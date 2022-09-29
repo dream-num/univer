@@ -1,0 +1,59 @@
+import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
+import { Context, IOCContainer, IRangeType, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SORT_PLUGIN_NAME } from './Const/PLUGIN_NAME';
+import { Sort } from './Domain';
+import { IConfig } from './IData/ISort';
+import { en, zh } from './Locale';
+import { SortButton } from './UI/SortButton';
+
+type IPluginConfig = {};
+
+export class SortPlugin extends Plugin {
+    private _sort: Sort | null;
+
+    constructor(config?: IPluginConfig) {
+        super(SORT_PLUGIN_NAME);
+    }
+
+    initialize(): void {
+        const context = this.getContext();
+
+        /**
+         * load more Locale object
+         */
+        context.getLocale().load({
+            en,
+            zh,
+        });
+        const config: IConfig = { context };
+
+        const item: IToolBarItemProps = {
+            locale: SORT_PLUGIN_NAME,
+            type: ISlotElement.JSX,
+            show: true,
+            label: <SortButton config={config} />,
+        };
+        context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
+    }
+
+    onMapping(IOC: IOCContainer): void {}
+
+    onMounted(ctx: Context): void {
+        this.initialize();
+
+        // const sort = this.createSort('A1:B2').ASCSord();
+    }
+
+    createSort(range: IRangeType) {
+        const _range = this.getContext().getWorkBook().getSheets()[0].getRange(range);
+        this._sort = new Sort(_range, 'ASCENDING');
+        return this._sort;
+    }
+
+    removeSort() {
+        this._sort = null;
+    }
+
+    onDestroy(): void {}
+}

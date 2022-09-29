@@ -1,0 +1,57 @@
+@import '../../assets/css/skin/base.module.less';
+
+.formula-box {
+    display: flex;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border-color-base);
+    height: 28px;
+    line-height: 28px;
+
+    .select-button .tooltip-Group .tooltip-body {
+        display: flex;
+
+        input {
+            width: 85px;
+            height: 28px;
+        }
+
+        svg {
+            vertical-align: text-bottom;
+        }
+    }
+
+    .formula-bar {
+        width: 100%;
+        display: flex;
+
+        .formula-icon {
+            display: flex;
+            border: 1px solid @gray-15;
+            border-top: none;
+            border-bottom: none;
+
+            span[role='img'] {
+                font-size: 24px;
+            }
+
+            .formula-grey {
+                color: @gray-5;
+            }
+
+            .formula-black {
+                color: var(--text-color);
+            }
+        }
+
+        .formula-input {
+            width: 100%;
+            padding: 0 10px;
+            overflow: hidden;
+
+            .formula-content {
+                outline: none;
+                word-wrap: break-word;
+            }
+        }
+    }
+}

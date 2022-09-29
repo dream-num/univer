@@ -1,0 +1,136 @@
+@import '@univer/style-universheet/assets/css/skin/base.module.less';
+.alternating-colors-side {
+    .section {
+        padding-top: @padding-base;
+        h3 {
+            margin-bottom: @margin-base;
+        }
+    }
+
+    .panel-body {
+        padding: 0 @padding-base;
+        position: relative;
+
+        .panel-body-inner {
+            position: absolute;
+            overflow-y: auto;
+            height: 100%;
+            .styles-checkbox {
+                display: flex;
+                > label {
+                    margin: 0 @margin-base @margin-base 0;
+                }
+            }
+
+            .theme-color-list {
+                display: flex;
+                flex-wrap: wrap;
+            }
+
+            .custom-color-list {
+                display: flex;
+                flex-wrap: wrap;
+                border: 1px solid var(--border-color-base);
+                border-radius: var(--border-radius-base);
+                .custom-style-add {
+                    padding: @padding-base;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+
+                    height: 4em;
+                    line-height: 4em;
+                    :hover {
+                        cursor: pointer;
+                    }
+                }
+            }
+
+            // 6 items per line
+            .theme-color-item {
+                width: 15.5%;
+                padding: 0.1em;
+                border: 2px solid transparent;
+                box-sizing: border-box;
+
+                :hover {
+                    cursor: pointer;
+                }
+                .theme-color-inner-item {
+                    border: 1px solid var(--border-color-base);
+                    box-sizing: border-box;
+
+                    &:hover {
+                        border-color: var(--border-color-base-hover);
+                    }
+                    > div {
+                        width: 100%;
+                        line-height: 1em;
+                        text-align: center;
+                        color: @gray-8;
+                    }
+                }
+            }
+            .theme-color-item-active {
+                border-color: #726efe;
+            }
+
+            .color-select {
+                display: flex;
+                flex-direction: column;
+                .color-select-item {
+                    width: 100%;
+                    display: flex;
+
+                    .color-select-banner {
+                        width: 65%;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 2em;
+                        border-radius: var(--border-radius-base);
+                    }
+
+                    .color-select-button {
+                        &:hover {
+                            cursor: pointer;
+                            background-color: @gray-4;
+                        }
+                    }
+                }
+            }
+
+            .bottom-buttons {
+                float: right;
+                button {
+                    padding: 0 1em;
+                    margin-left: 1em;
+                }
+            }
+        }
+    }
+    .panel-footer {
+        .section {
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--border-color-base);
+            padding: 0.9em @padding-base;
+            margin: 0.9em @padding-base;
+            &:hover {
+                cursor: pointer;
+                background-color: @gray-4;
+            }
+            .icon-container {
+                font-size: 1.6em;
+                :hover {
+                    cursor: pointer;
+                }
+            }
+            .text-container {
+                line-height: 1.8em;
+                display: inline-block;
+                height: 1.8em;
+            }
+        }
+    }
+}

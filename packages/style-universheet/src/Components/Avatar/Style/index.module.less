@@ -1,0 +1,48 @@
+@import '../../../assets/css/skin/base.module.less';
+
+@avatar-bg: #ccc;
+@avatar-size-base: 32px;
+@avatar-size-lg: 40px;
+@avatar-size-sm: 24px;
+
+.avatar {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    color: var(--bg);
+    white-space: nowrap;
+    text-align: center;
+    vertical-align: middle;
+    background: @avatar-bg;
+
+    .avatar-size(@avatar-size-base);
+
+    &-image {
+        background: transparent;
+    }
+
+    &-square {
+        border-radius: @border-radius-base;
+    }
+
+    &-lg {
+        .avatar-size(@avatar-size-lg);
+    }
+
+    &-sm {
+        .avatar-size(@avatar-size-sm);
+    }
+
+    &>img {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+}
+
+.avatar-size(@size) {
+    width: @size;
+    height: @size;
+    line-height: @size;
+    border-radius: 50%;
+}

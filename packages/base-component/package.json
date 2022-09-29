@@ -1,0 +1,61 @@
+{
+    "name": "@univer/base-component",
+    "version": "0.0.1",
+    "description": "UniverSheet normal plugin UI manager",
+    "keywords": [],
+    "author": "DreamNum <msoffice2@126.com>",
+    "license": "MIT",
+    "main": "./src/index.ts",
+    "module": "./src/index.ts",
+    "types": "./src/index.d.ts",
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*"
+    },
+    "publishConfig": {
+        "main": "./lib/univer-base-component.umd.js",
+        "module": "./lib/univer-base-component.es.js",
+        "types": "./lib/univer-base-component.d.ts"
+    },
+    "directories": {
+        "lib": "lib"
+    },
+    "scripts": {
+        "test": "jest -c jest.config.js",
+        "test:play": "npx playwright test",
+        "test:debug": "PWDEBUG=1 npx playwright test",
+        "test:cover": "cross-env NODE_ENV=--experimental-vm-modules jest --coverage",
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "serve": "vite preview"
+    },
+    "devDependencies": {
+        "@preact/preset-vite": "2.0.0",
+        "@testing-library/preact": "^2.0.1",
+        "@types/jest": "^27.5.2",
+        "@types/node": "^16.4.6",
+        "@vitejs/plugin-legacy": "^1.5.1",
+        "debug": "^4.3.3",
+        "enzyme": "^3.11.0",
+        "enzyme-adapter-preact-pure": "^3.3.0",
+        "identity-obj-proxy": "^3.0.0",
+        "jest-dev-server": "^6.1.1",
+        "jest-environment-jsdom": "^29.0.3",
+        "less": "^4.1.1",
+        "ts-jest": "29.0.1",
+        "ts-node": "^10.2.1",
+        "typescript": "^4.4.1-rc",
+        "vite": "^2.4.4",
+        "vite-plugin-external": "1.2.3"
+    },
+    "dependencies": {
+        "@univer/base-component": "workspace:^0.0.1",
+        "@univer/base-render": "workspace:^0.0.1",
+        "@univer/core": "workspace:^0.0.1",
+        "css-vars-ponyfill": "^2.4.6",
+        "csstype": "^3.0.11",
+        "nanoid": "^4.0.0",
+        "preact": "^10.5.14",
+        "react-colorful": "^5.3.0"
+    }
+}

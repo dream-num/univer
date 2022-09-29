@@ -1,0 +1,70 @@
+
+/*
+1. 所有的变量加到这里，复用
+2. 组件要用的话，在这定义好，导入组件使用
+3. 需要作为皮肤变量的，导入到所有皮肤中导出使用
+*/
+
+// base css variables
+@success-color: #52c41a; // 成功色
+@warning-color: #faad14; // 警告色
+@error-color: #f5222d; // 错误色
+
+@border-radius-base: 2px; // 组件/浮层圆角
+@border-width-base: 1px;
+@border-style-base: solid;
+@line-height-base: 1.5715;
+@font-weight: 400;
+@font-size-base: 14px; // 主字号
+@font-size-lg: @font-size-base + 2px;
+@font-size-sm: @font-size-base - 2px;
+
+@padding-base: 1em; // 主padding size
+@margin-base: 1em; // 主margin size
+
+@gray-1: #ffffff;
+@gray-2: #fafafa;
+@gray-3: #f5f5f5;
+@gray-4: #f0f0f0;
+@gray-5: #d9d9d9;
+@gray-6: #bfbfbf;
+@gray-7: #8c8c8c;
+@gray-8: #595959;
+@gray-9: #434343;
+@gray-10: #262626;
+@gray-11: #1f1f1f;
+@gray-12: #141414;
+@gray-13: #000000;
+@gray-14: #efefef;
+@gray-15: #e0e0e0;
+@gray-16: #ececec;
+@gray-17: #cbcbcb;
+
+// TODO remove
+@primary-color: #0188fb; // 全局主色 //也用作info-color信息色
+@primary-color-hover: #5391ff; // 全局主色 hover
+@link-color: #1890ff; // 链接色
+@bg: #fff; //Basics background color for most Components
+@heading-color: @gray-10; // 标题色
+@text-color: #333; // 主文本色
+@text-color-secondary: @gray-7; // 次文本色
+@disabled-color: @gray-6; // 失效色
+@disabled-bg: @gray-3; //失效背景色
+@border-color-base: @gray-5; // 边框色
+@border-color-base-hover: @gray-6; // 边框 hover高亮色
+@box-shadow-base: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05); // 浮层阴影
+
+// manage z-index
+.generateZIndex() {
+    @functions: ~`(function() {
+            let indexList=new Map([['toolbar', 100], ['tooltip', 200], ['bottom', 10],['rightMenu',100],['modal',500]]);
+
+            this.getZindex=function(param) {
+                return indexList.get(param);
+            }
+        }
+
+    )()`;
+}
+
+.generateZIndex();

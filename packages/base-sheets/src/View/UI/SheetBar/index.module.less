@@ -1,0 +1,283 @@
+@import '@univer/style-universheet/assets/css/skin/base.module.less';
+
+.sheet-bar {
+    position: relative;
+    height: 31px;
+    display: flex;
+    flex-direction: row;
+    background-color: var(--bg);
+}
+
+.sheet-bar-options {
+    border-right: 1px solid var(--border-color-base);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-right: 5px;
+}
+
+.sheet-bar-options-button {
+    padding: 0;
+    margin: 0;
+    border: none;
+    height: initial;
+    line-height: initial;
+    padding-right: 2px;
+}
+
+.sheet_bar_scroll_button {
+    border: none;
+    border-left: 1px solid var(--border-color-base);
+    padding-left: 5px;
+}
+
+// .sheet-bar {
+//     background-color: var(--bg);
+//     color: var(--text-color);
+//     height: 31px;
+//     padding-left: 44px;
+//     display: flex;
+//     // width: 100%;
+//     position: relative;
+
+//     button {
+//         &:hover {
+//             background-color: @gray-16;
+//         }
+//     }
+
+//     .sheet-icon {
+//         display: flex;
+//         align-items: center;
+
+//         .btn {
+//             font-size: 21px;
+//             margin-right: 3px;
+//             display: flex;
+//             align-items: center;
+//             padding: 0 2px;
+//         }
+
+//         .sheet-menu {
+//             position: relative;
+
+//             ul {
+//                 font-size: 13px;
+//                 overflow: auto;
+//                 max-height: 20em;
+//             }
+//         }
+//     }
+
+//     .sheet-bar-content {
+//         display: flex;
+//         width: 700px;
+//         position: relative;
+
+//         .sheet-container {
+//             max-width: 50%;
+//             position: relative;
+//             overflow: hidden;
+
+//             .sheet-fade {
+//                 position: absolute;
+//                 display: flex;
+//                 top: 0;
+//                 width: 6px;
+//                 height: 100%;
+//                 z-index: ~`getZindex('bottom') `;
+
+//                 div {
+//                     background-color: @gray-5;
+//                     width: 2px;
+//                     height: 100%;
+//                 }
+
+//                 .sheet-fade1 {
+//                     opacity: 0.82;
+//                 }
+
+//                 .sheet-fade2 {
+//                     opacity: 0.62;
+//                 }
+
+//                 .sheet-fade3 {
+//                     opacity: 0.4;
+//                 }
+//             }
+
+//             .sheet-left-bar {
+//                 left: 0;
+//             }
+
+//             .sheet-right-bar {
+//                 right: 0;
+//             }
+
+//             .sheet-content {
+//                 position: relative;
+//                 max-width: 500px;
+//                 display: flex;
+
+//                 .sheet-content-item {
+//                     display: flex;
+//                     align-items: center;
+//                     border-right: 1px solid @gray-15;
+//                     border-left: 1px solid @gray-15;
+//                     margin-right: -1px;
+//                     cursor: pointer;
+//                     padding: 0 5px;
+//                     height: 29px;
+//                     line-height: 29px;
+//                     flex-shrink: 0;
+//                     font-size: 13px;
+
+//                     span {
+//                         flex-shrink: 0;
+//                     }
+
+//                     &:hover {
+//                         background-color: @gray-16;
+//                     }
+
+//                     &-selected {
+//                         background-color: @gray-16;
+//                     }
+//                 }
+
+//                 button {
+//                     padding-left: 5px;
+//                 }
+
+//                 span[role='img'] {
+//                     margin-left: 5px;
+//                     color: #a1a1a1;
+
+//                     &:hover {
+//                         color: #2a2a2a;
+//                     }
+//                 }
+//             }
+//         }
+
+//         .cols-menu {
+//             .cols-menuitem-content {
+//                 padding: 6px 14px 6px 20px;
+//             }
+//         }
+//     }
+
+//     .sheet-scroll {
+//         button {
+//             margin-left: 3px;
+//             height: 80%;
+//             padding: 0 3px;
+//         }
+
+//         display: flex;
+//         align-items: center;
+//         text-align: center;
+//         background-color: transparent;
+//     }
+// }
+
+.slide-tab-bar {
+    user-select: none;
+    max-width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    overflow: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+}
+.slide-tab-bar::-webkit-scrollbar {
+    display: none;
+}
+
+/**
+  高亮标记
+ */
+.slide-tab-active {
+    position: relative;
+}
+
+/**
+ Tab Item
+*/
+.slide-tab-item {
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    cursor: pointer;
+    height: 100%;
+    background-color: var(--bg);
+}
+.slide-tab-item:first-child .slide-tab-divider {
+    opacity: 0;
+}
+.slide-tab-item:hover {
+    background: #efefef;
+}
+.slide-tab-item:hover .slide-tab-divider {
+    opacity: 0;
+}
+.slide-tab-item:hover + .slide-tab-item .slide-tab-divider {
+    opacity: 0;
+}
+
+/**
+  内容区域
+*/
+.slide-tab-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-grow: 1;
+}
+.slide-tab-title {
+    font-size: 14px;
+    color: #676464;
+    margin-right: 3px;
+    margin-left: 6px;
+}
+.slide-tab-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 15px;
+    color: #a1a1a1;
+    margin-right: 6px;
+}
+.slide-tab-divider {
+    width: 1px;
+    height: 16px;
+    background: var(--border-color-base);
+}
+.slide-tab-active .slide-tab-content {
+    background: #efefef;
+    color: #222;
+}
+.slide-tab-active .slide-tab-divider {
+    opacity: 0;
+}
+.slide-tab-active + .slide-tab-item .slide-tab-divider {
+    opacity: 0;
+}
+
+/**
+  底部区域
+ */
+.slide-tab-footer {
+    height: auto;
+    width: 100%;
+    flex-grow: 0;
+}
+.slide-tab-active-bar {
+    height: 2px;
+    width: 100%;
+}
+.slide-tab-active .slide-tab-active-bar {
+    background: #d0d0d0;
+}

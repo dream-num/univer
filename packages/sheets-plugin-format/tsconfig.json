@@ -1,0 +1,31 @@
+{
+    "compilerOptions": {
+        "rootDir": "./",
+        "outDir": "lib",
+        "target": "ESNext",
+
+        "lib": ["ESNext", "DOM", "WebWorker"],
+        "module": "ESNext",
+        "moduleResolution": "Node",
+
+        "declaration": true,
+        "declarationDir": "./lib",
+        "declarationMap": true,
+        "sourceMap": true,
+        "resolveJsonModule": true,
+        "strict": true,
+        "allowJs": true,
+
+        "baseUrl": "./",
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "experimentalDecorators": true,
+        "jsx": "preserve",
+        "jsxFactory": "h",
+        "jsxFragmentFactory": "Fragment",
+        "strictPropertyInitialization": false,
+        "types": ["jest", "node", "@types/jest"]
+    },
+    "include": ["src/**/*", "test/**/*.test.(ts|tsx|js)"]
+}

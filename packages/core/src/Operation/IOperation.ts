@@ -1,0 +1,4 @@
+/**
+ * Operation
+ */
+export interface IOperation {}

@@ -1,0 +1,34 @@
+// Main skin variables, green skin
+@import './base.module.less';
+
+@primary-color: #004b1c; // 全局主色 //也用作info-color信息色
+@primary-color-hover: #0e5c2f; // 全局主色 hover
+@link-color: #217346; // 链接色
+@bg: #fff; //Basics background color for most Components
+@bg-hover:#efefef;
+@heading-color: rgba(0, 0, 0, 0.85); // 标题色
+@text-color: rgba(0, 0, 0, 0.65); // 主文本色
+@text-color-secondary: rgba(0, 0, 0, 0.45); // 次文本色
+@disabled-color: rgba(0, 0, 0, 0.25); // 失效色
+@disabled-bg: rgba(0, 0, 0, 0.04); //失效背景色
+@border-color-base: rgba(0, 0, 0, 0.15); // 边框色
+@border-color-base-hover: @gray-6; // 边框 hover高亮色
+@box-shadow-base: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05); // 浮层阴影
+
+// Export all skin variables, call variables in js
+
+:export {
+    --primary-color: @primary-color;
+    --primary-color-hover: @primary-color-hover;
+    --link-color: @link-color;
+    --bg: @bg;
+    --font-size: @font-size-base;
+    --heading-color: @heading-color;
+    --text-color: @text-color;
+    --text-color-secondary: @text-color-secondary;
+    --disabled-color: @disabled-color;
+    --disabled-bg: @disabled-bg;
+    --border-color-base: @border-color-base;
+    --box-shadow-base: @box-shadow-base;
+    --border-color-base-hover: @border-color-base-hover;
+}

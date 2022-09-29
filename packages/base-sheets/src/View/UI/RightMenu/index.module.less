@@ -1,0 +1,135 @@
+@import '@univer/style-universheet/assets/css/skin/base.module.less';
+
+.context-menu {
+    position: fixed;
+
+    left: 0;
+    top: 26px;
+    background-color: var(--bg);
+    box-shadow: var(--box-shadow-base);
+    z-index: `getZindex('rightMenu') `;
+
+    .item {
+        padding: 0.5em 0;
+        background-color: var(--bg);
+    }
+
+    .item-item {
+        position: relative;
+        color: var(--text-color);
+        cursor: pointer;
+        list-style: none;
+        padding: 1px 16px;
+        margin: 0;
+        white-space: nowrap;
+        vertical-align: middle;
+        user-select: none;
+        line-height: 1.2;
+
+        & > .item {
+            position: absolute;
+            top: 0;
+        }
+
+        &:hover {
+            background-color: @gray-14;
+        }
+
+        .item-content {
+            padding: 3px 0px 3px 1px;
+            display: flex;
+            align-content: space-between;
+
+            // .item-content-right {
+            //     margin-right: 0px;
+            // }
+            > div {
+                flex: 1;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+
+                .submenu-arrow {
+                    transition: all 218ms;
+                    font-size: 12px;
+                    padding-right: 0;
+                    opacity: 0.5;
+                    color: var(--text-color);
+                    user-select: none;
+                    margin-left: 1.5em;
+
+                    span[role='img'] {
+                        font-size: 24px;
+                    }
+
+                    span[role='img'].univericon-rightIcon {
+                        font-size: 14px;
+                        color: turquoise;
+                    }
+                }
+            }
+        }
+    }
+
+    .item-line {
+        width: 80%;
+        border-top: 1px solid var(--text-color);
+        box-sizing: border-box;
+        margin: 5px auto;
+    }
+
+    .cols-menu {
+        .cols-menuitem {
+            .cols-menuitem-content {
+                padding: 5px 15px 5px 25px;
+
+                > div {
+                    position: relative;
+                    padding-right: 15px;
+
+                    .submenu-arrow {
+                        position: absolute;
+                        right: -15px;
+                    }
+                }
+            }
+
+            input {
+                width: 40px;
+                height: 20px;
+                text-align: center;
+                margin: 0 3px;
+                padding: 0;
+            }
+
+            button {
+                margin-left: 5px;
+                padding: 2px 3px;
+                line-height: 12px;
+                font-size: 12px;
+            }
+
+            .btn {
+                height: auto;
+            }
+
+            .right-menu-center {
+                .cols-menuitem-content {
+                    padding: 5px 15px;
+
+                    > div {
+                        justify-content: center;
+                    }
+                }
+            }
+        }
+    }
+
+    > .cols-menu {
+        > .cols-menuitem {
+            > .cols-menuitem-content {
+                padding-right: 25px;
+            }
+        }
+    }
+}

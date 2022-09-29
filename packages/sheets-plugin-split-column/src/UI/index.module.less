@@ -1,0 +1,39 @@
+.single-button {
+    .split-content {
+        p {
+            padding: 0.5em;
+
+            &:last-of-type {
+                margin-top: 0.5em;
+            }
+        }
+
+        label {
+            height: 1.8em;
+        }
+
+        .split-box {
+            padding: 0.5em;
+            border: 1px solid #dfdfdf;
+            position: relative;
+
+            .checkbox-group {
+                flex-direction: column;
+            }
+
+            input {
+                width: auto;
+                position: absolute;
+                left: 75px;
+                bottom: 0.5em;
+                height: 1.8em;
+            }
+        }
+
+        .split-preview {
+            border: 1px solid #dfdfdf;
+            height: 9em;
+            overflow-y: auto;
+        }
+    }
+}

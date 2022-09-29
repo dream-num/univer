@@ -1,0 +1,111 @@
+@import '@univer/style-universheet/assets/css/skin/default.module.less';
+
+.single-button {
+    .data-validation {
+        .box-item {
+            &:first-child {
+                padding-top: 0;
+            }
+
+            &:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            padding: 1em;
+            border-bottom: 1px solid @gray-5;
+
+            .title {
+                font-weight: bold;
+                margin-bottom: 1em;
+            }
+
+            .cell-range-modal {
+                height: 30px;
+            }
+
+            select {
+                width: 100%;
+                height: 30px;
+                border-color: @gray-5;
+                outline-style: none;
+
+                & + .cell-range-modal {
+                    margin-top: 1em;
+                }
+            }
+
+            .checkbox-group {
+                flex-direction: column;
+
+                label {
+                    margin: 0.5em;
+                    font-size: 12px;
+
+                    .checkbox-inner {
+                        width: 14px;
+                        height: 14px;
+                    }
+                }
+            }
+
+            .data-checkbox {
+                margin-top: 1em;
+                font-size: 12px;
+
+                div {
+                    span {
+                        margin: 0.3em;
+                    }
+
+                    &:first-child {
+                        margin-bottom: 0.5em;
+                    }
+
+                    input {
+                        width: auto;
+                    }
+                }
+            }
+
+            .data-between {
+                select {
+                    margin-top: 1em;
+                }
+
+                div {
+                    margin-top: 1em;
+                    display: flex;
+                    justify-content: space-between;
+
+                    input {
+                        width: 47%;
+                    }
+                }
+            }
+
+            .data-text {
+                select {
+                    margin: 1rem 0;
+                }
+            }
+
+            .data-date {
+                select {
+                    margin: 1rem 0;
+                }
+
+                div {
+                    display: flex;
+                    justify-content: space-around;
+                }
+            }
+
+            .data-validity {
+                select {
+                    margin-top: 1em;
+                }
+            }
+        }
+    }
+}

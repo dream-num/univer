@@ -1,0 +1,79 @@
+@import '../../assets/css/skin/base.module.less';
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+
+    .check-box {
+        position: relative;
+
+        .checkbox-input {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            opacity: 0;
+        }
+
+        .checkbox-inner {
+            position: relative;
+            top: 0;
+            left: 0;
+            display: block;
+            width: @font-size-base;
+            height: @font-size-base;
+            background-color: #fff;
+            border: @border-width-base @border-style-base var(--border-color-base);
+
+            &::after {
+                @check-width: (@font-size-base / 14) * 5px;
+                @check-height: (@font-size-base / 14) * 8px;
+
+                position: absolute;
+                top: 50%;
+                left: 21.5%;
+                display: table;
+                width: @check-width;
+                height: @check-height;
+                border: 2px solid #fff;
+                border-top: 0;
+                border-left: 0;
+                box-sizing: border-box;
+                transform: rotate(45deg) scale(1) translate(-50%, -50%);
+                opacity: 0;
+                transition: all 0.1s cubic-bezier(0.12, 0.4, 0.29, 1.46), opacity 0.1s;
+                content: ' ';
+            }
+        }
+
+        &-checked {
+            .checkbox-inner {
+                background-color: var(--primary-color);
+
+                &::after {
+                    opacity: 1;
+                }
+            }
+        }
+
+        &-disabled {
+            .checkbox-inner {
+                background-color: var(--disabled-color);
+            }
+        }
+
+        & + span {
+            padding: 0 0.5em;
+        }
+    }
+}
+
+.checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+}

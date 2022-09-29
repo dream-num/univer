@@ -1,0 +1,60 @@
+import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
+import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
+import { NodeType } from './NodeType';
+import { LexerNode } from '../Analysis/LexerNode';
+import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../Basics/TokenType';
+import { LambdaPrivacyVarType } from '../Basics/Common';
+import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
+import { ErrorType } from '../Basics/ErrorType';
+import { ErrorNode } from './ErrorNode';
+
+export class LambdaParameterNode extends BaseAstNode {
+    get nodeType() {
+        return NodeType.VALUE;
+    }
+    constructor(private _lambdaParameter: string, private _currentLambdaPrivacyVar: LambdaPrivacyVarType) {
+        super();
+    }
+
+    execute() {
+        const node = this._currentLambdaPrivacyVar.get(this._lambdaParameter);
+        if (!node) {
+            this.setValue(ErrorValueObject.create(ErrorType.SPILL));
+        } else {
+            this.setValue(node.getValue());
+        }
+    }
+}
+
+export class LambdaParameterNodeFactory extends BaseAstNodeFactory {
+    get zIndex() {
+        return 3;
+    }
+
+    create(param: LexerNode): BaseAstNode {
+        const lambdaId = param.getLambdaId();
+        const currentLambdaPrivacyVar = param.getLambdaPrivacyVar();
+        const lambdaParameter = param.getLambdaParameter();
+
+        if (!currentLambdaPrivacyVar) {
+            return new ErrorNode(ErrorType.SPILL);
+        }
+
+        return new LambdaParameterNode(lambdaParameter, currentLambdaPrivacyVar);
+    }
+
+    checkAndCreateNodeType(param: LexerNode | string) {
+        if (!(param instanceof LexerNode)) {
+            return false;
+        }
+
+        const token = param.getToken();
+        if (token !== DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER) {
+            return false;
+        }
+
+        return this.create(param);
+    }
+}
+
+FORMULA_AST_NODE_REGISTRY.add(new LambdaParameterNodeFactory());

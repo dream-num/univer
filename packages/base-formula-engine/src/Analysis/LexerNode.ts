@@ -59,6 +59,10 @@ export class LexerNode {
         this._children = children;
     }
 
+    addChildren(children: LexerNode | string) {
+        this._children.push(children);
+    }
+
     getToken() {
         return this._token;
     }

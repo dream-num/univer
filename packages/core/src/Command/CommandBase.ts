@@ -4,6 +4,7 @@ import { CommandManager } from './CommandManager';
 import { CommandType } from './CommandObservers';
 import { CommandInjector } from './CommandInjectorObservers';
 import { Class, Nullable } from '../Shared';
+
 /**
  * Manage action instances and action data
  */

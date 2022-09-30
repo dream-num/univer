@@ -12,7 +12,7 @@ import { ObjectArray } from '../../Shared';
  */
 export interface IInsertColumnDataActionData extends IActionData {
     columnIndex: number;
-    columnData: ObjectMatrixPrimitiveType<ICellData>;
+    columnData: ObjectMatrixPrimitiveType<ICellData>; // TODO Does it need to be merged with IKeyValue
 }
 
 /**

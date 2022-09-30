@@ -49,6 +49,10 @@ import { RemoveColumnAction } from '../Sheets/Action/removeColumnAction';
 import { RemoveSheetAction } from '../Sheets/Action/RemoveSheetAction';
 import { CommandManager } from './CommandManager';
 
+/**
+ * All Commands are registered statically. For each new Command, a static registration method must be added here.
+ */
+
 CommandManager.register(ACTION_NAMES.INSERT_ROW_DATA_ACTION, InsertRowDataAction);
 CommandManager.register(ACTION_NAMES.INSERT_ROW_ACTION, InsertRowAction);
 CommandManager.register(ACTION_NAMES.REMOVE_ROW_DATA_ACTION, RemoveRowDataAction);

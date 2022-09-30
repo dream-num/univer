@@ -1,7 +1,42 @@
 import { $$, getNodeindex } from '@univer/base-component';
-import { Nullable, LUCKY_COLOR, Tools } from '@univer/core';
+import { Nullable, Tools } from '@univer/core';
 import { lang } from './locale';
 import styles from './index.module.less';
+
+/**
+ * Random color for formula cell input
+ */
+const LUCKY_COLOR = [
+    '#c1232b',
+    '#27727b',
+    '#fcce10',
+    '#e87c25',
+    '#b5c334',
+    '#fe8463',
+    '#9bca63',
+    '#fad860',
+    '#f3a43b',
+    '#60c0dd',
+    '#d7504b',
+    '#c6e579',
+    '#f4e001',
+    '#f0805a',
+    '#26c0c0',
+    '#c12e34',
+    '#e6b600',
+    '#0098d9',
+    '#2b821d',
+    '#005eaa',
+    '#339ca8',
+    '#cda819',
+    '#32a487',
+    '#3fb1e3',
+    '#6be6c1',
+    '#626c91',
+    '#a0a7e6',
+    '#c4ebad',
+    '#96dee8',
+];
 
 /**
  * Handle cell input event

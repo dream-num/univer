@@ -1,3 +1,9 @@
+/**
+ * Add extension modules statically when the plugin is initialized, so that the plugin can register these extension modules uniformly
+ *
+ * @privateRemarks
+ * zh: 在插件初始化的时候静态添加扩展模块，方便插件统一注册这些扩展模块
+ */
 export class Registry {
     private _data: any[] = [];
 
@@ -19,6 +25,12 @@ export class Registry {
     }
 }
 
+/**
+ * Add extension modules statically when the plugin is initialized, so that the plugin can register these extension modules uniformly
+ *
+ * @privateRemarks
+ * zh: 在插件初始化的时候静态添加扩展模块，方便插件统一注册这些扩展模块
+ */
 export class RegistryAsMap {
     private _data: Map<string, any> = new Map();
 

@@ -1,4 +1,8 @@
-// 列下标  字母转数字
+/**
+ * column subscript letter to number
+ * @param a letter
+ * @returns
+ */
 export function ABCToNumber(a: string) {
     if (a == null || a.length === 0) {
         return NaN;
@@ -12,7 +16,6 @@ export function ABCToNumber(a: string) {
         charnum = getCharNumber(str[i]);
         numOut += charnum * 26 ** (al - i - 1);
     }
-    // console.log(a, numOut-1);
     if (numOut === 0) {
         return NaN;
     }
@@ -24,7 +27,11 @@ const orderZ = 'Z'.charCodeAt(0);
 const order_a = 'a'.charCodeAt(0);
 const order_z = 'z'.charCodeAt(0);
 
-// 列下标  数字转字母
+/**
+ * column subscript number to letters
+ * @param n number
+ * @returns
+ */
 export function numberToABC(n: number) {
     const len = orderZ - orderA + 1;
 
@@ -39,7 +46,12 @@ export function numberToABC(n: number) {
     return s;
 }
 
-// 重复给定的字符串（第一个参数）num次（第二个参数）。如果num不是正数，则返回一个空字符串。
+/**
+ * Repeats the given string (first argument) num times (second argument). If num is not positive, an empty string is returned.
+ * @param string given string
+ * @param times repeat times
+ * @returns
+ */
 export function repeatStringNumTimes(string: string, times: number) {
     let repeatedString = '';
     while (times > 0) {
@@ -49,7 +61,12 @@ export function repeatStringNumTimes(string: string, times: number) {
     return repeatedString;
 }
 
-// 列下标  数字转列表样式的字母，例如25之后表示AA BB  CC，而不是AA AB AC
+/**
+ * Column subscript numbers are converted to list-style letters, for example, after 25, it means AA BB CC, not AA AB AC
+ * @param n number
+ * @param uppercase Is it a capital letter
+ * @returns
+ */
 export function numberToListABC(n: number, uppercase = false) {
     const len = orderZ - orderA + 1;
 

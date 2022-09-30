@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "streetsidesoftware.code-spell-checker",
+    "intellsmi.comment-translate",
+    "Gruntfuggly.todo-tree"
+  ]
+}

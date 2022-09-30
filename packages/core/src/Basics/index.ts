@@ -5,6 +5,6 @@ export * from './Environment';
 export * from './UniverSheet';
 export * from './Version';
 export * from './Registry';
-export * from './sortRules';
+export * from './SortRules';
 export * from './Sequence';
 // @endindex

@@ -1,7 +1,7 @@
 import { prefixToken } from '../Basics/Token';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
-import { NodeType } from './NodeType';
+import { NodeType, NODE_ORDER_MAP } from './NodeType';
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
 import { ErrorType } from '../Basics/ErrorType';
 import { ErrorNode } from './ErrorNode';
@@ -17,10 +17,10 @@ export class PrefixNode extends BaseAstNode {
         return NodeType.PREFIX;
     }
     constructor(private _operatorString: string, private _functionExecutor?: BaseFunction) {
-        super();
+        super(_operatorString);
     }
 
-    private _handlerAT(value: FunctionVariantType, interpreterCalculateProps: IInterpreterCalculateProps) {
+    private _handlerAT(value: FunctionVariantType, interpreterCalculateProps?: IInterpreterCalculateProps) {
         if (!value.isReferenceObject()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
@@ -31,8 +31,8 @@ export class PrefixNode extends BaseAstNode {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const currentRow = interpreterCalculateProps.currentRow;
-        const currentColumn = interpreterCalculateProps.currentColumn;
+        const currentRow = interpreterCalculateProps?.currentRow || 0;
+        const currentColumn = interpreterCalculateProps?.currentColumn || 0;
 
         // @ projection to current
         if (currentValue.isRow()) {
@@ -48,7 +48,7 @@ export class PrefixNode extends BaseAstNode {
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 
-    execute(interpreterCalculateProps: IInterpreterCalculateProps) {
+    execute(interpreterCalculateProps?: IInterpreterCalculateProps) {
         const children = this.getChildren();
         const value = children[0].getValue();
         let result: FunctionVariantType;
@@ -65,7 +65,7 @@ export class PrefixNode extends BaseAstNode {
 
 export class PrefixNodeFactory extends BaseAstNodeFactory {
     get zIndex() {
-        return 6;
+        return NODE_ORDER_MAP.get(NodeType.PREFIX) || 100;
     }
 
     checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
@@ -75,6 +75,11 @@ export class PrefixNodeFactory extends BaseAstNodeFactory {
 
         const token = param.getToken();
         const tokenTrim = token.trim();
+
+        if (tokenTrim.charAt(0) === '"' && tokenTrim.charAt(tokenTrim.length - 1) === '"') {
+            return false;
+        }
+
         let functionName = '';
         if (tokenTrim === prefixToken.MINUS) {
             functionName = 'MINUS';

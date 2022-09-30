@@ -1,6 +1,6 @@
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
-import { NodeType } from './NodeType';
+import { NodeType, NODE_ORDER_MAP } from './NodeType';
 import { LexerNode } from '../Analysis/LexerNode';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../Basics/TokenType';
 import { LambdaPrivacyVarType } from '../Basics/Common';
@@ -10,10 +10,10 @@ import { ErrorNode } from './ErrorNode';
 
 export class LambdaParameterNode extends BaseAstNode {
     get nodeType() {
-        return NodeType.VALUE;
+        return NodeType.LAMBDA_PARAMETER;
     }
-    constructor(private _lambdaParameter: string, private _currentLambdaPrivacyVar: LambdaPrivacyVarType) {
-        super();
+    constructor(token: string, private _lambdaParameter: string, private _currentLambdaPrivacyVar: LambdaPrivacyVarType) {
+        super(token);
     }
 
     execute() {
@@ -28,7 +28,7 @@ export class LambdaParameterNode extends BaseAstNode {
 
 export class LambdaParameterNodeFactory extends BaseAstNodeFactory {
     get zIndex() {
-        return 3;
+        return NODE_ORDER_MAP.get(NodeType.LAMBDA_PARAMETER) || 100;
     }
 
     create(param: LexerNode): BaseAstNode {
@@ -40,7 +40,7 @@ export class LambdaParameterNodeFactory extends BaseAstNodeFactory {
             return new ErrorNode(ErrorType.SPILL);
         }
 
-        return new LambdaParameterNode(lambdaParameter, currentLambdaPrivacyVar);
+        return new LambdaParameterNode(param.getToken(), lambdaParameter, currentLambdaPrivacyVar);
     }
 
     checkAndCreateNodeType(param: LexerNode | string) {
@@ -48,7 +48,7 @@ export class LambdaParameterNodeFactory extends BaseAstNodeFactory {
             return false;
         }
 
-        const token = param.getToken();
+        const token = param.getToken().trim();
         if (token !== DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER) {
             return false;
         }

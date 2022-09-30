@@ -1,7 +1,7 @@
 import { OPERATOR_TOKEN_SET } from '../Basics/Token';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
-import { NodeType } from './NodeType';
+import { NodeType, NODE_ORDER_MAP } from './NodeType';
 import { ValueObjectFactory } from '../ValueObject/ValueObjectFactory';
 import { LexerNode } from '../Analysis/LexerNode';
 import { BooleanValue } from '../Basics/Common';
@@ -11,14 +11,14 @@ export class ValueNode extends BaseAstNode {
         return NodeType.VALUE;
     }
     constructor(private _operatorString: string) {
-        super();
+        super(_operatorString);
         this.setValue(ValueObjectFactory.create(this._operatorString));
     }
 }
 
 export class ValueNodeFactory extends BaseAstNodeFactory {
     get zIndex() {
-        return 8;
+        return NODE_ORDER_MAP.get(NodeType.VALUE) || 100;
     }
 
     _checkValueNode(token: string) {
@@ -27,7 +27,7 @@ export class ValueNodeFactory extends BaseAstNodeFactory {
             const startToken = tokenTrim.charAt(0);
             const endToken = tokenTrim.charAt(tokenTrim.length - 1);
             if (startToken === '"' && endToken === '"') {
-                return this.create(tokenTrim.substring(1, -1));
+                return this.create(tokenTrim);
             } else if (startToken === '{' && endToken === '}') {
                 return this.create(tokenTrim);
             } else if (tokenTrim === BooleanValue.TRUE || tokenTrim === BooleanValue.FALSE) {

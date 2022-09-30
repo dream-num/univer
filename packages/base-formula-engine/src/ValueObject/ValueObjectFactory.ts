@@ -2,6 +2,7 @@ import { BooleanValue } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
 import { $ARRAY_VALUE_REGEX } from '../Basics/Regex';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
+import { ArrayValueObject } from './ArrayValueObject';
 import { BooleanValueObject } from './BooleanValueObject';
 import { NumberValueObject } from './NumberValueObject';
 import { StringValueObject } from './StringValueObject';
@@ -17,7 +18,7 @@ export class ValueObjectFactory {
             } else if (!isNaN(Number(rawValue))) {
                 return new NumberValueObject(rawValue);
             } else if ($ARRAY_VALUE_REGEX.test(rawValue)) {
-                return new StringValueObject(rawValue);
+                return new ArrayValueObject(rawValue);
             } else {
                 return new StringValueObject(rawValue);
             }

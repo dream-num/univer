@@ -5,6 +5,7 @@ import { IOCContainer } from '@univer/core';
 import { LexerTreeMaker } from './Analysis/Lexer';
 import { FormulaEnginePluginObserver } from './Basics/Observer';
 import { AstTreeMaker } from './Analysis/Parser';
+import { Interpreter } from './Interpreter/Interpreter';
 
 interface IFormulaEnginePlugin {}
 
@@ -22,13 +23,19 @@ export class FormulaEnginePlugin extends Plugin<FormulaEnginePluginObserver> {
         const lexerTreeMaker = new LexerTreeMaker(formulaString);
         const lexerNode = lexerTreeMaker.treeMaker();
         lexerTreeMaker.suffixExpressionHandler(lexerNode); // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
-        // console.log('lexerNode', lexerNode.serialize());
+        console.log('lexerNode', lexerNode.serialize());
 
-        // const astTreeMaker = AstTreeMaker.create();
+        const astTreeMaker = AstTreeMaker.create();
 
-        // const astNode = astTreeMaker.parse(lexerNode);
+        const astNode = astTreeMaker.parse(lexerNode);
 
-        // console.log('astNode', astNode.serialize());
+        console.log('astNode', astNode.serialize());
+
+        const resultPromise = Interpreter.create().execute(astNode);
+
+        resultPromise.then((value) => {
+            console.log('formulaResult', value);
+        });
 
         this.getObserver('onAfterFormulaLexerObservable')?.notifyObservers(lexerNode);
     }

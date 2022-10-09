@@ -185,22 +185,30 @@ export class LexerTreeMaker {
 
     private _setAncestorCurrentLexerNode() {
         const parent = this._currentLexerNode?.getParent();
+        let state = false;
         if (parent && parent.getToken() === DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER) {
             // lambda will skip to more one level
             if (parent?.getParent()?.getParent()) {
                 this._currentLexerNode = this._currentLexerNode.getParent()?.getParent().getParent();
-                return true;
+                state = true;
             }
-
-            return false;
         } else {
             if (parent?.getParent()) {
                 this._currentLexerNode = this._currentLexerNode.getParent().getParent();
-                return true;
+                state = true;
             }
-
-            return false;
         }
+
+        for (let i = 0; i < this._upLevel; i++) {
+            this._currentLexerNode = this._currentLexerNode?.getParent();
+            if (this._currentLexerNode) {
+                state = true;
+            } else {
+                state = false;
+            }
+        }
+
+        return state;
     }
 
     private _segmentCount() {
@@ -480,7 +488,7 @@ export class LexerTreeMaker {
                 let upLevel = 0;
                 if (this._segmentCount() > 0) {
                     // e.g. A1:B5
-
+                    // -@A4:B5
                     let subLexerNode_minus: Nullable<LexerNode>;
                     let subLexerNode_at: Nullable<LexerNode>;
                     let sliceLength = 0;

@@ -6,18 +6,18 @@ import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER, DEFAULT_TOKEN_TYPE_ROOT } from '../Basics/TokenType';
 import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
 import { ErrorNode } from './ErrorNode';
-import { NodeType } from './NodeType';
+import { NodeType, NODE_ORDER_MAP } from './NodeType';
 import { nanoid } from 'nanoid';
 import { AstNodePromiseType, LambdaPrivacyVarType } from '../Basics/Common';
 
-export const LAMBDA_TOKEN = 'LAMBDA';
+export const LAMBDA_TOKEN: string = 'LAMBDA';
 
 export class LambdaNode extends BaseAstNode {
     get nodeType() {
         return NodeType.LAMBDA;
     }
-    constructor(private _lambdaId: string) {
-        super();
+    constructor(token: string, private _lambdaId: string) {
+        super(token);
     }
 
     getLambdaId() {
@@ -33,7 +33,7 @@ export class LambdaNode extends BaseAstNode {
 
 export class LambdaNodeFactory extends BaseAstNodeFactory {
     get zIndex() {
-        return 7;
+        return NODE_ORDER_MAP.get(NodeType.LAMBDA) || 100;
     }
 
     private _updateLambdaStatement(functionStatementNode: LexerNode, lambdaId: string, currentLambdaPrivacyVar: LambdaPrivacyVarType) {
@@ -48,12 +48,13 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
             if (node instanceof LexerNode) {
                 this._updateTree(node, lambdaId, currentLambdaPrivacyVar);
             } else {
-                if (currentLambdaPrivacyVar.has(node)) {
+                const token = node.trim();
+                if (currentLambdaPrivacyVar.has(token)) {
                     const newNode = new LexerNode();
                     newNode.setToken(DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER);
                     newNode.setLambdaId(lambdaId);
                     newNode.setLambdaPrivacyVar(currentLambdaPrivacyVar);
-                    newNode.setLambdaParameter(node);
+                    newNode.setLambdaParameter(token);
                     children[i] = newNode;
                 }
             }
@@ -98,18 +99,20 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
 
         this._updateLambdaStatement(functionStatementNode, lambdaId, currentLambdaPrivacyVar);
 
-        return new LambdaNode(lambdaId);
+        return new LambdaNode(param.getToken(), lambdaId);
     }
 
     checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
-        if (typeof param === 'string') {
+        if (!(param instanceof LexerNode)) {
             return false;
         }
-        const token = param.getToken();
-        if (token === LAMBDA_TOKEN) {
-            return this.create(param, parserDataLoader);
+
+        const token = param.getToken().trim().toUpperCase();
+        if (token !== LAMBDA_TOKEN) {
+            return false;
         }
-        return false;
+
+        return this.create(param, parserDataLoader);
     }
 }
 

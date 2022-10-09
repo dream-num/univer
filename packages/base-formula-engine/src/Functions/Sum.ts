@@ -18,7 +18,7 @@ export class Sum extends BaseFunction {
     calculate(...variants: Array<FunctionVariantType>) {
         let accumulatorAll: BaseValueObject = new NumberValueObject(0);
         for (let i = 0; i < variants.length; i++) {
-            let variant = variants[0];
+            let variant = variants[i];
 
             if (variant.isErrorObject()) {
                 return ErrorValueObject.create(ErrorType.VALUE);

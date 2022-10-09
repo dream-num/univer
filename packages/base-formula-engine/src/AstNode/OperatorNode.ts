@@ -1,7 +1,7 @@
 import { OPERATOR_TOKEN_SET, OPERATOR_TOKEN_COMPARE_SET, operatorToken, compareToken } from '../Basics/Token';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
-import { NodeType } from './NodeType';
+import { NodeType, NODE_ORDER_MAP } from './NodeType';
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
 import { ErrorNode } from './ErrorNode';
 import { ErrorType } from '../Basics/ErrorType';
@@ -29,7 +29,7 @@ export class OperatorNode extends BaseAstNode {
         return NodeType.OPERATOR;
     }
     constructor(private _operatorString: string, private _functionExecutor: BaseFunction) {
-        super();
+        super(_operatorString);
     }
 
     execute() {
@@ -43,12 +43,12 @@ export class OperatorNode extends BaseAstNode {
 
 export class OperatorNodeFactory extends BaseAstNodeFactory {
     get zIndex() {
-        return 4;
+        return NODE_ORDER_MAP.get(NodeType.OPERATOR) || 100;
     }
 
     create(param: string, parserDataLoader: ParserDataLoader): BaseAstNode {
-        const tokenTrim = param.trim();
         let functionName = '';
+        const tokenTrim = param;
         if (tokenTrim === operatorToken.PLUS) {
             functionName = PLUS_EXECUTOR_NAME;
         } else if (tokenTrim === operatorToken.MINUS) {
@@ -77,8 +77,14 @@ export class OperatorNodeFactory extends BaseAstNodeFactory {
         if (param instanceof LexerNode) {
             return false;
         }
-        if (OPERATOR_TOKEN_SET.has(param)) {
-            return this.create(param, parserDataLoader);
+        const tokenTrim = param.trim();
+
+        if (tokenTrim.charAt(0) === '"' && tokenTrim.charAt(tokenTrim.length - 1) === '"') {
+            return false;
+        }
+
+        if (OPERATOR_TOKEN_SET.has(tokenTrim)) {
+            return this.create(tokenTrim, parserDataLoader);
         }
         return false;
     }

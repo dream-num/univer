@@ -9,7 +9,7 @@ import { BaseFunction } from '../Functions/BaseFunction';
 import { AsyncObject } from '../OtherObject/AsyncObject';
 import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
 import { ErrorNode } from './ErrorNode';
-import { NodeType } from './NodeType';
+import { NodeType, NODE_ORDER_MAP } from './NodeType';
 import { PrefixNode } from './PrefixNode';
 
 export class FunctionNode extends BaseAstNode {
@@ -17,8 +17,8 @@ export class FunctionNode extends BaseAstNode {
         return NodeType.FUNCTION;
     }
 
-    constructor(private _functionExecutor: BaseFunction) {
-        super();
+    constructor(token: string, private _functionExecutor: BaseFunction) {
+        super(token);
     }
 
     async executeAsync() {
@@ -41,7 +41,7 @@ export class FunctionNode extends BaseAstNode {
 
 export class FunctionNodeFactory extends BaseAstNodeFactory {
     get zIndex() {
-        return 2;
+        return NODE_ORDER_MAP.get(NodeType.FUNCTION) || 100;
     }
 
     create(token: string, parserDataLoader: ParserDataLoader): BaseAstNode {
@@ -50,7 +50,7 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
             console.error('No function ' + token);
             return ErrorNode.create(ErrorType.NAME);
         }
-        return new FunctionNode(functionExecutor);
+        return new FunctionNode(token, functionExecutor);
     }
 
     checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
@@ -72,7 +72,8 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         if (new RegExp(prefixToken.AT, 'g').test(prefix)) {
             atPrefixNode = new PrefixNode(prefixToken.AT);
             if (minusPrefixNode) {
-                minusPrefixNode.addChildren(atPrefixNode);
+                // minusPrefixNode.addChildren(atPrefixNode);
+                atPrefixNode.setParent(minusPrefixNode);
             }
             sliceLength++;
         }
@@ -83,12 +84,13 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
 
         if (parserDataLoader?.hasExecutor(tokenTrim)) {
             const functionNode = this.create(tokenTrim, parserDataLoader);
+            console.log('functionNode', functionNode);
             if (atPrefixNode) {
-                atPrefixNode.addChildren(functionNode);
-                return atPrefixNode;
+                functionNode.setParent(atPrefixNode);
+                // return atPrefixNode;
             } else if (minusPrefixNode) {
-                minusPrefixNode.addChildren(functionNode);
-                return minusPrefixNode;
+                functionNode.setParent(minusPrefixNode);
+                // return minusPrefixNode;
             }
             return functionNode;
         }

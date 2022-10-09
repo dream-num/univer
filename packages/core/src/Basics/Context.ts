@@ -6,7 +6,8 @@ import { HooksManager } from '../Observer/HooksManager';
 import { PluginManager } from '../Plugin';
 import { Locale, Nullable, PropsFrom } from '../Shared';
 import { Environment } from './Environment';
-import { Observer } from './Observer';
+import { WorkBookObserver } from './WorkBookObserver';
+import { WorkBookObserverImpl } from './WorkBookObserverImpl';
 
 /**
  * Core context, mount important instances, managers
@@ -39,126 +40,7 @@ export class Context {
     protected _setWorkbookObserver(): void {
         const manager = this.getObserverManager();
 
-        manager.addObserver(
-            'onAfterSetSelectionObservable',
-            'core',
-            new Observable()
-        );
-
-        manager.addObserver(
-            'onBeforeChangeNameObservable',
-            'core',
-            new Observable()
-        );
-        manager.addObserver('onAfterChangeNameObservable', 'core', new Observable());
-
-        manager.addObserver(
-            'onBeforeChangeActiveSheetObservable',
-            'core',
-            new Observable()
-        );
-        manager.addObserver(
-            'onAfterChangeActiveSheetObservable',
-            'core',
-            new Observable()
-        );
-
-        manager.addObserver(
-            'onBeforeChangeSheetNameObservable',
-            'core',
-            new Observable()
-        );
-        manager.addObserver(
-            'onAfterChangeSheetNameObservable',
-            'core',
-            new Observable()
-        );
-
-        manager.addObserver(
-            'onBeforeInsertSheetObservable',
-            'core',
-            new Observable()
-        );
-        manager.addObserver(
-            'onAfterInsertSheetObservable',
-            'core',
-            new Observable()
-        );
-
-        manager.addObserver(
-            'onBeforeRemoveSheetObservable',
-            'core',
-            new Observable()
-        );
-        manager.addObserver(
-            'onAfterRemoveSheetObservable',
-            'core',
-            new Observable()
-        );
-
-        manager.addObserver(
-            'onBeforeChangeSheetColorObservable',
-            'core',
-            new Observable()
-        );
-        manager.addObserver(
-            'onAfterChangeSheetColorObservable',
-            'core',
-            new Observable()
-        );
-
-        manager.addObserver(
-            'onBeforeChangeSheetDataObservable',
-            'core',
-            new Observable()
-        );
-        manager.addObserver(
-            'onAfterChangeSheetDataObservable',
-            'core',
-            new Observable()
-        );
-
-        manager.addObserver(
-            'onSheetBarDidMountObservable',
-            'core',
-            new Observable()
-        );
-        manager.addObserver('onInfoBarDidMountObservable', 'core', new Observable());
-        manager.addObserver(
-            'onRightMenuDidMountObservable',
-            'core',
-            new Observable()
-        );
-
-        manager.addObserver(
-            'onAfterChangeSheetScrollObservable',
-            'core',
-            new Observable()
-        );
-        manager.addObserver(
-            'onAfterChangeUILocaleObservable',
-            'core',
-            new Observable()
-        );
-        manager.addObserver(
-            'onSheetRenderDidMountObservable',
-            'core',
-            new Observable()
-        );
-        manager.addObserver(
-            'onAfterChangeUISkinObservable',
-            'core',
-            new Observable()
-        );
-        manager.addObserver('onHideSheetObservable', 'core', new Observable());
-        manager.addObserver('onShowSheetObservable', 'core', new Observable());
-        manager.addObserver(
-            'onSheetTabColorChangeObservable',
-            'core',
-            new Observable()
-        );
-        manager.addObserver('onSheetOrderObservable', 'core', new Observable());
-        manager.addObserver('onZoomRatioSheetObservable', 'core', new Observable());
+        new WorkBookObserverImpl().install(manager);
     }
 
     constructor() {
@@ -182,9 +64,9 @@ export class Context {
         return this._locale;
     }
 
-    getContextObserver<Key extends keyof Observer>(
+    getContextObserver<Key extends keyof WorkBookObserver>(
         value: Key
-    ): Observable<PropsFrom<Observer[Key]>> {
+    ): Observable<PropsFrom<WorkBookObserver[Key]>> {
         return this.getObserverManager().requiredObserver(value, 'core');
     }
 

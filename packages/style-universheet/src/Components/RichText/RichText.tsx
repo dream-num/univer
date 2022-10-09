@@ -37,9 +37,9 @@ interface IState {
  * Rich Text Cell Editor Component
  */
 export class RichText extends Component<BaseRichTextProps, IState> {
-    // private _fontFamilyObserv: Nullable<Observer<string>>;
+    // private _fontFamilyObserv: Nullable<WorkBookObserver<string>>;
 
-    // private _fontSizeObserv: Nullable<Observer<number>>;
+    // private _fontSizeObserv: Nullable<WorkBookObserver<number>>;
 
     ref = createRef<HTMLDivElement>();
 

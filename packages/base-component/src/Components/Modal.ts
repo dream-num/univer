@@ -1,5 +1,5 @@
 import { BaseComponent, JSXComponent } from '../BaseComponent';
-import { ComponentChildren, RefObject } from '../Framework';
+import { ComponentChildren } from '../Framework';
 
 export interface BaseModalProps {
     title?: string;

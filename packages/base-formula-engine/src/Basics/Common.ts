@@ -2,7 +2,7 @@ import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
 import { BaseValueObject } from '../ValueObject/BaseValueObject';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { AsyncObject } from '../OtherObject/AsyncObject';
-import { BooleanNumber, ICellData, IRangeData, Nullable, ObjectMatrix, ObjectMatrixType } from '@univer/core';
+import { BooleanNumber, ICellData, IRangeData, Nullable, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univer/core';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 
 export type NodeValueType = BaseValueObject | BaseReferenceObject | ErrorValueObject | AsyncObject;
@@ -21,7 +21,7 @@ export interface IFormulaData {
     column: number;
 }
 
-export type FormulaDataType = { [sheetId: string]: ObjectMatrixType<IFormulaData> };
+export type FormulaDataType = { [sheetId: string]: ObjectMatrixPrimitiveType<IFormulaData> };
 
 export type SheetNameMapType = { [sheetName: string]: string };
 

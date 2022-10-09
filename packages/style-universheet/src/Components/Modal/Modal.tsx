@@ -7,42 +7,6 @@ import styles from './index.module.less';
 
 interface IState {}
 
-// export interface ModalBaseProps {
-//     title?: string;
-//     width?: number;
-//     style?: JSX.CSSProperties;
-//     children?: any;
-//     className?: string;
-//     group?: Array<ModalButtonGroup>;
-//     maskClick?: () => void;
-//     /** 模态框是否可以拖动 */
-//     isDrag?: boolean;
-
-//     /** 模态框是否可见 */
-//     visible?: boolean;
-
-//     /** 是否显示遮罩 */
-//     mask?: boolean;
-
-//     /** 是否显示底部 */
-//     footer?: boolean;
-
-//     /** 点击遮罩层或右上角叉或取消按钮的回调 */
-//     onCancel?: (e: Event) => void;
-// }
-
-// export type ModalButtonGroup = {
-//     name?: string;
-//     label?: string;
-//     onClick?: (e?: any) => void;
-//     type?: string;
-// };
-
-// interface ModalProps extends ModalBaseProps {
-//     show?: boolean;
-//     name?: string;
-// }
-
 class Modal extends Component<BaseModalProps, IState> {
     handleClickCancel = (cb: Function | undefined) => {
         // this.setState({ visible: false });

@@ -1,10 +1,10 @@
 # Univer
 
-English| [简体中文](./README-zh.md)
+English | [简体中文](./README-zh.md)
 
 ## Introduction
 
-Univer,[Luckysheet 2.0](https://github.com/dream-num/luckysheet) upgrade version.
+🚀Univer, [Luckysheet 2.0](https://github.com/dream-num/luckysheet) upgrade version.
 
 > ⚠️ This project is still in development, only for testing and learning, not for production
 
@@ -14,14 +14,13 @@ Univer,[Luckysheet 2.0](https://github.com/dream-num/luckysheet) upgrade version
 
 [Node.js](https://nodejs.org/en/) Version >= 14.19
 
-
 ### Installation
 ````
 git clone http://github.com/dream-num/univer
 cd univer
 npm i -g pnpm # MacOS : sudo npm i -g pnpm
 npx playwright install
-pnmp i
+pnpm i
 ````
 ### Development
 ````

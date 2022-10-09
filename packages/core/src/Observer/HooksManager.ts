@@ -2,7 +2,7 @@ import { Nullable } from '../Shared';
 import { ObservableHooks } from './ObservableHooks';
 
 /**
- * Observer hook
+ * WorkBookObserver hook
  */
 export class PathObservableHooks<T = any> {
     namespace: string;

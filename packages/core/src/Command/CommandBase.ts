@@ -1,9 +1,9 @@
 import { ActionBase, IActionData } from './ActionBase';
 import { WorkBook } from '../Sheets/Domain';
 import { CommandManager } from './CommandManager';
-import { CommandType } from './CommandObservers';
 import { CommandInjector } from './CommandInjectorObservers';
 import { Class, Nullable } from '../Shared';
+import { ActionType } from './ActionObservers';
 
 /**
  * Manage action instances and action data
@@ -23,7 +23,7 @@ export class CommandBase {
             this._actions.push(action);
         });
         CommandManager.getCommandObservers().notifyObservers({
-            type: CommandType.REDO,
+            type: ActionType.REDO,
             actions: this._actions,
         });
     }

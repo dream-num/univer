@@ -8,7 +8,7 @@ import {
     CommandManager,
     ISetRangeDataActionData,
 } from '../../src/Command';
-import { ICellData, ObjectMatrixType } from '../../src';
+import { ICellData, ObjectMatrixPrimitiveType } from '../../src';
 import { IOCContainerStartUpReady } from '../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
@@ -26,7 +26,7 @@ test('Test SetRangeDataAction', () => {
     const actionName = 'SetRangeDataAction';
 
     //  mock data
-    const cellValue: ObjectMatrixType<ICellData> = {
+    const cellValue: ObjectMatrixPrimitiveType<ICellData> = {
         0: {
             0: {
                 v: 1,

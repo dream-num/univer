@@ -1,6 +1,6 @@
 import { BooleanNumber, SheetTypes } from '../Enum';
 import { ObjectArrayType } from '../Shared/ObjectArray';
-import { ObjectMatrixType } from '../Shared/ObjectMatrix';
+import { ObjectMatrixPrimitiveType } from '../Shared/ObjectMatrix';
 import { ICellData } from './ICellData';
 import { IColumnData } from './IColumnData';
 import { IRangeData, IRangeType } from './IRangeData';
@@ -48,7 +48,7 @@ export interface IWorksheetConfig {
     hideRow: [];
     hideColumn: [];
     status: BooleanNumber;
-    cellData: ObjectMatrixType<ICellData>;
+    cellData: ObjectMatrixPrimitiveType<ICellData>;
     rowData: ObjectArrayType<Partial<IRowData>>;
     columnData: ObjectArrayType<Partial<IColumnData>>;
     showGridlines: BooleanNumber;

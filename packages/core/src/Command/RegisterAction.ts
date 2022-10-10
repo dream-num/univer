@@ -44,6 +44,7 @@ import { InsertSheetAction } from '../Sheets/Action/InsertSheetAction';
 import { RemoveColumnAction } from '../Sheets/Action/removeColumnAction';
 import { RemoveSheetAction } from '../Sheets/Action/RemoveSheetAction';
 import { CommandManager } from './CommandManager';
+import { SetZoomRatioAction } from '../Sheets/Action/SetZoomRatioAction';
 
 /**
  * All Commands are registered statically. For each new Command, a static registration method must be added here.
@@ -116,3 +117,5 @@ CommandManager.register(ACTION_NAMES.SET_RANGE_NOTE_ACTION, SetRangeNoteAction);
 CommandManager.register(ACTION_NAMES.INSERT_SHEET_ACTION, InsertSheetAction);
 CommandManager.register(ACTION_NAMES.REMOVE_SHEET_ACTION, RemoveSheetAction);
 CommandManager.register(ACTION_NAMES.SET_SHEET_ORDER_ACTION, SetSheetOrderAction);
+CommandManager.register(ACTION_NAMES.SET_SHEET_ORDER_ACTION, SetSheetOrderAction);
+CommandManager.register(ACTION_NAMES.SET_ZOOM_RATIO_ACTION, SetZoomRatioAction);

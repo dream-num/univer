@@ -425,9 +425,16 @@ export class Worksheet {
      * @param zoomRatio
      */
     setZoomRatio(zoomRatio: number): void {
-        const { _context } = this;
+        const { _context, _sheetId, _commandManager } = this;
+        const zoomRation = {
+            actionName: ACTION_NAMES.SET_ZOOM_RATIO_ACTION,
+            sheetId: _sheetId,
+            zoom: zoomRatio,
+        };
+        const command = new Command(_context.getWorkBook(), zoomRation);
+        _commandManager.invoke(command);
+
         const observer = _context.getContextObserver('onZoomRatioSheetObservable');
-        this._config.zoomRatio = zoomRatio;
         observer.notifyObservers({ zoomRatio });
     }
 

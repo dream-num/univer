@@ -88,7 +88,7 @@ export class CanvasView {
             // update data
             plugin.getCanvasView().updateToSheet(this._plugin.getContext().getWorkBook().getActiveSheet()!);
             // update render
-            // plugin.getMainComponent().makeDirty(true);
+            plugin.getMainComponent().makeDirty(true);
         });
 
         scene.addViewport(viewMain, viewLeft, viewTop, viewLeftTop).attachControl();

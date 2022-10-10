@@ -1,4 +1,4 @@
-import { ACTION_NAMES } from '../Const';
+  import { ACTION_NAMES } from '../Const';
 import {
     AddNamedRangeAction,
     DeleteNamedRangeAction,

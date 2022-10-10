@@ -1,7 +1,7 @@
 import { Observable } from '../Observer/Observable';
 import { WorkSheet } from '../Sheets/Domain';
 
-export type Observer = {
+export type WorkBookObserver = {
     onBeforeInsertSheetObservable: Observable<{ index: number; sheetId: string }>;
     onAfterInsertSheetObservable: Observable<{ index: number; sheetId: string }>;
 

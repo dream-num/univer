@@ -2,7 +2,7 @@ import { Nullable, Tools } from '../Shared';
 import { Observable } from './Observable';
 
 /**
- * Observer for the specified path
+ * WorkBookObserver for the specified path
  */
 export class PathObservable<T = any> {
     namespace: string;
@@ -19,7 +19,7 @@ export class PathObservable<T = any> {
 }
 
 /**
- * Manage a set of PathObservables, Get, remove, add Observer
+ * Manage a set of PathObservables, Get, remove, add WorkBookObserver
  */
 export class ObserverManager {
     private _observableArray: PathObservable[] = [];

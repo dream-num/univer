@@ -1,4 +1,4 @@
-# 前端插件化架构在 UniverSheet 3.0 的实现
+# 前端插件化架构在 Univer 的实现
 
 ## 需求
 
@@ -6,7 +6,9 @@
 
 这时候就需要考虑加入设计模式了，通常来说，只需要加入几种常见的设计模式，比如观察者模式、命令模式，就可以让模块间解耦，让你的系统变得更加健壮、扩展性更强。
 
-UniverSheet 2.0 很少用到设计模式，扩展性不好，模块拆分不够细致，所以我们 UniverSheet 3.0 重构的时候，重点考虑了扩展性，设计了一种插件化架构，或者叫微内核架构。有了插件，扩展自己的功能就方便了，而且不用改造核心库，可以和官方保持同步。下面就来介绍下我们团队在重构 UniverSheet 时候的思考。
+Luckysheet 2.0 很少用到设计模式，扩展性不好，模块拆分不够细致，所以我们 Univer 重构的时候，重点考虑了扩展性，设计了一种插件化架构，或者叫微内核架构。有了插件，扩展自己的功能就方便了，而且不用改造核心库，可以和官方保持同步。下面就来介绍下我们团队在重构 Univer 时候的思考。
+
+> [Univer](https://github.com/dream-num/univer)，原 [Luckysheet 2.0](https://github.com/dream-num/Luckysheet) 升级。
 
 ## 设计
 
@@ -18,7 +20,7 @@ UniverSheet 2.0 很少用到设计模式，扩展性不好，模块拆分不够�
 2. 插件管理，安装、卸载等
 3. 插件和核心通信，插件和插件通信
 
-下面简要介绍 UniverSheet 的插件设计
+下面简要介绍 Univer 的插件设计
 
 ## 原理
 
@@ -38,13 +40,13 @@ export abstract class Plugin {
         this._name = name;
     }
 
-    getName(): string {
+    getPluginName(): string {
         return this._name;
     }
 
-    abstract onMounted(): void;
+    onMounted(): void;
 
-    abstract onDestroy(): void;
+    onDestroy(): void;
 
     // 其它方法
 }
@@ -82,12 +84,6 @@ export class PluginManager {
 
     constructor() {}
 
-    _destroy(plugins: Plugin[]) {
-        plugins.forEach((plugin: Plugin) => {
-            plugin.onDestroy();
-        });
-    }
-
     _initialize(plugins: Plugin[]) {
         plugins.forEach((plugin: Plugin) => {
             plugin.onMounted();
@@ -104,10 +100,12 @@ export class PluginManager {
     // 卸载
     uninstall(name: string) {
         const { _plugins } = this;
-        const index = _plugins.findIndex((item) => item.getName() === name);
+        const index = _plugins.findIndex((item) => item.getPluginName() === name);
         if (index > -1) {
-            const remove = _plugins.splice(index, 1);
-            this._destroy(remove);
+            const plugin = _plugins.splice(index, 1)[0];
+            if (plugin) {
+                plugin.onDestroy();
+            }
         }
     }
 
@@ -154,7 +152,7 @@ export abstract class Plugin {
         this._name = name;
     }
 
-    getName(): string {
+    getPluginName(): string {
         return this._name;
     }
 
@@ -162,9 +160,9 @@ export abstract class Plugin {
         return this._context;
     }
 
-    abstract onMounted(ctx: Context): void;
+    onMounted(ctx: Context): void;
 
-    abstract onDestroy(): void;
+    onDestroy(): void;
 
     // 其它方法
 }
@@ -173,10 +171,10 @@ export abstract class Plugin {
 关于观察者模式，我们实现了
 
 1. `Observable` 类，提供基础的观察者模式功能如增加、移除、通知
-2. `PathObservable` 类，包装单个 `Observable`，提供观察者名称
+2. `PathObservable` 类，包装单个 `Observable`，并提供观察者名称和命名空间
 3. `ObserverManager` 管理类，和`PluginManager`类似，专门负责`PathObservable`实例的管理
 
-然后在插件实例中，提供快捷注册观察者的方法 `addObserve`，同时提供获取其它插件的 API `getPluginByName`，这样就能监听其它插件的消息了。这样实现了插件之间的通信。
+然后在插件实例中，提供快捷注册观察者的方法 `pushToObserve`，同时提供获取其它插件的 API `getPluginByName`，这样就能监听其它插件的消息了。这样实现了插件之间的通信。
 
 ```ts
 export abstract class Plugin<O = any> {
@@ -190,28 +188,26 @@ export abstract class Plugin<O = any> {
         this._observeNames = [];
     }
 
+    onMounted(context: Context): void {}
+
+    onDestroy(): void {
+        this.deleteObserve(...this._observeNames);
+    }
+
+    onMapping(ioc: IOCContainer): void {}
+
+    getPluginName(): string {
+        return this._name;
+    }
+
     getContext(): Context {
         return this._context;
     }
 
-    getName(): string {
-        return this._name;
-    }
-
-    abstract onMounted(ctx: Context): void;
-
-    abstract onMapping(container: IOCContainer): void;
-
-    onDestroy(): void {
-        this.removeObserve(...this._observeNames);
-    }
-
-    // 移除观察者
-    removeObserve(...names: string[]): void {
+    // 获取观察者
+    getObserver<K extends keyof Obs & string>(name: K): Nullable<Observable<PropsFrom<Obs[K]>>> {
         const manager = this._context.getObserverManager();
-        names.forEach((name) => {
-            manager.removeObserver(name, this._name);
-        });
+        return manager.getObserver(name, this._name);
     }
 
     // 获取其它插件实例
@@ -220,7 +216,7 @@ export abstract class Plugin<O = any> {
     }
 
     // 注册观察者
-    addObserve(...names: string[]): void {
+    pushToObserve<K extends keyof Obs & string>(...names: K[]): void {
         const manager = this._context.getObserverManager();
         names.forEach((name) => {
             if (!this._observeNames.includes(name)) {
@@ -230,21 +226,23 @@ export abstract class Plugin<O = any> {
         });
     }
 
-    // 获取观察者
-    getObserver<T>(name: keyof O): Nullable<Observable<T>> {
+    // 移除观察者
+    deleteObserve<K extends keyof Obs & string>(...names: K[]): void {
         const manager = this._context.getObserverManager();
-        return manager.getObserver<T, O>(name, this._name);
+        names.forEach((name) => {
+            manager.removeObserver(name, this._name);
+        });
     }
 }
 ```
 
 ## 总结
 
-以上就是我们在 UniverSheet 3.0 重构时候，关于插件化架构的设计和思考，项目还在不断优化和迭代，也有很多不足的地方，欢迎指出探讨。
+以上就是我们在 Luckysheet 重构为 Univer 的时候，关于插件化架构的设计和思考，项目还在不断优化和迭代，也有很多不足的地方，欢迎指出探讨。
 
-最新源码请关注我们的官方 GitHub 仓库： <https://github.com/dream-num/UniverSheet>
+最新源码请关注我们的官方 GitHub 仓库： <https://github.com/dream-num/Univer>
 
 ## 参考
 
--   [UniverSheet](https://github.com/dream-num/UniverSheet)
+-   [Univer](https://github.com/dream-num/Univer)
 -   [前端进阶：跟着开源项目学习插件化架构](https://zhuanlan.zhihu.com/p/149973342)

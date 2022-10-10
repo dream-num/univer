@@ -96,12 +96,9 @@ export class WorkSheet {
     protected _overGridImages: OverGridImage[];
     // protected _bandings: Array<Banding>;
 
-    private _setWorkbookObserver(): void {}
-
     private _initialize(): void {
         this._selection = new Selection(this);
         this._merges = new Merges(this, this._config.mergeData);
-        this._setWorkbookObserver();
     }
 
     constructor(context: Context);

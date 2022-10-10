@@ -19,7 +19,7 @@ export interface IActionObserverProps {
 }
 
 /**
- * Observer for action base
+ * WorkBookObserver for action base
  *
  * @beta
  */

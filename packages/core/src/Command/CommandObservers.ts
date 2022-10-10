@@ -1,19 +1,12 @@
 import { Observable } from '../Observer';
 import { ActionBase, IActionData } from './ActionBase';
-
-/**
- * Command type
- */
-export enum CommandType {
-    REDO,
-    UNDO,
-}
+import { ActionType } from './ActionObservers';
 
 /**
  * Command observer props
  */
 interface ICommandObserverProps {
-    type: CommandType;
+    type: ActionType;
     actions: Array<ActionBase<IActionData>>;
 }
 

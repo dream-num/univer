@@ -25,7 +25,7 @@ export class InputManager {
 
     private _alreadyAttachedTo: HTMLElement;
 
-    // Observer
+    // WorkBookObserver
     private _onInputObserver: Nullable<Observer<IEvent>>;
 
     // Pointers

@@ -13,7 +13,7 @@ export type ObjectMatrixPrimitiveType<T> = {
 /**
  * Object Matrix Type
  */
-export type ObjectMatrixType<T> =
+type ObjectMatrixType<T> =
     | ObjectMatrix<T>
     | ObjectArray<ObjectArray<T>>
     | ObjectMatrixPrimitiveType<T>;

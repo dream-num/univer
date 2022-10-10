@@ -26,7 +26,7 @@ export class EventState {
     }
 
     /**
-     * An Observer can set this property to true to prevent subsequent observers of being notified
+     * An WorkBookObserver can set this property to true to prevent subsequent observers of being notified
      */
     skipNextObservers: boolean | undefined;
 
@@ -49,7 +49,7 @@ interface INotifyObserversReturn {
 }
 
 /**
- * Represent an Observer registered to a given Observable object.
+ * Represent an WorkBookObserver registered to a given Observable object.
  */
 export class Observer<T = void> {
     /** @hidden */
@@ -110,8 +110,8 @@ export class Observable<T> {
     }
 
     /**
-     * Create a new Observer with the specified callback
-     * @param callback the callback that will be executed for that Observer
+     * Create a new WorkBookObserver with the specified callback
+     * @param callback the callback that will be executed for that WorkBookObserver
      * @param insertFirst if true the callback will be inserted at the first position, hence executed before the others ones. If false (default behavior) the callback will be inserted at the last position, executed after all the others already present.
      * @param unregisterOnFirstCall defines if the observer as to be unregistered after the next notification
      * @returns the new observer created for the callback
@@ -142,8 +142,8 @@ export class Observable<T> {
     }
 
     /**
-     * Create a new Observer with the specified callback and unregisters after the next notification
-     * @param callback the callback that will be executed for that Observer
+     * Create a new WorkBookObserver with the specified callback and unregisters after the next notification
+     * @param callback the callback that will be executed for that WorkBookObserver
      * @returns the new observer created for the callback
      */
     addOnce(
@@ -153,8 +153,8 @@ export class Observable<T> {
     }
 
     /**
-     * Remove an Observer from the Observable object
-     * @param observer the instance of the Observer to remove
+     * Remove an WorkBookObserver from the Observable object
+     * @param observer the instance of the WorkBookObserver to remove
      * @returns false if it doesn't belong to this Observable
      */
     remove(observer: Nullable<Observer<T>>): boolean {
@@ -356,7 +356,7 @@ export class Observable<T> {
 
     /**
      * Gets a boolean indicating if the observable has at least one observer
-     * @returns true is the Observable has at least one Observer registered
+     * @returns true is the Observable has at least one WorkBookObserver registered
      */
     hasObservers(): boolean {
         return this._observers.length > 0;

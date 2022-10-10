@@ -1,6 +1,6 @@
+import { ActionType } from './ActionObservers';
 import { CommandBase } from './CommandBase';
 import { CommandManager } from './CommandManager';
-import { CommandType } from './CommandObservers';
 
 /**
  * Execute the undo-redo command
@@ -9,7 +9,7 @@ export class Command extends CommandBase {
     redo(): void {
         this._actions.forEach((action) => action.redo());
         CommandManager.getCommandObservers().notifyObservers({
-            type: CommandType.REDO,
+            type: ActionType.REDO,
             actions: this._actions,
         });
     }
@@ -17,7 +17,7 @@ export class Command extends CommandBase {
     undo(): void {
         this._actions.forEach((action) => action.undo());
         CommandManager.getCommandObservers().notifyObservers({
-            type: CommandType.UNDO,
+            type: ActionType.UNDO,
             actions: this._actions,
         });
     }
@@ -27,7 +27,7 @@ export class Command extends CommandBase {
             this.getInjector()
         );
         CommandManager.getCommandObservers().notifyObservers({
-            type: CommandType.REDO,
+            type: ActionType.REDO,
             actions: this._actions,
         });
     }

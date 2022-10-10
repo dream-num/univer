@@ -1,7 +1,5 @@
 # Univer
 
-## 
-
 简体中文 | [English](./README.md)
 
 ## 介绍
@@ -16,14 +14,13 @@
 
 [Node.js](https://nodejs.org/en/) Version >= 14.19
 
-
 ### 安装
 ```
 git clone http://github.com/dream-num/univer
 cd univer
 npm i -g pnpm # MacOS : sudo npm i -g pnpm
 npx playwright install
-pnmp i
+pnpm i
 ```
 ### 开发
 ```

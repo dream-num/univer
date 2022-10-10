@@ -9,7 +9,7 @@ import {
     Component,
     FunctionComponent,
 } from '@univer/base-component';
-import { Nullable, Observer, Workbook1 } from '@univer/core';
+import { Nullable, Observer, Workbook } from '@univer/core';
 import { IConfig } from '../../IData';
 import styles from './index.module.less';
 import { PrintInput } from './printInput';
@@ -41,7 +41,7 @@ interface IState {
 class PrintMode extends Component<IProps, IState> {
     // printModeRef = createRef();
 
-    private _localeObserver: Nullable<Observer<Workbook1>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     Button: FunctionComponent<BaseButtonProps>;
 
@@ -206,7 +206,7 @@ class PrintMode extends Component<IProps, IState> {
 
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
@@ -216,7 +216,7 @@ class PrintMode extends Component<IProps, IState> {
      * destory
      */
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     setLocale() {

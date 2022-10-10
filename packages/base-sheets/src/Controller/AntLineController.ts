@@ -1,4 +1,4 @@
-import { Workbook1 } from '@univer/core';
+import { Workbook } from '@univer/core';
 import { Rect, Scene } from '@univer/base-render';
 import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
 import { SheetView } from '../View/Render/Views';
@@ -194,9 +194,9 @@ export class AntLineControl {
 
     /**
      * Return WorkBook
-     * @returns Workbook1
+     * @returns Workbook
      */
-    getWorkBook(): Workbook1 {
+    getWorkBook(): Workbook {
         return this._plugin.getWorkbook();
     }
 

@@ -52,7 +52,7 @@ import {
     Tuples,
 } from '../../Shared';
 import { DropCell } from '../../Shared/DropCell';
-import { Worksheet1 } from './Worksheet1';
+import { Worksheet } from './Worksheet';
 
 /**
  * getObjectValues options type
@@ -81,9 +81,9 @@ export class Range {
 
     private _rangeData: IRangeData;
 
-    private _worksheet: Worksheet1;
+    private _worksheet: Worksheet;
 
-    constructor(workSheet: Worksheet1, range: IRangeType) {
+    constructor(workSheet: Worksheet, range: IRangeType) {
         this._context = workSheet.getContext();
         this._commandManager = this._context.getCommandManager();
 
@@ -714,7 +714,7 @@ export class Range {
     /**
      * Returns the sheet this range belongs to.
      */
-    getSheet(): Worksheet1 {
+    getSheet(): Worksheet {
         return this._worksheet;
     }
 
@@ -2169,7 +2169,7 @@ export class Range {
      * @param endColumn The end column of the target range.
      */
     copyFormatToRange(
-        sheet: Worksheet1,
+        sheet: Worksheet,
         startRow: number,
         endRow: number,
         startColumn: number,
@@ -2183,7 +2183,7 @@ export class Range {
         const startColumn = argument[3];
         const endColumn = argument[4];
 
-        const sheetId = Tools.isAssignableFrom(argument[0], Worksheet1)
+        const sheetId = Tools.isAssignableFrom(argument[0], Worksheet)
             ? argument[0].getSheetId()
             : argument[0];
 
@@ -2242,7 +2242,7 @@ export class Range {
      * @returns
      */
     copyValuesToRange(
-        sheet: Worksheet1,
+        sheet: Worksheet,
         startRow: number,
         endRow: number,
         startColumn: number,
@@ -2256,7 +2256,7 @@ export class Range {
         const startColumn = argument[3];
         const endColumn = argument[4];
 
-        const sheetId = Tools.isAssignableFrom(argument[0], Worksheet1)
+        const sheetId = Tools.isAssignableFrom(argument[0], Worksheet)
             ? argument[0].getSheetId()
             : argument[0];
 

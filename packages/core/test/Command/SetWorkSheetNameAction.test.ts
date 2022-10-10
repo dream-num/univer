@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { Workbook1, Worksheet1 } from '../../src/Sheets/Domain';
+import { Workbook, Worksheet } from '../../src/Sheets/Domain';
 import { Context } from '../../src/Basics';
 import { IOCContainerStartUpReady } from '../ContainerStartUp';
 import { CommandManager, SetWorkSheetNameAction } from '../../src/Command';
@@ -12,11 +12,11 @@ jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 test('Set WorkSheet Name', () => {
     const container = IOCContainerStartUpReady();
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
 
     const sheetId = 'sheet1';
     const name = 'sheet1';
-    const worksheet = new Worksheet1(context, { id: sheetId, name });
+    const worksheet = new Worksheet(context, { id: sheetId, name });
     workbook.insertSheet(worksheet);
 
     const observers = CommandManager.getActionObservers();

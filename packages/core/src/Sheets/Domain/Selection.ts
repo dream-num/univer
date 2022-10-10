@@ -7,8 +7,8 @@ import { IRangeData, IRangeType, ISelectionData } from '../../Interfaces';
 import { Nullable, Tools } from '../../Shared';
 import { Range } from './Range';
 import { RangeList } from './RangeList';
-import { Workbook1 } from './Workbook1';
-import { Worksheet1 } from './Worksheet1';
+import { Workbook } from './Workbook';
+import { Worksheet } from './Worksheet';
 
 /**
  *
@@ -31,9 +31,9 @@ export class Selection {
 
     private _context: Context;
 
-    private _workBook: Workbook1;
+    private _workBook: Workbook;
 
-    private _workSheet: Worksheet1;
+    private _workSheet: Worksheet;
 
     private _activeRange: Range;
 
@@ -41,7 +41,7 @@ export class Selection {
 
     private _activeRangeList: RangeList;
 
-    constructor(worksheet: Worksheet1) {
+    constructor(worksheet: Worksheet) {
         this._workSheet = worksheet;
         this._context = worksheet.getContext();
         this._commandManager = this._context.getCommandManager();
@@ -53,7 +53,7 @@ export class Selection {
         this._currentCell = this._workSheet.getRange(DEFAULT_SELECTION);
     }
 
-    setWorkSheet(workSheet: Worksheet1): void {
+    setWorkSheet(workSheet: Worksheet): void {
         this._workSheet = workSheet;
     }
 
@@ -94,7 +94,7 @@ export class Selection {
                 startColumn: activeRange.startColumn,
                 endColumn: activeRange.startColumn,
             };
-        } else if (selection && Workbook1.isIRangeType(selection)) {
+        } else if (selection && Workbook.isIRangeType(selection)) {
             // Convert the selection passed in by the user into a standard format
             // activeRange = new TransformTool(this._workBook).transformRangeType(
             //     selection
@@ -217,7 +217,7 @@ export class Selection {
      *
      * @returns
      */
-    getActiveSheet(): Nullable<Worksheet1> {
+    getActiveSheet(): Nullable<Worksheet> {
         return this._workBook.getActiveSheet();
     }
 

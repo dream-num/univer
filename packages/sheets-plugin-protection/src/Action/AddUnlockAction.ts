@@ -1,4 +1,4 @@
-import { ActionBase, ActionObservers, ACTION_NAMES, CONVERTOR_OPERATION, IActionData, Range, Workbook1, WorkSheetConvertor } from '@univer/core';
+import { ActionBase, ActionObservers, ACTION_NAMES, CONVERTOR_OPERATION, IActionData, Range, Workbook, WorkSheetConvertor } from '@univer/core';
 import { AddUnlockService, RemoveUnlockService } from '../Service';
 
 export interface IAddUnlockActionData extends IActionData {
@@ -6,7 +6,7 @@ export interface IAddUnlockActionData extends IActionData {
 }
 
 export class AddUnlockAction extends ActionBase<IAddUnlockActionData, IAddUnlockActionData> {
-    constructor(actionData: IAddUnlockActionData, workbook: Workbook1, observers: ActionObservers) {
+    constructor(actionData: IAddUnlockActionData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._doActionData = {
             ...actionData,

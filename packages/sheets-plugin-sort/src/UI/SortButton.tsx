@@ -10,7 +10,7 @@ import {
     ISlotElement,
 } from '@univer/base-component';
 
-import { Nullable, Observer, Workbook1 } from '@univer/core';
+import { Nullable, Observer, Workbook } from '@univer/core';
 import { IProps } from '../IData/ISort';
 import { SortCustom } from './SortCustom';
 
@@ -35,7 +35,7 @@ export class SortButton extends Component<IProps, IState> {
 
     NextIcon: FunctionComponent<BaseIconProps>;
 
-    private _localeObserver: Nullable<Observer<Workbook1>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     sortCustom = createRef();
 
@@ -93,7 +93,7 @@ export class SortButton extends Component<IProps, IState> {
 
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
@@ -107,7 +107,7 @@ export class SortButton extends Component<IProps, IState> {
      * destory
      */
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
         // document.removeEventListener('click', this.SortCustomHide.bind(this), true);
     }
 

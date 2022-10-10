@@ -1,6 +1,6 @@
 import { SetRangeNote } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
-import { Workbook1 } from '../Domain';
+import { Workbook } from '../Domain';
 import { IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
@@ -24,7 +24,7 @@ export class SetRangeNoteAction extends ActionBase<
 > {
     constructor(
         actionData: ISetRangeNoteActionData,
-        workbook: Workbook1,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

@@ -1,7 +1,7 @@
 import { InsertRow, RemoveRow } from '../Apply';
 import { CONVERTOR_OPERATION } from '../../Const';
 import { WorkSheetConvertor } from '../../Convertor';
-import { Workbook1 } from '../Domain';
+import { Workbook } from '../Domain';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertRowActionData } from './InsertRowAction';
@@ -25,7 +25,7 @@ export class RemoveRowAction extends ActionBase<
 > {
     constructor(
         actionData: IRemoveRowActionData,
-        workbook: Workbook1,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

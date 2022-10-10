@@ -1,5 +1,5 @@
 import { CommandManager, UndoManager } from '../Command';
-import { Workbook1, Worksheet1 } from '../Sheets/Domain';
+import { Workbook, Worksheet } from '../Sheets/Domain';
 import { IOCContainer } from '../IOC';
 import { Environment } from './Environment';
 import { UniverSheet } from './UniverSheet';
@@ -22,12 +22,12 @@ export function Bootstrap(container: IOCContainer): IOCContainer {
     container.addSingletonMapping('Server', ServerSocket);
     container.addSingletonMapping('ServerSocket', ServerSocket);
     container.addSingletonMapping('ServerHttp', ServerHttp);
-    container.addSingletonMapping('WorkBook', Workbook1);
+    container.addSingletonMapping('WorkBook', Workbook);
     container.addSingletonMapping('Locale', Locale);
     container.addSingletonMapping('Context', Context);
     container.addSingletonMapping('UndoManager', UndoManager);
     container.addSingletonMapping('CommandManager', CommandManager);
-    container.addSingletonMapping('WorkSheet', Worksheet1);
+    container.addSingletonMapping('WorkSheet', Worksheet);
     container.addSingletonMapping('PluginManager', PluginManager);
     container.addSingletonMapping('ObserverManager', ObserverManager);
     container.addSingletonMapping('ObservableHooksManager', HooksManager);

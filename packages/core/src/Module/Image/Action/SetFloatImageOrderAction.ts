@@ -1,6 +1,6 @@
 import { ActionObservers, ActionBase, IActionData } from '../../../Command';
 
-import { Workbook1 } from '../../../Sheets/Domain';
+import { Workbook } from '../../../Sheets/Domain';
 
 export interface ISetFloatImageOrderActionData extends IActionData {
     x: number;
@@ -15,7 +15,7 @@ export class SetFloatImageOrderAction extends ActionBase<
 > {
     constructor(
         actionData: ISetFloatImageOrderActionData,
-        workbook: Workbook1,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

@@ -1,7 +1,7 @@
 import { Context } from '../../Basics';
 import { Command, CommandManager } from '../../Command';
 import { ACTION_NAMES } from '../../Const';
-import { Workbook1, Worksheet1 } from '../../Sheets/Domain';
+import { Workbook, Worksheet } from '../../Sheets/Domain';
 import {
     IAddNamedRangeActionData,
     IDeleteNamedRangeActionData,
@@ -15,9 +15,9 @@ import { INamedRange } from './INamedRange';
  * Reference: https://developers.google.com/apps-script/reference/spreadsheet/named-range
  */
 export class NamedRange {
-    private _workbook: Workbook1;
+    private _workbook: Workbook;
 
-    private _worksheet: Worksheet1;
+    private _worksheet: Worksheet;
 
     private _commandManager: CommandManager;
 
@@ -27,7 +27,7 @@ export class NamedRange {
     // private _range: Range;
     // private _namedRangeId: string;
 
-    constructor(worksheet: Worksheet1) {
+    constructor(worksheet: Worksheet) {
         this._worksheet = worksheet;
         this._workbook = this._worksheet.getContext().getWorkBook();
         this._commandManager = this._worksheet.getCommandManager();

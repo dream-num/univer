@@ -1,4 +1,4 @@
-import { Workbook1 } from '../Sheets/Domain';
+import { Workbook } from '../Sheets/Domain';
 import { IWorkbookConfig } from '../Interfaces';
 import { Inject, IOCAttribute, IOCContainer } from '../IOC';
 import { BasePlugin, Plugin } from '../Plugin';
@@ -99,9 +99,9 @@ export class UniverSheet {
     /**
      * get WorkBook
      *
-     * @returns Workbook1
+     * @returns Workbook
      */
-    getWorkBook(): Workbook1 {
+    getWorkBook(): Workbook {
         return this._context.getWorkBook();
     }
 

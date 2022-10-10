@@ -1,6 +1,6 @@
 import { SetWorkSheetActivate } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
-import { Workbook1 } from '../Domain';
+import { Workbook } from '../Domain';
 import { ActionBase, ActionOperation, IActionData } from '../../Command/ActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { BooleanNumber } from '../../Enum';
@@ -30,7 +30,7 @@ export class SetWorkSheetActivateAction extends ActionBase<
 > {
     constructor(
         actionData: ISetWorkSheetActivateActionData,
-        workbook: Workbook1,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

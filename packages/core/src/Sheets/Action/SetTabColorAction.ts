@@ -2,7 +2,7 @@ import { SetTabColor } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { CONVERTOR_OPERATION } from '../../Const/CONST';
 import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
-import { Workbook1 } from '../Domain';
+import { Workbook } from '../Domain';
 import { Nullable } from '../../Shared/Types';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
@@ -24,7 +24,7 @@ export class SetTabColorAction extends ActionBase<
 > {
     constructor(
         actionData: ISetTabColorActionData,
-        workbook: Workbook1,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

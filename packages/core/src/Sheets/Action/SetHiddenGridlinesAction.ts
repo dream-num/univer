@@ -1,5 +1,5 @@
 import { SetHiddenGridlines } from '../Apply';
-import { Workbook1 } from '../Domain/Workbook1';
+import { Workbook } from '../Domain/Workbook';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
@@ -16,7 +16,7 @@ export interface ISetHiddenGridlinesActionData extends IActionData {
 export class SetHiddenGridlinesAction extends ActionBase<ISetHiddenGridlinesActionData> {
     constructor(
         actionData: ISetHiddenGridlinesActionData,
-        workbook: Workbook1,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

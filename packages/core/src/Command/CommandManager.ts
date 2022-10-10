@@ -4,7 +4,7 @@ import { Command } from './Command';
 import { Class } from '../Shared';
 import { ActionBase, IActionData } from './ActionBase';
 import { ActionObservers } from './ActionObservers';
-import { Workbook1 } from '../Sheets/Domain';
+import { Workbook } from '../Sheets/Domain';
 import { CommandObservers } from './CommandObservers';
 import { CommandInjectorObservers } from './CommandInjectorObservers';
 
@@ -48,7 +48,7 @@ export class CommandManager {
     }
 
     @Inject('WorkBook')
-    private _workbook: Workbook1;
+    private _workbook: Workbook;
 
     @Inject('UndoManager')
     private _undoManager: UndoManager;

@@ -1,5 +1,5 @@
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
-import { Workbook1 } from '../Domain';
+import { Workbook } from '../Domain';
 import { IRangeData } from '../../Interfaces';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
@@ -35,7 +35,7 @@ export class SetSelectionActivateAction extends ActionBase<
 > {
     constructor(
         actionData: ISetSelectionActivateActionData,
-        workbook: Workbook1,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

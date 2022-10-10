@@ -1,5 +1,5 @@
 import { SetCollapseAllRowGroups } from '../Apply';
-import { Workbook1 } from '../Domain';
+import { Workbook } from '../Domain';
 import { GroupOpenType } from '../../Module/Group';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
@@ -20,7 +20,7 @@ export class SetCollapseAllRowGroupsAction extends ActionBase<
 > {
     constructor(
         actionData: ISetCollapseAllRowGroupsData,
-        workbook: Workbook1,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

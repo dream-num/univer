@@ -1,6 +1,6 @@
 import { SetWorkSheetName } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
-import { Workbook1 } from '../Domain/Workbook1';
+import { Workbook } from '../Domain/Workbook';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
@@ -21,7 +21,7 @@ export class SetWorkSheetNameAction extends ActionBase<
 > {
     constructor(
         actionData: ISetWorkSheetNameActionData,
-        workbook: Workbook1,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

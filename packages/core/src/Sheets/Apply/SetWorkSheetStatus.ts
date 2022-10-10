@@ -1,4 +1,4 @@
-import { Worksheet1 } from '../Domain/Worksheet1';
+import { Worksheet } from '../Domain/Worksheet';
 import { BooleanNumber } from '../../Enum';
 
 /**
@@ -10,7 +10,7 @@ import { BooleanNumber } from '../../Enum';
  * @internal
  */
 export function SetWorkSheetStatus(
-    worksheet: Worksheet1,
+    worksheet: Worksheet,
     sheetStatus: BooleanNumber
 ): BooleanNumber {
     // get config

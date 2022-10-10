@@ -1,5 +1,5 @@
 import { SetRightToLeft } from '../Apply';
-import { Workbook1 } from '../Domain/Workbook1';
+import { Workbook } from '../Domain/Workbook';
 import { BooleanNumber } from '../../Enum';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
@@ -17,7 +17,7 @@ export interface ISetRightToLeftActionData extends IActionData {
 export class SetRightToLeftAction extends ActionBase<ISetRightToLeftActionData> {
     constructor(
         actionData: ISetRightToLeftActionData,
-        workbook: Workbook1,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

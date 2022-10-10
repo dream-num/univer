@@ -1,5 +1,5 @@
 import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
-import { Context, UniverSheet, Nullable, Plugin, PLUGIN_NAMES, Worksheet1 } from '@univer/core';
+import { Context, UniverSheet, Nullable, Plugin, PLUGIN_NAMES, Worksheet } from '@univer/core';
 import { SpreadsheetPlugin } from '@univer/base-sheets';
 import { en, zh } from './Locale';
 import { FindButton } from './UI/FindButton';
@@ -49,7 +49,7 @@ export class FindPlugin extends Plugin {
         this.spreadsheetPlugin?.addButton(item);
     }
 
-    createTextFinder(workSheet: Worksheet1, type: FindType, text: string) {
+    createTextFinder(workSheet: Worksheet, type: FindType, text: string) {
         return new TextFinder(workSheet, type, text);
     }
 

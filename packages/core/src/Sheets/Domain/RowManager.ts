@@ -5,7 +5,7 @@ import { BooleanNumber } from '../../Enum';
 import { IRowData } from '../../Interfaces';
 import { Nullable } from '../../Shared';
 import { ObjectArray, ObjectArrayType } from '../../Shared/ObjectArray';
-import { Worksheet1 } from './Worksheet1';
+import { Worksheet } from './Worksheet';
 
 /**
  * Manage configuration information of all rows, get row height, row length, set row height, etc.
@@ -13,9 +13,9 @@ import { Worksheet1 } from './Worksheet1';
 export class RowManager {
     private _rowData: ObjectArray<IRowData>;
 
-    private _workSheet: Worksheet1;
+    private _workSheet: Worksheet;
 
-    constructor(workSheet: Worksheet1, data: ObjectArrayType<Partial<IRowData>>) {
+    constructor(workSheet: Worksheet, data: ObjectArrayType<Partial<IRowData>>) {
         this._workSheet = workSheet;
         this._rowData = new ObjectArray<IRowData>(data);
     }

@@ -6,7 +6,7 @@ import {
 } from '../../../Command';
 import { ACTION_NAMES, CONVERTOR_OPERATION } from '../../../Const';
 import { WorkSheetConvertor } from '../../../Convertor';
-import { Workbook1 } from '../../../Sheets/Domain';
+import { Workbook } from '../../../Sheets/Domain';
 import { INamedRange } from '../INamedRange';
 import { SetNamedRangeService } from '../Service/SetNamedRangeService';
 
@@ -21,7 +21,7 @@ export class SetNamedRangeAction extends ActionBase<
 > {
     constructor(
         actionData: ISetNamedRangeActionData,
-        workbook: Workbook1,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

@@ -1,4 +1,4 @@
-import { Worksheet1 } from '../Domain/Worksheet1';
+import { Worksheet } from '../Domain/Worksheet';
 
 /**
  *
@@ -8,7 +8,7 @@ import { Worksheet1 } from '../Domain/Worksheet1';
  *
  * @internal
  */
-export function SetWorkSheetName(worksheet: Worksheet1, sheetName: string): string {
+export function SetWorkSheetName(worksheet: Worksheet, sheetName: string): string {
     // get config
     const config = worksheet.getConfig();
 

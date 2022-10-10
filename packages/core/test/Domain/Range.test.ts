@@ -6,8 +6,8 @@ import { Context } from '../../src/Basics/Context';
 import { Environment } from '../../src/Basics/Environment';
 import { CommandManager } from '../../src/Command/CommandManager';
 import { UndoManager } from '../../src/Command/UndoManager';
-import { Workbook1 } from '../../src/Sheets/Domain/Workbook1';
-import { Worksheet1 } from '../../src/Sheets/Domain/Worksheet1';
+import { Workbook } from '../../src/Sheets/Domain/Workbook';
+import { Worksheet } from '../../src/Sheets/Domain/Worksheet';
 import {
     BooleanNumber,
     BorderStyleTypes,
@@ -70,7 +70,7 @@ export function IOCContainerStartUpReady(
     container.addSingletonMapping('Server', ServerSocket);
     container.addSingletonMapping('ServerSocket', ServerSocket);
     container.addSingletonMapping('ServerHttp', ServerHttp);
-    container.addSingletonMapping('WorkBook', Workbook1);
+    container.addSingletonMapping('WorkBook', Workbook);
     container.addSingletonMapping('Locale', Locale);
     container.addSingletonMapping('Context', Context);
     container.addSingletonMapping('UndoManager', UndoManager);
@@ -78,7 +78,7 @@ export function IOCContainerStartUpReady(
     container.addSingletonMapping('PluginManager', PluginManager);
     container.addSingletonMapping('ObserverManager', ObserverManager);
     container.addSingletonMapping('ObservableHooksManager', HooksManager);
-    container.addMapping('WorkSheet', Worksheet1);
+    container.addMapping('WorkSheet', Worksheet);
     return container;
 }
 
@@ -91,7 +91,7 @@ export function demo() {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -125,7 +125,7 @@ export function demo() {
         status: 1,
     };
     // const worksheet = new WorkSheet(context, configure);
-    const worksheet = container.getInstance<Worksheet1>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -152,7 +152,7 @@ test('Test setFontColor', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -168,7 +168,7 @@ test('Test setFontColor', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -205,7 +205,7 @@ test('Test setFontFamily', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -221,7 +221,7 @@ test('Test setFontFamily', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -267,7 +267,7 @@ test('Test setFontFamilies', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -283,7 +283,7 @@ test('Test setFontFamilies', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -326,7 +326,7 @@ test('Test setUnderline', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -342,7 +342,7 @@ test('Test setUnderline', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -379,7 +379,7 @@ test('Test setOverline', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -395,7 +395,7 @@ test('Test setOverline', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -432,7 +432,7 @@ test('Test setStrikeThrough', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -448,7 +448,7 @@ test('Test setStrikeThrough', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -489,7 +489,7 @@ test('Test setFontSize', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -505,7 +505,7 @@ test('Test setFontSize', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -552,7 +552,7 @@ test('Test setHorizontalAlignment', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -568,7 +568,7 @@ test('Test setHorizontalAlignment', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -613,7 +613,7 @@ test('Test setVerticalAlignment', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -629,7 +629,7 @@ test('Test setVerticalAlignment', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -674,7 +674,7 @@ test('Test setTextDirection', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -690,7 +690,7 @@ test('Test setTextDirection', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -734,7 +734,7 @@ test('Test setWrapStrategy', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -750,7 +750,7 @@ test('Test setWrapStrategy', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -817,7 +817,7 @@ test('Test setWrapStrategies', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -838,7 +838,7 @@ test('Test setWrapStrategies', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -902,7 +902,7 @@ test('Test setBorder', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -919,7 +919,7 @@ test('Test setBorder', () => {
         status: 1,
     };
 
-    const worksheet = container.getInstance<Worksheet1>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -1060,7 +1060,7 @@ test('Test copyTo formatOnly', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -1081,7 +1081,7 @@ test('Test copyTo formatOnly', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -1120,7 +1120,7 @@ test('Test copyTo contentsOnly', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -1141,7 +1141,7 @@ test('Test copyTo contentsOnly', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -1199,7 +1199,7 @@ test('Test copyTo CopyPasteType', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -1231,7 +1231,7 @@ test('Test copyTo CopyPasteType', () => {
 
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -1265,7 +1265,7 @@ test('Test copyFormatToRange by sheet', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -1286,7 +1286,7 @@ test('Test copyFormatToRange by sheet', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -1336,7 +1336,7 @@ test('Test copyFormatToRange by sheetId', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -1357,7 +1357,7 @@ test('Test copyFormatToRange by sheetId', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -1408,7 +1408,7 @@ test('Test copyValuesToRange by sheet', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -1429,7 +1429,7 @@ test('Test copyValuesToRange by sheet', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -1498,7 +1498,7 @@ test('Test copyValuesToRange by sheetId', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -1519,7 +1519,7 @@ test('Test copyValuesToRange by sheetId', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -1587,7 +1587,7 @@ test('Test moveTo', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -1608,7 +1608,7 @@ test('Test moveTo', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -1728,7 +1728,7 @@ test('Test offset', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -1749,7 +1749,7 @@ test('Test offset', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -1778,7 +1778,7 @@ test('Test setValue', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -1799,7 +1799,7 @@ test('Test setValue', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -1832,7 +1832,7 @@ test('Test setValues ICellV', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -1853,7 +1853,7 @@ test('Test setValues ICellV', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -1886,7 +1886,7 @@ test('Test setValues ObjectMatrix', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -1907,7 +1907,7 @@ test('Test setValues ObjectMatrix', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -1945,7 +1945,7 @@ test('Test clear', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -1961,7 +1961,7 @@ test('Test clear', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -2001,7 +2001,7 @@ test('Test clearFormat', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -2017,7 +2017,7 @@ test('Test clearFormat', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -2057,7 +2057,7 @@ test('Test deleteCells', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -2122,7 +2122,7 @@ test('Test deleteCells', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -2202,7 +2202,7 @@ test('Test insertCells', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -2267,7 +2267,7 @@ test('Test insertCells', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -2360,7 +2360,7 @@ test('Test insertCells COLUMNS', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -2409,7 +2409,7 @@ test('Test insertCells COLUMNS', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -2458,7 +2458,7 @@ test('Create a Merge', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -2523,7 +2523,7 @@ test('Create a Merge', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -2552,7 +2552,7 @@ test('Test getBackground', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -2618,7 +2618,7 @@ test('Test getBackground', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -2653,7 +2653,7 @@ test('Test getBackgrounds', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -2674,7 +2674,7 @@ test('Test getBackgrounds', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -2710,7 +2710,7 @@ test('Test getCell', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -2731,7 +2731,7 @@ test('Test getCell', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -2767,7 +2767,7 @@ test('Test getColumn', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -2788,7 +2788,7 @@ test('Test getColumn', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -2824,7 +2824,7 @@ test('Test getDisplayValue', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -2845,7 +2845,7 @@ test('Test getDisplayValue', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -2881,7 +2881,7 @@ test('Test getDisplayValues', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -2902,7 +2902,7 @@ test('Test getDisplayValues', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -2938,7 +2938,7 @@ test('Test getFontColor', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -2959,7 +2959,7 @@ test('Test getFontColor', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -2995,7 +2995,7 @@ test('Test getFontColors', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3016,7 +3016,7 @@ test('Test getFontColors', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -3054,7 +3054,7 @@ test('Test getFontFamily', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3075,7 +3075,7 @@ test('Test getFontFamily', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -3113,7 +3113,7 @@ test('Test getFontFamilies', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3134,7 +3134,7 @@ test('Test getFontFamilies', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -3162,7 +3162,7 @@ test('Test getFontLines', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3183,7 +3183,7 @@ test('Test getFontLines', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -3221,7 +3221,7 @@ test('Test getFontLine', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3242,7 +3242,7 @@ test('Test getFontLine', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -3284,7 +3284,7 @@ test('Test getFontSize', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3305,7 +3305,7 @@ test('Test getFontSize', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -3343,7 +3343,7 @@ test('Test getFontSizes', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3364,7 +3364,7 @@ test('Test getFontSizes', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -3388,7 +3388,7 @@ test('Test getFontWeight', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3409,7 +3409,7 @@ test('Test getFontWeight', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -3455,7 +3455,7 @@ test('Test getFontWeights', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3476,7 +3476,7 @@ test('Test getFontWeights', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -3500,7 +3500,7 @@ test('Test getHorizontalAlignment', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3521,7 +3521,7 @@ test('Test getHorizontalAlignment', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -3545,7 +3545,7 @@ test('Test getHorizontalAlignments', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3566,7 +3566,7 @@ test('Test getHorizontalAlignments', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -3590,7 +3590,7 @@ test('Test getVerticalAlignments', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3611,7 +3611,7 @@ test('Test getVerticalAlignments', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -3635,7 +3635,7 @@ test('Test getVerticalAlignment', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3656,7 +3656,7 @@ test('Test getVerticalAlignment', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -3680,7 +3680,7 @@ test('Test getFontStyles', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3701,7 +3701,7 @@ test('Test getFontStyles', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -3725,7 +3725,7 @@ test('Test getFontStyle', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3746,7 +3746,7 @@ test('Test getFontStyle', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -3770,7 +3770,7 @@ test('Test getTextDirections', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3791,7 +3791,7 @@ test('Test getTextDirections', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -3815,7 +3815,7 @@ test('Test getTextDirection', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3836,7 +3836,7 @@ test('Test getTextDirection', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -3864,7 +3864,7 @@ test('Test getTextRotations', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3885,7 +3885,7 @@ test('Test getTextRotations', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -3922,7 +3922,7 @@ test('Test getTextRotation', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3943,7 +3943,7 @@ test('Test getTextRotation', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -3969,7 +3969,7 @@ test('Test getTextStyles', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3990,7 +3990,7 @@ test('Test getTextStyles', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4027,7 +4027,7 @@ test('Test getTextStyle', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4048,7 +4048,7 @@ test('Test getTextStyle', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4089,7 +4089,7 @@ test('Test getSheet', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4105,7 +4105,7 @@ test('Test getSheet', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4133,7 +4133,7 @@ test('Test getNumColumns', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4154,7 +4154,7 @@ test('Test getNumColumns', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4192,7 +4192,7 @@ test('Test getNumRows', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4208,7 +4208,7 @@ test('Test getNumRows', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4246,7 +4246,7 @@ test('Test getRowIndex', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4262,7 +4262,7 @@ test('Test getRowIndex', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4284,7 +4284,7 @@ test('Test getLastColumn', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4300,7 +4300,7 @@ test('Test getLastColumn', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4321,7 +4321,7 @@ test('Test getWrapStrategies', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4342,7 +4342,7 @@ test('Test getWrapStrategies', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4364,7 +4364,7 @@ test('Test getWraps/getWrap', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4385,7 +4385,7 @@ test('Test getWraps/getWrap', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4414,7 +4414,7 @@ test('Test setFontColors', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4435,7 +4435,7 @@ test('Test setFontColors', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4484,7 +4484,7 @@ test('Test setBackground', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4500,7 +4500,7 @@ test('Test setBackground', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4561,7 +4561,7 @@ test('Test setBackgrounds', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4582,7 +4582,7 @@ test('Test setBackgrounds', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4643,7 +4643,7 @@ test('Test setBackgroundRGB', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4664,7 +4664,7 @@ test('Test setBackgroundRGB', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4721,7 +4721,7 @@ test('Test setUnderline', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4737,7 +4737,7 @@ test('Test setUnderline', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4774,7 +4774,7 @@ test('Test setOverline', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4790,7 +4790,7 @@ test('Test setOverline', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4827,7 +4827,7 @@ test('Test setStrikeThrough', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4843,7 +4843,7 @@ test('Test setStrikeThrough', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4880,7 +4880,7 @@ test('Test setHorizontalAlignments', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4896,7 +4896,7 @@ test('Test setHorizontalAlignments', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4957,7 +4957,7 @@ test('Test isPartOfMerge', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4986,7 +4986,7 @@ test('Test isPartOfMerge', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -5556,7 +5556,7 @@ test('Test removeDuplicates', () => {
         styles: {},
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -5613,7 +5613,7 @@ test('Test removeDuplicates', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -5640,7 +5640,7 @@ test('Test getColumnMatrix', () => {
         styles: {},
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -5673,7 +5673,7 @@ test('Test getColumnMatrix', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -5704,7 +5704,7 @@ test('Test isBlank', () => {
         styles: {},
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -5737,7 +5737,7 @@ test('Test isBlank', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -6065,7 +6065,7 @@ test('Test trimWhitespace', () => {
         },
     });
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -6081,7 +6081,7 @@ test('Test trimWhitespace', () => {
         },
         status: 1,
     };
-    const worksheet = new Worksheet1(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 

@@ -1,5 +1,5 @@
 import { Engine, EVENT_TYPE, IScrollObserverParam, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univer/base-render';
-import { EventState, Worksheet1, Plugin } from '@univer/core';
+import { EventState, Worksheet, Plugin } from '@univer/core';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from './BaseView';
 import { SheetView } from './Views/SheetView';
 import './Views';
@@ -148,7 +148,7 @@ export class CanvasView {
         return this.getSheetView().getSelectionModels();
     }
 
-    updateToSheet(worksheet: Worksheet1) {
+    updateToSheet(worksheet: Worksheet) {
         for (let view of this._views) {
             view.updateToSheet(worksheet);
         }

@@ -17,7 +17,7 @@ import {
     RefObject,
     cloneElement,
 } from '@univer/base-component';
-import { IKeyType, LocaleType, PLUGIN_NAMES, Tools, Workbook1 } from '@univer/core';
+import { IKeyType, LocaleType, PLUGIN_NAMES, Tools, Workbook } from '@univer/core';
 import cssVars from 'css-vars-ponyfill';
 
 import {
@@ -317,7 +317,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
         // https://www.webtips.dev/how-to-make-an-animated-day-and-night-toggle-switch;
 
         // publish
-        this.props.config.context.getObserverManager().getObserver<Workbook1>('onAfterChangeUISkinObservable')?.notifyObservers(this.props.config.context.getWorkBook());
+        this.props.config.context.getObserverManager().getObserver<Workbook>('onAfterChangeUISkinObservable')?.notifyObservers(this.props.config.context.getWorkBook());
         // this.props.config.context.onAfterChangeUISkinObservable.notifyObservers(this.props.config.context.getWorkBook())
     }
 

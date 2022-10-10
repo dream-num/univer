@@ -1,5 +1,5 @@
 import { Component } from '@univer/base-component';
-import { Nullable, Observer, Workbook1 } from '@univer/core';
+import { Nullable, Observer, Workbook } from '@univer/core';
 import { lang } from '../locale';
 import styles from './index.module.less';
 
@@ -17,7 +17,7 @@ interface IState {
 }
 
 export class SearchFunction extends Component<IProps, IState> {
-    private _localeObserver: Nullable<Observer<Workbook1>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     initialize() {
         this.state = {
@@ -33,7 +33,7 @@ export class SearchFunction extends Component<IProps, IState> {
         this.setLocale();
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });

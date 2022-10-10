@@ -1,8 +1,8 @@
-import { Workbook1, Worksheet1 } from '../Domain';
+import { Workbook, Worksheet } from '../Domain';
 import { IWorksheetConfig } from '../../Interfaces';
 
 export function InsertSheet(
-    workbook: Workbook1,
+    workbook: Workbook,
     index: number,
     worksheetConfig: IWorksheetConfig
 ): string {
@@ -16,7 +16,7 @@ export function InsertSheet(
     sheetOrder.splice(index, 0, worksheetConfig.id);
     iSheets.set(
         worksheetConfig.id,
-        new Worksheet1(workbook.getContext(), worksheetConfig)
+        new Worksheet(workbook.getContext(), worksheetConfig)
     );
     return worksheetConfig.id;
 }

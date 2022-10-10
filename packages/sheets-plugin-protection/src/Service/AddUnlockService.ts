@@ -1,6 +1,6 @@
-import { Range, Worksheet1 } from '@univer/core';
+import { Range, Worksheet } from '@univer/core';
 
-export function AddUnlockService(workSheet: Worksheet1, unlock: Range) {
+export function AddUnlockService(workSheet: Worksheet, unlock: Range) {
     const protection = workSheet.getProtection();
     protection.getUnlockList().addUnlock(unlock);
 }

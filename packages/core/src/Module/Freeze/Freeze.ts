@@ -1,4 +1,4 @@
-import { Worksheet1 } from '../../Sheets/Domain';
+import { Worksheet } from '../../Sheets/Domain';
 import { Command, CommandManager } from '../../Command';
 import { Context } from '../../Basics';
 import { ACTION_NAMES } from '../../Const';
@@ -8,15 +8,15 @@ export class Freeze {
 
     private _context: Context;
 
-    private _worksheet: Worksheet1;
+    private _worksheet: Worksheet;
 
-    constructor(workSheet: Worksheet1) {
+    constructor(workSheet: Worksheet) {
         this._context = workSheet.getContext();
         this._commandManager = this._context.getCommandManager();
         this._worksheet = workSheet;
     }
 
-    setFrozenColumns(columns: number): Worksheet1 {
+    setFrozenColumns(columns: number): Worksheet {
         const { _context, _commandManager } = this;
         const configure = {
             actionName: ACTION_NAMES.SET_FROZEN_COLUMNS_ACTION,
@@ -31,7 +31,7 @@ export class Freeze {
 
     setCancelFrozen(): void {}
 
-    setFrozenRows(rows: number): Worksheet1 {
+    setFrozenRows(rows: number): Worksheet {
         const { _context, _commandManager } = this;
         const configure = {
             actionName: ACTION_NAMES.SET_FROZEN_ROWS_ACTION,

@@ -1,4 +1,4 @@
-import { ActionBase, ActionObservers, IActionData, Workbook1 } from '@univer/core';
+import { ActionBase, ActionObservers, IActionData, Workbook } from '@univer/core';
 import { SetImageType } from '../../Apply';
 import { OverGridImagePlugin } from '../../OverGridImagePlugin';
 import { ACTION_NAMES } from '../../Const';
@@ -10,7 +10,7 @@ export interface ISetImageTypeData extends IActionData {
 }
 
 export class SetImageTypeAction extends ActionBase<ISetImageTypeData, ISetImageTypeData> {
-    constructor(actionData: ISetImageTypeData, workbook: Workbook1, observers: ActionObservers) {
+    constructor(actionData: ISetImageTypeData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._oldActionData = {
             actionName: ACTION_NAMES.SET_IMAGE_TYPE_ACTION,

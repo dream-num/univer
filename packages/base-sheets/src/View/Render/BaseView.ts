@@ -1,5 +1,5 @@
 import { Scene } from '@univer/base-render';
-import { Plugin, Registry, Worksheet1 } from '@univer/core';
+import { Plugin, Registry, Worksheet } from '@univer/core';
 
 export class BaseView {
     viewKey = '';
@@ -24,7 +24,7 @@ export class BaseView {
         return this._plugin.getContext();
     }
 
-    updateToSheet(worksheet: Worksheet1) {}
+    updateToSheet(worksheet: Worksheet) {}
 
     protected _initialize() {}
 

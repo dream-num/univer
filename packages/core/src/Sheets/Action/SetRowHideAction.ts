@@ -1,7 +1,7 @@
 import { SetHideRow, SetShowRow } from '../Apply';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { Workbook1 } from '../Domain';
+import { Workbook } from '../Domain';
 import { ISetRowShowActionData } from './SetRowShowAction';
 
 /**
@@ -23,7 +23,7 @@ export class SetRowHideAction extends ActionBase<
 > {
     constructor(
         actionData: ISetRowHideActionData,
-        workbook: Workbook1,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

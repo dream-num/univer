@@ -2,7 +2,7 @@ import { InsertSheet, RemoveSheet } from '../Apply';
 import { IWorksheetConfig } from '../../Interfaces';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { Workbook1 } from '../Domain';
+import { Workbook } from '../Domain';
 import { IInsertSheetActionData } from './InsertSheetAction';
 
 export interface IRemoveSheetActionData extends IActionData {
@@ -15,7 +15,7 @@ export class RemoveSheetAction extends ActionBase<
 > {
     constructor(
         actionData: IRemoveSheetActionData,
-        workbook: Workbook1,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

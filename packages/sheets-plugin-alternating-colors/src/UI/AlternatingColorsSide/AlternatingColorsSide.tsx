@@ -1,5 +1,5 @@
 import { closest, Component, createRef } from '@univer/base-component';
-import { IKeyValue, IRangeStringData, Nullable, Observer, PluginManager, PLUGIN_NAMES, Tools, Workbook1 } from '@univer/core';
+import { IKeyValue, IRangeStringData, Nullable, Observer, PluginManager, PLUGIN_NAMES, Tools, Workbook } from '@univer/core';
 import { SpreadsheetPlugin } from '@univer/base-sheets';
 
 import { AlternatingColorsPlugin } from '../../AlternatingColorsPlugin';
@@ -41,7 +41,7 @@ interface ICurrentStyle {
 }
 
 export class AlternatingColorsSide extends Component<IPanelProps, IState> {
-    private _localeObserver: Nullable<Observer<Workbook1>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     alternatingColorsPlugin: AlternatingColorsPlugin;
 
@@ -101,7 +101,7 @@ export class AlternatingColorsSide extends Component<IPanelProps, IState> {
             currentStyle,
             panelBodyHeight: 0,
             alternatingColors: {},
-            rangeStringData: Workbook1.rangeDataToRangeStringData(bandedRange.rangeData),
+            rangeStringData: Workbook.rangeDataToRangeStringData(bandedRange.rangeData),
             showHeader: banding.showHeader,
             showFooter: banding.showFooter,
         };
@@ -119,7 +119,7 @@ export class AlternatingColorsSide extends Component<IPanelProps, IState> {
 
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
@@ -147,7 +147,7 @@ export class AlternatingColorsSide extends Component<IPanelProps, IState> {
      * destory
      */
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     /**

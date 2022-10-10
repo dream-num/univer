@@ -1,4 +1,4 @@
-import { Worksheet1 } from '../Domain/Worksheet1';
+import { Worksheet } from '../Domain/Worksheet';
 
 /**
  *
@@ -9,7 +9,7 @@ import { Worksheet1 } from '../Domain/Worksheet1';
  * @internal
  */
 export function SetHiddenGridlines(
-    worksheet: Worksheet1,
+    worksheet: Worksheet,
     hideGridlines: boolean
 ): boolean {
     // get config

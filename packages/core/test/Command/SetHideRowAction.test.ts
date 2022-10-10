@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { Workbook1, Worksheet1 } from '../../src/Sheets/Domain';
+import { Workbook, Worksheet } from '../../src/Sheets/Domain';
 import { Context } from '../../src/Basics';
 import {
     CommandManager,
@@ -16,11 +16,11 @@ test('SetRowHideAction', () => {
     const observers = CommandManager.getActionObservers();
     const container = IOCContainerStartUpReady();
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
 
     const sheetId = 'sheet1';
     const actionName = 'SetRowHideAction';
-    const worksheet = new Worksheet1(context, { id: sheetId });
+    const worksheet = new Worksheet(context, { id: sheetId });
     workbook.insertSheet(worksheet);
 
     const configure = { actionName, sheetId, rowIndex: 1, rowCount: 1 };

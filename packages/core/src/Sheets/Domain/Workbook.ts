@@ -35,18 +35,18 @@ import { Range } from './Range';
 import { RangeList } from './RangeList';
 import { Selection } from './Selection';
 import { Styles } from './Styles';
-import { Worksheet1 } from './Worksheet1';
+import { Worksheet } from './Worksheet';
 import { IInsertSheetActionData, IRemoveSheetActionData } from '../Action';
 
 /**
  * Access and create Univer Sheets files
  */
-export class Workbook1 {
+export class Workbook {
     /**
      * sheets list
      * @private
      */
-    private _worksheets: Map<string, Worksheet1>;
+    private _worksheets: Map<string, Worksheet>;
 
     /**
      * Common style
@@ -87,7 +87,7 @@ export class Workbook1 {
         for (let sheetId in sheets) {
             let config = sheets[sheetId];
             config.name = NameGen.getSheetName(config.name);
-            const worksheet = new Worksheet1(_context, config);
+            const worksheet = new Worksheet(_context, config);
             this._container.inject(worksheet);
             _worksheets.set(worksheet.getSheetId(), worksheet);
             sheetOrder.push(worksheet.getSheetId());
@@ -115,7 +115,7 @@ export class Workbook1 {
         const { styles } = this._config;
         this._bookId = this._config.id ?? nanoid(6);
         this._styles = new Styles(styles);
-        this._worksheets = new Map<string, Worksheet1>();
+        this._worksheets = new Map<string, Worksheet>();
         // this._formatManage = new FormatManager();
         this._getDefaultWorkSheet();
     }
@@ -214,11 +214,11 @@ export class Workbook1 {
         return item;
     }
 
-    _getWorksheets(): Map<string, Worksheet1> {
+    _getWorksheets(): Map<string, Worksheet> {
         return this._worksheets;
     }
 
-    nextSheet(start: number): Nullable<Worksheet1> {
+    nextSheet(start: number): Nullable<Worksheet> {
         if (start >= 0) {
             const { sheetOrder } = this._config;
             for (let i = start; i < sheetOrder.length; i++) {
@@ -251,10 +251,10 @@ export class Workbook1 {
     insertSheet(index: number): Nullable<string>;
     insertSheet(name: string): Nullable<string>;
     insertSheet(data: Partial<IWorksheetConfig>): Nullable<string>;
-    insertSheet(sheet: Worksheet1): Nullable<string>;
+    insertSheet(sheet: Worksheet): Nullable<string>;
     insertSheet(name: string, index: number): Nullable<string>;
     insertSheet(index: number, data: Partial<IWorksheetConfig>): Nullable<string>;
-    insertSheet(index: number, sheet: Worksheet1): Nullable<string>;
+    insertSheet(index: number, sheet: Worksheet): Nullable<string>;
     insertSheet(...argument: any[]): Nullable<string> {
         const { _context, _commandManager } = this;
 
@@ -290,7 +290,7 @@ export class Workbook1 {
 
         if (Tools.hasLength(argument, 1)) {
             // insert clone worksheet instance
-            if (Tools.isAssignableFrom(argument[0], Worksheet1)) {
+            if (Tools.isAssignableFrom(argument[0], Worksheet)) {
                 const sheet = argument[0];
                 const index = this.getSheetSize();
                 const worksheetConfig = sheet.getConfig();
@@ -424,7 +424,7 @@ export class Workbook1 {
 
             if (Tools.isNumber(argument[0])) {
                 // insert clone worksheet instance to index
-                if (Tools.isAssignableFrom(argument[1], Worksheet1)) {
+                if (Tools.isAssignableFrom(argument[1], Worksheet)) {
                     const index = argument[0];
                     const sheet = argument[1];
                     const worksheetConfig = sheet.getConfig();
@@ -472,7 +472,7 @@ export class Workbook1 {
         }
     }
 
-    getActiveSpreadsheet(): Workbook1 {
+    getActiveSpreadsheet(): Workbook {
         return this;
     }
 
@@ -498,14 +498,14 @@ export class Workbook1 {
         return this._config;
     }
 
-    create(name: string, row: number, column: number): Worksheet1;
-    create(name: string): Worksheet1;
+    create(name: string, row: number, column: number): Worksheet;
+    create(name: string): Worksheet;
     create(...argument: unknown[]): unknown {
         if (Tools.hasLength(argument, 1)) {
             const { _container, _context } = this;
             const name = argument[0];
             const conf = { ...DEFAULT_WORKSHEET, name };
-            const worksheet = _container.getInstance<Worksheet1>(
+            const worksheet = _container.getInstance<Worksheet>(
                 'WorkSheet',
                 _context,
                 conf
@@ -519,7 +519,7 @@ export class Workbook1 {
             const rowCount = argument[1];
             const columnCount = argument[2];
             const conf = { ...DEFAULT_WORKSHEET, name, rowCount, columnCount };
-            const worksheet = _container.getInstance<Worksheet1>(
+            const worksheet = _container.getInstance<Worksheet>(
                 'WorkSheet',
                 _context,
                 conf
@@ -546,23 +546,23 @@ export class Workbook1 {
         return sheetOrder.findIndex((id) => id === sheetId);
     }
 
-    getActiveSheet(): Worksheet1 {
+    getActiveSheet(): Worksheet {
         const { sheetOrder } = this._config;
         const activeSheetId = sheetOrder.find((sheetId) => {
-            const worksheet = this._worksheets.get(sheetId) as Worksheet1;
+            const worksheet = this._worksheets.get(sheetId) as Worksheet;
             return worksheet.getStatus() === BooleanNumber.TRUE;
         });
         if (!activeSheetId) {
             console.warn('No active sheet, get first sheet');
             return this._worksheets[0];
         }
-        return this._worksheets.get(activeSheetId) as Worksheet1;
+        return this._worksheets.get(activeSheetId) as Worksheet;
     }
 
     getActiveSheetIndex(): number {
         const { sheetOrder } = this._config;
         return sheetOrder.findIndex((sheetId) => {
-            const worksheet = this._worksheets.get(sheetId) as Worksheet1;
+            const worksheet = this._worksheets.get(sheetId) as Worksheet;
             if (worksheet.getStatus() === 1) {
                 return true;
             }
@@ -656,14 +656,14 @@ export class Workbook1 {
         observer.notifyObservers();
     }
 
-    getSheets(): Worksheet1[] {
+    getSheets(): Worksheet[] {
         const { sheetOrder } = this._config;
         return sheetOrder.map((sheetId) =>
             this._worksheets.get(sheetId)
-        ) as Worksheet1[];
+        ) as Worksheet[];
     }
 
-    getSheetIndex(sheet: Worksheet1): number {
+    getSheetIndex(sheet: Worksheet): number {
         const { sheetOrder } = this._config;
         return sheetOrder.findIndex((sheetId) => {
             if (sheet.getSheetId() === sheetId) {
@@ -709,16 +709,16 @@ export class Workbook1 {
         }
     }
 
-    getSheetBySheetName(name: string): Nullable<Worksheet1> {
+    getSheetBySheetName(name: string): Nullable<Worksheet> {
         const { sheetOrder } = this._config;
         const sheetId = sheetOrder.find((sheetId) => {
-            const worksheet = this._worksheets.get(sheetId) as Worksheet1;
+            const worksheet = this._worksheets.get(sheetId) as Worksheet;
             return worksheet.getName() === name;
         }) as string;
         return this._worksheets.get(sheetId);
     }
 
-    getSheetBySheetId(sheetId: string): Nullable<Worksheet1> {
+    getSheetBySheetId(sheetId: string): Nullable<Worksheet> {
         return this._worksheets.get(sheetId);
     }
 
@@ -728,18 +728,18 @@ export class Workbook1 {
      * @param sheet - The new active sheet.
      * @returns {@link WorkSheet } the sheet that has been made the new active sheet
      */
-    setActiveSheet(sheet: Worksheet1): Worksheet1;
+    setActiveSheet(sheet: Worksheet): Worksheet;
     /**
      * Sets the active sheet in a spreadsheet, with the option to restore the most recent selection within that sheet. The Google Sheets UI displays the chosen sheet unless the sheet belongs to a different spreadsheet.
      * @param sheet - The new active sheet.
      * @param restoreSelection - If true, the most recent selection of the new active sheet becomes selected again as the new sheet becomes active; if false, the new sheet becomes active without changing the current selection.
      * @returns {@link WorkSheet} - the new active sheet
      */
-    setActiveSheet(sheet: Worksheet1, restoreSelection: boolean): Worksheet1;
-    setActiveSheet(...argument: any): Worksheet1 {
+    setActiveSheet(sheet: Worksheet, restoreSelection: boolean): Worksheet;
+    setActiveSheet(...argument: any): Worksheet {
         let restoreSelection = false;
-        const worksheet: Worksheet1 = argument[0];
-        if (Tuples.checkup(argument, Worksheet1, Tuples.BOOLEAN_TYPE)) {
+        const worksheet: Worksheet = argument[0];
+        if (Tuples.checkup(argument, Worksheet, Tuples.BOOLEAN_TYPE)) {
             restoreSelection = argument[1];
         }
 

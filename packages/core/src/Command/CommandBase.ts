@@ -1,5 +1,5 @@
 import { ActionBase, IActionData } from './ActionBase';
-import { Workbook1 } from '../Sheets/Domain';
+import { Workbook } from '../Sheets/Domain';
 import { CommandManager } from './CommandManager';
 import { CommandInjector } from './CommandInjectorObservers';
 import { Class, Nullable } from '../Shared';
@@ -11,9 +11,9 @@ import { ActionType } from './ActionObservers';
 export class CommandBase {
     protected _actions: Array<ActionBase<IActionData>>;
 
-    protected _workbook: Workbook1;
+    protected _workbook: Workbook;
 
-    constructor(workbook: Workbook1, ...list: IActionData[]) {
+    constructor(workbook: Workbook, ...list: IActionData[]) {
         this._workbook = workbook;
         this._actions = [];
         list.forEach((data) => {

@@ -1,5 +1,5 @@
 import { Component } from '@univer/base-component';
-import { Nullable, Observer, Workbook1 } from '@univer/core';
+import { Nullable, Observer, Workbook } from '@univer/core';
 
 import styles from './index.module.less';
 
@@ -21,7 +21,7 @@ type iconProps = {
 };
 
 export class IconContent extends Component<IconContentProps, IconContentState> {
-    private _localeObserver: Nullable<Observer<Workbook1>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     initialize() {
         this.state = {
@@ -241,14 +241,14 @@ export class IconContent extends Component<IconContentProps, IconContentState> {
         // subscribe Locale change event
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
     }
 
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     setValue = (value: object, fn?: () => void) => {

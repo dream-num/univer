@@ -1,9 +1,9 @@
-import { Worksheet1 } from '../Sheets/Domain';
+import { Worksheet } from '../Sheets/Domain';
 import { Observable } from '../Observer';
 
 /**
  * Worksheet Observable Data
  */
 export type IWorksheetObservableData = {
-    onAfterSetSelectionObservable: Observable<Worksheet1>;
+    onAfterSetSelectionObservable: Observable<Worksheet>;
 };

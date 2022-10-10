@@ -1,6 +1,6 @@
-import { Worksheet1 } from 'src/Sheets/Domain';
+import { Worksheet } from 'src/Sheets/Domain';
 
-export function SetFrozenRowsService(worksheet: Worksheet1, numRows: number): number {
+export function SetFrozenRowsService(worksheet: Worksheet, numRows: number): number {
     // get config
     const config = worksheet.getConfig();
 

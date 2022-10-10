@@ -10,7 +10,7 @@ import {
 import { InsertColumnAction, RemoveColumnAction } from '../Action';
 import { ACTION_NAMES } from '../../Const';
 import { IRangeData } from '../../Interfaces';
-import { Worksheet1 } from './Worksheet1';
+import { Worksheet } from './Worksheet';
 import { Nullable, Tools } from '../../Shared';
 import { Rectangle } from '../../Shared/Rectangle';
 import { Tuples } from '../../Shared/Tuples';
@@ -21,9 +21,9 @@ import { Tuples } from '../../Shared/Tuples';
 export class Merges {
     private _rectangleList: IRangeData[];
 
-    private _worksheet: Worksheet1;
+    private _worksheet: Worksheet;
 
-    constructor(worksheet: Worksheet1, mergeData: any) {
+    constructor(worksheet: Worksheet, mergeData: any) {
         this._worksheet = worksheet;
         this._rectangleList = mergeData;
 

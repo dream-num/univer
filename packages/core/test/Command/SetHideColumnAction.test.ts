@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { Workbook1, Worksheet1 } from '../../src/Sheets/Domain';
+import { Workbook, Worksheet } from '../../src/Sheets/Domain';
 import { IOCContainerStartUpReady } from '../ContainerStartUp';
 import { Context } from '../../src/Basics';
 import {
@@ -15,10 +15,10 @@ jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 test('Set a hide Column', () => {
     const container = IOCContainerStartUpReady();
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
 
     const sheetId = 'sheet1';
-    const worksheet = new Worksheet1(context, { id: sheetId });
+    const worksheet = new Worksheet(context, { id: sheetId });
     workbook.insertSheet(worksheet);
 
     const observers = CommandManager.getActionObservers();

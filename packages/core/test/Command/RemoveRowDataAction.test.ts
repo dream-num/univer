@@ -3,7 +3,7 @@
  */
 import { Context } from '../../src/Basics';
 import { CommandManager, RemoveRowDataAction } from '../../src/Command';
-import { Workbook1, Worksheet1 } from '../../src/Sheets/Domain';
+import { Workbook, Worksheet } from '../../src/Sheets/Domain';
 import { IOCContainerStartUpReady } from '../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
@@ -11,7 +11,7 @@ jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 test('Insert a new Row', () => {
     const container = IOCContainerStartUpReady();
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
 
     const data = {
         sheetId: 'sheet',
@@ -91,7 +91,7 @@ test('Insert a new Row', () => {
         status: 1,
         tabColor: 'red',
     };
-    const worksheet = new Worksheet1(context, data);
+    const worksheet = new Worksheet(context, data);
     workbook.insertSheet(worksheet);
 
     const observers = CommandManager.getActionObservers();

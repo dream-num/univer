@@ -4,7 +4,7 @@
 import { Context } from '../../src/Basics';
 import { CommandManager, SetWorkSheetStatusAction } from '../../src/Command';
 import { ACTION_NAMES } from '../../src/Const';
-import { Workbook1, Worksheet1 } from '../../src/Sheets/Domain';
+import { Workbook, Worksheet } from '../../src/Sheets/Domain';
 import { IOCContainerStartUpReady } from '../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
@@ -12,11 +12,11 @@ jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 test('Set WorkSheet Status', () => {
     const container = IOCContainerStartUpReady();
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<Workbook1>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
 
     const sheetId = 'sheet1';
     const status = 1;
-    const worksheet = new Worksheet1(context, { id: sheetId, status });
+    const worksheet = new Worksheet(context, { id: sheetId, status });
     workbook.insertSheet(worksheet);
 
     const observers = CommandManager.getActionObservers();

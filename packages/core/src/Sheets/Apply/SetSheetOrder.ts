@@ -1,7 +1,7 @@
-import { Workbook1 } from '../Domain';
+import { Workbook } from '../Domain';
 
 export function SetSheetOrder(
-    workbook: Workbook1,
+    workbook: Workbook,
     sheetId: string,
     order: number
 ): number {

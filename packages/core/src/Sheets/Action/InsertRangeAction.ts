@@ -1,6 +1,6 @@
 import { DeleteRange, InsertRange } from '../Apply';
 import { ACTION_NAMES } from '../../Const';
-import { Workbook1 } from '../Domain';
+import { Workbook } from '../Domain';
 import { Dimension } from '../../Enum/Dimension';
 import { ICellData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
@@ -28,7 +28,7 @@ export class InsertRangeAction extends ActionBase<
 > {
     constructor(
         actionData: IInsertRangeActionData,
-        workbook: Workbook1,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

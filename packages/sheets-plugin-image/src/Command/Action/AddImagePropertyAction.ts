@@ -1,4 +1,4 @@
-import { ActionBase, ActionObservers, IActionData, Workbook1 } from '@univer/core';
+import { ActionBase, ActionObservers, IActionData, Workbook } from '@univer/core';
 import { ACTION_NAMES } from '../../Const';
 import { OverGridImageBorderType, OverGridImagePlugin } from '../../OverGridImagePlugin';
 import { AddImageProperty } from '../../Apply/AddImageProperty';
@@ -20,7 +20,7 @@ export interface IAddImageProperty extends IActionData {
 }
 
 export class AddImagePropertyAction extends ActionBase<IAddImageProperty, IAddImageProperty> {
-    constructor(actionData: IAddImageProperty, workbook: Workbook1, observers: ActionObservers) {
+    constructor(actionData: IAddImageProperty, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._oldActionData = {
             actionName: ACTION_NAMES.SET_IMAGE_TYPE_ACTION,

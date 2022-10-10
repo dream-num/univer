@@ -1,5 +1,5 @@
 import { BaseComponentSheet, BaseSiderModalProps, Component, createRef, FunctionComponent } from '@univer/base-component';
-import { Context, IRangeData, Nullable, Observer, Workbook1 } from '@univer/core';
+import { Context, IRangeData, Nullable, Observer, Workbook } from '@univer/core';
 import { PTOTECTION_PLUGIN_NAME } from '../../Const';
 import { Protection } from '../../Domain';
 import styles from './index.module.less';
@@ -21,7 +21,7 @@ interface IState {
 }
 
 class ProtectionSide extends Component<IProps, IState> {
-    private _localeObserv: Nullable<Observer<Workbook1>>;
+    private _localeObserv: Nullable<Observer<Workbook>>;
 
     protectionRef = createRef();
 
@@ -51,7 +51,7 @@ class ProtectionSide extends Component<IProps, IState> {
 
         this._localeObserv = this._context
             .getObserverManager()
-            .getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });

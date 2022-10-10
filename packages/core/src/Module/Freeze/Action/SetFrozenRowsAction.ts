@@ -1,6 +1,6 @@
 import { ActionBase, ActionObservers, ActionType, IActionData } from 'src/Command';
 import { WorkSheetConvertor } from 'src/Convertor';
-import { Workbook1 } from 'src/Sheets/Domain';
+import { Workbook } from 'src/Sheets/Domain';
 import { SetFrozenRows } from 'src/Sheets/Apply';
 import { ACTION_NAMES, CONVERTOR_OPERATION } from 'src/Const';
 
@@ -11,7 +11,7 @@ export interface ISetFrozenRowsActionData extends IActionData {
 export class SetFrozenRowsAction extends ActionBase<ISetFrozenRowsActionData> {
     constructor(
         actionData: ISetFrozenRowsActionData,
-        workbook: Workbook1,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

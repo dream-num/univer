@@ -1,6 +1,6 @@
 import { ActionBase, IActionData } from '../../Command/ActionBase';
 import { InsertRow, RemoveRow } from '../Apply';
-import { Workbook1 } from '../Domain';
+import { Workbook } from '../Domain';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveRowActionData } from './RemoveRowAction';
 
@@ -23,7 +23,7 @@ export class InsertRowAction extends ActionBase<
 > {
     constructor(
         actionData: IInsertRowActionData,
-        workbook: Workbook1,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

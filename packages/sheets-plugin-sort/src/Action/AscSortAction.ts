@@ -1,4 +1,4 @@
-import { ActionBase, ActionObservers, IActionData, IRangeData, Workbook1 } from '@univer/core';
+import { ActionBase, ActionObservers, IActionData, IRangeData, Workbook } from '@univer/core';
 import { ACTION_NAMES } from '../Enum';
 import { IDescSortData } from './DescSortAction';
 
@@ -7,7 +7,7 @@ export interface IAscSortData extends IActionData {
 }
 
 export class AscSortAction extends ActionBase<IAscSortData, IDescSortData> {
-    constructor(actionData: IAscSortData, workbook: Workbook1, observers: ActionObservers) {
+    constructor(actionData: IAscSortData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._doActionData = {
             ...actionData,

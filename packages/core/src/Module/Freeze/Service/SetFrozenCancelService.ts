@@ -1,6 +1,6 @@
-import { Worksheet1 } from '../../../Sheets/Domain';
+import { Worksheet } from '../../../Sheets/Domain';
 
-export function SetFrozenCancelService(worksheet: Worksheet1): number[] {
+export function SetFrozenCancelService(worksheet: Worksheet): number[] {
     // get config
     const config = worksheet.getConfig();
 

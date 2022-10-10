@@ -1,4 +1,4 @@
-import { ActionBase, ActionObservers, IActionData, IRangeData, Workbook1 } from '@univer/core';
+import { ActionBase, ActionObservers, IActionData, IRangeData, Workbook } from '@univer/core';
 import { IAscSortData } from './index';
 
 export interface IDescSortData extends IActionData {
@@ -6,7 +6,7 @@ export interface IDescSortData extends IActionData {
 }
 
 export class DescSortAction extends ActionBase<IDescSortData, IAscSortData> {
-    constructor(actionData: IDescSortData, workbook: Workbook1, observers: ActionObservers) {
+    constructor(actionData: IDescSortData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
     }
 

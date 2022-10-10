@@ -1,4 +1,4 @@
-import { Range, Worksheet1, RangeList, FormatType, IRangeData } from '@univer/core';
+import { Range, Worksheet, RangeList, FormatType, IRangeData } from '@univer/core';
 import { getRegExpStr } from '../Util/util';
 import { FindType } from '../IData';
 
@@ -13,7 +13,7 @@ export class TextFinder {
 
     private _rangeList: IRangeData[]; // 初始rangeList
 
-    private _workSheet: Worksheet1;
+    private _workSheet: Worksheet;
 
     private _index: number;
 
@@ -27,7 +27,7 @@ export class TextFinder {
 
     private _startRange: Range | null; // 从这个位置后开始找
 
-    constructor(workSheet: Worksheet1, type: FindType, text?: string | FormatType) {
+    constructor(workSheet: Worksheet, type: FindType, text?: string | FormatType) {
         this._workSheet = workSheet;
         this._type = type;
         if (text) {

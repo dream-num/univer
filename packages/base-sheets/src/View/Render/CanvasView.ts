@@ -84,11 +84,11 @@ export class CanvasView {
         context.getContextObserver('onZoomRatioSheetObservable').add((value) => {
             const plugin = this._plugin as SpreadsheetPlugin;
             this._scene.scale(value.zoomRatio, value.zoomRatio);
-            this._scene.makeDirty();
+            // this._scene.makeDirty();
             // update data
             plugin.getCanvasView().updateToSheet(this._plugin.getContext().getWorkBook().getActiveSheet()!);
             // update render
-            plugin.getMainComponent().makeDirty(true);
+            // plugin.getMainComponent().makeDirty(true);
         });
 
         scene.addViewport(viewMain, viewLeft, viewTop, viewLeftTop).attachControl();

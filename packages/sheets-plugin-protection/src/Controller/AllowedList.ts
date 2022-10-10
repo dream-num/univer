@@ -1,4 +1,4 @@
-import { Nullable, Rectangle } from '../../Shared';
+import { Nullable, Rectangle } from '@univer/core';
 import { Allowed } from './Allowed';
 
 export class AllowedList {

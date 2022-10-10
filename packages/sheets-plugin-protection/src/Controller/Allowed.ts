@@ -1,4 +1,4 @@
-import { Range } from '../../Domain';
+import { Range } from '@univer/core';
 
 export class Allowed {
     protected _password: string;

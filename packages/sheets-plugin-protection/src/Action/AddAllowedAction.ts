@@ -1,5 +1,5 @@
 import { ActionBase, ActionObservers, ACTION_NAMES, CONVERTOR_OPERATION, IActionData, Workbook, WorkSheetConvertor } from '@univer/core';
-import { Allowed } from '../Domain';
+import { Allowed } from '../Controller';
 import { AddAllowed, RemoveAllowed } from '../Apply';
 
 export interface IAddAllowedActionData extends IActionData {

@@ -1,7 +1,7 @@
 import { Worksheet } from '@univer/core';
 import { Allowed } from '@univer/core/src/Module/Protection';
 
-export function AddAllowedService(workSheet: Worksheet, allowed: Allowed) {
+export function RemoveAllowed(workSheet: Worksheet, allowed: Allowed) {
     const protection = workSheet.getProtection();
-    protection.getAllowedList().addAllow(allowed);
+    protection.getAllowedList().removeAllow(allowed);
 }

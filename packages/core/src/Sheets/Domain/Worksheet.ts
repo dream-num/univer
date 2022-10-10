@@ -35,7 +35,6 @@ import {
     IStyleData,
     IWorksheetConfig,
 } from '../../Interfaces';
-import { Protection } from '../../Module/Protection';
 import { Nullable, ObjectMatrix, Tools } from '../../Shared';
 import { ObjectArray } from '../../Shared/ObjectArray';
 import { Tuples } from '../../Shared/Tuples';
@@ -80,7 +79,7 @@ export class Worksheet {
 
     protected _rowManager: RowManager;
 
-    protected _protection: Protection;
+    // protected _protection: Protection;
 
     protected _columnManager: ColumnManager;
 
@@ -114,7 +113,7 @@ export class Worksheet {
             // this._selection = new Selection(this);
             // this._borderStyles = new BorderStyles(this);
             this._cellData = new ObjectMatrix<ICellData>(cellData);
-            this._protection = new Protection();
+            // this._protection = new Protection();
             this._workbook = this._context.getWorkBook();
             this._commandManager = this._context.getCommandManager();
             // this._selection.setWorkSheet(this);
@@ -388,13 +387,13 @@ export class Worksheet {
         return _config.status;
     }
 
-    /**
-     * Returns Protection
-     * @returns User Pretection
-     */
-    getProtection(): Protection {
-        return this._protection;
-    }
+    // /**
+    //  * Returns Protection
+    //  * @returns User Pretection
+    //  */
+    // getProtection(): Protection {
+    //     return this._protection;
+    // }
 
     /**
      * Sets WorkSheet Status

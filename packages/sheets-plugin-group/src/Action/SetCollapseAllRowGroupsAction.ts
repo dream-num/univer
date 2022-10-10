@@ -1,6 +1,6 @@
-import { IActionData, ActionBase, Workbook, ActionObservers, ActionType } from "@univer/core";
-import { SetCollapseAllRowGroups } from "../Apply/SetCollapseAllRowGroups";
-import { GroupOpenType } from "../Controller/StructGroup";
+import { IActionData, ActionBase, Workbook, ActionObservers, ActionType } from '@univer/core';
+import { SetCollapseAllRowGroups } from '../Apply/SetCollapseAllRowGroups';
+import { GroupOpenType } from '../Controller/StructGroup';
 
 /**
  * @internal
@@ -12,15 +12,8 @@ export interface ISetCollapseAllRowGroupsData extends IActionData {}
  *
  * @internal
  */
-export class SetCollapseAllRowGroupsAction extends ActionBase<
-    ISetCollapseAllRowGroupsData,
-    ISetCollapseAllRowGroupsData
-> {
-    constructor(
-        actionData: ISetCollapseAllRowGroupsData,
-        workbook: Workbook,
-        observers: ActionObservers
-    ) {
+export class SetCollapseAllRowGroupsAction extends ActionBase<ISetCollapseAllRowGroupsData, ISetCollapseAllRowGroupsData> {
+    constructor(actionData: ISetCollapseAllRowGroupsData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._doActionData = {
             ...actionData,
@@ -36,9 +29,9 @@ export class SetCollapseAllRowGroupsAction extends ActionBase<
 
     do(): void {
         const workSheet = this.getWorkSheet();
-        const rowStructGroup = workSheet.getRowStructGroup();
+        // const rowStructGroup = workSheet.getRowStructGroup();
 
-        SetCollapseAllRowGroups(rowStructGroup, GroupOpenType.open);
+        // SetCollapseAllRowGroups(rowStructGroup, GroupOpenType.open);
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -53,9 +46,9 @@ export class SetCollapseAllRowGroupsAction extends ActionBase<
 
     undo(): void {
         const workSheet = this.getWorkSheet();
-        const rowStructGroup = workSheet.getRowStructGroup();
+        // const rowStructGroup = workSheet.getRowStructGroup();
 
-        SetCollapseAllRowGroups(rowStructGroup, GroupOpenType.close);
+        // SetCollapseAllRowGroups(rowStructGroup, GroupOpenType.close);
 
         this._observers.notifyObservers({
             type: ActionType.UNDO,

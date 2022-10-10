@@ -2,7 +2,7 @@ import { BaseComponentSheet, BaseIconProps, BaseSingleButtonProps, Component, Fu
 import { PLUGIN_NAMES, Nullable, Observer, Workbook } from '@univer/core';
 import { SpreadsheetPlugin } from '@univer/base-sheets';
 
-import { PTOTECTION_PLUGIN_NAME } from '../Const';
+import { PTOTECTION_PLUGIN_NAME } from '../Basic/Const';
 import { IProps } from '../IData/IProtection';
 
 // Types for state

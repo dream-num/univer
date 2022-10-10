@@ -1,6 +1,6 @@
 import { ActionBase, ActionObservers, ACTION_NAMES, CONVERTOR_OPERATION, IActionData, Workbook, WorkSheetConvertor } from '@univer/core';
 import { Allowed } from '../Domain';
-import { AddAllowedService, RemoveAllowedService } from '../Service';
+import { AddAllowed, RemoveAllowed } from '../Apply';
 
 export interface IAddAllowedActionData extends IActionData {
     allowed: Allowed;
@@ -29,12 +29,12 @@ export class AddAllowedAction extends ActionBase<IAddAllowedActionData, IAddAllo
 
     redo(): void {
         const worksheet = this.getWorkSheet();
-        AddAllowedService(worksheet, this._doActionData.allowed);
+        AddAllowed(worksheet, this._doActionData.allowed);
     }
 
     undo(): void {
         const worksheet = this.getWorkSheet();
-        RemoveAllowedService(worksheet, this._doActionData.allowed);
+        RemoveAllowed(worksheet, this._doActionData.allowed);
     }
 
     validate(): boolean {

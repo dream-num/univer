@@ -1,6 +1,6 @@
-import { IActionData, ActionBase, Workbook, ActionObservers, ActionType } from "@univer/core";
-import { SetCollapseAllColumnGroups } from "../Apply/SetCollapseAllColumnGroups";
-import { GroupOpenType } from "../Controller/StructGroup";
+import { IActionData, ActionBase, Workbook, ActionObservers, ActionType } from '@univer/core';
+import { SetCollapseAllColumnGroups } from '../Apply/SetCollapseAllColumnGroups';
+import { GroupOpenType } from '../Controller/StructGroup';
 
 /**
  * @internal
@@ -29,9 +29,9 @@ export class SetCollapseAllColumnGroupsAction extends ActionBase<ISetCollapseAll
 
     do(): void {
         const workSheet = this.getWorkSheet();
-        const structGroup = workSheet.getColumnStructGroup();
+        // const structGroup = workSheet.getColumnStructGroup();
 
-        SetCollapseAllColumnGroups(structGroup, GroupOpenType.open);
+        // SetCollapseAllColumnGroups(structGroup, GroupOpenType.open);
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -46,9 +46,9 @@ export class SetCollapseAllColumnGroupsAction extends ActionBase<ISetCollapseAll
 
     undo(): void {
         const workSheet = this.getWorkSheet();
-        const structGroup = workSheet.getColumnStructGroup();
+        // const structGroup = workSheet.getColumnStructGroup();
 
-        SetCollapseAllColumnGroups(structGroup, GroupOpenType.close);
+        // SetCollapseAllColumnGroups(structGroup, GroupOpenType.close);
 
         this._observers.notifyObservers({
             type: ActionType.UNDO,

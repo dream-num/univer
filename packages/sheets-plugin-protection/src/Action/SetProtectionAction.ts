@@ -1,5 +1,5 @@
 import { ActionBase, ActionObservers, ACTION_NAMES, CONVERTOR_OPERATION, IActionData, Workbook, WorkSheetConvertor } from '@univer/core';
-import { SetProtectionService } from '../Service';
+import { SetProtection } from '../Apply';
 
 export interface ISetProtectionActionData extends IActionData {
     enable: boolean;
@@ -32,12 +32,12 @@ export class SetProtectionAction extends ActionBase<ISetProtectionActionData, IS
 
     redo(): void {
         const worksheet = this.getWorkSheet();
-        this._oldValue = SetProtectionService(worksheet, this._doActionData.enable, this._doActionData.password);
+        this._oldValue = SetProtection(worksheet, this._doActionData.enable, this._doActionData.password);
     }
 
     undo(): void {
         const worksheet = this.getWorkSheet();
-        SetProtectionService(worksheet, this._oldValue[0], this._oldValue[1]);
+        SetProtection(worksheet, this._oldValue[0], this._oldValue[1]);
     }
 
     validate(): boolean {

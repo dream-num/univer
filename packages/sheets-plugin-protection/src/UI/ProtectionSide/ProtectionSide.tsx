@@ -1,6 +1,6 @@
 import { BaseComponentSheet, BaseSiderModalProps, Component, createRef, FunctionComponent } from '@univer/base-component';
 import { Context, IRangeData, Nullable, Observer, Workbook } from '@univer/core';
-import { PTOTECTION_PLUGIN_NAME } from '../../Const';
+import { PTOTECTION_PLUGIN_NAME } from '../../Basic/Const';
 import { Protection } from '../../Domain';
 import styles from './index.module.less';
 

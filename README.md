@@ -98,7 +98,7 @@ Please file an issue at [Issues](http://github.com/dream-num/univer/issues).
   - [ ] format
   - [ ] formula
   - [ ] image
-  - [ ] Frozen
+  - [ ] freeze
   - [ ] link
   - [ ] comment
   - [ ] pivot table

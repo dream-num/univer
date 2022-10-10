@@ -35,6 +35,24 @@ export class SetColumnWidthAction extends ActionBase<ISetColumnWidthActionData> 
         this.validate();
     }
 
+    do(): number[] {
+        const worksheet = this.getWorkSheet();
+
+        const result = SetColumnWidth(
+            this._doActionData.columnIndex,
+            this._doActionData.columnWidth,
+            worksheet.getColumnManager()
+        );
+
+        this._observers.notifyObservers({
+            type: ActionType.REDO,
+            data: this._doActionData,
+            action: this,
+        });
+
+        return result;
+    }
+
     redo(): void {
         this.do();
     }
@@ -51,24 +69,6 @@ export class SetColumnWidthAction extends ActionBase<ISetColumnWidthActionData> 
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
-            action: this,
-        });
-
-        return result;
-    }
-
-    do(): number[] {
-        const worksheet = this.getWorkSheet();
-
-        const result = SetColumnWidth(
-            this._doActionData.columnIndex,
-            this._doActionData.columnWidth,
-            worksheet.getColumnManager()
-        );
-
-        this._observers.notifyObservers({
-            type: ActionType.REDO,
-            data: this._doActionData,
             action: this,
         });
 

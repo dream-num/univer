@@ -39,6 +39,22 @@ export class SetRowHideAction extends ActionBase<
         this.validate();
     }
 
+    do(): void {
+        const worksheet = this.getWorkSheet();
+
+        SetHideRow(
+            this._doActionData.rowIndex,
+            this._doActionData.rowCount,
+            worksheet.getRowManager()
+        );
+
+        this._observers.notifyObservers({
+            type: ActionType.REDO,
+            data: this._doActionData,
+            action: this,
+        });
+    }
+
     redo(): void {
         this.do();
     }
@@ -55,22 +71,6 @@ export class SetRowHideAction extends ActionBase<
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
-            action: this,
-        });
-    }
-
-    do(): void {
-        const worksheet = this.getWorkSheet();
-
-        SetHideRow(
-            this._doActionData.rowIndex,
-            this._doActionData.rowCount,
-            worksheet.getRowManager()
-        );
-
-        this._observers.notifyObservers({
-            type: ActionType.REDO,
-            data: this._doActionData,
             action: this,
         });
     }

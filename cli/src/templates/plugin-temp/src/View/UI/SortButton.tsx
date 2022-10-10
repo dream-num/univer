@@ -1,5 +1,5 @@
-import { Nullable, Observer, WorkBook  } from '@univer/core';
-import { ISelectButton, IToolBarItemProps, Component } from '@univer/base-component';
+import { Nullable, Observer  } from '@univer/core';
+import { ISelectButton, IToolBarItemProps, Component, BaseSelectProps } from '@univer/base-component';
 
 interface IProps {}
 // Types for state
@@ -9,7 +9,7 @@ interface IState {
 
 export class <%= projectUpperValue %>Button extends Component<IProps, IState> {
     
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<void>>;
     initialize(props: IProps) {
 
         const OrderASCIcon = this.getComponentRender().renderFunction('OrderASCIcon');
@@ -17,7 +17,7 @@ export class <%= projectUpperValue %>Button extends Component<IProps, IState> {
         const OrderIcon = this.getComponentRender().renderFunction('OrderIcon');
         const NextIcon = this.getComponentRender().renderFunction('NextIcon');
 
-        const <%= projectValue %> = {
+        const <%= projectValue %>: IToolBarItemProps = {
             locale: '<%= projectValue %>',
             type: 'select',
             label: <OrderASCIcon />,
@@ -99,6 +99,6 @@ export class <%= projectUpperValue %>Button extends Component<IProps, IState> {
         const { <%= projectValue %> } = state;
         const Select = this.getComponentRender().renderFunction('Select');
         // Set Provider for entire Container
-        return <Select tooltip={<%= projectValue %>.tooltip} tooltipRight={<%= projectValue %>.tooltipRight} border={<%= projectValue %>.border} isDouble={<%= projectValue %>.isDouble} needChange={<%= projectValue %>.needChange} key={<%= projectValue %>.locale} children={<%= projectValue %>.children as IToolBarItemProps[]} label={<%= projectValue %>.label} icon={<%= projectValue %>.icon} />;
+        return <Select tooltip={<%= projectValue %>.tooltip} tooltipRight={<%= projectValue %>.tooltipRight} border={<%= projectValue %>.border} needChange={<%= projectValue %>.needChange} key={<%= projectValue %>.locale} children={<%= projectValue %>.children as BaseSelectProps[]} label={<%= projectValue %>.label} icon={<%= projectValue %>.icon} />;
     }
 }

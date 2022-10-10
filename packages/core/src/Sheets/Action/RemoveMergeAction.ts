@@ -40,22 +40,6 @@ export class RemoveMergeAction extends ActionBase<
         this.validate();
     }
 
-    redo(): void {
-        this.do();
-    }
-
-    undo(): void {
-        const worksheet = this.getWorkSheet();
-
-        addMerge(worksheet.getMerges(), this._doActionData.rectangles);
-
-        this._observers.notifyObservers({
-            type: ActionType.UNDO,
-            data: this._oldActionData,
-            action: this,
-        });
-    }
-
     do(): IRangeData[] {
         const worksheet = this.getWorkSheet();
 
@@ -71,6 +55,22 @@ export class RemoveMergeAction extends ActionBase<
         });
 
         return result;
+    }
+
+    redo(): void {
+        this.do();
+    }
+
+    undo(): void {
+        const worksheet = this.getWorkSheet();
+
+        addMerge(worksheet.getMerges(), this._doActionData.rectangles);
+
+        this._observers.notifyObservers({
+            type: ActionType.UNDO,
+            data: this._oldActionData,
+            action: this,
+        });
     }
 
     validate(): boolean {

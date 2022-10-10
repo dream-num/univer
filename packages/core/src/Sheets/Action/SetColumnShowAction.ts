@@ -35,6 +35,22 @@ export class SetColumnShowAction extends ActionBase<ISetColumnShowActionData> {
         this.validate();
     }
 
+    do(): void {
+        const worksheet = this.getWorkSheet();
+
+        SetColumnShow(
+            this._doActionData.columnIndex,
+            this._doActionData.columnCount,
+            worksheet.getColumnManager()
+        );
+
+        this._observers.notifyObservers({
+            type: ActionType.REDO,
+            data: this._doActionData,
+            action: this,
+        });
+    }
+
     redo(): void {
         this.do();
     }
@@ -51,22 +67,6 @@ export class SetColumnShowAction extends ActionBase<ISetColumnShowActionData> {
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
-            action: this,
-        });
-    }
-
-    do(): void {
-        const worksheet = this.getWorkSheet();
-
-        SetColumnShow(
-            this._doActionData.columnIndex,
-            this._doActionData.columnCount,
-            worksheet.getColumnManager()
-        );
-
-        this._observers.notifyObservers({
-            type: ActionType.REDO,
-            data: this._doActionData,
             action: this,
         });
     }

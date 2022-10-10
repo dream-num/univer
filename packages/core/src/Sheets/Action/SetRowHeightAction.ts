@@ -35,6 +35,24 @@ export class SetRowHeightAction extends ActionBase<ISetRowHeightActionData> {
         this.validate();
     }
 
+    do(): number[] {
+        const worksheet = this.getWorkSheet();
+
+        const result = SetRowHeight(
+            this._doActionData.rowIndex,
+            this._doActionData.rowHeight,
+            worksheet.getRowManager()
+        );
+
+        this._observers.notifyObservers({
+            type: ActionType.REDO,
+            data: this._doActionData,
+            action: this,
+        });
+
+        return result;
+    }
+
     redo(): void {
         this.do();
     }
@@ -51,24 +69,6 @@ export class SetRowHeightAction extends ActionBase<ISetRowHeightActionData> {
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
-            action: this,
-        });
-
-        return result;
-    }
-
-    do(): number[] {
-        const worksheet = this.getWorkSheet();
-
-        const result = SetRowHeight(
-            this._doActionData.rowIndex,
-            this._doActionData.rowHeight,
-            worksheet.getRowManager()
-        );
-
-        this._observers.notifyObservers({
-            type: ActionType.REDO,
-            data: this._doActionData,
             action: this,
         });
 

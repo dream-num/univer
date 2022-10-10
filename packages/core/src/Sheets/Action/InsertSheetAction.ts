@@ -31,7 +31,7 @@ export class InsertSheetAction extends ActionBase<
         };
     }
 
-    redo(): string {
+    do(): string {
         const workbook = this.getWorkBook();
         const result = InsertSheet(
             workbook,
@@ -46,6 +46,10 @@ export class InsertSheetAction extends ActionBase<
         return result;
     }
 
+    redo(): void {
+        this.redo();
+    }
+
     undo(): void {
         const workbook = this.getWorkBook();
         RemoveSheet(workbook, this._oldActionData.sheetId);
@@ -54,10 +58,6 @@ export class InsertSheetAction extends ActionBase<
             data: this._oldActionData,
             action: this,
         });
-    }
-
-    do(): string {
-        return this.redo();
     }
 
     validate(): boolean {

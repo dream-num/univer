@@ -12,8 +12,6 @@ import {
     IRemoveColumnDataAction,
     IRemoveRowActionData,
     IRemoveRowDataActionData,
-    ISetCollapseAllColumnGroupsData,
-    ISetCollapseAllRowGroupsData,
     ISetColumnHideActionData,
     ISetColumnShowActionData,
     ISetRowHideActionData,
@@ -37,14 +35,10 @@ import {
     IStyleData,
     IWorksheetConfig,
 } from '../../Interfaces';
-import { StructGroup } from '../../Module/Group';
-import { OverGridImage } from '../../Module/Image';
-import { Protection } from '../../Module/Protection';
 import { Nullable, ObjectMatrix, Tools } from '../../Shared';
 import { ObjectArray } from '../../Shared/ObjectArray';
 import { Tuples } from '../../Shared/Tuples';
 import { ColumnManager } from './ColumnManager';
-import { Freeze } from './Freeze';
 import { Merges } from './Merges';
 import { Range } from './Range';
 import { RangeList } from './RangeList';
@@ -85,16 +79,13 @@ export class Worksheet {
 
     protected _rowManager: RowManager;
 
-    protected _protection: Protection;
+    // protected _protection: Protection;
 
     protected _columnManager: ColumnManager;
 
-    protected _rowStatusGroup: StructGroup;
+    // protected _rowStatusGroup: StructGroup;
 
-    protected _columnStatusGroup: StructGroup;
-
-    protected _overGridImages: OverGridImage[];
-    // protected _bandings: Array<Banding>;
+    // protected _columnStatusGroup: StructGroup;
 
     private _initialize(): void {
         this._selection = new Selection(this);
@@ -122,19 +113,17 @@ export class Worksheet {
             // this._selection = new Selection(this);
             // this._borderStyles = new BorderStyles(this);
             this._cellData = new ObjectMatrix<ICellData>(cellData);
-            this._protection = new Protection();
+            // this._protection = new Protection();
             this._workbook = this._context.getWorkBook();
             this._commandManager = this._context.getCommandManager();
             // this._selection.setWorkSheet(this);
             this._rowManager = new RowManager(this, rowData);
             this._columnManager = new ColumnManager(this, columnData);
-            // overImage
-            this._overGridImages = new Array<OverGridImage>();
             // banding TODO init Banding instance from config.bandedRanges
             // this._bandings = new Array<Banding>();
             // group
-            this._rowStatusGroup = new StructGroup();
-            this._columnStatusGroup = new StructGroup();
+            // this._rowStatusGroup = new StructGroup();
+            // this._columnStatusGroup = new StructGroup();
             this._initialize();
         }
     }
@@ -398,13 +387,13 @@ export class Worksheet {
         return _config.status;
     }
 
-    /**
-     * Returns Protection
-     * @returns User Pretection
-     */
-    getProtection(): Protection {
-        return this._protection;
-    }
+    // /**
+    //  * Returns Protection
+    //  * @returns User Pretection
+    //  */
+    // getProtection(): Protection {
+    //     return this._protection;
+    // }
 
     /**
      * Sets WorkSheet Status
@@ -450,21 +439,21 @@ export class Worksheet {
         return this._selection;
     }
 
-    /**
-     * Returns Row StructGroup
-     * @returns Row StructGroup
-     */
-    getRowStructGroup(): StructGroup {
-        return this._rowStatusGroup;
-    }
+    // /**
+    //  * Returns Row StructGroup
+    //  * @returns Row StructGroup
+    //  */
+    // getRowStructGroup(): StructGroup {
+    //     return this._rowStatusGroup;
+    // }
 
-    /**
-     * Returns Column StructGroup
-     * @returns Column StructGroup
-     */
-    getColumnStructGroup(): StructGroup {
-        return this._columnStatusGroup;
-    }
+    // /**
+    //  * Returns Column StructGroup
+    //  * @returns Column StructGroup
+    //  */
+    // getColumnStructGroup(): StructGroup {
+    //     return this._columnStatusGroup;
+    // }
 
     /**
      * Returns Copy WorkSheet
@@ -1392,13 +1381,13 @@ export class Worksheet {
         return this.getSelection().getActiveRange();
     }
 
-    /**
-     * Returns Array OverGridImage
-     * @returns Array OverGridImage
-     */
-    getOverGridImages(): OverGridImage[] {
-        return this._overGridImages;
-    }
+    // /**
+    //  * Returns Array OverGridImage
+    //  * @returns Array OverGridImage
+    //  */
+    // getOverGridImages(): OverGridImage[] {
+    //     return this._overGridImages;
+    // }
 
     // /**
     //  * Returns all the bandings that are applied to any cells in this range.
@@ -1878,25 +1867,25 @@ export class Worksheet {
         return this;
     }
 
-    /**
-     * Freezes the given number of columns. If zero, no columns are frozen.
-     * @param columns freeze columns, 0 - columns
-     * @returns WorkSheet Instance
-     */
-    setFrozenColumns(columns: number): Worksheet {
-        const frozen = new Freeze(this);
-        return frozen.setFrozenColumns(columns);
-    }
+    // /**
+    //  * Freezes the given number of columns. If zero, no columns are frozen.
+    //  * @param columns freeze columns, 0 - columns
+    //  * @returns WorkSheet Instance
+    //  */
+    // setFrozenColumns(columns: number): WorkSheet {
+    //     const frozen = new Freeze(this);
+    //     return frozen.setFrozenColumns(columns);
+    // }
 
-    /**
-     * Freezes the given number of rows. If zero, no rows are frozen.
-     * @param rows freeze rows, 0 - rows
-     * @returns WorkSheet Instance
-     */
-    setFrozenRows(rows: number): Worksheet {
-        const frozen = new Freeze(this);
-        return frozen.setFrozenRows(rows);
-    }
+    // /**
+    //  * Freezes the given number of rows. If zero, no rows are frozen.
+    //  * @param rows freeze rows, 0 - rows
+    //  * @returns WorkSheet Instance
+    //  */
+    // setFrozenRows(rows: number): WorkSheet {
+    //     const frozen = new Freeze(this);
+    //     return frozen.setFrozenRows(rows);
+    // }
 
     /**
      * Returns true if this sheet layout is right-to-left. Returns false if the sheet uses the default left-to-right layout.
@@ -2083,41 +2072,41 @@ export class Worksheet {
         return this;
     }
 
-    /**
-     *  Collapse All Row
-     * @returns WorkSheet Instance
-     */
-    collapseAllRowGroups(): Worksheet {
-        const { _context, _commandManager, _sheetId } = this;
-        const collapseAllRowGroupsData: ISetCollapseAllRowGroupsData = {
-            actionName: ACTION_NAMES.SET_COLLAPSE_ALL_ROW_GROUPS_ACTION,
-            sheetId: _sheetId,
-        };
-        const command = new Command(
-            _context.getWorkBook(),
-            collapseAllRowGroupsData
-        );
-        _commandManager.invoke(command);
-        return this;
-    }
+    // /**
+    //  *  Collapse All Row
+    //  * @returns WorkSheet Instance
+    //  */
+    // collapseAllRowGroups(): WorkSheet {
+    //     const { _context, _commandManager, _sheetId } = this;
+    //     const collapseAllRowGroupsData: ISetCollapseAllRowGroupsData = {
+    //         actionName: ACTION_NAMES.SET_COLLAPSE_ALL_ROW_GROUPS_ACTION,
+    //         sheetId: _sheetId,
+    //     };
+    //     const command = new Command(
+    //         _context.getWorkBook(),
+    //         collapseAllRowGroupsData
+    //     );
+    //     _commandManager.invoke(command);
+    //     return this;
+    // }
 
-    /**
-     * Collapse All Column
-     * @returns WorkSheet Instance
-     */
-    collapseAllColumnGroups(): Worksheet {
-        const { _context, _commandManager, _sheetId } = this;
-        const collapseAllRowGroupsData: ISetCollapseAllColumnGroupsData = {
-            actionName: ACTION_NAMES.SET_COLLAPSE_ALL_COLUMN_GROUPS_ACTION,
-            sheetId: _sheetId,
-        };
-        const command = new Command(
-            _context.getWorkBook(),
-            collapseAllRowGroupsData
-        );
-        _commandManager.invoke(command);
-        return this;
-    }
+    // /**
+    //  * Collapse All Column
+    //  * @returns WorkSheet Instance
+    //  */
+    // collapseAllColumnGroups(): WorkSheet {
+    //     const { _context, _commandManager, _sheetId } = this;
+    //     const collapseAllRowGroupsData: ISetCollapseAllColumnGroupsData = {
+    //         actionName: ACTION_NAMES.SET_COLLAPSE_ALL_COLUMN_GROUPS_ACTION,
+    //         sheetId: _sheetId,
+    //     };
+    //     const command = new Command(
+    //         _context.getWorkBook(),
+    //         collapseAllRowGroupsData
+    //     );
+    //     _commandManager.invoke(command);
+    //     return this;
+    // }
 }
 
 // /**

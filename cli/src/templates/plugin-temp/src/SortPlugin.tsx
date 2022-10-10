@@ -4,6 +4,8 @@ import { zh, en } from './Locale';
 
 import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
 import { IOCContainer } from '@univer/core';
+import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { <%= projectConstantValue % >_PLUGIN_NAME} from './Basic/Const/PLUGIN_NAME'
 
 interface IPluginConfig {}
 
@@ -12,7 +14,7 @@ interface IConfig {}
 export class <%= projectUpperValue %>Plugin extends Plugin {
 
     constructor(config ?: IPluginConfig) {
-        super('plugin<%= projectUpperValue %>');
+        super(<%= projectConstantValue %>_PLUGIN_NAME);
     }
 
     initialize(): void {
@@ -26,13 +28,12 @@ export class <%= projectUpperValue %>Plugin extends Plugin {
             en: en,
             zh: zh,
         });
-        const config: IConfig = {};
 
         const item: IToolBarItemProps = {
             locale: '<%= projectValue %>',
             type: ISlotElement.JSX,
             show: true,
-            label: <<%= projectUpperValue %>Button config={ config } />
+            label: <<%= projectUpperValue %>Button />
         }
     context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item)
 }

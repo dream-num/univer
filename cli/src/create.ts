@@ -52,6 +52,7 @@ export function create(plugin: string) {
     const projectChoice = 'plugin-temp';
     const projectValue = covertToCamelCase(plugin);
     const projectUpperValue = covertToPascalCase(projectValue);
+    const projectConstantValue = covertToConstantCase(projectValue);
     const projectName = covertToParamCase(projectValue);
 
     //@ts-ignore
@@ -93,7 +94,7 @@ export function create(plugin: string) {
                 // read file content and transform it using template engine
                 let contents = fs.readFileSync(origFilePath, 'utf8');
 
-                contents = template.render(contents, { projectValue, projectUpperValue, projectName: cliOptions.projectName });
+                contents = template.render(contents, { projectValue, projectUpperValue, projectName: cliOptions.projectName, projectConstantValue });
 
                 // write file to destination folder
                 let writePath = path.join(DESTINATION_DIR, projectName, file);
@@ -150,7 +151,7 @@ function covertToPascalCase(str: string) {
         .replace(/-/g, '');
 }
 
-function covertToParamCase(str: string, prefix = 'plugin') {
+function covertToParamCase(str: string, prefix = 'sheets-plugin') {
     return prefix + str.replace(/(-\w|[A-Z]|\b\w)/g, (match) => (match.indexOf('-') > -1 ? match.toLowerCase() : `-${match.toLowerCase()}`));
 }
 
@@ -166,4 +167,11 @@ function covertToCamelCase(str: string) {
             return index === 0 ? match.toLowerCase() : match.toUpperCase();
         })
         .replace(/-/g, '');
+}
+
+function covertToConstantCase(str: string) {
+    return str
+        .replace(/(-\w|[A-Z]|\b\w)/g, (match) => (match.indexOf('-') > -1 ? match.replace('-', '_') : `_${match}`))
+        .slice(1)
+        .toUpperCase();
 }

@@ -1,5 +1,5 @@
 import { ActionBase, ActionObservers, ACTION_NAMES, CONVERTOR_OPERATION, IActionData, Range, Workbook, WorkSheetConvertor } from '@univer/core';
-import { AddUnlockService, RemoveUnlockService } from '../Service';
+import { AddUnlock, RemoveUnlock } from '../Apply';
 
 export interface IAddUnlockActionData extends IActionData {
     unlock: Range;
@@ -28,12 +28,12 @@ export class AddUnlockAction extends ActionBase<IAddUnlockActionData, IAddUnlock
 
     redo(): void {
         const worksheet = this.getWorkSheet();
-        AddUnlockService(worksheet, this._doActionData.unlock);
+        AddUnlock(worksheet, this._doActionData.unlock);
     }
 
     undo(): void {
         const worksheet = this.getWorkSheet();
-        RemoveUnlockService(worksheet, this._doActionData.unlock);
+        RemoveUnlock(worksheet, this._doActionData.unlock);
     }
 
     validate(): boolean {

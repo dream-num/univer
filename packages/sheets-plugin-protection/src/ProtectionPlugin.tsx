@@ -1,7 +1,7 @@
 import { ISlotElement, ISlotProps, IToolBarItemProps } from '@univer/base-component';
 import { Context, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
 import { SpreadsheetPlugin } from '@univer/base-sheets';
-import { PTOTECTION_PLUGIN_NAME } from './Const/PLUGIN_NAME';
+import { PTOTECTION_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
 import { Protection } from './Domain/Protection';
 import { IConfig } from './IData/IProtection';
 import { en, zh } from './Locale';

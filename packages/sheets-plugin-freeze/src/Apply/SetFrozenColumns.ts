@@ -1,6 +1,6 @@
-import { WorkSheet } from '@univer/core';
+import { Worksheet } from '@univer/core';
 
-export function SetFrozenColumns(worksheet: WorkSheet, numColumns: number): number {
+export function SetFrozenColumns(worksheet: Worksheet, numColumns: number): number {
     // get config
     const config = worksheet.getConfig();
 

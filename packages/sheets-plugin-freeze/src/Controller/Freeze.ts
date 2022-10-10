@@ -1,4 +1,4 @@
-import { CommandManager, WorkSheet, Command, Context } from '@univer/core';
+import { CommandManager, Worksheet, Command, Context } from '@univer/core';
 import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
 
 export class Freeze {
@@ -6,15 +6,15 @@ export class Freeze {
 
     private _context: Context;
 
-    private _worksheet: WorkSheet;
+    private _worksheet: Worksheet;
 
-    constructor(workSheet: WorkSheet) {
+    constructor(workSheet: Worksheet) {
         this._context = workSheet.getContext();
         this._commandManager = this._context.getCommandManager();
         this._worksheet = workSheet;
     }
 
-    setFrozenColumns(columns: number): WorkSheet {
+    setFrozenColumns(columns: number): Worksheet {
         const { _context, _commandManager } = this;
         const configure = {
             actionName: ACTION_NAMES.SET_FROZEN_COLUMNS_ACTION,
@@ -29,7 +29,7 @@ export class Freeze {
 
     setCancelFrozen(): void {}
 
-    setFrozenRows(rows: number): WorkSheet {
+    setFrozenRows(rows: number): Worksheet {
         const { _context, _commandManager } = this;
         const configure = {
             actionName: ACTION_NAMES.SET_FROZEN_ROWS_ACTION,

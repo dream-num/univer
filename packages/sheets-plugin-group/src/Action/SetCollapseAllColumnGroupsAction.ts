@@ -1,4 +1,4 @@
-import { IActionData, ActionBase, WorkBook, ActionObservers, ActionType } from "@univer/core";
+import { IActionData, ActionBase, Workbook, ActionObservers, ActionType } from "@univer/core";
 import { SetCollapseAllColumnGroups } from "../Apply/SetCollapseAllColumnGroups";
 import { GroupOpenType } from "../Controller/StructGroup";
 
@@ -13,7 +13,7 @@ export interface ISetCollapseAllColumnGroupsData extends IActionData {}
  * @internal
  */
 export class SetCollapseAllColumnGroupsAction extends ActionBase<ISetCollapseAllColumnGroupsData, ISetCollapseAllColumnGroupsData> {
-    constructor(actionData: ISetCollapseAllColumnGroupsData, workbook: WorkBook, observers: ActionObservers) {
+    constructor(actionData: ISetCollapseAllColumnGroupsData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._doActionData = {
             ...actionData,

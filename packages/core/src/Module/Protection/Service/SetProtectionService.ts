@@ -1,7 +1,7 @@
-import { WorkSheet } from '../../../Sheets/Domain';
+import { Worksheet } from '../../../Sheets/Domain';
 
 export function SetProtectionService(
-    workSheet: WorkSheet,
+    workSheet: Worksheet,
     enable: boolean,
     password: string
 ): [boolean, string] {

@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { WorkBook, WorkSheet } from '../../src/Sheets/Domain';
+import { Workbook, Worksheet } from '../../src/Sheets/Domain';
 import { Context } from '../../src/Basics';
 import { CommandManager, SetColumnShowAction } from '../../src/Command';
 import { IOCContainerStartUpReady } from '../ContainerStartUp';
@@ -11,10 +11,10 @@ jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 test('SetColumnShowAction', () => {
     const container = IOCContainerStartUpReady();
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
 
     const sheetId = 'sheet1';
-    const worksheet = new WorkSheet(context, { id: sheetId });
+    const worksheet = new Worksheet(context, { id: sheetId });
 
     const observers = CommandManager.getActionObservers();
     const actionName = 'SetColumnShowAction';

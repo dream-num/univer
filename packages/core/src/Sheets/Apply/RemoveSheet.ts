@@ -1,8 +1,8 @@
-import { WorkBook } from '../Domain';
+import { Workbook } from '../Domain';
 import { IWorksheetConfig } from '../../Interfaces';
 
 export function RemoveSheet(
-    workbook: WorkBook,
+    workbook: Workbook,
     sheetId: string
 ): {
     index: number;

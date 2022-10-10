@@ -1,5 +1,5 @@
 import { InsertColumn, RemoveColumn } from '../Apply';
-import { WorkBook } from '../Domain';
+import { Workbook } from '../Domain';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertColumnActionData } from './InsertColumnAction';
@@ -23,7 +23,7 @@ export class RemoveColumnAction extends ActionBase<
 > {
     constructor(
         actionData: IRemoveColumnAction,
-        workbook: WorkBook,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

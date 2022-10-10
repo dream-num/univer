@@ -1,5 +1,5 @@
 import { SetColumnHide, SetColumnShow } from '../Apply';
-import { WorkBook } from '../Domain';
+import { Workbook } from '../Domain';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
@@ -19,7 +19,7 @@ export interface ISetColumnShowActionData extends IActionData {
 export class SetColumnShowAction extends ActionBase<ISetColumnShowActionData> {
     constructor(
         actionData: ISetColumnShowActionData,
-        workbook: WorkBook,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

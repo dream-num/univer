@@ -1,5 +1,5 @@
 import { Component } from '@univer/base-component';
-import { Nullable, Observer, WorkBook } from '@univer/core';
+import { Nullable, Observer, Workbook } from '@univer/core';
 import CFcolorGradation from '../Assets/CFcolorGradation.png';
 import CFdataBar from '../Assets/CFdataBar.png';
 import styles from './index.module.less';
@@ -20,7 +20,7 @@ type LabelProps = {
 };
 
 export class ImageList extends Component<ImageListProps, ImageListState> {
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     state = {
         dataList: [
@@ -207,14 +207,14 @@ export class ImageList extends Component<ImageListProps, ImageListState> {
         // subscribe Locale change event
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
     }
 
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     render(props: ImageListProps, state: ImageListState) {

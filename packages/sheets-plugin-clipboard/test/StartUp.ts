@@ -11,8 +11,8 @@ import {
     ServerHttp,
     ServerSocket,
     UndoManager,
-    WorkBook,
-    WorkSheet,
+    Workbook,
+    Worksheet,
     ObserverManager,
     IWorksheetConfig,
 } from "@univer/core";
@@ -46,7 +46,7 @@ export function StartUpReady(): IOCContainer {
     container.addSingletonMapping('Server', ServerSocket);
     container.addSingletonMapping('ServerSocket', ServerSocket);
     container.addSingletonMapping('ServerHttp', ServerHttp);
-    container.addSingletonMapping('WorkBook', WorkBook);
+    container.addSingletonMapping('WorkBook', Workbook);
     container.addSingletonMapping('Locale', Locale);
     container.addSingletonMapping('Context', Context);
     container.addSingletonMapping('UndoManager', UndoManager);
@@ -54,7 +54,7 @@ export function StartUpReady(): IOCContainer {
     container.addSingletonMapping('PluginManager', PluginManager);
     container.addSingletonMapping('ObserverManager', ObserverManager);
     container.addSingletonMapping('ObservableHooksManager', HooksManager);
-    container.addMapping('WorkSheet', WorkSheet);
+    container.addMapping('WorkSheet', Worksheet);
     return container;
 }
 
@@ -82,10 +82,10 @@ export function StartUpInit(worksheetConfig?: Partial<IWorksheetConfig>) {
 
     const container = StartUpReady();
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const manager = workbook.getCommandManager();
 
-    const worksheet = container.getInstance<WorkSheet>('WorkSheet', context, configure);
+    const worksheet = container.getInstance<Worksheet>('WorkSheet', context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(manager);
 

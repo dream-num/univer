@@ -1,7 +1,7 @@
 import { ThemeColorType, ColorType, ThemeColors } from '../../Enum';
 import { Nullable } from '../../Shared';
 import { ColorBuilder } from './ColorBuilder';
-import { THEME_COLOR_MAP } from '../../Const/THEME_COLOR_MAP';
+import { THEME_COLORS } from '../../Const/THEME_COLOR_MAP';
 
 export class Color {
     static rgbColorToHexValue(color: RgbColor): string {
@@ -356,7 +356,7 @@ export class ThemeColor extends Color {
     }
 
     asRgbColor(): RgbColor {
-        const themeColors = THEME_COLOR_MAP.get(this._themeColors);
+        const themeColors = THEME_COLORS[this._themeColors];
         if (themeColors == null) {
             throw new Error('not find themeColors type');
         }

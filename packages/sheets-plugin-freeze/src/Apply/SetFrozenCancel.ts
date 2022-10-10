@@ -1,6 +1,6 @@
-import { WorkSheet } from '@univer/core';
+import { Worksheet } from '@univer/core';
 
-export function SetFrozenCancel(worksheet: WorkSheet): number[] {
+export function SetFrozenCancel(worksheet: Worksheet): number[] {
     // get config
     const config = worksheet.getConfig();
 

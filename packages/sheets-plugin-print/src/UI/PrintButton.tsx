@@ -1,5 +1,5 @@
 import { BaseComponentSheet, BaseIconProps, BaseSelectProps, Component, IToolBarItemProps } from '@univer/base-component';
-import { Nullable, Observer, WorkBook } from '@univer/core';
+import { Nullable, Observer, Workbook } from '@univer/core';
 import { FunctionComponent } from 'preact';
 import { IProps } from '../IData/IPrint';
 import { PrintMode } from './PrintMode';
@@ -20,7 +20,7 @@ export class PrintButton extends Component<IProps, IState> {
 
     PrintTitleIcon: FunctionComponent<BaseIconProps>;
 
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     initialize(props: IProps) {
         // super(props);
@@ -82,7 +82,7 @@ export class PrintButton extends Component<IProps, IState> {
 
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
@@ -92,7 +92,7 @@ export class PrintButton extends Component<IProps, IState> {
      * destory
      */
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     /**

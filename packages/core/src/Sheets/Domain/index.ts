@@ -8,6 +8,6 @@ export * from './RangeList';
 export * from './RowManager';
 export * from './Selection';
 export * from './Styles';
-export * from './WorkBook';
-export * from './WorkSheet';
+export * from './Workbook';
+export * from './Worksheet';
 // @endindex

@@ -1,5 +1,5 @@
 import { ISetSelectionActivateServiceData } from '../Action';
-import { WorkSheet } from '../Domain/WorkSheet';
+import { Worksheet } from '../Domain/Worksheet';
 import { IRangeData } from '../../Interfaces/IRangeData';
 
 /**
@@ -13,7 +13,7 @@ import { IRangeData } from '../../Interfaces/IRangeData';
  * @internal
  */
 export function SetSelectionActivate(
-    worksheet: WorkSheet,
+    worksheet: Worksheet,
     activeRangeList: IRangeData | IRangeData[],
     activeRange: IRangeData,
     currentCell: IRangeData

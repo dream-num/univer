@@ -1,34 +1,101 @@
-import { BaseMenuProps, JSXComponent, MenuComponent, MenuItemComponent } from '@univer/base-component';
+import { BaseMenuProps, JSXComponent, Component, MenuComponent, createRef, BaseMenuItem, joinClassNames } from '@univer/base-component';
 import styles from './index.module.less';
 
-interface menuProps {
-    children: any;
-    onClick?: () => void;
-}
-
-export const MenuItem = (props: BaseMenuProps) => {
-    const { children, onClick } = props;
-    return (
-        <div className={styles.menuItem} onClick={onClick}>
-            {children}
-        </div>
-    );
+type IState = {
+    show: boolean;
 };
 
-export const Menu = (props: BaseMenuProps) => {
-    const { children } = props;
+export class Menu extends Component<BaseMenuProps, IState> {
+    private _MenuRef = createRef<HTMLUListElement>();
 
-    return <div className={styles.menu}>{children}</div>;
-};
+    private _refs: Menu[] = [];
 
-export class UniverMenuItem implements MenuItemComponent {
-    render(): JSXComponent<BaseMenuProps> {
-        return MenuItem;
+    protected initialize() {
+        this.state = {
+            show: true,
+        };
+    }
+
+    handleClick = (e: MouseEvent, onClick?: () => void) => {
+        if (onClick) {
+            onClick();
+        } else if (this.props.onClick) {
+            this.props.onClick();
+        }
+        this.showMenu(false);
+    };
+
+    showMenu = (show: boolean) => {
+        this.setState({
+            show,
+        });
+    };
+
+    showMenuClick = (e: MouseEvent) => {
+        this.showMenu(false);
+    };
+
+    mouseEnter = (e: MouseEvent, index: number) => {
+        const { list } = this.props;
+        // if (list[index].children) {
+        // }
+    };
+
+    mouseLeave = (e: MouseEvent, index: number) => {};
+
+    componentDidMount() {
+        window.addEventListener('click', this.showMenuClick);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('click', this.showMenuClick);
+    }
+
+    render() {
+        const { className = '', style = '', list } = this.props;
+        const { show } = this.state;
+
+        return show ? (
+            <ul className={joinClassNames(styles.colsMenu, className)} style={style} ref={this._MenuRef}>
+                {list.map((item: BaseMenuItem, index: number) => {
+                    if (item.hide) return;
+                    return (
+                        <li
+                            className={joinClassNames(styles.colsMenuitem, item.className ?? '')}
+                            style={item.style ?? ''}
+                            onClick={(e) => this.handleClick(e, item.onClick)}
+                            onMouseEnter={(e) => {
+                                this.mouseEnter(e, index);
+                            }}
+                            onMouseLeave={(e) => {
+                                this.mouseLeave(e, index);
+                            }}
+                        >
+                            {item.label}
+                            {item.children ? (
+                                <Menu
+                                    ref={(ele: Menu) => (this._refs[index] = ele)}
+                                    list={item.children.list}
+                                    onClick={item.children.onClick}
+                                    className={item.children.className}
+                                    style={item.children.style}
+                                    parent={this}
+                                ></Menu>
+                            ) : (
+                                <></>
+                            )}
+                        </li>
+                    );
+                })}
+            </ul>
+        ) : (
+            ''
+        );
     }
 }
 
 export class UniverMenu implements MenuComponent {
     render(): JSXComponent<BaseMenuProps> {
-        return MenuItem;
+        return Menu;
     }
 }

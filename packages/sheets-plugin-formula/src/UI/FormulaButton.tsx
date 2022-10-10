@@ -1,5 +1,5 @@
 import { BaseComponentSheet, BaseIconProps, BaseSelectProps, Component, FunctionComponent, ISelectButton, IToolBarItemProps, ISlotElement } from '@univer/base-component';
-import { Nullable, Observer, WorkBook } from '@univer/core';
+import { Nullable, Observer, Workbook } from '@univer/core';
 import { FORMULA_CHILDREN } from '../Basic';
 import { IProps } from '../Basic/IFormula';
 import { IfGenerate } from './IfGenerate';
@@ -27,7 +27,7 @@ interface IState {
 // };
 
 export class FormulaButton extends Component<IProps, IState> {
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     SumIcon: FunctionComponent<BaseIconProps>;
 
@@ -72,7 +72,7 @@ export class FormulaButton extends Component<IProps, IState> {
 
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
@@ -90,7 +90,7 @@ export class FormulaButton extends Component<IProps, IState> {
      * destory
      */
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     /**

@@ -1,5 +1,5 @@
 import { IMouseEvent, IPointerEvent } from '@univer/base-render';
-import { Locale, PLUGIN_NAMES, WorkSheet } from '@univer/core';
+import { Locale, PLUGIN_NAMES, Worksheet } from '@univer/core';
 import { RightMenuModel, RightMenuProps } from '../Model/Domain/RightMenuModel';
 import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
 import Style from '../View/UI/RightMenu/index.module.less';
@@ -364,7 +364,7 @@ export class RightMenuController {
         return selections;
     }
 
-    private _render(sheet: WorkSheet) {
+    private _render(sheet: Worksheet) {
         this._plugin.getCanvasView().updateToSheet(sheet);
         this._plugin?.getMainComponent().makeDirty(true);
     }

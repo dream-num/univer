@@ -1,6 +1,6 @@
-import { WorkSheet } from '@univer/core';
+import { Worksheet } from '@univer/core';
 
-export function SetFrozenRows(worksheet: WorkSheet, numRows: number): number {
+export function SetFrozenRows(worksheet: Worksheet, numRows: number): number {
     // get config
     const config = worksheet.getConfig();
 

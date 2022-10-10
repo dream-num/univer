@@ -1,5 +1,5 @@
 import { SetSheetOrder } from '../Apply';
-import { WorkBook } from '../Domain';
+import { Workbook } from '../Domain';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
@@ -14,7 +14,7 @@ export class SetSheetOrderAction extends ActionBase<
 > {
     constructor(
         actionData: ISetSheetOrderActionData,
-        workbook: WorkBook,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

@@ -1,6 +1,6 @@
-import { Range, WorkSheet } from '../../../Sheets/Domain';
+import { Range, Worksheet } from '../../../Sheets/Domain';
 
-export function RemoveUnlockService(workSheet: WorkSheet, unlock: Range) {
+export function RemoveUnlockService(workSheet: Worksheet, unlock: Range) {
     const protection = workSheet.getProtection();
     protection.getUnlockList().removeUnlock(unlock);
 }

@@ -1,5 +1,5 @@
 import { Component } from '@univer/base-component';
-import { Nullable, Observer, WorkBook } from '@univer/core';
+import { Nullable, Observer, Workbook } from '@univer/core';
 import { lang } from '../locale';
 import styles from './index.module.less';
 
@@ -32,7 +32,7 @@ interface IState {
 }
 
 export class HelpFunction extends Component<IProps, IState> {
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     initialize() {
         this.state = {

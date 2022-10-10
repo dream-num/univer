@@ -1,6 +1,6 @@
 import { Component, IToolBarItemProps } from '@univer/base-component';
 
-import { Context, Nullable, Observer, PLUGIN_NAMES, WorkBook } from '@univer/core';
+import { Context, Nullable, Observer, PLUGIN_NAMES, Workbook } from '@univer/core';
 import { SpreadsheetPlugin } from '@univer/base-sheets';
 
 import { ALTERNATING_COLORS_PLUGIN_NAME } from '../Const';
@@ -12,7 +12,7 @@ interface IState {
 }
 
 export class AlternatingColorsButton extends Component<IProps, IState> {
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     initialize(props: IProps) {
         const OrderIcon = this.getComponentRender().renderFunction('OrderIcon');
@@ -44,7 +44,7 @@ export class AlternatingColorsButton extends Component<IProps, IState> {
 
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
@@ -54,7 +54,7 @@ export class AlternatingColorsButton extends Component<IProps, IState> {
      * destory
      */
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     /**

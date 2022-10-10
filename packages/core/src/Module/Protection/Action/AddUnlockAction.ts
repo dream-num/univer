@@ -1,5 +1,5 @@
 import { ActionBase, ActionObservers, IActionData } from '../../../Command';
-import { Range, WorkBook } from '../../../Sheets/Domain';
+import { Range, Workbook } from '../../../Sheets/Domain';
 import { WorkSheetConvertor } from '../../../Convertor';
 import { ACTION_NAMES, CONVERTOR_OPERATION } from '../../../Const';
 import { AddUnlockService } from '../Service/AddUnlockService';
@@ -15,7 +15,7 @@ export class AddUnlockAction extends ActionBase<
 > {
     constructor(
         actionData: IAddUnlockActionData,
-        workbook: WorkBook,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

@@ -1,6 +1,6 @@
-import { Range, WorkSheet } from '@univer/core';
+import { Range, Worksheet } from '@univer/core';
 
-export function RemoveUnlockService(workSheet: WorkSheet, unlock: Range) {
+export function RemoveUnlockService(workSheet: Worksheet, unlock: Range) {
     const protection = workSheet.getProtection();
     protection.getUnlockList().removeUnlock(unlock);
 }

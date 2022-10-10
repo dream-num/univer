@@ -1,5 +1,5 @@
 import { BasePlugin, Context, Nullable } from '@univer/core';
-import { cloneElement, Component as PreactComponent, ComponentChildren, ComponentClass, createRef, JSX, RefObject, render, VNode, PreactContext } from 'preact';
+import { cloneElement, Component as PreactComponent, ComponentChildren, ComponentClass, createRef, JSX, RefObject, render, VNode, PreactContext, Ref } from 'preact';
 import { ForwardFn, forwardRef, PureComponent as PreactPureComponent } from 'preact/compat';
 import { BaseComponentRender, BaseComponentSheet } from '../BaseComponent';
 import { AppContext, AppContextValues } from '../Common';
@@ -57,4 +57,4 @@ abstract class PureComponent<P = {}, S = {}> extends PreactPureComponent<P, S> {
 
 export { render, Component, forwardRef, createRef, PureComponent, cloneElement };
 
-export type { ComponentChildren, ComponentClass, ForwardFn, JSX, RefObject, VNode, PreactContext };
+export type { ComponentChildren, ComponentClass, ForwardFn, JSX, RefObject, VNode, PreactContext, Ref };

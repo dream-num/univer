@@ -11,7 +11,7 @@ import {
     DescriptionEnum,
     BaseSelectProps,
 } from '@univer/base-component';
-import { Nullable, Observer, PLUGIN_NAMES, WorkBook } from '@univer/core';
+import { Nullable, Observer, PLUGIN_NAMES, Workbook } from '@univer/core';
 import { SpreadsheetPlugin } from '../../../SpreadsheetPlugin';
 
 import styles from './index.module.less';
@@ -49,7 +49,7 @@ export class ToolBar extends Component<BaseToolBarProps, IState> {
 
     Render: BaseComponentRender;
 
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     initialize(props: BaseToolBarProps) {
         // super(props);

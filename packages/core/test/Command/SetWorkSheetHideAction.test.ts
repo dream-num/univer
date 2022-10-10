@@ -4,7 +4,7 @@
 import { Context } from '../../src/Basics';
 import { CommandManager, SetWorkSheetHideAction } from '../../src/Command';
 import { ACTION_NAMES } from '../../src/Const';
-import { WorkBook, WorkSheet } from '../../src/Sheets/Domain';
+import { Workbook, Worksheet } from '../../src/Sheets/Domain';
 import { BooleanNumber } from '../../src/Enum';
 import { IOCContainerStartUpReady } from '../ContainerStartUp';
 
@@ -12,10 +12,10 @@ jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 test('Set WorkSheet Hide', () => {
     const container = IOCContainerStartUpReady();
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
 
     const sheetId = 'sheet-01';
-    const worksheet = new WorkSheet(context, { id: sheetId });
+    const worksheet = new Worksheet(context, { id: sheetId });
     workbook.insertSheet(worksheet);
 
     const observers = CommandManager.getActionObservers();

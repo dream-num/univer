@@ -1,5 +1,5 @@
 import { ISheetStatus } from '../../Command';
-import { WorkSheet } from '../Domain/WorkSheet';
+import { Worksheet } from '../Domain/Worksheet';
 import { BooleanNumber } from '../../Enum';
 
 /**
@@ -11,7 +11,7 @@ import { BooleanNumber } from '../../Enum';
  * @internal
  */
 export function SetWorkSheetActivate(
-    worksheet: WorkSheet,
+    worksheet: Worksheet,
     status: BooleanNumber
 ): ISheetStatus {
     // store old status

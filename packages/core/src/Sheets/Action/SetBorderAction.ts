@@ -1,5 +1,5 @@
 import { ObjectMatrixPrimitiveType } from '../../Shared';
-import { WorkBook } from '../Domain';
+import { Workbook } from '../Domain';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
 import { SetBorder } from '../Apply';
 import { IStyleData } from '../../Interfaces';
@@ -21,7 +21,7 @@ export interface BorderStyleData extends IActionData {
 export class SetBorderAction extends ActionBase<BorderStyleData, BorderStyleData> {
     constructor(
         actionData: BorderStyleData,
-        workbook: WorkBook,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

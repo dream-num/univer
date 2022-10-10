@@ -1,4 +1,4 @@
-import { ActionBase, ActionObservers, ACTION_NAMES, CONVERTOR_OPERATION, IActionData, WorkBook, WorkSheetConvertor } from '@univer/core';
+import { ActionBase, ActionObservers, ACTION_NAMES, CONVERTOR_OPERATION, IActionData, Workbook, WorkSheetConvertor } from '@univer/core';
 import { Allowed } from '../Domain';
 import { AddAllowedService, RemoveAllowedService } from '../Service';
 
@@ -7,7 +7,7 @@ export interface IAddAllowedActionData extends IActionData {
 }
 
 export class AddAllowedAction extends ActionBase<IAddAllowedActionData, IAddAllowedActionData> {
-    constructor(actionData: IAddAllowedActionData, workbook: WorkBook, observers: ActionObservers) {
+    constructor(actionData: IAddAllowedActionData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._doActionData = {
             ...actionData,

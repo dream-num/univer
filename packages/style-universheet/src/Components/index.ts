@@ -14,7 +14,7 @@ import * as Icon from './Icon/index';
 import { InfoBar } from './InfoBar';
 import { Input } from './Input';
 import { Content, Footer, Header, Layout, Sider } from './Layout';
-import { Menu, MenuItem } from './Menu';
+import { Menu } from './Menu';
 import type { ModalProps } from './Modal';
 import { Modal } from './Modal';
 import { Radio, RadioGroup } from './Radio';
@@ -36,7 +36,6 @@ export {
     Collapse,
     Panel,
     Menu,
-    MenuItem,
     Container,
     Layout,
     Header,

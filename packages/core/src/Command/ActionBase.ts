@@ -1,4 +1,4 @@
-import { WorkBook, WorkSheet } from '../Sheets/Domain';
+import { Workbook, Worksheet } from '../Sheets/Domain';
 import { ActionObservers } from './ActionObservers';
 
 /**
@@ -42,7 +42,7 @@ export abstract class ActionBase<
     O extends IActionData = D,
     R = void
 > {
-    protected _workbook: WorkBook;
+    protected _workbook: Workbook;
 
     protected _observers: ActionObservers;
 
@@ -54,7 +54,7 @@ export abstract class ActionBase<
 
     protected constructor(
         actionData: D,
-        workbook: WorkBook,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         this._doActionData = actionData;
@@ -79,13 +79,13 @@ export abstract class ActionBase<
         return this._oldActionData;
     }
 
-    getWorkSheet(): WorkSheet {
+    getWorkSheet(): Worksheet {
         const { _workbook, _doActionData } = this;
         const { sheetId } = _doActionData;
-        return _workbook.getSheetBySheetId(sheetId) as WorkSheet;
+        return _workbook.getSheetBySheetId(sheetId) as Worksheet;
     }
 
-    getWorkBook(): WorkBook {
+    getWorkBook(): Workbook {
         return this._workbook;
     }
 

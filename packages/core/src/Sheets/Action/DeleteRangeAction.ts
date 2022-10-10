@@ -2,7 +2,7 @@ import { DeleteRange, InsertRange } from '../Apply';
 import { ACTION_NAMES } from '../../Const';
 import { CONVERTOR_OPERATION } from '../../Const/CONST';
 import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
-import { WorkBook } from '../Domain';
+import { Workbook } from '../Domain';
 import { Dimension } from '../../Enum/Dimension';
 import { ICellData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
@@ -30,7 +30,7 @@ export class DeleteRangeAction extends ActionBase<
 > {
     constructor(
         actionData: IDeleteRangeActionData,
-        workbook: WorkBook,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

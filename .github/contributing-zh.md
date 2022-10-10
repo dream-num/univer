@@ -799,7 +799,7 @@ export class AlternatingColorsPlugin extends Plugin {
 -   `Domain`提供 API，触发`Action`
 -   `Action`触发协同，调用`Service`具体操作数据
 
-一个简单的设置 worksheet 切换按钮 color 的 API [setTabColor](../packages/core/src/Sheets/Domain/WorkSheet.ts) 的案例
+一个简单的设置 worksheet 切换按钮 color 的 API [setTabColor](../packages/core/src/Sheets/Domain/Worksheet.ts) 的案例
 
 1.  在[ACTION_NAMES](../packages/core/src/Const/ACTION_NAMES.ts)中预先定义一个`Action`名称 `SET_TAB_COLOR_ACTION`
 

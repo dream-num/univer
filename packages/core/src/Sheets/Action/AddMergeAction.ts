@@ -2,7 +2,7 @@ import { addMerge } from '../Apply/AddMerge';
 import { RemoveMerge } from '../Apply/RemoveMerge';
 import { CONVERTOR_OPERATION } from '../../Const';
 import { WorkSheetConvertor } from '../../Convertor';
-import { WorkBook } from '../Domain';
+import { Workbook } from '../Domain';
 import { IRangeData } from '../../Interfaces';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
 import { ActionObservers } from '../../Command/ActionObservers';
@@ -28,7 +28,7 @@ export class AddMergeAction extends ActionBase<
 > {
     constructor(
         actionData: IAddMergeActionData,
-        workbook: WorkBook,
+        workbook: Workbook,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

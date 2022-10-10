@@ -45,7 +45,7 @@ import { Range } from './Range';
 import { RangeList } from './RangeList';
 import { RowManager } from './RowManager';
 import { Selection } from './Selection';
-import { WorkBook } from './WorkBook';
+import { Workbook } from './Workbook';
 
 /**
  * Access and modify spreadsheet sheets.
@@ -57,14 +57,14 @@ import { WorkBook } from './WorkBook';
  *
  * @beta
  */
-export class WorkSheet {
+export class Worksheet {
     protected _commandManager: CommandManager;
 
     protected _selection: Selection;
 
     protected _context: Context;
 
-    protected _workbook: WorkBook;
+    protected _workbook: Workbook;
 
     protected _config: IWorksheetConfig;
 
@@ -141,7 +141,7 @@ export class WorkSheet {
      * Activates this sheet. Does not alter the sheet itself, only the parent's notion of the active sheet.
      * @returns Sheet — The newly active sheet.
      */
-    activate(): WorkSheet {
+    activate(): Worksheet {
         if (this._config.status === BooleanNumber.TRUE) {
             return this;
         }
@@ -169,7 +169,7 @@ export class WorkSheet {
      * @param config config of worksheet
      * @returns current worksheet instance
      */
-    setConfig(config: Partial<IWorksheetConfig>): WorkSheet {
+    setConfig(config: Partial<IWorksheetConfig>): Worksheet {
         this._config = Tools.commonExtend(DEFAULT_WORKSHEET, config);
         // this._config = Tools.deepMerge(DEFAULT_WORKSHEET, config);
         return this;
@@ -213,7 +213,7 @@ export class WorkSheet {
      *
      * @alpha
      */
-    setName(name: string): WorkSheet {
+    setName(name: string): Worksheet {
         const { _context, _commandManager, _sheetId } = this;
         const before = _context.getContextObserver(
             'onBeforeChangeSheetNameObservable'
@@ -256,10 +256,10 @@ export class WorkSheet {
      * Returns WorkSheet Clone Object
      * @returns WorkSheet Clone Object
      */
-    clone(): WorkSheet {
+    clone(): Worksheet {
         const { _config, _context } = this;
         const copy = Tools.deepClone(_config);
-        return new WorkSheet(_context, copy);
+        return new Worksheet(_context, copy);
     }
 
     /**
@@ -401,7 +401,7 @@ export class WorkSheet {
      * @param status type of sheet status
      * @returns WorkSheet Instance
      */
-    setStatus(status: BooleanNumber): WorkSheet {
+    setStatus(status: BooleanNumber): Worksheet {
         const { _context, _commandManager, _sheetId } = this;
         const configure: ISetWorkSheetStatusActionData = {
             actionName: ACTION_NAMES.SET_WORKSHEET_STATUS_ACTION,
@@ -461,13 +461,13 @@ export class WorkSheet {
      * @param name sheet name
      * @returns Copy WorkSheet
      */
-    copy(name: string): WorkSheet {
+    copy(name: string): Worksheet {
         const { _config, _context } = this;
         const copy = Tools.deepClone(_config);
         copy.name = name;
         copy.status = BooleanNumber.FALSE;
         copy.id = nanoid();
-        return new WorkSheet(_context, copy);
+        return new Worksheet(_context, copy);
     }
 
     /**
@@ -485,15 +485,15 @@ export class WorkSheet {
      * @param rowPosition row index
      * @returns WorkSheet Instance
      */
-    insertRows(rowPosition: number): WorkSheet;
+    insertRows(rowPosition: number): Worksheet;
     /**
      * Inserts a blank row in a sheet at the specified location.
      * @param rowPosition row index
      * @param numberRows row count
      * @returns WorkSheet Instance
      */
-    insertRows(rowPosition: number, numberRows: number): WorkSheet;
-    insertRows(...argument: any): WorkSheet {
+    insertRows(rowPosition: number, numberRows: number): Worksheet;
+    insertRows(...argument: any): Worksheet {
         let rowIndex: number = 0;
         let numRows: number = 1;
 
@@ -532,15 +532,15 @@ export class WorkSheet {
      * @param afterPosition row index
      * @returns WorkSheet Instance
      */
-    insertRowAfter(afterPosition: number): WorkSheet;
+    insertRowAfter(afterPosition: number): Worksheet;
     /**
      * Inserts a number of rows after the given row position.
      * @param afterPosition row index
      * @param howMany row count
      * @returns WorkSheet Instance
      */
-    insertRowAfter(afterPosition: number, howMany: number): WorkSheet;
-    insertRowAfter(...argument: any): WorkSheet {
+    insertRowAfter(afterPosition: number, howMany: number): Worksheet;
+    insertRowAfter(...argument: any): Worksheet {
         let rowIndex: number = 0;
         let numRows: number = 1;
 
@@ -580,15 +580,15 @@ export class WorkSheet {
      * @param beforePosition row index
      * @returns WorkSheet Instance
      */
-    insertRowBefore(beforePosition: number): WorkSheet;
+    insertRowBefore(beforePosition: number): Worksheet;
     /**
      * Inserts a number of rows before the given row position.
      * @param beforePosition row index
      * @param howMany row count
      * @returns WorkSheet Instance
      */
-    insertRowBefore(beforePosition: number, howMany: number): WorkSheet;
-    insertRowBefore(...argument: any): WorkSheet {
+    insertRowBefore(beforePosition: number, howMany: number): Worksheet;
+    insertRowBefore(...argument: any): Worksheet {
         let rowIndex: number = 0;
         let numRows: number = 1;
 
@@ -631,15 +631,15 @@ export class WorkSheet {
      * @param columnIndex column index
      * @returns WorkSheet Instance
      */
-    insertColumns(columnIndex: number): WorkSheet;
+    insertColumns(columnIndex: number): Worksheet;
     /**
      * Inserts a blank column in a sheet at the specified location.
      * @param columnIndex column index
      * @param numColumns column count
      * @returns WorkSheet Instance
      */
-    insertColumns(columnIndex: number, numColumns: number): WorkSheet;
-    insertColumns(...argument: any): WorkSheet {
+    insertColumns(columnIndex: number, numColumns: number): Worksheet;
+    insertColumns(...argument: any): Worksheet {
         let columnIndex: number = 0;
         let numColumns: number = 1;
 
@@ -685,15 +685,15 @@ export class WorkSheet {
      * @param beforePosition column index
      * @returns WorkSheet Instance
      */
-    insertColumnBefore(beforePosition: number): WorkSheet;
+    insertColumnBefore(beforePosition: number): Worksheet;
     /**
      * Inserts a number of columns before the given row position.
      * @param beforePosition column index
      * @param howMany column count
      * @returns WorkSheet Instance
      */
-    insertColumnBefore(beforePosition: number, howMany: number): WorkSheet;
-    insertColumnBefore(...argument: any): WorkSheet {
+    insertColumnBefore(beforePosition: number, howMany: number): Worksheet;
+    insertColumnBefore(...argument: any): Worksheet {
         let columnIndex: number = 0;
         let numColumns: number = 1;
 
@@ -743,15 +743,15 @@ export class WorkSheet {
      * @param afterPosition column index
      * @returns WorkSheet Instance
      */
-    insertColumnAfter(afterPosition: number): WorkSheet;
+    insertColumnAfter(afterPosition: number): Worksheet;
     /**
      * Inserts a number of columns after the given row position.
      * @param afterPosition column index
      * @param howMany column count
      * @returns WorkSheet Instance
      */
-    insertColumnAfter(afterPosition: number, howMany: number): WorkSheet;
-    insertColumnAfter(...argument: any): WorkSheet {
+    insertColumnAfter(afterPosition: number, howMany: number): Worksheet;
+    insertColumnAfter(...argument: any): Worksheet {
         let columnIndex: number = 0;
         let numColumns: number = 1;
 
@@ -796,14 +796,14 @@ export class WorkSheet {
      * Clears the sheet of content and formatting information.
      * @returns WorkSheet Instance
      */
-    clear(): WorkSheet;
+    clear(): Worksheet;
     /**
      * Clears the sheet of content and formatting information.
      * @param options clear option
      * @returns WorkSheet Instance
      */
-    clear(options: IOptionData): WorkSheet;
-    clear(...argument: any): WorkSheet {
+    clear(options: IOptionData): Worksheet;
+    clear(...argument: any): Worksheet {
         const { _context, _commandManager } = this;
 
         // collect all cell as a Range
@@ -840,7 +840,7 @@ export class WorkSheet {
      * @param color A color code in CSS notation (like '#ffffff' or 'white'), or null to reset the tab color.
      * @returns WorkSheet This sheet, for chaining.
      */
-    setTabColor(color: Nullable<string>): WorkSheet {
+    setTabColor(color: Nullable<string>): Worksheet {
         const { _context, _commandManager } = this;
         const observer = _context.getContextObserver(
             'onSheetTabColorChangeObservable'
@@ -860,7 +860,7 @@ export class WorkSheet {
      * Hides this sheet. Has no effect if the sheet is already hidden. If this method is called on the only visible sheet, it throws an exception.
      * @returns Sheet — The current sheet.
      */
-    hideSheet(): WorkSheet {
+    hideSheet(): Worksheet {
         const { _context, _workbook, _commandManager } = this;
         if (!this._config.hidden) {
             const observer = _context.getContextObserver('onHideSheetObservable');
@@ -890,7 +890,7 @@ export class WorkSheet {
      *  Makes the sheet visible. Has no effect if the sheet is already visible.
      * @returns WorkSheet Instance
      */
-    showSheet(): WorkSheet {
+    showSheet(): Worksheet {
         if (!this._config.hidden) {
             return this;
         }
@@ -913,7 +913,7 @@ export class WorkSheet {
      * @param commandManager Command Manager
      * @returns commandManager
      */
-    setCommandManager(commandManager: CommandManager): WorkSheet {
+    setCommandManager(commandManager: CommandManager): Worksheet {
         this._commandManager = commandManager;
         return this;
     }
@@ -1003,7 +1003,7 @@ export class WorkSheet {
      * Clears the sheet of contents, while preserving formatting information.
      * @returns WorkSheet Instance
      */
-    clearContents(): WorkSheet {
+    clearContents(): Worksheet {
         const { _config } = this;
         const { rowCount, columnCount } = _config;
         this.getRange({
@@ -1021,7 +1021,7 @@ export class WorkSheet {
      * Clears the sheet of formatting, while preserving contents.
      * @returns WorkSheet Instance
      */
-    clearFormats(): WorkSheet {
+    clearFormats(): Worksheet {
         const { _config } = this;
         const { rowCount, columnCount } = _config;
         this.getRange({
@@ -1039,7 +1039,7 @@ export class WorkSheet {
      * Clears the sheet of all notes.
      * @returns WorkSheet Instance
      */
-    clearNotes(): WorkSheet {
+    clearNotes(): Worksheet {
         const { _config } = this;
         const { rowCount, columnCount } = _config;
         this.getRange({
@@ -1058,7 +1058,7 @@ export class WorkSheet {
      * @param columnPosition column index
      * @returns WorkSheet Instance
      */
-    deleteColumn(columnPosition: number): WorkSheet {
+    deleteColumn(columnPosition: number): Worksheet {
         const { _context, _commandManager, _sheetId } = this;
         const deleteColumnData: IRemoveColumnDataAction = {
             actionName: ACTION_NAMES.REMOVE_COLUMN_DATA_ACTION,
@@ -1090,7 +1090,7 @@ export class WorkSheet {
      * @param howMany column count
      * @returns WorkSheet Instance
      */
-    deleteColumns(columnPosition: number, howMany: number): WorkSheet {
+    deleteColumns(columnPosition: number, howMany: number): Worksheet {
         const { _context, _commandManager, _sheetId } = this;
         const deleteColumnData: IRemoveColumnDataAction = {
             actionName: ACTION_NAMES.REMOVE_COLUMN_DATA_ACTION,
@@ -1121,7 +1121,7 @@ export class WorkSheet {
      * @param rowPosition row index
      * @returns WorkSheet Instance
      */
-    deleteRow(rowPosition: number): WorkSheet {
+    deleteRow(rowPosition: number): Worksheet {
         const { _context, _commandManager, _sheetId } = this;
         const dataRowDelete: IRemoveRowDataActionData = {
             actionName: ACTION_NAMES.REMOVE_ROW_DATA_ACTION,
@@ -1153,7 +1153,7 @@ export class WorkSheet {
      * @param howMany row count
      * @returns WorkSheet Instance
      */
-    deleteRows(rowPosition: number, howMany: number): WorkSheet {
+    deleteRows(rowPosition: number, howMany: number): Worksheet {
         const { _context, _commandManager, _sheetId } = this;
 
         const dataRowDelete: IRemoveRowDataActionData = {
@@ -1506,7 +1506,7 @@ export class WorkSheet {
      * Returns the Sheets that contains this sheet.
      * @returns the Sheets that contains this sheet.
      */
-    getParent(): WorkBook {
+    getParent(): Workbook {
         return this._context.getWorkBook();
     }
 
@@ -1543,7 +1543,7 @@ export class WorkSheet {
      * @param row row range
      * @returns WorkSheet Instance
      */
-    hideRow(row: Range): WorkSheet {
+    hideRow(row: Range): Worksheet {
         const range = row.getRangeData();
         const index = range.startRow;
         const count = range.endRow - range.startRow + 1;
@@ -1564,15 +1564,15 @@ export class WorkSheet {
      * @param rowIndex row index
      * @returns WorkSheet Instance
      */
-    hideRows(rowIndex: number): WorkSheet;
+    hideRows(rowIndex: number): Worksheet;
     /**
      * Hides one or more consecutive rows starting at the given index.
      * @param rowIndex row index
      * @param numRows row count
      * @returns WorkSheet Instance
      */
-    hideRows(rowIndex: number, numRows: number): WorkSheet;
-    hideRows(...argument: any): WorkSheet {
+    hideRows(rowIndex: number, numRows: number): Worksheet;
+    hideRows(...argument: any): Worksheet {
         const index = --argument[0];
         let count = 1;
         if (argument[1]) {
@@ -1595,7 +1595,7 @@ export class WorkSheet {
      * @param column column range
      * @returns WorkSheet Instance
      */
-    hideColumn(column: Range): WorkSheet {
+    hideColumn(column: Range): Worksheet {
         const range = column.getRangeData();
         const index = range.startColumn;
         const count = range.endColumn - range.startColumn + 1;
@@ -1616,15 +1616,15 @@ export class WorkSheet {
      * @param columnIndex column index
      * @returns WorkSheet Instance
      */
-    hideColumns(columnIndex: number): WorkSheet;
+    hideColumns(columnIndex: number): Worksheet;
     /**
      * Hides one or more consecutive columns starting at the given index.
      * @param columnIndex column index
      * @param numColumns column count
      * @returns WorkSheet Instance
      */
-    hideColumns(columnIndex: number, numColumns: number): WorkSheet;
-    hideColumns(...argument: any): WorkSheet {
+    hideColumns(columnIndex: number, numColumns: number): Worksheet;
+    hideColumns(...argument: any): Worksheet {
         const index = argument[0];
         let count = 1;
         if (argument[1]) {
@@ -1647,7 +1647,7 @@ export class WorkSheet {
      * @param row row range
      * @return WorkSheet Instance
      */
-    unhideRow(row: Range): WorkSheet {
+    unhideRow(row: Range): Worksheet {
         const range = row.getRangeData();
         const index = range.startRow;
         const count = range.endRow - range.startRow + 1;
@@ -1668,7 +1668,7 @@ export class WorkSheet {
      * @param column column range
      * @return WorkSheet Instance
      */
-    unhideColumn(column: Range): WorkSheet {
+    unhideColumn(column: Range): Worksheet {
         const range = column.getRangeData();
         const index = range.startColumn;
         const count = range.endColumn - range.startColumn + 1;
@@ -1689,15 +1689,15 @@ export class WorkSheet {
      * @param columnIndex column index
      * @returns WorkSheet Instance
      */
-    showColumns(columnIndex: number): WorkSheet;
+    showColumns(columnIndex: number): Worksheet;
     /**
      * Unhides one or more consecutive columns starting at the given index.
      * @param columnIndex column index
      * @param numColumns column count
      * @returns WorkSheet Instance
      */
-    showColumns(columnIndex: number, numColumns: number): WorkSheet;
-    showColumns(...argument: any): WorkSheet {
+    showColumns(columnIndex: number, numColumns: number): Worksheet;
+    showColumns(...argument: any): Worksheet {
         const index = argument[0];
         let count = 1;
         if (argument[1]) {
@@ -1720,15 +1720,15 @@ export class WorkSheet {
      * @param rowIndex row index
      * @returns WorkSheet Instance
      */
-    showRows(rowIndex: number): WorkSheet;
+    showRows(rowIndex: number): Worksheet;
     /**
      * Unhides one or more consecutive rows starting at the given index.
      * @param rowIndex row index
      * @param numRows row count
      * @returns WorkSheet Instance
      */
-    showRows(rowIndex: number, numRows: number): WorkSheet;
-    showRows(...argument: any): WorkSheet {
+    showRows(rowIndex: number, numRows: number): Worksheet;
+    showRows(...argument: any): Worksheet {
         const index = --argument[0];
         let count = 1;
         if (argument[1]) {
@@ -1793,7 +1793,7 @@ export class WorkSheet {
      * @param width column width
      * @returns WorkSheet Instance
      */
-    setColumnWidth(columnPosition: number, width: number): WorkSheet;
+    setColumnWidth(columnPosition: number, width: number): Worksheet;
     /**
      * Sets the width of the given columns in pixels.
      * @param startColumn column index
@@ -1805,8 +1805,8 @@ export class WorkSheet {
         startColumn: number,
         numColumns: number,
         width: number
-    ): WorkSheet;
-    setColumnWidth(...argument: any): WorkSheet {
+    ): Worksheet;
+    setColumnWidth(...argument: any): Worksheet {
         let columnIndex;
         let columnWidth: number[] = [];
         if (Tools.hasLength(argument, 2)) {
@@ -1830,7 +1830,7 @@ export class WorkSheet {
      * @param height row height
      * @returns WorkSheet Instance
      */
-    setRowHeights(startRow: number, numRows: number, height: number): WorkSheet {
+    setRowHeights(startRow: number, numRows: number, height: number): Worksheet {
         const rowHeight = [];
         for (let i = 0; i < numRows; i++) {
             rowHeight.push(height);
@@ -1845,7 +1845,7 @@ export class WorkSheet {
      * @param height row height
      * @returns WorkSheet Instance
      */
-    setRowHeight(rowPosition: number, height: number): WorkSheet {
+    setRowHeight(rowPosition: number, height: number): Worksheet {
         const rowHeight = [height];
         this.getRowManager().setRowHeight(rowPosition, rowHeight);
         return this;
@@ -1856,7 +1856,7 @@ export class WorkSheet {
      * @param hideGridlines hide gridlines status
      * @returns WorkSheet Instance
      */
-    setHiddenGridlines(hideGridlines: boolean): WorkSheet {
+    setHiddenGridlines(hideGridlines: boolean): Worksheet {
         const { _context, _commandManager, _sheetId } = this;
         const configure = {
             actionName: ACTION_NAMES.SET_HIDDEN_GRIDLINES_ACTION,
@@ -1903,7 +1903,7 @@ export class WorkSheet {
      * @param rightToLeft rightToLeft status
      * @returns WorkSheet Instance
      */
-    setRightToLeft(rightToLeft: BooleanNumber): WorkSheet {
+    setRightToLeft(rightToLeft: BooleanNumber): Worksheet {
         const { _context, _commandManager, _sheetId } = this;
         const configure = {
             actionName: ACTION_NAMES.SET_RIGHT_TO_LEFT_ACTION,
@@ -1988,7 +1988,7 @@ export class WorkSheet {
      * @param sheetIndex sheet index
      * @returns WorkSheet Instance
      */
-    copyTo(sheetIndex: number): WorkSheet {
+    copyTo(sheetIndex: number): Worksheet {
         const worksheet = this._context.getWorkBook().getSheets()[sheetIndex];
         if (!worksheet) return this;
         const config = Tools.deepClone(this._config);
@@ -2051,7 +2051,7 @@ export class WorkSheet {
      * @param destinationIndex row index
      * @returns WorkSheet Instance
      */
-    moveRows(rowSpec: Range, destinationIndex: number): WorkSheet {
+    moveRows(rowSpec: Range, destinationIndex: number): Worksheet {
         const { startRow } = rowSpec.getRangeData();
         const { endRow } = rowSpec.getRangeData();
         const data = this._cellData.spliceRows(startRow, endRow - startRow + 1);
@@ -2065,7 +2065,7 @@ export class WorkSheet {
      * @param destinationIndex column index
      * @returns WorkSheet Instance
      */
-    moveColumns(columnSpec: Range, destinationIndex: number): WorkSheet {
+    moveColumns(columnSpec: Range, destinationIndex: number): Worksheet {
         const startRow = columnSpec.getRangeData().startColumn;
         const endRow = columnSpec.getRangeData().endColumn;
         const data = this._cellData.spliceColumns(startRow, endRow - startRow + 1);

@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { Context, WorkBook, WorkSheet } from '../../../src';
+import { Context, Workbook1, Worksheet1 } from '../../../src';
 import {
     DEFAULT_NAMED_RANGE,
     INamedRange,
@@ -20,7 +20,7 @@ test('Test Named Range', () => {
 
     const container = IOCContainerStartUpReady();
     const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook1>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -36,7 +36,7 @@ test('Test Named Range', () => {
         },
         status: 1,
     };
-    const worksheet = new WorkSheet(context, configure);
+    const worksheet = new Worksheet1(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 

@@ -1,4 +1,4 @@
-import { WorkSheet } from './index';
+import { Worksheet1 } from './index';
 import { Context } from '../../Basics';
 import {
     Command,
@@ -27,7 +27,7 @@ import {
     ITextDecoration,
 } from '../../Interfaces';
 import { Nullable, ObjectMatrix, Tools, Tuples } from '../../Shared';
-import { WorkBook } from './WorkBook';
+import { Workbook1 } from './Workbook1';
 /**
  * A collection of one or more Range instances in the same sheet.
  *
@@ -42,15 +42,15 @@ export class RangeList {
 
     private _commandManager: CommandManager;
 
-    private _workBook: WorkBook;
+    private _workBook: Workbook1;
 
     private _context: Context;
 
-    private _worksheet: WorkSheet;
+    private _worksheet: Worksheet1;
 
     private _rangeList: IRangeData[];
 
-    constructor(worksheet: WorkSheet, rangeList: IRangeType[]) {
+    constructor(worksheet: Worksheet1, rangeList: IRangeType[]) {
         this._context = worksheet.getContext();
         this._workBook = this._context.getWorkBook();
         this._commandManager = this._context.getCommandManager();

@@ -1,5 +1,5 @@
 import { InsertDataRow, RemoveRowData } from '../Apply';
-import { WorkBook } from '../Domain';
+import { Workbook1 } from '../Domain';
 import { ICellData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
@@ -25,7 +25,7 @@ export class RemoveRowDataAction extends ActionBase<
 > {
     constructor(
         actionData: IRemoveRowDataActionData,
-        workbook: WorkBook,
+        workbook: Workbook1,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

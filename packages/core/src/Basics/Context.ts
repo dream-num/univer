@@ -1,5 +1,5 @@
 import { CommandManager, UndoManager } from '../Command';
-import { WorkBook } from '../Sheets/Domain';
+import { Workbook1 } from '../Sheets/Domain';
 import { Inject, PostConstruct } from '../IOC';
 import { Observable, ObservableHooks, ObserverManager } from '../Observer';
 import { HooksManager } from '../Observer/HooksManager';
@@ -23,7 +23,7 @@ export class Context {
     protected _hooksManager: HooksManager;
 
     @Inject('WorkBook')
-    protected _workBook: WorkBook;
+    protected _workBook: Workbook1;
 
     @Inject('UndoManager')
     protected _undoManager: UndoManager;
@@ -56,7 +56,7 @@ export class Context {
         return this._hooksManager.getHooks<T>(path);
     }
 
-    getWorkBook(): WorkBook {
+    getWorkBook(): Workbook1 {
         return this._workBook;
     }
 

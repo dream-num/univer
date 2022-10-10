@@ -6,7 +6,7 @@ import {
 } from '../../../Command';
 import { ACTION_NAMES, CONVERTOR_OPERATION } from '../../../Const';
 import { WorkSheetConvertor } from '../../../Convertor';
-import { WorkBook } from '../../../Sheets/Domain';
+import { Workbook1 } from '../../../Sheets/Domain';
 import { INamedRange } from '../INamedRange';
 import { AddNamedRangeService } from '../Service/AddNamedRangeService';
 import { DeleteNamedRangeService } from '../Service/DeleteNamedRangeService';
@@ -23,7 +23,7 @@ export class DeleteNamedRangeAction extends ActionBase<
 > {
     constructor(
         actionData: IDeleteNamedRangeActionData,
-        workbook: WorkBook,
+        workbook: Workbook1,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

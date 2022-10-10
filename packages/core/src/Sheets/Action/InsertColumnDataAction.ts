@@ -1,5 +1,5 @@
 import { InsertDataColumn, RemoveColumnData } from '../Apply';
-import { WorkBook } from '../Domain';
+import { Workbook1 } from '../Domain';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
 import { ICellData } from '../../Interfaces';
@@ -26,7 +26,7 @@ export class InsertColumnDataAction extends ActionBase<
 > {
     constructor(
         actionData: IInsertColumnDataActionData,
-        workbook: WorkBook,
+        workbook: Workbook1,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

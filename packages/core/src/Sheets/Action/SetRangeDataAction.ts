@@ -2,7 +2,7 @@ import { SetRangeData } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { CONVERTOR_OPERATION } from '../../Const/CONST';
 import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
-import { WorkBook } from '../Domain';
+import { Workbook1 } from '../Domain';
 import { ICellData, ICopyToOptionsData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
@@ -29,7 +29,7 @@ export class SetRangeDataAction extends ActionBase<
 > {
     constructor(
         actionData: ISetRangeDataActionData,
-        workbook: WorkBook,
+        workbook: Workbook1,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

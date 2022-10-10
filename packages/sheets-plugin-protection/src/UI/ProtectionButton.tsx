@@ -1,5 +1,5 @@
 import { BaseComponentSheet, BaseIconProps, BaseSingleButtonProps, Component, FunctionComponent, IToolBarItemProps } from '@univer/base-component';
-import { PLUGIN_NAMES, Nullable, Observer, WorkBook } from '@univer/core';
+import { PLUGIN_NAMES, Nullable, Observer, Workbook1 } from '@univer/core';
 import { SpreadsheetPlugin } from '@univer/base-sheets';
 
 import { PTOTECTION_PLUGIN_NAME } from '../Const';
@@ -11,7 +11,7 @@ interface IState {
 }
 
 export class ProtectionButton extends Component<IProps, IState> {
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook1>>;
 
     SingleButton: FunctionComponent<BaseSingleButtonProps>;
 
@@ -49,7 +49,7 @@ export class ProtectionButton extends Component<IProps, IState> {
 
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
@@ -59,7 +59,7 @@ export class ProtectionButton extends Component<IProps, IState> {
      * destory
      */
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        this._context.getObserverManager().getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     /**

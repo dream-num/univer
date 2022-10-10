@@ -5,7 +5,7 @@ import { BooleanNumber } from '../../Enum';
 import { IColumnData } from '../../Interfaces';
 import { Nullable } from '../../Shared';
 import { ObjectArray, ObjectArrayType } from '../../Shared/ObjectArray';
-import { WorkSheet } from './WorkSheet';
+import { Worksheet1 } from './Worksheet1';
 
 /**
  * Manage configuration information of all columns, get column width, column length, set column width, etc.
@@ -13,9 +13,9 @@ import { WorkSheet } from './WorkSheet';
 export class ColumnManager {
     private _columnData: ObjectArray<IColumnData>;
 
-    private _workSheet: WorkSheet;
+    private _workSheet: Worksheet1;
 
-    constructor(workSheet: WorkSheet, data: ObjectArrayType<Partial<IColumnData>>) {
+    constructor(workSheet: Worksheet1, data: ObjectArrayType<Partial<IColumnData>>) {
         this._workSheet = workSheet;
         this._columnData = new ObjectArray<IColumnData>(data);
     }

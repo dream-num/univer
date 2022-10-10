@@ -1,5 +1,5 @@
 import { getColor, Rect, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, SpreadsheetSkeleton } from '@univer/base-render';
-import { WorkSheet } from '@univer/core';
+import { Worksheet1 } from '@univer/core';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from '../BaseView';
 import { SelectionManager } from '../../../Controller/Selection/SelectionManager';
 import { SelectionModel } from '../../../Model/Domain/SelectionModel';
@@ -115,7 +115,7 @@ export class SheetView extends BaseView {
         return this._spreadsheetLeftTopPlaceholder;
     }
 
-    updateToSheet(worksheet: WorkSheet) {
+    updateToSheet(worksheet: Worksheet1) {
         const scene = this.getScene();
         const spreadsheetSkeleton = this._buildSkeleton(worksheet);
         const { rowTotalHeight, columnTotalWidth, rowTitleWidth, columnTitleHeight } = spreadsheetSkeleton;
@@ -168,7 +168,7 @@ export class SheetView extends BaseView {
         });
     }
 
-    private _buildSkeleton(worksheet: WorkSheet) {
+    private _buildSkeleton(worksheet: Worksheet1) {
         const context = this.getContext();
         const workbook = context.getWorkBook();
         const config = worksheet.getConfig();
@@ -178,13 +178,13 @@ export class SheetView extends BaseView {
         return spreadsheetSkeleton;
     }
 
-    private _rowHeightByTitle(worksheet: WorkSheet) {
+    private _rowHeightByTitle(worksheet: Worksheet1) {
         const config = worksheet?.getConfig();
         const columnTitle = config?.columnTitle.height || 0;
         return columnTitle;
     }
 
-    private _columnWidthByTitle(worksheet: WorkSheet) {
+    private _columnWidthByTitle(worksheet: Worksheet1) {
         const config = worksheet?.getConfig();
         const rowTitle = config?.rowTitle.width || 0;
         return rowTitle;

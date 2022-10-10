@@ -1,5 +1,5 @@
 import { BaseComponentRender, BaseComponentSheet, Component } from '@univer/base-component';
-import { Nullable, Observer, WorkBook } from '@univer/core';
+import { Nullable, Observer, Workbook1 } from '@univer/core';
 import { SpreadsheetPlugin } from '@univer/base-sheets';
 import styles from './index.module.less';
 
@@ -19,7 +19,7 @@ type LabelProps = {
 };
 
 export class RuleManage extends Component<RuleManageProps, RuleManageState> {
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook1>>;
 
     Render: BaseComponentRender;
 
@@ -84,14 +84,14 @@ export class RuleManage extends Component<RuleManageProps, RuleManageState> {
         // subscribe Locale change event
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
     }
 
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        this._context.getObserverManager().getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     setValue = (value: object, fn?: () => void) => {

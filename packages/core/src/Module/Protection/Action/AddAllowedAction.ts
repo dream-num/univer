@@ -1,6 +1,6 @@
 import { ActionBase, ActionObservers, IActionData } from '../../../Command';
 import { Allowed } from '../Allowed';
-import { WorkBook } from '../../../Sheets/Domain';
+import { Workbook1 } from '../../../Sheets/Domain';
 import { WorkSheetConvertor } from '../../../Convertor';
 import { ACTION_NAMES, CONVERTOR_OPERATION } from '../../../Const';
 import { AddAllowedService } from '../Service/AddAllowedService';
@@ -16,7 +16,7 @@ export class AddAllowedAction extends ActionBase<
 > {
     constructor(
         actionData: IAddAllowedActionData,
-        workbook: WorkBook,
+        workbook: Workbook1,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

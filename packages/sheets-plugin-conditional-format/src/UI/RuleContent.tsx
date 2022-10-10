@@ -1,5 +1,5 @@
 import { BaseComponentRender, BaseComponentSheet, Component, joinClassNames } from '@univer/base-component';
-import { Nullable, Observer, WorkBook } from '@univer/core';
+import { Nullable, Observer, Workbook1 } from '@univer/core';
 import { SpreadsheetPlugin } from '@univer/base-sheets';
 import styles from './index.module.less';
 
@@ -20,7 +20,7 @@ type LabelProps = {
 };
 
 export class RuleContent extends Component<RuleContentProps, RuleContentState> {
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook1>>;
 
     Render: BaseComponentRender;
 
@@ -96,14 +96,14 @@ export class RuleContent extends Component<RuleContentProps, RuleContentState> {
         // subscribe Locale change event
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
     }
 
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        this._context.getObserverManager().getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     setValue = (value: object, fn?: () => void) => {
@@ -184,7 +184,7 @@ type RuleEditState = {
 
 // edit rule content
 class RuleEditContent extends Component<RuleEditProps, RuleEditState> {
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook1>>;
 
     Render: BaseComponentRender;
 
@@ -449,14 +449,14 @@ class RuleEditContent extends Component<RuleEditProps, RuleEditState> {
         // subscribe Locale change event
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
     }
 
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        this._context.getObserverManager().getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     setValue = (value: object, fn?: () => void) => {

@@ -1,5 +1,5 @@
 import { ActionBase, ActionObservers, IActionData } from '../../../Command';
-import { WorkBook } from '../../../Sheets/Domain';
+import { Workbook1 } from '../../../Sheets/Domain';
 import { WorkSheetConvertor } from '../../../Convertor';
 import { SetFrozenCancelService } from '../Service/SetFrozenCancelService';
 import { ACTION_NAMES, CONVERTOR_OPERATION } from '../../../Const';
@@ -10,7 +10,7 @@ export class SetFrozenCancelAction extends ActionBase<IActionData> {
 
     constructor(
         actionData: IActionData,
-        workbook: WorkBook,
+        workbook: Workbook1,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

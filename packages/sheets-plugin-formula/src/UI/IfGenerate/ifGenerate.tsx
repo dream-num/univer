@@ -1,5 +1,5 @@
 import { BaseButtonProps, BaseComponentSheet, BaseModalProps, BaseSelectProps, Component, FunctionComponent } from '@univer/base-component';
-import { Nullable, Observer, WorkBook } from '@univer/core';
+import { Nullable, Observer, Workbook1 } from '@univer/core';
 import { IConfig } from '../../Basic/IFormula';
 import styles from './index.module.less';
 
@@ -17,7 +17,7 @@ interface IState {
 }
 
 class IfGenerate extends Component<IProps, IState> {
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook1>>;
 
     Button: FunctionComponent<BaseButtonProps>;
 
@@ -51,7 +51,7 @@ class IfGenerate extends Component<IProps, IState> {
         this.setLocale();
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
@@ -61,7 +61,7 @@ class IfGenerate extends Component<IProps, IState> {
      * destory
      */
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        this._context.getObserverManager().getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     setLocale() {

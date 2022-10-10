@@ -1,5 +1,5 @@
 import { SetFrozenColumns } from '../Apply';
-import { WorkBook } from '../Domain/WorkBook';
+import { Workbook1 } from '../Domain/Workbook1';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
@@ -16,7 +16,7 @@ export interface ISetFrozenColumnsActionData extends IActionData {
 export class SetFrozenColumnsAction extends ActionBase<ISetFrozenColumnsActionData> {
     constructor(
         actionData: ISetFrozenColumnsActionData,
-        workbook: WorkBook,
+        workbook: Workbook1,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

@@ -1,4 +1,4 @@
-import { ActionBase, ActionObservers, CONVERTOR_OPERATION, IActionData, WorkBook, WorkSheetConvertor } from '@univer/core';
+import { ActionBase, ActionObservers, CONVERTOR_OPERATION, IActionData, Workbook1, WorkSheetConvertor } from '@univer/core';
 import { AlternatingColorsPlugin } from '../../AlternatingColorsPlugin';
 import { AddBanding } from '../../Apply/AddBanding';
 import { DeleteBanding } from '../../Apply/DeleteBanding';
@@ -12,7 +12,7 @@ export interface IAddBandingActionData extends IActionData {
 }
 
 export class AddBandingAction extends ActionBase<IAddBandingActionData, IDeleteBandingActionData, void> {
-    constructor(actionData: IAddBandingActionData, workbook: WorkBook, observers: ActionObservers) {
+    constructor(actionData: IAddBandingActionData, workbook: Workbook1, observers: ActionObservers) {
         super(actionData, workbook, observers);
 
         this._doActionData = {

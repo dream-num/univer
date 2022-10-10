@@ -1,4 +1,4 @@
-import { WorkSheet } from '../../Sheets/Domain';
+import { Worksheet1 } from '../../Sheets/Domain';
 import { ICellData } from '../../Interfaces';
 import { Nullable } from '../../Shared';
 // import {IObjectFullState, IShapeConfig, Shape} from "@univer/base-render/src";
@@ -50,7 +50,7 @@ export class OverGridImage {
         return 0;
     }
 
-    getSheet(): Nullable<WorkSheet> {
+    getSheet(): Nullable<Worksheet1> {
         return null;
     }
 

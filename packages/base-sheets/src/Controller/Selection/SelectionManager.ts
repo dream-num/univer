@@ -1,5 +1,5 @@
 import { IMouseEvent, IPointerEvent, Rect, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle } from '@univer/base-render';
-import { Nullable, Observer, Plugin, WorkSheet, ISelection, makeCellToSelection, IRangeData, RangeList, Range } from '@univer/core';
+import { Nullable, Observer, Plugin, Worksheet1, ISelection, makeCellToSelection, IRangeData, RangeList, Range } from '@univer/core';
 import { SelectionModel } from '../../Model/Domain/SelectionModel';
 import { SheetView } from '../../View/Render/Views/SheetView';
 import { ScrollTimer } from '../ScrollTimer';
@@ -28,7 +28,7 @@ export class SelectionManager {
 
     private _startOffsetY: number = 0;
 
-    private _worksheet: Nullable<WorkSheet>;
+    private _worksheet: Nullable<Worksheet1>;
 
     hasSelection: boolean = false;
 
@@ -42,7 +42,7 @@ export class SelectionManager {
 
     // getRangeList =>
 
-    updateToSheet(worksheet: WorkSheet) {
+    updateToSheet(worksheet: Worksheet1) {
         this._worksheet = worksheet;
         const worksheetId = this.getWorksheetId();
         if (worksheetId) {

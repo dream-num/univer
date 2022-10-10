@@ -1,5 +1,5 @@
 import { Observable } from '../Observer/Observable';
-import { WorkSheet } from '../Sheets/Domain';
+import { Worksheet1 } from '../Sheets/Domain';
 
 export type WorkBookObserver = {
     onBeforeInsertSheetObservable: Observable<{ index: number; sheetId: string }>;
@@ -25,14 +25,14 @@ export type WorkBookObserver = {
 
     onZoomRatioSheetObservable: Observable<{ zoomRatio: number }>;
 
-    onHideSheetObservable: Observable<{ sheet: WorkSheet }>;
-    onShowSheetObservable: Observable<{ sheet: WorkSheet }>;
+    onHideSheetObservable: Observable<{ sheet: Worksheet1 }>;
+    onShowSheetObservable: Observable<{ sheet: Worksheet1 }>;
 
-    onBeforeChangeActiveSheetObservable: Observable<{ sheet: WorkSheet }>;
-    onAfterChangeActiveSheetObservable: Observable<{ sheet: WorkSheet }>;
+    onBeforeChangeActiveSheetObservable: Observable<{ sheet: Worksheet1 }>;
+    onAfterChangeActiveSheetObservable: Observable<{ sheet: Worksheet1 }>;
 
     onBeforeChangeSheetNameObservable: Observable<void>;
-    onAfterChangeSheetNameObservable: Observable<{ name: string; sheet: WorkSheet }>;
+    onAfterChangeSheetNameObservable: Observable<{ name: string; sheet: Worksheet1 }>;
 
     onBeforeRemoveSheetObservable: Observable<{ index: number }>;
     onAfterRemoveSheetObservable: Observable<{ index: number; sheetId: string }>;

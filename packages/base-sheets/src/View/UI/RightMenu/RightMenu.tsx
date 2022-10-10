@@ -1,6 +1,6 @@
 import { BaseComponentRender, BaseComponentSheet, BaseRightMenuProps, BaseUlProps, Component, createRef } from '@univer/base-component';
 import { IMouseEvent } from '@univer/base-render';
-import { Nullable, Observer, PLUGIN_NAMES, WorkBook } from '@univer/core';
+import { Nullable, Observer, PLUGIN_NAMES, Workbook1 } from '@univer/core';
 import Style from './index.module.less';
 
 interface BaseRightMenuChildrenProps extends BaseUlProps {
@@ -15,7 +15,7 @@ interface IState {
 }
 
 export class RightMenu extends Component<BaseRightMenuProps, IState> {
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook1>>;
 
     ulRef = createRef();
 
@@ -61,7 +61,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
         // 移除事件监听
         // document.removeEventListener('contextmenu', this.handleContextMenu);
         document.removeEventListener('click', this.handleClick);
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        this._context.getObserverManager().getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     jointJsx(option: any) {

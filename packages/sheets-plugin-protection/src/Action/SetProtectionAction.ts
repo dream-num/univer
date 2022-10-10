@@ -1,4 +1,4 @@
-import { ActionBase, ActionObservers, ACTION_NAMES, CONVERTOR_OPERATION, IActionData, WorkBook, WorkSheetConvertor } from '@univer/core';
+import { ActionBase, ActionObservers, ACTION_NAMES, CONVERTOR_OPERATION, IActionData, Workbook1, WorkSheetConvertor } from '@univer/core';
 import { SetProtectionService } from '../Service';
 
 export interface ISetProtectionActionData extends IActionData {
@@ -9,7 +9,7 @@ export interface ISetProtectionActionData extends IActionData {
 export class SetProtectionAction extends ActionBase<ISetProtectionActionData, ISetProtectionActionData> {
     protected _oldValue: [boolean, string];
 
-    constructor(actionData: ISetProtectionActionData, workbook: WorkBook, observers: ActionObservers) {
+    constructor(actionData: ISetProtectionActionData, workbook: Workbook1, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._doActionData = {
             ...actionData,

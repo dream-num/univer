@@ -1,5 +1,5 @@
 import { BaseComponentRender, BaseComponentSheet, BaseSheetBarProps, BaseUlProps, Component, createRef, RefObject } from '@univer/base-component';
-import { Nullable, Observer, PLUGIN_NAMES, WorkBook } from '@univer/core';
+import { Nullable, Observer, PLUGIN_NAMES, Workbook1 } from '@univer/core';
 import { Ul } from '@univer/style-universheet';
 import { SlideTabBar } from '../../../Model/Base/SlideTabBar/SlideTabBar';
 import styles from './index.module.less';
@@ -30,7 +30,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
 
     Render: BaseComponentRender;
 
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook1>>;
 
     private _renderKey: number = 1;
 
@@ -212,7 +212,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
      * destory
      */
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        this._context.getObserverManager().getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     componentDidUpdate() {

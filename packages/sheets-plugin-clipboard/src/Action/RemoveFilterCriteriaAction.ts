@@ -1,4 +1,4 @@
-import { ActionBase, ActionObservers, IActionData, Nullable, WorkBook } from '@univer/core';
+import { ActionBase, ActionObservers, IActionData, Nullable, Workbook1 } from '@univer/core';
 import { AddFilterCriteria, RemoveFilterCriteria } from '../Apply';
 import { ACTION_NAMES, FILTER_PLUGIN } from '../Const';
 import { IFilterCriteriaColumn } from '../Domain';
@@ -9,7 +9,7 @@ export interface IRemoveFilterCriteriaAction extends IActionData {
 }
 
 export class RemoveFilterCriteriaAction extends ActionBase<IRemoveFilterCriteriaAction, IAddFilterCriteriaActionData> {
-    constructor(actionData: IRemoveFilterCriteriaAction, workbook: WorkBook, observers: ActionObservers) {
+    constructor(actionData: IRemoveFilterCriteriaAction, workbook: Workbook1, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._doActionData = {
             ...actionData,

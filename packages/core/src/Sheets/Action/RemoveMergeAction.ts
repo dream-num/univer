@@ -1,5 +1,5 @@
 import { addMerge, RemoveMerge } from '../Apply';
-import { WorkBook } from '../Domain';
+import { Workbook1 } from '../Domain';
 import { IRangeData } from '../../Interfaces';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
@@ -24,7 +24,7 @@ export class RemoveMergeAction extends ActionBase<
 > {
     constructor(
         actionData: IRemoveMergeActionData,
-        workbook: WorkBook,
+        workbook: Workbook1,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

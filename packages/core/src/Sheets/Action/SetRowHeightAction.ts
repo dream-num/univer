@@ -1,5 +1,5 @@
 import { SetRowHeight } from '../Apply';
-import { WorkBook } from '../Domain';
+import { Workbook1 } from '../Domain';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
@@ -19,7 +19,7 @@ export interface ISetRowHeightActionData extends IActionData {
 export class SetRowHeightAction extends ActionBase<ISetRowHeightActionData> {
     constructor(
         actionData: ISetRowHeightActionData,
-        workbook: WorkBook,
+        workbook: Workbook1,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

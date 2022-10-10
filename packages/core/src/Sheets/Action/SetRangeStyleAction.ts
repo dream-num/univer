@@ -1,6 +1,6 @@
 import { SetRangeStyle } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
-import { WorkBook } from '../Domain';
+import { Workbook1 } from '../Domain';
 import { IRangeData, IStyleData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { ActionBase, IActionData } from '../../Command/ActionBase';
@@ -17,7 +17,7 @@ export interface ISetRangeStyleActionData extends IActionData {
 export class SetRangeStyleAction extends ActionBase<ISetRangeStyleActionData> {
     constructor(
         actionData: ISetRangeStyleActionData,
-        workbook: WorkBook,
+        workbook: Workbook1,
         observers: ActionObservers
     ) {
         super(actionData, workbook, observers);

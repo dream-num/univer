@@ -1,7 +1,7 @@
-import { WorkSheet } from 'src/Sheets/Domain';
+import { Worksheet1 } from 'src/Sheets/Domain';
 
 export function SetFrozenColumnsService(
-    worksheet: WorkSheet,
+    worksheet: Worksheet1,
     numColumns: number
 ): number {
     // get config

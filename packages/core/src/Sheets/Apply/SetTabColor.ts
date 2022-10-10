@@ -1,4 +1,4 @@
-import { WorkSheet } from '../Domain/WorkSheet';
+import { Worksheet1 } from '../Domain/Worksheet1';
 import { Nullable } from '../../Shared/Types';
 
 /**
@@ -10,7 +10,7 @@ import { Nullable } from '../../Shared/Types';
  * @internal
  */
 export function SetTabColor(
-    worksheet: WorkSheet,
+    worksheet: Worksheet1,
     color: Nullable<string>
 ): Nullable<string> {
     // get config

@@ -1,4 +1,4 @@
-import { WorkSheet } from '../Domain/WorkSheet';
+import { Worksheet1 } from '../Domain/Worksheet1';
 
 /**
  *
@@ -8,7 +8,7 @@ import { WorkSheet } from '../Domain/WorkSheet';
  *
  * @internal
  */
-export function SetFrozenRows(worksheet: WorkSheet, numRows: number): number {
+export function SetFrozenRows(worksheet: Worksheet1, numRows: number): number {
     // get config
     const config = worksheet.getConfig();
 

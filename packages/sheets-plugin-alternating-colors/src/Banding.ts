@@ -1,4 +1,4 @@
-import { Command, CommandManager, Context, Plugin, WorkSheet } from '@univer/core';
+import { Command, CommandManager, Context, Plugin, Worksheet1 } from '@univer/core';
 
 import { IAddBandingActionData, IDeleteBandingActionData, ISetBandingActionData } from './Command';
 import { ACTION_NAMES } from './Command/ACTION_NAMES';
@@ -17,7 +17,7 @@ export class Banding {
 
     protected readonly _plugin: Plugin;
 
-    private _worksheet: WorkSheet;
+    private _worksheet: Worksheet1;
 
     private _commandManager: CommandManager;
 

@@ -1,5 +1,5 @@
 import { ISlotElement, ISlotProps, IToolBarItemProps } from '@univer/base-component';
-import { Command, Plugin, PLUGIN_NAMES, Nullable, WorkSheet, IOCContainer, UniverSheet } from '@univer/core';
+import { Command, Plugin, PLUGIN_NAMES, Nullable, Worksheet1, IOCContainer, UniverSheet } from '@univer/core';
 import { SpreadsheetPlugin } from '@univer/base-sheets';
 import { IPictureProps } from '@univer/base-render';
 import { ACTION_NAMES } from './Const';
@@ -66,7 +66,7 @@ export class OverGridImage {
         return this._plugin;
     }
 
-    getSheet(): Nullable<WorkSheet> {
+    getSheet(): Nullable<Worksheet1> {
         return this.getPlugin().getContext().getWorkBook().getSheetBySheetId(this._property.sheetId);
     }
 

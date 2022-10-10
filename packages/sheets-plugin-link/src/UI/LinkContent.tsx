@@ -1,5 +1,5 @@
 import { BaseComponentRender, BaseComponentSheet, Component } from '@univer/base-component';
-import { Nullable, Observer, WorkBook } from '@univer/core';
+import { Nullable, Observer, Workbook1 } from '@univer/core';
 import { IProps } from '../IData';
 import styles from './index.module.less';
 
@@ -24,7 +24,7 @@ type LinkContentState = {
     type: string;
 };
 export class LinkContent extends Component<LinkContentProps, LinkContentState> {
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook1>>;
 
     Render: BaseComponentRender;
 
@@ -145,14 +145,14 @@ export class LinkContent extends Component<LinkContentProps, LinkContentState> {
         // subscribe Locale change event
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
     }
 
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        this._context.getObserverManager().getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     render(props: LinkContentProps, state: LinkContentState) {

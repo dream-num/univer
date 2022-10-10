@@ -1,5 +1,5 @@
 import { BaseButtonProps, BaseComponentSheet, BaseModalProps, BaseSelectProps, Component, createRef, FunctionComponent } from '@univer/base-component';
-import { Nullable, Observer, WorkBook } from '@univer/core';
+import { Nullable, Observer, Workbook1 } from '@univer/core';
 import * as func from '../../Const/FunctionList'; // 全部公式数组
 import { IConfig } from '../../Basic/IFormula';
 import styles from './index.module.less';
@@ -33,7 +33,7 @@ class SearchFormulaModal extends Component<IProps, IState> {
 
     funRef = createRef();
 
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook1>>;
 
     initialize(props: IProps) {
         // super();
@@ -62,7 +62,7 @@ class SearchFormulaModal extends Component<IProps, IState> {
         this.setLocale();
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
@@ -72,7 +72,7 @@ class SearchFormulaModal extends Component<IProps, IState> {
      * destory
      */
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        this._context.getObserverManager().getObserver<Workbook1>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     setLocale() {

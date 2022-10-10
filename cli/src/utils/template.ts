@@ -10,6 +10,7 @@ import { IBuildJson } from '../build';
 export interface TemplateData {
     projectValue: string;
     projectUpperValue: string;
+    projectConstantValue: string;
     projectName: string;
 }
 

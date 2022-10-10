@@ -31,10 +31,6 @@ export class SetSheetOrderAction extends ActionBase<
     }
 
     do(): number {
-        return this.redo();
-    }
-
-    redo(): number {
         const worksheet = this.getWorkSheet();
         const context = worksheet.getContext();
         const workbook = context.getWorkBook();
@@ -49,6 +45,10 @@ export class SetSheetOrderAction extends ActionBase<
             action: this,
         });
         return result;
+    }
+
+    redo(): void {
+        this.do();
     }
 
     undo(): void {

@@ -30,6 +30,10 @@ export class RemoveSheetAction extends ActionBase<
         };
     }
 
+    do(): { index: number; sheet: IWorksheetConfig } {
+        return this.redo();
+    }
+
     redo(): { index: number; sheet: IWorksheetConfig } {
         const workbook = this.getWorkBook();
         const result = RemoveSheet(workbook, this._doActionData.sheetId);
@@ -49,10 +53,6 @@ export class RemoveSheetAction extends ActionBase<
             action: this,
         });
         InsertSheet(workbook, this._oldActionData.index, this._oldActionData.sheet);
-    }
-
-    do(): { index: number; sheet: IWorksheetConfig } {
-        return this.redo();
     }
 
     validate(): boolean {

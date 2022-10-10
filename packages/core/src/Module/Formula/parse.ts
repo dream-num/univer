@@ -1,4 +1,0 @@
-/**
- * Parse
- */
-export class Parse {}

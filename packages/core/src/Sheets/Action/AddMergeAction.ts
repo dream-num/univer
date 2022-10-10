@@ -44,6 +44,11 @@ export class AddMergeAction extends ActionBase<
         this.validate();
     }
 
+    do(): IRangeData[] {
+        const worksheet = this.getWorkSheet();
+        return addMerge(worksheet.getMerges(), this._doActionData.rectangles);
+    }
+
     redo(): void {
         this.do();
     }
@@ -51,11 +56,6 @@ export class AddMergeAction extends ActionBase<
     undo(): void {
         const worksheet = this.getWorkSheet();
         RemoveMerge(worksheet.getMerges(), this._doActionData.rectangles);
-    }
-
-    do(): IRangeData[] {
-        const worksheet = this.getWorkSheet();
-        return addMerge(worksheet.getMerges(), this._doActionData.rectangles);
     }
 
     validate(): boolean {

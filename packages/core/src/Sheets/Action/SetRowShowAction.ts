@@ -33,6 +33,22 @@ export class SetRowShowAction extends ActionBase<ISetRowShowActionData> {
         this.validate();
     }
 
+    do(): void {
+        const worksheet = this.getWorkSheet();
+
+        SetShowRow(
+            this._doActionData.rowIndex,
+            this._doActionData.rowCount,
+            worksheet.getRowManager()
+        );
+
+        this._observers.notifyObservers({
+            type: ActionType.REDO,
+            data: this._doActionData,
+            action: this,
+        });
+    }
+
     redo(): void {
         this.do();
     }
@@ -49,22 +65,6 @@ export class SetRowShowAction extends ActionBase<ISetRowShowActionData> {
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
-            action: this,
-        });
-    }
-
-    do(): void {
-        const worksheet = this.getWorkSheet();
-
-        SetShowRow(
-            this._doActionData.rowIndex,
-            this._doActionData.rowCount,
-            worksheet.getRowManager()
-        );
-
-        this._observers.notifyObservers({
-            type: ActionType.REDO,
-            data: this._doActionData,
             action: this,
         });
     }

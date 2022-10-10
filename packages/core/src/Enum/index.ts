@@ -10,7 +10,6 @@ export * from './DeveloperMetadataVisibility';
 export * from './Dimension';
 export * from './Direction';
 export * from './FormatType';
-export * from './GroupControlTogglePosition';
 export * from './InterpolationPointType';
 export * from './KeyCode';
 export * from './LocaleType';

@@ -20,8 +20,6 @@ export * from './Sheets/Domain';
 export * from './Enum';
 export * from './Interfaces';
 export * from './IOC';
-export * from './Module/Formula';
-export * from './Module/Group';
 export * from './Observer';
 export * from './Operation';
 export * from './Plugin';

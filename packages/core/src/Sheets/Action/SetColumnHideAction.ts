@@ -39,6 +39,22 @@ export class SetColumnHideAction extends ActionBase<
         this.validate();
     }
 
+    do(): void {
+        const worksheet = this.getWorkSheet();
+
+        SetColumnHide(
+            this._doActionData.columnIndex,
+            this._doActionData.columnCount,
+            worksheet.getColumnManager()
+        );
+
+        this._observers.notifyObservers({
+            type: ActionType.REDO,
+            data: this._doActionData,
+            action: this,
+        });
+    }
+
     redo(): void {
         this.do();
     }
@@ -55,22 +71,6 @@ export class SetColumnHideAction extends ActionBase<
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
-            action: this,
-        });
-    }
-
-    do(): void {
-        const worksheet = this.getWorkSheet();
-
-        SetColumnHide(
-            this._doActionData.columnIndex,
-            this._doActionData.columnCount,
-            worksheet.getColumnManager()
-        );
-
-        this._observers.notifyObservers({
-            type: ActionType.REDO,
-            data: this._doActionData,
             action: this,
         });
     }

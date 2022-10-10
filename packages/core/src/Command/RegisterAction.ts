@@ -17,13 +17,9 @@ import {
     RemoveRowAction,
     RemoveRowDataAction,
     SetBorderAction,
-    SetCollapseAllColumnGroupsAction,
-    SetCollapseAllRowGroupsAction,
     SetColumnHideAction,
     SetColumnShowAction,
     SetColumnWidthAction,
-    SetFrozenColumnsAction,
-    SetFrozenRowsAction,
     SetHiddenGridlinesAction,
     SetRangeDataAction,
     SetRangeFormatAction,
@@ -94,19 +90,6 @@ CommandManager.register(
 CommandManager.register(ACTION_NAMES.SET_COLUMN_WIDTH_ACTION, SetColumnWidthAction);
 CommandManager.register(ACTION_NAMES.SET_ROW_HEIGHT_ACTION, SetRowHeightAction);
 CommandManager.register(ACTION_NAMES.SET_BORDER_ACTION, SetBorderAction);
-CommandManager.register(
-    ACTION_NAMES.SET_COLLAPSE_ALL_COLUMN_GROUPS_ACTION,
-    SetCollapseAllColumnGroupsAction
-);
-CommandManager.register(
-    ACTION_NAMES.SET_COLLAPSE_ALL_ROW_GROUPS_ACTION,
-    SetCollapseAllRowGroupsAction
-);
-CommandManager.register(
-    ACTION_NAMES.SET_FROZEN_COLUMNS_ACTION,
-    SetFrozenColumnsAction
-);
-CommandManager.register(ACTION_NAMES.SET_FROZEN_ROWS_ACTION, SetFrozenRowsAction);
 CommandManager.register(ACTION_NAMES.SET_RIGHT_TO_LEFT_ACTION, SetRightToLeftAction);
 CommandManager.register(
     ACTION_NAMES.INSERT_COLUMN_DATA_ACTION,

@@ -211,6 +211,8 @@ export class HLSColor {
 }
 
 export class RgbColor extends Color {
+    static RGB_COLOR_AMT: number = 0;
+
     static RGBA_EXTRACT: RegExp = new RegExp(
         `\\s*rgba\\s*\\((\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d.\\d|\\d\\s*)\\)\\s*`
     );
@@ -271,15 +273,39 @@ export class RgbColor extends Color {
     }
 
     getRed(): number {
-        return this._red;
+        let r = this._red + RgbColor.RGB_COLOR_AMT;
+
+        if (r > 255) {
+            r = 255;
+        } else if (r < 0) {
+            r = 0;
+        }
+
+        return r;
     }
 
     getGreen(): number {
-        return this._green;
+        let g = this._green + RgbColor.RGB_COLOR_AMT;
+
+        if (g > 255) {
+            g = 255;
+        } else if (g < 0) {
+            g = 0;
+        }
+
+        return g;
     }
 
     getBlue(): number {
-        return this._blue;
+        let b = this._blue + RgbColor.RGB_COLOR_AMT;
+
+        if (b > 255) {
+            b = 255;
+        } else if (b < 0) {
+            b = 0;
+        }
+
+        return b;
     }
 
     getAlpha(): number {

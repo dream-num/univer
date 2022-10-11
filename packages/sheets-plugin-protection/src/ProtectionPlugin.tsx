@@ -1,12 +1,12 @@
 import { ISlotElement, ISlotProps, IToolBarItemProps } from '@univer/base-component';
 import { Context, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
 import { SpreadsheetPlugin } from '@univer/base-sheets';
-import { PTOTECTION_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
-import { Protection } from './Controller/Protection';
+import { PROTECTION_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
 import { IConfig } from './IData/IProtection';
 import { en, zh } from './Locale';
 import { ProtectionButton } from './UI/ProtectionButton';
 import { ProtectionSide } from './UI/ProtectionSide';
+import { Protection } from './Controller';
 
 type IPluginConfig = {};
 
@@ -14,7 +14,7 @@ export class ProtectionPlugin extends Plugin {
     _protectionSilder: Protection;
 
     constructor(config?: IPluginConfig) {
-        super(PTOTECTION_PLUGIN_NAME);
+        super(PROTECTION_PLUGIN_NAME);
     }
 
     static create(config?: IPluginConfig) {
@@ -40,7 +40,7 @@ export class ProtectionPlugin extends Plugin {
         };
 
         const item: IToolBarItemProps = {
-            locale: PTOTECTION_PLUGIN_NAME,
+            locale: PROTECTION_PLUGIN_NAME,
             type: ISlotElement.JSX,
             show: true,
             label: <ProtectionButton config={config} />,

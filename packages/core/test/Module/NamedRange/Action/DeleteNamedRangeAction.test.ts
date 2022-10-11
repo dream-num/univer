@@ -9,7 +9,7 @@ import {
     AddNamedRangeAction,
     DeleteNamedRangeAction,
 } from '../../../../src/Module/NamedRange/Action';
-import { INamedRange } from '../../../../src/Module/NamedRange/INamedRange';
+import { INamedRange } from '../../../../src/Interfaces/INamedRange';
 import { IOCContainerStartUpReady } from '../../../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));

@@ -1,6 +1,6 @@
-import { INamedRange } from '../INamedRange';
+import { INamedRange } from '../../Interfaces/INamedRange';
 
-export function SetNamedRangeService(
+export function SetNamedRange(
     namedRanges: INamedRange[],
     namedRange: INamedRange
 ): INamedRange {
@@ -10,5 +10,6 @@ export function SetNamedRangeService(
             namedRanges[i] = namedRange;
             return currentNamedRange;
         }
+        return null;
     })!;
 }

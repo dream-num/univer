@@ -17,4 +17,3 @@
 - [es6-proxy-polyfill](https://github.com/ambit-tsai/es6-proxy-polyfill)
 - [react-colorful](https://github.com/omgovich/react-colorful)
 - [css-vars-ponyfill](https://github.com/jhildenbiddle/css-vars-ponyfill)
-- [csstype](https://github.com/frenic/csstype)

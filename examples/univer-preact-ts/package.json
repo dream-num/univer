@@ -61,7 +61,6 @@
         "@univer/sheets-plugin-filter": "^0.0.1",
         "@univer/base-sheets": "^0.0.1",
         "@univer/style-universheet": "^0.0.1",
-        "csstype": "^3.0.11",
         "preact": "^10.5.14"
     }
 }

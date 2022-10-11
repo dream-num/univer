@@ -1,5 +1,6 @@
-import { ActionBase, ActionObservers, ACTION_NAMES, CONVERTOR_OPERATION, IActionData, Range, Workbook, WorkSheetConvertor } from '@univer/core';
+import { ActionBase, ActionObservers, CONVERTOR_OPERATION, IActionData, Range, Workbook, WorkSheetConvertor } from '@univer/core';
 import { AddUnlock, RemoveUnlock } from '../Apply';
+import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
 
 export interface IAddUnlockActionData extends IActionData {
     unlock: Range;
@@ -13,7 +14,7 @@ export class AddUnlockAction extends ActionBase<IAddUnlockActionData, IAddUnlock
             convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
         this._oldActionData = {
-            actionName: ACTION_NAMES.SET_FROZEN_COLUMNS_ACTION,
+            actionName: ACTION_NAMES.ADD_UNLOCK_ACTION,
             sheetId: actionData.sheetId,
             unlock: actionData.unlock,
             convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],

@@ -1,6 +1,7 @@
-import { ActionBase, ActionObservers, ACTION_NAMES, CONVERTOR_OPERATION, IActionData, Workbook, WorkSheetConvertor } from '@univer/core';
+import { ActionBase, ActionObservers, CONVERTOR_OPERATION, IActionData, Workbook, WorkSheetConvertor } from '@univer/core';
 import { Allowed } from '../Controller';
 import { AddAllowed, RemoveAllowed } from '../Apply';
+import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
 
 export interface IAddAllowedActionData extends IActionData {
     allowed: Allowed;
@@ -14,7 +15,7 @@ export class AddAllowedAction extends ActionBase<IAddAllowedActionData, IAddAllo
             convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
         this._oldActionData = {
-            actionName: ACTION_NAMES.SET_FROZEN_COLUMNS_ACTION,
+            actionName: ACTION_NAMES.ADD_ALLOWED_ACTION,
             sheetId: actionData.sheetId,
             allowed: actionData.allowed,
             convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],

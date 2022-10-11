@@ -21,7 +21,6 @@ export * from './Enum';
 export * from './Interfaces';
 export * from './IOC';
 export * from './Observer';
-export * from './Operation';
 export * from './Plugin';
 export * from './Server';
 export * from './Shared';

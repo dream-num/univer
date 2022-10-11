@@ -1,5 +1,6 @@
-import { ActionBase, ActionObservers, ACTION_NAMES, CONVERTOR_OPERATION, IActionData, Workbook, WorkSheetConvertor } from '@univer/core';
+import { ActionBase, ActionObservers, CONVERTOR_OPERATION, IActionData, Workbook, WorkSheetConvertor } from '@univer/core';
 import { SetProtection } from '../Apply';
+import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
 
 export interface ISetProtectionActionData extends IActionData {
     enable: boolean;
@@ -16,7 +17,7 @@ export class SetProtectionAction extends ActionBase<ISetProtectionActionData, IS
             convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
         this._oldActionData = {
-            actionName: ACTION_NAMES.SET_FROZEN_COLUMNS_ACTION,
+            actionName: ACTION_NAMES.SET_PROTECTION_ACTION,
             sheetId: actionData.sheetId,
             enable: actionData.enable,
             password: actionData.password,

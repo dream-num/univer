@@ -41,7 +41,6 @@
         "@univer/base-component": "^0.0.1",
         "@univer/core": "^0.0.1",
         "@univer/style-universheet": "^0.0.1",
-        "csstype": "^3.0.11",
         "preact": "^10.5.14"
     }
 }

@@ -33,7 +33,6 @@
         "@univer/base-component": "workspace:^0.0.1",
         "@univer/core": "workspace:^0.0.1",
         "@univer/base-sheets": "workspace:^0.0.1",
-        "csstype": "^3.0.11",
         "es6-proxy-polyfill": "^2.1.1",
         "reflect-metadata": "^0.1.13"
     },

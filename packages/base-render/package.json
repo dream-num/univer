@@ -45,7 +45,6 @@
         "vite-plugin-external": "1.2.3"
     },
     "dependencies": {
-        "@univer/core": "workspace:^0.0.1",
-        "csstype": "^3.0.11"
+        "@univer/core": "workspace:^0.0.1"
     }
 }

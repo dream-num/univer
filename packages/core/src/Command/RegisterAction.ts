@@ -1,26 +1,28 @@
 import { ACTION_NAMES } from '../Const';
 import {
-    AddNamedRangeAction,
-    DeleteNamedRangeAction,
-    SetNamedRangeAction,
-} from '../Module/NamedRange/Action';
-import {
     AddMergeAction,
+    AddNamedRangeAction,
     ClearRangeAction,
+    DeleteNamedRangeAction,
     DeleteRangeAction,
+    InsertColumnAction,
     InsertColumnDataAction,
     InsertRangeAction,
     InsertRowAction,
     InsertRowDataAction,
+    InsertSheetAction,
+    RemoveColumnAction,
     RemoveColumnDataAction,
     RemoveMergeAction,
     RemoveRowAction,
     RemoveRowDataAction,
+    RemoveSheetAction,
     SetBorderAction,
     SetColumnHideAction,
     SetColumnShowAction,
     SetColumnWidthAction,
     SetHiddenGridlinesAction,
+    SetNamedRangeAction,
     SetRangeDataAction,
     SetRangeFormatAction,
     SetRangeFormulaAction,
@@ -38,13 +40,9 @@ import {
     SetWorkSheetHideAction,
     SetWorkSheetNameAction,
     SetWorkSheetStatusAction,
+    SetZoomRatioAction,
 } from '../Sheets/Action';
-import { InsertColumnAction } from '../Sheets/Action/InsertColumnAction';
-import { InsertSheetAction } from '../Sheets/Action/InsertSheetAction';
-import { RemoveColumnAction } from '../Sheets/Action/removeColumnAction';
-import { RemoveSheetAction } from '../Sheets/Action/RemoveSheetAction';
 import { CommandManager } from './CommandManager';
-import { SetZoomRatioAction } from '../Sheets/Action/SetZoomRatioAction';
 
 /**
  * All Commands are registered statically. For each new Command, a static registration method must be added here.

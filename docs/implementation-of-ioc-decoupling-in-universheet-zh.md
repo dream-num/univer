@@ -51,7 +51,7 @@ class IOCContainer {
 
 ```ts
 class IOCContainer {
-    Map<string, Class>
+    typedMap: Map<string, Class>;
 }
 ```
 
@@ -105,11 +105,7 @@ class UniverSheet {
 }
 ```
 
-以上我们就完成了一个简单版本的 IOC 容器，下面我们分析一下这个简单的 IOC 容器还存在哪些能够优化的地方
-
-## 优化
-
-## 总结
+以上我们就完成了一个简单版本的 IOC 容器
 
 ## 参考
 

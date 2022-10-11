@@ -1,15 +1,10 @@
-import {
-    ActionBase,
-    ActionObservers,
-    ActionType,
-    IActionData,
-} from '../../../Command';
-import { ACTION_NAMES, CONVERTOR_OPERATION } from '../../../Const';
-import { WorkSheetConvertor } from '../../../Convertor';
-import { Workbook } from '../../../Sheets/Domain';
-import { INamedRange } from '../INamedRange';
-import { AddNamedRangeService } from '../Service/AddNamedRangeService';
-import { DeleteNamedRangeService } from '../Service/DeleteNamedRangeService';
+import { IActionData, ActionBase, ActionObservers, ActionType } from '../../Command';
+import { CONVERTOR_OPERATION, ACTION_NAMES } from '../../Const';
+import { WorkSheetConvertor } from '../../Convertor';
+import { INamedRange } from '../../Interfaces/INamedRange';
+import { AddNamedRange } from '../Apply/AddNamedRange';
+import { DeleteNamedRange } from '../Apply/DeleteNamedRange';
+import { Workbook } from '../Domain';
 import { IDeleteNamedRangeActionData } from './DeleteNamedRangeAction';
 
 export interface IAddNamedRangeActionData extends IActionData {
@@ -49,7 +44,7 @@ export class AddNamedRangeAction extends ActionBase<
             data: this._doActionData,
             action: this,
         });
-        AddNamedRangeService(namedRanges, namedRange);
+        AddNamedRange(namedRanges, namedRange);
     }
 
     redo(): void {
@@ -70,7 +65,7 @@ export class AddNamedRangeAction extends ActionBase<
         this._doActionData = {
             actionName: ACTION_NAMES.ADD_NAMED_RANGE_ACTION,
             sheetId,
-            namedRange: DeleteNamedRangeService(namedRanges, namedRangeId),
+            namedRange: DeleteNamedRange(namedRanges, namedRangeId),
         };
     }
 

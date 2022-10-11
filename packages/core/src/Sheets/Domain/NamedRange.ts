@@ -1,13 +1,13 @@
 import { Context } from '../../Basics';
 import { Command, CommandManager } from '../../Command';
 import { ACTION_NAMES } from '../../Const';
-import { Workbook, Worksheet } from '../../Sheets/Domain';
+import { Workbook, Worksheet } from './index';
 import {
     IAddNamedRangeActionData,
     IDeleteNamedRangeActionData,
     ISetNamedRangeActionData,
-} from './Action';
-import { INamedRange } from './INamedRange';
+} from '../../Module/NamedRange/Action';
+import { INamedRange } from '../../Interfaces/INamedRange';
 
 /**
  * Create, access and modify named ranges in a spreadsheet. Named ranges are ranges that have associated string aliases.

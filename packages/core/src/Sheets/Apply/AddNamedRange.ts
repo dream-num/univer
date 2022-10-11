@@ -1,6 +1,6 @@
-import { INamedRange } from '../INamedRange';
+import { INamedRange } from '../../Interfaces/INamedRange';
 
-export function AddNamedRangeService(
+export function AddNamedRange(
     namedRanges: INamedRange[],
     namedRange: INamedRange
 ): void {

@@ -1,6 +1,6 @@
-import { INamedRange } from '../INamedRange';
+import { INamedRange } from '../../Interfaces/INamedRange';
 
-export function DeleteNamedRangeService(
+export function DeleteNamedRange(
     namedRanges: INamedRange[],
     namedRangeId: string
 ): INamedRange {
@@ -10,5 +10,6 @@ export function DeleteNamedRangeService(
             namedRanges.splice(i, 1);
             return currentNamedRange;
         }
+        return null;
     })!;
 }

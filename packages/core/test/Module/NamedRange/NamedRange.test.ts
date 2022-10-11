@@ -5,8 +5,8 @@ import { Context, Workbook, Worksheet } from '../../../src';
 import {
     DEFAULT_NAMED_RANGE,
     INamedRange,
-} from '../../../src/Module/NamedRange/INamedRange';
-import { NamedRange } from '../../../src/Module/NamedRange/NamedRange';
+} from '../../../src/Interfaces/INamedRange';
+import { NamedRange } from '../../../src/Sheets/Domain/NamedRange';
 import { IOCContainerStartUpReady } from '../../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));

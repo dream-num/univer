@@ -1,7 +1,8 @@
 import { BaseComponentSheet, BaseSiderModalProps, Component, createRef, FunctionComponent } from '@univer/base-component';
 import { Context, IRangeData, Nullable, Observer, Workbook } from '@univer/core';
-import { PTOTECTION_PLUGIN_NAME } from '../../Basic/Const';
-import { Protection } from '../../Controller';
+import { PROTECTION_PLUGIN_NAME } from '../../Basic/Const';
+import { Protection } from '../../Controller/Protection';
+
 import styles from './index.module.less';
 
 type IConfig = {
@@ -89,10 +90,10 @@ class ProtectionSide extends Component<IProps, IState> {
             <this.SiderModal
                 title={this.state.locale.protectionLabel}
                 closeSide={() => {
-                    // this.context.coreContext.getPluginManager().getPluginByName<StyleUniverSheet>('styleUniverSheet')?.showSiderByName(PTOTECTION_PLUGIN_NAME, false);
+                    // this.context.coreContext.getPluginManager().getPluginByName<StyleUniverSheet>('styleUniverSheet')?.showSiderByName(PROTECTION_PLUGIN_NAME, false);
                 }}
                 footer={this.footer()}
-                pluginName={PTOTECTION_PLUGIN_NAME}
+                pluginName={PROTECTION_PLUGIN_NAME}
                 className={styles.protectionSide}
                 style={{ ...style }}
             >

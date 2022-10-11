@@ -1,6 +1,6 @@
 import { IKeyType, Nullable } from '../Shared/Types';
 import { BooleanNumber, LocaleType } from '../Enum';
-import { INamedRange } from '../Module/NamedRange/INamedRange';
+import { INamedRange } from './INamedRange';
 import { IStyleData } from './IStyleData';
 import { IWorksheetConfig } from './IWorksheetData';
 

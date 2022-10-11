@@ -1,14 +1,9 @@
-import {
-    ActionBase,
-    ActionObservers,
-    ActionType,
-    IActionData,
-} from '../../../Command';
-import { ACTION_NAMES, CONVERTOR_OPERATION } from '../../../Const';
-import { WorkSheetConvertor } from '../../../Convertor';
-import { Workbook } from '../../../Sheets/Domain';
-import { INamedRange } from '../INamedRange';
-import { SetNamedRangeService } from '../Service/SetNamedRangeService';
+import { IActionData, ActionBase, ActionObservers, ActionType } from '../../Command';
+import { CONVERTOR_OPERATION, ACTION_NAMES } from '../../Const';
+import { WorkSheetConvertor } from '../../Convertor';
+import { INamedRange } from '../../Interfaces/INamedRange';
+import { SetNamedRange } from '../Apply/SetNamedRange';
+import { Workbook } from '../Domain';
 
 export interface ISetNamedRangeActionData extends IActionData {
     namedRange: INamedRange;
@@ -46,7 +41,7 @@ export class SetNamedRangeAction extends ActionBase<
             data: this._doActionData,
             action: this,
         });
-        return SetNamedRangeService(namedRanges, namedRange);
+        return SetNamedRange(namedRanges, namedRange);
     }
 
     redo(): void {
@@ -72,7 +67,7 @@ export class SetNamedRangeAction extends ActionBase<
         this._doActionData = {
             actionName: ACTION_NAMES.SET_NAMED_RANGE_ACTION,
             sheetId,
-            namedRange: SetNamedRangeService(namedRanges, namedRange),
+            namedRange: SetNamedRange(namedRanges, namedRange),
         };
     }
 

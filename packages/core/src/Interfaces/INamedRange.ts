@@ -1,5 +1,5 @@
-import { DEFAULT_SELECTION } from '../../Const';
-import { IGridRange } from '../../Interfaces';
+import { DEFAULT_SELECTION } from '../Const';
+import { IGridRange } from './index';
 
 export interface INamedRange {
     namedRangeId: string;

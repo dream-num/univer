@@ -1,1 +1,1 @@
-export const PTOTECTION_PLUGIN_NAME = 'protection';
+export const PROTECTION_PLUGIN_NAME = 'protection';

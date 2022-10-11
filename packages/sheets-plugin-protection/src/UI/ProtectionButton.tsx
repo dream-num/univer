@@ -2,7 +2,7 @@ import { BaseComponentSheet, BaseIconProps, BaseSingleButtonProps, Component, Fu
 import { PLUGIN_NAMES, Nullable, Observer, Workbook } from '@univer/core';
 import { SpreadsheetPlugin } from '@univer/base-sheets';
 
-import { PTOTECTION_PLUGIN_NAME } from '../Basic/Const';
+import { PROTECTION_PLUGIN_NAME } from '../Basic/Const';
 import { IProps } from '../IData/IProtection';
 
 // Types for state
@@ -31,7 +31,7 @@ export class ProtectionButton extends Component<IProps, IState> {
             label: <this.LockIcon />,
             show: true,
             onClick: () => {
-                this._context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.showSiderByName(PTOTECTION_PLUGIN_NAME, true);
+                this._context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.showSiderByName(PROTECTION_PLUGIN_NAME, true);
             },
         };
         this.state = {

@@ -1,5 +1,5 @@
-import { EventState, Observable, Observer, sortRules, sortRulesByDesc } from '@univer/core';
-import { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent, Nullable } from './Base/IEvents';
+import { EventState, Observable, Observer, sortRules, sortRulesByDesc, Nullable } from '@univer/core';
+import { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './Base/IEvents';
 
 import { requestNewFrame, precisionTo } from './Base/Tools';
 

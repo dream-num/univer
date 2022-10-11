@@ -1,4 +1,5 @@
-import { Nullable, Vector2 } from '.';
+import { Nullable } from '@univer/core';
+import { Vector2 } from '.';
 
 export const INITIAL_Path2: Vector2[] = [new Vector2(0, 0), new Vector2(1, 1)];
 

@@ -1,5 +1,5 @@
-import { Observer } from '@univer/core';
-import { IKeyboardEvent, IMouseEvent, IPointerEvent, IEvent, DeviceType, PointerInput, IWheelEvent, Nullable } from './Base/IEvents';
+import { Observer, Nullable } from '@univer/core';
+import { IKeyboardEvent, IMouseEvent, IPointerEvent, IEvent, DeviceType, PointerInput, IWheelEvent } from './Base/IEvents';
 
 import { Vector2 } from './Base/Vector2';
 

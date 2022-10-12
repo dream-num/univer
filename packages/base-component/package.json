@@ -49,7 +49,6 @@
         "vite-plugin-external": "1.2.3"
     },
     "dependencies": {
-        "@univer/base-component": "workspace:^0.0.1",
         "@univer/base-render": "workspace:^0.0.1",
         "@univer/core": "workspace:^0.0.1",
         "css-vars-ponyfill": "^2.4.6",

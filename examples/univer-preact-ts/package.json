@@ -55,11 +55,12 @@
     },
     "dependencies": {
         "@univer/base-component": "^0.0.1",
-        "@univer/base-render": "^0.0.1",
+        "@univer/base-render": "workspace:^0.0.1",
+        "@univer/base-sheets": "^0.0.1",
+        "@univer/common-plugin-data": "workspace:^0.0.1",
         "@univer/core": "^0.0.1",
         "@univer/sheets-plugin-alternating-colors": "^0.0.1",
         "@univer/sheets-plugin-filter": "^0.0.1",
-        "@univer/base-sheets": "^0.0.1",
         "@univer/style-universheet": "^0.0.1",
         "preact": "^10.5.14"
     }

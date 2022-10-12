@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 import { numfmt } from "../src/index";
 
 test('numfmt custom', () => {

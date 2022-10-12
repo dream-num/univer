@@ -1,17 +1,13 @@
 /** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
 module.exports = {
-    testEnvironment: 'jsdom',
     preset: 'ts-jest',
-    globals: {
-        'ts-jest': {
-            tsConfig: 'tsconfig.test.json',
-        },
-    },
-    moduleFileExtensions: ['js', 'ts', 'tsx'],
-    roots: ['<rootDir>/src'],
-    testMatch: ['**/__tests__/**/*.+(ts|tsx|js)', '**/?(*.)+(spec|test).+(ts|tsx|js)'],
+    testEnvironment: 'node',
+    collectCoverage: true,
+    coverageReporters: ['json', 'html'],
+    // coveragePathIgnorePatterns: ['src/Render/'],
+    testMatch: ['<rootDir>/test/**/*.test.ts'],
+    // collectCoverageFrom: ['**/*.{js,jsx}', '!**/node_modules/**', '!**/vendor/**'],
     transform: {
-        '^.+\\.(ts|tsx)$': 'ts-jest',
-        '^.+\\.tsx?$': 'babel-jest',
+        '^.+\\.ts?$': 'ts-jest',
     },
 };

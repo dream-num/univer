@@ -28,6 +28,8 @@ module.exports = {
     },
     plugins: ['@typescript-eslint', 'prettier', 'import', 'import-newlines', 'unused-imports'],
     rules: {
+        'no-cond-assign':'off',
+        'no-restricted-globals':"off",
         'prettier/prettier': [
             'error',
             {
@@ -39,7 +41,6 @@ module.exports = {
         // turn on errors for missing imports
         'import/no-unresolved': [2, { ignore: ['\\.less$', '^@'] }],
         '@typescript-eslint/naming-convention': 'off',
-        '@typescript-eslint/no-unused-vars': 'off',
         '@typescript-eslint/no-use-before-define': 'off',
         '@typescript-eslint/no-shadow': 'off',
         'import/no-cycle': 'off',

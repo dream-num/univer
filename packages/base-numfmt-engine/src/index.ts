@@ -1,28 +1,12 @@
-import {
-    formatNumber,
-    parseLocale,
-    isDate,
-    isPercent,
-    isText,
-    getLocale,
-    addLocale,
-    round,
-    dec2frac,
-    options,
-    codeToLocale,
-    color,
-    parsePattern,
-    parseCatch,
-    dateToSerial,
-    parseNumber,
-    parseDate,
-    parseTime,
-    parseBool,
-    parseValue,
-    dateFromSerial,
-    OptionsData,
-    PatternType,
-} from './internal';
+import { codeToLocale } from './core/codeToLocale';
+import { dec2frac } from './core/dec2frac';
+import { color, formatNumber, isDate, isPercent, isText } from './core/formatNumber';
+import { addLocale, getLocale, parseLocale } from './core/locale';
+import { options, OptionsData } from './core/options';
+import { parseCatch, parsePattern, PatternType } from './core/parsePattern';
+import { parseBool, parseDate, parseNumber, parseTime, parseValue } from './core/parseValue';
+import { round } from './core/round';
+import { dateFromSerial, dateToSerial } from './core/serialDate';
 
 export interface FormatterType {
     (value: number, opts?: OptionsData): void;

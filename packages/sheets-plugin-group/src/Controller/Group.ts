@@ -1,4 +1,4 @@
-import { Nullable } from '@univer/core/src/Shared';
+import { Nullable } from '@univer/core';
 
 /**
  *

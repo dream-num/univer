@@ -1,7 +1,7 @@
-import { EventState, Observable } from '@univer/core';
+import { EventState, Observable, Nullable } from '@univer/core';
 import { toPx } from './Base/Tools';
 
-import { PointerInput, IWheelEvent, Nullable } from './Base/IEvents';
+import { PointerInput, IWheelEvent } from './Base/IEvents';
 
 import { Canvas } from './Canvas';
 

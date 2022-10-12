@@ -1,22 +1,28 @@
-/** Alias type for value that can be null */
-export type Nullable<T> = T | null | undefined | void;
+import { Nullable } from '@univer/core';
 
 /**
  * Alias type for number that are floats
  */
 export type float = number;
+
 /**
  * Alias type for number that are doubles.
  */
 export type double = number;
+
 /* *
  * Alias type for number that are integer
  */
 export type int = number;
 
-/** Alias type for number array or Float32Array */
+/**
+ * Alias type for number array or Float32Array
+ */
 export type FloatArray = number[] | Float32Array;
-/** Alias type for number array or Float32Array or Int32 Array or Uint32Array or Uint16Array */
+
+/**
+ * Alias type for number array or Float32Array or Int32 Array or Uint32Array or Uint16Array
+ */
 export type IndicesArray = number[] | Int32Array | Uint32Array | Uint16Array;
 
 /**

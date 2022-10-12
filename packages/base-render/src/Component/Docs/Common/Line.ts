@@ -1,5 +1,5 @@
-import { IDrawing, PositionedObjectLayoutType, WrapTextType } from '@univer/core';
-import { IDocumentSkeletonBlockAnchor, IDocumentSkeletonDivide, IDocumentSkeletonDrawing, IDocumentSkeletonLine, LineType, Nullable, Path2, Transform, Vector2 } from '../../..';
+import { IDrawing, Nullable, PositionedObjectLayoutType, WrapTextType } from '@univer/core';
+import { IDocumentSkeletonBlockAnchor, IDocumentSkeletonDivide, IDocumentSkeletonDrawing, IDocumentSkeletonLine, LineType, Path2, Transform, Vector2 } from '../../..';
 
 interface IDrawingsSplit {
     left: number;

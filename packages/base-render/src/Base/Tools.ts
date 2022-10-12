@@ -17,8 +17,6 @@ const RGB_PAREN = 'rgb(';
 const RGBA_PAREN = 'rgba(';
 const RGB_REGEX = /rgb\((\d{1,3}),(\d{1,3}),(\d{1,3})\)/;
 
-/** Alias type for value that can be null */
-// export type Nullable<T> = T | null | undefined | void;
 // TODO :move to core
 export const getColor = (RgbArray: number[], opacity?: number): string => {
     if (!RgbArray) {

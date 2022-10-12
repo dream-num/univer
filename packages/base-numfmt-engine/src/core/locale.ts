@@ -1,4 +1,4 @@
-import { codeToLocale } from '../internal';
+import { codeToLocale } from './codeToLocale';
 
 export interface LocaleData {
     positive?: string;

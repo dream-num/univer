@@ -1,5 +1,5 @@
 import { BaseComponentRender, BaseComponentSheet, Component } from '@univer/base-component';
-import { Nullable, Observer, Workbook } from '@univer/core';
+import { IKeyValue, Nullable, Observer, Workbook } from '@univer/core';
 import { SpreadsheetPlugin } from '@univer/base-sheets';
 
 import styles from './index.module.less';
@@ -9,11 +9,14 @@ type ConditionContentProps = {
     type: string;
     genre: string;
 };
+
+// TODO: remove IKeyValue
 type ConditionContentState = {
     condition: ConditionProps;
     setting: Record<string, LabelProps>;
     duplicateOption: LabelProps[];
-};
+} & IKeyValue;
+
 type LabelProps = {
     locale?: string;
     label?: string;
@@ -334,11 +337,11 @@ export class ConditionContent extends Component<ConditionContentProps, Condition
                 <div className={styles.colorBox}>
                     <div className={styles.colorItem}>
                         <Checkbox>{setting.textColor.label}</Checkbox>
-                        <ColorPicker color="#9c0006" onColor={this.pickTextColor} onCancel={this.cancelColor}></ColorPicker>
+                        <ColorPicker color="#9c0006" onClick={this.pickTextColor} onCancel={this.cancelColor}></ColorPicker>
                     </div>
                     <div className={styles.colorItem}>
                         <Checkbox>{setting.cellColor.label}</Checkbox>
-                        <ColorPicker color="#ffc7ce" onColor={this.pickCellColor} onCancel={this.cancelColor}></ColorPicker>
+                        <ColorPicker color="#ffc7ce" onClick={this.pickCellColor} onCancel={this.cancelColor}></ColorPicker>
                     </div>
                 </div>
             </div>

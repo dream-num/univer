@@ -289,7 +289,7 @@ export class Select extends PureComponent<BaseSelectProps, BaseSelectState> {
                     {border ? <div className={styles.selectLine}></div> : ''}
                     <ColorPicker
                         color={'#000'}
-                        onColor={(col: string) => {
+                        onClick={(col: string) => {
                             this.setState(
                                 {
                                     selectColor: col,
@@ -299,7 +299,6 @@ export class Select extends PureComponent<BaseSelectProps, BaseSelectState> {
                                 }
                             );
                         }}
-                        onCancel={() => {}}
                         slot={slot!}
                         ref={this.ref}
                     />

@@ -14,15 +14,14 @@ cover: ''
 
 按钮的属性说明如下：
 
-| 属性      | 说明           | 类型              | 默认值        |
-| --------- | -------------- | ----------------- | ------------- |
-| color     | 默认颜色       | string            | `#000`        |
-| onColor   | 已选颜色的回调 | function          | `(color)=>{}` |
-| onCancel  | 取消按钮       | function          | -             |
-| onClick   | 确定按钮       | function          | -             |
-| onChange  | 切换按钮       | function          | -             |
-| style     | 内联样式       | JSX.CSSProperties | -             |
-| className | 类名           | string            | -             |
+| 属性      | 说明     | 类型              | 默认值 |
+| --------- | -------- | ----------------- | ------ |
+| color     | 默认颜色 | string            | `#000` |
+| onCancel  | 取消按钮 | function          | -      |
+| onClick   | 确定按钮 | function          | -      |
+| onChange  | 切换按钮 | function          | -      |
+| style     | 内联样式 | JSX.CSSProperties | -      |
+| className | 类名     | string            | -      |
 
 支持原生 button 的其他所有属性。
 
@@ -36,7 +35,7 @@ const Demo = () => {
     return (
         <ColorPicker
             color="#000"
-            onColor={(color) => {
+            onClick={(color) => {
                 console.log(color);
             }}
         />

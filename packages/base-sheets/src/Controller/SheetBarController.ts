@@ -51,7 +51,7 @@ class SheetBarUIController {
                     {
                         selectType: 'jsx',
                         label: 'ColorPicker',
-                        onColor: (color: string) => {
+                        onClick: (color: string) => {
                             barControl.setSheetColor(color);
                         },
                     },

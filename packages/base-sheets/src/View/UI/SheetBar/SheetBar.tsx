@@ -58,11 +58,12 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
             }
             if (item.selectType && item.selectType === 'jsx') {
                 const JSX: any = this.Render.renderFunction(item.label);
+                // ColorPicker
                 item.label = (
                     <JSX
                         style={{ visibility: 'visible', marginTop: '-60px', marginLeft: '-50px' }}
-                        onColor={(color: string) => {
-                            item.onColor(color);
+                        onClick={(color: string) => {
+                            item.onClick(color);
                         }}
                     />
                 );

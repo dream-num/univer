@@ -15,7 +15,6 @@ export interface BaseUlProps extends BaseComponentProps {
     border?: boolean;
     children?: BaseUlProps[];
     onClick?: (...arg: any[]) => void;
-    onColor?: (color: string) => void;
     onKeyUp?: (...any: any[]) => void;
     onDown?: (...any: any[]) => void;
     style?: JSX.CSSProperties;

@@ -423,7 +423,7 @@ export class ToolBar extends Component<BaseToolBarProps, IState> {
                 <ColorPicker
                     style={{ visibility: 'visible', position: 'relative', boxShadow: 'none' }}
                     color="#000"
-                    onColor={(color) => {
+                    onClick={(color) => {
                         // Update selected color
                         item.value = color;
                     }}

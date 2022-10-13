@@ -21,7 +21,7 @@ class FilterSelect extends Component<BaseFilterSelectProps, IState> {
                 {
                     content: '按颜色筛选',
                     onClick: this.printContent.bind(this, '按颜色筛选'),
-                    children: [{ content: <ColorPicker color="#000" onColor={() => {}} onCancel={() => {}} style={{ display: 'flex' }} />, type: 'jsx' }],
+                    children: [{ content: <ColorPicker color="#000" onClick={() => {}} onCancel={() => {}} style={{ display: 'flex' }} />, type: 'jsx' }],
                 },
                 { content: '按条件过滤', onClick: this.printContent.bind(this, '按条件过滤') },
                 { content: '按值过滤', onClick: this.printContent.bind(this, '按值过滤') },
@@ -42,7 +42,7 @@ class FilterSelect extends Component<BaseFilterSelectProps, IState> {
 
                     children: [
                         {
-                            label: <ColorPicker style={{ visibility: 'visible', position: 'relative', boxShadow: 'none' }} color="#000" onColor={() => {}} onCancel={() => {}} />,
+                            label: <ColorPicker style={{ visibility: 'visible', position: 'relative', boxShadow: 'none' }} color="#000" onClick={() => {}} onCancel={() => {}} />,
                             isJsx: true,
                         },
                     ],

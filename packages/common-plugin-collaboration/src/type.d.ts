@@ -1,2 +1,2 @@
 export * from './index';
-declare module '@univer/core' {}
+declare module '@univer/common-plugin-collaboration' {}

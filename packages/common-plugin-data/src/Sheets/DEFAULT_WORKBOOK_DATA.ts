@@ -1,20 +1,18 @@
 import {
+    IDocumentData,
+    BlockType,
+    ParagraphElementType,
     BaselineOffset,
+    IWorkbookConfig,
+    LocaleType,
     BooleanNumber,
     BorderStyleTypes,
     HorizontalAlign,
-    LocaleType,
-    SheetTypes,
     VerticalAlign,
     WrapStrategy,
-} from '../Enum';
-import {
-    BlockType,
-    IDocumentData,
-    IWorkbookConfig,
-    ParagraphElementType,
-} from '../Interfaces';
-import { Tools } from '../Shared/Tools';
+    SheetTypes,
+    Tools,
+} from '@univer/core';
 
 const richTextTest: IDocumentData = {
     documentId: 'd',
@@ -117,7 +115,7 @@ const richTextTest: IDocumentData = {
 /**
  * Default workbook data
  */
-export const defaultWorkbookData: IWorkbookConfig = {
+export const DEFAULT_WORKBOOK_DATA: IWorkbookConfig = {
     id: 'workbook-01',
     theme: 'default',
     locale: LocaleType.EN,

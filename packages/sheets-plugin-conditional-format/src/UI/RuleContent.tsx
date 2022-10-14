@@ -674,11 +674,11 @@ class RuleEditContent extends Component<RuleEditProps, RuleEditState> {
                 <div className={styles.colorBox}>
                     <div className={styles.colorItem}>
                         <Checkbox>{setting.textColor.label}</Checkbox>
-                        <ColorPicker color="#9c0006" onColor={this.pickTextColor} onCancel={this.cancelColor}></ColorPicker>
+                        <ColorPicker color="#9c0006" onClick={this.pickTextColor} onCancel={this.cancelColor}></ColorPicker>
                     </div>
                     <div className={styles.colorItem}>
                         <Checkbox>{setting.cellColor.label}</Checkbox>
-                        <ColorPicker color="#ffc7ce" onColor={this.pickCellColor} onCancel={this.cancelColor}></ColorPicker>
+                        <ColorPicker color="#ffc7ce" onClick={this.pickCellColor} onCancel={this.cancelColor}></ColorPicker>
                     </div>
                 </div>
             </div>

@@ -21,7 +21,6 @@ interface CliOptions {
 //     inner?: boolean;
 // }
 export function create(plugin: string) {
-    console.log('plugin create', plugin);
 
     const cliOptions: CliOptions = {
         //@ts-ignore

@@ -10,7 +10,7 @@ export function ColorButton(props: BaseColorButtonProps) {
     const { color } = props;
     return (
         <div className={styles.colorButton}>
-            <ColorPicker color={color} onColor={(col, val) => {}} onCancel={() => {}} />
+            <ColorPicker color={color} onClick={(color) => {}} onCancel={() => {}} />
             <Icon.Format.NextIcon />
         </div>
     );

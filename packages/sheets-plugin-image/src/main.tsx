@@ -1,18 +1,20 @@
-import { defaultWorkbookData, UniverSheet } from '@univer/core';
+import { UniverSheet } from '@univer/core';
+import { RenderEngine } from '@univer/base-render';
+import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
 import { SpreadsheetPlugin } from '@univer/base-sheets';
 import { UniverComponentSheet } from '@univer/style-universheet';
-import { RenderEngine } from '@univer/base-render';
 import { OverGridImagePlugin } from './OverGridImagePlugin';
 
 const uiDefaultConfigUp = {
     containerId: 'universheet-demo-up',
     layout: 'auto',
 };
-const univerSheetInstance = UniverSheet.newInstance(defaultWorkbookData);
-univerSheetInstance.installPlugin(new UniverComponentSheet());
-univerSheetInstance.installPlugin(new RenderEngine());
-univerSheetInstance.installPlugin(new SpreadsheetPlugin(uiDefaultConfigUp));
-univerSheetInstance.installPlugin(
+const univerSheetUp = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);
+univerSheetUp.installPlugin(new RenderEngine());
+univerSheetUp.installPlugin(new UniverComponentSheet());
+univerSheetUp.installPlugin(new RenderEngine());
+univerSheetUp.installPlugin(new SpreadsheetPlugin(uiDefaultConfigUp));
+univerSheetUp.installPlugin(
     new OverGridImagePlugin({
         value: [],
     })

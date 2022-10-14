@@ -36,8 +36,8 @@
         "eslint-config-airbnb-typescript": "^17.0.0",
         "eslint-config-prettier": "^8.3.0",
         "eslint-plugin-import": "^2.23.4",
-        "eslint-plugin-prettier": "^3.4.0",
         "eslint-plugin-jsx-a11y": "^6.5.1",
+        "eslint-plugin-prettier": "^3.4.0",
         "eslint-plugin-react": "^7.28.0",
         "eslint-plugin-react-hooks": "^4.3.0",
         "less": "^4.1.1",
@@ -50,8 +50,9 @@
     "dependencies": {
         "@univer/base-component": "workspace:^0.0.1",
         "@univer/base-render": "workspace:^0.0.1",
-        "@univer/core": "workspace:^0.0.1",
         "@univer/base-sheets": "workspace:^0.0.1",
+        "@univer/common-plugin-data": "workspace:^0.0.1",
+        "@univer/core": "workspace:^0.0.1",
         "@univer/sheets-plugin-filter": "workspace:^0.0.1",
         "@univer/style-universheet": "workspace:^0.0.1",
         "preact": "^10.5.14"

@@ -1,6 +1,7 @@
-import { defaultWorkbookData, UniverSheet } from '@univer/core';
-import { UniverComponentSheet } from '@univer/style-universheet';
+import { UniverSheet } from '@univer/core';
 import { RenderEngine } from '@univer/base-render';
+import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
+import { UniverComponentSheet } from '@univer/style-universheet';
 import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
 import { FormulaPlugin } from '@univer/sheets-plugin-formula';
 
@@ -19,7 +20,7 @@ const uiDefaultConfigUp = {
         },
     },
 };
-const univerSheetUp = UniverSheet.newInstance(defaultWorkbookData);
+const univerSheetUp = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);
 univerSheetUp.installPlugin(new RenderEngine());
 univerSheetUp.installPlugin(new UniverComponentSheet());
 FormulaPlugin.create().installTo(univerSheetUp);
@@ -32,31 +33,3 @@ import('./SpreadsheetPlugin').then(({ SpreadsheetPlugin }) => {
     univerSheetUp.installPlugin(clipboardPlugin);
     (window as any).spreadsheetPlugin = spreadsheetPlugin;
 });
-
-// const uiDefaultConfigDown = {
-//     containerId: 'universheet-demo-down',
-//     layout: {
-//         outerLeft: false,
-
-//         outerRight: true,
-
-//         innerLeft: false,
-
-//         innerRight: false,
-
-//         toolBar: true,
-
-//         toolBarConfig: {
-//             undoRedo: true,
-//             font: true,
-//         },
-//         contentSplit: true,
-//     },
-// };
-
-// const univerSheetDown = UniverSheet.newInstance(defaultWorkbookData);
-
-// univerSheetDown.installPlugin(new StyleUniverSheet(uiDefaultConfigDown));
-
-// univerSheetDown.installPlugin(new FilterPlugin());
-// univerSheetDown.installPlugin(new SpreadsheetPlugin());

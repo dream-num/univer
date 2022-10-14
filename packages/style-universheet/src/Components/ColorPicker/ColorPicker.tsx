@@ -15,20 +15,6 @@ let allColor = [
     ['#600', '#783f04', '#7f6000', '#274e13', '#0c343d', '#073763', '#20124d', '#4c1130'],
 ];
 
-// interface ColorPickerProps {
-//     color?: string; // 当前颜色
-//     onColor: (color: string, val?: boolean) => void; // 返回所选颜色
-//     onCancel?: () => void; //取消
-//     onClick?: () => void;
-//     onChange?: () => void;
-//     style?: JSX.CSSProperties;
-//     className?: string;
-//     slot?: {
-//         header?: IMainProps;
-//         footer?: IMainProps;
-//     };
-// }
-
 interface IState {
     presetColors: string[][];
     defaultColor: string;
@@ -94,10 +80,20 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
      * @param {boolean} val true:Close color selector
      */
     onChange = (presetColor: string) => {
-        this.props.onColor(presetColor);
+        this.props.onChange && this.props.onChange(presetColor);
         this.setState({
             afterColor: presetColor,
         });
+    };
+
+    /**
+     * confirm color
+     *
+     * @eventProperty
+     */
+    onClick = (color: string) => {
+        this.props.onClick && this.props.onClick(color);
+        this.hideSelect();
     };
 
     /**
@@ -167,7 +163,6 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                 this.ulRef.current.style.left = `${left}px`;
                 this.ulRef.current.style.top = `${top}px`;
             }
-            this.props.onChange && this.props.onChange();
         });
     };
 
@@ -175,7 +170,7 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
         const obj = Object.assign(this.state.styles || {}, this.props.style);
 
         return (
-            <div className={`${styles.colorPickerOutter} ${this.props.className}`} ref={this.ulRef} style={{ ...obj }}>
+            <div className={`${styles.colorPickerOuter} ${this.props.className}`} ref={this.ulRef} style={{ ...obj }}>
                 {this.props.slot && this.props.slot.header ? <div className={styles.colorPickerSlot}>{this.props.slot.header.content}</div> : null}
                 <div
                     className={styles.colorPicker}
@@ -195,9 +190,8 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                                                     className={styles.pickerSwatchBtn}
                                                     style={{ background: item }}
                                                     onClick={(e: MouseEvent) => {
-                                                        this.props.onColor(item);
-                                                        this.hideSelect();
-                                                        this.props.onClick && this.props.onClick();
+                                                        this.onChange(item);
+                                                        this.onClick(item);
                                                     }}
                                                 />
                                             </Tooltip>
@@ -219,8 +213,8 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                                 <Button
                                     type="primary"
                                     onClick={(e: MouseEvent) => {
-                                        this.props.onColor(this.state.afterColor);
-                                        this.hideSelect();
+                                        console.info('确定');
+                                        this.onClick(this.state.afterColor);
                                     }}
                                 >
                                     {this.state.locale.confirmColor}

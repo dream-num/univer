@@ -107,7 +107,7 @@ export class ImagePanelUI extends Component<ImagePanelUIProps> {
                                         style={{ width: '152px', display: 'inline-block' }}
                                         color={'#000'}
                                         onCancel={() => {}}
-                                        onColor={(color: string) => {}}
+                                        onClick={(color: string) => {}}
                                     />
                                 </div>
                             </div>

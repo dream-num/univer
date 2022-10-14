@@ -460,7 +460,7 @@ export class AlternatingColorsSide extends Component<IPanelProps, IState> {
                                             <span className={styles.colorSelectButton}>
                                                 <ColorPickerCircleButton
                                                     color={colorSelect[key]}
-                                                    onColor={this.handleColorSelect.bind(this, key)}
+                                                    onClick={this.handleColorSelect.bind(this, key)}
                                                     onCancel={this.handleColorCancel.bind(this)}
                                                     style={{ bottom: '30px', right: '0' }}
                                                 />

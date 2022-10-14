@@ -7,11 +7,11 @@
 
 // describe('ColorPicker', () => {
 //     test('should display initial ColorPicker', () => {
-//         const { container } = render(<ColorPicker onColor={(color) => {}} color="#000" />);
+//         const { container } = render(<ColorPicker onClick={(color) => {}} color="#000" />);
 //         expect(container).toBe(true);
 //     });
 //     test('click onSwitch function', async () => {
-//         render(<ColorPicker onColor={(color) => {}} color="#000" />);
+//         render(<ColorPicker onClick={(color) => {}} color="#000" />);
 
 //         fireEvent.click(screen.getByText('自定义'));
 

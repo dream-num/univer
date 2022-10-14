@@ -8,7 +8,7 @@
         background-color: transparent !important;
     }
 
-    >div:first-of-type {
+    > div:first-of-type {
         height: 100%;
 
         &:hover {
@@ -35,7 +35,7 @@
         .select-button-inner-label-icon {
             font-size: 24px;
 
-            &~span {
+            & ~ span {
                 display: flex;
                 align-items: center;
             }
@@ -49,11 +49,10 @@
             white-space: nowrap;
             width: 70px;
 
-            &~span {
+            & ~ span {
                 align-self: center;
             }
         }
-
     }
 
     .select-input {
@@ -72,7 +71,7 @@
                 -webkit-appearance: none;
             }
 
-            &[type="number"] {
+            &[type='number'] {
                 -moz-appearance: textfield;
             }
 
@@ -97,12 +96,13 @@
         vertical-align: top;
     }
 
+    // TODO 应该精确className指定按钮颜色
     button {
         .button();
-        border-color: transparent;
+        // border-color: transparent;
     }
 
-    .btn {
+    .btn:not(.color-picker .btn) {
         height: auto;
     }
 }
@@ -121,8 +121,8 @@
 }
 
 .button() {
-    padding: 0px 5px;
+    // padding: 0px 5px;
     line-height: 1;
-    box-sizing: border-box;
-    font-size: 0px;
+    // box-sizing: border-box;
+    // font-size: 0px;
 }

@@ -40,8 +40,6 @@ export class SelectionManager {
         return this._sheetView.getContext();
     }
 
-    // getRangeList =>
-
     updateToSheet(worksheet: Worksheet) {
         this._worksheet = worksheet;
         const worksheetId = this.getWorksheetId();
@@ -79,6 +77,12 @@ export class SelectionManager {
         return this._worksheet?.getSheetId();
     }
 
+    /**
+     * TODO Not necessarily curCellRange
+     * @param selectionRange
+     * @param curCellRange
+     * @returns
+     */
     addControlToCurrentByRangeData(selectionRange: IRangeData, curCellRange: IRangeData) {
         const currentControls = this.getCurrentControls();
         if (!currentControls) {

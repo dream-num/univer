@@ -1,26 +1,26 @@
 import { Context, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
 import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
 import { SpreadsheetPlugin } from '@univer/base-sheets';
-import { FormulaEnginePlugin } from '../../base-formula-engine';
+import { FormulaEnginePlugin } from '@univer/base-formula-engine';
 import { FormulaButton } from './UI/FormulaButton';
 import { zh, en } from './Locale';
 
 import { IConfig } from './Basic/IFormula';
 import { FORMULA_PLUGIN_NAME } from './Basic/PLUGIN_NAME';
 
-type IPluginConfig = {};
+export interface IFormulaPluginConfig {}
 
 export class FormulaPlugin extends Plugin {
-    protected _config: IPluginConfig;
+    protected _config: IFormulaPluginConfig;
 
     private _formulaEngine: FormulaEnginePlugin;
 
-    constructor(config?: IPluginConfig) {
+    constructor(config?: IFormulaPluginConfig) {
         super(FORMULA_PLUGIN_NAME);
         this._config = config || {};
     }
 
-    static create(config?: IPluginConfig) {
+    static create(config?: IFormulaPluginConfig) {
         return new FormulaPlugin(config);
     }
 

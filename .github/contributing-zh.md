@@ -1168,7 +1168,7 @@ univerSheetUp.installPlugin(new UniverComponentSheet());
 // 基础 sheets 插件
 univerSheetUp.installPlugin(
     new SpreadsheetPlugin({
-        containerId: 'universheet-demo-up',
+        container: 'universheet-demo-up',
         layout: 'auto',
     })
 );
@@ -1208,7 +1208,7 @@ univerSheetUp.installPlugin(new UniverComponentSheet());
 // 基础 sheets 插件
 univerSheetUp.installPlugin(
     new SpreadsheetPlugin({
-        containerId: 'universheet-demo-up',
+        container: 'universheet-demo-up',
         layout: 'auto',
     })
 );
@@ -1260,7 +1260,7 @@ const workbookConfig = {
 
 // 可选的spreadsheetConfig插件配置
 const spreadsheetConfig = {
-    containerId: 'universheet-demo-up',
+    container: 'universheet-demo-up',
     layout: 'auto',
 };
 

@@ -107,7 +107,7 @@ export interface Description {
     MoneyIcon: IconComponent;
     FxIcon: IconComponent;
     AddIcon: IconComponent;
-    reduceIcon: IconComponent;
+    ReduceIcon: IconComponent;
     DivideIcon: IconComponent;
     LockIcon: IconComponent;
     LocationIcon: IconComponent;
@@ -236,7 +236,7 @@ export enum DescriptionEnum {
     MoneyIcon,
     FxIcon,
     AddIcon,
-    reduceIcon,
+    ReduceIcon,
     DivideIcon,
     LockIcon,
     LocationIcon,

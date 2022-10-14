@@ -35,3 +35,5 @@ export interface IKeyValue {
 export type IKeyType<T> = {
     [key: string]: T;
 };
+
+export type AsyncFunction<T = void, R = void> = (value: T) => Promise<R>;

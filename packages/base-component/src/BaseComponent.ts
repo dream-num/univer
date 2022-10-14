@@ -2,7 +2,7 @@ import { BasePlugin } from '@univer/core';
 import { ISelectButtonType } from './Enum/ISelectButton';
 import { ISlotElementType } from './Enum/ISlotElement';
 import { ComponentClass, ForwardFn, RefObject } from './Framework';
-import { IMainProps, ISheetContainerConfig } from './IData';
+import { IMainProps } from './IData';
 import { BaseIconProps, Description } from './Components';
 
 // TODO Button const enum
@@ -57,9 +57,6 @@ export interface BaseCellRangeModalProps extends BaseComponentProps {
 }
 export interface BaseDemoProps extends BaseComponentProps {
     onClick?: (e: MouseEvent) => void;
-}
-export interface BaseSheetContainerProps extends BaseComponentProps {
-    config: ISheetContainerConfig;
 }
 export interface IToolBarItemProps extends BaseComponentProps {
     /**
@@ -180,9 +177,9 @@ export interface DemoComponent extends BaseComponent<BaseDemoProps> {
     render(): JSXComponent<BaseDemoProps>;
 }
 
-export interface SheetContainerComponent extends BaseComponent<BaseSheetContainerProps> {
-    render(): JSXComponent<BaseSheetContainerProps>;
-}
+// export interface SheetContainerComponent extends BaseComponent<BaseSheetContainerProps> {
+//     render(): JSXComponent<BaseSheetContainerProps>;
+// }
 export interface ToolBarComponent extends BaseComponent<BaseToolBarProps> {
     render(): JSXComponent<BaseToolBarProps>;
 }

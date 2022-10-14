@@ -82,7 +82,7 @@ export class CountBar extends Component<BaseCountBarProps, CountState> {
 
     render(props: BaseCountBarProps, state: CountState) {
         const { zoom, content } = state;
-        const ReduceIcon = this.getComponentRender().renderFunction('reduceIcon');
+        const ReduceIcon = this.getComponentRender().renderFunction('ReduceIcon');
         const RegularIcon = this.getComponentRender().renderFunction('RegularIcon');
         const Slider = this.getComponentRender().renderFunction('Slider');
         const Button = this.getComponentRender().renderFunction('Button');

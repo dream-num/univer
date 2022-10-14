@@ -71,7 +71,7 @@ export class CountBar extends Component<BaseCountBarProps, CountState> {
                     <Slider ref={this.ref} onChange={this.onChange} value={zoom} min={this.min} max={this.max} onClick={this.handleClick} />
                 </div>
                 <Button type="text" onClick={this.reduceZoom}>
-                    <Icon.Math.reduceIcon />
+                    <Icon.Math.ReduceIcon />
                 </Button>
                 <Button type="text">
                     <Icon.Sheet.PageIcon />

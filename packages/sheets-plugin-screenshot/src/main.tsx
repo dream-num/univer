@@ -6,7 +6,7 @@ import { UniverComponentSheet } from '@univer/style-universheet';
 import { ScreenshotPlugin } from './ScreenshotPlugin';
 
 const uiDefaultConfigUp = {
-    containerId: 'universheet-demo-up',
+    container: 'universheet-demo-up',
     layout: 'auto',
 };
 

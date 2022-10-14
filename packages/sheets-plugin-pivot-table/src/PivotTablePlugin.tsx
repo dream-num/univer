@@ -7,16 +7,16 @@ import { PivotTableButton } from './UI/PivotTableButton';
 import { IConfig } from './IData/IPivotTable';
 import { PIVOT_TABLE_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 
-type IPluginConfig = {};
+export interface IPivotTablePluginConfig {}
 
 export class PivotTablePlugin extends Plugin {
     spreadsheetPlugin: any;
 
-    constructor(config?: IPluginConfig) {
+    constructor(config?: IPivotTablePluginConfig) {
         super(PIVOT_TABLE_PLUGIN_NAME);
     }
 
-    static create(config?: IPluginConfig) {
+    static create(config?: IPivotTablePluginConfig) {
         return new PivotTablePlugin(config);
     }
 

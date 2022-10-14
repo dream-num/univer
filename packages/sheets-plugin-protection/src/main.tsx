@@ -8,7 +8,7 @@ import { FilterPlugin } from '@univer/sheets-plugin-filter';
 import { ProtectionPlugin } from './ProtectionPlugin';
 
 const uiDefaultConfigUp = {
-    containerId: 'universheet-demo',
+    container: 'universheet-demo',
     layout: 'auto',
 };
 

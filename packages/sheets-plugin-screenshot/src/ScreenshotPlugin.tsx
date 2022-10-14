@@ -6,14 +6,14 @@ import { IConfig } from './IData/IScreenshot';
 import { en, zh } from './Locale';
 import { ScreenshotButton } from './UI/ScreenshotButton';
 
-type IPluginConfig = {};
+export interface IScreenshotPluginConfig {}
 
 export class ScreenshotPlugin extends Plugin {
-    constructor(config?: IPluginConfig) {
+    constructor(config?: IScreenshotPluginConfig) {
         super(SCREENSHOT_PLUGIN_NAME);
     }
 
-    static create(config?: IPluginConfig) {
+    static create(config?: IScreenshotPluginConfig) {
         return new ScreenshotPlugin(config);
     }
 

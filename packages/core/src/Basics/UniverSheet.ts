@@ -12,7 +12,7 @@ import { ColorBuilder } from '../Sheets/Domain/ColorBuilder';
  * Externally provided UniverSheet root instance
  */
 export class UniverSheet {
-    static newInstance(univerSheetData = {}): UniverSheet {
+    static newInstance(univerSheetData: Partial<IWorkbookConfig> = {}): UniverSheet {
         Logger.capsule(VersionEnv, VersionCode, 'powered by :: universheet :: ');
         const attribute = new IOCAttribute();
         attribute.setValue(univerSheetData);

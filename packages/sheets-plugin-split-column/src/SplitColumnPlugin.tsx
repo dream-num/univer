@@ -7,14 +7,14 @@ import { zh, en } from './Locale';
 import { IConfig } from './IData/ISplitColumn';
 import { SPLIT_COLUMN_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 
-type IPluginConfig = {};
+export interface ISplitColumnPluginConfig {}
 
 export class SplitColumnPlugin extends Plugin {
-    constructor(config?: IPluginConfig) {
+    constructor(config?: ISplitColumnPluginConfig) {
         super(SPLIT_COLUMN_PLUGIN_NAME);
     }
 
-    static create(config?: IPluginConfig) {
+    static create(config?: ISplitColumnPluginConfig) {
         return new SplitColumnPlugin(config);
     }
 

@@ -87,12 +87,27 @@ export type IRangeArrayData = {
     column: IColumnStartEndData;
 };
 
+export type IRangeCellData = {
+    /**
+     * row
+     */
+    row: number;
+    /**
+     * column
+     */
+    column: number;
+};
+
 /**
  * range types
  *
  * Allow users to provide one of three formats, we need to convert to IRangeData to store
  */
-export type IRangeType = IRangeData | IRangeStringData | IRangeArrayData;
+export type IRangeType =
+    | IRangeData
+    | IRangeStringData
+    | IRangeArrayData
+    | IRangeCellData;
 
 // export interface IInfoObjData extends IRangeArrayData {
 //     sheetId?: Nullable<string>;

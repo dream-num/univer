@@ -2,18 +2,20 @@ import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
 import { Context, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
 import { SpreadsheetPlugin } from '@univer/base-sheets';
 import { FROZEN_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
-import { IConfig, IPluginConfig } from './IData';
+import { IConfig } from './IData';
 import { en, zh } from './Model/Locale';
 import { FreezeButton } from './View/UI/FreezeButton';
+
+export interface IFreezePluginConfig {}
 
 export class FreezePlugin extends Plugin {
     spreadsheetPlugin: any;
 
-    constructor(config?: IPluginConfig) {
+    constructor(config?: IFreezePluginConfig) {
         super(FROZEN_PLUGIN_NAME);
     }
 
-    static create(config?: IPluginConfig) {
+    static create(config?: IFreezePluginConfig) {
         return new FreezePlugin(config);
     }
 

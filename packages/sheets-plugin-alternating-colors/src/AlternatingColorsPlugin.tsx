@@ -11,21 +11,21 @@ import { en, zh } from './Locale';
 import { AlternatingColorsButton } from './UI/AlternatingColorsButton';
 import { AlternatingColorsSide } from './UI/AlternatingColorsSide/AlternatingColorsSide';
 
-export interface IPluginConfig {
+export interface IAlternatingColorsPluginConfig {
     value: IBandedRange[];
 }
 
 export class AlternatingColorsPlugin extends Plugin {
     spreadsheetPlugin: Nullable<SpreadsheetPlugin>;
 
-    protected _config: IPluginConfig;
+    protected _config: IAlternatingColorsPluginConfig;
 
-    constructor(config?: IPluginConfig) {
+    constructor(config?: IAlternatingColorsPluginConfig) {
         super(ALTERNATING_COLORS_PLUGIN_NAME);
         this._config = config || { value: [] };
     }
 
-    static create(config?: IPluginConfig) {
+    static create(config?: IAlternatingColorsPluginConfig) {
         return new AlternatingColorsPlugin(config);
     }
 

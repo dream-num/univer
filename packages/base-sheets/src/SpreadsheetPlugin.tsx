@@ -1,6 +1,6 @@
 import { getRefElement, IMainProps, isElement, ISlotProps, IToolBarItemProps, RefObject, render } from '@univer/base-component';
 import { Engine, RenderEngine } from '@univer/base-render';
-import { AsyncFunction, Attribute, Context, IOCAttribute, IOCContainer, IWorkbookConfig, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { AsyncFunction, Attribute, Context, IOCAttribute, IOCContainer, IRangeCellData, IRangeData, IWorkbookConfig, Plugin, PLUGIN_NAMES, Tools } from '@univer/core';
 import { FormulaPlugin } from '@univer/sheets-plugin-formula';
 
 import { install, SpreadsheetPluginObserve, uninstall } from './Basics/Observer';
@@ -8,7 +8,7 @@ import { RightMenuProps } from './Model/RightMenuModel';
 import { en, zh } from './Locale';
 import { CANVAS_VIEW_KEY } from './View/Render/BaseView';
 import { CanvasView } from './View/Render/CanvasView';
-import { BaseSheetContainerConfig, ILayout, ISpreadsheetPluginConfigBase, SheetContainer } from './View/UI/SheetContainer';
+import { BaseSheetContainerConfig, ISpreadsheetPluginConfigBase, SheetContainer } from './View/UI/SheetContainer';
 import {
     RightMenuController,
     ToolBarController,
@@ -20,10 +20,40 @@ import {
     SheetContainerController,
 } from './Controller';
 
-export interface ISpreadsheetPluginConfig extends ISpreadsheetPluginConfigBase {
-    container?: HTMLElement | string;
-    // selection?: ISelection[]
+export interface ISelectionConfig {
+    selection: IRangeData;
+    cell?: IRangeCellData;
 }
+
+export interface ISelectionsConfig {
+    [worksheetId: string]: ISelectionConfig[];
+}
+
+export interface ISpreadsheetPluginConfig extends ISpreadsheetPluginConfigBase {
+    container: HTMLElement | string;
+    selections: ISelectionsConfig;
+}
+
+const DEFAULT_SPREADSHEET_PLUGIN_DATA: ISpreadsheetPluginConfig = {
+    container: 'universheet',
+    layout: 'auto',
+    selections: {
+        'sheet-01': [
+            {
+                selection: {
+                    startRow: 13,
+                    endRow: 14,
+                    startColumn: 1,
+                    endColumn: 2,
+                },
+                cell: {
+                    row: 13,
+                    column: 1,
+                },
+            },
+        ],
+    },
+};
 
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
@@ -32,7 +62,7 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
     @Attribute()
     private pros: IOCAttribute;
 
-    layout: string | ILayout;
+    private _config: ISpreadsheetPluginConfig;
 
     context: Context;
 
@@ -51,8 +81,6 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
     private _showSiderByNameFunc: Function;
 
     private _showMainByNameFunc: Function;
-
-    private _sheetContainer: HTMLElement;
 
     private _canvasEngine: Engine;
 
@@ -76,26 +104,10 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
 
     private _sheetContainerController: SheetContainerController;
 
-    constructor(props: ISpreadsheetPluginConfig = {}) {
+    constructor(props: Partial<ISpreadsheetPluginConfig> = {}) {
         super(PLUGIN_NAMES.SPREADSHEET);
 
-        const { container = 'universheet', layout = 'auto' } = props;
-        this.layout = layout;
-
-        if (typeof container === 'string') {
-            const containerDOM = document.getElementById(container);
-            if (containerDOM == null) {
-                this._sheetContainer = document.createElement('div');
-                this._sheetContainer.id = container;
-            } else {
-                this._sheetContainer = containerDOM;
-            }
-        } else if (isElement(container)) {
-            this._sheetContainer = container;
-        } else {
-            this._sheetContainer = document.createElement('div');
-            this._sheetContainer.id = 'universheet';
-        }
+        this._config = Tools.commonExtend(DEFAULT_SPREADSHEET_PLUGIN_DATA, props);
     }
 
     register(engineInstance: Engine) {
@@ -117,7 +129,6 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
             this._initializeRender(context);
         });
 
-        const locale = context.getLocale().options.currentLocale;
         /**
          * load more Locale object
          */
@@ -128,10 +139,12 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
 
         const configure: IWorkbookConfig = this.pros.getValue();
 
+        const sheetContainer = this._initContainer(this._config.container);
+
         const config: BaseSheetContainerConfig = {
             skin: configure.skin || 'default',
-            layout: this.layout,
-            container: this._sheetContainer,
+            layout: this._config.layout,
+            container: sheetContainer,
             context,
             getSplitLeftRef: (ref) => {
                 this._splitLeftRef = ref;
@@ -167,7 +180,7 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
         this._sheetContainerController = new SheetContainerController(this);
 
         // render sheet container
-        render(<SheetContainer config={config} />, this._sheetContainer!);
+        render(<SheetContainer config={config} />, sheetContainer);
 
         const formulaEngine = this.getPluginByName<FormulaPlugin>('formula')?.getFormulaEngine();
         // =(sum(max(B1:C10,10)*5-100,((1+1)*2+5)/2,10)+count(B1:C10,10*5-100))*5-100
@@ -177,6 +190,36 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
         // =(-(1+2)--@A1:B2 + 5)/2 + -sum(indirect("A5"):B10# + B6# + A1:offset("C5", 1, 1)  ,  100) + {1,2,3;4,5,6;7,8,10} + lambda(x,y,z, x*y*z)(sum(1,(1+2)*3),2,lambda(x,y, @offset(A1:B0,x#*y#))(1,2):C20) & "美国人才" + sum((1+2%)*30%, 1+2)%
         // formulaEngine?.calculate(`=lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)`);
     }
+
+    /**
+     * Convert id to DOM
+     * @param container
+     * @returns
+     */
+    private _initContainer(container: HTMLElement | string) {
+        let sheetContainer = null;
+        if (typeof container === 'string') {
+            const containerDOM = document.getElementById(container);
+            if (containerDOM == null) {
+                sheetContainer = document.createElement('div');
+                sheetContainer.id = container;
+            } else {
+                sheetContainer = containerDOM;
+            }
+        } else if (isElement(container)) {
+            sheetContainer = container;
+        } else {
+            sheetContainer = document.createElement('div');
+            sheetContainer.id = 'universheet';
+        }
+
+        return sheetContainer;
+    }
+
+    /**
+     * Initialize all selections
+     */
+    private _initSelection() {}
 
     onMounted(ctx: Context): void {
         install(this);
@@ -198,6 +241,10 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
         // }
 
         // this._initializeRender(ctx);
+    }
+
+    get config() {
+        return this._config;
     }
 
     private _initializeRender(context: Context) {

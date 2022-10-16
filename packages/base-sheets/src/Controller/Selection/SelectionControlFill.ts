@@ -20,6 +20,12 @@ export class SelectionControlFill {
         });
     }
 
+    remove() {
+        const { fillControl } = this._control;
+        fillControl.onPointerEnterObserver.clear();
+        fillControl.onPointerLeaveObserver.clear();
+    }
+
     static create(control: SelectionControl) {
         return new SelectionControlFill(control);
     }

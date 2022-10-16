@@ -133,4 +133,8 @@ export class SelectionModel implements ISelection {
             this._currentCell = currentCell;
         }
     }
+
+    clearCurrentCell() {
+        this._currentCell = null;
+    }
 }

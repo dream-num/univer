@@ -9,7 +9,7 @@ export class SheetContainerController {
 
     private _sheetContainerContent: HTMLElement;
 
-    private __debounceTimeout: number;
+    // private __debounceTimeout: number;
 
     constructor(plugin: SpreadsheetPlugin) {
         this._plugin = plugin;
@@ -20,10 +20,12 @@ export class SheetContainerController {
     protected _initialize() {
         // Monitor all command changes and automatically trigger the refresh of the canvas
         CommandManager.getActionObservers().add((actionEvent) => {
-            window.clearTimeout(this.__debounceTimeout);
-            this.__debounceTimeout = window.setTimeout(() => {
-                this._plugin.getMainComponent().makeDirty(true);
-            }, 10);
+            //In order not to affect the refresh experience and remove the delay, multiple refreshes are acceptable if there is no performance problem
+
+            // window.clearTimeout(this.__debounceTimeout);
+            // this.__debounceTimeout = window.setTimeout(() => {
+            this._plugin.getMainComponent().makeDirty(true);
+            // }, 10);
         });
     }
 }

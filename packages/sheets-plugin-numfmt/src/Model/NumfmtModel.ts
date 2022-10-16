@@ -2,38 +2,38 @@ import { Nullable, ObjectMatrix } from '@univer/core';
 import { numfmt } from '@univer/base-numfmt-engine';
 
 export class NumfmtValue {
-    numfmt: string;
+    _numfmt: string;
 
-    color: string;
+    _color: string;
 
-    value: string;
+    _value: string;
 
-    status: boolean;
+    _status: boolean;
 
     constructor(numfmt: string) {
-        this.numfmt = numfmt;
-        this.value = String();
-        this.color = String();
-        this.status = true;
-    }
-
-    getValue() {
-        this.calculate();
-        return this.value;
-    }
-
-    getColor() {
-        this.calculate();
-        return this.color;
+        this._numfmt = numfmt;
+        this._status = true;
+        this._value = String();
+        this._color = String();
     }
 
     calculate(): void {
-        if (this.status) {
-            const formatter = numfmt(this.numfmt);
-            this.value = formatter(this.value);
-            this.color = formatter.color(this.value);
-            this.status = false;
+        if (this._status) {
+            const formatter = numfmt(this._numfmt);
+            this._value = formatter(this._value);
+            this._color = formatter.color(this._value);
+            this._status = false;
         }
+    }
+
+    getValue(): string {
+        this.calculate();
+        return this._value;
+    }
+
+    getColor(): string {
+        this.calculate();
+        return this._color;
     }
 }
 

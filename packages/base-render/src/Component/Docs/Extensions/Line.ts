@@ -1,12 +1,12 @@
 import { BooleanNumber, getColorStyle, TextDecoration } from '@univer/core';
-import { IScale } from '../../../Base/Interfaces';
+import { IScale } from '../../../Basics/Interfaces';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../Extension';
 import { docsExtension } from '../DocsExtension';
-import { IDocumentSkeletonSpan } from '../../../Base/IDocumentSkeletonCached';
-import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING } from '../../../Base/Const';
-import { Vector2 } from '../../../Base/Vector2';
-import { calculateRectRotate } from '../../../Base/Draw';
-import { fixLineWidthByScale, getScale } from '../../../Base/Tools';
+import { IDocumentSkeletonSpan } from '../../../Basics/IDocumentSkeletonCached';
+import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING } from '../../../Basics/Const';
+import { Vector2 } from '../../../Basics/Vector2';
+import { calculateRectRotate } from '../../../Basics/Draw';
+import { fixLineWidthByScale, getScale } from '../../../Basics/Tools';
 
 const UNIQUE_KEY = 'DefaultDocsLineExtension';
 

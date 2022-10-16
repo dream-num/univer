@@ -9,16 +9,14 @@ import { round } from './core/round';
 import { dateFromSerial, dateToSerial } from './core/serialDate';
 
 export interface FormatterType {
-    (value: number, opts?: OptionsData): void;
+    (value: number | string, opts?: OptionsData): string;
     color(value, ops?): string;
     isDate(): boolean;
     isText(): boolean;
     isPercent(): boolean;
 }
 
-const _cache: {
-    [key: string]: PatternType;
-} = {};
+const _cache: { [key: string]: PatternType } = {};
 
 function getFormatter(parseData: PatternType, initOpts: OptionsData = {}): FormatterType {
     const { pattern, partitions, locale } = parseData;

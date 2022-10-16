@@ -50,8 +50,8 @@ export default defineConfig({
     resolve: {
         // alias: [
         //     {
-        //         find: '@Base',
-        //         replacement: path.resolve('..', '/src/Base'),
+        //         find: '@Basics',
+        //         replacement: path.resolve('..', '/src/Basics'),
         //     },
         // ],
         // alias: [

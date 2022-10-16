@@ -1,9 +1,9 @@
 import { searchArray } from '@univer/core';
-import { IBoundRect } from '../../Base/Vector2';
+import { IBoundRect } from '../../Basics/Vector2';
 import { RenderComponent } from '../Component';
 import { SpreadsheetSkeleton } from './SheetSkeleton';
 import { SHEET_EXTENSION_TYPE } from './Extensions/SheetExtension';
-import { RENDER_CLASS_TYPE } from '../../Base/Const';
+import { RENDER_CLASS_TYPE } from '../../Basics/Const';
 
 export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE> {
     // protected _cacheCanvas = new Canvas();

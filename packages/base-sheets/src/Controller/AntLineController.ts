@@ -2,7 +2,7 @@ import { Workbook } from '@univer/core';
 import { Rect, Scene } from '@univer/base-render';
 import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
 import { SheetView } from '../View/Render/Views';
-import { AntLine, AntLineModel, IAntLineRange } from '../Model/Domain/AntLineModel';
+import { AntLine, AntLineModel, IAntLineRange } from '../Model/AntLineModel';
 
 enum ANT_LINE_MANAGER_KEY {
     AntLine = '__AntLineShape__',

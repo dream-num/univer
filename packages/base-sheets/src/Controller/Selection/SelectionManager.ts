@@ -1,10 +1,14 @@
 import { IMouseEvent, IPointerEvent, Rect, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle } from '@univer/base-render';
-import { Nullable, Observer, Plugin, Worksheet, ISelection, makeCellToSelection, IRangeData, RangeList, Range } from '@univer/core';
-import { SelectionModel } from '../../Model/Domain/SelectionModel';
+import { Nullable, Observer, Worksheet, ISelection, makeCellToSelection, IRangeData, RangeList, Range, IRangeCellData } from '@univer/core';
+import { SelectionModel } from '../../Model/SelectionModel';
+import { ISelectionsConfig, SpreadsheetPlugin } from '../../SpreadsheetPlugin';
 import { SheetView } from '../../View/Render/Views/SheetView';
 import { ScrollTimer } from '../ScrollTimer';
 import { SelectionControl, SELECTION_TYPE } from './SelectionController';
 
+/**
+ * TODO 注册selection拦截，可能在有公式ArrayObject时，fx公式栏显示不同
+ */
 export class SelectionManager {
     private _mainComponent: Spreadsheet;
 
@@ -20,7 +24,7 @@ export class SelectionManager {
 
     private _selectionControls = new Map<string, SelectionControl[]>(); // sheetID:Controls
 
-    private _plugin: Plugin;
+    private _plugin: SpreadsheetPlugin;
 
     private _startSelectionRange: ISelection;
 
@@ -78,12 +82,12 @@ export class SelectionManager {
     }
 
     /**
-     * TODO Not necessarily curCellRange
+     * add a selection
      * @param selectionRange
      * @param curCellRange
      * @returns
      */
-    addControlToCurrentByRangeData(selectionRange: IRangeData, curCellRange: IRangeData) {
+    addControlToCurrentByRangeData(selectionRange: IRangeData, curCellRange: Nullable<IRangeCellData>) {
         const currentControls = this.getCurrentControls();
         if (!currentControls) {
             return;
@@ -91,7 +95,11 @@ export class SelectionManager {
         const main = this._mainComponent;
 
         const control = SelectionControl.create(this, currentControls.length);
-        const cellInfo = main.getCellByIndex(curCellRange.startRow, curCellRange.startColumn);
+
+        let cellInfo = null;
+        if (curCellRange) {
+            cellInfo = main.getCellByIndex(curCellRange.row, curCellRange.column);
+        }
 
         const { startRow: finalStartRow, startColumn: finalStartColumn, endRow: finalEndRow, endColumn: finalEndColumn } = selectionRange;
         const startCell = main.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn);
@@ -116,7 +124,7 @@ export class SelectionManager {
     recreateControlsByRangeData() {}
 
     constructor(private _sheetView: SheetView) {
-        this._plugin = this._sheetView.getPlugin();
+        this._plugin = this._sheetView.getPlugin() as SpreadsheetPlugin;
         this._initialize();
     }
 
@@ -139,6 +147,8 @@ export class SelectionManager {
         if (worksheetId) {
             this._selectionControls.set(worksheetId, []);
         }
+
+        this._initControls(this._plugin.config.selections);
     }
 
     private _mainEventInitial() {
@@ -173,21 +183,26 @@ export class SelectionManager {
 
             let curControls = this.getCurrentControls();
 
-            console.log('selection', curControls, startSelectionRange);
+            // console.log('selection', curControls, startSelectionRange);
 
             if (!curControls) {
                 return false;
             }
 
             for (let control of curControls) {
+                // right click
                 if (evt.button === 2 && control.model.isInclude(startSelectionRange, SELECTION_TYPE.NORMAL)) {
                     selectionControl = control;
                     return;
                 }
+                // Click to an existing selection
                 if (control.model.isEqual(startSelectionRange, SELECTION_TYPE.NORMAL)) {
                     selectionControl = control;
                     break;
                 }
+
+                // There can only be one highlighted cell, so clear the highlighted cell of the existing selection
+                control.clearHighlight();
             }
 
             if (!selectionControl) {
@@ -284,7 +299,7 @@ export class SelectionManager {
         selectionControl && selectionControl.update(newSelectionRange);
 
         if (oldStartColumn !== finalStartColumn || oldStartRow !== finalStartRow || oldEndColumn !== finalEndColumn || oldEndRow !== finalEndRow) {
-            this._plugin.getObserver('onChangeSelectionObserver')?.notifyObservers(selectionControl);
+            selectionControl && this._plugin.getObserver('onChangeSelectionObserver')?.notifyObservers(selectionControl);
         }
     }
 
@@ -306,6 +321,51 @@ export class SelectionManager {
         const leftTop = this._leftTopComponent;
         leftTop.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
             console.log('leftTop_moveObserver', evt);
+        });
+    }
+
+    /**
+     * Initialize selection based on user configuration
+     * @param selections
+     */
+    private _initControls(selections: ISelectionsConfig) {
+        Object.keys(selections).forEach((worksheetId) => {
+            const selectionsList = selections[worksheetId];
+            const currentControls: SelectionControl[] = [];
+
+            selectionsList.forEach((selectionConfig) => {
+                const selectionRange = selectionConfig.selection;
+                const curCellRange = selectionConfig.cell;
+                const main = this._mainComponent;
+
+                const control = SelectionControl.create(this, currentControls.length);
+
+                let cellInfo = null;
+                if (curCellRange) {
+                    cellInfo = main.getCellByIndex(curCellRange.row, curCellRange.column);
+                }
+
+                const { startRow: finalStartRow, startColumn: finalStartColumn, endRow: finalEndRow, endColumn: finalEndColumn } = selectionRange;
+                const startCell = main.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn);
+                const endCell = main.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn);
+
+                control.update(
+                    {
+                        startColumn: finalStartColumn,
+                        startRow: finalStartRow,
+                        endColumn: finalEndColumn,
+                        endRow: finalEndRow,
+                        startY: startCell?.startY || 0,
+                        endY: endCell?.endY || 0,
+                        startX: startCell?.startX || 0,
+                        endX: endCell?.endX || 0,
+                    },
+                    cellInfo
+                );
+                currentControls.push(control);
+            });
+
+            this._selectionControls.set(worksheetId, currentControls);
         });
     }
 
@@ -333,21 +393,38 @@ export class SelectionManager {
 
     /**
      * Returns the selected range in the active sheet, or null if there is no active range. If multiple ranges are selected this method returns only the last selected range.
-     * TODO: 默认最后一个选区为当前激活选区，或者当前激活单元格所在选区为激活选区
      * @returns
      */
     getActiveRange(): Nullable<Range> {
         const controls = this.getCurrentControls();
-        const model = controls && controls[controls.length - 1].model;
-        return (
-            model &&
-            this._worksheet?.getRange({
-                startRow: model.startRow,
-                startColumn: model.startColumn,
-                endRow: model.endRow,
-                endColumn: model.endColumn,
-            })
-        );
+        if (controls && controls.length > 0) {
+            const control = controls?.find((control: SelectionControl) => {
+                if (control.getCurrentCellInfo()) {
+                    return control;
+                }
+                return null;
+            });
+            if (control) {
+                const model = control.model;
+                const rangeData = {
+                    startRow: model.startRow,
+                    startColumn: model.startColumn,
+                    endRow: model.endRow,
+                    endColumn: model.endColumn,
+                };
+                return this._worksheet?.getRange(rangeData);
+            }
+        }
+        // const model = controls && controls[controls.length - 1].model;
+        // return (
+        //     model &&
+        //     this._worksheet?.getRange({
+        //         startRow: model.startRow,
+        //         startColumn: model.startColumn,
+        //         endRow: model.endRow,
+        //         endColumn: model.endColumn,
+        //     })
+        // );
 
         // if (controls && controls.length > 0) {
         //     const selections = controls?.map((control: SelectionControl) => {
@@ -369,6 +446,16 @@ export class SelectionManager {
      */
     getActiveSelection(): Nullable<SelectionControl> {
         const controls = this.getCurrentControls();
-        return controls && controls[controls.length - 1];
+        if (controls && controls.length > 0) {
+            const control = controls?.find((control: SelectionControl) => {
+                if (control.getCurrentCellInfo()) {
+                    return control;
+                }
+                return null;
+            });
+            if (control) {
+                return control;
+            }
+        }
     }
 }

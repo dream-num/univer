@@ -1,16 +1,16 @@
 import { Observable } from '@univer/core';
-import { DeviceType, IEvent, IKeyboardEvent, IPointerEvent, PointerInput } from './Base/IEvents';
+import { DeviceType, IEvent, IKeyboardEvent, IPointerEvent, PointerInput } from './Basics/IEvents';
 
-import { getPointerPrefix, IsSafari, requestNewFrame } from './Base/Tools';
+import { getPointerPrefix, IsSafari, requestNewFrame } from './Basics/Tools';
 
-import { ITransformChangeState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './Base/Interfaces';
+import { ITransformChangeState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './Basics/Interfaces';
 
-import { PerformanceMonitor } from './Base/PerformanceMonitor';
+import { PerformanceMonitor } from './Basics/PerformanceMonitor';
 
 import { Canvas } from './Canvas';
 
 import { Scene } from './Scene';
-import { RENDER_CLASS_TYPE } from './Base/Const';
+import { RENDER_CLASS_TYPE } from './Basics/Const';
 
 export class Engine {
     private _container: HTMLElement;

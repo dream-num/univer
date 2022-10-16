@@ -13,10 +13,10 @@ import {
     TEXT_WRAP_CHILDREN,
     VERTICAL_ALIGN_CHILDREN,
 } from '../View/UI/ToolBar/Const';
-import { ToolBarModel } from '../Model/Domain/ToolBarModel';
+import { ToolBarModel } from '../Model/ToolBarModel';
 import { ToolBar } from '../View/UI/ToolBar/ToolBar';
 import { SelectionControl } from './Selection/SelectionController';
-import { SelectionModel } from '../Model/Domain/SelectionModel';
+import { SelectionModel } from '../Model/SelectionModel';
 
 /**
  *
@@ -40,9 +40,9 @@ export class ToolBarController {
         this.Render = component.getComponentRender();
 
         const config =
-            this._plugin.layout === 'auto'
+            this._plugin.config.layout === 'auto'
                 ? Tools.deepClone(defaultLayout.toolBarConfig)
-                : Tools.deepMerge(defaultLayout.toolBarConfig, (this._plugin.layout as ILayout).toolBarConfig);
+                : Tools.deepMerge(defaultLayout.toolBarConfig, (this._plugin.config.layout as ILayout).toolBarConfig);
 
         const toolList: IToolBarItemProps[] = [
             {

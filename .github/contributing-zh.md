@@ -333,7 +333,7 @@ pnpm install
 
 ### 插件目录
 
-一个标准的插件目录结构如下所示
+一个标准的插件目录结构 `src` 目录如下所示
 
 ```sh
 │  index.ts # 插件出口
@@ -345,16 +345,15 @@ pnpm install
 │      index.ts # 出口
 │      SpreadsheetController.ts # 具体的数据更新类（实际名称会根据插件名称替换）
 │
-├─Basic # 基础工具函数、常量、接口
+├─Basics # 基础工具函数、常量、接口（可选）
 │  ├─Const # 常量
 │  │      index.ts # 出口
 │  │
 │  ├─Enum # 枚举
 │  │      index.ts # 出口
 │  │
-│  │
 │  └─Shared # 公共方法
-│          index.ts # 出口
+│         index.ts # 出口
 │
 ├─Locale # 国际化
 │      en.ts # 英文国际化翻译文件
@@ -362,8 +361,15 @@ pnpm install
 │      zh.ts # 中文国际化翻译文件
 │
 ├─Model # 数据 CRDT
-│
-├─Apply # 通用的一些公共的外部服务连接，比如权限、其他插件的能力对接
+│  │
+│  ├─Action # 由Command触发（可选）
+│  │      index.ts # 出口
+│  │
+│  ├─Apply # 修改数据（可选）
+│  │      index.ts # 出口
+│  │
+│  └─SpreadsheetModel # 各个Controller对应的数据模型
+│         index.ts # 出口
 │
 ├─Types # 声明文件
 │      index.d.ts # 具体的声明文件
@@ -568,9 +574,14 @@ import styles from './index.module.less';
 const s = `${style.AlternatingColorsSideSetting}`;
 ```
 
+### 测试数据
+
+1. 如果是单元测试需要使用的数据，直接放在 `src` 同级的 `test` 目录下
+2. 如果是插件的初始化的入参数据，可以直接写在 `main.tsx` 中，或者自己建立一个新的文件夹，如 `src/Data` 文件夹，文件名推荐使用 `DEFAULT_[NAME]_DATA` 的格式，如 `DEFAULT_WORKBOOK_DATA`
+
 ### 不使用 preact 构造插件 UI
 
-#### 处理国际化
+### 处理国际化
 
 ## 测试
 
@@ -1278,10 +1289,3 @@ npm run build:customd
 ```
 
 将每个插件单独打包出模块，内部自动使用`import()`动态载入插件，提升首屏加载速度，用法上和上面几乎一致，区别是需要将打包后所有文件复制到工程目录即可，其他配置一样。
-
-## 已知问题
-
-1. 遇上科学计数法 会卡死
-   输入 =1.2974966045650646E8
-   有时候输入后系统崩溃
-   有时候是输入后在操作其他单元格系统崩溃

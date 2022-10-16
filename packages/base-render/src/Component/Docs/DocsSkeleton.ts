@@ -19,12 +19,12 @@ import { createSkeletonSection } from './Common/Section';
 
 import { dealWithBlocks } from './Block/Block';
 
-import { IDocumentSkeletonCached, IDocumentSkeletonColumn, IDocumentSkeletonPage, ISkeletonResourceReference } from '../../Base/IDocumentSkeletonCached';
-import { IDocsConfig, ISectionBreakConfig } from '../../Base/Interfaces';
+import { IDocumentSkeletonCached, IDocumentSkeletonColumn, IDocumentSkeletonPage, ISkeletonResourceReference } from '../../Basics/IDocumentSkeletonCached';
+import { IDocsConfig, ISectionBreakConfig } from '../../Basics/Interfaces';
 import { Skeleton } from '../Skeleton';
-import { IBoundRect } from '../../Base/Vector2';
-import { getRotateOffsetAndFarthestHypotenuse, getRotateOrientation } from '../../Base/Draw';
-import { ORIENTATION_TYPE } from '../../Base/Const';
+import { IBoundRect } from '../../Basics/Vector2';
+import { getRotateOffsetAndFarthestHypotenuse, getRotateOrientation } from '../../Basics/Draw';
+import { ORIENTATION_TYPE } from '../../Basics/Const';
 
 interface IDocumentContentMap {
     blockElements: IBlockElement[];

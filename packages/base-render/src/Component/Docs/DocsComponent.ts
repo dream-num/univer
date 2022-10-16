@@ -1,12 +1,12 @@
-import { IBoundRect } from '../../Base/Vector2';
-import { ITransformChangeState } from '../../Base/Interfaces';
+import { IBoundRect } from '../../Basics/Vector2';
+import { ITransformChangeState } from '../../Basics/Interfaces';
 import { Canvas } from '../../Canvas';
 import { RenderComponent } from '../Component';
 import { DocumentSkeleton } from './DocsSkeleton';
 import { Scene } from '../../Scene';
 import { DOCS_EXTENSION_TYPE } from './DocsExtension';
-import { IDocumentSkeletonLine, IDocumentSkeletonSpan } from '../../Base/IDocumentSkeletonCached';
-import { RENDER_CLASS_TYPE } from '../../Base/Const';
+import { IDocumentSkeletonLine, IDocumentSkeletonSpan } from '../../Basics/IDocumentSkeletonCached';
+import { RENDER_CLASS_TYPE } from '../../Basics/Const';
 
 export class docsComponent extends RenderComponent<IDocumentSkeletonSpan | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE> {
     protected _cacheCanvas: Canvas;

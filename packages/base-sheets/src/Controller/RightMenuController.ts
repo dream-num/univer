@@ -1,11 +1,11 @@
 import { IMouseEvent, IPointerEvent } from '@univer/base-render';
 import { Locale, PLUGIN_NAMES, Worksheet } from '@univer/core';
-import { RightMenuModel, RightMenuProps } from '../Model/Domain/RightMenuModel';
+import { RightMenuModel, RightMenuProps } from '../Model/RightMenuModel';
 import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
 import Style from '../View/UI/RightMenu/index.module.less';
 import { RightMenu } from '../View/UI/RightMenu';
 import { SelectionControl } from './Selection/SelectionController';
-import { SelectionModel } from '../Model/Domain/SelectionModel';
+import { SelectionModel } from '../Model/SelectionModel';
 
 type MenuFlag = 'row' | 'column';
 

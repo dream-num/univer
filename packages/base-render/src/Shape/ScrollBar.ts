@@ -1,9 +1,9 @@
 import { EventState } from '@univer/core';
-import { Vector2 } from '../Base/Vector2';
-import { IMouseEvent, IPointerEvent } from '../Base/IEvents';
-import { COLORS, EVENT_TYPE, RENDER_CLASS_TYPE } from '../Base/Const';
-import { getColor } from '../Base/Tools';
-import { Transform } from '../Base/Transform';
+import { Vector2 } from '../Basics/Vector2';
+import { IMouseEvent, IPointerEvent } from '../Basics/IEvents';
+import { COLORS, EVENT_TYPE, RENDER_CLASS_TYPE } from '../Basics/Const';
+import { getColor } from '../Basics/Tools';
+import { Transform } from '../Basics/Transform';
 import { Scene } from '../Scene';
 import { Viewport } from '../Viewport';
 import { Rect } from './Rect';

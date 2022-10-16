@@ -82,7 +82,7 @@ export interface ILayout {
 }
 
 export interface ISpreadsheetPluginConfigBase {
-    layout?: string | ILayout;
+    layout: string | ILayout;
 }
 
 export interface BaseSheetContainerConfig extends BaseComponentProps, ISpreadsheetPluginConfigBase {

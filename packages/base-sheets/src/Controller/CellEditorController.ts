@@ -10,6 +10,16 @@ const CELL_EDIT_HIDDEN_TOP = -10000;
 
 /**
  * Cell Editor
+ *
+ * TODO:
+ *
+ * 1. 注册机制，type='prefix | suffix | regex'，
+ *   type='prefix' pattern='='，注册为公式
+ *   type='prefix' pattern='$' 注册为货币
+ *   type='suffix' pattern='%' 注册为百分比
+ *   type='regex'  pattern='/*-*-/g' 注册为日期
+ *
+ * 2. p存储的富文本字符数少于50的情况下，存一份到v，便于vlookup公式计算
  */
 export class CellEditorController {
     private _plugin: SpreadsheetPlugin;
@@ -84,6 +94,8 @@ export class CellEditorController {
             .getObserver('onSheetRenderDidMountObservable', 'core')
             ?.add((e) => {
                 const main = this._plugin.getMainComponent();
+
+                // TODO 应该接受selection obs，便于外部注册拦截
                 main.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
                     this.enterEditMode();
                 });

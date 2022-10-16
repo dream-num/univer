@@ -1,7 +1,7 @@
 import { BaseComponentRender, BaseComponentSheet, BaseSheetBarProps, BaseUlProps, Component, createRef, RefObject } from '@univer/base-component';
 import { Nullable, Observer, PLUGIN_NAMES, Workbook } from '@univer/core';
 import { Ul } from '@univer/style-universheet';
-import { SlideTabBar } from '../../../Model/Base/SlideTabBar/SlideTabBar';
+import { SlideTabBar } from '../../../Basics/SlideTabBar/SlideTabBar';
 import styles from './index.module.less';
 
 type SheetState = {

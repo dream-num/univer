@@ -1,6 +1,6 @@
 import { Context } from '@univer/core';
 import { en, zh } from '../Locale';
-import { IFontLocale } from '../Base/Interfaces';
+import { IFontLocale } from '../Basics/Interfaces';
 
 export class Skeleton {
     private _context: Context;

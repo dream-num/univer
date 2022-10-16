@@ -1,10 +1,10 @@
 import { HorizontalAlign, IColorStyle, ObjectMatrix, WrapStrategy } from '@univer/core';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';
-import { IScale } from '../../../Base/Interfaces';
+import { IScale } from '../../../Basics/Interfaces';
 import { SpreadsheetExtensionRegistry } from '../../Extension';
 import { Spreadsheet } from '../Spreadsheet';
-import { fixLineWidthByScale } from '../../../Base/Tools';
+import { fixLineWidthByScale } from '../../../Basics/Tools';
 import { fontCacheItem } from '../Interfaces';
 
 const UNIQUE_KEY = 'DefaultFontExtension';

@@ -1,5 +1,5 @@
 import { ICellInfo, ISelection, Nullable, makeCellToSelection } from '@univer/core';
-import { SELECTION_TYPE } from '../../Controller/Selection/SelectionController';
+import { SELECTION_TYPE } from '../Controller/Selection/SelectionController';
 
 export class SelectionModel implements ISelection {
     private _startColumn: number;
@@ -132,5 +132,9 @@ export class SelectionModel implements ISelection {
         if (currentCell) {
             this._currentCell = currentCell;
         }
+    }
+
+    clearCurrentCell() {
+        this._currentCell = null;
     }
 }

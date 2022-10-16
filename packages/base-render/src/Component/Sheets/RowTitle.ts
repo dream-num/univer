@@ -1,9 +1,9 @@
 import { RowTitleLayout } from '.';
-import { IBoundRect, Vector2 } from '../../Base/Vector2';
+import { IBoundRect, Vector2 } from '../../Basics/Vector2';
 import { SpreadsheetSkeleton } from './SheetSkeleton';
 import { SpreadsheetTitle } from './SheetComponent';
 import { SheetRowTitleExtensionRegistry } from '../Extension';
-import { fixLineWidthByScale, getScale } from '../../Base/Tools';
+import { fixLineWidthByScale, getScale } from '../../Basics/Tools';
 
 export class SpreadsheetRowTitle extends SpreadsheetTitle {
     private _rowTitleLayoutExtension: RowTitleLayout;

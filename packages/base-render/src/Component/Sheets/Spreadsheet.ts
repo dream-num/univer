@@ -3,7 +3,7 @@ import { Background } from './Extensions/Background';
 import { Border } from './Extensions/Border';
 import { Font } from './Extensions/Font';
 import { BorderAuxiliary } from './Extensions/BorderAuxiliary';
-import { IBoundRect, Vector2 } from '../../Base/Vector2';
+import { IBoundRect, Vector2 } from '../../Basics/Vector2';
 import { SpreadsheetSkeleton } from './SheetSkeleton';
 import { SheetComponent } from './SheetComponent';
 import { SpreadsheetExtensionRegistry } from '../Extension';
@@ -12,11 +12,11 @@ import { Engine } from '../../Engine';
 import { Scene } from '../../Scene';
 import { SceneViewer } from '../../SceneViewer';
 import { Viewport } from '../../Viewport';
-import { degToRad, fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getScale, mergeInfoOffset } from '../../Base/Tools';
-import { ITransformChangeState } from '../../Base/Interfaces';
+import { degToRad, fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getScale, mergeInfoOffset } from '../../Basics/Tools';
+import { ITransformChangeState } from '../../Basics/Interfaces';
 import { BaseObject } from '../../BaseObject';
 import { Documents } from '../Docs/Document';
-import { RENDER_CLASS_TYPE } from '../../Base/Const';
+import { RENDER_CLASS_TYPE } from '../../Basics/Const';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 

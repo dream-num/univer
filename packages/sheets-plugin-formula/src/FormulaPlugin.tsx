@@ -5,22 +5,20 @@ import { FormulaEnginePlugin } from '@univer/base-formula-engine';
 import { FormulaButton } from './UI/FormulaButton';
 import { zh, en } from './Locale';
 
-import { IConfig } from './Basic/IFormula';
+import { IConfig, IFormulaConfig } from './Basic/IFormula';
 import { FORMULA_PLUGIN_NAME } from './Basic/PLUGIN_NAME';
-
-export interface IFormulaPluginConfig {}
+import { FormulaController } from './Controller/FormulaController';
 
 export class FormulaPlugin extends Plugin {
-    protected _config: IFormulaPluginConfig;
+    private _formulaController: FormulaController;
 
-    private _formulaEngine: FormulaEnginePlugin;
-
-    constructor(config?: IFormulaPluginConfig) {
+    constructor(config?: IFormulaConfig) {
         super(FORMULA_PLUGIN_NAME);
-        this._config = config || {};
+        this._formulaController = new FormulaController(this, config);
+        // this._config = config || {};
     }
 
-    static create(config?: IFormulaPluginConfig) {
+    static create(config: IFormulaConfig) {
         return new FormulaPlugin(config);
     }
 
@@ -33,7 +31,7 @@ export class FormulaPlugin extends Plugin {
             formulaEngine = new FormulaEnginePlugin();
             universheetInstance.installPlugin(formulaEngine);
         }
-        this._formulaEngine = formulaEngine;
+        this._formulaController.setFormulaEngine(formulaEngine);
     }
 
     initialize(): void {
@@ -66,6 +64,6 @@ export class FormulaPlugin extends Plugin {
     onDestroy(): void {}
 
     getFormulaEngine() {
-        return this._formulaEngine;
+        return this._formulaController.getFormulaEngine();
     }
 }

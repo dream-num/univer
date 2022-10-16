@@ -1,13 +1,8 @@
 import { FunctionVariantType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
 import { FORMULA_FUNCTION_REGISTRY } from '../Basics/Registry';
-import { compareToken } from '../Basics/Token';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
-import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
-import { ArrayValueObject } from '../ValueObject/ArrayValueObject';
 import { BaseValueObject } from '../ValueObject/BaseValueObject';
-import { BooleanValueObject } from '../ValueObject/BooleanValueObject';
-import { NumberValueObject } from '../ValueObject/NumberValueObject';
 
 import { BaseFunction } from './BaseFunction';
 import { Count } from './Count';

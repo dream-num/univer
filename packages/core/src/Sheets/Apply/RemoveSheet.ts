@@ -8,7 +8,7 @@ export function RemoveSheet(
     index: number;
     sheet: IWorksheetConfig;
 } {
-    const iSheets = workbook._getWorksheets();
+    const iSheets = workbook.getWorksheets();
     const config = workbook.getConfig();
     const { sheets } = config;
     if (sheets[sheetId] == null) {

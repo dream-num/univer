@@ -19,6 +19,7 @@ export interface IFormulaData {
     fs: string; // formulaString
     row: number;
     column: number;
+    sheetId: string;
 }
 
 export type FormulaDataType = { [sheetId: string]: ObjectMatrixPrimitiveType<IFormulaData> };

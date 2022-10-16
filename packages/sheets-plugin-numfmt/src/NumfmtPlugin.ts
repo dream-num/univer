@@ -13,6 +13,10 @@ export class NumfmtPlugin extends Plugin {
         this._controller = new NumfmtController(this);
     }
 
+    getConfig() {
+        this._controller.getConfig();
+    }
+
     getValue(row: number, column: number): string {
         return this._controller.getValue(row, column);
     }

@@ -1,14 +1,14 @@
+import { Plugin } from '@univer/core';
 import { NumfmtModel, NumfmtValue } from '../Model/NumfmtModel';
 
 export class NumfmtController {
     protected _model: NumfmtModel;
 
-    constructor() {
-        this._model = new NumfmtModel();
-    }
+    protected _plugin: Plugin;
 
-    setNumfmt(row: number, column: number, numfmt: string): void {
-        this._model.setNumfmtValue(row, column, new NumfmtValue(numfmt));
+    constructor(plugin: Plugin) {
+        this._model = new NumfmtModel();
+        this._plugin = plugin;
     }
 
     getColor(row: number, column: number): string {
@@ -19,5 +19,9 @@ export class NumfmtController {
     getValue(row: number, column: number): string {
         const numfmt = this._model.getNumfmtValue(row, column);
         return numfmt ? numfmt.getValue() : String();
+    }
+
+    setNumfmt(row: number, column: number, numfmt: string): void {
+        this._model.setNumfmtValue(row, column, new NumfmtValue(numfmt));
     }
 }

@@ -1,1 +1,1 @@
-export function SetNumfmt() {}
+export function SetNumfmt(row: number, column: number) {}

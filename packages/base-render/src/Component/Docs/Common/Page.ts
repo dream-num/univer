@@ -1,7 +1,7 @@
 import { IBlockElement, IFooterData, IHeaderData, Nullable } from '@univer/core';
 import { createSkeletonSection } from './Section';
-import { BreakType, IDocumentSkeletonFooter, IDocumentSkeletonHeader, IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../Base/IDocumentSkeletonCached';
-import { ISectionBreakConfig } from '../../../Base/Interfaces';
+import { BreakType, IDocumentSkeletonFooter, IDocumentSkeletonHeader, IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../Basics/IDocumentSkeletonCached';
+import { ISectionBreakConfig } from '../../../Basics/Interfaces';
 import { dealWithBlocks } from '../Block';
 
 // 新增数据结构框架

@@ -1,5 +1,5 @@
 import { ObjectMatrix, BorderStyleTypes, VerticalAlign, HorizontalAlign, WrapStrategy } from '@univer/core';
-import { BORDER_TYPE } from '../../Base/Const';
+import { BORDER_TYPE } from '../../Basics/Const';
 import { DocumentSkeleton } from '../Docs/DocsSkeleton';
 
 export interface BorderCache {

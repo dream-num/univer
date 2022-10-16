@@ -1,9 +1,7 @@
 import { handleDomToJson, handleStringToStyle } from '@univer/base-component';
 import { SelectionControl } from '@univer/base-sheets/src/Controller/Selection/SelectionController';
 import { Context, ICellData, PLUGIN_NAMES, Tools } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
-import { SelectionModel } from '@univer/base-sheets/src/Model/Domain/SelectionModel';
-import { RightMenuProps } from '@univer/base-sheets/src/Model/Domain/RightMenuModel';
+import { RightMenuProps, SelectionModel, SpreadsheetPlugin } from '@univer/base-sheets';
 import { Clipboard } from './Clipboard';
 
 export interface PasteType {

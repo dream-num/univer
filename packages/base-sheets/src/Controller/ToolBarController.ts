@@ -13,10 +13,10 @@ import {
     TEXT_WRAP_CHILDREN,
     VERTICAL_ALIGN_CHILDREN,
 } from '../View/UI/ToolBar/Const';
-import { ToolBarModel } from '../Model/Domain/ToolBarModel';
+import { ToolBarModel } from '../Model/ToolBarModel';
 import { ToolBar } from '../View/UI/ToolBar/ToolBar';
 import { SelectionControl } from './Selection/SelectionController';
-import { SelectionModel } from '../Model/Domain/SelectionModel';
+import { SelectionModel } from '../Model/SelectionModel';
 
 /**
  *

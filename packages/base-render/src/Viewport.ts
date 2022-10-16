@@ -1,20 +1,20 @@
 import { EventState, Observable, Nullable } from '@univer/core';
-import { toPx } from './Base/Tools';
+import { toPx } from './Basics/Tools';
 
-import { PointerInput, IWheelEvent } from './Base/IEvents';
+import { PointerInput, IWheelEvent } from './Basics/IEvents';
 
 import { Canvas } from './Canvas';
 
 import { Scene } from './Scene';
 
-import { IBoundRect, Vector2 } from './Base/Vector2';
+import { IBoundRect, Vector2 } from './Basics/Vector2';
 
-import { Transform } from './Base/Transform';
+import { Transform } from './Basics/Transform';
 
 import { SceneViewer } from './SceneViewer';
 
 import { ScrollBar } from './Shape/ScrollBar';
-import { RENDER_CLASS_TYPE } from './Base/Const';
+import { RENDER_CLASS_TYPE } from './Basics/Const';
 
 interface IViewPosition {
     top?: number | string;

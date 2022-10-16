@@ -87,6 +87,9 @@ export type IRangeArrayData = {
     column: IColumnStartEndData;
 };
 
+/**
+ * The row and column numbers represent a cell
+ */
 export type IRangeCellData = {
     /**
      * row
@@ -167,6 +170,6 @@ export interface IOptionsData extends IOptionData {
 }
 
 /**
- * Option of copyto function
+ * Option of copyTo function
  */
 export interface ICopyToOptionsData extends IOptionData {}

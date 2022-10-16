@@ -1,5 +1,5 @@
 import { sortRules } from '@univer/core';
-import { IBoundRect } from '../Base/Vector2';
+import { IBoundRect } from '../Basics/Vector2';
 import { BaseObject } from '../BaseObject';
 import { ComponentExtension } from './Extension';
 

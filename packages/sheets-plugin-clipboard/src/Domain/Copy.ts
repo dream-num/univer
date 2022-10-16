@@ -1,9 +1,6 @@
 import { handleJsonToDom, handleStyleToString } from '@univer/base-component';
 import { Context, PLUGIN_NAMES, Tools } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
-import { SelectionControl } from '@univer/base-sheets/src/Controller/Selection/SelectionController';
-import { RightMenuProps } from '@univer/base-sheets/src/Model/Domain/RightMenuModel';
-import { SelectionModel } from '@univer/base-sheets/src/Model/Domain/SelectionModel';
+import { SpreadsheetPlugin, SelectionModel, RightMenuProps, SelectionControl } from '@univer/base-sheets';
 import { Clipboard } from './Clipboard';
 
 export abstract class Copy {

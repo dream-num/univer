@@ -1,11 +1,11 @@
 import { BorderStyleTypes, getColorStyle, IBorderData, IBorderStyleData, Nullable } from '@univer/core';
-import { IScale } from '../../../Base/Interfaces';
+import { IScale } from '../../../Basics/Interfaces';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../Extension';
 import { docsExtension } from '../DocsExtension';
-import { IDocumentSkeletonSpan } from '../../../Base/IDocumentSkeletonCached';
-import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../../Base/Const';
-import { drawLineByBorderType, getLineWidth, setLineType } from '../../../Base/Draw';
-import { Vector2 } from '../../../Base/Vector2';
+import { IDocumentSkeletonSpan } from '../../../Basics/IDocumentSkeletonCached';
+import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../../Basics/Const';
+import { drawLineByBorderType, getLineWidth, setLineType } from '../../../Basics/Draw';
+import { Vector2 } from '../../../Basics/Vector2';
 
 const UNIQUE_KEY = 'DefaultDocsBorderExtension';
 

@@ -1,8 +1,8 @@
 import { IKeyboardEvent } from '@univer/base-render';
 import { Observable, Plugin } from '@univer/core';
-import { SelectionControl } from '../../Controller/Selection/SelectionController';
-import { SheetContainer } from '../../View/UI/SheetContainer';
-import { ToolBar } from '../../View/UI/ToolBar/ToolBar';
+import { SelectionControl } from '../Controller/Selection/SelectionController';
+import { SheetContainer } from '../View/UI/SheetContainer';
+import { ToolBar } from '../View/UI/ToolBar/ToolBar';
 
 interface ISelectionControlFillConfig {}
 

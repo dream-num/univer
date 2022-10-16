@@ -95,7 +95,7 @@ export interface IPaddingData {
 }
 
 /**
- * Base properties of cell style
+ * Basics properties of cell style
  */
 export interface IStyleBase {
     /**

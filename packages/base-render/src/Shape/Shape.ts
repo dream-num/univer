@@ -1,9 +1,9 @@
 import { IKeyValue, Nullable } from '@univer/core';
 import { Canvas, getDevicePixelRatio } from '../Canvas';
 import { BaseObject, BASE_OBJECT_ARRAY } from '../BaseObject';
-import { IBoundRect, Vector2 } from '../Base/Vector2';
-import { IObjectFullState, IScale } from '../Base/Interfaces';
-import { SHAPE_TYPE } from '../Base/Const';
+import { IBoundRect, Vector2 } from '../Basics/Vector2';
+import { IObjectFullState, IScale } from '../Basics/Interfaces';
+import { SHAPE_TYPE } from '../Basics/Const';
 
 export type LineJoin = 'round' | 'bevel' | 'miter';
 export type LineCap = 'butt' | 'round' | 'square';

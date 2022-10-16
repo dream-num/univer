@@ -1,10 +1,10 @@
 import { BaselineOffset, getColorStyle } from '@univer/core';
-import { IScale } from '../../../Base/Interfaces';
+import { IScale } from '../../../Basics/Interfaces';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../Extension';
 import { docsExtension } from '../DocsExtension';
-import { IDocumentSkeletonSpan } from '../../../Base/IDocumentSkeletonCached';
-import { COLOR_BLACK_RGB } from '../../../Base/Const';
-import { Vector2 } from '../../../Base/Vector2';
+import { IDocumentSkeletonSpan } from '../../../Basics/IDocumentSkeletonCached';
+import { COLOR_BLACK_RGB } from '../../../Basics/Const';
+import { Vector2 } from '../../../Basics/Vector2';
 
 const UNIQUE_KEY = 'DefaultDocsFontAndBaseLineExtension';
 

@@ -23,7 +23,7 @@ import {
     ISectionBreakConfig,
     isFunction,
     SpanType,
-} from '../../../Base';
+} from '../../../Basics';
 
 export function getLastPage(pages: IDocumentSkeletonPage[]) {
     return pages?.[pages.length - 1];

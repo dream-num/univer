@@ -1,8 +1,8 @@
-import { IBoundRect, Vector2 } from './Base/Vector2';
+import { IBoundRect, Vector2 } from './Basics/Vector2';
 import { BaseObject } from './BaseObject';
 import { Scene } from './Scene';
-import { IObjectFullState } from './Base/Interfaces';
-import { RENDER_CLASS_TYPE } from './Base/Const';
+import { IObjectFullState } from './Basics/Interfaces';
+import { RENDER_CLASS_TYPE } from './Basics/Const';
 
 export class SceneViewer extends BaseObject {
     private _childrenScene: Scene;

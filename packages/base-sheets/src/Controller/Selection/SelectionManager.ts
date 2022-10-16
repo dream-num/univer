@@ -1,6 +1,6 @@
 import { IMouseEvent, IPointerEvent, Rect, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle } from '@univer/base-render';
 import { Nullable, Observer, Plugin, Worksheet, ISelection, makeCellToSelection, IRangeData, RangeList, Range } from '@univer/core';
-import { SelectionModel } from '../../Model/Domain/SelectionModel';
+import { SelectionModel } from '../../Model/SelectionModel';
 import { SheetView } from '../../View/Render/Views/SheetView';
 import { ScrollTimer } from '../ScrollTimer';
 import { SelectionControl, SELECTION_TYPE } from './SelectionController';

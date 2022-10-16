@@ -55,8 +55,8 @@ export default defineConfig({
         // preserveSymlinks: true,
         // alias: [
         //     {
-        //         find: '@Base',
-        //         replacement: path.resolve('..', '/src/Base'),
+        //         find: '@Basics',
+        //         replacement: path.resolve('..', '/src/Basics'),
         //     },
         // ],
         // alias: [

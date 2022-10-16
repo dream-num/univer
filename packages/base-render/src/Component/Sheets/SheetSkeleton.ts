@@ -30,11 +30,11 @@ import {
     getColorStyle,
     IDocumentRenderConfig,
 } from '@univer/core';
-import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../Base/Const';
+import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../Basics/Const';
 import { IStylesCache, BorderCache } from './Interfaces';
-import { getFontStyleString, getCellPositionByIndex, isRectIntersect } from '../../Base/Tools';
-import { IFontLocale } from '../../Base/Interfaces';
-import { IBoundRect } from '../../Base/Vector2';
+import { getFontStyleString, getCellPositionByIndex, isRectIntersect } from '../../Basics/Tools';
+import { IFontLocale } from '../../Basics/Interfaces';
+import { IBoundRect } from '../../Basics/Vector2';
 import { Skeleton } from '../Skeleton';
 import { DocumentSkeleton } from '../Docs/DocsSkeleton';
 

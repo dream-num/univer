@@ -2,20 +2,23 @@ import { getRefElement, IMainProps, isElement, ISlotProps, IToolBarItemProps, Re
 import { Engine, RenderEngine } from '@univer/base-render';
 import { AsyncFunction, Attribute, Context, IOCAttribute, IOCContainer, IWorkbookConfig, Plugin, PLUGIN_NAMES } from '@univer/core';
 import { FormulaPlugin } from '@univer/sheets-plugin-formula';
-import { AntLineControl } from './Controller/AntLineController';
-import { CellEditorController } from './Controller/CellEditorController';
-import { CountBarController } from './Controller/CountBarController';
-import { InfoBarController } from './Controller/InfoBarController';
-import { RightMenuController } from './Controller/RightMenuController';
-import { SheetBarControl } from './Controller/SheetBarController';
-import { SheetContainerController } from './Controller/SheetContainerController';
-import { ToolBarController } from './Controller/ToolBarController';
-import { install, SpreadsheetPluginObserve, uninstall } from './Model/Base/Observer';
-import { RightMenuProps } from './Model/Domain/RightMenuModel';
-import { en, zh } from './Model/Locale';
+
+import { install, SpreadsheetPluginObserve, uninstall } from './Basics/Observer';
+import { RightMenuProps } from './Model/RightMenuModel';
+import { en, zh } from './Locale';
 import { CANVAS_VIEW_KEY } from './View/Render/BaseView';
 import { CanvasView } from './View/Render/CanvasView';
 import { BaseSheetContainerConfig, ILayout, ISpreadsheetPluginConfigBase, SheetContainer } from './View/UI/SheetContainer';
+import {
+    RightMenuController,
+    ToolBarController,
+    InfoBarController,
+    SheetBarControl,
+    CellEditorController,
+    AntLineControl,
+    CountBarController,
+    SheetContainerController,
+} from './Controller';
 
 export interface ISpreadsheetPluginConfig extends ISpreadsheetPluginConfigBase {
     container?: HTMLElement | string;

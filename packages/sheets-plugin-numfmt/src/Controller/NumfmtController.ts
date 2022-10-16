@@ -13,11 +13,11 @@ export class NumfmtController {
 
     getColor(row: number, column: number): string {
         const numfmt = this._model.getNumfmtValue(row, column);
-        return numfmt ? numfmt.getColor() : '';
+        return numfmt ? numfmt.getColor() : String();
     }
 
     getValue(row: number, column: number): string {
         const numfmt = this._model.getNumfmtValue(row, column);
-        return numfmt ? numfmt.getValue() : '';
+        return numfmt ? numfmt.getValue() : String();
     }
 }

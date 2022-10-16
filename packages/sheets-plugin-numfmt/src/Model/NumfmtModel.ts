@@ -12,8 +12,8 @@ export class NumfmtValue {
 
     constructor(numfmt: string) {
         this.numfmt = numfmt;
-        this.value = '';
-        this.color = '';
+        this.value = String();
+        this.color = String();
         this.status = true;
     }
 

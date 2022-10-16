@@ -55,13 +55,4 @@ export class NumfmtModel {
     getNumfmtConfig(sheetId: string): ObjectMatrixPrimitiveType<NumfmtValue> {
         return this._fmtMatrix(sheetId).toJSON();
     }
-
-    setNumfmtValue(sheetId: string, row: number, column: number, value: string): void {
-        this._fmtMatrix(sheetId).setValue(row, column, {
-            numfmt: value,
-            change: true,
-            value: String(),
-            color: String(),
-        });
-    }
 }

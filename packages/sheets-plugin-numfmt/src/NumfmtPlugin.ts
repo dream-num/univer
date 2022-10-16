@@ -1,6 +1,7 @@
-import { Context, Plugin } from '@univer/core';
+import { Context, ObjectMatrixPrimitiveType, Plugin } from '@univer/core';
 import { NUMFMT_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 import { NumfmtController } from './Controller/NumfmtController';
+import { NumfmtValue } from './Model/NumfmtModel';
 
 export class NumfmtPlugin extends Plugin {
     protected _controller: NumfmtController;
@@ -13,8 +14,8 @@ export class NumfmtPlugin extends Plugin {
         this._controller = new NumfmtController(this);
     }
 
-    getConfig(sheetId: string) {
-        this._controller.getConfig(sheetId);
+    getConfig(sheetId: string): ObjectMatrixPrimitiveType<NumfmtValue> {
+        return this._controller.getConfig(sheetId);
     }
 
     getValue(sheetId: string, row: number, column: number): string {

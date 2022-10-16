@@ -20,11 +20,17 @@ export class SetNumfmtAction extends ActionBase<ISetNumfmtActionData, ISetNumfmt
         this.do();
     }
 
-    redo(): void {}
+    redo(): void {
+        // todo ...
+    }
 
-    do(): void {}
+    do(): void {
+        this.redo();
+    }
 
-    undo(): void {}
+    undo(): void {
+        // todo ...
+    }
 
     validate(): boolean {
         return false;

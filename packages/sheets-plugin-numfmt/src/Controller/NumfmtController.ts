@@ -1,5 +1,5 @@
 import { Command, ObjectMatrixPrimitiveType, Plugin } from '@univer/core';
-import { ACTION_NAMES } from 'src/Const/ACTION_NAMES';
+import { ACTION_NAMES } from '../Const';
 import { NumfmtModel, NumfmtValue } from '../Model/NumfmtModel';
 
 export class NumfmtController {
@@ -25,8 +25,8 @@ export class NumfmtController {
     }
 
     setNumfmt(sheetId: string, row: number, column: number, numfmt: string): void {
-        const context = this._plugin.getContext();
-        const commandManager = context.getCommandManager();
+        const pluginContext = this._plugin.getContext();
+        const commandManager = pluginContext.getCommandManager();
         const config = {
             actionName: ACTION_NAMES.SET_NUMFMT_ACTION,
             sheetId,
@@ -34,7 +34,7 @@ export class NumfmtController {
             column,
             numfmt,
         };
-        const command = new Command(context.getWorkBook(), config);
+        const command = new Command(pluginContext.getWorkBook(), config);
         commandManager.invoke(command);
     }
 }

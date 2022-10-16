@@ -17,15 +17,6 @@ export class NumfmtValue {
         this.status = true;
     }
 
-    calculate(): void {
-        if (this.status) {
-            const formatter = numfmt(this.numfmt);
-            this.value = formatter(this.value);
-            this.color = formatter.color(this.value);
-            this.status = false;
-        }
-    }
-
     getValue() {
         this.calculate();
         return this.value;
@@ -34,6 +25,15 @@ export class NumfmtValue {
     getColor() {
         this.calculate();
         return this.color;
+    }
+
+    calculate(): void {
+        if (this.status) {
+            const formatter = numfmt(this.numfmt);
+            this.value = formatter(this.value);
+            this.color = formatter.color(this.value);
+            this.status = false;
+        }
     }
 }
 

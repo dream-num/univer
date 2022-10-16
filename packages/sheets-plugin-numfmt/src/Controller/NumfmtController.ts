@@ -11,19 +11,19 @@ export class NumfmtController {
         this._plugin = plugin;
     }
 
-    getConfig(): ObjectMatrixPrimitiveType<NumfmtValue> {
-        return this._model.getNumfmtConfig();
+    getConfig(sheetId: string): ObjectMatrixPrimitiveType<NumfmtValue> {
+        return this._model.getNumfmtConfig(sheetId);
     }
 
-    getColor(row: number, column: number): string {
-        return this._model.getNumfmtColor(row, column);
+    getColor(sheetId: string, row: number, column: number): string {
+        return this._model.getNumfmtColor(sheetId, row, column);
     }
 
-    getValue(row: number, column: number): string {
-        return this._model.getNumfmtValue(row, column);
+    getValue(sheetId: string, row: number, column: number): string {
+        return this._model.getNumfmtValue(sheetId, row, column);
     }
 
-    setNumfmt(row: number, column: number, numfmt: string): void {
-        this._model.setNumfmtValue(row, column, numfmt);
+    setNumfmt(sheetId: string, row: number, column: number, numfmt: string): void {
+        this._model.setNumfmtValue(sheetId, row, column, numfmt);
     }
 }

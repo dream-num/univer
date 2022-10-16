@@ -9,23 +9,23 @@ export class NumfmtPlugin extends Plugin {
         super(NUMFMT_PLUGIN_NAME);
     }
 
-    onMounted(ctx: Context): void {
+    onMounted(context: Context): void {
         this._controller = new NumfmtController(this);
     }
 
-    getConfig() {
-        this._controller.getConfig();
+    getConfig(sheetId: string) {
+        this._controller.getConfig(sheetId);
     }
 
-    getValue(row: number, column: number): string {
-        return this._controller.getValue(row, column);
+    getValue(sheetId: string, row: number, column: number): string {
+        return this._controller.getValue(sheetId, row, column);
     }
 
-    getColor(row: number, column: number): string {
-        return this._controller.getColor(row, column);
+    getColor(sheetId: string, row: number, column: number): string {
+        return this._controller.getColor(sheetId, row, column);
     }
 
-    setNumfmt(row: number, column: number, numfmt: string): void {
-        this._controller.setNumfmt(row, column, numfmt);
+    setNumfmt(sheetId: string, row: number, column: number, numfmt: string): void {
+        this._controller.setNumfmt(sheetId, row, column, numfmt);
     }
 }

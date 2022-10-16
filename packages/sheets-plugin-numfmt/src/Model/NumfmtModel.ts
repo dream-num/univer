@@ -12,7 +12,7 @@ export interface NumfmtValue {
 }
 
 export class NumfmtModel {
-    protected _matrix: ObjectMatrix<NumfmtValue>;
+    protected _sheetNumfmtMatrix: Map<string, ObjectMatrix<NumfmtValue>>;
 
     protected _calculate(primeval: NumfmtValue): void {
         if (primeval.change) {
@@ -23,25 +23,22 @@ export class NumfmtModel {
         }
     }
 
+    protected _fmtMatrix(sheetId: string): ObjectMatrix<NumfmtValue> {
+        let sheetNumfmtMatrix = this._sheetNumfmtMatrix.get(sheetId);
+        if (sheetNumfmtMatrix) {
+            return sheetNumfmtMatrix;
+        }
+        sheetNumfmtMatrix = new ObjectMatrix<NumfmtValue>();
+        this._sheetNumfmtMatrix.set(sheetId, sheetNumfmtMatrix);
+        return sheetNumfmtMatrix;
+    }
+
     constructor() {
-        this._matrix = new ObjectMatrix<NumfmtValue>();
+        this._sheetNumfmtMatrix = new Map();
     }
 
-    getNumfmtConfig(): ObjectMatrixPrimitiveType<NumfmtValue> {
-        return this._matrix.toJSON();
-    }
-
-    setNumfmtValue(row: number, column: number, value: string): void {
-        this._matrix.setValue(row, column, {
-            numfmt: value,
-            change: true,
-            value: String(),
-            color: String(),
-        });
-    }
-
-    getNumfmtValue(row: number, column: number): string {
-        const primeval = this._matrix.getValue(row, column);
+    getNumfmtValue(sheetId: string, row: number, column: number): string {
+        const primeval = this._fmtMatrix(sheetId).getValue(row, column);
         if (primeval) {
             this._calculate(primeval);
             return primeval.value;
@@ -49,12 +46,25 @@ export class NumfmtModel {
         return String();
     }
 
-    getNumfmtColor(row: number, column: number): string {
-        const primeval = this._matrix.getValue(row, column);
+    getNumfmtColor(sheetId: string, row: number, column: number): string {
+        const primeval = this._fmtMatrix(sheetId).getValue(row, column);
         if (primeval) {
             this._calculate(primeval);
             return primeval.color;
         }
         return String();
+    }
+
+    getNumfmtConfig(sheetId: string): ObjectMatrixPrimitiveType<NumfmtValue> {
+        return this._fmtMatrix(sheetId).toJSON();
+    }
+
+    setNumfmtValue(sheetId: string, row: number, column: number, value: string): void {
+        this._fmtMatrix(sheetId).setValue(row, column, {
+            numfmt: value,
+            change: true,
+            value: String(),
+            color: String(),
+        });
     }
 }

@@ -3,11 +3,8 @@ import { numfmt } from '@univer/base-numfmt-engine';
 
 export interface NumfmtValue {
     numfmt: string;
-
     color: string;
-
     value: string;
-
     change: boolean;
 }
 

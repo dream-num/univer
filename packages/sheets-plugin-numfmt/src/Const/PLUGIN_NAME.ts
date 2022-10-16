@@ -1,0 +1,1 @@
+export const NUMFMT_PLUGIN_NAME = 'NUMFMT_PLUGIN_NAME';

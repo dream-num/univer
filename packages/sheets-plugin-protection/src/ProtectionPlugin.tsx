@@ -8,16 +8,16 @@ import { ProtectionButton } from './UI/ProtectionButton';
 import { ProtectionSide } from './UI/ProtectionSide';
 import { Protection } from './Controller';
 
-type IPluginConfig = {};
+export interface IProtectionPluginConfig {}
 
 export class ProtectionPlugin extends Plugin {
-    _protectionSilder: Protection;
+    _protectionSlider: Protection;
 
-    constructor(config?: IPluginConfig) {
+    constructor(config?: IProtectionPluginConfig) {
         super(PROTECTION_PLUGIN_NAME);
     }
 
-    static create(config?: IPluginConfig) {
+    static create(config?: IProtectionPluginConfig) {
         return new ProtectionPlugin(config);
     }
 
@@ -48,7 +48,7 @@ export class ProtectionPlugin extends Plugin {
         context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
 
         // TODO
-        this._protectionSilder = new Protection();
+        this._protectionSlider = new Protection();
 
         const rangeData = {
             startRow: 0,
@@ -60,7 +60,7 @@ export class ProtectionPlugin extends Plugin {
         const siderItem: ISlotProps = {
             name: 'protection',
             type: ISlotElement.JSX,
-            label: <ProtectionSide config={{ rangeData, context, protection: this._protectionSilder }} />,
+            label: <ProtectionSide config={{ rangeData, context, protection: this._protectionSlider }} />,
         };
         context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addSider(siderItem);
     }

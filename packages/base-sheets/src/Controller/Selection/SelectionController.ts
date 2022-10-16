@@ -1,6 +1,6 @@
 import { Rect, Group } from '@univer/base-render';
 import { Nullable, ISelection, ICellInfo } from '@univer/core';
-import { SelectionModel } from '../../Model/Domain/SelectionModel';
+import { SelectionModel } from '../../Model/SelectionModel';
 import { SelectionControlDragAndDrop } from './SelectionControlDragDrop';
 import { SelectionControlFill } from './SelectionControlFill';
 import { SelectionManager } from './SelectionManager';

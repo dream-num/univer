@@ -7,16 +7,16 @@ import { TextFinder } from './Domain/TextFind';
 import { FindType, IConfig } from './IData/IFind';
 import { FIND_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 
-type IPluginConfig = {};
+export interface IFindPluginConfig {}
 
 export class FindPlugin extends Plugin {
     spreadsheetPlugin: Nullable<SpreadsheetPlugin>;
 
-    constructor(config?: IPluginConfig) {
+    constructor(config?: IFindPluginConfig) {
         super(FIND_PLUGIN_NAME);
     }
 
-    static create(config?: IPluginConfig) {
+    static create(config?: IFindPluginConfig) {
         return new FindPlugin(config);
     }
 

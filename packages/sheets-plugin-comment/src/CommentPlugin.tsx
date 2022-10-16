@@ -6,16 +6,16 @@ import { IConfig } from './IData/IComment';
 import { en, zh } from './Locale';
 import { CommentButton } from './UI/CommentButton';
 
-type IPluginConfig = {};
+export interface ICommentPluginConfig {}
 
 export class CommentPlugin extends Plugin {
     spreadsheetPlugin: Nullable<SpreadsheetPlugin>;
 
-    constructor(config?: IPluginConfig) {
+    constructor(config?: ICommentPluginConfig) {
         super(COMMENT_COLORS_PLUGIN_NAME);
     }
 
-    static create(config?: IPluginConfig) {
+    static create(config?: ICommentPluginConfig) {
         return new CommentPlugin(config);
     }
 

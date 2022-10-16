@@ -6,11 +6,11 @@ import { UniverComponentSheet } from '@univer/style-universheet';
 import { FindPlugin } from './FindPlugin';
 
 const uiDefaultConfigUp = {
-    containerId: 'universheet-demo-up',
+    container: 'universheet-demo-up',
     layout: 'auto',
 };
 const uiDefaultConfigDown = {
-    containerId: 'universheet-demo-down',
+    container: 'universheet-demo-down',
     layout: {
         outerLeft: false,
 
@@ -30,11 +30,11 @@ const uiDefaultConfigDown = {
     },
 };
 const uiDefaultConfigLeft = {
-    containerId: 'universheet-demo-left',
+    container: 'universheet-demo-left',
     layout: 'auto',
 };
 const uiDefaultConfigRight = {
-    containerId: 'universheet-demo-right',
+    container: 'universheet-demo-right',
     layout: 'auto',
 };
 const univerSheetUp = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);

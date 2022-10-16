@@ -7,14 +7,14 @@ import { LinkButton } from './UI/LinkButton';
 import { IConfig } from './IData/ILink';
 import { LINK_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 
-type IPluginConfig = {};
+export interface ILinkPluginConfig {}
 
 export class LinkPlugin extends Plugin {
-    constructor(config?: IPluginConfig) {
+    constructor(config?: ILinkPluginConfig) {
         super(LINK_PLUGIN_NAME);
     }
 
-    static create(config?: IPluginConfig) {
+    static create(config?: ILinkPluginConfig) {
         return new LinkPlugin(config);
     }
 

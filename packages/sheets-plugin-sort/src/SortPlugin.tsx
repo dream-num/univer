@@ -1,5 +1,5 @@
 import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
-import { Context, IOCContainer, IRangeType, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { Context, IOCContainer, IRangeType, Plugin, PLUGIN_NAMES, UniverSheet } from '@univer/core';
 import { SpreadsheetPlugin } from '@univer/base-sheets';
 import { SORT_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 import { Sort } from './Domain';
@@ -7,13 +7,21 @@ import { IConfig } from './IData/ISort';
 import { en, zh } from './Locale';
 import { SortButton } from './UI/SortButton';
 
-type IPluginConfig = {};
+export interface ISortPluginConfig {}
 
 export class SortPlugin extends Plugin {
     private _sort: Sort | null;
 
-    constructor(config?: IPluginConfig) {
+    constructor(config?: ISortPluginConfig) {
         super(SORT_PLUGIN_NAME);
+    }
+
+    static create(config?: ISortPluginConfig) {
+        return new SortPlugin(config);
+    }
+
+    installTo(universheetInstance: UniverSheet) {
+        universheetInstance.installPlugin(this);
     }
 
     initialize(): void {

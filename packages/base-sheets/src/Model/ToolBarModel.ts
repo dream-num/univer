@@ -1,4 +1,5 @@
-import { IShowToolBarConfig, IToolBarItemProps } from '@univer/base-component';
+import { IToolBarItemProps } from '@univer/base-component';
+import { IShowToolBarConfig } from '../View/UI/ToolBar';
 
 export class ToolBarModel {
     private _config: IShowToolBarConfig[];

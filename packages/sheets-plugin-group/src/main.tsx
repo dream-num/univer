@@ -7,7 +7,7 @@ import { FilterPlugin } from '@univer/sheets-plugin-filter';
 import { GroupPlugin } from './GroupPlugin';
 
 const uiDefaultConfigUp = {
-    containerId: 'universheet-demo',
+    container: 'universheet-demo',
     layout: 'auto',
 };
 

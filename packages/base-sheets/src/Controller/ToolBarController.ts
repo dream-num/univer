@@ -1,7 +1,7 @@
-import { BaseComponentRender, BaseComponentSheet, ILayout, ISelectButton, IToolBarItemProps } from '@univer/base-component';
+import { BaseComponentRender, BaseComponentSheet, ISelectButton, IToolBarItemProps } from '@univer/base-component';
 import { Tools, BorderType, BorderStyleTypes, ICellData, IStyleData, HorizontalAlign, VerticalAlign, WrapStrategy, DEFAULT_STYLES } from '@univer/core';
 import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
-import { defaultLayout } from '../View/UI/SheetContainer';
+import { defaultLayout, ILayout } from '../View/UI/SheetContainer';
 import {
     BORDER_LINE_CHILDREN,
     FONT_FAMILY_CHILDREN,
@@ -13,10 +13,10 @@ import {
     TEXT_WRAP_CHILDREN,
     VERTICAL_ALIGN_CHILDREN,
 } from '../View/UI/ToolBar/Const';
-import { ToolBarModel } from '../Model/Domain/ToolBarModel';
+import { ToolBarModel } from '../Model/ToolBarModel';
 import { ToolBar } from '../View/UI/ToolBar/ToolBar';
 import { SelectionControl } from './Selection/SelectionController';
-import { SelectionModel } from '../Model/Domain/SelectionModel';
+import { SelectionModel } from '../Model/SelectionModel';
 
 /**
  *

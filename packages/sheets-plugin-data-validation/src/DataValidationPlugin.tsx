@@ -7,16 +7,16 @@ import { DataValidationButton } from './UI/DataValidationButton';
 import { IConfig } from './IData/IDataValidation';
 import { DATA_VALIDATION_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 
-type IPluginConfig = {};
+export interface IDataValidationPluginConfig {}
 
 export class DataValidationPlugin extends Plugin {
     spreadsheetPlugin: any;
 
-    constructor(config?: IPluginConfig) {
+    constructor(config?: IDataValidationPluginConfig) {
         super(DATA_VALIDATION_PLUGIN_NAME);
     }
 
-    static create(config?: IPluginConfig) {
+    static create(config?: IDataValidationPluginConfig) {
         return new DataValidationPlugin(config);
     }
 

@@ -1,8 +1,8 @@
 import { IRangeData, ObjectMatrix } from '@univer/core';
-import { fixLineWidthByScale, getColor } from '../../../Base/Tools';
+import { fixLineWidthByScale, getColor } from '../../../Basics/Tools';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';
-import { IScale } from '../../../Base/Interfaces';
+import { IScale } from '../../../Basics/Interfaces';
 import { SpreadsheetExtensionRegistry } from '../../Extension';
 
 const UNIQUE_KEY = 'DefaultBorderAuxiliaryExtension';

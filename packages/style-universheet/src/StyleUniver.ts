@@ -75,7 +75,7 @@ import {
 import { UniverChartIcon, UniverLinkIcon, UniverPhotoIcon } from './Components/Icon/Insert';
 import { UniverLoadingIcon } from './Components/Icon/Loading';
 import { UniverLogoIcon } from './Components/Icon/Logo';
-import { UniverAddIcon, UniverAddNumIcon, UniverFxIcon, UniverMoneyIcon, UniverPercentIcon, UniverreduceIcon, UniverReduceNumIcon } from './Components/Icon/Math';
+import { UniverAddIcon, UniverAddNumIcon, UniverFxIcon, UniverMoneyIcon, UniverPercentIcon, UniverReduceIcon, UniverReduceNumIcon } from './Components/Icon/Math';
 import {
     UniverCommentIcon,
     UniverConditionalFormatIcon,
@@ -421,8 +421,8 @@ export class UniverComponentFactory implements BaseComponentFactory {
             case 'AddIcon': {
                 return new UniverAddIcon() as unknown as T;
             }
-            case 'reduceIcon': {
-                return new UniverreduceIcon() as unknown as T;
+            case 'ReduceIcon': {
+                return new UniverReduceIcon() as unknown as T;
             }
             case 'DivideIcon': {
                 return new UniverDivideIcon() as unknown as T;

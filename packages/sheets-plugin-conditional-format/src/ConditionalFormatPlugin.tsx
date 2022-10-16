@@ -7,16 +7,16 @@ import { ConditionalFormatButton } from './UI/ConditionalFormatButton';
 import { IConfig } from './IData/IConditionalFormat';
 import { CONDITIONAL_FORMAT_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 
-type IPluginConfig = {};
+export interface IConditionalFormatPluginConfig {}
 
 export class ConditionalFormatPlugin extends Plugin {
     spreadsheetPlugin: any;
 
-    constructor(config?: IPluginConfig) {
+    constructor(config?: IConditionalFormatPluginConfig) {
         super(CONDITIONAL_FORMAT_PLUGIN_NAME);
     }
 
-    static create(config?: IPluginConfig) {
+    static create(config?: IConditionalFormatPluginConfig) {
         return new ConditionalFormatPlugin(config);
     }
 

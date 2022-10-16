@@ -2,7 +2,7 @@ import { getColor, Rect, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitl
 import { Worksheet } from '@univer/core';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from '../BaseView';
 import { SelectionManager } from '../../../Controller/Selection/SelectionManager';
-import { SelectionModel } from '../../../Model/Domain/SelectionModel';
+import { SelectionModel } from '../../../Model/SelectionModel';
 import { SheetViewKeyboardEvent } from './SheetViewKeyboardEvent';
 
 export enum SHEET_VIEW_KEY {

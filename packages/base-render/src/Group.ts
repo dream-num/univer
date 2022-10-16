@@ -1,9 +1,9 @@
 import { Nullable, sortRules } from '@univer/core';
 import { Scene } from './Scene';
-import { isString } from './Base/Tools';
-import { IBoundRect, Vector2 } from './Base/Vector2';
+import { isString } from './Basics/Tools';
+import { IBoundRect, Vector2 } from './Basics/Vector2';
 import { BaseObject } from './BaseObject';
-import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './Base/Const';
+import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './Basics/Const';
 
 export class Group extends BaseObject {
     private _objects: BaseObject[] = [];

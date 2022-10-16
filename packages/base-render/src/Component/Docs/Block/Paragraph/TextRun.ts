@@ -13,7 +13,7 @@ import {
 } from '../../../..';
 // import { getCharSpaceApply, getSpanGroupWidth, lineIterator } from '../../Common/Tools';
 // import { createSkeletonTabSpan, createSkeletonWordSpan } from '../../Common/Span';
-import { IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../../../Base/IDocumentSkeletonCached';
+import { IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../../../Basics/IDocumentSkeletonCached';
 
 export function dealWidthTextRun(
     textRun: ITextRun,

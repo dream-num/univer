@@ -33,7 +33,7 @@ export enum ActionOperation {
 }
 
 /**
- * Base class for action
+ * Basics class for action
  *
  * @beta
  */

@@ -1,4 +1,4 @@
-import { Context, Plugin } from '@univer/core';
+import { Context, Plugin, UniverSheet } from '@univer/core';
 import { en, zh } from './Locale';
 import { CLIPBOARD_PLUGIN } from './Const';
 import { Copy, UniverCopy, Paste, UniverPaste } from './Domain';
@@ -20,6 +20,14 @@ export class ClipboardPlugin extends Plugin {
 
     constructor() {
         super(CLIPBOARD_PLUGIN);
+    }
+
+    static create() {
+        return new ClipboardPlugin();
+    }
+
+    installTo(universheetInstance: UniverSheet) {
+        universheetInstance.installPlugin(this);
     }
 
     onMounted(context: Context): void {

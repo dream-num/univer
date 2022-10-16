@@ -25,7 +25,7 @@ export enum ServerReceiveType {
 }
 
 /**
- * Base class for Server
+ * Basics class for Server
  */
 export abstract class ServerBase {
     static isMessageReponseReceive(

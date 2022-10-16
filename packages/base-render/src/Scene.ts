@@ -1,15 +1,15 @@
 import { EventState, Observable, Observer, sortRules, sortRulesByDesc, Nullable } from '@univer/core';
-import { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './Base/IEvents';
+import { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './Basics/IEvents';
 
-import { requestNewFrame, precisionTo } from './Base/Tools';
+import { requestNewFrame, precisionTo } from './Basics/Tools';
 
-import { IBoundRect, Vector2 } from './Base/Vector2';
+import { IBoundRect, Vector2 } from './Basics/Vector2';
 
-import { EVENT_TYPE, CURSOR_TYPE, RENDER_CLASS_TYPE } from './Base/Const';
+import { EVENT_TYPE, CURSOR_TYPE, RENDER_CLASS_TYPE } from './Basics/Const';
 
-import { ISceneTransformState, ITransformChangeState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './Base/Interfaces';
+import { ISceneTransformState, ITransformChangeState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './Basics/Interfaces';
 
-import { Transform } from './Base/Transform';
+import { Transform } from './Basics/Transform';
 
 import { Engine } from './Engine';
 

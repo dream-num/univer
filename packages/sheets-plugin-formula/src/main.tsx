@@ -6,7 +6,7 @@ import { UniverComponentSheet } from '@univer/style-universheet';
 import { FormulaPlugin } from './FormulaPlugin';
 
 const uiDefaultConfigUp = {
-    containerId: 'universheet-demo-up',
+    container: 'universheet-demo-up',
     layout: 'auto',
 };
 

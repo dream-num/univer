@@ -10,6 +10,14 @@ const CELL_EDIT_HIDDEN_TOP = -10000;
 
 /**
  * Cell Editor
+ *
+ * TODO:
+ *
+ * 1. 注册机制，type='prefix | suffix | regex'，
+ *   type='prefix' value='='，注册为公式
+ *   type='prefix' value=''' 注册为单元格文本格式设置
+ *
+ * 2. p存储的富文本字符数少于50的情况下，存一份到v，便于vlookup公式计算
  */
 export class CellEditorController {
     private _plugin: SpreadsheetPlugin;

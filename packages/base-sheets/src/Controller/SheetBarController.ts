@@ -1,6 +1,6 @@
 import { BaseUlProps } from '@univer/base-component';
 import { ACTION_NAMES, CommandManager, NameGen, Nullable, PLUGIN_NAMES } from '@univer/core';
-import { SheetBarModel } from '../Model/Domain/SheetBarModel';
+import { SheetBarModel } from '../Model/SheetBarModel';
 import { SheetBar } from '../View/UI/SheetBar';
 import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
 

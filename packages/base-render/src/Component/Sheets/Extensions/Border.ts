@@ -1,12 +1,12 @@
 import { BorderStyleTypes, IRangeData, ObjectMatrix } from '@univer/core';
 import { BorderCacheItem } from '../Interfaces';
-import { fixLineWidthByScale } from '../../../Base/Tools';
+import { fixLineWidthByScale } from '../../../Basics/Tools';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';
-import { IScale } from '../../../Base/Interfaces';
-import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../../Base/Const';
+import { IScale } from '../../../Basics/Interfaces';
+import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../../Basics/Const';
 import { SpreadsheetExtensionRegistry } from '../../Extension';
-import { drawLineByBorderType, getLineWidth, setLineType } from '../../../Base/Draw';
+import { drawLineByBorderType, getLineWidth, setLineType } from '../../../Basics/Draw';
 
 const UNIQUE_KEY = 'DefaultBorderExtension';
 

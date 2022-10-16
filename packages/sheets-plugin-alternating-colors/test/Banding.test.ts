@@ -50,7 +50,7 @@ test('Test Banding', () => {
     });
 
     const uiDefaultConfigUp = {
-        containerId: 'universheet-demo-up',
+        container: 'universheet-demo-up',
         // layout: 'auto',
         layout: {
             outerLeft: false,

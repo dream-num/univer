@@ -1,20 +1,26 @@
-import { Context, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { Context, Plugin, PLUGIN_NAMES, UniverSheet } from '@univer/core';
 import { <%= projectUpperValue %>Button } from './View/UI/<%= projectUpperValue %>Button';
 import { zh, en } from './Locale';
 
 import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
 import { IOCContainer } from '@univer/core';
 import { SpreadsheetPlugin } from '@univer/base-sheets';
-import { <%= projectConstantValue % >_PLUGIN_NAME} from './Basic/Const/PLUGIN_NAME'
+import { <%= projectConstantValue %>_PLUGIN_NAME} from './Basic/Const/PLUGIN_NAME'
 
-interface IPluginConfig {}
-
-interface IConfig {}
+export interface I<%= projectUpperValue %>PluginConfig {}
 
 export class <%= projectUpperValue %>Plugin extends Plugin {
 
     constructor(config ?: IPluginConfig) {
         super(<%= projectConstantValue %>_PLUGIN_NAME);
+    }
+
+    static create(config?: I<%= projectUpperValue %>PluginConfig) {
+        return new <%= projectUpperValue %>Plugin(config);
+    }
+
+    installTo(universheetInstance: UniverSheet) {
+        universheetInstance.installPlugin(this);
     }
 
     initialize(): void {

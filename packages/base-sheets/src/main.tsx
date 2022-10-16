@@ -6,7 +6,7 @@ import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
 import { FormulaPlugin } from '@univer/sheets-plugin-formula';
 
 const uiDefaultConfigUp = {
-    containerId: 'universheet-demo-up',
+    container: 'universheet-demo-up',
     layout: {
         innerRight: false,
         outerLeft: false,

@@ -1,3 +1,3 @@
-import { SpreadsheetPlugin } from './SpreadsheetPlugin';
-
-export { SpreadsheetPlugin };
+export * from './SpreadsheetPlugin';
+export * from './Model';
+export * from './Controller';

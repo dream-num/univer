@@ -81,7 +81,7 @@ const AddIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const reduceIcon = (props: BaseIconProps) => (
+const ReduceIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5318" width="1em" height="1em" fill="currentColor">
             <path d="M213.333333 469.333333h597.333334v85.333334H213.333333z" p-id="5319"></path>
@@ -96,7 +96,7 @@ export default {
     MoneyIcon,
     FxIcon,
     AddIcon,
-    reduceIcon,
+    ReduceIcon,
 };
 
 export class UniverAddNumIcon implements IconComponent {
@@ -129,8 +129,8 @@ export class UniverAddIcon implements IconComponent {
         return AddIcon;
     }
 }
-export class UniverreduceIcon implements IconComponent {
+export class UniverReduceIcon implements IconComponent {
     render(): FunctionComponent<BaseIconProps> {
-        return reduceIcon;
+        return ReduceIcon;
     }
 }

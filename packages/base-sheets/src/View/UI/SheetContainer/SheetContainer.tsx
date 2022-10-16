@@ -1,14 +1,10 @@
 import {
     AppContext,
-    BaseSheetContainerProps,
-    ILayout,
     IMainProps,
     IMainState,
     ISiderState,
     ISlotElement,
     ISlotProps,
-    JSXComponent,
-    SheetContainerComponent,
     Component,
     BaseComponentSheet,
     BaseComponentRender,
@@ -16,8 +12,9 @@ import {
     createRef,
     RefObject,
     cloneElement,
+    BaseComponentProps,
 } from '@univer/base-component';
-import { IKeyType, LocaleType, PLUGIN_NAMES, Tools, Workbook } from '@univer/core';
+import { AsyncFunction, Context, IKeyType, LocaleType, PLUGIN_NAMES, Tools, Workbook } from '@univer/core';
 import cssVars from 'css-vars-ponyfill';
 
 import {
@@ -41,8 +38,70 @@ import { RightMenu } from '../RightMenu';
 import { InfoBar } from '../InfoBar';
 import { SheetBar } from '../SheetBar';
 import style from './index.module.less';
-import { ToolBar } from '../ToolBar';
+import { IShowToolBarConfig, ToolBar } from '../ToolBar';
 import { CountBar } from '../CountBar/CountBar';
+
+export interface ILayout {
+    outerLeft?: boolean;
+
+    outerRight?: boolean;
+
+    header?: boolean;
+
+    footer?: boolean;
+
+    innerLeft?: boolean;
+
+    innerRight?: boolean;
+
+    frozenHeaderLT?: boolean;
+
+    frozenHeaderRT?: boolean;
+
+    frozenHeaderLM?: boolean;
+
+    frozenContent?: boolean;
+
+    // Whether to show the toolbar
+    toolBar?: boolean;
+
+    // Custom configuration toolbar,can be used in conjunction with showToolBar, showToolBarConfig has a higher priority
+    toolBarConfig?: IShowToolBarConfig;
+
+    /**
+     * 左右或者上下分割content区域
+     *
+     * undefined: no split
+     * false: no split
+     * true: horizontal split
+     * "horizontal": horizontal split
+     * "vertical": vertical split
+     */
+
+    contentSplit?: boolean | string;
+}
+
+export interface ISpreadsheetPluginConfigBase {
+    layout?: string | ILayout;
+}
+
+export interface BaseSheetContainerConfig extends BaseComponentProps, ISpreadsheetPluginConfigBase {
+    container: HTMLElement;
+    skin: string;
+    context: Context;
+    getSplitLeftRef: (ref: RefObject<HTMLDivElement>) => void;
+    getContentRef: (ref: RefObject<HTMLDivElement>) => void;
+    addButton: (cb: Function) => void;
+    addSider: (cb: AsyncFunction<ISlotProps>) => void;
+    addMain: (cb: Function) => void;
+    showSiderByName: (cb: Function) => void;
+    showMainByName: (cb: Function) => void;
+    onDidMount: () => void;
+}
+
+export interface BaseSheetContainerProps {
+    config: BaseSheetContainerConfig;
+}
 
 export const defaultLayout: ILayout = {
     outerLeft: false,
@@ -113,9 +172,6 @@ export const defaultLayout: ILayout = {
  * SheetContainer
  */
 
-// Types for props
-// type BaseSheetContainerProps = { config: ISheetContainerConfig };
-
 // Types for state
 type IState = {
     layout: ILayout;
@@ -128,6 +184,10 @@ type IState = {
     showSider: boolean;
     renderState: number;
 };
+
+/**
+ * One universheet instance DOM container
+ */
 export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
     splitLeftRef = createRef<HTMLDivElement>();
 
@@ -731,8 +791,8 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
     }
 }
 
-export class UniverSheetContainer implements SheetContainerComponent {
-    render(): JSXComponent<BaseSheetContainerProps> {
-        return SheetContainer;
-    }
-}
+// export class UniverSheetContainer implements SheetContainerComponent {
+//     render(): JSXComponent<BaseSheetContainerProps> {
+//         return SheetContainer;
+//     }
+// }

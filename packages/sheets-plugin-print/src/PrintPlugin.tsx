@@ -7,14 +7,14 @@ import { PrintButton } from './UI/PrintButton';
 import { IConfig } from './IData/IPrint';
 import { PRINT_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 
-type IPluginConfig = {};
+export interface IPrintPluginConfig {}
 
 export class PrintPlugin extends Plugin {
-    constructor(config?: IPluginConfig) {
+    constructor(config?: IPrintPluginConfig) {
         super(PRINT_PLUGIN_NAME);
     }
 
-    static create(config?: IPluginConfig) {
+    static create(config?: IPrintPluginConfig) {
         return new PrintPlugin(config);
     }
 

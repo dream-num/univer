@@ -1,22 +1,33 @@
-import { AsyncFunction, getRefElement, ILayout, IMainProps, ISheetContainerConfig, ISlotProps, IStyleConfig, IToolBarItemProps, RefObject, render } from '@univer/base-component';
+import { getRefElement, IMainProps, isElement, ISlotProps, IToolBarItemProps, RefObject, render } from '@univer/base-component';
 import { Engine, RenderEngine } from '@univer/base-render';
-import { Attribute, Context, IOCAttribute, IOCContainer, IWorkbookConfig, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { AsyncFunction, Attribute, Context, IOCAttribute, IOCContainer, IWorkbookConfig, Plugin, PLUGIN_NAMES } from '@univer/core';
 import { FormulaPlugin } from '@univer/sheets-plugin-formula';
-import { AntLineControl } from './Controller/AntLineController';
-import { CellEditorController } from './Controller/CellEditorController';
-import { CountBarController } from './Controller/CountBarController';
-import { InfoBarController } from './Controller/InfoBarController';
-import { RightMenuController } from './Controller/RightMenuController';
-import { SheetBarControl } from './Controller/SheetBarController';
-import { SheetContainerController } from './Controller/SheetContainerController';
-import { ToolBarController } from './Controller/ToolBarController';
-import { install, SpreadsheetPluginObserve, uninstall } from './Model/Base/Observer';
-import { RightMenuProps } from './Model/Domain/RightMenuModel';
-import { en, zh } from './Model/Locale';
+
+import { install, SpreadsheetPluginObserve, uninstall } from './Basics/Observer';
+import { RightMenuProps } from './Model/RightMenuModel';
+import { en, zh } from './Locale';
 import { CANVAS_VIEW_KEY } from './View/Render/BaseView';
 import { CanvasView } from './View/Render/CanvasView';
-import { SheetContainer } from './View/UI/SheetContainer';
+import { BaseSheetContainerConfig, ILayout, ISpreadsheetPluginConfigBase, SheetContainer } from './View/UI/SheetContainer';
+import {
+    RightMenuController,
+    ToolBarController,
+    InfoBarController,
+    SheetBarControl,
+    CellEditorController,
+    AntLineControl,
+    CountBarController,
+    SheetContainerController,
+} from './Controller';
 
+export interface ISpreadsheetPluginConfig extends ISpreadsheetPluginConfigBase {
+    container?: HTMLElement | string;
+    // selection?: ISelection[]
+}
+
+/**
+ * The main sheet base, construct the sheet container and layout, mount the rendering engine
+ */
 export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
     @Attribute()
     private pros: IOCAttribute;
@@ -41,7 +52,7 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
 
     private _showMainByNameFunc: Function;
 
-    private _sheetContainer: HTMLElement | any;
+    private _sheetContainer: HTMLElement;
 
     private _canvasEngine: Engine;
 
@@ -65,18 +76,25 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
 
     private _sheetContainerController: SheetContainerController;
 
-    constructor(props: IStyleConfig = {}) {
+    constructor(props: ISpreadsheetPluginConfig = {}) {
         super(PLUGIN_NAMES.SPREADSHEET);
 
-        const { containerId = 'universheet', layout = 'auto' } = props;
+        const { container = 'universheet', layout = 'auto' } = props;
         this.layout = layout;
 
-        this._sheetContainer = typeof containerId === 'string' ? document.getElementById(containerId) : containerId;
-
-        //  Prevent the container DOM from not rendering
-        if (this._sheetContainer == null) {
+        if (typeof container === 'string') {
+            const containerDOM = document.getElementById(container);
+            if (containerDOM == null) {
+                this._sheetContainer = document.createElement('div');
+                this._sheetContainer.id = container;
+            } else {
+                this._sheetContainer = containerDOM;
+            }
+        } else if (isElement(container)) {
+            this._sheetContainer = container;
+        } else {
             this._sheetContainer = document.createElement('div');
-            this._sheetContainer.id = containerId;
+            this._sheetContainer.id = 'universheet';
         }
     }
 
@@ -110,7 +128,7 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
 
         const configure: IWorkbookConfig = this.pros.getValue();
 
-        const config: ISheetContainerConfig = {
+        const config: BaseSheetContainerConfig = {
             skin: configure.skin || 'default',
             layout: this.layout,
             container: this._sheetContainer,

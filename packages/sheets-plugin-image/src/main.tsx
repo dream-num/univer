@@ -6,7 +6,7 @@ import { UniverComponentSheet } from '@univer/style-universheet';
 import { OverGridImagePlugin } from './OverGridImagePlugin';
 
 const uiDefaultConfigUp = {
-    containerId: 'universheet-demo-up',
+    container: 'universheet-demo-up',
     layout: 'auto',
 };
 const univerSheetUp = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);

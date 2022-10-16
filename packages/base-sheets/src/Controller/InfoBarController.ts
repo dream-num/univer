@@ -1,5 +1,5 @@
 import { PLUGIN_NAMES } from '@univer/core';
-import { InfoBarModel } from '../Model/Domain/InfoBarModel';
+import { InfoBarModel } from '../Model/InfoBarModel';
 import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
 import { InfoBar } from '../View/UI/InfoBar';
 

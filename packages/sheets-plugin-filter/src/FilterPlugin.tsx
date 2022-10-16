@@ -5,17 +5,17 @@ import { en, zh } from './Locale';
 import { IConfig } from './IData';
 import { FilterButton } from './UI/FilterButton';
 import { ACTION_NAMES, FILTER_PLUGIN_NAME } from './Const';
-import { Filter, FilterList, IFilterList } from './Domain';
+import { Filter, FilterList, IFilterPluginConfig } from './Domain';
 
 export class FilterPlugin extends Plugin {
     private _filterList: FilterList;
 
-    constructor(config?: IFilterList) {
+    constructor(config?: IFilterPluginConfig) {
         super(FILTER_PLUGIN_NAME);
         this._filterList = FilterList.fromSequence(config || {});
     }
 
-    static create(config?: IFilterList) {
+    static create(config?: IFilterPluginConfig) {
         return new FilterPlugin(config);
     }
 

@@ -20,7 +20,7 @@ const workbookConfig = {
 };
 
 const spreadsheetConfig = {
-    containerId: 'universheet-demo-up',
+    container: 'universheet-demo-up',
     layout: 'auto',
 };
 

@@ -1,5 +1,5 @@
 import { ICellInfo, ISelection, Nullable, makeCellToSelection } from '@univer/core';
-import { SELECTION_TYPE } from '../../Controller/Selection/SelectionController';
+import { SELECTION_TYPE } from '../Controller/Selection/SelectionController';
 
 export class SelectionModel implements ISelection {
     private _startColumn: number;

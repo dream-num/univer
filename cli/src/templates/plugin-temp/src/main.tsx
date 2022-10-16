@@ -8,7 +8,7 @@ import { <%= projectUpperValue %>Plugin } from './<%= projectUpperValue %>Plugin
 
 
 const uiDefaultConfigUp = {
-    containerId: 'universheet-demo',
+    container: 'universheet-demo',
     layout: 'auto',
 };
 

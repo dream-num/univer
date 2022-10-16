@@ -1,5 +1,5 @@
 import { IRangeData, ObjectMatrix } from '@univer/core';
-import { getCellByIndex } from '../../../Base/Tools';
+import { getCellByIndex } from '../../../Basics/Tools';
 import { ComponentExtension } from '../../Extension';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 

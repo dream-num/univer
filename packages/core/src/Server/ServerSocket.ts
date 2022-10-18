@@ -81,7 +81,7 @@ export class ServerSocket extends ServerBase {
      * @returns
      */
     private checkupReceiveMessage(receive: IOServerReceive<unknown>) {
-        if (ServerSocket.isMessageReponseReceive(receive)) {
+        if (ServerSocket.isMessageResponseReceive(receive)) {
             if (this.getTopMessage().version === receive.message.version) {
                 this.popTopMessage();
                 this.globalSendResolve();

@@ -50,6 +50,18 @@ export class SelectionControlDragAndDrop {
         });
     }
 
+    remove() {
+        const { leftControl, rightControl, topControl, bottomControl } = this._control;
+        leftControl.onPointerEnterObserver.clear();
+        leftControl.onPointerLeaveObserver.clear();
+        rightControl.onPointerEnterObserver.clear();
+        rightControl.onPointerLeaveObserver.clear();
+        topControl.onPointerEnterObserver.clear();
+        topControl.onPointerLeaveObserver.clear();
+        bottomControl.onPointerEnterObserver.clear();
+        bottomControl.onPointerLeaveObserver.clear();
+    }
+
     static create(control: SelectionControl) {
         return new SelectionControlDragAndDrop(control);
     }

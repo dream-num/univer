@@ -3,7 +3,7 @@ import { RenderEngine } from '@univer/base-render';
 import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
 import { UniverComponentSheet } from '@univer/style-universheet';
 import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
-import { FormulaPlugin } from '@univer/sheets-plugin-formula';
+import { DEFAULT_FORMULA_DATA, FormulaPlugin } from '@univer/sheets-plugin-formula';
 
 const uiDefaultConfigUp = {
     container: 'universheet-demo-up',
@@ -23,7 +23,7 @@ const uiDefaultConfigUp = {
 const univerSheetUp = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);
 univerSheetUp.installPlugin(new RenderEngine());
 univerSheetUp.installPlugin(new UniverComponentSheet());
-FormulaPlugin.create().installTo(univerSheetUp);
+FormulaPlugin.create(DEFAULT_FORMULA_DATA).installTo(univerSheetUp);
 
 // init spreadsheet plugin first
 import('./SpreadsheetPlugin').then(({ SpreadsheetPlugin }) => {

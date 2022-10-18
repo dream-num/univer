@@ -40,9 +40,9 @@ export class ToolBarController {
         this.Render = component.getComponentRender();
 
         const config =
-            this._plugin.layout === 'auto'
+            this._plugin.config.layout === 'auto'
                 ? Tools.deepClone(defaultLayout.toolBarConfig)
-                : Tools.deepMerge(defaultLayout.toolBarConfig, (this._plugin.layout as ILayout).toolBarConfig);
+                : Tools.deepMerge(defaultLayout.toolBarConfig, (this._plugin.config.layout as ILayout).toolBarConfig);
 
         const toolList: IToolBarItemProps[] = [
             {

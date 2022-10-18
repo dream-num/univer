@@ -6,7 +6,7 @@ export function InsertSheet(
     index: number,
     worksheetConfig: IWorksheetConfig
 ): string {
-    const iSheets = workbook._getWorksheets();
+    const iSheets = workbook.getWorksheets();
     const config = workbook.getConfig();
     const { sheets, sheetOrder } = config;
     if (sheets[worksheetConfig.id]) {

@@ -214,7 +214,7 @@ export class Workbook {
         return item;
     }
 
-    _getWorksheets(): Map<string, Worksheet> {
+    getWorksheets(): Map<string, Worksheet> {
         return this._worksheets;
     }
 

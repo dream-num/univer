@@ -25,6 +25,8 @@ export class FormulaEnginePlugin extends Plugin<FormulaEnginePluginObserver> {
         lexerTreeMaker.suffixExpressionHandler(lexerNode); // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
         console.log('lexerNode', lexerNode.serialize());
 
+        this.getObserver('onAfterFormulaLexerObservable')?.notifyObservers(lexerNode);
+
         const astTreeMaker = AstTreeMaker.create();
 
         const astNode = astTreeMaker.parse(lexerNode);
@@ -36,8 +38,6 @@ export class FormulaEnginePlugin extends Plugin<FormulaEnginePluginObserver> {
         resultPromise.then((value) => {
             console.log('formulaResult', value);
         });
-
-        this.getObserver('onAfterFormulaLexerObservable')?.notifyObservers(lexerNode);
     }
 
     initialize(): void {}

@@ -9,7 +9,7 @@ import { ActionBase, IActionData } from '../../Command/ActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
 /**
- * @internal
+ *
  */
 export interface ISetRangeFormattedValueActionData extends IActionData {
     cellValue: ObjectMatrixPrimitiveType<ICellV>;
@@ -17,7 +17,7 @@ export interface ISetRangeFormattedValueActionData extends IActionData {
 }
 
 /**
- * @internal
+ *
  */
 export class SetRangeFormattedValueAction extends ActionBase<
     ISetRangeFormattedValueActionData,

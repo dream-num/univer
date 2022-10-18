@@ -28,7 +28,7 @@ import {
     SetRangeFormulaAction,
     SetRangeNoteAction,
     SetRangeStyleAction,
-    SetRangeValueAction,
+    SetRangeFormattedValueAction,
     SetRightToLeftAction,
     SetRowHeightAction,
     SetRowHideAction,
@@ -62,7 +62,10 @@ CommandManager.register(
     SetSelectionActivateAction
 );
 CommandManager.register(ACTION_NAMES.SET_RANGE_DATA_ACTION, SetRangeDataAction);
-CommandManager.register(ACTION_NAMES.SET_RANGE_VALUE_ACTION, SetRangeValueAction);
+CommandManager.register(
+    ACTION_NAMES.SET_RANGE_FORMATTED_VALUE_ACTION,
+    SetRangeFormattedValueAction
+);
 CommandManager.register(ACTION_NAMES.DELETE_RANGE_ACTION, DeleteRangeAction);
 CommandManager.register(ACTION_NAMES.CLEAR_RANGE_ACTION, ClearRangeAction);
 CommandManager.register(ACTION_NAMES.INSERT_RANGE_ACTION, InsertRangeAction);

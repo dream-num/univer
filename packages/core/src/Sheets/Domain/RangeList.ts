@@ -7,7 +7,7 @@ import {
     ISetRangeDataActionData,
     ISetRangeFormulaActionData,
     ISetRangeStyleActionData,
-    ISetRangeValueActionData,
+    ISetRangeFormattedValueActionData,
 } from '../../Command';
 
 import { ACTION_NAMES } from '../../Const';
@@ -726,9 +726,9 @@ export class RangeList {
                 }
             }
 
-            let setValue: ISetRangeValueActionData = {
+            let setValue: ISetRangeFormattedValueActionData = {
                 sheetId: _worksheet.getSheetId(),
-                actionName: ACTION_NAMES.SET_RANGE_VALUE_ACTION,
+                actionName: ACTION_NAMES.SET_RANGE_FORMATTED_VALUE_ACTION,
                 cellValue: cellValue.getData(),
                 rangeData: range,
             };

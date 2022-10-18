@@ -12,7 +12,7 @@ import {
     ISetRangeDataActionData,
     ISetRangeFormulaActionData,
     ISetRangeStyleActionData,
-    ISetRangeValueActionData,
+    ISetRangeFormattedValueActionData,
 } from '../../Command';
 import { DEFAULT_RANGE, DEFAULT_STYLES } from '../../Const';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
@@ -1869,9 +1869,9 @@ export class Range {
             }
         }
 
-        const setValue: ISetRangeValueActionData = {
+        const setValue: ISetRangeFormattedValueActionData = {
             sheetId: _worksheet.getSheetId(),
-            actionName: ACTION_NAMES.SET_RANGE_VALUE_ACTION,
+            actionName: ACTION_NAMES.SET_RANGE_FORMATTED_VALUE_ACTION,
             cellValue: cellValue.getData(),
             rangeData: this._rangeData,
         };
@@ -2088,9 +2088,9 @@ export class Range {
                     })
                 );
 
-                const setValue: ISetRangeValueActionData = {
+                const setValue: ISetRangeFormattedValueActionData = {
                     sheetId: _worksheet.getSheetId(),
-                    actionName: ACTION_NAMES.SET_RANGE_VALUE_ACTION,
+                    actionName: ACTION_NAMES.SET_RANGE_FORMATTED_VALUE_ACTION,
                     cellValue: cellValue.getData(),
                     rangeData: range,
                 };
@@ -2279,9 +2279,9 @@ export class Range {
             })
         );
 
-        const setValue: ISetRangeValueActionData = {
+        const setValue: ISetRangeFormattedValueActionData = {
             sheetId,
-            actionName: ACTION_NAMES.SET_RANGE_VALUE_ACTION,
+            actionName: ACTION_NAMES.SET_RANGE_FORMATTED_VALUE_ACTION,
             cellValue: cellValue.getData(),
             rangeData: range,
         };
@@ -3030,9 +3030,9 @@ export class Range {
                 cellValue.setValue(r, c, value);
             }
         }
-        const setValue: ISetRangeValueActionData = {
+        const setValue: ISetRangeFormattedValueActionData = {
             sheetId: _worksheet.getSheetId(),
-            actionName: ACTION_NAMES.SET_RANGE_VALUE_ACTION,
+            actionName: ACTION_NAMES.SET_RANGE_FORMATTED_VALUE_ACTION,
             cellValue: cellValue.getData(),
             rangeData: this._rangeData,
         };
@@ -3063,18 +3063,18 @@ export class Range {
                 }
             }
 
-            const setValue: ISetRangeValueActionData = {
+            const setValue: ISetRangeFormattedValueActionData = {
                 sheetId: _worksheet.getSheetId(),
-                actionName: ACTION_NAMES.SET_RANGE_VALUE_ACTION,
+                actionName: ACTION_NAMES.SET_RANGE_FORMATTED_VALUE_ACTION,
                 cellValue: cellValue.getData(),
                 rangeData: this._rangeData,
             };
             const command = new Command(_context.getWorkBook(), setValue);
             _commandManager.invoke(command);
         } else if (Tuples.checkup(argument, ObjectMatrix)) {
-            const setValue: ISetRangeValueActionData = {
+            const setValue: ISetRangeFormattedValueActionData = {
                 sheetId: _worksheet.getSheetId(),
-                actionName: ACTION_NAMES.SET_RANGE_VALUE_ACTION,
+                actionName: ACTION_NAMES.SET_RANGE_FORMATTED_VALUE_ACTION,
                 cellValue: values,
                 rangeData: this._rangeData,
             };

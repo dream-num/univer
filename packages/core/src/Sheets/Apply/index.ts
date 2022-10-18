@@ -29,7 +29,7 @@ export * from './SetRangeFormat';
 export * from './SetRangeFormula';
 export * from './SetRangeNote';
 export * from './SetRangeStyle';
-export * from './SetRangeValue';
+export * from './SetRangeFormattedValue';
 export * from './SetRightToLeft';
 export * from './SetRowHeight';
 export * from './SetSelectionActivate';

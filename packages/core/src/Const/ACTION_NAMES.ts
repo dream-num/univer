@@ -12,7 +12,7 @@ export enum ACTION_NAMES {
     SET_RANGE_FORMAT_ACTION = 'SetRangeFormatAction',
     SET_SELECTION_ACTION = 'SetSelectionActivateAction',
     SET_RANGE_DATA_ACTION = 'SetRangeDataAction',
-    SET_RANGE_VALUE_ACTION = 'SetRangeValueAction',
+    SET_RANGE_FORMATTED_VALUE_ACTION = 'SetRangeFormattedValueAction',
     SET_RANGE_NOTE_ACTION = 'SetRangeNoteAction',
     DELETE_RANGE_ACTION = 'DeleteRangeAction',
     INSERT_SHEET_ACTION = 'InsertSheetAction',

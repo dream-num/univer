@@ -8,10 +8,10 @@ import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatr
  * @param addMatrix
  * @param rangeData
  * @returns
- *
+ *TODO: change to setRangeFormattedValue()
  * @internal
  */
-export function SetRangeValue(
+export function SetRangeFormattedValue(
     cellMatrix: ObjectMatrix<ICellData>,
     addMatrix: ObjectMatrixPrimitiveType<ICellV>,
     rangeData: IRangeData

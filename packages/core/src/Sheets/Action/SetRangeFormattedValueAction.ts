@@ -1,4 +1,4 @@
-import { SetRangeValue } from '../Apply';
+import { SetRangeFormattedValue } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { CONVERTOR_OPERATION } from '../../Const/CONST';
 import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
@@ -11,7 +11,7 @@ import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 /**
  * @internal
  */
-export interface ISetRangeValueActionData extends IActionData {
+export interface ISetRangeFormattedValueActionData extends IActionData {
     cellValue: ObjectMatrixPrimitiveType<ICellV>;
     rangeData: IRangeData;
 }
@@ -19,13 +19,13 @@ export interface ISetRangeValueActionData extends IActionData {
 /**
  * @internal
  */
-export class SetRangeValueAction extends ActionBase<
-    ISetRangeValueActionData,
-    ISetRangeValueActionData,
+export class SetRangeFormattedValueAction extends ActionBase<
+    ISetRangeFormattedValueActionData,
+    ISetRangeFormattedValueActionData,
     ObjectMatrixPrimitiveType<ICellV>
 > {
     constructor(
-        actionData: ISetRangeValueActionData,
+        actionData: ISetRangeFormattedValueActionData,
         workbook: Workbook,
         observers: ActionObservers
     ) {
@@ -46,7 +46,7 @@ export class SetRangeValueAction extends ActionBase<
     do(): ObjectMatrixPrimitiveType<ICellV> {
         const worksheet = this.getWorkSheet();
 
-        const result = SetRangeValue(
+        const result = SetRangeFormattedValue(
             worksheet.getCellMatrix(),
             this._doActionData.cellValue,
             this._doActionData.rangeData
@@ -80,7 +80,7 @@ export class SetRangeValueAction extends ActionBase<
             this._doActionData = {
                 actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                 sheetId,
-                cellValue: SetRangeValue(
+                cellValue: SetRangeFormattedValue(
                     worksheet.getCellMatrix(),
                     cellValue,
                     rangeData

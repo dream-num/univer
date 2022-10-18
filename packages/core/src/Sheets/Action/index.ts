@@ -27,7 +27,7 @@ export * from './SetRangeFormatAction';
 export * from './SetRangeFormulaAction';
 export * from './SetRangeNoteAction';
 export * from './SetRangeStyleAction';
-export * from './SetRangeValueAction';
+export * from './SetRangeFormattedValueAction';
 export * from './SetRightToLeftAction';
 export * from './SetRowHeightAction';
 export * from './SetRowHideAction';

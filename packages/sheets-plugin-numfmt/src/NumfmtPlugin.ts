@@ -1,9 +1,14 @@
-import { Context, ObjectMatrixPrimitiveType, Plugin } from '@univer/core';
+import { Context, IRangeData, Plugin } from '@univer/core';
 import { NUMFMT_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 import { NumfmtController } from './Controller/NumfmtController';
-import { NumfmtValue } from './Model/NumfmtModel';
 
 export class NumfmtPlugin extends Plugin {
+    static isCurrency() {}
+
+    static isNumeral() {}
+
+    static isPercentage() {}
+
     protected _controller: NumfmtController;
 
     constructor() {
@@ -14,19 +19,5 @@ export class NumfmtPlugin extends Plugin {
         this._controller = new NumfmtController(this);
     }
 
-    getConfig(sheetId: string): ObjectMatrixPrimitiveType<NumfmtValue> {
-        return this._controller.getConfig(sheetId);
-    }
-
-    getValue(sheetId: string, row: number, column: number): string {
-        return this._controller.getValue(sheetId, row, column);
-    }
-
-    getColor(sheetId: string, row: number, column: number): string {
-        return this._controller.getColor(sheetId, row, column);
-    }
-
-    setNumfmt(sheetId: string, row: number, column: number, numfmt: string): void {
-        this._controller.setNumfmt(sheetId, row, column, numfmt);
-    }
+    setNumfmtByRange(sheetId: string, range: IRangeData, value: string): void {}
 }

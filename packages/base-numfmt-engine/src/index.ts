@@ -49,7 +49,7 @@ function getFormatter(parseData: PatternType, initOpts: OptionsData = {}): Forma
     return Object.freeze(formatter);
 }
 
-function numfmt(pattern: string, opts: OptionsData = {}): FormatterType {
+function numfmt(pattern?: string, opts: OptionsData = {}): FormatterType {
     if (!pattern) {
         pattern = 'General';
     }

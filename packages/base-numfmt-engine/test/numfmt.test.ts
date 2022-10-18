@@ -39,3 +39,8 @@ test('numfmt percentage', () => {
   const formatter = numfmt("0.00%");
   expect(formatter(0.1)).toEqual('10.00%');
 });
+
+test('numfmt isCurrency', () => {
+  const formatter = numfmt();
+  expect(formatter(1.00)).toEqual('￥1.00');
+});

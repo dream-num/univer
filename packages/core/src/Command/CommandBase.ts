@@ -4,7 +4,7 @@ import { CommandManager } from './CommandManager';
 import { CommandInjector } from './CommandInjectorObservers';
 import { Class, Nullable } from '../Shared';
 import { ActionType } from './ActionObservers';
-// import { ActionExtensionManager } from './ActionExtensionManager';
+import { ActionExtensionManager } from './ActionExtensionManager';
 
 /**
  * Manage action instances and action data
@@ -19,8 +19,8 @@ export class CommandBase {
         this._actions = [];
 
         // TODO inject and invoke
-        // const actionExtensionManager = new ActionExtensionManager();
-        // actionExtensionManager.inject(this);
+        const actionExtensionManager = new ActionExtensionManager();
+        actionExtensionManager.inject(this);
 
         list.forEach((data) => {
             const ActionClass = CommandManager.getAction(data.actionName);

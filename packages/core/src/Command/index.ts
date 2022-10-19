@@ -12,6 +12,6 @@ export * from './UndoManager';
 
 /* eslint-disable import/first */
 import './RegisterAction';
-// import './RegisterActionExtension';
+import './RegisterActionExtension';
 
 // @endindex

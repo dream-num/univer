@@ -1,13 +1,13 @@
 import { ActionBase, ActionObservers, IActionData, Workbook } from '@univer/core';
 
-export interface ISetNumfmtActionData extends IActionData {
+export interface ISetNumfmtCoordsActionData extends IActionData {
     row: number;
     column: number;
     numfmt: string;
 }
 
-export class SetNumfmtAction extends ActionBase<ISetNumfmtActionData, ISetNumfmtActionData> {
-    constructor(actionData: ISetNumfmtActionData, workbook: Workbook, observers: ActionObservers) {
+export class SetNumfmtCoordsAction extends ActionBase<ISetNumfmtCoordsActionData, ISetNumfmtCoordsActionData> {
+    constructor(actionData: ISetNumfmtCoordsActionData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._doActionData = {
             ...actionData,

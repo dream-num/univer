@@ -24,7 +24,7 @@ export class NumfmtController {
         return this._model.getNumfmtValue(sheetId, row, column);
     }
 
-    setNumfmt(sheetId: string, row: number, column: number, numfmt: string): void {
+    setNumfmtByCoords(sheetId: string, row: number, column: number, numfmt: string): void {
         const pluginContext = this._plugin.getContext();
         const commandManager = pluginContext.getCommandManager();
         const config = {

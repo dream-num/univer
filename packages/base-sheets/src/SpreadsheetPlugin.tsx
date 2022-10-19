@@ -52,6 +52,20 @@ const DEFAULT_SPREADSHEET_PLUGIN_DATA: ISpreadsheetPluginConfig = {
                 },
             },
         ],
+        'sheet-02': [
+            {
+                selection: {
+                    startRow: 17,
+                    endRow: 19,
+                    startColumn: 1,
+                    endColumn: 2,
+                },
+                cell: {
+                    row: 17,
+                    column: 1,
+                },
+            },
+        ],
     },
 };
 

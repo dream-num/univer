@@ -284,13 +284,14 @@ class SheetBarUIController {
                     const target = e.currentTarget as HTMLDivElement;
                     this._dataId = target.dataset.id as string;
                     sheet.activate();
-                    // 清空选区
-                    const controls = plugin.getSelectionManager().getCurrentControls();
-                    for (let control of controls!) {
-                        control.dispose();
-                    }
+                    plugin.getSelectionManager().renderCurrentControls();
+                    // // 清空选区
+                    // const controls = plugin.getSelectionManager().getCurrentControls();
+                    // for (let control of controls!) {
+                    //     control.dispose();
+                    // }
                     plugin.getCanvasView().updateToSheet(plugin.getContext().getWorkBook().getActiveSheet()!);
-                    // plugin.getMainComponent().makeDirty(true);
+                    // // plugin.getMainComponent().makeDirty(true);
                 },
             }));
         this._sheetIndex = sheets.findIndex((sheet) => sheet.getStatus() === 1);

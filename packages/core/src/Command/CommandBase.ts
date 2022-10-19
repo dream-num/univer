@@ -20,7 +20,7 @@ export class CommandBase {
 
         // TODO inject and invoke
         const actionExtensionManager = new ActionExtensionManager();
-        actionExtensionManager.inject(this);
+        actionExtensionManager.handle(list);
 
         list.forEach((data) => {
             const ActionClass = CommandManager.getAction(data.actionName);

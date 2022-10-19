@@ -501,6 +501,6 @@ export function parseBool(str) {
     return null;
 }
 
-export function parseValue(s, opts) {
+export function parseValue(s, opts?): { v: Date | number[]; z: any } | { v: number; z: any } | { v: boolean } {
     return parseNumber(s) ?? parseDate(s, opts) ?? parseTime(s) ?? parseBool(s);
 }

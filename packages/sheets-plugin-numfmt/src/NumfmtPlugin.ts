@@ -3,12 +3,6 @@ import { NUMFMT_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 import { NumfmtController } from './Controller/NumfmtController';
 
 export class NumfmtPlugin extends Plugin {
-    static isCurrency() {}
-
-    static isNumeral() {}
-
-    static isPercentage() {}
-
     protected _controller: NumfmtController;
 
     constructor() {
@@ -19,5 +13,9 @@ export class NumfmtPlugin extends Plugin {
         this._controller = new NumfmtController(this);
     }
 
-    setNumfmtByRange(sheetId: string, range: IRangeData, value: string): void {}
+    intercepted(): void {}
+
+    setNumfmtByRange(sheetId: string, range: IRangeData, format: string): void {}
+
+    setNumfmtByCoords(row: number, column: number, format: string): void {}
 }

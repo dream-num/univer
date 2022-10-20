@@ -1,4 +1,4 @@
-import { Rect, Group } from '@univer/base-render';
+import { Rect, Group, Spreadsheet } from '@univer/base-render';
 import { Nullable, ISelection, ICellInfo } from '@univer/core';
 import { SelectionModel } from '../../Model/SelectionModel';
 import { SelectionControlDragAndDrop } from './SelectionControlDragDrop';
@@ -42,6 +42,8 @@ enum SELECTION_MANAGER_KEY {
 }
 
 export class SelectionControl {
+    private _mainComponent: Spreadsheet;
+
     private _leftControl: Rect;
 
     private _rightControl: Rect;
@@ -275,7 +277,43 @@ export class SelectionControl {
         this._updateControl();
     }
 
+    /**
+     *When switching to the current sheet
+     *
+     * 1. Reinitialize the rendering component
+     * 2. Calculate the position based on the current skeleton
+     * 3. Update data
+     * 4. Trigger rendering
+     */
     render() {
+        this._initialize();
+
+        let cellInfo = null;
+        const main = this._manager.getMainComponent();
+        const curCellRange = this._selectionModel.currentCell;
+
+        if (curCellRange) {
+            cellInfo = main.getCellByIndex(curCellRange.row, curCellRange.column);
+        }
+
+        const { startRow: finalStartRow, startColumn: finalStartColumn, endRow: finalEndRow, endColumn: finalEndColumn } = this._selectionModel;
+        const startCell = main.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn);
+        const endCell = main.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn);
+
+        this._selectionModel.setValue(
+            {
+                startColumn: finalStartColumn,
+                startRow: finalStartRow,
+                endColumn: finalEndColumn,
+                endRow: finalEndRow,
+                startY: startCell?.startY || 0,
+                endY: endCell?.endY || 0,
+                startX: startCell?.startX || 0,
+                endX: endCell?.endX || 0,
+            },
+            cellInfo
+        );
+
         this._updateControl();
     }
 

@@ -3,7 +3,7 @@ import { Workbook } from '../Sheets/Domain';
 import { CommandManager } from './CommandManager';
 import { CommandInjector } from './CommandInjectorObservers';
 import { Class, Nullable } from '../Shared';
-import { ActionType } from './ActionObservers';
+// import { ActionType } from './ActionObservers';
 import { ActionExtensionManager } from './ActionExtensionManager';
 
 /**
@@ -28,10 +28,10 @@ export class CommandBase {
             const action = new ActionClass(data, this._workbook, observers);
             this._actions.push(action);
         });
-        CommandManager.getCommandObservers().notifyObservers({
-            type: ActionType.REDO,
-            actions: this._actions,
-        });
+        // CommandManager.getCommandObservers().notifyObservers({
+        //     type: ActionType.REDO,
+        //     actions: this._actions,
+        // });
     }
 
     getDoData(): IActionData[] {

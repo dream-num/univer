@@ -1,5 +1,5 @@
 import { IMouseEvent, IPointerEvent } from '@univer/base-render';
-import { Locale, PLUGIN_NAMES, Worksheet } from '@univer/core';
+import { Locale, PLUGIN_NAMES } from '@univer/core';
 import { RightMenuModel, RightMenuProps } from '../Model/RightMenuModel';
 import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
 import Style from '../View/UI/RightMenu/index.module.less';
@@ -204,10 +204,10 @@ export class RightMenuController {
         ];
 
         this._rightMenuModel = new RightMenuModel();
-        this._init(this._menuList);
+        this._initialize(this._menuList);
     }
 
-    private _init(menuList: RightMenuProps[]) {
+    private _initialize(menuList: RightMenuProps[]) {
         const context = this._plugin.getContext();
         const manager = context.getObserverManager();
 
@@ -364,10 +364,10 @@ export class RightMenuController {
         return selections;
     }
 
-    private _render(sheet: Worksheet) {
-        this._plugin.getCanvasView().updateToSheet(sheet);
-        this._plugin?.getMainComponent().makeDirty(true);
-    }
+    // private _render(sheet: Worksheet) {
+    //     this._plugin.getCanvasView().updateToSheet(sheet);
+    //     this._plugin?.getMainComponent().makeDirty(true);
+    // }
 
     insertRow = (...arg: any) => {
         arg[1].ref.hideSelect();
@@ -376,7 +376,7 @@ export class RightMenuController {
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
             sheet?.insertRowBefore(selections[0].startRow, selections[0].endRow - selections[0].startRow + 1);
-            this._render(sheet);
+            // this._render(sheet);
         }
     };
 
@@ -387,7 +387,7 @@ export class RightMenuController {
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
             sheet?.deleteRows(selections[0].startRow, selections[0].endRow - selections[0].startRow + 1);
-            this._render(sheet);
+            // this._render(sheet);
         }
     };
 
@@ -398,7 +398,7 @@ export class RightMenuController {
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
             sheet.insertColumnBefore(selections[0].startColumn, selections[0].endColumn - selections[0].startColumn + 1);
-            this._render(sheet);
+            // this._render(sheet);
         }
     };
 
@@ -409,7 +409,7 @@ export class RightMenuController {
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
             sheet.deleteColumns(selections[0].startColumn, selections[0].endColumn - selections[0].startColumn + 1);
-            this._render(sheet);
+            // this._render(sheet);
         }
     };
 
@@ -420,7 +420,7 @@ export class RightMenuController {
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
             sheet.getRange(selections[0]).clear();
-            this._render(sheet);
+            // this._render(sheet);
         }
     };
 
@@ -432,7 +432,7 @@ export class RightMenuController {
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
             sheet.getRange(selections[0]).deleteCells(0);
-            this._render(sheet);
+            // this._render(sheet);
         }
     };
 
@@ -444,7 +444,7 @@ export class RightMenuController {
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
             sheet.getRange(selections[0]).deleteCells(1);
-            this._render(sheet);
+            // this._render(sheet);
         }
     };
 

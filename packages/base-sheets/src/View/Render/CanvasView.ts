@@ -85,7 +85,7 @@ export class CanvasView {
             const plugin = this._plugin as SpreadsheetPlugin;
             this._scene.scale(value.zoomRatio, value.zoomRatio);
             // this._scene.makeDirty();
-            // update data
+            // update data TODO 增加action后，会自动刷新，此处需要移除
             plugin.getCanvasView().updateToSheet(this._plugin.getContext().getWorkBook().getActiveSheet()!);
             // update render
             // plugin.getMainComponent().makeDirty(true);

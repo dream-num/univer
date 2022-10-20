@@ -1,15 +1,8 @@
-import { CommandManager } from '@univer/core';
+import { BooleanNumber, CommandManager } from '@univer/core';
 import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
-import { SheetContainer } from '../View/UI/SheetContainer';
 
 export class SheetContainerController {
     private _plugin: SpreadsheetPlugin;
-
-    private _sheetContainer: SheetContainer;
-
-    private _sheetContainerContent: HTMLElement;
-
-    // private __debounceTimeout: number;
 
     constructor(plugin: SpreadsheetPlugin) {
         this._plugin = plugin;
@@ -17,15 +10,16 @@ export class SheetContainerController {
         this._initialize();
     }
 
-    protected _initialize() {
+    private _initialize() {
         // Monitor all command changes and automatically trigger the refresh of the canvas
-        CommandManager.getActionObservers().add((actionEvent) => {
-            //In order not to affect the refresh experience and remove the delay, multiple refreshes are acceptable if there is no performance problem
+        CommandManager.getCommandObservers().add(({ actions }) => {
+            const worksheet = actions[0].getWorkSheet();
 
-            // window.clearTimeout(this.__debounceTimeout);
-            // this.__debounceTimeout = window.setTimeout(() => {
-            this._plugin.getMainComponent().makeDirty(true);
-            // }, 10);
+            // Only the currently active worksheet needs to be refreshed
+            if (worksheet.getConfig().status === BooleanNumber.TRUE) {
+                this._plugin.getCanvasView().updateToSheet(worksheet);
+                this._plugin.getMainComponent().makeDirty(true);
+            }
         });
     }
 }

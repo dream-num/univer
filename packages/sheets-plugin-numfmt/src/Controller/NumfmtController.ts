@@ -1,4 +1,4 @@
-import { Command, ObjectMatrixPrimitiveType, Plugin } from '@univer/core';
+import { Command, Range, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType, Plugin } from '@univer/core';
 import { ACTION_NAMES } from '../Const';
 import { NumfmtModel, NumfmtValue } from '../Model/NumfmtModel';
 
@@ -24,11 +24,28 @@ export class NumfmtController {
         return this._model.getNumfmtValue(sheetId, row, column);
     }
 
-    setNumfmt(sheetId: string, row: number, column: number, numfmt: string): void {
+    setNumfmtByRange(sheetId: string, numfmtRange: IRangeData, numfmtValue: string): void {
+        const numfmtMatrix = new ObjectMatrix<string>();
+        Range.foreach(numfmtRange, (row, column) => {
+            numfmtMatrix.setValue(row, column, numfmtValue);
+        });
         const pluginContext = this._plugin.getContext();
         const commandManager = pluginContext.getCommandManager();
         const config = {
-            actionName: ACTION_NAMES.SET_NUMFMT_ACTION,
+            actionName: ACTION_NAMES.SET_NUMFMT_RANGE_ACTION,
+            sheetId,
+            numfmtMatrix,
+            numfmtValue,
+        };
+        const command = new Command(pluginContext.getWorkBook(), config);
+        commandManager.invoke(command);
+    }
+
+    setNumfmtByCoords(sheetId: string, row: number, column: number, numfmt: string): void {
+        const pluginContext = this._plugin.getContext();
+        const commandManager = pluginContext.getCommandManager();
+        const config = {
+            actionName: ACTION_NAMES.SET_NUMFMT_COORDS_ACTION,
             sheetId,
             row,
             column,

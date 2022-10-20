@@ -1,14 +1,9 @@
-import { Context, IRangeData, Plugin } from '@univer/core';
+import { ActionExtensionManager, Context, IRangeData, Plugin } from '@univer/core';
 import { NUMFMT_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 import { NumfmtController } from './Controller/NumfmtController';
+import { NumfmtActionExtensionFactory } from './NumfmtActionExtensionFactory';
 
 export class NumfmtPlugin extends Plugin {
-    static isCurrency() {}
-
-    static isNumeral() {}
-
-    static isPercentage() {}
-
     protected _controller: NumfmtController;
 
     constructor() {
@@ -19,5 +14,14 @@ export class NumfmtPlugin extends Plugin {
         this._controller = new NumfmtController(this);
     }
 
-    setNumfmtByRange(sheetId: string, range: IRangeData, value: string): void {}
+    intercepted(): void {
+        const register = ActionExtensionManager.create();
+        register.add(new NumfmtActionExtensionFactory(this));
+    }
+
+    setNumfmtByRange(sheetId: string, range: IRangeData, format: string): void {}
+
+    setNumfmtByCoords(sheetId: string, row: number, column: number, format: string): void {
+        this._controller.setNumfmtByCoords(sheetId, row, column, format);
+    }
 }

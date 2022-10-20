@@ -75,6 +75,18 @@ type IValueOptionsType = {
  * @beta
  */
 export class Range {
+    static foreach(
+        rangeData: IRangeData,
+        action: (row: number, column: number) => void
+    ): void {
+        const { startRow, startColumn, endRow, endColumn } = rangeData;
+        for (let i = startRow; i <= endRow; i++) {
+            for (let j = startColumn; j <= endColumn; j++) {
+                action(i, j);
+            }
+        }
+    }
+
     private _commandManager: CommandManager;
 
     private _context: Context;
@@ -3638,12 +3650,7 @@ export class Range {
     }
 
     forEach(action: (row: number, column: number) => void): void {
-        const { startRow, startColumn, endRow, endColumn } = this._rangeData;
-        for (let i = startRow; i <= endRow; i++) {
-            for (let j = startColumn; j <= endColumn; j++) {
-                action(i, j);
-            }
-        }
+        Range.foreach(this._rangeData, action);
     }
 
     /**

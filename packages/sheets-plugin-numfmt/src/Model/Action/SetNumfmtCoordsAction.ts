@@ -1,4 +1,5 @@
 import { ActionBase, ActionObservers, IActionData, Workbook } from '@univer/core';
+import { SetNumfmtCoords } from '../Apply/SetNumfmtCoords';
 
 export interface ISetNumfmtCoordsActionData extends IActionData {
     row: number;
@@ -15,21 +16,22 @@ export class SetNumfmtCoordsAction extends ActionBase<ISetNumfmtCoordsActionData
         };
         this._oldActionData = {
             ...actionData,
+            numfmt: this.do(),
             convertor: [],
         };
         this.do();
     }
 
-    redo(): void {
-        // todo ...
+    redo(): string {
+        return SetNumfmtCoords(this.getWorkBook(), this._doActionData.sheetId, this._doActionData.row, this._doActionData.column, this._doActionData.numfmt);
     }
 
-    do(): void {
-        this.redo();
+    do(): string {
+        return this.redo();
     }
 
     undo(): void {
-        // todo ...
+        SetNumfmtCoords(this.getWorkBook(), this._oldActionData.sheetId, this._oldActionData.row, this._oldActionData.column, this._oldActionData.numfmt);
     }
 
     validate(): boolean {

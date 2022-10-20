@@ -59,6 +59,29 @@ export class ObjectMatrix<T> {
         return this;
     }
 
+    forValue(
+        callback: (row: number, col: number, value: T) => Nullable<boolean>
+    ): ObjectMatrix<T> {
+        const rowArray = this._matrix;
+        const rowKeys = rowArray.getKeys();
+        const rowLength = rowKeys.length;
+        for (let i = 0; i < rowLength; i++) {
+            const rowNumber = +rowKeys[i];
+            const colArray = this.getRow(rowNumber) as ObjectArray<T>;
+            const colKeys = colArray.getKeys();
+            const colLength = colKeys.length;
+            for (let j = 0; j < colLength; j++) {
+                const colNumber = +colKeys[j];
+                const value = colArray.get(colNumber) as T;
+                const result = callback(rowNumber, colNumber, value);
+                if (result === false) {
+                    return this;
+                }
+            }
+        }
+        return this;
+    }
+
     swapRow(src: number, target: number): void {
         const srcRow = this._matrix.get(src);
         const targetRow = this._matrix.get(target);

@@ -275,6 +275,10 @@ export class SelectionControl {
         this._updateControl();
     }
 
+    render() {
+        this._updateControl();
+    }
+
     clearHighlight() {
         this._selectionModel.clearCurrentCell();
         this._updateControl();

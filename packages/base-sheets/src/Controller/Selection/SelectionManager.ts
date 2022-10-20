@@ -66,6 +66,27 @@ export class SelectionManager {
         }
     }
 
+    /**
+     * Renders all controls of the currently active sheet
+     * @returns
+     */
+    renderCurrentControls() {
+        const worksheetId = this.getWorksheetId();
+        if (worksheetId) {
+            this._selectionControls.forEach((selectionControls, sheetId) => {
+                if (worksheetId !== sheetId) {
+                    for (let control of selectionControls) {
+                        control.dispose();
+                    }
+                } else {
+                    for (let control of selectionControls) {
+                        control.render();
+                    }
+                }
+            });
+        }
+    }
+
     resetCurrentControls() {
         const worksheetId = this.getWorksheetId();
         if (worksheetId) {
@@ -149,6 +170,7 @@ export class SelectionManager {
         }
 
         this._initControls(this._plugin.config.selections);
+        this.renderCurrentControls();
     }
 
     private _mainEventInitial() {
@@ -349,7 +371,8 @@ export class SelectionManager {
                 const startCell = main.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn);
                 const endCell = main.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn);
 
-                control.update(
+                // Only update data, not render
+                control.model.setValue(
                     {
                         startColumn: finalStartColumn,
                         startRow: finalStartRow,
@@ -362,6 +385,19 @@ export class SelectionManager {
                     },
                     cellInfo
                 );
+                // control.update(
+                //     {
+                //         startColumn: finalStartColumn,
+                //         startRow: finalStartRow,
+                //         endColumn: finalEndColumn,
+                //         endRow: finalEndRow,
+                //         startY: startCell?.startY || 0,
+                //         endY: endCell?.endY || 0,
+                //         startX: startCell?.startX || 0,
+                //         endX: endCell?.endX || 0,
+                //     },
+                //     cellInfo
+                // );
                 currentControls.push(control);
             });
 

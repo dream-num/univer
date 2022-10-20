@@ -1,7 +1,6 @@
 import { IActionData } from './ActionBase';
 import { BaseActionExtensionFactory } from './ActionExtensionFactory';
 import { ActionExtensionRegister } from './ActionExtensionRegister';
-import { CommandBase } from './CommandBase';
 
 export class ActionExtensionManager {
     private _actionExtensionFactoryList: Array<
@@ -12,12 +11,12 @@ export class ActionExtensionManager {
      * inject all actions
      * @param command
      */
-    inject(command: CommandBase) {
+    handle(actions: IActionData[]) {
         // get the sorted list
         // get the dynamically added list
         this._actionExtensionFactoryList =
             ActionExtensionManager.register.actionExtensionFactoryList;
-        this._checkExtension(command);
+        this._checkExtension(actions);
     }
 
     /**
@@ -25,15 +24,12 @@ export class ActionExtensionManager {
      * @param command
      * @returns
      */
-    private _checkExtension(command: CommandBase) {
+    private _checkExtension(actions: IActionData[]) {
         if (!this._actionExtensionFactoryList) return false;
 
-        const actions = command.getInjector().getActions();
         actions.forEach((action) => {
             this._actionExtensionFactoryList.forEach((actionExtensionFactory) => {
-                const extension = actionExtensionFactory.check(
-                    action.getDoActionData()
-                );
+                const extension = actionExtensionFactory.check(action);
                 // TODO 可能只需执行一次
                 if (extension !== false) {
                     extension.execute();

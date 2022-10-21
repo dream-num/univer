@@ -371,10 +371,10 @@ export class ToolBarController {
         this._toolBarModel.config = config;
         this._toolBarModel.toolList = toolList;
 
-        this.init();
+        this._initialize();
     }
 
-    init() {
+    private _initialize() {
         // this._plugin.sheetContainerConfig.toolList = [];
         // this._plugin.sheetContainerConfig.toolList = this._toolBarModel.toolList;
 
@@ -569,7 +569,7 @@ export class ToolBarController {
         }
 
         // update data
-        this._plugin.getCanvasView().updateToSheet(this._plugin.getContext().getWorkBook().getActiveSheet()!);
+        // this._plugin.getCanvasView().updateToSheet(this._plugin.getContext().getWorkBook().getActiveSheet()!);
         // update render
         // this._plugin.getMainComponent().makeDirty(true);
     }
@@ -620,7 +620,7 @@ export class ToolBarController {
             });
 
             // update data
-            this._plugin.getCanvasView().updateToSheet(this._plugin.getContext().getWorkBook().getActiveSheet()!);
+            // this._plugin.getCanvasView().updateToSheet(this._plugin.getContext().getWorkBook().getActiveSheet()!);
             // update render
             // this._plugin.getMainComponent().makeDirty(true);
         }

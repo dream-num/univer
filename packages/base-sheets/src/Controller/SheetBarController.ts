@@ -76,8 +76,8 @@ class SheetBarUIController {
                 onClick: () => barControl.moveSheet('right'),
             },
         ];
-        this.initializeData();
-        this.initializeObserver();
+        this._initializeData();
+        this._initializeObserver();
     }
 
     /**
@@ -105,7 +105,7 @@ class SheetBarUIController {
     /**
      * 初始化sheet ui
      */
-    initializeObserver() {
+    private _initializeObserver() {
         const plugin = this._barControl.getPlugin();
         const context = plugin.getContext();
         const manager = context.getObserverManager();
@@ -125,8 +125,6 @@ class SheetBarUIController {
                     const sheet = plugin.getContext().getWorkBook().getSheetBySheetId(this._dataId);
                     if (sheet) {
                         sheet.activate();
-                        plugin.getCanvasView().updateToSheet(sheet);
-                        // plugin.getMainComponent().makeDirty(true);
                     }
                 },
                 contextMenu: (e: MouseEvent) => {
@@ -150,7 +148,7 @@ class SheetBarUIController {
         });
         // context.getContextObserver('onAfterInsertSheetObservable').add(() => {
         //     // update data
-        //     this.initializeData();
+        //     this._initializeData();
         //     this._sheetBar.setValue({
         //         sheetList: this._sheetList,
         //         menuList: this._menuList,
@@ -158,7 +156,7 @@ class SheetBarUIController {
         // });
         // context.getContextObserver('onSheetTabColorChangeObservable').add(() => {
         //     // update data
-        //     this.initializeData();
+        //     this._initializeData();
         //     this._sheetBar.setValue({
         //         sheetList: this._sheetList,
         //         menuList: this._menuList,
@@ -168,7 +166,7 @@ class SheetBarUIController {
         //     const activeSheet = plugin.getContext().getWorkBook().getActiveSheet();
         //     if (activeSheet) {
         //         // update data;
-        //         this.initializeData();
+        //         this._initializeData();
         //         // set ui bar sheetList;
         //         this._sheetBar.setValue({
         //             sheetList: this._sheetList,
@@ -181,7 +179,7 @@ class SheetBarUIController {
         // });
         // context.getContextObserver('onAfterChangeSheetNameObservable').add(() => {
         //     // update data;
-        //     this.initializeData();
+        //     this._initializeData();
         //     // set ui bar sheetList;
         //     this._sheetBar.setValue({
         //         sheetList: this._sheetList,
@@ -190,7 +188,7 @@ class SheetBarUIController {
         // });
         // context.getContextObserver('onAfterChangeActiveSheetObservable').add(() => {
         //     // update data;
-        //     this.initializeData();
+        //     this._initializeData();
         //     // set ui bar sheetList;
         //     this._sheetBar.setValue({
         //         sheetList: this._sheetList,
@@ -199,7 +197,7 @@ class SheetBarUIController {
         // });
         // context.getContextObserver('onShowSheetObservable').add(() => {
         //     // update data;
-        //     this.initializeData();
+        //     this._initializeData();
         //     // set ui bar sheetList;
         //     this._sheetBar.setValue({
         //         sheetList: this._sheetList,
@@ -208,7 +206,7 @@ class SheetBarUIController {
         // });
         // context.getContextObserver('onSheetOrderObservable').add(() => {
         //     // update data;
-        //     this.initializeData();
+        //     this._initializeData();
         //     // set ui bar sheetList;
         //     this._sheetBar.setValue({
         //         sheetList: this._sheetList,
@@ -217,7 +215,7 @@ class SheetBarUIController {
         // });
         // context.getContextObserver('onHideSheetObservable').add(() => {
         //     // update data;
-        //     this.initializeData();
+        //     this._initializeData();
         //     // set ui bar sheetList;
         //     this._sheetBar.setValue({
         //         sheetList: this._sheetList,
@@ -236,7 +234,7 @@ class SheetBarUIController {
                 case ACTION_NAMES.SET_WORKSHEET_ACTIVATE_ACTION:
                 case ACTION_NAMES.SET_WORKSHEET_STATUS_ACTION: {
                     // update data;
-                    this.initializeData();
+                    this._initializeData();
                     // set ui bar sheetList;
                     this._sheetBar.setValue({
                         sheetList: this._sheetList,
@@ -248,7 +246,7 @@ class SheetBarUIController {
         });
     }
 
-    initializeData() {
+    private _initializeData() {
         const plugin = this._barControl.getPlugin();
         const workbook = plugin.getWorkbook();
         const sheets = workbook.getSheets();
@@ -263,8 +261,6 @@ class SheetBarUIController {
                 this._dataId = target.dataset.id as string;
                 sheet.showSheet();
                 sheet.activate();
-                plugin.getCanvasView().updateToSheet(plugin.getContext().getWorkBook().getActiveSheet()!);
-                // plugin.getMainComponent().makeDirty(true);
             },
         }));
         this._sheetList = sheets
@@ -283,14 +279,18 @@ class SheetBarUIController {
                 onClick: (e: MouseEvent) => {
                     const target = e.currentTarget as HTMLDivElement;
                     this._dataId = target.dataset.id as string;
+
                     sheet.activate();
-                    plugin.getSelectionManager().renderCurrentControls();
+
                     // // 清空选区
                     // const controls = plugin.getSelectionManager().getCurrentControls();
                     // for (let control of controls!) {
                     //     control.dispose();
                     // }
-                    plugin.getCanvasView().updateToSheet(plugin.getContext().getWorkBook().getActiveSheet()!);
+                    // plugin.getCanvasView().updateToSheet(plugin.getContext().getWorkBook().getActiveSheet()!);
+
+                    // plugin.getSelectionManager().renderCurrentControls();
+
                     // // plugin.getMainComponent().makeDirty(true);
                 },
             }));

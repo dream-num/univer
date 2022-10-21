@@ -44,6 +44,10 @@ export class SelectionManager {
         return this._sheetView.getContext();
     }
 
+    getMainComponent() {
+        return this._mainComponent;
+    }
+
     updateToSheet(worksheet: Worksheet) {
         this._worksheet = worksheet;
         const worksheetId = this.getWorksheetId();
@@ -147,6 +151,7 @@ export class SelectionManager {
     constructor(private _sheetView: SheetView) {
         this._plugin = this._sheetView.getPlugin() as SpreadsheetPlugin;
         this._initialize();
+        this._initializeObserver();
     }
 
     private _initialize() {
@@ -402,6 +407,17 @@ export class SelectionManager {
             });
 
             this._selectionControls.set(worksheetId, currentControls);
+        });
+    }
+
+    /**
+     * Initialize the observer
+     */
+    private _initializeObserver() {
+        const context = this._plugin.getContext();
+        context.getContextObserver('onAfterChangeActiveSheetObservable').add(() => {
+            // this._plugin.getCanvasView().updateToSheet(this._plugin.getContext().getWorkBook().getActiveSheet()!);
+            this._plugin.getSelectionManager().renderCurrentControls();
         });
     }
 

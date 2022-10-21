@@ -46,8 +46,16 @@ const DEFAULT_SPREADSHEET_PLUGIN_DATA: ISpreadsheetPluginConfig = {
                     startColumn: 1,
                     endColumn: 2,
                 },
+            },
+            {
+                selection: {
+                    startRow: 16,
+                    endRow: 18,
+                    startColumn: 1,
+                    endColumn: 2,
+                },
                 cell: {
-                    row: 13,
+                    row: 16,
                     column: 1,
                 },
             },
@@ -56,13 +64,29 @@ const DEFAULT_SPREADSHEET_PLUGIN_DATA: ISpreadsheetPluginConfig = {
             {
                 selection: {
                     startRow: 17,
-                    endRow: 19,
+                    endRow: 20,
                     startColumn: 1,
                     endColumn: 2,
                 },
+            },
+            {
+                selection: {
+                    startRow: 22,
+                    endRow: 23,
+                    startColumn: 1,
+                    endColumn: 2,
+                },
+            },
+            {
+                selection: {
+                    startRow: 25,
+                    endRow: 27,
+                    startColumn: 4,
+                    endColumn: 6,
+                },
                 cell: {
-                    row: 17,
-                    column: 1,
+                    row: 25,
+                    column: 4,
                 },
             },
         ],
@@ -385,17 +409,6 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
 
     showMainByName(name: string, show: boolean): Promise<void> {
         return this._showMainByNameFunc(name, show);
-    }
-
-    changeWorksheet(sheetId: string) {
-        const workbook = this.getWorkbook();
-        const worksheet = workbook.getSheetBySheetId(sheetId);
-        if (!worksheet) {
-            return;
-        }
-        this.getCanvasView().updateToSheet(worksheet);
-
-        this.getObserver('onChangeCurrentSheetObserver')?.notifyObservers(sheetId);
     }
 
     addRightMenu(item: RightMenuProps[] | RightMenuProps) {

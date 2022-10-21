@@ -46,10 +46,10 @@ export class InfoBarController {
                 onBlur: this.setSheetName,
             },
         };
-        this.init();
+        this._initialize();
     }
 
-    init() {
+    private _initialize() {
         const context = this._plugin.context;
         const manager = context.getObserverManager();
 

@@ -19,7 +19,9 @@ export class NumfmtPlugin extends Plugin {
         register.add(new NumfmtActionExtensionFactory(this));
     }
 
-    setNumfmtByRange(sheetId: string, range: IRangeData, format: string): void {}
+    setNumfmtByRange(sheetId: string, range: IRangeData, format: string): void {
+        this._controller.setNumfmtByRange(sheetId, range, format);
+    }
 
     setNumfmtByCoords(sheetId: string, row: number, column: number, format: string): void {
         this._controller.setNumfmtByCoords(sheetId, row, column, format);

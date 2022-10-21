@@ -1,6 +1,6 @@
-import { Command, Range, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType, Plugin } from '@univer/core';
+import { Command, Range, IRangeData, ObjectMatrix, Plugin } from '@univer/core';
 import { ACTION_NAMES } from '../Const';
-import { NumfmtModel, NumfmtValue } from '../Model/NumfmtModel';
+import { NumfmtModel } from '../Model/NumfmtModel';
 
 export class NumfmtController {
     protected _model: NumfmtModel;
@@ -12,23 +12,12 @@ export class NumfmtController {
         this._plugin = plugin;
     }
 
-    getConfig(sheetId: string): ObjectMatrixPrimitiveType<NumfmtValue> {
-        return this._model.getNumfmtConfig(sheetId);
-    }
-
-    getColor(sheetId: string, row: number, column: number): string {
-        return this._model.getNumfmtColor(sheetId, row, column);
-    }
-
-    getValue(sheetId: string, row: number, column: number): string {
-        return this._model.getNumfmtValue(sheetId, row, column);
-    }
-
     setNumfmtByRange(sheetId: string, numfmtRange: IRangeData, numfmtValue: string): void {
         const numfmtMatrix = new ObjectMatrix<string>();
         Range.foreach(numfmtRange, (row, column) => {
             numfmtMatrix.setValue(row, column, numfmtValue);
         });
+        this._model.setNumfmtMatrix(sheetId, numfmtMatrix);
         const pluginContext = this._plugin.getContext();
         const commandManager = pluginContext.getCommandManager();
         const config = {
@@ -42,6 +31,7 @@ export class NumfmtController {
     }
 
     setNumfmtByCoords(sheetId: string, row: number, column: number, numfmt: string): void {
+        this._model.setNumfmtCoords(sheetId, row, column, numfmt);
         const pluginContext = this._plugin.getContext();
         const commandManager = pluginContext.getCommandManager();
         const config = {

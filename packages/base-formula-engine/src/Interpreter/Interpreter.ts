@@ -1,6 +1,6 @@
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { NodeType } from '../AstNode/NodeType';
-import { AstNodePromiseType, FunctionVariantType, IInterpreterCalculateProps } from '../Basics/Common';
+import { AstNodePromiseType, FunctionVariantType, IInterpreterDatasetConfig } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 
@@ -19,15 +19,15 @@ export class Interpreter {
         }
 
         if (node.nodeType === NodeType.FUNCTION) {
-            await node.executeAsync(this._interpreterCalculateProps);
+            await node.executeAsync(this._interpreterDatasetConfig);
         } else {
-            node.execute(this._interpreterCalculateProps);
+            node.execute(this._interpreterDatasetConfig);
         }
 
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
-    constructor(private _interpreterCalculateProps?: IInterpreterCalculateProps) {}
+    constructor(private _interpreterDatasetConfig?: IInterpreterDatasetConfig) {}
 
     async execute(node: BaseAstNode): Promise<FunctionVariantType> {
         // if (!this._interpreterCalculateProps) {
@@ -43,19 +43,20 @@ export class Interpreter {
         return Promise.resolve(node.getValue());
     }
 
-    setProps(interpreterCalculateProps: IInterpreterCalculateProps) {
-        this._interpreterCalculateProps = interpreterCalculateProps;
+    setProps(interpreterCalculateProps: IInterpreterDatasetConfig) {
+        this._interpreterDatasetConfig = interpreterCalculateProps;
     }
 
-    static interpreter: Interpreter;
+    // static interpreter: Interpreter;
 
-    static create(interpreterCalculateProps?: IInterpreterCalculateProps) {
-        if (!this.interpreter) {
-            this.interpreter = new Interpreter(interpreterCalculateProps);
-        }
+    static create(interpreterCalculateProps?: IInterpreterDatasetConfig) {
+        return new Interpreter(interpreterCalculateProps);
+        // if (!this.interpreter) {
+        //     this.interpreter = new Interpreter(interpreterCalculateProps);
+        // }
 
-        interpreterCalculateProps && this.interpreter.setProps(interpreterCalculateProps);
+        // interpreterCalculateProps && this.interpreter.setProps(interpreterCalculateProps);
 
-        return this.interpreter;
+        // return this.interpreter;
     }
 }

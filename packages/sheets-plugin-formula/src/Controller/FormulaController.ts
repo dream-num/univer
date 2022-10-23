@@ -1,4 +1,4 @@
-import { FormulaEnginePlugin, IInterpreterCalculateProps, SheetDataType, SheetNameMapType } from '@univer/base-formula-engine';
+import { FormulaEnginePlugin, IInterpreterDatasetConfig, SheetDataType, UnitDataType, SheetNameMapType } from '@univer/base-formula-engine';
 import { Context, Plugin } from '@univer/core';
 import { IFormulaConfig } from '../Basic/IFormula';
 import { FormulaDataModel } from '../Model/FormulaDataModel';
@@ -10,7 +10,7 @@ export class FormulaController {
 
     private _context: Context;
 
-    private _interpreterCalculatePropsCache: IInterpreterCalculateProps;
+    private _interpreterCalculatePropsCache: IInterpreterDatasetConfig;
 
     constructor(private _plugin: Plugin, config?: IFormulaConfig) {
         this._formulaDataModel = new FormulaDataModel(config);
@@ -30,9 +30,9 @@ export class FormulaController {
         return this._formulaEngine;
     }
 
-    toInterpreterCalculateProps(currentRow: number, currentColumn: number, isRefresh = true) {
+    toInterpreterCalculateProps(currentRow: number, currentColumn: number, currentSheetId: string, isRefresh = true) {
         if (isRefresh || !this._interpreterCalculatePropsCache) {
-            this._interpreterCalculatePropsCache = this._toInterpreterCalculateProps(currentRow, currentColumn);
+            this._interpreterCalculatePropsCache = this._toInterpreterCalculateProps(currentRow, currentColumn, currentSheetId);
         }
 
         this._interpreterCalculatePropsCache.currentRow = currentRow;
@@ -41,33 +41,37 @@ export class FormulaController {
         return this._interpreterCalculatePropsCache;
     }
 
-    private _toInterpreterCalculateProps(currentRow: number, currentColumn: number): IInterpreterCalculateProps {
+    private _toInterpreterCalculateProps(currentRow: number, currentColumn: number, currentSheetId: string): IInterpreterDatasetConfig {
         const workbook = this._context.getWorkBook();
         const sheets = workbook.getSheets();
         const sheetData: SheetDataType = {};
+        const unitData: UnitDataType = {};
         const sheetNameMap: SheetNameMapType = {};
+
+        const currentUnitId = workbook.getUnitId();
 
         for (let sheet of sheets) {
             sheetData[sheet.getSheetId()] = sheet.getCellMatrix();
             sheetNameMap[sheet.getName()] = sheet.getSheetId();
         }
 
+        unitData[currentUnitId] = sheetData;
+
         const formulaData = this._formulaDataModel.getFormulaData();
 
         const activeSheet = workbook.getActiveSheet();
-
-        const currentSheetId = activeSheet.getSheetId();
 
         const rowCount = activeSheet.getRowCount();
         const columnCount = activeSheet.getColumnCount();
 
         return {
-            sheetData,
+            unitData,
             formulaData,
             sheetNameMap,
             currentRow,
             currentColumn,
             currentSheetId,
+            currentUnitId,
             rowCount,
             columnCount,
         };

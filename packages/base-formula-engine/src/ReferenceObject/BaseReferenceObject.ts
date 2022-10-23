@@ -1,5 +1,5 @@
 import { CellValueType, ICellData, IRangeData, Nullable, ObjectArray, ObjectMatrix } from '@univer/core';
-import { CalculateValueType, NodeValueType, SheetDataType, SheetNameMapType } from '../Basics/Common';
+import { CalculateValueType, NodeValueType, SheetDataType, SheetNameMapType, UnitDataType } from '../Basics/Common';
 import { ErrorType, ERROR_TYPE_SET } from '../Basics/ErrorType';
 import { ObjectClassType } from '../Basics/ObjectClassType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
@@ -17,11 +17,15 @@ export class BaseReferenceObject extends ObjectClassType {
 
     private _rangeData: IRangeData;
 
-    private _sheetData: SheetDataType;
+    private _unitData: UnitDataType;
 
     private _rowCount: number = 0;
 
     private _columnCount: number = 0;
+
+    private _defaultUnitId: string;
+
+    private _forcedUnitId: string;
 
     constructor(private _token: string) {
         super();
@@ -53,7 +57,7 @@ export class BaseReferenceObject extends ObjectClassType {
             endColumn = this._columnCount - 1;
         }
 
-        const activeSheetData = this._sheetData[this.getSheetId()];
+        const activeSheetData = this.getCurrentActiveSheetData();
 
         if (!activeSheetData) {
             return;
@@ -94,11 +98,26 @@ export class BaseReferenceObject extends ObjectClassType {
         this._rangeData = rangeData;
     }
 
+    getUnitId() {
+        if (this._forcedUnitId) {
+            return this._forcedUnitId;
+        }
+        return this._defaultUnitId;
+    }
+
     getSheetId() {
         if (this._forcedSheetId) {
             return this._forcedSheetId;
         }
         return this._defaultSheetId;
+    }
+
+    setForcedUnitIdDirect(unitId: string) {
+        this._forcedUnitId = unitId;
+    }
+
+    getForcedUnitId() {
+        return this._forcedUnitId;
     }
 
     setForcedSheetId(sheetNameMap: SheetNameMapType) {
@@ -129,12 +148,20 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._defaultSheetId;
     }
 
-    getSheetData() {
-        return this._sheetData;
+    setDefaultUnitId(sheetId: string) {
+        this._defaultUnitId = sheetId;
     }
 
-    setSheetData(sheetData: SheetDataType) {
-        this._sheetData = sheetData;
+    getDefaultUnitId() {
+        return this._defaultUnitId;
+    }
+
+    getUnitData() {
+        return this._unitData;
+    }
+
+    setUnitData(unitData: UnitDataType) {
+        this._unitData = unitData;
     }
 
     getRowCount() {
@@ -209,8 +236,12 @@ export class BaseReferenceObject extends ObjectClassType {
         return this.getCellByPosition(undefined, column);
     }
 
+    getCurrentActiveSheetData() {
+        return this._unitData[this.getUnitId()][this.getSheetId()];
+    }
+
     getCellByPosition(row?: number, column?: number) {
-        const activeSheetData = this._sheetData[this.getSheetId()];
+        const activeSheetData = this.getCurrentActiveSheetData();
 
         if (!row) {
             row = this._rangeData.startRow;

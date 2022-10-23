@@ -13,10 +13,12 @@ export type LambdaPrivacyVarType = Map<string, Nullable<BaseAstNode>>;
 
 export type SheetDataType = { [sheetId: string]: ObjectMatrix<ICellData> };
 
+export type UnitDataType = { [unitId: string]: SheetDataType };
+
 export type CalculateValueType = BaseValueObject | ErrorValueObject;
 
 export interface IFormulaData {
-    fs: string; // formulaString
+    formulaString: string; // formulaString
     row: number;
     column: number;
     sheetId: string;
@@ -51,13 +53,14 @@ export enum TableOptionType {
     TOTALS = '#Totals',
 }
 
-export interface IInterpreterCalculateProps {
-    sheetData: SheetDataType;
+export interface IInterpreterDatasetConfig {
+    unitData: UnitDataType;
     formulaData: FormulaDataType;
     sheetNameMap: SheetNameMapType;
     currentRow: number;
     currentColumn: number;
     currentSheetId: string;
+    currentUnitId: string;
     rowCount: number;
     columnCount: number;
 }

@@ -1,3 +1,3 @@
 export { FormulaEnginePlugin } from './FormulaEnginePlugin';
 
-export { type FormulaDataType, type IInterpreterCalculateProps, type SheetDataType, type SheetNameMapType } from './Basics/Common';
+export { type FormulaDataType, type IInterpreterDatasetConfig, type SheetDataType, type UnitDataType, type SheetNameMapType } from './Basics/Common';

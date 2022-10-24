@@ -6,7 +6,7 @@ export class FormulaDependencyTree implements IFormulaData {
     parent: IFormulaData;
     isVisited = false;
 
-    formulaString: string;
+    formula: string;
     row: number;
     column: number;
     sheetId: string;

@@ -18,7 +18,7 @@ export type UnitDataType = { [unitId: string]: SheetDataType };
 export type CalculateValueType = BaseValueObject | ErrorValueObject;
 
 export interface IFormulaData {
-    formulaString: string; // formulaString
+    formula: string; // formulaString
     row: number;
     column: number;
     sheetId: string;

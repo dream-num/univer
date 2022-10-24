@@ -7,7 +7,7 @@ import { ErrorType } from '../Basics/ErrorType';
 import { ErrorNode } from './ErrorNode';
 import { BaseFunction } from '../Functions/BaseFunction';
 import { NumberValueObject } from '../ValueObject/NumberValueObject';
-import { FunctionVariantType, IInterpreterCalculateProps } from '../Basics/Common';
+import { FunctionVariantType, IInterpreterDatasetConfig } from '../Basics/Common';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { LexerNode } from '../Analysis/LexerNode';
 import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
@@ -20,7 +20,7 @@ export class PrefixNode extends BaseAstNode {
         super(_operatorString);
     }
 
-    private _handlerAT(value: FunctionVariantType, interpreterCalculateProps?: IInterpreterCalculateProps) {
+    private _handlerAT(value: FunctionVariantType, interpreterDatasetConfig?: IInterpreterDatasetConfig) {
         if (!value.isReferenceObject()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
@@ -31,8 +31,8 @@ export class PrefixNode extends BaseAstNode {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const currentRow = interpreterCalculateProps?.currentRow || 0;
-        const currentColumn = interpreterCalculateProps?.currentColumn || 0;
+        const currentRow = interpreterDatasetConfig?.currentRow || 0;
+        const currentColumn = interpreterDatasetConfig?.currentColumn || 0;
 
         // @ projection to current
         if (currentValue.isRow()) {
@@ -48,14 +48,14 @@ export class PrefixNode extends BaseAstNode {
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 
-    execute(interpreterCalculateProps?: IInterpreterCalculateProps) {
+    execute(interpreterDatasetConfig?: IInterpreterDatasetConfig) {
         const children = this.getChildren();
         const value = children[0].getValue();
         let result: FunctionVariantType;
         if (this._operatorString === prefixToken.MINUS) {
             result = this._functionExecutor!.calculate(new NumberValueObject(0), value) as FunctionVariantType;
         } else if (this._operatorString === prefixToken.AT) {
-            result = this._handlerAT(value, interpreterCalculateProps);
+            result = this._handlerAT(value, interpreterDatasetConfig);
         } else {
             result = ErrorValueObject.create(ErrorType.VALUE);
         }

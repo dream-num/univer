@@ -7,7 +7,7 @@ import { ErrorType } from '../Basics/ErrorType';
 import { ErrorNode } from './ErrorNode';
 import { BaseFunction } from '../Functions/BaseFunction';
 import { NumberValueObject } from '../ValueObject/NumberValueObject';
-import { FunctionVariantType, IInterpreterCalculateProps } from '../Basics/Common';
+import { FunctionVariantType, IInterpreterDatasetConfig } from '../Basics/Common';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { LexerNode } from '../Analysis/LexerNode';
 import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
@@ -22,8 +22,8 @@ export class SuffixNode extends BaseAstNode {
         super(_operatorString);
     }
 
-    private _handlerPound(value: FunctionVariantType, interpreterCalculateProps?: IInterpreterCalculateProps) {
-        // const sheetData = interpreterCalculateProps.sheetData;
+    private _handlerPound(value: FunctionVariantType, interpreterDatasetConfig?: IInterpreterDatasetConfig) {
+        // const sheetData = interpreterDatasetConfig.sheetData;
         // if (!sheetData) {
         //     return false;
         // }
@@ -39,9 +39,9 @@ export class SuffixNode extends BaseAstNode {
         const cellValue = value as CellReferenceObject;
         const rangeData = cellValue.getRangeData();
         const sheetId = cellValue.getSheetId();
-        const formulaData = interpreterCalculateProps?.formulaData;
+        const formulaData = interpreterDatasetConfig?.formulaData;
 
-        const formulaString = formulaData?.[sheetId]?.[rangeData.startRow]?.[rangeData.startColumn]?.fs;
+        const formulaString = formulaData?.[sheetId]?.[rangeData.startRow]?.[rangeData.startColumn]?.formula;
 
         if (!formulaString) {
             return ErrorValueObject.create(ErrorType.VALUE);
@@ -55,7 +55,7 @@ export class SuffixNode extends BaseAstNode {
         /** todo */
     }
 
-    execute(interpreterCalculateProps?: IInterpreterCalculateProps) {
+    execute(interpreterCalculateProps?: IInterpreterDatasetConfig) {
         const children = this.getChildren();
         const value = children[0].getValue();
         let result: FunctionVariantType;

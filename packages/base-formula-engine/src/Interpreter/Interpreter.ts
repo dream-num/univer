@@ -43,14 +43,14 @@ export class Interpreter {
         return Promise.resolve(node.getValue());
     }
 
-    setProps(interpreterCalculateProps: IInterpreterDatasetConfig) {
-        this._interpreterDatasetConfig = interpreterCalculateProps;
+    setProps(interpreterDatasetConfig: IInterpreterDatasetConfig) {
+        this._interpreterDatasetConfig = interpreterDatasetConfig;
     }
 
     // static interpreter: Interpreter;
 
-    static create(interpreterCalculateProps?: IInterpreterDatasetConfig) {
-        return new Interpreter(interpreterCalculateProps);
+    static create(interpreterDatasetConfig?: IInterpreterDatasetConfig) {
+        return new Interpreter(interpreterDatasetConfig);
         // if (!this.interpreter) {
         //     this.interpreter = new Interpreter(interpreterCalculateProps);
         // }

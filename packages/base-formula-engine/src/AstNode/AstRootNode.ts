@@ -1,5 +1,5 @@
 import { LexerNode } from '../Analysis/LexerNode';
-import { AstNodePromiseType, IInterpreterCalculateProps } from '../Basics/Common';
+import { AstNodePromiseType } from '../Basics/Common';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { DEFAULT_TOKEN_TYPE_PARAMETER, DEFAULT_TOKEN_TYPE_ROOT } from '../Basics/TokenType';
 import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';

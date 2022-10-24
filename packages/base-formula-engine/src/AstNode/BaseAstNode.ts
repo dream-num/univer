@@ -1,5 +1,5 @@
 import { LexerNode } from '../Analysis/LexerNode';
-import { AstNodePromiseType, FunctionVariantType, IInterpreterCalculateProps } from '../Basics/Common';
+import { AstNodePromiseType, FunctionVariantType, IInterpreterDatasetConfig } from '../Basics/Common';
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
 
 import { NodeType } from './NodeType';
@@ -62,11 +62,11 @@ export class BaseAstNode {
         this._calculateState = true;
     }
 
-    execute(interpreterCalculateProps?: IInterpreterCalculateProps) {
+    execute(interpreterDatasetConfig?: IInterpreterDatasetConfig) {
         /* abstract */
     }
 
-    async executeAsync(interpreterCalculateProps?: IInterpreterCalculateProps): Promise<AstNodePromiseType> {
+    async executeAsync(interpreterDatasetConfig?: IInterpreterDatasetConfig): Promise<AstNodePromiseType> {
         /* abstract */
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }

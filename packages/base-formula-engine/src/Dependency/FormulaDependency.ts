@@ -1,5 +1,7 @@
 import { IGridRange, IRangeData, ObjectMatrix } from '@univer/core';
-import { FormulaDataType } from '../Basics/Common';
+import { generateAstNode } from '../Analysis/Tools';
+import { FormulaDataType, IInterpreterDatasetConfig } from '../Basics/Common';
+import { Interpreter } from '../Interpreter/Interpreter';
 import { FormulaDependencyTree } from './DependencyTree';
 
 export class FormulaDependencyGenerator {
@@ -41,10 +43,14 @@ export class FormulaDependencyGenerator {
         }
     }
 
-    generate(updateRangeList: IGridRange[] = []) {
+    private _getRangeListByNode() {}
+
+    generate(updateRangeList: IGridRange[] = [], interpreterDatasetConfig?: IInterpreterDatasetConfig) {
         this.updateRangeFlatten(updateRangeList);
 
         const FDtree = new FormulaDependencyTree();
+
+        const formulaInterpreter = Interpreter.create(interpreterDatasetConfig);
 
         const formulaDataKeys = Object.keys(this._formulaData);
 
@@ -53,7 +59,8 @@ export class FormulaDependencyGenerator {
 
             matrixData.forEach((row, rangeRow) => {
                 rangeRow.forEach((column, formulaData) => {
-                    const formulaString = formulaData.formulaString;
+                    const formulaString = formulaData.formula;
+                    const node = generateAstNode(formulaString);
                 });
             });
         }

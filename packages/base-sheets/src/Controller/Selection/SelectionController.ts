@@ -157,7 +157,10 @@ export class SelectionControl {
         scene.addObject(this._selectionShape);
     }
 
-    private _updateControl() {
+    /**
+     * just handle the view
+     */
+    _updateControl() {
         const { startX, startY, endX, endY } = this._selectionModel;
 
         this.leftControl.resize(undefined, endY - startY);
@@ -300,7 +303,8 @@ export class SelectionControl {
         const startCell = main.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn);
         const endCell = main.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn);
 
-        this._selectionModel.setValue(
+        this._manager.updateSelectionValue(
+            this,
             {
                 startColumn: finalStartColumn,
                 startRow: finalStartRow,
@@ -433,7 +437,8 @@ export class SelectionControl {
 
     static fromJson(manager: SelectionManager, zIndex: number, newSelectionRange: ISelection) {
         const control = SelectionControl.create(manager, zIndex);
-        control.update(newSelectionRange);
+        manager.updateSelectionValue(control, newSelectionRange);
+        control._updateControl();
         return control;
     }
 }

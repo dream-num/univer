@@ -281,17 +281,6 @@ class SheetBarUIController {
                     this._dataId = target.dataset.id as string;
 
                     sheet.activate();
-
-                    // // 清空选区
-                    // const controls = plugin.getSelectionManager().getCurrentControls();
-                    // for (let control of controls!) {
-                    //     control.dispose();
-                    // }
-                    // plugin.getCanvasView().updateToSheet(plugin.getContext().getWorkBook().getActiveSheet()!);
-
-                    // plugin.getSelectionManager().renderCurrentControls();
-
-                    // // plugin.getMainComponent().makeDirty(true);
                 },
             }));
         this._sheetIndex = sheets.findIndex((sheet) => sheet.getStatus() === 1);

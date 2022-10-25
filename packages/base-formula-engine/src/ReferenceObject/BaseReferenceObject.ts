@@ -27,6 +27,8 @@ export class BaseReferenceObject extends ObjectClassType {
 
     private _forcedUnitId: string;
 
+    private _runtimeData: UnitDataType;
+
     constructor(private _token: string) {
         super();
     }
@@ -57,31 +59,18 @@ export class BaseReferenceObject extends ObjectClassType {
             endColumn = this._columnCount - 1;
         }
 
-        const activeSheetData = this.getCurrentActiveSheetData();
-
-        if (!activeSheetData) {
-            return;
-        }
-
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
-                const cell = activeSheetData.getValue(r, c);
+                const cell = this.getCellData(r, c);
                 let result: Nullable<boolean> = false;
                 if (!cell) {
                     result = callback(new NumberValueObject(0, true), r, c);
                     return;
                 }
 
-                const value = cell.v || 0;
-                if (ERROR_TYPE_SET.has(value as string)) {
-                    result = callback(ErrorValueObject.create(value as ErrorType), r, c);
-                } else if (cell.t === CellValueType.BOOLEAN) {
-                    result = callback(new BooleanValueObject(value), r, c);
-                } else if (cell.t === CellValueType.NUMBER) {
-                    result = callback(new NumberValueObject(value), r, c);
-                } else {
-                    result = callback(new StringValueObject(value), r, c);
-                }
+                const resultObjectValue = this.getCellValueObject(cell);
+
+                result = callback(resultObjectValue, r, c);
 
                 if (result === false) {
                     return;
@@ -164,6 +153,14 @@ export class BaseReferenceObject extends ObjectClassType {
         this._unitData = unitData;
     }
 
+    getRuntimeData() {
+        return this._runtimeData;
+    }
+
+    setRuntimeData(runtimeData: UnitDataType) {
+        this._runtimeData = runtimeData;
+    }
+
     getRowCount() {
         return this._rowCount;
     }
@@ -240,9 +237,19 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._unitData[this.getUnitId()][this.getSheetId()];
     }
 
-    getCellByPosition(row?: number, column?: number) {
+    getCurrentRuntimeSheetData() {
+        return this._runtimeData[this.getUnitId()][this.getSheetId()];
+    }
+
+    getCellData(row: number, column: number) {
         const activeSheetData = this.getCurrentActiveSheetData();
 
+        const activeRuntimeData = this.getCurrentRuntimeSheetData();
+
+        return activeRuntimeData.getValue(row, column) || activeSheetData.getValue(row, column);
+    }
+
+    getCellByPosition(row?: number, column?: number) {
         if (!row) {
             row = this._rangeData.startRow;
         }
@@ -251,7 +258,7 @@ export class BaseReferenceObject extends ObjectClassType {
             column = this._rangeData.startColumn;
         }
 
-        const cell = activeSheetData.getValue(row, column);
+        const cell = this.getCellData(row, column);
 
         if (!cell) {
             return ErrorValueObject.create(ErrorType.VALUE);

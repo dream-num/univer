@@ -28,7 +28,7 @@ export class SelectionManager {
 
     // private _selectionControls = new Map<string, SelectionControl[]>(); // sheetID:Controls
 
-    private _selectionControls: SelectionControl[]; // sheetID:Controls
+    private _selectionControls: SelectionControl[] = []; // sheetID:Controls
 
     private _selectionModels = new Map<string, SelectionModel[]>(); // sheetID:Models
 
@@ -122,12 +122,12 @@ export class SelectionManager {
         }
     }
 
-    resetCurrentModels() {
-        const worksheetId = this.getWorksheetId();
-        if (worksheetId) {
-            this._selectionModels.set(worksheetId, []);
-        }
-    }
+    // resetCurrentModels() {
+    //     const worksheetId = this.getWorksheetId();
+    //     if (worksheetId) {
+    //         this._selectionModels.set(worksheetId, []);
+    //     }
+    // }
 
     getPlugin() {
         return this._plugin;
@@ -162,10 +162,7 @@ export class SelectionManager {
         const endCell = main.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn);
 
         // update control
-        currentControls.push(control);
-
-        // update model
-        this.addSelectionValue(
+        control.update(
             {
                 startColumn: finalStartColumn,
                 startRow: finalStartRow,
@@ -178,18 +175,20 @@ export class SelectionManager {
             },
             cellInfo
         );
+
+        currentControls.push(control);
     }
 
     /**
      * update all current controls data in model
      */
-    addSelectionValue(selection: ISelection, cell: Nullable<ICellInfo>) {
+    setSelectionModel(models?: ISelectionModelValue[]) {
         if (!this._worksheet) return;
-        const currentModelsValue = this.getSelectionModelsValue();
-        currentModelsValue?.push({
-            selection,
-            cell,
-        });
+
+        // get models from current control
+        if (!models) {
+            models = this._selectionControls.map((control) => control.model.getValue());
+        }
 
         const workbook = this._worksheet.getContext().getWorkBook();
         const commandManager = workbook.getCommandManager();
@@ -197,32 +196,64 @@ export class SelectionManager {
         const value: ISetSelectionValueActionData = {
             sheetId: this._worksheet.getSheetId(),
             actionName: ACTION_NAMES.SET_SELECTION_VALUE_ACTION,
-            selections: currentModelsValue,
+            selections: models,
         };
 
         const command = new Command(workbook, value);
         commandManager.invoke(command);
     }
 
+    // /**
+    //  * update current control in model
+    //  */
+    // updateSelectionValue(selectionControl: SelectionControl, selection: ISelection, cell: Nullable<ICellInfo>) {
+    //     if (!this._worksheet) return;
+
+    //     const controls = this.getCurrentControls();
+    //     if (!controls) {
+    //         return;
+    //     }
+    //     const selectionModelsValue: ISelectionModelValue[] = [];
+    //     for (let control of controls) {
+    //         // update current control
+    //         if (control === selectionControl) {
+    //             selectionModelsValue.push({ selection, cell });
+    //         } else {
+    //             selectionModelsValue.push(control.model.getValue());
+    //         }
+    //     }
+
+    //     const workbook = this._worksheet.getContext().getWorkBook();
+    //     const commandManager = workbook.getCommandManager();
+
+    //     const value: ISetSelectionValueActionData = {
+    //         sheetId: this._worksheet.getSheetId(),
+    //         actionName: ACTION_NAMES.SET_SELECTION_VALUE_ACTION,
+    //         selections: selectionModelsValue,
+    //     };
+
+    //     const command = new Command(workbook, value);
+    //     commandManager.invoke(command);
+    // }
+
     /**
      * update current control in model
      */
-    updateSelectionValue(selectionControl: SelectionControl, selection: ISelection, cell: Nullable<ICellInfo>) {
-        if (!this._worksheet) return;
+    updateSelectionModel(selection: ISelection, cell: Nullable<ICellInfo>, index: number) {
+        const worksheetId = this.getWorksheetId();
 
-        const controls = this.getCurrentControls();
-        if (!controls) {
-            return;
-        }
+        if (!this._worksheet || !worksheetId) return;
+
+        // Collect constituency data for the entire current sheet
+        const selectionModels = this._selectionModels.get(worksheetId);
         const selectionModelsValue: ISelectionModelValue[] = [];
-        for (let control of controls) {
-            // update current control
-            if (control === selectionControl) {
+        selectionModels?.forEach((model, i) => {
+            if (i === index) {
                 selectionModelsValue.push({ selection, cell });
             } else {
-                selectionModelsValue.push(control.model.getValue());
+                selectionModelsValue.push(model.getValue());
             }
-        }
+        });
 
         const workbook = this._worksheet.getContext().getWorkBook();
         const commandManager = workbook.getCommandManager();
@@ -238,25 +269,27 @@ export class SelectionManager {
     }
 
     getSelectionModels() {
-        const controls = this.getCurrentControls();
-        if (!controls) {
+        const worksheetId = this.getWorksheetId();
+        if (!worksheetId) {
             return;
         }
-        const selectionModels: SelectionModel[] = [];
-        for (let control of controls) {
-            selectionModels.push(control.model);
+
+        const models = this._selectionModels.get(worksheetId);
+
+        if (!models) {
+            this._selectionModels.set(worksheetId, []);
         }
-        return selectionModels;
+        return this._selectionModels.get(worksheetId);
     }
 
     getSelectionModelsValue(): ISelectionModelValue[] {
-        const controls = this.getCurrentControls();
-        if (!controls) {
+        const models = this.getSelectionModels();
+        if (!models) {
             return [];
         }
         const selectionModelsValue = [];
-        for (let control of controls) {
-            selectionModelsValue.push(control.model.getValue());
+        for (let model of models) {
+            selectionModelsValue.push(model.getValue());
         }
         return selectionModelsValue;
     }
@@ -351,15 +384,13 @@ export class SelectionManager {
                     for (let control of curControls) {
                         control.dispose();
                     }
-                    this.resetCurrentModels();
-                    curControls = this.getCurrentControls()!;
+                    // this.resetCurrentModels();
+                    curControls = [];
                 }
 
                 selectionControl = SelectionControl.create(this, curControls.length);
                 curControls.push(selectionControl);
             }
-
-            this.addSelectionValue(startSelectionRange, cellInfo);
 
             selectionControl.update(startSelectionRange, cellInfo);
 
@@ -384,6 +415,7 @@ export class SelectionManager {
             });
 
             this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+                this.up();
                 scene.onPointerMoveObserver.remove(this._moveObserver);
                 scene.onPointerUpObserver.remove(this._upObserver);
                 scene.enableEvent();
@@ -446,10 +478,20 @@ export class SelectionManager {
         } = selectionControl?.model || { startRow: -1, endRow: -1, startColumn: -1, endColumn: -1 };
 
         if (oldStartColumn !== finalStartColumn || oldStartRow !== finalStartRow || oldEndColumn !== finalEndColumn || oldEndRow !== finalEndRow) {
-            selectionControl && this.updateSelectionValue(selectionControl, newSelectionRange);
-            selectionControl && selectionControl._updateControl();
+            selectionControl && selectionControl.update(newSelectionRange);
             selectionControl && this._plugin.getObserver('onChangeSelectionObserver')?.notifyObservers(selectionControl);
         }
+    }
+
+    /**
+     * pointer up event
+     * @param moveEvt
+     * @param selectionControl
+     * @returns
+     */
+    up() {
+        // update model
+        this.setSelectionModel();
     }
 
     private _rowEventInitial() {
@@ -479,6 +521,7 @@ export class SelectionManager {
      */
     private _initModels() {
         const selections: ISelectionsConfig = this._plugin.config.selections;
+
         Object.keys(selections).forEach((worksheetId) => {
             const selectionsList = selections[worksheetId];
             const currentModels: SelectionModel[] = [];
@@ -601,6 +644,8 @@ export class SelectionManager {
     /**
      * Returns the list of active ranges in the active sheet or null if there are no active ranges.
      * If there is a single range selected, this behaves as a getActiveRange() call.
+     *
+     * TODO
      *
      * @returns
      */

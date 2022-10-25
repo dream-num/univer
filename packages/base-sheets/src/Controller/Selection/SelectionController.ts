@@ -41,6 +41,9 @@ enum SELECTION_MANAGER_KEY {
     fill = '__SpreadsheetSelectionFillControl__',
 }
 
+/**
+ * The main selection canvas component
+ */
 export class SelectionControl {
     private _mainComponent: Spreadsheet;
 
@@ -159,6 +162,8 @@ export class SelectionControl {
 
     /**
      * just handle the view
+     *
+     * inner update
      */
     _updateControl() {
         const { startX, startY, endX, endY } = this._selectionModel;
@@ -280,46 +285,46 @@ export class SelectionControl {
         this._updateControl();
     }
 
-    /**
-     *When switching to the current sheet
-     *
-     * 1. Reinitialize the rendering component
-     * 2. Calculate the position based on the current skeleton
-     * 3. Update data
-     * 4. Trigger rendering
-     */
-    render() {
-        this._initialize();
+    // /**
+    //  *When switching to the current sheet
+    //  *
+    //  * 1. Reinitialize the rendering component
+    //  * 2. Calculate the position based on the current skeleton
+    //  * 3. Update data
+    //  * 4. Trigger rendering
+    //  */
+    // render() {
+    //     this._initialize();
 
-        let cellInfo = null;
-        const main = this._manager.getMainComponent();
-        const curCellRange = this._selectionModel.currentCell;
+    //     let cellInfo = null;
+    //     const main = this._manager.getMainComponent();
+    //     const curCellRange = this._selectionModel.currentCell;
 
-        if (curCellRange) {
-            cellInfo = main.getCellByIndex(curCellRange.row, curCellRange.column);
-        }
+    //     if (curCellRange) {
+    //         cellInfo = main.getCellByIndex(curCellRange.row, curCellRange.column);
+    //     }
 
-        const { startRow: finalStartRow, startColumn: finalStartColumn, endRow: finalEndRow, endColumn: finalEndColumn } = this._selectionModel;
-        const startCell = main.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn);
-        const endCell = main.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn);
+    //     const { startRow: finalStartRow, startColumn: finalStartColumn, endRow: finalEndRow, endColumn: finalEndColumn } = this._selectionModel;
+    //     const startCell = main.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn);
+    //     const endCell = main.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn);
 
-        this._manager.updateSelectionValue(
-            this,
-            {
-                startColumn: finalStartColumn,
-                startRow: finalStartRow,
-                endColumn: finalEndColumn,
-                endRow: finalEndRow,
-                startY: startCell?.startY || 0,
-                endY: endCell?.endY || 0,
-                startX: startCell?.startX || 0,
-                endX: endCell?.endX || 0,
-            },
-            cellInfo
-        );
+    //     this._manager.updateSelectionValue(
+    //         this,
+    //         {
+    //             startColumn: finalStartColumn,
+    //             startRow: finalStartRow,
+    //             endColumn: finalEndColumn,
+    //             endRow: finalEndRow,
+    //             startY: startCell?.startY || 0,
+    //             endY: endCell?.endY || 0,
+    //             startX: startCell?.startX || 0,
+    //             endX: endCell?.endX || 0,
+    //         },
+    //         cellInfo
+    //     );
 
-        this._updateControl();
-    }
+    //     this._updateControl();
+    // }
 
     clearHighlight() {
         this._selectionModel.clearCurrentCell();
@@ -437,8 +442,7 @@ export class SelectionControl {
 
     static fromJson(manager: SelectionManager, zIndex: number, newSelectionRange: ISelection) {
         const control = SelectionControl.create(manager, zIndex);
-        manager.updateSelectionValue(control, newSelectionRange);
-        control._updateControl();
+        control.update(newSelectionRange);
         return control;
     }
 }

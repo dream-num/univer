@@ -1,4 +1,4 @@
-import { PLUGIN_NAMES, Tools, Worksheet } from '@univer/core';
+import { PLUGIN_NAMES, Worksheet } from '@univer/core';
 import { SpreadsheetPlugin } from '../..';
 import { ISelectionModelValue } from '../Action/SetSelectionValueAction';
 
@@ -13,19 +13,16 @@ import { ISelectionModelValue } from '../Action/SetSelectionValueAction';
  * @internal
  */
 export function SetSelectionValue(worksheet: Worksheet, selections: ISelectionModelValue[]): ISelectionModelValue[] {
-    const currentControls = worksheet.getContext().getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.getSelectionManager().getCurrentControls();
+    const selectionManager = worksheet.getContext().getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.getSelectionManager();
 
-    const result: ISelectionModelValue[] = [];
+    if (!selectionManager) return [];
 
-    if (!currentControls) return [];
+    const result = selectionManager?.getSelectionModelsValue();
+    const models = selectionManager?.getSelectionModels();
 
-    currentControls.forEach((control, i) => {
+    models?.forEach((model, i) => {
         const { selection, cell } = selections[i];
-        result.push({
-            selection: Tools.deepClone(selection),
-            cell: Tools.deepClone(cell),
-        });
-        control.updateModel(selection, cell);
+        model.setValue(selection, cell);
     });
 
     return result;

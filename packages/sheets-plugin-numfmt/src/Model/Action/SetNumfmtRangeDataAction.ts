@@ -1,4 +1,4 @@
-import { ActionBase, ActionObservers, IActionData, ObjectMatrixPrimitiveType, Workbook } from '@univer/core/src';
+import { ActionBase, ActionObservers, IActionData, ObjectMatrixPrimitiveType, Workbook } from '@univer/core';
 import { SetNumfmtRangeData } from '../Apply/SetNumfmtRangeData';
 
 export interface ISetNumfmtRangeActionData extends IActionData {

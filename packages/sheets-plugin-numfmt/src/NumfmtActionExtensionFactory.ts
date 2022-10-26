@@ -13,11 +13,10 @@ export class NumfmtActionExtension extends BaseActionExtension<ISetRangeDataActi
         rangeMatrix.forValue((r, c, cell) => {
             const typed = numfmt.parseValue(cell.v) as unknown as { z: string; v: string };
             if (typed) {
-                const patten = typed.z || 'General';
-                const format = numfmt(patten);
-                cell.m = format(cell.m);
-                cell.v =  typed.v || String();
-                numfmtMatrix.setValue(r, c, patten);
+                const format = numfmt(typed.z);
+                cell.m = format(typed.v);
+                cell.v = typed.v || String();
+                numfmtMatrix.setValue(r, c, typed.z);
             }
         });
         const setNumfmtRangeDataAction = {

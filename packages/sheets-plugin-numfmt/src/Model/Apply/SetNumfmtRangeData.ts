@@ -1,4 +1,4 @@
-import { ObjectMatrix, ObjectMatrixPrimitiveType, Workbook } from '@univer/core/src';
+import { ObjectMatrix, ObjectMatrixPrimitiveType, Workbook } from '@univer/core';
 import { NUMFMT_PLUGIN_NAME } from '../../Const';
 import { NumfmtPlugin } from '../../NumfmtPlugin';
 

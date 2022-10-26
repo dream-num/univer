@@ -9,7 +9,7 @@ import { round } from './core/round';
 import { dateFromSerial, dateToSerial } from './core/serialDate';
 
 export interface FormatterType {
-    (value: number | string, opts?: OptionsData): string;
+    (value: number | string | null | unknown | void, opts?: OptionsData): string;
     color(value, ops?): string;
     isDate(): boolean;
     isText(): boolean;
@@ -30,8 +30,11 @@ function getFormatter(parseData: PatternType, initOpts: OptionsData = {}): Forma
     };
 
     const formatter = (value, opts) => {
-        const o = getRuntimeOptions(opts);
-        return formatNumber(dateToSerial(value, o), partitions, o);
+        if (value) {
+            const o = getRuntimeOptions(opts);
+            return formatNumber(dateToSerial(value, o), partitions, o);
+        }
+        return String();
     };
     formatter.color = (value, opts = {}) => {
         const o = getRuntimeOptions(opts);

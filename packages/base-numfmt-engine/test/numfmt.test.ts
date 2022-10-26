@@ -41,5 +41,9 @@ test('numfmt percentage', () => {
 });
 
 test('numfmt percentage', () => {
-  console.log(numfmt.parseValue('10%'));
+  // console.log(numfmt.parseValue('100.00'));
+  // console.log(numfmt("yyyy-mm-dd")(44876));
+
+  const formatter = numfmt()(100.00);
+  console.log(formatter)
 });

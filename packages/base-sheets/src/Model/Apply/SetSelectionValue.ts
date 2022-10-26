@@ -18,12 +18,8 @@ export function SetSelectionValue(worksheet: Worksheet, selections: ISelectionMo
     if (!selectionManager) return [];
 
     const result = selectionManager?.getSelectionModelsValue();
-    const models = selectionManager?.getSelectionModels();
 
-    models?.forEach((model, i) => {
-        const { selection, cell } = selections[i];
-        model.setValue(selection, cell);
-    });
+    selectionManager.setModels(selections);
 
     return result;
 }

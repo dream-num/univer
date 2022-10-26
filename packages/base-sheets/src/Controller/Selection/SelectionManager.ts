@@ -119,6 +119,8 @@ export class SelectionManager {
                 );
                 this._selectionControls.push(control);
             });
+
+            this.setSelectionModel();
         }
     }
 
@@ -282,6 +284,21 @@ export class SelectionManager {
         return this._selectionModels.get(worksheetId);
     }
 
+    setModels(selections: ISelectionModelValue[]) {
+        const worksheetId = this.getWorksheetId();
+        if (!worksheetId) {
+            return;
+        }
+
+        const models = selections.map(({ selection, cell }) => {
+            const model = new SelectionModel(SELECTION_TYPE.NORMAL);
+            model.setValue(selection, cell);
+            return model;
+        });
+
+        this._selectionModels.set(worksheetId, models);
+    }
+
     getSelectionModelsValue(): ISelectionModelValue[] {
         const models = this.getSelectionModels();
         if (!models) {
@@ -385,7 +402,7 @@ export class SelectionManager {
                         control.dispose();
                     }
                     // this.resetCurrentModels();
-                    curControls = [];
+                    curControls.length = 0; // clear currentSelectionControls
                 }
 
                 selectionControl = SelectionControl.create(this, curControls.length);
@@ -630,7 +647,7 @@ export class SelectionManager {
         const context = this._plugin.getContext();
         context.getContextObserver('onAfterChangeActiveSheetObservable').add(() => {
             // this._plugin.getCanvasView().updateToSheet(this._plugin.getContext().getWorkBook().getActiveSheet()!);
-            this._plugin.getSelectionManager().renderCurrentControls();
+            this.renderCurrentControls();
         });
 
         this._worksheet

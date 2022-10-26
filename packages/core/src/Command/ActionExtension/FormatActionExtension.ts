@@ -7,10 +7,6 @@ import {
 } from '../ActionExtensionFactory';
 
 export class FormatActionExtension extends BaseActionExtension<ISetRangeDataActionData> {
-    constructor(protected actionData: ISetRangeDataActionData) {
-        super(actionData);
-    }
-
     setValue() {
         const rangeData = this.actionData.rangeData;
         const cellValue = this.actionData.cellValue;
@@ -40,17 +36,18 @@ export class FormatActionExtensionFactory extends BaseActionExtensionFactory<ISe
     }
 
     create(
-        actionData: ISetRangeDataActionData
+        actionData: ISetRangeDataActionData,
+        actionDataList: IActionData[]
     ): BaseActionExtension<ISetRangeDataActionData> {
-        return new FormatActionExtension(actionData);
+        return new FormatActionExtension(actionData, actionDataList);
     }
 
-    check(actionData: IActionData) {
-        // Determine whether it is a setFormattedValueAction
-        if (actionData.actionName !== this.actionName) {
-            return false;
-        }
+    // check(actionData: ISetRangeDataActionData, actionDataList: IActionData[]) {
+    //     // Determine whether it is a setFormattedValueAction
+    //     if (actionData.actionName !== this.actionName) {
+    //         return false;
+    //     }
 
-        return this.create(actionData as ISetRangeDataActionData);
-    }
+    //     return this.create(actionData, actionDataList);
+    // }
 }

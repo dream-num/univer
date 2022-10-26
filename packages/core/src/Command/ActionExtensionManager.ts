@@ -29,7 +29,7 @@ export class ActionExtensionManager {
 
         actions.forEach((action) => {
             this._actionExtensionFactoryList.forEach((actionExtensionFactory) => {
-                const extension = actionExtensionFactory.check(action);
+                const extension = actionExtensionFactory.check(action, actions);
                 // TODO 可能只需执行一次
                 if (extension !== false) {
                     extension.execute();

@@ -1,10 +1,10 @@
-import { ACTION_NAMES, Plugin, BaseActionExtension, BaseActionExtensionFactory, IActionData, ISetRangeDataActionData, ObjectMatrix } from '@univer/core';
+import { ACTION_NAMES, Plugin, BaseActionExtension, BaseActionExtensionFactory, ISetRangeDataActionData, ObjectMatrix, IActionData } from '@univer/core';
 import { numfmt } from '@univer/base-numfmt-engine';
 
 export class NumfmtActionExtension extends BaseActionExtension<ISetRangeDataActionData> {
-    constructor(protected actionData: ISetRangeDataActionData) {
-        super(actionData);
-    }
+    // constructor(protected actionData: ISetRangeDataActionData) {
+    //     super(actionData);
+    // }
 
     execute() {
         const matrix = new ObjectMatrix(this.actionData.cellValue);
@@ -38,16 +38,16 @@ export class NumfmtActionExtensionFactory extends BaseActionExtensionFactory<ISe
         this._plugin = plugin;
     }
 
-    create(actionData: ISetRangeDataActionData): BaseActionExtension<ISetRangeDataActionData> {
-        return new NumfmtActionExtension(actionData);
+    create(actionData: ISetRangeDataActionData, actionDataList: IActionData[]): BaseActionExtension<ISetRangeDataActionData> {
+        return new NumfmtActionExtension(actionData, actionDataList);
     }
 
-    check(actionData: IActionData) {
-        // Determine whether it is a setFormattedValueAction
-        if (actionData.actionName !== this.actionName) {
-            return false;
-        }
+    // check(actionData: IActionData) {
+    //     // Determine whether it is a setFormattedValueAction
+    //     if (actionData.actionName !== this.actionName) {
+    //         return false;
+    //     }
 
-        return this.create(actionData as ISetRangeDataActionData);
-    }
+    //     return this.create(actionData as ISetRangeDataActionData);
+    // }
 }

@@ -39,11 +39,3 @@ test('numfmt percentage', () => {
     const formatter = numfmt('0.00%');
     expect(formatter(0.1)).toEqual('10.00%');
 });
-
-test('numfmt percentage', () => {
-    // console.log(numfmt.parseValue('100.00'));
-    // console.log(numfmt("yyyy-mm-dd")(44876));
-
-    const formatter = numfmt('')('100.00');
-    console.log(formatter);
-});

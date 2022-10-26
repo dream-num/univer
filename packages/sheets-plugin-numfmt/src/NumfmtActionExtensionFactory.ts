@@ -1,5 +1,6 @@
 import { ACTION_NAMES, Plugin, BaseActionExtension, BaseActionExtensionFactory, IActionData, ISetRangeDataActionData, ObjectMatrix } from '@univer/core';
 import { numfmt } from '@univer/base-numfmt-engine';
+import { ACTION_NAMES as PLUGIN_ACTION_NAMES } from './Const';
 
 export class NumfmtActionExtension extends BaseActionExtension<ISetRangeDataActionData> {
     constructor(protected actionData: ISetRangeDataActionData) {
@@ -7,18 +8,20 @@ export class NumfmtActionExtension extends BaseActionExtension<ISetRangeDataActi
     }
 
     execute() {
-        const matrix = new ObjectMatrix(this.actionData.cellValue);
-        matrix.forEach((rowNumber, row) => {
-            row.forEach((colNumber, cell) => {
-                if (cell.v) {
-                    const result = numfmt.parseValue(cell.v) as { z: string };
-                    if (result) {
-                        const format = numfmt(result.z);
-                        cell.m = format(String(cell.v));
-                    }
-                }
-            });
+        const rangeMatrix = new ObjectMatrix(this.actionData.cellValue);
+        const numfmtMatrix = new ObjectMatrix<string>();
+        rangeMatrix.forValue((r, c, cell) => {
+            const result = numfmt.parseValue(cell.v) as { z: string };
+            const patten = result.z || 'General';
+            cell.m = numfmt(patten)(String(cell.v));
+            numfmtMatrix.setValue(r, c, patten);
         });
+        const setNumfmtRangeDataAction = {
+            actionName: PLUGIN_ACTION_NAMES.SET_NUMFMT_RANGE_DATA_ACTION,
+            sheetId: this.actionData.sheetId,
+            rangeData: this.actionData.rangeData,
+            cellValue: numfmtMatrix.toJSON(),
+        };
     }
 }
 

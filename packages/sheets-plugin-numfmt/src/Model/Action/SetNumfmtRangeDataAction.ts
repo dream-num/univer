@@ -1,11 +1,11 @@
 import { ActionBase, ActionObservers, IActionData, ObjectMatrixPrimitiveType, Workbook } from '@univer/core/src';
-import { SetNumfmtRange } from '../Apply/SetNumfmtRange';
+import { SetNumfmtRangeData } from '../Apply/SetNumfmtRangeData';
 
 export interface ISetNumfmtRangeActionData extends IActionData {
     numfmtMatrix: ObjectMatrixPrimitiveType<string>;
 }
 
-export class SetNumfmtRangeAction extends ActionBase<ISetNumfmtRangeActionData, ISetNumfmtRangeActionData> {
+export class SetNumfmtRangeDataAction extends ActionBase<ISetNumfmtRangeActionData, ISetNumfmtRangeActionData> {
     constructor(actionData: ISetNumfmtRangeActionData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._doActionData = {
@@ -24,11 +24,11 @@ export class SetNumfmtRangeAction extends ActionBase<ISetNumfmtRangeActionData, 
     }
 
     redo(): ObjectMatrixPrimitiveType<string> {
-        return SetNumfmtRange(this.getWorkBook(), this._doActionData.sheetId, this._doActionData.numfmtMatrix);
+        return SetNumfmtRangeData(this.getWorkBook(), this._doActionData.sheetId, this._doActionData.numfmtMatrix);
     }
 
     undo(): void {
-        SetNumfmtRange(this.getWorkBook(), this._oldActionData.sheetId, this._oldActionData.numfmtMatrix);
+        SetNumfmtRangeData(this.getWorkBook(), this._oldActionData.sheetId, this._oldActionData.numfmtMatrix);
     }
 
     validate(): boolean {

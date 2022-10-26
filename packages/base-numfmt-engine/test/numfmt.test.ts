@@ -38,4 +38,8 @@ test('numfmt currency', () => {
 test('numfmt percentage', () => {
   const formatter = numfmt("0.00%");
   expect(formatter(0.1)).toEqual('10.00%');
-});;
+});
+
+test('numfmt percentage', () => {
+  console.log(numfmt.parseValue('10%'));
+});

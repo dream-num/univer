@@ -1,5 +1,4 @@
-import { Command, Range, IRangeData, ObjectMatrix, Plugin } from '@univer/core';
-import { ACTION_NAMES } from '../Const';
+import { Command, Range, IRangeData, ObjectMatrix, Plugin, ACTION_NAMES, ObjectMatrixPrimitiveType } from '@univer/core';
 import { NumfmtModel } from '../Model/NumfmtModel';
 
 export class NumfmtController {
@@ -12,34 +11,38 @@ export class NumfmtController {
         this._plugin = plugin;
     }
 
+    getNumfmtBySheetIdConfig(sheetId: string): ObjectMatrixPrimitiveType<string> {
+        return this._model.getNumfmtBySheetIdConfig(sheetId);
+    }
+
     setNumfmtByRange(sheetId: string, numfmtRange: IRangeData, numfmtValue: string): void {
         const numfmtMatrix = new ObjectMatrix<string>();
         Range.foreach(numfmtRange, (row, column) => {
             numfmtMatrix.setValue(row, column, numfmtValue);
         });
-        this._model.setNumfmtMatrix(sheetId, numfmtMatrix);
         const pluginContext = this._plugin.getContext();
         const commandManager = pluginContext.getCommandManager();
         const config = {
-            actionName: ACTION_NAMES.SET_NUMFMT_RANGE_ACTION,
+            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
             sheetId,
-            numfmtMatrix,
-            numfmtValue,
+            rangeData: numfmtRange,
+            cellValue: numfmtMatrix.toJSON(),
         };
         const command = new Command(pluginContext.getWorkBook(), config);
         commandManager.invoke(command);
     }
 
     setNumfmtByCoords(sheetId: string, row: number, column: number, numfmt: string): void {
-        this._model.setNumfmtCoords(sheetId, row, column, numfmt);
+        const numfmtMatrix = new ObjectMatrix<string>();
+        numfmtMatrix.setValue(row, column, numfmt);
+        const numfmtRange: IRangeData = { startRow: row, startColumn: column, endRow: row, endColumn: column };
         const pluginContext = this._plugin.getContext();
         const commandManager = pluginContext.getCommandManager();
         const config = {
-            actionName: ACTION_NAMES.SET_NUMFMT_COORDS_ACTION,
+            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
             sheetId,
-            row,
-            column,
-            numfmt,
+            rangeData: numfmtRange,
+            cellValue: numfmtMatrix.toJSON(),
         };
         const command = new Command(pluginContext.getWorkBook(), config);
         commandManager.invoke(command);

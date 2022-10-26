@@ -428,9 +428,9 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
         this._rightMenuControl.addItem(item);
     }
 
-    addToolButton(config: IToolBarItemProps) {
-        this._toolBarControl1.addToolButton(config);
-    }
+    // addToolButton(config: IToolBarItemProps) {
+    //     this._toolBarControl1.addToolButton(config);
+    // }
 
     registerComponent(name: string, component: any, props?: any) {
         this._componentList.set(name, {

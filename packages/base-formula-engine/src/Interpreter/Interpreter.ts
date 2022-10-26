@@ -1,10 +1,20 @@
+import { CellValueType, ICellData, ICellV, ObjectMatrix } from '@univer/core';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { NodeType } from '../AstNode/NodeType';
-import { AstNodePromiseType, FunctionVariantType, IInterpreterCalculateProps } from '../Basics/Common';
+import { AstNodePromiseType, CalculateValueType, FunctionVariantType, IInterpreterDatasetConfig, UnitDataType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
+import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
+import { ArrayValueObject } from '../ValueObject/ArrayValueObject';
+import { BaseValueObject } from '../ValueObject/BaseValueObject';
+import { BooleanValueObject } from '../ValueObject/BooleanValueObject';
+import { NumberValueObject } from '../ValueObject/NumberValueObject';
 
 export class Interpreter {
+    private _runtimeData: UnitDataType = {};
+
+    private _unitId: string;
+
     private async _execute(node: BaseAstNode): Promise<AstNodePromiseType> {
         const children = node.getChildren();
         const childrenCount = children.length;
@@ -19,15 +29,43 @@ export class Interpreter {
         }
 
         if (node.nodeType === NodeType.FUNCTION) {
-            await node.executeAsync(this._interpreterCalculateProps);
+            await node.executeAsync(this._interpreterDatasetConfig);
         } else {
-            node.execute(this._interpreterCalculateProps);
+            node.execute(this._interpreterDatasetConfig, this._runtimeData);
         }
 
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
-    constructor(private _interpreterCalculateProps?: IInterpreterCalculateProps) {}
+    private _objectValueToCellValue(objectValue: CalculateValueType) {
+        if (objectValue.isErrorObject()) {
+            return {
+                v: (objectValue as ErrorValueObject).getErrorType() as string,
+                t: CellValueType.STRING,
+            };
+        } else if (objectValue.isValueObject()) {
+            const vo = objectValue as BaseValueObject;
+            const v = vo.getValue();
+            if (vo.isNumber()) {
+                return {
+                    v,
+                    t: CellValueType.NUMBER,
+                };
+            } else if (vo.isBoolean()) {
+                return {
+                    v,
+                    t: CellValueType.BOOLEAN,
+                };
+            } else {
+                return {
+                    v,
+                    t: CellValueType.STRING,
+                };
+            }
+        }
+    }
+
+    constructor(private _interpreterDatasetConfig?: IInterpreterDatasetConfig) {}
 
     async execute(node: BaseAstNode): Promise<FunctionVariantType> {
         // if (!this._interpreterCalculateProps) {
@@ -43,19 +81,42 @@ export class Interpreter {
         return Promise.resolve(node.getValue());
     }
 
-    setProps(interpreterCalculateProps: IInterpreterCalculateProps) {
-        this._interpreterCalculateProps = interpreterCalculateProps;
-    }
-
-    static interpreter: Interpreter;
-
-    static create(interpreterCalculateProps?: IInterpreterCalculateProps) {
-        if (!this.interpreter) {
-            this.interpreter = new Interpreter(interpreterCalculateProps);
+    setRuntimeData(row: number, column: number, sheetId: string, functionVariant: FunctionVariantType) {
+        if (this._runtimeData[this._unitId] === null) {
+            this._runtimeData[this._unitId] = {};
         }
 
-        interpreterCalculateProps && this.interpreter.setProps(interpreterCalculateProps);
+        const unitData = this._runtimeData[this._unitId];
 
-        return this.interpreter;
+        if (unitData[sheetId] === null) {
+            unitData[sheetId] = new ObjectMatrix<ICellData>();
+        }
+
+        const sheetData = unitData[sheetId];
+        if (functionVariant.isReferenceObject() || (functionVariant as BaseValueObject).isArray()) {
+            const objectValueRefOrArray = functionVariant as BaseReferenceObject | ArrayValueObject;
+            objectValueRefOrArray.iterator((valueObject, rowIndex, columnIndex) => {
+                sheetData.setValue(rowIndex, columnIndex, this._objectValueToCellValue(valueObject));
+            });
+        } else {
+            sheetData.setValue(row, column, this._objectValueToCellValue(functionVariant as CalculateValueType));
+        }
+    }
+
+    setProps(interpreterDatasetConfig: IInterpreterDatasetConfig) {
+        this._interpreterDatasetConfig = interpreterDatasetConfig;
+    }
+
+    // static interpreter: Interpreter;
+
+    static create(interpreterDatasetConfig?: IInterpreterDatasetConfig) {
+        return new Interpreter(interpreterDatasetConfig);
+        // if (!this.interpreter) {
+        //     this.interpreter = new Interpreter(interpreterCalculateProps);
+        // }
+
+        // interpreterCalculateProps && this.interpreter.setProps(interpreterCalculateProps);
+
+        // return this.interpreter;
     }
 }

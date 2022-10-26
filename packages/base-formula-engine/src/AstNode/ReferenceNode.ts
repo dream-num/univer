@@ -6,7 +6,7 @@ import { REFERENCE_SINGLE_RANGE_REGEX, REFERENCE_REGEX_SINGLE_ROW, REFERENCE_REG
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
 import { LexerNode } from '../Analysis/LexerNode';
 import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
-import { SheetDataType, IInterpreterCalculateProps } from '../Basics/Common';
+import { SheetDataType, IInterpreterDatasetConfig, UnitDataType } from '../Basics/Common';
 import { CellReferenceObject } from '../ReferenceObject/CellReferenceObject';
 import { RowReferenceObject } from '../ReferenceObject/RowReferenceObject';
 import { ColumnReferenceObject } from '../ReferenceObject/ColumnReferenceObject';
@@ -23,14 +23,19 @@ export class ReferenceNode extends BaseAstNode {
         super(_operatorString);
     }
 
-    execute(interpreterCalculateProps?: IInterpreterCalculateProps) {
+    execute(interpreterCalculateProps?: IInterpreterDatasetConfig, runtimeData?: UnitDataType) {
         const props = interpreterCalculateProps;
         if (props) {
-            this._referenceObject.setSheetData(props.sheetData);
+            this._referenceObject.setUnitData(props.unitData);
             this._referenceObject.setDefaultSheetId(props.currentSheetId);
             this._referenceObject.setForcedSheetId(props.sheetNameMap);
             this._referenceObject.setRowCount(props.rowCount);
             this._referenceObject.setColumnCount(props.columnCount);
+            this._referenceObject.setDefaultUnitId(props.currentUnitId);
+        }
+
+        if (runtimeData) {
+            this._referenceObject.setRuntimeData(runtimeData);
         }
 
         this.setValue(this._referenceObject);

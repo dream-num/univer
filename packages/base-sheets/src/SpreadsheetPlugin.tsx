@@ -19,6 +19,7 @@ import {
     CountBarController,
     SheetContainerController,
 } from './Controller';
+import { ToolBarController1 } from './Controller/ToolBarController1';
 
 export interface ISelectionConfig {
     selection: IRangeData;
@@ -96,6 +97,11 @@ const DEFAULT_SPREADSHEET_PLUGIN_DATA: ISpreadsheetPluginConfig = {
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
  */
+interface ComponentChildrenProps {
+    component: any;
+    props?: any;
+}
+
 export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
     @Attribute()
     private pros: IOCAttribute;
@@ -130,6 +136,8 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
 
     private _toolBarControl: ToolBarController;
 
+    private _toolBarControl1: ToolBarController1;
+
     private _infoBarControl: InfoBarController;
 
     private _sheetBarControl: SheetBarControl;
@@ -141,6 +149,8 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
     private _countBarController: CountBarController;
 
     private _sheetContainerController: SheetContainerController;
+
+    private _componentList: Map<string, ComponentChildrenProps>;
 
     constructor(props: Partial<ISpreadsheetPluginConfig> = {}) {
         super(PLUGIN_NAMES.SPREADSHEET);
@@ -208,8 +218,11 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
             onDidMount: () => {},
         };
 
+        this._componentList = new Map();
+
         this._rightMenuControl = new RightMenuController(this);
         this._toolBarControl = new ToolBarController(this);
+        this._toolBarControl1 = new ToolBarController1(this);
         this._infoBarControl = new InfoBarController(this);
         this._sheetBarControl = new SheetBarControl(this);
         this._cellEditorControl = new CellEditorController(this);
@@ -342,10 +355,6 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
         return this.getSelectionManager()?.getCurrentControls();
     }
 
-    getSelectionModels() {
-        return this.getSheetView()?.getSelectionModels();
-    }
-
     getSelectionShape() {
         return this._canvasEngine;
     }
@@ -413,5 +422,20 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
 
     addRightMenu(item: RightMenuProps[] | RightMenuProps) {
         this._rightMenuControl.addItem(item);
+    }
+
+    // addToolButton(config: IToolBarItemProps) {
+    //     this._toolBarControl1.addToolButton(config);
+    // }
+
+    registerComponent(name: string, component: any, props?: any) {
+        this._componentList.set(name, {
+            component,
+            props,
+        });
+    }
+
+    getRegisterComponent(name: string) {
+        return this._componentList.get(name);
     }
 }

@@ -9,8 +9,7 @@ export interface BaseColorPickerCircleButtonProps {
     /**
      * Listen to the confirm button
      */
-    onClick?: (color: string) => void;
-
+    onClick: (color: string, e?: MouseEvent) => void;
     /**
      * cancel select
      */

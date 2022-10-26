@@ -1,13 +1,10 @@
-import {
-    FormatActionExtensionFactory,
-    FormulaActionExtensionFactory,
-} from './ActionExtension';
+import { FormulaActionExtensionFactory } from './ActionExtension';
 
 import { ActionExtensionManager } from './ActionExtensionManager';
 
 const register = ActionExtensionManager.create();
 
 register.add(
-    new FormatActionExtensionFactory(),
+    // new FormatActionExtensionFactory(),
     new FormulaActionExtensionFactory()
 );

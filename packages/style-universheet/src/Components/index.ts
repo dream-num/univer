@@ -21,6 +21,7 @@ import { Radio, RadioGroup } from './Radio';
 import { ResizeDialog } from './ResizeDialog';
 import { RichText } from './RichText/RichText';
 import { Select } from './SelectComponent';
+import { Dropdown } from './Dropdown';
 import { Separator } from './Separator';
 import { SiderModal } from './SiderModal';
 import { Slider } from './Slider';
@@ -68,4 +69,5 @@ export {
     SiderModal,
     ResizeDialog,
     RichText,
+    Dropdown,
 };

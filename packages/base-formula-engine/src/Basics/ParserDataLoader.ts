@@ -13,7 +13,7 @@ export class ParserDataLoader {
     // 18.5.1.2 table (Table)
     private _tableMap: Map<string, ISuperTable> = new Map();
 
-    // 18.5.1.2 table (Table)
+    // 18.5.1.2 table (Table) for I18N
     private _tableOptionMap: Map<string, TableOptionType> = new Map();
 
     // 18.2.6 definedNames (Defined Names)

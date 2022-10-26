@@ -66,7 +66,7 @@ export class Workbook {
     @AttributeValue()
     private _config: IWorkbookConfig;
 
-    private _bookId: string;
+    private _unitId: string;
 
     @Inject('Server')
     private _server: ServerBase;
@@ -113,7 +113,7 @@ export class Workbook {
         this._config = Tools.commonExtend(DEFAULT_WORKBOOK, this._config);
 
         const { styles } = this._config;
-        this._bookId = this._config.id ?? nanoid(6);
+        this._unitId = this._config.id ?? nanoid(6);
         this._styles = new Styles(styles);
         this._worksheets = new Map<string, Worksheet>();
         // this._formatManage = new FormatManager();
@@ -212,6 +212,10 @@ export class Workbook {
             },
         };
         return item;
+    }
+
+    getUnitId() {
+        return this._unitId;
     }
 
     getWorksheets(): Map<string, Worksheet> {

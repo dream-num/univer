@@ -144,10 +144,6 @@ export class CanvasView {
         return this.getView(CANVAS_VIEW_KEY.SHEET_VIEW) as SheetView;
     }
 
-    getSelectionModels() {
-        return this.getSheetView().getSelectionModels();
-    }
-
     updateToSheet(worksheet: Worksheet) {
         for (let view of this._views) {
             view.updateToSheet(worksheet);

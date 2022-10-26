@@ -2,8 +2,9 @@
 @import '../../assets/css/skin/base.module.less';
 
 @Tooltip-bg: #000000bf;
+
 .tooltip-Group {
-    width: 100%;
+    // width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
@@ -20,11 +21,13 @@
         font-size: @font-size-base;
         line-height: 1.5;
     }
+
     .tooltip-body {
         width: 100%;
         height: 100%;
         display: inline-flex;
-        &:hover ~ .tooltip-title {
+
+        &:hover~.tooltip-title {
             position: absolute;
             display: inline-block;
             z-index: `getZindex('tooltip') `;
@@ -39,41 +42,48 @@
 .top {
     left: 50%;
     transform: translateX(-50%);
+
     & .tooltip-triangle {
-        .triangleDown(@Tooltip-bg,5px);
+        .triangleDown(@Tooltip-bg, 5px);
         bottom: -10px;
         left: 50%;
         transform: translateX(-50%);
         pointer-events: none;
     }
 }
+
 .right {
     top: 50%;
     transform: translatey(-50%);
+
     & .tooltip-triangle {
-        .triangleRight(@Tooltip-bg,5px);
+        .triangleRight(@Tooltip-bg, 5px);
         right: -10px;
         top: 50%;
         transform: translateY(-50%);
         pointer-events: none;
     }
 }
+
 .bottom {
     left: 50%;
     transform: translateX(-50%);
+
     & .tooltip-triangle {
-        .triangleUp(@Tooltip-bg,5px);
+        .triangleUp(@Tooltip-bg, 5px);
         top: -10px;
         left: 50%;
         transform: translateX(-50%);
         pointer-events: none;
     }
 }
+
 .left {
     top: 50%;
     transform: translatey(-50%);
+
     & .tooltip-triangle {
-        .triangleLeft(@Tooltip-bg,5px);
+        .triangleLeft(@Tooltip-bg, 5px);
         left: -10px;
         top: 50%;
         transform: translateY(-50%);

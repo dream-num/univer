@@ -5,7 +5,7 @@ export const DEFAULT_FORMULA_DATA: IFormulaConfig = {
         'sheet-01': {
             '12': {
                 '3': {
-                    fs: '=SUM(F1, G8)',
+                    formula: '=SUM(F1, G8)',
                     row: 11,
                     column: 3,
                     sheetId: 'sheet-01',
@@ -13,7 +13,7 @@ export const DEFAULT_FORMULA_DATA: IFormulaConfig = {
             },
             '13': {
                 '3': {
-                    fs: '=SUM(A3:G4)',
+                    formula: '=SUM(A3:G4)',
                     row: 11,
                     column: 3,
                     sheetId: 'sheet-01',
@@ -21,7 +21,7 @@ export const DEFAULT_FORMULA_DATA: IFormulaConfig = {
             },
             '14': {
                 '3': {
-                    fs: '=AVERAGE(I10, M16)',
+                    formula: '=AVERAGE(I10, M16)',
                     row: 11,
                     column: 3,
                     sheetId: 'sheet-01',

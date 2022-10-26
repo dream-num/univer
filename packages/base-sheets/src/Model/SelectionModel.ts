@@ -96,7 +96,25 @@ export class SelectionModel implements ISelection {
         return makeCellToSelection(this._currentCell);
     }
 
+    getValue() {
+        return {
+            selection: {
+                startColumn: this._startColumn,
+                startRow: this._startRow,
+                endColumn: this._endColumn,
+                endRow: this._endRow,
+
+                startX: this._startX,
+                startY: this._startY,
+                endX: this._endX,
+                endY: this._endY,
+            },
+            cell: this._currentCell,
+        };
+    }
+
     setValue(newSelectionRange: ISelection, currentCell: Nullable<ICellInfo>) {
+        // TODO action触发
         const {
             startColumn,
             startRow,

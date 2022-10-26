@@ -8,7 +8,7 @@ import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatr
  * @param addMatrix
  * @param rangeData
  * @returns
- *TODO: change to setRangeFormattedValue()
+ *
  * @internal
  */
 export function SetRangeFormattedValue(

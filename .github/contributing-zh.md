@@ -351,6 +351,9 @@ pnpm install
 │  │
 │  ├─Enum # 枚举
 │  │      index.ts # 出口
+│  │      
+│  ├─Interfaces # 接口
+│  │      index.ts # 出口
 │  │
 │  └─Shared # 公共方法
 │         index.ts # 出口

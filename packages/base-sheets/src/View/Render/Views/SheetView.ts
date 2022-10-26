@@ -2,7 +2,6 @@ import { getColor, Rect, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitl
 import { Worksheet } from '@univer/core';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from '../BaseView';
 import { SelectionManager } from '../../../Controller/Selection/SelectionManager';
-import { SelectionModel } from '../../../Model/SelectionModel';
 import { SheetViewKeyboardEvent } from './SheetViewKeyboardEvent';
 
 export enum SHEET_VIEW_KEY {
@@ -81,18 +80,6 @@ export class SheetView extends BaseView {
 
     getSelectionControls() {
         return this._selectionManager.getCurrentControls();
-    }
-
-    getSelectionModels() {
-        const controls = this.getSelectionControls();
-        if (!controls) {
-            return;
-        }
-        const selectionModels: SelectionModel[] = [];
-        for (let control of controls) {
-            selectionModels.push(control.model);
-        }
-        return selectionModels;
     }
 
     getSpreadsheetSkeleton() {

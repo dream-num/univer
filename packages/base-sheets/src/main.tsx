@@ -4,6 +4,7 @@ import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
 import { UniverComponentSheet } from '@univer/style-universheet';
 import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
 import { DEFAULT_FORMULA_DATA, FormulaPlugin } from '@univer/sheets-plugin-formula';
+import { NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
 
 const uiDefaultConfigUp = {
     container: 'universheet-demo-up',
@@ -29,7 +30,9 @@ FormulaPlugin.create(DEFAULT_FORMULA_DATA).installTo(univerSheetUp);
 import('./SpreadsheetPlugin').then(({ SpreadsheetPlugin }) => {
     let spreadsheetPlugin = new SpreadsheetPlugin(uiDefaultConfigUp);
     let clipboardPlugin = new ClipboardPlugin();
+    let numfmtPlugin = new NumfmtPlugin();
     univerSheetUp.installPlugin(spreadsheetPlugin);
     univerSheetUp.installPlugin(clipboardPlugin);
     (window as any).spreadsheetPlugin = spreadsheetPlugin;
+    univerSheetUp.installPlugin(numfmtPlugin);
 });

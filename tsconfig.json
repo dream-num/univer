@@ -15,6 +15,7 @@
         { "path": "./packages/style-universheet/tsconfig.ref.json" },
         { "path": "./packages/sheets-plugin-sort/tsconfig.ref.json" },
         { "path": "./packages/sheets-plugin-filter/tsconfig.ref.json" },
-        { "path": "./packages/sheets-plugin-find/tsconfig.ref.json" }
+        { "path": "./packages/sheets-plugin-find/tsconfig.ref.json" },
+        { "path": "./packages/sheets-plugin-numfmt/tsconfig.ref.json" }
     ]
 }

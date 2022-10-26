@@ -22,6 +22,7 @@ export class NumfmtActionExtension extends BaseActionExtension<ISetRangeDataActi
             rangeData: this.actionData.rangeData,
             cellValue: numfmtMatrix.toJSON(),
         };
+        this.push(setNumfmtRangeDataAction);
     }
 }
 

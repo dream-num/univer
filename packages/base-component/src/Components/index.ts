@@ -29,3 +29,4 @@ export * from './Tab';
 export * from './Tooltip';
 export * from './Ul';
 export * from './Description';
+export * from './Dropdown';

@@ -35,16 +35,13 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
     ulRef = createRef();
 
     initialize(props: BaseColorPickerProps) {
-        // super(props);
         this.state = {
             presetColors: allColor,
             defaultColor: props.color || '#000',
             afterColor: props.color || '#000',
             rgb: true,
             setting: false,
-            styles: {
-                visibility: 'hidden',
-            },
+            styles: {},
             currentLocale: '',
             locale: {},
             root: null,
@@ -91,9 +88,9 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
      *
      * @eventProperty
      */
-    onClick = (color: string) => {
-        this.props.onClick && this.props.onClick(color);
-        this.hideSelect();
+    onClick = (color: string, e: MouseEvent) => {
+        this.props.onClick && this.props.onClick(color, e);
+        // this.hideSelect();
     };
 
     /**
@@ -103,25 +100,19 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
      */
     onCancel = () => {
         this.props.onCancel && this.props.onCancel();
-        this.hideSelect();
+        // this.hideSelect();
     };
 
     hideSelect = (e?: MouseEvent) => {
         if (e && this.ulRef.current.contains(e.target)) return;
 
-        this.setState((prevState) => ({ styles: { visibility: 'hidden' } }));
+        this.setState((prevState) => ({ styles: { display: 'none' } }));
 
         document.removeEventListener('click', this.hideSelect, true);
     };
 
     showSelect = (root?: Element) => {
-        if (root) {
-            const { top, left } = this.getOffset(root, this.ulRef.current);
-            this.setState({ root, styles: { left: `${left}px`, top: `${top}px`, visibility: 'visible' } });
-        } else {
-            this.setState((prevState) => ({ styles: { visibility: 'visible' } }));
-        }
-
+        this.setState((prevState) => ({ styles: { display: 'block' } }));
         // 点击外部隐藏子组件
         document.addEventListener('click', this.hideSelect, true);
     };
@@ -175,7 +166,7 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                 <div
                     className={styles.colorPicker}
                     onClick={(e: MouseEvent) => {
-                        e.stopImmediatePropagation();
+                        // e.stopImmediatePropagation();
                     }}
                 >
                     <div className={styles.picker}>
@@ -190,8 +181,8 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                                                     className={styles.pickerSwatchBtn}
                                                     style={{ background: item }}
                                                     onClick={(e: MouseEvent) => {
-                                                        this.onChange(item);
-                                                        this.onClick(item);
+                                                        // this.hideSelect();
+                                                        this.props.onClick && this.props.onClick(item, e);
                                                     }}
                                                 />
                                             </Tooltip>
@@ -213,8 +204,8 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                                 <Button
                                     type="primary"
                                     onClick={(e: MouseEvent) => {
-                                        console.info('确定');
-                                        this.onClick(this.state.afterColor);
+                                        this.onClick?.(this.state.afterColor, e);
+                                        // this.hideSelect();
                                     }}
                                 >
                                     {this.state.locale.confirmColor}
@@ -229,6 +220,7 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                                 </Button>
                                 <Button
                                     onClick={(e: MouseEvent) => {
+                                        e.stopPropagation();
                                         this.setState({
                                             rgb: !this.state.rgb,
                                         });
@@ -240,8 +232,6 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                         </div>
                     ) : null}
                 </div>
-                {/* {this.props.slot && this.props.slot.header ? <div className={styles.colorPickerSlot}>{this.props.slot.header.label}</div> : null} */}
-                {/* {this.props.solt && this.props.solt.footer ? <div className={styles.colorPickSolt}>{this.props.solt.footer}</div> : null} */}
             </div>
         );
     }

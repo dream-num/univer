@@ -8,11 +8,6 @@ export interface BaseColorPickerProps {
     color?: string;
 
     /**
-     * Listen to the confirm button
-     */
-    onClick?: (color: string) => void;
-
-    /**
      * cancel select
      */
     onCancel?: () => void;
@@ -26,6 +21,8 @@ export interface BaseColorPickerProps {
      * style
      */
     style?: JSX.CSSProperties;
+
+    onClick?: (color: string, e: MouseEvent) => void; // 返回所选颜色
 
     /**
      * class name

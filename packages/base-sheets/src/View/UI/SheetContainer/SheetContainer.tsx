@@ -16,7 +16,6 @@ import {
 } from '@univer/base-component';
 import { AsyncFunction, Context, IKeyType, LocaleType, PLUGIN_NAMES, Tools, Workbook } from '@univer/core';
 import cssVars from 'css-vars-ponyfill';
-
 import {
     Container,
     Content,
@@ -34,11 +33,12 @@ import darkSkin from '@univer/style-universheet/assets/css/skin/dark.module.less
 import greenSkin from '@univer/style-universheet/assets/css/skin/green.module.less';
 // app context for skin and Locale
 import { SpreadsheetPlugin } from '@SpreadsheetPlugin';
+import { ToolBar1 } from '../ToolBar/ToolBar1';
 import { RightMenu } from '../RightMenu';
 import { InfoBar } from '../InfoBar';
 import { SheetBar } from '../SheetBar';
 import style from './index.module.less';
-import { IShowToolBarConfig, ToolBar } from '../ToolBar';
+import { IShowToolBarConfig } from '../ToolBar';
 import { CountBar } from '../CountBar/CountBar';
 
 export interface ILayout {
@@ -192,6 +192,8 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
     splitLeftRef = createRef<HTMLDivElement>();
 
     rightRef = createRef<HTMLDivElement>();
+
+    menuRef = createRef();
 
     cellRightRef = createRef<HTMLDivElement>();
 
@@ -649,28 +651,16 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                         <Layout className={style.mainContent} style={{ position: 'relative' }}>
                             <Header style={{ display: layout.header ? 'block' : 'none' }}>
                                 <InfoBar></InfoBar>
-                                <ToolBar
+                                {/* <ToolBar
                                     style={{
                                         display: layout.toolBar ? 'block' : 'none',
                                     }}
                                     toolList={[]}
                                     func={{ addButton }}
-                                ></ToolBar>
+                                ></ToolBar> */}
+                                <ToolBar1 toolList={[]}></ToolBar1>
                                 <FormulaBar></FormulaBar>
                             </Header>
-                            {/* <Menu
-                                list={[
-                                    {
-                                        label: '哈哈哈',
-                                    },
-                                    {
-                                        label: '嘿嘿嘿',
-                                        children: {
-                                            list: [],
-                                        },
-                                    },
-                                ]}
-                            /> */}
                             <Layout>
                                 <Sider
                                     style={{

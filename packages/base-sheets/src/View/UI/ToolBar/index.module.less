@@ -31,14 +31,48 @@
     height: 40px;
     position: relative;
 
-    > div {
-        margin-top: 7px;
+    >div {
+        // margin-top: 7px;
         height: 26px;
         display: inline-block;
         vertical-align: middle;
+        margin: 7px 3px 0 3px;
 
         &.select-button:hover {
             background-color: #efefef;
+        }
+    }
+
+    .cols-menu {
+        overflow-y: auto;
+    }
+
+    .select-label-string {
+        .drop-content {
+            >div {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                width: 90px;
+            }
+        }
+    }
+
+    .select-color-picker-parent {
+        .select-item-content {
+            width: 100%;
+        }
+
+        ul {
+            padding: 0;
+        }
+
+        .select-color-picker {
+            padding: 0;
+
+            .select-item {
+                padding: 0;
+            }
         }
     }
 

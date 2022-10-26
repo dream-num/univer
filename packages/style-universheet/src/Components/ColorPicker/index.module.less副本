@@ -1,10 +1,11 @@
-.color-picker-outer {
+.color-picker-outter {
     width: fit-content;
     display: block;
     background-color: var(--bg);
     padding: 10px;
     // padding-bottom: 0;
     border-radius: 10px;
+    position: fixed;
     // left: 0; // set outside
     box-shadow: var(--box-shadow-base);
     z-index: `getZindex('modal') `;
@@ -49,11 +50,11 @@
             }
         }
 
-        // button {
-        //     display: inline-block;
-        //     font-size: var(--font-size);
-        //     padding: 0 5px;
-        // }
+        button {
+            display: inline-block;
+            font-size: var(--font-size);
+            padding: 0 5px;
+        }
     }
 
     .colorful-warp {

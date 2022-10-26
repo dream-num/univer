@@ -32,6 +32,7 @@ import { UniverColorPickerCircleButton } from './Components/ColorPickerCircleBut
 import { UniverContainer } from './Components/Container';
 import { UniverDemo } from './Components/Demo';
 import { UniverFormatModal } from './Components/FormatModal';
+import { UniverMenu } from './Components/Menu/Menu';
 import {
     UniverBottomBorderIcon,
     UniverFillColorIcon,
@@ -119,6 +120,7 @@ import { UniverSlider } from './Components/Slider';
 import { UniverTab, UniverTabPane } from './Components/Tabs';
 import { UniverTooltip } from './Components/Tooltip';
 import { UniverUl } from './Components/Ul';
+import { UniverDropdown } from './Components/Dropdown';
 
 /**
  *
@@ -254,7 +256,12 @@ export class UniverComponentFactory implements BaseComponentFactory {
             case 'RichText': {
                 return new UniverRichText() as unknown as T;
             }
-
+            case 'Menu': {
+                return new UniverMenu() as unknown as T;
+            }
+            case 'Dropdown': {
+                return new UniverDropdown() as unknown as T;
+            }
             // Icon
             case 'NextIcon': {
                 return new UniverNextIcon() as unknown as T;

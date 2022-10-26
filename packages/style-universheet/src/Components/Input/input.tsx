@@ -30,7 +30,7 @@ export class Input extends Component<BaseInputProps, IState> {
     initialize(props: BaseInputProps) {
         // super(props);
         this.state = {
-            value: '',
+            value: props.value,
             focused: false,
         };
     }
@@ -78,6 +78,12 @@ export class Input extends Component<BaseInputProps, IState> {
     componentWillMount() {
         if (this.props.value) {
             this.setValue(this.props.value);
+        }
+    }
+
+    componentWillReceiveProps(nextProps: Readonly<BaseInputProps>) {
+        if (nextProps.value && nextProps.value !== this.state.value) {
+            this.setValue(nextProps.value);
         }
     }
 

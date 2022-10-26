@@ -3,6 +3,8 @@ import { Observable, Plugin } from '@univer/core';
 import { SelectionControl } from '../Controller/Selection/SelectionController';
 import { SheetContainer } from '../View/UI/SheetContainer';
 import { ToolBar } from '../View/UI/ToolBar/ToolBar';
+import { LineColor } from '../View/UI/Common/Line/LineColor';
+import { ToolBar1 } from '../View/UI/ToolBar/ToolBar1';
 
 interface ISelectionControlFillConfig {}
 
@@ -35,6 +37,9 @@ export type SpreadsheetPluginObserve = {
     onChangeCurrentSheetObserver: Observable<string>;
 
     onToolBarDidMountObservable: Observable<ToolBar>;
+    onToolBar1DidMountObservable: Observable<ToolBar1>;
+
+    onLineColorDidMountObservable: Observable<LineColor>;
 
     onSheetContainerDidMountObservable: Observable<SheetContainer>;
 
@@ -101,6 +106,8 @@ export function install(plugin: Plugin) {
     plugin.pushToObserve('onChangeCurrentSheetObserver');
 
     plugin.pushToObserve('onToolBarDidMountObservable');
+    plugin.pushToObserve('onToolBar1DidMountObservable');
+    plugin.pushToObserve('onLineColorDidMountObservable');
     plugin.pushToObserve('onSheetBarDidMountObservable');
     plugin.pushToObserve('onCountBarDidMountObservable');
     plugin.pushToObserve('onInfoBarDidMountObservable');

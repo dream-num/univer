@@ -1,6 +1,6 @@
 import { getRefElement, IMainProps, isElement, ISlotProps, IToolBarItemProps, RefObject, render } from '@univer/base-component';
 import { Engine, RenderEngine } from '@univer/base-render';
-import { AsyncFunction, Attribute, Context, IOCAttribute, IOCContainer, IWorkbookConfig, Plugin, PLUGIN_NAMES, Tools } from '@univer/core';
+import { AsyncFunction, Attribute, Context, IOCAttribute, IOCContainer, IRangeCellData, IRangeData, IWorkbookConfig, Plugin, PLUGIN_NAMES, Tools } from '@univer/core';
 import { FormulaPlugin } from '@univer/sheets-plugin-formula';
 
 import { install, SpreadsheetPluginObserve, uninstall } from './Basics/Observer';
@@ -8,7 +8,7 @@ import { RightMenuProps } from './Model/RightMenuModel';
 import { en, zh } from './Locale';
 import { CANVAS_VIEW_KEY } from './View/Render/BaseView';
 import { CanvasView } from './View/Render/CanvasView';
-import { BaseSheetContainerConfig, SheetContainer } from './View/UI/SheetContainer';
+import { BaseSheetContainerConfig, ISpreadsheetPluginConfigBase, SheetContainer } from './View/UI/SheetContainer';
 import {
     RightMenuController,
     ToolBarController,

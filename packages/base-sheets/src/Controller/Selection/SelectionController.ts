@@ -160,6 +160,10 @@ export class SelectionControl {
         scene.addObject(this._selectionShape);
     }
 
+    get zIndex() {
+        return this._zIndex;
+    }
+
     /**
      * just handle the view
      *

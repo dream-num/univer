@@ -1,5 +1,7 @@
 import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect } from '@univer/base-render';
+import { ISelection, makeCellToSelection, Nullable, Observer } from '@univer/core';
 import { SelectionModel } from '../../Model';
+import { ScrollTimer } from '../ScrollTimer';
 import { DEFAULT_SELECTION_CONFIG, SelectionControl } from './SelectionController';
 
 enum SELECTION_DRAG_KEY {
@@ -19,20 +21,35 @@ export class SelectionControlDragAndDrop {
 
     private _bottomDragControl: Rect;
 
-    private _selectionShape: Group;
+    private _selectionDragShape: Group;
 
     private _zIndex: number;
 
     private _model: SelectionModel;
 
+    private _oldSelectionRange: ISelection;
+
+    private _startOffsetX: number = 0;
+
+    private _startOffsetY: number = 0;
+
+    private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+
+    private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+
     constructor(private _control: SelectionControl) {
         this._zIndex = _control.zIndex + 1;
         this._model = _control.model;
+        // this._model = new SelectionModel(SELECTION_TYPE.NORMAL);
+        // this._model.setValue(_control.model.getValue().selection);
         this._initialize();
     }
 
     private _initialize() {
         const plugin = this._control.getPlugin();
+
+        const main = plugin.getMainComponent();
+
         const { leftControl, rightControl, topControl, bottomControl, fillControl } = this._control;
         leftControl.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
             leftControl.cursor = CURSOR_TYPE.MOVE;
@@ -60,21 +77,75 @@ export class SelectionControlDragAndDrop {
 
         bottomControl.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
             bottomControl.cursor = CURSOR_TYPE.MOVE;
-            console.log(CURSOR_TYPE.MOVE, evt);
+            console.log('onPointerEnterObserver');
         });
 
         bottomControl.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent) => {
             bottomControl.resetCursor();
-            console.log(CURSOR_TYPE.MOVE, evt);
+            console.log('onPointerLeaveObserver');
         });
 
         bottomControl.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            bottomControl.cursor = CURSOR_TYPE.MOVE;
-            console.log(CURSOR_TYPE.MOVE, evt);
+            console.log('onPointerDownObserver');
+
+            this._updateControl();
+
+            const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
+            this._startOffsetX = evtOffsetX;
+            this._startOffsetY = evtOffsetY;
+            const scrollXY = main.getAncestorScrollXY(this._startOffsetX, this._startOffsetY);
+
+            // Subtract the border width to make the calculation of selected cells more accurate
+            const cellInfo = main.calculateCellIndexByPosition(evtOffsetX, evtOffsetY - DEFAULT_SELECTION_CONFIG.strokeWidth, scrollXY);
+            const actualSelection = makeCellToSelection(cellInfo);
+            if (!actualSelection) {
+                return false;
+            }
+
+            const { startRow, startColumn, endColumn, endRow, startY, endY, startX, endX } = actualSelection;
+
+            const startSelectionRange = {
+                startColumn,
+                startRow,
+                endColumn,
+                endRow,
+                startY,
+                endY,
+                startX,
+                endX,
+            };
+
+            this._oldSelectionRange = startSelectionRange;
+
+            console.log('this._oldSelectionRange', this._oldSelectionRange);
+
+            const scene = this._control.getScene();
+
+            scene.disableEvent();
+
+            const scrollTimer = ScrollTimer.create(scene);
+            scrollTimer.startScroll(evtOffsetX, evtOffsetY);
+
+            this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+                this.dragMoving(moveEvt);
+                const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+                scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
+                    this.dragMoving(moveEvt);
+                });
+            });
+
+            this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+                this.dragUp();
+                scene.onPointerMoveObserver.remove(this._moveObserver);
+                scene.onPointerUpObserver.remove(this._upObserver);
+                scene.enableEvent();
+                scrollTimer.stopScroll();
+            });
         });
+
         bottomControl.onPointerUpObserver.add((evt: IPointerEvent | IMouseEvent) => {
             bottomControl.resetCursor();
-            console.log(CURSOR_TYPE.MOVE, evt);
+            console.log('onPointerUpObserver');
         });
 
         // init drag render box
@@ -105,18 +176,54 @@ export class SelectionControlDragAndDrop {
             zIndex,
         });
 
-        this._selectionShape = new Group(SELECTION_DRAG_KEY.Selection + zIndex, this._leftDragControl, this._rightDragControl, this._topDragControl, this._bottomDragControl);
+        this._selectionDragShape = new Group(SELECTION_DRAG_KEY.Selection + zIndex, this._leftDragControl, this._rightDragControl, this._topDragControl, this._bottomDragControl);
 
-        this._selectionShape.visible = true;
+        // this._selectionDragShape.visible = false;
 
-        this._selectionShape.evented = false;
+        this._selectionDragShape.evented = false;
 
-        this._selectionShape.zIndex = zIndex;
+        this._selectionDragShape.zIndex = zIndex;
 
         const scene = this._control.getScene();
-        scene.addObject(this._selectionShape);
+        scene.addObject(this._selectionDragShape);
+    }
 
-        this._updateControl();
+    dragEventInitial() {}
+
+    dragMoving(moveEvt: IPointerEvent | IMouseEvent) {
+        const main = this._control.getPlugin().getMainComponent();
+        const { offsetX: moveOffsetX, offsetY: moveOffsetY, clientX, clientY } = moveEvt;
+
+        const scrollXY = main.getAncestorScrollXY(this._startOffsetX, this._startOffsetY);
+        const moveCellInfo = main.calculateCellIndexByPosition(moveOffsetX, moveOffsetY, scrollXY);
+        const moveActualSelection = makeCellToSelection(moveCellInfo);
+
+        if (!moveActualSelection) {
+            return false;
+        }
+        const { startRow: moveStartRow, startColumn: moveStartColumn, endColumn: moveEndColumn, endRow: moveEndRow, startX, startY, endX, endY } = moveActualSelection;
+
+        const newSelectionRange: ISelection = {
+            startColumn: moveStartColumn,
+            startRow: moveStartRow,
+            endColumn: moveEndColumn,
+            endRow: moveEndRow,
+            startY: startX || 0,
+            endY: startY || 0,
+            startX: endX || 0,
+            endX: endY || 0,
+        };
+        // when the selection changes
+        const { startRow: oldStartRow, endRow: oldEndRow, startColumn: oldStartColumn, endColumn: oldEndColumn } = this._oldSelectionRange;
+
+        if (oldStartColumn !== moveStartColumn || oldStartRow !== moveStartRow || oldEndColumn !== moveEndColumn || oldEndRow !== moveEndRow) {
+            this._oldSelectionRange = newSelectionRange;
+            console.log('this._oldSelectionRange', this._oldSelectionRange);
+        }
+    }
+
+    dragUp() {
+        console.log('drag up');
     }
 
     _updateControl() {
@@ -133,10 +240,23 @@ export class SelectionControlDragAndDrop {
             top: endY - startY - DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
         });
 
-        this._selectionShape.visible = true;
-        this._selectionShape.translate(startX, startY);
+        this._selectionDragShape.visible = true;
+        this._selectionDragShape.translate(startX, startY);
 
-        this._selectionShape.makeDirty(true);
+        this._selectionDragShape.makeDirty(true);
+    }
+
+    hide() {
+        this._selectionDragShape.visible = false;
+        this._selectionDragShape.makeDirty(true);
+    }
+
+    dispose() {
+        this._leftDragControl.dispose();
+        this._rightDragControl.dispose();
+        this._topDragControl.dispose();
+        this._bottomDragControl.dispose();
+        this._selectionDragShape.dispose();
     }
 
     remove() {

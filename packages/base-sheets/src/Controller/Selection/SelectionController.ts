@@ -346,6 +346,8 @@ export class SelectionControl {
         this._backgroundControlBottom?.dispose();
         this._fillControl?.dispose();
         this._selectionShape?.dispose();
+
+        this._selectionDragAndDrop.dispose();
     }
 
     getScene() {

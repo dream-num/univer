@@ -205,39 +205,6 @@ export class SelectionManager {
         commandManager.invoke(command);
     }
 
-    // /**
-    //  * update current control in model
-    //  */
-    // updateSelectionValue(selectionControl: SelectionControl, selection: ISelection, cell: Nullable<ICellInfo>) {
-    //     if (!this._worksheet) return;
-
-    //     const controls = this.getCurrentControls();
-    //     if (!controls) {
-    //         return;
-    //     }
-    //     const selectionModelsValue: ISelectionModelValue[] = [];
-    //     for (let control of controls) {
-    //         // update current control
-    //         if (control === selectionControl) {
-    //             selectionModelsValue.push({ selection, cell });
-    //         } else {
-    //             selectionModelsValue.push(control.model.getValue());
-    //         }
-    //     }
-
-    //     const workbook = this._worksheet.getContext().getWorkBook();
-    //     const commandManager = workbook.getCommandManager();
-
-    //     const value: ISetSelectionValueActionData = {
-    //         sheetId: this._worksheet.getSheetId(),
-    //         actionName: ACTION_NAMES.SET_SELECTION_VALUE_ACTION,
-    //         selections: selectionModelsValue,
-    //     };
-
-    //     const command = new Command(workbook, value);
-    //     commandManager.invoke(command);
-    // }
-
     /**
      * update current control in model
      */
@@ -334,10 +301,6 @@ export class SelectionManager {
         this._leftTopEventInitial();
 
         this._worksheet = this.getContext().getWorkBook().getActiveSheet();
-        // const worksheetId = this.getWorksheetId();
-        // if (worksheetId) {
-        //     this._selectionControls.set(worksheetId, []);
-        // }
 
         this._initModels();
     }
@@ -374,8 +337,6 @@ export class SelectionManager {
 
             let curControls = this.getCurrentControls();
 
-            // console.log('selection', curControls, startSelectionRange);
-
             if (!curControls) {
                 return false;
             }
@@ -401,7 +362,7 @@ export class SelectionManager {
                     for (let control of curControls) {
                         control.dispose();
                     }
-                    // this.resetCurrentModels();
+
                     curControls.length = 0; // clear currentSelectionControls
                 }
 
@@ -451,11 +412,11 @@ export class SelectionManager {
         const main = this._mainComponent;
         const { offsetX: moveOffsetX, offsetY: moveOffsetY, clientX, clientY } = moveEvt;
         const { startRow, startColumn, endRow, endColumn } = this._startSelectionRange;
-        // console.log('_moveObserver', moveOffsetX, moveOffsetY, clientX, clientY);
+
         const scrollXY = main.getAncestorScrollXY(this._startOffsetX, this._startOffsetY);
         const moveCellInfo = main.calculateCellIndexByPosition(moveOffsetX, moveOffsetY, scrollXY);
         const moveActualSelection = makeCellToSelection(moveCellInfo);
-        // console.log('onPointerMoveObserver', moveOffsetY, scrollXY, moveCellInfo, moveCellInfo?.endRowIndex, moveActualPos, moveActualPos?.endRowIndex);
+
         if (!moveActualSelection) {
             return false;
         }
@@ -467,7 +428,6 @@ export class SelectionManager {
         const newEndColumn = Math.max(moveEndColumn, endColumn);
         const newBounding = main.getSelectionBounding(newStartRow, newStartColumn, newEndRow, newEndColumn);
 
-        // console.log('_moveObserver', newStartRowIndex, newStartColumnIndex, newEndRowIndex, newEndColumnIndex);
         if (!newBounding) {
             return false;
         }

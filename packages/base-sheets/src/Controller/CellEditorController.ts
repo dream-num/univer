@@ -350,6 +350,7 @@ export class CellEditorController {
         this.isEditMode = false;
         // this._plugin.showMainByName('cellEditor', false).then(() => {
         const value = handleDomToJson(this.richTextEditEle);
+        const text = this.richTextEditEle.innerText;
 
         let cell: ICellData = {};
 
@@ -361,6 +362,8 @@ export class CellEditorController {
         // get rich text
         else if (typeof value === 'object') {
             cell.p = value;
+            cell.v = text;
+            cell.m = text;
         }
 
         // get style

@@ -1,4 +1,5 @@
 import { CellValueType, ICellData, ICellV, ObjectMatrix } from '@univer/core';
+import { ReferenceNode } from '../AstNode';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { NodeType } from '../AstNode/NodeType';
 import { AstNodePromiseType, CalculateValueType, FunctionVariantType, IInterpreterDatasetConfig, UnitDataType } from '../Basics/Common';
@@ -79,6 +80,11 @@ export class Interpreter {
         await this._execute(node);
 
         return Promise.resolve(node.getValue());
+    }
+
+    executeRef(node: ReferenceNode) {
+        node.execute(this._interpreterDatasetConfig, this._runtimeData);
+        return node.getValue();
     }
 
     setRuntimeData(row: number, column: number, sheetId: string, functionVariant: FunctionVariantType) {

@@ -1,8 +1,8 @@
 import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect } from '@univer/base-render';
-import { ISelection, makeCellToSelection, Nullable, Observer } from '@univer/core';
+import { Direction, ISelection, makeCellToSelection, Nullable, Observer } from '@univer/core';
 import { SelectionModel } from '../../Model';
 import { ScrollTimer } from '../ScrollTimer';
-import { DEFAULT_SELECTION_CONFIG, SelectionControl } from './SelectionController';
+import { DEFAULT_SELECTION_CONFIG, SelectionControl, SELECTION_TYPE } from './SelectionController';
 
 enum SELECTION_DRAG_KEY {
     Selection = '__SelectionDragShape__',
@@ -10,6 +10,13 @@ enum SELECTION_DRAG_KEY {
     bottom = '__BottomDragControl__',
     left = '__LeftDragControl__',
     right = '__RightDragControl__',
+}
+
+interface IPositionOffset {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
 }
 
 export class SelectionControlDragAndDrop {
@@ -33,6 +40,8 @@ export class SelectionControlDragAndDrop {
 
     private _startOffsetY: number = 0;
 
+    private _cellPositionOffset: IPositionOffset;
+
     private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
@@ -40,8 +49,6 @@ export class SelectionControlDragAndDrop {
     constructor(private _control: SelectionControl) {
         this._zIndex = _control.zIndex + 1;
         this._model = _control.model;
-        // this._model = new SelectionModel(SELECTION_TYPE.NORMAL);
-        // this._model.setValue(_control.model.getValue().selection);
         this._initialize();
     }
 
@@ -87,60 +94,7 @@ export class SelectionControlDragAndDrop {
 
         bottomControl.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
             console.log('onPointerDownObserver');
-
-            this._updateControl();
-
-            const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
-            this._startOffsetX = evtOffsetX;
-            this._startOffsetY = evtOffsetY;
-            const scrollXY = main.getAncestorScrollXY(this._startOffsetX, this._startOffsetY);
-
-            // Subtract the border width to make the calculation of selected cells more accurate
-            const cellInfo = main.calculateCellIndexByPosition(evtOffsetX, evtOffsetY - DEFAULT_SELECTION_CONFIG.strokeWidth, scrollXY);
-            const actualSelection = makeCellToSelection(cellInfo);
-            if (!actualSelection) {
-                return false;
-            }
-
-            const { startRow, startColumn, endColumn, endRow, startY, endY, startX, endX } = actualSelection;
-
-            const startSelectionRange = {
-                startColumn,
-                startRow,
-                endColumn,
-                endRow,
-                startY,
-                endY,
-                startX,
-                endX,
-            };
-
-            this._oldSelectionRange = startSelectionRange;
-
-            console.log('this._oldSelectionRange', this._oldSelectionRange);
-
-            const scene = this._control.getScene();
-
-            scene.disableEvent();
-
-            const scrollTimer = ScrollTimer.create(scene);
-            scrollTimer.startScroll(evtOffsetX, evtOffsetY);
-
-            this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
-                this.dragMoving(moveEvt);
-                const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
-                scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
-                    this.dragMoving(moveEvt);
-                });
-            });
-
-            this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
-                this.dragUp();
-                scene.onPointerMoveObserver.remove(this._moveObserver);
-                scene.onPointerUpObserver.remove(this._upObserver);
-                scene.enableEvent();
-                scrollTimer.stopScroll();
-            });
+            this.dragDown(evt, Direction.BOTTOM);
         });
 
         bottomControl.onPointerUpObserver.add((evt: IPointerEvent | IMouseEvent) => {
@@ -190,6 +144,94 @@ export class SelectionControlDragAndDrop {
 
     dragEventInitial() {}
 
+    dragDown(evt: IPointerEvent | IMouseEvent, direction: Direction) {
+        const main = this._control.getPlugin().getMainComponent();
+
+        // reset model
+        const selection = this._model.getValue().selection;
+        this._model = new SelectionModel(SELECTION_TYPE.NORMAL);
+        this._model.setValue(selection);
+
+        // update control
+        this._updateControl();
+
+        const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
+        this._startOffsetX = evtOffsetX;
+        this._startOffsetY = evtOffsetY;
+        const scrollXY = main.getAncestorScrollXY(this._startOffsetX, this._startOffsetY);
+
+        // Subtract the border width to make the calculation of selected cells more accurate
+        let cellInfo = null;
+        switch (direction) {
+            case Direction.LEFT:
+                cellInfo = main.calculateCellIndexByPosition(evtOffsetX + DEFAULT_SELECTION_CONFIG.strokeWidth, evtOffsetY, scrollXY);
+                break;
+            case Direction.TOP:
+                cellInfo = main.calculateCellIndexByPosition(evtOffsetX, evtOffsetY + DEFAULT_SELECTION_CONFIG.strokeWidth, scrollXY);
+                break;
+            case Direction.RIGHT:
+                cellInfo = main.calculateCellIndexByPosition(evtOffsetX - DEFAULT_SELECTION_CONFIG.strokeWidth, evtOffsetY, scrollXY);
+                break;
+            case Direction.BOTTOM:
+                cellInfo = main.calculateCellIndexByPosition(evtOffsetX, evtOffsetY - DEFAULT_SELECTION_CONFIG.strokeWidth, scrollXY);
+                break;
+
+            default:
+                break;
+        }
+
+        const actualSelection = makeCellToSelection(cellInfo);
+        if (!actualSelection) {
+            return false;
+        }
+
+        const { startRow, startColumn, endColumn, endRow, startY, endY, startX, endX } = actualSelection;
+
+        const startSelectionRange = {
+            startColumn,
+            startRow,
+            endColumn,
+            endRow,
+            startY,
+            endY,
+            startX,
+            endX,
+        };
+
+        this._oldSelectionRange = startSelectionRange;
+
+        // calculate active cell in selection position
+        this._cellPositionOffset = {
+            top: startSelectionRange.startRow - this._model.startRow,
+            bottom: this._model.endRow - startSelectionRange.endRow,
+            left: startSelectionRange.startColumn - this._model.startColumn,
+            right: this._model.endColumn - startSelectionRange.endColumn,
+        };
+
+        const scene = this._control.getScene();
+
+        scene.disableEvent();
+
+        const scrollTimer = ScrollTimer.create(scene);
+        scrollTimer.startScroll(evtOffsetX, evtOffsetY);
+
+        this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+            this.dragMoving(moveEvt);
+            const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+            scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
+                this.dragMoving(moveEvt);
+            });
+        });
+
+        this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+            this.dragUp();
+            scene.onPointerMoveObserver.remove(this._moveObserver);
+            scene.onPointerUpObserver.remove(this._upObserver);
+            scene.enableEvent();
+            scrollTimer.stopScroll();
+        });
+    }
+
     dragMoving(moveEvt: IPointerEvent | IMouseEvent) {
         const main = this._control.getPlugin().getMainComponent();
         const { offsetX: moveOffsetX, offsetY: moveOffsetY, clientX, clientY } = moveEvt;
@@ -208,10 +250,10 @@ export class SelectionControlDragAndDrop {
             startRow: moveStartRow,
             endColumn: moveEndColumn,
             endRow: moveEndRow,
-            startY: startX || 0,
-            endY: startY || 0,
-            startX: endX || 0,
-            endX: endY || 0,
+            startY: startY || 0,
+            endY: endY || 0,
+            startX: startX || 0,
+            endX: endX || 0,
         };
         // when the selection changes
         const { startRow: oldStartRow, endRow: oldEndRow, startColumn: oldStartColumn, endColumn: oldEndColumn } = this._oldSelectionRange;
@@ -219,11 +261,52 @@ export class SelectionControlDragAndDrop {
         if (oldStartColumn !== moveStartColumn || oldStartRow !== moveStartRow || oldEndColumn !== moveEndColumn || oldEndRow !== moveEndRow) {
             this._oldSelectionRange = newSelectionRange;
             console.log('this._oldSelectionRange', this._oldSelectionRange);
+
+            // Calculate the position of the selection based on the position of the cell selected when clicking
+            const { left, right, top, bottom } = this._cellPositionOffset;
+
+            const startRowTop = moveStartRow - top;
+            const endRowBottom = moveEndRow + bottom;
+            const startColumnLeft = moveStartColumn - left;
+            const endColumnRight = moveEndColumn + right;
+
+            // Boundary detection
+            if (startRowTop < 0 || endRowBottom < 0 || startColumnLeft < 0 || endColumnRight < 0) {
+                return;
+            }
+            const newSelection = {
+                startRow: startRowTop,
+                endRow: endRowBottom,
+                startColumn: startColumnLeft,
+                endColumn: endColumnRight,
+            };
+
+            const startCell = main.getNoMergeCellPositionByIndex(newSelection.startRow, newSelection.startColumn);
+            const endCell = main.getNoMergeCellPositionByIndex(newSelection.endRow, newSelection.endColumn);
+
+            const newSelectionPosition = Object.assign(newSelection, {
+                startY: startCell?.startY || 0,
+                endY: endCell?.endY || 0,
+                startX: startCell?.startX || 0,
+                endX: endCell?.endX || 0,
+            });
+
+            this._model.setValue(newSelectionPosition);
+
+            this._updateControl();
         }
     }
 
     dragUp() {
-        console.log('drag up');
+        const main = this._control.getPlugin().getMainComponent();
+
+        this.hide();
+
+        const { selection } = this._model.getValue();
+
+        // By default, the upper left corner is the active cell
+        const cell = main.getCellByIndex(selection.startRow, selection.startColumn);
+        this._control.update(selection, cell);
     }
 
     _updateControl() {

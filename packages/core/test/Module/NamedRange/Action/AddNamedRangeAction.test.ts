@@ -3,9 +3,8 @@
  */
 import { ACTION_NAMES } from '../../../../src';
 import { Context } from '../../../../src/Basics';
-import { ActionObservers } from '../../../../src/Command';
+import { ActionObservers, AddNamedRangeAction } from '../../../../src/Command';
 import { Workbook, Worksheet } from '../../../../src/Sheets/Domain';
-import { AddNamedRangeAction } from '../../../../src/Module/NamedRange/Action';
 import { INamedRange } from '../../../../src/Interfaces/INamedRange';
 import { IOCContainerStartUpReady } from '../../../ContainerStartUp';
 

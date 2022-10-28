@@ -1,12 +1,14 @@
 import { Context } from '../../Basics';
-import { Command, CommandManager } from '../../Command';
-import { ACTION_NAMES } from '../../Const';
-import { Workbook, Worksheet } from './index';
 import {
+    Command,
+    CommandManager,
     IAddNamedRangeActionData,
     IDeleteNamedRangeActionData,
     ISetNamedRangeActionData,
-} from '../../Module/NamedRange/Action';
+} from '../../Command';
+import { ACTION_NAMES } from '../../Const';
+import { Workbook, Worksheet } from './index';
+
 import { INamedRange } from '../../Interfaces/INamedRange';
 
 /**

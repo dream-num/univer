@@ -1,14 +1,14 @@
 /**
  * @jest-environment jsdom
  */
-import { ACTION_NAMES } from '../../../../src';
-import { Context } from '../../../../src/Basics';
-import { ActionObservers } from '../../../../src/Command';
-import { Workbook, Worksheet } from '../../../../src/Sheets/Domain';
 import {
+    ActionObservers,
+    ACTION_NAMES,
     AddNamedRangeAction,
     DeleteNamedRangeAction,
-} from '../../../../src/Module/NamedRange/Action';
+} from '../../../../src';
+import { Context } from '../../../../src/Basics';
+import { Workbook, Worksheet } from '../../../../src/Sheets/Domain';
 import { INamedRange } from '../../../../src/Interfaces/INamedRange';
 import { IOCContainerStartUpReady } from '../../../ContainerStartUp';
 

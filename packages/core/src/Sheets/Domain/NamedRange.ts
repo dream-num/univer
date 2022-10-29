@@ -1,12 +1,14 @@
 import { Context } from '../../Basics';
-import { SheetsCommand, CommandManager } from '../../Command';
-import { ACTION_NAMES } from '../../Const';
-import { Workbook, Worksheet } from './index';
 import {
+    Command,
+    CommandManager,
     IAddNamedRangeActionData,
     IDeleteNamedRangeActionData,
     ISetNamedRangeActionData,
-} from '../../Module/NamedRange/Action';
+} from '../../Command';
+import { ACTION_NAMES } from '../../Const';
+import { Workbook, Worksheet } from './index';
+
 import { INamedRange } from '../../Interfaces/INamedRange';
 
 /**
@@ -58,7 +60,7 @@ export class NamedRange {
         };
 
         // Execute action
-        const command = new SheetsCommand(_context.getWorkBook(), actionData);
+        const command = new Command(_context.getWorkBook(), actionData);
         _commandManager.invoke(command);
 
         // // manage instance
@@ -84,7 +86,7 @@ export class NamedRange {
         };
 
         // Execute action
-        const command = new SheetsCommand(_context.getWorkBook(), actionData);
+        const command = new Command(_context.getWorkBook(), actionData);
         _commandManager.invoke(command);
     }
 
@@ -156,7 +158,7 @@ export class NamedRange {
         };
 
         // Execute action
-        const command = new SheetsCommand(_context.getWorkBook(), actionData);
+        const command = new Command(_context.getWorkBook(), actionData);
         _commandManager.invoke(command);
 
         // const namedRanges = this._workbook.getNamedRanges();

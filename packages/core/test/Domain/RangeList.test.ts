@@ -29,7 +29,7 @@ test('Test RangeList setValue', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -83,7 +83,7 @@ test('Test RangeList clear', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -140,7 +140,7 @@ function demo() {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {

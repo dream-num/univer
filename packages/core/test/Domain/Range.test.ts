@@ -95,7 +95,7 @@ export function demo() {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -156,7 +156,7 @@ test('Test setFontColor', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -209,7 +209,7 @@ test('Test setFontFamily', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -271,7 +271,7 @@ test('Test setFontFamilies', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -330,7 +330,7 @@ test('Test setUnderline', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -383,7 +383,7 @@ test('Test setOverline', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -436,7 +436,7 @@ test('Test setStrikeThrough', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -493,7 +493,7 @@ test('Test setFontSize', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -556,7 +556,7 @@ test('Test setHorizontalAlignment', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -617,7 +617,7 @@ test('Test setVerticalAlignment', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -678,7 +678,7 @@ test('Test setTextDirection', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -738,7 +738,7 @@ test('Test setWrapStrategy', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -821,7 +821,7 @@ test('Test setWrapStrategies', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -906,7 +906,7 @@ test('Test setBorder', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1064,7 +1064,7 @@ test('Test copyTo formatOnly', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1124,7 +1124,7 @@ test('Test copyTo contentsOnly', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1203,7 +1203,7 @@ test('Test copyTo CopyPasteType', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1269,7 +1269,7 @@ test('Test copyFormatToRange by sheet', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1340,7 +1340,7 @@ test('Test copyFormatToRange by sheetId', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1412,7 +1412,7 @@ test('Test copyValuesToRange by sheet', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1502,7 +1502,7 @@ test('Test copyValuesToRange by sheetId', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1591,7 +1591,7 @@ test('Test moveTo', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1732,7 +1732,7 @@ test('Test offset', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1782,7 +1782,7 @@ test('Test setValue', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1836,7 +1836,7 @@ test('Test setValues ICellV', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1890,7 +1890,7 @@ test('Test setValues ObjectMatrix', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1949,7 +1949,7 @@ test('Test clear', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2005,7 +2005,7 @@ test('Test clearFormat', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2061,7 +2061,7 @@ test('Test deleteCells', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2206,7 +2206,7 @@ test('Test insertCells', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2364,7 +2364,7 @@ test('Test insertCells COLUMNS', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2462,7 +2462,7 @@ test('Create a Merge', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2556,7 +2556,7 @@ test('Test getBackground', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2657,7 +2657,7 @@ test('Test getBackgrounds', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2714,7 +2714,7 @@ test('Test getCell', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2771,7 +2771,7 @@ test('Test getColumn', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2828,7 +2828,7 @@ test('Test getDisplayValue', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2885,7 +2885,7 @@ test('Test getDisplayValues', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2942,7 +2942,7 @@ test('Test getFontColor', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2999,7 +2999,7 @@ test('Test getFontColors', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3058,7 +3058,7 @@ test('Test getFontFamily', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3117,7 +3117,7 @@ test('Test getFontFamilies', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3166,7 +3166,7 @@ test('Test getFontLines', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3225,7 +3225,7 @@ test('Test getFontLine', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3288,7 +3288,7 @@ test('Test getFontSize', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3347,7 +3347,7 @@ test('Test getFontSizes', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3392,7 +3392,7 @@ test('Test getFontWeight', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3459,7 +3459,7 @@ test('Test getFontWeights', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3504,7 +3504,7 @@ test('Test getHorizontalAlignment', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3549,7 +3549,7 @@ test('Test getHorizontalAlignments', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3594,7 +3594,7 @@ test('Test getVerticalAlignments', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3639,7 +3639,7 @@ test('Test getVerticalAlignment', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3684,7 +3684,7 @@ test('Test getFontStyles', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3729,7 +3729,7 @@ test('Test getFontStyle', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3774,7 +3774,7 @@ test('Test getTextDirections', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3819,7 +3819,7 @@ test('Test getTextDirection', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3868,7 +3868,7 @@ test('Test getTextRotations', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3926,7 +3926,7 @@ test('Test getTextRotation', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3973,7 +3973,7 @@ test('Test getTextStyles', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4031,7 +4031,7 @@ test('Test getTextStyle', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4093,7 +4093,7 @@ test('Test getSheet', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4137,7 +4137,7 @@ test('Test getNumColumns', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4196,7 +4196,7 @@ test('Test getNumRows', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4250,7 +4250,7 @@ test('Test getRowIndex', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4288,7 +4288,7 @@ test('Test getLastColumn', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4325,7 +4325,7 @@ test('Test getWrapStrategies', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4368,7 +4368,7 @@ test('Test getWraps/getWrap', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4418,7 +4418,7 @@ test('Test setFontColors', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4488,7 +4488,7 @@ test('Test setBackground', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4565,7 +4565,7 @@ test('Test setBackgrounds', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4647,7 +4647,7 @@ test('Test setBackgroundRGB', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4725,7 +4725,7 @@ test('Test setUnderline', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4778,7 +4778,7 @@ test('Test setOverline', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4831,7 +4831,7 @@ test('Test setStrikeThrough', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4884,7 +4884,7 @@ test('Test setHorizontalAlignments', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4961,7 +4961,7 @@ test('Test isPartOfMerge', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         mergeData: [
             {
                 startRow: 0,
@@ -5560,7 +5560,7 @@ test('Test removeDuplicates', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -5644,7 +5644,7 @@ test('Test getColumnMatrix', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -5708,7 +5708,7 @@ test('Test isBlank', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -6069,7 +6069,7 @@ test('Test trimWhitespace', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {

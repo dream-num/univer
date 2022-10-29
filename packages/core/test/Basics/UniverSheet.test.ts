@@ -10,11 +10,12 @@ describe('UniverSheet', () => {
     beforeAll(async () => {
         univerSheet = UniverSheet.newInstance({
             id: 'workbook-01',
-            sheets: [
-                {
+            sheets: {
+                'sheet-01': {
                     name: 'first sheet',
+                    id: 'sheet-01',
                 },
-            ],
+            },
         });
     });
     afterAll(async () => {});

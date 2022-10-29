@@ -160,6 +160,10 @@ export class SelectionControl {
         scene.addObject(this._selectionShape);
     }
 
+    get zIndex() {
+        return this._zIndex;
+    }
+
     /**
      * just handle the view
      *
@@ -342,6 +346,8 @@ export class SelectionControl {
         this._backgroundControlBottom?.dispose();
         this._fillControl?.dispose();
         this._selectionShape?.dispose();
+
+        this._selectionDragAndDrop.dispose();
     }
 
     getScene() {

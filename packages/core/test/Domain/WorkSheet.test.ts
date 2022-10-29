@@ -29,7 +29,7 @@ test('Test activate', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet-01',
+        id: 'sheet-01',
         cellData: {
             0: {
                 0: {
@@ -47,7 +47,7 @@ test('Test activate', () => {
     worksheet.setCommandManager(commandManager);
 
     const secondConfigure = {
-        sheetId: 'sheet-02',
+        id: 'sheet-02',
         cellData: {
             0: {
                 0: {
@@ -94,7 +94,7 @@ test('Test getCellMatrix', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -222,7 +222,7 @@ test('Test Clear', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -463,7 +463,7 @@ test('Test SetCurrentCell/getActiveCell/getActiveRangeList', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -570,7 +570,7 @@ test('Test SetCurrentCell/getActiveCell/getActiveRangeList', () => {
 //     const commandManager = workbook.getCommandManager();
 
 //     const configure = {
-//         sheetId: 'sheet',
+//         id: 'sheet',
 //         cellData: {
 //             0: {
 //                 0: {
@@ -638,7 +638,7 @@ test('Test getRange', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -748,7 +748,7 @@ test('Test getRangeList', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -872,7 +872,7 @@ test('Test hideRow/hideRows', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -949,7 +949,7 @@ test('Test showColumns/hideColumns', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1044,7 +1044,7 @@ test('Test showRows/hideRows', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1114,7 +1114,7 @@ test('Test unhideRow/unhideColumn', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1208,7 +1208,7 @@ test('Test getTabColor', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1280,7 +1280,7 @@ test('Test setColumnWidth/getColumnWidth', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1380,7 +1380,7 @@ test('Test setRowHeights/getRowHeight', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1481,7 +1481,7 @@ test('Test setActiveSelection', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1576,7 +1576,7 @@ test('Test getFrozenRows/getFrozenColumns/getMaxColumns/getMaxRows/getType/getRo
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1673,7 +1673,7 @@ test('Test getFrozenRows/getFrozenColumns/getMaxColumns/getMaxRows/getType/getRo
 //     const commandManager = workbook.getCommandManager();
 
 //     const configure = {
-//         sheetId: 'sheet',
+//         id: 'sheet',
 //         cellData: {
 //             0: {
 //                 0: {
@@ -1831,7 +1831,7 @@ test('Test getLastRow/getLastColumn', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1927,7 +1927,7 @@ test('Test copyTo', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet-01',
+        id: 'sheet-01',
         cellData: {
             0: {
                 0: {
@@ -1944,7 +1944,7 @@ test('Test copyTo', () => {
     worksheet.setCommandManager(commandManager);
 
     const secondConfigure = {
-        sheetId: 'sheet-02',
+        id: 'sheet-02',
         cellData: {
             0: {
                 0: {
@@ -1971,7 +1971,7 @@ test('Test getSheetValues', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2062,7 +2062,7 @@ test('Test getSheetValues', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2153,7 +2153,7 @@ test('Test InsertRows', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2246,7 +2246,7 @@ test('Test insertrowsafter/insertrowsbefore', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2337,7 +2337,7 @@ test('Test insertrowsbefore', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2429,7 +2429,7 @@ test('Test moveRows', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2520,7 +2520,7 @@ test('Test insertColumns', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2614,7 +2614,7 @@ test('Test insertColumnsBefore', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2707,7 +2707,7 @@ test('Test insertColumnsAfter', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2800,7 +2800,7 @@ test('Test moveColumns', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2891,7 +2891,7 @@ test('Test deleteColumns/deleteColumn', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2986,7 +2986,7 @@ test('Test getContext', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3076,7 +3076,7 @@ test('Test getMerges', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3166,7 +3166,7 @@ test('Test getSheetData', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3256,7 +3256,7 @@ test('Test getSelection', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3350,7 +3350,7 @@ test('Test setActiveRange', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3458,7 +3458,7 @@ test('Test setActiveRangeList', () => {
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {

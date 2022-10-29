@@ -4,6 +4,10 @@ import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { AsyncObject } from '../OtherObject/AsyncObject';
 import { BooleanNumber, ICellData, IRangeData, Nullable, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univer/core';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
+import { ReferenceNode } from '../AstNode/ReferenceNode';
+import { UnionNode } from '../AstNode/UnionNode';
+import { PrefixNode } from '../AstNode/PrefixNode';
+import { SuffixNode } from '../AstNode/SuffixNode';
 
 export type NodeValueType = BaseValueObject | BaseReferenceObject | ErrorValueObject | AsyncObject;
 
@@ -16,6 +20,8 @@ export type SheetDataType = { [sheetId: string]: ObjectMatrix<ICellData> };
 export type UnitDataType = { [unitId: string]: SheetDataType };
 
 export type CalculateValueType = BaseValueObject | ErrorValueObject;
+
+export type PreCalculateNodeType = ReferenceNode | UnionNode | PrefixNode | SuffixNode;
 
 export interface IFormulaData {
     formula: string; // formulaString

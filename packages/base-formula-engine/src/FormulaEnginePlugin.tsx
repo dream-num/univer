@@ -33,11 +33,17 @@ export class FormulaEnginePlugin extends Plugin<FormulaEnginePluginObserver> {
 
         console.log('astNode', astNode.serialize());
 
-        const resultPromise = Interpreter.create().execute(astNode);
+        const interpreter = Interpreter.create();
 
-        resultPromise.then((value) => {
-            console.log('formulaResult', value);
-        });
+        if (interpreter.checkAsyncNode(astNode)) {
+            const resultPromise = interpreter.executeAsync(astNode);
+
+            resultPromise.then((value) => {
+                console.log('formulaResult', value);
+            });
+        } else {
+            console.log(interpreter.execute(astNode));
+        }
     }
 
     initialize(): void {}

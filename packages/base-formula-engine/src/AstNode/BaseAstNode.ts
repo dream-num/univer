@@ -19,11 +19,31 @@ export class BaseAstNode {
 
     private _calculateState = false;
 
+    private _async = false;
+
+    private _address = false;
+
     get nodeType() {
         return NodeType.BASE;
     }
 
     constructor(private _token: string) {}
+
+    isAsync() {
+        return this._async;
+    }
+
+    isAddress() {
+        return this._address;
+    }
+
+    setAsync() {
+        this._async = true;
+    }
+
+    setAddress() {
+        this._address = true;
+    }
 
     getParent() {
         return this._parent;

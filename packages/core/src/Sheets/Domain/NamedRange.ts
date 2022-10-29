@@ -1,5 +1,5 @@
 import { Context } from '../../Basics';
-import { Command, CommandManager } from '../../Command';
+import { SheetsCommand, CommandManager } from '../../Command';
 import { ACTION_NAMES } from '../../Const';
 import { Workbook, Worksheet } from './index';
 import {
@@ -58,7 +58,7 @@ export class NamedRange {
         };
 
         // Execute action
-        const command = new Command(_context.getWorkBook(), actionData);
+        const command = new SheetsCommand(_context.getWorkBook(), actionData);
         _commandManager.invoke(command);
 
         // // manage instance
@@ -84,7 +84,7 @@ export class NamedRange {
         };
 
         // Execute action
-        const command = new Command(_context.getWorkBook(), actionData);
+        const command = new SheetsCommand(_context.getWorkBook(), actionData);
         _commandManager.invoke(command);
     }
 
@@ -156,7 +156,7 @@ export class NamedRange {
         };
 
         // Execute action
-        const command = new Command(_context.getWorkBook(), actionData);
+        const command = new SheetsCommand(_context.getWorkBook(), actionData);
         _commandManager.invoke(command);
 
         // const namedRanges = this._workbook.getNamedRanges();

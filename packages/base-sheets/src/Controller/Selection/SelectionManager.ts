@@ -1,5 +1,5 @@
 import { IMouseEvent, IPointerEvent, Rect, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle } from '@univer/base-render';
-import { Nullable, Observer, Worksheet, ISelection, makeCellToSelection, IRangeData, RangeList, Range, IRangeCellData, ICellInfo, Command } from '@univer/core';
+import { Nullable, Observer, Worksheet, ISelection, makeCellToSelection, IRangeData, RangeList, Range, IRangeCellData, ICellInfo, SheetsCommand } from '@univer/core';
 import { ACTION_NAMES, ISelectionsConfig } from '../../Basics';
 import { ISelectionModelValue, ISetSelectionValueActionData } from '../../Model/Action/SetSelectionValueAction';
 import { SelectionModel } from '../../Model/SelectionModel';
@@ -201,7 +201,7 @@ export class SelectionManager {
             selections: models,
         };
 
-        const command = new Command(workbook, value);
+        const command = new SheetsCommand(workbook, value);
         commandManager.invoke(command);
     }
 
@@ -266,7 +266,7 @@ export class SelectionManager {
             selections: selectionModelsValue,
         };
 
-        const command = new Command(workbook, value);
+        const command = new SheetsCommand(workbook, value);
         commandManager.invoke(command);
     }
 

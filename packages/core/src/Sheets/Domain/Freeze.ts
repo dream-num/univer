@@ -1,5 +1,5 @@
 import { Context } from '../../Basics';
-import { Command, CommandManager } from '../../Command';
+import { SheetsCommand, CommandManager } from '../../Command';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { Worksheet } from './Worksheet';
 
@@ -23,7 +23,7 @@ export class Freeze {
             sheetId: this._worksheet.getSheetId(),
             numColumns: columns,
         };
-        const command = new Command(_context.getWorkBook(), configure);
+        const command = new SheetsCommand(_context.getWorkBook(), configure);
         _commandManager.invoke(command);
 
         return this._worksheet;
@@ -36,7 +36,7 @@ export class Freeze {
             sheetId: this._worksheet.getSheetId(),
             numRows: rows,
         };
-        const command = new Command(_context.getWorkBook(), configure);
+        const command = new SheetsCommand(_context.getWorkBook(), configure);
         _commandManager.invoke(command);
 
         return this._worksheet;

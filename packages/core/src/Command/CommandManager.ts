@@ -1,6 +1,6 @@
 import { UndoManager } from './UndoManager';
 import { Inject } from '../IOC';
-import { Command } from './Command';
+import { SheetsCommand } from './SheetsCommand';
 import { Class } from '../Shared';
 import { ActionBase, IActionData } from './ActionBase';
 import { ActionObservers } from './ActionObservers';
@@ -73,7 +73,7 @@ export class CommandManager {
         }
     }
 
-    invoke(command: Command): void {
+    invoke(command: SheetsCommand): void {
         const { _workbook, _undoManager } = this;
         const server = _workbook.getServer();
         command.invoke();

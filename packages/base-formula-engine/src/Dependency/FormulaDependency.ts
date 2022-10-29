@@ -3,14 +3,11 @@ import { generateAstNode } from '../Analysis/Tools';
 import { FunctionNode, PrefixNode, ReferenceNode, SuffixNode, UnionNode } from '../AstNode';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { NodeType } from '../AstNode/NodeType';
-import { FormulaDataType, IInterpreterDatasetConfig } from '../Basics/Common';
-import { REFERENCE_FUNCTION_SET } from '../Basics/SpecialFunction';
+import { FormulaDataType, IInterpreterDatasetConfig, PreCalculateNodeType } from '../Basics/Common';
 import { prefixToken, suffixToken } from '../Basics/Token';
 import { Interpreter } from '../Interpreter/Interpreter';
+import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
 import { FormulaDependencyTree } from './DependencyTree';
-
-type PreCalculateNodeType = ReferenceNode | UnionNode | PrefixNode | SuffixNode;
-
 export class FormulaDependencyGenerator {
     private _updateRangeFlattenCache = new Map<string, ObjectMatrix<boolean>>();
 
@@ -86,7 +83,7 @@ export class FormulaDependencyGenerator {
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
             const item = children[i];
-            if (item.nodeType === NodeType.FUNCTION && REFERENCE_FUNCTION_SET.has((item as FunctionNode).getToken())) {
+            if (item.nodeType === NodeType.FUNCTION && (item as FunctionNode).isAddress()) {
                 result.push(item as FunctionNode);
                 continue;
             }
@@ -103,23 +100,94 @@ export class FormulaDependencyGenerator {
 
         this._nodeTraversalReferenceFunction(node, referenceFunctionList);
 
-        const rangeList = [];
+        const rangeList: IGridRange[] = [];
 
         for (let i = 0, len = preCalculateNodeList.length; i < len; i++) {
             const node = preCalculateNodeList[i];
 
-            const value = await formulaInterpreter.execute(node);
+            const value = formulaInterpreter.executePreCalculateNode(node) as BaseReferenceObject;
+
+            const gridRange = value.toGridRange();
+
+            rangeList.push(gridRange);
         }
+
+        for (let i = 0, len = referenceFunctionList.length; i < len; i++) {
+            const node = referenceFunctionList[i];
+            let value: BaseReferenceObject;
+            if (formulaInterpreter.checkAsyncNode(node)) {
+                value = (await formulaInterpreter.executeAsync(node)) as BaseReferenceObject;
+            } else {
+                value = formulaInterpreter.execute(node) as BaseReferenceObject;
+            }
+
+            const gridRange = value.toGridRange();
+
+            rangeList.push(gridRange);
+        }
+
+        return rangeList;
+    }
+
+    private _makeDependency(treeList: FormulaDependencyTree[]) {
+        for (let i = 0, len = treeList.length; i < len; i++) {
+            const tree = treeList[i];
+            for (let m = 0, mLen = treeList.length; m < mLen; m++) {
+                const treeMatch = treeList[i];
+                if (tree === treeMatch) {
+                    continue;
+                }
+
+                if (tree.dependency(treeMatch)) {
+                    tree.pushChildren(treeMatch);
+                }
+            }
+        }
+    }
+
+    private _calculateRunList(treeList: FormulaDependencyTree[]) {
+        let stack = treeList;
+        const formulaRunList = [];
+        while (stack.length > 0) {
+            let tree = stack.pop();
+
+            if (tree === undefined || tree.isSkip()) {
+                continue;
+            }
+
+            if (tree.isAdded()) {
+                formulaRunList.push(tree);
+                continue;
+            }
+
+            const cacheStack: FormulaDependencyTree[] = [];
+
+            for (let i = 0, len = tree.parents.length; i < len; i++) {
+                const parentTree = tree.parents[i];
+                cacheStack.push(parentTree);
+            }
+
+            if (cacheStack.length == 0) {
+                formulaRunList.push(tree);
+                tree.setSkip();
+            } else {
+                tree.setAdded();
+                stack.push(tree);
+                stack = stack.concat(cacheStack);
+            }
+        }
+
+        return formulaRunList.reverse();
     }
 
     async generate(updateRangeList: IGridRange[] = [], interpreterDatasetConfig?: IInterpreterDatasetConfig) {
         this.updateRangeFlatten(updateRangeList);
 
-        const FDtree = new FormulaDependencyTree();
-
         const formulaInterpreter = Interpreter.create(interpreterDatasetConfig);
 
         const formulaDataKeys = Object.keys(this._formulaData);
+
+        const treeList: FormulaDependencyTree[] = [];
 
         for (let sheetId of formulaDataKeys) {
             const matrixData = new ObjectMatrix(this._formulaData[sheetId]);
@@ -128,9 +196,31 @@ export class FormulaDependencyGenerator {
                 rangeRow.forEach((column, formulaData) => {
                     const formulaString = formulaData.formula;
                     const node = generateAstNode(formulaString);
+
+                    const FDtree = new FormulaDependencyTree();
+
+                    FDtree.node = node;
+                    FDtree.formula = formulaString;
+                    FDtree.sheetId = sheetId;
+                    FDtree.row = row;
+                    FDtree.column = column;
+
+                    treeList.push(FDtree);
                 });
             });
         }
+
+        for (let i = 0, len = treeList.length; i < len; i++) {
+            const tree = treeList[i];
+            const rangeList = await this._getRangeListByNode(tree.node, formulaInterpreter);
+            for (let r = 0, rLen = rangeList.length; r < rLen; r++) {
+                tree.pushRangeList(rangeList[r]);
+            }
+        }
+
+        this._makeDependency(treeList);
+
+        return Promise.resolve(this._calculateRunList(treeList));
     }
 
     static create(formulaData: FormulaDataType) {

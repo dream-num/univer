@@ -279,4 +279,11 @@ export class BaseReferenceObject extends ObjectClassType {
 
         return arrayValueList;
     }
+
+    toGridRange() {
+        return {
+            rangeData: this._rangeData,
+            sheetId: this.getSheetId(),
+        };
+    }
 }

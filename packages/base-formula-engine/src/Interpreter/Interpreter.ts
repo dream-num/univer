@@ -2,7 +2,7 @@ import { CellValueType, ICellData, ICellV, ObjectMatrix } from '@univer/core';
 import { ReferenceNode } from '../AstNode';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { NodeType } from '../AstNode/NodeType';
-import { AstNodePromiseType, CalculateValueType, FunctionVariantType, IInterpreterDatasetConfig, UnitDataType } from '../Basics/Common';
+import { AstNodePromiseType, CalculateValueType, FunctionVariantType, IInterpreterDatasetConfig, PreCalculateNodeType, UnitDataType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
@@ -16,17 +16,22 @@ export class Interpreter {
 
     private _unitId: string;
 
-    private async _execute(node: BaseAstNode): Promise<AstNodePromiseType> {
+    private _checkAsyncNode(node: BaseAstNode, resultList: boolean[]) {
         const children = node.getChildren();
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
             const item = children[i];
-            this._execute(item);
-            // if (item.nodeType === NodeType.FUNCTION) {
-            //     await item.executeAsync(this._interpreterCalculateProps);
-            // } else {
-            //     item.execute(this._interpreterCalculateProps);
-            // }
+            resultList.push(item.isAsync());
+            this._checkAsyncNode(item, resultList);
+        }
+    }
+
+    private async _executeAsync(node: BaseAstNode): Promise<AstNodePromiseType> {
+        const children = node.getChildren();
+        const childrenCount = children.length;
+        for (let i = 0; i < childrenCount; i++) {
+            const item = children[i];
+            this._executeAsync(item);
         }
 
         if (node.nodeType === NodeType.FUNCTION) {
@@ -36,6 +41,19 @@ export class Interpreter {
         }
 
         return Promise.resolve(AstNodePromiseType.SUCCESS);
+    }
+
+    private _execute(node: BaseAstNode): AstNodePromiseType {
+        const children = node.getChildren();
+        const childrenCount = children.length;
+        for (let i = 0; i < childrenCount; i++) {
+            const item = children[i];
+            this._execute(item);
+        }
+
+        node.execute(this._interpreterDatasetConfig, this._runtimeData);
+
+        return AstNodePromiseType.SUCCESS;
     }
 
     private _objectValueToCellValue(objectValue: CalculateValueType) {
@@ -68,7 +86,7 @@ export class Interpreter {
 
     constructor(private _interpreterDatasetConfig?: IInterpreterDatasetConfig) {}
 
-    async execute(node: BaseAstNode): Promise<FunctionVariantType> {
+    async executeAsync(node: BaseAstNode): Promise<FunctionVariantType> {
         // if (!this._interpreterCalculateProps) {
         //     return ErrorValueObject.create(ErrorType.ERROR);
         // }
@@ -82,9 +100,37 @@ export class Interpreter {
         return Promise.resolve(node.getValue());
     }
 
-    executeRef(node: ReferenceNode) {
+    execute(node: BaseAstNode): FunctionVariantType {
+        // if (!this._interpreterCalculateProps) {
+        //     return ErrorValueObject.create(ErrorType.ERROR);
+        // }
+
+        if (!node) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        this._execute(node);
+
+        return node.getValue();
+    }
+
+    executePreCalculateNode(node: PreCalculateNodeType) {
         node.execute(this._interpreterDatasetConfig, this._runtimeData);
         return node.getValue();
+    }
+
+    checkAsyncNode(node: BaseAstNode) {
+        const result: boolean[] = [];
+        this._checkAsyncNode(node, result);
+
+        for (let i = 0, len = result.length; i < len; i++) {
+            const item = result[i];
+            if (item === true) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     setRuntimeData(row: number, column: number, sheetId: string, functionVariant: FunctionVariantType) {

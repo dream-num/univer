@@ -108,6 +108,9 @@ export class CellEditorController {
                     case 'Enter':
                         if (this.isEditMode) {
                             this.exitEditMode();
+
+                            // move to cell below
+                            // this._plugin.getSelectionManager().moveDown()
                         } else {
                             this.enterEditMode();
                         }

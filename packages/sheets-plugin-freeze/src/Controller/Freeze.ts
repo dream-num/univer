@@ -1,4 +1,4 @@
-import { CommandManager, Worksheet, Command, Context } from '@univer/core';
+import { CommandManager, Worksheet, SheetsCommand, Context } from '@univer/core';
 import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
 
 export class Freeze {
@@ -21,7 +21,7 @@ export class Freeze {
             sheetId: this._worksheet.getSheetId(),
             numColumns: columns,
         };
-        const command = new Command(_context.getWorkBook(), configure);
+        const command = new SheetsCommand(_context.getWorkBook(), configure);
         _commandManager.invoke(command);
 
         return this._worksheet;
@@ -36,7 +36,7 @@ export class Freeze {
             sheetId: this._worksheet.getSheetId(),
             numRows: rows,
         };
-        const command = new Command(_context.getWorkBook(), configure);
+        const command = new SheetsCommand(_context.getWorkBook(), configure);
         _commandManager.invoke(command);
 
         return this._worksheet;

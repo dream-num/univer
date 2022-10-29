@@ -1,4 +1,4 @@
-import { Command, CommandManager, Context, Plugin, Worksheet } from '@univer/core';
+import { SheetsCommand, CommandManager, Context, Plugin, Worksheet } from '@univer/core';
 
 import { IAddBandingActionData, IDeleteBandingActionData, ISetBandingActionData } from './Command';
 import { ACTION_NAMES } from './Command/ACTION_NAMES';
@@ -102,7 +102,7 @@ export class Banding {
         };
 
         // Execute action
-        const command = new Command(_context.getWorkBook(), actionData);
+        const command = new SheetsCommand(_context.getWorkBook(), actionData);
         _commandManager.invoke(command);
         return this;
     }
@@ -121,7 +121,7 @@ export class Banding {
         };
 
         // Execute action
-        const command = new Command(_context.getWorkBook(), actionData);
+        const command = new SheetsCommand(_context.getWorkBook(), actionData);
         _commandManager.invoke(command);
 
         return this;
@@ -152,7 +152,7 @@ export class Banding {
         };
 
         // Execute action
-        const command = new Command(_context.getWorkBook(), actionData);
+        const command = new SheetsCommand(_context.getWorkBook(), actionData);
         _commandManager.invoke(command);
     }
 

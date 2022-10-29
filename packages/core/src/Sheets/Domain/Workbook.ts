@@ -7,7 +7,7 @@ import {
 } from '../../Const';
 import { BooleanNumber } from '../../Enum';
 import { Context } from '../../Basics';
-import { Command, CommandManager, ISetSheetOrderActionData } from '../../Command';
+import { SheetsCommand, CommandManager, ISetSheetOrderActionData } from '../../Command';
 
 import {
     IColumnStartEndData,
@@ -278,7 +278,7 @@ export class Workbook {
                 sheetId: worksheetConfig.id,
             });
             _commandManager.invoke(
-                new Command(_context.getWorkBook(), {
+                new SheetsCommand(_context.getWorkBook(), {
                     actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
                     sheetId: worksheetConfig.id,
                     index,
@@ -304,7 +304,7 @@ export class Workbook {
                     sheetId: worksheetConfig.id,
                 });
                 _commandManager.invoke(
-                    new Command(_context.getWorkBook(), {
+                    new SheetsCommand(_context.getWorkBook(), {
                         actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
                         sheetId: worksheetConfig.id,
                         index,
@@ -331,7 +331,7 @@ export class Workbook {
                     sheetId: worksheetConfig.id,
                 });
                 _commandManager.invoke(
-                    new Command(_context.getWorkBook(), {
+                    new SheetsCommand(_context.getWorkBook(), {
                         actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
                         sheetId: worksheetConfig.id,
                         index,
@@ -359,7 +359,7 @@ export class Workbook {
                     sheetId: worksheetConfig.id,
                 });
                 _commandManager.invoke(
-                    new Command(_context.getWorkBook(), {
+                    new SheetsCommand(_context.getWorkBook(), {
                         actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
                         sheetId: worksheetConfig.id,
                         index,
@@ -382,7 +382,7 @@ export class Workbook {
                     sheetId: worksheetConfig.id,
                 });
                 _commandManager.invoke(
-                    new Command(_context.getWorkBook(), {
+                    new SheetsCommand(_context.getWorkBook(), {
                         actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
                         sheetId: worksheetConfig.id,
                         index,
@@ -412,7 +412,7 @@ export class Workbook {
                     sheetId: worksheetConfig.id,
                 });
                 _commandManager.invoke(
-                    new Command(_context.getWorkBook(), {
+                    new SheetsCommand(_context.getWorkBook(), {
                         actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
                         sheetId: worksheetConfig.id,
                         index,
@@ -438,7 +438,7 @@ export class Workbook {
                         sheetId: worksheetConfig.id,
                     });
                     _commandManager.invoke(
-                        new Command(_context.getWorkBook(), {
+                        new SheetsCommand(_context.getWorkBook(), {
                             actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
                             sheetId: worksheetConfig.id,
                             index,
@@ -459,7 +459,7 @@ export class Workbook {
                         sheetId: worksheetConfig.id,
                     });
                     _commandManager.invoke(
-                        new Command(_context.getWorkBook(), {
+                        new SheetsCommand(_context.getWorkBook(), {
                             actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
                             sheetId: worksheetConfig.id,
                             index,
@@ -655,7 +655,7 @@ export class Workbook {
             sheetId,
             order,
         };
-        const command = new Command(_context.getWorkBook(), config);
+        const command = new SheetsCommand(_context.getWorkBook(), config);
         _commandManager.invoke(command);
         observer.notifyObservers();
     }
@@ -696,7 +696,7 @@ export class Workbook {
             });
 
             _commandManager.invoke(
-                new Command(this, {
+                new SheetsCommand(this, {
                     actionName: ACTION_NAMES.REMOVE_SHEET_ACTION,
                     sheetId,
                 } as IRemoveSheetActionData)

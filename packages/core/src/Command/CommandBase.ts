@@ -5,34 +5,13 @@ import { CommandInjector } from './CommandInjectorObservers';
 import { Class, Nullable } from '../Shared';
 // import { ActionType } from './ActionObservers';
 import { ActionExtensionManager } from './ActionExtensionManager';
+import {ActionType} from "./ActionObservers";
 
 /**
  * Manage action instances and action data
  */
 export class CommandBase {
     protected _actions: Array<ActionBase<IActionData>>;
-
-    protected _workbook: Workbook;
-
-    constructor(workbook: Workbook, ...list: IActionData[]) {
-        this._workbook = workbook;
-        this._actions = [];
-
-        // TODO inject and invoke
-        const actionExtensionManager = new ActionExtensionManager();
-        actionExtensionManager.handle(list);
-
-        list.forEach((data) => {
-            const ActionClass = CommandManager.getAction(data.actionName);
-            const observers = CommandManager.getActionObservers();
-            const action = new ActionClass(data, this._workbook, observers);
-            this._actions.push(action);
-        });
-        // CommandManager.getCommandObservers().notifyObservers({
-        //     type: ActionType.REDO,
-        //     actions: this._actions,
-        // });
-    }
 
     getDoData(): IActionData[] {
         return this._actions.map((action) => action.getDoActionData());
@@ -62,5 +41,31 @@ export class CommandBase {
                 return null;
             }
         })();
+    }
+
+    redo(): void {
+        this._actions.forEach((action) => action.redo());
+        CommandManager.getCommandObservers().notifyObservers({
+            type: ActionType.REDO,
+            actions: this._actions,
+        });
+    }
+
+    undo(): void {
+        this._actions.forEach((action) => action.undo());
+        CommandManager.getCommandObservers().notifyObservers({
+            type: ActionType.UNDO,
+            actions: this._actions,
+        });
+    }
+
+    invoke(): void {
+        CommandManager.getCommandInjectorObservers().notifyObservers(
+            this.getInjector()
+        );
+        CommandManager.getCommandObservers().notifyObservers({
+            type: ActionType.REDO,
+            actions: this._actions,
+        });
     }
 }

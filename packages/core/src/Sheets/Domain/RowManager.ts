@@ -1,4 +1,4 @@
-import { Command } from '../../Command';
+import { SheetsCommand } from '../../Command';
 import { ISetRowHeightActionData } from '../Action';
 import { ACTION_NAMES } from '../../Const';
 import { BooleanNumber } from '../../Enum';
@@ -89,7 +89,7 @@ export class RowManager {
             rowIndex,
             rowHeight,
         };
-        const command = new Command(_context.getWorkBook(), setRowHeight);
+        const command = new SheetsCommand(_context.getWorkBook(), setRowHeight);
         _commandManager.invoke(command);
     }
 

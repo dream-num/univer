@@ -1,5 +1,5 @@
 import { ISlotElement } from '@univer/base-component';
-import { Command, Context, IRangeData, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { SheetsCommand, Context, IRangeData, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
 import { SpreadsheetPlugin } from '@univer/base-sheets';
 import { en, zh } from './Locale';
 import { IConfig } from './IData';
@@ -53,7 +53,7 @@ export class FilterPlugin extends Plugin {
                 filter: filter.toSequence(),
                 sheetId: worksheet.getSheetId(),
             };
-            const command = new Command(workbook, configure);
+            const command = new SheetsCommand(workbook, configure);
             commandManager.invoke(command);
         }
     }

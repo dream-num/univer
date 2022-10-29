@@ -1,7 +1,7 @@
 // import { nanoid } from 'nanoid';
 import { Context } from '../../Basics';
 import {
-    Command,
+    SheetsCommand,
     CommandManager,
     IActionData,
     IAddMergeActionData,
@@ -890,7 +890,7 @@ export class Range {
             rangeData: this._rangeData,
         };
 
-        const command = new Command(_context.getWorkBook(), setStyle);
+        const command = new SheetsCommand(_context.getWorkBook(), setStyle);
         _commandManager.invoke(command);
         return this;
     }
@@ -916,7 +916,7 @@ export class Range {
             rangeData: this._rangeData,
         };
 
-        const command = new Command(_context.getWorkBook(), setStyle);
+        const command = new SheetsCommand(_context.getWorkBook(), setStyle);
         _commandManager.invoke(command);
         return this;
     }
@@ -953,7 +953,7 @@ export class Range {
             rangeData: this._rangeData,
         };
 
-        const command = new Command(_context.getWorkBook(), setStyle);
+        const command = new SheetsCommand(_context.getWorkBook(), setStyle);
         _commandManager.invoke(command);
         return this;
     }
@@ -986,7 +986,7 @@ export class Range {
             rangeData: this._rangeData,
         };
 
-        const command = new Command(_context.getWorkBook(), setStyle);
+        const command = new SheetsCommand(_context.getWorkBook(), setStyle);
         _commandManager.invoke(command);
         return this;
     }
@@ -1026,7 +1026,7 @@ export class Range {
             rangeData: this._rangeData,
         };
 
-        const command = new Command(_context.getWorkBook(), setStyle);
+        const command = new SheetsCommand(_context.getWorkBook(), setStyle);
         _commandManager.invoke(command);
         return this;
     }
@@ -1055,7 +1055,7 @@ export class Range {
             rangeData: this._rangeData,
         };
 
-        const command = new Command(_context.getWorkBook(), setStyle);
+        const command = new SheetsCommand(_context.getWorkBook(), setStyle);
         _commandManager.invoke(command);
         return this;
     }
@@ -1213,7 +1213,7 @@ export class Range {
             cellFormula: cellValue.getData(),
             rangeData: this._rangeData,
         };
-        const command = new Command(_context.getWorkBook(), setValue);
+        const command = new SheetsCommand(_context.getWorkBook(), setValue);
         _commandManager.invoke(command);
 
         return this;
@@ -1243,7 +1243,7 @@ export class Range {
             cellFormula: cellValue.getData(),
             rangeData: this._rangeData,
         };
-        const command = new Command(_context.getWorkBook(), setValue);
+        const command = new SheetsCommand(_context.getWorkBook(), setValue);
         _commandManager.invoke(command);
 
         return this;
@@ -1434,7 +1434,7 @@ export class Range {
             rangeData: this._rangeData,
         };
 
-        const command = new Command(_context.getWorkBook(), setStyle);
+        const command = new SheetsCommand(_context.getWorkBook(), setStyle);
         _commandManager.invoke(command);
         return this;
     }
@@ -1469,7 +1469,7 @@ export class Range {
             rangeData: this._rangeData,
         };
 
-        const command = new Command(_context.getWorkBook(), setStyle);
+        const command = new SheetsCommand(_context.getWorkBook(), setStyle);
         _commandManager.invoke(command);
         return this;
     }
@@ -1501,7 +1501,7 @@ export class Range {
             rangeData: this._rangeData,
         };
 
-        const command = new Command(_context.getWorkBook(), setStyle);
+        const command = new SheetsCommand(_context.getWorkBook(), setStyle);
         _commandManager.invoke(command);
         return this;
     }
@@ -1530,7 +1530,7 @@ export class Range {
             rangeData: this._rangeData,
         };
 
-        const command = new Command(_context.getWorkBook(), setStyle);
+        const command = new SheetsCommand(_context.getWorkBook(), setStyle);
         _commandManager.invoke(command);
         return this;
     }
@@ -1577,7 +1577,7 @@ export class Range {
             rangeData: this._rangeData,
         };
 
-        const command = new Command(_context.getWorkBook(), setStyle);
+        const command = new SheetsCommand(_context.getWorkBook(), setStyle);
         _commandManager.invoke(command);
         return this;
     }
@@ -1723,7 +1723,7 @@ export class Range {
             cellValue: matrix.getData(),
             rangeData: destination._rangeData,
         };
-        const command = new Command(_context.getWorkBook(), setValue);
+        const command = new SheetsCommand(_context.getWorkBook(), setValue);
         _commandManager.invoke(command);
         return this;
     }
@@ -1887,7 +1887,7 @@ export class Range {
             cellValue: cellValue.getData(),
             rangeData: this._rangeData,
         };
-        const command = new Command(_context.getWorkBook(), setValue);
+        const command = new SheetsCommand(_context.getWorkBook(), setValue);
         _commandManager.invoke(command);
 
         return this;
@@ -2000,7 +2000,7 @@ export class Range {
             rangeData: this._rangeData,
         };
 
-        const command = new Command(_context.getWorkBook(), setStyle);
+        const command = new SheetsCommand(_context.getWorkBook(), setStyle);
         _commandManager.invoke(command);
         return this;
     }
@@ -2061,7 +2061,7 @@ export class Range {
                     cellValue: cellValue.getData(),
                     rangeData: range,
                 };
-                const command = new Command(_context.getWorkBook(), setValue);
+                const command = new SheetsCommand(_context.getWorkBook(), setValue);
                 _commandManager.invoke(command);
             } else if (copyPasteType === CopyPasteType.PASTE_FORMAT) {
                 const styles = _context.getWorkBook().getStyles();
@@ -2085,7 +2085,7 @@ export class Range {
                     value: stylesMatrix.getData(),
                     rangeData: range,
                 };
-                const command = new Command(_context.getWorkBook(), setStyle);
+                const command = new SheetsCommand(_context.getWorkBook(), setStyle);
                 _commandManager.invoke(command);
             } else if (copyPasteType === CopyPasteType.PASTE_VALUES) {
                 const cellValue = new ObjectMatrix<ICellV>();
@@ -2106,7 +2106,7 @@ export class Range {
                     cellValue: cellValue.getData(),
                     rangeData: range,
                 };
-                const command = new Command(_context.getWorkBook(), setValue);
+                const command = new SheetsCommand(_context.getWorkBook(), setValue);
                 _commandManager.invoke(command);
             } else if (copyPasteType === CopyPasteType.PASTE_COLUMN_WIDTHS) {
                 const rangeStartColumn = this._rangeData.startColumn;
@@ -2133,7 +2133,7 @@ export class Range {
                 rangeData: range,
                 options,
             };
-            const command = new Command(_context.getWorkBook(), setValue);
+            const command = new SheetsCommand(_context.getWorkBook(), setValue);
             _commandManager.invoke(command);
         } else if (Tuples.checkup(argument, Range)) {
             const cellValue = new ObjectMatrix<ICellData>();
@@ -2150,7 +2150,7 @@ export class Range {
                 cellValue: cellValue.getData(),
                 rangeData: range,
             };
-            const command = new Command(_context.getWorkBook(), setValue);
+            const command = new SheetsCommand(_context.getWorkBook(), setValue);
             _commandManager.invoke(command);
         }
     }
@@ -2224,7 +2224,7 @@ export class Range {
             value: stylesMatrix.getData(),
             rangeData: range,
         };
-        const command = new Command(_context.getWorkBook(), setStyle);
+        const command = new SheetsCommand(_context.getWorkBook(), setStyle);
         _commandManager.invoke(command);
     }
 
@@ -2297,7 +2297,7 @@ export class Range {
             cellValue: cellValue.getData(),
             rangeData: range,
         };
-        const command = new Command(_context.getWorkBook(), setValue);
+        const command = new SheetsCommand(_context.getWorkBook(), setValue);
         _commandManager.invoke(command);
     }
 
@@ -2354,7 +2354,7 @@ export class Range {
             },
         };
 
-        const command = new Command(_context.getWorkBook(), clearValue, setValue);
+        const command = new SheetsCommand(_context.getWorkBook(), clearValue, setValue);
         _commandManager.invoke(command);
     }
 
@@ -2769,7 +2769,7 @@ export class Range {
         };
         actions.push(setCCData);
 
-        const commandCC = new Command(_workbook, ...actions);
+        const commandCC = new SheetsCommand(_workbook, ...actions);
         _commandManager.invoke(commandCC);
 
         return this;
@@ -2868,7 +2868,7 @@ export class Range {
             rangeData: this._rangeData,
         };
 
-        const command = new Command(_context.getWorkBook(), setStyle);
+        const command = new SheetsCommand(_context.getWorkBook(), setStyle);
         _commandManager.invoke(command);
         return this;
     }
@@ -2899,7 +2899,7 @@ export class Range {
             rangeData: this._rangeData,
         };
 
-        const command = new Command(_context.getWorkBook(), setStyle);
+        const command = new SheetsCommand(_context.getWorkBook(), setStyle);
         _commandManager.invoke(command);
         return this;
     }
@@ -2930,7 +2930,7 @@ export class Range {
             rangeData: this._rangeData,
         };
 
-        const command = new Command(_context.getWorkBook(), setStyle);
+        const command = new SheetsCommand(_context.getWorkBook(), setStyle);
         _commandManager.invoke(command);
         return this;
     }
@@ -2961,7 +2961,7 @@ export class Range {
             rangeData: this._rangeData,
         };
 
-        const command = new Command(_context.getWorkBook(), setStyle);
+        const command = new SheetsCommand(_context.getWorkBook(), setStyle);
         _commandManager.invoke(command);
         return this;
     }
@@ -2992,7 +2992,7 @@ export class Range {
             rangeData: this._rangeData,
         };
 
-        const command = new Command(_context.getWorkBook(), setStyle);
+        const command = new SheetsCommand(_context.getWorkBook(), setStyle);
         _commandManager.invoke(command);
         return this;
     }
@@ -3023,7 +3023,7 @@ export class Range {
             rangeData: this._rangeData,
         };
 
-        const command = new Command(_context.getWorkBook(), setStyle);
+        const command = new SheetsCommand(_context.getWorkBook(), setStyle);
         _commandManager.invoke(command);
         return this;
     }
@@ -3048,7 +3048,7 @@ export class Range {
             cellValue: cellValue.getData(),
             rangeData: this._rangeData,
         };
-        const command = new Command(_context.getWorkBook(), setValue);
+        const command = new SheetsCommand(_context.getWorkBook(), setValue);
         _commandManager.invoke(command);
 
         return this;
@@ -3081,7 +3081,7 @@ export class Range {
                 cellValue: cellValue.getData(),
                 rangeData: this._rangeData,
             };
-            const command = new Command(_context.getWorkBook(), setValue);
+            const command = new SheetsCommand(_context.getWorkBook(), setValue);
             _commandManager.invoke(command);
         } else if (Tuples.checkup(argument, ObjectMatrix)) {
             const setValue: ISetRangeFormattedValueActionData = {
@@ -3090,7 +3090,7 @@ export class Range {
                 cellValue: values,
                 rangeData: this._rangeData,
             };
-            const command = new Command(_context.getWorkBook(), setValue);
+            const command = new SheetsCommand(_context.getWorkBook(), setValue);
             _commandManager.invoke(command);
         }
 
@@ -3118,7 +3118,7 @@ export class Range {
             cellValue: cellValue.getData(),
             rangeData: this._rangeData,
         };
-        const command = new Command(_context.getWorkBook(), setValue);
+        const command = new SheetsCommand(_context.getWorkBook(), setValue);
         _commandManager.invoke(command);
 
         return this;
@@ -3151,7 +3151,7 @@ export class Range {
                 cellValue: cellValue.getData(),
                 rangeData: this._rangeData,
             };
-            const command = new Command(_context.getWorkBook(), setValue);
+            const command = new SheetsCommand(_context.getWorkBook(), setValue);
             _commandManager.invoke(command);
         } else if (Tuples.checkup(argument, ObjectMatrix)) {
             const setValue: ISetRangeDataActionData = {
@@ -3160,7 +3160,7 @@ export class Range {
                 cellValue: values,
                 rangeData: this._rangeData,
             };
-            const command = new Command(_context.getWorkBook(), setValue);
+            const command = new SheetsCommand(_context.getWorkBook(), setValue);
             _commandManager.invoke(command);
         }
 
@@ -3196,7 +3196,7 @@ export class Range {
             options,
             rangeData: _rangeData,
         };
-        const command = new Command(_context.getWorkBook(), setValue);
+        const command = new SheetsCommand(_context.getWorkBook(), setValue);
         _commandManager.invoke(command);
 
         return this;
@@ -3247,7 +3247,7 @@ export class Range {
             shiftDimension,
             rangeData: _rangeData,
         };
-        const command = new Command(_context.getWorkBook(), setValue);
+        const command = new SheetsCommand(_context.getWorkBook(), setValue);
         _commandManager.invoke(command);
     }
 
@@ -3303,7 +3303,7 @@ export class Range {
             rangeData,
             cellValue: cellValue.getData(),
         };
-        const command = new Command(_context.getWorkBook(), insertValue);
+        const command = new SheetsCommand(_context.getWorkBook(), insertValue);
         _commandManager.invoke(command);
         return this;
     }
@@ -3323,7 +3323,7 @@ export class Range {
             sheetId: _sheetId,
             rectangles: [this._rangeData],
         };
-        const command = new Command(_context.getWorkBook(), dataRowInsert);
+        const command = new SheetsCommand(_context.getWorkBook(), dataRowInsert);
         _commandManager.invoke(command);
 
         return this;
@@ -3357,7 +3357,7 @@ export class Range {
             sheetId: _sheetId,
             rectangles,
         };
-        const command = new Command(_context.getWorkBook(), dataRowInsert);
+        const command = new SheetsCommand(_context.getWorkBook(), dataRowInsert);
         _commandManager.invoke(command);
 
         return this;
@@ -3391,7 +3391,7 @@ export class Range {
             sheetId: _sheetId,
             rectangles,
         };
-        const command = new Command(_context.getWorkBook(), dataRowInsert);
+        const command = new SheetsCommand(_context.getWorkBook(), dataRowInsert);
         _commandManager.invoke(command);
 
         return this;
@@ -3420,7 +3420,7 @@ export class Range {
             sheetId: _sheetId,
             rectangles,
         };
-        const command = new Command(_context.getWorkBook(), dataRowInsert);
+        const command = new SheetsCommand(_context.getWorkBook(), dataRowInsert);
         _commandManager.invoke(command);
 
         return this;
@@ -3486,7 +3486,7 @@ export class Range {
                 rangeData: _rangeData,
             },
         ];
-        const command = new Command(_context.getWorkBook(), ...removeDatas);
+        const command = new SheetsCommand(_context.getWorkBook(), ...removeDatas);
         _commandManager.invoke(command);
         return this;
     }
@@ -3680,7 +3680,7 @@ export class Range {
             cellValue: cellValue.getData(),
             rangeData: _rangeData,
         };
-        const command = new Command(_context.getWorkBook(), setValue);
+        const command = new SheetsCommand(_context.getWorkBook(), setValue);
         _commandManager.invoke(command);
     }
 

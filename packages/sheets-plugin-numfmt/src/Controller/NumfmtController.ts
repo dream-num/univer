@@ -1,4 +1,4 @@
-import { Command, Range, IRangeData, ObjectMatrix, Plugin, ACTION_NAMES, ObjectMatrixPrimitiveType } from '@univer/core';
+import { SheetsCommand, Range, IRangeData, ObjectMatrix, Plugin, ACTION_NAMES, ObjectMatrixPrimitiveType } from '@univer/core';
 import { NumfmtModel } from '../Model/NumfmtModel';
 
 export class NumfmtController {
@@ -28,7 +28,7 @@ export class NumfmtController {
             rangeData: numfmtRange,
             cellValue: numfmtMatrix.toJSON(),
         };
-        const command = new Command(pluginContext.getWorkBook(), config);
+        const command = new SheetsCommand(pluginContext.getWorkBook(), config);
         commandManager.invoke(command);
     }
 
@@ -44,7 +44,7 @@ export class NumfmtController {
             rangeData: numfmtRange,
             cellValue: numfmtMatrix.toJSON(),
         };
-        const command = new Command(pluginContext.getWorkBook(), config);
+        const command = new SheetsCommand(pluginContext.getWorkBook(), config);
         commandManager.invoke(command);
     }
 }

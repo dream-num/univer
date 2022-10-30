@@ -1,4 +1,4 @@
-import { IGridRange, IRangeData, ObjectMatrix } from '@univer/core';
+import { IGridRange, IRangeData, IUnitRange, ObjectMatrix } from '@univer/core';
 import { generateAstNode } from '../Analysis/Tools';
 import { FunctionNode, PrefixNode, ReferenceNode, SuffixNode, UnionNode } from '../AstNode';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
@@ -9,25 +9,36 @@ import { Interpreter } from '../Interpreter/Interpreter';
 import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
 import { FormulaDependencyTree } from './DependencyTree';
 export class FormulaDependencyGenerator {
-    private _updateRangeFlattenCache = new Map<string, ObjectMatrix<boolean>>();
+    private _updateRangeFlattenCache = new Map<string, Map<string, ObjectMatrix<boolean>>>();
 
-    constructor(private _formulaData: FormulaDataType) {}
+    constructor(private _formulaData: FormulaDataType, private _forceCalculate = false) {}
 
-    updateRangeFlatten(updateRangeList: IGridRange[]) {
+    updateRangeFlatten(updateRangeList: IUnitRange[]) {
+        if (this._forceCalculate) {
+            return;
+        }
+        this._updateRangeFlattenCache = new Map<string, Map<string, ObjectMatrix<boolean>>>();
         for (let i = 0; i < updateRangeList.length; i++) {
             const gridRange = updateRangeList[i];
             const range = gridRange.rangeData;
             const sheetId = gridRange.sheetId;
+            const unitId = gridRange.unitId;
 
-            this._addFlattenCache(sheetId, range);
+            this._addFlattenCache(unitId, sheetId, range);
         }
     }
 
-    private _addFlattenCache(sheetId: string, rangeData: IRangeData) {
-        let matrix = this._updateRangeFlattenCache.get(sheetId);
-        if (!matrix) {
-            matrix = new ObjectMatrix<boolean>();
-            this._updateRangeFlattenCache.set(sheetId, matrix);
+    private _addFlattenCache(unitId: string, sheetId: string, rangeData: IRangeData) {
+        let unitMatrix = this._updateRangeFlattenCache.get(unitId);
+        if (!unitMatrix) {
+            unitMatrix = new Map<string, ObjectMatrix<boolean>>();
+            this._updateRangeFlattenCache.set(unitId, unitMatrix);
+        }
+
+        let sheetMatrix = unitMatrix.get(sheetId);
+        if (!sheetMatrix) {
+            sheetMatrix = new ObjectMatrix<boolean>();
+            unitMatrix.set(sheetId, sheetMatrix);
         }
 
         // don't use destructuring assignment
@@ -42,7 +53,7 @@ export class FormulaDependencyGenerator {
         // don't use chained calls
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
-                matrix.setValue(r, c, true);
+                sheetMatrix.setValue(r, c, true);
             }
         }
     }
@@ -100,14 +111,14 @@ export class FormulaDependencyGenerator {
 
         this._nodeTraversalReferenceFunction(node, referenceFunctionList);
 
-        const rangeList: IGridRange[] = [];
+        const rangeList: IUnitRange[] = [];
 
         for (let i = 0, len = preCalculateNodeList.length; i < len; i++) {
             const node = preCalculateNodeList[i];
 
             const value = formulaInterpreter.executePreCalculateNode(node) as BaseReferenceObject;
 
-            const gridRange = value.toGridRange();
+            const gridRange = value.toUnitRange();
 
             rangeList.push(gridRange);
         }
@@ -121,7 +132,7 @@ export class FormulaDependencyGenerator {
                 value = formulaInterpreter.execute(node) as BaseReferenceObject;
             }
 
-            const gridRange = value.toGridRange();
+            const gridRange = value.toUnitRange();
 
             rangeList.push(gridRange);
         }
@@ -129,7 +140,33 @@ export class FormulaDependencyGenerator {
         return rangeList;
     }
 
-    private _makeDependency(treeList: FormulaDependencyTree[]) {
+    private _includeTree(tree: FormulaDependencyTree) {
+        const unitId = tree.unitId;
+        const sheetId = tree.sheetId;
+        const row = tree.row;
+        const column = tree.column;
+
+        if (!this._updateRangeFlattenCache.has(unitId)) {
+            return false;
+        }
+
+        const sheetObjectMatrix = this._updateRangeFlattenCache.get(unitId)!;
+
+        if (!sheetObjectMatrix.has(sheetId)) {
+            return false;
+        }
+
+        const rangeObjectMatrix = sheetObjectMatrix.get(unitId)!;
+
+        if (rangeObjectMatrix.getValue(row, column)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private _getUpdateTreeListAndMakeDependency(treeList: FormulaDependencyTree[]) {
+        const newTreeList: FormulaDependencyTree[] = [];
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
             for (let m = 0, mLen = treeList.length; m < mLen; m++) {
@@ -142,7 +179,13 @@ export class FormulaDependencyGenerator {
                     tree.pushChildren(treeMatch);
                 }
             }
+
+            if (this._forceCalculate || this._includeTree(tree)) {
+                newTreeList.push(tree);
+            }
         }
+
+        return newTreeList;
     }
 
     private _calculateRunList(treeList: FormulaDependencyTree[]) {
@@ -180,7 +223,7 @@ export class FormulaDependencyGenerator {
         return formulaRunList.reverse();
     }
 
-    async generate(updateRangeList: IGridRange[] = [], interpreterDatasetConfig?: IInterpreterDatasetConfig) {
+    async generate(updateRangeList: IUnitRange[] = [], interpreterDatasetConfig?: IInterpreterDatasetConfig) {
         this.updateRangeFlatten(updateRangeList);
 
         const formulaInterpreter = Interpreter.create(interpreterDatasetConfig);
@@ -189,41 +232,52 @@ export class FormulaDependencyGenerator {
 
         const treeList: FormulaDependencyTree[] = [];
 
-        for (let sheetId of formulaDataKeys) {
-            const matrixData = new ObjectMatrix(this._formulaData[sheetId]);
+        for (let unitId of formulaDataKeys) {
+            const sheetData = this._formulaData[unitId];
 
-            matrixData.forEach((row, rangeRow) => {
-                rangeRow.forEach((column, formulaData) => {
-                    const formulaString = formulaData.formula;
-                    const node = generateAstNode(formulaString);
+            const sheetDataKeys = Object.keys(sheetData);
 
-                    const FDtree = new FormulaDependencyTree();
+            for (let sheetId of sheetDataKeys) {
+                const matrixData = new ObjectMatrix(sheetData[sheetId]);
 
-                    FDtree.node = node;
-                    FDtree.formula = formulaString;
-                    FDtree.sheetId = sheetId;
-                    FDtree.row = row;
-                    FDtree.column = column;
+                matrixData.forEach((row, rangeRow) => {
+                    rangeRow.forEach((column, formulaData) => {
+                        const formulaString = formulaData.formula;
+                        const node = generateAstNode(formulaString);
 
-                    treeList.push(FDtree);
+                        const FDtree = new FormulaDependencyTree();
+
+                        FDtree.node = node;
+                        FDtree.formula = formulaString;
+                        FDtree.unitId = unitId;
+                        FDtree.sheetId = sheetId;
+                        FDtree.row = row;
+                        FDtree.column = column;
+
+                        treeList.push(FDtree);
+                    });
                 });
-            });
+            }
         }
 
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
+
+            formulaInterpreter.setCurrentPosition(tree.row, tree.column, tree.sheetId, tree.unitId);
+
             const rangeList = await this._getRangeListByNode(tree.node, formulaInterpreter);
+
             for (let r = 0, rLen = rangeList.length; r < rLen; r++) {
                 tree.pushRangeList(rangeList[r]);
             }
         }
 
-        this._makeDependency(treeList);
+        const updateTreeList = this._getUpdateTreeListAndMakeDependency(treeList);
 
-        return Promise.resolve(this._calculateRunList(treeList));
+        return Promise.resolve(this._calculateRunList(updateTreeList));
     }
 
-    static create(formulaData: FormulaDataType) {
-        return new FormulaDependencyGenerator(formulaData);
+    static create(formulaData: FormulaDataType, forceCalculate = false) {
+        return new FormulaDependencyGenerator(formulaData, forceCalculate);
     }
 }

@@ -106,4 +106,8 @@ export class TableReferenceObject extends BaseReferenceObject {
             endRow,
         });
     }
+
+    isTable() {
+        return true;
+    }
 }

@@ -8,13 +8,13 @@ import { zh, en } from './Locale';
 import { IConfig, IFormulaConfig } from './Basic/IFormula';
 import { FORMULA_PLUGIN_NAME } from './Basic/PLUGIN_NAME';
 import { FormulaController } from './Controller/FormulaController';
+import { firstLoader } from './Controller/FirstLoader';
 
 export class FormulaPlugin extends Plugin {
     private _formulaController: FormulaController;
 
-    constructor(config?: IFormulaConfig) {
+    constructor(private _config?: IFormulaConfig) {
         super(FORMULA_PLUGIN_NAME);
-        this._formulaController = new FormulaController(this, config);
         // this._config = config || {};
     }
 
@@ -31,7 +31,12 @@ export class FormulaPlugin extends Plugin {
             formulaEngine = new FormulaEnginePlugin();
             universheetInstance.installPlugin(formulaEngine);
         }
+
+        this._formulaController = new FormulaController(this, this._config);
+
         this._formulaController.setFormulaEngine(formulaEngine);
+
+        firstLoader(this._formulaController);
     }
 
     initialize(): void {

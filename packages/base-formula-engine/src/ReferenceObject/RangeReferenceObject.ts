@@ -13,4 +13,8 @@ export class RangeReferenceObject extends BaseReferenceObject {
             this.setForcedUnitIdDirect(forcedUnitId);
         }
     }
+
+    isRange() {
+        return true;
+    }
 }

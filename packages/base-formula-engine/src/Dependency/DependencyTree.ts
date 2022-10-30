@@ -1,4 +1,4 @@
-import { IGridRange, IRangeData } from '@univer/core';
+import { IRangeData, IUnitRange } from '@univer/core';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { IFormulaData } from '../Basics/Common';
 
@@ -19,8 +19,9 @@ export class FormulaDependencyTree implements IFormulaData {
     row: number;
     column: number;
     sheetId: string;
+    unitId: string;
 
-    rangeList: IGridRange[];
+    rangeList: IUnitRange[] = [];
 
     private _pushParent(tree: FormulaDependencyTree) {
         this.parents.push(tree);
@@ -60,7 +61,7 @@ export class FormulaDependencyTree implements IFormulaData {
         tree._pushParent(this);
     }
 
-    pushRangeList(range: IGridRange) {
+    pushRangeList(range: IUnitRange) {
         this.rangeList.push(range);
     }
 
@@ -70,11 +71,12 @@ export class FormulaDependencyTree implements IFormulaData {
         }
 
         for (let r = 0, len = this.rangeList.length; r < len; r++) {
-            const gridRange = this.rangeList[r];
-            const sheetId = gridRange.sheetId;
-            const rangeData = gridRange.rangeData;
+            const unitRange = this.rangeList[r];
+            const unitId = unitRange.unitId;
+            const sheetId = unitRange.sheetId;
+            const rangeData = unitRange.rangeData;
 
-            if (dependenceTree.sheetId === sheetId && dependenceTree.compareRangeData(rangeData)) {
+            if (dependenceTree.unitId === unitId && dependenceTree.sheetId === sheetId && dependenceTree.compareRangeData(rangeData)) {
                 return true;
             }
         }

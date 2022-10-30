@@ -38,15 +38,19 @@ export class CellReferenceObject extends BaseReferenceObject {
         return rangeReferenceObject;
     }
 
+    isCell() {
+        return true;
+    }
+
     unionBy(referenceObject: BaseReferenceObject) {
         if (!referenceObject.isCell()) {
             return ErrorValueObject.create(ErrorType.REF);
         }
 
         const cellReferenceObject = referenceObject as CellReferenceObject;
-        if (cellReferenceObject.getForcedSheetName() !== undefined) {
-            return ErrorValueObject.create(ErrorType.REF);
-        }
+        // if (cellReferenceObject.getForcedSheetName() !== undefined) {
+        //     return ErrorValueObject.create(ErrorType.REF);
+        // }
 
         const newRangeData = this.unionRange(this.getRangeData(), cellReferenceObject.getRangeData());
 
@@ -74,11 +78,11 @@ export class CellReferenceObject extends BaseReferenceObject {
         }
 
         if (startColumn1 > startColumn2) {
-            rangeData.startRow = startColumn2;
-            rangeData.endRow = startColumn1;
+            rangeData.startColumn = startColumn2;
+            rangeData.endColumn = startColumn1;
         } else {
-            rangeData.startRow = startColumn1;
-            rangeData.endRow = startColumn2;
+            rangeData.startColumn = startColumn1;
+            rangeData.endColumn = startColumn2;
         }
 
         return rangeData;

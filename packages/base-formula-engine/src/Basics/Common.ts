@@ -30,7 +30,7 @@ export interface IFormulaData {
     sheetId: string;
 }
 
-export type FormulaDataType = { [sheetId: string]: ObjectMatrixPrimitiveType<IFormulaData> };
+export type FormulaDataType = { [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<IFormulaData> } };
 
 export type SheetNameMapType = { [sheetName: string]: string };
 

@@ -1,5 +1,5 @@
-import { CellValueType, ICellData, ICellV, ObjectMatrix } from '@univer/core';
-import { ReferenceNode } from '../AstNode';
+import { CellValueType, ICellData, ObjectMatrix } from '@univer/core';
+import { FunctionNode } from '../AstNode';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { NodeType } from '../AstNode/NodeType';
 import { AstNodePromiseType, CalculateValueType, FunctionVariantType, IInterpreterDatasetConfig, PreCalculateNodeType, UnitDataType } from '../Basics/Common';
@@ -8,13 +8,9 @@ import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
 import { ArrayValueObject } from '../ValueObject/ArrayValueObject';
 import { BaseValueObject } from '../ValueObject/BaseValueObject';
-import { BooleanValueObject } from '../ValueObject/BooleanValueObject';
-import { NumberValueObject } from '../ValueObject/NumberValueObject';
 
 export class Interpreter {
     private _runtimeData: UnitDataType = {};
-
-    private _unitId: string;
 
     private _checkAsyncNode(node: BaseAstNode, resultList: boolean[]) {
         const children = node.getChildren();
@@ -34,7 +30,7 @@ export class Interpreter {
             this._executeAsync(item);
         }
 
-        if (node.nodeType === NodeType.FUNCTION) {
+        if (node.nodeType === NodeType.FUNCTION && (node as FunctionNode).isAsync()) {
             await node.executeAsync(this._interpreterDatasetConfig);
         } else {
             node.execute(this._interpreterDatasetConfig, this._runtimeData);
@@ -95,9 +91,11 @@ export class Interpreter {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        await this._execute(node);
+        await this._executeAsync(node);
 
-        return Promise.resolve(node.getValue());
+        const value = node.getValue();
+
+        return Promise.resolve(value);
     }
 
     execute(node: BaseAstNode): FunctionVariantType {
@@ -133,19 +131,19 @@ export class Interpreter {
         return false;
     }
 
-    setRuntimeData(row: number, column: number, sheetId: string, functionVariant: FunctionVariantType) {
-        if (this._runtimeData[this._unitId] === null) {
-            this._runtimeData[this._unitId] = {};
+    setRuntimeData(row: number, column: number, sheetId: string, unitId: string, functionVariant: FunctionVariantType) {
+        if (this._runtimeData[unitId] === undefined) {
+            this._runtimeData[unitId] = {};
         }
 
-        const unitData = this._runtimeData[this._unitId];
+        const unitData = this._runtimeData[unitId];
 
-        if (unitData[sheetId] === null) {
+        if (unitData[sheetId] === undefined) {
             unitData[sheetId] = new ObjectMatrix<ICellData>();
         }
 
         const sheetData = unitData[sheetId];
-        if (functionVariant.isReferenceObject() || (functionVariant as BaseValueObject).isArray()) {
+        if (functionVariant.isReferenceObject() || (functionVariant.isValueObject() && (functionVariant as BaseValueObject).isArray())) {
             const objectValueRefOrArray = functionVariant as BaseReferenceObject | ArrayValueObject;
             objectValueRefOrArray.iterator((valueObject, rowIndex, columnIndex) => {
                 sheetData.setValue(rowIndex, columnIndex, this._objectValueToCellValue(valueObject));
@@ -155,8 +153,22 @@ export class Interpreter {
         }
     }
 
+    getSheetData(unitId: string) {
+        return this._runtimeData[unitId];
+    }
+
     setProps(interpreterDatasetConfig: IInterpreterDatasetConfig) {
         this._interpreterDatasetConfig = interpreterDatasetConfig;
+    }
+
+    setCurrentPosition(row: number, column: number, sheetId: string, unitId: string) {
+        if (!this._interpreterDatasetConfig) {
+            return;
+        }
+        this._interpreterDatasetConfig.currentRow = row;
+        this._interpreterDatasetConfig.currentColumn = column;
+        this._interpreterDatasetConfig.currentSheetId = sheetId;
+        this._interpreterDatasetConfig.currentUnitId = unitId;
     }
 
     // static interpreter: Interpreter;

@@ -1,14 +1,14 @@
 import { CommandBase } from './CommandBase';
 import { CommandManager } from './CommandManager';
-import {Workbook} from "../Sheets/Domain";
-import {IActionData} from "./ActionBase";
-import {ActionExtensionManager} from "./ActionExtensionManager";
+import { Workbook } from '../Sheets/Domain';
+import { IActionData } from './ActionBase';
+import { ActionExtensionManager } from './ActionExtensionManager';
 
 /**
  * Execute the undo-redo command
  */
 export class SheetsCommand extends CommandBase {
-    protected unit: Workbook | docs|slider;
+    protected unit: Workbook;
 
     constructor(workbook: Workbook, ...list: IActionData[]) {
         super();
@@ -22,7 +22,7 @@ export class SheetsCommand extends CommandBase {
         list.forEach((data) => {
             const ActionClass = CommandManager.getAction(data.actionName);
             const observers = CommandManager.getActionObservers();
-            const action = new ActionClass(data, this._workbook, observers);
+            const action = new ActionClass(data, workbook, observers);
             this._actions.push(action);
         });
         // CommandManager.getCommandObservers().notifyObservers({

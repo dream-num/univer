@@ -1,11 +1,9 @@
 import { ActionBase, IActionData } from './ActionBase';
-import { Workbook } from '../Sheets/Domain';
 import { CommandManager } from './CommandManager';
 import { CommandInjector } from './CommandInjectorObservers';
 import { Class, Nullable } from '../Shared';
 // import { ActionType } from './ActionObservers';
-import { ActionExtensionManager } from './ActionExtensionManager';
-import {ActionType} from "./ActionObservers";
+import { ActionType } from './ActionObservers';
 
 /**
  * Manage action instances and action data

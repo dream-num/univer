@@ -108,6 +108,9 @@ export class CellEditorController {
                     case 'Enter':
                         if (this.isEditMode) {
                             this.exitEditMode();
+
+                            // move to cell below
+                            this._plugin.getSelectionManager().move(Direction.BOTTOM);
                         } else {
                             this.enterEditMode();
                         }
@@ -119,17 +122,36 @@ export class CellEditorController {
                         }
                         break;
 
-                    // case 'ArrowUp':
-                    //     break;
+                    case 'ArrowUp':
+                        if (!this.isEditMode) {
+                            this._plugin.getSelectionManager().move(Direction.TOP);
+                        }
+                        break;
 
-                    // case 'ArrowDown':
-                    //     break;
+                    case 'ArrowDown':
+                        if (!this.isEditMode) {
+                            this._plugin.getSelectionManager().move(Direction.BOTTOM);
+                        }
+                        break;
 
-                    // case 'ArrowLeft':
-                    //     break;
+                    case 'ArrowLeft':
+                        if (!this.isEditMode) {
+                            this._plugin.getSelectionManager().move(Direction.LEFT);
+                        }
+                        break;
 
-                    // case 'ArrowRight':
-                    //     break;
+                    case 'ArrowRight':
+                        if (!this.isEditMode) {
+                            this._plugin.getSelectionManager().move(Direction.RIGHT);
+                        }
+                        break;
+
+                    case 'Tab':
+                        if (!this.isEditMode) {
+                            this._plugin.getSelectionManager().move(Direction.RIGHT);
+                        }
+                        evt.preventDefault();
+                        break;
 
                     default:
                         break;
@@ -285,13 +307,11 @@ export class CellEditorController {
 
         this.isEditMode = true;
 
-        const selection = this._plugin.getSelectionManager().getActiveSelection();
+        const currentCell = this._plugin.getSelectionManager().getCurrentModel();
 
-        if (!selection || !selection.model || !selection.model.currentCell) {
+        if (!currentCell) {
             return false;
         }
-
-        const currentCell = selection.model.currentCell;
 
         let startX;
         let endX;
@@ -383,14 +403,14 @@ export class CellEditorController {
     }
 
     setCurrentEditRangeData() {
-        const model = this._plugin.getSelectionManager().getActiveSelection()?.model;
+        const model = this._plugin.getSelectionManager().getCurrentModel();
         if (!model) return;
 
         this.currentEditRangeData = {
-            startRow: model.startRow,
-            startColumn: model.startColumn,
-            endRow: model.endRow,
-            endColumn: model.endColumn,
+            startRow: model.row,
+            startColumn: model.column,
+            endRow: model.row,
+            endColumn: model.column,
         };
     }
 

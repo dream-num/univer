@@ -65,7 +65,7 @@ export class BaseReferenceObject extends ObjectClassType {
                 let result: Nullable<boolean> = false;
                 if (!cell) {
                     result = callback(new NumberValueObject(0, true), r, c);
-                    return;
+                    continue;
                 }
 
                 const resultObjectValue = this.getCellValueObject(cell);
@@ -238,7 +238,7 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     getCurrentRuntimeSheetData() {
-        return this._runtimeData[this.getUnitId()][this.getSheetId()];
+        return this._runtimeData?.[this.getUnitId()]?.[this.getSheetId()];
     }
 
     getCellData(row: number, column: number) {
@@ -246,7 +246,7 @@ export class BaseReferenceObject extends ObjectClassType {
 
         const activeRuntimeData = this.getCurrentRuntimeSheetData();
 
-        return activeRuntimeData.getValue(row, column) || activeSheetData.getValue(row, column);
+        return activeRuntimeData?.getValue(row, column) || activeSheetData.getValue(row, column);
     }
 
     getCellByPosition(row?: number, column?: number) {
@@ -278,5 +278,13 @@ export class BaseReferenceObject extends ObjectClassType {
         });
 
         return arrayValueList;
+    }
+
+    toUnitRange() {
+        return {
+            rangeData: this._rangeData,
+            sheetId: this.getSheetId(),
+            unitId: this.getUnitId(),
+        };
     }
 }

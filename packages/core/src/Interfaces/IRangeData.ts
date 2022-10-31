@@ -45,6 +45,13 @@ export interface IGridRange {
 }
 
 /**
+ * Range data of Unit
+ */
+export interface IUnitRange extends IGridRange {
+    unitId: string;
+}
+
+/**
  * One of the range types,
  *
  * e.g.,"A1:B2","sheet1!A1:B2","A1","1:1","A:A","AA1:BB2"

@@ -17,7 +17,7 @@ export function SetSelectionValue(worksheet: Worksheet, selections: ISelectionMo
 
     if (!selectionManager) return [];
 
-    const result = selectionManager?.getSelectionModelsValue();
+    const result = selectionManager?.getCurrentModelsValue();
 
     selectionManager.setModels(selections);
 

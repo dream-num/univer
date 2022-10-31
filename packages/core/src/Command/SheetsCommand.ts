@@ -8,11 +8,11 @@ import {ActionExtensionManager} from "./ActionExtensionManager";
  * Execute the undo-redo command
  */
 export class SheetsCommand extends CommandBase {
-    protected _workbook: Workbook;
+    protected unit: Workbook | docs|slider;
 
     constructor(workbook: Workbook, ...list: IActionData[]) {
         super();
-        this._workbook = workbook;
+        this.unit = workbook;
         this._actions = [];
 
         // TODO inject and invoke

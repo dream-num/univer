@@ -21,12 +21,15 @@ import { mergeStyle, transformStyle } from './SetRangeStyle';
  */
 export function SetRangeData(
     cellMatrix: ObjectMatrix<ICellData>,
-    addMatrix: ObjectMatrixPrimitiveType<ICellData>,
+    addMatrix: ObjectMatrixPrimitiveType<ICellData> | ICellData,
     rangeData: IRangeData,
     styles: Styles,
     options?: ICopyToOptionsData
 ): ObjectMatrixPrimitiveType<ICellData> {
-    const target = new ObjectMatrix(addMatrix);
+    let target;
+    if (!isNaN(parseInt(Object.keys(addMatrix)[0]))) {
+        target = new ObjectMatrix(addMatrix as ObjectMatrixPrimitiveType<ICellData>);
+    }
     const result = new ObjectMatrix<ICellData>();
 
     const { startRow, endRow, startColumn, endColumn } = rangeData;
@@ -34,7 +37,9 @@ export function SetRangeData(
     if (options) {
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
-                const value = target.getValue(r, c);
+                const value: Nullable<ICellData> = target
+                    ? target.getValue(r, c)
+                    : addMatrix;
                 const cell = cellMatrix.getValue(r, c);
                 const newCell: ICellData = {};
 
@@ -59,7 +64,9 @@ export function SetRangeData(
 
     for (let r = startRow; r <= endRow; r++) {
         for (let c = startColumn; c <= endColumn; c++) {
-            const value = target.getValue(r, c);
+            const value: Nullable<ICellData> = target
+                ? target.getValue(r, c)
+                : addMatrix;
             const cell = cellMatrix.getValue(r, c) || {};
 
             // set null, clear cell

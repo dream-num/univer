@@ -461,6 +461,7 @@ export class SelectionManager {
             if (selectionControl && evt.shiftKey && currentCell) {
                 const { row, column } = currentCell;
 
+                // TODO startCell position calculate error
                 const startCell = main.getNoMergeCellPositionByIndex(row, column);
                 const endCell = main.getNoMergeCellPositionByIndex(endRow, endColumn);
 

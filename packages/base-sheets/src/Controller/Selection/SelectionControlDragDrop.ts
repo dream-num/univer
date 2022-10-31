@@ -260,7 +260,6 @@ export class SelectionControlDragAndDrop {
 
         if (oldStartColumn !== moveStartColumn || oldStartRow !== moveStartRow || oldEndColumn !== moveEndColumn || oldEndRow !== moveEndRow) {
             this._oldSelectionRange = newSelectionRange;
-            console.log('this._oldSelectionRange', this._oldSelectionRange);
 
             // Calculate the position of the selection based on the position of the cell selected when clicking
             const { left, right, top, bottom } = this._cellPositionOffset;

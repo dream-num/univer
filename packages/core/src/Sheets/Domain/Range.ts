@@ -2354,7 +2354,11 @@ export class Range {
             },
         };
 
-        const command = new SheetsCommand(_context.getWorkBook(), clearValue, setValue);
+        const command = new SheetsCommand(
+            _context.getWorkBook(),
+            clearValue,
+            setValue
+        );
         _commandManager.invoke(command);
     }
 
@@ -3104,19 +3108,12 @@ export class Range {
      */
     setRangeData(value: ICellData): Range {
         const { _rangeData, _context, _commandManager, _worksheet } = this;
-        const { startRow, startColumn, endRow, endColumn } = _rangeData;
-        const cellValue = new ObjectMatrix<ICellData>();
-        for (let r = startRow; r <= endRow; r++) {
-            for (let c = startColumn; c <= endColumn; c++) {
-                cellValue.setValue(r, c, value);
-            }
-        }
 
         const setValue: ISetRangeDataActionData = {
             sheetId: _worksheet.getSheetId(),
             actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-            cellValue: cellValue.getData(),
-            rangeData: this._rangeData,
+            cellValue: value,
+            rangeData: _rangeData,
         };
         const command = new SheetsCommand(_context.getWorkBook(), setValue);
         _commandManager.invoke(command);

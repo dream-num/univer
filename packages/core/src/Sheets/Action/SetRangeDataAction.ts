@@ -12,7 +12,7 @@ import { ActionObservers, ActionType } from '../../Command/ActionObservers';
  * @internal
  */
 export interface ISetRangeDataActionData extends IActionData {
-    cellValue: ObjectMatrixPrimitiveType<ICellData>;
+    cellValue: ObjectMatrixPrimitiveType<ICellData> | ICellData;
     rangeData: IRangeData;
     options?: ICopyToOptionsData;
 }
@@ -25,7 +25,7 @@ export interface ISetRangeDataActionData extends IActionData {
 export class SetRangeDataAction extends ActionBase<
     ISetRangeDataActionData,
     ISetRangeDataActionData,
-    ObjectMatrixPrimitiveType<ICellData>
+    ObjectMatrixPrimitiveType<ICellData> | ICellData
 > {
     constructor(
         actionData: ISetRangeDataActionData,

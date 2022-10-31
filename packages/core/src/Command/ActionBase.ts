@@ -10,12 +10,14 @@ export interface IActionData {
     convertor?: object[];
     rangeRef?: string;
     memberId?: string;
+    operation?: ActionOperation;
 }
 
 /**
  * Action Operation Type
  */
 export enum ActionOperation {
+
     /**
      * send obs
      */
@@ -30,6 +32,11 @@ export enum ActionOperation {
      * push to UNDO/REDO stack
      */
     UNDO_ACTION = 3,
+
+    /**
+     * default obs
+     */
+    DEFAULT_ACTION = 1 | 2 | 3
 }
 
 /**

@@ -1,6 +1,5 @@
 import { Context, IGridRange, IUnitRange, Plugin, PLUGIN_NAMES } from '@univer/core';
 
-import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
 import { IOCContainer } from '@univer/core';
 import { LexerTreeMaker } from './Analysis/Lexer';
 import { FormulaEnginePluginObserver } from './Basics/Observer';

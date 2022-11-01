@@ -1,7 +1,6 @@
-import { getRefElement, IMainProps, isElement, ISlotProps, IToolBarItemProps, RefObject, render } from '@univer/base-component';
+import { getRefElement, IMainProps, isElement, ISlotProps, RefObject, render } from '@univer/base-component';
 import { Engine, RenderEngine } from '@univer/base-render';
 import { AsyncFunction, Attribute, Context, IOCAttribute, IOCContainer, IWorkbookConfig, Plugin, PLUGIN_NAMES, Tools } from '@univer/core';
-import { FormulaPlugin } from '@univer/sheets-plugin-formula';
 
 import { install, SpreadsheetPluginObserve, uninstall } from './Basics/Observer';
 import { RightMenuProps } from './Model/RightMenuModel';
@@ -11,15 +10,16 @@ import { CanvasView } from './View/Render/CanvasView';
 import { BaseSheetContainerConfig, SheetContainer } from './View/UI/SheetContainer';
 import {
     RightMenuController,
-    ToolBarController,
     InfoBarController,
     SheetBarControl,
     CellEditorController,
     AntLineControl,
     CountBarController,
     SheetContainerController,
+    ToolBarController,
 } from './Controller';
-import { ToolBarController1 } from './Controller/ToolBarController1';
+import { IToolBarItemProps } from './Model/ToolBarModel';
+import { ModalGroupController } from './Controller/ModalGroupController';
 import { ISpreadsheetPluginConfig, DEFAULT_SPREADSHEET_PLUGIN_DATA } from './Basics';
 
 /**
@@ -64,8 +64,6 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
 
     private _toolBarControl: ToolBarController;
 
-    private _toolBarControl1: ToolBarController1;
-
     private _infoBarControl: InfoBarController;
 
     private _sheetBarControl: SheetBarControl;
@@ -78,7 +76,9 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
 
     private _sheetContainerController: SheetContainerController;
 
-    private _componentList: Map<string, ComponentChildrenProps>;
+    private _modalGroupController: ModalGroupController;
+
+    private _componentList: Map<string, any>;
 
     constructor(props: Partial<ISpreadsheetPluginConfig> = {}) {
         super(PLUGIN_NAMES.SPREADSHEET);
@@ -150,24 +150,24 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
 
         this._rightMenuControl = new RightMenuController(this);
         this._toolBarControl = new ToolBarController(this);
-        this._toolBarControl1 = new ToolBarController1(this);
         this._infoBarControl = new InfoBarController(this);
         this._sheetBarControl = new SheetBarControl(this);
         this._cellEditorControl = new CellEditorController(this);
         this._antLineController = new AntLineControl(this);
         this._countBarController = new CountBarController(this);
         this._sheetContainerController = new SheetContainerController(this);
+        this._modalGroupController = new ModalGroupController(this);
 
         // render sheet container
         render(<SheetContainer config={config} />, sheetContainer);
 
-        const formulaEngine = this.getPluginByName<FormulaPlugin>('formula')?.getFormulaEngine();
+        // const formulaEngine = this.getPluginByName<FormulaPlugin>('formula')?.getFormulaEngine();
         // =(sum(max(B1:C10,10)*5-100,((1+1)*2+5)/2,10)+count(B1:C10,10*5-100))*5-100
         // =(sum(max(B1:C10,10)*5-100,((1+1)*2+5)/2,10, lambda(x,y, x*y*x)(sum(1,(1+2)*3),2))+lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+count(B1:C10,10*5-100))*5-100
         // =((1+2)-A1:B2 + 5)/2 + sum(indirect("A5"):B10 + A1:offset("C5", 1, 1), 100)
         // =1+(3*4=4)*5+1
         // =(-(1+2)--@A1:B2 + 5)/2 + -sum(indirect("A5"):B10# + B6# + A1:offset("C5", 1, 1)  ,  100) + {1,2,3;4,5,6;7,8,10} + lambda(x,y,z, x*y*z)(sum(1,(1+2)*3),2,lambda(x,y, @offset(A1:B0,x#*y#))(1,2):C20) & "美国人才" + sum((1+2%)*30%, 1+2)%
-        formulaEngine?.calculate(`=lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+1-max(100,200)`);
+        // formulaEngine?.calculate(`=lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+1-max(100,200)`);
     }
 
     /**
@@ -352,18 +352,19 @@ export class SpreadsheetPlugin extends Plugin<SpreadsheetPluginObserve> {
         this._rightMenuControl.addItem(item);
     }
 
-    // addToolButton(config: IToolBarItemProps) {
-    //     this._toolBarControl1.addToolButton(config);
-    // }
+    addToolButton(config: IToolBarItemProps) {
+        this._toolBarControl.addToolButton(config);
+    }
 
     registerComponent(name: string, component: any, props?: any) {
-        this._componentList.set(name, {
-            component,
-            props,
-        });
+        this._componentList.set(name, component);
     }
 
     getRegisterComponent(name: string) {
         return this._componentList.get(name);
+    }
+
+    registerModal(name: string, component: any) {
+        this._modalGroupController.addModal(name, component);
     }
 }

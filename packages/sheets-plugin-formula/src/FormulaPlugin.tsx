@@ -1,5 +1,4 @@
 import { Context, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
 import { CellExtensionManager, SpreadsheetPlugin } from '@univer/base-sheets';
 import { FormulaEnginePlugin } from '@univer/base-formula-engine';
 import { FormulaButton } from './UI/FormulaButton';
@@ -52,13 +51,13 @@ export class FormulaPlugin extends Plugin {
 
         const config: IConfig = { context };
 
-        const item: IToolBarItemProps = {
+        const item = {
             locale: FORMULA_PLUGIN_NAME,
-            type: ISlotElement.JSX,
+            type: 0,
             show: true,
             label: <FormulaButton config={config} />,
         };
-        context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
+        context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addToolButton(item);
 
         this.registerExtension();
     }

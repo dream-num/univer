@@ -1,6 +1,6 @@
-import { IMainProps, ISlotElement, ISlotProps, IToolBarItemProps } from '@univer/base-component';
-import { SheetsCommand, Context, IOCContainer, UniverSheet, Nullable, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { ISlotElement, ISlotProps } from '@univer/base-component';
+import { Context, IOCContainer, UniverSheet, Nullable, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { IToolBarItemProps, SpreadsheetPlugin } from '@univer/base-sheets';
 import { Banding } from './Banding';
 import { IAddBandingActionData } from './Command';
 import { ACTION_NAMES } from './Command/ACTION_NAMES';
@@ -69,13 +69,13 @@ export class AlternatingColorsPlugin extends Plugin {
         this.spreadsheetPlugin?.addSider(panelItem);
 
         // extend main area
-        const mainItem: IMainProps = {
-            name: ALTERNATING_COLORS_PLUGIN_NAME,
-            type: ISlotElement.JSX,
-            content: <div>middle alternating</div>,
-        };
+        // const mainItem: IMainProps = {
+        //     name: ALTERNATING_COLORS_PLUGIN_NAME,
+        //     type: ISlotElement.JSX,
+        //     content: <div>middle alternating</div>,
+        // };
 
-        this.spreadsheetPlugin?.addMain(mainItem);
+        // this.spreadsheetPlugin?.addMain(mainItem);
         this.spreadsheetPlugin?.showMainByName(ALTERNATING_COLORS_PLUGIN_NAME, true);
     }
 

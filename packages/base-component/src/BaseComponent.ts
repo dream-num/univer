@@ -1,9 +1,6 @@
 import { BasePlugin } from '@univer/core';
-import { ISelectButtonType } from './Enum/ISelectButton';
-import { ISlotElementType } from './Enum/ISlotElement';
-import { ComponentClass, ForwardFn, RefObject } from './Framework';
-import { IMainProps } from './IData';
-import { BaseIconProps, Description } from './Components';
+import { ComponentClass, ForwardFn } from './Framework';
+import { Description } from './Components';
 
 // TODO Button const enum
 
@@ -55,133 +52,12 @@ export interface BaseCellRangeModalProps extends BaseComponentProps {
     placeholderProps?: string;
     valueProps?: string;
 }
-export interface BaseDemoProps extends BaseComponentProps {
-    onClick?: (e: MouseEvent) => void;
-}
-export interface IToolBarItemProps extends BaseComponentProps {
-    /**
-     * locale info
-     */
-    locale?: string;
-    /**
-     * icon locale info
-     */
-    iconName?: string;
-    /**
-     * show info
-     */
-    label?: string | JSX.Element;
-    /**
-     * value
-     */
-    value?: string | number;
-
-    /**
-     * is selected
-     */
-    selected?: boolean;
-    /**
-     * icon
-     */
-    icon?: JSX.Element | string | null | undefined;
-
-    /**
-     * icon props for the icon represented by the string
-     */
-    iconProps?: BaseIconProps;
-
-    /**
-     * type of item
-     */
-    type?: ISlotElementType;
-
-    /**
-     * tooltip info
-     */
-    tooltip?: string;
-
-    /**
-     *
-     */
-    tooltipRight?: string;
-
-    /**
-     * top split line
-     */
-    border?: boolean;
-
-    /**
-     * is show
-     */
-    show?: boolean;
-
-    /**
-     * child item
-     */
-    children?: IToolBarItemProps[];
-
-    /**
-     * click event listener
-     */
-    onClick?: (...arg: any[]) => void;
-
-    /**
-     * key up event listener
-     */
-    onKeyUp?: (...arg: any[]) => void;
-
-    /**
-     * trigger update label
-     */
-    triggerUpdate?: (func: Function) => void;
-
-    /**
-     * style
-     */
-    style?: Record<string, string>;
-
-    /**
-     * apply to input box
-     */
-    needChange?: boolean;
-
-    /**
-     * type of select element
-     */
-    selectType?: ISelectButtonType;
-
-    // TODO: what is meaning
-    slot?: {
-        header?: IMainProps;
-        footer?: IMainProps;
-    };
-}
-
-export interface BaseToolBarProps extends BaseComponentProps {
-    style?: JSX.CSSProperties;
-    toolList: IToolBarItemProps[];
-    forwardRefs?: RefObject<HTMLElement>;
-    func?: {
-        addButton: Function;
-    };
-}
-
 // component class
 export interface ButtonComponent extends BaseComponent<BaseButtonProps> {
     render(): JSXComponent<BaseButtonProps>;
 }
 export interface CellRangeModalComponent extends BaseComponent<BaseCellRangeModalProps> {
     render(): JSXComponent<BaseCellRangeModalProps>;
-}
-export interface DemoComponent extends BaseComponent<BaseDemoProps> {
-    render(): JSXComponent<BaseDemoProps>;
-}
-
-// export interface SheetContainerComponent extends BaseComponent<BaseSheetContainerProps> {
-//     render(): JSXComponent<BaseSheetContainerProps>;
-// }
-export interface ToolBarComponent extends BaseComponent<BaseToolBarProps> {
-    render(): JSXComponent<BaseToolBarProps>;
 }
 
 // component type

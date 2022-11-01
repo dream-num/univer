@@ -8,11 +8,11 @@ import {
     Component,
     BaseComponentSheet,
     BaseComponentRender,
-    Description,
     createRef,
     RefObject,
     cloneElement,
     BaseComponentProps,
+    Description,
 } from '@univer/base-component';
 import { AsyncFunction, Context, IKeyType, LocaleType, PLUGIN_NAMES, Tools, Workbook } from '@univer/core';
 import cssVars from 'css-vars-ponyfill';
@@ -33,13 +33,14 @@ import darkSkin from '@univer/style-universheet/assets/css/skin/dark.module.less
 import greenSkin from '@univer/style-universheet/assets/css/skin/green.module.less';
 // app context for skin and Locale
 import { SpreadsheetPlugin } from '@SpreadsheetPlugin';
-import { ToolBar1 } from '../ToolBar/ToolBar1';
 import { RightMenu } from '../RightMenu';
 import { InfoBar } from '../InfoBar';
 import { SheetBar } from '../SheetBar';
 import style from './index.module.less';
-import { IShowToolBarConfig } from '../ToolBar';
+import { ToolBar } from '../ToolBar';
 import { CountBar } from '../CountBar/CountBar';
+import { IShowToolBarConfig } from '../../../Model/ToolBarModel';
+import { ModalGroup } from '../ModalGroup/ModalGroup';
 
 export interface ILayout {
     outerLeft?: boolean;
@@ -651,14 +652,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                         <Layout className={style.mainContent} style={{ position: 'relative' }}>
                             <Header style={{ display: layout.header ? 'block' : 'none' }}>
                                 <InfoBar></InfoBar>
-                                {/* <ToolBar
-                                    style={{
-                                        display: layout.toolBar ? 'block' : 'none',
-                                    }}
-                                    toolList={[]}
-                                    func={{ addButton }}
-                                ></ToolBar> */}
-                                <ToolBar1 toolList={[]}></ToolBar1>
+                                <ToolBar toolList={[]}></ToolBar>
                                 <FormulaBar></FormulaBar>
                             </Header>
                             <Layout>
@@ -713,6 +707,8 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                         }
                                         return item;
                                     })}
+
+                                    <ModalGroup></ModalGroup>
 
                                     {!!layout.contentSplit && (
                                         <Container ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>

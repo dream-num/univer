@@ -8,7 +8,6 @@ export class FormulaCellExtension extends BaseCellExtension {
     }
 
     execute() {
-        console.info('Find formula!');
         this.setValue(this._value);
     }
 }

@@ -15,5 +15,5 @@ const univerSheetUp = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);
 univerSheetUp.installPlugin(new RenderEngine());
 univerSheetUp.installPlugin(new UniverComponentSheet());
 univerSheetUp.installPlugin(new SpreadsheetPlugin(uiDefaultConfigUp));
-univerSheetUp.installPlugin(new FilterPlugin());
-univerSheetUp.installPlugin(new GroupPlugin());
+// univerSheetUp.installPlugin(new FilterPlugin());
+// univerSheetUp.installPlugin(new GroupPlugin());

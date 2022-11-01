@@ -4,9 +4,6 @@ import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
 import { SpreadsheetPlugin } from '@univer/base-sheets';
 import { UniverComponentSheet } from '@univer/style-universheet';
 
-import { FilterPlugin } from '@univer/sheets-plugin-filter';
-import { ProtectionPlugin } from './ProtectionPlugin';
-
 const uiDefaultConfigUp = {
     container: 'universheet-demo',
     layout: 'auto',
@@ -16,5 +13,5 @@ const univerSheetUp = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);
 univerSheetUp.installPlugin(new RenderEngine());
 univerSheetUp.installPlugin(new UniverComponentSheet());
 univerSheetUp.installPlugin(new SpreadsheetPlugin(uiDefaultConfigUp));
-univerSheetUp.installPlugin(new FilterPlugin());
-univerSheetUp.installPlugin(new ProtectionPlugin());
+// univerSheetUp.installPlugin(new FilterPlugin());
+// univerSheetUp.installPlugin(new ProtectionPlugin());

@@ -4,7 +4,7 @@ import { SelectionControl } from '../Controller/Selection/SelectionController';
 import { SheetContainer } from '../View/UI/SheetContainer';
 import { ToolBar } from '../View/UI/ToolBar/ToolBar';
 import { LineColor } from '../View/UI/Common/Line/LineColor';
-import { ToolBar1 } from '../View/UI/ToolBar/ToolBar1';
+import { ModalGroup } from '../View/UI/ModalGroup/ModalGroup';
 
 interface ISelectionControlFillConfig {}
 
@@ -37,7 +37,8 @@ export type SpreadsheetPluginObserve = {
     onChangeCurrentSheetObserver: Observable<string>;
 
     onToolBarDidMountObservable: Observable<ToolBar>;
-    onToolBar1DidMountObservable: Observable<ToolBar1>;
+
+    onModalGroupDidMountObservable: Observable<ModalGroup>;
 
     onLineColorDidMountObservable: Observable<LineColor>;
 
@@ -72,6 +73,7 @@ export function uninstall(plugin: Plugin) {
     plugin.deleteObserve('onChangeSelectionObserver');
 
     plugin.deleteObserve('onToolBarDidMountObservable');
+    plugin.deleteObserve('onModalGroupDidMountObservable');
 
     plugin.deleteObserve('onChangeCurrentSheetObserver');
     plugin.deleteObserve('onSheetContainerDidMountObservable');
@@ -106,7 +108,8 @@ export function install(plugin: Plugin) {
     plugin.pushToObserve('onChangeCurrentSheetObserver');
 
     plugin.pushToObserve('onToolBarDidMountObservable');
-    plugin.pushToObserve('onToolBar1DidMountObservable');
+    plugin.pushToObserve('onModalGroupDidMountObservable');
+
     plugin.pushToObserve('onLineColorDidMountObservable');
     plugin.pushToObserve('onSheetBarDidMountObservable');
     plugin.pushToObserve('onCountBarDidMountObservable');

@@ -30,7 +30,7 @@ import { UniverCollapse, UniverPanel } from './Components/Collapse/Collapse';
 import { UniverColorPicker } from './Components/ColorPicker';
 import { UniverColorPickerCircleButton } from './Components/ColorPickerCircleButton';
 import { UniverContainer } from './Components/Container';
-import { UniverDemo } from './Components/Demo';
+// import { UniverDemo } from './Components/Demo';
 import { UniverFormatModal } from './Components/FormatModal';
 import { UniverMenu } from './Components/Menu/Menu';
 import {
@@ -208,9 +208,9 @@ export class UniverComponentFactory implements BaseComponentFactory {
             case 'Sider': {
                 return new UniverSider() as unknown as T;
             }
-            case 'Demo': {
-                return new UniverDemo() as unknown as T;
-            }
+            // case 'Demo': {
+            //     return new UniverDemo() as unknown as T;
+            // }
             case 'Checkbox': {
                 return new UniverCheckbox() as unknown as T;
             }

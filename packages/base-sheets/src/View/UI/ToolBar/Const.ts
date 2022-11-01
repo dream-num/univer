@@ -62,67 +62,6 @@ export const FONT_SIZE_CHILDREN = [
     },
 ];
 
-export const MORE_FORMATS_CHILDREN = [
-    {
-        locale: 'defaultFmt.Automatic.text',
-        selected: true,
-    },
-    {
-        locale: 'defaultFmt.PlainText.text',
-        border: true,
-    },
-    {
-        locale: 'defaultFmt.Number.text',
-        suffixLocale: 'defaultFmt.Number.example',
-    },
-    {
-        locale: 'defaultFmt.Percent.text',
-        suffixLocale: 'defaultFmt.Percent.example',
-    },
-    {
-        locale: 'defaultFmt.Scientific.text',
-        suffixLocale: 'defaultFmt.Scientific.example',
-        border: true,
-    },
-    {
-        locale: 'defaultFmt.Accounting.text',
-        suffixLocale: 'defaultFmt.Accounting.example',
-    },
-    {
-        locale: 'defaultFmt.Thousand.text',
-        suffixLocale: 'defaultFmt.Thousand.example',
-    },
-    {
-        locale: 'defaultFmt.Currency.text',
-        suffixLocale: 'defaultFmt.Currency.example',
-    },
-    {
-        locale: 'defaultFmt.Digit.text',
-        suffixLocale: 'defaultFmt.Digit.example',
-        border: true,
-    },
-    {
-        locale: 'defaultFmt.Date.text',
-        suffixLocale: 'defaultFmt.Date.example',
-    },
-    {
-        locale: 'defaultFmt.Time.text',
-        suffixLocale: 'defaultFmt.Time.example',
-    },
-    {
-        locale: 'defaultFmt.Time24H.text',
-        suffixLocale: 'defaultFmt.Time24H.example',
-    },
-    {
-        locale: 'defaultFmt.DateTime.text',
-        suffixLocale: 'defaultFmt.DateTime.example',
-    },
-    {
-        locale: 'defaultFmt.DateTime24H.text',
-        suffixLocale: 'defaultFmt.DateTime.example',
-    },
-];
-
 export const FONT_FAMILY_CHILDREN = [
     {
         locale: 'fontFamily.TimesNewRoman',
@@ -210,54 +149,74 @@ export const FONT_FAMILY_CHILDREN = [
 export const BORDER_LINE_CHILDREN = [
     {
         locale: 'borderLine.borderTop',
-        suffix: 'TopBorderIcon',
+        customSuffix: {
+            name: 'TopBorderIcon',
+        },
         value: 'top',
     },
     {
         locale: 'borderLine.borderBottom',
-        suffix: 'BottomBorderIcon',
+        customSuffix: {
+            name: 'BottomBorderIcon',
+        },
         value: 'bottom',
     },
     {
         locale: 'borderLine.borderLeft',
-        suffix: 'LeftBorderIcon',
+        customSuffix: {
+            name: 'LeftBorderIcon',
+        },
         value: 'left',
     },
     {
         locale: 'borderLine.borderRight',
-        suffix: 'RightBorderIcon',
+        customSuffix: {
+            name: 'RightBorderIcon',
+        },
         value: 'right',
         border: true,
     },
     {
         locale: 'borderLine.borderNone',
-        suffix: 'NoneBorderIcon',
+        customSuffix: {
+            name: 'NoneBorderIcon',
+        },
         value: 'none',
     },
     {
         locale: 'borderLine.borderAll',
-        suffix: 'FullBorderIcon',
+        customSuffix: {
+            name: 'FullBorderIcon',
+        },
         value: 'all',
         selected: true,
     },
     {
         locale: 'borderLine.borderOutside',
-        suffix: 'OuterBorderIcon',
+        customSuffix: {
+            name: 'OuterBorderIcon',
+        },
         value: 'outside',
     },
     {
         locale: 'borderLine.borderInside',
-        suffix: 'InnerBorderIcon',
+        customSuffix: {
+            name: 'InnerBorderIcon',
+        },
         value: 'inside',
     },
     {
         locale: 'borderLine.borderHorizontal',
-        suffix: 'StripingBorderIcon',
+        customSuffix: {
+            name: 'StripingBorderIcon',
+        },
         value: 'horizontal',
     },
     {
         locale: 'borderLine.borderVertical',
-        suffix: 'VerticalBorderIcon',
+        customSuffix: {
+            name: 'VerticalBorderIcon',
+        },
         value: 'vertical',
     },
 ];
@@ -284,17 +243,23 @@ export const MERGE_CHILDREN = [
 export const HORIZONTAL_ALIGN_CHILDREN = [
     {
         locale: 'align.left',
-        suffix: 'LeftAlignIcon',
+        customSuffix: {
+            name: 'LeftAlignIcon',
+        },
         value: 1,
     },
     {
         locale: 'align.center',
-        suffix: 'CenterAlignIcon',
+        customSuffix: {
+            name: 'CenterAlignIcon',
+        },
         value: 2,
     },
     {
         locale: 'align.right',
-        suffix: 'RightAlignIcon',
+        customSuffix: {
+            name: 'RightAlignIcon',
+        },
         value: 3,
     },
 ];
@@ -302,17 +267,23 @@ export const HORIZONTAL_ALIGN_CHILDREN = [
 export const VERTICAL_ALIGN_CHILDREN = [
     {
         locale: 'align.top',
-        suffix: 'TopVerticalIcon',
+        customSuffix: {
+            name: 'TopVerticalIcon',
+        },
         value: 1,
     },
     {
         locale: 'align.middle',
-        suffix: 'CenterVerticalIcon',
+        customSuffix: {
+            name: 'CenterVerticalIcon',
+        },
         value: 2,
     },
     {
         locale: 'align.bottom',
-        suffix: 'BottomVerticalIcon',
+        customSuffix: {
+            name: 'BottomVerticalIcon',
+        },
         value: 3,
     },
 ];
@@ -320,17 +291,23 @@ export const VERTICAL_ALIGN_CHILDREN = [
 export const TEXT_WRAP_CHILDREN = [
     {
         locale: 'textWrap.overflow',
-        suffix: 'OverflowIcon',
+        customSuffix: {
+            name: 'OverflowIcon',
+        },
         value: 1,
     },
     {
         locale: 'textWrap.wrap',
-        suffix: 'BrIcon',
+        customSuffix: {
+            name: 'BrIcon',
+        },
         value: 3,
     },
     {
         locale: 'textWrap.clip',
-        suffix: 'CutIcon',
+        customSuffix: {
+            name: 'CutIcon',
+        },
         value: 2,
     },
 ];
@@ -338,32 +315,44 @@ export const TEXT_WRAP_CHILDREN = [
 export const TEXT_ROTATE_CHILDREN = [
     {
         locale: 'textRotate.none',
-        suffix: 'TextRotateIcon',
+        customSuffix: {
+            name: 'TextRotateIcon',
+        },
         value: 0,
     },
     {
         locale: 'textRotate.angleUp',
-        suffix: 'TextRotateAngleUpIcon',
+        customSuffix: {
+            name: 'TextRotateAngleUpIcon',
+        },
         value: -45,
     },
     {
         locale: 'textRotate.angleDown',
-        suffix: 'TextRotateAngleDownIcon',
+        customSuffix: {
+            name: 'TextRotateAngleDownIcon',
+        },
         value: 45,
     },
     {
         locale: 'textRotate.vertical',
-        suffix: 'TextRotateVerticalIcon',
+        customSuffix: {
+            name: 'TextRotateVerticalIcon',
+        },
         value: 'v',
     },
     {
         locale: 'textRotate.rotationUp',
-        suffix: 'TextRotateRotationUpIcon',
+        customSuffix: {
+            name: 'TextRotateRotationUpIcon',
+        },
         value: -90,
     },
     {
         locale: 'textRotate.rotationDown',
-        suffix: 'TextRotateRotationDownIcon',
+        customSuffix: {
+            name: 'TextRotateRotationDownIcon',
+        },
         value: 90,
     },
 ];

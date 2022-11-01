@@ -3,7 +3,7 @@ import { AvatarComponent } from './Avatar';
 import { CheckboxComponent, CheckboxGroupComponent } from './Checkbox';
 import { ColorPickerCircleButtonComponent } from './ColorPickerCircleButton';
 import { SiderModalComponent } from './SiderModal';
-import { ButtonComponent, CellRangeModalComponent, DemoComponent } from '../BaseComponent';
+import { ButtonComponent, CellRangeModalComponent } from '../BaseComponent';
 import { IconComponent } from './Icon';
 import { InputComponent } from './Input';
 import { TabComponent, TabPaneComponent } from './Tab';
@@ -35,7 +35,6 @@ export interface Description {
     Footer: FooterComponent;
     Content: ContentComponent;
     Sider: SiderComponent;
-    Demo: DemoComponent;
     Checkbox: CheckboxComponent;
     CheckboxGroup: CheckboxGroupComponent;
     ColorPicker: ColorPickerComponent;

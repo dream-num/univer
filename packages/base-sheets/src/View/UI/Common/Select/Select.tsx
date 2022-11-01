@@ -17,10 +17,17 @@ enum DisplayTypes {
     SUFFIX,
 }
 
+interface CustomComponent {
+    name: string;
+    props?: Record<string, any>;
+}
+
 export interface BaseSelectChildrenProps extends BaseItemProps {
     onKeyUp?: (...arg: any) => void;
     children?: BaseSelectChildrenProps[];
     unSelectable?: boolean; //选中后不生效事件
+    customLabel?: CustomComponent;
+    customSuffix?: CustomComponent;
 }
 
 export interface BaseSelectProps {
@@ -34,6 +41,8 @@ export interface BaseSelectProps {
     hideSelectedIcon?: boolean;
     selectClassName?: string;
     name?: string;
+    customLabel?: CustomComponent;
+    customSuffix?: CustomComponent;
 }
 
 interface IState {
@@ -89,7 +98,7 @@ export class Select extends Component<BaseSelectProps, IState> {
 
         // 显示值可变
         if (type === 0 || type === 3) {
-            if (!children) return;
+            if (!children.length) return;
             let index = children.findIndex((item) => item.selected);
             if (index < 0) index = 0;
             const list = this.handleSelected(index);
@@ -132,7 +141,7 @@ export class Select extends Component<BaseSelectProps, IState> {
             };
         } else if (type === 1) {
             // 输入框
-            if (!children) return;
+            if (!children.length) return;
             // 匹配label和选项label确定选中项
             const getLabel = (label: ComponentChildren) => {
                 if (label !== null) {
@@ -186,7 +195,7 @@ export class Select extends Component<BaseSelectProps, IState> {
             };
         } else if (type === 4 || type === 5) {
             //固定显示值
-            if (!children) return;
+            if (!children.length) return;
             let index = children.findIndex((item) => item.selected);
             if (index < 0) index = 0;
             const item = children[index];
@@ -224,6 +233,7 @@ export class Select extends Component<BaseSelectProps, IState> {
             list[i].style = children[i].style;
             list[i].value = children[i].value;
             list[i].className = children[i].className;
+            list[i].onClick = children[i].onClick;
 
             if (children[i].children) {
                 list[i].children = this.getChildren(children[i].children!);
@@ -276,12 +286,13 @@ export class Select extends Component<BaseSelectProps, IState> {
     // 处理选中
     handleSelected = (index: number | null): BaseMenuItem[] | undefined => {
         const { children = [], hideSelectedIcon } = this.props;
-
-        children.forEach((item) => {
-            item.selected = false;
-        });
-        if (index !== null) {
-            children[index].selected = true;
+        if (children.length) {
+            children.forEach((item) => {
+                item.selected = false;
+            });
+            if (index !== null) {
+                children[index].selected = true;
+            }
         }
 
         const list = this.resetMenu(children, hideSelectedIcon);
@@ -368,7 +379,7 @@ export class Select extends Component<BaseSelectProps, IState> {
             <div className={`${styles.selectDouble} ${selectClassName}`}>
                 <Button type="text">
                     <Dropdown menu={{ menu, onClick: this.onClick }} showArrow>
-                        <div>{label}</div>
+                        <div className={styles.selectLabel}>{label}</div>
                     </Dropdown>
                 </Button>
             </div>

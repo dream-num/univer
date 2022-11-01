@@ -200,32 +200,7 @@ export default {
         middle: 'middle',
         bottom: 'bottom',
     },
-    currencyDetail: [
-        {
-            name: 'RMB',
-            value: '¥',
-        },
-        {
-            name: 'US dollar',
-            value: '$',
-        },
-        {
-            name: 'EUR',
-            value: '€',
-        },
-        {
-            name: 'GBP',
-            value: '￡',
-        },
-        {
-            name: 'HK',
-            value: '$',
-        },
-        {
-            name: 'JPY',
-            value: '￥',
-        },
-    ],
+
     dateFmtList: [
         {
             name: '1930-08-05',

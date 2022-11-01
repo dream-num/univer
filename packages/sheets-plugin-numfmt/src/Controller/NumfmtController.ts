@@ -1,14 +1,77 @@
-import { SheetsCommand, Range, IRangeData, ObjectMatrix, Plugin, ACTION_NAMES, ObjectMatrixPrimitiveType } from '@univer/core';
+import { SheetsCommand, Range, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType, PLUGIN_NAMES, ACTION_NAMES } from '@univer/core';
+import { BaseComponentRender, BaseComponentSheet } from '@univer/base-component';
+import { IToolBarItemProps, SpreadsheetPlugin } from '@univer/base-sheets';
 import { NumfmtModel } from '../Model/NumfmtModel';
+import { NUMFMT_PLUGIN_NAME } from '../Const';
+import { DEFAULT_DATA } from '../Const/DEFAULT_DATA';
+import { NumfmtPlugin } from '../NumfmtPlugin';
 
 export class NumfmtController {
     protected _model: NumfmtModel;
 
-    protected _plugin: Plugin;
+    protected _plugin: NumfmtPlugin;
 
-    constructor(plugin: Plugin) {
+    private _spreadSheetPlugin: SpreadsheetPlugin;
+
+    private _numfmtList: IToolBarItemProps;
+
+    private _render: BaseComponentRender;
+
+    constructor(plugin: NumfmtPlugin) {
         this._model = new NumfmtModel();
         this._plugin = plugin;
+        this._spreadSheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+
+        this.initRegisterComponent();
+
+        this._numfmtList = {
+            name: NUMFMT_PLUGIN_NAME,
+            type: 0,
+            tooltipLocale: 'moreFormats',
+            show: true,
+            border: true,
+            children: [
+                ...DEFAULT_DATA,
+                {
+                    locale: 'defaultFmt.CustomFormats.text',
+                    customSuffix: { name: 'RightIcon' },
+                    children: [
+                        {
+                            locale: 'format.moreCurrency',
+                            onClick: () => {
+                                this._plugin.getNumfmtModalController().showModal('currency', true);
+                            },
+                        },
+                        {
+                            locale: 'format.moreDateTime',
+                            onClick: () => {
+                                this._plugin.getNumfmtModalController().showModal('date', true);
+                            },
+                        },
+                        {
+                            locale: 'format.moreNumber',
+                            onClick: () => {},
+                        },
+                    ],
+                },
+            ],
+        };
+
+        this._spreadSheetPlugin.addToolButton(this._numfmtList);
+    }
+
+    // 注册自定义组件
+    initRegisterComponent() {
+        const component = this._plugin.getContext().getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        this._render = component.getComponentRender();
+
+        const registerIcon = {
+            RightIcon: this._render.renderFunction('RightIcon'),
+        };
+
+        for (let k in registerIcon) {
+            this._spreadSheetPlugin.registerComponent(k, registerIcon[k]);
+        }
     }
 
     getNumfmtBySheetIdConfig(sheetId: string): ObjectMatrixPrimitiveType<string> {

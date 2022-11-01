@@ -5,21 +5,28 @@ import { Drag } from '../Drag';
 import * as Icon from '../Icon';
 import styles from './index.module.less';
 
-interface IState {}
+interface IState {
+    visible: boolean;
+}
 
 class Modal extends Component<BaseModalProps, IState> {
+    initialize() {
+        this.state = {
+            visible: this.props.visible ?? false,
+        };
+    }
+
     handleClickCancel = (cb: Function | undefined) => {
         // this.setState({ visible: false });
         if (cb) cb();
     };
 
-    // showModal = (value: boolean) => {
-    //     this.setState((prevState) => {
-    //         return {
-    //             visible: value,
-    //         };
-    //     });
-    // };
+    showModal = (value: boolean) => {
+        this.setState((prevState) => ({
+            visible: value,
+        }));
+    };
+
     // maskClick = (e: MouseEvent) => {
     //     const mask = document.querySelector(`.${styles.modalMask}`);
     //     if (e.target === mask) {
@@ -33,25 +40,40 @@ class Modal extends Component<BaseModalProps, IState> {
     };
 
     render() {
-        const { title, width = 500, top = 0, style, children, className, group = [], isDrag = false, mask = true, footer = true, visible } = this.props;
+        const { title, width = 500, top = 0, style, children, className, group = [], isDrag = false, mask = true, footer = true } = this.props;
+        const { visible } = this.state;
 
         return (
             <>
                 {visible ? (
                     <div className={className}>
-                        {mask ? <div className={styles.modalMask} onClick={this.props.onCancel}></div> : null}
+                        {mask ? (
+                            <div
+                                className={styles.modalMask}
+                                onClick={(e) => {
+                                    this.props.onCancel?.(e);
+                                    this.showModal(false);
+                                }}
+                            ></div>
+                        ) : null}
                         <Drag isDrag={isDrag}>
                             <div
                                 className={`${isDrag ? styles.modalDargWrapper : styles.modalWrapper}`}
                                 style={{
                                     width: `${width}px`,
-                                    top: `${top}px`,
+                                    // top: `${top}px`,
                                     ...style,
                                 }}
                             >
                                 <div className={styles.modalHeader}>
                                     <span>{title}</span>
-                                    <span className={styles.modalClose} onClick={this.props.onCancel}>
+                                    <span
+                                        className={styles.modalClose}
+                                        onClick={(e) => {
+                                            this.props.onCancel?.(e);
+                                            this.showModal(false);
+                                        }}
+                                    >
                                         <Icon.Other.Close></Icon.Other.Close>
                                     </span>
                                 </div>

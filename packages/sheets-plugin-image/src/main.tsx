@@ -3,7 +3,6 @@ import { RenderEngine } from '@univer/base-render';
 import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
 import { SpreadsheetPlugin } from '@univer/base-sheets';
 import { UniverComponentSheet } from '@univer/style-universheet';
-import { OverGridImagePlugin } from './OverGridImagePlugin';
 
 const uiDefaultConfigUp = {
     container: 'universheet-demo-up',
@@ -14,8 +13,8 @@ univerSheetUp.installPlugin(new RenderEngine());
 univerSheetUp.installPlugin(new UniverComponentSheet());
 univerSheetUp.installPlugin(new RenderEngine());
 univerSheetUp.installPlugin(new SpreadsheetPlugin(uiDefaultConfigUp));
-univerSheetUp.installPlugin(
-    new OverGridImagePlugin({
-        value: [],
-    })
-);
+// univerSheetUp.installPlugin(
+//     new OverGridImagePlugin({
+//         value: [],
+//     })
+// );

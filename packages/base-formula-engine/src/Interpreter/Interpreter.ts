@@ -1,41 +1,55 @@
-import { CellValueType, ICellData, ICellV, ObjectMatrix } from '@univer/core';
-import { ReferenceNode } from '../AstNode';
+import { CellValueType, ICellData, ObjectMatrix } from '@univer/core';
+import { FunctionNode } from '../AstNode';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { NodeType } from '../AstNode/NodeType';
-import { AstNodePromiseType, CalculateValueType, FunctionVariantType, IInterpreterDatasetConfig, UnitDataType } from '../Basics/Common';
+import { AstNodePromiseType, CalculateValueType, FunctionVariantType, IInterpreterDatasetConfig, PreCalculateNodeType, UnitDataType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
 import { ArrayValueObject } from '../ValueObject/ArrayValueObject';
 import { BaseValueObject } from '../ValueObject/BaseValueObject';
-import { BooleanValueObject } from '../ValueObject/BooleanValueObject';
-import { NumberValueObject } from '../ValueObject/NumberValueObject';
 
 export class Interpreter {
     private _runtimeData: UnitDataType = {};
 
-    private _unitId: string;
-
-    private async _execute(node: BaseAstNode): Promise<AstNodePromiseType> {
+    private _checkAsyncNode(node: BaseAstNode, resultList: boolean[]) {
         const children = node.getChildren();
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
             const item = children[i];
-            this._execute(item);
-            // if (item.nodeType === NodeType.FUNCTION) {
-            //     await item.executeAsync(this._interpreterCalculateProps);
-            // } else {
-            //     item.execute(this._interpreterCalculateProps);
-            // }
+            resultList.push(item.isAsync());
+            this._checkAsyncNode(item, resultList);
+        }
+    }
+
+    private async _executeAsync(node: BaseAstNode): Promise<AstNodePromiseType> {
+        const children = node.getChildren();
+        const childrenCount = children.length;
+        for (let i = 0; i < childrenCount; i++) {
+            const item = children[i];
+            this._executeAsync(item);
         }
 
-        if (node.nodeType === NodeType.FUNCTION) {
+        if (node.nodeType === NodeType.FUNCTION && (node as FunctionNode).isAsync()) {
             await node.executeAsync(this._interpreterDatasetConfig);
         } else {
             node.execute(this._interpreterDatasetConfig, this._runtimeData);
         }
 
         return Promise.resolve(AstNodePromiseType.SUCCESS);
+    }
+
+    private _execute(node: BaseAstNode): AstNodePromiseType {
+        const children = node.getChildren();
+        const childrenCount = children.length;
+        for (let i = 0; i < childrenCount; i++) {
+            const item = children[i];
+            this._execute(item);
+        }
+
+        node.execute(this._interpreterDatasetConfig, this._runtimeData);
+
+        return AstNodePromiseType.SUCCESS;
     }
 
     private _objectValueToCellValue(objectValue: CalculateValueType) {
@@ -68,7 +82,7 @@ export class Interpreter {
 
     constructor(private _interpreterDatasetConfig?: IInterpreterDatasetConfig) {}
 
-    async execute(node: BaseAstNode): Promise<FunctionVariantType> {
+    async executeAsync(node: BaseAstNode): Promise<FunctionVariantType> {
         // if (!this._interpreterCalculateProps) {
         //     return ErrorValueObject.create(ErrorType.ERROR);
         // }
@@ -77,29 +91,59 @@ export class Interpreter {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        await this._execute(node);
+        await this._executeAsync(node);
 
-        return Promise.resolve(node.getValue());
+        const value = node.getValue();
+
+        return Promise.resolve(value);
     }
 
-    executeRef(node: ReferenceNode) {
+    execute(node: BaseAstNode): FunctionVariantType {
+        // if (!this._interpreterCalculateProps) {
+        //     return ErrorValueObject.create(ErrorType.ERROR);
+        // }
+
+        if (!node) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        this._execute(node);
+
+        return node.getValue();
+    }
+
+    executePreCalculateNode(node: PreCalculateNodeType) {
         node.execute(this._interpreterDatasetConfig, this._runtimeData);
         return node.getValue();
     }
 
-    setRuntimeData(row: number, column: number, sheetId: string, functionVariant: FunctionVariantType) {
-        if (this._runtimeData[this._unitId] === null) {
-            this._runtimeData[this._unitId] = {};
+    checkAsyncNode(node: BaseAstNode) {
+        const result: boolean[] = [];
+        this._checkAsyncNode(node, result);
+
+        for (let i = 0, len = result.length; i < len; i++) {
+            const item = result[i];
+            if (item === true) {
+                return true;
+            }
         }
 
-        const unitData = this._runtimeData[this._unitId];
+        return false;
+    }
 
-        if (unitData[sheetId] === null) {
+    setRuntimeData(row: number, column: number, sheetId: string, unitId: string, functionVariant: FunctionVariantType) {
+        if (this._runtimeData[unitId] === undefined) {
+            this._runtimeData[unitId] = {};
+        }
+
+        const unitData = this._runtimeData[unitId];
+
+        if (unitData[sheetId] === undefined) {
             unitData[sheetId] = new ObjectMatrix<ICellData>();
         }
 
         const sheetData = unitData[sheetId];
-        if (functionVariant.isReferenceObject() || (functionVariant as BaseValueObject).isArray()) {
+        if (functionVariant.isReferenceObject() || (functionVariant.isValueObject() && (functionVariant as BaseValueObject).isArray())) {
             const objectValueRefOrArray = functionVariant as BaseReferenceObject | ArrayValueObject;
             objectValueRefOrArray.iterator((valueObject, rowIndex, columnIndex) => {
                 sheetData.setValue(rowIndex, columnIndex, this._objectValueToCellValue(valueObject));
@@ -109,8 +153,22 @@ export class Interpreter {
         }
     }
 
+    getSheetData(unitId: string) {
+        return this._runtimeData[unitId];
+    }
+
     setProps(interpreterDatasetConfig: IInterpreterDatasetConfig) {
         this._interpreterDatasetConfig = interpreterDatasetConfig;
+    }
+
+    setCurrentPosition(row: number, column: number, sheetId: string, unitId: string) {
+        if (!this._interpreterDatasetConfig) {
+            return;
+        }
+        this._interpreterDatasetConfig.currentRow = row;
+        this._interpreterDatasetConfig.currentColumn = column;
+        this._interpreterDatasetConfig.currentSheetId = sheetId;
+        this._interpreterDatasetConfig.currentUnitId = unitId;
     }
 
     // static interpreter: Interpreter;

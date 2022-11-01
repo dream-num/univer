@@ -10,12 +10,13 @@ export interface IActionData {
     convertor?: object[];
     rangeRef?: string;
     memberId?: string;
+    operation?: ActionOperationType;
 }
 
 /**
  * Action Operation Type
  */
-export enum ActionOperation {
+export enum ActionOperationType {
     /**
      * send obs
      */
@@ -30,6 +31,11 @@ export enum ActionOperation {
      * push to UNDO/REDO stack
      */
     UNDO_ACTION = 3,
+
+    /**
+     * default obs
+     */
+    DEFAULT_ACTION = 1 | 2 | 3,
 }
 
 /**
@@ -50,7 +56,7 @@ export abstract class ActionBase<
 
     protected _oldActionData: O;
 
-    protected _operation: ActionOperation;
+    protected _operation: ActionOperationType;
 
     protected constructor(
         actionData: D,
@@ -60,7 +66,7 @@ export abstract class ActionBase<
         this._doActionData = actionData;
         this._workbook = workbook;
         this._observers = observers;
-        this._operation = ActionOperation.OBSERVER_ACTION;
+        this._operation = ActionOperationType.OBSERVER_ACTION;
     }
 
     abstract redo(): void;
@@ -89,16 +95,16 @@ export abstract class ActionBase<
         return this._workbook;
     }
 
-    hasOperation(operation: ActionOperation): boolean {
+    hasOperation(operation: ActionOperationType): boolean {
         return (this._operation & operation) === operation;
     }
 
     // TODO how to use
-    addOperation(operation: ActionOperation) {
+    addOperation(operation: ActionOperationType) {
         this._operation |= operation;
     }
 
-    removeOperation(operation: ActionOperation) {
+    removeOperation(operation: ActionOperationType) {
         this._operation &= ~operation;
     }
 }

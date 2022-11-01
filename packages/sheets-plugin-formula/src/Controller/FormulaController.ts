@@ -18,6 +18,10 @@ export class FormulaController {
         this._context = this._plugin.getContext();
     }
 
+    getDataModel() {
+        return this._formulaDataModel;
+    }
+
     initialEditor() {}
 
     initialSelection() {}
@@ -30,18 +34,27 @@ export class FormulaController {
         return this._formulaEngine;
     }
 
-    toInterpreterCalculateProps(currentRow: number, currentColumn: number, currentSheetId: string, isRefresh = true) {
+    toInterpreterCalculateProps(isRefresh = true) {
         if (isRefresh || !this._interpreterCalculatePropsCache) {
-            this._interpreterCalculatePropsCache = this._toInterpreterCalculateProps(currentRow, currentColumn, currentSheetId);
+            this._interpreterCalculatePropsCache = this._toInterpreterCalculateProps();
         }
-
-        this._interpreterCalculatePropsCache.currentRow = currentRow;
-        this._interpreterCalculatePropsCache.currentRow = currentColumn;
 
         return this._interpreterCalculatePropsCache;
     }
 
-    private _toInterpreterCalculateProps(currentRow: number, currentColumn: number, currentSheetId: string): IInterpreterDatasetConfig {
+    getCommandManager() {
+        return this._context.getCommandManager();
+    }
+
+    getWorkbook() {
+        return this._context.getWorkBook();
+    }
+
+    getUnitId() {
+        return this.getWorkbook().getUnitId();
+    }
+
+    private _toInterpreterCalculateProps(): IInterpreterDatasetConfig {
         const workbook = this._context.getWorkBook();
         const sheets = workbook.getSheets();
         const sheetData: SheetDataType = {};
@@ -68,9 +81,9 @@ export class FormulaController {
             unitData,
             formulaData,
             sheetNameMap,
-            currentRow,
-            currentColumn,
-            currentSheetId,
+            currentRow: -1,
+            currentColumn: -1,
+            currentSheetId: '',
             currentUnitId,
             rowCount,
             columnCount,

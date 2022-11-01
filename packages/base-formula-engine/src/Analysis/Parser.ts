@@ -77,7 +77,7 @@ export class AstTreeMaker {
         const childrenCount = children.length;
         const calculateStack: BaseAstNode[] = [];
         let currentAstNode: false | BaseAstNode = false;
-        console.log('lexerNode', lexerNode, children);
+        // console.log('lexerNode', lexerNode, children);
         if (lexerNode.getToken() === DEFAULT_TOKEN_TYPE_PARAMETER) {
             currentAstNode = parent;
         } else {
@@ -196,7 +196,7 @@ export class AstTreeMaker {
                 break;
             }
         }
-        console.log('astNode111', astNode, item);
+        // console.log('astNode111', astNode, item);
         return astNode;
     }
 

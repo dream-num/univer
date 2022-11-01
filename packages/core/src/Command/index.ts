@@ -8,6 +8,7 @@ export * from './UndoManager';
 export * from './ActionExtensionManager';
 export * from './ActionExtensionFactory';
 export * from '../Sheets/Action/index';
+export * from './ActionOperation';
 
 /* eslint-disable import/first */
 import './RegisterAction';

@@ -19,6 +19,14 @@ export class FunctionNode extends BaseAstNode {
 
     constructor(token: string, private _functionExecutor: BaseFunction) {
         super(token);
+
+        if (this._functionExecutor.isAsync()) {
+            this.setAsync();
+        }
+
+        if (this._functionExecutor.isAddress()) {
+            this.setAddress();
+        }
     }
 
     async executeAsync() {
@@ -36,6 +44,19 @@ export class FunctionNode extends BaseAstNode {
             this.setValue(resultVariant as FunctionVariantType);
         }
         return Promise.resolve(AstNodePromiseType.SUCCESS);
+    }
+
+    execute() {
+        const variants: Array<FunctionVariantType> = [];
+        const children = this.getChildren();
+        const childrenCount = children.length;
+        for (let i = 0; i < childrenCount; i++) {
+            variants.push(children[i].getValue());
+        }
+
+        const resultVariant = this._functionExecutor.calculate(...variants);
+
+        this.setValue(resultVariant as FunctionVariantType);
     }
 }
 

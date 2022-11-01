@@ -1,7 +1,11 @@
 import { SetWorkSheetActivate } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { Workbook } from '../Domain';
-import { ActionBase, ActionOperation, IActionData } from '../../Command/ActionBase';
+import {
+    ActionBase,
+    ActionOperationType,
+    IActionData,
+} from '../../Command/ActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { BooleanNumber } from '../../Enum';
 
@@ -46,7 +50,7 @@ export class SetWorkSheetActivateAction extends ActionBase<
             convertor: [],
         };
         this.validate();
-        this.removeOperation(ActionOperation.SERVER_ACTION);
+        this.removeOperation(ActionOperationType.SERVER_ACTION);
     }
 
     do(): ISheetStatus {

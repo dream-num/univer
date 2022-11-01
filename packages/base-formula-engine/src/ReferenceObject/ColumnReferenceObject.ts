@@ -17,6 +17,10 @@ export class ColumnReferenceObject extends BaseReferenceObject {
         this.setRangeData(rangeData);
     }
 
+    isColumn() {
+        return true;
+    }
+
     unionBy(referenceObject: BaseReferenceObject) {
         if (!referenceObject.isColumn()) {
             return ErrorValueObject.create(ErrorType.REF);

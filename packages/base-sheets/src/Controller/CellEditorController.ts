@@ -5,6 +5,7 @@ import { RichText } from '@univer/style-universheet';
 import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
 import { SheetContainer } from '../View/UI/SheetContainer';
 import { CANVAS_VIEW_KEY } from '../View/Render/BaseView';
+import { CellExtensionManager } from '../Basics/Register/CellEditRegister';
 
 const CELL_EDIT_HIDDEN_TOP = -10000;
 
@@ -19,6 +20,8 @@ export class CellEditorController {
     private _plugin: SpreadsheetPlugin;
 
     private _sheetContainer: SheetContainer;
+
+    private _cellExtensionManager: CellExtensionManager;
 
     richTextEle: HTMLElement;
 
@@ -198,6 +201,8 @@ export class CellEditorController {
         });
         this._plugin.getObserver('onSpreadsheetKeyCompositionUpdateObservable')?.add((evt: IKeyboardEvent) => {});
         this._plugin.getObserver('onSpreadsheetKeyCompositionEndObservable')?.add((evt: IKeyboardEvent) => {});
+
+        this._cellExtensionManager = new CellExtensionManager();
     }
 
     /**
@@ -346,7 +351,19 @@ export class CellEditorController {
         this.richTextEle.style.maxHeight = `${sheetContentRect.height - startY + scrollY}px`;
 
         // this._plugin.showMainByName('cellEditor', true).then(() => {
-        const cellValue = this.getSelectionValue();
+        let cellValue = this.getSelectionValue();
+
+        // Intercept, the formula needs to modify the value of the edit state
+        const cell = this._cellExtensionManager.handle({
+            row: currentCell.row,
+            column: currentCell.column,
+            value: cellValue,
+        });
+
+        if (cell) {
+            cellValue = cell.value;
+        }
+
         this.richText.setValue(cellValue);
 
         const style = this.getSelectionStyle();

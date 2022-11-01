@@ -117,6 +117,8 @@ export function SetRangeData(
             }
             if (value.m) {
                 cell.m = value.m;
+            } else {
+                cell.m = String(cell.v);
             }
             if (value.t) {
                 cell.t = value.t;

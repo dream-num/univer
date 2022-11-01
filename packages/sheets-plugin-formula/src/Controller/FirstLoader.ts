@@ -32,11 +32,12 @@ export function firstLoader(formulaController: FormulaController) {
                             startRow: row,
                             endRow: row,
                         },
-                        cellValue: {
-                            [row]: {
-                                [column]: mainCell,
-                            },
-                        },
+                        cellValue: mainCell,
+                        // cellValue: {
+                        //     [row]: {
+                        //         [column]: mainCell,
+                        //     },
+                        // },
                     });
                 });
             });

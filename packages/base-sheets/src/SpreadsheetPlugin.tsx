@@ -1,6 +1,6 @@
 import { getRefElement, IMainProps, isElement, ISlotProps, IToolBarItemProps, RefObject, render } from '@univer/base-component';
 import { Engine, RenderEngine } from '@univer/base-render';
-import { AsyncFunction, Attribute, Context, IOCAttribute, IOCContainer, IRangeCellData, IRangeData, IWorkbookConfig, Plugin, PLUGIN_NAMES, Tools } from '@univer/core';
+import { AsyncFunction, Attribute, Context, IOCAttribute, IOCContainer, IWorkbookConfig, Plugin, PLUGIN_NAMES, Tools } from '@univer/core';
 import { FormulaPlugin } from '@univer/sheets-plugin-formula';
 
 import { install, SpreadsheetPluginObserve, uninstall } from './Basics/Observer';
@@ -8,7 +8,7 @@ import { RightMenuProps } from './Model/RightMenuModel';
 import { en, zh } from './Locale';
 import { CANVAS_VIEW_KEY } from './View/Render/BaseView';
 import { CanvasView } from './View/Render/CanvasView';
-import { BaseSheetContainerConfig, ISpreadsheetPluginConfigBase, SheetContainer } from './View/UI/SheetContainer';
+import { BaseSheetContainerConfig, SheetContainer } from './View/UI/SheetContainer';
 import {
     RightMenuController,
     ToolBarController,
@@ -20,79 +20,7 @@ import {
     SheetContainerController,
 } from './Controller';
 import { ToolBarController1 } from './Controller/ToolBarController1';
-
-export interface ISelectionConfig {
-    selection: IRangeData;
-    cell?: IRangeCellData;
-}
-
-export interface ISelectionsConfig {
-    [worksheetId: string]: ISelectionConfig[];
-}
-
-export interface ISpreadsheetPluginConfig extends ISpreadsheetPluginConfigBase {
-    container: HTMLElement | string;
-    selections: ISelectionsConfig;
-}
-
-const DEFAULT_SPREADSHEET_PLUGIN_DATA: ISpreadsheetPluginConfig = {
-    container: 'universheet',
-    layout: 'auto',
-    selections: {
-        'sheet-01': [
-            {
-                selection: {
-                    startRow: 13,
-                    endRow: 14,
-                    startColumn: 1,
-                    endColumn: 2,
-                },
-            },
-            {
-                selection: {
-                    startRow: 16,
-                    endRow: 18,
-                    startColumn: 1,
-                    endColumn: 2,
-                },
-                cell: {
-                    row: 16,
-                    column: 1,
-                },
-            },
-        ],
-        'sheet-02': [
-            {
-                selection: {
-                    startRow: 17,
-                    endRow: 20,
-                    startColumn: 1,
-                    endColumn: 2,
-                },
-            },
-            {
-                selection: {
-                    startRow: 22,
-                    endRow: 23,
-                    startColumn: 1,
-                    endColumn: 2,
-                },
-            },
-            {
-                selection: {
-                    startRow: 25,
-                    endRow: 27,
-                    startColumn: 4,
-                    endColumn: 6,
-                },
-                cell: {
-                    row: 25,
-                    column: 4,
-                },
-            },
-        ],
-    },
-};
+import { ISpreadsheetPluginConfig, DEFAULT_SPREADSHEET_PLUGIN_DATA } from './Basics';
 
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine

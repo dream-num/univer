@@ -17,7 +17,6 @@ export interface IActionData {
  * Action Operation Type
  */
 export enum ActionOperation {
-
     /**
      * send obs
      */
@@ -36,7 +35,7 @@ export enum ActionOperation {
     /**
      * default obs
      */
-    DEFAULT_ACTION = 1 | 2 | 3
+    DEFAULT_ACTION = 1 | 2 | 3,
 }
 
 /**

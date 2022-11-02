@@ -54,6 +54,7 @@
         "@univer/base-sheets": "workspace:^0.0.1",
         "@univer/sheets-plugin-filter": "workspace:^0.0.1",
         "@univer/style-universheet": "workspace:^0.0.1",
+        "css-vars-ponyfill": "^2.4.6",
         "preact": "^10.5.14"
     }
 }

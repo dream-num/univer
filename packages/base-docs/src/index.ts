@@ -1,3 +1,3 @@
-import { DocsPlugin } from './DocsPlugin';
+import { DocPlugin } from './DocPlugin';
 
-export { DocsPlugin };
+export { DocPlugin };

@@ -2,6 +2,7 @@ import { IColorStyle, IStyleBase } from '.';
 import {
     BooleanNumber,
     HorizontalAlign,
+    LocaleType,
     TextDirection,
     VerticalAlign,
     WrapStrategy,
@@ -13,6 +14,7 @@ import {
  */
 export interface IDocumentData extends IReferenceSource {
     documentId: string;
+    locale?: LocaleType;
     title?: string;
     body?: IDocumentBody;
     documentStyle: IDocumentStyle;

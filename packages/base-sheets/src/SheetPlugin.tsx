@@ -1,6 +1,6 @@
 import { getRefElement, IMainProps, isElement, ISlotProps, RefObject, render } from '@univer/base-component';
 import { Engine, RenderEngine } from '@univer/base-render';
-import { AsyncFunction, SheetContext, IOCContainer, IWorkbookConfig, Plugin, PLUGIN_NAMES, Tools } from '@univer/core';
+import { AsyncFunction, SheetContext, IWorkbookConfig, Plugin, PLUGIN_NAMES, Tools } from '@univer/core';
 
 import { install, SheetPluginObserve, uninstall } from './Basics/Observer';
 import { RightMenuProps } from './Model/RightMenuModel';
@@ -75,10 +75,10 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     private _componentList: Map<string, any>;
 
-    constructor(props: Partial<ISheetPluginConfig> = {}) {
+    constructor(config: Partial<ISheetPluginConfig> = {}) {
         super(PLUGIN_NAMES.SPREADSHEET);
 
-        this._config = Tools.commonExtend(DEFAULT_SPREADSHEET_PLUGIN_DATA, props);
+        this._config = Tools.commonExtend(DEFAULT_SPREADSHEET_PLUGIN_DATA, config);
     }
 
     register(engineInstance: Engine) {
@@ -230,8 +230,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
         this.context.getContextObserver('onSheetRenderDidMountObservable')?.notifyObservers();
     }
-
-    onMapping(IOC: IOCContainer): void {}
 
     onDestroy(): void {
         super.onDestroy();

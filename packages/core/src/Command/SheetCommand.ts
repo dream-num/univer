@@ -5,6 +5,8 @@ import { ISheetActionData } from './SheetAction';
 
 /**
  * Execute the undo-redo command
+ *
+ * TODO: SlideCommand/DocCommand
  */
 export class SheetCommand extends CommandBase {
     protected unit: Workbook;

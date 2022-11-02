@@ -13,6 +13,7 @@ export interface ISheetActionData extends IActionData {
 /**
  * Basics class for action
  *
+ * TODO: SlideAction/DocAction
  * @beta
  */
 export abstract class SheetAction<

@@ -2,7 +2,7 @@ import { getRefElement, handleDomToJson, handleJsonToDom, IMainProps, ISlotEleme
 import { Direction, IDocumentData, IRangeData, IStyleData, Nullable, ICellData, Tools, isKeyPrintable } from '@univer/core';
 import { DeviceType, IKeyboardEvent, IMouseEvent, IPointerEvent } from '@univer/base-render';
 import { RichText } from '@univer/style-universheet';
-import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
+import { SheetPlugin } from '../SheetPlugin';
 import { SheetContainer } from '../View/UI/SheetContainer';
 import { CANVAS_VIEW_KEY } from '../View/Render/BaseView';
 import { CellExtensionManager } from '../Basics/Register/CellEditRegister';
@@ -17,7 +17,7 @@ const CELL_EDIT_HIDDEN_TOP = -10000;
  * 2. p存储的富文本字符数少于50的情况下，存一份到v，便于vlookup公式计算
  */
 export class CellEditorController {
-    private _plugin: SpreadsheetPlugin;
+    private _plugin: SheetPlugin;
 
     private _sheetContainer: SheetContainer;
 
@@ -35,7 +35,7 @@ export class CellEditorController {
     // current edit cell
     currentEditRangeData: IRangeData;
 
-    constructor(plugin: SpreadsheetPlugin) {
+    constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
 
         this._initialize();

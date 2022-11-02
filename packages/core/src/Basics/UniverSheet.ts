@@ -1,10 +1,8 @@
 import { Workbook } from '../Sheets/Domain';
 import { IWorkbookConfig } from '../Interfaces';
-import { Inject, IOCAttribute, IOCContainer } from '../IOC';
 import { BasePlugin, Plugin } from '../Plugin';
 import { IOHttp, IOHttpConfig, Logger } from '../Shared';
-import { Bootstrap } from './Bootstrap';
-import { Context } from './Context';
+import { SheetContext } from './SheetContext';
 import { VersionCode, VersionEnv } from './Version';
 import { ColorBuilder } from '../Sheets/Domain/ColorBuilder';
 
@@ -12,13 +10,16 @@ import { ColorBuilder } from '../Sheets/Domain/ColorBuilder';
  * Externally provided UniverSheet root instance
  */
 export class UniverSheet {
+    univerSheetConfig: Partial<IWorkbookConfig>;
+
+    constructor(univerSheetData: Partial<IWorkbookConfig> = {}) {
+        this.univerSheetConfig = univerSheetData;
+        this._context = new SheetContext(univerSheetData);
+    }
+
     static newInstance(univerSheetData: Partial<IWorkbookConfig> = {}): UniverSheet {
         Logger.capsule(VersionEnv, VersionCode, 'powered by :: universheet :: ');
-        const attribute = new IOCAttribute();
-        attribute.setValue(univerSheetData);
-        const container = new IOCContainer(attribute);
-        Bootstrap(container);
-        return container.getInstance('UniverSheet');
+        return new UniverSheet(univerSheetData);
     }
 
     /**
@@ -68,11 +69,10 @@ export class UniverSheet {
         return new ColorBuilder();
     }
 
-    @Inject('Context')
-    private _context: Context;
+    private _context: SheetContext;
 
     /**
-     * get Context
+     * get SheetContext
      */
     get context() {
         return this._context;

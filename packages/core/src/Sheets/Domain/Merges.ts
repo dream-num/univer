@@ -3,7 +3,7 @@ import {
     CommandManager,
     InsertRowAction,
     IRemoveMergeActionData,
-    SheetsCommand,
+    SheetCommand,
     RemoveRowAction,
     DeleteRangeAction,
 } from '../../Command';
@@ -326,7 +326,7 @@ export class Merges {
             rectangles: currentMerge,
         };
 
-        const command = new SheetsCommand(context.getWorkBook(), removeMerge, addMerge);
+        const command = new SheetCommand(context.getWorkBook(), removeMerge, addMerge);
         commandManager.invoke(command);
     }
 }

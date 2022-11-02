@@ -1,6 +1,6 @@
 import { BaseComponentRender, BaseComponentSheet, Component } from '@univer/base-component';
 import { Nullable, Observer, Workbook } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 // import { Button, CheckboxGroup, Input, Tab, TabPane } from '@univer/style-universheet';
 import styles from './index.module.less';
 import { FindPlugin } from '../../FindPlugin';
@@ -34,7 +34,7 @@ export class SearchContent extends Component<SearchProps, SearchState> {
     Render: BaseComponentRender;
 
     initialize() {
-        const component = new SpreadsheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = new SheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this.Render = component.getComponentRender();
         this.state = {
             tab: [
@@ -118,7 +118,7 @@ class Content extends Component<ContentProps, ContentState> {
     private _matchList: string[] = []; // match condition list
 
     initialize(props: ContentProps) {
-        const component = new SpreadsheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = new SheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this.Render = component.getComponentRender();
 
         // super(props);

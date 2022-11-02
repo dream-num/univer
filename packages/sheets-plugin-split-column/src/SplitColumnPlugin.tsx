@@ -1,6 +1,6 @@
-import { Context, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { SheetContext, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
 import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 import { SplitColumnButton } from './UI/SplitColumnButton';
 import { zh, en } from './Locale';
 
@@ -40,10 +40,10 @@ export class SplitColumnPlugin extends Plugin {
             show: true,
             label: <SplitColumnButton config={config} />,
         };
-        context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
+        context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
     }
 
-    onMounted(ctx: Context): void {
+    onMounted(ctx: SheetContext): void {
         this.initialize();
     }
 

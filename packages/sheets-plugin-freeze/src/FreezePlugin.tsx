@@ -1,6 +1,6 @@
 import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
-import { Context, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetContext, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { SheetPlugin } from '@univer/base-sheets';
 import { FROZEN_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
 import { IConfig } from './IData';
 import { en, zh } from './Model/Locale';
@@ -9,7 +9,7 @@ import { FreezeButton } from './View/UI/FreezeButton';
 export interface IFreezePluginConfig {}
 
 export class FreezePlugin extends Plugin {
-    spreadsheetPlugin: any;
+    SheetPlugin: any;
 
     constructor(config?: IFreezePluginConfig) {
         super(FROZEN_PLUGIN_NAME);
@@ -42,15 +42,15 @@ export class FreezePlugin extends Plugin {
             label: <FreezeButton config={config} />,
         };
         // get spreadsheet plugin
-        this.spreadsheetPlugin = context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
+        this.sheetPlugin = context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
 
         // extend comment
-        this.spreadsheetPlugin?.addButton(item);
+        this.sheetPlugin?.addButton(item);
     }
 
     onMapping(IOC: IOCContainer): void {}
 
-    onMounted(ctx: Context): void {
+    onMounted(ctx: SheetContext): void {
         this.initialize();
     }
 

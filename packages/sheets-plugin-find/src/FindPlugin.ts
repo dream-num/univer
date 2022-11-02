@@ -1,4 +1,4 @@
-import { Context, UniverSheet, Plugin, Worksheet } from '@univer/core';
+import { SheetContext, UniverSheet, Plugin, Worksheet } from '@univer/core';
 // import { TextFinder } from './Domain/TextFind';
 import { FindType } from './IData/IFind';
 import { FIND_PLUGIN_NAME } from './Const/PLUGIN_NAME';
@@ -47,7 +47,7 @@ export class FindPlugin extends Plugin<FindPluginObserve> {
         // return new TextFinder(workSheet, type, text);
     }
 
-    onMounted(ctx: Context): void {
+    onMounted(ctx: SheetContext): void {
         install(this);
         this.initialize();
     }

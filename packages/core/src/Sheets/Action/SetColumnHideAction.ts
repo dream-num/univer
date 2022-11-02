@@ -1,5 +1,5 @@
 import { SetColumnHide, SetColumnShow } from '../Apply';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { Workbook } from '../Domain';
 import { ISetColumnShowActionData } from './SetColumnShowAction';
@@ -7,7 +7,7 @@ import { ISetColumnShowActionData } from './SetColumnShowAction';
 /**
  * @internal
  */
-export interface ISetColumnHideActionData extends IActionData {
+export interface ISetColumnHideActionData extends ISheetActionData {
     columnIndex: number;
     columnCount: number;
 }
@@ -17,7 +17,7 @@ export interface ISetColumnHideActionData extends IActionData {
  *
  * @internal
  */
-export class SetColumnHideAction extends ActionBase<
+export class SetColumnHideAction extends SheetAction<
     ISetColumnHideActionData,
     ISetColumnShowActionData
 > {

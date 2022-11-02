@@ -1,4 +1,4 @@
-import { ActionExtensionManager, Context, IRangeData, ObjectMatrixPrimitiveType, Plugin } from '@univer/core';
+import { ActionExtensionManager, SheetContext, IRangeData, ObjectMatrixPrimitiveType, Plugin } from '@univer/core';
 import { NumfmtPluginObserve, install } from './Basic/Observer';
 import { NUMFMT_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 import { NumfmtController } from './Controller/NumfmtController';
@@ -6,7 +6,7 @@ import { NumftmModalController } from './Controller/NumfmtModalController';
 import { en, zh } from './Locale';
 import { NumfmtActionExtensionFactory } from './NumfmtActionExtensionFactory';
 
-export class NumfmtPlugin extends Plugin<NumfmtPluginObserve> {
+export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
     protected _controller: NumfmtController;
 
     private _numftmModalController: NumftmModalController;
@@ -17,7 +17,7 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve> {
         super(NUMFMT_PLUGIN_NAME);
     }
 
-    onMounted(context: Context): void {
+    onMounted(context: SheetContext): void {
         install(this);
 
         context.getLocale().load({

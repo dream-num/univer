@@ -1,7 +1,7 @@
 import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, createRef } from '@univer/base-component';
 import { PLUGIN_NAMES } from '@univer/core';
 import { IToolBarItemProps } from '../../../Model/ToolBarModel';
-import { SpreadsheetPlugin } from '../../../SpreadsheetPlugin';
+import { SheetPlugin } from '../../../SheetPlugin';
 import { Select } from '../Common/Select/Select';
 import { TextButton } from '../Common/TextButton/TextButton';
 import styles from './index.module.less';
@@ -105,7 +105,7 @@ export class ToolBar extends Component<IProps, IState> {
     };
 
     resetLabel = (toolList: any[]) => {
-        const plugin = this._context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
+        const plugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
 
         for (let i = 0; i < toolList.length; i++) {
             const item = toolList[i];
@@ -187,7 +187,7 @@ export class ToolBar extends Component<IProps, IState> {
             },
             () => {
                 // 获取contentref,Ul限制高度
-                const wrapper = this._context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.getContentRef().current!;
+                const wrapper = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.getContentRef().current!;
                 const height = `${(wrapper as HTMLDivElement).offsetHeight}px`;
                 const ul = this.toolbarRef.current.querySelectorAll('ul');
                 for (let i = 0; i < ul.length; i++) {

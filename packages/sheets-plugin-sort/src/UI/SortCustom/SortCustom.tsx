@@ -9,7 +9,7 @@ import {
     Component,
     FunctionComponent,
 } from '@univer/base-component';
-import { Context } from '@univer/core';
+import { SheetContext } from '@univer/core';
 
 import styles from './index.module.less';
 
@@ -22,7 +22,7 @@ type IProps = {
     visible: boolean;
     onOk: () => void;
     onCancel: (e: Event) => void;
-    config: { context: Context; locale: any };
+    config: { context: SheetContext; locale: any };
 };
 type IState = {
     active: string | number;

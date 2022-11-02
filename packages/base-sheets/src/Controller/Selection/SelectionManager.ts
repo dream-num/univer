@@ -1,9 +1,9 @@
 import { IMouseEvent, IPointerEvent, Rect, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle } from '@univer/base-render';
-import { Nullable, Observer, Worksheet, ISelection, makeCellToSelection, IRangeData, RangeList, Range, IRangeCellData, ICellInfo, SheetsCommand, Direction } from '@univer/core';
+import { Nullable, Observer, Worksheet, ISelection, makeCellToSelection, IRangeData, RangeList, Range, IRangeCellData, ICellInfo, SheetCommand, Direction } from '@univer/core';
 import { ACTION_NAMES, ISelectionsConfig } from '../../Basics';
 import { ISelectionModelValue, ISetSelectionValueActionData } from '../../Model/Action/SetSelectionValueAction';
 import { SelectionModel } from '../../Model/SelectionModel';
-import { SpreadsheetPlugin } from '../../SpreadsheetPlugin';
+import { SheetPlugin } from '../../SheetPlugin';
 import { SheetView } from '../../View/Render/Views/SheetView';
 import { ScrollTimer } from '../ScrollTimer';
 import { SelectionControl, SELECTION_TYPE } from './SelectionController';
@@ -30,7 +30,7 @@ export class SelectionManager {
 
     private _selectionModels = new Map<string, SelectionModel[]>(); // sheetID:Models
 
-    private _plugin: SpreadsheetPlugin;
+    private _plugin: SheetPlugin;
 
     private _startSelectionRange: ISelection;
 
@@ -256,7 +256,7 @@ export class SelectionManager {
             selections: models,
         };
 
-        const command = new SheetsCommand(workbook, value);
+        const command = new SheetCommand(workbook, value);
         commandManager.invoke(command);
     }
 
@@ -288,7 +288,7 @@ export class SelectionManager {
             selections: selectionModelsValue,
         };
 
-        const command = new SheetsCommand(workbook, value);
+        const command = new SheetCommand(workbook, value);
         commandManager.invoke(command);
     }
 
@@ -369,7 +369,7 @@ export class SelectionManager {
     }
 
     constructor(private _sheetView: SheetView) {
-        this._plugin = this._sheetView.getPlugin() as SpreadsheetPlugin;
+        this._plugin = this._sheetView.getPlugin() as SheetPlugin;
         this._initialize();
         this._initializeObserver();
     }

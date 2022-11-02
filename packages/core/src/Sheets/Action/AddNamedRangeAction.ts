@@ -1,4 +1,4 @@
-import { IActionData, ActionBase, ActionObservers, ActionType } from '../../Command';
+import { ISheetActionData, SheetAction, ActionObservers, ActionType } from '../../Command';
 import { CONVERTOR_OPERATION, ACTION_NAMES } from '../../Const';
 import { WorkSheetConvertor } from '../../Convertor';
 import { INamedRange } from '../../Interfaces/INamedRange';
@@ -7,11 +7,11 @@ import { DeleteNamedRange } from '../Apply/DeleteNamedRange';
 import { Workbook } from '../Domain';
 import { IDeleteNamedRangeActionData } from './DeleteNamedRangeAction';
 
-export interface IAddNamedRangeActionData extends IActionData {
+export interface IAddNamedRangeActionData extends ISheetActionData {
     namedRange: INamedRange;
 }
 
-export class AddNamedRangeAction extends ActionBase<
+export class AddNamedRangeAction extends SheetAction<
     IAddNamedRangeActionData,
     IDeleteNamedRangeActionData,
     void

@@ -1,5 +1,5 @@
 import { Observable } from '../Observer';
-import { ActionBase, IActionData } from './ActionBase';
+import { IActionData, ActionBase } from './ActionBase';
 
 /**
  * Action type

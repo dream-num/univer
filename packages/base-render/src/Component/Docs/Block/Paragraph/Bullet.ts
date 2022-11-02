@@ -1,4 +1,4 @@
-import { Context, IBullet, ILists, INestingLevel, ITextStyle } from '@univer/core';
+import { SheetContext, IBullet, ILists, INestingLevel, ITextStyle } from '@univer/core';
 import { FontCache, getFontStyleString, IDocumentSkeletonBullet, IFontLocale } from '../../../..';
 import { getBulletOrderedSymbol } from '.';
 
@@ -7,7 +7,7 @@ export function dealWidthBullet(
     lists?: ILists,
     listLevelAncestors?: IDocumentSkeletonBullet[],
     fontLocale?: IFontLocale,
-    context?: Context
+    context?: SheetContext
 ): IDocumentSkeletonBullet | undefined {
     if (!bullet || !lists) {
         return;
@@ -62,7 +62,7 @@ function _getBulletSke(
     listLevelAncestors?: IDocumentSkeletonBullet[],
     textStyleConfig?: ITextStyle,
     fontLocale?: IFontLocale,
-    context?: Context
+    context?: SheetContext
 ): IDocumentSkeletonBullet {
     const nesting = nestings[nestingLevel];
     const { bulletAlignment, glyphFormat, textStyle: textStyleFirst, startNumber, glyphType, glyphSymbol } = nesting;
@@ -96,7 +96,7 @@ function _getBulletSke(
     };
 }
 
-function __generateOrderedListSymbol(glyphFormat: string, nestings: INestingLevel[], listLevelAncestors?: IDocumentSkeletonBullet[], context?: Context) {
+function __generateOrderedListSymbol(glyphFormat: string, nestings: INestingLevel[], listLevelAncestors?: IDocumentSkeletonBullet[], context?: SheetContext) {
     // const indexNumber = startNumber + startIndex;
     // parse  <prefix>%[nestingLevelMinusOne]<suffix>, return symbolContent
     // <w:lvl w:ilvl="0">
@@ -117,7 +117,7 @@ function __generateOrderedListSymbol(glyphFormat: string, nestings: INestingLeve
     return resultSymbol.join('');
 }
 
-function ___getSymbolByBesting(startIndex: number = 1, nesting: INestingLevel, context?: Context) {
+function ___getSymbolByBesting(startIndex: number = 1, nesting: INestingLevel, context?: SheetContext) {
     const { startNumber, glyphType, glyphSymbol } = nesting;
 
     if (glyphSymbol) {

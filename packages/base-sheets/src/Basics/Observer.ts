@@ -10,7 +10,7 @@ interface ISelectionControlFillConfig {}
 
 interface ISelectionControlDragAndDropConfig {}
 
-export type SpreadsheetPluginObserve = {
+export type SheetPluginObserve = {
     onAfterChangeFontFamilyObservable: Observable<string>;
     onAfterChangeFontSizeObservable: Observable<number>;
     onAfterChangeFontWeightObservable: Observable<boolean>;

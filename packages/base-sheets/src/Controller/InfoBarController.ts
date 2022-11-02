@@ -1,6 +1,6 @@
 import { PLUGIN_NAMES } from '@univer/core';
 import { InfoBarModel } from '../Model/InfoBarModel';
-import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
+import { SheetPlugin } from '../SheetPlugin';
 import { InfoBar } from '../View/UI/InfoBar';
 
 type IProps = {
@@ -22,11 +22,11 @@ export class InfoBarController {
 
     private _infoBar: InfoBar;
 
-    private _plugin: SpreadsheetPlugin;
+    private _plugin: SheetPlugin;
 
     private _infoList: BaseInfoBarProps;
 
-    constructor(plugin: SpreadsheetPlugin) {
+    constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
         this._infoList = {
             back: {

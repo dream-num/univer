@@ -1,7 +1,7 @@
 import { BaseComponentRender, BaseComponentSheet } from '@univer/base-component';
 import { Tools, BorderType, BorderStyleTypes, HorizontalAlign, VerticalAlign, WrapStrategy, DEFAULT_STYLES } from '@univer/core';
 import { ColorPicker } from '@univer/style-universheet';
-import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
+import { SheetPlugin } from '../SheetPlugin';
 import { defaultLayout, ILayout } from '../View/UI/SheetContainer';
 
 import { SelectionControl } from './Selection/SelectionController';
@@ -32,7 +32,7 @@ interface BorderInfo {
 export class ToolBarController {
     private _toolBarModel: ToolBarModel;
 
-    private _plugin: SpreadsheetPlugin;
+    private _plugin: SheetPlugin;
 
     private _toolBarComponent: ToolBar;
 
@@ -44,7 +44,7 @@ export class ToolBarController {
 
     private _borderInfo: BorderInfo; //存储边框信息
 
-    constructor(plugin: SpreadsheetPlugin) {
+    constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
 
         const pluginName = this._plugin.getPluginName();

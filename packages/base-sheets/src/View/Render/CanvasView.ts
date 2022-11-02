@@ -3,7 +3,7 @@ import { EventState, Worksheet, Plugin } from '@univer/core';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from './BaseView';
 import { SheetView } from './Views/SheetView';
 import './Views';
-import { SpreadsheetPlugin } from '../..';
+import { SheetPlugin } from '../..';
 
 // workbook
 export class CanvasView {
@@ -82,7 +82,7 @@ export class CanvasView {
 
         // sheet zoom [0 ~ 1]
         context.getContextObserver('onZoomRatioSheetObservable').add((value) => {
-            const plugin = this._plugin as SpreadsheetPlugin;
+            const plugin = this._plugin as SheetPlugin;
             this._scene.scale(value.zoomRatio, value.zoomRatio);
             // this._scene.makeDirty();
             // update data TODO 增加action后，会自动刷新，此处需要移除

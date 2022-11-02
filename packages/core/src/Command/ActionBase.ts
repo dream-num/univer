@@ -1,4 +1,3 @@
-import { Workbook, Worksheet } from '../Sheets/Domain';
 import { ActionObservers } from './ActionObservers';
 
 /**
@@ -6,9 +5,7 @@ import { ActionObservers } from './ActionObservers';
  */
 export interface IActionData {
     actionName: string;
-    sheetId: string;
     convertor?: object[];
-    rangeRef?: string;
     memberId?: string;
     operation?: ActionOperationType;
 }
@@ -48,8 +45,6 @@ export abstract class ActionBase<
     O extends IActionData = D,
     R = void
 > {
-    protected _workbook: Workbook;
-
     protected _observers: ActionObservers;
 
     protected _doActionData: D;
@@ -58,13 +53,8 @@ export abstract class ActionBase<
 
     protected _operation: ActionOperationType;
 
-    protected constructor(
-        actionData: D,
-        workbook: Workbook,
-        observers: ActionObservers
-    ) {
+    protected constructor(actionData: D, observers: ActionObservers) {
         this._doActionData = actionData;
-        this._workbook = workbook;
         this._observers = observers;
         this._operation = ActionOperationType.OBSERVER_ACTION;
     }
@@ -85,21 +75,10 @@ export abstract class ActionBase<
         return this._oldActionData;
     }
 
-    getWorkSheet(): Worksheet {
-        const { _workbook, _doActionData } = this;
-        const { sheetId } = _doActionData;
-        return _workbook.getSheetBySheetId(sheetId) as Worksheet;
-    }
-
-    getWorkBook(): Workbook {
-        return this._workbook;
-    }
-
     hasOperation(operation: ActionOperationType): boolean {
         return (this._operation & operation) === operation;
     }
 
-    // TODO how to use
     addOperation(operation: ActionOperationType) {
         this._operation |= operation;
     }

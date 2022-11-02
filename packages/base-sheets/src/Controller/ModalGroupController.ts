@@ -1,4 +1,4 @@
-import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
+import { SheetPlugin } from '../SheetPlugin';
 import { ModalGroup } from '../View/UI/ModalGroup/ModalGroup';
 
 export type ModalGroupProps = string[];
@@ -8,9 +8,9 @@ export class ModalGroupController {
 
     private _ModalGroupComponent: ModalGroup;
 
-    private _plugin: SpreadsheetPlugin;
+    private _plugin: SheetPlugin;
 
-    constructor(plugin: SpreadsheetPlugin) {
+    constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
 
         this._ModalGroup = [];

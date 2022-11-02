@@ -1,12 +1,12 @@
 import { SetHideRow, SetShowRow } from '../Apply';
 import { Workbook } from '../Domain';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
 /**
  * @internal
  */
-export interface ISetRowShowActionData extends IActionData {
+export interface ISetRowShowActionData extends ISheetActionData {
     rowIndex: number;
     rowCount: number;
 }
@@ -14,7 +14,7 @@ export interface ISetRowShowActionData extends IActionData {
 /**
  * @internal
  */
-export class SetRowShowAction extends ActionBase<ISetRowShowActionData> {
+export class SetRowShowAction extends SheetAction<ISetRowShowActionData> {
     constructor(
         actionData: ISetRowShowActionData,
         workbook: Workbook,

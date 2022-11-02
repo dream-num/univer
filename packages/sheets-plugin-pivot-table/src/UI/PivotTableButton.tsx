@@ -1,6 +1,6 @@
 import { BaseComponentRender, BaseComponentSheet, Component, IToolBarItemProps } from '@univer/base-component';
 import { Nullable, Observer, Workbook } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 import { PIVOT_TABLE_PLUGIN_NAME } from '../Const/PLUGIN_NAME';
 import { IProps } from '../IData/IPivotTable';
 import styles from './index.module.less';
@@ -18,7 +18,7 @@ export class PivotTableButton extends Component<IProps, IState> {
 
     initialize(props: IProps) {
         // super(props);
-        const component = new SpreadsheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = new SheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this.Render = component.getComponentRender();
 
         const PivotableIcon = this.Render.renderFunction('PivotableIcon');

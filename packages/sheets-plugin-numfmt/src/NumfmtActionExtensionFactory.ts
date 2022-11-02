@@ -1,4 +1,4 @@
-import { ACTION_NAMES, Plugin, BaseActionExtension, BaseActionExtensionFactory, ISetRangeDataActionData, ObjectMatrix, IActionData, ObjectMatrixPrimitiveType } from '@univer/core';
+import { ACTION_NAMES, Plugin, BaseActionExtension, BaseActionExtensionFactory, ISetRangeDataActionData, ObjectMatrix, ISheetActionData, ObjectMatrixPrimitiveType } from '@univer/core';
 import { numfmt } from '@univer/base-numfmt-engine';
 import { ICellData } from '@univer/core/src/Interfaces/ICellData';
 import { ACTION_NAMES as PLUGIN_ACTION_NAMES } from './Const';
@@ -63,11 +63,11 @@ export class NumfmtActionExtensionFactory extends BaseActionExtensionFactory<ISe
         this._plugin = plugin;
     }
 
-    create(actionData: ISetRangeDataActionData, actionDataList: IActionData[]): BaseActionExtension<ISetRangeDataActionData> {
+    create(actionData: ISetRangeDataActionData, actionDataList: ISheetActionData[]): BaseActionExtension<ISetRangeDataActionData> {
         return new NumfmtActionExtension(actionData, actionDataList);
     }
 
-    // check(actionData: IActionData) {
+    // check(actionData: ISheetActionData) {
     //     // Determine whether it is a setFormattedValueAction
     //     if (actionData.actionName !== this.actionName) {
     //         return false;

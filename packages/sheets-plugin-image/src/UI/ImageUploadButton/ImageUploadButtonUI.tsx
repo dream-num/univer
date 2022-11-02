@@ -1,5 +1,5 @@
 import { Component, IToolBarItemProps, VNode } from '@univer/base-component';
-import { Context } from '@univer/core';
+import { SheetContext } from '@univer/core';
 import { FileSelected } from '../../Library/FileSelected';
 
 export interface ImageUploadButtonUIProps {
@@ -19,7 +19,7 @@ export class ImageUploadButtonUI extends Component<ImageUploadButtonUIProps> {
             type: 'single',
             label: <OrderIcon />,
             show: true,
-            onClick: async (item: IToolBarItemProps, context: Context) => {
+            onClick: async (item: IToolBarItemProps, context: SheetContext) => {
                 const file = await FileSelected.chooseImage();
                 this.props.chooseCallback(URL.createObjectURL(file), file);
             },

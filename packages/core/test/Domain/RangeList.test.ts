@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { Context } from '../../src/Basics/Context';
+import { SheetContext } from '../../src/Basics/SheetContext';
 import { Workbook } from '../../src/Sheets/Domain/Workbook';
 import { Worksheet } from '../../src/Sheets/Domain/Worksheet';
 import { BooleanNumber, WrapStrategy } from '../../src/Enum';
@@ -24,7 +24,7 @@ test('Test RangeList setValue', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -78,7 +78,7 @@ test('Test RangeList clear', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -135,7 +135,7 @@ function demo() {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 

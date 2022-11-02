@@ -1,6 +1,6 @@
 import { BaseComponentRender, BaseComponentSheet, Component } from '@univer/base-component';
 import { IKeyValue, Nullable, Observer, Workbook } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 
 import styles from './index.module.less';
 
@@ -36,7 +36,7 @@ export class ConditionContent extends Component<ConditionContentProps, Condition
     Render: BaseComponentRender;
 
     initialize() {
-        const component = new SpreadsheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = new SheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this.Render = component.getComponentRender();
 
         this.state = {

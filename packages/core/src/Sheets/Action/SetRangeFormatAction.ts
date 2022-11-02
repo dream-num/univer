@@ -5,13 +5,13 @@ import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
 import { Workbook } from '../Domain';
 import { IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
 /**
  * @internal
  */
-export interface ISetRangeFormatActionData extends IActionData {
+export interface ISetRangeFormatActionData extends ISheetActionData {
     cellFormat: ObjectMatrixPrimitiveType<string>;
     rangeData: IRangeData;
 }
@@ -19,7 +19,7 @@ export interface ISetRangeFormatActionData extends IActionData {
 /**
  * @internal
  */
-export class SetRangeFormatAction extends ActionBase<
+export class SetRangeFormatAction extends SheetAction<
     ISetRangeFormatActionData,
     ISetRangeFormatActionData,
     ObjectMatrixPrimitiveType<string>

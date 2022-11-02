@@ -1,7 +1,7 @@
 import { Component } from '@univer/base-component';
 import { PLUGIN_NAMES } from '@univer/core';
-import { SpreadsheetPlugin } from '../../../SpreadsheetPlugin';
 import { ModalGroupProps } from '../../../Controller/ModalGroupController';
+import { SheetPlugin } from '../../../SheetPlugin';
 
 interface IState {
     modalGroup: any[];
@@ -19,7 +19,7 @@ export class ModalGroup extends Component<any, IState> {
     }
 
     setModalGroup(group: ModalGroupProps) {
-        const plugin = this._context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
+        const plugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
 
         const modalGroup = group.map((item) => {
             const Modal = plugin?.getRegisterComponent(item);

@@ -4,14 +4,14 @@ import { Workbook } from '../Domain';
 import { Dimension } from '../../Enum/Dimension';
 import { ICellData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IDeleteRangeActionData } from './DeleteRangeAction';
 
 /**
  * @internal
  */
-export interface IInsertRangeActionData extends IActionData {
+export interface IInsertRangeActionData extends ISheetActionData {
     shiftDimension: Dimension;
     rangeData: IRangeData;
     cellValue: ObjectMatrixPrimitiveType<ICellData>;
@@ -22,7 +22,7 @@ export interface IInsertRangeActionData extends IActionData {
  *
  * @internal
  */
-export class InsertRangeAction extends ActionBase<
+export class InsertRangeAction extends SheetAction<
     IInsertRangeActionData,
     IDeleteRangeActionData
 > {

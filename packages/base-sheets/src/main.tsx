@@ -27,13 +27,13 @@ univerSheetUp.installPlugin(new UniverComponentSheet());
 FormulaPlugin.create(DEFAULT_FORMULA_DATA).installTo(univerSheetUp);
 
 // init spreadsheet plugin first
-import('./SpreadsheetPlugin').then(({ SpreadsheetPlugin }) => {
-    let spreadsheetPlugin = new SpreadsheetPlugin(uiDefaultConfigUp);
+import('./SheetPlugin').then(({ SheetPlugin }) => {
+    let sheetPlugin = new SheetPlugin(uiDefaultConfigUp);
     let clipboardPlugin = new ClipboardPlugin();
-    let numfmtPlugin = new NumfmtPlugin();
-    univerSheetUp.installPlugin(spreadsheetPlugin);
+    // let numfmtPlugin = new NumfmtPlugin();
+    univerSheetUp.installPlugin(sheetPlugin);
     univerSheetUp.installPlugin(clipboardPlugin);
     // univerSheetUp.installPlugin(new FindPlugin());
     univerSheetUp.installPlugin(new NumfmtPlugin());
-    (window as any).spreadsheetPlugin = spreadsheetPlugin;
+    (window as any).sheetPlugin = sheetPlugin;
 });

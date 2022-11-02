@@ -4,20 +4,20 @@ import { CONVERTOR_OPERATION } from '../../Const/CONST';
 import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
 import { Workbook } from '../Domain';
 import { Nullable } from '../../Shared/Types';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
 /**
  * @internal
  */
-export interface ISetTabColorActionData extends IActionData {
+export interface ISetTabColorActionData extends ISheetActionData {
     color: Nullable<string>;
 }
 
 /**
  * @internal
  */
-export class SetTabColorAction extends ActionBase<
+export class SetTabColorAction extends SheetAction<
     ISetTabColorActionData,
     ISetTabColorActionData,
     Nullable<string>

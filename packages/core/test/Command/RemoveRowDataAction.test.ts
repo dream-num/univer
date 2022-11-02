@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { Context } from '../../src/Basics';
+import { SheetContext } from '../../src/Basics';
 import { CommandManager, RemoveRowDataAction } from '../../src/Command';
 import { Workbook, Worksheet } from '../../src/Sheets/Domain';
 import { IOCContainerStartUpReady } from '../ContainerStartUp';
@@ -10,7 +10,7 @@ jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
 test('Insert a new Row', () => {
     const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
 
     const data = {

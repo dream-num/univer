@@ -1,5 +1,5 @@
 import { BaseComponentRender, BaseComponentSheet, Component } from '@univer/base-component';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 import { PLUGIN_NAMES } from '@univer/core';
 import { NUMFMT_PLUGIN_NAME } from '../../Const';
 import { ModalDataProps } from '../../Controller/NumfmtModalController';
@@ -30,10 +30,10 @@ export class NumfmtModal extends Component<IProps, IState> {
     }
 
     setModal(modalData: ModalDataProps[]) {
-        const spreadSheetPlugin = this._context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+        const SheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
 
         modalData.forEach((item) => {
-            const Label = spreadSheetPlugin.getRegisterComponent(item.children.name);
+            const Label = SheetPlugin.getRegisterComponent(item.children.name);
             if (Label) {
                 const props = item.children.props ?? {};
                 item.modal = <Label {...props} />;

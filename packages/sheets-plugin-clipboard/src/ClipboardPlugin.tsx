@@ -1,4 +1,4 @@
-import { Context, Plugin, UniverSheet } from '@univer/core';
+import { SheetContext, Plugin, UniverSheet } from '@univer/core';
 import { en, zh } from './Locale';
 import { CLIPBOARD_PLUGIN } from './Const';
 import { Copy, UniverCopy, Paste, UniverPaste } from './Domain';
@@ -13,7 +13,7 @@ interface PasteResolver {
     resolver: Paste;
 }
 
-export class ClipboardPlugin extends Plugin {
+export class ClipboardPlugin extends Plugin<any, SheetContext> {
     private _copyResolvers: CopyResolver[] = [];
 
     private _pasteResolvers: PasteResolver[] = [];
@@ -30,7 +30,8 @@ export class ClipboardPlugin extends Plugin {
         universheetInstance.installPlugin(this);
     }
 
-    onMounted(context: Context): void {
+    onMounted(context: SheetContext): void {
+        super.onMounted(context);
         context.getLocale().load({
             en,
             zh,

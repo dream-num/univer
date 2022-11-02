@@ -1,15 +1,15 @@
-import { IActionData, ActionBase, ActionObservers, ActionType } from '../../Command';
+import { ISheetActionData, SheetAction, ActionObservers, ActionType } from '../../Command';
 import { CONVERTOR_OPERATION, ACTION_NAMES } from '../../Const';
 import { WorkSheetConvertor } from '../../Convertor';
 import { INamedRange } from '../../Interfaces/INamedRange';
 import { SetNamedRange } from '../Apply/SetNamedRange';
 import { Workbook } from '../Domain';
 
-export interface ISetNamedRangeActionData extends IActionData {
+export interface ISetNamedRangeActionData extends ISheetActionData {
     namedRange: INamedRange;
 }
 
-export class SetNamedRangeAction extends ActionBase<
+export class SetNamedRangeAction extends SheetAction<
     ISetNamedRangeActionData,
     ISetNamedRangeActionData,
     INamedRange

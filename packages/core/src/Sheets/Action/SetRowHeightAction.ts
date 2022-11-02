@@ -1,12 +1,12 @@
 import { SetRowHeight } from '../Apply';
 import { Workbook } from '../Domain';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
 /**
  * @internal
  */
-export interface ISetRowHeightActionData extends IActionData {
+export interface ISetRowHeightActionData extends ISheetActionData {
     rowIndex: number;
     rowHeight: number[];
 }
@@ -16,7 +16,7 @@ export interface ISetRowHeightActionData extends IActionData {
  *
  * @internal
  */
-export class SetRowHeightAction extends ActionBase<ISetRowHeightActionData> {
+export class SetRowHeightAction extends SheetAction<ISetRowHeightActionData> {
     constructor(
         actionData: ISetRowHeightActionData,
         workbook: Workbook,

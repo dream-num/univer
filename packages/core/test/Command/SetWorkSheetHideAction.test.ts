@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { Context } from '../../src/Basics';
+import { SheetContext } from '../../src/Basics';
 import { CommandManager, SetWorkSheetHideAction } from '../../src/Command';
 import { ACTION_NAMES } from '../../src/Const';
 import { Workbook, Worksheet } from '../../src/Sheets/Domain';
@@ -11,7 +11,7 @@ import { IOCContainerStartUpReady } from '../ContainerStartUp';
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 test('Set WorkSheet Hide', () => {
     const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
 
     const sheetId = 'sheet-01';

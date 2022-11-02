@@ -1,4 +1,4 @@
-import { ACTION_NAMES, Plugin, BaseActionExtension, BaseActionExtensionFactory, ISetRangeDataActionData, IActionData } from '@univer/core';
+import { ACTION_NAMES, Plugin, BaseActionExtension, BaseActionExtensionFactory, ISetRangeDataActionData, ISheetActionData } from '@univer/core';
 
 export class FormulaActionExtension extends BaseActionExtension<ISetRangeDataActionData> {
     execute() {}
@@ -20,7 +20,7 @@ export class FormulaActionExtensionFactory extends BaseActionExtensionFactory<IS
         this._plugin = plugin;
     }
 
-    create(actionData: ISetRangeDataActionData, actionDataList: IActionData[]): BaseActionExtension<ISetRangeDataActionData> {
+    create(actionData: ISetRangeDataActionData, actionDataList: ISheetActionData[]): BaseActionExtension<ISetRangeDataActionData> {
         return new FormulaActionExtension(actionData, actionDataList);
     }
 }

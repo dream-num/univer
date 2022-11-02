@@ -272,7 +272,9 @@ pnpm install
 2. Registry：插件内部小的功能块，使用核心提供的一个 Registry 静态注册方法，方便在项目初始化的时候快速搜集内部模块的扩展实例
 3. Register：Register 将上一步 Registry 注册的方法，再统一动态注册管理，并且提供直接将内部模块动态注册上去的方法，以便开发者在外部进行动态扩增加某一个模块
 
-## 插件开发流程
+## 插件开发实践
+
+### 新建插件
 
 这里演示在 Univer 主仓库内部新建一个插件的流程
 
@@ -285,15 +287,20 @@ pnpm install
 
     然后再回到主目录运行生成插件的命令
 
-2. 通过下方命令，在主仓库内部生成一个名称为`data-validation`的插件
+2. 运行 cli 命令来选择插件
 
-    ```sh
-    npm run univer-cli create data-validation inner
+    ```shell
+    npm run univer-cli create inner
     ```
 
-    程序将会在 `packages` 文件夹下，生成一个完整的插件模板，比如`packages/sheets-plugin-data-validation`。
+    其中 create 表示创建一个插件，inner 表示在 Univer 主仓库内部新建插件，也就是放到 packages 文件夹下。如果想在自己电脑的一个空白目录用脚手架新建一个插件，就不用加 inner，运行`npm run univer-cli create`即可。
 
-    其中 inner 意思就是在 Univer 主仓库内部新建插件，也就是放到 packages 文件夹下。如果想在自己电脑的一个空白目录用脚手架新建一个插件，就不用加 inner。
+    接着选择你想要的模板
+
+    - base：基础插件，构建类似 `base-sheets`、`base-docs`、`base-slides` 的插件
+    - sheets-plugin：表格插件，构建类似 `sheet-plugin-sort`、`sheet-plugin-data-validation`的插件
+
+    接着再填写你的插件名称，比如填写 `data-validation`，程序将会在 `packages` 文件夹下，生成一个完整的插件模板，比如`packages/sheets-plugin-data-validation`。
 
 3. 根据命令行的提示，使用 pnpm 安装依赖 和 启动开发模式。
 
@@ -311,9 +318,7 @@ pnpm install
 
     这里用到了 pnpm 的 `--filter` 的功能来筛选出指定的插件来运行命令，更多学习内容请移步[官网 pnpm 过滤](https://pnpm.io/zh/filtering)
 
-4. 依据插件模板生成的新插件，默认会将插件里的 DOM 元素挂载到界面上的工具栏，内部是在插件里引入了`@univer/base-sheets`，然后通过其 API `addButton` 来动态挂载 DOM 元素，所以工具栏会多出一个`data-validation`插件按钮，即表明插件加载成功
-
-5. 如果需要测试其他的插件和当前插件一起运行，需要在当前插件里安装您所需要的插件，比如以下命令是在`@univer/base-sheets` 插件中安装 `@univer/sheets-plugin-alternating-colors` 插件：
+4. 如果需要测试其他的插件和当前插件一起运行，需要在当前插件里安装您所需要的插件，比如以下命令是在`@univer/base-sheets` 插件中安装 `@univer/sheets-plugin-alternating-colors` 插件：
 
     ```sh
     pnpm add @univer/sheets-plugin-alternating-colors --filter @univer/base-sheets
@@ -327,19 +332,15 @@ pnpm install
 
     常用组件 `PLUGIN_NAMES.SPREADSHEET`的方式，其它插件采用自己抛出变量，如`ALTERNATING_PLUGIN_NAME`
 
-## 插件开发实践
-
-以 base-sheets 插件为例
-
 ### 插件目录
 
-一个标准的插件目录结构 `src` 目录如下所示
+以 base-sheets 插件为例，一个标准的插件目录结构 `src` 目录如下所示
 
 ```sh
 │  index.ts # 插件出口
 │  main.tsx # 插件调试预览入口
 │  preact.d.ts # preact 声明文件
-│  SpreadsheetPlugin.tsx # 插件核心导出类（实际名称会根据插件名称替换）
+│  SheetPlugin.tsx # 插件核心导出类（实际名称会根据插件名称替换）
 │
 ├─Controller # 根据Model改变view状态；如果是preact，那就只涉及一些公共业务逻辑，修改view还是在preact的view里
 │      index.ts # 出口
@@ -351,7 +352,7 @@ pnpm install
 │  │
 │  ├─Enum # 枚举
 │  │      index.ts # 出口
-│  │      
+│  │
 │  ├─Interfaces # 接口
 │  │      index.ts # 出口
 │  │
@@ -390,7 +391,9 @@ pnpm install
 
 ### 挂载设置面板
 
--   filterPlugin 类中的 initialize 初始化时，使用 SpreadsheetPlugin 插件提供的 API 来挂载 JSX 组件
+依据插件模板生成的新插件，默认会将插件里的 DOM 元素挂载到界面上的工具栏，内部是在插件里引入了`@univer/base-sheets`，然后通过其 API `addButton` 来动态挂载 DOM 元素，所以工具栏会多出一个`data-validation`插件按钮，即表明插件加载成功
+
+-   filterPlugin 类中的 initialize 初始化时，使用 SheetPlugin 插件提供的 API 来挂载 JSX 组件
 
     现有的 API 有
 
@@ -406,7 +409,7 @@ pnpm install
             ```tsx
             export class FilterPlugin extends Plugin {
                 // 其他代码
-                initialize(context: Context): void {
+                initialize(context: SheetContext): void {
                     // 其他代码
                     const item: IToolBarItemProps = {
                         locale: 'filter',
@@ -414,7 +417,7 @@ pnpm install
                         show: true,
                         label: <FilterButton config={config} super={this} />,
                     };
-                    context.getPluginManager().getPluginByName<SpreadsheetPlugin>('spreadsheet')?.addButton(item);
+                    context.getPluginManager().getPluginByName<SheetPlugin>('spreadsheet')?.addButton(item);
                 }
             }
             ```
@@ -429,8 +432,8 @@ pnpm install
                 type: ISlotElement.JSX,
                 content: <div>中间的alternating</div>,
             };
-            context.getPluginManager().getPluginByName<SpreadsheetPlugin>('spreadsheet')?.addMain(mainItem);
-            context.getPluginManager().getPluginByName<SpreadsheetPlugin>('spreadsheet')?.showMainByName(ALTERNATING_COLORS_PLUGIN_NAME, true);
+            context.getPluginManager().getPluginByName<SheetPlugin>('spreadsheet')?.addMain(mainItem);
+            context.getPluginManager().getPluginByName<SheetPlugin>('spreadsheet')?.showMainByName(ALTERNATING_COLORS_PLUGIN_NAME, true);
             ```
 
             参照源码 [./packages/sheets-plugin-alternating-colors/src/AlternatingColorsPlugin.tsx)](http://github.com/dream-num/univer/blob/master/packages/sheets-plugin-alternating-colors/src/AlternatingColorsPlugin.tsx)
@@ -439,7 +442,7 @@ pnpm install
 
             ```tsx
             export class AlternatingColorsPlugin extends Plugin {
-                initialize(context: Context): void {
+                initialize(context: SheetContext): void {
                     // 其他代码
                     const rangeData = {
                         startRow: 0,
@@ -466,14 +469,14 @@ pnpm install
                         type: ISlotElement.JSX,
                         content: <AlternatingColorsSide config={{ rangeData: rangeData, context: context, banding: banding, alternatingColors: this._alternatingColors }} />,
                     };
-                    context.getPluginManager().getPluginByName<SpreadsheetPlugin>('spreadsheet')?.addSider(panelItem);
+                    context.getPluginManager().getPluginByName<SheetPlugin>('spreadsheet')?.addSider(panelItem);
                 }
             }
             ```
 
             参照源码 [./packages/sheets-plugin-alternating-colors/src/AlternatingColorsPlugin.tsx)](http://github.com/dream-num/univer/blob/master/packages/sheets-plugin-alternating-colors/src/AlternatingColorsPlugin.tsx)
 
--   除了没有您想要的挂载函数，还可以考虑使用 SpreadsheetPlugin 插件抛出的 DOM 元素，外部插件直接使用`appendChild`挂载。
+-   除了没有您想要的挂载函数，还可以考虑使用 SheetPlugin 插件抛出的 DOM 元素，外部插件直接使用`appendChild`挂载。
 
     现有抛出元素的 API 有
 
@@ -486,11 +489,11 @@ pnpm install
             一个可以参照的案例:
 
             ```tsx
-            export class SpreadsheetPlugin extends Plugin {
+            export class SheetPlugin extends Plugin {
                 // 其他代码
                 register(engineInstance: Engine) {
                     // 获取到内容区DOM
-                    let container = this.context.getPluginManager().getPluginByName<SpreadsheetPlugin>('spreadsheet')?.getContentRef().current!;
+                    let container = this.context.getPluginManager().getPluginByName<SheetPlugin>('spreadsheet')?.getContentRef().current!;
 
                     // 将内容区设置为引擎的容器
                     engineInstance.setContainer(container);
@@ -620,7 +623,7 @@ npm run test:ui
 
 UI 测试主要是测试`@univer/style-universheet`的组件
 
--   未与核心耦合、未使用核心`Context`/`locale`的无状态组件，编写单元测试，测试文件的目录和组件在一个层级，参照`./packages/style-universheet/src/components/Container>`组件
+-   未与核心耦合、未使用核心`SheetContext`/`locale`的无状态组件，编写单元测试，测试文件的目录和组件在一个层级，参照`./packages/style-universheet/src/components/Container>`组件
 
     ```sh
       Container
@@ -636,7 +639,7 @@ UI 测试主要是测试`@univer/style-universheet`的组件
 
     如果您想为`Container`组件增加测试代码，直接在`Container.test.tsx`文件中增加`test`方法即可。
 
--   与核心耦合、使用了核心`Context`/`locale`的有状态组件，编写 e2e 测试，技术上采用`Playwright`。因为要启动一个浏览器实例和本地服务，所以我们将所有需要 e2e 测试的组件放在一个文件中管理，测试文件为`./packages/style-universheet/test/components.e2e.spec.ts`，每个组件编写一个`it`用例即可，不要和之前的函数命名冲突即可。
+-   与核心耦合、使用了核心`SheetContext`/`locale`的有状态组件，编写 e2e 测试，技术上采用`Playwright`。因为要启动一个浏览器实例和本地服务，所以我们将所有需要 e2e 测试的组件放在一个文件中管理，测试文件为`./packages/style-universheet/test/components.e2e.spec.ts`，每个组件编写一个`it`用例即可，不要和之前的函数命名冲突即可。
 
 Tips:
 
@@ -825,7 +828,7 @@ export class AlternatingColorsPlugin extends Plugin {
 
     ```js
     // packages/core/src/Command/Action/SetTabColorAction.ts
-    interface ISetTabColorActionData extends IActionData {
+    interface ISetTabColorActionData extends ISheetActionData {
         color: Nullable<string>;
     }
     ```
@@ -873,7 +876,7 @@ export class AlternatingColorsPlugin extends Plugin {
         ```ts
         test('Test setTabColor', () => {
             const container = IOCContainerStartUpReady();
-            const context = container.getSingleton<Context>('Context');
+            const context = container.getSingleton<SheetContext>('SheetContext');
             const workbook = container.getSingleton<WorkBook>('WorkBook');
             const commandManager = workbook.getCommandManager();
 
@@ -969,7 +972,7 @@ Tips:
     };
     ```
 
-    在`base-sheets/src/SpreadsheetPlugin.tsx`中配置进`config`传输到`base-sheets/src/View/UI/SpreadsheetButton.tsx`组件中使用
+    在`base-sheets/src/SheetPlugin.tsx`中配置进`config`传输到`base-sheets/src/View/UI/SpreadsheetButton.tsx`组件中使用
 
     ```ts
     const config: ISheetContainerConfig = {
@@ -1166,11 +1169,11 @@ import { UniverSheet } from '@univer/core';
 import '@univer/core/lib/style.css';
 import { UniverComponentSheet } from '@univer/style-universheet';
 import { RenderEngine } from '@univer/base-render';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 
 // 初始化universheet
 const univerSheet = UniverSheet.newInstance({
-    id: 'workbook-01',
+  id: 'workbook-01',
 });
 
 // 渲染引擎
@@ -1181,10 +1184,10 @@ univerSheetUp.installPlugin(new UniverComponentSheet());
 
 // 基础 sheets 插件
 univerSheetUp.installPlugin(
-    new SpreadsheetPlugin({
-        container: 'universheet-demo-up',
-        layout: 'auto',
-    })
+  new SheetPlugin({
+    container: 'universheet-demo-up',
+    layout: 'auto',
+  })
 );
 // 加载筛选插件
 univerSheet.installPlugin(new FilterPlugin());
@@ -1206,11 +1209,11 @@ import { UniverSheet } from '@univer/core';
 import '@univer/core/lib/style.css';
 import { UniverComponentSheet } from '@univer/style-universheet';
 import { RenderEngine } from '@univer/base-render';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 
 // 初始化universheet
 const univerSheet = UniverSheet.newInstance({
-    id: 'workbook-01',
+  id: 'workbook-01',
 });
 
 // 渲染引擎
@@ -1221,15 +1224,15 @@ univerSheetUp.installPlugin(new UniverComponentSheet());
 
 // 基础 sheets 插件
 univerSheetUp.installPlugin(
-    new SpreadsheetPlugin({
-        container: 'universheet-demo-up',
-        layout: 'auto',
-    })
+  new SheetPlugin({
+    container: 'universheet-demo-up',
+    layout: 'auto',
+  })
 );
 
 // 动态加载筛选插件
 import('@univer/sheets-plugin-filter').then(({ FilterPlugin }) => {
-    univerSheetUp.installPlugin(new FilterPlugin());
+  univerSheetUp.installPlugin(new FilterPlugin());
 });
 ```
 

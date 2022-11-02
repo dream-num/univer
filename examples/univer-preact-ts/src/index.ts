@@ -1,7 +1,7 @@
 import { IStyleConfig } from '@univer/base-component';
 import { IWorkbookConfig, UniverSheet } from '@univer/core';
 import { FilterPlugin } from '@univer/sheets-plugin-filter';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 import { StyleUniver } from '@univer/style-universheet';
 
 interface IPropsCustom {
@@ -18,7 +18,7 @@ class UniverSheetCustom {
         const univerSheetUp = UniverSheet.newInstance(config.workbookConfig);
 
         univerSheetUp.installPlugin(new StyleUniver(config.spreadsheetConfig));
-        univerSheetUp.installPlugin(new SpreadsheetPlugin());
+        univerSheetUp.installPlugin(new SheetPlugin());
         univerSheetUp.installPlugin(new FilterPlugin());
 
         return univerSheetUp;

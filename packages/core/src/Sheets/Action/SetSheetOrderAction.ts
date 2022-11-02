@@ -1,14 +1,14 @@
 import { SetSheetOrder } from '../Apply';
 import { Workbook } from '../Domain';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
-export interface ISetSheetOrderActionData extends IActionData {
+export interface ISetSheetOrderActionData extends ISheetActionData {
     sheetId: string;
     order: number;
 }
 
-export class SetSheetOrderAction extends ActionBase<
+export class SetSheetOrderAction extends SheetAction<
     ISetSheetOrderActionData,
     ISetSheetOrderActionData
 > {

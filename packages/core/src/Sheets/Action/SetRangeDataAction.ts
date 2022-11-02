@@ -5,13 +5,13 @@ import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
 import { Workbook } from '../Domain';
 import { ICellData, ICopyToOptionsData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
 /**
  * @internal
  */
-export interface ISetRangeDataActionData extends IActionData {
+export interface ISetRangeDataActionData extends ISheetActionData {
     cellValue: ObjectMatrixPrimitiveType<ICellData> | ICellData;
     rangeData: IRangeData;
     options?: ICopyToOptionsData;
@@ -22,7 +22,7 @@ export interface ISetRangeDataActionData extends IActionData {
  *
  * @internal
  */
-export class SetRangeDataAction extends ActionBase<
+export class SetRangeDataAction extends SheetAction<
     ISetRangeDataActionData,
     ISetRangeDataActionData,
     ObjectMatrixPrimitiveType<ICellData> | ICellData

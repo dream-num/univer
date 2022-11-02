@@ -1,5 +1,5 @@
-import { Context, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { CellExtensionManager, SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetContext, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { CellExtensionManager, SheetPlugin } from '@univer/base-sheets';
 import { FormulaEnginePlugin } from '@univer/base-formula-engine';
 import { FormulaButton } from './UI/FormulaButton';
 import { zh, en } from './Locale';
@@ -10,7 +10,7 @@ import { FormulaController } from './Controller/FormulaController';
 import { firstLoader } from './Controller/FirstLoader';
 import { FormulaCellExtensionFactory } from './Basic/Register/FormulaCellExtension';
 
-export class FormulaPlugin extends Plugin {
+export class FormulaPlugin extends Plugin<any, SheetContext> {
     private _formulaController: FormulaController;
 
     constructor(private _config?: IFormulaConfig) {
@@ -39,8 +39,8 @@ export class FormulaPlugin extends Plugin {
         firstLoader(this._formulaController);
     }
 
-    initialize(): void {
-        const context = this.getContext();
+    initialize(context: SheetContext): void {
+        this.context = context;
         /**
          * load more Locale object
          */
@@ -57,15 +57,15 @@ export class FormulaPlugin extends Plugin {
             show: true,
             label: <FormulaButton config={config} />,
         };
-        context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addToolButton(item);
+        context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addToolButton(item);
 
         this.registerExtension();
     }
 
     onMapping(IOC: IOCContainer): void {}
 
-    onMounted(ctx: Context): void {
-        this.initialize();
+    onMounted(context: SheetContext): void {
+        this.initialize(context);
     }
 
     onDestroy(): void {}

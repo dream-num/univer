@@ -1,6 +1,6 @@
 import { ISlotElement, ISlotProps, IToolBarItemProps } from '@univer/base-component';
-import { SheetsCommand, Plugin, PLUGIN_NAMES, Nullable, Worksheet, IOCContainer, UniverSheet } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetCommand, Plugin, PLUGIN_NAMES, Nullable, Worksheet, IOCContainer, UniverSheet } from '@univer/core';
+import { SheetPlugin } from '@univer/base-sheets';
 import { IPictureProps } from '@univer/base-render';
 import { ACTION_NAMES } from './Const';
 import { ImagePluginObserve, install, uninstall } from './Basic/Observer';
@@ -77,7 +77,7 @@ export class OverGridImage {
             actionName: ACTION_NAMES.SET_IMAGE_TYPE_ACTION,
             sheetId: this._property.sheetId,
         };
-        const command = new SheetsCommand(workbook, configure);
+        const command = new SheetCommand(workbook, configure);
         manager.invoke(command);
     }
 }
@@ -112,7 +112,7 @@ export class OverGridImagePlugin extends Plugin<ImagePluginObserve> {
 
     onMounted(): void {
         install(this);
-        const plugin = this.getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+        const plugin = this.getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
         const panel: ISlotProps = {
             name: OVER_GRID_IMAGE_PLUGIN_NAME,
             type: ISlotElement.JSX,
@@ -143,7 +143,7 @@ export class OverGridImagePlugin extends Plugin<ImagePluginObserve> {
                                 borderWidth: 5,
                                 borderColor: 'red',
                             };
-                            const command = new SheetsCommand(workbook, configure);
+                            const command = new SheetCommand(workbook, configure);
                             manager.invoke(command);
                         };
                     }}
@@ -160,12 +160,12 @@ export class OverGridImagePlugin extends Plugin<ImagePluginObserve> {
     }
 
     hideOverImagePanel(): void {
-        const plugin: SpreadsheetPlugin = this.getPluginByName(PLUGIN_NAMES.SPREADSHEET)!;
+        const plugin: SheetPlugin = this.getPluginByName(PLUGIN_NAMES.SPREADSHEET)!;
         plugin.showSiderByName(OVER_GRID_IMAGE_PLUGIN_NAME, false);
     }
 
     showOverImagePanel(): void {
-        const plugin: SpreadsheetPlugin = this.getPluginByName(PLUGIN_NAMES.SPREADSHEET)!;
+        const plugin: SheetPlugin = this.getPluginByName(PLUGIN_NAMES.SPREADSHEET)!;
         plugin.showSiderByName(OVER_GRID_IMAGE_PLUGIN_NAME, true);
     }
 

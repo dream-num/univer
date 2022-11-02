@@ -1,11 +1,11 @@
-import { ActionBase, ActionObservers, IActionData, ObjectMatrixPrimitiveType, Workbook } from '@univer/core';
+import { SheetAction, ActionObservers, ISheetActionData, ObjectMatrixPrimitiveType, Workbook } from '@univer/core';
 import { SetNumfmtRangeData } from '../Apply/SetNumfmtRangeData';
 
-export interface ISetNumfmtRangeActionData extends IActionData {
+export interface ISetNumfmtRangeActionData extends ISheetActionData {
     numfmtMatrix: ObjectMatrixPrimitiveType<string>;
 }
 
-export class SetNumfmtRangeDataAction extends ActionBase<ISetNumfmtRangeActionData, ISetNumfmtRangeActionData> {
+export class SetNumfmtRangeDataAction extends SheetAction<ISetNumfmtRangeActionData, ISetNumfmtRangeActionData> {
     constructor(actionData: ISetNumfmtRangeActionData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._doActionData = {

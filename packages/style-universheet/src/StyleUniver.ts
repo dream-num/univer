@@ -9,7 +9,7 @@ import {
     FunctionComponent,
     PropsFrom,
 } from '@univer/base-component';
-import { Context, IOCContainer, Plugin } from '@univer/core';
+import { SheetContext, IOCContainer, Plugin } from '@univer/core';
 // import { UniverSingleButton } from './Components';
 import { UniverButton } from './Components/Button/Button';
 import { UniverBorderDashDot } from './Components/CanvasIcon/BorderLine/BorderDashDot';
@@ -138,7 +138,7 @@ export class UniverComponentSheet extends Plugin implements BaseComponentSheet {
 
     onMapping(container: IOCContainer): void {}
 
-    onMounted(context: Context): void {}
+    onMounted(context: SheetContext): void {}
 
     getComponentRender(): BaseComponentRender {
         return new UniverComponentRender(this.getComponentFactory());
@@ -558,7 +558,7 @@ export class UniverComponentFactory implements BaseComponentFactory {
 //         return new GoogleComponentFactory();
 //     }
 //     onMapping(container: IOCContainer): void {}
-//     onMounted(ctx: Context): void {}
+//     onMounted(ctx: SheetContext): void {}
 // }
 //
 // export class GoogleComponentFactory implements ComponentFactory {

@@ -1,7 +1,7 @@
 import { Component, IToolBarItemProps } from '@univer/base-component';
 
-import { Context, Nullable, Observer, PLUGIN_NAMES, Workbook } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetContext, Nullable, Observer, PLUGIN_NAMES, Workbook } from '@univer/core';
+import { SheetPlugin } from '@univer/base-sheets';
 
 import { ALTERNATING_COLORS_PLUGIN_NAME } from '../Const';
 import { IProps } from '../IData/IAlternatingColors';
@@ -24,8 +24,8 @@ export class AlternatingColorsButton extends Component<IProps, IState> {
             type: 'single',
             label: <OrderIcon />,
             show: true,
-            onClick: (item, context: Context) => {
-                context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.showSiderByName(ALTERNATING_COLORS_PLUGIN_NAME, true);
+            onClick: (item, context: SheetContext) => {
+                context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.showSiderByName(ALTERNATING_COLORS_PLUGIN_NAME, true);
             },
         };
 

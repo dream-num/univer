@@ -1,6 +1,6 @@
 import { BaseComponentRender, BaseComponentSheet, Component, IToolBarItemProps, ModalProps } from '@univer/base-component';
 import { Nullable, Observer, Workbook } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 import { IProps } from '../IData/IDataValidation';
 import { DataValidationContent } from './DataValidationContent';
 import styles from './index.module.less';
@@ -24,7 +24,7 @@ export class DataValidationButton extends Component<IProps, IState> {
 
     initialize(props: IProps) {
         // super(props);
-        const component = new SpreadsheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = new SheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this.Render = component.getComponentRender();
 
         const CheckIcon = this.Render.renderFunction('CheckIcon');

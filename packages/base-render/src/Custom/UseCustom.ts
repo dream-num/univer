@@ -1,4 +1,4 @@
-import { Context } from '@univer/core';
+import { SheetContext } from '@univer/core';
 import { IDocumentSkeletonPage, ISectionBreakConfig, ISkeletonResourceReference } from '..';
 import { BlockPlugin, BulletPlugin } from '.';
 
@@ -11,7 +11,7 @@ export function dealWidthCustomBlock(
     curPage: IDocumentSkeletonPage,
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
-    context?: Context
+    context?: SheetContext
 ) {
     if (!context) {
         return [];
@@ -23,7 +23,7 @@ export function dealWidthCustomBlock(
     return [];
 }
 
-export function dealWidthCustomBulletOrderedSymbol(startIndex: number, startNumber: number, glyphType: string, context?: Context) {
+export function dealWidthCustomBulletOrderedSymbol(startIndex: number, startNumber: number, glyphType: string, context?: SheetContext) {
     if (!context) {
         return '';
     }

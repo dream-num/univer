@@ -1,4 +1,4 @@
-import { Context, IGridRange, IUnitRange, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { SheetContext, IGridRange, IUnitRange, Plugin, PLUGIN_NAMES } from '@univer/core';
 
 import { IOCContainer } from '@univer/core';
 import { LexerTreeMaker } from './Analysis/Lexer';
@@ -76,7 +76,7 @@ export class FormulaEnginePlugin extends Plugin<FormulaEnginePluginObserver> {
 
     onMapping(IOC: IOCContainer): void {}
 
-    onMounted(ctx: Context): void {
+    onMounted(ctx: SheetContext): void {
         this.initialize();
     }
 

@@ -1,6 +1,6 @@
-import { SheetsCommand, Range, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType, PLUGIN_NAMES, ACTION_NAMES } from '@univer/core';
+import { SheetCommand, Range, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType, PLUGIN_NAMES, ACTION_NAMES } from '@univer/core';
 import { BaseComponentRender, BaseComponentSheet } from '@univer/base-component';
-import { IToolBarItemProps, SpreadsheetPlugin } from '@univer/base-sheets';
+import { IToolBarItemProps, SheetPlugin } from '@univer/base-sheets';
 import { NumfmtModel } from '../Model/NumfmtModel';
 import { NUMFMT_PLUGIN_NAME } from '../Const';
 import { DEFAULT_DATA } from '../Const/DEFAULT_DATA';
@@ -11,7 +11,7 @@ export class NumfmtController {
 
     protected _plugin: NumfmtPlugin;
 
-    private _spreadSheetPlugin: SpreadsheetPlugin;
+    private _sheetPlugin: SheetPlugin;
 
     private _numfmtList: IToolBarItemProps;
 
@@ -20,7 +20,7 @@ export class NumfmtController {
     constructor(plugin: NumfmtPlugin) {
         this._model = new NumfmtModel();
         this._plugin = plugin;
-        this._spreadSheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+        this._sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
 
         this.initRegisterComponent();
 
@@ -57,7 +57,7 @@ export class NumfmtController {
             ],
         };
 
-        this._spreadSheetPlugin.addToolButton(this._numfmtList);
+        this._sheetPlugin.addToolButton(this._numfmtList);
     }
 
     // 注册自定义组件
@@ -70,7 +70,7 @@ export class NumfmtController {
         };
 
         for (let k in registerIcon) {
-            this._spreadSheetPlugin.registerComponent(k, registerIcon[k]);
+            this._sheetPlugin.registerComponent(k, registerIcon[k]);
         }
     }
 
@@ -91,7 +91,7 @@ export class NumfmtController {
             rangeData: numfmtRange,
             cellValue: numfmtMatrix.toJSON(),
         };
-        const command = new SheetsCommand(pluginContext.getWorkBook(), config);
+        const command = new SheetCommand(pluginContext.getWorkBook(), config);
         commandManager.invoke(command);
     }
 
@@ -107,7 +107,7 @@ export class NumfmtController {
             rangeData: numfmtRange,
             cellValue: numfmtMatrix.toJSON(),
         };
-        const command = new SheetsCommand(pluginContext.getWorkBook(), config);
+        const command = new SheetCommand(pluginContext.getWorkBook(), config);
         commandManager.invoke(command);
     }
 }

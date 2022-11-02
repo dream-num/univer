@@ -1,6 +1,6 @@
 import { BaseComponentRender, BaseComponentSheet, Component } from '@univer/base-component';
 import { Nullable, Observer, Workbook } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 import styles from './index.module.less';
 
 type RuleManageProps = {
@@ -24,7 +24,7 @@ export class RuleManage extends Component<RuleManageProps, RuleManageState> {
     Render: BaseComponentRender;
 
     initialize() {
-        const component = new SpreadsheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = new SheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this.Render = component.getComponentRender();
 
         this.state = {

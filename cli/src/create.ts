@@ -8,6 +8,7 @@
 
 import chalk from 'chalk';
 import * as fs from 'fs';
+import * as inquirer from 'inquirer';
 import * as path from 'path';
 import * as template from './utils/template';
 interface CliOptions {
@@ -20,8 +21,7 @@ interface CliOptions {
 // interface IOptions {
 //     inner?: boolean;
 // }
-export function create(plugin: string) {
-
+export function create() {
     const cliOptions: CliOptions = {
         //@ts-ignore
         projectName: '',
@@ -34,9 +34,14 @@ export function create(plugin: string) {
     const SKIP_FILES = ['node_modules', '.template.json'];
 
     const CURR_DIR = process.cwd();
-    const inner = process.argv[4];
+    const inner = process.argv[3];
 
     let DESTINATION_DIR = '';
+    let projectChoice = '';
+    let projectValue = '';
+    let projectUpperValue = '';
+    let projectConstantValue = '';
+    let projectName = '';
 
     if (inner === 'inner') {
         // core repository create plugin
@@ -48,33 +53,50 @@ export function create(plugin: string) {
 
     const TEMP_PLUGIN_NAME = 'Sort';
 
-    const projectChoice = 'plugin-temp';
-    const projectValue = covertToCamelCase(plugin);
-    const projectUpperValue = covertToPascalCase(projectValue);
-    const projectConstantValue = covertToConstantCase(projectValue);
-    const projectName = covertToParamCase(projectValue);
+    const CHOICES = fs.readdirSync(path.join(__dirname, 'templates'));
+    const QUESTIONS = [
+        {
+            name: 'template',
+            type: 'list',
+            message: 'What template would you like to use?',
+            choices: CHOICES,
+        },
+        {
+            name: 'name',
+            type: 'input',
+            message: 'Please input a new plugin name:',
+        },
+    ];
 
-    //@ts-ignore
-    const templatePath = path.join(__dirname, 'templates', projectChoice);
+    inquirer.prompt(QUESTIONS).then((answers) => {
+        projectChoice = answers['template'] as string;
+        projectValue = covertToCamelCase(answers['name'] as string);
+        projectUpperValue = covertToPascalCase(projectValue);
+        projectConstantValue = covertToConstantCase(projectValue);
+        projectName = covertToParamCase(projectValue, projectChoice);
 
-    // sheets-plugin-data-validation => sheets-plugin-data-validation
-    //@ts-ignore
-    const tartgetPath = path.join(DESTINATION_DIR, projectName);
+        //@ts-ignore
+        const templatePath = path.join(__dirname, 'templates', projectChoice);
 
-    cliOptions.projectName = projectName;
-    cliOptions.templateName = projectChoice;
-    cliOptions.templatePath = templatePath;
-    cliOptions.tartgetPath = tartgetPath;
+        // sheets-plugin-data-validation => sheets-plugin-data-validation
+        //@ts-ignore
+        const tartgetPath = path.join(DESTINATION_DIR, projectName);
 
-    if (!createProject(tartgetPath)) {
-        return;
-    }
+        cliOptions.projectName = projectName;
+        cliOptions.templateName = projectChoice;
+        cliOptions.templatePath = templatePath;
+        cliOptions.tartgetPath = tartgetPath;
 
-    //@ts-ignore
-    createDirectoryContents(templatePath, projectName, cliOptions);
+        if (!createProject(tartgetPath)) {
+            return;
+        }
 
-    // postProcess(cliOptions);
-    devTips(projectName);
+        //@ts-ignore
+        createDirectoryContents(templatePath, projectName, cliOptions);
+
+        // postProcess(cliOptions);
+        devTips(projectName);
+    });
 
     function createDirectoryContents(templatePath: string, projectName: string) {
         // read all files/folders (1 level) from template folder
@@ -150,7 +172,7 @@ function covertToPascalCase(str: string) {
         .replace(/-/g, '');
 }
 
-function covertToParamCase(str: string, prefix = 'sheets-plugin') {
+function covertToParamCase(str: string, prefix: string) {
     return prefix + str.replace(/(-\w|[A-Z]|\b\w)/g, (match) => (match.indexOf('-') > -1 ? match.toLowerCase() : `-${match.toLowerCase()}`));
 }
 

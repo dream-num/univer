@@ -1,6 +1,6 @@
 import { BaseComponentRender, BaseComponentSheet, Component, ModalProps } from '@univer/base-component';
 import { PLUGIN_NAMES } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 import { IProps } from '../../IData/IFind';
 import { FindPlugin } from '../../FindPlugin';
 import { FIND_PLUGIN_NAME } from '../../Const/PLUGIN_NAME';
@@ -32,10 +32,10 @@ export class FindModal extends Component<IProps, IState> {
     }
 
     setModal(modalData: ModalDataProps[]) {
-        const spreadSheetPlugin = this._context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+        const SheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
 
         modalData.forEach((item) => {
-            const component = spreadSheetPlugin.getRegisterComponent(item.children as string);
+            const component = SheetPlugin.getRegisterComponent(item.children as string);
             if (component) {
                 const Label = component.component;
                 const props = component.props ?? {};

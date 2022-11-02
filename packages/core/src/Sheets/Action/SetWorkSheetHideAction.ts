@@ -1,21 +1,21 @@
 import { SetWorkSheetHideService } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { BooleanNumber } from '../../Enum';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
 import { Workbook } from '../Domain';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
 /**
  * @internal
  */
-export interface ISetWorkSheetHideActionData extends IActionData {
+export interface ISetWorkSheetHideActionData extends ISheetActionData {
     hidden: BooleanNumber;
 }
 
 /**
  * @internal
  */
-export class SetWorkSheetHideAction extends ActionBase<
+export class SetWorkSheetHideAction extends SheetAction<
     ISetWorkSheetHideActionData,
     ISetWorkSheetHideActionData,
     BooleanNumber

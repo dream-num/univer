@@ -1,10 +1,10 @@
-import { Context, Plugin, PLUGIN_NAMES, UniverSheet } from '@univer/core';
+import { SheetContext, Plugin, PLUGIN_NAMES, UniverSheet } from '@univer/core';
 import { GroupButton } from './View/UI/GroupButton';
 import { zh, en } from './Locale';
 
 import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
 import { IOCContainer } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 import { GROUP_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
 
 export interface IGroupPluginConfig {}
@@ -39,12 +39,12 @@ export class GroupPlugin extends Plugin {
             show: true,
             label: <GroupButton />,
         };
-        context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
+        context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
     }
 
     onMapping(IOC: IOCContainer): void {}
 
-    onMounted(ctx: Context): void {
+    onMounted(ctx: SheetContext): void {
         this.initialize();
     }
 

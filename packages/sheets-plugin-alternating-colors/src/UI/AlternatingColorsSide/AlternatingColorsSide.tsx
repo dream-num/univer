@@ -1,6 +1,6 @@
 import { closest, Component, createRef } from '@univer/base-component';
 import { IKeyValue, IRangeStringData, Nullable, Observer, PluginManager, PLUGIN_NAMES, Tools, Workbook } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 
 import { AlternatingColorsPlugin } from '../../AlternatingColorsPlugin';
 import { BandingTheme } from '../../BandingTheme';
@@ -171,7 +171,7 @@ export class AlternatingColorsSide extends Component<IPanelProps, IState> {
     handleClosePanel() {
         const manage: PluginManager = this._context.getPluginManager();
 
-        manage.getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.showSiderByName(ALTERNATING_COLORS_PLUGIN_NAME, false);
+        manage.getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.showSiderByName(ALTERNATING_COLORS_PLUGIN_NAME, false);
     }
 
     /**

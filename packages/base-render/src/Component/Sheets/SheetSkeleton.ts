@@ -1,7 +1,7 @@
 import {
     BlockType,
     BooleanNumber,
-    Context,
+    SheetContext,
     HorizontalAlign,
     IBorderStyleData,
     ICellData,
@@ -36,7 +36,7 @@ import { getFontStyleString, getCellPositionByIndex, isRectIntersect } from '../
 import { IFontLocale } from '../../Basics/Interfaces';
 import { IBoundRect } from '../../Basics/Vector2';
 import { Skeleton } from '../Skeleton';
-import { DocumentSkeleton } from '../Docs/DocsSkeleton';
+import { DocumentSkeleton } from '../Docs/DocSkeleton';
 
 interface ISetCellCache {
     cache: IStylesCache;
@@ -102,7 +102,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     private _stylesCache: IStylesCache;
 
-    constructor(private _config: IWorksheetConfig, private _cellData: ObjectMatrix<ICellData>, private _styles: Styles, context: Context) {
+    constructor(private _config: IWorksheetConfig, private _cellData: ObjectMatrix<ICellData>, private _styles: Styles, context: SheetContext) {
         super(context);
         this.updateMatrix();
         this.updateDataMergeCacheAll();
@@ -978,7 +978,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return cacheDataMerge;
     }
 
-    static create(config: IWorksheetConfig, cellData: ObjectMatrix<ICellData>, styles: Styles, context: Context) {
+    static create(config: IWorksheetConfig, cellData: ObjectMatrix<ICellData>, styles: Styles, context: SheetContext) {
         return new SpreadsheetSkeleton(config, cellData, styles, context);
     }
 }

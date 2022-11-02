@@ -1,15 +1,15 @@
 import { BooleanNumber, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univer/core';
-import { docsComponent } from './DocsComponent';
+import { DocComponent } from './DocComponent';
 import { LineType } from '../../Basics/IDocumentSkeletonCached';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';
 import { DocumentsSpanAndLineExtensionRegistry, IExtensionConfig } from '../Extension';
-import { DocumentSkeleton } from './DocsSkeleton';
-import { DOCS_EXTENSION_TYPE } from './DocsExtension';
+import { DocumentSkeleton } from './DocSkeleton';
+import { DOCS_EXTENSION_TYPE } from './DocExtension';
 import './Extensions';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../Basics/Draw';
 import { fixLineWidthByScale, getScale, degToRad } from '../../Basics/Tools';
 
-export class Documents extends docsComponent {
+export class Documents extends DocComponent {
     private _translateX: number = 0;
 
     private _translateY: number = 0;

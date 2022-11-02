@@ -1,10 +1,10 @@
 import { BooleanNumber, CommandManager } from '@univer/core';
-import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
+import { SheetPlugin } from '../SheetPlugin';
 
 export class SheetContainerController {
-    private _plugin: SpreadsheetPlugin;
+    private _plugin: SheetPlugin;
 
-    constructor(plugin: SpreadsheetPlugin) {
+    constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
 
         this._initialize();

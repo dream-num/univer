@@ -1,6 +1,6 @@
 import { ISlotElement, ISlotProps, IToolBarItemProps } from '@univer/base-component';
-import { Context, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetContext, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { SheetPlugin } from '@univer/base-sheets';
 import { PROTECTION_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
 import { IConfig } from './IData/IProtection';
 import { en, zh } from './Locale';
@@ -45,7 +45,7 @@ export class ProtectionPlugin extends Plugin {
             show: true,
             label: <ProtectionButton config={config} />,
         };
-        context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
+        context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
 
         // TODO
         this._protectionSlider = new Protection();
@@ -62,12 +62,12 @@ export class ProtectionPlugin extends Plugin {
             type: ISlotElement.JSX,
             label: <ProtectionSide config={{ rangeData, context, protection: this._protectionSlider }} />,
         };
-        context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addSider(siderItem);
+        context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addSider(siderItem);
     }
 
     onMapping(IOC: IOCContainer): void {}
 
-    onMounted(ctx: Context): void {
+    onMounted(ctx: SheetContext): void {
         this.initialize();
     }
 

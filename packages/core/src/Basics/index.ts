@@ -1,8 +1,9 @@
 // @index('./*.ts', f => `export * from '${f.path}'`)
-export * from './Bootstrap';
-export * from './Context';
 export * from './Environment';
+export * from './Registry';
+export * from './SheetContext';
 export * from './UniverSheet';
 export * from './Version';
-export * from './Registry';
+export * from './WorkBookObserver';
+export * from './WorkBookObserverImpl';
 // @endindex

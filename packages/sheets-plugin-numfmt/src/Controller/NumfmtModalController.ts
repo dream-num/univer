@@ -1,5 +1,5 @@
 import { ComponentChildren } from '@univer/base-component';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 import { PLUGIN_NAMES } from '@univer/core';
 import { NUMFMT_PLUGIN_NAME } from '../Const';
 import { CURRENCYDETAIL, DATEFMTLISG } from '../Const/FORMATDETAIL';
@@ -30,7 +30,7 @@ export interface ModalDataProps {
 export class NumftmModalController {
     private _plugin: NumfmtPlugin;
 
-    private _spreadSheetPlugin: SpreadsheetPlugin;
+    private _sheetPlugin: SheetPlugin;
 
     private _numfmtModal: NumfmtModal;
 
@@ -38,7 +38,7 @@ export class NumftmModalController {
 
     constructor(plugin: NumfmtPlugin) {
         this._plugin = plugin;
-        this._spreadSheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+        this._sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
         const locale = this._plugin.getContext().getLocale();
 
         this._modalData = [
@@ -102,8 +102,8 @@ export class NumftmModalController {
     }
 
     initRegisterComponent() {
-        this._spreadSheetPlugin.registerComponent(NUMFMT_PLUGIN_NAME + FormatContent.name, FormatContent);
-        this._spreadSheetPlugin.registerModal(NUMFMT_PLUGIN_NAME + NumfmtModal.name, NumfmtModal);
+        this._sheetPlugin.registerComponent(NUMFMT_PLUGIN_NAME + FormatContent.name, FormatContent);
+        this._sheetPlugin.registerModal(NUMFMT_PLUGIN_NAME + NumfmtModal.name, NumfmtModal);
     }
 
     resetContentData(data: any[]) {

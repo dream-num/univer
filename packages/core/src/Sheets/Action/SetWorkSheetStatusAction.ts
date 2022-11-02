@@ -2,20 +2,20 @@ import { SetWorkSheetStatus } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { Workbook } from '../Domain/Workbook';
 import { BooleanNumber } from '../../Enum';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
 /**
  * @internal
  */
-export interface ISetWorkSheetStatusActionData extends IActionData {
+export interface ISetWorkSheetStatusActionData extends ISheetActionData {
     sheetStatus: BooleanNumber;
 }
 
 /**
  * @internal
  */
-export class SetWorkSheetStatusAction extends ActionBase<ISetWorkSheetStatusActionData> {
+export class SetWorkSheetStatusAction extends SheetAction<ISetWorkSheetStatusActionData> {
     constructor(
         actionData: ISetWorkSheetStatusActionData,
         workbook: Workbook,

@@ -1,15 +1,15 @@
 import { InsertSheet, RemoveSheet } from '../Apply';
 import { IWorksheetConfig } from '../../Interfaces';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { Workbook } from '../Domain';
 import { IInsertSheetActionData } from './InsertSheetAction';
 
-export interface IRemoveSheetActionData extends IActionData {
+export interface IRemoveSheetActionData extends ISheetActionData {
     sheetId: string;
 }
 
-export class RemoveSheetAction extends ActionBase<
+export class RemoveSheetAction extends SheetAction<
     IRemoveSheetActionData,
     IInsertSheetActionData
 > {

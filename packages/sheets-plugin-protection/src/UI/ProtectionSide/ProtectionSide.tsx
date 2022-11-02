@@ -1,12 +1,12 @@
 import { BaseComponentSheet, BaseSiderModalProps, Component, createRef, FunctionComponent } from '@univer/base-component';
-import { Context, IRangeData, Nullable, Observer, Workbook } from '@univer/core';
+import { SheetContext, IRangeData, Nullable, Observer, Workbook } from '@univer/core';
 import { PROTECTION_PLUGIN_NAME } from '../../Basic/Const';
 import { Protection } from '../../Controller/Protection';
 
 import styles from './index.module.less';
 
 type IConfig = {
-    context: Context;
+    context: SheetContext;
     rangeData: IRangeData;
     protection: Protection;
 };

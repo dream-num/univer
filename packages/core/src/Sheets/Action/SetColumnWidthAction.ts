@@ -1,12 +1,12 @@
 import { SetColumnWidth } from '../Apply';
 import { Workbook } from '../Domain';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
 /**
  * @internal
  */
-export interface ISetColumnWidthActionData extends IActionData {
+export interface ISetColumnWidthActionData extends ISheetActionData {
     columnIndex: number;
     columnWidth: number[];
 }
@@ -16,7 +16,7 @@ export interface ISetColumnWidthActionData extends IActionData {
  *
  * @internal
  */
-export class SetColumnWidthAction extends ActionBase<ISetColumnWidthActionData> {
+export class SetColumnWidthAction extends SheetAction<ISetColumnWidthActionData> {
     constructor(
         actionData: ISetColumnWidthActionData,
         workbook: Workbook,

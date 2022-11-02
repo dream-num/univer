@@ -2,7 +2,7 @@ import { BaseUlProps } from '@univer/base-component';
 import { ACTION_NAMES, CommandManager, NameGen, Nullable, PLUGIN_NAMES } from '@univer/core';
 import { SheetBarModel } from '../Model/SheetBarModel';
 import { SheetBar } from '../View/UI/SheetBar';
-import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
+import { SheetPlugin } from '../SheetPlugin';
 
 interface SheetUlProps extends BaseUlProps {
     index: string;
@@ -716,9 +716,9 @@ export class SheetBarControl {
 
     private _apiController: SheetBarAPIControl;
 
-    private _plugin: SpreadsheetPlugin;
+    private _plugin: SheetPlugin;
 
-    constructor(plugin: SpreadsheetPlugin) {
+    constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
         this._apiController = new SheetBarAPIControl(this);
         this._uiController = new SheetBarUIController(this);
@@ -727,7 +727,7 @@ export class SheetBarControl {
     /**
      * 获取插件
      */
-    getPlugin(): SpreadsheetPlugin {
+    getPlugin(): SheetPlugin {
         return this._plugin;
     }
 

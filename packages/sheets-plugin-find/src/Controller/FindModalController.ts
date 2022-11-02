@@ -1,5 +1,5 @@
 import { BaseComponentRender, BaseComponentSheet, ComponentChildren } from '@univer/base-component';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 import { PLUGIN_NAMES } from '@univer/core';
 import { FIND_PLUGIN_NAME } from '../Const/PLUGIN_NAME';
 import { FindPlugin } from '../FindPlugin';
@@ -29,13 +29,13 @@ export class FindModalController {
 
     private _findModal: FindModal;
 
-    private _spreadSheetPlugin: SpreadsheetPlugin;
+    private _sheetPlugin: SheetPlugin;
 
     private _modalData: ModalDataProps[];
 
     constructor(plugin: FindPlugin) {
         this._plugin = plugin;
-        this._spreadSheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+        this._sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
 
         this._modalData = [
             // {
@@ -77,7 +77,7 @@ export class FindModalController {
     }
 
     init() {
-        const plugin = this._spreadSheetPlugin.getPluginByName<FindPlugin>(FIND_PLUGIN_NAME)!;
+        const plugin = this._sheetPlugin.getPluginByName<FindPlugin>(FIND_PLUGIN_NAME)!;
 
         plugin.getObserver('onFindModalDidMountObservable')!.add((component) => {
             this._findModal = component;
@@ -98,11 +98,11 @@ export class FindModalController {
         };
 
         for (let k in registerIcon) {
-            this._spreadSheetPlugin.registerComponent(k, registerIcon[k]);
+            this._sheetPlugin.registerComponent(k, registerIcon[k]);
         }
 
-        this._spreadSheetPlugin.registerModal(FIND_PLUGIN_NAME + FindModal.name, 100, FindModal);
-        this._spreadSheetPlugin.registerComponent(FIND_PLUGIN_NAME + SearchContent.name, SearchContent, { activeKey: 'find' });
+        this._sheetPlugin.registerModal(FIND_PLUGIN_NAME + FindModal.name, 100, FindModal);
+        this._sheetPlugin.registerComponent(FIND_PLUGIN_NAME + SearchContent.name, SearchContent, { activeKey: 'find' });
     }
 
     // 转化为渲染数据

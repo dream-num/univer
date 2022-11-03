@@ -2,7 +2,7 @@ import { DocContext, Plugin, PLUGIN_NAMES, UniverSheet, Tools, AsyncFunction } f
 import { zh, en } from './Locale';
 import { IOCContainer } from '@univer/core';
 import { getRefElement, isElement, ISlotProps, RefObject, render } from '@univer/base-component';
-import { install } from './Basic/Observer';
+import { DocPluginObserve, install } from './Basic/Observer';
 import { ToolBarController } from './Controller/ToolBarController';
 import { DocContainerController } from './Controller/DocContainerController';
 import { BaseDocContainerConfig, DocContainer, IDocPluginConfigBase } from './View/UI/DocContainer';
@@ -18,7 +18,7 @@ const DEFAULT_DOCUMENT_PLUGIN_DATA = {
     layout: 'auto',
 };
 
-export class DocPlugin extends Plugin {
+export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
     private _config: IDocPluginConfig;
     private _toolBarRef: RefObject<HTMLElement>;
     private _infoBarControl: InfoBarController;
@@ -61,7 +61,7 @@ export class DocPlugin extends Plugin {
         const context = this.getContext();
 
         this.getObserver('onDocContainerDidMountObservable')?.add(() => {
-            this._initializeRender(context);
+            this._initializeRender();
         });
 
         /**
@@ -137,7 +137,7 @@ export class DocPlugin extends Plugin {
         return docContainer;
     }
 
-    private _initializeRender(context: DocContext) {
+    private _initializeRender() {
         const engine = this.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
 
         this.register(engine);

@@ -1,6 +1,5 @@
-import { BaseFormulaBarProps, Component, debounce, FormulaBarComponent, ISelectButton, JSXComponent } from '@univer/base-component';
-import * as Icon from '../Icon';
-import { Select } from '../index';
+import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, debounce, ISelectButton } from '@univer/base-component';
+import { Select } from '../Common/Select/Select';
 import styles from './index.module.less';
 
 type FormulaState = {
@@ -8,13 +7,22 @@ type FormulaState = {
     spanClass: string;
 };
 
+export interface BaseFormulaBarProps extends BaseComponentProps {}
+
 export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
+    Render: BaseComponentRender;
+
     initialize(props?: BaseFormulaBarProps) {
+        const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        this.Render = component.getComponentRender();
+
+        const NextIcon = this.Render.renderFunction('NextIcon');
+
         this.state = {
             data: {
                 selectType: ISelectButton.INPUT,
                 needChange: true,
-                icon: <Icon.Format.NextIcon />,
+                icon: <NextIcon />,
                 children: [],
             },
             spanClass: styles.formulaGrey,
@@ -33,19 +41,24 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
 
     render(props: BaseFormulaBarProps, state: FormulaState) {
         const { data } = state;
+
+        const CloseIcon = this.Render.renderFunction('CloseIcon');
+        const CorrectIcon = this.Render.renderFunction('CorrectIcon');
+        const FxIcon = this.Render.renderFunction('FxIcon');
+
         return (
             <div className={styles.formulaBox}>
-                <Select selectType={data.selectType} icon={data.icon} children={data.children} needChange={data.needChange}></Select>
+                <Select children={data.children}></Select>
                 <div className={styles.formulaBar}>
                     <div className={styles.formulaIcon}>
                         <span className={state.spanClass}>
-                            <Icon.Format.CloseIcon />
+                            <CloseIcon />
                         </span>
                         <span className={state.spanClass}>
-                            <Icon.Format.CorrectIcon />
+                            <CorrectIcon />
                         </span>
                         <span className={styles.formulaBlack}>
-                            <Icon.Math.FxIcon />
+                            <FxIcon />
                         </span>
                     </div>
                     <div className={styles.formulaInput}>
@@ -54,11 +67,5 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
                 </div>
             </div>
         );
-    }
-}
-
-export class UniverFormulaBar implements FormulaBarComponent {
-    render(): JSXComponent<BaseFormulaBarProps> {
-        return FormulaBar;
     }
 }

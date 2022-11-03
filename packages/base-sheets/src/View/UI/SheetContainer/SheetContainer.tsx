@@ -20,7 +20,6 @@ import {
     Container,
     Content,
     Footer,
-    FormulaBar,
     Header,
     // InfoBar,
     Layout,
@@ -41,6 +40,7 @@ import { CountBar } from '../CountBar/CountBar';
 import { IShowToolBarConfig } from '../../../Model/ToolBarModel';
 import { ModalGroup } from '../ModalGroup/ModalGroup';
 import { SheetPlugin } from '../../../SheetPlugin';
+import { FormulaBar } from '../FormulaBar';
 
 export interface ILayout {
     outerLeft?: boolean;

@@ -3,7 +3,7 @@ import { Observable, Plugin } from '@univer/core';
 import { DocContainer } from '../View/UI/DocContainer';
 import { ToolBar } from '../View/UI/ToolBar/ToolBar';
 
-export type SheetPluginObserve = {
+export type DocPluginObserve = {
     onAfterChangeFontFamilyObservable: Observable<string>;
     onAfterChangeFontSizeObservable: Observable<number>;
     onAfterChangeFontWeightObservable: Observable<boolean>;

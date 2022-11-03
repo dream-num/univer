@@ -491,7 +491,7 @@ export default {
         copy: 'Copy',
         return: 'Exit',
         rename: 'Rename',
-        tips: 'WorkBook rename',
+        tips: 'Rename',
         noName: 'Untitled spreadsheet',
         wait: 'waiting for update',
 

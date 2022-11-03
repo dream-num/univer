@@ -9,7 +9,7 @@ import { ColorPickerCircleButton } from './ColorPickerCircleButton';
 import { Container } from './Container';
 import { CountBar } from './CountBar';
 import { FormatModal } from './FormatModal';
-import { FormulaBar } from './FormulaBar';
+import { FormulaBar } from '../../../base-sheets/src/View/UI/FormulaBar';
 import * as Icon from './Icon/index';
 import { InfoBar } from './InfoBar';
 import { Input } from './Input';

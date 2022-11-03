@@ -1,11 +1,11 @@
 import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, createRef } from '@univer/base-component';
 
 import { PLUGIN_NAMES } from '@univer/core';
-import { Select } from '@univer/style-universheet';
 import { SlidePlugin } from '../../../SlidePlugin';
 import { IToolBarItemProps } from '../../../Model/ToolBarModel';
 import { TextButton } from '../Common/TextButton/TextButton';
 import styles from './index.module.less';
+import { Select } from '../Common/Select/Select';
 
 interface IProps extends BaseComponentProps {
     style?: JSX.CSSProperties;

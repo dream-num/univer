@@ -2,11 +2,11 @@ import { SlideContext, Plugin, PLUGIN_NAMES, UniverSheet, Tools, AsyncFunction }
 import { getRefElement, isElement, ISlotProps, RefObject, render } from '@univer/base-component';
 import { Engine, RenderEngine } from '@univer/base-render';
 import { zh, en } from './Locale';
-import { install } from './Basic/Observer';
+import { install, SlidePluginObserve } from './Basic/Observer';
 import { ToolBarController } from './Controller/ToolBarController';
 import { SlideContainerController } from './Controller/SlideContainerController';
-import { BaseSlideContainerConfig, SlideContainer, ISlidePluginConfigBase } from './View/UI/SlideContainer';
 import { InfoBarController } from './Controller/InfoBarController';
+import { BaseSlideContainerConfig, ISlidePluginConfigBase, SlideContainer } from './View/UI/SlideContainer';
 
 export interface ISlidePluginConfig extends ISlidePluginConfigBase {
     container: HTMLElement | string;
@@ -17,10 +17,8 @@ const DEFAULT_SLIDE_PLUGIN_DATA = {
     layout: 'auto',
 };
 
-export class SlidePlugin extends Plugin {
+export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
     private _config: ISlidePluginConfig;
-
-    private _toolBarRef: RefObject<HTMLElement>;
 
     private _infoBarControl: InfoBarController;
 
@@ -64,7 +62,7 @@ export class SlidePlugin extends Plugin {
         const context = this.getContext();
 
         this.getObserver('onSlideContainerDidMountObservable')?.add(() => {
-            this._initializeRender(context);
+            this._initializeRender();
         });
 
         /**
@@ -126,7 +124,7 @@ export class SlidePlugin extends Plugin {
             const containerDOM = document.getElementById(container);
             if (containerDOM == null) {
                 slideContainer = document.createElement('div');
-                SlideContainer.id = container;
+                slideContainer.id = container;
             } else {
                 slideContainer = containerDOM;
             }
@@ -134,13 +132,13 @@ export class SlidePlugin extends Plugin {
             slideContainer = container;
         } else {
             slideContainer = document.createElement('div');
-            SlideContainer.id = 'univerdoc';
+            slideContainer.id = 'universlide';
         }
 
         return slideContainer;
     }
 
-    private _initializeRender(context: SlideContext) {
+    private _initializeRender() {
         const engine = this.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
 
         this.register(engine);
@@ -174,14 +172,14 @@ export class SlidePlugin extends Plugin {
         return this._infoBarControl;
     }
 
-    onMounted(ctx: SlideContext): void {
+    onMounted(): void {
         install(this);
         this.initialize();
     }
 
     onDestroy(): void {}
 
-    registerComponent(name: string, component: any, props?: any) {
+    registerComponent(name: string, component: any) {
         this._componentList.set(name, component);
     }
 

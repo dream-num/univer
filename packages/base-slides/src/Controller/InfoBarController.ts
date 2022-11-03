@@ -28,6 +28,11 @@ export class InfoBarController {
 
     constructor(plugin: SlidePlugin) {
         this._plugin = plugin;
+
+        // TODO get name from config
+        const name = 'UniverSlide Demo';
+        this._infoBarModel = new InfoBarModel(name);
+
         this._infoList = {
             back: {
                 locale: 'info.return',
@@ -42,8 +47,10 @@ export class InfoBarController {
                 locale: 'info.tips',
             },
             sheet: {
-                label: 'UniverSlide Demo',
-                onBlur: this.setSlideName,
+                label: name,
+                onBlur: (e) => {
+                    this.setSlideName(e);
+                },
             },
         };
         this._initialize();

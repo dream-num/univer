@@ -354,7 +354,7 @@ export default {
         copy: '副本',
         return: '返回',
         rename: '重命名',
-        tips: '表格重命名',
+        tips: '重命名',
         noName: '无标题的电子表格',
         wait: '待更新',
 

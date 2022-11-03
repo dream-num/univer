@@ -3,7 +3,7 @@ import { Observable, Plugin } from '@univer/core';
 import { SlideContainer } from '../View/UI/SlideContainer';
 import { ToolBar } from '../View/UI/ToolBar/ToolBar';
 
-export type SheetPluginObserve = {
+export type SlidePluginObserve = {
     onAfterChangeFontFamilyObservable: Observable<string>;
     onAfterChangeFontSizeObservable: Observable<number>;
     onAfterChangeFontWeightObservable: Observable<boolean>;

@@ -1,11 +1,11 @@
 export class InfoBarModel {
-    private _sheetName: string;
+    constructor(private _name: string) {}
 
-    get sheetName(): string {
-        return this._sheetName;
+    get name(): string {
+        return this._name;
     }
 
-    setSheetName(name: string) {
-        this._sheetName = name;
+    setName(name: string) {
+        this._name = name;
     }
 }

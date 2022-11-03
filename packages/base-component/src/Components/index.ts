@@ -9,7 +9,6 @@ export * from './CountBar';
 export * from './Drag';
 export * from './FilterSelect';
 export * from './FormatModal';
-export * from './FormulaBar';
 export * from './Icon';
 export * from './InfoBar';
 export * from './Input';

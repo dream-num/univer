@@ -1,9 +1,9 @@
 import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, createRef } from '@univer/base-component';
 
 import { PLUGIN_NAMES } from '@univer/core';
-import { Select } from '@univer/style-universheet';
 import { DocPlugin } from '../../../DocPlugin';
 import { IToolBarItemProps } from '../../../Model/ToolBarModel';
+import { Select } from '../Common/Select/Select';
 import { TextButton } from '../Common/TextButton/TextButton';
 import styles from './index.module.less';
 

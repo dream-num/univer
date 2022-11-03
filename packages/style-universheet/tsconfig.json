@@ -3,11 +3,7 @@
         "rootDir": "./",
         "outDir": "lib",
         "target": "ESNext",
-        "lib": [
-            "ESNext",
-            "DOM",
-            "WebWorker"
-        ],
+        "lib": ["ESNext", "DOM", "WebWorker"],
         "module": "ESNext",
         "moduleResolution": "Node", //This value is needed for Node.js.
         "declaration": true,
@@ -26,13 +22,7 @@
         "jsxFactory": "h",
         "jsxFragmentFactory": "Fragment",
         "strictPropertyInitialization": false,
-        "types": [
-            "jest",
-            "node",
-            "@types/jest"
-        ]
+        "types": ["jest", "node", "@types/jest"]
     },
-    "include": [
-        "src/**/*",
-        "tests/**/*.(spec|test).(ts|tsx|js)"]
+    "include": ["src/**/*", "tests/**/*.(spec|test).(ts|tsx|js)", "../base-sheets/src/View/UI/FormulaBar"]
 }

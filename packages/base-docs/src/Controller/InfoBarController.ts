@@ -28,6 +28,11 @@ export class InfoBarController {
 
     constructor(plugin: DocPlugin) {
         this._plugin = plugin;
+
+        // TODO get name from config
+        const name = 'UniverDoc Demo';
+        this._infoBarModel = new InfoBarModel(name);
+
         this._infoList = {
             back: {
                 locale: 'info.return',
@@ -42,8 +47,10 @@ export class InfoBarController {
                 locale: 'info.tips',
             },
             sheet: {
-                label: 'UniverDoc Demo',
-                onBlur: this.setDocName,
+                label: name,
+                onBlur: (e) => {
+                    this.setDocName(e);
+                },
             },
         };
         this._initialize();

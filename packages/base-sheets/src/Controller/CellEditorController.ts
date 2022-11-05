@@ -1,27 +1,23 @@
-import { getRefElement, handleDomToJson, handleJsonToDom, IMainProps, ISlotElement, handleStyleToString, handleStringToStyle } from '@univer/base-component';
+import { getRefElement, handleDomToJson, handleJsonToDom, handleStyleToString, handleStringToStyle, $$ } from '@univer/base-component';
 import { Direction, IDocumentData, IRangeData, IStyleData, Nullable, ICellData, Tools, isKeyPrintable, PLUGIN_NAMES } from '@univer/core';
 import { DeviceType, IKeyboardEvent, IMouseEvent, IPointerEvent } from '@univer/base-render';
-import { RichText } from '@univer/style-universheet';
 import { SheetPlugin } from '../SheetPlugin';
 import { SheetContainer } from '../View/UI/SheetContainer';
 import { CANVAS_VIEW_KEY } from '../View/Render/BaseView';
-import { CellExtensionManager } from '../Basics/Register/CellEditRegister';
+import { CellEditExtensionManager } from '../Basics/Register/CellEditRegister';
+import { RichText } from '../View/UI/RichText/RichText';
 
 const CELL_EDIT_HIDDEN_TOP = -10000;
 
 /**
  * Cell Editor
- *
- * TODO:
- *
- * 2. p存储的富文本字符数少于50的情况下，存一份到v，便于vlookup公式计算
  */
 export class CellEditorController {
     private _plugin: SheetPlugin;
 
     private _sheetContainer: SheetContainer;
 
-    private _cellExtensionManager: CellExtensionManager;
+    private _cellEditExtensionManager: CellEditExtensionManager;
 
     richTextEle: HTMLElement;
 
@@ -38,46 +34,35 @@ export class CellEditorController {
     constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
 
-        this.initRegisterComponent();
-
         this._initialize();
     }
 
     private _initialize() {
         this._plugin.getObserver('onSheetContainerDidMountObservable')?.add((sheetContainer: SheetContainer) => {
             this._sheetContainer = sheetContainer;
-            const mainItem: IMainProps = {
-                name: 'cellEditor',
-                type: ISlotElement.JSX_STRING,
-                content: 'RichText',
-                show: false,
-            };
+            // const mainItem: IMainProps = {
+            //     name: 'cellEditor',
+            //     type: ISlotElement.JSX_STRING,
+            //     content: 'RichText',
+            //     show: false,
+            // };
 
-            //     this._plugin.addMain(mainItem).then(() => {
-            //         const cellEditor = this._sheetContainer.refMap.cellEditor;
-            //         this.richTextEle = getRefElement(cellEditor);
-            //         this.richTextEditEle = $$('div', this.richTextEle);
-            //         this.richText = cellEditor.current as RichText;
+            // init RichText component
+            this.initRegisterComponent();
+            this._plugin.getObserver('onRichTextDidMountObservable')?.add((cellEditor) => {
+                this.richTextEle = getRefElement(cellEditor.container);
+                this.richTextEditEle = $$('div', this.richTextEle);
+                this.richText = cellEditor;
 
-            //         // focus
-            //         this._plugin.showMainByName('cellEditor', true).then(() => {
-            //             this.richTextEditEle.focus();
-            //             this.richTextEditEle.tabIndex = 1;
+                // focus
+                this.richTextEditEle.focus();
+                this.richTextEditEle.tabIndex = 1;
 
-            //             this.hideEditContainer();
-            //         });
+                this.hideEditContainer();
 
-            //         // init event
-            //         this._handleKeyboardAction();
-
-            //         // // set key down hooks
-            //         // this.richText.hooks.set('onKeyDown', (event) => {
-            //         //     let kCode = event.keyCode;
-            //         //     if (kCode === KeyCode.ENTER) {
-            //         //         this.exitEditMode();
-            //         //     }
-            //         // });
-            //     });
+                // init event
+                this._handleKeyboardAction();
+            });
         });
 
         this._plugin.context
@@ -204,7 +189,7 @@ export class CellEditorController {
         this._plugin.getObserver('onSpreadsheetKeyCompositionUpdateObservable')?.add((evt: IKeyboardEvent) => {});
         this._plugin.getObserver('onSpreadsheetKeyCompositionEndObservable')?.add((evt: IKeyboardEvent) => {});
 
-        this._cellExtensionManager = new CellExtensionManager();
+        this._cellEditExtensionManager = new CellEditExtensionManager();
     }
 
     /**
@@ -364,7 +349,7 @@ export class CellEditorController {
         let cellValue = this.getSelectionValue();
 
         // Intercept, the formula needs to modify the value of the edit state
-        const cell = this._cellExtensionManager.handle({
+        const cell = this._cellEditExtensionManager.handle({
             row: currentCell.row,
             column: currentCell.column,
             value: cellValue,

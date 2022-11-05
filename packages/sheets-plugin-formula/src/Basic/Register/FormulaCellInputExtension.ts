@@ -1,8 +1,8 @@
-import { BaseCellExtension, BaseCellExtensionFactory, ICell } from '@univer/base-sheets';
+import { BaseCellInputExtension, BaseCellInputExtensionFactory, ICell } from '@univer/base-sheets';
 import { IFormulaData } from '@univer/base-formula-engine';
 import { FormulaPlugin } from '../../FormulaPlugin';
 
-export class FormulaCellExtension extends BaseCellExtension {
+export class FormulaCellInputExtension extends BaseCellInputExtension {
     setValue(value: string) {
         this._cell.value = value;
     }
@@ -12,13 +12,13 @@ export class FormulaCellExtension extends BaseCellExtension {
     }
 }
 
-export class FormulaCellExtensionFactory extends BaseCellExtensionFactory<FormulaPlugin> {
+export class FormulaCellInputExtensionFactory extends BaseCellInputExtensionFactory<FormulaPlugin> {
     get zIndex(): number {
         return 0;
     }
 
-    create(cell: ICell, value: string): FormulaCellExtension {
-        return new FormulaCellExtension(cell, value);
+    create(cell: ICell, value: string): FormulaCellInputExtension {
+        return new FormulaCellInputExtension(cell, value);
     }
 
     check(cell: ICell) {
@@ -36,13 +36,6 @@ export class FormulaCellExtensionFactory extends BaseCellExtensionFactory<Formul
             for (let i = 0, len = sheetIds.length; i < len; i++) {
                 const sheetId = sheetIds[i];
                 const cellData = sheetData[sheetId];
-                console.info('cellData', cellData);
-                // cellData.forEach((row, rowArray) => {
-                //     rowArray.forEach((column, mainCell) => {
-                //         console.log('main----', row, column, mainCell);
-                //     });
-                // });
-
                 Object.keys(cellData).forEach((cellRow) => {
                     const rowArray = cellData[cellRow];
                     rowArray.forEach((cellColumn: number, value: IFormulaData) => {

@@ -1,6 +1,6 @@
 // @index(['./*.ts','./**/index.ts'], f => `export * from '${f.path}'`)
 
-export * from './CellExtensionFactory';
-export * from './CellExtensionManager';
-export * from './CellExtensionRegister';
+export * from './CellEditExtensionFactory';
+export * from './CellEditExtensionManager';
+export * from './CellEditExtensionRegister';
 // @endindex

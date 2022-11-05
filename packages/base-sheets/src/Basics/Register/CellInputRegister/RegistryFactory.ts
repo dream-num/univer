@@ -20,4 +20,4 @@ class Registry {
     }
 }
 
-export const REGISTRY_CELL_EDIT_FACTORY = Registry.create();
+export const REGISTRY_CELL_INPUT_FACTORY = Registry.create();

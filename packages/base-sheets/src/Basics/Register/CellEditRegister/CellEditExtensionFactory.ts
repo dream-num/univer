@@ -1,15 +1,10 @@
 import { Plugin } from '@univer/core';
-
-export interface ICell {
-    row: number;
-    column: number;
-    value: string;
-}
+import { ICell } from '../../Interfaces';
 
 /**
  * Modify cell value
  */
-export class BaseCellExtension {
+export class BaseCellEditExtension {
     constructor(protected _cell: ICell, protected _value: string) {}
 
     getCell(): ICell {
@@ -28,9 +23,9 @@ export class BaseCellExtension {
 }
 
 /**
- * Determine whether to intercept and create BaseCellExtension
+ * Determine whether to intercept and create BaseCellEditExtension
  */
-export class BaseCellExtensionFactory<T extends Plugin = Plugin> {
+export class BaseCellEditExtensionFactory<T extends Plugin = Plugin> {
     constructor(protected _plugin: T) {}
 
     get zIndex() {
@@ -42,8 +37,8 @@ export class BaseCellExtensionFactory<T extends Plugin = Plugin> {
      * @param value
      * @returns
      */
-    create(cell: ICell, value: string): BaseCellExtension {
-        return new BaseCellExtension(cell, value);
+    create(cell: ICell, value: string): BaseCellEditExtension {
+        return new BaseCellEditExtension(cell, value);
     }
 
     /**
@@ -53,7 +48,7 @@ export class BaseCellExtensionFactory<T extends Plugin = Plugin> {
      * @param value
      * @returns
      */
-    check(cell: ICell): false | BaseCellExtension {
+    check(cell: ICell): false | BaseCellEditExtension {
         return false;
     }
 }

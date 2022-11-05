@@ -48,6 +48,8 @@ export class RichText extends Component<BaseRichTextProps, IState> {
 
     // private _fontSizeObserv: Nullable<WorkBookObserver<number>>;
 
+    container = createRef<HTMLDivElement>();
+
     ref = createRef<HTMLDivElement>();
 
     cellTextStyle: CellTextStyle;
@@ -74,6 +76,14 @@ export class RichText extends Component<BaseRichTextProps, IState> {
 
     getValue(): string {
         return this.cellInputHandler.getInputValue();
+    }
+
+    show() {
+        this.container.current!.style.display = 'block';
+    }
+
+    hide() {
+        this.container.current!.style.display = 'none';
     }
 
     // TODO 键盘事件
@@ -248,6 +258,8 @@ export class RichText extends Component<BaseRichTextProps, IState> {
     componentDidMount() {
         this.cellTextStyle = new CellTextStyle(this.ref.current!);
         this.cellInputHandler = new CellInputHandler(this.ref.current!);
+
+        this._context.getObserverManager().getObserver<RichText>('onRichTextDidMountObservable')?.notifyObservers(this);
     }
 
     /**
@@ -260,7 +272,7 @@ export class RichText extends Component<BaseRichTextProps, IState> {
     render(props: BaseRichTextProps, state: IState) {
         const { style, className, onClick, text } = props;
         return (
-            <div className={`${styles.richTextEditorContainer} ${className}`} style={style}>
+            <div className={`${styles.richTextEditorContainer} ${className}`} style={style} ref={this.container}>
                 <div
                     ref={this.ref}
                     className={styles.richTextEditor}

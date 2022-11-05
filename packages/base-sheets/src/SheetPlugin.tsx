@@ -21,6 +21,7 @@ import {
 import { IToolBarItemProps } from './Model/ToolBarModel';
 import { ModalGroupController } from './Controller/ModalGroupController';
 import { ISheetPluginConfig, DEFAULT_SPREADSHEET_PLUGIN_DATA } from './Basics';
+import { FormulaBarController } from './Controller/FormulaBarController';
 
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
@@ -60,6 +61,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     private _toolBarControl: ToolBarController;
 
     private _infoBarControl: InfoBarController;
+
+    private _formulaBarController: FormulaBarController;
 
     private _sheetBarControl: SheetBarControl;
 
@@ -147,6 +150,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         this._rightMenuControl = new RightMenuController(this);
         this._toolBarControl = new ToolBarController(this);
         this._infoBarControl = new InfoBarController(this);
+        this._formulaBarController = new FormulaBarController(this);
         this._sheetBarControl = new SheetBarControl(this);
         this._cellEditorControl = new CellEditorController(this);
         this._antLineController = new AntLineControl(this);

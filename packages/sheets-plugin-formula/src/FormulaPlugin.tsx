@@ -1,5 +1,5 @@
 import { SheetContext, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { CellExtensionManager, SheetPlugin } from '@univer/base-sheets';
+import { CellEditExtensionManager, CellInputExtensionManager, SheetPlugin } from '@univer/base-sheets';
 import { FormulaEnginePlugin } from '@univer/base-formula-engine';
 import { FormulaButton } from './UI/FormulaButton';
 import { zh, en } from './Locale';
@@ -8,7 +8,8 @@ import { IConfig, IFormulaConfig } from './Basic/IFormula';
 import { FORMULA_PLUGIN_NAME } from './Basic/PLUGIN_NAME';
 import { FormulaController } from './Controller/FormulaController';
 import { firstLoader } from './Controller/FirstLoader';
-import { FormulaCellExtensionFactory } from './Basic/Register/FormulaCellExtension';
+import { FormulaCellEditExtensionFactory } from './Basic/Register/FormulaCellEditExtension';
+import { FormulaCellInputExtensionFactory } from './Basic/Register/FormulaCellInputExtension';
 
 export class FormulaPlugin extends Plugin<any, SheetContext> {
     private _formulaController: FormulaController;
@@ -71,9 +72,13 @@ export class FormulaPlugin extends Plugin<any, SheetContext> {
     onDestroy(): void {}
 
     registerExtension() {
-        const register = CellExtensionManager.create();
+        const cellEditRegister = CellEditExtensionManager.create();
 
-        register.add(new FormulaCellExtensionFactory(this));
+        cellEditRegister.add(new FormulaCellEditExtensionFactory(this));
+
+        const cellInputRegister = CellInputExtensionManager.create();
+
+        cellInputRegister.add(new FormulaCellInputExtensionFactory(this));
     }
 
     getFormulaEngine() {

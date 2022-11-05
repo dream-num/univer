@@ -1,11 +1,11 @@
-import { BaseComponentRender, BaseComponentSheet, Component } from '@univer/base-component';
+import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component } from '@univer/base-component';
 import { SheetPlugin } from '@univer/base-sheets';
 import { PLUGIN_NAMES } from '@univer/core';
 import { NUMFMT_PLUGIN_NAME } from '../../Const';
 import { ModalDataProps } from '../../Controller/NumfmtModalController';
 import { NumfmtPlugin } from '../../NumfmtPlugin';
 
-interface IProps {}
+interface IProps extends BaseComponentProps {}
 
 interface IState {
     modalData: ModalDataProps[];

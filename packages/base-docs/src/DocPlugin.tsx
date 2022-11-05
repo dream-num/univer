@@ -1,7 +1,7 @@
 import { DocContext, Plugin, PLUGIN_NAMES, UniverSheet, Tools, AsyncFunction } from '@univer/core';
 import { zh, en } from './Locale';
 import { IOCContainer } from '@univer/core';
-import { getRefElement, isElement, ISlotProps, RefObject, render } from '@univer/base-component';
+import { Component, getRefElement, isElement, ISlotProps, RefObject, render } from '@univer/base-component';
 import { DocPluginObserve, install } from './Basic/Observer';
 import { ToolBarController } from './Controller/ToolBarController';
 import { DocContainerController } from './Controller/DocContainerController';
@@ -177,7 +177,7 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
 
     onDestroy(): void {}
 
-    registerComponent(name: string, component: any, props?: any) {
+    registerComponent(name: string, component: Component, props?: any) {
         this._componentList.set(name, component);
     }
 

@@ -1,5 +1,5 @@
 import { Engine, EVENT_TYPE, IScrollObserverParam, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univer/base-render';
-import { EventState, Worksheet, Plugin } from '@univer/core';
+import { EventState, Worksheet } from '@univer/core';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from './BaseView';
 import { SheetView } from './Views/SheetView';
 import './Views';
@@ -11,7 +11,7 @@ export class CanvasView {
 
     private _views: BaseView[] = []; // worksheet
 
-    constructor(private _engine: Engine, private _plugin: Plugin) {
+    constructor(private _engine: Engine, private _plugin: SheetPlugin) {
         this._initialize();
     }
 
@@ -82,7 +82,7 @@ export class CanvasView {
 
         // sheet zoom [0 ~ 1]
         context.getContextObserver('onZoomRatioSheetObservable').add((value) => {
-            const plugin = this._plugin as SheetPlugin;
+            const plugin = this._plugin;
             this._scene.scale(value.zoomRatio, value.zoomRatio);
             // this._scene.makeDirty();
             // update data TODO 增加action后，会自动刷新，此处需要移除
@@ -150,7 +150,7 @@ export class CanvasView {
         }
     }
 
-    private _viewLoader(scene: Scene, plugin: Plugin) {
+    private _viewLoader(scene: Scene, plugin: SheetPlugin) {
         CanvasViewRegistry.getData().forEach((view) => {
             this._views.push(view.initialize(scene, plugin));
         });

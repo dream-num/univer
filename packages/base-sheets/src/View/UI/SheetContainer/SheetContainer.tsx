@@ -12,7 +12,6 @@ import {
     RefObject,
     cloneElement,
     BaseComponentProps,
-    Description,
 } from '@univer/base-component';
 import { AsyncFunction, SheetContext, IKeyType, LocaleType, PLUGIN_NAMES, Tools, Workbook } from '@univer/core';
 import cssVars from 'css-vars-ponyfill';
@@ -687,7 +686,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                 </Sider>
                                 <Content className={layout.contentSplit === 'vertical' ? style.contentContainerVertical : style.contentContainerHorizontal}>
                                     {/* extend main content */}
-                                    {mainList.map((item: IMainState, i) => {
+                                    {/* {mainList.map((item: IMainState, i) => {
                                         // if (!item.show) return null;
 
                                         if (item.type === ISlotElement.JSX) {
@@ -706,7 +705,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                             return <JSXElement ref={this.refMap[item.name]} style={{ display: item.show ? '' : 'none' }} />;
                                         }
                                         return item;
-                                    })}
+                                    })} */}
 
                                     <ModalGroup></ModalGroup>
 

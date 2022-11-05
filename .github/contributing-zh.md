@@ -1,20 +1,28 @@
 # Univer 贡献指南
 
+> 此贡献指南正在更新中，尚有不完善的地方，仅供参考
+
 ## 工具
 
--   vite
--   Typescript/tsx
--   Typescript references
--   pnpm workspace
+- vite
+- pnpm
+- Typescript
+- preact
 
 ## 工程介绍
 
 pnpm 管理的多包项目，
 
--   packages 插件和核心
--   examples 案例
--   templates 插件模板
--   scripts 脚本
+- cli 脚手架
+- examples 案例
+- packages 插件和核心
+- patches 补丁
+- scripts 脚本
+
+## 注意事项
+
+- PR 贡献请提交到 dev 分支，提到其它分支的会被驳回
+- commit 信息必须使用全英文，代码中注释和issues尽量使用英文，便于全球的开发者沟通交流
 
 ## 基本命令
 

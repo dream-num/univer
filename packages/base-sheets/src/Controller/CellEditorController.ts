@@ -1,5 +1,5 @@
-import { getRefElement, handleDomToJson, handleJsonToDom, IMainProps, ISlotElement, handleStyleToString, handleStringToStyle, $$ } from '@univer/base-component';
-import { Direction, IDocumentData, IRangeData, IStyleData, Nullable, ICellData, Tools, isKeyPrintable } from '@univer/core';
+import { getRefElement, handleDomToJson, handleJsonToDom, IMainProps, ISlotElement, handleStyleToString, handleStringToStyle } from '@univer/base-component';
+import { Direction, IDocumentData, IRangeData, IStyleData, Nullable, ICellData, Tools, isKeyPrintable, PLUGIN_NAMES } from '@univer/core';
 import { DeviceType, IKeyboardEvent, IMouseEvent, IPointerEvent } from '@univer/base-render';
 import { RichText } from '@univer/style-universheet';
 import { SheetPlugin } from '../SheetPlugin';
@@ -38,6 +38,8 @@ export class CellEditorController {
     constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
 
+        this.initRegisterComponent();
+
         this._initialize();
     }
 
@@ -51,31 +53,31 @@ export class CellEditorController {
                 show: false,
             };
 
-            this._plugin.addMain(mainItem).then(() => {
-                const cellEditor = this._sheetContainer.refMap.cellEditor;
-                this.richTextEle = getRefElement(cellEditor);
-                this.richTextEditEle = $$('div', this.richTextEle);
-                this.richText = cellEditor.current as RichText;
+            //     this._plugin.addMain(mainItem).then(() => {
+            //         const cellEditor = this._sheetContainer.refMap.cellEditor;
+            //         this.richTextEle = getRefElement(cellEditor);
+            //         this.richTextEditEle = $$('div', this.richTextEle);
+            //         this.richText = cellEditor.current as RichText;
 
-                // focus
-                this._plugin.showMainByName('cellEditor', true).then(() => {
-                    this.richTextEditEle.focus();
-                    this.richTextEditEle.tabIndex = 1;
+            //         // focus
+            //         this._plugin.showMainByName('cellEditor', true).then(() => {
+            //             this.richTextEditEle.focus();
+            //             this.richTextEditEle.tabIndex = 1;
 
-                    this.hideEditContainer();
-                });
+            //             this.hideEditContainer();
+            //         });
 
-                // init event
-                this._handleKeyboardAction();
+            //         // init event
+            //         this._handleKeyboardAction();
 
-                // // set key down hooks
-                // this.richText.hooks.set('onKeyDown', (event) => {
-                //     let kCode = event.keyCode;
-                //     if (kCode === KeyCode.ENTER) {
-                //         this.exitEditMode();
-                //     }
-                // });
-            });
+            //         // // set key down hooks
+            //         // this.richText.hooks.set('onKeyDown', (event) => {
+            //         //     let kCode = event.keyCode;
+            //         //     if (kCode === KeyCode.ENTER) {
+            //         //         this.exitEditMode();
+            //         //     }
+            //         // });
+            //     });
         });
 
         this._plugin.context
@@ -203,6 +205,14 @@ export class CellEditorController {
         this._plugin.getObserver('onSpreadsheetKeyCompositionEndObservable')?.add((evt: IKeyboardEvent) => {});
 
         this._cellExtensionManager = new CellExtensionManager();
+    }
+
+    /**
+     * Register custom components
+     */
+    initRegisterComponent() {
+        // this._plugin.registerComponent(PLUGIN_NAMES.SPREADSHEET + RichText.name, RichText, { activeKey: 'cellEdit' });
+        this._plugin.registerModal(PLUGIN_NAMES.SPREADSHEET + RichText.name, RichText);
     }
 
     /**

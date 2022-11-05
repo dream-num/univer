@@ -19,7 +19,7 @@ import type { ModalProps } from './Modal';
 import { Modal } from './Modal';
 import { Radio, RadioGroup } from './Radio';
 import { ResizeDialog } from './ResizeDialog';
-import { RichText } from './RichText/RichText';
+import { RichText } from '../../../base-sheets/src/View/UI/RichText/RichText';
 import { Select } from './SelectComponent';
 import { Dropdown } from './Dropdown';
 import { Separator } from './Separator';

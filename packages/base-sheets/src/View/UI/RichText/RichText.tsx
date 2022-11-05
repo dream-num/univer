@@ -1,4 +1,4 @@
-import { BaseRichTextProps, Component, createRef, JSXComponent, RichTextComponent } from '@univer/base-component';
+import { Component, createRef } from '@univer/base-component';
 import { KeyCode } from '@univer/core';
 import { CellInputHandler } from './CellInputHandler';
 import { CellTextStyle } from './CellTextStyle';
@@ -19,6 +19,13 @@ interface IState {
     paramIndex: number;
     searchActive: boolean;
     formula: any[];
+}
+
+export interface BaseRichTextProps {
+    style?: {};
+    className?: string;
+    onClick?: (e: MouseEvent) => void;
+    text?: string;
 }
 
 /**
@@ -268,11 +275,5 @@ export class RichText extends Component<BaseRichTextProps, IState> {
                 {/* <HelpFunction funName={this.state.formulaName} paramIndex={this.state.paramIndex} /> */}
             </div>
         );
-    }
-}
-
-export class UniverRichText implements RichTextComponent {
-    render(): JSXComponent<BaseRichTextProps> {
-        return RichText;
     }
 }

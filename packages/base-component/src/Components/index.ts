@@ -16,7 +16,6 @@ export * from './Menu';
 export * from './Modal';
 export * from './Radio';
 export * from './ResizeDialog';
-export * from './RichText';
 export * from './RightMenu';
 export * from './SearchTree';
 export * from './Select';

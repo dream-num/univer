@@ -16,7 +16,6 @@ import { ColorPickerComponent } from './ColorPicker';
 import { TooltipComponent } from './Tooltip';
 import { CollapseComponent, PanelComponent } from './Collapse';
 import { UlComponent } from './Ul';
-import { RichTextComponent } from './RichText';
 import { SliderComponent } from './Slider';
 import { MenuComponent } from './Menu';
 import { DropdownComponent } from './Dropdown';
@@ -50,7 +49,6 @@ export interface Description {
     Collapse: CollapseComponent;
     Panel: PanelComponent;
     FormatModal: FormatModalComponent;
-    RichText: RichTextComponent;
     Menu: MenuComponent;
     Dropdown: DropdownComponent;
 

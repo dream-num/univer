@@ -113,7 +113,6 @@ import { UniverInput } from './Components/Input';
 import { UniverContent, UniverFooter, UniverHeader, UniverLayout, UniverSider } from './Components/Layout';
 import { UniverModal } from './Components/Modal';
 import { UniverRadio, UniverRadioGroup } from './Components/Radio';
-import { UniverRichText } from './Components/RichText/RichText';
 import { UniverSelect } from './Components/SelectComponent';
 import { UniverSiderModal } from './Components/SiderModal';
 import { UniverSlider } from './Components/Slider';
@@ -252,9 +251,6 @@ export class UniverComponentFactory implements BaseComponentFactory {
             }
             case 'FormatModal': {
                 return new UniverFormatModal() as unknown as T;
-            }
-            case 'RichText': {
-                return new UniverRichText() as unknown as T;
             }
             case 'Menu': {
                 return new UniverMenu() as unknown as T;

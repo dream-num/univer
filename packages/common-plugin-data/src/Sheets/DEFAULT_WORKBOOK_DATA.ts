@@ -58,7 +58,7 @@ const richTextTest: IDocumentData = {
                                     cl: {
                                         rgb: 'rgb(0,1,55)',
                                     },
-                                    va: BaselineOffset.SUBSCRIPT,
+                                    va: BaselineOffset.SUPERSCRIPT,
                                 },
                             },
                         },

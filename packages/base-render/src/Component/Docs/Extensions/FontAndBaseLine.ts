@@ -56,7 +56,7 @@ export class FontAndBaseLine extends docExtension {
             const { centerAngle = 0 } = renderConfig;
 
             let offset = bBox.spo;
-            if (baselineOffset === BaselineOffset.SUBSCRIPT) {
+            if (baselineOffset === BaselineOffset.SUPERSCRIPT) {
                 offset = -bBox.sbo;
             }
 

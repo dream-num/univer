@@ -67,5 +67,8 @@
         "Xinwei"
     ],
     "javascript.preferences.importModuleSpecifier": "relative",
-    "typescript.preferences.importModuleSpecifier": "relative"
+    "typescript.preferences.importModuleSpecifier": "relative",
+    "[xml]": {
+        "editor.defaultFormatter": "redhat.vscode-xml"
+    }
 }

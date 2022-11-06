@@ -1,4 +1,4 @@
-import { BulletAlignment, ColumnSeparatorType, IDrawing, INestingLevel, IParagraphStyle, ITextStyle, IDocumentRenderConfig } from '@univer/core';
+import { BulletAlignment, ColumnSeparatorType, IDrawing, INestingLevel, IParagraphStyle, ITextStyle, IDocumentRenderConfig, IIndentStart } from '@univer/core';
 
 export interface IDocumentSkeletonCached extends ISkeletonResourceReference {
     pages: IDocumentSkeletonPage[];
@@ -145,7 +145,7 @@ export interface IDocumentSkeletonSpan {
     url?: string; // image url链接;
 }
 
-export interface IDocumentSkeletonBullet {
+export interface IDocumentSkeletonBullet extends IIndentStart {
     listId: string; // listId
     symbol: string; // symbol 列表的内容
     ts: ITextStyle; // 文字样式

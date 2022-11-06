@@ -576,9 +576,12 @@ export class Viewport {
             return;
         }
         let isLimitedStore;
-        if (evt.inputIndex === PointerInput.MouseWheelX && evt.deltaX !== 0) {
+        if (evt.inputIndex === PointerInput.MouseWheelX) {
             const deltaFactor = Math.abs(evt.deltaX);
-            let scrollNum = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
+            // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
+            const allWidth = this._scene.width;
+            const viewWidth = this.width || 1;
+            let scrollNum = (viewWidth / allWidth) * deltaFactor;
 
             if (evt.deltaX > 0) {
                 isLimitedStore = this.scrollBy({
@@ -601,9 +604,12 @@ export class Viewport {
                 evt.preventDefault();
             }
         }
-        if (evt.inputIndex === PointerInput.MouseWheelY && evt.deltaY !== 0) {
+        if (evt.inputIndex === PointerInput.MouseWheelY) {
             const deltaFactor = Math.abs(evt.deltaY);
-            let scrollNum = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
+            const allHeight = this._scene.height;
+            const viewHeight = this.height || 1;
+            // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
+            let scrollNum = (viewHeight / allHeight) * deltaFactor;
             if (evt.shiftKey) {
                 if (evt.deltaY > 0) {
                     isLimitedStore = this.scrollBy({

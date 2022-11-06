@@ -220,8 +220,10 @@ export class DocumentSkeleton extends Skeleton {
             linePitch = 15.6, // linePitch pt
             gridType = GridType.LINES, // gridType
             paragraphLineGapDefault = 3,
-            defaultTabStop = 36,
-            textStyle,
+            defaultTabStop = 10.5,
+            textStyle = {
+                fs: 10.5,
+            },
             renderConfig: global_renderConfig = {
                 horizontalAlign: HorizontalAlign.UNSPECIFIED,
                 verticalAlign: VerticalAlign.UNSPECIFIED,

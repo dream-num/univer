@@ -50,12 +50,12 @@ function zeroDecimal(startIndex: number, startNumber: number) {
 
 // 	An uppercase letter, like A, B, or C.
 function upperAlpha(startIndex: number, startNumber: number) {
-    return numberToListABC(startIndex + startNumber, true);
+    return numberToListABC(startIndex + startNumber - 1, true);
 }
 
 // 	A lowercase letter, like a, b, or c.
 function alpha(startIndex: number, startNumber: number) {
-    return numberToListABC(startIndex + startNumber, false);
+    return numberToListABC(startIndex + startNumber - 1, false);
 }
 
 // 	An uppercase Roman numeral, like I, II, or III.

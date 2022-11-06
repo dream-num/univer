@@ -1,9 +1,9 @@
 import { EVENT_TYPE, IWheelEvent, Layer, Rect, Scene, SceneViewer, ScrollBar, Viewport } from '@univer/base-render';
-import { Context, EventState } from '@univer/core';
+import { SheetContext, EventState } from '@univer/core';
 import { CanvasViewRegistry } from './BaseView';
 
 export class SceneViewerTestView {
-    constructor(private _scene: Scene, private _context: Context) {
+    constructor(private _scene: Scene, private _context: SheetContext) {
         this._initialize();
     }
 

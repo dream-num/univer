@@ -1,5 +1,5 @@
 import { FormulaEnginePlugin, IInterpreterDatasetConfig, SheetDataType, UnitDataType, SheetNameMapType } from '@univer/base-formula-engine';
-import { Context, Plugin } from '@univer/core';
+import { SheetContext, Plugin } from '@univer/core';
 import { IFormulaConfig } from '../Basic/IFormula';
 import { FormulaDataModel } from '../Model/FormulaDataModel';
 
@@ -8,7 +8,7 @@ export class FormulaController {
 
     private _formulaEngine: FormulaEnginePlugin;
 
-    private _context: Context;
+    private _context: SheetContext;
 
     private _interpreterCalculatePropsCache: IInterpreterDatasetConfig;
 

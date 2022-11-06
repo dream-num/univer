@@ -1,4 +1,4 @@
-import { IActionData } from '../Command';
+import { ISheetActionData } from '../Command';
 import { Tools } from '../Shared';
 
 /**
@@ -6,7 +6,7 @@ import { Tools } from '../Shared';
  */
 export interface IOServerMessage {
     version: string;
-    changed: IActionData[];
+    changed: ISheetActionData[];
 }
 
 /**
@@ -43,12 +43,12 @@ export abstract class ServerBase {
      * @param changed
      * @returns
      */
-    packMessage(changed: IActionData[]): IOServerMessage {
+    packMessage(changed: ISheetActionData[]): IOServerMessage {
         return {
             changed,
             version: Tools.generateRandomId(),
         };
     }
 
-    abstract pushMessageQueue(data: IActionData[]): void;
+    abstract pushMessageQueue(data: ISheetActionData[]): void;
 }

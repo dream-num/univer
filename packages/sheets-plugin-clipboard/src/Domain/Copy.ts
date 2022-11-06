@@ -1,15 +1,15 @@
 import { handleJsonToDom, handleStyleToString } from '@univer/base-component';
-import { Context, PLUGIN_NAMES, Tools } from '@univer/core';
-import { SpreadsheetPlugin, SelectionModel, RightMenuProps, SelectionControl } from '@univer/base-sheets';
+import { SheetContext, PLUGIN_NAMES, Tools } from '@univer/core';
+import { SheetPlugin, SelectionModel, RightMenuProps, SelectionControl } from '@univer/base-sheets';
 import { Clipboard } from './Clipboard';
 
 export abstract class Copy {
-    private _context: Context;
+    private _context: SheetContext;
 
-    constructor(context: Context, copyList: RightMenuProps[]) {
+    constructor(context: SheetContext, copyList: RightMenuProps[]) {
         this._context = context;
-        const spreadSheetPlugin = this._context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
-        spreadSheetPlugin?.addRightMenu(copyList);
+        const SheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
+        SheetPlugin?.addRightMenu(copyList);
 
         const manager = this._context.getObserverManager();
         manager.requiredObserver<ClipboardEvent>('onSpreadsheetKeyCopyObservable', PLUGIN_NAMES.SPREADSHEET).add((e) => {
@@ -27,7 +27,7 @@ export abstract class Copy {
 }
 
 export class UniverCopy extends Copy {
-    constructor(context: Context) {
+    constructor(context: SheetContext) {
         const copyList = [
             {
                 locale: ['rightClick.copy'],
@@ -100,9 +100,9 @@ export class UniverCopy extends Copy {
 
     private _getSheetInfo() {
         const sheet = this.getContext().getWorkBook().getActiveSheet();
-        const spreadSheetPlugin = this.getContext().getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
-        const spreadsheet = spreadSheetPlugin?.getMainComponent();
-        const controls = spreadSheetPlugin?.getSelectionManager().getCurrentControls();
+        const SheetPlugin = this.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
+        const spreadsheet = SheetPlugin?.getMainComponent();
+        const controls = SheetPlugin?.getSelectionManager().getCurrentControls();
         const selections: any = controls?.map((control: SelectionControl) => {
             const model: SelectionModel = control.model;
             return {

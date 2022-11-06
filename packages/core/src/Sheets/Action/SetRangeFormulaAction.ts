@@ -3,13 +3,13 @@ import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { Workbook } from '../Domain';
 import { IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
 /**
  * @internal
  */
-export interface ISetRangeFormulaActionData extends IActionData {
+export interface ISetRangeFormulaActionData extends ISheetActionData {
     cellFormula: ObjectMatrixPrimitiveType<string>;
     rangeData: IRangeData;
 }
@@ -17,7 +17,7 @@ export interface ISetRangeFormulaActionData extends IActionData {
 /**
  * @internal
  */
-export class SetRangeFormulaAction extends ActionBase<
+export class SetRangeFormulaAction extends SheetAction<
     ISetRangeFormulaActionData,
     ISetRangeFormulaActionData,
     ObjectMatrixPrimitiveType<string>

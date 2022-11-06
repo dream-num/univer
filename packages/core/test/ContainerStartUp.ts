@@ -1,4 +1,4 @@
-import { Context, Environment } from '../src/Basics';
+import { SheetContext, Environment } from '../src/Basics';
 import { CommandManager, UndoManager } from '../src/Command';
 import { Workbook, Worksheet } from '../src/Sheets/Domain';
 import { BooleanNumber } from '../src/Enum';
@@ -41,7 +41,7 @@ export function IOCContainerStartUpReady(): IOCContainer {
     container.addSingletonMapping('ServerHttp', ServerHttp);
     container.addSingletonMapping('WorkBook', Workbook);
     container.addSingletonMapping('Locale', Locale);
-    container.addSingletonMapping('Context', Context);
+    container.addSingletonMapping('Context', SheetContext);
     container.addSingletonMapping('UndoManager', UndoManager);
     container.addSingletonMapping('CommandManager', CommandManager);
     container.addSingletonMapping('PluginManager', PluginManager);
@@ -76,7 +76,7 @@ export function TestInit(worksheetConfig?: Partial<IWorksheetConfig>) {
     const configure = Object.assign(defaultWorksheetConfigure, worksheetConfig);
 
     const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -93,7 +93,7 @@ export function TestInit(worksheetConfig?: Partial<IWorksheetConfig>) {
 }
 export function TestInitTwoSheet() {
     const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -161,7 +161,7 @@ export function TestInitTwoSheet() {
 export function TestInitSheetInstance(worksheetConfig?: Partial<IWorksheetConfig>) {
     const configure = Object.assign(defaultWorksheetConfigure, worksheetConfig);
     const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
     const worksheet = new Worksheet(context, configure);

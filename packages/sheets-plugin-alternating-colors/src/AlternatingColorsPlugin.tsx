@@ -1,6 +1,6 @@
-import { IMainProps, ISlotElement, ISlotProps, IToolBarItemProps } from '@univer/base-component';
-import { SheetsCommand, Context, IOCContainer, UniverSheet, Nullable, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { ISlotElement, ISlotProps } from '@univer/base-component';
+import { SheetContext, IOCContainer, UniverSheet, Nullable, Plugin, PLUGIN_NAMES, SheetCommand } from '@univer/core';
+import { IToolBarItemProps, SheetPlugin } from '@univer/base-sheets';
 import { Banding } from './Banding';
 import { IAddBandingActionData } from './Command';
 import { ACTION_NAMES } from './Command/ACTION_NAMES';
@@ -10,13 +10,14 @@ import { IConfig } from './IData/IAlternatingColors';
 import { en, zh } from './Locale';
 import { AlternatingColorsButton } from './UI/AlternatingColorsButton';
 import { AlternatingColorsSide } from './UI/AlternatingColorsSide/AlternatingColorsSide';
+import { AlternatingColorsPluginObserve } from './Basics/Observer';
 
 export interface IAlternatingColorsPluginConfig {
     value: IBandedRange[];
 }
 
-export class AlternatingColorsPlugin extends Plugin {
-    spreadsheetPlugin: Nullable<SpreadsheetPlugin>;
+export class AlternatingColorsPlugin extends Plugin<AlternatingColorsPluginObserve, SheetContext> {
+    sheetPlugin: Nullable<SheetPlugin>;
 
     protected _config: IAlternatingColorsPluginConfig;
 
@@ -54,10 +55,10 @@ export class AlternatingColorsPlugin extends Plugin {
         };
 
         // get spreadsheet plugin
-        this.spreadsheetPlugin = context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
+        this.sheetPlugin = context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
 
         // extend toolbar
-        this.spreadsheetPlugin?.addButton(item);
+        this.sheetPlugin?.addButton(item);
 
         const panelItem: ISlotProps = {
             name: ALTERNATING_COLORS_PLUGIN_NAME,
@@ -66,17 +67,17 @@ export class AlternatingColorsPlugin extends Plugin {
         };
 
         // extend sider
-        this.spreadsheetPlugin?.addSider(panelItem);
+        this.sheetPlugin?.addSider(panelItem);
 
         // extend main area
-        const mainItem: IMainProps = {
-            name: ALTERNATING_COLORS_PLUGIN_NAME,
-            type: ISlotElement.JSX,
-            content: <div>middle alternating</div>,
-        };
+        // const mainItem: IMainProps = {
+        //     name: ALTERNATING_COLORS_PLUGIN_NAME,
+        //     type: ISlotElement.JSX,
+        //     content: <div>middle alternating</div>,
+        // };
 
-        this.spreadsheetPlugin?.addMain(mainItem);
-        this.spreadsheetPlugin?.showMainByName(ALTERNATING_COLORS_PLUGIN_NAME, true);
+        // this.sheetPlugin?.addMain(mainItem);
+        this.sheetPlugin?.showMainByName(ALTERNATING_COLORS_PLUGIN_NAME, true);
     }
 
     /**
@@ -84,7 +85,7 @@ export class AlternatingColorsPlugin extends Plugin {
      */
     onMapping(IOC: IOCContainer): void {}
 
-    onMounted(ctx: Context): void {
+    onMounted(ctx: SheetContext): void {
         this.initialize();
     }
 
@@ -120,7 +121,7 @@ export class AlternatingColorsPlugin extends Plugin {
         };
 
         // Execute action
-        const command = new SheetsCommand(context.getWorkBook(), actionData);
+        const command = new SheetCommand(context.getWorkBook(), actionData);
         _commandManager.invoke(command);
     }
 }

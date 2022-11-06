@@ -1,6 +1,6 @@
 import { BaseComponentRender, BaseComponentSheet, BaseSelectProps, Component, ISelectButton, IToolBarItemProps } from '@univer/base-component';
 import { Nullable, Observer, Workbook } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 import { IConfig } from '../../IData';
 
 interface IProps {
@@ -19,7 +19,7 @@ export class FreezeButton extends Component<IProps, IState> {
 
     initialize(props: IProps) {
         // super(props);
-        const component = new SpreadsheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = new SheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this.Render = component.getComponentRender();
         const NextIcon = this.Render.renderFunction('NextIcon');
         const FreezeIcon = this.Render.renderFunction('FreezeIcon');

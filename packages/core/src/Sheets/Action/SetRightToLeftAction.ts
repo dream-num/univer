@@ -1,20 +1,20 @@
 import { SetRightToLeft } from '../Apply';
 import { Workbook } from '../Domain/Workbook';
 import { BooleanNumber } from '../../Enum';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
 /**
  * @internal
  */
-export interface ISetRightToLeftActionData extends IActionData {
+export interface ISetRightToLeftActionData extends ISheetActionData {
     rightToLeft: BooleanNumber;
 }
 
 /**
  * @internal
  */
-export class SetRightToLeftAction extends ActionBase<ISetRightToLeftActionData> {
+export class SetRightToLeftAction extends SheetAction<ISetRightToLeftActionData> {
     constructor(
         actionData: ISetRightToLeftActionData,
         workbook: Workbook,

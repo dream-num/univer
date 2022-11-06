@@ -1,4 +1,4 @@
-import { IActionData } from '../Command';
+import { ISheetActionData } from '../Command';
 import { IWorkbookConfig } from '../Interfaces';
 import { AttributeValue, PostConstruct } from '../IOC/IOCContainer';
 import { IOSocket, IOSocketListenType } from '../Shared';
@@ -93,7 +93,7 @@ export class ServerSocket extends ServerBase {
      * zh: 消息添加到发送队列中
      * @param data
      */
-    pushMessageQueue(changed: IActionData[]): void {
+    pushMessageQueue(changed: ISheetActionData[]): void {
         if (this.config.socketEnable) {
             this.messageQueue.push(this.packMessage(changed));
             this.sendMessageQueue();

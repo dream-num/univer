@@ -1,14 +1,14 @@
 import { BaselineOffset, getColorStyle } from '@univer/core';
 import { IScale } from '../../../Basics/Interfaces';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../Extension';
-import { docsExtension } from '../DocsExtension';
+import { docExtension } from '../DocExtension';
 import { IDocumentSkeletonSpan } from '../../../Basics/IDocumentSkeletonCached';
 import { COLOR_BLACK_RGB } from '../../../Basics/Const';
 import { Vector2 } from '../../../Basics/Vector2';
 
 const UNIQUE_KEY = 'DefaultDocsFontAndBaseLineExtension';
 
-export class FontAndBaseLine extends docsExtension {
+export class FontAndBaseLine extends docExtension {
     uKey = UNIQUE_KEY;
 
     zIndex = 20;

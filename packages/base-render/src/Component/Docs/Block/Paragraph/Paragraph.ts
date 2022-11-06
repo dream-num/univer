@@ -1,4 +1,15 @@
-import { ColumnSeparatorType, Context, IBullet, IDrawing, IDrawings, IElementsOrder, IParagraph, Nullable, ParagraphElementType, PositionedObjectLayoutType } from '@univer/core';
+import {
+    ColumnSeparatorType,
+    SheetContext,
+    IBullet,
+    IDrawing,
+    IDrawings,
+    IElementsOrder,
+    IParagraph,
+    Nullable,
+    ParagraphElementType,
+    PositionedObjectLayoutType,
+} from '@univer/core';
 import { dealWidthBullet, dealWidthInlineDrawing, dealWidthTextRun } from '.';
 import { createSkeletonPage, getLastNotFullColumnInfo, setColumnFullState } from '../..';
 import {
@@ -17,7 +28,7 @@ export function dealWidthParagraph(
     curPage: IDocumentSkeletonPage,
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
-    context?: Context
+    context?: SheetContext
 ): IDocumentSkeletonPage[] {
     const {
         pageNumberStart,

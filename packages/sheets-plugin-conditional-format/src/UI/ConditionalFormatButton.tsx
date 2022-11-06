@@ -1,6 +1,6 @@
 import { BaseComponentRender, BaseComponentSheet, BaseSelectProps, Component, ModalProps } from '@univer/base-component';
 import { Nullable, Observer, Workbook } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 
 import { IProps } from '../IData/IConditionalFormat';
 import { ConditionContent } from './ConditionContent';
@@ -38,7 +38,7 @@ export class ConditionalFormatButton extends Component<IProps, IState> {
     Render: BaseComponentRender;
 
     initialize(props: IProps) {
-        const component = new SpreadsheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = new SheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this.Render = component.getComponentRender();
         const ConditionalFormatIcon = this.Render.renderFunction('ConditionalFormatIcon');
         const NextIcon = this.Render.renderFunction('NextIcon');

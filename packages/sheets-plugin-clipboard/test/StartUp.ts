@@ -1,7 +1,7 @@
 import {
     BooleanNumber,
     CommandManager,
-    Context,
+    SheetContext,
     Environment,
     HooksManager,
     IOCAttribute,
@@ -48,7 +48,7 @@ export function StartUpReady(): IOCContainer {
     container.addSingletonMapping('ServerHttp', ServerHttp);
     container.addSingletonMapping('WorkBook', Workbook);
     container.addSingletonMapping('Locale', Locale);
-    container.addSingletonMapping('Context', Context);
+    container.addSingletonMapping('Context', SheetContext);
     container.addSingletonMapping('UndoManager', UndoManager);
     container.addSingletonMapping('CommandManager', CommandManager);
     container.addSingletonMapping('PluginManager', PluginManager);
@@ -81,7 +81,7 @@ export function StartUpInit(worksheetConfig?: Partial<IWorksheetConfig>) {
     }, worksheetConfig);
 
     const container = StartUpReady();
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const manager = workbook.getCommandManager();
 

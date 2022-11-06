@@ -1,5 +1,5 @@
-import { Plugin, RangeList, Tools } from '@univer/core';
-import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
+import { RangeList, Tools } from '@univer/core';
+import { SheetPlugin } from '../SheetPlugin';
 import { CountBar } from '../View/UI/CountBar';
 
 class APIController {
@@ -16,7 +16,7 @@ class UIController {
     private _countBar: CountBar;
 
     private _initialize(): void {
-        const plugin = this._master.getPlugin() as SpreadsheetPlugin;
+        const plugin = this._master.getPlugin();
         const context = plugin.getContext();
         const workbook = context.getWorkBook();
 
@@ -30,7 +30,7 @@ class UIController {
     private _totalRangeList(rangeList: RangeList): void {
         let rectList = rangeList.getRangeList();
         let recList: string[] = [];
-        let plugin = this._master.getPlugin() as SpreadsheetPlugin;
+        let plugin = this._master.getPlugin();
         let context = plugin.getContext();
         let workbook = context.getWorkBook();
         let worksheet = workbook.getActiveSheet();
@@ -67,7 +67,7 @@ class UIController {
     }
 
     private _initializeSelectedObserver(): void {
-        const plugin = this._master.getPlugin() as SpreadsheetPlugin;
+        const plugin = this._master.getPlugin();
         const manager = plugin.getSelectionManager();
         plugin.getObserver('onChangeSelectionObserver')?.add(() => {
             const rangeList = manager.getActiveRangeList();
@@ -99,19 +99,19 @@ class UIController {
 }
 
 export class CountBarController {
-    private _plugin: Plugin;
+    private _plugin: SheetPlugin;
 
     private _uiController: UIController;
 
     private _apiController: APIController;
 
-    constructor(plugin: Plugin) {
+    constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
         this._uiController = new UIController(this);
         this._apiController = new APIController(this);
     }
 
-    getPlugin(): Plugin {
+    getPlugin(): SheetPlugin {
         return this._plugin;
     }
 

@@ -4,14 +4,14 @@ import { WorkSheetConvertor } from '../../Convertor';
 import { Workbook } from '../Domain';
 import { ICellData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertColumnDataActionData } from './InsertColumnDataAction';
 
 /**
  * @internal
  */
-export interface IRemoveColumnDataAction extends IActionData {
+export interface IRemoveColumnDataAction extends ISheetActionData {
     columnIndex: number;
     columnCount: number;
 }
@@ -21,7 +21,7 @@ export interface IRemoveColumnDataAction extends IActionData {
  *
  * @internal
  */
-export class RemoveColumnDataAction extends ActionBase<
+export class RemoveColumnDataAction extends SheetAction<
     IRemoveColumnDataAction,
     IInsertColumnDataActionData
 > {

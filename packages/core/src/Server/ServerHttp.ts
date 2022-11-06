@@ -1,11 +1,11 @@
-import { IActionData } from '../Command';
+import { ISheetActionData } from '../Command';
 import { ServerBase } from './ServerBase';
 
 /**
  * Http wrapper
  */
 export class ServerHttp extends ServerBase {
-    pushMessageQueue(data: IActionData[]): void {
+    pushMessageQueue(data: ISheetActionData[]): void {
         throw new Error('Method not implemented.');
     }
 }

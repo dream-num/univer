@@ -1,22 +1,30 @@
-import { BaseComponentRender, BaseComponentSheet, ISelectButton, IToolBarItemProps } from '@univer/base-component';
-import { Tools, BorderType, BorderStyleTypes, ICellData, IStyleData, HorizontalAlign, VerticalAlign, WrapStrategy, DEFAULT_STYLES } from '@univer/core';
-import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
+import { BaseComponentRender, BaseComponentSheet } from '@univer/base-component';
+import { Tools, BorderType, BorderStyleTypes, HorizontalAlign, VerticalAlign, WrapStrategy, DEFAULT_STYLES } from '@univer/core';
+import { ColorPicker } from '@univer/style-universheet';
+import { SheetPlugin } from '../SheetPlugin';
 import { defaultLayout, ILayout } from '../View/UI/SheetContainer';
+
+import { SelectionControl } from './Selection/SelectionController';
 import {
     BORDER_LINE_CHILDREN,
     FONT_FAMILY_CHILDREN,
     FONT_SIZE_CHILDREN,
     HORIZONTAL_ALIGN_CHILDREN,
     MERGE_CHILDREN,
-    MORE_FORMATS_CHILDREN,
     TEXT_ROTATE_CHILDREN,
     TEXT_WRAP_CHILDREN,
     VERTICAL_ALIGN_CHILDREN,
 } from '../View/UI/ToolBar/Const';
-import { ToolBarModel } from '../Model/ToolBarModel';
-import { ToolBar } from '../View/UI/ToolBar/ToolBar';
-import { SelectionControl } from './Selection/SelectionController';
-import { SelectionModel } from '../Model/SelectionModel';
+import styles from '../View/UI/ToolBar/index.module.less';
+import { LineColor } from '../View/UI/Common/Line/LineColor';
+import { SelectionModel } from '../Model';
+import { IToolBarItemProps, ToolBarModel } from '../Model/ToolBarModel';
+import { ToolBar } from '../View/UI/ToolBar';
+
+interface BorderInfo {
+    color: string;
+    width: string;
+}
 
 /**
  *
@@ -24,367 +32,291 @@ import { SelectionModel } from '../Model/SelectionModel';
 export class ToolBarController {
     private _toolBarModel: ToolBarModel;
 
-    private _plugin: SpreadsheetPlugin;
+    private _plugin: SheetPlugin;
 
     private _toolBarComponent: ToolBar;
 
+    private _toolList: IToolBarItemProps[];
+
+    private _lineColor: LineColor;
+
     Render: BaseComponentRender;
 
-    // all functions need trigger to update tool bar status
-    triggerUpdateMap: Map<string, Function> = new Map();
+    private _borderInfo: BorderInfo; //存储边框信息
 
-    constructor(plugin: SpreadsheetPlugin) {
+    constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
 
-        const component = this._plugin.context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this.Render = component.getComponentRender();
+        const pluginName = this._plugin.getPluginName();
+
+        this.initRegisterComponent();
 
         const config =
             this._plugin.config.layout === 'auto'
                 ? Tools.deepClone(defaultLayout.toolBarConfig)
                 : Tools.deepMerge(defaultLayout.toolBarConfig, (this._plugin.config.layout as ILayout).toolBarConfig);
 
-        const toolList: IToolBarItemProps[] = [
+        this._borderInfo = {
+            color: '#000',
+            width: '1',
+        };
+
+        this._toolList = [
             {
-                locale: 'undo',
-                type: 'single',
-                icon: 'ForwardIcon',
+                toolbarType: 1,
+                tooltipLocale: 'toolbar.undo',
+                customLabel: {
+                    name: 'ForwardIcon',
+                },
                 show: config.undoRedo,
                 onClick: () => {
                     this.setUndo();
                 },
             },
             {
-                locale: 'redo',
-                type: 'single',
-                icon: 'BackIcon',
+                toolbarType: 1,
+                tooltipLocale: 'toolbar.redo',
+                customLabel: {
+                    name: 'BackIcon',
+                },
                 show: config.undoRedo,
                 onClick: () => {
                     this.setRedo();
                 },
             },
-            {
-                locale: 'paintFormat',
-                type: 'single',
-                icon: 'FormatIcon',
-                show: config.paintFormat,
-            },
-            {
-                locale: 'currencyFormat',
-                type: 'single',
-                icon: 'MoneyIcon',
-                show: config.currencyFormat,
-            },
-            {
-                locale: 'percentageFormat',
-                type: 'single',
-                icon: 'PercentIcon',
-                show: config.percentageFormat,
-            },
-            {
-                locale: 'numberDecrease',
-                type: 'single',
-                icon: 'ReduceNumIcon',
-                show: config.numberDecrease,
-            },
-            {
-                locale: 'numberIncrease',
-                type: 'single',
-                icon: 'AddNumIcon',
-                show: config.numberIncrease,
-            },
-            {
-                locale: 'moreFormats',
-                type: 'select',
-                icon: 'NextIcon',
-                needChange: true,
-                show: config.moreFormats,
-                // onClick: this.handleClickMoreFormats,
-                border: true,
-                children: [
-                    ...MORE_FORMATS_CHILDREN,
-                    {
-                        locale: 'defaultFmt.CustomFormats.text',
-                        border: true,
-                        selected: false,
-                        icon: 'RightIcon',
-                        children: [
-                            {
-                                locale: 'format.moreCurrency',
-                                onClick: (e: string) => {
-                                    // this.showFormatModal(e, 'format.titleCurrency');
-                                },
-                            },
-                            {
-                                locale: 'format.moreDateTime',
-                                onClick: (e: string) => {
-                                    // this.showFormatModal(e, 'format.titleDateTime');
-                                },
-                            },
-                            {
-                                locale: 'format.moreNumber',
-                                onClick: (e: string) => {
-                                    // this.showFormatModal(e, 'format.titleNumber');
-                                },
-                            },
-                        ],
-                    },
-                ],
-            },
+
+            // {
+            //     toolbarType: 1,
+            //     tooltipLocale: 'paintFormat',
+            //     label: 'FormatIcon',
+            //     show: config.paintFormat,
+            // },
+            // {
+            //     toolbarType: 1,
+            //     tooltipLocale: 'currencyFormat',
+            //     label: 'MoneyIcon',
+            //     show: config.currencyFormat,
+            // },
+            // {
+            //     toolbarType: 1,
+            //     tooltipLocale: 'percentageFormat',
+            //     label: 'PercentIcon',
+            //     show: config.percentageFormat,
+            // },
+            // {
+            //     toolbarType: 1,
+            //     tooltipLocale: 'numberDecrease',
+            //     label: 'ReduceNumIcon',
+            //     show: config.numberDecrease,
+            // },
+            // {
+            //     toolbarType: 1,
+            //     tooltipLocale: 'numberIncrease',
+            //     label: 'AddNumIcon',
+            //     show: config.numberIncrease,
+            // },
 
             {
-                locale: 'font',
-                type: 'select',
-                icon: 'NextIcon',
+                type: 0,
+                tooltipLocale: 'font',
+                selectClassName: styles.selectLabelString,
                 show: config.font,
-                needChange: true,
                 border: true,
                 onClick: (fontFamily: string) => {
                     this._plugin.getObserver('onAfterChangeFontFamilyObservable')?.notifyObservers(fontFamily);
                 },
-                triggerUpdate: (cb: Function) => {
-                    this.triggerUpdateMap.set('font', cb);
-                },
                 children: FONT_FAMILY_CHILDREN,
             },
-
             {
-                type: 'select',
-                locale: 'fontSize',
+                type: 1,
+                tooltipLocale: 'fontSize',
                 label: String(DEFAULT_STYLES.fs),
                 show: config.fontSize,
-                selectType: ISelectButton.INPUT_NUMBER,
-                needChange: true,
-                border: false,
-                onKeyUp: (fontSize: number) => {
-                    this._plugin.getObserver('onAfterChangeFontSizeObservable')?.notifyObservers(fontSize);
-                },
                 onClick: (fontSize: number) => {
                     this._plugin.getObserver('onAfterChangeFontSizeObservable')?.notifyObservers(fontSize);
                 },
-                triggerUpdate: (cb: Function) => {
-                    this.triggerUpdateMap.set('fontSize', cb);
+                onKeyUp: (fontSize: number) => {
+                    this._plugin.getObserver('onAfterChangeFontSizeObservable')?.notifyObservers(fontSize);
                 },
-                icon: 'NextIcon',
                 children: FONT_SIZE_CHILDREN,
             },
-
             {
-                locale: 'bold',
-                type: 'single',
-                icon: 'BoldIcon',
+                toolbarType: 1,
+                tooltipLocale: 'bold',
+                customLabel: {
+                    name: 'BoldIcon',
+                },
                 show: config.bold,
-                selected: false,
                 onClick: (isBold: boolean) => {
                     this._plugin.getObserver('onAfterChangeFontWeightObservable')?.notifyObservers(isBold);
                 },
-                triggerUpdate: (cb: Function) => {
-                    this.triggerUpdateMap.set('bold', cb);
-                },
             },
-
             {
-                locale: 'italic',
-                type: 'single',
-                icon: 'ItalicIcon',
+                toolbarType: 1,
+                tooltipLocale: 'italic',
+                customLabel: {
+                    name: 'ItalicIcon',
+                },
                 show: config.italic,
-                selected: false,
                 onClick: (isItalic: boolean) => {
                     this._plugin.getObserver('onAfterChangeFontItalicObservable')?.notifyObservers(isItalic);
                 },
-                triggerUpdate: (cb: Function) => {
-                    this.triggerUpdateMap.set('italic', cb);
-                },
             },
             {
-                locale: 'strikethrough',
-                type: 'single',
-                icon: 'DeleteLineIcon',
+                toolbarType: 1,
+                tooltipLocale: 'strikethrough',
+                customLabel: {
+                    name: 'DeleteLineIcon',
+                },
                 show: config.strikethrough,
-                selected: false,
                 onClick: (isStrikethrough: boolean) => {
                     this._plugin.getObserver('onAfterChangeFontStrikethroughObservable')?.notifyObservers(isStrikethrough);
                 },
-                triggerUpdate: (cb: Function) => {
-                    this.triggerUpdateMap.set('strikethrough', cb);
-                },
             },
             {
-                locale: 'underline',
-                type: 'single',
-                icon: 'UnderLineIcon',
+                toolbarType: 1,
+                tooltipLocale: 'underline',
+                customLabel: {
+                    name: 'UnderLineIcon',
+                },
                 show: config.underline,
-                selected: false,
                 onClick: (isItalic: boolean) => {
                     this._plugin.getObserver('onAfterChangeFontUnderlineObservable')?.notifyObservers(isItalic);
                 },
-                triggerUpdate: (cb: Function) => {
-                    this.triggerUpdateMap.set('underline', cb);
-                },
             },
             {
-                locale: 'textColor',
-                type: 'select',
-                label: 'TextColorIcon',
-                icon: 'NextIcon',
-                selectType: ISelectButton.COLOR,
+                type: 2,
+                tooltipLocale: 'textColor',
+                customLabel: {
+                    name: 'TextColorIcon',
+                },
                 show: config.textColor,
-                slot: {},
                 onClick: (color: string) => {
                     this._plugin.getObserver('onAfterChangeFontColorObservable')?.notifyObservers(color);
                 },
             },
             {
-                locale: 'fillColor',
-                type: 'select',
-                label: 'FillColorIcon',
-                icon: 'NextIcon',
-                selectType: ISelectButton.COLOR,
+                type: 2,
+                tooltipLocale: 'fillColor',
+                customLabel: {
+                    name: 'FillColorIcon',
+                },
                 show: config.fillColor,
-                slot: {},
                 onClick: (color: string) => {
                     this._plugin.getObserver('onAfterChangeFontBackgroundObservable')?.notifyObservers(color);
                 },
             },
-
             {
-                locale: 'borderLine',
-                type: 'select',
-                label: 'FullBorderIcon',
-                icon: 'NextIcon',
+                type: 3,
+                display: 1,
                 show: config.border,
-                needChange: true,
-                selectType: ISelectButton.DOUBLE,
-                onClick: (type, color, style) => {
-                    this.setBorder(type, color, style);
+                onClick: (type) => {
+                    // console.dir(type);
+                    // console.dir(this._borderInfo);
                 },
-                children: BORDER_LINE_CHILDREN,
+                children: [
+                    ...BORDER_LINE_CHILDREN,
+                    {
+                        customLabel: {
+                            name: pluginName + LineColor.name,
+                        },
+                        unSelectable: true,
+                        className: styles.selectColorPickerParent,
+                        children: [
+                            {
+                                customLabel: {
+                                    name: pluginName + ColorPicker.name,
+                                    props: { onClick: (color: string, e: MouseEvent) => this.handleLineColor(color, e) },
+                                },
+                                className: styles.selectColorPicker,
+                                onClick: this.handleLineColor,
+                            },
+                        ],
+                    },
+                    // {
+                    //     locale: 'borderLine.borderSize',
+                    //     suffix: 'RightIcon',
+                    //     value: 1,
+                    //     unSelectable: true,
+                    //     children: [
+                    //         { locale: 'borderLine.borderNone', value: 0 },
+                    //         { label: 'BorderThin', value: 1 },
+                    //         { label: 'BorderHair', value: 2 },
+                    //         { label: 'BorderDotted', value: 3 },
+                    //         { label: 'BorderDashed', value: 4 },
+                    //         { label: 'BorderDashDot', value: 5 },
+                    //         { label: 'BorderDashDotDot', value: 6 },
+                    //         { label: 'BorderMedium', value: 7 },
+                    //         { label: 'BorderMediumDashed', value: 8 },
+                    //         { label: 'BorderMediumDashDot', value: 9 },
+                    //         { label: 'BorderMediumDashDotDot', value: 10 },
+                    //         { label: 'BorderThick', value: 12 },
+                    //     ],
+                    // },
+                ],
             },
-
             {
-                locale: 'mergeCell',
-                type: 'select',
-                label: 'MergeIcon',
-                icon: 'NextIcon',
+                type: 5,
+                tooltipLocale: 'mergeCell',
+                customLabel: {
+                    name: 'MergeIcon',
+                },
                 show: config.mergeCell,
-                selectType: ISelectButton.DOUBLE,
                 onClick: (value: string) => {
                     this.setMerge(value);
                 },
                 children: MERGE_CHILDREN,
             },
-
             {
-                locale: 'horizontalAlignMode',
-                type: 'select',
-                label: 'LeftAlignIcon',
-                icon: 'NextIcon',
+                type: 3,
+                tooltipLocale: 'horizontalAlignMode',
+                display: 1,
                 show: config.horizontalAlignMode,
-                selectType: ISelectButton.DOUBLE,
-                needChange: true,
                 onClick: (value: HorizontalAlign) => {
                     this.setHorizontalAlignment(value);
-                },
-                triggerUpdate: (cb: Function) => {
-                    this.triggerUpdateMap.set('horizontalAlign', cb);
                 },
                 children: HORIZONTAL_ALIGN_CHILDREN,
             },
             {
-                locale: 'verticalAlignMode',
-                type: 'select',
-                label: 'BottomVerticalIcon',
-                icon: 'NextIcon',
+                type: 3,
+                tooltipLocale: 'verticalAlignMode',
+                display: 1,
                 show: config.verticalAlignMode,
-                selectType: ISelectButton.DOUBLE,
-                needChange: true,
                 onClick: (value: VerticalAlign) => {
                     this.setVerticalAlignment(value);
-                },
-                triggerUpdate: (cb: Function) => {
-                    this.triggerUpdateMap.set('verticalAlign', cb);
                 },
                 children: VERTICAL_ALIGN_CHILDREN,
             },
             {
-                locale: 'textWrapMode',
-                type: 'select',
-                label: 'CutIcon',
-                icon: 'NextIcon',
+                type: 3,
+                tooltipLocale: 'textWrapMode',
+                display: 1,
                 show: config.textWrapMode,
-                selectType: ISelectButton.DOUBLE,
-                needChange: true,
                 onClick: (value: WrapStrategy) => {
                     this.setWrapStrategy(value);
-                },
-                triggerUpdate: (cb: Function) => {
-                    this.triggerUpdateMap.set('textWrap', cb);
                 },
                 children: TEXT_WRAP_CHILDREN,
             },
             {
-                locale: 'textRotateMode',
-                type: 'select',
-                label: 'TextRotateIcon',
-                icon: 'NextIcon',
+                type: 3,
+                tooltipLocale: 'textRotateMode',
+                display: 1,
                 show: config.textRotateMode,
-                selectType: ISelectButton.DOUBLE,
-                needChange: true,
                 onClick: (value: number | string) => {
                     this.setTextRotation(value);
                 },
-                triggerUpdate: (cb: Function) => {
-                    this.triggerUpdateMap.set('textRotate', cb);
-                },
                 children: TEXT_ROTATE_CHILDREN,
             },
-
-            // {
-            //     locale: 'print',
-            //     type: 'select',
-            //     label: 'PrintIcon',
-            //     show: true,
-            //     icon: 'NextIcon',
-            //     children: [
-            //         {
-            //             locale: 'print.menuItemPrint',
-            //             icon: 'PrintIcon',
-            //         },
-            //         {
-            //             locale: 'print.menuItemAreas',
-            //             icon: 'PrintAreaIcon',
-            //             border: true,
-            //         },
-            //         {
-            //             locale: 'print.menuItemRows',
-            //             icon: 'PrintTitleIcon',
-            //         },
-            //         {
-            //             locale: 'print.menuItemColumns',
-            //             icon: 'PrintTitleIcon',
-            //         },
-            //     ],
-            // },
         ];
 
         this._toolBarModel = new ToolBarModel();
         this._toolBarModel.config = config;
-        this._toolBarModel.toolList = toolList;
+        this._toolBarModel.toolList = this._toolList;
 
-        this._initialize();
+        this.init();
     }
 
-    private _initialize() {
-        // this._plugin.sheetContainerConfig.toolList = [];
-        // this._plugin.sheetContainerConfig.toolList = this._toolBarModel.toolList;
-
-        // this._plugin.context
-        //     .getObserverManager()
-        //     .getObserver<SheetContainer>('onSheetContainerDidMountObservable', 'workbook')
-        //     ?.add((component) => {
-        //         this._sheetContainer = component;
-        //         this._sheetContainer.setToolBar(this._toolBarModel.toolList);
-        //     });
+    init() {
         this._plugin.getObserver('onAfterChangeFontFamilyObservable')?.add((value: string) => {
             if (!this._plugin.getCellEditorControl().isEditMode) {
                 this.setFontFamily(value);
@@ -443,27 +375,23 @@ export class ToolBarController {
         });
 
         this._plugin.getObserver('onToolBarDidMountObservable')?.add((component) => {
+            //初始化视图
             this._toolBarComponent = component;
+            this.resetToolBarList();
+        });
 
-            this._toolBarComponent.setToolBar(this._toolBarModel.toolList);
-
-            // this._toolBarComponent.setState((prevState) => ({
-            //     defaultToolList: prevState.toolList,
-            //     index: prevState.toolList.length,
-            // }));
+        this._plugin.getObserver('onLineColorDidMountObservable')?.add((component) => {
+            //初始化视图
+            this._lineColor = component;
         });
 
         this._plugin.context
             .getObserverManager()
             .getObserver('onAfterChangeUILocaleObservable', 'workbook')
-            ?.add(() => {
-                // this._sheetContainer.setToolBar(this._toolBarModel.toolList);
-            });
+            ?.add(() => {});
 
         // Monitor selection changes, update toolbar button status and values TODO: 根据不同的焦点对象，接受
         this._plugin.getObserver('onChangeSelectionObserver')?.add((selectionControl: SelectionControl) => {
-            // console.log('this._plugin.getSelectionManager().getActiveRangeList()?.getRangeList()', this._plugin.getSelectionManager().getActiveRangeList()?.getRangeList());
-
             const currentCell = selectionControl.model.currentCell;
 
             if (currentCell) {
@@ -489,59 +417,123 @@ export class ToolBarController {
                 }
 
                 const cellData = this._plugin.getWorkbook().getActiveSheet().getRange(currentRangeData).getObjectValue({ isIncludeStyle: true });
-                this.triggerAllUpdate(cellData);
             }
         });
     }
 
+    initRegisterComponent() {
+        const component = this._plugin.context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const pluginName = this._plugin.getPluginName();
+        this.Render = component.getComponentRender();
+        const registerIcon = {
+            ForwardIcon: this.Render.renderFunction('ForwardIcon'),
+            BackIcon: this.Render.renderFunction('BackIcon'),
+            BoldIcon: this.Render.renderFunction('BoldIcon'),
+            ItalicIcon: this.Render.renderFunction('ItalicIcon'),
+            DeleteLineIcon: this.Render.renderFunction('DeleteLineIcon'),
+            UnderLineIcon: this.Render.renderFunction('UnderLineIcon'),
+            TextColorIcon: this.Render.renderFunction('TextColorIcon'),
+            FillColorIcon: this.Render.renderFunction('FillColorIcon'),
+            MergeIcon: this.Render.renderFunction('MergeIcon'),
+            TopBorderIcon: this.Render.renderFunction('TopBorderIcon'),
+            BottomBorderIcon: this.Render.renderFunction('BottomBorderIcon'),
+            LeftBorderIcon: this.Render.renderFunction('LeftBorderIcon'),
+            RightBorderIcon: this.Render.renderFunction('RightBorderIcon'),
+            NoneBorderIcon: this.Render.renderFunction('NoneBorderIcon'),
+            FullBorderIcon: this.Render.renderFunction('FullBorderIcon'),
+            OuterBorderIcon: this.Render.renderFunction('OuterBorderIcon'),
+            InnerBorderIcon: this.Render.renderFunction('InnerBorderIcon'),
+            StripingBorderIcon: this.Render.renderFunction('StripingBorderIcon'),
+            VerticalBorderIcon: this.Render.renderFunction('VerticalBorderIcon'),
+            LeftAlignIcon: this.Render.renderFunction('LeftAlignIcon'),
+            CenterAlignIcon: this.Render.renderFunction('CenterAlignIcon'),
+            RightAlignIcon: this.Render.renderFunction('RightAlignIcon'),
+            TopVerticalIcon: this.Render.renderFunction('TopVerticalIcon'),
+            CenterVerticalIcon: this.Render.renderFunction('CenterVerticalIcon'),
+            BottomVerticalIcon: this.Render.renderFunction('BottomVerticalIcon'),
+            OverflowIcon: this.Render.renderFunction('OverflowIcon'),
+            BrIcon: this.Render.renderFunction('BrIcon'),
+            CutIcon: this.Render.renderFunction('CutIcon'),
+            TextRotateIcon: this.Render.renderFunction('TextRotateIcon'),
+            TextRotateAngleUpIcon: this.Render.renderFunction('TextRotateAngleUpIcon'),
+            TextRotateAngleDownIcon: this.Render.renderFunction('TextRotateAngleDownIcon'),
+            TextRotateVerticalIcon: this.Render.renderFunction('TextRotateVerticalIcon'),
+            TextRotateRotationUpIcon: this.Render.renderFunction('TextRotateRotationUpIcon'),
+            TextRotateRotationDownIcon: this.Render.renderFunction('TextRotateRotationDownIcon'),
+        };
+
+        // 注册自定义组件
+        this._plugin.registerComponent(pluginName + LineColor.name, LineColor);
+        this._plugin.registerComponent(pluginName + ColorPicker.name, ColorPicker);
+        for (let k in registerIcon) {
+            this._plugin.registerComponent(k, registerIcon[k]);
+        }
+    }
+
+    resetLocale(toolList: any[]) {
+        const locale = this._plugin.context.getLocale();
+
+        for (let i = 0; i < toolList.length; i++) {
+            const item = toolList[i];
+            if (item.tooltipLocale) {
+                item.tooltip = locale.get(item.tooltipLocale);
+            }
+            if (item.locale) {
+                item.label = locale.get(item.locale);
+            }
+            if (item.suffixLocale) {
+                item.suffix = locale.get(item.suffixLocale);
+            }
+            if (item.children) {
+                item.children = this.resetLocale(item.children);
+            }
+        }
+        return toolList;
+    }
+
+    resetToolBarList() {
+        const toolList = this.resetLocale(this._toolList);
+        this._toolBarComponent.setToolBar(toolList);
+    }
+
     setRedo() {
         this._plugin.getContext().getCommandManager().redo();
-        // // this._plugin.getMainComponent().makeDirty(true);
     }
 
     setUndo() {
         this._plugin.getContext().getCommandManager().undo();
-        // // this._plugin.getMainComponent().makeDirty(true);
     }
 
     setFontColor(value: string) {
         this._plugin.getSelectionManager().getActiveRangeList()?.setFontColor(value);
-        // this._plugin.getMainComponent().makeDirty(true);
     }
 
     setBackground(value: string) {
         this._plugin.getSelectionManager().getActiveRangeList()?.setBackground(value);
-        // this._plugin.getMainComponent().makeDirty(true);
     }
 
     setFontSize(value: number) {
         this._plugin.getSelectionManager().getActiveRangeList()?.setFontSize(value);
-        // this._plugin.getMainComponent().makeDirty(true);
     }
 
     setFontFamily(value: string) {
         this._plugin.getSelectionManager().getActiveRangeList()?.setFontFamily(value);
-        // this._plugin.getMainComponent().makeDirty(true);
     }
 
     setFontWeight(value: boolean) {
         this._plugin.getSelectionManager().getActiveRangeList()?.setFontWeight(value);
-        // this._plugin.getMainComponent().makeDirty(true);
     }
 
     setFontStyle(value: boolean) {
         this._plugin.getSelectionManager().getActiveRangeList()?.setFontStyle(value);
-        // this._plugin.getMainComponent().makeDirty(true);
     }
 
     setStrikeThrough(value: boolean) {
         this._plugin.getSelectionManager().getActiveRangeList()?.setStrikeThrough(value);
-        // this._plugin.getMainComponent().makeDirty(true);
     }
 
     setUnderline(value: boolean) {
         this._plugin.getSelectionManager().getActiveRangeList()?.setUnderline(value);
-        // this._plugin.getMainComponent().makeDirty(true);
     }
 
     setMerge(value: string) {
@@ -569,28 +561,24 @@ export class ToolBarController {
         }
 
         // update data
-        // this._plugin.getCanvasView().updateToSheet(this._plugin.getContext().getWorkBook().getActiveSheet()!);
+        this._plugin.getCanvasView().updateToSheet(this._plugin.getContext().getWorkBook().getActiveSheet()!);
         // update render
         // this._plugin.getMainComponent().makeDirty(true);
     }
 
     setHorizontalAlignment(value: HorizontalAlign) {
         this._plugin.getSelectionManager().getActiveRangeList()?.setHorizontalAlignment(value);
-        // this._plugin.getMainComponent().makeDirty(true);
     }
 
     setVerticalAlignment(value: VerticalAlign) {
         this._plugin.getSelectionManager().getActiveRangeList()?.setVerticalAlignment(value);
-        // this._plugin.getMainComponent().makeDirty(true);
     }
 
     setWrapStrategy(value: WrapStrategy) {
         this._plugin.getSelectionManager().getActiveRangeList()?.setWrapStrategy(value);
-        // this._plugin.getMainComponent().makeDirty(true);
     }
 
     setTextRotation(value: number | string) {
-        // vertical
         if (value === 'v') {
             this._plugin.getSelectionManager().getActiveRangeList()?.setVerticalText(1);
         } else {
@@ -599,8 +587,6 @@ export class ToolBarController {
                 .getActiveRangeList()
                 ?.setTextRotation(value as number);
         }
-
-        // this._plugin.getMainComponent().makeDirty(true);
     }
 
     setBorder(type: BorderType, color: string, style: BorderStyleTypes) {
@@ -619,72 +605,21 @@ export class ToolBarController {
                 this._plugin.getContext().getWorkBook().getActiveSheet().getRange(range).setBorderByType(type, color, style);
             });
 
-            // update data
-            // this._plugin.getCanvasView().updateToSheet(this._plugin.getContext().getWorkBook().getActiveSheet()!);
-            // update render
-            // this._plugin.getMainComponent().makeDirty(true);
+            this._plugin.getCanvasView().updateToSheet(this._plugin.getContext().getWorkBook().getActiveSheet()!);
         }
     }
 
-    triggerAllUpdate(cellData: ICellData) {
-        if (!cellData) {
-            cellData = {
-                s: {},
-            };
-        }
-        const style = (cellData.s as IStyleData) || {};
+    // 改变边框线颜色
+    handleLineColor(color: string, e: MouseEvent) {
+        e.stopPropagation();
+        this._lineColor.setColor(color);
+        this._borderInfo.color = color;
+    }
 
-        for (const [key, triggerUpdate] of this.triggerUpdateMap) {
-            let f;
-            switch (key) {
-                case 'font':
-                    f = style.ff || DEFAULT_STYLES.ff;
-                    triggerUpdate(f);
-                    break;
-
-                case 'fontSize':
-                    f = style.fs || DEFAULT_STYLES.fs;
-                    triggerUpdate(f);
-                    break;
-
-                case 'bold':
-                    triggerUpdate(!!style.bl);
-                    break;
-
-                case 'italic':
-                    triggerUpdate(!!style.it);
-                    break;
-
-                case 'strikethrough':
-                    triggerUpdate(!!style.st?.s);
-                    break;
-
-                case 'underline':
-                    triggerUpdate(!!style.ul?.s);
-                    break;
-
-                case 'horizontalAlign':
-                    triggerUpdate(style?.ht || DEFAULT_STYLES.ht);
-                    break;
-
-                case 'verticalAlign':
-                    triggerUpdate(style?.vt || DEFAULT_STYLES.vt);
-                    break;
-
-                case 'textWrap':
-                    triggerUpdate(style?.tb || DEFAULT_STYLES.tb);
-                    break;
-
-                case 'textRotate':
-                    if (!style.tr) {
-                        style.tr = DEFAULT_STYLES.tr;
-                    }
-                    triggerUpdate(style.tr?.v ? 'v' : style.tr?.a);
-                    break;
-
-                default:
-                    break;
-            }
-        }
+    addToolButton(config: IToolBarItemProps) {
+        const index = this._toolList.findIndex((item) => item.name === config.name);
+        if (index > -1) return;
+        this._toolList.push(config);
+        this.resetToolBarList();
     }
 }

@@ -1,11 +1,11 @@
 import { nanoid } from 'nanoid';
-import { Context } from '../../Basics';
+import { SheetContext } from '../../Basics';
 import {
     IInsertColumnDataActionData,
     BorderStyleData,
-    SheetsCommand,
+    SheetCommand,
     CommandManager,
-    IActionData,
+    ISheetActionData,
     IClearRangeActionData,
     IInsertRowActionData,
     IInsertRowDataActionData,
@@ -61,7 +61,7 @@ export class Worksheet {
 
     protected _selection: Selection;
 
-    protected _context: Context;
+    protected _context: SheetContext;
 
     protected _workbook: Workbook;
 
@@ -88,12 +88,12 @@ export class Worksheet {
     // protected _columnStatusGroup: StructGroup;
 
     private _initialize(): void {
-        this._selection = new Selection(this);
+        // this._selection = new Selection(this);
         this._merges = new Merges(this, this._config.mergeData);
     }
 
-    constructor(context: Context);
-    constructor(context: Context, config: Partial<IWorksheetConfig>);
+    constructor(context: SheetContext);
+    constructor(context: SheetContext, config: Partial<IWorksheetConfig>);
     constructor(...argument: any) {
         if (Tools.hasLength(argument, 1)) {
             const context = argument[0];
@@ -156,7 +156,7 @@ export class Worksheet {
             actionName: ACTION_NAMES.SET_WORKSHEET_ACTIVATE_ACTION,
             status: BooleanNumber.TRUE,
         };
-        const command = new SheetsCommand(_context.getWorkBook(), setActive);
+        const command = new SheetCommand(_context.getWorkBook(), setActive);
         before.notifyObservers({ sheet: this });
         _commandManager.invoke(command);
         after.notifyObservers({ sheet: this });
@@ -237,7 +237,7 @@ export class Worksheet {
         }
 
         before.notifyObservers();
-        const command = new SheetsCommand(_context.getWorkBook(), configure);
+        const command = new SheetCommand(_context.getWorkBook(), configure);
         _commandManager.invoke(command);
         after.notifyObservers({ name, sheet: this });
         return this;
@@ -262,10 +262,10 @@ export class Worksheet {
     }
 
     /**
-     * Returns Application Global Context
-     * @returns Global Context
+     * Returns Application Global SheetContext
+     * @returns Global SheetContext
      */
-    getContext(): Context {
+    getContext(): SheetContext {
         return this._context;
     }
 
@@ -407,7 +407,7 @@ export class Worksheet {
             sheetId: _sheetId,
             sheetStatus: status,
         };
-        const command = new SheetsCommand(_context.getWorkBook(), configure);
+        const command = new SheetCommand(_context.getWorkBook(), configure);
         _commandManager.invoke(command);
         return this;
     }
@@ -431,7 +431,7 @@ export class Worksheet {
             sheetId: _sheetId,
             zoom: zoomRatio,
         };
-        const command = new SheetsCommand(_context.getWorkBook(), zoomRation);
+        const command = new SheetCommand(_context.getWorkBook(), zoomRation);
         _commandManager.invoke(command);
 
         const observer = _context.getContextObserver('onZoomRatioSheetObservable');
@@ -524,7 +524,7 @@ export class Worksheet {
             rowIndex,
             rowCount: numRows,
         };
-        const command = new SheetsCommand(
+        const command = new SheetCommand(
             _context.getWorkBook(),
             insertRowData,
             insertRow
@@ -572,7 +572,7 @@ export class Worksheet {
             rowCount: numRows,
         };
 
-        const command = new SheetsCommand(
+        const command = new SheetCommand(
             _context.getWorkBook(),
             insertRowData,
             insertRow
@@ -623,7 +623,7 @@ export class Worksheet {
             rowIndex,
             rowCount: numRows,
         };
-        const command = new SheetsCommand(
+        const command = new SheetCommand(
             _context.getWorkBook(),
             insertRowData,
             insertRow
@@ -676,7 +676,7 @@ export class Worksheet {
             columnIndex,
             columnCount: numColumns,
         };
-        const command = new SheetsCommand(
+        const command = new SheetCommand(
             _context.getWorkBook(),
             insertColumn,
             insertColumnData
@@ -734,7 +734,7 @@ export class Worksheet {
             columnIndex,
             columnCount: numColumns,
         };
-        const command = new SheetsCommand(
+        const command = new SheetCommand(
             _context.getWorkBook(),
             insertColumn,
             insertColumnData
@@ -788,7 +788,7 @@ export class Worksheet {
             columnIndex,
             columnCount: numColumns,
         };
-        const command = new SheetsCommand(
+        const command = new SheetCommand(
             _context.getWorkBook(),
             insertColumnData,
             insertColumn
@@ -836,7 +836,7 @@ export class Worksheet {
             options,
             rangeData: _range,
         };
-        const command = new SheetsCommand(_context.getWorkBook(), setValue);
+        const command = new SheetCommand(_context.getWorkBook(), setValue);
         _commandManager.invoke(command);
         return this;
     }
@@ -856,7 +856,7 @@ export class Worksheet {
             actionName: ACTION_NAMES.SET_TAB_COLOR_ACTION,
             color,
         };
-        const command = new SheetsCommand(_context.getWorkBook(), setTabColor);
+        const command = new SheetCommand(_context.getWorkBook(), setTabColor);
         _commandManager.invoke(command);
         observer.notifyObservers();
         return this;
@@ -875,7 +875,7 @@ export class Worksheet {
                 actionName: ACTION_NAMES.HIDE_SHEET_ACTION,
                 hidden: BooleanNumber.TRUE,
             };
-            const command = new SheetsCommand(_workbook, setHiddenAction);
+            const command = new SheetCommand(_workbook, setHiddenAction);
             _commandManager.invoke(command);
 
             const needSwitch = this.getStatus() === BooleanNumber.TRUE;
@@ -906,7 +906,7 @@ export class Worksheet {
             actionName: ACTION_NAMES.HIDE_SHEET_ACTION,
             hidden: BooleanNumber.FALSE,
         };
-        const command = new SheetsCommand(_context.getWorkBook(), setHidden);
+        const command = new SheetCommand(_context.getWorkBook(), setHidden);
         _commandManager.invoke(command);
         _context
             .getContextObserver('onShowSheetObservable')
@@ -1080,7 +1080,7 @@ export class Worksheet {
             columnIndex: columnPosition,
         };
 
-        const command = new SheetsCommand(
+        const command = new SheetCommand(
             _context.getWorkBook(),
             deleteColumnData,
             deleteColumn
@@ -1112,7 +1112,7 @@ export class Worksheet {
             columnIndex: columnPosition,
         };
 
-        const command = new SheetsCommand(
+        const command = new SheetCommand(
             _context.getWorkBook(),
             deleteColumnData,
             deleteColumn
@@ -1143,7 +1143,7 @@ export class Worksheet {
             rowIndex: rowPosition,
         };
 
-        const command = new SheetsCommand(
+        const command = new SheetCommand(
             _context.getWorkBook(),
             dataRowDelete,
             rowDelete
@@ -1176,7 +1176,7 @@ export class Worksheet {
             rowIndex: rowPosition,
         };
 
-        const command = new SheetsCommand(
+        const command = new SheetCommand(
             _context.getWorkBook(),
             dataRowDelete,
             rowDelete
@@ -1316,7 +1316,7 @@ export class Worksheet {
             mcr.setValue(row, column, style);
         });
 
-        const actions: IActionData[] = [];
+        const actions: ISheetActionData[] = [];
 
         if (directions.includes(Direction.TOP)) {
             const setBottomData: BorderStyleData = {
@@ -1357,7 +1357,7 @@ export class Worksheet {
         };
         actions.push(setCCData);
 
-        const commandCC = new SheetsCommand(workbook, ...actions);
+        const commandCC = new SheetCommand(workbook, ...actions);
         _commandManager.invoke(commandCC);
 
         return this;
@@ -1560,7 +1560,7 @@ export class Worksheet {
             rowCount: count,
             rowIndex: index,
         };
-        const command = new SheetsCommand(_context.getWorkBook(), hideRow);
+        const command = new SheetCommand(_context.getWorkBook(), hideRow);
         _commandManager.invoke(command);
         return this;
     }
@@ -1591,7 +1591,7 @@ export class Worksheet {
             rowCount: count,
             rowIndex: index,
         };
-        const command = new SheetsCommand(_context.getWorkBook(), hideRow);
+        const command = new SheetCommand(_context.getWorkBook(), hideRow);
         _commandManager.invoke(command);
         return this;
     }
@@ -1612,7 +1612,7 @@ export class Worksheet {
             columnCount: count,
             columnIndex: index,
         };
-        const command = new SheetsCommand(_context.getWorkBook(), hideColumn);
+        const command = new SheetCommand(_context.getWorkBook(), hideColumn);
         _commandManager.invoke(command);
         return this;
     }
@@ -1643,7 +1643,7 @@ export class Worksheet {
             columnCount: count,
             columnIndex: index,
         };
-        const command = new SheetsCommand(_context.getWorkBook(), hideColumn);
+        const command = new SheetCommand(_context.getWorkBook(), hideColumn);
         _commandManager.invoke(command);
         return this;
     }
@@ -1664,7 +1664,7 @@ export class Worksheet {
             rowCount: count,
             rowIndex: index,
         };
-        const command = new SheetsCommand(_context.getWorkBook(), unhideRow);
+        const command = new SheetCommand(_context.getWorkBook(), unhideRow);
         _commandManager.invoke(command);
         return this;
     }
@@ -1685,7 +1685,7 @@ export class Worksheet {
             columnCount: count,
             columnIndex: index,
         };
-        const command = new SheetsCommand(_context.getWorkBook(), unhideColumn);
+        const command = new SheetCommand(_context.getWorkBook(), unhideColumn);
         _commandManager.invoke(command);
         return this;
     }
@@ -1716,7 +1716,7 @@ export class Worksheet {
             columnCount: count,
             columnIndex: index,
         };
-        const command = new SheetsCommand(_context.getWorkBook(), showColumn);
+        const command = new SheetCommand(_context.getWorkBook(), showColumn);
         _commandManager.invoke(command);
         return this;
     }
@@ -1747,7 +1747,7 @@ export class Worksheet {
             rowCount: count,
             rowIndex: index,
         };
-        const command = new SheetsCommand(_context.getWorkBook(), showRow);
+        const command = new SheetCommand(_context.getWorkBook(), showRow);
         _commandManager.invoke(command);
         return this;
     }
@@ -1869,7 +1869,7 @@ export class Worksheet {
             hideGridlines,
             sheetId: _sheetId,
         };
-        const command = new SheetsCommand(_context.getWorkBook(), configure);
+        const command = new SheetCommand(_context.getWorkBook(), configure);
         _commandManager.invoke(command);
         return this;
     }
@@ -1916,7 +1916,7 @@ export class Worksheet {
             rightToLeft,
             sheetId: _sheetId,
         };
-        const command = new SheetsCommand(_context.getWorkBook(), configure);
+        const command = new SheetCommand(_context.getWorkBook(), configure);
         _commandManager.invoke(command);
 
         return this;

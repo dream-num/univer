@@ -3,7 +3,7 @@
  */
 import {
     CommandManager,
-    Context,
+    SheetContext,
     RemoveRowAction,
     Workbook,
     Worksheet,
@@ -14,7 +14,7 @@ jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
 test('Remove a new column', () => {
     const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
 
     const rowData = { 0: { hd: 0, h: 50 } };
@@ -37,7 +37,7 @@ test('Remove a new column', () => {
 
 test('Remove Undo column', () => {
     const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
 
     const rowData = { 0: { hd: 0, h: 50 } };

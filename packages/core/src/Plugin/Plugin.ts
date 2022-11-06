@@ -1,5 +1,4 @@
-import { Context } from '../Basics';
-import { Inject, IOCContainer } from '../IOC';
+import { ContextBase } from '../Basics/ContextBase';
 import { Observable } from '../Observer';
 import { Nullable, PropsFrom } from '../Shared';
 
@@ -7,16 +6,11 @@ import { Nullable, PropsFrom } from '../Shared';
  * Basic function of plugin
  */
 export interface BasePlugin {
-    getContext(): Context;
+    context: ContextBase;
+    getContext(): ContextBase;
     getPluginName(): string;
-    onMounted(context: Context): void;
-    /**
-     * mapping
-     *
-     * @param container - IOC container dependency injection
-     * @public
-     */
-    onMapping(container: IOCContainer): void;
+    onCreate(context: ContextBase): void;
+    onMounted(context: ContextBase): void;
     onDestroy(): void;
 
     deleteObserve(...names: string[]): void;
@@ -34,9 +28,10 @@ export interface BasePlugin {
 /**
  * Plug-in base class, all plug-ins must inherit from this base class. provides the basic method
  */
-export abstract class Plugin<Obs = any> implements BasePlugin {
-    @Inject('Context')
-    private _context: Context;
+export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase>
+    implements BasePlugin
+{
+    context: O;
 
     private _name: string;
 
@@ -47,41 +42,43 @@ export abstract class Plugin<Obs = any> implements BasePlugin {
         this._observeNames = [];
     }
 
+    onCreate(context: O): void {
+        this.context = context;
+    }
+
     load<T>(data: T): void {}
 
     save(): object {
         return Object();
     }
 
-    onMounted(context: Context): void {}
+    onMounted(context: O): void {}
 
     onDestroy(): void {
         this.deleteObserve(...this._observeNames);
     }
 
-    onMapping(ioc: IOCContainer): void {}
-
     getPluginName(): string {
         return this._name;
     }
 
-    getContext(): Context {
-        return this._context;
+    getContext(): O {
+        return this.context;
     }
 
     getObserver<K extends keyof Obs & string>(
         name: K
     ): Nullable<Observable<PropsFrom<Obs[K]>>> {
-        const manager = this._context.getObserverManager();
+        const manager = this.context.getObserverManager();
         return manager.getObserver(name, this._name);
     }
 
     getPluginByName<T extends BasePlugin>(name: string): Nullable<T> {
-        return this._context.getPluginManager().getPluginByName<T>(name);
+        return this.context.getPluginManager().getPluginByName<T>(name);
     }
 
     pushToObserve<K extends keyof Obs & string>(...names: K[]): void {
-        const manager = this._context.getObserverManager();
+        const manager = this.context.getObserverManager();
         names.forEach((name) => {
             if (!this._observeNames.includes(name)) {
                 this._observeNames.push(name);
@@ -91,7 +88,7 @@ export abstract class Plugin<Obs = any> implements BasePlugin {
     }
 
     deleteObserve<K extends keyof Obs & string>(...names: K[]): void {
-        const manager = this._context.getObserverManager();
+        const manager = this.context.getObserverManager();
         names.forEach((name) => {
             manager.removeObserver(name, this._name);
         });

@@ -1,7 +1,7 @@
 import { Worksheet } from './index';
-import { Context } from '../../Basics';
+import { SheetContext } from '../../Basics';
 import {
-    SheetsCommand,
+    SheetCommand,
     CommandManager,
     IClearRangeActionData,
     ISetRangeDataActionData,
@@ -42,9 +42,9 @@ export class RangeList {
 
     private _commandManager: CommandManager;
 
-    private _workBook: Workbook;
+    private _workbook: Workbook;
 
-    private _context: Context;
+    private _context: SheetContext;
 
     private _worksheet: Worksheet;
 
@@ -52,7 +52,7 @@ export class RangeList {
 
     constructor(worksheet: Worksheet, rangeList: IRangeType[]) {
         this._context = worksheet.getContext();
-        this._workBook = this._context.getWorkBook();
+        this._workbook = this._context.getWorkBook();
         this._commandManager = this._context.getCommandManager();
         this._worksheet = worksheet;
         this._rangeList = [];
@@ -60,7 +60,7 @@ export class RangeList {
         // Convert the rangeList passed in by the user into a standard format
         rangeList.forEach((range: IRangeType) => {
             // this._rangeList.push(
-            //     new TransformTool(this._workBook).transformRangeType(range)
+            //     new TransformTool(this._workbook).transformRangeType(range)
             // );
             this._rangeList.push(
                 this._context.getWorkBook().transformRangeType(range).rangeData
@@ -132,7 +132,7 @@ export class RangeList {
             return setValue;
         });
 
-        let command = new SheetsCommand(_context.getWorkBook(), ...setList);
+        let command = new SheetCommand(_context.getWorkBook(), ...setList);
         _commandManager.invoke(command);
         return this;
     }
@@ -177,7 +177,7 @@ export class RangeList {
             return clearRange;
         });
 
-        let command = new SheetsCommand(_context.getWorkBook(), ...clearList);
+        let command = new SheetCommand(_context.getWorkBook(), ...clearList);
         _commandManager.invoke(command);
 
         return this;
@@ -247,7 +247,7 @@ export class RangeList {
             return setStyle;
         });
 
-        let command = new SheetsCommand(_context.getWorkBook(), ...setList);
+        let command = new SheetCommand(_context.getWorkBook(), ...setList);
         _commandManager.invoke(command);
         return this;
     }
@@ -287,7 +287,7 @@ export class RangeList {
             return setStyle;
         });
 
-        let command = new SheetsCommand(_context.getWorkBook(), ...setList);
+        let command = new SheetCommand(_context.getWorkBook(), ...setList);
         _commandManager.invoke(command);
         return this;
     }
@@ -330,7 +330,7 @@ export class RangeList {
             return setStyle;
         });
 
-        let command = new SheetsCommand(_context.getWorkBook(), ...setList);
+        let command = new SheetCommand(_context.getWorkBook(), ...setList);
         _commandManager.invoke(command);
         return this;
     }
@@ -374,7 +374,7 @@ export class RangeList {
             return setStyle;
         });
 
-        let command = new SheetsCommand(_context.getWorkBook(), ...setList);
+        let command = new SheetCommand(_context.getWorkBook(), ...setList);
         _commandManager.invoke(command);
         return this;
     }
@@ -490,7 +490,7 @@ export class RangeList {
             return setValue;
         });
 
-        let command = new SheetsCommand(_context.getWorkBook(), ...setList);
+        let command = new SheetCommand(_context.getWorkBook(), ...setList);
         _commandManager.invoke(command);
         return this;
     }
@@ -628,7 +628,7 @@ export class RangeList {
             return setStyle;
         });
 
-        let command = new SheetsCommand(_context.getWorkBook(), ...setList);
+        let command = new SheetCommand(_context.getWorkBook(), ...setList);
         _commandManager.invoke(command);
         return this;
     }
@@ -679,7 +679,7 @@ export class RangeList {
             return setStyle;
         });
 
-        let command = new SheetsCommand(_context.getWorkBook(), ...setList);
+        let command = new SheetCommand(_context.getWorkBook(), ...setList);
         _commandManager.invoke(command);
         return this;
     }
@@ -736,7 +736,7 @@ export class RangeList {
             return setValue;
         });
 
-        let command = new SheetsCommand(_context.getWorkBook(), ...setList);
+        let command = new SheetCommand(_context.getWorkBook(), ...setList);
         _commandManager.invoke(command);
         return this;
     }

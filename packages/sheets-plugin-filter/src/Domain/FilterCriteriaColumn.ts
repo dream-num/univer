@@ -1,4 +1,4 @@
-import { Context, Sequence, Serializer } from '@univer/core';
+import { SheetContext, Sequence, Serializer } from '@univer/core';
 import { FilterCriteria, IFilterCriteria } from './FilterCriteria';
 
 export interface IFilterCriteriaColumn extends Sequence {
@@ -6,7 +6,7 @@ export interface IFilterCriteriaColumn extends Sequence {
     criteria: IFilterCriteria;
 }
 
-export class FilterCriteriaColumn extends Serializer implements Context.WithContext<FilterCriteriaColumn> {
+export class FilterCriteriaColumn extends Serializer implements SheetContext.WithContext<FilterCriteriaColumn> {
     static newInstance(sequence: IFilterCriteriaColumn): FilterCriteriaColumn {
         const criteriaColumn = new FilterCriteriaColumn();
         criteriaColumn._column = sequence.column;
@@ -18,9 +18,9 @@ export class FilterCriteriaColumn extends Serializer implements Context.WithCont
 
     private _column: number;
 
-    private _context: Context;
+    private _context: SheetContext;
 
-    withContext(context: Context): FilterCriteriaColumn {
+    withContext(context: SheetContext): FilterCriteriaColumn {
         this._context = context;
         return this;
     }
@@ -29,7 +29,7 @@ export class FilterCriteriaColumn extends Serializer implements Context.WithCont
         return this._column;
     }
 
-    getContext(): Context {
+    getContext(): SheetContext {
         return this._context;
     }
 

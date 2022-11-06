@@ -119,7 +119,7 @@ export class PluginManager {
 
 ```ts
 export class UniverSheet {
-    private _context: Context;
+    private _context: SheetContext;
 
     installPlugin(plugin: Plugin): void {
         this._context.getPluginManager().install(plugin);
@@ -135,17 +135,17 @@ export class UniverSheet {
 
 ### 插件通信
 
-我们有两种通信机制：全局`Context`和观察者模式。
+我们有两种通信机制：全局`SheetContext`和观察者模式。
 
-关于 `Context`，这是我们设计的一个全局上下文，使用依赖注入的方式，将`Context`注入到各个插件模块，这样在插件模块中就能调用到`Context`上通用的方法了，我们扩充下 `Plugin` 类，使用我们内部实现的`IOC`，将全局 `Context` 注入进来。这样就实现了插件和核心的通信。
+关于 `SheetContext`，这是我们设计的一个全局上下文，使用依赖注入的方式，将`SheetContext`注入到各个插件模块，这样在插件模块中就能调用到`SheetContext`上通用的方法了，我们扩充下 `Plugin` 类，使用我们内部实现的`IOC`，将全局 `SheetContext` 注入进来。这样就实现了插件和核心的通信。
 
 > 关于 `IOC` 的内容，参考我们的另一篇文章
 
 ```ts
 export abstract class Plugin {
-    // 注入 Context
-    @Inject('Context')
-    protected _context: Context;
+    // 注入 SheetContext
+    @Inject('SheetContext')
+    protected _context: SheetContext;
     protected _name: string;
 
     protected constructor(name: string) {
@@ -156,11 +156,11 @@ export abstract class Plugin {
         return this._name;
     }
 
-    getContext(): Context {
+    getContext(): SheetContext {
         return this._context;
     }
 
-    onMounted(ctx: Context): void;
+    onMounted(ctx: SheetContext): void;
 
     onDestroy(): void;
 
@@ -178,8 +178,8 @@ export abstract class Plugin {
 
 ```ts
 export abstract class Plugin<O = any> {
-    @Inject('Context')
-    protected _context: Context;
+    @Inject('SheetContext')
+    protected _context: SheetContext;
     protected _name: string;
     protected _observeNames: string[];
 
@@ -188,7 +188,7 @@ export abstract class Plugin<O = any> {
         this._observeNames = [];
     }
 
-    onMounted(context: Context): void {}
+    onMounted(context: SheetContext): void {}
 
     onDestroy(): void {
         this.deleteObserve(...this._observeNames);
@@ -200,7 +200,7 @@ export abstract class Plugin<O = any> {
         return this._name;
     }
 
-    getContext(): Context {
+    getContext(): SheetContext {
         return this._context;
     }
 

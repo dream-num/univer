@@ -23,15 +23,31 @@ npx playwright install
 pnpm i
 ````
 ### Development
-````
+
+Start sheets
+```
 npm run dev
-````
+```
+
+Start docs
+```
+npm run dev:doc
+```
+
+Start slides
+```
+npm run dev:slide
+```
 
 For more development tutorials, please refer to [Contribution Guide](./.github/contributing.md).
 
 ## Issues
 
 Please file an issue at [Issues](http://github.com/dream-num/univer/issues).
+
+## Stargazers
+
+[![Stargazers repo roster for @dream-num/univer](https://reporoster.com/stars/dream-num/univer)](https://github.com/dream-num/univer/stargazers)
 
 ## Development Plan
 
@@ -70,7 +86,7 @@ Please file an issue at [Issues](http://github.com/dream-num/univer/issues).
   - [ ] formatter
   - [ ] currency format
   - [ ] percent format
-  - [ ] Decrease decimal places
+  - [ ] decrease decimal places
   - [ ] increase the number of decimal places
   - [ ] more formats
   - [x] font family
@@ -121,10 +137,10 @@ Please file an issue at [Issues](http://github.com/dream-num/univer/issues).
 
 - [x] render
 - [ ] UI
-- [ ] Pending
+- [ ] pending
 
 ### Slides
 
 - [ ] render
 - [ ] UI
-- [ ] Pending
+- [ ] pending

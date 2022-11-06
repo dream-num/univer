@@ -9,7 +9,7 @@ import {
     FunctionComponent,
     PropsFrom,
 } from '@univer/base-component';
-import { Context, IOCContainer, Plugin } from '@univer/core';
+import { SheetContext, IOCContainer, Plugin } from '@univer/core';
 // import { UniverSingleButton } from './Components';
 import { UniverButton } from './Components/Button/Button';
 import { UniverBorderDashDot } from './Components/CanvasIcon/BorderLine/BorderDashDot';
@@ -30,7 +30,7 @@ import { UniverCollapse, UniverPanel } from './Components/Collapse/Collapse';
 import { UniverColorPicker } from './Components/ColorPicker';
 import { UniverColorPickerCircleButton } from './Components/ColorPickerCircleButton';
 import { UniverContainer } from './Components/Container';
-import { UniverDemo } from './Components/Demo';
+// import { UniverDemo } from './Components/Demo';
 import { UniverFormatModal } from './Components/FormatModal';
 import { UniverMenu } from './Components/Menu/Menu';
 import {
@@ -113,7 +113,6 @@ import { UniverInput } from './Components/Input';
 import { UniverContent, UniverFooter, UniverHeader, UniverLayout, UniverSider } from './Components/Layout';
 import { UniverModal } from './Components/Modal';
 import { UniverRadio, UniverRadioGroup } from './Components/Radio';
-import { UniverRichText } from './Components/RichText/RichText';
 import { UniverSelect } from './Components/SelectComponent';
 import { UniverSiderModal } from './Components/SiderModal';
 import { UniverSlider } from './Components/Slider';
@@ -138,7 +137,7 @@ export class UniverComponentSheet extends Plugin implements BaseComponentSheet {
 
     onMapping(container: IOCContainer): void {}
 
-    onMounted(context: Context): void {}
+    onMounted(context: SheetContext): void {}
 
     getComponentRender(): BaseComponentRender {
         return new UniverComponentRender(this.getComponentFactory());
@@ -208,9 +207,9 @@ export class UniverComponentFactory implements BaseComponentFactory {
             case 'Sider': {
                 return new UniverSider() as unknown as T;
             }
-            case 'Demo': {
-                return new UniverDemo() as unknown as T;
-            }
+            // case 'Demo': {
+            //     return new UniverDemo() as unknown as T;
+            // }
             case 'Checkbox': {
                 return new UniverCheckbox() as unknown as T;
             }
@@ -252,9 +251,6 @@ export class UniverComponentFactory implements BaseComponentFactory {
             }
             case 'FormatModal': {
                 return new UniverFormatModal() as unknown as T;
-            }
-            case 'RichText': {
-                return new UniverRichText() as unknown as T;
             }
             case 'Menu': {
                 return new UniverMenu() as unknown as T;
@@ -558,7 +554,7 @@ export class UniverComponentFactory implements BaseComponentFactory {
 //         return new GoogleComponentFactory();
 //     }
 //     onMapping(container: IOCContainer): void {}
-//     onMounted(ctx: Context): void {}
+//     onMounted(ctx: SheetContext): void {}
 // }
 //
 // export class GoogleComponentFactory implements ComponentFactory {

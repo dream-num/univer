@@ -1,10 +1,10 @@
-import { BooleanNumber, CommandManager } from '@univer/core';
-import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
+import { BooleanNumber, CommandManager, SheetAction, ISheetActionData } from '@univer/core';
+import { SheetPlugin } from '../SheetPlugin';
 
 export class SheetContainerController {
-    private _plugin: SpreadsheetPlugin;
+    private _plugin: SheetPlugin;
 
-    constructor(plugin: SpreadsheetPlugin) {
+    constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
 
         this._initialize();
@@ -13,7 +13,8 @@ export class SheetContainerController {
     private _initialize() {
         // Monitor all command changes and automatically trigger the refresh of the canvas
         CommandManager.getCommandObservers().add(({ actions }) => {
-            const worksheet = actions[0].getWorkSheet();
+            const action = actions[0] as SheetAction<ISheetActionData>;
+            const worksheet = action.getWorkSheet();
 
             // Only the currently active worksheet needs to be refreshed
             if (worksheet.getConfig().status === BooleanNumber.TRUE) {

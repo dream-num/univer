@@ -1,8 +1,8 @@
 import { Workbook } from '@univer/core';
 import { Rect, Scene } from '@univer/base-render';
-import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
 import { SheetView } from '../View/Render/Views';
 import { AntLine, AntLineModel, IAntLineRange } from '../Model/AntLineModel';
+import { SheetPlugin } from '../SheetPlugin';
 
 enum ANT_LINE_MANAGER_KEY {
     AntLine = '__AntLineShape__',
@@ -14,7 +14,7 @@ enum ANT_LINE_MANAGER_KEY {
 export class AntLineControl {
     private _antLineModelList: AntLineModel[];
 
-    private _plugin: SpreadsheetPlugin;
+    private _plugin: SheetPlugin;
 
     private _activeSheetId: string;
 
@@ -144,7 +144,7 @@ export class AntLineControl {
      * Create AntLineController
      * @param plugin
      */
-    constructor(plugin: SpreadsheetPlugin) {
+    constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
         this._antLineModelList = [];
         plugin

@@ -1,6 +1,6 @@
 import { PLUGIN_NAMES } from '@univer/core';
 import { InfoBarModel } from '../Model/InfoBarModel';
-import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
+import { SheetPlugin } from '../SheetPlugin';
 import { InfoBar } from '../View/UI/InfoBar';
 
 type IProps = {
@@ -22,12 +22,15 @@ export class InfoBarController {
 
     private _infoBar: InfoBar;
 
-    private _plugin: SpreadsheetPlugin;
+    private _plugin: SheetPlugin;
 
     private _infoList: BaseInfoBarProps;
 
-    constructor(plugin: SpreadsheetPlugin) {
+    constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
+        const name = plugin.getContext().getWorkBook().getConfig().name;
+
+        this._infoBarModel = new InfoBarModel(name);
         this._infoList = {
             back: {
                 locale: 'info.return',
@@ -42,8 +45,10 @@ export class InfoBarController {
                 locale: 'info.tips',
             },
             sheet: {
-                label: 'UniverSheet Demo',
-                onBlur: this.setSheetName,
+                label: name,
+                onBlur: (e) => {
+                    this.setSheetName(e);
+                },
             },
         };
         this._initialize();
@@ -76,6 +81,6 @@ export class InfoBarController {
     setSheetName(e: FocusEvent) {
         const target = e.target as HTMLInputElement;
         const name = target.value;
-        this._infoBarModel.setSheetName(name);
+        this._infoBarModel.setName(name);
     }
 }

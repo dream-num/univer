@@ -1,5 +1,5 @@
-import { Context } from '../../Basics';
-import { SheetsCommand, CommandManager } from '../../Command';
+import { SheetContext } from '../../Basics';
+import { SheetCommand, CommandManager } from '../../Command';
 import { ISetSelectionActivateActionData } from '../Action';
 import { ACTION_NAMES, DEFAULT_SELECTION } from '../../Const';
 import { Direction } from '../../Enum';
@@ -29,9 +29,9 @@ import { Worksheet } from './Worksheet';
 export class Selection {
     private _commandManager: CommandManager;
 
-    private _context: Context;
+    private _context: SheetContext;
 
-    private _workBook: Workbook;
+    private _workbook: Workbook;
 
     private _workSheet: Worksheet;
 
@@ -45,7 +45,7 @@ export class Selection {
         this._workSheet = worksheet;
         this._context = worksheet.getContext();
         this._commandManager = this._context.getCommandManager();
-        this._workBook = worksheet.getContext().getWorkBook();
+        this._workbook = worksheet.getContext().getWorkBook();
 
         // set default selection
         this._activeRangeList = this._workSheet.getRangeList([DEFAULT_SELECTION]);
@@ -96,10 +96,10 @@ export class Selection {
             };
         } else if (selection && Workbook.isIRangeType(selection)) {
             // Convert the selection passed in by the user into a standard format
-            // activeRange = new TransformTool(this._workBook).transformRangeType(
+            // activeRange = new TransformTool(this._workbook).transformRangeType(
             //     selection
             // );
-            activeRange = this._workBook.transformRangeType(selection).rangeData;
+            activeRange = this._workbook.transformRangeType(selection).rangeData;
             // The user entered an invalid range
             if (activeRange.startRow === -1) {
                 console.error('Invalid selection, default set startRow -1');
@@ -120,9 +120,9 @@ export class Selection {
 
             // Convert the selection passed in by the user into a standard format
             activeRangeList = selection.map((item: IRangeType) => {
-                // item = new TransformTool(this._workBook).transformRangeType(item);
+                // item = new TransformTool(this._workbook).transformRangeType(item);
                 const itemData: IRangeData =
-                    this._workBook.transformRangeType(item).rangeData;
+                    this._workbook.transformRangeType(item).rangeData;
                 // The user entered an invalid range
                 if (itemData.startRow === -1) {
                     console.error('Invalid selection, default set startRow -1');
@@ -148,8 +148,8 @@ export class Selection {
 
         // update current cell based on currentCell
         if (cell) {
-            // currentCell = new TransformTool(this._workBook).transformRangeType(cell);
-            currentCell = this._workBook.transformRangeType(cell).rangeData;
+            // currentCell = new TransformTool(this._workbook).transformRangeType(cell);
+            currentCell = this._workbook.transformRangeType(cell).rangeData;
             const activeRangeData: Nullable<IRangeData> = Selection.cellInRange(
                 activeRangeList,
                 currentCell
@@ -171,7 +171,7 @@ export class Selection {
             currentCell,
         };
 
-        const command = new SheetsCommand(_context.getWorkBook(), setSelection);
+        const command = new SheetCommand(_context.getWorkBook(), setSelection);
         _commandManager.invoke(command);
 
         // 设置后获取范围(以A1:B10形式)
@@ -218,7 +218,7 @@ export class Selection {
      * @returns
      */
     getActiveSheet(): Nullable<Worksheet> {
-        return this._workBook.getActiveSheet();
+        return this._workbook.getActiveSheet();
     }
 
     /**
@@ -286,7 +286,7 @@ export class Selection {
             currentCell: range,
         };
 
-        const command = new SheetsCommand(_context.getWorkBook(), setSelection);
+        const command = new SheetCommand(_context.getWorkBook(), setSelection);
         _commandManager.invoke(command);
 
         return this;

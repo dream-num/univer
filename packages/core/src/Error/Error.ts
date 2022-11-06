@@ -1,9 +1,9 @@
-import { Context } from '../Basics';
+import { SheetContext } from '../Basics';
 
 class Error {
     private readonly message: string;
 
-    constructor(context: Context, msg: string) {
+    constructor(context: SheetContext, msg: string) {
         this.message = msg;
     }
 }

@@ -1,7 +1,7 @@
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { Workbook } from '../Domain';
 import { IRangeData } from '../../Interfaces';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { SetSelectionActivate } from '../Apply';
 import { CONVERTOR_OPERATION } from '../../Const/CONST';
@@ -10,7 +10,7 @@ import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
 /**
  * @internal
  */
-export interface ISetSelectionActivateActionData extends IActionData {
+export interface ISetSelectionActivateActionData extends ISheetActionData {
     activeRangeList: IRangeData | IRangeData[];
     activeRange: IRangeData;
     currentCell: IRangeData;
@@ -28,7 +28,7 @@ export interface ISetSelectionActivateServiceData {
 /**
  * @internal
  */
-export class SetSelectionActivateAction extends ActionBase<
+export class SetSelectionActivateAction extends SheetAction<
     ISetSelectionActivateActionData,
     ISetSelectionActivateActionData,
     ISetSelectionActivateServiceData

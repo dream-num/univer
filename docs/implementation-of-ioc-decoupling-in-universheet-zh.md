@@ -83,21 +83,21 @@ function Inject(name: string): void {
 function bootstrap(): IOCContainer {
     const container = new IOCContainer();
     container.addMapping('Environment', Environment);
-    container.addMapping('Context', Context);
+    container.addMapping('SheetContext', SheetContext);
     container.addMapping('UndoManager', UndoManager);
     container.addMapping('UniverSheet', UniverSheet);
     container.addMapping('PluginManager', PluginManager);
     return container;
 }
 
-class Context {
+class SheetContext {
     @Inject('Environment')
     private environment: Environment;
 }
 
 class UniverSheet {
-    @Inject('Context')
-    private context: Context;
+    @Inject('SheetContext')
+    private context: SheetContext;
 
     static newInstance(): UniverSheet {
         return bootstrap().getInstance('UniverSheet', Scope.prototype);

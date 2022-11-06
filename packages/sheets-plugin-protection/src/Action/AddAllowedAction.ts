@@ -1,13 +1,13 @@
-import { ActionBase, ActionObservers, CONVERTOR_OPERATION, IActionData, Workbook, WorkSheetConvertor } from '@univer/core';
+import { SheetAction, ActionObservers, CONVERTOR_OPERATION, ISheetActionData, Workbook, WorkSheetConvertor } from '@univer/core';
 import { Allowed } from '../Controller';
 import { AddAllowed, RemoveAllowed } from '../Apply';
 import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
 
-export interface IAddAllowedActionData extends IActionData {
+export interface IAddAllowedActionData extends ISheetActionData {
     allowed: Allowed;
 }
 
-export class AddAllowedAction extends ActionBase<IAddAllowedActionData, IAddAllowedActionData> {
+export class AddAllowedAction extends SheetAction<IAddAllowedActionData, IAddAllowedActionData> {
     constructor(actionData: IAddAllowedActionData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._doActionData = {

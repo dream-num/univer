@@ -1,6 +1,6 @@
 import { BaseComponentRender, BaseComponentSheet, BaseSelectProps, Component, IToolBarItemProps } from '@univer/base-component';
 import { Nullable, Observer, Workbook } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 
 import { IProps } from '../IData/IComment';
 
@@ -15,7 +15,7 @@ export class CommentButton extends Component<IProps, IState> {
     Render: BaseComponentRender;
 
     initialize(props: IProps) {
-        const component = new SpreadsheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = new SheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this.Render = component.getComponentRender();
         const NextIcon = this.Render.renderFunction('NextIcon');
         const CommentIcon = this.Render.renderFunction('CommentIcon');

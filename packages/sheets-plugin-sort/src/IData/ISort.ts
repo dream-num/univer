@@ -1,7 +1,7 @@
-import { Context } from '@univer/core';
+import { SheetContext } from '@univer/core';
 
 export type IConfig = {
-    context: Context;
+    context: SheetContext;
 };
 
 // Types for props

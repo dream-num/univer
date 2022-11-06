@@ -1,8 +1,8 @@
-import { BooleanCriteria, Color, Context, RelativeDate, Serializer, Tools, Tuples } from '@univer/core';
+import { BooleanCriteria, Color, SheetContext, RelativeDate, Serializer, Tools, Tuples } from '@univer/core';
 import { ConditionValue } from '../../../sheets-plugin-conditional-format';
 import { FilterCriteria, IFilterCriteria } from './FilterCriteria';
 
-export class FilterCriteriaBuilder extends Serializer implements Context.WithContext<FilterCriteriaBuilder> {
+export class FilterCriteriaBuilder extends Serializer implements SheetContext.WithContext<FilterCriteriaBuilder> {
     static newInstance(sequence: IFilterCriteria): FilterCriteriaBuilder {
         const builder = new FilterCriteriaBuilder();
         builder._criteriaType = sequence.criteriaType;
@@ -44,7 +44,7 @@ export class FilterCriteriaBuilder extends Serializer implements Context.WithCon
         return builder;
     }
 
-    private _context: Context;
+    private _context: SheetContext;
 
     private _whenNumberGreaterThanOrEqualTo: number;
 
@@ -128,7 +128,7 @@ export class FilterCriteriaBuilder extends Serializer implements Context.WithCon
         return FilterCriteriaBuilder.newInstance(this.toSequence()).withContext(this._context);
     }
 
-    withContext(context: Context): FilterCriteriaBuilder {
+    withContext(context: SheetContext): FilterCriteriaBuilder {
         this._context = context;
         return this;
     }
@@ -175,7 +175,7 @@ export class FilterCriteriaBuilder extends Serializer implements Context.WithCon
         };
     }
 
-    getContext(): Context {
+    getContext(): SheetContext {
         return this._context;
     }
 

@@ -8,19 +8,17 @@ import {
     Component,
     BaseComponentSheet,
     BaseComponentRender,
-    Description,
     createRef,
     RefObject,
     cloneElement,
     BaseComponentProps,
 } from '@univer/base-component';
-import { AsyncFunction, Context, IKeyType, LocaleType, PLUGIN_NAMES, Tools, Workbook } from '@univer/core';
+import { AsyncFunction, SheetContext, IKeyType, LocaleType, PLUGIN_NAMES, Tools, Workbook } from '@univer/core';
 import cssVars from 'css-vars-ponyfill';
 import {
     Container,
     Content,
     Footer,
-    FormulaBar,
     Header,
     // InfoBar,
     Layout,
@@ -32,14 +30,16 @@ import darkSkin from '@univer/style-universheet/assets/css/skin/dark.module.less
 // All skins' less file
 import greenSkin from '@univer/style-universheet/assets/css/skin/green.module.less';
 // app context for skin and Locale
-import { SpreadsheetPlugin } from '@SpreadsheetPlugin';
-import { ToolBar1 } from '../ToolBar/ToolBar1';
 import { RightMenu } from '../RightMenu';
 import { InfoBar } from '../InfoBar';
 import { SheetBar } from '../SheetBar';
 import style from './index.module.less';
-import { IShowToolBarConfig } from '../ToolBar';
+import { ToolBar } from '../ToolBar';
 import { CountBar } from '../CountBar/CountBar';
+import { IShowToolBarConfig } from '../../../Model/ToolBarModel';
+import { ModalGroup } from '../ModalGroup/ModalGroup';
+import { SheetPlugin } from '../../../SheetPlugin';
+import { FormulaBar } from '../FormulaBar';
 
 export interface ILayout {
     outerLeft?: boolean;
@@ -81,14 +81,14 @@ export interface ILayout {
     contentSplit?: boolean | string;
 }
 
-export interface ISpreadsheetPluginConfigBase {
+export interface ISheetPluginConfigBase {
     layout: string | ILayout;
 }
 
-export interface BaseSheetContainerConfig extends BaseComponentProps, ISpreadsheetPluginConfigBase {
+export interface BaseSheetContainerConfig extends BaseComponentProps, ISheetPluginConfigBase {
     container: HTMLElement;
     skin: string;
-    context: Context;
+    context: SheetContext;
     getSplitLeftRef: (ref: RefObject<HTMLDivElement>) => void;
     getContentRef: (ref: RefObject<HTMLDivElement>) => void;
     addButton: (cb: Function) => void;
@@ -618,7 +618,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                 // After the mount is successful, an observe is issued to notify other plug-ins that they can start using dom
                 this.getContext()
                     .getPluginManager()
-                    .getRequirePluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)
+                    .getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)
                     .getObserver('onSheetContainerDidMountObservable')
                     ?.notifyObservers(this);
             }
@@ -651,14 +651,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                         <Layout className={style.mainContent} style={{ position: 'relative' }}>
                             <Header style={{ display: layout.header ? 'block' : 'none' }}>
                                 <InfoBar></InfoBar>
-                                {/* <ToolBar
-                                    style={{
-                                        display: layout.toolBar ? 'block' : 'none',
-                                    }}
-                                    toolList={[]}
-                                    func={{ addButton }}
-                                ></ToolBar> */}
-                                <ToolBar1 toolList={[]}></ToolBar1>
+                                <ToolBar toolList={[]}></ToolBar>
                                 <FormulaBar></FormulaBar>
                             </Header>
                             <Layout>
@@ -693,7 +686,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                 </Sider>
                                 <Content className={layout.contentSplit === 'vertical' ? style.contentContainerVertical : style.contentContainerHorizontal}>
                                     {/* extend main content */}
-                                    {mainList.map((item: IMainState, i) => {
+                                    {/* {mainList.map((item: IMainState, i) => {
                                         // if (!item.show) return null;
 
                                         if (item.type === ISlotElement.JSX) {
@@ -712,7 +705,9 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                             return <JSXElement ref={this.refMap[item.name]} style={{ display: item.show ? '' : 'none' }} />;
                                         }
                                         return item;
-                                    })}
+                                    })} */}
+
+                                    <ModalGroup></ModalGroup>
 
                                     {!!layout.contentSplit && (
                                         <Container ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>

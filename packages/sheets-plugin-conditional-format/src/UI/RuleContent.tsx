@@ -1,6 +1,6 @@
 import { BaseComponentRender, BaseComponentSheet, Component, joinClassNames } from '@univer/base-component';
 import { Nullable, Observer, Workbook } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 import styles from './index.module.less';
 
 type RuleContentProps = {
@@ -25,7 +25,7 @@ export class RuleContent extends Component<RuleContentProps, RuleContentState> {
     Render: BaseComponentRender;
 
     initialize() {
-        const component = new SpreadsheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = new SheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this.Render = component.getComponentRender();
 
         this.state = {
@@ -189,7 +189,7 @@ class RuleEditContent extends Component<RuleEditProps, RuleEditState> {
     Render: BaseComponentRender;
 
     initialize() {
-        const component = new SpreadsheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = new SheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this.Render = component.getComponentRender();
 
         this.state = {

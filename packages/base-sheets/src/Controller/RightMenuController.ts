@@ -1,7 +1,7 @@
 import { IMouseEvent, IPointerEvent } from '@univer/base-render';
 import { Locale, PLUGIN_NAMES } from '@univer/core';
 import { RightMenuModel, RightMenuProps } from '../Model/RightMenuModel';
-import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
+import { SheetPlugin } from '../SheetPlugin';
 import Style from '../View/UI/RightMenu/index.module.less';
 import { RightMenu } from '../View/UI/RightMenu';
 import { SelectionControl } from './Selection/SelectionController';
@@ -12,13 +12,13 @@ type MenuFlag = 'row' | 'column';
 export class RightMenuController {
     private _rightMenuModel: RightMenuModel;
 
-    private _plugin: SpreadsheetPlugin;
+    private _plugin: SheetPlugin;
 
     private _RightMenu: RightMenu;
 
     private _menuList: RightMenuProps[];
 
-    constructor(plugin: SpreadsheetPlugin) {
+    constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
 
         this._menuList = [

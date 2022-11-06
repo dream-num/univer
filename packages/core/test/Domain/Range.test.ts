@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import { ObjectMatrix } from '../../src';
-import { Context } from '../../src/Basics/Context';
+import { SheetContext } from '../../src/Basics/SheetContext';
 import { Environment } from '../../src/Basics/Environment';
 import { CommandManager } from '../../src/Command/CommandManager';
 import { UndoManager } from '../../src/Command/UndoManager';
@@ -72,7 +72,7 @@ export function IOCContainerStartUpReady(
     container.addSingletonMapping('ServerHttp', ServerHttp);
     container.addSingletonMapping('WorkBook', Workbook);
     container.addSingletonMapping('Locale', Locale);
-    container.addSingletonMapping('Context', Context);
+    container.addSingletonMapping('Context', SheetContext);
     container.addSingletonMapping('UndoManager', UndoManager);
     container.addSingletonMapping('CommandManager', CommandManager);
     container.addSingletonMapping('PluginManager', PluginManager);
@@ -90,7 +90,7 @@ export function demo() {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -151,7 +151,7 @@ test('Test setFontColor', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -204,7 +204,7 @@ test('Test setFontFamily', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -266,7 +266,7 @@ test('Test setFontFamilies', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -325,7 +325,7 @@ test('Test setUnderline', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -378,7 +378,7 @@ test('Test setOverline', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -431,7 +431,7 @@ test('Test setStrikeThrough', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -488,7 +488,7 @@ test('Test setFontSize', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -551,7 +551,7 @@ test('Test setHorizontalAlignment', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -612,7 +612,7 @@ test('Test setVerticalAlignment', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -673,7 +673,7 @@ test('Test setTextDirection', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -733,7 +733,7 @@ test('Test setWrapStrategy', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -816,7 +816,7 @@ test('Test setWrapStrategies', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -901,7 +901,7 @@ test('Test setBorder', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -1059,7 +1059,7 @@ test('Test copyTo formatOnly', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -1119,7 +1119,7 @@ test('Test copyTo contentsOnly', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -1198,7 +1198,7 @@ test('Test copyTo CopyPasteType', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -1264,7 +1264,7 @@ test('Test copyFormatToRange by sheet', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -1335,7 +1335,7 @@ test('Test copyFormatToRange by sheetId', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -1407,7 +1407,7 @@ test('Test copyValuesToRange by sheet', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -1497,7 +1497,7 @@ test('Test copyValuesToRange by sheetId', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -1586,7 +1586,7 @@ test('Test moveTo', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -1727,7 +1727,7 @@ test('Test offset', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -1777,7 +1777,7 @@ test('Test setValue', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -1831,7 +1831,7 @@ test('Test setValues ICellV', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -1885,7 +1885,7 @@ test('Test setValues ObjectMatrix', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -1944,7 +1944,7 @@ test('Test clear', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -2000,7 +2000,7 @@ test('Test clearFormat', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -2056,7 +2056,7 @@ test('Test deleteCells', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -2201,7 +2201,7 @@ test('Test insertCells', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -2359,7 +2359,7 @@ test('Test insertCells COLUMNS', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -2457,7 +2457,7 @@ test('Create a Merge', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -2551,7 +2551,7 @@ test('Test getBackground', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -2652,7 +2652,7 @@ test('Test getBackgrounds', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -2709,7 +2709,7 @@ test('Test getCell', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -2766,7 +2766,7 @@ test('Test getColumn', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -2823,7 +2823,7 @@ test('Test getDisplayValue', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -2880,7 +2880,7 @@ test('Test getDisplayValues', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -2937,7 +2937,7 @@ test('Test getFontColor', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -2994,7 +2994,7 @@ test('Test getFontColors', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -3053,7 +3053,7 @@ test('Test getFontFamily', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -3112,7 +3112,7 @@ test('Test getFontFamilies', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -3161,7 +3161,7 @@ test('Test getFontLines', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -3220,7 +3220,7 @@ test('Test getFontLine', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -3283,7 +3283,7 @@ test('Test getFontSize', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -3342,7 +3342,7 @@ test('Test getFontSizes', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -3387,7 +3387,7 @@ test('Test getFontWeight', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -3454,7 +3454,7 @@ test('Test getFontWeights', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -3499,7 +3499,7 @@ test('Test getHorizontalAlignment', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -3544,7 +3544,7 @@ test('Test getHorizontalAlignments', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -3589,7 +3589,7 @@ test('Test getVerticalAlignments', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -3634,7 +3634,7 @@ test('Test getVerticalAlignment', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -3679,7 +3679,7 @@ test('Test getFontStyles', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -3724,7 +3724,7 @@ test('Test getFontStyle', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -3769,7 +3769,7 @@ test('Test getTextDirections', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -3814,7 +3814,7 @@ test('Test getTextDirection', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -3863,7 +3863,7 @@ test('Test getTextRotations', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -3921,7 +3921,7 @@ test('Test getTextRotation', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -3968,7 +3968,7 @@ test('Test getTextStyles', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -4026,7 +4026,7 @@ test('Test getTextStyle', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -4088,7 +4088,7 @@ test('Test getSheet', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -4132,7 +4132,7 @@ test('Test getNumColumns', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -4191,7 +4191,7 @@ test('Test getNumRows', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -4245,7 +4245,7 @@ test('Test getRowIndex', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -4283,7 +4283,7 @@ test('Test getLastColumn', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -4320,7 +4320,7 @@ test('Test getWrapStrategies', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -4363,7 +4363,7 @@ test('Test getWraps/getWrap', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -4413,7 +4413,7 @@ test('Test setFontColors', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -4483,7 +4483,7 @@ test('Test setBackground', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -4560,7 +4560,7 @@ test('Test setBackgrounds', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -4642,7 +4642,7 @@ test('Test setBackgroundRGB', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -4720,7 +4720,7 @@ test('Test setUnderline', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -4773,7 +4773,7 @@ test('Test setOverline', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -4826,7 +4826,7 @@ test('Test setStrikeThrough', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -4879,7 +4879,7 @@ test('Test setHorizontalAlignments', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -4956,7 +4956,7 @@ test('Test isPartOfMerge', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -5555,7 +5555,7 @@ test('Test removeDuplicates', () => {
     const container = IOCContainerStartUpReady({
         styles: {},
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -5639,7 +5639,7 @@ test('Test getColumnMatrix', () => {
     const container = IOCContainerStartUpReady({
         styles: {},
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -5703,7 +5703,7 @@ test('Test isBlank', () => {
     const container = IOCContainerStartUpReady({
         styles: {},
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
@@ -5762,7 +5762,7 @@ test('Test getA1Notation', () => {
 //     const container = IOCContainerStartUpReady({
 //         styles: {},
 //     });
-//     const context = container.getSingleton<Context>('Context');
+//     const context = container.getSingleton<SheetContext>('SheetContext');
 //     const workbook = container.getSingleton<WorkBook>('WorkBook');
 //     const commandManager = workbook.getCommandManager();
 
@@ -5807,7 +5807,7 @@ test('Test getA1Notation', () => {
 //     const container = IOCContainerStartUpReady({
 //         styles: {},
 //     });
-//     const context = container.getSingleton<Context>('Context');
+//     const context = container.getSingleton<SheetContext>('SheetContext');
 //     const workbook = container.getSingleton<WorkBook>('WorkBook');
 //     const commandManager = workbook.getCommandManager();
 
@@ -5860,7 +5860,7 @@ test('Test getA1Notation', () => {
 //     const container = IOCContainerStartUpReady({
 //         styles: {},
 //     });
-//     const context = container.getSingleton<Context>('Context');
+//     const context = container.getSingleton<SheetContext>('SheetContext');
 //     const workbook = container.getSingleton<WorkBook>('WorkBook');
 //     const commandManager = workbook.getCommandManager();
 
@@ -5938,7 +5938,7 @@ test('Test getGridId', () => {
 //     const container = IOCContainerStartUpReady({
 //         styles: {},
 //     });
-//     const context = container.getSingleton<Context>('Context');
+//     const context = container.getSingleton<SheetContext>('SheetContext');
 //     const workbook = container.getSingleton<WorkBook>('WorkBook');
 //     const commandManager = workbook.getCommandManager();
 
@@ -5983,7 +5983,7 @@ test('Test getGridId', () => {
 //     const container = IOCContainerStartUpReady({
 //         styles: {},
 //     });
-//     const context = container.getSingleton<Context>('Context');
+//     const context = container.getSingleton<SheetContext>('SheetContext');
 //     const workbook = container.getSingleton<WorkBook>('WorkBook');
 //     const commandManager = workbook.getCommandManager();
 
@@ -6064,7 +6064,7 @@ test('Test trimWhitespace', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 

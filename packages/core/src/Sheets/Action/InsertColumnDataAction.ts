@@ -1,7 +1,7 @@
 import { InsertDataColumn, RemoveColumnData } from '../Apply';
 import { Workbook } from '../Domain';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
 import { ICellData } from '../../Interfaces';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveColumnDataAction } from './RemoveColumnDataAction';
@@ -10,7 +10,7 @@ import { ObjectArray } from '../../Shared';
 /**
  * @internal
  */
-export interface IInsertColumnDataActionData extends IActionData {
+export interface IInsertColumnDataActionData extends ISheetActionData {
     columnIndex: number;
     columnData: ObjectMatrixPrimitiveType<ICellData>; // TODO Does it need to be merged with IKeyValue
 }
@@ -20,7 +20,7 @@ export interface IInsertColumnDataActionData extends IActionData {
  *
  * @internal
  */
-export class InsertColumnDataAction extends ActionBase<
+export class InsertColumnDataAction extends SheetAction<
     IInsertColumnDataActionData,
     IRemoveColumnDataAction
 > {

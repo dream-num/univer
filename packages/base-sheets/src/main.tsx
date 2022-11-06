@@ -3,8 +3,8 @@ import { RenderEngine } from '@univer/base-render';
 import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
 import { UniverComponentSheet } from '@univer/style-universheet';
 import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
-import { DEFAULT_FORMULA_DATA, FormulaPlugin } from '@univer/sheets-plugin-formula';
 import { NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
+import { DEFAULT_FORMULA_DATA, FormulaPlugin } from '@univer/sheets-plugin-formula';
 
 const uiDefaultConfigUp = {
     container: 'universheet-demo-up',
@@ -27,12 +27,13 @@ univerSheetUp.installPlugin(new UniverComponentSheet());
 FormulaPlugin.create(DEFAULT_FORMULA_DATA).installTo(univerSheetUp);
 
 // init spreadsheet plugin first
-import('./SpreadsheetPlugin').then(({ SpreadsheetPlugin }) => {
-    let spreadsheetPlugin = new SpreadsheetPlugin(uiDefaultConfigUp);
+import('./SheetPlugin').then(({ SheetPlugin }) => {
+    let sheetPlugin = new SheetPlugin(uiDefaultConfigUp);
     let clipboardPlugin = new ClipboardPlugin();
-    let numfmtPlugin = new NumfmtPlugin();
-    univerSheetUp.installPlugin(spreadsheetPlugin);
+    // let numfmtPlugin = new NumfmtPlugin();
+    univerSheetUp.installPlugin(sheetPlugin);
     univerSheetUp.installPlugin(clipboardPlugin);
-    (window as any).spreadsheetPlugin = spreadsheetPlugin;
-    univerSheetUp.installPlugin(numfmtPlugin);
+    // univerSheetUp.installPlugin(new FindPlugin());
+    univerSheetUp.installPlugin(new NumfmtPlugin());
+    (window as any).sheetPlugin = sheetPlugin;
 });

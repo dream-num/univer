@@ -1,13 +1,13 @@
 import { InsertColumn, RemoveColumn } from '../Apply';
 import { Workbook } from '../Domain';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertColumnActionData } from './InsertColumnAction';
 
 /**
  * @internal
  */
-export interface IRemoveColumnAction extends IActionData {
+export interface IRemoveColumnAction extends ISheetActionData {
     columnCount: number;
     columnIndex: number;
 }
@@ -17,7 +17,7 @@ export interface IRemoveColumnAction extends IActionData {
  *
  * @internal
  */
-export class RemoveColumnAction extends ActionBase<
+export class RemoveColumnAction extends SheetAction<
     IRemoveColumnAction,
     IInsertColumnActionData
 > {

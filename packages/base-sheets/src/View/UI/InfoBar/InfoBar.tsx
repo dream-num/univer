@@ -1,15 +1,15 @@
 import { BaseComponentRender, BaseComponentSheet, Component } from '@univer/base-component';
 import { Nullable, PLUGIN_NAMES } from '@univer/core';
 import { BaseInfoBarProps } from '../../../Controller/InfoBarController';
-import './index.less';
+import styles from './index.module.less';
 
 interface IState {
     infoList: Nullable<BaseInfoBarProps>;
 }
 
-interface Iprops {}
+interface IProps {}
 
-export class InfoBar extends Component<Iprops, IState> {
+export class InfoBar extends Component<IProps, IState> {
     Render: BaseComponentRender;
 
     initialize() {
@@ -43,26 +43,22 @@ export class InfoBar extends Component<Iprops, IState> {
         const { back, sheet, update, save, rename } = this.state.infoList;
 
         return (
-            <Container className={'universheet-info-detail'}>
+            <Container className={styles.infoDetail}>
                 <div style={{ marginRight: '18px' }}>
                     <Tooltip title={back.label} placement={'bottom'}>
-                        <Button className={'universheet-info-return'} type="text">
+                        <Button className={styles.infoReturn} type="text">
                             <DropDownIcon rotate={90} />
                         </Button>
                     </Tooltip>
                 </div>
                 <LogoIcon style={{ width: '152px', height: '32px' }} />
-                <div className={'sheet-name'}>
+                <div className={styles.sheetName}>
                     <Tooltip title={rename.label} placement={'bottom'}>
                         <Input bordered={false} value={sheet.label} onBlur={sheet.onBlur} />
                     </Tooltip>
                 </div>
-                <div id="universheet-info-detail-update" className="universheet-info-detail-update">
-                    {update.label}
-                </div>
-                <div id="universheet-info-detail-save" className="universheet-info-detail-save">
-                    {save.label}
-                </div>
+                <div className={styles.infoDetailUpdate}>{update.label}</div>
+                <div className={styles.infoDetailSave}>{save.label}</div>
             </Container>
         );
     }

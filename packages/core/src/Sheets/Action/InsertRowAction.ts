@@ -1,4 +1,4 @@
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
 import { InsertRow, RemoveRow } from '../Apply';
 import { Workbook } from '../Domain';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
@@ -7,7 +7,7 @@ import { IRemoveRowActionData } from './RemoveRowAction';
 /**
  * @internal
  */
-export interface IInsertRowActionData extends IActionData {
+export interface IInsertRowActionData extends ISheetActionData {
     rowIndex: number;
     rowCount: number;
 }
@@ -17,7 +17,7 @@ export interface IInsertRowActionData extends IActionData {
  *
  * @internal
  */
-export class InsertRowAction extends ActionBase<
+export class InsertRowAction extends SheetAction<
     IInsertRowActionData,
     IRemoveRowActionData
 > {

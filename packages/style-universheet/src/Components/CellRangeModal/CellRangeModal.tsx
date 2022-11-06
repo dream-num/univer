@@ -1,5 +1,5 @@
 import { BaseCellRangeModalProps, CellRangeModalComponent, Component, createRef, JSXComponent } from '@univer/base-component';
-import { Context, Nullable, Observer, Workbook, Worksheet } from '@univer/core';
+import { SheetContext, Nullable, Observer, Workbook, Worksheet } from '@univer/core';
 import { Icon, Input, Modal, ModalProps } from '../index';
 import styles from './index.module.less';
 
@@ -109,7 +109,7 @@ export class CellRangeModal extends Component<BaseCellRangeModalProps, CellModal
         // init Locale message
         this.setLocale();
 
-        const cellRangeContext = this._context as Context;
+        const cellRangeContext = this._context as SheetContext;
         // when change Locale, update Locale message
         // do not use componentWillUpdate,it will listen all state changes
         this._localeObserver = this._context

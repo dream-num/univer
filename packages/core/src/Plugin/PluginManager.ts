@@ -1,35 +1,28 @@
-import { Context } from '../Basics';
-import { Container, Inject, IOCContainer, PostConstruct } from '../IOC';
 import { BasePlugin } from './Plugin';
 import { Nullable } from '../Shared';
+import { ContextBase } from '../Basics/ContextBase';
 
 /**
  * Provides APIs to initialize, install, and uninstall plugins
  */
 export class PluginManager {
-    @Container()
-    protected _container: IOCContainer;
-
-    @Inject('Context')
-    protected _context: Context;
+    protected _context: ContextBase;
 
     protected _plugins: BasePlugin[];
 
     protected _initialized: boolean;
 
-    @PostConstruct()
     protected _initialize() {
-        if (this._container && this._initialized) {
+        if (this._initialized) {
             this._initialized = false;
             this._plugins.forEach((plugin: BasePlugin) => {
-                plugin.onMapping(this._container);
-                this._container.inject(plugin);
+                plugin.onCreate(this._context);
                 plugin.onMounted(this._context);
             });
         }
     }
 
-    constructor(context: Context, plugins: BasePlugin[] = []) {
+    constructor(context: ContextBase, plugins: BasePlugin[] = []) {
         this._context = context;
         this._plugins = [];
         this._initialized = true;
@@ -40,8 +33,7 @@ export class PluginManager {
     install(plugin: BasePlugin) {
         const { _plugins } = this;
         _plugins.push(plugin);
-        plugin.onMapping(this._container);
-        this._container.inject(plugin);
+        plugin.onCreate(this._context);
         plugin.onMounted(this._context);
     }
 
@@ -56,7 +48,7 @@ export class PluginManager {
         }
     }
 
-    setContext(context: Context) {
+    setContext(context: ContextBase) {
         this._context = context;
     }
 

@@ -1,6 +1,6 @@
 import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
-import { Context, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetContext, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { SheetPlugin } from '@univer/base-sheets';
 import { en, zh } from './Locale';
 import { PrintButton } from './UI/PrintButton';
 
@@ -42,12 +42,12 @@ export class PrintPlugin extends Plugin {
             show: true,
             label: <PrintButton config={config} />,
         };
-        context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
+        context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
     }
 
     onMapping(IOC: IOCContainer): void {}
 
-    onMounted(ctx: Context): void {
+    onMounted(ctx: SheetContext): void {
         this.initialize();
     }
 

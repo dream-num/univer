@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import { IOCContainerStartUpReady } from '../ContainerStartUp';
-import { Context, PluginManager, Plugin, IOCContainer } from '../../src';
+import { SheetContext, PluginManager, Plugin, IOCContainer } from '../../src';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
@@ -12,12 +12,12 @@ test('Test _initialize', () => {
             super('plugin');
         }
 
-        onMounted(context: Context): void {}
+        onMounted(context: SheetContext): void {}
 
         onMapping(container: IOCContainer): void {}
     }
     const container = IOCContainerStartUpReady();
-    const context: Context = container.getSingleton('Context');
+    const context: SheetContext = container.getSingleton('Context');
     const manager2: PluginManager = container.getInstance(
         'PluginManager',
         context,
@@ -32,14 +32,14 @@ test('Test _initialize', () => {
 
 test('Test install', () => {
     const container = IOCContainerStartUpReady();
-    const context: Context = container.getSingleton('Context');
+    const context: SheetContext = container.getSingleton('Context');
     const manager: PluginManager = container.getInstance('PluginManager', context);
     class MyPlugin extends Plugin {
         constructor() {
             super('plugin');
         }
 
-        onMounted(context: Context): void {}
+        onMounted(context: SheetContext): void {}
 
         onMapping(container: IOCContainer): void {}
     }
@@ -49,14 +49,14 @@ test('Test install', () => {
 
 test('Test getPluginByName', () => {
     const container = IOCContainerStartUpReady();
-    const context: Context = container.getSingleton('Context');
+    const context: SheetContext = container.getSingleton('Context');
     const manager: PluginManager = container.getInstance('PluginManager', context);
     class MyPlugin extends Plugin {
         constructor() {
             super('plugin');
         }
 
-        onMounted(context: Context): void {}
+        onMounted(context: SheetContext): void {}
 
         onMapping(container: IOCContainer): void {}
     }
@@ -67,14 +67,14 @@ test('Test getPluginByName', () => {
 
 test('Test uninstall', () => {
     const container = IOCContainerStartUpReady();
-    const context: Context = container.getSingleton('Context');
+    const context: SheetContext = container.getSingleton('Context');
     const manager: PluginManager = container.getInstance('PluginManager', context);
     class MyPlugin extends Plugin {
         constructor() {
             super('plugin');
         }
 
-        onMounted(context: Context): void {}
+        onMounted(context: SheetContext): void {}
 
         onMapping(container: IOCContainer): void {}
     }

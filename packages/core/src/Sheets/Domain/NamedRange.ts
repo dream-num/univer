@@ -1,7 +1,7 @@
-import { Context } from '../../Basics';
+import { SheetContext } from '../../Basics';
 import {
     CommandManager,
-    SheetsCommand,
+    SheetCommand,
     IAddNamedRangeActionData,
     IDeleteNamedRangeActionData,
     ISetNamedRangeActionData,
@@ -23,7 +23,7 @@ export class NamedRange {
 
     private _commandManager: CommandManager;
 
-    private _context: Context;
+    private _context: SheetContext;
 
     // private _name: string;
     // private _range: Range;
@@ -60,7 +60,7 @@ export class NamedRange {
         };
 
         // Execute action
-        const command = new SheetsCommand(_context.getWorkBook(), actionData);
+        const command = new SheetCommand(_context.getWorkBook(), actionData);
         _commandManager.invoke(command);
 
         // // manage instance
@@ -86,7 +86,7 @@ export class NamedRange {
         };
 
         // Execute action
-        const command = new SheetsCommand(_context.getWorkBook(), actionData);
+        const command = new SheetCommand(_context.getWorkBook(), actionData);
         _commandManager.invoke(command);
     }
 
@@ -158,7 +158,7 @@ export class NamedRange {
         };
 
         // Execute action
-        const command = new SheetsCommand(_context.getWorkBook(), actionData);
+        const command = new SheetCommand(_context.getWorkBook(), actionData);
         _commandManager.invoke(command);
 
         // const namedRanges = this._workbook.getNamedRanges();

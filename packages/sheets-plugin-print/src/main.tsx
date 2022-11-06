@@ -1,9 +1,8 @@
 import { UniverSheet } from '@univer/core';
 import { RenderEngine } from '@univer/base-render';
 import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 import { UniverComponentSheet } from '@univer/style-universheet';
-import { PrintPlugin } from './PrintPlugin';
 
 const uiDefaultConfigUp = {
     container: 'universheet-demo-up',
@@ -13,5 +12,5 @@ const uiDefaultConfigUp = {
 const univerSheetUp = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);
 univerSheetUp.installPlugin(new RenderEngine());
 univerSheetUp.installPlugin(new UniverComponentSheet());
-univerSheetUp.installPlugin(new SpreadsheetPlugin(uiDefaultConfigUp));
-univerSheetUp.installPlugin(new PrintPlugin());
+univerSheetUp.installPlugin(new SheetPlugin(uiDefaultConfigUp));
+// univerSheetUp.installPlugin(new PrintPlugin());

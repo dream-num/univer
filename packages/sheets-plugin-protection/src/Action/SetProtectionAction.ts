@@ -1,13 +1,13 @@
-import { ActionBase, ActionObservers, CONVERTOR_OPERATION, IActionData, Workbook, WorkSheetConvertor } from '@univer/core';
+import { SheetAction, ActionObservers, CONVERTOR_OPERATION, ISheetActionData, Workbook, WorkSheetConvertor } from '@univer/core';
 import { SetProtection } from '../Apply';
 import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
 
-export interface ISetProtectionActionData extends IActionData {
+export interface ISetProtectionActionData extends ISheetActionData {
     enable: boolean;
     password: string;
 }
 
-export class SetProtectionAction extends ActionBase<ISetProtectionActionData, ISetProtectionActionData> {
+export class SetProtectionAction extends SheetAction<ISetProtectionActionData, ISetProtectionActionData> {
     protected _oldValue: [boolean, string];
 
     constructor(actionData: ISetProtectionActionData, workbook: Workbook, observers: ActionObservers) {

@@ -1,11 +1,11 @@
-import { ActionBase, ActionObservers, IActionData, IRangeData, Workbook } from '@univer/core';
+import { SheetAction, ActionObservers, ISheetActionData, IRangeData, Workbook } from '@univer/core';
 import { IAscSortData } from './index';
 
-export interface IDescSortData extends IActionData {
+export interface IDescSortData extends ISheetActionData {
     range: IRangeData;
 }
 
-export class DescSortAction extends ActionBase<IDescSortData, IAscSortData> {
+export class DescSortAction extends SheetAction<IDescSortData, IAscSortData> {
     constructor(actionData: IDescSortData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
     }

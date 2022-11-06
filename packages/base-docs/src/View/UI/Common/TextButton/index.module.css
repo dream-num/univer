@@ -1,0 +1,6 @@
+.text-button span[role="img"] {
+  font-size: 24px;
+}
+.text-button button {
+  padding: 0 5px;
+}

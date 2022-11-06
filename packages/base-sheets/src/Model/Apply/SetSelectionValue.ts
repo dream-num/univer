@@ -1,5 +1,5 @@
 import { PLUGIN_NAMES, Worksheet } from '@univer/core';
-import { SpreadsheetPlugin } from '../..';
+import { SheetPlugin } from '../..';
 import { ISelectionModelValue } from '../Action/SetSelectionValueAction';
 
 /**
@@ -13,7 +13,7 @@ import { ISelectionModelValue } from '../Action/SetSelectionValueAction';
  * @internal
  */
 export function SetSelectionValue(worksheet: Worksheet, selections: ISelectionModelValue[]): ISelectionModelValue[] {
-    const selectionManager = worksheet.getContext().getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.getSelectionManager();
+    const selectionManager = worksheet.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.getSelectionManager();
 
     if (!selectionManager) return [];
 

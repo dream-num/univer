@@ -1,6 +1,6 @@
-import { ISpreadsheetPluginConfig } from '../Interfaces/SpreadsheetConfig';
+import { ISheetPluginConfig } from '../Interfaces/SpreadsheetConfig';
 
-export const DEFAULT_SPREADSHEET_PLUGIN_DATA: ISpreadsheetPluginConfig = {
+export const DEFAULT_SPREADSHEET_PLUGIN_DATA: ISheetPluginConfig = {
     container: 'universheet',
     layout: 'auto',
     selections: {

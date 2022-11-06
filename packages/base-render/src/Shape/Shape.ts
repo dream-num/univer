@@ -381,7 +381,7 @@ export abstract class Shape<T> extends BaseObject {
 
     /**
      * @private
-     * @param {CanvasRenderingContext2D} ctx Context to render on
+     * @param {CanvasRenderingContext2D} ctx SheetContext to render on
      */
     private static _renderFill(ctx: CanvasRenderingContext2D, props: IShapeProps) {
         if (!props.fill) {
@@ -400,7 +400,7 @@ export abstract class Shape<T> extends BaseObject {
 
     /**
      * @private
-     * @param {CanvasRenderingContext2D} ctx Context to render on
+     * @param {CanvasRenderingContext2D} ctx SheetContext to render on
      */
     private static _renderStroke(ctx: CanvasRenderingContext2D, props: IShapeProps) {
         let { stroke, strokeWidth, shadowEnabled, shadowForStrokeEnabled, strokeScaleEnabled, scaleX, scaleY, parent } = props;

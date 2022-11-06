@@ -1,20 +1,20 @@
 import { SetWorkSheetName } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { Workbook } from '../Domain/Workbook';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
 /**
  * @internal
  */
-export interface ISetWorkSheetNameActionData extends IActionData {
+export interface ISetWorkSheetNameActionData extends ISheetActionData {
     sheetName: string;
 }
 
 /**
  * @internal
  */
-export class SetWorkSheetNameAction extends ActionBase<
+export class SetWorkSheetNameAction extends SheetAction<
     ISetWorkSheetNameActionData,
     ISetWorkSheetNameActionData,
     string

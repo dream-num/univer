@@ -1,6 +1,6 @@
 import { ACTION_NAMES } from '../../Const';
 import { ISetRangeDataActionData } from '../../Sheets/Action';
-import { IActionData } from '../ActionBase';
+import { ISheetActionData } from '../SheetAction';
 import {
     BaseActionExtension,
     BaseActionExtensionFactory,
@@ -37,12 +37,12 @@ export class FormatActionExtensionFactory extends BaseActionExtensionFactory<ISe
 
     create(
         actionData: ISetRangeDataActionData,
-        actionDataList: IActionData[]
+        actionDataList: ISheetActionData[]
     ): BaseActionExtension<ISetRangeDataActionData> {
         return new FormatActionExtension(actionData, actionDataList);
     }
 
-    // check(actionData: ISetRangeDataActionData, actionDataList: IActionData[]) {
+    // check(actionData: ISetRangeDataActionData, actionDataList: ISheetActionData[]) {
     //     // Determine whether it is a setFormattedValueAction
     //     if (actionData.actionName !== this.actionName) {
     //         return false;

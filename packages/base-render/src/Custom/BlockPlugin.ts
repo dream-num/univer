@@ -1,4 +1,4 @@
-import { Context, IOCContainer, Observable, Plugin } from '@univer/core';
+import { SheetContext, IOCContainer, Observable, Plugin } from '@univer/core';
 import { IDocumentSkeletonPage, ISectionBreakConfig, ISkeletonResourceReference } from '..';
 
 export type BlockPluginObserve = {
@@ -19,7 +19,7 @@ export class BlockPlugin extends Plugin<BlockPluginObserve> {
 
     onMapping(IOC: IOCContainer): void {}
 
-    onMounted(ctx: Context): void {}
+    onMounted(ctx: SheetContext): void {}
 
     onDestroy(): void {}
 }

@@ -4,12 +4,18 @@ import { CommandInjector } from './CommandInjectorObservers';
 import { Class, Nullable } from '../Shared';
 // import { ActionType } from './ActionObservers';
 import { ActionType } from './ActionObservers';
+import { ActionExtensionManager } from './ActionExtensionManager';
 
 /**
  * Manage action instances and action data
  */
 export class CommandBase {
     protected _actions: Array<ActionBase<IActionData>>;
+
+    constructor(list: IActionData[]) {
+        const actionExtensionManager = new ActionExtensionManager();
+        actionExtensionManager.handle(list);
+    }
 
     getDoData(): IActionData[] {
         return this._actions.map((action) => action.getDoActionData());

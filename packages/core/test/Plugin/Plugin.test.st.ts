@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { Context } from '../../src/Basics';
+import { SheetContext } from '../../src/Basics';
 import { Plugin, PluginManager } from '../../src/Plugin';
 import { IOCContainer } from '../../src/IOC';
 import { IOCContainerStartUpReady } from '../ContainerStartUp';
@@ -16,7 +16,7 @@ test('Test getContext', () => {
             super('test');
         }
 
-        onMounted(context: Context): void {}
+        onMounted(context: SheetContext): void {}
 
         onMapping(container: IOCContainer): void {}
     }
@@ -33,7 +33,7 @@ test('Test getName', () => {
             super('test');
         }
 
-        onMounted(context: Context): void {}
+        onMounted(context: SheetContext): void {}
 
         onMapping(container: IOCContainer): void {}
     }
@@ -49,7 +49,7 @@ test('Test getPluginByName', () => {
             super('test');
         }
 
-        onMounted(context: Context): void {}
+        onMounted(context: SheetContext): void {}
 
         onMapping(container: IOCContainer): void {}
     }
@@ -65,7 +65,7 @@ test('Test addObserve', () => {
             super('test');
         }
 
-        onMounted(context: Context): void {}
+        onMounted(context: SheetContext): void {}
 
         onMapping(container: IOCContainer): void {}
     }
@@ -83,7 +83,7 @@ test('Test removeObserve', () => {
             super('test');
         }
 
-        onMounted(context: Context): void {}
+        onMounted(context: SheetContext): void {}
 
         onMapping(container: IOCContainer): void {}
     }

@@ -1,7 +1,7 @@
 import { BooleanNumber, getColorStyle, TextDecoration } from '@univer/core';
 import { IScale } from '../../../Basics/Interfaces';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../Extension';
-import { docsExtension } from '../DocsExtension';
+import { docExtension } from '../DocExtension';
 import { IDocumentSkeletonSpan } from '../../../Basics/IDocumentSkeletonCached';
 import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING } from '../../../Basics/Const';
 import { Vector2 } from '../../../Basics/Vector2';
@@ -10,7 +10,7 @@ import { fixLineWidthByScale, getScale } from '../../../Basics/Tools';
 
 const UNIQUE_KEY = 'DefaultDocsLineExtension';
 
-export class Line extends docsExtension {
+export class Line extends docExtension {
     uKey = UNIQUE_KEY;
 
     zIndex = 40;

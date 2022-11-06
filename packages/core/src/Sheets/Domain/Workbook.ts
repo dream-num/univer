@@ -6,8 +6,12 @@ import {
     DEFAULT_WORKSHEET,
 } from '../../Const';
 import { BooleanNumber } from '../../Enum';
-import { Context } from '../../Basics';
-import { SheetsCommand, CommandManager, ISetSheetOrderActionData } from '../../Command';
+import { SheetContext } from '../../Basics';
+import {
+    SheetCommand,
+    CommandManager,
+    ISetSheetOrderActionData,
+} from '../../Command';
 
 import {
     IColumnStartEndData,
@@ -20,15 +24,6 @@ import {
     IWorksheetConfig,
 } from '../../Interfaces';
 
-import {
-    AttributeValue,
-    Container,
-    Inject,
-    IOCContainer,
-    PostConstruct,
-} from '../../IOC';
-
-import { ServerBase } from '../../Server/ServerBase';
 import { NameGen, Nullable, Tools } from '../../Shared';
 import { Tuples } from '../../Shared/Tuples';
 import { Range } from './Range';
@@ -60,22 +55,26 @@ export class Workbook {
      */
     // private _formatManage: FormatManager;
 
-    @Container()
-    private _container: IOCContainer;
-
-    @AttributeValue()
     private _config: IWorkbookConfig;
 
     private _unitId: string;
 
-    @Inject('Server')
-    private _server: ServerBase;
+    private _context: SheetContext;
 
-    @Inject('Context')
-    private _context: Context;
-
-    @Inject('CommandManager')
     private _commandManager: CommandManager;
+
+    constructor(workbookData: Partial<IWorkbookConfig> = {}, context: SheetContext) {
+        this._config = Tools.commonExtend(DEFAULT_WORKBOOK, workbookData);
+        this._context = context;
+
+        const { styles } = this._config;
+        this._unitId = this._config.id ?? nanoid(6);
+        this._styles = new Styles(styles);
+        this._worksheets = new Map<string, Worksheet>();
+        this._commandManager = context.getCommandManager();
+        // this._formatManage = new FormatManager();
+        this._getDefaultWorkSheet();
+    }
 
     /**
      * Get Default Sheet
@@ -88,7 +87,6 @@ export class Workbook {
             let config = sheets[sheetId];
             config.name = NameGen.getSheetName(config.name);
             const worksheet = new Worksheet(_context, config);
-            this._container.inject(worksheet);
             _worksheets.set(worksheet.getSheetId(), worksheet);
             sheetOrder.push(worksheet.getSheetId());
         }
@@ -105,19 +103,6 @@ export class Workbook {
             });
             this._worksheets[0].setStatus(BooleanNumber.TRUE);
         }
-    }
-
-    @PostConstruct()
-    private _initialize(): void {
-        // merge config
-        this._config = Tools.commonExtend(DEFAULT_WORKBOOK, this._config);
-
-        const { styles } = this._config;
-        this._unitId = this._config.id ?? nanoid(6);
-        this._styles = new Styles(styles);
-        this._worksheets = new Map<string, Worksheet>();
-        // this._formatManage = new FormatManager();
-        this._getDefaultWorkSheet();
     }
 
     /**
@@ -243,7 +228,7 @@ export class Workbook {
         }
     }
 
-    setContext(context: Context): void {
+    setContext(context: SheetContext): void {
         this._context = context;
     }
 
@@ -278,7 +263,7 @@ export class Workbook {
                 sheetId: worksheetConfig.id,
             });
             _commandManager.invoke(
-                new SheetsCommand(_context.getWorkBook(), {
+                new SheetCommand(_context.getWorkBook(), {
                     actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
                     sheetId: worksheetConfig.id,
                     index,
@@ -304,7 +289,7 @@ export class Workbook {
                     sheetId: worksheetConfig.id,
                 });
                 _commandManager.invoke(
-                    new SheetsCommand(_context.getWorkBook(), {
+                    new SheetCommand(_context.getWorkBook(), {
                         actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
                         sheetId: worksheetConfig.id,
                         index,
@@ -331,7 +316,7 @@ export class Workbook {
                     sheetId: worksheetConfig.id,
                 });
                 _commandManager.invoke(
-                    new SheetsCommand(_context.getWorkBook(), {
+                    new SheetCommand(_context.getWorkBook(), {
                         actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
                         sheetId: worksheetConfig.id,
                         index,
@@ -359,7 +344,7 @@ export class Workbook {
                     sheetId: worksheetConfig.id,
                 });
                 _commandManager.invoke(
-                    new SheetsCommand(_context.getWorkBook(), {
+                    new SheetCommand(_context.getWorkBook(), {
                         actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
                         sheetId: worksheetConfig.id,
                         index,
@@ -382,7 +367,7 @@ export class Workbook {
                     sheetId: worksheetConfig.id,
                 });
                 _commandManager.invoke(
-                    new SheetsCommand(_context.getWorkBook(), {
+                    new SheetCommand(_context.getWorkBook(), {
                         actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
                         sheetId: worksheetConfig.id,
                         index,
@@ -412,7 +397,7 @@ export class Workbook {
                     sheetId: worksheetConfig.id,
                 });
                 _commandManager.invoke(
-                    new SheetsCommand(_context.getWorkBook(), {
+                    new SheetCommand(_context.getWorkBook(), {
                         actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
                         sheetId: worksheetConfig.id,
                         index,
@@ -438,7 +423,7 @@ export class Workbook {
                         sheetId: worksheetConfig.id,
                     });
                     _commandManager.invoke(
-                        new SheetsCommand(_context.getWorkBook(), {
+                        new SheetCommand(_context.getWorkBook(), {
                             actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
                             sheetId: worksheetConfig.id,
                             index,
@@ -459,7 +444,7 @@ export class Workbook {
                         sheetId: worksheetConfig.id,
                     });
                     _commandManager.invoke(
-                        new SheetsCommand(_context.getWorkBook(), {
+                        new SheetCommand(_context.getWorkBook(), {
                             actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
                             sheetId: worksheetConfig.id,
                             index,
@@ -484,7 +469,7 @@ export class Workbook {
         return this._styles;
     }
 
-    getContext(): Context {
+    getContext(): SheetContext {
         return this._context;
     }
 
@@ -506,43 +491,33 @@ export class Workbook {
     create(name: string): Worksheet;
     create(...argument: unknown[]): unknown {
         if (Tools.hasLength(argument, 1)) {
-            const { _container, _context } = this;
+            const { _context } = this;
             const name = argument[0];
             const conf = { ...DEFAULT_WORKSHEET, name };
-            const worksheet = _container.getInstance<Worksheet>(
-                'WorkSheet',
+            const worksheet = new Worksheet(
                 _context,
-                conf
+                conf as Partial<IWorksheetConfig>
             );
             this.insertSheet(worksheet);
             return worksheet;
         }
         if (Tools.hasLength(argument, 3)) {
-            const { _container, _context } = this;
+            const { _context } = this;
             const name = argument[0];
             const rowCount = argument[1];
             const columnCount = argument[2];
             const conf = { ...DEFAULT_WORKSHEET, name, rowCount, columnCount };
-            const worksheet = _container.getInstance<Worksheet>(
-                'WorkSheet',
+            const worksheet = new Worksheet(
                 _context,
-                conf
+                conf as Partial<IWorksheetConfig>
             );
             this.insertSheet(worksheet);
             return worksheet;
         }
     }
 
-    setServerBase(server: ServerBase): void {
-        this._server = server;
-    }
-
     setDefaultActiveSheet(): void {
         this._setDefaultActiveSheet();
-    }
-
-    getServer(): ServerBase {
-        return this._server;
     }
 
     getIndexBySheetId(sheetId: string): number {
@@ -655,7 +630,7 @@ export class Workbook {
             sheetId,
             order,
         };
-        const command = new SheetsCommand(_context.getWorkBook(), config);
+        const command = new SheetCommand(_context.getWorkBook(), config);
         _commandManager.invoke(command);
         observer.notifyObservers();
     }
@@ -696,7 +671,7 @@ export class Workbook {
             });
 
             _commandManager.invoke(
-                new SheetsCommand(this, {
+                new SheetCommand(this, {
                     actionName: ACTION_NAMES.REMOVE_SHEET_ACTION,
                     sheetId,
                 } as IRemoveSheetActionData)

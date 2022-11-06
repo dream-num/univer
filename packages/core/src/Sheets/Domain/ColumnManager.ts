@@ -1,4 +1,4 @@
-import { SheetsCommand } from '../../Command';
+import { SheetCommand } from '../../Command';
 import { ISetColumnWidthActionData } from '../Action';
 import { ACTION_NAMES } from '../../Const';
 import { BooleanNumber } from '../../Enum';
@@ -97,7 +97,7 @@ export class ColumnManager {
             columnIndex,
             columnWidth,
         };
-        const command = new SheetsCommand(_context.getWorkBook(), setColumnWidth);
+        const command = new SheetCommand(_context.getWorkBook(), setColumnWidth);
         _commandManager.invoke(command);
     }
 

@@ -1,7 +1,7 @@
-import { ISpreadsheetPluginConfigBase } from '../../View/UI/SheetContainer';
+import { ISheetPluginConfigBase } from '../../View/UI/SheetContainer';
 import { ISelectionsConfig } from './SelectionConfig';
 
-export interface ISpreadsheetPluginConfig extends ISpreadsheetPluginConfigBase {
+export interface ISheetPluginConfig extends ISheetPluginConfigBase {
     container: HTMLElement | string;
     selections: ISelectionsConfig;
 }

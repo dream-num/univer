@@ -1,11 +1,11 @@
-import { Context, IBullet, ILists, INestingLevel, ITextStyle } from '@univer/core';
+import { Context, IBullet, ILists, INestingLevel, ITextStyle, Nullable } from '@univer/core';
 import { FontCache, getFontStyleString, IDocumentSkeletonBullet, IFontLocale } from '../../../..';
 import { getBulletOrderedSymbol } from '.';
 
 export function dealWidthBullet(
     bullet?: IBullet,
     lists?: ILists,
-    listLevelAncestors?: IDocumentSkeletonBullet[],
+    listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>,
     fontLocale?: IFontLocale,
     context?: Context
 ): IDocumentSkeletonBullet | undefined {
@@ -52,6 +52,9 @@ export function getDefaultBulletSke(listId: string, startIndex: number = 1, font
             spr: 0.5,
             spo: 0,
         },
+        indentFirstLine: 0,
+        hanging: 21,
+        indentStart: 0,
     };
 }
 
@@ -59,13 +62,13 @@ function _getBulletSke(
     listId: string,
     nestingLevel: number,
     nestings: INestingLevel[],
-    listLevelAncestors?: IDocumentSkeletonBullet[],
+    listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>,
     textStyleConfig?: ITextStyle,
     fontLocale?: IFontLocale,
     context?: Context
 ): IDocumentSkeletonBullet {
     const nesting = nestings[nestingLevel];
-    const { bulletAlignment, glyphFormat, textStyle: textStyleFirst, startNumber, glyphType, glyphSymbol } = nesting;
+    const { bulletAlignment, glyphFormat, textStyle: textStyleFirst, startNumber, glyphType, glyphSymbol, indentFirstLine, hanging, indentStart } = nesting;
 
     const textStyle = { ...textStyleConfig, ...textStyleFirst };
 
@@ -77,26 +80,35 @@ function _getBulletSke(
         symbolContent = glyphSymbol;
     } else {
         // 有序列表
-        symbolContent = __generateOrderedListSymbol(glyphFormat, nestings, listLevelAncestors, context); // 有序列表的处理
+        symbolContent = __generateOrderedListSymbol(glyphFormat, nestingLevel, nestings, listLevelAncestors, context); // 有序列表的处理
     }
 
     const bBox = FontCache.getTextSize(symbolContent, fontStyle);
-    const startIndex = listLevelAncestors?.[nestingLevel]?.startIndexItem ?? 0;
+    const startIndex = listLevelAncestors?.[nestingLevel]?.startIndexItem ?? 1;
 
     return {
         listId,
         symbol: symbolContent, // symbol 列表的内容
         ts: textStyle, // 文字样式
         fontStyle, //
-        startIndexItem: startIndex,
+        startIndexItem: startIndex + 1,
         bBox,
         nestingLevel: nesting,
         bulletAlign: bulletAlignment,
         bulletType: glyphSymbol ? false : !!glyphType, // 默认是无序列表，假如glyphSymbol为空且glyphType不为空才是有序列表
+        indentFirstLine,
+        hanging,
+        indentStart,
     };
 }
 
-function __generateOrderedListSymbol(glyphFormat: string, nestings: INestingLevel[], listLevelAncestors?: IDocumentSkeletonBullet[], context?: Context) {
+function __generateOrderedListSymbol(
+    glyphFormat: string,
+    nestingLevel: number,
+    nestings: INestingLevel[],
+    listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>,
+    context?: Context
+) {
     // const indexNumber = startNumber + startIndex;
     // parse  <prefix>%[nestingLevelMinusOne]<suffix>, return symbolContent
     // <w:lvl w:ilvl="0">
@@ -109,9 +121,23 @@ function __generateOrderedListSymbol(glyphFormat: string, nestings: INestingLeve
     const prefix = glyphFormatSplit[0];
     const resultSymbol = [prefix];
     for (let i = 1; i < glyphFormatSplit.length; i++) {
-        const levelAndSuffixPre = glyphFormatSplit[1];
+        const levelAndSuffixPre = glyphFormatSplit[i];
         const { level, suffix } = ___getLevelAndSuffix(levelAndSuffixPre);
-        const singleSymbol = ___getSymbolByBesting(listLevelAncestors?.[level]?.startIndexItem, nestings[level], context);
+        let startIndexItem = listLevelAncestors?.[level]?.startIndexItem || 1;
+        if (level !== nestingLevel && listLevelAncestors?.[level] !== null) {
+            startIndexItem -= 1;
+        }
+        const singleSymbol = ___getSymbolByBesting(startIndexItem, nestings[level], context);
+        // console.log(
+        //     '___getSymbolByBesting',
+        //     singleSymbol,
+        //     level,
+        //     suffix,
+        //     listLevelAncestors?.length,
+        //     listLevelAncestors?.[level]?.startIndexItem,
+        //     listLevelAncestors?.[level]?.symbol,
+        //     nestings
+        // );
         resultSymbol.push(singleSymbol, suffix);
     }
     return resultSymbol.join('');

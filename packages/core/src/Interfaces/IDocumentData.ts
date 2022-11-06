@@ -448,8 +448,8 @@ export interface IShapeProperties {}
  * Properties of Image
  */
 export interface IImageProperties {
-    contentUri: string;
-    sourceUri: string;
+    contentUrl: string;
+    sourceUrl: string;
     brightness: number;
     contrast: number;
     transparency: number;

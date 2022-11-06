@@ -22,8 +22,8 @@ export class Documents extends docsComponent {
 
     isCalculateSkeleton = true;
 
-    constructor(oKey: string, spreadsheetSkeleton?: DocumentSkeleton, allowCache: boolean = true) {
-        super(oKey, spreadsheetSkeleton, allowCache);
+    constructor(oKey: string, documentSkeleton?: DocumentSkeleton, allowCache: boolean = true) {
+        super(oKey, documentSkeleton, allowCache);
 
         this._initialDefaultExtension();
 

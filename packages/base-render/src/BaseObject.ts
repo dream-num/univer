@@ -271,7 +271,7 @@ export abstract class BaseObject {
         return this._top;
     }
 
-    private set top(num: number | string) {
+    protected set top(num: number | string) {
         this._topOrigin = num;
         this._top = toPx(num, this._parent?.height);
     }
@@ -280,7 +280,7 @@ export abstract class BaseObject {
         return this._left;
     }
 
-    private set left(num: number | string) {
+    protected set left(num: number | string) {
         this._leftOrigin = num;
         this._left = toPx(num, this._parent?.width);
     }
@@ -289,7 +289,7 @@ export abstract class BaseObject {
         return this._width;
     }
 
-    private set width(num: number | string) {
+    protected set width(num: number | string) {
         this._widthOrigin = num;
         this._width = toPx(num, this._parent?.width);
     }
@@ -298,7 +298,7 @@ export abstract class BaseObject {
         return this._height;
     }
 
-    private set height(num: number | string) {
+    protected set height(num: number | string) {
         this._heightOrigin = num;
         this._height = toPx(num, this._parent?.height);
     }
@@ -307,7 +307,7 @@ export abstract class BaseObject {
         return this._strokeWidth;
     }
 
-    private set strokeWidth(width: number) {
+    protected set strokeWidth(width: number) {
         this._strokeWidth = width;
     }
 
@@ -315,7 +315,7 @@ export abstract class BaseObject {
         return this._angle;
     }
 
-    private set angle(angle: number) {
+    protected set angle(angle: number) {
         this._angle = angle;
     }
 
@@ -323,7 +323,7 @@ export abstract class BaseObject {
         return this._scaleX;
     }
 
-    private set scaleX(scaleX: number) {
+    protected set scaleX(scaleX: number) {
         this._scaleX = scaleX;
     }
 
@@ -331,7 +331,7 @@ export abstract class BaseObject {
         return this._scaleY;
     }
 
-    private set scaleY(scaleY: number) {
+    protected set scaleY(scaleY: number) {
         this._scaleY = scaleY;
     }
 
@@ -349,7 +349,7 @@ export abstract class BaseObject {
         return this._skewX;
     }
 
-    private set skewX(skewX: number) {
+    protected set skewX(skewX: number) {
         this._skewX = skewX;
     }
 
@@ -357,7 +357,7 @@ export abstract class BaseObject {
         return this._skewY;
     }
 
-    private set skewY(skewY: number) {
+    protected set skewY(skewY: number) {
         this._skewY = skewY;
     }
 
@@ -365,7 +365,7 @@ export abstract class BaseObject {
         return this._flipX;
     }
 
-    private set flipX(flipX: boolean) {
+    protected set flipX(flipX: boolean) {
         this._flipX = flipX;
     }
 
@@ -373,7 +373,7 @@ export abstract class BaseObject {
         return this._flipY;
     }
 
-    private set flipY(flipY: boolean) {
+    protected set flipY(flipY: boolean) {
         this._flipY = flipY;
     }
 

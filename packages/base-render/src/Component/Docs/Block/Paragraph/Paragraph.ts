@@ -1,4 +1,4 @@
-import { ColumnSeparatorType, Context, IBullet, IDrawing, IDrawings, IElementsOrder, IParagraph, ParagraphElementType, PositionedObjectLayoutType } from '@univer/core';
+import { ColumnSeparatorType, Context, IBullet, IDrawing, IDrawings, IElementsOrder, IParagraph, Nullable, ParagraphElementType, PositionedObjectLayoutType } from '@univer/core';
 import { dealWidthBullet, dealWidthInlineDrawing, dealWidthTextRun } from '.';
 import { createSkeletonPage, getLastNotFullColumnInfo, setColumnFullState } from '../..';
 import {
@@ -40,7 +40,7 @@ export function dealWidthParagraph(
         fontLocale,
     } = sectionBreakConfig;
 
-    const { elements, elementOrder, paragraphStyle, bullet } = paragraph;
+    const { elements, elementOrder, paragraphStyle = {}, bullet } = paragraph;
 
     // const paragraphAffectSkeDrawings = _changeDrawingToSkeletonFormat(drawingIds, drawings);
 
@@ -126,7 +126,7 @@ export function dealWidthParagraph(
     return pages;
 }
 
-function _getListLevelAncestors(bullet?: IBullet, listLevel?: Map<string, IDocumentSkeletonBullet[]>): IDocumentSkeletonBullet[] | undefined {
+function _getListLevelAncestors(bullet?: IBullet, listLevel?: Map<string, IDocumentSkeletonBullet[]>): Array<Nullable<IDocumentSkeletonBullet>> | undefined {
     if (!bullet || !listLevel) {
         return;
     }
@@ -137,18 +137,18 @@ function _getListLevelAncestors(bullet?: IBullet, listLevel?: Map<string, IDocum
 
     let level = nestingLevel;
 
-    const listLevelAncestors: IDocumentSkeletonBullet[] = [];
-
-    while (sameList?.[level]) {
-        const bs = sameList[level];
-        listLevelAncestors[level] = bs!;
-        level -= 1;
+    if (level < 0) {
+        level = 0;
     }
 
-    if (level > 0) {
-        // 证明sameList存储的信息确实，一个list的level要从0开始
-        return;
+    const listLevelAncestors: Array<Nullable<IDocumentSkeletonBullet>> = [];
+
+    for (let i = level; i >= 0; i--) {
+        const bs = sameList?.[i];
+        listLevelAncestors[i] = bs || null;
     }
+
+    // console.log('SymbolByBesting', sameList, listLevelAncestors, level, listId, listLevel);
 
     return listLevelAncestors;
 }
@@ -160,7 +160,7 @@ function _updateListLevelAncestors(bullet?: IBullet, bulletSkeleton?: IDocumentS
 
     const { listId, nestingLevel } = bullet;
 
-    const cacheItem: IDocumentSkeletonBullet[] = [...(listLevel?.[listId] || [])];
+    const cacheItem: IDocumentSkeletonBullet[] = [...(listLevel?.get(listId) || [])];
 
     // [[nestingLevel, bulletSkeleton]];
 

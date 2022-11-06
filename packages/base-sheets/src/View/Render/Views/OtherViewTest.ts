@@ -1,10 +1,88 @@
 import { getColor, Path, Picture, Rect, Circle, RichText } from '@univer/base-render';
-import { BaselineOffset, BlockType, BulletAlignment, GlyphType, IDocumentData, ParagraphElementType } from '@univer/core';
+import {
+    BaselineOffset,
+    BlockType,
+    BooleanNumber,
+    BulletAlignment,
+    GlyphType,
+    IDocumentData,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    ParagraphElementType,
+    PositionedObjectLayoutType,
+    WrapTextType,
+} from '@univer/core';
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 
 const richTextTest: IDocumentData = {
     documentId: 'd',
+    drawings: {
+        shapeTest1: {
+            objectId: 'shapeTest1',
+            objectProperties: {
+                title: 'test shape',
+                description: 'test shape',
+                size: {
+                    width: 100,
+                    height: 400,
+                },
+                positionH: {
+                    relativeFrom: ObjectRelativeFromH.COLUMN,
+                    posOffset: 100,
+                },
+                positionV: {
+                    relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+                    posOffset: 160,
+                },
+                angle: 0,
+                imageProperties: {
+                    contentUrl: 'https://cnbabylon.com/assets/img/agents.png',
+                },
+            },
+            layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+            behindDoc: BooleanNumber.FALSE,
+            wrapText: WrapTextType.BOTH_SIDES,
+        },
+    },
     lists: {
+        unorderedTest: {
+            listId: 'unorderedTest',
+            nestingLevel: [
+                {
+                    bulletAlignment: BulletAlignment.START,
+                    glyphFormat: ' %0',
+                    textStyle: {
+                        fs: 12,
+                    },
+                    startNumber: 0,
+                    glyphSymbol: '\u25CF',
+                    hanging: 21,
+                    indentStart: 21,
+                },
+                {
+                    bulletAlignment: BulletAlignment.START,
+                    glyphFormat: ' %1',
+                    textStyle: {
+                        fs: 12,
+                    },
+                    startNumber: 0,
+                    glyphSymbol: '\u25A0',
+                    hanging: 21,
+                    indentStart: 42,
+                },
+                {
+                    bulletAlignment: BulletAlignment.START,
+                    glyphFormat: ' %1',
+                    textStyle: {
+                        fs: 12,
+                    },
+                    startNumber: 0,
+                    glyphSymbol: '\u25C6',
+                    hanging: 21,
+                    indentStart: 63,
+                },
+            ],
+        },
         testBullet: {
             listId: 'testBullet',
             nestingLevel: [
@@ -42,41 +120,6 @@ const richTextTest: IDocumentData = {
                     indentStart: 63,
                 },
             ],
-            // nestingLevel: [
-            //     {
-            //         bulletAlignment: BulletAlignment.START,
-            //         glyphFormat: ' %0',
-            //         textStyle: {
-            //             fs: 12,
-            //         },
-            //         startNumber: 0,
-            //         glyphSymbol: '\u25CF',
-            //         hanging: 21,
-            //         indentStart: 21,
-            //     },
-            //     {
-            //         bulletAlignment: BulletAlignment.START,
-            //         glyphFormat: ' %1',
-            //         textStyle: {
-            //             fs: 12,
-            //         },
-            //         startNumber: 0,
-            //         glyphSymbol: '\u25A0',
-            //         hanging: 21,
-            //         indentStart: 42,
-            //     },
-            //     {
-            //         bulletAlignment: BulletAlignment.START,
-            //         glyphFormat: ' %1',
-            //         textStyle: {
-            //             fs: 12,
-            //         },
-            //         startNumber: 0,
-            //         glyphSymbol: '\u25C6',
-            //         hanging: 21,
-            //         indentStart: 63,
-            //     },
-            // ],
         },
     },
     body: {
@@ -155,6 +198,10 @@ const richTextTest: IDocumentData = {
                         {
                             elementId: 'oneElement',
                             paragraphElementType: ParagraphElementType.TEXT_RUN,
+                        },
+                        {
+                            elementId: 'shapeTest1',
+                            paragraphElementType: ParagraphElementType.DRAWING,
                         },
                         {
                             elementId: 'smallSub',

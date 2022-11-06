@@ -14,9 +14,7 @@ export class Documents extends DocComponent {
 
     private _translateY: number = 0;
 
-    private _translateXSave: number = 0;
-
-    private _translateYSave: number = 0;
+    private _translateSaveList: Array<{ x: number; y: number }> = [];
 
     // private _textAngleRotateOffset: number = 0;
 
@@ -45,13 +43,18 @@ export class Documents extends DocComponent {
     }
 
     private _translateSave() {
-        this._translateXSave = this._translateX;
-        this._translateYSave = this._translateY;
+        this._translateSaveList.push({
+            x: this._translateX,
+            y: this._translateY,
+        });
     }
 
     private _translateRestore() {
-        this._translateX = this._translateXSave;
-        this._translateY = this._translateYSave;
+        const save = this._translateSaveList.pop();
+        if (save) {
+            this._translateX = save.x;
+            this._translateY = save.y;
+        }
     }
 
     private _horizontalHandler(pageWidth: number, pagePaddingLeft: number, pagePaddingRight: number, horizontalAlign: HorizontalAlign) {
@@ -260,6 +263,7 @@ export class Documents extends DocComponent {
                             for (let i = 0; i < divideLength; i++) {
                                 const divide = divides[i];
                                 const { spanGroup, left: divideLeft, paddingLeft: dividePaddingLeft } = divide;
+                                this._translateSave();
                                 this._translate(divideLeft + dividePaddingLeft, 0);
                                 // console.log(divide, spanGroup, divideLeft, dividePaddingLeft);
                                 for (let span of spanGroup) {
@@ -321,6 +325,7 @@ export class Documents extends DocComponent {
                                         }
                                     }
                                 }
+                                this._translateRestore();
                             }
                             this._translateRestore();
                         }

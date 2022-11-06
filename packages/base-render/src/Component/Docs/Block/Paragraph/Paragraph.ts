@@ -104,10 +104,13 @@ export function dealWidthParagraph(
     // 如果下一节是连续的，则按照1列进行计算，计算结果返回后，用来预估列高度，然后在接来下的流程进行二次计算
     elementOrder.forEach((elementOrderItem: IElementsOrder, elementIndex: number) => {
         const { elementId, paragraphElementType } = elementOrderItem;
-        const element = elements[elementId];
-        const { tr: textRun, st, ed } = element;
         let currentPages: IDocumentSkeletonPage[] = [];
-        if (paragraphElementType === ParagraphElementType.TEXT_RUN && textRun) {
+        if (paragraphElementType === ParagraphElementType.TEXT_RUN) {
+            const element = elements[elementId];
+            const { tr: textRun, st, ed } = element;
+            if (!textRun) {
+                return false;
+            }
             currentPages = dealWidthTextRun(textRun, elementIndex, sectionBreakConfig, lastPage, { ...paragraphConfig, paragraphAffectSkeDrawings }, fontLocale);
         } else if (paragraphElementType === ParagraphElementType.DRAWING) {
             const drawingOrigin = drawings[elementId];
@@ -120,7 +123,7 @@ export function dealWidthParagraph(
             // 换页标识，换页后还在同一个节内
             currentPages = [createSkeletonPage(sectionBreakConfig, skeletonResourceReference, _getNextPageNumber(lastPage), BreakType.PAGE)];
             paragraphAffectSkeDrawings.clear();
-        } else if (element.et === ParagraphElementType.COLUMN_BREAK) {
+        } else if (paragraphElementType === ParagraphElementType.COLUMN_BREAK) {
             // 换列标识，还在同一个节内
             const columnInfo = getLastNotFullColumnInfo(lastPage);
 

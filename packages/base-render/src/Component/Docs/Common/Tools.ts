@@ -579,6 +579,7 @@ export function getPositionVertical(
         } else if (relativeFrom === ObjectRelativeFromV.PARAGRAPH) {
             absoluteTop = (isPageBreak ? 0 : blockAnchorTop || lineTop) + posOffset;
         }
+        return absoluteTop;
     } else if (percent) {
         const { height: pageHeight, marginBottom, marginTop } = page;
         if (relativeFrom === ObjectRelativeFromV.TOP_MARGIN) {

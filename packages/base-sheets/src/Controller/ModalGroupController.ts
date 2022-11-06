@@ -31,7 +31,7 @@ export class ModalGroupController {
             this._plugin.registerComponent(name, component);
             this._ModalGroup.push(name);
 
-            this._ModalGroupComponent.setModalGroup(this._ModalGroup);
+            this._ModalGroupComponent?.setModalGroup(this._ModalGroup);
         }
     }
 }

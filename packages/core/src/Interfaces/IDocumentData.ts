@@ -378,6 +378,13 @@ export interface IBullet {
 
 /**
  * Properties of Drawing
+ * 20.4.2.8 inline (Inline DrawingML Object)
+ * 20.4.2.15 wrapNone (No Text Wrapping)
+ * 20.4.2.16 wrapPolygon (Wrapping Polygon)
+ * 20.4.2.17 wrapSquare (Square Wrapping)
+ * 20.4.2.18 wrapThrough (Through Wrapping)
+ * 20.4.2.19 wrapTight (Tight Wrapping)
+ * 20.4.2.20 wrapTopAndBottom (Top and Bottom Wrapping)
  */
 export interface IDrawing {
     objectId: string;
@@ -388,7 +395,7 @@ export interface IDrawing {
 
     behindDoc?: BooleanNumber; // wrapNone
     start?: number[]; // wrapPolygon
-    lineTo: number[][]; // wrapPolygon
+    lineTo?: number[][]; // wrapPolygon
     wrapText?: WrapTextType; // wrapSquare | wrapThrough | wrapTight
     distL?: number; // wrapSquare | wrapThrough | wrapTight
     distR?: number; // wrapSquare | wrapThrough | wrapTight
@@ -425,15 +432,15 @@ export enum PositionedObjectLayoutType {
 export interface IObjectProperties {
     title: string;
     description: string;
-    embeddedObjectBorder: IDocsBorder;
+    embeddedObjectBorder?: IDocsBorder;
     size: ISizeData;
     positionH: ObjectPositionH;
     positionV: ObjectPositionV;
     angle: number;
     // Union field properties can be only one of the following:
-    shapeProperties: IShapeProperties;
-    chartProperties: IChartProperties;
-    imageProperties: IImageProperties;
+    shapeProperties?: IShapeProperties;
+    chartProperties?: IChartProperties;
+    imageProperties?: IImageProperties;
 }
 
 /**
@@ -451,12 +458,12 @@ export interface IShapeProperties {}
  */
 export interface IImageProperties {
     contentUrl: string;
-    sourceUrl: string;
-    brightness: number;
-    contrast: number;
-    transparency: number;
-    cropProperties: ICropProperties;
-    angle: number;
+    sourceUrl?: string;
+    brightness?: number;
+    contrast?: number;
+    transparency?: number;
+    cropProperties?: ICropProperties;
+    angle?: number;
 }
 
 /**

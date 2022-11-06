@@ -1,3 +1,4 @@
+import { Tools } from './Tools';
 import { Nullable } from '.';
 import { ICellInfo, ISelection, ICellData, IColorStyle } from '../Interfaces';
 import { ColorBuilder } from '../Sheets/Domain';
@@ -72,4 +73,8 @@ export function getColorStyle(color: Nullable<IColorStyle>): Nullable<string> {
         }
     }
     return null;
+}
+
+export function isFormulaString(value: any): boolean {
+    return Tools.isString(value) && value.indexOf('=') === 0;
 }

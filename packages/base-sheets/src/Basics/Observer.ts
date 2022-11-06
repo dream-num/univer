@@ -1,10 +1,12 @@
 import { IKeyboardEvent } from '@univer/base-render';
 import { Observable, Plugin } from '@univer/core';
+import { FormulaBar } from '../View/UI/FormulaBar/FormulaBar';
 import { SelectionControl } from '../Controller/Selection/SelectionController';
 import { SheetContainer } from '../View/UI/SheetContainer';
 import { ToolBar } from '../View/UI/ToolBar/ToolBar';
 import { LineColor } from '../View/UI/Common/Line/LineColor';
 import { ModalGroup } from '../View/UI/ModalGroup/ModalGroup';
+import { RichText } from '../View/UI/RichText/RichText';
 
 interface ISelectionControlFillConfig {}
 
@@ -40,6 +42,10 @@ export type SheetPluginObserve = {
 
     onModalGroupDidMountObservable: Observable<ModalGroup>;
 
+    onRichTextDidMountObservable: Observable<RichText>;
+
+    onFormulaBarDidMountObservable: Observable<FormulaBar>;
+
     onLineColorDidMountObservable: Observable<LineColor>;
 
     onSheetContainerDidMountObservable: Observable<SheetContainer>;
@@ -74,6 +80,8 @@ export function uninstall(plugin: Plugin) {
 
     plugin.deleteObserve('onToolBarDidMountObservable');
     plugin.deleteObserve('onModalGroupDidMountObservable');
+    plugin.deleteObserve('onRichTextDidMountObservable');
+    plugin.deleteObserve('onFormulaBarDidMountObservable');
 
     plugin.deleteObserve('onChangeCurrentSheetObserver');
     plugin.deleteObserve('onSheetContainerDidMountObservable');
@@ -109,6 +117,8 @@ export function install(plugin: Plugin) {
 
     plugin.pushToObserve('onToolBarDidMountObservable');
     plugin.pushToObserve('onModalGroupDidMountObservable');
+    plugin.pushToObserve('onRichTextDidMountObservable');
+    plugin.pushToObserve('onFormulaBarDidMountObservable');
 
     plugin.pushToObserve('onLineColorDidMountObservable');
     plugin.pushToObserve('onSheetBarDidMountObservable');

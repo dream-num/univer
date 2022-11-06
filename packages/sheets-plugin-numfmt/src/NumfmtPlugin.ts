@@ -1,15 +1,15 @@
 import { ActionExtensionManager, SheetContext, IRangeData, ObjectMatrixPrimitiveType, Plugin } from '@univer/core';
 import { NumfmtPluginObserve, install } from './Basic/Observer';
-import { NUMFMT_PLUGIN_NAME } from './Const/PLUGIN_NAME';
+import { NUMFMT_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
 import { NumfmtController } from './Controller/NumfmtController';
-import { NumftmModalController } from './Controller/NumfmtModalController';
+import { NumfmtModalController } from './Controller/NumfmtModalController';
 import { en, zh } from './Locale';
-import { NumfmtActionExtensionFactory } from './NumfmtActionExtensionFactory';
+import { NumfmtActionExtensionFactory } from './Basic/Register/NumfmtActionExtension';
 
 export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
     protected _controller: NumfmtController;
 
-    private _numftmModalController: NumftmModalController;
+    private _NumfmtModalController: NumfmtModalController;
 
     protected _numfmtActionExtensionFactory: NumfmtActionExtensionFactory;
 
@@ -26,7 +26,7 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
         });
 
         this._numfmtActionExtensionFactory = new NumfmtActionExtensionFactory(this);
-        this._numftmModalController = new NumftmModalController(this);
+        this._NumfmtModalController = new NumfmtModalController(this);
         this._controller = new NumfmtController(this);
         ActionExtensionManager.create().add(this._numfmtActionExtensionFactory);
     }
@@ -49,6 +49,6 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
     }
 
     getNumfmtModalController() {
-        return this._numftmModalController;
+        return this._NumfmtModalController;
     }
 }

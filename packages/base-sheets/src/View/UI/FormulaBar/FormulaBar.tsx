@@ -1,16 +1,19 @@
-import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, debounce, ISelectButton } from '@univer/base-component';
+import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, debounce } from '@univer/base-component';
 import { Select } from '../Common/Select/Select';
 import styles from './index.module.less';
 
 type FormulaState = {
     data: Record<string, any>;
     spanClass: string;
+    formulaContent: string;
 };
 
 export interface BaseFormulaBarProps extends BaseComponentProps {}
 
 export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
     Render: BaseComponentRender;
+
+    // formulaContent = createRef<HTMLDivElement>();
 
     initialize(props?: BaseFormulaBarProps) {
         const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
@@ -20,12 +23,10 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
 
         this.state = {
             data: {
-                selectType: ISelectButton.INPUT,
-                needChange: true,
-                icon: <NextIcon />,
                 children: [],
             },
             spanClass: styles.formulaGrey,
+            formulaContent: '',
         };
 
         this.onkeyUp = debounce(this.onkeyUp, 300);
@@ -38,6 +39,16 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
     printChange = (e: KeyboardEvent) => {
         this.onkeyUp(e.target);
     };
+
+    setFormulaContent(value: string) {
+        this.setState({
+            formulaContent: value,
+        });
+    }
+
+    componentDidMount() {
+        this._context.getObserverManager().getObserver<FormulaBar>('onFormulaBarDidMountObservable')?.notifyObservers(this);
+    }
 
     render(props: BaseFormulaBarProps, state: FormulaState) {
         const { data } = state;
@@ -62,7 +73,9 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
                         </span>
                     </div>
                     <div className={styles.formulaInput}>
-                        <div autoFocus contentEditable={true} className={styles.formulaContent} onKeyUp={(e) => this.printChange(e)}></div>
+                        <div autoFocus contentEditable={true} className={styles.formulaContent} onKeyUp={(e) => this.printChange(e)}>
+                            {state.formulaContent}
+                        </div>
                     </div>
                 </div>
             </div>

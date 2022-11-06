@@ -12,6 +12,5 @@ export * from './ActionOperation';
 
 /* eslint-disable import/first */
 import './RegisterAction';
-import './RegisterActionExtension';
 
 // @endindex

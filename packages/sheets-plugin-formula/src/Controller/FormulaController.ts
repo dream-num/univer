@@ -1,6 +1,7 @@
 import { FormulaEnginePlugin, IInterpreterDatasetConfig, SheetDataType, UnitDataType, SheetNameMapType } from '@univer/base-formula-engine';
-import { SheetContext, Plugin } from '@univer/core';
-import { IFormulaConfig } from '../Basic/IFormula';
+import { SheetContext } from '@univer/core';
+import { IFormulaConfig } from '../Basic/Interfaces/IFormula';
+import { FormulaPlugin } from '../FormulaPlugin';
 import { FormulaDataModel } from '../Model/FormulaDataModel';
 
 export class FormulaController {
@@ -12,7 +13,7 @@ export class FormulaController {
 
     private _interpreterCalculatePropsCache: IInterpreterDatasetConfig;
 
-    constructor(private _plugin: Plugin, config?: IFormulaConfig) {
+    constructor(private _plugin: FormulaPlugin, config?: IFormulaConfig) {
         this._formulaDataModel = new FormulaDataModel(config);
 
         this._context = this._plugin.getContext();

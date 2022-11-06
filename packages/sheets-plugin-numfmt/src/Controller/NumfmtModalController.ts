@@ -1,8 +1,8 @@
 import { ComponentChildren } from '@univer/base-component';
 import { SheetPlugin } from '@univer/base-sheets';
 import { PLUGIN_NAMES } from '@univer/core';
-import { NUMFMT_PLUGIN_NAME } from '../Const';
-import { CURRENCYDETAIL, DATEFMTLISG } from '../Const/FORMATDETAIL';
+import { NUMFMT_PLUGIN_NAME } from '../Basic/Const';
+import { CURRENCYDETAIL, DATEFMTLISG } from '../Basic/Const/FORMATDETAIL';
 import { NumfmtPlugin } from '../NumfmtPlugin';
 import { FormatContent } from '../View/UI/FormatContent';
 import { NumfmtModal } from '../View/UI/NumfmtModal';
@@ -27,7 +27,7 @@ export interface ModalDataProps {
     modal?: ComponentChildren; // 渲染的组件
 }
 
-export class NumftmModalController {
+export class NumfmtModalController {
     private _plugin: NumfmtPlugin;
 
     private _sheetPlugin: SheetPlugin;

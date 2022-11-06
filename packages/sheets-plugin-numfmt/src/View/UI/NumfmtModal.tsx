@@ -1,7 +1,7 @@
 import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component } from '@univer/base-component';
 import { SheetPlugin } from '@univer/base-sheets';
 import { PLUGIN_NAMES } from '@univer/core';
-import { NUMFMT_PLUGIN_NAME } from '../../Const';
+import { NUMFMT_PLUGIN_NAME } from '../../Basic/Const';
 import { ModalDataProps } from '../../Controller/NumfmtModalController';
 import { NumfmtPlugin } from '../../NumfmtPlugin';
 

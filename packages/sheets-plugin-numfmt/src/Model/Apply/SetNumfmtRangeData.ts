@@ -1,5 +1,5 @@
 import { ObjectMatrix, ObjectMatrixPrimitiveType, Workbook } from '@univer/core';
-import { NUMFMT_PLUGIN_NAME } from '../../Const';
+import { NUMFMT_PLUGIN_NAME } from '../../Basic/Const';
 import { NumfmtPlugin } from '../../NumfmtPlugin';
 
 export function SetNumfmtRangeData(workbook: Workbook, sheetId: string, numfmtPrimitiveMatrix: ObjectMatrixPrimitiveType<string>): ObjectMatrixPrimitiveType<string> {

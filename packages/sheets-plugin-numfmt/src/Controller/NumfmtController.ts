@@ -2,8 +2,8 @@ import { SheetCommand, Range, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveTyp
 import { BaseComponentRender, BaseComponentSheet } from '@univer/base-component';
 import { IToolBarItemProps, SheetPlugin } from '@univer/base-sheets';
 import { NumfmtModel } from '../Model/NumfmtModel';
-import { NUMFMT_PLUGIN_NAME } from '../Const';
-import { DEFAULT_DATA } from '../Const/DEFAULT_DATA';
+import { NUMFMT_PLUGIN_NAME } from '../Basic/Const';
+import { DEFAULT_DATA } from '../Basic/Const/DEFAULT_DATA';
 import { NumfmtPlugin } from '../NumfmtPlugin';
 
 export class NumfmtController {

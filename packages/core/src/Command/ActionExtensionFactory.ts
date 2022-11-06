@@ -1,11 +1,19 @@
 import { ACTION_NAMES } from '../Const';
 import { IActionData } from './ActionBase';
+import { Plugin } from '../Plugin';
 
 /**
  * Manipulate the list of actions in a command
  */
-export class BaseActionExtension<T extends IActionData = IActionData> {
-    constructor(protected actionData: T, protected actionDataList: IActionData[]) {}
+export class BaseActionExtension<
+    T extends IActionData = IActionData,
+    P extends Plugin = Plugin
+> {
+    constructor(
+        protected actionData: T,
+        protected actionDataList: IActionData[],
+        protected _plugin: P
+    ) {}
 
     getActionData(): T {
         return this.actionData;
@@ -37,7 +45,12 @@ export class BaseActionExtension<T extends IActionData = IActionData> {
 /**
  * Determine whether to intercept and create BaseActionExtension
  */
-export class BaseActionExtensionFactory<T extends IActionData> {
+export class BaseActionExtensionFactory<
+    T extends IActionData,
+    P extends Plugin = Plugin
+> {
+    constructor(protected _plugin: P) {}
+
     get zIndex() {
         return 0;
     }
@@ -53,7 +66,7 @@ export class BaseActionExtensionFactory<T extends IActionData> {
      * @returns
      */
     create(actionData: T, actionDataList: IActionData[]): BaseActionExtension<T> {
-        return new BaseActionExtension(actionData, actionDataList);
+        return new BaseActionExtension(actionData, actionDataList, this._plugin);
     }
 
     /**

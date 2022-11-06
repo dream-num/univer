@@ -1,4 +1,4 @@
-import { IFormulaConfig } from './IFormula';
+import { IFormulaConfig } from '../Interfaces/IFormula';
 
 export const DEFAULT_FORMULA_DATA: IFormulaConfig = {
     formulaData: {

@@ -1,7 +1,7 @@
 import { BaseButtonProps, BaseComponentSheet, BaseModalProps, BaseSelectProps, Component, createRef, FunctionComponent } from '@univer/base-component';
 import { Nullable, Observer, Workbook } from '@univer/core';
-import * as func from '../../Const/FunctionList'; // 全部公式数组
-import { IConfig } from '../../Basic/IFormula';
+import * as func from '../../Basic/Const/FunctionList'; // 全部公式数组
+import { IConfig } from '../../Basic/Interfaces/IFormula';
 import styles from './index.module.less';
 
 interface IProps {

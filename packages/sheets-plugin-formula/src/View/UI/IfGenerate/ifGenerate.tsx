@@ -1,6 +1,6 @@
 import { BaseButtonProps, BaseComponentSheet, BaseModalProps, BaseSelectProps, Component, FunctionComponent } from '@univer/base-component';
 import { Nullable, Observer, Workbook } from '@univer/core';
-import { IConfig } from '../../Basic/IFormula';
+import { IConfig } from '../../Basic/Interfaces/IFormula';
 import styles from './index.module.less';
 
 interface IProps {

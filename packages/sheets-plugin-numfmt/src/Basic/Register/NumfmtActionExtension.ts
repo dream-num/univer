@@ -1,14 +1,16 @@
-import { ACTION_NAMES, Plugin, BaseActionExtension, BaseActionExtensionFactory, ISetRangeDataActionData, ObjectMatrix, ISheetActionData, ObjectMatrixPrimitiveType } from '@univer/core';
+import { ACTION_NAMES, BaseActionExtension, BaseActionExtensionFactory, ISetRangeDataActionData, ObjectMatrix, ISheetActionData, ObjectMatrixPrimitiveType } from '@univer/core';
 import { numfmt } from '@univer/base-numfmt-engine';
 import { ICellData } from '@univer/core/src/Interfaces/ICellData';
-import { ACTION_NAMES as PLUGIN_ACTION_NAMES } from './Const';
+import { ACTION_NAMES as PLUGIN_ACTION_NAMES } from '../Enum';
+import { NumfmtPlugin } from '../../NumfmtPlugin';
 
-export class NumfmtActionExtension extends BaseActionExtension<ISetRangeDataActionData> {
+export class NumfmtActionExtension extends BaseActionExtension<ISetRangeDataActionData, NumfmtPlugin> {
     // constructor(protected actionData: ISetRangeDataActionData) {
     //     super(actionData);
     // }
 
     execute() {
+        // TODO
         const numfmtMatrix = new ObjectMatrix<string>();
         let cellValue = this.actionData.cellValue;
         // a range
@@ -47,9 +49,7 @@ export class NumfmtActionExtension extends BaseActionExtension<ISetRangeDataActi
     }
 }
 
-export class NumfmtActionExtensionFactory extends BaseActionExtensionFactory<ISetRangeDataActionData> {
-    private _plugin: Plugin;
-
+export class NumfmtActionExtensionFactory extends BaseActionExtensionFactory<ISetRangeDataActionData, NumfmtPlugin> {
     get zIndex(): number {
         return 2;
     }
@@ -58,21 +58,7 @@ export class NumfmtActionExtensionFactory extends BaseActionExtensionFactory<ISe
         return ACTION_NAMES.SET_RANGE_DATA_ACTION;
     }
 
-    constructor(plugin: Plugin) {
-        super();
-        this._plugin = plugin;
-    }
-
     create(actionData: ISetRangeDataActionData, actionDataList: ISheetActionData[]): BaseActionExtension<ISetRangeDataActionData> {
-        return new NumfmtActionExtension(actionData, actionDataList);
+        return new NumfmtActionExtension(actionData, actionDataList, this._plugin);
     }
-
-    // check(actionData: ISheetActionData) {
-    //     // Determine whether it is a setFormattedValueAction
-    //     if (actionData.actionName !== this.actionName) {
-    //         return false;
-    //     }
-
-    //     return this.create(actionData as ISetRangeDataActionData);
-    // }
 }

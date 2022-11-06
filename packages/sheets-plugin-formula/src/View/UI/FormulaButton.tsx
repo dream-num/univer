@@ -1,7 +1,8 @@
-import { BaseComponentSheet, BaseIconProps, BaseSelectProps, Component, FunctionComponent, ISelectButton, IToolBarItemProps, ISlotElement } from '@univer/base-component';
+import { BaseComponentSheet, BaseIconProps, BaseSelectProps, Component, FunctionComponent, ISelectButton, ISlotElement } from '@univer/base-component';
+import { IToolBarItemProps } from '@univer/base-sheets';
 import { Nullable, Observer, Workbook } from '@univer/core';
-import { FORMULA_CHILDREN } from '../Basic';
-import { IProps } from '../Basic/IFormula';
+import { FORMULA_CHILDREN } from '../../Basic';
+import { IProps } from '../../Basic/Interfaces';
 import { IfGenerate } from './IfGenerate';
 import { SearchFormulaModal } from './SearchFormulaModal';
 

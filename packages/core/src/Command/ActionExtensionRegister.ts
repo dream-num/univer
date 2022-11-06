@@ -2,7 +2,6 @@ import { sortRules } from '../Shared';
 import { BaseActionExtensionFactory } from './ActionExtensionFactory';
 import { REGISTRY_ACTION_FACTORY } from './RegistryFactory';
 
-import './ActionExtension/index';
 import { IActionData } from './ActionBase';
 
 export class ActionExtensionRegister {

@@ -1,17 +1,17 @@
-import { SheetContext, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { CellEditExtensionManager, CellInputExtensionManager, SheetPlugin } from '@univer/base-sheets';
+import { SheetContext, IOCContainer, UniverSheet, Plugin, IKeyValue, ActionExtensionManager } from '@univer/core';
+import { CellEditExtensionManager, CellInputExtensionManager } from '@univer/base-sheets';
 import { FormulaEnginePlugin } from '@univer/base-formula-engine';
-import { FormulaButton } from './UI/FormulaButton';
 import { zh, en } from './Locale';
 
-import { IConfig, IFormulaConfig } from './Basic/IFormula';
-import { FORMULA_PLUGIN_NAME } from './Basic/PLUGIN_NAME';
+import { IConfig, IFormulaConfig } from './Basic/Interfaces/IFormula';
+import { FORMULA_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
 import { FormulaController } from './Controller/FormulaController';
 import { firstLoader } from './Controller/FirstLoader';
 import { FormulaCellEditExtensionFactory } from './Basic/Register/FormulaCellEditExtension';
 import { FormulaCellInputExtensionFactory } from './Basic/Register/FormulaCellInputExtension';
+import { FormulaActionExtensionFactory } from './Basic/Register';
 
-export class FormulaPlugin extends Plugin<any, SheetContext> {
+export class FormulaPlugin extends Plugin<IKeyValue, SheetContext> {
     private _formulaController: FormulaController;
 
     constructor(private _config?: IFormulaConfig) {
@@ -52,13 +52,13 @@ export class FormulaPlugin extends Plugin<any, SheetContext> {
 
         const config: IConfig = { context };
 
-        const item = {
-            locale: FORMULA_PLUGIN_NAME,
-            type: 0,
-            show: true,
-            label: <FormulaButton config={config} />,
-        };
-        context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addToolButton(item);
+        // const item = {
+        //     locale: FORMULA_PLUGIN_NAME,
+        //     type: 0,
+        //     show: true,
+        //     label: <FormulaButton config={config} />,
+        // };
+        // context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addToolButton(item);
 
         this.registerExtension();
     }
@@ -73,12 +73,13 @@ export class FormulaPlugin extends Plugin<any, SheetContext> {
 
     registerExtension() {
         const cellEditRegister = CellEditExtensionManager.create();
-
         cellEditRegister.add(new FormulaCellEditExtensionFactory(this));
 
         const cellInputRegister = CellInputExtensionManager.create();
-
         cellInputRegister.add(new FormulaCellInputExtensionFactory(this));
+
+        const actionRegister = ActionExtensionManager.create();
+        actionRegister.add(new FormulaActionExtensionFactory(this));
     }
 
     getFormulaEngine() {

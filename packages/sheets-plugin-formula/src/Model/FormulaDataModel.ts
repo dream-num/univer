@@ -1,5 +1,5 @@
 import { FormulaDataType } from '@univer/base-formula-engine';
-import { IFormulaConfig, RecalculationModeType } from '../Basic/IFormula';
+import { IFormulaConfig, RecalculationModeType } from '../Basic/Interfaces/IFormula';
 
 export class FormulaDataModel {
     private _formulaData: FormulaDataType = {};

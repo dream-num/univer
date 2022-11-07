@@ -109,32 +109,35 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
                 {menu?.map((item: BaseMenuItem, index: number) => {
                     if (item.hide) return;
                     return (
-                        <li
-                            className={joinClassNames(styles.colsMenuitem, item.className ?? '', item.disabled ? styles.colsMenuitemDisabled : '')}
-                            style={item.style ?? ''}
-                            onClick={(e) => this.handleClick(e, item, index)}
-                            onMouseEnter={(e) => {
-                                this.mouseEnter(e, index);
-                            }}
-                            onMouseLeave={(e) => {
-                                this.mouseLeave(e, index);
-                            }}
-                        >
-                            {item.label}
-                            {item.children ? (
-                                <Menu
-                                    ref={(ele: Menu) => (this._refs[index] = ele)}
-                                    menu={item.children}
-                                    onClick={item.onClick}
-                                    className={item.className}
-                                    style={item.style}
-                                    parent={this}
-                                    deep={deep + 1}
-                                ></Menu>
-                            ) : (
-                                <></>
-                            )}
-                        </li>
+                        <>
+                            <li
+                                className={joinClassNames(styles.colsMenuitem, item.className ?? '', item.disabled ? styles.colsMenuitemDisabled : '')}
+                                style={item.style ?? ''}
+                                onClick={(e) => this.handleClick(e, item, index)}
+                                onMouseEnter={(e) => {
+                                    this.mouseEnter(e, index);
+                                }}
+                                onMouseLeave={(e) => {
+                                    this.mouseLeave(e, index);
+                                }}
+                            >
+                                {item.label}
+                                {item.children ? (
+                                    <Menu
+                                        ref={(ele: Menu) => (this._refs[index] = ele)}
+                                        menu={item.children}
+                                        onClick={item.onClick}
+                                        className={item.className}
+                                        style={item.style}
+                                        parent={this}
+                                        deep={deep + 1}
+                                    ></Menu>
+                                ) : (
+                                    <></>
+                                )}
+                            </li>
+                            {item.border ? <div className={styles.colsMenuitemLine}></div> : ''}
+                        </>
                     );
                 })}
             </ul>

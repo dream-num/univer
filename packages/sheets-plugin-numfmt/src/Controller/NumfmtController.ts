@@ -5,6 +5,7 @@ import { NumfmtModel } from '../Model/NumfmtModel';
 import { NUMFMT_PLUGIN_NAME } from '../Basic/Const';
 import { DEFAULT_DATA } from '../Basic/Const/DEFAULT_DATA';
 import { NumfmtPlugin } from '../NumfmtPlugin';
+import styles from '../View/UI/index.module.less';
 
 export class NumfmtController {
     protected _model: NumfmtModel;
@@ -27,7 +28,8 @@ export class NumfmtController {
         this._numfmtList = {
             name: NUMFMT_PLUGIN_NAME,
             type: 0,
-            tooltipLocale: 'moreFormats',
+            tooltipLocale: 'toolbar.moreFormats',
+            className: styles.customFormat,
             show: true,
             border: true,
             children: [
@@ -35,6 +37,7 @@ export class NumfmtController {
                 {
                     locale: 'defaultFmt.CustomFormats.text',
                     customSuffix: { name: 'RightIcon' },
+                    className: styles.customFormatMore,
                     children: [
                         {
                             locale: 'format.moreCurrency',

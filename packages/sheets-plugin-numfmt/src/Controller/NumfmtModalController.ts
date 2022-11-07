@@ -55,6 +55,7 @@ export class NumfmtModalController {
                         locale: 'button.cancel',
                     },
                 ],
+                onCancel: () => this.showModal('currency', false),
                 children: {
                     name: NUMFMT_PLUGIN_NAME + FormatContent.name,
                     props: {
@@ -78,6 +79,7 @@ export class NumfmtModalController {
                         locale: 'button.cancel',
                     },
                 ],
+                onCancel: () => this.showModal('currency', false),
                 children: {
                     name: NUMFMT_PLUGIN_NAME + FormatContent.name,
                     props: {

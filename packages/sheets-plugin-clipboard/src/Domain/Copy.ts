@@ -1,14 +1,18 @@
 import { handleJsonToDom, handleStyleToString } from '@univer/base-component';
 import { SheetContext, PLUGIN_NAMES, Tools } from '@univer/core';
-import { SheetPlugin, SelectionModel, RightMenuProps, SelectionControl } from '@univer/base-sheets';
+import { SheetPlugin, SelectionModel, RightMenuProps, SelectionControl, RightMenuItem } from '@univer/base-sheets';
 import { Clipboard } from './Clipboard';
+import { ClipboardInput } from '../UI/ClipboardInput';
+import { CLIPBOARD_PLUGIN } from '../Const';
 
 export abstract class Copy {
     private _context: SheetContext;
 
-    constructor(context: SheetContext, copyList: RightMenuProps[]) {
+    constructor(context: SheetContext, copyList: RightMenuProps[], componentList: any[]) {
         this._context = context;
         const SheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
+
+        this.initRegisterComponent(componentList);
         SheetPlugin?.addRightMenu(copyList);
 
         const manager = this._context.getObserverManager();
@@ -24,6 +28,13 @@ export abstract class Copy {
     copy(e: Event) {
         e.preventDefault();
     }
+
+    initRegisterComponent(component: any[]) {
+        const SheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+        for (let i = 0; i < component.length; i++) {
+            SheetPlugin.registerComponent(CLIPBOARD_PLUGIN + component[i].name, component[i]);
+        }
+    }
 }
 
 export class UniverCopy extends Copy {
@@ -34,8 +45,12 @@ export class UniverCopy extends Copy {
                 onClick: (...arg: any) => this.copyTo(...arg),
             },
             {
-                locale: ['rightClick.copyAs'],
-                icon: 'RightIcon',
+                customLabel: {
+                    name: RightMenuItem.name,
+                    props: {
+                        locale: 'rightClick.copyAs',
+                    },
+                },
                 children: [
                     {
                         locale: ['Json', 'rightClick.firstLineTitle'],
@@ -54,31 +69,40 @@ export class UniverCopy extends Copy {
                         onClick: (...arg: any) => this.copyArray2(...arg),
                     },
                     {
-                        locale: [
-                            'rightClick.array3',
-                            {
-                                type: 'input',
-                                min: 1,
-                                format: 'number',
-                                placeholder: 'rightClick.row',
-                                locale: 'rightClick.row',
-                                onKeyUp: (e: KeyboardEvent) => this.copyArrayMore(e),
+                        customLabel: {
+                            name: CLIPBOARD_PLUGIN + ClipboardInput.name,
+                            props: {
+                                prefixLocale: 'rightClick.array3',
+                                placeholder1Locale: 'rightClick.row',
+                                suffixLocale: 'rightClick.column',
+                                placeholder2Locale: 'rightClick.column',
                             },
-                            '×',
-                            {
-                                type: 'input',
-                                format: 'number',
-                                min: 1,
-                                placeholder: 'rightClick.column',
-                                locale: 'rightClick.column',
-                                onKeyUp: (e: KeyboardEvent) => this.copyArrayMore(e),
-                            },
-                        ],
-                        onKeyUp: (...arg: any) => {
-                            if (arg[0].key !== 'Enter') return;
-                            arg[1].ref.hideSelect();
-                            arg[1].ref.getParent().hideSelect();
                         },
+                        // locale: [
+                        //     'rightClick.array3',
+                        //     {
+                        //         type: 'input',
+                        //         min: 1,
+                        //         format: 'number',
+                        //         placeholder: 'rightClick.row',
+                        //         locale: 'rightClick.row',
+                        //         onKeyUp: (e: KeyboardEvent) => this.copyArrayMore(e),
+                        //     },
+                        //     '×',
+                        //     {
+                        //         type: 'input',
+                        //         format: 'number',
+                        //         min: 1,
+                        //         placeholder: 'rightClick.column',
+                        //         locale: 'rightClick.column',
+                        //         onKeyUp: (e: KeyboardEvent) => this.copyArrayMore(e),
+                        //     },
+                        // ],
+                        // onKeyUp: (...arg: any) => {
+                        //     if (arg[0].key !== 'Enter') return;
+                        //     arg[1].ref.hideSelect();
+                        //     arg[1].ref.getParent().hideSelect();
+                        // },
                     },
                     // {
                     //     locale: ['rightClick.diagonal'],
@@ -95,7 +119,7 @@ export class UniverCopy extends Copy {
                 ],
             },
         ];
-        super(context, copyList);
+        super(context, copyList, [ClipboardInput]);
     }
 
     private _getSheetInfo() {

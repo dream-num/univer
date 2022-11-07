@@ -150,8 +150,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         this._rightMenuControl = new RightMenuController(this);
         this._toolBarControl = new ToolBarController(this);
         this._infoBarControl = new InfoBarController(this);
-        this._formulaBarController = new FormulaBarController(this);
-        this._sheetBarControl = new SheetBarControl(this);
+        // this._sheetBarControl = new SheetBarControl(this);
         this._cellEditorControl = new CellEditorController(this);
         this._antLineController = new AntLineControl(this);
         this._countBarController = new CountBarController(this);

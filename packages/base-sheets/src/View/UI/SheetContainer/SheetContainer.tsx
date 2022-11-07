@@ -32,7 +32,6 @@ import greenSkin from '@univer/style-universheet/assets/css/skin/green.module.le
 // app context for skin and Locale
 import { RightMenu } from '../RightMenu';
 import { InfoBar } from '../InfoBar';
-import { SheetBar } from '../SheetBar';
 import style from './index.module.less';
 import { ToolBar } from '../ToolBar';
 import { CountBar } from '../CountBar/CountBar';
@@ -717,7 +716,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                     <Container ref={this.contentRef} className={style.contentInnerRightContainer} onClick={this.handleContentClick}>
                                         <RightMenu />
 
-                                        {/* <div style={{ position: 'fixed', right: '200px', top: '10px', fontSize: '14px' }}>
+                                        <div style={{ position: 'fixed', right: '200px', top: '10px', fontSize: '14px' }}>
                                             <span style={{ display: 'inline-block', width: 50, margin: '5px 0 0 5px' }}>皮肤</span>
                                             <select value={currentSkin} onChange={this.changeSkin.bind(this)} style={{ width: 55 }}>
                                                 <option value="default">默认</option>
@@ -733,7 +732,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                             </select>
 
                                             <span style={{ visibility: 'hidden' }}>{renderState}</span>
-                                        </div> */}
+                                        </div>
                                     </Container>
                                 </Content>
                                 <Sider
@@ -749,7 +748,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                     display: layout.footer ? 'block' : 'none',
                                 }}
                             >
-                                <SheetBar></SheetBar>
+                                {/* <SheetBar></SheetBar> */}
                                 <CountBar></CountBar>
                             </Footer>
                         </Layout>

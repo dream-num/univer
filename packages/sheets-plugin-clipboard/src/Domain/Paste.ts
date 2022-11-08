@@ -22,6 +22,8 @@ export abstract class Paste {
         manager.requiredObserver<ClipboardEvent>('onSpreadsheetKeyPasteObservable', PLUGIN_NAMES.SPREADSHEET).add((e) => {
             this.paste(e);
         });
+
+        // TODO 注册机制 Paste， PasteManager.handle() 匹配 WPSPaste/GoogleSheetPaste/ExcelPaste
     }
 
     getContext() {

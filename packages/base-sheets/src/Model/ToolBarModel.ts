@@ -1,6 +1,9 @@
 import { BaseSelectChildrenProps, BaseSelectProps } from '../View/UI/Common/Select/Select';
 import { BaseTextButtonProps } from '../View/UI/Common/TextButton/TextButton';
 
+/**
+ * TODO: 插件的要去除
+ */
 export interface IShowToolBarConfig {
     undoRedo?: boolean; // Undo redo
     paintFormat?: boolean; // Format brush

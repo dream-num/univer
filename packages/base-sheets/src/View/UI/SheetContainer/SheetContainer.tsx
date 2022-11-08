@@ -68,6 +68,8 @@ export interface ILayout {
     // Custom configuration toolbar,can be used in conjunction with showToolBar, showToolBarConfig has a higher priority
     toolBarConfig?: IShowToolBarConfig;
 
+    // TODO: 支持 infoBar sheetBar, countBar, rightMenu rightMenuConfig(base-sheets)
+
     /**
      * 左右或者上下分割content区域
      *

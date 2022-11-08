@@ -24,5 +24,5 @@
         "strictPropertyInitialization": false,
         "types": ["jest", "node", "@types/jest"]
     },
-    "include": ["src/**/*", "tests/**/*.(spec|test).(ts|tsx|js)", "../base-sheets/src/View/UI/FormulaBar", "../base-sheets/src/View/UI/RichText"]
+    "include": ["src/**/*", "tests/**/*.(spec|test).(ts|tsx|js)"]
 }

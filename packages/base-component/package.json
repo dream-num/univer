@@ -27,6 +27,7 @@
         "test:cover": "cross-env NODE_ENV=--experimental-vm-modules jest --coverage",
         "dev": "vite",
         "build": "tsc && vite build",
+        "watch": "vite build",
         "link": "pnpm link ./",
         "serve": "vite preview"
     },

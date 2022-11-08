@@ -14,6 +14,15 @@ export default defineConfig({
     //     },
     //     outDir: './lib',
     // },
+    build: {
+        lib: {
+            entry: resolve('src/index.ts'),
+            name: 'UniverCommonPluginData',
+            formats: ['es', 'umd'],
+            fileName: 'univer-common-plugin-data',
+        },
+        outDir: './lib',
+    },
     define: {
         pkgJson: { name, version },
     },

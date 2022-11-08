@@ -1,6 +1,6 @@
 import { BaseButtonProps, ButtonComponent, joinClassNames, JSXComponent } from '@univer/base-component';
 import { LoadingIcon } from '../Icon';
-import styles from './style/index.module.less';
+import styles from './Style/index.module.less';
 
 // const ButtonTypes: string[] = ['default', 'primary'];
 // export type ButtonType = typeof ButtonTypes[number];

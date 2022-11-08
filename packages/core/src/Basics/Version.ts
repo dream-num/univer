@@ -1,4 +1,4 @@
-import * as pack from '../../package.json';
+import pack from '../../package.json';
 /**
  * Default env
  */

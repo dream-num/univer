@@ -24,6 +24,7 @@
         "test": "jest",
         "dev": "vite",
         "build": "tsc && vite build",
+        "link": "pnpm link ./",
         "serve": "vite preview"
     },
     "devDependencies": {

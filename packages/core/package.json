@@ -25,6 +25,7 @@
         "test": "cross-env NODE_ENV=--experimental-vm-modules jest --config=jest.config.js",
         "dev": "vite",
         "build": "tsc && vite build",
+        "link": "pnpm link ./",
         "api": "node ./api.js",
         "tsc": "tsc",
         "serve": "node test/Server/server.js"

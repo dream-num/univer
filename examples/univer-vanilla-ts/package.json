@@ -10,6 +10,7 @@
         "test": "echo \"Error: run tests from root\" && exit 1",
         "dev": "vite",
         "build": "tsc && vite build",
+        "link": "pnpm link ./",
         "serve": "vite preview"
     },
     "devDependencies": {

@@ -10,7 +10,7 @@ import { LineColor } from '../View/UI/Common/Line/LineColor';
 import { SelectionModel } from '../Model';
 import { IToolBarItemProps, ToolBarModel } from '../Model/ToolBarModel';
 import { ToolBar } from '../View/UI/ToolBar';
-import styles from '../View/UI/toolbar/index.module.less';
+import styles from '../View/UI/ToolBar/index.module.less';
 import {
     BORDER_LINE_CHILDREN,
     FONT_FAMILY_CHILDREN,

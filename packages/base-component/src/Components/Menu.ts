@@ -10,6 +10,7 @@ export interface BaseMenuItem {
     hide?: boolean;
     disabled?: boolean;
     onClick?: (...arg: any) => void;
+    border?: boolean;
 }
 
 export interface BaseMenuProps {

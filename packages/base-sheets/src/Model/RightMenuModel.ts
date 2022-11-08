@@ -1,7 +1,31 @@
-import { BaseUlProps } from '@univer/base-component';
+import { BaseMenuItem } from '@univer/base-component';
+import { BaseSelectChildrenProps } from '../View/UI/Common/Select/Select';
 
-export interface RightMenuProps extends BaseUlProps {
-    flag?: string;
+export interface CustomLabelOptions extends BaseSelectChildrenProps {
+    locale?: string;
+}
+
+interface CustomLabelProps {
+    prefix?: string;
+    suffix?: string;
+    prefixLocale?: string[] | string;
+    suffixLocale?: string[] | string;
+    buttonsLocale?: string[];
+    buttons?: string[];
+    options?: CustomLabelOptions[];
+    locale?: string;
+    label?: string;
+}
+
+export interface RightMenuProps extends BaseMenuItem {
+    locale?: string[];
+    customLabel?: {
+        name: string;
+        props?: CustomLabelProps;
+    };
+    children?: RightMenuProps[];
+    suffix?: string;
+    border?: boolean;
 }
 
 export interface IRightMenu {

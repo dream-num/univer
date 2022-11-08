@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet, BaseMenuItem, BaseMenuProps, Component, ComponentChildren } from '@univer/base-component';
+import { BaseComponentRender, BaseComponentSheet, BaseMenuItem, Component, ComponentChildren } from '@univer/base-component';
 import { ColorPicker, Dropdown } from '@univer/style-universheet';
 import { BaseItemProps, Item } from '../Item/Item';
 import styles from './index.module.less';
@@ -39,7 +39,7 @@ export interface BaseSelectProps {
     onKeyUp?: (...arg: any) => void;
     defaultColor?: string;
     hideSelectedIcon?: boolean;
-    selectClassName?: string;
+    className?: string;
     name?: string;
     customLabel?: CustomComponent;
     customSuffix?: CustomComponent;
@@ -93,7 +93,7 @@ export class Select extends Component<BaseSelectProps, IState> {
         }
     }
 
-    componentDidMount() {
+    initData() {
         const { type, display, children = [], label } = this.props;
 
         // 显示值可变
@@ -220,6 +220,14 @@ export class Select extends Component<BaseSelectProps, IState> {
         }
     }
 
+    componentDidMount() {
+        this.initData();
+    }
+
+    componentWillReceiveProps() {
+        this.initData();
+    }
+
     resetMenu(children: BaseSelectChildrenProps[], hideSelectedIcon?: boolean) {
         const list: BaseMenuItem[] = [];
         for (let i = 0; i < children.length; i++) {
@@ -234,9 +242,10 @@ export class Select extends Component<BaseSelectProps, IState> {
             list[i].value = children[i].value;
             list[i].className = children[i].className;
             list[i].onClick = children[i].onClick;
+            list[i].border = children[i].border;
 
             if (children[i].children) {
-                list[i].children = this.getChildren(children[i].children!);
+                list[i].children = this.resetMenu(children[i].children!);
             }
         }
 
@@ -271,18 +280,6 @@ export class Select extends Component<BaseSelectProps, IState> {
         return list;
     }
 
-    getChildren(children: BaseSelectChildrenProps[]) {
-        const menu: BaseMenuProps[] = children.map((item) => {
-            const selected = this.props.hideSelectedIcon ? false : item.selected;
-            item.label = <Item disabled={item.disabled} border={item.border} selected={selected} label={item.label} suffix={item.suffix}></Item>;
-            if (item.children) {
-                item.children = this.getChildren(item.children);
-            }
-            return item as BaseMenuItem;
-        });
-        return menu;
-    }
-
     // 处理选中
     handleSelected = (index: number | null): BaseMenuItem[] | undefined => {
         const { children = [], hideSelectedIcon } = this.props;
@@ -302,11 +299,11 @@ export class Select extends Component<BaseSelectProps, IState> {
     // 普通下拉
     getSingle = () => {
         const { content, menu } = this.state;
-        const { selectClassName = '' } = this.props;
+        const { className = '' } = this.props;
         const Button = this.Render.renderFunction('Button');
 
         return (
-            <div className={`${styles.selectSingle} ${selectClassName}`}>
+            <div className={`${styles.selectSingle} ${className}`}>
                 <Button type="text">
                     <Dropdown menu={{ menu, onClick: this.onClick }} showArrow>
                         <div>{content}</div>
@@ -319,12 +316,12 @@ export class Select extends Component<BaseSelectProps, IState> {
     //Input下拉
     getInput = () => {
         const { content, menu } = this.state;
-        const { selectClassName = '' } = this.props;
+        const { className = '' } = this.props;
         const Input = this.Render.renderFunction('Input');
         const Button = this.Render.renderFunction('Button');
 
         return (
-            <div className={`${styles.selectInput} ${selectClassName}`}>
+            <div className={`${styles.selectInput} ${className}`}>
                 <Button type="text">
                     <Dropdown menu={{ menu, onClick: this.onClick }} showArrow>
                         <Input onKeyUp={this.onKeyUp} type="number" value={content as string} />
@@ -336,13 +333,13 @@ export class Select extends Component<BaseSelectProps, IState> {
 
     //颜色选择器
     getColor = () => {
-        const { label, selectClassName = '' } = this.props;
+        const { label, className = '' } = this.props;
         const { color, menu } = this.state;
         const Button = this.Render.renderFunction('Button');
         const NextIcon = this.Render.renderFunction('NextIcon');
 
         return (
-            <div className={`${styles.selectColor} ${styles.selectDouble} ${selectClassName}`}>
+            <div className={`${styles.selectColor} ${styles.selectDouble} ${className}`}>
                 <Button type="text">
                     <Dropdown onClick={this.onClick} menu={{ menu, onClick: this.onClick }} icon={<NextIcon />}>
                         <div className={styles.selectLabel}>{label}</div>
@@ -355,12 +352,12 @@ export class Select extends Component<BaseSelectProps, IState> {
 
     getDouble = () => {
         const { content, menu } = this.state;
-        const { selectClassName = '' } = this.props;
+        const { className = '' } = this.props;
         const NextIcon = this.Render.renderFunction('NextIcon');
         const Button = this.Render.renderFunction('Button');
 
         return (
-            <div className={`${styles.selectDouble} ${selectClassName}`}>
+            <div className={`${styles.selectDouble} ${className}`}>
                 <Button type="text">
                     <Dropdown menu={{ menu, onClick: this.onClick }} icon={<NextIcon />}>
                         <div className={styles.selectLabel}>{content}</div>
@@ -371,12 +368,12 @@ export class Select extends Component<BaseSelectProps, IState> {
     };
 
     getFix = () => {
-        const { label, selectClassName = '' } = this.props;
+        const { label, className = '' } = this.props;
         const { menu } = this.state;
         const Button = this.Render.renderFunction('Button');
 
         return (
-            <div className={`${styles.selectDouble} ${selectClassName}`}>
+            <div className={`${styles.selectDouble} ${className}`}>
                 <Button type="text">
                     <Dropdown menu={{ menu, onClick: this.onClick }} showArrow>
                         <div className={styles.selectLabel}>{label}</div>
@@ -387,13 +384,13 @@ export class Select extends Component<BaseSelectProps, IState> {
     };
 
     getDoubleFix = () => {
-        const { label, selectClassName = '' } = this.props;
+        const { label, className = '' } = this.props;
         const { menu } = this.state;
         const Button = this.Render.renderFunction('Button');
         const NextIcon = this.Render.renderFunction('NextIcon');
 
         return (
-            <div className={`${styles.selectDouble} ${selectClassName}`}>
+            <div className={`${styles.selectDouble} ${className}`}>
                 <Button type="text">
                     <Dropdown onClick={this.onClick} menu={{ menu, onClick: this.onClick }} icon={<NextIcon />}>
                         <div className={styles.selectLabel}>{label}</div>

@@ -5,6 +5,12 @@ import { SheetPlugin } from '../SheetPlugin';
 import { defaultLayout, ILayout } from '../View/UI/SheetContainer';
 
 import { SelectionControl } from './Selection/SelectionController';
+
+import { LineColor } from '../View/UI/Common/Line/LineColor';
+import { SelectionModel } from '../Model';
+import { IToolBarItemProps, ToolBarModel } from '../Model/ToolBarModel';
+import { ToolBar } from '../View/UI/ToolBar';
+import styles from '../View/UI/toolbar/index.module.less';
 import {
     BORDER_LINE_CHILDREN,
     FONT_FAMILY_CHILDREN,
@@ -15,11 +21,6 @@ import {
     TEXT_WRAP_CHILDREN,
     VERTICAL_ALIGN_CHILDREN,
 } from '../View/UI/ToolBar/Const';
-import styles from '../View/UI/ToolBar/index.module.less';
-import { LineColor } from '../View/UI/Common/Line/LineColor';
-import { SelectionModel } from '../Model';
-import { IToolBarItemProps, ToolBarModel } from '../Model/ToolBarModel';
-import { ToolBar } from '../View/UI/ToolBar';
 
 interface BorderInfo {
     color: string;
@@ -84,7 +85,6 @@ export class ToolBarController {
                     this.setRedo();
                 },
             },
-
             // {
             //     toolbarType: 1,
             //     tooltipLocale: 'paintFormat',
@@ -115,11 +115,10 @@ export class ToolBarController {
             //     label: 'AddNumIcon',
             //     show: config.numberIncrease,
             // },
-
             {
                 type: 0,
-                tooltipLocale: 'font',
-                selectClassName: styles.selectLabelString,
+                tooltipLocale: 'toolbar.font',
+                className: styles.selectLabelString,
                 show: config.font,
                 border: true,
                 onClick: (fontFamily: string) => {
@@ -129,7 +128,7 @@ export class ToolBarController {
             },
             {
                 type: 1,
-                tooltipLocale: 'fontSize',
+                tooltipLocale: 'toolbar.fontSize',
                 label: String(DEFAULT_STYLES.fs),
                 show: config.fontSize,
                 onClick: (fontSize: number) => {
@@ -142,7 +141,7 @@ export class ToolBarController {
             },
             {
                 toolbarType: 1,
-                tooltipLocale: 'bold',
+                tooltipLocale: 'toolbar.bold',
                 customLabel: {
                     name: 'BoldIcon',
                 },
@@ -153,7 +152,7 @@ export class ToolBarController {
             },
             {
                 toolbarType: 1,
-                tooltipLocale: 'italic',
+                tooltipLocale: 'toolbar.italic',
                 customLabel: {
                     name: 'ItalicIcon',
                 },
@@ -164,7 +163,7 @@ export class ToolBarController {
             },
             {
                 toolbarType: 1,
-                tooltipLocale: 'strikethrough',
+                tooltipLocale: 'toolbar.strikethrough',
                 customLabel: {
                     name: 'DeleteLineIcon',
                 },
@@ -175,7 +174,7 @@ export class ToolBarController {
             },
             {
                 toolbarType: 1,
-                tooltipLocale: 'underline',
+                tooltipLocale: 'toolbar.underline',
                 customLabel: {
                     name: 'UnderLineIcon',
                 },
@@ -186,7 +185,7 @@ export class ToolBarController {
             },
             {
                 type: 2,
-                tooltipLocale: 'textColor',
+                tooltipLocale: 'toolbar.textColor.main',
                 customLabel: {
                     name: 'TextColorIcon',
                 },
@@ -197,7 +196,7 @@ export class ToolBarController {
             },
             {
                 type: 2,
-                tooltipLocale: 'fillColor',
+                tooltipLocale: 'toolbar.fillColor.main',
                 customLabel: {
                     name: 'FillColorIcon',
                 },
@@ -210,6 +209,7 @@ export class ToolBarController {
                 type: 3,
                 display: 1,
                 show: config.border,
+                tooltipLocale: 'toolbar.border.main',
                 onClick: (type) => {
                     // console.dir(type);
                     // console.dir(this._borderInfo);
@@ -219,6 +219,9 @@ export class ToolBarController {
                     {
                         customLabel: {
                             name: pluginName + LineColor.name,
+                            props: {
+                                locale: 'borderLine.borderColor',
+                            },
                         },
                         unSelectable: true,
                         className: styles.selectColorPickerParent,
@@ -257,7 +260,7 @@ export class ToolBarController {
             },
             {
                 type: 5,
-                tooltipLocale: 'mergeCell',
+                tooltipLocale: 'toolbar.mergeCell.main',
                 customLabel: {
                     name: 'MergeIcon',
                 },
@@ -269,7 +272,7 @@ export class ToolBarController {
             },
             {
                 type: 3,
-                tooltipLocale: 'horizontalAlignMode',
+                tooltipLocale: 'toolbar.horizontalAlignMode.main',
                 display: 1,
                 show: config.horizontalAlignMode,
                 onClick: (value: HorizontalAlign) => {
@@ -279,7 +282,7 @@ export class ToolBarController {
             },
             {
                 type: 3,
-                tooltipLocale: 'verticalAlignMode',
+                tooltipLocale: 'toolbar.verticalAlignMode.main',
                 display: 1,
                 show: config.verticalAlignMode,
                 onClick: (value: VerticalAlign) => {
@@ -289,7 +292,7 @@ export class ToolBarController {
             },
             {
                 type: 3,
-                tooltipLocale: 'textWrapMode',
+                tooltipLocale: 'toolbar.textWrapMode.main',
                 display: 1,
                 show: config.textWrapMode,
                 onClick: (value: WrapStrategy) => {
@@ -299,7 +302,7 @@ export class ToolBarController {
             },
             {
                 type: 3,
-                tooltipLocale: 'textRotateMode',
+                tooltipLocale: 'toolbar.textRotateMode.main',
                 display: 1,
                 show: config.textRotateMode,
                 onClick: (value: number | string) => {
@@ -387,8 +390,10 @@ export class ToolBarController {
 
         this._plugin.context
             .getObserverManager()
-            .getObserver('onAfterChangeUILocaleObservable', 'workbook')
-            ?.add(() => {});
+            .getObserver('onAfterChangeUILocaleObservable', 'core')
+            ?.add(() => {
+                this.resetToolBarList();
+            });
 
         // Monitor selection changes, update toolbar button status and values TODO: 根据不同的焦点对象，接受
         this._plugin.getObserver('onChangeSelectionObserver')?.add((selectionControl: SelectionControl) => {
@@ -483,6 +488,9 @@ export class ToolBarController {
             }
             if (item.suffixLocale) {
                 item.suffix = locale.get(item.suffixLocale);
+            }
+            if (item.customLabel?.props?.locale) {
+                item.customLabel.props.label = locale.get(item.customLabel.props.locale);
             }
             if (item.children) {
                 item.children = this.resetLocale(item.children);

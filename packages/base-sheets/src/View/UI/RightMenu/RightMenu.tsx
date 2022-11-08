@@ -1,22 +1,18 @@
-import { BaseComponentRender, BaseComponentSheet, BaseRightMenuProps, BaseUlProps, Component, createRef } from '@univer/base-component';
+import { BaseComponentRender, BaseComponentSheet, BaseRightMenuProps, Component, createRef } from '@univer/base-component';
 import { IMouseEvent } from '@univer/base-render';
-import { Nullable, Observer, PLUGIN_NAMES, Workbook } from '@univer/core';
+import { PLUGIN_NAMES } from '@univer/core';
 import Style from './index.module.less';
-
-interface BaseRightMenuChildrenProps extends BaseUlProps {
-    flag?: string;
-}
+import { SheetPlugin } from '../../../SheetPlugin';
+import { RightMenuProps } from '../../../Model';
 
 interface IState {
     visible: boolean;
     srcElement: any;
     eventType: string | null;
-    children: BaseRightMenuChildrenProps[];
+    children: RightMenuProps[];
 }
 
 export class RightMenu extends Component<BaseRightMenuProps, IState> {
-    private _localeObserver: Nullable<Observer<Workbook>>;
-
     ulRef = createRef();
 
     Render: BaseComponentRender;
@@ -35,18 +31,31 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
 
     root = createRef();
 
-    setMenuList(children: BaseRightMenuChildrenProps[]) {
+    // 转换成渲染需要的数据
+    resetMenuList(children: RightMenuProps[]) {
+        const SheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+
         for (let i = 0; i < children.length; i++) {
             const item = children[i];
-            item.label = this.jointJsx(item.label);
-            if (item.children) {
-                for (let j = 0; j < item.children.length; j++) {
-                    item.children[j].label = this.jointJsx(item.children[j].label);
+            if (item.customLabel) {
+                const Label = SheetPlugin.getRegisterComponent(item.customLabel.name);
+
+                const props = item.customLabel.props ?? {};
+                if (Label) {
+                    item.label = <Label {...props} />;
                 }
             }
+            if (item.children) {
+                item.children = this.resetMenuList(item.children);
+            }
         }
+
+        return children;
+    }
+
+    setMenuList(children: RightMenuProps[]) {
         this.setState({
-            children,
+            children: this.resetMenuList(children),
         });
     }
 
@@ -61,41 +70,6 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
         // 移除事件监听
         // document.removeEventListener('contextmenu', this.handleContextMenu);
         document.removeEventListener('click', this.handleClick);
-        this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
-    }
-
-    jointJsx(option: any) {
-        const Button = this.Render.renderFunction('Button');
-        const Input = this.Render.renderFunction('Input');
-        if (option instanceof Array) {
-            const arr = [];
-            for (let i = 0; i < option.length; i++) {
-                const item = option[i];
-                if (item instanceof Object) {
-                    if (item.type === 'input') {
-                        if (item.format) {
-                            arr.push(<Input placeholder={item.placeholder} type="number" onKeyUp={item.onKeyUp}></Input>);
-                        } else {
-                            arr.push(<Input placeholder={item.placeholder} onKeyUp={item.onKeyUp}></Input>);
-                        }
-                    } else if (item.type === 'button') {
-                        arr.push(<Button type="primary">{item.text}</Button>);
-                    } else if (item.type === 'select') {
-                        arr.push(
-                            <select>
-                                {item.option.map((ele: any, index: number) => (
-                                    <option key={index}>{ele.text}</option>
-                                ))}
-                            </select>
-                        );
-                    }
-                } else {
-                    arr.push(item);
-                }
-            }
-            return arr;
-        }
-        return option;
     }
 
     // 右键菜单事件
@@ -104,7 +78,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
 
         this.setState({ visible: true, srcElement: event.target, eventType: event.type }, () => {
             new Promise<void>((resolve, reject) => {
-                this.ulRef.current.showSelect();
+                this.ulRef.current.showMenu(true);
                 resolve();
             }).then(() => {
                 // clientX/Y 获取到的是触发点相对于浏览器可视区域左上角距离
@@ -168,7 +142,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
 
         const wrapStyles = { ...this.props.style };
         const { visible } = this.state;
-        const Ul = this.Render.renderFunction('Ul');
+        const Menu = this.Render.renderFunction('Menu');
 
         return (
             visible && (
@@ -180,7 +154,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
                         e.preventDefault();
                     }}
                 >
-                    <Ul ref={this.ulRef} children={this.state.children} onClick={this.handleClick}></Ul>
+                    <Menu ref={this.ulRef} menu={this.state.children} onClick={this.handleClick}></Menu>
                 </div>
             )
         );

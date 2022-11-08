@@ -42,7 +42,6 @@ export class UniverPaste extends Paste {
                     arg[1].ref.hideSelect();
                     this.pasteTo();
                 },
-                border: true,
             },
         ];
         super(context, pasteList);

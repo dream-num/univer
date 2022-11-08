@@ -34,11 +34,15 @@ export class CellEditorController {
     constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
 
+        // this.initRegisterComponent();
+
         this._initialize();
     }
 
     private _initialize() {
         this._plugin.getObserver('onSheetContainerDidMountObservable')?.add((sheetContainer: SheetContainer) => {
+            this.initRegisterComponent();
+
             this._sheetContainer = sheetContainer;
             // const mainItem: IMainProps = {
             //     name: 'cellEditor',

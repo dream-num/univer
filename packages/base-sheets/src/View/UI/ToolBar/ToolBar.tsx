@@ -233,7 +233,7 @@ export class ToolBar extends Component<IProps, IState> {
                                         onKeyUp={item.onKeyUp}
                                         defaultColor={item.defaultColor}
                                         hideSelectedIcon={item.hideSelectedIcon}
-                                        selectClassName={item.selectClassName}
+                                        className={item.className}
                                     ></Select>
                                 </Tooltip>
                             );

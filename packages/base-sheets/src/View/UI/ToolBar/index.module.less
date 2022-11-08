@@ -1,7 +1,6 @@
 @import '@univer/style-universheet/assets/css/skin/base.module.less';
 
 .toolbar-warp {
-    height: 40px;
     max-height: fit-content;
     width: 100%;
     overflow: unset;
@@ -27,17 +26,18 @@
 .toolbar {
     max-width: 100%;
     color: var(--text-color);
-    padding: 5px 15px;
+    padding: 0 15px;
     height: 40px;
     position: relative;
+    display: flex;
+    align-items: center;
 
     >div {
-        // margin-top: 7px;
         height: 26px;
         display: inline-block;
         vertical-align: middle;
-        margin: 7px 3px 0 3px;
-
+        margin: 0 3px;
+        cursor: pointer;
         &.select-button:hover {
             background-color: #efefef;
         }
@@ -76,71 +76,9 @@
         }
     }
 
-    .single-button {
-        margin: 0 3px;
-
-        button {
-            .button();
-            font-size: 24px;
-        }
-    }
-
-    .double-button {
-        position: relative;
-        display: flex;
-        align-items: center;
-        margin: 0 5px;
-
-        .color-bottom {
-            width: 10px;
-            margin: 0 auto;
-            outline: 2px solid;
-            position: relative;
-            bottom: 4px;
-        }
-
-        .double-button-right {
-            height: 100%;
-            display: flex;
-            align-items: center;
-
-            .double-button-right-popup {
-                box-shadow: var(--box-shadow-base);
-                background-color: var(--bg);
-                position: absolute;
-                left: 0;
-                top: 35px;
-                width: max-content;
-
-                .double-button-menu-item {
-                    display: flex;
-                    align-content: center;
-
-                    .double-button-menu-item-icon {
-                        width: 25px;
-                        margin-right: 5px;
-                    }
-
-                    .double-button-menu-item-content {
-                        display: flex;
-                        align-items: center;
-                    }
-                }
-            }
-
-            button {
-                padding: 0;
-                padding-right: 5px;
-            }
-        }
-
-        button {
-            .button();
-        }
-
-        span[role='img'] {
-            font-size: 24px;
-        }
+    button {
+        padding: 0;
+        height: 26px;
     }
 }
 
@@ -178,7 +116,7 @@
 }
 
 .button() {
-    padding: 0px 5px;
+    padding: 0px;
     line-height: 1;
 }
 

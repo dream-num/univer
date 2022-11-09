@@ -30,7 +30,7 @@
         &:hover~.tooltip-title {
             position: absolute;
             display: inline-block;
-            z-index: `getZindex('tooltip') `;
+            z-index: 500;
         }
     }
 }
@@ -90,67 +90,3 @@
         pointer-events: none;
     }
 }
-
-// @import '../../assets/css/triangle.less';
-// @import '../../assets/css/skin/base.module.less';
-
-// @Tooltip-bg: #000000bf;
-
-// .tooltip-title {
-//     white-space: nowrap;
-//     background-color: @Tooltip-bg;
-//     color: #fff;
-//     padding: 5px 10px;
-//     box-shadow: var(--box-shadow-base);
-//     border-radius: @border-radius-base;
-//     font-size: @font-size-base;
-//     line-height: 1.5;
-//     z-index: `getZindex('tooltip') `;
-//     position: fixed;
-// }
-
-// .top {
-//     left: 50%;
-//     transform: translateX(-50%);
-//     & .tooltipTriangle {
-//         .triangleDown(@Tooltip-bg,5px);
-//         bottom: -10px;
-//         left: 50%;
-//         transform: translateX(-50%);
-//     }
-// }
-// .right {
-//     top: 50%;
-//     transform: translatey(-50%);
-//     & .tooltipTriangle {
-//         .triangleRight(@Tooltip-bg,5px);
-//         right: -10px;
-//         top: 50%;
-//         transform: translateY(-50%);
-//     }
-// }
-// .bottom {
-//     left: 50%;
-//     transform: translateX(-50%);
-//     & .tooltipTriangle {
-//         .triangleUp(@Tooltip-bg,5px);
-//         top: -10px;
-//         left: 50%;
-//         transform: translateX(-50%);
-//     }
-// }
-// .left {
-//     top: 50%;
-//     transform: translatey(-50%);
-//     & .tooltipTriangle {
-//         .triangleLeft(@Tooltip-bg,5px);
-//         left: -10px;
-//         top: 50%;
-//         transform: translateY(-50%);
-//     }
-// }
-
-// .tool {
-//     transition: all 0.3s;
-//     opacity: 0;
-// }

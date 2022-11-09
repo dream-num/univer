@@ -4,25 +4,25 @@
 
 ## 工具
 
-- vite
-- pnpm
-- Typescript
-- preact
+-   vite
+-   pnpm
+-   Typescript
+-   preact
 
 ## 工程介绍
 
 pnpm 管理的多包项目，
 
-- cli 脚手架
-- examples 案例
-- packages 插件和核心
-- patches 补丁
-- scripts 脚本
+-   cli 脚手架
+-   examples 案例
+-   packages 插件和核心
+-   patches 补丁
+-   scripts 脚本
 
 ## 注意事项
 
-- PR 贡献请提交到 dev 分支，提到其它分支的会被驳回
-- commit 信息必须使用全英文，代码中注释和issues尽量使用英文，便于全球的开发者沟通交流
+-   PR 贡献请提交到 dev 分支，提到其它分支的会被驳回
+-   commit 信息必须使用全英文，代码中注释和 issues 尽量使用英文，便于全球的开发者沟通交流
 
 ## 基本命令
 
@@ -557,14 +557,13 @@ context.getWorkBook().setPluginMeta < IKeyType < IBandedRange >> (ALTERNATING_CO
 比如`alternating colors`插件，就会加一个`alternating-colors`前缀
 
 ```css
-@import '@univer/style-universheet/assets/css/skin/base.module.less';
 .alternating-colors-panel-setting {
     height: 100%;
 
     .section {
-        padding-top: @padding-base;
+        padding-top: var(--padding-base);
         h3 {
-            margin-bottom: @margin-base;
+            margin-bottom: var(--margin-base);
         }
     }
 }
@@ -1181,7 +1180,7 @@ import { SheetPlugin } from '@univer/base-sheets';
 
 // 初始化universheet
 const univerSheet = UniverSheet.newInstance({
-  id: 'workbook-01',
+    id: 'workbook-01',
 });
 
 // 渲染引擎
@@ -1192,10 +1191,10 @@ univerSheetUp.installPlugin(new UniverComponentSheet());
 
 // 基础 sheets 插件
 univerSheetUp.installPlugin(
-  new SheetPlugin({
-    container: 'universheet-demo-up',
-    layout: 'auto',
-  })
+    new SheetPlugin({
+        container: 'universheet-demo-up',
+        layout: 'auto',
+    })
 );
 // 加载筛选插件
 univerSheet.installPlugin(new FilterPlugin());
@@ -1221,7 +1220,7 @@ import { SheetPlugin } from '@univer/base-sheets';
 
 // 初始化universheet
 const univerSheet = UniverSheet.newInstance({
-  id: 'workbook-01',
+    id: 'workbook-01',
 });
 
 // 渲染引擎
@@ -1232,15 +1231,15 @@ univerSheetUp.installPlugin(new UniverComponentSheet());
 
 // 基础 sheets 插件
 univerSheetUp.installPlugin(
-  new SheetPlugin({
-    container: 'universheet-demo-up',
-    layout: 'auto',
-  })
+    new SheetPlugin({
+        container: 'universheet-demo-up',
+        layout: 'auto',
+    })
 );
 
 // 动态加载筛选插件
 import('@univer/sheets-plugin-filter').then(({ FilterPlugin }) => {
-  univerSheetUp.installPlugin(new FilterPlugin());
+    univerSheetUp.installPlugin(new FilterPlugin());
 });
 ```
 

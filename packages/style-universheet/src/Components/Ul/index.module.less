@@ -4,7 +4,7 @@
     .cols-menu-jsx {
         border: 1px solid rgba(0, 0, 0, 0.2);
         box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
-        z-index: ~`getZindex('toolbar') `;
+        z-index: 100;
         border-radius: 10px;
     }
 
@@ -57,7 +57,7 @@
                 transform: scale(1.5);
             }
 
-            >div {
+            > div {
                 flex: 1;
                 display: flex;
                 justify-content: space-between;
@@ -97,7 +97,7 @@
     margin: 0;
     outline: 0;
     position: absolute;
-    z-index: ~`getZindex('toolbar') `;
+    z-index: 100;
     box-sizing: border-box;
     user-select: none;
 }

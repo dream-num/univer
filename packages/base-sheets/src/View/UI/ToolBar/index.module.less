@@ -1,5 +1,3 @@
-@import '@univer/style-universheet/assets/css/skin/base.module.less';
-
 .toolbar-warp {
     max-height: fit-content;
     width: 100%;
@@ -32,7 +30,7 @@
     display: flex;
     align-items: center;
 
-    >div {
+    > div {
         height: 26px;
         display: inline-block;
         vertical-align: middle;
@@ -49,7 +47,7 @@
 
     .select-label-string {
         .drop-content {
-            >div {
+            > div {
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
@@ -103,7 +101,7 @@
     position: absolute;
     right: 2em;
     top: 40px;
-    z-index: `getZindex('toolbar') `;
+    z-index: 100;
 
     &.more-show {
         display: flex;

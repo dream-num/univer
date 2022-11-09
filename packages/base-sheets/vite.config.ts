@@ -31,6 +31,14 @@ export default defineConfig({
             },
         },
     },
+    // resolve: {
+    //     alias: [
+    //         {
+    //             find: '@',
+    //             replacement: path.resolve(__dirname, './node_modules')
+    //         }
+    //     ],
+    // },
     server: {
         port: 3103,
         open: true, // Automatically open the app in the browser on server start.

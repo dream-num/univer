@@ -1,18 +1,16 @@
-@import '@univer/style-universheet/assets/css/skin/base.module.less';
-
 .select-component {
     position: relative;
     margin: 0 3px;
     height: 26px;
 
     &:hover {
-        background-color: @gray-14;
+        background-color: var(--gray-14);
     }
 
     .select-button {
         padding: 0px 5px;
 
-        span[role="img"] {
+        span[role='img'] {
             font-size: 24px;
         }
     }
@@ -23,7 +21,6 @@
     }
 
     .select-input {
-
         input {
             width: 38px;
             height: 20px;
@@ -35,7 +32,7 @@
                 -webkit-appearance: none;
             }
 
-            &[type="number"] {
+            &[type='number'] {
                 -moz-appearance: textfield;
             }
 
@@ -51,7 +48,6 @@
     }
 
     .select-color {
-
         .cols-menu {
             padding: 0;
             border: none;
@@ -64,7 +60,6 @@
                 padding: 0;
             }
         }
-
     }
 
     .select-double {
@@ -93,14 +88,13 @@
 
         &:hover {
             .drop-icon {
-                border-left: 1px solid @gray-6;
+                border-left: 1px solid var(--gray-6);
             }
         }
-
     }
 
     .select-label {
-        span[role="img"] {
+        span[role='img'] {
             font-size: 24px;
         }
     }
@@ -110,7 +104,6 @@
         border-color: transparent;
         height: auto;
     }
-
 }
 
 .button() {

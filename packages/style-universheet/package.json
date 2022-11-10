@@ -5,17 +5,23 @@
     "keywords": [],
     "author": "DreamNum <msoffice2@126.com>",
     "license": "MIT",
-    "main": "./src/index.ts",
-    "module": "./src/index.ts",
-    "types": "./src/index.d.ts",
-    "exports": {
-        ".": "./src/index.ts",
-        "./*": "./src/*"
+    "main": "./lib/univer-style-univer.cjs.js",
+    "module": "./lib/univer-style-univer.es.js",
+    "browser": {
+        "./lib/univer-style-univer.cjs.js": "./src/index.ts",
+        "./lib/univer-style-univer.es.js": "./src/index.ts"
     },
-    "publishConfig": {
-        "main": "./lib/univer-style-univer.umd.js",
-        "module": "./lib/univer-style-univer.es.js",
-        "types": "./lib/univer-style-univer.d.ts"
+    "types": "./src/Types/index.d.ts",
+    "exports": {
+        ".": {
+            "import": {
+              "node": "./lib/univer-style-univer.cjs.js",
+              "default": "./lib/univer-style-univer.es.js"
+            },
+            "require": "./lib/univer-style-univer.cjs.js",
+            "types": "./lib/univer-style-univer.d.ts"
+          },
+          "./*": "./src/*"
     },
     "directories": {
         "lib": "lib"

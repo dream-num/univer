@@ -1,9 +1,7 @@
 /// <reference types="vite/client" />
 
 export * from '../index';
-declare module '@univer/base-docs' {}
-
-import JSX = preact.JSX;
+declare module '@univer/base-docs' { }
 
 // use css module
 declare module '*.less' {

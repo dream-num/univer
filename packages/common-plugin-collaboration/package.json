@@ -3,17 +3,23 @@
     "version": "0.0.1",
     "description": "",
     "author": "",
-    "main": "./src/index.ts",
-    "module": "./src/index.ts",
-    "types": "./src/type.d.ts",
-    "publishConfig": {
-        "main": "./lib/index.umd.js",
-        "module": "./lib/index.es.js",
-        "types": "./lib/index.d.ts"
+    "main": "./lib/univer-common-plugin-collaboration.cjs.js",
+    "module": "./lib/univer-common-plugin-collaboration.es.js",
+    "browser": {
+        "./lib/univer-common-plugin-collaboration.cjs.js": "./src/index.ts",
+        "./lib/univer-common-plugin-collaboration.es.js": "./src/index.ts"
     },
+    "types": "./src/Types/index.d.ts",
     "exports": {
-        ".": "./src/index.ts",
-        "./*": "./src/*"
+        ".": {
+            "import": {
+              "node": "./lib/univer-common-plugin-collaboration.cjs.js",
+              "default": "./lib/univer-common-plugin-collaboration.es.js"
+            },
+            "require": "./lib/univer-common-plugin-collaboration.cjs.js",
+            "types": "./lib/univer-common-plugin-collaboration.d.ts"
+          },
+          "./*": "./src/*"
     },
     "directories": {
         "lib": "lib"
@@ -32,10 +38,8 @@
     },
     "license": "MIT",
     "dependencies": {
-        "@univer/base-component": "workspace:^0.0.1",
-        "@univer/core": "workspace:^0.0.1",
-        "es6-proxy-polyfill": "^2.1.1",
-        "reflect-metadata": "^0.1.13"
+        "@univer/common-plugin-collaboration": "workspace:^0.0.1",
+        "@univer/core": "workspace:^0.0.1"
     },
     "devDependencies": {
         "@types/jest": "^27.5.2",
@@ -44,8 +48,6 @@
         "@typescript-eslint/parser": "^4.28.5",
         "@vitejs/plugin-legacy": "^1.5.0",
         "debug": "^4.3.3",
-        "enzyme": "^3.11.0",
-        "enzyme-adapter-preact-pure": "^3.3.0",
         "identity-obj-proxy": "^3.0.0",
         "jest": "29.0.0",
         "jest-dev-server": "^6.1.1",

@@ -10,7 +10,7 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetPluginImage',
+            name: 'UniverSheetsPluginFormula',
             formats: ['es', 'umd'],
             fileName: 'univer-sheets-plugin-formula',
         },

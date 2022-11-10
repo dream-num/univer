@@ -8,13 +8,13 @@ const resolve = (url: string) => path.resolve(__dirname, url);
 
 export default defineConfig({
     build: {
-        // lib: {
-        //     entry: resolve('src/index.ts'),
-        //     name: 'BaseStyleUniver',
-        //     formats: ['es', 'umd'],
-        //     fileName: 'index',
-        // },
-        // outDir: './lib',
+        lib: {
+            entry: resolve('src/index.ts'),
+            name: 'BaseStyleUniver',
+            formats: ['es', 'umd'],
+            fileName: 'index',
+        },
+        outDir: './lib',
     },
     define: {
         pkgJson: { name, version },

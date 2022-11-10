@@ -4,14 +4,15 @@ import path from 'path';
 import createExternal from 'vite-plugin-external';
 
 const resolve = (url: string) => path.resolve(__dirname, url);
+console.log(1111111111);
 
 export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheet',
-            formats: ['es', 'umd'],
-            fileName: 'universheet-core',
+            name: 'Univer',
+            formats: ['es', 'umd', 'cjs'],
+            fileName: 'univer-core',
         },
         outDir: './lib',
     },
@@ -36,16 +37,16 @@ export default defineConfig({
 
     resolve: {
         alias: {
-            '@': path.resolve(__dirname, 'src'),
+            // '@': path.resolve(__dirname, 'src'),
         },
     },
 
     plugins: [
-        createExternal({
-            externals: {
-                'es6-proxy-polyfill': 'es6-proxy-polyfill',
-                'reflect-metadata': 'reflect-metadata',
-            },
-        }),
+        // createExternal({
+        //     externals: {
+        //         'es6-proxy-polyfill': 'es6-proxy-polyfill',
+        //         'reflect-metadata': 'reflect-metadata',
+        //     },
+        // }),
     ],
 });

@@ -11,8 +11,8 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetPluginSpreadsheet',
-            formats: ['es', 'umd'],
+            name: 'UniverBaseSheets',
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-base-sheets',
         },
         outDir: './lib',

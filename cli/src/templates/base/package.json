@@ -5,17 +5,23 @@
     "keywords": [],
     "author": "DreamNum <msoffice2@126.com>",
     "license": "MIT",
-    "main": "./src/index.ts",
-    "module": "./src/index.ts",
+    "main": "./lib/univer-<%= projectName %>.cjs.js",
+    "module": "./lib/univer-<%= projectName %>.es.js",
+    "browser": {
+        "./lib/univer-<%= projectName %>.cjs.js": "./src/index.ts",
+        "./lib/univer-<%= projectName %>.es.js": "./src/index.ts"
+    },
     "types": "./src/Types/index.d.ts",
     "exports": {
-        ".": "./src/index.ts",
-        "./*": "./src/*"
-    },
-    "publishConfig": {
-        "main": "./lib/index.umd.js",
-        "module": "./lib/index.es.js",
-        "types": "./lib/index.d.ts"
+        ".": {
+            "import": {
+              "node": "./lib/univer-<%= projectName %>.cjs.js",
+              "default": "./lib/univer-<%= projectName %>.es.js"
+            },
+            "require": "./lib/univer-<%= projectName %>.cjs.js",
+            "types": "./lib/univer-<%= projectName %>.d.ts"
+          },
+          "./*": "./src/*"
     },
     "directories": {
         "lib": "lib"
@@ -34,6 +40,8 @@
         "@types/jest": "^27.0.1",
         "@types/node": "^16.4.6",
         "@vitejs/plugin-legacy": "^1.5.1",
+        "enzyme": "^3.11.0",
+        "enzyme-adapter-preact-pure": "^3.3.0",
         "eslint": "^8.22.0",
         "eslint-config-airbnb-typescript": "^17.0.0",
         "eslint-config-prettier": "^8.3.0",
@@ -50,7 +58,7 @@
         "vite": "^2.4.4"
     },
     "dependencies": {
-        "@univer/base-component": "workspace:^0.0.1",
+        "@univer/<%= projectName %>": "workspace:^0.0.1",
         "@univer/base-render": "workspace:^0.0.1",
         "@univer/core": "workspace:^0.0.1",
         "@univer/base-sheets": "workspace:^0.0.1",

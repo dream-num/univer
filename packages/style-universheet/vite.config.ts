@@ -13,7 +13,7 @@ export default defineConfig({
         lib: {
             entry: resolve('src/index.ts'),
             name: 'StyleUniver',
-            formats: ['es', 'umd'],
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-style-univer',
         },
         outDir: './lib',

@@ -5,18 +5,6 @@
     "keywords": [],
     "author": "DreamNum <msoffice2@126.com>",
     "license": "MIT",
-    "main": "./src/index.ts",
-    "module": "./src/index.ts",
-    "types": "./src/Types/index.d.ts",
-    "exports": {
-        ".": "./src/index.ts",
-        "./*": "./src/*"
-    },
-    "publishConfig": {
-        "main": "./lib/univer-preact-ts.umd.js",
-        "module": "./lib/univer-preact-ts.es.js",
-        "types": "./lib/univer-preact-ts.d.ts"
-    },
     "directories": {
         "lib": "lib"
     },
@@ -56,7 +44,7 @@
         "vite-plugin-external": "1.2.3"
     },
     "dependencies": {
-        "@univer/base-component": "^0.0.1",
+        "@univer/preact-ts": "^0.0.1",
         "@univer/base-render": "workspace:^0.0.1",
         "@univer/base-sheets": "^0.0.1",
         "@univer/common-plugin-data": "workspace:^0.0.1",

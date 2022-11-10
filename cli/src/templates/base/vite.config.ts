@@ -7,15 +7,15 @@ import { name, version } from './package.json';
 const resolve = (url: string) => path.resolve(__dirname, url);
 
 export default defineConfig({
-    build: {
-        // lib: {
-        //     entry: resolve('src/index.ts'),
-        //     name: 'BaseStyleUniver',
-        //     formats: ['es', 'umd'],
-        //     fileName: 'index',
-        // },
-        // outDir: './lib',
-    },
+    // build: {
+    //     lib: {
+    //         entry: resolve('src/index.ts'),
+    //         name: 'BaseStyleUniver',
+    //         formats: ['es', 'umd'],
+    //         fileName: 'index',
+    //     },
+    //     outDir: './lib',
+    // },
     define: {
         pkgJson: { name, version },
     },

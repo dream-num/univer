@@ -78,7 +78,7 @@ export class SearchContent extends Component<SearchProps, SearchState> {
     }
 
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     setValue = (value: object, fn?: () => void) => {
@@ -205,7 +205,7 @@ class Content extends Component<ContentProps, ContentState> {
     }
 
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     // get search text

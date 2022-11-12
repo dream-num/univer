@@ -63,5 +63,5 @@ async function runParallel(maxConcurrency, source, iteratorFn) {
 }
 
 async function link(target) {
-    await execa('pnpm', ['run', '--filter', target, 'link'], { stdio: 'inherit' });
+    await execa('pnpm', ['run', '--filter', target, 'watch'], { stdio: 'inherit' });
 }

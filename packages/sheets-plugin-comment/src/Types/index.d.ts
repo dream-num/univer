@@ -1,12 +1,7 @@
-/// <reference types="vite/client" />
 
-import JSX = preact.JSX;
 
 export * from '../index';
-declare module '@univer/sheets-plugin-comment' {}
-
-declare module 'es6-proxy-polyfill';
-// declare module '*.less';
+declare module '@univer/sheets-plugin-comment' { }
 
 // use css module
 declare module '*.less' {

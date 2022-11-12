@@ -13,10 +13,11 @@ export default defineConfig({
         lib: {
             entry: resolve('src/index.ts'),
             name: 'StyleUniverSheet',
-            formats: ['es', 'umd'],
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-base-component',
         },
         outDir: './lib',
+        sourcemap: true
     },
     define: {
         pkgJson: { name, version },

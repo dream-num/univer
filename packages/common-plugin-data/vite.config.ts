@@ -5,23 +5,15 @@ import path from 'path';
 const resolve = (url: string) => path.resolve(__dirname, url);
 
 export default defineConfig({
-    // build: {
-    //     lib: {
-    //         entry: resolve('src/index.ts'),
-    //         name: 'UniverSheet',
-    //         formats: ['es', 'umd'],
-    //         fileName: 'index',
-    //     },
-    //     outDir: './lib',
-    // },
     build: {
         lib: {
             entry: resolve('src/index.ts'),
             name: 'UniverCommonPluginData',
-            formats: ['es', 'umd'],
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-common-plugin-data',
         },
         outDir: './lib',
+        sourcemap: true
     },
     define: {
         pkgJson: { name, version },

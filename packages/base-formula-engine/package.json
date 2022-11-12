@@ -5,17 +5,23 @@
     "keywords": [],
     "author": "DreamNum <msoffice2@126.com>",
     "license": "MIT",
-    "main": "./src/index.ts",
-    "module": "./src/index.ts",
+    "main": "./lib/univer-base-formula-engine.cjs.js",
+    "module": "./lib/univer-base-formula-engine.es.js",
+    "browser": {
+        "./lib/univer-base-formula-engine.cjs.js": "./src/index.ts",
+        "./lib/univer-base-formula-engine.es.js": "./src/index.ts"
+    },
     "types": "./src/Types/index.d.ts",
     "exports": {
-        ".": "./src/index.ts",
-        "./*": "./src/*"
-    },
-    "publishConfig": {
-        "main": "./lib/index.umd.js",
-        "module": "./lib/index.es.js",
-        "types": "./lib/index.d.ts"
+        ".": {
+            "import": {
+              "node": "./lib/univer-base-formula-engine.cjs.js",
+              "default": "./lib/univer-base-formula-engine.es.js"
+            },
+            "require": "./lib/univer-base-formula-engine.cjs.js",
+            "types": "./lib/univer-base-formula-engine.d.ts"
+          },
+          "./*": "./src/*"
     },
     "directories": {
         "lib": "lib"
@@ -51,7 +57,7 @@
         "vite": "^2.4.4"
     },
     "dependencies": {
-        "@univer/base-component": "workspace:^0.0.1",
+        "@univer/base-formula-engine": "workspace:^0.0.1",
         "@univer/base-sheets": "workspace:^0.0.1",
         "@univer/core": "workspace:^0.0.1",
         "@univer/sheets-plugin-filter": "workspace:^0.0.1",

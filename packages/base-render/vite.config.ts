@@ -12,10 +12,11 @@ export default defineConfig({
         lib: {
             entry: resolve('src/index.ts'),
             name: 'UniverSheetBaseRender',
-            formats: ['es', 'umd'],
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-base-render',
         },
         outDir: './lib',
+        sourcemap: true
     },
     define: {
         pkgJson: { name, version },

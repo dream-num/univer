@@ -9,11 +9,12 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheet',
-            formats: ['es', 'umd'],
-            fileName: 'universheet-core',
+            name: 'Univer',
+            formats: ['es', 'umd', 'cjs'],
+            fileName: 'univer-core',
         },
         outDir: './lib',
+        sourcemap: true
     },
     define: {
         pkgJson: { name, version },
@@ -36,16 +37,16 @@ export default defineConfig({
 
     resolve: {
         alias: {
-            '@': path.resolve(__dirname, 'src'),
+            // '@': path.resolve(__dirname, 'src'),
         },
     },
 
     plugins: [
-        createExternal({
-            externals: {
-                'es6-proxy-polyfill': 'es6-proxy-polyfill',
-                'reflect-metadata': 'reflect-metadata',
-            },
-        }),
+        // createExternal({
+        //     externals: {
+        //         'es6-proxy-polyfill': 'es6-proxy-polyfill',
+        //         'reflect-metadata': 'reflect-metadata',
+        //     },
+        // }),
     ],
 });

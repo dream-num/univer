@@ -59,7 +59,7 @@ class ProtectionSide extends Component<IProps, IState> {
     }
 
     componentWillUnmount() {
-        this.context.coreContext.getObserverManager().getObserver('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserv);
+        // this.context.coreContext.getObserverManager().getObserver('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserv);
     }
 
     setLocale() {

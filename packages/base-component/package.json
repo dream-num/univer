@@ -5,17 +5,23 @@
     "keywords": [],
     "author": "DreamNum <msoffice2@126.com>",
     "license": "MIT",
-    "main": "./src/index.ts",
-    "module": "./src/index.ts",
-    "types": "./src/index.d.ts",
-    "exports": {
-        ".": "./src/index.ts",
-        "./*": "./src/*"
+    "main": "./lib/univer-base-component.cjs.js",
+    "module": "./lib/univer-base-component.es.js",
+    "types": "./src/Types/index.d.ts",
+    "browser": {
+        "./lib/univer-base-component.cjs.js": "./src/index.ts",
+        "./lib/univer-base-component.es.js": "./src/index.ts"
     },
-    "publishConfig": {
-        "main": "./lib/univer-base-component.umd.js",
-        "module": "./lib/univer-base-component.es.js",
-        "types": "./lib/univer-base-component.d.ts"
+    "exports": {
+        ".": {
+            "import": {
+              "node": "./lib/univer-base-component.cjs.js",
+              "default": "./lib/univer-base-component.es.js"
+            },
+            "require": "./lib/univer-base-component.cjs.js",
+            "types": "./lib/univer-base-component.d.ts"
+          },
+          "./*": "./src/*"
     },
     "directories": {
         "lib": "lib"
@@ -38,8 +44,6 @@
         "@types/node": "^16.4.6",
         "@vitejs/plugin-legacy": "^1.5.1",
         "debug": "^4.3.3",
-        "enzyme": "^3.11.0",
-        "enzyme-adapter-preact-pure": "^3.3.0",
         "identity-obj-proxy": "^3.0.0",
         "jest-dev-server": "^6.1.1",
         "jest-environment-jsdom": "^29.0.3",

@@ -9,13 +9,13 @@ UniverSheet Spreadsheet 插件
 ### 安装
 
 ```bash
-npm i @univer/preact-ts
+npm i univer-preact-ts
 ```
 
 ### 使用
 
 ```js
-impport {Spreadsheet} from '@univer/preact-ts'
+impport {Spreadsheet} from 'univer-preact-ts'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Spreadsheet());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/preact-ts dev
+pnpm run --filter  univer-preact-ts dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/preact-ts dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/preact-ts build
+pnpm run --filter  univer-preact-ts build
 ```

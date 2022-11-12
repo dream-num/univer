@@ -44,7 +44,7 @@
         "vite-plugin-external": "1.2.3"
     },
     "dependencies": {
-        "@univer/preact-ts": "^0.0.1",
+        "univer-preact-ts": "^0.0.1",
         "@univer/base-render": "workspace:^0.0.1",
         "@univer/base-sheets": "^0.0.1",
         "@univer/common-plugin-data": "workspace:^0.0.1",

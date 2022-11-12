@@ -9,13 +9,13 @@ UniverSheet Plugin Spreadsheet
 ### Installation
 
 ```bash
-npm i @univer/preact-ts
+npm i univer-preact-ts
 ```
 
 ### Usage
 
 ```js
-impport {Spreadsheet} from '@univer/preact-ts'
+impport {Spreadsheet} from 'univer-preact-ts'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Spreadsheet());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/preact-ts dev
+pnpm run --filter  univer-preact-ts dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/preact-ts dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/preact-ts build
+pnpm run --filter  univer-preact-ts build
 ```

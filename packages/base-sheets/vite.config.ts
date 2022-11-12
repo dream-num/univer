@@ -16,6 +16,7 @@ export default defineConfig({
             fileName: 'univer-base-sheets',
         },
         outDir: './lib',
+        sourcemap: true
     },
     define: {
         pkgJson: { name, version },

@@ -13,6 +13,7 @@ export default defineConfig({
             fileName: 'univer-common-plugin-data',
         },
         outDir: './lib',
+        sourcemap: true
     },
     define: {
         pkgJson: { name, version },

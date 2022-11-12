@@ -63,7 +63,11 @@ export interface ILayout {
     frozenContent?: boolean;
 
     // Whether to show the toolbar
+    infoBar?: boolean;
+    formulaBar?: boolean;
     toolBar?: boolean;
+    sheetBar?: boolean;
+    countBar?: boolean;
 
     // Custom configuration toolbar,can be used in conjunction with showToolBar, showToolBarConfig has a higher priority
     toolBarConfig?: IShowToolBarConfig;
@@ -126,7 +130,11 @@ export const defaultLayout: ILayout = {
 
     frozenContent: true,
 
+    infoBar: true,
+    formulaBar: true,
     toolBar: true,
+    sheetBar: true,
+    countBar: true,
 
     toolBarConfig: {
         undoRedo: true, // Undo redo
@@ -652,9 +660,9 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                         <Sider style={{ display: layout.outerLeft ? 'block' : 'none' }}></Sider>
                         <Layout className={style.mainContent} style={{ position: 'relative' }}>
                             <Header style={{ display: layout.header ? 'block' : 'none' }}>
-                                <InfoBar></InfoBar>
-                                <ToolBar toolList={[]}></ToolBar>
-                                <FormulaBar></FormulaBar>
+                                {layout.infoBar && <InfoBar></InfoBar>}
+                                {layout.toolBar && <ToolBar toolList={[]}></ToolBar>}
+                                {layout.formulaBar && <FormulaBar></FormulaBar>}
                             </Header>
                             <Layout>
                                 <Sider
@@ -753,7 +761,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                 }}
                             >
                                 {/* <SheetBar></SheetBar> */}
-                                <CountBar></CountBar>
+                                {layout.countBar && <CountBar></CountBar>}
                             </Footer>
                         </Layout>
                         <Sider

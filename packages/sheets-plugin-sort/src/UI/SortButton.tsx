@@ -107,7 +107,7 @@ export class SortButton extends Component<IProps, IState> {
      * destory
      */
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
         // document.removeEventListener('click', this.SortCustomHide.bind(this), true);
     }
 

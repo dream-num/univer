@@ -63,7 +63,7 @@ export class GroupButton extends Component<IProps, IState> {
      * destory
      */
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver('onAfterChangeUILocaleObservable','core')?.remove(this._localeObserver);
+        // this._context.getObserverManager().getObserver('onAfterChangeUILocaleObservable','core')?.remove(this._localeObserver);
     }
     /**
      * set text by config setting and Locale message

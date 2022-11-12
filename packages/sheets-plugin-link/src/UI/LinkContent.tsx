@@ -152,7 +152,7 @@ export class LinkContent extends Component<LinkContentProps, LinkContentState> {
     }
 
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     render(props: LinkContentProps, state: LinkContentState) {

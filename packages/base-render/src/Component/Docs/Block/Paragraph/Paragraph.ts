@@ -1,6 +1,5 @@
 import {
     ColumnSeparatorType,
-    SheetContext,
     IBullet,
     IDrawing,
     IDrawings,
@@ -9,6 +8,7 @@ import {
     Nullable,
     ParagraphElementType,
     PositionedObjectLayoutType,
+    ContextBase,
 } from '@univer/core';
 import { dealWidthBullet, dealWidthInlineDrawing, dealWidthTextRun } from '.';
 import { createSkeletonPage, getLastNotFullColumnInfo, setColumnFullState } from '../..';
@@ -28,7 +28,7 @@ export function dealWidthParagraph(
     curPage: IDocumentSkeletonPage,
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
-    context?: SheetContext
+    context?: ContextBase
 ): IDocumentSkeletonPage[] {
     const {
         pageNumberStart,

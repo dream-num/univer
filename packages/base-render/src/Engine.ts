@@ -373,7 +373,7 @@ export class Engine {
                 deviceEvent.currentState = this.__pointer[PointerInput.Horizontal];
 
                 this.onInputChangedObservable.notifyObservers(deviceEvent);
-                console.log('pointerDownEvent_clientX');
+                // console.log('pointerDownEvent_clientX');
             }
             if (previousVertical !== evt.clientY) {
                 deviceEvent.inputIndex = PointerInput.Vertical;
@@ -381,14 +381,14 @@ export class Engine {
                 deviceEvent.currentState = this.__pointer[PointerInput.Vertical];
 
                 this.onInputChangedObservable.notifyObservers(deviceEvent);
-                console.log('pointerDownEvent_clientY');
+                // console.log('pointerDownEvent_clientY');
             }
 
             deviceEvent.inputIndex = evt.button + 2;
             deviceEvent.previousState = previousButton;
             deviceEvent.currentState = this.__pointer[evt.button + 2];
             this.onInputChangedObservable.notifyObservers(deviceEvent);
-            console.log('pointerDownEvent_2', previousHorizontal, evt.clientX, previousVertical, evt.clientY, this.__pointer);
+            // console.log('pointerDownEvent_2', previousHorizontal, evt.clientX, previousVertical, evt.clientY, this.__pointer);
         };
 
         const pointerUpEvent = (evt: any) => {

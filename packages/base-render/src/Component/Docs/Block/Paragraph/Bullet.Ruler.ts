@@ -1,7 +1,7 @@
-import { SheetContext, GlyphType, numberToListABC } from '@univer/core';
+import { ContextBase, GlyphType, numberToListABC } from '@univer/core';
 import { dealWidthCustomBulletOrderedSymbol } from '../../../../Custom/UseCustom';
 
-export function getBulletOrderedSymbol(startIndex: number, startNumber: number, glyphType: GlyphType | string, context?: SheetContext) {
+export function getBulletOrderedSymbol(startIndex: number, startNumber: number, glyphType: GlyphType | string, context?: ContextBase) {
     if (!(glyphType in GlyphType)) {
         return dealWidthCustomBulletOrderedSymbol(startIndex, startNumber, glyphType as string, context); // 插件定义更多类型的bullet
     }

@@ -1,6 +1,6 @@
-import { BooleanNumber, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univer/core';
+import { BooleanNumber, HorizontalAlign, Observable, VerticalAlign, WrapStrategy } from '@univer/core';
 import { DocComponent } from './DocComponent';
-import { LineType } from '../../Basics/IDocumentSkeletonCached';
+import { IDocumentSkeletonPage, LineType, PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';
 import { DocumentsSpanAndLineExtensionRegistry, IExtensionConfig } from '../Extension';
 import { DocumentSkeleton } from './DocSkeleton';
@@ -8,6 +8,19 @@ import { DOCS_EXTENSION_TYPE } from './DocExtension';
 import './Extensions';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../Basics/Draw';
 import { fixLineWidthByScale, getScale, degToRad } from '../../Basics/Tools';
+
+export interface IDocumentsPageLayoutConfig {
+    pageMarginLeft?: number;
+    pageMarginTop?: number;
+    pageLayoutType?: PageLayoutType;
+}
+
+export interface IPageRenderConfig {
+    page: IDocumentSkeletonPage;
+    pageLeft: number;
+    pageTop: number;
+    ctx: CanvasRenderingContext2D;
+}
 
 export class Documents extends DocComponent {
     private _translateX: number = 0;
@@ -18,10 +31,24 @@ export class Documents extends DocComponent {
 
     // private _textAngleRotateOffset: number = 0;
 
+    pageMarginLeft: number;
+
+    pageMarginTop: number;
+
+    pageLayoutType: PageLayoutType;
+
     isCalculateSkeleton = true;
 
-    constructor(oKey: string, documentSkeleton?: DocumentSkeleton, allowCache: boolean = true) {
+    onPageRenderObservable = new Observable<IPageRenderConfig>();
+
+    constructor(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsPageLayoutConfig, allowCache: boolean = true) {
         super(oKey, documentSkeleton, allowCache);
+
+        this.pageMarginLeft = config?.pageMarginLeft || 17;
+
+        this.pageMarginTop = config?.pageMarginTop || 14;
+
+        this.pageLayoutType = config?.pageLayoutType || PageLayoutType.VERTICAL;
 
         this._initialDefaultExtension();
 
@@ -127,6 +154,7 @@ export class Documents extends DocComponent {
                 marginRight: pagePaddingRight = 0,
                 width: pageWidth,
                 height: pageHeight,
+                pageNumber = 1,
                 renderConfig = {},
             } = page;
             const {
@@ -147,6 +175,25 @@ export class Documents extends DocComponent {
             const vertexAngle = degToRad(vertexAngleDeg);
 
             const finalAngle = vertexAngle - centerAngle;
+
+            let pageTop = 0;
+
+            let pageLeft = 0;
+
+            if (this.pageLayoutType === PageLayoutType.VERTICAL) {
+                pageTop = pageHeight * (pageNumber - 1) + this.pageMarginTop;
+            } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
+                pageLeft = pageWidth * (pageNumber - 1) + this.pageMarginLeft;
+            }
+
+            this._translate(pageLeft, pageTop);
+
+            this.onPageRenderObservable.notifyObservers({
+                page,
+                pageLeft,
+                pageTop,
+                ctx,
+            });
 
             this._startRotation(ctx, finalAngle);
 
@@ -339,5 +386,9 @@ export class Documents extends DocComponent {
 
             this._resetRotation(ctx, finalAngle);
         }
+    }
+
+    static create(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsPageLayoutConfig, allowCache: boolean = true) {
+        return new Documents(oKey, documentSkeleton, config, allowCache);
     }
 }

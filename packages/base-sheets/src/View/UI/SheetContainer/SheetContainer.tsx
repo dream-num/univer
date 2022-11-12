@@ -39,6 +39,7 @@ import { IShowToolBarConfig } from '../../../Model/ToolBarModel';
 import { ModalGroup } from '../ModalGroup/ModalGroup';
 import { SheetPlugin } from '../../../SheetPlugin';
 import { FormulaBar } from '../FormulaBar';
+import { SideGroup } from '../SideGroup/SideGroup';
 
 export interface ILayout {
     outerLeft?: boolean;
@@ -743,6 +744,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                     }}
                                 >
                                     {/* innerRight */}
+                                    <SideGroup></SideGroup>
                                 </Sider>
                             </Layout>
                             <Footer

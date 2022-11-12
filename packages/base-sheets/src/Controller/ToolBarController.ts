@@ -39,6 +39,8 @@ export class ToolBarController {
 
     private _toolList: IToolBarItemProps[];
 
+    private _moreText: Record<string, string>;
+
     private _lineColor: LineColor;
 
     Render: BaseComponentRender;
@@ -210,6 +212,7 @@ export class ToolBarController {
                 display: 1,
                 show: config.border,
                 tooltipLocale: 'toolbar.border.main',
+                className: styles.selectDoubleString,
                 onClick: (type) => {
                     // console.dir(type);
                     // console.dir(this._borderInfo);
@@ -273,6 +276,7 @@ export class ToolBarController {
             {
                 type: 3,
                 tooltipLocale: 'toolbar.horizontalAlignMode.main',
+                className: styles.selectDoubleString,
                 display: 1,
                 show: config.horizontalAlignMode,
                 onClick: (value: HorizontalAlign) => {
@@ -283,6 +287,7 @@ export class ToolBarController {
             {
                 type: 3,
                 tooltipLocale: 'toolbar.verticalAlignMode.main',
+                className: styles.selectDoubleString,
                 display: 1,
                 show: config.verticalAlignMode,
                 onClick: (value: VerticalAlign) => {
@@ -292,6 +297,7 @@ export class ToolBarController {
             },
             {
                 type: 3,
+                className: styles.selectDoubleString,
                 tooltipLocale: 'toolbar.textWrapMode.main',
                 display: 1,
                 show: config.textWrapMode,
@@ -302,6 +308,7 @@ export class ToolBarController {
             },
             {
                 type: 3,
+                className: styles.selectDoubleString,
                 tooltipLocale: 'toolbar.textRotateMode.main',
                 display: 1,
                 show: config.textRotateMode,
@@ -311,6 +318,8 @@ export class ToolBarController {
                 children: TEXT_ROTATE_CHILDREN,
             },
         ];
+
+        this._moreText = { more: 'toolbar.toolMore', tip: 'toolbar.toolMoreTip' };
 
         this._toolBarModel = new ToolBarModel();
         this._toolBarModel.config = config;
@@ -500,8 +509,13 @@ export class ToolBarController {
     }
 
     resetToolBarList() {
+        const locale = this._plugin.context.getLocale();
+
         const toolList = this.resetLocale(this._toolList);
-        this._toolBarComponent.setToolBar(toolList);
+        this._toolBarComponent.setToolBar(toolList, {
+            more: locale.get(this._moreText.more),
+            tip: locale.get(this._moreText.tip),
+        });
     }
 
     setRedo() {

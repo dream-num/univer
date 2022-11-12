@@ -30,12 +30,13 @@
     display: flex;
     align-items: center;
 
-    > div {
+    >div {
         height: 26px;
         display: inline-block;
         vertical-align: middle;
         margin: 0 3px;
         cursor: pointer;
+
         &.select-button:hover {
             background-color: #efefef;
         }
@@ -47,11 +48,19 @@
 
     .select-label-string {
         .drop-content {
-            > div {
+            >div {
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
                 width: 90px;
+            }
+        }
+    }
+
+    .select-double-string {
+        .drop-content {
+            >div {
+                // width: 26px;
             }
         }
     }

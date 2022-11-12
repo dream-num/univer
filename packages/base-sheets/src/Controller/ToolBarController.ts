@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet } from '@univer/base-component';
+import { BaseComponentRender } from '@univer/base-component';
 import { Tools, BorderType, BorderStyleTypes, HorizontalAlign, VerticalAlign, WrapStrategy, DEFAULT_STYLES } from '@univer/core';
 import { ColorPicker } from '@univer/style-universheet';
 import { SheetPlugin } from '../SheetPlugin';
@@ -436,52 +436,11 @@ export class ToolBarController {
     }
 
     initRegisterComponent() {
-        const component = this._plugin.context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         const pluginName = this._plugin.getPluginName();
-        this.Render = component.getComponentRender();
-        const registerIcon = {
-            ForwardIcon: this.Render.renderFunction('ForwardIcon'),
-            BackIcon: this.Render.renderFunction('BackIcon'),
-            BoldIcon: this.Render.renderFunction('BoldIcon'),
-            ItalicIcon: this.Render.renderFunction('ItalicIcon'),
-            DeleteLineIcon: this.Render.renderFunction('DeleteLineIcon'),
-            UnderLineIcon: this.Render.renderFunction('UnderLineIcon'),
-            TextColorIcon: this.Render.renderFunction('TextColorIcon'),
-            FillColorIcon: this.Render.renderFunction('FillColorIcon'),
-            MergeIcon: this.Render.renderFunction('MergeIcon'),
-            TopBorderIcon: this.Render.renderFunction('TopBorderIcon'),
-            BottomBorderIcon: this.Render.renderFunction('BottomBorderIcon'),
-            LeftBorderIcon: this.Render.renderFunction('LeftBorderIcon'),
-            RightBorderIcon: this.Render.renderFunction('RightBorderIcon'),
-            NoneBorderIcon: this.Render.renderFunction('NoneBorderIcon'),
-            FullBorderIcon: this.Render.renderFunction('FullBorderIcon'),
-            OuterBorderIcon: this.Render.renderFunction('OuterBorderIcon'),
-            InnerBorderIcon: this.Render.renderFunction('InnerBorderIcon'),
-            StripingBorderIcon: this.Render.renderFunction('StripingBorderIcon'),
-            VerticalBorderIcon: this.Render.renderFunction('VerticalBorderIcon'),
-            LeftAlignIcon: this.Render.renderFunction('LeftAlignIcon'),
-            CenterAlignIcon: this.Render.renderFunction('CenterAlignIcon'),
-            RightAlignIcon: this.Render.renderFunction('RightAlignIcon'),
-            TopVerticalIcon: this.Render.renderFunction('TopVerticalIcon'),
-            CenterVerticalIcon: this.Render.renderFunction('CenterVerticalIcon'),
-            BottomVerticalIcon: this.Render.renderFunction('BottomVerticalIcon'),
-            OverflowIcon: this.Render.renderFunction('OverflowIcon'),
-            BrIcon: this.Render.renderFunction('BrIcon'),
-            CutIcon: this.Render.renderFunction('CutIcon'),
-            TextRotateIcon: this.Render.renderFunction('TextRotateIcon'),
-            TextRotateAngleUpIcon: this.Render.renderFunction('TextRotateAngleUpIcon'),
-            TextRotateAngleDownIcon: this.Render.renderFunction('TextRotateAngleDownIcon'),
-            TextRotateVerticalIcon: this.Render.renderFunction('TextRotateVerticalIcon'),
-            TextRotateRotationUpIcon: this.Render.renderFunction('TextRotateRotationUpIcon'),
-            TextRotateRotationDownIcon: this.Render.renderFunction('TextRotateRotationDownIcon'),
-        };
 
         // 注册自定义组件
         this._plugin.registerComponent(pluginName + LineColor.name, LineColor);
         this._plugin.registerComponent(pluginName + ColorPicker.name, ColorPicker);
-        for (let k in registerIcon) {
-            this._plugin.registerComponent(k, registerIcon[k]);
-        }
     }
 
     resetLocale(toolList: any[]) {
@@ -642,6 +601,8 @@ export class ToolBarController {
         const index = this._toolList.findIndex((item) => item.name === config.name);
         if (index > -1) return;
         this._toolList.push(config);
-        this.resetToolBarList();
+        if (this._toolBarComponent) {
+            this.resetToolBarList();
+        }
     }
 }

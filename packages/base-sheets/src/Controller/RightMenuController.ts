@@ -1,6 +1,6 @@
 import { IMouseEvent, IPointerEvent } from '@univer/base-render';
 import { PLUGIN_NAMES } from '@univer/core';
-import { RightMenuModel, RightMenuProps } from '../Model/RightMenuModel';
+import { RightMenuConfig, RightMenuModel, RightMenuProps } from '../Model/RightMenuModel';
 import { SheetPlugin } from '../SheetPlugin';
 import { RightMenu } from '../View/UI/RightMenu';
 import { SelectionControl } from './Selection/SelectionController';
@@ -29,13 +29,14 @@ export class RightMenuController {
             {
                 locale: ['rightClick.insert', 'rightClick.row'],
                 onClick: this.insertRow,
+                hide: RightMenuConfig.hideInsertRow,
             },
             {
                 locale: ['rightClick.insert', 'rightClick.column'],
                 onClick: this.insertColumn,
+                hide: RightMenuConfig.hideInsertColumn,
             },
             {
-                hide: true,
                 customLabel: {
                     name: RightMenuInput.name,
                     props: {
@@ -43,9 +44,9 @@ export class RightMenuController {
                         suffixLocale: 'rightClick.row',
                     },
                 },
+                hide: RightMenuConfig.hideAddRowTop,
             },
             {
-                hide: true,
                 customLabel: {
                     name: RightMenuInput.name,
                     props: {
@@ -53,9 +54,9 @@ export class RightMenuController {
                         suffixLocale: 'rightClick.row',
                     },
                 },
+                hide: RightMenuConfig.hideAddRowBottom,
             },
             {
-                hide: true,
                 customLabel: {
                     name: RightMenuInput.name,
                     props: {
@@ -63,9 +64,9 @@ export class RightMenuController {
                         suffixLocale: 'rightClick.column',
                     },
                 },
+                hide: RightMenuConfig.hideAddColumnLeft,
             },
             {
-                hide: true,
                 customLabel: {
                     name: RightMenuInput.name,
                     props: {
@@ -73,25 +74,27 @@ export class RightMenuController {
                         suffixLocale: 'rightClick.column',
                     },
                 },
+                hide: RightMenuConfig.hideAddColumnRight,
             },
             {
                 locale: ['rightClick.deleteSelected', 'rightClick.row'],
                 onClick: this.deleteRow,
+                hide: RightMenuConfig.hideDeleteRow,
             },
             {
                 locale: ['rightClick.deleteSelected', 'rightClick.column'],
                 onClick: this.deleteColumn,
+                hide: RightMenuConfig.hideDeleteColumn,
             },
             {
-                hide: true,
                 locale: ['rightClick.hideSelected', 'rightClick.row'],
+                hide: RightMenuConfig.hideHideRow,
             },
             {
-                hide: true,
                 locale: ['rightClick.showHide', 'rightClick.row'],
+                hide: RightMenuConfig.hideShowRow,
             },
             {
-                hide: true,
                 customLabel: {
                     name: RightMenuInput.name,
                     props: {
@@ -99,17 +102,17 @@ export class RightMenuController {
                         suffix: 'px',
                     },
                 },
+                hide: RightMenuConfig.hideRowHeight,
             },
             {
-                hide: true,
                 locale: ['rightClick.hideSelected', 'rightClick.column'],
+                hide: RightMenuConfig.hideHideColumn,
             },
             {
-                hide: true,
                 locale: ['rightClick.showHide', 'rightClick.column'],
+                hide: RightMenuConfig.hideShowColumn,
             },
             {
-                hide: true,
                 customLabel: {
                     name: RightMenuInput.name,
                     props: {
@@ -117,8 +120,10 @@ export class RightMenuController {
                         suffix: 'px',
                     },
                 },
+                hide: RightMenuConfig.hideColumnWidth,
             },
             {
+                hide: RightMenuConfig.hideDeleteCell,
                 customLabel: {
                     name: RightMenuItem.name,
                     props: {
@@ -143,22 +148,30 @@ export class RightMenuController {
                 locale: ['rightClick.clearContent'],
                 onClick: (...arg: any) => this.clear(...arg),
                 border: true,
+                hide: RightMenuConfig.hideClearContent,
             },
             {
+                hide: RightMenuConfig.hideMatrix,
                 customLabel: {
                     name: RightMenuItem.name,
                     props: {
                         locale: 'rightClick.matrix',
                     },
                 },
-                hide: true,
                 children: [
                     {
                         customLabel: {
                             name: RightMenuButton.name,
                             props: {
-                                prefixLocale: 'rightClick.flip',
-                                buttonsLocale: ['rightClick.upAndDown', 'rightClick.leftAndRight'],
+                                locale: 'rightClick.flip',
+                                children: [
+                                    {
+                                        locale: 'rightClick.upAndDown',
+                                    },
+                                    {
+                                        locale: 'rightClick.leftAndRight',
+                                    },
+                                ],
                             },
                         },
                     },
@@ -166,8 +179,15 @@ export class RightMenuController {
                         customLabel: {
                             name: RightMenuButton.name,
                             props: {
-                                prefixLocale: 'rightClick.flip',
-                                buttonsLocale: ['rightClick.clockwise', 'rightClick.counterclockwise'],
+                                locale: 'rightClick.flip',
+                                children: [
+                                    {
+                                        locale: 'rightClick.clockwise',
+                                    },
+                                    {
+                                        locale: 'rightClick.counterclockwise',
+                                    },
+                                ],
                             },
                         },
                     },
@@ -178,7 +198,7 @@ export class RightMenuController {
                         customLabel: {
                             name: RightMenuSelect.name,
                             props: {
-                                prefixLocale: 'rightClick.matrixCalculation',
+                                locale: 'rightClick.matrixCalculation',
                                 options: [
                                     {
                                         locale: 'rightClick.plus',
@@ -209,8 +229,15 @@ export class RightMenuController {
                         customLabel: {
                             name: RightMenuButton.name,
                             props: {
-                                prefixLocale: 'rightClick.delete0',
-                                buttonsLocale: ['rightClick.byRow', 'rightClick.byCol'],
+                                locale: 'rightClick.delete0',
+                                children: [
+                                    {
+                                        locale: 'rightClick.byRow',
+                                    },
+                                    {
+                                        locale: 'rightClick.byCol',
+                                    },
+                                ],
                             },
                         },
                     },
@@ -218,41 +245,48 @@ export class RightMenuController {
                         customLabel: {
                             name: RightMenuButton.name,
                             props: {
-                                prefixLocale: 'rightClick.removeDuplicate',
-                                buttonsLocale: ['rightClick.byRow', 'rightClick.byCol'],
+                                locale: 'rightClick.removeDuplicate',
+                                children: [
+                                    {
+                                        locale: 'rightClick.byRow',
+                                    },
+                                    {
+                                        locale: 'rightClick.byCol',
+                                    },
+                                ],
                             },
                         },
                     },
                 ],
             },
-            {
-                locale: ['rightClick.sortSelection'],
-                hide: true,
-            },
-            {
-                locale: ['rightClick.filterSelection'],
-                hide: true,
-            },
-            {
-                locale: ['rightClick.chartGeneration'],
-                hide: true,
-            },
-            {
-                locale: ['toolbar.insertImage'],
-                hide: true,
-            },
-            {
-                locale: ['toolbar.insertLink'],
-                hide: true,
-            },
-            {
-                locale: ['toolbar.dataValidation'],
-                hide: true,
-            },
-            {
-                locale: ['toolbar.cellFormat'],
-                hide: true,
-            },
+            // {
+            //     locale: ['rightClick.sortSelection'],
+            //     hide: true,
+            // },
+            // {
+            //     locale: ['rightClick.filterSelection'],
+            //     hide: true,
+            // },
+            // {
+            //     locale: ['rightClick.chartGeneration'],
+            //     hide: true,
+            // },
+            // {
+            //     locale: ['toolbar.insertImage'],
+            //     hide: true,
+            // },
+            // {
+            //     locale: ['toolbar.insertLink'],
+            //     hide: true,
+            // },
+            // {
+            //     locale: ['toolbar.dataValidation'],
+            //     hide: true,
+            // },
+            // {
+            //     locale: ['toolbar.cellFormat'],
+            //     hide: true,
+            // },
         ];
 
         this._rightMenuModel = new RightMenuModel();
@@ -266,11 +300,11 @@ export class RightMenuController {
         manager.requiredObserver<RightMenu>('onRightMenuDidMountObservable', PLUGIN_NAMES.SPREADSHEET).add((component) => {
             this._RightMenu = component;
 
-            this._RightMenu.setMenuList(this.resetMenuList(this._menuList));
+            this.resetMenuList(this.resetMenuLabel(this._menuList));
         });
 
         context.getContextObserver('onAfterChangeUILocaleObservable').add(() => {
-            this._RightMenu.setMenuList(this.resetMenuList(this._menuList));
+            this.resetMenuList(this.resetMenuLabel(this._menuList));
         });
 
         context.getContextObserver('onSheetRenderDidMountObservable').add(() => {
@@ -287,7 +321,7 @@ export class RightMenuController {
             //     const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
             //     if (evt.button === 2) {
             //         spreadSheet.oncontextmenu = () => false;
-            //         this.resetMenuList(this._menuList, 'row');
+            //         this.resetMenuLabel(this._menuList, 'row');
             //         this._RightMenu.handleContextMenu(evt);
             //     }
             // });
@@ -295,7 +329,7 @@ export class RightMenuController {
             //     const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
             //     if (evt.button === 2) {
             //         spreadSheet.oncontextmenu = () => false;
-            //         this.resetMenuList(this._menuList, 'column');
+            //         this.resetMenuLabel(this._menuList, 'column');
             //         this._RightMenu.handleContextMenu(evt);
             //     }
             // });
@@ -340,26 +374,34 @@ export class RightMenuController {
             } else if (k.endsWith('Locale')) {
                 const index = k.indexOf('Locale');
                 obj[k.slice(0, index)] = this.resetLabel(obj[k]);
-            } else if (Object.prototype.toString.call(obj[k]) === '[object Object]' && !obj[k].$$typeof) {
-                this.findLocale(obj[k]);
+            } else if (!obj[k].$$typeof) {
+                if (Object.prototype.toString.call(obj[k]) === '[object Object]') {
+                    this.findLocale(obj[k]);
+                } else if (Object.prototype.toString.call(obj[k]) === '[object Array]') {
+                    this.resetMenuLabel(obj[k]);
+                }
             }
         }
 
         return obj;
     }
 
-    resetMenuList(menuList: RightMenuProps[]) {
+    resetMenuLabel(menuList: RightMenuProps[]) {
         for (let i = 0; i < menuList.length; i++) {
             let item = menuList[i];
 
             item = this.findLocale(item);
 
             if (item.children) {
-                item.children = this.resetMenuList(item.children);
+                item.children = this.resetMenuLabel(item.children);
             }
         }
 
         return menuList;
+    }
+
+    resetMenuList(menuList: RightMenuProps[]) {
+        this._RightMenu?.setMenuList(menuList);
     }
 
     private _getSelections() {
@@ -377,8 +419,6 @@ export class RightMenuController {
     }
 
     insertRow = (...arg: any) => {
-        arg[1].ref.hideSelect();
-
         const selections = this._getSelections();
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
@@ -388,8 +428,6 @@ export class RightMenuController {
     };
 
     deleteRow = (...arg: any) => {
-        arg[1].ref.hideSelect();
-
         const selections = this._getSelections();
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
@@ -398,8 +436,6 @@ export class RightMenuController {
     };
 
     insertColumn = (...arg: any) => {
-        arg[1].ref.hideSelect();
-
         const selections = this._getSelections();
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
@@ -408,8 +444,6 @@ export class RightMenuController {
     };
 
     deleteColumn = (...arg: any) => {
-        arg[1].ref.hideSelect();
-
         const selections = this._getSelections();
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
@@ -418,8 +452,6 @@ export class RightMenuController {
     };
 
     clear = (...arg: any) => {
-        arg[1].ref.hideSelect();
-
         const selections = this._getSelections();
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
@@ -428,9 +460,6 @@ export class RightMenuController {
     };
 
     deleteCellLeft = (...arg: any) => {
-        arg[1].ref.hideSelect();
-        arg[1].ref.getParent().hideSelect();
-
         const selections = this._getSelections();
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
@@ -439,9 +468,6 @@ export class RightMenuController {
     };
 
     deleteCellTop = (...arg: any) => {
-        arg[1].ref.hideSelect();
-        arg[1].ref.getParent().hideSelect();
-
         const selections = this._getSelections();
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
@@ -455,6 +481,6 @@ export class RightMenuController {
         } else {
             this._menuList.push(item);
         }
-        this._RightMenu.setMenuList(this.resetMenuList(this._menuList));
+        this.resetMenuList(this.resetMenuLabel(this._menuList));
     };
 }

@@ -1,6 +1,46 @@
 import { BaseMenuItem } from '@univer/base-component';
 import { BaseSelectChildrenProps } from '../View/UI/Common/Select/Select';
 
+interface IHideRightMenuConfig {
+    hideInsertRow?: boolean;
+    hideInsertColumn?: boolean;
+    hideAddRowTop?: boolean;
+    hideAddRowBottom?: boolean;
+    hideAddColumnLeft?: boolean;
+    hideAddColumnRight?: boolean;
+    hideDeleteRow?: boolean;
+    hideDeleteColumn?: boolean;
+    hideHideRow?: boolean;
+    hideShowRow?: boolean;
+    hideRowHeight?: boolean;
+    hideHideColumn?: boolean;
+    hideShowColumn?: boolean;
+    hideColumnWidth?: boolean;
+    hideDeleteCell?: boolean;
+    hideClearContent?: boolean;
+    hideMatrix?: boolean;
+}
+
+export const RightMenuConfig: IHideRightMenuConfig = {
+    hideInsertRow: false,
+    hideInsertColumn: false,
+    hideAddRowTop: true,
+    hideAddRowBottom: true,
+    hideAddColumnLeft: true,
+    hideAddColumnRight: true,
+    hideDeleteRow: false,
+    hideDeleteColumn: false,
+    hideHideRow: true,
+    hideShowRow: true,
+    hideRowHeight: true,
+    hideHideColumn: true,
+    hideShowColumn: true,
+    hideColumnWidth: true,
+    hideDeleteCell: false,
+    hideClearContent: false,
+    hideMatrix: true,
+};
+
 export interface CustomLabelOptions extends BaseSelectChildrenProps {
     locale?: string;
 }
@@ -10,11 +50,10 @@ interface CustomLabelProps {
     suffix?: string;
     prefixLocale?: string[] | string;
     suffixLocale?: string[] | string;
-    buttonsLocale?: string[];
-    buttons?: string[];
     options?: CustomLabelOptions[];
     locale?: string;
     label?: string;
+    children?: CustomLabelProps[];
 }
 
 export interface RightMenuProps extends BaseMenuItem {
@@ -33,8 +72,6 @@ export interface IRightMenu {
     copyAs: boolean;
     paste: boolean;
 }
-
-export interface IConfig {}
 
 export class RightMenuModel implements IRightMenu {
     private _menuList: RightMenuProps[];

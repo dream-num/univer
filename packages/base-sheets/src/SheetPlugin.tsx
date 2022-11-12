@@ -145,6 +145,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         };
 
         this._componentList = new Map();
+
+        this._sheetContainerController = new SheetContainerController(this);
         this._modalGroupController = new ModalGroupController(this);
 
         this._rightMenuControl = new RightMenuController(this);
@@ -154,7 +156,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         this._cellEditorControl = new CellEditorController(this);
         this._antLineController = new AntLineControl(this);
         this._countBarController = new CountBarController(this);
-        this._sheetContainerController = new SheetContainerController(this);
 
         // render sheet container
         render(<SheetContainer config={config} />, sheetContainer);

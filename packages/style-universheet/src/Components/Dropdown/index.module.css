@@ -18,4 +18,6 @@
   height: 100%;
   margin-left: 5px;
   border-left: 1px solid #efefef;
+  display: flex;
+  align-items: center;
 }

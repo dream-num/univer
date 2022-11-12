@@ -285,6 +285,7 @@ export default {
     rightClick: {
         copy: '复制',
         copyAs: '复制为',
+        cut: '剪切',
         paste: '粘贴',
         insert: '插入',
         delete: '删除',

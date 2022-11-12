@@ -166,6 +166,7 @@ export class ToolBar extends Component<IProps, IState> {
             }
 
             if (item.customSuffix) {
+                console.dir(item);
                 const Suffix = plugin?.getRegisterComponent(item.customSuffix.name);
                 if (Suffix) {
                     const props = item.customSuffix.props ?? {};
@@ -219,29 +220,35 @@ export class ToolBar extends Component<IProps, IState> {
 
         return list.map((item) => {
             if (item.toolbarType) {
-                return (
-                    <Tooltip title={item.tooltip} placement={'bottom'}>
-                        <TextButton label={item.label} onClick={item.onClick}></TextButton>
-                    </Tooltip>
-                );
+                if (item.show) {
+                    return (
+                        <Tooltip title={item.tooltip} placement={'bottom'}>
+                            <TextButton label={item.label} onClick={item.onClick}></TextButton>
+                        </Tooltip>
+                    );
+                }
+            } else {
+                if (item.show) {
+                    return (
+                        <Tooltip title={item.tooltip} placement={'bottom'}>
+                            <Select
+                                type={item.type}
+                                display={item.display}
+                                children={item.children}
+                                customLabel={item.customLabel}
+                                customSuffix={item.customSuffix}
+                                label={item.label}
+                                onClick={item.onClick}
+                                onKeyUp={item.onKeyUp}
+                                defaultColor={item.defaultColor}
+                                hideSelectedIcon={item.hideSelectedIcon}
+                                className={item.className}
+                            ></Select>
+                        </Tooltip>
+                    );
+                }
             }
-            return (
-                <Tooltip title={item.tooltip} placement={'bottom'}>
-                    <Select
-                        type={item.type}
-                        display={item.display}
-                        children={item.children}
-                        customLabel={item.customLabel}
-                        customSuffix={item.customSuffix}
-                        label={item.label}
-                        onClick={item.onClick}
-                        onKeyUp={item.onKeyUp}
-                        defaultColor={item.defaultColor}
-                        hideSelectedIcon={item.hideSelectedIcon}
-                        className={item.className}
-                    ></Select>
-                </Tooltip>
-            );
+            return null;
         });
     }
 

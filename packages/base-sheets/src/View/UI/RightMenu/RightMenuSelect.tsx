@@ -2,7 +2,7 @@ import { BaseComponentRender, BaseComponentSheet, Component } from '@univer/base
 import { CustomLabelOptions } from '../../../Model';
 
 interface IProps {
-    prefix: string;
+    label: string;
     options: CustomLabelOptions[];
 }
 
@@ -15,12 +15,12 @@ export class RightMenuSelect extends Component<IProps> {
     }
 
     render() {
-        const { prefix, options } = this.props;
+        const { label, options } = this.props;
         const Input = this._render.renderFunction('Input');
 
         return (
             <div>
-                <div>{prefix}</div>
+                <div>{label}</div>
                 <select>
                     {options.map((item) => (
                         <option>{item.label}</option>

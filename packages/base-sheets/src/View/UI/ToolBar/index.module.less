@@ -60,7 +60,7 @@
     .select-double-string {
         .drop-content {
             >div {
-                // width: 26px;
+                width: 24px;
             }
         }
     }
@@ -87,12 +87,17 @@
         padding: 0;
         height: 26px;
     }
+
+    span[role='img'].univericon-nextIcon {
+        font-size: 12px;
+    }
 }
 
 .more-button {
-    height: 35px;
-    margin: 5px;
-    display: none;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
     .button();
 
     &.more-show {
@@ -101,9 +106,9 @@
 }
 
 .more-tool {
-    height: 40px;
-    display: none;
-    align-items: center;
+    // height: 40px;
+    // display: none;
+    // align-items: center;
     padding: 0 10px;
     background-color: var(--bg);
     box-shadow: var(--box-shadow-base);
@@ -118,15 +123,11 @@
 
     button {
         .button();
-        font-size: 24px;
+        // font-size: 24px;
     }
 }
 
 .button() {
     padding: 0px;
     line-height: 1;
-}
-
-span[role='img'].univericon-nextIcon {
-    font-size: 12px;
 }

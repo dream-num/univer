@@ -44,6 +44,9 @@
   white-space: nowrap;
   width: 90px;
 }
+.toolbar .select-double-string .drop-content > div {
+  width: 24px;
+}
 .toolbar .select-color-picker-parent .select-item-content {
   width: 100%;
 }
@@ -60,10 +63,14 @@
   padding: 0;
   height: 26px;
 }
+.toolbar span[role='img'].univericon-nextIcon {
+  font-size: 12px;
+}
 .more-button {
-  height: 35px;
-  margin: 5px;
-  display: none;
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
   padding: 0px;
   line-height: 1;
 }
@@ -71,9 +78,6 @@
   display: block;
 }
 .more-tool {
-  height: 40px;
-  display: none;
-  align-items: center;
   padding: 0 10px;
   background-color: var(--bg);
   box-shadow: var(--box-shadow-base);
@@ -88,8 +92,4 @@
 .more-tool button {
   padding: 0px;
   line-height: 1;
-  font-size: 24px;
-}
-span[role='img'].univericon-nextIcon {
-  font-size: 12px;
 }

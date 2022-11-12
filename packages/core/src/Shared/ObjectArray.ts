@@ -19,7 +19,7 @@ export type UnaryOperatorFunction<T> = (value: T) => T;
 /**
  * Object Array Primitive Type
  */
-export type ObjectArrayPrimitiveType<T> = { [key: number]: T };
+export type ObjectArrayPrimitiveType<T> = { [key: number]: T; length?: number };
 
 /**
  * Object Array Type
@@ -36,6 +36,9 @@ const define = <T>(value?: T): value is T => value !== undefined && value !== nu
 export class ObjectArray<T> {
     static getMaxLength<T>(array: Nullable<ObjectArrayPrimitiveType<T>>) {
         if (array) {
+            if (array.length) {
+                return array.length;
+            }
             const keys: unknown[] = Object.keys(array);
             if (keys.length) {
                 return Math.max(...(keys as number[])) + 1;
@@ -186,7 +189,7 @@ export class ObjectArray<T> {
     }
 
     toJSON(): ObjectArrayPrimitiveType<T> {
-        return this._array;
+        return { ...this._array, length: this._length };
     }
 
     toArray(): T[] {

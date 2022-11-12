@@ -18,8 +18,16 @@ export class SheetContainerController {
 
             // Only the currently active worksheet needs to be refreshed
             if (worksheet.getConfig().status === BooleanNumber.TRUE) {
-                this._plugin.getCanvasView().updateToSheet(worksheet);
-                this._plugin.getMainComponent().makeDirty(true);
+                try {
+                    const canvasView = this._plugin?.getCanvasView()
+                    if (canvasView) {
+                        canvasView.updateToSheet(worksheet);
+                    }
+                    this._plugin?.getMainComponent().makeDirty(true);
+                } catch (error) {
+                    console.info(error)
+                }
+
             }
         });
     }

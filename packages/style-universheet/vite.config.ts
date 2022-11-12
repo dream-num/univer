@@ -17,6 +17,7 @@ export default defineConfig({
             fileName: 'univer-style-univer',
         },
         outDir: './lib',
+        sourcemap: true
     },
     define: {
         pkgJson: { name, version },

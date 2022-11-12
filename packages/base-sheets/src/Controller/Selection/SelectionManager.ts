@@ -307,7 +307,7 @@ export class SelectionManager {
         this._selectionModels.set(worksheetId, models);
     }
 
-    recreateControlsByRangeData() {}
+    recreateControlsByRangeData() { }
 
     /**
      * Move the selection according to different directions, usually used for the shortcut key operation of ↑ ↓ ← →
@@ -621,25 +621,25 @@ export class SelectionManager {
 
                 const cellInfo = cell
                     ? {
-                          row: cell.row,
-                          column: cell.column,
-                          isMerged: false,
-                          isMergedMainCell: false,
-                          startY: 0,
-                          endY: 0,
-                          startX: 0,
-                          endX: 0,
-                          mergeInfo: {
-                              startColumn,
-                              startRow,
-                              endColumn,
-                              endRow,
-                              startY: 0,
-                              endY: 0,
-                              startX: 0,
-                              endX: 0,
-                          },
-                      }
+                        row: cell.row,
+                        column: cell.column,
+                        isMerged: false,
+                        isMergedMainCell: false,
+                        startY: 0,
+                        endY: 0,
+                        startX: 0,
+                        endX: 0,
+                        mergeInfo: {
+                            startColumn,
+                            startRow,
+                            endColumn,
+                            endRow,
+                            startY: 0,
+                            endY: 0,
+                            startX: 0,
+                            endX: 0,
+                        },
+                    }
                     : null;
 
                 // Only update data, not render
@@ -724,6 +724,7 @@ export class SelectionManager {
             ?.getContext()
             .getContextObserver('onSheetRenderDidMountObservable')
             .add(() => {
+                console.log('onSheetRenderDidMountObservable===id==', this.getContext().getWorkBook().getUnitId())
                 this.renderCurrentControls();
             });
     }

@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
 export * from '../index';
-declare module '@univer/univer-vanilla-ts' {}
+declare module 'univer-vanilla-ts' {}
 
 
 // use css module

@@ -137,7 +137,7 @@ export class FormatModal extends Component<BaseFormatModalProps, FormatModalStat
     }
 
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     render(props: BaseFormatModalProps, state: FormatModalState) {

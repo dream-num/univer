@@ -12,10 +12,11 @@ export class ActionExtensionManager {
      * @param command
      */
     handle(actions: IActionData[]) {
+        const actionExtensionFactoryList = ActionExtensionManager?.register?.actionExtensionFactoryList
+        if (!actionExtensionFactoryList) return
         // get the sorted list
         // get the dynamically added list
-        this._actionExtensionFactoryList =
-            ActionExtensionManager.register.actionExtensionFactoryList;
+        this._actionExtensionFactoryList = actionExtensionFactoryList;
         this._checkExtension(actions);
     }
 

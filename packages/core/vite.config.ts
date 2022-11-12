@@ -4,7 +4,6 @@ import path from 'path';
 import createExternal from 'vite-plugin-external';
 
 const resolve = (url: string) => path.resolve(__dirname, url);
-console.log(1111111111);
 
 export default defineConfig({
     build: {
@@ -15,6 +14,7 @@ export default defineConfig({
             fileName: 'univer-core',
         },
         outDir: './lib',
+        sourcemap: true
     },
     define: {
         pkgJson: { name, version },

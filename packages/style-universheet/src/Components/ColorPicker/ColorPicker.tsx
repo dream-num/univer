@@ -49,23 +49,22 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
     }
 
     componentWillMount() {
-        this.setLocale();
-        this._localeObserver = this._context
-            .getObserverManager()
-            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
-            ?.add(() => {
-                this.setLocale();
-            });
+        // // this.setLocale();
+        // this._localeObserver = this._context
+        //     .getObserverManager()
+        //     .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'core')
+        //     ?.add(() => {
+        //         // this.setLocale();
+        //     });
     }
 
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'core')?.remove(this._localeObserver);
     }
 
     setLocale() {
         const locale = this.context.locale;
-        const changeLocale = locale.get('colorPicker');
-
+        const changeLocale = locale.get('toolbar');
         this.setState({
             locale: changeLocale,
         });

@@ -422,6 +422,7 @@ export class OtherViewTest extends BaseView {
             strokeWidth: 1,
             stroke: getColor([102, 111, 99], 1),
             fill: getColor([102, 255, 99], 1),
+            isTransformer: true,
         });
 
         const pathRect = path.getRect();
@@ -437,6 +438,7 @@ export class OtherViewTest extends BaseView {
             top: 500,
             left: 800,
             zIndex: 13,
+            isTransformer: true,
         });
 
         const circle1 = new Circle('circle1', {
@@ -445,6 +447,7 @@ export class OtherViewTest extends BaseView {
             radius: 100,
             fill: 'rgba(255,111,99, 0.8)',
             zIndex: 14,
+            isTransformer: true,
         });
 
         const richText = new RichText(this.getContext(), 'richText1', {
@@ -453,6 +456,7 @@ export class OtherViewTest extends BaseView {
             zIndex: 20,
             left: 100,
             top: 400,
+            isTransformer: true,
         });
 
         console.log('insert path test', mainScene);

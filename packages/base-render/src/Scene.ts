@@ -23,6 +23,8 @@ import { InputManager } from './Scene.inputManager';
 
 import { SceneViewer } from './SceneViewer';
 
+import { Transformer, ITransformerConfig } from './Scene.Transformer';
+
 export class Scene {
     // private _ObjectsForward = new Array<BaseObject>();
 
@@ -51,6 +53,15 @@ export class Scene {
     private _evented = true;
 
     private _cursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
+
+    /**
+     * Transformer constructor.  Transformer is a special type of group that allow you transform
+     * primitives and shapes. Transforming tool is not changing `width` and `height` properties of nodes
+     * when you resize them. Instead it changes `scaleX` and `scaleY` properties.
+     */
+    private _transformer: Nullable<Transformer>;
+
+    private _transformerOpenState = false;
 
     /** @hidden */
     private _inputManager: InputManager;
@@ -521,6 +532,30 @@ export class Scene {
         this._evented = false;
     }
 
+    get evented() {
+        return this._evented;
+    }
+
+    openTransformer(config?: ITransformerConfig) {
+        if (!this._transformer) {
+            this._transformer = new Transformer(this, config);
+        }
+        this._transformerOpenState = true;
+    }
+
+    closeTransformer() {
+        this._transformer = null;
+        this._transformerOpenState = false;
+    }
+
+    applyTransformer(o: BaseObject) {
+        if (!this._transformerOpenState) {
+            return;
+        }
+
+        this._transformer?.attachTo(o);
+    }
+
     // Determine the only object selected
     pick(coord: Vector2): Nullable<BaseObject | Scene> {
         const pickedViewport = this._viewports.find((vp) => vp.isHit(coord));
@@ -650,59 +685,78 @@ export class Scene {
     triggerPointerUp(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerUpObserver.notifyObservers(evt)?.stopPropagation && this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
             (this._parent as SceneViewer)?.triggerPointerUp(evt);
+            return false;
         }
+        return true;
     }
 
     triggerMouseWheel(evt: IWheelEvent) {
         if (!this.onMouseWheelObserver.notifyObservers(evt)?.stopPropagation && this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
             (this._parent as SceneViewer)?.triggerMouseWheel(evt);
+            return false;
         }
+        return true;
     }
 
     triggerPointerMove(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerMoveObserver.notifyObservers(evt)?.stopPropagation && this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
             (this._parent as SceneViewer)?.triggerPointerMove(evt);
+            return false;
         }
+        return true;
     }
 
     triggerDblclick(evt: IPointerEvent | IMouseEvent) {
         if (!this.onDblclickObserver.notifyObservers(evt)?.stopPropagation && this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
             (this._parent as SceneViewer)?.triggerDblclick(evt);
+            return false;
         }
+        return true;
     }
 
     triggerPointerDown(evt: IPointerEvent | IMouseEvent) {
+        console.log(this, 'scene');
         if (!this.onPointerDownObserver.notifyObservers(evt)?.stopPropagation && this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
             (this._parent as SceneViewer)?.triggerPointerDown(evt);
+            return false;
         }
+        return true;
     }
 
     triggerPointerOut(evt: IPointerEvent | IMouseEvent) {
         // this.onPointerOutObserver.notifyObservers(evt);
         if (this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
             (this._parent as SceneViewer)?.triggerPointerOut(evt);
+            return false;
         }
+        return true;
     }
 
     triggerPointerLeave(evt: IPointerEvent | IMouseEvent) {
         // this.onPointerLeaveObserver.notifyObservers(evt);
         if (this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
             (this._parent as SceneViewer)?.triggerPointerLeave(evt);
+            return false;
         }
+        return true;
     }
 
     triggerPointerOver(evt: IPointerEvent | IMouseEvent) {
         // this.onPointerOverObserver.notifyObservers(evt);
         if (this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
             (this._parent as SceneViewer)?.triggerPointerOver(evt);
+            return false;
         }
+        return true;
     }
 
     triggerPointerEnter(evt: IPointerEvent | IMouseEvent) {
         // this.onPointerEnterObserver.notifyObservers(evt);
         if (this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
             (this._parent as SceneViewer)?.triggerPointerEnter(evt);
+            return false;
         }
+        return true;
     }
 
     onTransformChangeObservable = new Observable<ITransformChangeState>();

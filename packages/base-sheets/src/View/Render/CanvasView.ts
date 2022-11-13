@@ -31,6 +31,7 @@ export class CanvasView {
             width: 1200,
             height: 1000,
         });
+        scene.openTransformer();
         this._scene = scene;
         const viewMain = new Viewport(CANVAS_VIEW_KEY.VIEW_MAIN, scene, {
             left: rowTitle.width,
@@ -128,7 +129,7 @@ export class CanvasView {
 
         engine.runRenderLoop(() => {
             scene.render();
-            const app = document.getElementById('app')
+            const app = document.getElementById('app');
             if (app) {
                 app.innerText = `fps:${Math.round(engine.getFps()).toString()}`;
             }

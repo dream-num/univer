@@ -60,6 +60,7 @@ export class Layer {
         }
         this._objects.push(o);
         this.scene.setObjectBehavior(o);
+        this.scene.applyTransformer(o);
 
         return this;
     }

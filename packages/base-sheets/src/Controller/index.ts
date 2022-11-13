@@ -4,7 +4,6 @@ export * from './CellEditorController';
 export * from './CountBarController';
 export * from './InfoBarController';
 export * from './RightMenuController';
-export * from './ScrollTimer';
 export * from './Selection/index';
 export * from './SheetBarController';
 export * from './SheetContainerController';

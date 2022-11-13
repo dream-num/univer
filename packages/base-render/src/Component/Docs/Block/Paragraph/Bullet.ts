@@ -1,6 +1,9 @@
 import { ContextBase, IBullet, ILists, INestingLevel, ITextStyle, Nullable } from '@univer/core';
-import { FontCache, getFontStyleString, IDocumentSkeletonBullet, IFontLocale } from '../../../..';
-import { getBulletOrderedSymbol } from '.';
+import { FontCache } from '../../../../Basics/FontCache';
+import { getFontStyleString } from '../../../../Basics/Tools';
+import { IDocumentSkeletonBullet } from '../../../../Basics/IDocumentSkeletonCached';
+import { IFontLocale } from '../../../../Basics/Interfaces';
+import { getBulletOrderedSymbol } from './Bullet.Ruler';
 
 export function dealWidthBullet(
     bullet?: IBullet,

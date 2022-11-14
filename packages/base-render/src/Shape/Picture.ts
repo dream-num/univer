@@ -13,7 +13,11 @@ export class Picture extends Shape<IPictureProps> {
     static drawWith(ctx: CanvasRenderingContext2D, picture: Picture) {
         if (picture._native.complete) {
             const { width, height } = picture;
-            ctx.drawImage(picture._native, 0, 0, width, height);
+            try {
+                ctx.drawImage(picture._native, 0, 0, width, height);
+            } catch (error) {
+                console.error(error);
+            }
         }
     }
 

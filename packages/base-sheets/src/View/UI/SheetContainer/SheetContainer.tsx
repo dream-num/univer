@@ -72,11 +72,7 @@ export interface ILayout {
     sheetBar?: boolean;
 
     // Whether to show the toolbar
-    infoBar?: boolean;
-    formulaBar?: boolean;
     toolBar?: boolean;
-    sheetBar?: boolean;
-    countBar?: boolean;
 
     // Custom configuration toolbar,can be used in conjunction with showToolBar, showToolBarConfig has a higher priority
     toolBarConfig?: IShowToolBarConfig;
@@ -139,15 +135,15 @@ export const defaultLayout: ILayout = {
 
     frozenContent: true,
 
-    infoBar: false,
+    infoBar: true,
 
-    formulaBar: false,
+    formulaBar: true,
 
-    toolBar: false,
+    toolBar: true,
 
-    countBar: false,
+    countBar: true,
 
-    sheetBar: false,
+    sheetBar: true,
 
     toolBarConfig: {
         undoRedo: true, // Undo redo
@@ -254,6 +250,8 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
             showSider: false,
             renderState: 0,
         };
+
+        console.log('this.state', this.state);
     }
 
     /**

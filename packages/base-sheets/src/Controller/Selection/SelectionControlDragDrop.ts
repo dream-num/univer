@@ -1,7 +1,6 @@
-import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect } from '@univer/base-render';
+import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect, ScrollTimer } from '@univer/base-render';
 import { Direction, ISelection, makeCellToSelection, Nullable, Observer } from '@univer/core';
 import { SelectionModel } from '../../Model';
-import { ScrollTimer } from '../ScrollTimer';
 import { DEFAULT_SELECTION_CONFIG, SelectionControl, SELECTION_TYPE } from './SelectionController';
 
 enum SELECTION_DRAG_KEY {

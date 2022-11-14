@@ -1,11 +1,10 @@
-import { IMouseEvent, IPointerEvent, Rect, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle } from '@univer/base-render';
+import { IMouseEvent, IPointerEvent, Rect, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, ScrollTimer } from '@univer/base-render';
 import { Nullable, Observer, Worksheet, ISelection, makeCellToSelection, IRangeData, RangeList, Range, IRangeCellData, ICellInfo, SheetCommand, Direction } from '@univer/core';
 import { ACTION_NAMES, ISelectionsConfig } from '../../Basics';
 import { ISelectionModelValue, ISetSelectionValueActionData } from '../../Model/Action/SetSelectionValueAction';
 import { SelectionModel } from '../../Model/SelectionModel';
 import { SheetPlugin } from '../../SheetPlugin';
 import { SheetView } from '../../View/Render/Views/SheetView';
-import { ScrollTimer } from '../ScrollTimer';
 import { SelectionControl, SELECTION_TYPE } from './SelectionController';
 
 /**
@@ -307,7 +306,7 @@ export class SelectionManager {
         this._selectionModels.set(worksheetId, models);
     }
 
-    recreateControlsByRangeData() { }
+    recreateControlsByRangeData() {}
 
     /**
      * Move the selection according to different directions, usually used for the shortcut key operation of ↑ ↓ ← →
@@ -497,8 +496,10 @@ export class SelectionManager {
             this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
                 this.moving(moveEvt, selectionControl);
                 const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+
                 scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
                     this.moving(moveEvt, selectionControl);
+                    console.log(1111);
                 });
             });
 
@@ -507,6 +508,7 @@ export class SelectionManager {
                 scene.onPointerMoveObserver.remove(this._moveObserver);
                 scene.onPointerUpObserver.remove(this._upObserver);
                 scene.enableEvent();
+
                 scrollTimer.stopScroll();
             });
         });
@@ -621,25 +623,25 @@ export class SelectionManager {
 
                 const cellInfo = cell
                     ? {
-                        row: cell.row,
-                        column: cell.column,
-                        isMerged: false,
-                        isMergedMainCell: false,
-                        startY: 0,
-                        endY: 0,
-                        startX: 0,
-                        endX: 0,
-                        mergeInfo: {
-                            startColumn,
-                            startRow,
-                            endColumn,
-                            endRow,
-                            startY: 0,
-                            endY: 0,
-                            startX: 0,
-                            endX: 0,
-                        },
-                    }
+                          row: cell.row,
+                          column: cell.column,
+                          isMerged: false,
+                          isMergedMainCell: false,
+                          startY: 0,
+                          endY: 0,
+                          startX: 0,
+                          endX: 0,
+                          mergeInfo: {
+                              startColumn,
+                              startRow,
+                              endColumn,
+                              endRow,
+                              startY: 0,
+                              endY: 0,
+                              startX: 0,
+                              endX: 0,
+                          },
+                      }
                     : null;
 
                 // Only update data, not render
@@ -724,7 +726,7 @@ export class SelectionManager {
             ?.getContext()
             .getContextObserver('onSheetRenderDidMountObservable')
             .add(() => {
-                console.log('onSheetRenderDidMountObservable===id==', this.getContext().getWorkBook().getUnitId())
+                console.log('onSheetRenderDidMountObservable===id==', this.getContext().getWorkBook().getUnitId());
                 this.renderCurrentControls();
             });
     }

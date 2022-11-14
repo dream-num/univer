@@ -8,6 +8,7 @@ import { DocContainerController } from './Controller/DocContainerController';
 import { BaseDocContainerConfig, DocContainer, IDocPluginConfigBase } from './View/UI/DocContainer';
 import { InfoBarController } from './Controller/InfoBarController';
 import { Engine, RenderEngine } from '@univer/base-render';
+import { CanvasView } from './View/Render/CanvasView';
 
 export interface IDocPluginConfig extends IDocPluginConfigBase {
     container: HTMLElement | string;
@@ -26,6 +27,8 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
     private _splitLeftRef: RefObject<HTMLDivElement>;
 
     private _contentRef: RefObject<HTMLDivElement>;
+
+    private _canvasView: CanvasView;
 
     private _addButtonFunc: Function;
 
@@ -139,6 +142,8 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
 
     private _initializeRender() {
         const engine = this.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
+
+        this._canvasView = new CanvasView(engine, this);
 
         this.register(engine);
     }

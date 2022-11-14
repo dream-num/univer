@@ -378,7 +378,7 @@ export class Viewport {
             this.makeDirty(true);
         }
 
-        const scroll = this._transformScroll();
+        const scroll = this.transformScroll();
         this.actualScrollX = scroll.x;
         this.actualScrollY = scroll.y;
 
@@ -397,10 +397,9 @@ export class Viewport {
         return limited;
     }
 
-    private _transformScroll() {
-        let x = this.scrollX;
-        let y = this.scrollY;
-
+    getActualScroll(scrollX: number, scrollY: number) {
+        let x = scrollX;
+        let y = scrollY;
         if (this._scrollBar) {
             x /= this._scrollBar.ratioScrollX; // 转换为内容区实际滚动距离
             y /= this._scrollBar.ratioScrollY;
@@ -420,6 +419,13 @@ export class Viewport {
             x,
             y,
         };
+    }
+
+    transformScroll() {
+        let x = this.scrollX;
+        let y = this.scrollY;
+
+        return this.getActualScroll(x, y);
     }
 
     getScrollBar() {
@@ -542,7 +548,7 @@ export class Viewport {
 
     getRelativeVector(coord: Vector2) {
         const sceneTrans = this.scene.transform.clone().invert();
-        const scroll = this._transformScroll();
+        const scroll = this.transformScroll();
 
         const svCoord = sceneTrans.applyPoint(coord).add(Vector2.FromArray([scroll.x, scroll.y]));
         return svCoord;

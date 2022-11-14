@@ -1,9 +1,9 @@
-import { SheetContext } from '@univer/core';
+import { ContextBase } from '@univer/core';
 import { en, zh } from '../Locale';
 import { IFontLocale } from '../Basics/Interfaces';
 
 export class Skeleton {
-    private _context: SheetContext;
+    private _context: ContextBase;
 
     private _fontLocale: IFontLocale;
 
@@ -13,7 +13,7 @@ export class Skeleton {
         return this._dirty;
     }
 
-    constructor(context: SheetContext) {
+    constructor(context: ContextBase) {
         this._context = context;
         this._localeInitial();
     }

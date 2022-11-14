@@ -321,14 +321,14 @@ export class SelectionControlDragAndDrop {
             top: endY - startY - DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
         });
 
-        this._selectionDragShape.visible = true;
+        this._selectionDragShape.show();
         this._selectionDragShape.translate(startX, startY);
 
         this._selectionDragShape.makeDirty(true);
     }
 
     hide() {
-        this._selectionDragShape.visible = false;
+        this._selectionDragShape.hide();
         this._selectionDragShape.makeDirty(true);
     }
 

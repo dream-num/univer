@@ -415,10 +415,6 @@ export abstract class BaseObject {
         return this._visible;
     }
 
-    set visible(state: boolean) {
-        this._visible = state;
-    }
-
     get debounceParentDirty() {
         return this._debounceParentDirty;
     }
@@ -433,6 +429,14 @@ export abstract class BaseObject {
 
     set isTransformer(state: boolean) {
         this._isTransformer = state;
+    }
+
+    hide() {
+        this._visible = false;
+    }
+
+    show() {
+        this._visible = true;
     }
 
     render(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {

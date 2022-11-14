@@ -19,7 +19,7 @@ export class FormulaPlugin extends Plugin<IKeyValue, SheetContext> {
         // this._config = config || {};
     }
 
-    static create(config: IFormulaConfig) {
+    static create(config?: IFormulaConfig) {
         return new FormulaPlugin(config);
     }
 

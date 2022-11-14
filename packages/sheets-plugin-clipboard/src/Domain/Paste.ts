@@ -225,8 +225,6 @@ export class UniverPaste extends Paste {
         }
 
         sheet.getRange(minH, minC, maxH, maxC).setRangeDatas(data);
-        // SheetPlugin.getCanvasView().updateToSheet(SheetPlugin.getContext().getWorkBook().getActiveSheet()!);
-        // spreadsheet.makeDirty(true);
     }
 
     paste(e: ClipboardEvent) {

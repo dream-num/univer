@@ -83,6 +83,12 @@ export class Workbook {
     private _getDefaultWorkSheet(): void {
         const { _context, _config, _worksheets } = this;
         const { sheets, sheetOrder } = _config;
+
+        // One worksheet by default
+        if (Tools.isEmptyObject(sheets)) {
+            sheets[DEFAULT_WORKSHEET.id] = DEFAULT_WORKSHEET;
+        }
+
         for (let sheetId in sheets) {
             let config = sheets[sheetId];
             config.name = NameGen.getSheetName(config.name);
@@ -616,7 +622,7 @@ export class Workbook {
      *
      * @returns void
      */
-    flush(): void {}
+    flush(): void { }
 
     setSheetOrder(sheetId: string, order: number): void {
         // const { _sheetOrder } = this;

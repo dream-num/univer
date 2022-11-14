@@ -567,11 +567,6 @@ export class ToolBarController {
             default:
                 break;
         }
-
-        // update data
-        this._plugin.getCanvasView().updateToSheet(this._plugin.getContext().getWorkBook().getActiveSheet()!);
-        // update render
-        // this._plugin.getMainComponent().makeDirty(true);
     }
 
     setHorizontalAlignment(value: HorizontalAlign) {
@@ -612,8 +607,6 @@ export class ToolBarController {
 
                 this._plugin.getContext().getWorkBook().getActiveSheet().getRange(range).setBorderByType(type, color, style);
             });
-
-            this._plugin.getCanvasView().updateToSheet(this._plugin.getContext().getWorkBook().getActiveSheet()!);
         }
     }
 

@@ -306,7 +306,7 @@ export class SelectionManager {
         this._selectionModels.set(worksheetId, models);
     }
 
-    recreateControlsByRangeData() {}
+    recreateControlsByRangeData() { }
 
     /**
      * Move the selection according to different directions, usually used for the shortcut key operation of ↑ ↓ ← →
@@ -499,7 +499,6 @@ export class SelectionManager {
 
                 scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
                     this.moving(moveEvt, selectionControl);
-                    console.log(1111);
                 });
             });
 
@@ -511,6 +510,15 @@ export class SelectionManager {
 
                 scrollTimer.stopScroll();
             });
+
+            // document.addEventListener('pointerup', () => {
+            //     this.up();
+            //     scene.onPointerMoveObserver.remove(this._moveObserver);
+            //     scene.onPointerUpObserver.remove(this._upObserver);
+            //     scene.enableEvent();
+
+            //     scrollTimer.stopScroll();
+            // });
         });
     }
 
@@ -521,6 +529,8 @@ export class SelectionManager {
      * @returns
      */
     moving(moveEvt: IPointerEvent | IMouseEvent, selectionControl: Nullable<SelectionControl>) {
+        console.log('moving');
+
         const main = this._mainComponent;
         const { offsetX: moveOffsetX, offsetY: moveOffsetY, clientX, clientY } = moveEvt;
         const { startRow, startColumn, endRow, endColumn } = this._startSelectionRange;
@@ -623,25 +633,25 @@ export class SelectionManager {
 
                 const cellInfo = cell
                     ? {
-                          row: cell.row,
-                          column: cell.column,
-                          isMerged: false,
-                          isMergedMainCell: false,
-                          startY: 0,
-                          endY: 0,
-                          startX: 0,
-                          endX: 0,
-                          mergeInfo: {
-                              startColumn,
-                              startRow,
-                              endColumn,
-                              endRow,
-                              startY: 0,
-                              endY: 0,
-                              startX: 0,
-                              endX: 0,
-                          },
-                      }
+                        row: cell.row,
+                        column: cell.column,
+                        isMerged: false,
+                        isMergedMainCell: false,
+                        startY: 0,
+                        endY: 0,
+                        startX: 0,
+                        endX: 0,
+                        mergeInfo: {
+                            startColumn,
+                            startRow,
+                            endColumn,
+                            endRow,
+                            startY: 0,
+                            endY: 0,
+                            startX: 0,
+                            endX: 0,
+                        },
+                    }
                     : null;
 
                 // Only update data, not render
@@ -718,7 +728,6 @@ export class SelectionManager {
     private _initializeObserver() {
         const context = this._plugin.getContext();
         context.getContextObserver('onAfterChangeActiveSheetObservable').add(() => {
-            // this._plugin.getCanvasView().updateToSheet(this._plugin.getContext().getWorkBook().getActiveSheet()!);
             this.renderCurrentControls();
         });
 
@@ -726,7 +735,6 @@ export class SelectionManager {
             ?.getContext()
             .getContextObserver('onSheetRenderDidMountObservable')
             .add(() => {
-                console.log('onSheetRenderDidMountObservable===id==', this.getContext().getWorkBook().getUnitId());
                 this.renderCurrentControls();
             });
     }

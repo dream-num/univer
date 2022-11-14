@@ -3,23 +3,17 @@
     "version": "0.0.1",
     "description": "",
     "author": "",
-    "main": "./lib/univer-core.js",
-    "module": "./lib/univer-core.mjs",
-    "browser": {
-        "./lib/univer-core.js": "./src/index.ts",
-        "./lib/univer-core.mjs": "./src/index.ts"
+    "main": "./src/index.ts",
+    "module": "./src/index.ts",
+    "types": "./src/type.d.ts",
+    "publishConfig": {
+        "main": "./lib/index.umd.js",
+        "module": "./lib/index.es.js",
+        "types": "./dist/core.d.ts"
     },
-    "types": "./src/Types/index.d.ts",
     "exports": {
-        ".": {
-            "import": {
-              "node": "./lib/univer-core.js",
-              "default": "./lib/univer-core.mjs"
-            },
-            "require": "./lib/univer-core.js",
-            "types": "./lib/univer-core.d.ts"
-          },
-          "./*": "./src/*"
+        ".": "./src/index.ts",
+        "./*": "./src/*"
     },
     "files": [
         "lib"
@@ -31,8 +25,6 @@
         "test": "cross-env NODE_ENV=--experimental-vm-modules jest --config=jest.config.js",
         "dev": "vite",
         "build": "tsc && vite build",
-        "watch": "vite build",
-        "link": "pnpm link ./",
         "api": "node ./api.js",
         "tsc": "tsc",
         "serve": "node test/Server/server.js"

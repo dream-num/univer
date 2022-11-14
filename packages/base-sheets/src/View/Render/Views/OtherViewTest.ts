@@ -426,7 +426,7 @@ export class OtherViewTest extends BaseView {
         });
 
         const pathRect = path.getRect();
-
+        console.log('pathRect', pathRect, path);
         const rect3 = new Rect('pathRect', {
             ...pathRect,
             strokeWidth: 1,

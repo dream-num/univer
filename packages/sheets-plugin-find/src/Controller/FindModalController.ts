@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet, ComponentChildren } from '@univer/base-component';
+import { BaseComponentRender, ComponentChildren } from '@univer/base-component';
 import { SheetPlugin } from '@univer/base-sheets';
 import { PLUGIN_NAMES } from '@univer/core';
 import { FIND_PLUGIN_NAME } from '../Const/PLUGIN_NAME';
@@ -88,19 +88,6 @@ export class FindModalController {
 
     // 注册自定义组件
     initRegisterComponent() {
-        const component = this._plugin.getContext().getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this._render = component.getComponentRender();
-
-        const registerIcon = {
-            SearchIcon: this._render.renderFunction('SearchIcon'),
-            ReplaceIcon: this._render.renderFunction('ReplaceIcon'),
-            LocationIcon: this._render.renderFunction('LocationIcon'),
-        };
-
-        for (let k in registerIcon) {
-            this._sheetPlugin.registerComponent(k, registerIcon[k]);
-        }
-
         this._sheetPlugin.registerModal(FIND_PLUGIN_NAME + FindModal.name, 100, FindModal);
         this._sheetPlugin.registerComponent(FIND_PLUGIN_NAME + SearchContent.name, SearchContent, { activeKey: 'find' });
     }

@@ -1,8 +1,12 @@
 import { BaseComponentRender, BaseComponentSheet, Component } from '@univer/base-component';
 
 interface IProps {
-    prefix: string;
-    buttons: string[];
+    label: string;
+    children: IPropsChildren[];
+}
+
+interface IPropsChildren {
+    label: string;
 }
 
 export class RightMenuButton extends Component<IProps> {
@@ -14,14 +18,14 @@ export class RightMenuButton extends Component<IProps> {
     }
 
     render() {
-        const { prefix, buttons } = this.props;
+        const { label, children } = this.props;
         const Button = this._render.renderFunction('Button');
 
         return (
             <div>
-                {prefix}
-                {buttons.map((item) => (
-                    <Button type="primary">{item}</Button>
+                {label}
+                {children.map((item: IPropsChildren) => (
+                    <Button type="primary">{item.label}</Button>
                 ))}
             </div>
         );

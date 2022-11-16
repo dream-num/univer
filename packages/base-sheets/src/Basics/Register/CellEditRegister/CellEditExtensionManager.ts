@@ -13,9 +13,11 @@ export class CellEditExtensionManager {
      * @param value
      */
     handle(cell: ICell): Nullable<ICell> {
+        const cellEditExtensionFactoryList = CellEditExtensionManager?.register?.cellEditExtensionFactoryList;
+        if (!cellEditExtensionFactoryList) return;
         // get the sorted list
         // get the dynamically added list
-        this._cellEditExtensionFactoryList = CellEditExtensionManager.register.cellEditExtensionFactoryList;
+        this._cellEditExtensionFactoryList = cellEditExtensionFactoryList;
         const extension = this._checkExtension(cell);
         if (extension) {
             extension.execute();

@@ -87,4 +87,4 @@ export class SceneViewerTestView extends BaseView {
     }
 }
 
-CanvasViewRegistry.add(new SceneViewerTestView());
+// CanvasViewRegistry.add(SceneViewerTestView);

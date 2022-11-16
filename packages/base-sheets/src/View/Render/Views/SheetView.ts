@@ -178,4 +178,4 @@ export class SheetView extends BaseView {
     }
 }
 
-CanvasViewRegistry.add(new SheetView());
+CanvasViewRegistry.add(SheetView);

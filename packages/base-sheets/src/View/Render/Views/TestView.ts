@@ -79,4 +79,4 @@ export class TestView extends BaseView {
     }
 }
 
-CanvasViewRegistry.add(new TestView());
+// CanvasViewRegistry.add(TestView);

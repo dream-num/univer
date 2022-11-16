@@ -13,9 +13,12 @@ export class CellInputExtensionManager {
      * @param value
      */
     handle(cell: ICell): Nullable<ICell> {
+        const cellInputExtensionFactoryList = CellInputExtensionManager?.register?.cellInputExtensionFactoryList;
+        if (!cellInputExtensionFactoryList) return;
+        
         // get the sorted list
         // get the dynamically added list
-        this._cellInputExtensionFactoryList = CellInputExtensionManager.register.cellInputExtensionFactoryList;
+        this._cellInputExtensionFactoryList = cellInputExtensionFactoryList;
         const extension = this._checkExtension(cell);
         if (extension) {
             extension.execute();

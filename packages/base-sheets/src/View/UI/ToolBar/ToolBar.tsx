@@ -166,7 +166,7 @@ export class ToolBar extends Component<IProps, IState> {
             }
 
             if (item.customSuffix) {
-                console.dir(item);
+                // console.dir(item);
                 const Suffix = plugin?.getRegisterComponent(item.customSuffix.name);
                 if (Suffix) {
                     const props = item.customSuffix.props ?? {};

@@ -151,7 +151,7 @@ export class CanvasView {
 
     private _viewLoader(scene: Scene, plugin: SheetPlugin) {
         CanvasViewRegistry.getData().forEach((view) => {
-            this._views.push(view.initialize(scene, plugin));
+            this._views.push(new view().initialize(scene, plugin));
         });
     }
 }

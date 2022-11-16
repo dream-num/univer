@@ -464,4 +464,4 @@ export class OtherViewTest extends BaseView {
     }
 }
 
-CanvasViewRegistry.add(new OtherViewTest());
+CanvasViewRegistry.add(OtherViewTest);

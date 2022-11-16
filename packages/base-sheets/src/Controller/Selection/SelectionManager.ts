@@ -167,6 +167,8 @@ export class SelectionManager {
                 this._selectionControls.push(control);
             });
 
+            console.log('setSelectionModel');
+
             this.setSelectionModel();
         }
     }

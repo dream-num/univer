@@ -1,6 +1,7 @@
 // import { IShapeProps, Shape, IObjectFullState, Group, Scene } from '.';
 
 import { IKeyValue } from '@univer/core';
+import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../Basics';
 import { IShapeProps, Shape } from './Shape';
 
 export interface ICircleProps extends IShapeProps {
@@ -21,6 +22,17 @@ export class Circle extends Shape<ICircleProps> {
         this._radius = props?.radius || 10;
 
         this._setFixBoundingBox();
+
+        this.onTransformChangeObservable.add((changeState) => {
+            const { type, value, preValue } = changeState;
+            if (type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize || type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.all) {
+                const value = Math.min(this.width, this.height);
+                this._radius = value / 2;
+                this.width = value;
+                this.height = value;
+                this._setTransForm();
+            }
+        });
     }
 
     private _setFixBoundingBox() {

@@ -1,6 +1,7 @@
 // import { IShapeProps, Shape, IObjectFullState, Group, Scene } from '.';
 
 import { IKeyValue, Nullable } from '@univer/core';
+import { IObjectFullState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../Basics';
 import { IShapeProps, Shape } from './Shape';
 
 interface IPathDataArray {
@@ -32,9 +33,9 @@ export class Path extends Shape<IPathProps> {
 
     private pathLength: number = 0;
 
-    private _fixLeft = 0;
+    private _selfRectCache: IPathFixConfig;
 
-    private _fixTop = 0;
+    private _reCalculateCache: boolean = true;
 
     get dataArray() {
         return this._dataArray;
@@ -53,6 +54,59 @@ export class Path extends Shape<IPathProps> {
         }
 
         this._setFixBoundingBox();
+
+        this.onTransformChangeObservable.add((changeState) => {
+            const { type, value, preValue } = changeState;
+            if (type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize || type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.all) {
+                this._reCalculateCache = true;
+
+                const { left, top, width, height } = this._getSelfRect();
+
+                const { width: preWidth, height: preHeight } = preValue as IObjectFullState;
+
+                let fixX;
+                let fixY;
+
+                if (!preWidth) {
+                    fixX = 0;
+                } else {
+                    fixX = (this.width as number) - preWidth;
+                }
+
+                if (!preHeight) {
+                    fixY = 0;
+                } else {
+                    fixY = (this.height as number) - preHeight;
+                }
+
+                const increaseScaleX = fixX / width;
+
+                const increaseScaleY = fixY / height;
+
+                this.scaleX += increaseScaleX;
+                this.scaleY += increaseScaleY;
+
+                this.left = (this.left as number) - left * increaseScaleX;
+                this.top = (this.top as number) - top * increaseScaleY;
+
+                // console.log({
+                //     left: this.left,
+                //     top: this.top,
+                //     scaleX: this.scaleX,
+                //     scaleY: this.scaleY,
+                //     width: this.width,
+                //     preWidth,
+                //     height: this.height,
+                //     preHeight,
+                //     originWidth: width,
+                //     originHeight: height,
+                //     originLeft: left,
+                //     originTop: top,
+                // });
+
+                this._setTransForm();
+            }
+        });
     }
 
     protected _draw(ctx: CanvasRenderingContext2D) {
@@ -125,17 +179,14 @@ export class Path extends Shape<IPathProps> {
         const fixScaleX = (this.width as number) / width;
         const fixScaleY = (this.height as number) / height;
 
-        this.transformByState({
-            left: (this.left as number) - left * fixScaleX,
-            top: (this.top as number) - top * fixScaleY,
-            scaleX: fixScaleX,
-            scaleY: fixScaleY,
-            width,
-            height,
-        });
+        this.left = (this.left as number) - left * fixScaleX;
+        this.top = (this.top as number) - top * fixScaleY;
+        this.scaleX = fixScaleX;
+        this.scaleY = fixScaleY;
+        this.width = width;
+        this.height = height;
 
-        this._fixLeft = left;
-        this._fixTop = top;
+        this._setTransForm();
     }
 
     toJson() {
@@ -151,17 +202,37 @@ export class Path extends Shape<IPathProps> {
         };
     }
 
+    getState() {
+        const { left, top, width, height } = this.getRect();
+        return {
+            left,
+            top,
+            width,
+            height,
+            scaleX: this.scaleX,
+            scaleY: this.scaleY,
+            angle: this.angle,
+            skewX: this.skewX,
+            skewY: this.skewY,
+            flipX: this.flipX,
+            flipY: this.flipY,
+        };
+    }
+
     getRect() {
         const { left, top, width, height } = this._getSelfRect();
         return {
             left: left * this.scaleX + this.left,
-            top: top * this.scaleX + this.top,
+            top: top * this.scaleY + this.top,
             width: width * this.scaleX,
             height: height * this.scaleY,
         };
     }
 
     private _getSelfRect() {
+        if (!this._reCalculateCache) {
+            return this._selfRectCache;
+        }
         let points: number[] = [];
         this.dataArray.forEach((data) => {
             if (data.command === 'A') {
@@ -230,12 +301,17 @@ export class Path extends Shape<IPathProps> {
                 maxY = Math.max(maxY, y);
             }
         }
-        return {
+
+        const cache = {
             left: minX,
             top: minY,
             width: maxX - minX,
             height: maxY - minY,
         };
+
+        this._selfRectCache = cache;
+
+        return cache;
     }
 
     /**

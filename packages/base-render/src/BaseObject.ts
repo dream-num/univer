@@ -134,10 +134,12 @@ export abstract class BaseObject {
     }
 
     translate(x?: number | string, y?: number | string) {
+        const preTop = this.top;
         if (y !== undefined) {
             this.top = y;
         }
 
+        const preLeft = this.left;
         if (x !== undefined) {
             this.left = x;
         }
@@ -146,17 +148,19 @@ export abstract class BaseObject {
 
         this.onTransformChangeObservable.notifyObservers({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.translate,
-            value: { x: this._top, y: this._left },
+            value: { top: this._top, left: this._left },
+            preValue: { top: preTop, left: preLeft },
         });
 
         return this;
     }
 
     resize(width?: number | string, height?: number | string) {
+        const preWidth = this.width;
         if (width !== undefined) {
             this.width = width;
         }
-
+        const preHeight = this.height;
         if (height !== undefined) {
             this.height = height;
         }
@@ -165,17 +169,20 @@ export abstract class BaseObject {
 
         this.onTransformChangeObservable.notifyObservers({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize,
-            value: { x: this._width, y: this._height },
+            value: { width: this._width, height: this._height },
+            preValue: { width: preWidth, height: preHeight },
         });
 
         return this;
     }
 
     scale(scaleX?: number, scaleY?: number) {
+        const preScaleX = this.scaleX;
         if (scaleX !== undefined) {
             this.scaleX = scaleX;
         }
 
+        const preScaleY = this.scaleY;
         if (scaleY !== undefined) {
             this.scaleY = scaleY;
         }
@@ -184,17 +191,20 @@ export abstract class BaseObject {
 
         this.onTransformChangeObservable.notifyObservers({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale,
-            value: { x: this._scaleX, y: this._scaleY },
+            value: { scaleX: this._scaleX, scaleY: this._scaleY },
+            preValue: { scaleX: preScaleX, scaleY: preScaleY },
         });
 
         return this;
     }
 
     skew(skewX?: number, skewY?: number) {
+        const preSkewX = skewX;
         if (skewX !== undefined) {
             this.skewX = skewX;
         }
 
+        const preSkewY = skewY;
         if (skewY !== undefined) {
             this.skewY = skewY;
         }
@@ -203,17 +213,19 @@ export abstract class BaseObject {
 
         this.onTransformChangeObservable.notifyObservers({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.skew,
-            value: { x: this._skewX, y: this._skewY },
+            value: { skewX: this._skewX, skewY: this._skewY },
+            preValue: { skewX: preSkewX, skewY: preSkewY },
         });
 
         return this;
     }
 
     flip(flipX?: boolean, flipY?: boolean) {
+        const preFlipX = flipX;
         if (flipX !== undefined) {
             this.flipX = flipX;
         }
-
+        const preFlipY = flipY;
         if (flipY !== undefined) {
             this.flipY = flipY;
         }
@@ -222,7 +234,8 @@ export abstract class BaseObject {
 
         this.onTransformChangeObservable.notifyObservers({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.flip,
-            value: { x: this._flipX, y: this._flipY },
+            value: { flipX: this._flipX, flipY: this._flipY },
+            preValue: { flipX: preFlipX, flipY: preFlipY },
         });
 
         return this;
@@ -230,11 +243,13 @@ export abstract class BaseObject {
 
     transformByState(option: IObjectFullState) {
         const optionKeys = Object.keys(option);
+        const preKeys: IObjectFullState = {};
         if (optionKeys.length === 0) {
             return;
         }
         optionKeys.forEach((pKey) => {
             if (option[pKey] !== undefined) {
+                preKeys[pKey] = this[pKey];
                 this[pKey] = option[pKey];
             }
         });
@@ -244,12 +259,13 @@ export abstract class BaseObject {
         this.onTransformChangeObservable.notifyObservers({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.all,
             value: option,
+            preValue: preKeys,
         });
 
         return this;
     }
 
-    private _setTransForm() {
+    protected _setTransForm() {
         const composeResult = Transform.create().composeMatrix({
             left: this.left + this.strokeWidth / 2,
             top: this.top + this.strokeWidth / 2,
@@ -429,6 +445,22 @@ export abstract class BaseObject {
 
     set isTransformer(state: boolean) {
         this._isTransformer = state;
+    }
+
+    getState() {
+        return {
+            left: this.left,
+            top: this.top,
+            width: this.width,
+            height: this.height,
+            scaleX: this.scaleX,
+            scaleY: this.scaleY,
+            angle: this.angle,
+            skewX: this.skewX,
+            skewY: this.skewY,
+            flipX: this.flipX,
+            flipY: this.flipY,
+        };
     }
 
     hide() {

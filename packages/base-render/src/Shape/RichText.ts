@@ -3,7 +3,7 @@
 import { BlockType, SheetContext, IDocumentData, IKeyValue, ParagraphElementType } from '@univer/core';
 import { Canvas } from '..';
 import { BaseObject } from '../BaseObject';
-import { IBoundRect, IObjectFullState } from '../Basics';
+import { IBoundRect, IObjectFullState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../Basics';
 import { Documents, DocumentSkeleton } from '../Component';
 
 export interface IRichTextProps extends IObjectFullState {
@@ -52,6 +52,18 @@ export class RichText extends BaseObject {
         this._documents = new Documents(`${this.oKey}_DOCUMENTS`, this._documentSkeleton);
 
         this._initialProps(props);
+
+        this.onTransformChangeObservable.add((changeState) => {
+            const { type, value, preValue } = changeState;
+            if (type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize || type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.all) {
+                this._documentSkeleton.updateDocumentDataPageSize(this.width);
+                this._documentSkeleton.makeDirty(true);
+                this._documentSkeleton.calculate();
+                const size = this._documentSkeleton.getLastPageSize();
+                this.height = size?.height || this.height;
+                this._setTransForm();
+            }
+        });
     }
 
     private convertToDocumentData(text: string) {

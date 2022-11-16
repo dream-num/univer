@@ -88,7 +88,7 @@ export class TestViewFactory {
      * @param plugin
      * @returns
      */
-    initialize(scene: Scene, plugin: SheetPlugin): TestView {
+    create(scene: Scene, plugin: SheetPlugin): TestView {
         return new TestView().initialize(scene, plugin);
     }
 }

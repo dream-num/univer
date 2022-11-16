@@ -97,7 +97,7 @@ export class SceneViewerTestViewFactory {
      * @param plugin
      * @returns
      */
-    initialize(scene: Scene, plugin: SheetPlugin): SceneViewerTestView {
+    create(scene: Scene, plugin: SheetPlugin): SceneViewerTestView {
         return new SceneViewerTestView().initialize(scene, plugin);
     }
 }

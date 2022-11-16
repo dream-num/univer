@@ -2,7 +2,6 @@ import { getColor, Rect, Scene, Spreadsheet, SpreadsheetColumnTitle, Spreadsheet
 import { Worksheet } from '@univer/core';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from '../BaseView';
 import { SelectionManager } from '../../../Controller/Selection/SelectionManager';
-import { SheetViewKeyboardEvent } from './SheetViewKeyboardEvent';
 import { SheetPlugin } from '../../../SheetPlugin';
 
 export enum SHEET_VIEW_KEY {
@@ -70,9 +69,6 @@ export class SheetView extends BaseView {
         this._updateViewport(rowTitleWidth, columnTitleHeight);
 
         this._selectionManager = new SelectionManager(this);
-
-        // init keyboard event
-        new SheetViewKeyboardEvent(scene);
     }
 
     getSelectionManager() {
@@ -186,7 +182,7 @@ export class SheetViewFactory {
      * @param plugin
      * @returns
      */
-    initialize(scene: Scene, plugin: SheetPlugin): SheetView {
+    create(scene: Scene, plugin: SheetPlugin): SheetView {
         return new SheetView().initialize(scene, plugin);
     }
 }

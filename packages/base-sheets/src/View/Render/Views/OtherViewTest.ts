@@ -472,7 +472,7 @@ export class OtherViewTestFactory {
      * @param plugin
      * @returns
      */
-    initialize(scene: Scene, plugin: SheetPlugin): OtherViewTest {
+    create(scene: Scene, plugin: SheetPlugin): OtherViewTest {
         return new OtherViewTest().initialize(scene, plugin);
     }
 }

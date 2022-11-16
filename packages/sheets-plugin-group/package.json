@@ -56,7 +56,6 @@
         "vite": "^2.4.4"
     },
     "dependencies": {
-        "@univer/sheets-plugin-group": "workspace:^0.0.1",
         "@univer/base-render": "workspace:^0.0.1",
         "@univer/base-sheets": "workspace:^0.0.1",
         "@univer/common-plugin-data": "workspace:^0.0.1",

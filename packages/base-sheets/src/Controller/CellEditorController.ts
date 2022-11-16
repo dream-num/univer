@@ -148,8 +148,8 @@ export class CellEditorController {
                 this.enterEditMode();
             }
         });
-        this._plugin.getObserver('onSpreadsheetKeyCompositionUpdateObservable')?.add((evt: IKeyboardEvent) => { });
-        this._plugin.getObserver('onSpreadsheetKeyCompositionEndObservable')?.add((evt: IKeyboardEvent) => { });
+        this._plugin.getObserver('onSpreadsheetKeyCompositionUpdateObservable')?.add((evt: IKeyboardEvent) => {});
+        this._plugin.getObserver('onSpreadsheetKeyCompositionEndObservable')?.add((evt: IKeyboardEvent) => {});
 
         this._cellEditExtensionManager = new CellEditExtensionManager();
     }
@@ -445,7 +445,7 @@ export class CellEditorController {
         this.enterEditMode();
     }
 
-    handleBackSpace() { }
+    handleBackSpace() {}
 
     handleDirection(direction: Direction) {
         // todo

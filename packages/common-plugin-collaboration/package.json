@@ -38,7 +38,6 @@
     },
     "license": "MIT",
     "dependencies": {
-        "@univer/common-plugin-collaboration": "workspace:^0.0.1",
         "@univer/core": "workspace:^0.0.1"
     },
     "devDependencies": {

@@ -28,8 +28,8 @@ module.exports = {
     },
     plugins: ['@typescript-eslint', 'prettier', 'import', 'import-newlines', 'unused-imports'],
     rules: {
-        'no-cond-assign':'off',
-        'no-restricted-globals':"off",
+        'no-cond-assign': 'off',
+        'no-restricted-globals': 'off',
         'prettier/prettier': [
             'error',
             {
@@ -79,7 +79,13 @@ module.exports = {
                 accessibility: 'no-public',
             },
         ],
-        '@typescript-eslint/consistent-type-assertions': ['error', { assertionStyle: 'as', objectLiteralTypeAssertions: 'allow-as-parameter' }],
+        '@typescript-eslint/consistent-type-assertions': [
+            'error',
+            {
+                assertionStyle: 'as',
+                objectLiteralTypeAssertions: 'allow-as-parameter',
+            },
+        ],
         'spaced-comment': 'off',
         eqeqeq: ['error', 'always', { null: 'ignore' }],
 

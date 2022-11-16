@@ -3,8 +3,8 @@ import { RenderEngine } from '@univer/base-render';
 import { UniverComponentSheet } from '@univer/style-universheet';
 import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
 import { NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
-import { DEFAULT_FORMULA_DATA,DEFAULT_FORMULA_DATA_DOWN, FormulaPlugin } from '@univer/sheets-plugin-formula';
-import {DEFAULT_WORKBOOK_DATA,DEFAULT_WORKBOOK_DATA_DOWN} from '@univer/common-plugin-data'
+import { DEFAULT_FORMULA_DATA, DEFAULT_FORMULA_DATA_DOWN, FormulaPlugin } from '@univer/sheets-plugin-formula';
+import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DOWN } from '@univer/common-plugin-data';
 import { SheetPlugin } from './SheetPlugin';
 
 const uiDefaultConfigUp = {
@@ -103,7 +103,6 @@ univerSheetUp.installPlugin(clipboardPlugin);
 univerSheetUp.installPlugin(new NumfmtPlugin());
 (window as any).sheetPlugin = sheetPlugin;
 
-
 const uiDefaultConfigDown = {
     container: 'universheet-demo-down',
     selections: {
@@ -123,7 +122,6 @@ const uiDefaultConfigDown = {
         ],
     },
 };
-
 
 const univerSheetDown = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DOWN);
 univerSheetDown.installPlugin(new RenderEngine());

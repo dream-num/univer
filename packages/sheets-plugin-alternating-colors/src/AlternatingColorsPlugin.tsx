@@ -1,5 +1,5 @@
 import { ISlotElement, ISlotProps } from '@univer/base-component';
-import { SheetContext, IOCContainer, UniverSheet, Nullable, Plugin, PLUGIN_NAMES, SheetCommand } from '@univer/core';
+import { SheetContext, IOCContainer, UniverSheet, Nullable, Plugin, PLUGIN_NAMES, Command } from '@univer/core';
 import { IToolBarItemProps, SheetPlugin } from '@univer/base-sheets';
 import { Banding } from './Banding';
 import { IAddBandingActionData } from './Command';
@@ -121,7 +121,7 @@ export class AlternatingColorsPlugin extends Plugin<AlternatingColorsPluginObser
         };
 
         // Execute action
-        const command = new SheetCommand(context.getWorkBook(), actionData);
+        const command = new Command(context.getWorkBook(), actionData);
         _commandManager.invoke(command);
     }
 }

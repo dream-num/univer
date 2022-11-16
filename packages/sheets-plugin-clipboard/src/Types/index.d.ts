@@ -1,7 +1,5 @@
-
-
-export * from './index';
-declare module '@univer/sheets-plugin-clipboard' { }
+export * from '../index';
+declare module '@univer/sheets-plugin-clipboard' {}
 
 // use css module
 declare module '*.less' {

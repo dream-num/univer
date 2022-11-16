@@ -1,4 +1,4 @@
-import { SheetAction, ActionObservers, ISheetActionData, Workbook } from '@univer/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, Workbook } from '@univer/core';
 import { ACTION_NAMES } from '../../Const';
 import { OverGridImageBorderType, OverGridImagePlugin } from '../../OverGridImagePlugin';
 import { AddImageProperty } from '../../Apply/AddImageProperty';
@@ -19,7 +19,7 @@ export interface IAddImageProperty extends ISheetActionData {
     borderWidth: number;
 }
 
-export class AddImagePropertyAction extends SheetAction<IAddImageProperty, IAddImageProperty> {
+export class AddImagePropertyAction extends SheetActionBase<IAddImageProperty, IAddImageProperty> {
     constructor(actionData: IAddImageProperty, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._oldActionData = {

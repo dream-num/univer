@@ -1,4 +1,4 @@
-import { SheetAction, ActionObservers, ActionType, ISheetActionData } from '../../Command';
+import { SheetActionBase, ActionObservers, ActionType, ISheetActionData } from '../../Command';
 import { Workbook } from '../Domain';
 import { SetZoomRatio } from '../Apply/SetZoomRatio';
 
@@ -7,7 +7,7 @@ export interface ISetZoomRatioActionData extends ISheetActionData {
     sheetId: string;
 }
 
-export class SetZoomRatioAction extends SheetAction<
+export class SetZoomRatioAction extends SheetActionBase<
     ISetZoomRatioActionData,
     ISetZoomRatioActionData
 > {

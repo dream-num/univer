@@ -5,7 +5,7 @@ import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
 import { Workbook } from '../Domain';
 import { ICellData, IOptionsData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { ISetRangeDataActionData } from './SetRangeDataAction';
 
@@ -22,7 +22,7 @@ export interface IClearRangeActionData extends ISheetActionData {
  *
  * @internal
  */
-export class ClearRangeAction extends SheetAction<
+export class ClearRangeAction extends SheetActionBase<
     IClearRangeActionData,
     ISetRangeDataActionData,
     ObjectMatrixPrimitiveType<ICellData>

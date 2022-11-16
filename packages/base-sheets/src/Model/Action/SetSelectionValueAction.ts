@@ -1,4 +1,4 @@
-import { SheetAction, ActionObservers, ActionType, ISheetActionData, ICellInfo, ISelection, Nullable, Workbook } from '@univer/core';
+import { SheetActionBase, ActionObservers, ActionType, ISheetActionData, ICellInfo, ISelection, Nullable, Workbook } from '@univer/core';
 import { ACTION_NAMES } from '../../Basics';
 import { SetSelectionValue } from '../Apply/SetSelectionValue';
 
@@ -11,7 +11,7 @@ export interface ISetSelectionValueActionData extends ISheetActionData {
     selections: ISelectionModelValue[];
 }
 
-export class SetSelectionValueAction extends SheetAction<ISetSelectionValueActionData, ISetSelectionValueActionData, ISelectionModelValue[]> {
+export class SetSelectionValueAction extends SheetActionBase<ISetSelectionValueActionData, ISetSelectionValueActionData, ISelectionModelValue[]> {
     constructor(actionData: ISetSelectionValueActionData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
 

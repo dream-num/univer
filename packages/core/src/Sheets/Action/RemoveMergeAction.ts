@@ -1,7 +1,7 @@
 import { addMerge, RemoveMerge } from '../Apply';
 import { Workbook } from '../Domain';
 import { IRangeData } from '../../Interfaces';
-import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IAddMergeActionData } from './AddMergeAction';
 
@@ -17,7 +17,7 @@ export interface IRemoveMergeActionData extends ISheetActionData {
  *
  * @internal
  */
-export class RemoveMergeAction extends SheetAction<
+export class RemoveMergeAction extends SheetActionBase<
     IRemoveMergeActionData,
     IAddMergeActionData,
     IRangeData[]

@@ -1,6 +1,6 @@
 import { SetColumnWidth } from '../Apply';
 import { Workbook } from '../Domain';
-import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
 /**
@@ -16,7 +16,7 @@ export interface ISetColumnWidthActionData extends ISheetActionData {
  *
  * @internal
  */
-export class SetColumnWidthAction extends SheetAction<ISetColumnWidthActionData> {
+export class SetColumnWidthAction extends SheetActionBase<ISetColumnWidthActionData> {
     constructor(
         actionData: ISetColumnWidthActionData,
         workbook: Workbook,

@@ -1,4 +1,4 @@
-import { ActionOperation, ACTION_NAMES, ISetRangeDataActionData, SheetCommand } from '@univer/core';
+import { ActionOperation, ACTION_NAMES, ISetRangeDataActionData, Command } from '@univer/core';
 import { FormulaController } from './FormulaController';
 
 export function firstLoader(formulaController: FormulaController) {
@@ -42,7 +42,7 @@ export function firstLoader(formulaController: FormulaController) {
             });
         }
 
-        const command = new SheetCommand(workBook, ...actionList);
+        const command = new Command(workBook, ...actionList);
         commandManager.invoke(command);
     });
 }

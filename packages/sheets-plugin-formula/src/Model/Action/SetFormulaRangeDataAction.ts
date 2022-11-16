@@ -1,12 +1,12 @@
 import { IFormulaData } from '@univer/base-formula-engine';
-import { SheetAction, ActionObservers, ISheetActionData, ObjectMatrixPrimitiveType, Workbook } from '@univer/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, ObjectMatrixPrimitiveType, Workbook } from '@univer/core';
 import { SetFormulaRangeData } from '../Apply/SetFormulaRangeData';
 
 export interface ISetFormulaRangeActionData extends ISheetActionData {
     formulaData: IFormulaData;
 }
 
-export class SetFormulaRangeDataAction extends SheetAction<ISetFormulaRangeActionData, IFormulaData> {
+export class SetFormulaRangeDataAction extends SheetActionBase<ISetFormulaRangeActionData, IFormulaData> {
     constructor(actionData: ISetFormulaRangeActionData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._doActionData = {

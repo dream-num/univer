@@ -1,4 +1,4 @@
-import { Range, Worksheet, Workbook, SheetContext, SheetCommand, CommandManager, Inject } from '@univer/core';
+import { Range, Worksheet, Workbook, SheetContext, Command, CommandManager, Inject } from '@univer/core';
 import { IAscSortData } from '../Action';
 import { ACTION_NAMES, SortOrderType, SortOrder } from '../Enum';
 
@@ -92,7 +92,7 @@ export class Sort {
             sheetId: _workSheet.getSheetId(),
         };
 
-        const command = new SheetCommand(_context.getWorkBook(), actionData);
+        const command = new Command(_context.getWorkBook(), actionData);
         _commandManager.invoke(command);
     }
 }

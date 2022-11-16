@@ -1,6 +1,6 @@
 import { SetHideRow, SetShowRow } from '../Apply';
 import { Workbook } from '../Domain';
-import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
 /**
@@ -14,7 +14,7 @@ export interface ISetRowShowActionData extends ISheetActionData {
 /**
  * @internal
  */
-export class SetRowShowAction extends SheetAction<ISetRowShowActionData> {
+export class SetRowShowAction extends SheetActionBase<ISetRowShowActionData> {
     constructor(
         actionData: ISetRowShowActionData,
         workbook: Workbook,

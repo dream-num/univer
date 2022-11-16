@@ -3,7 +3,7 @@ import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { Workbook } from '../Domain';
 import { IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
 /**
@@ -17,7 +17,7 @@ export interface ISetRangeNoteActionData extends ISheetActionData {
 /**
  * @internal
  */
-export class SetRangeNoteAction extends SheetAction<
+export class SetRangeNoteAction extends SheetActionBase<
     ISetRangeNoteActionData,
     ISetRangeNoteActionData,
     ObjectMatrixPrimitiveType<string>

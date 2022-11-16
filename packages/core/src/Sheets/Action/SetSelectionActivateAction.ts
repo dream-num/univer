@@ -1,7 +1,7 @@
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { Workbook } from '../Domain';
 import { IRangeData } from '../../Interfaces';
-import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { SetSelectionActivate } from '../Apply';
 import { CONVERTOR_OPERATION } from '../../Const/CONST';
@@ -28,7 +28,7 @@ export interface ISetSelectionActivateServiceData {
 /**
  * @internal
  */
-export class SetSelectionActivateAction extends SheetAction<
+export class SetSelectionActivateAction extends SheetActionBase<
     ISetSelectionActivateActionData,
     ISetSelectionActivateActionData,
     ISetSelectionActivateServiceData

@@ -1,5 +1,5 @@
 import { ISlotElement, ISlotProps, IToolBarItemProps } from '@univer/base-component';
-import { SheetCommand, Plugin, PLUGIN_NAMES, Nullable, Worksheet, IOCContainer, UniverSheet } from '@univer/core';
+import { Command, Plugin, PLUGIN_NAMES, Nullable, Worksheet, IOCContainer, UniverSheet } from '@univer/core';
 import { SheetPlugin } from '@univer/base-sheets';
 import { IPictureProps } from '@univer/base-render';
 import { ACTION_NAMES } from './Const';
@@ -77,7 +77,7 @@ export class OverGridImage {
             actionName: ACTION_NAMES.SET_IMAGE_TYPE_ACTION,
             sheetId: this._property.sheetId,
         };
-        const command = new SheetCommand(workbook, configure);
+        const command = new Command(workbook, configure);
         manager.invoke(command);
     }
 }
@@ -143,7 +143,7 @@ export class OverGridImagePlugin extends Plugin<ImagePluginObserve> {
                                 borderWidth: 5,
                                 borderColor: 'red',
                             };
-                            const command = new SheetCommand(workbook, configure);
+                            const command = new Command(workbook, configure);
                             manager.invoke(command);
                         };
                     }}

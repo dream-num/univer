@@ -1,4 +1,4 @@
-import { ISheetActionData, SheetAction, ActionObservers, ActionType } from '../../Command';
+import { ISheetActionData, SheetActionBase, ActionObservers, ActionType } from '../../Command';
 import { CONVERTOR_OPERATION, ACTION_NAMES } from '../../Const';
 import { WorkSheetConvertor } from '../../Convertor';
 import { INamedRange } from '../../Interfaces/INamedRange';
@@ -9,7 +9,7 @@ export interface ISetNamedRangeActionData extends ISheetActionData {
     namedRange: INamedRange;
 }
 
-export class SetNamedRangeAction extends SheetAction<
+export class SetNamedRangeAction extends SheetActionBase<
     ISetNamedRangeActionData,
     ISetNamedRangeActionData,
     INamedRange

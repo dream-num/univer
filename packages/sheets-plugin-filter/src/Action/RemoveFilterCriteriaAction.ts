@@ -1,4 +1,4 @@
-import { SheetAction, ActionObservers, ISheetActionData, Nullable, Workbook } from '@univer/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, Nullable, Workbook } from '@univer/core';
 import { AddFilterCriteria, RemoveFilterCriteria } from '../Apply';
 import { ACTION_NAMES, FILTER_PLUGIN_NAME } from '../Const';
 import { IFilterCriteriaColumn } from '../Domain';
@@ -8,7 +8,7 @@ export interface IRemoveFilterCriteriaAction extends ISheetActionData {
     columnPosition: number;
 }
 
-export class RemoveFilterCriteriaAction extends SheetAction<IRemoveFilterCriteriaAction, IAddFilterCriteriaActionData> {
+export class RemoveFilterCriteriaAction extends SheetActionBase<IRemoveFilterCriteriaAction, IAddFilterCriteriaActionData> {
     constructor(actionData: IRemoveFilterCriteriaAction, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._doActionData = {

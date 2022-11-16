@@ -4,7 +4,7 @@ import { CONVERTOR_OPERATION } from '../../Const/CONST';
 import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
 import { Workbook } from '../Domain';
 import { Nullable } from '../../Shared/Types';
-import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
 /**
@@ -17,7 +17,7 @@ export interface ISetTabColorActionData extends ISheetActionData {
 /**
  * @internal
  */
-export class SetTabColorAction extends SheetAction<
+export class SetTabColorAction extends SheetActionBase<
     ISetTabColorActionData,
     ISetTabColorActionData,
     Nullable<string>

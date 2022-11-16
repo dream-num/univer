@@ -1,4 +1,4 @@
-import { SheetAction, ActionObservers, ISheetActionData, Workbook } from '@univer/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, Workbook } from '@univer/core';
 import { SetImageType } from '../../Apply';
 import { OverGridImagePlugin } from '../../OverGridImagePlugin';
 import { ACTION_NAMES } from '../../Const';
@@ -9,7 +9,7 @@ export interface ISetImageTypeData extends ISheetActionData {
     type: string;
 }
 
-export class SetImageTypeAction extends SheetAction<ISetImageTypeData, ISetImageTypeData> {
+export class SetImageTypeAction extends SheetActionBase<ISetImageTypeData, ISetImageTypeData> {
     constructor(actionData: ISetImageTypeData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._oldActionData = {

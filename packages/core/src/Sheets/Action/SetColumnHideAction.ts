@@ -1,5 +1,5 @@
 import { SetColumnHide, SetColumnShow } from '../Apply';
-import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { Workbook } from '../Domain';
 import { ISetColumnShowActionData } from './SetColumnShowAction';
@@ -17,7 +17,7 @@ export interface ISetColumnHideActionData extends ISheetActionData {
  *
  * @internal
  */
-export class SetColumnHideAction extends SheetAction<
+export class SetColumnHideAction extends SheetActionBase<
     ISetColumnHideActionData,
     ISetColumnShowActionData
 > {

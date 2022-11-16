@@ -3,7 +3,7 @@ import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { Workbook } from '../Domain';
 import { IRangeData, IStyleData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
 export interface ISetRangeStyleActionData extends ISheetActionData {
@@ -14,7 +14,7 @@ export interface ISetRangeStyleActionData extends ISheetActionData {
 /**
  * @internal
  */
-export class SetRangeStyleAction extends SheetAction<ISetRangeStyleActionData> {
+export class SetRangeStyleAction extends SheetActionBase<ISetRangeStyleActionData> {
     constructor(
         actionData: ISetRangeStyleActionData,
         workbook: Workbook,

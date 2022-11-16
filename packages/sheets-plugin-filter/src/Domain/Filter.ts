@@ -1,4 +1,4 @@
-import { SheetCommand, SheetContext, IRangeData, GroupModel, Nullable, Sequence, Serializer } from '@univer/core';
+import { Command, SheetContext, IRangeData, GroupModel, Nullable, Sequence, Serializer } from '@univer/core';
 import { ACTION_NAMES } from '../Const';
 import { FilterCriteria } from './FilterCriteria';
 import { FilterCriteriaColumn, IFilterCriteriaColumn } from './FilterCriteriaColumn';
@@ -72,7 +72,7 @@ export class Filter extends Serializer implements GroupModel<{ [column: number]:
                 columnPosition,
                 criteriaColumn: criteriaColumn.toSequence(),
             };
-            const command = new SheetCommand(workbook, configure);
+            const command = new Command(workbook, configure);
             commandManager.invoke(command);
         }
     }

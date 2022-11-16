@@ -1,6 +1,6 @@
 import { RemoveColumn, InsertColumn } from '../Apply';
 import { Workbook } from '../Domain';
-import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveColumnAction } from './removeColumnAction';
 
@@ -17,7 +17,7 @@ export interface IInsertColumnActionData extends ISheetActionData {
  *
  * @internal
  */
-export class InsertColumnAction extends SheetAction<
+export class InsertColumnAction extends SheetActionBase<
     IInsertColumnActionData,
     IRemoveColumnAction
 > {

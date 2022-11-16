@@ -1,4 +1,4 @@
-import { getColor, Path, Picture, Rect, Circle, RichText } from '@univer/base-render';
+import { getColor, Path, Picture, Rect, Circle, RichText, Scene } from '@univer/base-render';
 import {
     BaselineOffset,
     BlockType,
@@ -12,6 +12,7 @@ import {
     PositionedObjectLayoutType,
     WrapTextType,
 } from '@univer/core';
+import { SheetPlugin } from '../../../SheetPlugin';
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 
 const richTextTest: IDocumentData = {
@@ -464,4 +465,15 @@ export class OtherViewTest extends BaseView {
     }
 }
 
-CanvasViewRegistry.add(OtherViewTest);
+export class OtherViewTestFactory {
+    /**
+     * Generate OtherViewTest Instance
+     * @param scene
+     * @param plugin
+     * @returns
+     */
+    initialize(scene: Scene, plugin: SheetPlugin): OtherViewTest {
+        return new OtherViewTest().initialize(scene, plugin);
+    }
+}
+CanvasViewRegistry.add(new OtherViewTestFactory());

@@ -1,8 +1,9 @@
-import { getColor, Rect, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, SpreadsheetSkeleton } from '@univer/base-render';
+import { getColor, Rect, Scene, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, SpreadsheetSkeleton } from '@univer/base-render';
 import { Worksheet } from '@univer/core';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from '../BaseView';
 import { SelectionManager } from '../../../Controller/Selection/SelectionManager';
 import { SheetViewKeyboardEvent } from './SheetViewKeyboardEvent';
+import { SheetPlugin } from '../../../SheetPlugin';
 
 export enum SHEET_VIEW_KEY {
     MAIN = '__SpreadsheetRender__',
@@ -178,4 +179,15 @@ export class SheetView extends BaseView {
     }
 }
 
-CanvasViewRegistry.add(SheetView);
+export class SheetViewFactory {
+    /**
+     * Generate SheetView Instance
+     * @param scene
+     * @param plugin
+     * @returns
+     */
+    initialize(scene: Scene, plugin: SheetPlugin): SheetView {
+        return new SheetView().initialize(scene, plugin);
+    }
+}
+CanvasViewRegistry.add(new SheetViewFactory());

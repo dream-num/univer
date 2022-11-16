@@ -1,5 +1,6 @@
 import { EVENT_TYPE, IWheelEvent, Layer, Rect, Scene, SceneViewer, ScrollBar, Viewport } from '@univer/base-render';
 import { EventState } from '@univer/core';
+import { SheetPlugin } from '../../../SheetPlugin';
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 
 export class SceneViewerTestView extends BaseView {
@@ -88,3 +89,16 @@ export class SceneViewerTestView extends BaseView {
 }
 
 // CanvasViewRegistry.add(SceneViewerTestView);
+
+export class SceneViewerTestViewFactory {
+    /**
+     * Generate SceneViewerTestView Instance
+     * @param scene
+     * @param plugin
+     * @returns
+     */
+    initialize(scene: Scene, plugin: SheetPlugin): SceneViewerTestView {
+        return new SceneViewerTestView().initialize(scene, plugin);
+    }
+}
+CanvasViewRegistry.add(new SceneViewerTestViewFactory());

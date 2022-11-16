@@ -5,23 +5,17 @@
     "keywords": [],
     "author": "DreamNum <msoffice2@126.com>",
     "license": "MIT",
-    "main": "./lib/univer-sheets-plugin-numfmt.cjs.js",
-    "module": "./lib/univer-sheets-plugin-numfmt.es.js",
-    "browser": {
-        "./lib/univer-sheets-plugin-numfmt.cjs.js": "./src/index.ts",
-        "./lib/univer-sheets-plugin-numfmt.es.js": "./src/index.ts"
-    },
+    "main": "./src/index.ts",
+    "module": "./src/index.ts",
     "types": "./src/Types/index.d.ts",
+    "publishConfig": {
+        "main": "./lib/univer-sheets-plugin-numfmt.cjs.js",
+        "module": "./lib/univer-sheets-plugin-numfmt.es.js",
+        "types": "./lib/index.d.ts"
+    },
     "exports": {
-        ".": {
-            "import": {
-              "node": "./lib/univer-sheets-plugin-numfmt.cjs.js",
-              "default": "./lib/univer-sheets-plugin-numfmt.es.js"
-            },
-            "require": "./lib/univer-sheets-plugin-numfmt.cjs.js",
-            "types": "./lib/univer-sheets-plugin-numfmt.d.ts"
-          },
-          "./*": "./src/*"
+        ".": "./src/index.ts",
+        "./*": "./src/*"
     },
     "directories": {
         "lib": "lib"

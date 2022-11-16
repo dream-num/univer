@@ -3,23 +3,17 @@
     "version": "0.0.1",
     "description": "",
     "author": "",
-    "main": "./lib/univer-common-plugin-collaboration.cjs.js",
-    "module": "./lib/univer-common-plugin-collaboration.es.js",
-    "browser": {
-        "./lib/univer-common-plugin-collaboration.cjs.js": "./src/index.ts",
-        "./lib/univer-common-plugin-collaboration.es.js": "./src/index.ts"
-    },
+    "main": "./src/index.ts",
+    "module": "./src/index.ts",
     "types": "./src/Types/index.d.ts",
+    "publishConfig": {
+        "main": "./lib/univer-common-plugin-collaboration.cjs.js",
+        "module": "./lib/univer-common-plugin-collaboration.es.js",
+        "types": "./lib/index.d.ts"
+    },
     "exports": {
-        ".": {
-            "import": {
-              "node": "./lib/univer-common-plugin-collaboration.cjs.js",
-              "default": "./lib/univer-common-plugin-collaboration.es.js"
-            },
-            "require": "./lib/univer-common-plugin-collaboration.cjs.js",
-            "types": "./lib/univer-common-plugin-collaboration.d.ts"
-          },
-          "./*": "./src/*"
+        ".": "./src/index.ts",
+        "./*": "./src/*"
     },
     "directories": {
         "lib": "lib"

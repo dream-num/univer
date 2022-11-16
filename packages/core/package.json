@@ -3,22 +3,16 @@
     "version": "0.0.1",
     "description": "",
     "author": "",
-    "main": "./lib/univer-core.js",
-    "module": "./lib/univer-core.mjs",
-    "browser": {
-        "./lib/univer-core.cjs.js": "./src/index.ts",
-        "./lib/univer-core.es.js": "./src/index.ts"
-    },
+    "main": "./src/index.ts",
+    "module": "./src/index.ts",
     "types": "./src/Types/index.d.ts",
+    "publishConfig": {
+        "main": "./lib/univer-core.js",
+        "module": "./lib/univer-core.mjs",
+        "types": "./lib/index.d.ts"
+    },
     "exports": {
-        ".": {
-            "import": {
-                "node": "./lib/univer-core.js",
-                "default": "./lib/univer-core.mjs"
-            },
-            "require": "./lib/univer-core.js",
-            "types": "./lib/univer-core.d.ts"
-        },
+        ".": "./src/index.ts",
         "./*": "./src/*"
     },
     "files": [

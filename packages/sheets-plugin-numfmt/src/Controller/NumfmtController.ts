@@ -1,4 +1,4 @@
-import { SheetCommand, Range, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType, PLUGIN_NAMES, ACTION_NAMES } from '@univer/core';
+import { Command, Range, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType, PLUGIN_NAMES, ACTION_NAMES } from '@univer/core';
 import { BaseComponentRender } from '@univer/base-component';
 import { IToolBarItemProps, SheetPlugin } from '@univer/base-sheets';
 import { NumfmtModel } from '../Model/NumfmtModel';
@@ -52,7 +52,7 @@ export class NumfmtController {
                         },
                         {
                             locale: 'format.moreNumber',
-                            onClick: () => {},
+                            onClick: () => { },
                         },
                     ],
                 },
@@ -79,7 +79,7 @@ export class NumfmtController {
             rangeData: numfmtRange,
             cellValue: numfmtMatrix.toJSON(),
         };
-        const command = new SheetCommand(pluginContext.getWorkBook(), config);
+        const command = new Command(pluginContext.getWorkBook(), config);
         commandManager.invoke(command);
     }
 
@@ -95,7 +95,7 @@ export class NumfmtController {
             rangeData: numfmtRange,
             cellValue: numfmtMatrix.toJSON(),
         };
-        const command = new SheetCommand(pluginContext.getWorkBook(), config);
+        const command = new Command(pluginContext.getWorkBook(), config);
         commandManager.invoke(command);
     }
 }

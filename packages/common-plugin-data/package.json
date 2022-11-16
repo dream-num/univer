@@ -3,16 +3,22 @@
     "version": "0.0.1",
     "description": "",
     "author": "",
-    "main": "./src/index.ts",
-    "module": "./src/index.ts",
-    "types": "./src/type.d.ts",
-    "publishConfig": {
-        "main": "./lib/index.umd.js",
-        "module": "./lib/index.es.js",
-        "types": "./lib/index.d.ts"
+    "main": "./lib/univer-common-plugin-data.cjs.js",
+    "module": "./lib/univer-common-plugin-data.es.js",
+    "browser": {
+        "./lib/univer-common-plugin-data.cjs.js": "./src/index.ts",
+        "./lib/univer-common-plugin-data.es.js": "./src/index.ts"
     },
+    "types": "./src/Types/index.d.ts",
     "exports": {
-        ".": "./src/index.ts",
+        ".": {
+            "import": {
+                "node": "./lib/univer-common-plugin-data.cjs.js",
+                "default": "./lib/univer-common-plugin-data.es.js"
+            },
+            "require": "./lib/univer-common-plugin-data.cjs.js",
+            "types": "./lib/univer-common-plugin-data.d.ts"
+        },
         "./*": "./src/*"
     },
     "directories": {
@@ -26,6 +32,8 @@
         "test": "cross-env NODE_ENV=--experimental-vm-modules jest",
         "dev": "vite",
         "build": "tsc && vite build",
+        "watch": "vite build",
+        "link": "pnpm link ./",
         "serve": "vite preview"
     },
     "license": "MIT",

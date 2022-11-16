@@ -5,17 +5,23 @@
     "keywords": [],
     "author": "DreamNum <msoffice2@126.com>",
     "license": "MIT",
-    "main": "./src/index.ts",
-    "module": "./src/index.ts",
-    "types": "./src/index.d.ts",
-    "exports": {
-        ".": "./src/index.ts",
-        "./*": "./src/*"
+    "main": "./lib/univer-style-universheet.cjs.js",
+    "module": "./lib/univer-style-universheet.es.js",
+    "browser": {
+        "./lib/univer-style-universheet.cjs.js": "./src/index.ts",
+        "./lib/univer-style-universheet.es.js": "./src/index.ts"
     },
-    "publishConfig": {
-        "main": "./lib/univer-style-univer.umd.js",
-        "module": "./lib/univer-style-univer.es.js",
-        "types": "./lib/univer-style-univer.d.ts"
+    "types": "./src/Types/index.d.ts",
+    "exports": {
+        ".": {
+            "import": {
+              "node": "./lib/univer-style-universheet.cjs.js",
+              "default": "./lib/univer-style-universheet.es.js"
+            },
+            "require": "./lib/univer-style-universheet.cjs.js",
+            "types": "./lib/univer-style-universheet.d.ts"
+          },
+          "./*": "./src/*"
     },
     "directories": {
         "lib": "lib"
@@ -25,6 +31,8 @@
         "test:cover": "cross-env NODE_ENV=--experimental-vm-modules jest --coverage",
         "dev": "vite",
         "build": "tsc && vite build",
+        "watch": "vite build",
+        "link": "pnpm link ./",
         "serve": "vite preview"
     },
     "devDependencies": {

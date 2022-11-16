@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import { name, version } from './package.json';
 import path from 'path';
+import createExternal from 'vite-plugin-external';
 
 const resolve = (url: string) => path.resolve(__dirname, url);
 
@@ -27,6 +28,13 @@ export default defineConfig({
         port: 3102,
         open: true, // // Automatically open the app in the browser on server start.
     },
+    plugins: [
+        createExternal({
+            externals: {
+                '@univer/core': '@univer/core'
+            },
+        }),
+    ],
     resolve: {
         alias: {
             '@': path.resolve(__dirname, 'src'),

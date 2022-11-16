@@ -55,8 +55,12 @@ export default defineConfig({
             externals: {
                 '@univer/core': '@univer/core',
                 '@univer/base-render': '@univer/base-render',
+                '@univer/base-component': '@univer/base-component',
                 '@univer/style-universheet': '@univer/style-universheet',
+                'css-vars-ponyfill': 'css-vars-ponyfill',
+                'nanoid': 'nanoid',
                 preact: 'preact',
+                react: 'react',
             },
         }),
     ],

@@ -46,11 +46,10 @@ export default defineConfig({
         createExternal({
             externals: {
                 '@univer/core': '@univer/core',
+                '@univer/base-render': '@univer/base-render',
                 'css-vars-ponyfill': 'css-vars-ponyfill',
                 'react-colorful': 'react-colorful',
-                // TODO: build ,still have "new Component$1()).isPureReactComponent"
-                preact: 'preact',
-                react: 'react',
+                preact: 'preact'
             },
         }),
     ],

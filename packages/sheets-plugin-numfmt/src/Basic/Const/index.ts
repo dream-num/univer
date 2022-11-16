@@ -2,4 +2,5 @@
 export * from './DEFAULT_DATA';
 export * from './FORMATDETAIL';
 export * from './PLUGIN_NAME';
+export * from './CONFIG';
 // @endindex

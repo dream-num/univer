@@ -6,7 +6,7 @@ import { NUMFMT_PLUGIN_NAME } from '../Basic/Const';
 import { DEFAULT_DATA } from '../Basic/Const/DEFAULT_DATA';
 import { NumfmtPlugin } from '../NumfmtPlugin';
 import styles from '../View/UI/index.module.less';
-import { NumftmConfig } from '../Basic/Const/Config';
+import { NumftmConfig } from '../Basic/Const';
 
 export class NumfmtController {
     protected _model: NumfmtModel;

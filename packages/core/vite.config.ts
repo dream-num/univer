@@ -34,19 +34,20 @@ export default defineConfig({
         port: 3102,
         open: true, // // Automatically open the app in the browser on server start.
     },
-
+    plugins: [
+        createExternal({
+            externals: {
+                'dayjs': 'dayjs',
+                'nanoid': 'nanoid',
+                'numeral': 'numeral',
+                'es6-proxy-polyfill': 'es6-proxy-polyfill',
+                'reflect-metadata': 'reflect-metadata',
+            },
+        }),
+    ],
     resolve: {
         alias: {
             // '@': path.resolve(__dirname, 'src'),
         },
     },
-
-    plugins: [
-        // createExternal({
-        //     externals: {
-        //         'es6-proxy-polyfill': 'es6-proxy-polyfill',
-        //         'reflect-metadata': 'reflect-metadata',
-        //     },
-        // }),
-    ],
 });

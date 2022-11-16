@@ -41,6 +41,7 @@ export default defineConfig({
                 '@univer/core': '@univer/core',
                 '@univer/style-universheet': '@univer/style-universheet',
                 preact: 'preact',
+                react: 'react',
             },
         }),
     ],

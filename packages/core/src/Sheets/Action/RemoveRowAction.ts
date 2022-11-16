@@ -2,7 +2,7 @@ import { InsertRow, RemoveRow } from '../Apply';
 import { CONVERTOR_OPERATION } from '../../Const';
 import { WorkSheetConvertor } from '../../Convertor';
 import { Workbook } from '../Domain';
-import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertRowActionData } from './InsertRowAction';
 
@@ -19,7 +19,7 @@ export interface IRemoveRowActionData extends ISheetActionData {
  *
  * @internal
  */
-export class RemoveRowAction extends SheetAction<
+export class RemoveRowAction extends SheetActionBase<
     IRemoveRowActionData,
     IInsertRowActionData
 > {

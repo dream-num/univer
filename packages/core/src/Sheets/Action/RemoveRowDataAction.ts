@@ -2,7 +2,7 @@ import { InsertDataRow, RemoveRowData } from '../Apply';
 import { Workbook } from '../Domain';
 import { ICellData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertRowDataActionData } from './InsertRowDataAction';
 
@@ -19,7 +19,7 @@ export interface IRemoveRowDataActionData extends ISheetActionData {
  *
  * @internal
  */
-export class RemoveRowDataAction extends SheetAction<
+export class RemoveRowDataAction extends SheetActionBase<
     IRemoveRowDataActionData,
     IInsertRowDataActionData
 > {

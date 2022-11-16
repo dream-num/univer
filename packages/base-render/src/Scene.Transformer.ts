@@ -36,6 +36,13 @@ const TransformerManagerTypeArray: TransformerManagerType[] = [
     TransformerManagerType.RESIZE_RB,
 ];
 
+interface transformState {
+    left?: number;
+    top?: number;
+    width?: number;
+    height?: number;
+}
+
 export interface ITransformerConfig {
     hoverEnabled?: boolean;
     hoverEnterFunc?: (e: IPointerEvent | IMouseEvent) => void;
@@ -184,7 +191,36 @@ export class Transformer implements ITransformerConfig {
         });
     }
 
-    private _moving(moveOffsetX: number, moveOffsetY: number, scrollTimer: ScrollTimer) {
+    private _updateControlChildren() {
+        this._updateControlIterator((control, applyObject) => {
+            const { left, top, width, height, scaleX, scaleY } = applyObject;
+            const children = control.getObjects();
+            children.forEach((o: BaseObject) => {
+                const key = o.oKey;
+                const type = this._checkTransformerType(key);
+
+                if (!type) {
+                    return true;
+                }
+
+                if (type === TransformerManagerType.OUTLINE) {
+                    o.transformByState(this._getOutlinePosition(width, height, scaleX, scaleY));
+                } else {
+                    const { left, top } = this._getRotateAnchorPosition(type, height, width, scaleX, scaleY);
+                    o.transformByState({
+                        left,
+                        top,
+                    });
+                }
+            });
+            control.transformByState({
+                left,
+                top,
+            });
+        });
+    }
+
+    private _anchorMoving(type: TransformerManagerType, moveOffsetX: number, moveOffsetY: number, scrollTimer: ScrollTimer) {
         const { scrollX, scrollY } = this._getCurrentScrollXY(scrollTimer);
         const x = moveOffsetX - this._viewportScrollX + scrollX;
         const y = moveOffsetY - this._viewportScrollY + scrollY;
@@ -193,60 +229,50 @@ export class Transformer implements ITransformerConfig {
         const moveTop = y - this._startOffsetY;
 
         this._selectedObjectMap.forEach((moveObject) => {
-            moveObject.translate(moveLeft + moveObject.left, moveTop + moveObject.top);
+            // console.log(moveLeft + moveObject.width, moveTop + moveObject.height);
+            const { left, top, width, height } = moveObject;
+            const state: transformState = {};
+
+            switch (type) {
+                case TransformerManagerType.RESIZE_LT:
+                    state.left = left + moveLeft;
+                    state.top = top + moveTop;
+                    state.width = width - moveLeft;
+                    state.height = height - moveTop;
+                    break;
+                case TransformerManagerType.RESIZE_CT:
+                    state.top = top + moveTop;
+                    state.height = height - moveTop;
+                    break;
+                case TransformerManagerType.RESIZE_RT:
+                    state.top = top + moveTop;
+                    state.width = width + moveLeft;
+                    state.height = height - moveTop;
+                    break;
+                case TransformerManagerType.RESIZE_LM:
+                    state.left = left + moveLeft;
+                    state.width = width - moveLeft;
+                    break;
+                case TransformerManagerType.RESIZE_RM:
+                    state.width = moveLeft + width;
+                    break;
+                case TransformerManagerType.RESIZE_LB:
+                    state.left = left + moveLeft;
+                    state.width = width - moveLeft;
+                    state.height = height + moveTop;
+                    break;
+                case TransformerManagerType.RESIZE_CB:
+                    state.height = moveTop + height;
+                    break;
+                case TransformerManagerType.RESIZE_RB:
+                    state.width = moveLeft + width;
+                    state.height = moveTop + height;
+                    break;
+            }
+            moveObject.transformByState(state);
         });
 
-        this._startOffsetX = x;
-        this._startOffsetY = y;
-    }
-
-    private _updateActiveObjectList(applyObject: BaseObject, evt: IPointerEvent | IMouseEvent) {
-        if (this._selectedObjectMap.has(applyObject.oKey)) {
-            return;
-        }
-
-        if (!evt.ctrlKey) {
-            this._selectedObjectMap.clear();
-            this._clearControl();
-        }
-        this._selectedObjectMap.set(applyObject.oKey, applyObject);
-        this._createControl(applyObject);
-    }
-
-    private _getCurrentScrollXY(scrollTimer: ScrollTimer) {
-        const viewport = scrollTimer.getViewportByCoord(this.getScene());
-        let scrollX = 0;
-        let scrollY = 0;
-        if (!viewport) {
-            return {
-                scrollX,
-                scrollY,
-            };
-        }
-        const actualScroll = viewport.getActualScroll(viewport.scrollX, viewport.scrollY);
-        return {
-            scrollX: actualScroll.x,
-            scrollY: actualScroll.y,
-        };
-    }
-
-    private _anchorMoving(moveOffsetX: number, moveOffsetY: number, scrollTimer: ScrollTimer) {
-        const { scrollX, scrollY } = this._getCurrentScrollXY(scrollTimer);
-        const x = moveOffsetX - this._viewportScrollX + scrollX;
-        const y = moveOffsetY - this._viewportScrollY + scrollY;
-
-        const moveLeft = x - this._startOffsetX;
-        const moveTop = y - this._startOffsetY;
-
-        // this._transformerControlMap.forEach((moveObject) => {
-        //     // moveObject.translate(moveLeft + moveObject.left, moveTop + moveObject.top);
-        //     moveObject.resize(moveLeft + moveObject.width, moveTop + moveObject.height);
-        // });
-
-        this._selectedObjectMap.forEach((moveObject) => {
-            console.log(moveLeft + moveObject.width, moveTop + moveObject.height);
-            moveObject.resize(moveLeft + moveObject.width, moveTop + moveObject.height);
-        });
+        this._updateControlChildren();
 
         this._startOffsetX = x;
         this._startOffsetY = y;
@@ -272,9 +298,9 @@ export class Transformer implements ITransformerConfig {
 
             this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
                 const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
-                this._anchorMoving(moveOffsetX, moveOffsetY, scrollTimer);
+                this._anchorMoving(type, moveOffsetX, moveOffsetY, scrollTimer);
                 scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
-                    this._anchorMoving(moveOffsetX, moveOffsetY, scrollTimer);
+                    this._anchorMoving(type, moveOffsetX, moveOffsetY, scrollTimer);
                 });
             });
 
@@ -316,12 +342,19 @@ export class Transformer implements ITransformerConfig {
         });
     }
 
-    private _createResizeAnchor(type: TransformerManagerType, applyObject: BaseObject, zIndex: number) {
-        let { height, width, scaleX, scaleY } = applyObject;
+    private _getOutlinePosition(width: number, height: number, scaleX: number, scaleY: number) {
+        return {
+            left: -this.borderSpacing - this.borderStrokeWidth,
+            top: -this.borderSpacing - this.borderStrokeWidth,
+            width: width + this.borderSpacing * 2,
+            height: height + this.borderSpacing * 2,
+        };
+    }
 
-        width *= scaleX;
+    private _getRotateAnchorPosition(type: TransformerManagerType, height: number, width: number, scaleX: number, scaleY: number) {
+        // width *= scaleX;
 
-        height *= scaleY;
+        // height *= scaleY;
 
         let left = -this.anchorSize / 2;
         let top = -this.anchorSize / 2;
@@ -329,6 +362,16 @@ export class Transformer implements ITransformerConfig {
         let cursor = CURSOR_TYPE.NORTH_WEST_RESIZE;
 
         switch (type) {
+            case TransformerManagerType.ROTATE:
+                left = width / 2 - this.rotateSize / 2;
+                top = -this.rotateAnchorOffset - this.borderSpacing - this.borderStrokeWidth * 2 - this.rotateSize;
+                cursor = CURSOR_TYPE.MOVE;
+                break;
+            case TransformerManagerType.ROTATE_LINE:
+                left = width / 2;
+                top = -this.rotateAnchorOffset - this.borderSpacing - this.borderStrokeWidth;
+                cursor = CURSOR_TYPE.MOVE;
+                break;
             case TransformerManagerType.RESIZE_LT:
                 left += -this.borderSpacing - this.borderStrokeWidth;
                 top += -this.borderSpacing - this.borderStrokeWidth;
@@ -370,6 +413,18 @@ export class Transformer implements ITransformerConfig {
                 break;
         }
 
+        return {
+            left: left * scaleX,
+            top: top * scaleY,
+            cursor,
+        };
+    }
+
+    private _createResizeAnchor(type: TransformerManagerType, applyObject: BaseObject, zIndex: number) {
+        let { height, width, scaleX, scaleY } = applyObject;
+
+        const { left, top, cursor } = this._getRotateAnchorPosition(type, height, width, scaleX, scaleY);
+
         const anchor = new Rect(`${type}_${zIndex}`, {
             zIndex: zIndex - 1,
             fill: this.anchorFill,
@@ -388,12 +443,57 @@ export class Transformer implements ITransformerConfig {
         return anchor;
     }
 
-    private _updateControl() {
+    private _checkTransformerType(oKey: string) {
+        if (oKey.indexOf(TransformerManagerType.OUTLINE) > -1) {
+            return TransformerManagerType.OUTLINE;
+        }
+
+        if (oKey.indexOf(TransformerManagerType.ROTATE) > -1) {
+            return TransformerManagerType.ROTATE;
+        }
+        if (oKey.indexOf(TransformerManagerType.ROTATE_LINE) > -1) {
+            return TransformerManagerType.ROTATE_LINE;
+        }
+
+        if (oKey.indexOf(TransformerManagerType.RESIZE_LT) > -1) {
+            return TransformerManagerType.RESIZE_LT;
+        }
+        if (oKey.indexOf(TransformerManagerType.RESIZE_CT) > -1) {
+            return TransformerManagerType.RESIZE_CT;
+        }
+        if (oKey.indexOf(TransformerManagerType.RESIZE_RT) > -1) {
+            return TransformerManagerType.RESIZE_RT;
+        }
+        if (oKey.indexOf(TransformerManagerType.RESIZE_LM) > -1) {
+            return TransformerManagerType.RESIZE_LM;
+        }
+        if (oKey.indexOf(TransformerManagerType.RESIZE_RM) > -1) {
+            return TransformerManagerType.RESIZE_RM;
+        }
+        if (oKey.indexOf(TransformerManagerType.RESIZE_LB) > -1) {
+            return TransformerManagerType.RESIZE_LB;
+        }
+        if (oKey.indexOf(TransformerManagerType.RESIZE_CB) > -1) {
+            return TransformerManagerType.RESIZE_CB;
+        }
+        if (oKey.indexOf(TransformerManagerType.RESIZE_RB) > -1) {
+            return TransformerManagerType.RESIZE_RB;
+        }
+    }
+
+    private _updateControlIterator(func: (control: Group, applyObject: BaseObject) => void) {
         this._transformerControlMap.forEach((control, oKey) => {
             const applyObject = this._selectedObjectMap.get(oKey);
             if (!applyObject) {
                 return true;
             }
+
+            func(control, applyObject);
+        });
+    }
+
+    private _updateControl() {
+        this._updateControlIterator((control, applyObject) => {
             const { left, top } = applyObject;
             control.transformByState({
                 left,
@@ -443,32 +543,31 @@ export class Transformer implements ITransformerConfig {
             const outline = new Rect(`${TransformerManagerType.OUTLINE}_${zIndex}`, {
                 zIndex: zIndex - 1,
                 evented: false,
-                left: -this.borderSpacing - this.borderStrokeWidth,
-                top: -this.borderSpacing - this.borderStrokeWidth,
-                width: width + this.borderSpacing * 2,
-                height: height + this.borderSpacing * 2,
                 strokeWidth: this.borderStrokeWidth,
                 stroke: this.borderStroke,
+                ...this._getOutlinePosition(width, height, scaleX, scaleY),
             });
             groupElements.push(outline);
         }
 
         if (this.resizeEnabled) {
+            const { left: lineLeft, top: lineTop } = this._getRotateAnchorPosition(TransformerManagerType.ROTATE_LINE, height, width, scaleX, scaleY);
             const rotateLine = new Rect(`${TransformerManagerType.ROTATE_LINE}_${zIndex}`, {
                 zIndex: zIndex - 1,
                 evented: false,
-                top: -this.rotateAnchorOffset - this.borderSpacing - this.borderStrokeWidth,
-                left: width / 2,
+                left: lineLeft,
+                top: lineTop,
                 height: this.rotateAnchorOffset,
                 width: 1,
                 strokeWidth: this.borderStrokeWidth,
                 stroke: this.borderStroke,
             });
 
+            const { left, top, cursor } = this._getRotateAnchorPosition(TransformerManagerType.ROTATE, height, width, scaleX, scaleY);
             const rotate = new Rect(`${TransformerManagerType.ROTATE}_${zIndex}`, {
                 zIndex: zIndex - 1,
-                top: -this.rotateAnchorOffset - this.borderSpacing - this.borderStrokeWidth * 2 - this.rotateSize,
-                left: width / 2 - this.rotateSize / 2,
+                left,
+                top,
                 height: this.rotateSize,
                 width: this.rotateSize,
                 radius: this.rotateCornerRadius,
@@ -476,7 +575,7 @@ export class Transformer implements ITransformerConfig {
                 stroke: this.borderStroke,
             });
             this._attachEventToRotate(rotate);
-            this._attachHover(rotate, CURSOR_TYPE.MOVE, CURSOR_TYPE.DEFAULT);
+            this._attachHover(rotate, cursor, CURSOR_TYPE.DEFAULT);
             groupElements.push(rotateLine, rotate);
         }
 
@@ -516,6 +615,52 @@ export class Transformer implements ITransformerConfig {
 
     getScene() {
         return this._scene;
+    }
+
+    private _moving(moveOffsetX: number, moveOffsetY: number, scrollTimer: ScrollTimer) {
+        const { scrollX, scrollY } = this._getCurrentScrollXY(scrollTimer);
+        const x = moveOffsetX - this._viewportScrollX + scrollX;
+        const y = moveOffsetY - this._viewportScrollY + scrollY;
+
+        const moveLeft = x - this._startOffsetX;
+        const moveTop = y - this._startOffsetY;
+
+        this._selectedObjectMap.forEach((moveObject) => {
+            moveObject.translate(moveLeft + moveObject.left, moveTop + moveObject.top);
+        });
+
+        this._startOffsetX = x;
+        this._startOffsetY = y;
+    }
+
+    private _updateActiveObjectList(applyObject: BaseObject, evt: IPointerEvent | IMouseEvent) {
+        if (this._selectedObjectMap.has(applyObject.oKey)) {
+            return;
+        }
+
+        if (!evt.ctrlKey) {
+            this._selectedObjectMap.clear();
+            this._clearControl();
+        }
+        this._selectedObjectMap.set(applyObject.oKey, applyObject);
+        this._createControl(applyObject);
+    }
+
+    private _getCurrentScrollXY(scrollTimer: ScrollTimer) {
+        const viewport = scrollTimer.getViewportByCoord(this.getScene());
+        let scrollX = 0;
+        let scrollY = 0;
+        if (!viewport) {
+            return {
+                scrollX,
+                scrollY,
+            };
+        }
+        const actualScroll = viewport.getActualScroll(viewport.scrollX, viewport.scrollY);
+        return {
+            scrollX: actualScroll.x,
+            scrollY: actualScroll.y,
+        };
     }
 
     attachTo(applyObject: BaseObject) {

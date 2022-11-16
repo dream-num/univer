@@ -1,17 +1,17 @@
 import { CommandBase } from './CommandBase';
 import { CommandManager } from './CommandManager';
 import { Workbook } from '../Sheets/Domain';
-import { ISheetActionData } from './SheetAction';
+import { IActionData } from './ActionBase';
 
 /**
  * Execute the undo-redo command
  *
  * TODO: SlideCommand/DocCommand
  */
-export class SheetCommand extends CommandBase {
+export class Command extends CommandBase {
     protected unit: Workbook;
 
-    constructor(workbook: Workbook, ...list: ISheetActionData[]) {
+    constructor(workbook: Workbook, ...list: IActionData[]) {
         super(list);
         this.unit = workbook;
         this._actions = [];

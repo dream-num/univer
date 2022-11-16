@@ -1,7 +1,7 @@
 // @index(['./*.ts','./Action/index.ts'], f => `export * from '${f.path}'`)
-export * from './SheetAction';
+export * from './SheetActionBase';
 export * from './ActionObservers';
-export * from './SheetCommand';
+export * from './Command';
 export * from './CommandBase';
 export * from './CommandManager';
 export * from './UndoManager';

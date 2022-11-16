@@ -1,5 +1,5 @@
 import { SheetContext } from '../../Basics';
-import { SheetCommand, CommandManager } from '../../Command';
+import { Command, CommandManager } from '../../Command';
 import { ISetSelectionActivateActionData } from '../Action';
 import { ACTION_NAMES, DEFAULT_SELECTION } from '../../Const';
 import { Direction } from '../../Enum';
@@ -171,7 +171,7 @@ export class Selection {
             currentCell,
         };
 
-        const command = new SheetCommand(_context.getWorkBook(), setSelection);
+        const command = new Command(_context.getWorkBook(), setSelection);
         _commandManager.invoke(command);
 
         // 设置后获取范围(以A1:B10形式)
@@ -286,7 +286,7 @@ export class Selection {
             currentCell: range,
         };
 
-        const command = new SheetCommand(_context.getWorkBook(), setSelection);
+        const command = new Command(_context.getWorkBook(), setSelection);
         _commandManager.invoke(command);
 
         return this;

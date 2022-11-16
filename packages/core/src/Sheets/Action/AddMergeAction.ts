@@ -4,7 +4,7 @@ import { CONVERTOR_OPERATION } from '../../Const';
 import { WorkSheetConvertor } from '../../Convertor';
 import { Workbook } from '../Domain';
 import { IRangeData } from '../../Interfaces';
-import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers } from '../../Command/ActionObservers';
 import { IRemoveMergeActionData } from './RemoveMergeAction';
 
@@ -21,7 +21,7 @@ export interface IAddMergeActionData extends ISheetActionData {
  *
  * @internal
  */
-export class AddMergeAction extends SheetAction<
+export class AddMergeAction extends SheetActionBase<
     IAddMergeActionData,
     IRemoveMergeActionData,
     IRangeData[]

@@ -1,10 +1,10 @@
-import { SheetAction, ISheetActionData, Workbook, ActionObservers, WorkSheetConvertor, CONVERTOR_OPERATION, ActionType } from '@univer/core';
+import { SheetActionBase, ISheetActionData, Workbook, ActionObservers, WorkSheetConvertor, CONVERTOR_OPERATION, ActionType } from '@univer/core';
 import { SetFrozenCancel } from '../Apply/SetFrozenCancel';
 import { SetFrozenColumns } from '../Apply/SetFrozenColumns';
 import { SetFrozenRows } from '../Apply/SetFrozenRows';
 import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
 
-export class SetFrozenCancelAction extends SheetAction<ISheetActionData> {
+export class SetFrozenCancelAction extends SheetActionBase<ISheetActionData> {
     _numbers: number[] = [];
 
     constructor(actionData: ISheetActionData, workbook: Workbook, observers: ActionObservers) {

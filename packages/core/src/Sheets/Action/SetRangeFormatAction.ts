@@ -5,7 +5,7 @@ import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
 import { Workbook } from '../Domain';
 import { IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
 /**
@@ -19,7 +19,7 @@ export interface ISetRangeFormatActionData extends ISheetActionData {
 /**
  * @internal
  */
-export class SetRangeFormatAction extends SheetAction<
+export class SetRangeFormatAction extends SheetActionBase<
     ISetRangeFormatActionData,
     ISetRangeFormatActionData,
     ObjectMatrixPrimitiveType<string>

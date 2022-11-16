@@ -4,7 +4,7 @@ import { Workbook } from '../Domain';
 import { Dimension } from '../../Enum/Dimension';
 import { ICellData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { SheetAction, ISheetActionData } from '../../Command/SheetAction';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IDeleteRangeActionData } from './DeleteRangeAction';
 
@@ -22,7 +22,7 @@ export interface IInsertRangeActionData extends ISheetActionData {
  *
  * @internal
  */
-export class InsertRangeAction extends SheetAction<
+export class InsertRangeAction extends SheetActionBase<
     IInsertRangeActionData,
     IDeleteRangeActionData
 > {

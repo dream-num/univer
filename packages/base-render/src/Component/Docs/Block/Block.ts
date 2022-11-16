@@ -1,4 +1,4 @@
-import { BlockType, SheetContext, IBlockElement } from '@univer/core';
+import { BlockType, ContextBase, IBlockElement } from '@univer/core';
 import { dealWidthParagraph, dealWithBlockError } from '.';
 import { updateBlockIndex } from '..';
 import { dealWidthCustomBlock, IDocumentSkeletonPage, ISectionBreakConfig, ISkeletonResourceReference } from '../../..';
@@ -9,7 +9,7 @@ export function dealWithBlocks(
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
     preRenderedBlockIdMap?: Map<string, boolean>,
-    context?: SheetContext
+    context?: ContextBase
 ) {
     const allCurrentSkeletonPages: IDocumentSkeletonPage[] = [];
     const renderedBlockIdMap = new Map<string, boolean>();

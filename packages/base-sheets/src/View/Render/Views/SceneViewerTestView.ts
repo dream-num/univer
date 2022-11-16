@@ -31,9 +31,7 @@ export class SceneViewerTestView extends BaseView {
 
         // 鼠标滚轮缩放
         scene.on(EVENT_TYPE.wheel, (evt: unknown, state: EventState) => {
-            return;
             const e = evt as IWheelEvent;
-            console.log('Wheel11112312313123132');
             if (e.ctrlKey) {
                 const deltaFactor = Math.abs(e.deltaX);
                 let scrollNum = deltaFactor < 40 ? 0.05 : deltaFactor < 80 ? 0.02 : 0.01;

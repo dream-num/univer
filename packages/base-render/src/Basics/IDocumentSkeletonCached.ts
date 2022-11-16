@@ -226,3 +226,9 @@ export enum SpanType {
     MULTI_LINE,
     CUSTOM,
 }
+
+export enum PageLayoutType {
+    VERTICAL,
+    HORIZONTAL,
+    AUTO,
+}

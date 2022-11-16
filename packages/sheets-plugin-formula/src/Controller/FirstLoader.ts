@@ -5,8 +5,6 @@ export function firstLoader(formulaController: FormulaController) {
     const dataModel = formulaController.getDataModel();
     const engine = formulaController.getFormulaEngine();
 
-    console.log(dataModel, dataModel.getFormulaData());
-
     const sheetDataPromise = engine.execute(formulaController.getUnitId(), dataModel.getFormulaData(), formulaController.toInterpreterCalculateProps(), true);
 
     const commandManager = formulaController.getCommandManager();
@@ -14,6 +12,7 @@ export function firstLoader(formulaController: FormulaController) {
     const workBook = formulaController.getWorkbook();
 
     sheetDataPromise.then((sheetData) => {
+        if (!sheetData) return;
         const sheetIds = Object.keys(sheetData);
 
         const actionList: ISetRangeDataActionData[] = [];

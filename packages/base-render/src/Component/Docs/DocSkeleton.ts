@@ -1,6 +1,6 @@
 import {
     ColumnSeparatorType,
-    SheetContext,
+    ContextBase,
     GridType,
     HorizontalAlign,
     IBlockElement,
@@ -57,7 +57,7 @@ export class DocumentSkeleton extends Skeleton {
         return this._top;
     }
 
-    constructor(documentData: IDocumentData, context: SheetContext) {
+    constructor(documentData: IDocumentData, context: ContextBase) {
         super(context);
         this._documentData = documentData;
     }
@@ -71,6 +71,10 @@ export class DocumentSkeleton extends Skeleton {
 
     getSkeleton() {
         return this._skeleton;
+    }
+
+    getPageSize() {
+        return this._documentData.documentStyle.pageSize;
     }
 
     setPosition(left: number, top: number) {
@@ -398,7 +402,7 @@ export class DocumentSkeleton extends Skeleton {
         };
     }
 
-    static create(documentData: IDocumentData, context: SheetContext) {
+    static create(documentData: IDocumentData, context: ContextBase) {
         return new DocumentSkeleton(documentData, context);
     }
 }

@@ -1,7 +1,6 @@
-import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect } from '@univer/base-render';
+import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect, ScrollTimer } from '@univer/base-render';
 import { Direction, ISelection, makeCellToSelection, Nullable, Observer } from '@univer/core';
 import { SelectionModel } from '../../Model';
-import { ScrollTimer } from '../ScrollTimer';
 import { DEFAULT_SELECTION_CONFIG, SelectionControl, SELECTION_TYPE } from './SelectionController';
 
 enum SELECTION_DRAG_KEY {
@@ -322,14 +321,14 @@ export class SelectionControlDragAndDrop {
             top: endY - startY - DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
         });
 
-        this._selectionDragShape.visible = true;
+        this._selectionDragShape.show();
         this._selectionDragShape.translate(startX, startY);
 
         this._selectionDragShape.makeDirty(true);
     }
 
     hide() {
-        this._selectionDragShape.visible = false;
+        this._selectionDragShape.hide();
         this._selectionDragShape.makeDirty(true);
     }
 

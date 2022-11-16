@@ -146,7 +146,7 @@ export class SelectionControl {
             this._backgroundControlBottom
         );
 
-        this._selectionShape.visible = false;
+        this._selectionShape.hide();
 
         this._selectionShape.evented = false;
 
@@ -188,7 +188,7 @@ export class SelectionControl {
         this._updateBackgroundControl();
         this._updateDragAndFill();
 
-        this.selectionShape.visible = true;
+        this.selectionShape.show();
         this.selectionShape.translate(startX, startY);
 
         this.selectionShape.makeDirty(true);

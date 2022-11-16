@@ -73,7 +73,7 @@ export const DEFAULT_WORKBOOK: IWorkbookConfig = {
 export const DEFAULT_WORKSHEET: IWorksheetConfig = {
     type: SheetTypes.GRID,
     name: '',
-    id: '',
+    id: 'sheet-01',
     tabColor: '',
     hidden: BooleanNumber.FALSE,
     freezeColumn: -1,
@@ -91,7 +91,7 @@ export const DEFAULT_WORKSHEET: IWorksheetConfig = {
     cellData: {},
     rowData: {},
     columnData: {},
-    status: BooleanNumber.FALSE,
+    status: BooleanNumber.TRUE,
     showGridlines: BooleanNumber.TRUE,
     rowTitle: {
         width: 46,

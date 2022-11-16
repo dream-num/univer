@@ -1,11 +1,12 @@
-import { Command, Range, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType, PLUGIN_NAMES, ACTION_NAMES } from '@univer/core';
-import { BaseComponentRender, BaseComponentSheet } from '@univer/base-component';
+import { SheetCommand, Range, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType, PLUGIN_NAMES, ACTION_NAMES } from '@univer/core';
+import { BaseComponentRender } from '@univer/base-component';
 import { IToolBarItemProps, SheetPlugin } from '@univer/base-sheets';
 import { NumfmtModel } from '../Model/NumfmtModel';
 import { NUMFMT_PLUGIN_NAME } from '../Basic/Const';
 import { DEFAULT_DATA } from '../Basic/Const/DEFAULT_DATA';
 import { NumfmtPlugin } from '../NumfmtPlugin';
 import styles from '../View/UI/index.module.less';
+import { NumftmConfig } from '../Basic/Const/Config';
 
 export class NumfmtController {
     protected _model: NumfmtModel;
@@ -23,14 +24,12 @@ export class NumfmtController {
         this._plugin = plugin;
         this._sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
 
-        this.initRegisterComponent();
-
         this._numfmtList = {
             name: NUMFMT_PLUGIN_NAME,
             type: 0,
             tooltipLocale: 'toolbar.moreFormats',
             className: styles.customFormat,
-            show: true,
+            show: NumftmConfig.show,
             border: true,
             children: [
                 ...DEFAULT_DATA,
@@ -63,20 +62,6 @@ export class NumfmtController {
         this._sheetPlugin.addToolButton(this._numfmtList);
     }
 
-    // 注册自定义组件
-    initRegisterComponent() {
-        const component = this._plugin.getContext().getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this._render = component.getComponentRender();
-
-        const registerIcon = {
-            RightIcon: this._render.renderFunction('RightIcon'),
-        };
-
-        for (let k in registerIcon) {
-            this._sheetPlugin.registerComponent(k, registerIcon[k]);
-        }
-    }
-
     getNumfmtBySheetIdConfig(sheetId: string): ObjectMatrixPrimitiveType<string> {
         return this._model.getNumfmtBySheetIdConfig(sheetId);
     }
@@ -94,7 +79,7 @@ export class NumfmtController {
             rangeData: numfmtRange,
             cellValue: numfmtMatrix.toJSON(),
         };
-        const command = new Command(pluginContext.getWorkBook(), config);
+        const command = new SheetCommand(pluginContext.getWorkBook(), config);
         commandManager.invoke(command);
     }
 
@@ -110,7 +95,7 @@ export class NumfmtController {
             rangeData: numfmtRange,
             cellValue: numfmtMatrix.toJSON(),
         };
-        const command = new Command(pluginContext.getWorkBook(), config);
+        const command = new SheetCommand(pluginContext.getWorkBook(), config);
         commandManager.invoke(command);
     }
 }

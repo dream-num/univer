@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet } from '@univer/base-component';
+import { BaseComponentRender } from '@univer/base-component';
 import { IToolBarItemProps, SheetPlugin } from '@univer/base-sheets';
 import { PLUGIN_NAMES } from '@univer/core';
 import { FIND_PLUGIN_NAME } from '../Const/PLUGIN_NAME';
@@ -16,8 +16,6 @@ export class FindController {
     constructor(plugin: FindPlugin) {
         this._plugin = plugin;
         this._sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
-
-        this.initRegisterComponent();
 
         this._findList = {
             name: FIND_PLUGIN_NAME,
@@ -86,22 +84,6 @@ export class FindController {
         };
 
         this._sheetPlugin.addToolButton(this._findList);
-    }
-
-    // 注册自定义组件
-    initRegisterComponent() {
-        const component = this._plugin.getContext().getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this._render = component.getComponentRender();
-
-        const registerIcon = {
-            SearchIcon: this._render.renderFunction('SearchIcon'),
-            ReplaceIcon: this._render.renderFunction('ReplaceIcon'),
-            LocationIcon: this._render.renderFunction('LocationIcon'),
-        };
-
-        for (let k in registerIcon) {
-            this._sheetPlugin.registerComponent(k, registerIcon[k]);
-        }
     }
 
     showModal(name: string, show: boolean) {

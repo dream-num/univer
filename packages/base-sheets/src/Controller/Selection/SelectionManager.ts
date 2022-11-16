@@ -1,11 +1,10 @@
-import { IMouseEvent, IPointerEvent, Rect, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle } from '@univer/base-render';
-import { Nullable, Observer, Worksheet, ISelection, makeCellToSelection, IRangeData, RangeList, Range, IRangeCellData, ICellInfo, Command, Direction } from '@univer/core';
+import { IMouseEvent, IPointerEvent, Rect, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, ScrollTimer } from '@univer/base-render';
+import { Nullable, Observer, Worksheet, ISelection, makeCellToSelection, IRangeData, RangeList, Range, IRangeCellData, ICellInfo, SheetCommand, Direction } from '@univer/core';
 import { ACTION_NAMES, ISelectionsConfig } from '../../Basics';
 import { ISelectionModelValue, ISetSelectionValueActionData } from '../../Model/Action/SetSelectionValueAction';
 import { SelectionModel } from '../../Model/SelectionModel';
 import { SheetPlugin } from '../../SheetPlugin';
 import { SheetView } from '../../View/Render/Views/SheetView';
-import { ScrollTimer } from '../ScrollTimer';
 import { SelectionControl, SELECTION_TYPE } from './SelectionController';
 
 /**
@@ -256,7 +255,7 @@ export class SelectionManager {
             selections: models,
         };
 
-        const command = new Command(workbook, value);
+        const command = new SheetCommand(workbook, value);
         commandManager.invoke(command);
     }
 
@@ -288,7 +287,7 @@ export class SelectionManager {
             selections: selectionModelsValue,
         };
 
-        const command = new Command(workbook, value);
+        const command = new SheetCommand(workbook, value);
         commandManager.invoke(command);
     }
 
@@ -497,6 +496,7 @@ export class SelectionManager {
             this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
                 this.moving(moveEvt, selectionControl);
                 const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+
                 scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
                     this.moving(moveEvt, selectionControl);
                 });
@@ -507,8 +507,18 @@ export class SelectionManager {
                 scene.onPointerMoveObserver.remove(this._moveObserver);
                 scene.onPointerUpObserver.remove(this._upObserver);
                 scene.enableEvent();
+
                 scrollTimer.stopScroll();
             });
+
+            // document.addEventListener('pointerup', () => {
+            //     this.up();
+            //     scene.onPointerMoveObserver.remove(this._moveObserver);
+            //     scene.onPointerUpObserver.remove(this._upObserver);
+            //     scene.enableEvent();
+
+            //     scrollTimer.stopScroll();
+            // });
         });
     }
 
@@ -519,6 +529,8 @@ export class SelectionManager {
      * @returns
      */
     moving(moveEvt: IPointerEvent | IMouseEvent, selectionControl: Nullable<SelectionControl>) {
+        console.log('moving');
+
         const main = this._mainComponent;
         const { offsetX: moveOffsetX, offsetY: moveOffsetY, clientX, clientY } = moveEvt;
         const { startRow, startColumn, endRow, endColumn } = this._startSelectionRange;
@@ -716,7 +728,6 @@ export class SelectionManager {
     private _initializeObserver() {
         const context = this._plugin.getContext();
         context.getContextObserver('onAfterChangeActiveSheetObservable').add(() => {
-            // this._plugin.getCanvasView().updateToSheet(this._plugin.getContext().getWorkBook().getActiveSheet()!);
             this.renderCurrentControls();
         });
 
@@ -724,7 +735,6 @@ export class SelectionManager {
             ?.getContext()
             .getContextObserver('onSheetRenderDidMountObservable')
             .add(() => {
-                console.log('onSheetRenderDidMountObservable===id==', this.getContext().getWorkBook().getUnitId())
                 this.renderCurrentControls();
             });
     }

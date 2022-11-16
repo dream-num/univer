@@ -71,7 +71,7 @@ class UIController {
         const manager = plugin.getSelectionManager();
         plugin.getObserver('onChangeSelectionObserver')?.add(() => {
             const rangeList = manager.getActiveRangeList();
-            if (rangeList) {
+            if (rangeList && this._countBar) {
                 this._totalRangeList(rangeList);
             }
         });

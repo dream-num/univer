@@ -133,4 +133,11 @@ export class Group extends BaseObject {
 
     // 判断被选中的唯一对象
     pick(coord: Vector2) {}
+
+    dispose() {
+        this.getObjects().forEach((o) => {
+            o.dispose();
+        });
+        super.dispose();
+    }
 }

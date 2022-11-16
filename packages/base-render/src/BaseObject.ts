@@ -66,6 +66,8 @@ export abstract class BaseObject {
 
     private _cursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
 
+    private _isTransformer = false;
+
     groupKey?: string;
 
     isInGroup: boolean = false;
@@ -413,16 +415,28 @@ export abstract class BaseObject {
         return this._visible;
     }
 
-    set visible(state: boolean) {
-        this._visible = state;
-    }
-
     get debounceParentDirty() {
         return this._debounceParentDirty;
     }
 
     set debounceParentDirty(state: boolean) {
         this._debounceParentDirty = state;
+    }
+
+    get isTransformer() {
+        return this._isTransformer;
+    }
+
+    set isTransformer(state: boolean) {
+        this._isTransformer = state;
+    }
+
+    hide() {
+        this._visible = false;
+    }
+
+    show() {
+        this._visible = true;
     }
 
     render(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
@@ -473,31 +487,41 @@ export abstract class BaseObject {
     triggerPointerMove(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerMoveObserver.notifyObservers(evt)?.stopPropagation) {
             this._parent?.triggerPointerMove(evt);
+            return false;
         }
+        return true;
     }
 
     triggerPointerDown(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerDownObserver.notifyObservers(evt)?.stopPropagation) {
             this._parent?.triggerPointerDown(evt);
+            return false;
         }
+        return true;
     }
 
     triggerPointerUp(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerUpObserver.notifyObservers(evt)?.stopPropagation) {
             this._parent?.triggerPointerUp(evt);
+            return false;
         }
+        return true;
     }
 
     triggerDblclick(evt: IPointerEvent | IMouseEvent) {
         if (!this.onDblclickObserver.notifyObservers(evt)?.stopPropagation) {
             this._parent?.triggerDblclick(evt);
+            return false;
         }
+        return true;
     }
 
     triggerMouseWheel(evt: IWheelEvent) {
         if (!this.onMouseWheelObserver.notifyObservers(evt)?.stopPropagation) {
             this._parent?.triggerMouseWheel(evt);
+            return false;
         }
+        return true;
     }
 
     // triggerKeyDown(evt: IKeyboardEvent) {
@@ -513,25 +537,33 @@ export abstract class BaseObject {
     triggerPointerOut(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerOutObserver.notifyObservers(evt)?.stopPropagation) {
             this._parent?.triggerPointerOut(evt);
+            return false;
         }
+        return true;
     }
 
     triggerPointerLeave(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerLeaveObserver.notifyObservers(evt)?.stopPropagation) {
             this._parent?.triggerPointerLeave(evt);
+            return false;
         }
+        return true;
     }
 
     triggerPointerOver(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerOverObserver.notifyObservers(evt)) {
             this._parent?.triggerPointerOver(evt);
+            return false;
         }
+        return true;
     }
 
     triggerPointerEnter(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerEnterObserver.notifyObservers(evt)?.stopPropagation) {
             this._parent?.triggerPointerEnter(evt);
+            return false;
         }
+        return true;
     }
 
     dispose() {

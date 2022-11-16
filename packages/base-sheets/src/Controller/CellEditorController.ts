@@ -7,8 +7,6 @@ import { CANVAS_VIEW_KEY } from '../View/Render/BaseView';
 import { CellEditExtensionManager } from '../Basics/Register/CellEditRegister';
 import { RichText } from '../View/UI/RichText/RichText';
 
-const CELL_EDIT_HIDDEN_TOP = -10000;
-
 /**
  * Cell Editor
  */
@@ -58,9 +56,9 @@ export class CellEditorController {
                 this.richTextEditEle = $$('div', this.richTextEle);
                 this.richText = cellEditor;
 
-                // focus
-                this.richTextEditEle.focus();
-                this.richTextEditEle.tabIndex = 1;
+                // // focus
+                // this.richTextEditEle.focus();
+                // this.richTextEditEle.tabIndex = 1;
 
                 this.hideEditContainer();
 
@@ -68,14 +66,6 @@ export class CellEditorController {
                 this._handleKeyboardAction();
             });
         });
-
-        this._plugin.context
-            .getObserverManager()
-            .getObserver('onAfterChangeUILocaleObservable', 'core')
-            ?.add(() => {
-                // this._sheetContainer.setToolBar(this._toolBarModel.toolList);
-            });
-
         // If other plugins are loaded asynchronously, they may be initialized after the rendering layer is loaded, and they will not receive obs listeners.
         this._plugin.context
             .getObserverManager()
@@ -151,38 +141,6 @@ export class CellEditorController {
                         break;
                 }
             }
-
-            // switch (evt.code) {
-            //     case 'Enter':
-            //         if (this.isEditMode) {
-            //             this.exitEditMode();
-            //         } else {
-            //             this.enterEditMode();
-            //         }
-            //         break;
-
-            //     case 'Tab':
-            //         break;
-
-            //     case ' ':
-            //         break;
-
-            //     case 'Shift':
-            //         break;
-
-            //     case 'Control':
-            //         break;
-
-            //     case 'Meta':
-            //         break;
-
-            //     case 'Alt':
-            //         break;
-
-            //     default:
-            //         // this.enterEditMode();
-            //         break;
-            // }
         });
 
         this._plugin.getObserver('onSpreadsheetKeyCompositionStartObservable')?.add((evt: IKeyboardEvent) => {
@@ -190,8 +148,8 @@ export class CellEditorController {
                 this.enterEditMode();
             }
         });
-        this._plugin.getObserver('onSpreadsheetKeyCompositionUpdateObservable')?.add((evt: IKeyboardEvent) => {});
-        this._plugin.getObserver('onSpreadsheetKeyCompositionEndObservable')?.add((evt: IKeyboardEvent) => {});
+        this._plugin.getObserver('onSpreadsheetKeyCompositionUpdateObservable')?.add((evt: IKeyboardEvent) => { });
+        this._plugin.getObserver('onSpreadsheetKeyCompositionEndObservable')?.add((evt: IKeyboardEvent) => { });
 
         this._cellEditExtensionManager = new CellEditExtensionManager();
     }
@@ -295,8 +253,13 @@ export class CellEditorController {
     }
 
     hideEditContainer() {
-        // hidden
-        this.richTextEle.style.top = `${CELL_EDIT_HIDDEN_TOP}px`;
+        this.richTextEle.style.maxHeight = '0px';
+        this.richTextEle.style.maxWidth = '0px';
+
+        this.richTextEle.style.minWidth = `0px`;
+        this.richTextEle.style.minHeight = `0px`;
+
+        this.richTextEle.style.borderWidth = '0px';
     }
 
     /**
@@ -343,6 +306,8 @@ export class CellEditorController {
 
         this.richTextEle.style.minWidth = `${endX - startX}px`;
         this.richTextEle.style.minHeight = `${endY - startY}px`;
+
+        this.richTextEle.style.borderWidth = '2px';
 
         const sheetContentRect = getRefElement(this._sheetContainer.contentRef).getBoundingClientRect();
 
@@ -480,7 +445,7 @@ export class CellEditorController {
         this.enterEditMode();
     }
 
-    handleBackSpace() {}
+    handleBackSpace() { }
 
     handleDirection(direction: Direction) {
         // todo

@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet } from '@univer/base-component';
+import { BaseComponentRender } from '@univer/base-component';
 import { Tools, BorderType, BorderStyleTypes, HorizontalAlign, VerticalAlign, WrapStrategy, DEFAULT_STYLES } from '@univer/core';
 import { ColorPicker } from '@univer/style-universheet';
 import { SheetPlugin } from '../SheetPlugin';
@@ -38,6 +38,8 @@ export class ToolBarController {
     private _toolBarComponent: ToolBar;
 
     private _toolList: IToolBarItemProps[];
+
+    private _moreText: Record<string, string>;
 
     private _lineColor: LineColor;
 
@@ -210,6 +212,7 @@ export class ToolBarController {
                 display: 1,
                 show: config.border,
                 tooltipLocale: 'toolbar.border.main',
+                className: styles.selectDoubleString,
                 onClick: (type) => {
                     // console.dir(type);
                     // console.dir(this._borderInfo);
@@ -273,6 +276,7 @@ export class ToolBarController {
             {
                 type: 3,
                 tooltipLocale: 'toolbar.horizontalAlignMode.main',
+                className: styles.selectDoubleString,
                 display: 1,
                 show: config.horizontalAlignMode,
                 onClick: (value: HorizontalAlign) => {
@@ -283,6 +287,7 @@ export class ToolBarController {
             {
                 type: 3,
                 tooltipLocale: 'toolbar.verticalAlignMode.main',
+                className: styles.selectDoubleString,
                 display: 1,
                 show: config.verticalAlignMode,
                 onClick: (value: VerticalAlign) => {
@@ -292,6 +297,7 @@ export class ToolBarController {
             },
             {
                 type: 3,
+                className: styles.selectDoubleString,
                 tooltipLocale: 'toolbar.textWrapMode.main',
                 display: 1,
                 show: config.textWrapMode,
@@ -302,6 +308,7 @@ export class ToolBarController {
             },
             {
                 type: 3,
+                className: styles.selectDoubleString,
                 tooltipLocale: 'toolbar.textRotateMode.main',
                 display: 1,
                 show: config.textRotateMode,
@@ -311,6 +318,8 @@ export class ToolBarController {
                 children: TEXT_ROTATE_CHILDREN,
             },
         ];
+
+        this._moreText = { more: 'toolbar.toolMore', tip: 'toolbar.toolMoreTip' };
 
         this._toolBarModel = new ToolBarModel();
         this._toolBarModel.config = config;
@@ -427,52 +436,11 @@ export class ToolBarController {
     }
 
     initRegisterComponent() {
-        const component = this._plugin.context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         const pluginName = this._plugin.getPluginName();
-        this.Render = component.getComponentRender();
-        const registerIcon = {
-            ForwardIcon: this.Render.renderFunction('ForwardIcon'),
-            BackIcon: this.Render.renderFunction('BackIcon'),
-            BoldIcon: this.Render.renderFunction('BoldIcon'),
-            ItalicIcon: this.Render.renderFunction('ItalicIcon'),
-            DeleteLineIcon: this.Render.renderFunction('DeleteLineIcon'),
-            UnderLineIcon: this.Render.renderFunction('UnderLineIcon'),
-            TextColorIcon: this.Render.renderFunction('TextColorIcon'),
-            FillColorIcon: this.Render.renderFunction('FillColorIcon'),
-            MergeIcon: this.Render.renderFunction('MergeIcon'),
-            TopBorderIcon: this.Render.renderFunction('TopBorderIcon'),
-            BottomBorderIcon: this.Render.renderFunction('BottomBorderIcon'),
-            LeftBorderIcon: this.Render.renderFunction('LeftBorderIcon'),
-            RightBorderIcon: this.Render.renderFunction('RightBorderIcon'),
-            NoneBorderIcon: this.Render.renderFunction('NoneBorderIcon'),
-            FullBorderIcon: this.Render.renderFunction('FullBorderIcon'),
-            OuterBorderIcon: this.Render.renderFunction('OuterBorderIcon'),
-            InnerBorderIcon: this.Render.renderFunction('InnerBorderIcon'),
-            StripingBorderIcon: this.Render.renderFunction('StripingBorderIcon'),
-            VerticalBorderIcon: this.Render.renderFunction('VerticalBorderIcon'),
-            LeftAlignIcon: this.Render.renderFunction('LeftAlignIcon'),
-            CenterAlignIcon: this.Render.renderFunction('CenterAlignIcon'),
-            RightAlignIcon: this.Render.renderFunction('RightAlignIcon'),
-            TopVerticalIcon: this.Render.renderFunction('TopVerticalIcon'),
-            CenterVerticalIcon: this.Render.renderFunction('CenterVerticalIcon'),
-            BottomVerticalIcon: this.Render.renderFunction('BottomVerticalIcon'),
-            OverflowIcon: this.Render.renderFunction('OverflowIcon'),
-            BrIcon: this.Render.renderFunction('BrIcon'),
-            CutIcon: this.Render.renderFunction('CutIcon'),
-            TextRotateIcon: this.Render.renderFunction('TextRotateIcon'),
-            TextRotateAngleUpIcon: this.Render.renderFunction('TextRotateAngleUpIcon'),
-            TextRotateAngleDownIcon: this.Render.renderFunction('TextRotateAngleDownIcon'),
-            TextRotateVerticalIcon: this.Render.renderFunction('TextRotateVerticalIcon'),
-            TextRotateRotationUpIcon: this.Render.renderFunction('TextRotateRotationUpIcon'),
-            TextRotateRotationDownIcon: this.Render.renderFunction('TextRotateRotationDownIcon'),
-        };
 
         // 注册自定义组件
         this._plugin.registerComponent(pluginName + LineColor.name, LineColor);
         this._plugin.registerComponent(pluginName + ColorPicker.name, ColorPicker);
-        for (let k in registerIcon) {
-            this._plugin.registerComponent(k, registerIcon[k]);
-        }
     }
 
     resetLocale(toolList: any[]) {
@@ -500,8 +468,13 @@ export class ToolBarController {
     }
 
     resetToolBarList() {
+        const locale = this._plugin.context.getLocale();
+
         const toolList = this.resetLocale(this._toolList);
-        this._toolBarComponent.setToolBar(toolList);
+        this._toolBarComponent.setToolBar(toolList, {
+            more: locale.get(this._moreText.more),
+            tip: locale.get(this._moreText.tip),
+        });
     }
 
     setRedo() {
@@ -567,11 +540,6 @@ export class ToolBarController {
             default:
                 break;
         }
-
-        // update data
-        this._plugin.getCanvasView().updateToSheet(this._plugin.getContext().getWorkBook().getActiveSheet()!);
-        // update render
-        // this._plugin.getMainComponent().makeDirty(true);
     }
 
     setHorizontalAlignment(value: HorizontalAlign) {
@@ -612,8 +580,6 @@ export class ToolBarController {
 
                 this._plugin.getContext().getWorkBook().getActiveSheet().getRange(range).setBorderByType(type, color, style);
             });
-
-            this._plugin.getCanvasView().updateToSheet(this._plugin.getContext().getWorkBook().getActiveSheet()!);
         }
     }
 
@@ -628,6 +594,8 @@ export class ToolBarController {
         const index = this._toolList.findIndex((item) => item.name === config.name);
         if (index > -1) return;
         this._toolList.push(config);
-        this.resetToolBarList();
+        if (this._toolBarComponent) {
+            this.resetToolBarList();
+        }
     }
 }

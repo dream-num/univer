@@ -39,6 +39,8 @@ import { IShowToolBarConfig } from '../../../Model/ToolBarModel';
 import { ModalGroup } from '../ModalGroup/ModalGroup';
 import { SheetPlugin } from '../../../SheetPlugin';
 import { FormulaBar } from '../FormulaBar';
+import { SideGroup } from '../SideGroup/SideGroup';
+import { SheetBar } from '../SheetBar';
 
 export interface ILayout {
     outerLeft?: boolean;
@@ -61,12 +63,16 @@ export interface ILayout {
 
     frozenContent?: boolean;
 
-    // Whether to show the toolbar
     infoBar?: boolean;
+
     formulaBar?: boolean;
-    toolBar?: boolean;
-    sheetBar?: boolean;
+
     countBar?: boolean;
+
+    sheetBar?: boolean;
+
+    // Whether to show the toolbar
+    toolBar?: boolean;
 
     // Custom configuration toolbar,can be used in conjunction with showToolBar, showToolBarConfig has a higher priority
     toolBarConfig?: IShowToolBarConfig;
@@ -130,10 +136,14 @@ export const defaultLayout: ILayout = {
     frozenContent: true,
 
     infoBar: true,
+
     formulaBar: true,
+
     toolBar: true,
-    sheetBar: true,
+
     countBar: true,
+
+    sheetBar: true,
 
     toolBarConfig: {
         undoRedo: true, // Undo redo
@@ -142,7 +152,6 @@ export const defaultLayout: ILayout = {
         percentageFormat: true, // Percentage format
         numberDecrease: true, // 'Decrease the number of decimal places'
         numberIncrease: true, // 'Increase the number of decimal places
-        moreFormats: true, // 'More Formats'
         font: true, // 'font'
         fontSize: true, // 'Font size'
         bold: true, // 'Bold (Ctrl+B)'
@@ -157,21 +166,6 @@ export const defaultLayout: ILayout = {
         verticalAlignMode: true, // 'Vertical alignment'
         textWrapMode: true, // 'Wrap mode'
         textRotateMode: true, // 'Text Rotation Mode'
-        image: true, // 'Insert picture'
-        link: true, // 'Insert link'
-        chart: true, // 'chart' (the icon is hidden, but if the chart plugin is configured, you can still create a new chart by right click)
-        comment: true, // 'comment'
-        pivotTable: true, // 'PivotTable'
-        function: true, // 'formula'
-        frozenMode: true, // 'freeze mode'
-        sortAndFilter: true, // 'Sort and filter'
-        conditionalFormat: true, // 'Conditional Format'
-        dataValidation: true, // 'Data Validation'
-        splitColumn: true, // 'Split column'
-        screenshot: true, // 'screenshot'
-        findAndReplace: true, // 'Find and Replace'
-        protection: true, // 'Worksheet protection'
-        print: true, // 'Print'
     },
 
     contentSplit: false,
@@ -256,6 +250,8 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
             showSider: false,
             renderState: 0,
         };
+
+        console.log('this.state', this.state);
     }
 
     /**
@@ -294,7 +290,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
         let currentSkin = skins[skin];
 
         // transform "primaryColor" to "--primary-color"
-        currentSkin = Object.fromEntries(Object.keys(currentSkin).map((item) => [`--${item.replace(/([A-Z])/g, '-$1').toLowerCase()}`, currentSkin[item]]));
+        currentSkin = Object.fromEntries(Object.keys(currentSkin).map((item) => [`--${item.replace(/([A-Z0-9])/g, '-$1').toLowerCase()}`, currentSkin[item]]));
 
         // ie11 does not support css variables, use css-vars-ponyfill to handle
         if (Tools.isIEBrowser()) {
@@ -751,6 +747,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                     }}
                                 >
                                     {/* innerRight */}
+                                    <SideGroup></SideGroup>
                                 </Sider>
                             </Layout>
                             <Footer
@@ -758,7 +755,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                     display: layout.footer ? 'block' : 'none',
                                 }}
                             >
-                                {/* <SheetBar></SheetBar> */}
+                                {layout.sheetBar && <SheetBar></SheetBar>}
                                 {layout.countBar && <CountBar></CountBar>}
                             </Footer>
                         </Layout>
@@ -784,9 +781,3 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
         );
     }
 }
-
-// export class UniverSheetContainer implements SheetContainerComponent {
-//     render(): JSXComponent<BaseSheetContainerProps> {
-//         return SheetContainer;
-//     }
-// }

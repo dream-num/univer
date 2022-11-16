@@ -4,6 +4,8 @@ import { Ul } from '@univer/style-universheet';
 import { SlideTabBar } from '../../../Basics/SlideTabBar/SlideTabBar';
 import styles from './index.module.less';
 
+console.info('styles', styles);
+
 type SheetState = {
     sheetList: BaseSheetBarProps[];
     menuList: BaseSheetBarProps[];
@@ -213,7 +215,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
      * destory
      */
     componentWillUnmount() {
-       // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     componentDidUpdate() {

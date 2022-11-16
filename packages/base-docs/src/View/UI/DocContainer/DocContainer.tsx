@@ -14,7 +14,7 @@ import {
     BaseComponentProps,
     Description,
 } from '@univer/base-component';
-import { AsyncFunction, DocContext, IKeyType, LocaleType, PLUGIN_NAMES, Tools, Workbook } from '@univer/core';
+import { AsyncFunction, ContextBase, DocContext, IKeyType, LocaleType, PLUGIN_NAMES, Tools, Workbook } from '@univer/core';
 import cssVars from 'css-vars-ponyfill';
 import {
     Container,
@@ -128,7 +128,7 @@ export interface IDocPluginConfigBase {
 export interface BaseDocContainerConfig extends BaseComponentProps, IDocPluginConfigBase {
     container: HTMLElement;
     skin: string;
-    context: DocContext;
+    context: ContextBase;
     getSplitLeftRef: (ref: RefObject<HTMLDivElement>) => void;
     getContentRef: (ref: RefObject<HTMLDivElement>) => void;
     addButton: (cb: Function) => void;

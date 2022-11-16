@@ -422,6 +422,7 @@ export default {
     rightClick: {
         copy: 'Copy',
         copyAs: 'Copy as',
+        cut: 'Cut',
         paste: 'Paste',
         insert: 'Insert',
         delete: 'Delete',

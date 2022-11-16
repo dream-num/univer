@@ -41,6 +41,7 @@ export interface ITransformState extends IOffset {
 export interface IObjectFullState extends ITransformState, ISize {
     strokeWidth?: number;
     zIndex?: number;
+    isTransformer?: boolean;
 }
 
 export interface ISceneTransformState extends ISize, IScale {}

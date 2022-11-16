@@ -30,5 +30,5 @@
         "strictPropertyInitialization": false,
         "types": ["jest", "node", "@types/jest"]
     },
-    "include": ["src/**/*", "test/**/*.test.(ts|tsx|js)"]
+    "include": ["src/**/*", "test/**/*.test.(ts|tsx|js)", "../base-render/src/ScrollTimer.ts"]
 }

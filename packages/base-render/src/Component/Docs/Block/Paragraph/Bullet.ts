@@ -1,13 +1,16 @@
-import { SheetContext, IBullet, ILists, INestingLevel, ITextStyle, Nullable } from '@univer/core';
-import { FontCache, getFontStyleString, IDocumentSkeletonBullet, IFontLocale } from '../../../..';
-import { getBulletOrderedSymbol } from '.';
+import { ContextBase, IBullet, ILists, INestingLevel, ITextStyle, Nullable } from '@univer/core';
+import { FontCache } from '../../../../Basics/FontCache';
+import { getFontStyleString } from '../../../../Basics/Tools';
+import { IDocumentSkeletonBullet } from '../../../../Basics/IDocumentSkeletonCached';
+import { IFontLocale } from '../../../../Basics/Interfaces';
+import { getBulletOrderedSymbol } from './Bullet.Ruler';
 
 export function dealWidthBullet(
     bullet?: IBullet,
     lists?: ILists,
     listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>,
     fontLocale?: IFontLocale,
-    context?: SheetContext
+    context?: ContextBase
 ): IDocumentSkeletonBullet | undefined {
     if (!bullet || !lists) {
         return;
@@ -65,7 +68,7 @@ function _getBulletSke(
     listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>,
     textStyleConfig?: ITextStyle,
     fontLocale?: IFontLocale,
-    context?: SheetContext
+    context?: ContextBase
 ): IDocumentSkeletonBullet {
     const nesting = nestings[nestingLevel];
     const { bulletAlignment, glyphFormat, textStyle: textStyleFirst, startNumber, glyphType, glyphSymbol, indentFirstLine, hanging, indentStart } = nesting;
@@ -107,7 +110,7 @@ function __generateOrderedListSymbol(
     nestingLevel: number,
     nestings: INestingLevel[],
     listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>,
-    context?: SheetContext
+    context?: ContextBase
 ) {
     // const indexNumber = startNumber + startIndex;
     // parse  <prefix>%[nestingLevelMinusOne]<suffix>, return symbolContent
@@ -143,7 +146,7 @@ function __generateOrderedListSymbol(
     return resultSymbol.join('');
 }
 
-function ___getSymbolByBesting(startIndex: number = 1, nesting: INestingLevel, context?: SheetContext) {
+function ___getSymbolByBesting(startIndex: number = 1, nesting: INestingLevel, context?: ContextBase) {
     const { startNumber, glyphType, glyphSymbol } = nesting;
 
     if (glyphSymbol) {

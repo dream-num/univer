@@ -1,8 +1,9 @@
+import { defaultLayout } from '../../View/UI/SheetContainer';
 import { ISheetPluginConfig } from '../Interfaces/SpreadsheetConfig';
 
 export const DEFAULT_SPREADSHEET_PLUGIN_DATA: ISheetPluginConfig = {
     container: 'universheet',
-    layout: 'auto',
+    layout: defaultLayout,
     selections: {
         'sheet-01': [
             {

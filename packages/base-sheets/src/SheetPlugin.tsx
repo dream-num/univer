@@ -7,7 +7,7 @@ import { RightMenuProps } from './Model/RightMenuModel';
 import { en, zh } from './Locale';
 import { CANVAS_VIEW_KEY } from './View/Render/BaseView';
 import { CanvasView } from './View/Render/CanvasView';
-import { BaseSheetContainerConfig, SheetContainer } from './View/UI/SheetContainer';
+import { BaseSheetContainerConfig, ILayout, SheetContainer } from './View/UI/SheetContainer';
 import {
     RightMenuController,
     InfoBarController,
@@ -81,7 +81,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     constructor(config: Partial<ISheetPluginConfig> = {}) {
         super(PLUGIN_NAMES.SPREADSHEET);
 
-        this._config = Tools.commonExtend(DEFAULT_SPREADSHEET_PLUGIN_DATA, config);
+        this._config = Tools.deepMerge(DEFAULT_SPREADSHEET_PLUGIN_DATA, config);
     }
 
     register(engineInstance: Engine) {
@@ -146,16 +146,29 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
         this._componentList = new Map();
 
+        const layout = this._config.layout as ILayout
+
         this._sheetContainerController = new SheetContainerController(this);
         this._modalGroupController = new ModalGroupController(this);
 
+        // TODO rightMenu config
         this._rightMenuControl = new RightMenuController(this);
-        this._toolBarControl = new ToolBarController(this);
-        this._infoBarControl = new InfoBarController(this);
-        this._sheetBarControl = new SheetBarControl(this);
+        
+        if(layout === 'auto' || layout.toolBar){
+            this._toolBarControl = new ToolBarController(this);
+        }
+        if(layout === 'auto' || layout.infoBar){
+            this._infoBarControl = new InfoBarController(this);
+        }
+        if(layout === 'auto' || layout.sheetBar){
+            this._sheetBarControl = new SheetBarControl(this);
+        }
         this._cellEditorControl = new CellEditorController(this);
         this._antLineController = new AntLineControl(this);
-        this._countBarController = new CountBarController(this);
+
+        if(layout === 'auto' || layout.countBar){
+            this._countBarController = new CountBarController(this);
+        }
         // this._sheetContainerController = new SheetContainerController(this);
 
         // render sheet container

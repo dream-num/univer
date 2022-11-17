@@ -105,6 +105,7 @@ univerSheetUp.installPlugin(new NumfmtPlugin());
 
 const uiDefaultConfigDown = {
     container: 'universheet-demo-down',
+    layout:'auto',
     selections: {
         'sheet-0001': [
             {

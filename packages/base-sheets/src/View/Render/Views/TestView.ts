@@ -92,4 +92,4 @@ export class TestViewFactory {
         return new TestView().initialize(scene, plugin);
     }
 }
-CanvasViewRegistry.add(new TestViewFactory());
+// CanvasViewRegistry.add(new TestViewFactory());

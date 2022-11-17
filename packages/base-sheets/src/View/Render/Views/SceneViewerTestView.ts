@@ -101,4 +101,4 @@ export class SceneViewerTestViewFactory {
         return new SceneViewerTestView().initialize(scene, plugin);
     }
 }
-CanvasViewRegistry.add(new SceneViewerTestViewFactory());
+// CanvasViewRegistry.add(new SceneViewerTestViewFactory());

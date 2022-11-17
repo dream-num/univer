@@ -1,4 +1,4 @@
-import { Context, Plugin, PLUGIN_NAMES, UniverSheet } from '@univer/core';
+import { Context, Plugin, PLUGIN_NAMES, UniverSheet, UniverDoc, UniverSlide } from '@univer/core';
 import { <%= projectUpperValue %>Button } from './View/UI/<%= projectUpperValue %>Button';
 import { zh, en } from './Locale';
 
@@ -19,8 +19,8 @@ export class <%= projectUpperValue %>Plugin extends Plugin {
         return new <%= projectUpperValue %>Plugin(config);
     }
 
-    installTo(universheetInstance: UniverSheet) {
-        universheetInstance.installPlugin(this);
+    installTo(univerInstance: UniverSheet | UniverDoc | UniverSlide) {
+        univerInstance.installPlugin(this);
     }
 
     initialize(): void {
@@ -34,14 +34,15 @@ export class <%= projectUpperValue %>Plugin extends Plugin {
             en: en,
             zh: zh,
         });
+        
 
-        const item: IToolBarItemProps = {
-            locale: '<%= projectValue %>',
-            type: ISlotElement.JSX,
-            show: true,
-            label: <<%= projectUpperValue %>Button />
-        }
-        context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addToolButton(item)
+        // const item: IToolBarItemProps = {
+        //     locale: '<%= projectValue %>',
+        //     type: ISlotElement.JSX,
+        //     show: true,
+        //     label: <<%= projectUpperValue %>Button />
+        // }
+        // context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addToolButton(item)
 }
 
 onMapping(IOC: IOCContainer): void {}

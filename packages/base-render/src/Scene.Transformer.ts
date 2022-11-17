@@ -193,7 +193,7 @@ export class Transformer implements ITransformerConfig {
 
     private _updateControlChildren() {
         this._updateControlIterator((control, applyObject) => {
-            const { left, top, width, height, scaleX, scaleY } = applyObject;
+            const { left, top, width, height, scaleX, scaleY } = applyObject.getState();
             const children = control.getObjects();
             children.forEach((o: BaseObject) => {
                 const key = o.oKey;
@@ -352,9 +352,9 @@ export class Transformer implements ITransformerConfig {
     }
 
     private _getRotateAnchorPosition(type: TransformerManagerType, height: number, width: number, scaleX: number, scaleY: number) {
-        // width *= scaleX;
+        // width /= scaleX;
 
-        // height *= scaleY;
+        // height /= scaleY;
 
         let left = -this.anchorSize / 2;
         let top = -this.anchorSize / 2;
@@ -414,14 +414,14 @@ export class Transformer implements ITransformerConfig {
         }
 
         return {
-            left: left * scaleX,
-            top: top * scaleY,
+            left,
+            top,
             cursor,
         };
     }
 
     private _createResizeAnchor(type: TransformerManagerType, applyObject: BaseObject, zIndex: number) {
-        let { height, width, scaleX, scaleY } = applyObject;
+        let { height, width, scaleX, scaleY } = applyObject.getState();
 
         const { left, top, cursor } = this._getRotateAnchorPosition(type, height, width, scaleX, scaleY);
 
@@ -494,7 +494,7 @@ export class Transformer implements ITransformerConfig {
 
     private _updateControl() {
         this._updateControlIterator((control, applyObject) => {
-            const { left, top } = applyObject;
+            const { left, top } = applyObject.getState();
             control.transformByState({
                 left,
                 top,
@@ -529,15 +529,15 @@ export class Transformer implements ITransformerConfig {
     }
 
     private _createControl(applyObject: BaseObject) {
-        let { left, top, height, width, angle, scaleX, scaleY, skewX, skewY, flipX, flipY, oKey } = applyObject;
-
+        let { left, top, height, width, angle, scaleX, scaleY, skewX, skewY, flipX, flipY } = applyObject.getState();
+        const oKey = applyObject.oKey;
         const zIndex = this._selectedObjectMap.size;
 
         const groupElements: BaseObject[] = [];
 
-        width *= scaleX;
+        // width *= scaleX;
 
-        height *= scaleY;
+        // height *= scaleY;
 
         if (this.borderEnabled) {
             const outline = new Rect(`${TransformerManagerType.OUTLINE}_${zIndex}`, {

@@ -89,7 +89,12 @@ export class RowManager {
             rowIndex,
             rowHeight,
         };
-        const command = new Command(_context.getWorkBook(), setRowHeight);
+        const command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            setRowHeight
+        );
         _commandManager.invoke(command);
     }
 

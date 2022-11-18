@@ -255,7 +255,12 @@ export class SelectionManager {
             selections: models,
         };
 
-        const command = new Command(workbook, value);
+        const command = new Command(
+            {
+                WorkBookUnit: workbook,
+            },
+            value
+        );
         commandManager.invoke(command);
     }
 
@@ -287,7 +292,12 @@ export class SelectionManager {
             selections: selectionModelsValue,
         };
 
-        const command = new Command(workbook, value);
+        const command = new Command(
+            {
+                WorkBookUnit: workbook,
+            },
+            value
+        );
         commandManager.invoke(command);
     }
 

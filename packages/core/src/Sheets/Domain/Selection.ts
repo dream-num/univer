@@ -171,7 +171,12 @@ export class Selection {
             currentCell,
         };
 
-        const command = new Command(_context.getWorkBook(), setSelection);
+        const command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            setSelection
+        );
         _commandManager.invoke(command);
 
         // 设置后获取范围(以A1:B10形式)
@@ -286,7 +291,12 @@ export class Selection {
             currentCell: range,
         };
 
-        const command = new Command(_context.getWorkBook(), setSelection);
+        const command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            setSelection
+        );
         _commandManager.invoke(command);
 
         return this;

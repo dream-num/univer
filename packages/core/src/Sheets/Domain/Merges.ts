@@ -326,7 +326,13 @@ export class Merges {
             rectangles: currentMerge,
         };
 
-        const command = new Command(context.getWorkBook(), removeMerge, addMerge);
+        const command = new Command(
+            {
+                WorkBookUnit: context.getWorkBook(),
+            },
+            removeMerge,
+            addMerge
+        );
         commandManager.invoke(command);
     }
 }

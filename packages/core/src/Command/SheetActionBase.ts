@@ -1,6 +1,7 @@
 import { Workbook, Worksheet } from '../Sheets/Domain';
 import { ActionBase, IActionData } from './ActionBase';
 import { ActionObservers } from './ActionObservers';
+import { CommandUnit } from './Command';
 
 /**
  * Format of action data param
@@ -25,11 +26,11 @@ export abstract class SheetActionBase<
 
     protected constructor(
         actionData: D,
-        workbook: Workbook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
         super(actionData, observers);
-        this._workbook = workbook;
+        this._workbook = commandUnit.WorkBookUnit;
     }
 
     getWorkSheet(): Worksheet {

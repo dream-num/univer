@@ -97,7 +97,12 @@ export class ColumnManager {
             columnIndex,
             columnWidth,
         };
-        const command = new Command(_context.getWorkBook(), setColumnWidth);
+        const command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            setColumnWidth
+        );
         _commandManager.invoke(command);
     }
 

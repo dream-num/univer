@@ -60,7 +60,12 @@ export class NamedRange {
         };
 
         // Execute action
-        const command = new Command(_context.getWorkBook(), actionData);
+        const command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            actionData
+        );
         _commandManager.invoke(command);
 
         // // manage instance
@@ -86,7 +91,12 @@ export class NamedRange {
         };
 
         // Execute action
-        const command = new Command(_context.getWorkBook(), actionData);
+        const command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            actionData
+        );
         _commandManager.invoke(command);
     }
 
@@ -158,7 +168,12 @@ export class NamedRange {
         };
 
         // Execute action
-        const command = new Command(_context.getWorkBook(), actionData);
+        const command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            actionData
+        );
         _commandManager.invoke(command);
 
         // const namedRanges = this._workbook.getNamedRanges();

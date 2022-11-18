@@ -23,7 +23,12 @@ export class Freeze {
             sheetId: this._worksheet.getSheetId(),
             numColumns: columns,
         };
-        const command = new Command(_context.getWorkBook(), configure);
+        const command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            configure
+        );
         _commandManager.invoke(command);
 
         return this._worksheet;
@@ -36,7 +41,12 @@ export class Freeze {
             sheetId: this._worksheet.getSheetId(),
             numRows: rows,
         };
-        const command = new Command(_context.getWorkBook(), configure);
+        const command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            configure
+        );
         _commandManager.invoke(command);
 
         return this._worksheet;

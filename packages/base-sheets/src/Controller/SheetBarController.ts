@@ -1,5 +1,5 @@
 import { BaseUlProps } from '@univer/base-component';
-import { ACTION_NAMES, CommandManager, NameGen, Nullable, PLUGIN_NAMES } from '@univer/core';
+import { ACTION_NAMES, CommandManager, NameGen, Nullable, PLUGIN_NAMES, SheetActionBase } from '@univer/core';
 import { SheetBarModel } from '../Model/SheetBarModel';
 import { SheetBar } from '../View/UI/SheetBar';
 import { SheetPlugin } from '../SheetPlugin';
@@ -109,6 +109,8 @@ class SheetBarUIController {
         const plugin = this._barControl.getPlugin();
         const context = plugin.getContext();
         const manager = context.getObserverManager();
+        const workbook = context.getWorkBook();
+        const unitId = workbook.getUnitId();
         // manager.requiredObserver<SheetBar>('onSheetBarDidMountObservable', PLUGIN_NAMES.SPREADSHEET);
         manager.requiredObserver<SheetBar>('onSheetBarDidMountObservable', PLUGIN_NAMES.SPREADSHEET).add((component) => {
             this._sheetBar = component;
@@ -222,8 +224,12 @@ class SheetBarUIController {
         //         menuList: this._menuList,
         //     });
         // });
-
         CommandManager.getActionObservers().add((actionEvent) => {
+            const action = actionEvent.action as SheetActionBase<any>;
+            const worksheet = action.getWorkSheet();
+            const actionUnitId = worksheet.getContext().getWorkBook().getUnitId();
+            if (unitId !== actionUnitId) return;
+
             const { data } = actionEvent;
             switch (data.actionName) {
                 case ACTION_NAMES.SET_SHEET_ORDER_ACTION:

@@ -132,7 +132,12 @@ export class RangeList {
             return setValue;
         });
 
-        let command = new Command(_context.getWorkBook(), ...setList);
+        let command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            ...setList
+        );
         _commandManager.invoke(command);
         return this;
     }
@@ -177,7 +182,12 @@ export class RangeList {
             return clearRange;
         });
 
-        let command = new Command(_context.getWorkBook(), ...clearList);
+        let command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            ...clearList
+        );
         _commandManager.invoke(command);
 
         return this;
@@ -247,7 +257,12 @@ export class RangeList {
             return setStyle;
         });
 
-        let command = new Command(_context.getWorkBook(), ...setList);
+        let command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            ...setList
+        );
         _commandManager.invoke(command);
         return this;
     }
@@ -287,7 +302,12 @@ export class RangeList {
             return setStyle;
         });
 
-        let command = new Command(_context.getWorkBook(), ...setList);
+        let command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            ...setList
+        );
         _commandManager.invoke(command);
         return this;
     }
@@ -330,7 +350,12 @@ export class RangeList {
             return setStyle;
         });
 
-        let command = new Command(_context.getWorkBook(), ...setList);
+        let command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            ...setList
+        );
         _commandManager.invoke(command);
         return this;
     }
@@ -374,7 +399,12 @@ export class RangeList {
             return setStyle;
         });
 
-        let command = new Command(_context.getWorkBook(), ...setList);
+        let command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            ...setList
+        );
         _commandManager.invoke(command);
         return this;
     }
@@ -490,7 +520,12 @@ export class RangeList {
             return setValue;
         });
 
-        let command = new Command(_context.getWorkBook(), ...setList);
+        let command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            ...setList
+        );
         _commandManager.invoke(command);
         return this;
     }
@@ -628,7 +663,12 @@ export class RangeList {
             return setStyle;
         });
 
-        let command = new Command(_context.getWorkBook(), ...setList);
+        let command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            ...setList
+        );
         _commandManager.invoke(command);
         return this;
     }
@@ -679,7 +719,12 @@ export class RangeList {
             return setStyle;
         });
 
-        let command = new Command(_context.getWorkBook(), ...setList);
+        let command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            ...setList
+        );
         _commandManager.invoke(command);
         return this;
     }
@@ -736,7 +781,12 @@ export class RangeList {
             return setValue;
         });
 
-        let command = new Command(_context.getWorkBook(), ...setList);
+        let command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            ...setList
+        );
         _commandManager.invoke(command);
         return this;
     }

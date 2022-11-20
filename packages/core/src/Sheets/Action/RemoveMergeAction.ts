@@ -1,9 +1,9 @@
 import { addMerge, RemoveMerge } from '../Apply';
-import { Workbook } from '../Domain';
 import { IRangeData } from '../../Interfaces';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IAddMergeActionData } from './AddMergeAction';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -24,10 +24,10 @@ export class RemoveMergeAction extends SheetActionBase<
 > {
     constructor(
         actionData: IRemoveMergeActionData,
-        workbook: Workbook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],

@@ -1,8 +1,8 @@
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { InsertRow, RemoveRow } from '../Apply';
-import { Workbook } from '../Domain';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveRowActionData } from './RemoveRowAction';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -23,10 +23,10 @@ export class InsertRowAction extends SheetActionBase<
 > {
     constructor(
         actionData: IInsertRowActionData,
-        workbook: Workbook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],

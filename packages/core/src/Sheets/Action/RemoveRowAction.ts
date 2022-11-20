@@ -1,10 +1,10 @@
 import { InsertRow, RemoveRow } from '../Apply';
 import { CONVERTOR_OPERATION } from '../../Const';
 import { WorkSheetConvertor } from '../../Convertor';
-import { Workbook } from '../Domain';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertRowActionData } from './InsertRowAction';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -25,10 +25,10 @@ export class RemoveRowAction extends SheetActionBase<
 > {
     constructor(
         actionData: IRemoveRowActionData,
-        workbook: Workbook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.REMOVE)],

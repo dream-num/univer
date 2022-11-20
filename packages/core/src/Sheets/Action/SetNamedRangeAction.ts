@@ -1,9 +1,14 @@
-import { ISheetActionData, SheetActionBase, ActionObservers, ActionType } from '../../Command';
+import {
+    ISheetActionData,
+    SheetActionBase,
+    ActionObservers,
+    ActionType,
+    CommandUnit,
+} from '../../Command';
 import { CONVERTOR_OPERATION, ACTION_NAMES } from '../../Const';
 import { WorkSheetConvertor } from '../../Convertor';
 import { INamedRange } from '../../Interfaces/INamedRange';
 import { SetNamedRange } from '../Apply/SetNamedRange';
-import { Workbook } from '../Domain';
 
 export interface ISetNamedRangeActionData extends ISheetActionData {
     namedRange: INamedRange;
@@ -16,10 +21,10 @@ export class SetNamedRangeAction extends SheetActionBase<
 > {
     constructor(
         actionData: ISetNamedRangeActionData,
-        workbook: Workbook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
 
         this._doActionData = {
             ...actionData,

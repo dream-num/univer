@@ -1,7 +1,7 @@
 import { SetColumnWidth } from '../Apply';
-import { Workbook } from '../Domain';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -19,10 +19,10 @@ export interface ISetColumnWidthActionData extends ISheetActionData {
 export class SetColumnWidthAction extends SheetActionBase<ISetColumnWidthActionData> {
     constructor(
         actionData: ISetColumnWidthActionData,
-        workbook: Workbook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],

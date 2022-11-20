@@ -1,9 +1,9 @@
 import { SetWorkSheetStatus } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
-import { Workbook } from '../Domain/Workbook';
 import { BooleanNumber } from '../../Enum';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -18,10 +18,10 @@ export interface ISetWorkSheetStatusActionData extends ISheetActionData {
 export class SetWorkSheetStatusAction extends SheetActionBase<ISetWorkSheetStatusActionData> {
     constructor(
         actionData: ISetWorkSheetStatusActionData,
-        workbook: Workbook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],

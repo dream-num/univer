@@ -93,5 +93,6 @@ export class SheetContainerController {
         for (let k in registerIcon) {
             this._plugin.registerComponent(k, registerIcon[k]);
         }
+        // this._plugin.registerModal(CellRangeModal.name, CellRangeModal);
     }
 }

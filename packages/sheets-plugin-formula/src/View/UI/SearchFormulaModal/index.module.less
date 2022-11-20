@@ -1,7 +1,7 @@
 .function-modal {
     font-size: 14px;
 
-    > div {
+    >div {
         margin-bottom: 10px;
     }
 
@@ -24,9 +24,11 @@
         .function-label {
             margin-bottom: 0;
         }
+
         .function-selector {
             border: 1px solid var(--border-color-base);
             border-radius: var(--border-radius-base);
+
             .select-button {
                 margin: 0;
             }
@@ -39,20 +41,26 @@
             height: 170px;
             border: 1px solid #d4d4d4;
             overflow-y: auto;
+            margin: 0;
+            padding: 0;
+
             .function-lists-item {
                 padding: 5px;
                 border-bottom: 1px solid #d4d4d4;
-                .function-lists-item-name {
-                }
-                .function-lists-item-detail {
-                }
+                cursor: pointer;
+                list-style: none;
 
-                &.active {
-                    background-color: #0188fb;
+                .function-lists-item-name {}
+
+                .function-lists-item-detail {}
+
+                &-active {
+                    background-color: var(--primary-color);
                     color: #fff;
                 }
+
                 &:hover {
-                    background-color: #5391ff;
+                    background-color: var(--primary-color-hover);
                     color: #fff;
                 }
             }
@@ -70,15 +78,18 @@
         border: 1px solid;
         padding: 0.5 em;
 
-        > div {
+        >div {
             display: flex;
             padding: 5px 0;
-            > span {
+
+            >span {
                 flex: 1;
+
                 &:first-child {
                     text-align: right;
                 }
             }
+
             input {
                 flex: 1;
             }
@@ -88,8 +99,8 @@
     .function-param-desc {
         margin: 1em 0;
 
-        .function-param-desc-detail {
-        }
+        .function-param-desc-detail {}
+
         .function-param-desc-details {
             padding: 10px;
             height: 100px;
@@ -99,8 +110,8 @@
             font-size: 12px;
         }
     }
-    .function-param-result {
-    }
+
+    .function-param-result {}
 }
 
 .function-btn {

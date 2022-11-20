@@ -9,6 +9,7 @@ export interface BaseDropdownProps {
     showArrow?: boolean;
     icon?: ComponentChildren;
     onClick?: () => void;
+    tooltip?: string;
 }
 
 export interface DropdownComponent extends BaseComponent<BaseDropdownProps> {

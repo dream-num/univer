@@ -1,22 +1,25 @@
-import { SheetContext, IOCContainer, UniverSheet, Plugin, IKeyValue, ActionExtensionManager } from '@univer/core';
+import { SheetContext, IOCContainer, UniverSheet, Plugin, ActionExtensionManager } from '@univer/core';
 import { CellEditExtensionManager, CellInputExtensionManager } from '@univer/base-sheets';
 import { FormulaEnginePlugin } from '@univer/base-formula-engine';
 import { zh, en } from './Locale';
 
-import { IConfig, IFormulaConfig } from './Basic/Interfaces/IFormula';
+import { IFormulaConfig } from './Basic/Interfaces/IFormula';
 import { FORMULA_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
 import { FormulaController } from './Controller/FormulaController';
 import { firstLoader } from './Controller/FirstLoader';
 import { FormulaCellEditExtensionFactory } from './Basic/Register/FormulaCellEditExtension';
 import { FormulaCellInputExtensionFactory } from './Basic/Register/FormulaCellInputExtension';
 import { FormulaActionExtensionFactory } from './Basic/Register';
+import { FormulaPluginObserve, install } from './Basic/Observer';
+import { SearchFormulaController } from './Controller/SearchFormulaModalController';
 
-export class FormulaPlugin extends Plugin<IKeyValue, SheetContext> {
+export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
     private _formulaController: FormulaController;
+
+    private _searchFormulaController: SearchFormulaController;
 
     constructor(private _config?: IFormulaConfig) {
         super(FORMULA_PLUGIN_NAME);
-        // this._config = config || {};
     }
 
     static create(config?: IFormulaConfig) {
@@ -35,6 +38,8 @@ export class FormulaPlugin extends Plugin<IKeyValue, SheetContext> {
 
         this._formulaController = new FormulaController(this, this._config);
 
+        this._searchFormulaController = new SearchFormulaController(this);
+
         this._formulaController.setFormulaEngine(formulaEngine);
 
         firstLoader(this._formulaController);
@@ -50,22 +55,14 @@ export class FormulaPlugin extends Plugin<IKeyValue, SheetContext> {
             zh,
         });
 
-        const config: IConfig = { context };
-
-        // const item = {
-        //     locale: FORMULA_PLUGIN_NAME,
-        //     type: 0,
-        //     show: true,
-        //     label: <FormulaButton config={config} />,
-        // };
-        // context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addToolButton(item);
-
         this.registerExtension();
     }
 
     onMapping(IOC: IOCContainer): void {}
 
     onMounted(context: SheetContext): void {
+        install(this);
+
         this.initialize(context);
     }
 
@@ -88,5 +85,9 @@ export class FormulaPlugin extends Plugin<IKeyValue, SheetContext> {
 
     getFormulaController() {
         return this._formulaController;
+    }
+
+    getSearchFormulaController() {
+        return this._searchFormulaController;
     }
 }

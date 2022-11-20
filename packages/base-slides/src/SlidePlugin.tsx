@@ -7,6 +7,7 @@ import { ToolBarController } from './Controller/ToolBarController';
 import { SlideContainerController } from './Controller/SlideContainerController';
 import { InfoBarController } from './Controller/InfoBarController';
 import { BaseSlideContainerConfig, ISlidePluginConfigBase, SlideContainer } from './View/UI/SlideContainer';
+import { SlideBarController } from './Controller/SlideBarController';
 
 export interface ISlidePluginConfig extends ISlidePluginConfigBase {
     container: HTMLElement | string;
@@ -39,6 +40,8 @@ export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
     private _canvasEngine: Engine;
 
     private _toolBarControl: ToolBarController;
+
+    private _slideBarControl: SlideBarController;
 
     private _slideContainerController: SlideContainerController;
 
@@ -76,6 +79,7 @@ export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
         this._componentList = new Map();
 
         this._toolBarControl = new ToolBarController(this);
+        this._slideBarControl = new SlideBarController(this);
         this._infoBarControl = new InfoBarController(this);
         this._slideContainerController = new SlideContainerController(this);
 
@@ -170,6 +174,10 @@ export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
 
     getInfoBarControl() {
         return this._infoBarControl;
+    }
+
+    getSlideBarControl() {
+        return this._slideBarControl;
     }
 
     onMounted(): void {

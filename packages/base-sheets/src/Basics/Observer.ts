@@ -49,6 +49,7 @@ export type SheetPluginObserve = {
     onLineColorDidMountObservable: Observable<LineColor>;
 
     onSheetContainerDidMountObservable: Observable<SheetContainer>;
+    // onSheetContainerDidMountObservable: Observable<SheetContainer>;
 
     onSpreadsheetKeyDownObservable: Observable<IKeyboardEvent>;
     onSpreadsheetKeyUpObservable: Observable<IKeyboardEvent>;

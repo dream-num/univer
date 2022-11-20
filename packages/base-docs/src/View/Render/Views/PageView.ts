@@ -7,6 +7,8 @@ const PAGE_VIEW_BACKGROUND = 'page_view_background';
 export class PageView extends BaseView {
     zIndex = 2;
 
+    viewKey = PAGE_VIEW_BACKGROUND;
+
     protected _initialize() {
         const scene = this.getScene();
         const context = this.getContext();

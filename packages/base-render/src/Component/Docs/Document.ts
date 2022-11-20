@@ -9,7 +9,6 @@ import './Extensions';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../Basics/Draw';
 import { fixLineWidthByScale, getScale, degToRad } from '../../Basics/Tools';
 import { DocsEditor } from './Document.Editor';
-import { Scene } from '../../Scene';
 
 export interface IDocumentsConfig {
     pageMarginLeft?: number;
@@ -435,7 +434,7 @@ export class Documents extends DocComponent {
     }
 
     findNodeByCoord(offsetX: number, offsetY: number) {
-        const scene = this.getScene() as Scene;
+        const scene = this.getScene();
         const originCoord = scene.transformToSceneCoord(Vector2.FromArray([offsetX, offsetY]));
 
         if (!originCoord) {
@@ -492,8 +491,8 @@ export class Documents extends DocComponent {
                 continue;
             }
 
-            x -= startX;
-            y -= startY;
+            x -= startX + pagePaddingLeft;
+            y -= startY + pagePaddingTop;
 
             const sections = page.sections;
             for (let section of sections) {

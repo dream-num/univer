@@ -1,4 +1,5 @@
-import { getColor, Rect, Documents, DocumentSkeleton } from '@univer/base-render';
+import { getColor, Rect, Documents, DocumentSkeleton, Picture, RichText } from '@univer/base-render';
+import { BlockType, IDocumentData, ParagraphElementType } from '@univer/core';
 import { docsDemoData } from '../../../Basic/DemoData';
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 import { CANVAS_VIEW_KEY } from '../BaseView';
@@ -6,6 +7,56 @@ import { CANVAS_VIEW_KEY } from '../BaseView';
 export enum DOCS_VIEW_KEY {
     MAIN = '__DocsRender__',
 }
+
+const richTextTest: IDocumentData = {
+    documentId: 'd',
+    body: {
+        blockElements: {
+            twoParagraph: {
+                blockId: 'twoParagraph',
+                st: 0,
+                ed: 15,
+                blockType: BlockType.PARAGRAPH,
+                paragraph: {
+                    elements: {
+                        oneElement: {
+                            eId: 'oneElement',
+                            st: 0,
+                            ed: 15,
+                            et: ParagraphElementType.TEXT_RUN,
+                            tr: {
+                                ct: '祝贺Babylon中文网顺利启动！',
+                                ts: {
+                                    fs: 30,
+                                    cl: {
+                                        rgb: 'rgb(196,62,28)',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    elementOrder: [
+                        {
+                            elementId: 'oneElement',
+                            paragraphElementType: ParagraphElementType.TEXT_RUN,
+                        },
+                    ],
+                },
+            },
+        },
+        blockElementOrder: ['twoParagraph'],
+    },
+    documentStyle: {
+        pageSize: {
+            width: Infinity,
+            height: Infinity,
+        },
+        marginTop: 0,
+        marginBottom: 0,
+        marginRight: 2,
+        marginLeft: 2,
+    },
+};
 
 export class DocsView extends BaseView {
     zIndex = 1;
@@ -20,52 +71,54 @@ export class DocsView extends BaseView {
         const scene = this.getScene();
         const context = this.getContext();
 
-        const documentSkeleton = this._buildSkeleton();
-
-        const documents = new Documents(DOCS_VIEW_KEY.MAIN, documentSkeleton);
-        documents.zIndex = 1000;
-        this._documentSkeleton = documentSkeleton;
-        this._documents = documents;
-
-        documentSkeleton.calculate();
-
-        scene.addObjects([documents], 0);
-
         const engine = scene.getEngine();
-        if (engine) {
-            const { width: engineWidth, height: engineHeight } = engine;
-
-            const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = documents;
-
-            let docsLeft = 0;
-            let docsTop = 0;
-
-            let sceneWidth = 0;
-
-            let sceneHeight = 0;
-
-            if (engineWidth > docsWidth) {
-                docsLeft = engineWidth / 2 - docsWidth / 2;
-                sceneWidth = engineWidth - 30;
-            } else {
-                docsLeft = pageMarginLeft;
-                sceneWidth = docsWidth + pageMarginLeft * 2;
-            }
-
-            if (engineHeight > docsHeight) {
-                docsTop = engineHeight / 2 - docsHeight / 2;
-                sceneHeight = engineHeight - 30;
-            } else {
-                docsTop = pageMarginTop;
-                sceneHeight = docsHeight + pageMarginTop * 2;
-            }
-
-            scene.resize(sceneWidth, sceneHeight);
-
-            documents.translate(docsLeft, docsTop);
+        if (!engine) {
+            return;
         }
 
-        documents.enableEditor();
+        const pageWidth = 1384;
+
+        const pageHeight = 500;
+
+        const { width: engineWidth, height: engineHeight } = engine;
+
+        const left = engineWidth / 2 - pageWidth / 2;
+
+        const top = engineHeight / 2 - pageHeight / 2;
+
+        const page = new Rect('canvas', {
+            left,
+            top,
+            width: pageWidth,
+            height: pageHeight,
+            strokeWidth: 1,
+            stroke: 'rgba(198,198,198, 1)',
+            fill: 'rgba(255,255,255, 1)',
+            zIndex: 3,
+        });
+
+        const picture = new Picture({
+            url: 'https://cnbabylon.com/assets/img/banner_doc_cnbabylon.jpg',
+            top: top + 68,
+            left,
+            width: 1384,
+            height: 432,
+            zIndex: 13,
+            isTransformer: true,
+        });
+
+        const richText = new RichText(this.getContext(), 'richText1', {
+            richText: richTextTest,
+            width: 420,
+            zIndex: 20,
+            left: engineWidth / 2 - 210,
+            top: top + 10,
+            isTransformer: true,
+        });
+
+        scene.openTransformer();
+
+        scene.addObjects([page, picture, richText]);
     }
 
     getDocumentSkeleton() {

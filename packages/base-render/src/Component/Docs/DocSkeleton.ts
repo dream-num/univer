@@ -38,6 +38,13 @@ export enum DocumentSkeletonState {
     INVALID = 'invalid',
 }
 
+interface IDrawingUpdateConfig {
+    left: number;
+    top: number;
+    height: number;
+    width: number;
+}
+
 export class DocumentSkeleton extends Skeleton {
     private _documentData: IDocumentData;
 
@@ -50,6 +57,23 @@ export class DocumentSkeleton extends Skeleton {
     constructor(documentData: IDocumentData, context: ContextBase) {
         super(context);
         this._documentData = documentData;
+    }
+
+    updateDrawing(id: string, config: IDrawingUpdateConfig) {
+        const drawings = this._documentData.drawings;
+        if (!drawings) {
+            return;
+        }
+
+        const drawing = drawings[id];
+
+        const objectProperties = drawing.objectProperties;
+
+        objectProperties.size.width = config.width;
+        objectProperties.size.height = config.height;
+
+        objectProperties.positionH.posOffset = config.left;
+        objectProperties.positionV.posOffset = config.top;
     }
 
     calculate(bounds?: IBoundRect) {

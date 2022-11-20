@@ -1,4 +1,4 @@
-import { Nullable, Observer } from '@univer/core';
+import { Nullable, Observable, Observer } from '@univer/core';
 import { BaseObject } from './BaseObject';
 import { CURSOR_TYPE, IMouseEvent, IPointerEvent } from './Basics';
 import { getCurrentScrollXY } from './Basics/Position';
@@ -42,6 +42,19 @@ interface transformState {
     top?: number;
     width?: number;
     height?: number;
+}
+
+enum MoveObserverType {
+    MOVE_START,
+    MOVING,
+    MOVE_END,
+}
+
+interface IChangeObserverConfig {
+    objects: Map<string, BaseObject>;
+    moveX?: number;
+    moveY?: number;
+    type: MoveObserverType;
 }
 
 export interface ITransformerConfig {
@@ -165,6 +178,12 @@ export class Transformer implements ITransformerConfig {
 
     private _selectedObjectMap = new Map<string, BaseObject>();
 
+    onChangeStartObservable = new Observable<IChangeObserverConfig>();
+
+    onChangingObservable = new Observable<IChangeObserverConfig>();
+
+    onChangeEndObservable = new Observable<IChangeObserverConfig>();
+
     constructor(private _scene: Scene, config?: ITransformerConfig) {
         this._initialProps(config);
         this._scene.onPointerDownObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
@@ -274,6 +293,13 @@ export class Transformer implements ITransformerConfig {
         });
 
         this._updateControlChildren();
+
+        this.onChangingObservable.notifyObservers({
+            objects: this._selectedObjectMap,
+            moveX: moveLeft,
+            moveY: moveTop,
+            type: MoveObserverType.MOVING,
+        });
 
         this._startOffsetX = x;
         this._startOffsetY = y;
@@ -671,6 +697,13 @@ export class Transformer implements ITransformerConfig {
             moveObject.translate(moveLeft + moveObject.left, moveTop + moveObject.top);
         });
 
+        this.onChangingObservable.notifyObservers({
+            objects: this._selectedObjectMap,
+            moveX: moveLeft,
+            moveY: moveTop,
+            type: MoveObserverType.MOVING,
+        });
+
         this._startOffsetX = x;
         this._startOffsetY = y;
     }
@@ -732,6 +765,11 @@ export class Transformer implements ITransformerConfig {
                 scene.enableEvent();
                 this._updateControl();
                 scrollTimer.stopScroll();
+
+                this.onChangeEndObservable.notifyObservers({
+                    objects: this._selectedObjectMap,
+                    type: MoveObserverType.MOVE_END,
+                });
             });
 
             state.stopPropagation();

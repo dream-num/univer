@@ -567,6 +567,10 @@ export class Scene {
         this._transformer?.attachTo(o);
     }
 
+    getTransformer() {
+        return this._transformer;
+    }
+
     transformToSceneCoord(coord: Vector2) {
         const pickedViewport = this._viewports.find((vp) => vp.isHit(coord));
         if (!this._evented || !pickedViewport) {

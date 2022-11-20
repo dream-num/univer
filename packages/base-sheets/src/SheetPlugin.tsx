@@ -169,7 +169,9 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         if(layout === 'auto' || layout.countBar){
             this._countBarController = new CountBarController(this);
         }
-        // this._sheetContainerController = new SheetContainerController(this);
+        if(layout === 'auto' || layout.formulaBar){
+            this._formulaBarController = new FormulaBarController(this)
+        }
 
         // render sheet container
         render(<SheetContainer config={config} />, sheetContainer);

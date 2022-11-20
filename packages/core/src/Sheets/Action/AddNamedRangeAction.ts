@@ -1,10 +1,15 @@
-import { ISheetActionData, SheetActionBase, ActionObservers, ActionType } from '../../Command';
+import {
+    ISheetActionData,
+    SheetActionBase,
+    ActionObservers,
+    ActionType,
+    CommandUnit,
+} from '../../Command';
 import { CONVERTOR_OPERATION, ACTION_NAMES } from '../../Const';
 import { WorkSheetConvertor } from '../../Convertor';
 import { INamedRange } from '../../Interfaces/INamedRange';
 import { AddNamedRange } from '../Apply/AddNamedRange';
 import { DeleteNamedRange } from '../Apply/DeleteNamedRange';
-import { Workbook } from '../Domain';
 import { IDeleteNamedRangeActionData } from './DeleteNamedRangeAction';
 
 export interface IAddNamedRangeActionData extends ISheetActionData {
@@ -18,10 +23,10 @@ export class AddNamedRangeAction extends SheetActionBase<
 > {
     constructor(
         actionData: IAddNamedRangeActionData,
-        workbook: Workbook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
 
         this._doActionData = {
             ...actionData,

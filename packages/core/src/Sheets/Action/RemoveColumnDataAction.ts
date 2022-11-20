@@ -1,12 +1,12 @@
 import { InsertDataColumn, RemoveColumnData } from '../Apply';
 import { CONVERTOR_OPERATION } from '../../Const';
 import { WorkSheetConvertor } from '../../Convertor';
-import { Workbook } from '../Domain';
 import { ICellData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertColumnDataActionData } from './InsertColumnDataAction';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -27,10 +27,10 @@ export class RemoveColumnDataAction extends SheetActionBase<
 > {
     constructor(
         actionData: IRemoveColumnDataAction,
-        workbook: Workbook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.REMOVE)],

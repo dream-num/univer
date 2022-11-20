@@ -1,11 +1,11 @@
 import { InsertDataColumn, RemoveColumnData } from '../Apply';
-import { Workbook } from '../Domain';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ICellData } from '../../Interfaces';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveColumnDataAction } from './RemoveColumnDataAction';
 import { ObjectArray } from '../../Shared';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -26,10 +26,10 @@ export class InsertColumnDataAction extends SheetActionBase<
 > {
     constructor(
         actionData: IInsertColumnDataActionData,
-        workbook: Workbook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],

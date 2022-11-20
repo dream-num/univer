@@ -152,7 +152,7 @@ export const defaultLayout: ILayout = {
 
     footer: true,
 
-    innerLeft: true,
+    innerLeft: false,
 
     innerRight: false,
 
@@ -652,7 +652,13 @@ export class DocContainer extends Component<BaseDocContainerProps, IState> {
                                 <ToolBar toolList={[]}></ToolBar>
                             </Header>
                             <Layout>
-                                <Sider></Sider>
+                                <Sider
+                                    style={{
+                                        display: layout.innerLeft ? 'block' : 'none',
+                                    }}
+                                >
+                                    {/* innerLeft */}
+                                </Sider>
                                 <Content className={layout.contentSplit === 'vertical' ? style.contentContainerVertical : style.contentContainerHorizontal}>
                                     {/* extend main content */}
                                     {mainList.map((item: IMainState, i) => {

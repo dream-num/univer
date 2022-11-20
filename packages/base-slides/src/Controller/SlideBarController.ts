@@ -11,7 +11,7 @@ export class SlideBarController {
 
     constructor(plugin: SlidePlugin) {
         this._plugin = plugin;
-        this._slideList = [];
+        this._slideList = [{}, {}, {}, {}, {}];
 
         this._init();
     }
@@ -22,6 +22,8 @@ export class SlideBarController {
 
         manager.requiredObserver<SlideBar>('onSlideBarDidMountObservable', PLUGIN_NAMES.SLIDE).add((component) => {
             this._slideBar = component;
+
+            this._slideBar.setSlide(this._slideList);
         });
     }
 

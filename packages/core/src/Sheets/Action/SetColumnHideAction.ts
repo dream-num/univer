@@ -1,8 +1,8 @@
 import { SetColumnHide, SetColumnShow } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { Workbook } from '../Domain';
 import { ISetColumnShowActionData } from './SetColumnShowAction';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -23,10 +23,10 @@ export class SetColumnHideAction extends SheetActionBase<
 > {
     constructor(
         actionData: ISetColumnHideActionData,
-        workbook: Workbook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],

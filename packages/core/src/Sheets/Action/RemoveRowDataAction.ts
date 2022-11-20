@@ -1,10 +1,10 @@
 import { InsertDataRow, RemoveRowData } from '../Apply';
-import { Workbook } from '../Domain';
 import { ICellData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertRowDataActionData } from './InsertRowDataAction';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -25,10 +25,10 @@ export class RemoveRowDataAction extends SheetActionBase<
 > {
     constructor(
         actionData: IRemoveRowDataActionData,
-        workbook: Workbook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],

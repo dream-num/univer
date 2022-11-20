@@ -135,21 +135,20 @@ export class ToolBar extends Component<IProps, IState> {
                                 );
                             }
                             return (
-                                <Tooltip title={item.tooltip} placement={'bottom'}>
-                                    <Select
-                                        type={item.type}
-                                        display={item.display}
-                                        children={item.children}
-                                        customLabel={item.customLabel}
-                                        customSuffix={item.customSuffix}
-                                        label={item.label}
-                                        onClick={item.onClick}
-                                        onKeyUp={item.onKeyUp}
-                                        defaultColor={item.defaultColor}
-                                        hideSelectedIcon={item.hideSelectedIcon}
-                                        selectClassName={item.selectClassName}
-                                    ></Select>
-                                </Tooltip>
+                                <Select
+                                    tooltip={item.tooltip}
+                                    type={item.type}
+                                    display={item.display}
+                                    children={item.children}
+                                    customLabel={item.customLabel}
+                                    customSuffix={item.customSuffix}
+                                    label={item.label}
+                                    onClick={item.onClick}
+                                    onKeyUp={item.onKeyUp}
+                                    defaultColor={item.defaultColor}
+                                    hideSelectedIcon={item.hideSelectedIcon}
+                                    selectClassName={item.selectClassName}
+                                ></Select>
                             );
                         })}
                     </div>

@@ -1,5 +1,5 @@
 import { BaseDropdownProps, JSXComponent, createRef, Component, DropdownComponent } from '@univer/base-component';
-import { Icon, Menu } from '../../index';
+import { Icon, Menu, Tooltip } from '../../index';
 import styles from './index.module.less';
 
 interface IState {
@@ -64,15 +64,17 @@ export class Dropdown extends Component<BaseDropdownProps, IState> {
     }
 
     render() {
-        const { children, menu, showArrow, icon } = this.props;
+        const { children, menu, showArrow, icon, tooltip } = this.props;
         const { menuStyle } = this.state;
 
         return (
             <div className={styles.dropdown} ref={this.DropRef}>
-                <div className={styles.dropContent} onClick={this.handleClick}>
-                    {children}
-                    {showArrow ? <Icon.Format.NextIcon /> : ''}
-                </div>
+                <Tooltip title={tooltip} placement={'bottom'}>
+                    <div className={styles.dropContent} onClick={this.handleClick}>
+                        {children}
+                        {showArrow ? <Icon.Format.NextIcon /> : ''}
+                    </div>
+                </Tooltip>
                 {icon ? (
                     <div ref={this.IconRef} className={styles.dropIcon} onClick={this.handleSubClick}>
                         {icon}

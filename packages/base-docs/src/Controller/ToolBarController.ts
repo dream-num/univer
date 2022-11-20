@@ -85,7 +85,7 @@ export class ToolBarController {
 
             {
                 type: 0,
-                tooltipLocale: 'font',
+                tooltipLocale: 'toolbar.font',
                 selectClassName: styles.selectLabelString,
                 show: config.font,
                 border: true,
@@ -96,7 +96,7 @@ export class ToolBarController {
             },
             {
                 type: 1,
-                tooltipLocale: 'fontSize',
+                tooltipLocale: 'toolbar.fontSize',
                 label: String(DEFAULT_STYLES.fs),
                 show: config.fontSize,
                 onClick: (fontSize: number) => {
@@ -109,7 +109,7 @@ export class ToolBarController {
             },
             {
                 toolbarType: 1,
-                tooltipLocale: 'bold',
+                tooltipLocale: 'toolbar.bold',
                 customLabel: {
                     name: 'BoldIcon',
                 },
@@ -120,7 +120,7 @@ export class ToolBarController {
             },
             {
                 toolbarType: 1,
-                tooltipLocale: 'italic',
+                tooltipLocale: 'toolbar.italic',
                 customLabel: {
                     name: 'ItalicIcon',
                 },
@@ -131,7 +131,7 @@ export class ToolBarController {
             },
             {
                 toolbarType: 1,
-                tooltipLocale: 'strikethrough',
+                tooltipLocale: 'toolbar.strikethrough',
                 customLabel: {
                     name: 'DeleteLineIcon',
                 },
@@ -142,7 +142,7 @@ export class ToolBarController {
             },
             {
                 toolbarType: 1,
-                tooltipLocale: 'underline',
+                tooltipLocale: 'toolbar.underline',
                 customLabel: {
                     name: 'UnderLineIcon',
                 },
@@ -153,7 +153,7 @@ export class ToolBarController {
             },
             {
                 type: 2,
-                tooltipLocale: 'textColor',
+                tooltipLocale: 'toolbar.textColor.main',
                 customLabel: {
                     name: 'TextColorIcon',
                 },
@@ -164,7 +164,7 @@ export class ToolBarController {
             },
             {
                 type: 2,
-                tooltipLocale: 'fillColor',
+                tooltipLocale: 'toolbar.fillColor.main',
                 customLabel: {
                     name: 'FillColorIcon',
                 },
@@ -261,9 +261,6 @@ export class ToolBarController {
             TextRotateRotationDownIcon: this.Render.renderFunction('TextRotateRotationDownIcon'),
         };
 
-        // 注册自定义组件
-        this._plugin.registerComponent(pluginName + LineColor.name, LineColor);
-        this._plugin.registerComponent(pluginName + ColorPicker.name, ColorPicker);
         for (let k in registerIcon) {
             this._plugin.registerComponent(k, registerIcon[k]);
         }

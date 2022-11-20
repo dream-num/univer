@@ -36,6 +36,7 @@ import style from './index.module.less';
 import { ToolBar } from '../ToolBar';
 import { SlidePlugin } from '../../../SlidePlugin';
 import { InfoBar } from '../InfoBar';
+import { SlideBar } from '../SliderBar/SlideBar';
 
 export interface ISlidePluginConfigBase {
     layout: string | ILayout;
@@ -625,6 +626,10 @@ export class SlideContainer extends Component<BaseSlideContainerProps, IState> {
         // this.initEvent();
     }
 
+    addSlide() {
+        this.getContext().getPluginManager().getRequirePluginByName<SlidePlugin>(PLUGIN_NAMES.SLIDE).getSlideBarControl().addSlide();
+    }
+
     /**
      * Render the component's HTML
      *
@@ -654,33 +659,11 @@ export class SlideContainer extends Component<BaseSlideContainerProps, IState> {
                             <Layout>
                                 <Sider
                                     style={{
+                                        width: '300px',
                                         display: layout.innerLeft ? 'block' : 'none',
-                                        background: 'lightgray',
                                     }}
                                 >
-                                    innerLeft 左侧缩略图
-                                    {/* <FilterSelect />
-                                    <FilterSelect />
-                                    <FilterSelect /> */}
-                                    {/* <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            const rect = this.btnRef.current && this.btnRef.current.getBoundingClientRect();
-
-                                            this.cellRightRef.current && (this.cellRightRef.current as unknown as RightMenu).handleContextMenu(e, rect, true);
-                                        }}
-                                        ref={this.btnRef}
-                                    >
-                                        点击
-                                    </button>
-                                    {/* <PrintMode
-                                        visible={this.state.printVisible}
-                                        onCancel={() => {
-                                            this.setState({
-                                                printVisible: !this.state.printVisible,
-                                            });
-                                        }}
-                                    /> */}
+                                    <SlideBar addSlide={this.addSlide.bind(this)}></SlideBar>
                                 </Sider>
                                 <Content className={layout.contentSplit === 'vertical' ? style.contentContainerVertical : style.contentContainerHorizontal}>
                                     {/* extend main content */}

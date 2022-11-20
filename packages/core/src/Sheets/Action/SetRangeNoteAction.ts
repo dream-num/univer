@@ -1,10 +1,10 @@
 import { SetRangeNote } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
-import { Workbook } from '../Domain';
 import { IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -24,10 +24,10 @@ export class SetRangeNoteAction extends SheetActionBase<
 > {
     constructor(
         actionData: ISetRangeNoteActionData,
-        workbook: Workbook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
 
         this._doActionData = {
             ...actionData,

@@ -46,6 +46,7 @@
         "vite-plugin-external": "1.2.3"
     },
     "dependencies": {
+        "@univer/base-component": "workspace:^0.0.1",
         "@univer/base-formula-engine": "workspace:^0.0.1",
         "@univer/base-render": "workspace:^0.0.1",
         "@univer/base-sheets": "workspace:^0.0.1",

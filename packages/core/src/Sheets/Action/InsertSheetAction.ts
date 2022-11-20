@@ -1,9 +1,9 @@
 import { InsertSheet, RemoveSheet } from '../Apply';
 import { IWorksheetConfig } from '../../Interfaces';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { Workbook } from '../Domain';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveSheetActionData } from './RemoveSheetAction';
+import { CommandUnit } from '../../Command';
 
 export interface IInsertSheetActionData extends ISheetActionData {
     index: number;
@@ -16,10 +16,10 @@ export class InsertSheetAction extends SheetActionBase<
 > {
     constructor(
         actionData: IInsertSheetActionData,
-        workbook: Workbook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],

@@ -2,8 +2,8 @@ import { SetWorkSheetHideService } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { BooleanNumber } from '../../Enum';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { Workbook } from '../Domain';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -22,10 +22,10 @@ export class SetWorkSheetHideAction extends SheetActionBase<
 > {
     constructor(
         actionData: ISetWorkSheetHideActionData,
-        workbook: Workbook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],

@@ -1,12 +1,12 @@
 import { DeleteRange, InsertRange } from '../Apply';
 import { ACTION_NAMES } from '../../Const';
-import { Workbook } from '../Domain';
 import { Dimension } from '../../Enum/Dimension';
 import { ICellData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IDeleteRangeActionData } from './DeleteRangeAction';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -28,10 +28,10 @@ export class InsertRangeAction extends SheetActionBase<
 > {
     constructor(
         actionData: IInsertRangeActionData,
-        workbook: Workbook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],

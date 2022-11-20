@@ -2,11 +2,11 @@ import { addMerge } from '../Apply/AddMerge';
 import { RemoveMerge } from '../Apply/RemoveMerge';
 import { CONVERTOR_OPERATION } from '../../Const';
 import { WorkSheetConvertor } from '../../Convertor';
-import { Workbook } from '../Domain';
 import { IRangeData } from '../../Interfaces';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers } from '../../Command/ActionObservers';
 import { IRemoveMergeActionData } from './RemoveMergeAction';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -28,10 +28,10 @@ export class AddMergeAction extends SheetActionBase<
 > {
     constructor(
         actionData: IAddMergeActionData,
-        workbook: Workbook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.INSERT)],

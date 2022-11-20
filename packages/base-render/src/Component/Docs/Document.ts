@@ -529,14 +529,42 @@ export class Documents extends DocComponent {
                             lineHeight = 0,
                         } = line;
 
-                        if (!(y >= lineTop && y <= lineTop + lineHeight)) {
-                            continue;
-                        }
-
                         if (type === LineType.BLOCK) {
                             continue;
                         } else {
                             const lineOffset = lineTop + lineMarginTop + linePaddingTop;
+
+                            if (!(y >= lineOffset && y <= lineOffset + lineHeight)) {
+                                continue;
+                            }
+
+                            y -= lineOffset;
+
+                            const divideLength = divides.length;
+                            for (let i = 0; i < divideLength; i++) {
+                                const divide = divides[i];
+                                const { spanGroup, width: divideWidth, left: divideLeft, paddingLeft: dividePaddingLeft } = divide;
+                                const divideStart = divideLeft + dividePaddingLeft;
+                                if (!(x >= divideStart && x <= divideStart + divideWidth)) {
+                                    continue;
+                                }
+
+                                x -= divideStart;
+
+                                for (let span of spanGroup) {
+                                    if (!span.content || span.content.length === 0) {
+                                        continue;
+                                    }
+
+                                    const { width: spanWidth, left: spanLeft } = span;
+
+                                    if (!(x >= spanLeft && x <= spanLeft + spanWidth)) {
+                                        continue;
+                                    }
+
+                                    return span;
+                                }
+                            }
                         }
                     }
                 }

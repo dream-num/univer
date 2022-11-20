@@ -36,7 +36,7 @@ import style from './index.module.less';
 import { ToolBar } from '../ToolBar';
 import { SlidePlugin } from '../../../SlidePlugin';
 import { InfoBar } from '../InfoBar';
-import { SlideBar } from '../SliderBar/SlideBar';
+import { SlideBar } from '../SlideBar/SlideBar';
 
 export interface ISlidePluginConfigBase {
     layout: string | ILayout;

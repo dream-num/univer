@@ -1,6 +1,6 @@
 import { PLUGIN_NAMES } from '@univer/core';
 import { SlidePlugin } from '../SlidePlugin';
-import { SlideBar } from '../View/UI/SliderBar/SlideBar';
+import { SlideBar } from '../View/UI/SlideBar/SlideBar';
 
 export class SlideBarController {
     private _plugin: SlidePlugin;

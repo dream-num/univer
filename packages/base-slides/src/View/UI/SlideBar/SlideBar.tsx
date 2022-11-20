@@ -29,9 +29,14 @@ export class SlideBar extends Component<IProps, SlideBarState> {
     }
 
     setSlide(slideList: any[]) {
-        this.setState({
-            slideList,
-        });
+        this.setState(
+            {
+                slideList,
+            },
+            () => {
+                this.handleClick(0);
+            }
+        );
     }
 
     handleClick(index: number) {

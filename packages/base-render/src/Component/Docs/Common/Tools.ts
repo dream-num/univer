@@ -231,7 +231,7 @@ export function validationGrid(gridType = GridType.LINES, snapToGrid = BooleanNu
 export function getLineHeightConfig(sectionBreakConfig: ISectionBreakConfig, paragraphConfig: IParagraphConfig) {
     const { paragraphStyle = {} } = paragraphConfig;
 
-    const { linePitch = 15.6, gridType = GridType.LINES, paragraphLineGapDefault = 3 } = sectionBreakConfig;
+    const { linePitch = 15.6, gridType = GridType.LINES, paragraphLineGapDefault = 0 } = sectionBreakConfig;
 
     const { lineSpacing = 1, spacingRule = SpacingRule.AUTO, snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 

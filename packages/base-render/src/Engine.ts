@@ -135,12 +135,18 @@ export class Engine {
     }
 
     resizeBySize(width: number, height: number) {
+        const preWidth = this.width;
+        const preHeight = this.height;
         this._canvas.setSize(width, height);
         this.onTransformChangeObservable.notifyObservers({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize,
             value: {
-                x: width,
-                y: height,
+                width,
+                height,
+            },
+            preValue: {
+                width: preWidth,
+                height: preHeight,
             },
         });
     }

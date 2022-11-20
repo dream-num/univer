@@ -218,14 +218,14 @@ export function getFontStyleString(textStyle?: IStyleBase, fontLocale?: IFontLoc
     if (!fontLocale) {
         fontLocale = {
             fontList: ['Arial'],
-            defaultFontSize: 10.5,
+            defaultFontSize: 14,
         };
     }
 
     const { fontList, defaultFontSize } = fontLocale;
 
     if (!textStyle) {
-        return { fontString: `${defaultFontSize}pt  ${fontList[0]}`, fontSize: defaultFontSize, fontFamily: fontList[0] };
+        return { fontString: `${defaultFontSize}px  ${fontList[0]}`, fontSize: defaultFontSize, fontFamily: fontList[0] };
     }
 
     // font-style
@@ -278,7 +278,7 @@ export function getFontStyleString(textStyle?: IStyleBase, fontLocale?: IFontLoc
         fontSize *= baselineOffset === BaselineOffset.SUBSCRIPT ? sbr : spr;
     }
 
-    const fontString = `${italic} ${bold} ${fontSize}pt ${fontFamilyResult}, ${DEFAULT_FONTFACE_PLANE} `;
+    const fontString = `${italic} ${bold} ${fontSize}px ${fontFamilyResult}, ${DEFAULT_FONTFACE_PLANE} `;
 
     return {
         fontString,
@@ -420,12 +420,12 @@ const BENCHMARK_CONVERT_MM = 25.4;
 
 // ptToPx
 export function ptToPx(pt: number) {
-    return pt * (BENCHMARK_DPI / getDPI());
+    return pt / (BENCHMARK_DPI / getDPI());
 }
 
 // pxToPt
 export function pxToPt(px: number) {
-    return px / (BENCHMARK_DPI / getDPI());
+    return px * (BENCHMARK_DPI / getDPI());
 }
 
 // pxToMM
@@ -573,4 +573,16 @@ export function mergeInfoOffset(mergeInfo: ISelection, offsetX: number, offsetY:
 
 export function isRectIntersect(rect1: IBoundRectNoAngle, rect2: IBoundRectNoAngle) {
     return !(rect1.left > rect2.right || rect1.top > rect2.bottom || rect2.left > rect1.right || rect2.top > rect1.bottom);
+}
+
+export function injectStyle(styles: string[]) {
+    const styleElement = document.createElement('style');
+
+    document.head.appendChild(styleElement);
+
+    const styleSheet = styleElement.sheet;
+
+    for (let style of styles) {
+        styleSheet?.insertRule(style, styleSheet.cssRules.length);
+    }
 }

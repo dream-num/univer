@@ -7,11 +7,13 @@ import {
     IDocumentData,
     ISectionBreak,
     ISectionColumnProperties,
+    Observable,
+    PageOrientType,
     SectionType,
     VerticalAlign,
     WrapStrategy,
 } from '@univer/core';
-import { columnIterator, getLastPage } from './Common/Tools';
+import { getLastPage } from './Common/Tools';
 
 import { createSkeletonPage } from './Common/Page';
 
@@ -19,12 +21,10 @@ import { createSkeletonSection } from './Common/Section';
 
 import { dealWithBlocks } from './Block/Block';
 
-import { IDocumentSkeletonCached, IDocumentSkeletonColumn, IDocumentSkeletonPage, ISkeletonResourceReference } from '../../Basics/IDocumentSkeletonCached';
+import { IDocumentSkeletonCached, IDocumentSkeletonPage, ISkeletonResourceReference } from '../../Basics/IDocumentSkeletonCached';
 import { IDocsConfig, ISectionBreakConfig } from '../../Basics/Interfaces';
 import { Skeleton } from '../Skeleton';
 import { IBoundRect } from '../../Basics/Vector2';
-import { getRotateOffsetAndFarthestHypotenuse, getRotateOrientation } from '../../Basics/Draw';
-import { ORIENTATION_TYPE } from '../../Basics/Const';
 
 interface IDocumentContentMap {
     blockElements: IBlockElement[];
@@ -41,21 +41,11 @@ export enum DocumentSkeletonState {
 export class DocumentSkeleton extends Skeleton {
     private _documentData: IDocumentData;
 
-    private _skeleton: IDocumentSkeletonCached;
+    private _skeletonData: IDocumentSkeletonCached;
 
     private _renderedBlockIdMap = new Map<string, boolean>();
 
-    private _left: number = 0;
-
-    private _top: number = 0;
-
-    get left() {
-        return this._left;
-    }
-
-    get top() {
-        return this._top;
-    }
+    onRecalculateChangeObservable = new Observable<IDocumentSkeletonCached>();
 
     constructor(documentData: IDocumentData, context: ContextBase) {
         super(context);
@@ -66,21 +56,17 @@ export class DocumentSkeleton extends Skeleton {
         if (!this.dirty) {
             return;
         }
-        this._skeleton = this._createSkeleton(bounds);
+        this._skeletonData = this._createSkeleton(bounds);
+
+        this.onRecalculateChangeObservable.notifyObservers(this._skeletonData);
     }
 
-    getSkeleton() {
-        return this._skeleton;
+    getSkeletonData() {
+        return this._skeletonData;
     }
 
     getPageSize() {
         return this._documentData.documentStyle.pageSize;
-    }
-
-    setPosition(left: number, top: number) {
-        this._left = left;
-        this._top = top;
-        return this;
     }
 
     updateDocumentDataPageSize(width?: number, height?: number) {
@@ -102,54 +88,6 @@ export class DocumentSkeleton extends Skeleton {
         if (height !== undefined) {
             documentStyle.pageSize.height = height;
         }
-    }
-
-    getLastPageSize(angle: number = 0) {
-        if (!this._skeleton) {
-            return;
-        }
-
-        const { pages } = this._skeleton;
-        const lastPage = pages[pages.length - 1];
-        if (angle === 0) {
-            const { width, height } = lastPage;
-            return { width, height };
-        }
-
-        let allRotatedWidth = 0;
-        let allRotatedHeight = 0;
-
-        const orientation = getRotateOrientation(angle);
-        const widthArray: Array<{ rotatedWidth: number; spaceWidth: number }> = [];
-        columnIterator([lastPage], (column: IDocumentSkeletonColumn) => {
-            const { lines, width: columnWidth, spaceWidth } = column;
-
-            const { rotatedHeight, rotatedWidth } = getRotateOffsetAndFarthestHypotenuse(lines, columnWidth, angle);
-            allRotatedHeight += rotatedHeight;
-
-            widthArray.push({ rotatedWidth, spaceWidth });
-        });
-
-        const tanTheta = Math.tan(angle);
-        const sinTheta = Math.sin(angle);
-
-        const widthCount = widthArray.length;
-        for (let i = 0; i < widthCount; i++) {
-            const { rotatedWidth, spaceWidth } = widthArray[i];
-
-            if (i === 0) {
-                allRotatedWidth += rotatedWidth;
-            }
-
-            if ((orientation === ORIENTATION_TYPE.UP && i === 0) || (orientation === ORIENTATION_TYPE.DOWN && i === widthCount - 1)) {
-                allRotatedWidth += (rotatedWidth + spaceWidth / sinTheta) / tanTheta;
-            }
-        }
-
-        return {
-            width: allRotatedWidth,
-            height: allRotatedHeight,
-        };
     }
 
     private __getContentMapArr() {
@@ -204,6 +142,7 @@ export class DocumentSkeleton extends Skeleton {
         const {
             pageNumberStart: global_pageNumberStart = 1, // pageNumberStart
             pageSize: global_pageSize = DEFAULT_PAGE_SIZE,
+            pageOrient: global_pageOrient = PageOrientType.PORTRAIT,
             defaultHeaderId: global_defaultHeaderId,
             defaultFooterId: global_defaultFooterId,
             evenPageHeaderId: global_evenPageHeaderId,
@@ -223,10 +162,10 @@ export class DocumentSkeleton extends Skeleton {
             charSpace = 0, // charSpace
             linePitch = 15.6, // linePitch pt
             gridType = GridType.LINES, // gridType
-            paragraphLineGapDefault = 3,
+            paragraphLineGapDefault = 0,
             defaultTabStop = 10.5,
             textStyle = {
-                fs: 10.5,
+                fs: 14,
             },
             renderConfig: global_renderConfig = {
                 horizontalAlign: HorizontalAlign.UNSPECIFIED,
@@ -281,6 +220,7 @@ export class DocumentSkeleton extends Skeleton {
             const {
                 pageNumberStart = global_pageNumberStart,
                 pageSize = global_pageSize,
+                pageOrient = global_pageOrient,
                 marginTop = global_marginTop,
                 marginBottom = global_marginBottom,
                 marginRight = global_marginRight,
@@ -322,7 +262,7 @@ export class DocumentSkeleton extends Skeleton {
             const sectionBreakConfig: ISectionBreakConfig = {
                 pageNumberStart,
                 pageSize,
-
+                pageOrient,
                 marginTop,
                 marginBottom,
                 marginRight,

@@ -203,6 +203,7 @@ export class ScrollBar {
                     fill: this._thumbActiveBackgroundColor!,
                 });
                 this.makeViewDirty(true);
+                mainScene.disableEvent();
                 state.stopPropagation();
             });
             mainScene.on(EVENT_TYPE.PointerMove, (evt: unknown, state: EventState) => {
@@ -219,6 +220,7 @@ export class ScrollBar {
                 const e = evt as IPointerEvent | IMouseEvent;
                 const srcElement = this._horizonThumbRect;
                 this._isHorizonMove = false;
+                mainScene.enableEvent();
                 // srcElement.fill = this._thumbBackgroundColor!;
                 srcElement.setProps({
                     fill: this._thumbBackgroundColor!,
@@ -252,6 +254,7 @@ export class ScrollBar {
                 srcElement.setProps({
                     fill: this._thumbActiveBackgroundColor!,
                 });
+                mainScene.disableEvent();
                 this.makeViewDirty(true);
                 state.stopPropagation();
             });
@@ -270,6 +273,7 @@ export class ScrollBar {
                 const srcElement = this._verticalThumbRect;
                 this._isVerticalMove = false;
                 // srcElement.fill = this._thumbBackgroundColor!;
+                mainScene.enableEvent();
                 srcElement.setProps({
                     fill: this._thumbBackgroundColor!,
                 });

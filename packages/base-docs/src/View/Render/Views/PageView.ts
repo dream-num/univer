@@ -1,4 +1,4 @@
-import { getColor, Rect, Documents, DocumentSkeleton, CustomObject, IPageRenderConfig, Transform } from '@univer/base-render';
+import { getColor, Rect, Documents, DocumentSkeleton, CustomObject, IPageRenderConfig, Transform, ptToPx } from '@univer/base-render';
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 import { DOCS_VIEW_KEY } from './DocsView';
 
@@ -18,10 +18,11 @@ export class PageView extends BaseView {
         documents.onPageRenderObservable.add((config: IPageRenderConfig) => {
             const { page, pageLeft, pageTop, ctx } = config;
             const { width, height, marginBottom, marginLeft, marginRight, marginTop } = page;
+            ctx.save();
             ctx.translate(pageLeft - 0.5, pageTop - 0.5);
             Rect.drawWith(ctx, {
-                width: (pageSize?.width || width) + marginLeft + marginRight,
-                height: (pageSize?.height || height) + marginTop + marginBottom,
+                width: pageSize?.width || width,
+                height: pageSize?.height || height,
                 strokeWidth: 1,
                 stroke: 'rgba(198,198,198, 1)',
                 fill: 'rgba(255,255,255, 1)',

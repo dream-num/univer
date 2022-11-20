@@ -166,10 +166,12 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookConfig = {
                 rgb: 'rgb(200, 2, 0)',
             },
             fs: 24,
+            ht: HorizontalAlign.RIGHT,
+            vt: VerticalAlign.TOP,
         },
         '3': {
             ht: HorizontalAlign.RIGHT,
-            vt: VerticalAlign.TOP,
+            vt: VerticalAlign.MIDDLE,
             tb: WrapStrategy.WRAP,
             // va: BaselineOffset.SUPERSCRIPT,
             // cl: {
@@ -851,7 +853,6 @@ export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookConfig = {
             id: 'sheet-0002',
             name: 'sheet0003',
         },
-       
     },
     namedRanges: [],
 };

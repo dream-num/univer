@@ -460,6 +460,16 @@ export class OtherViewTest extends BaseView {
             isTransformer: true,
         });
 
+        const rect4 = new Rect('pathRect', {
+            left: 100,
+            top: 400,
+            width: 300,
+            height: richText.getDocsSkeletonPageSize()?.height || 0,
+            strokeWidth: 1,
+            stroke: 'rgba(102,111,99, 0.8)',
+            zIndex: 11,
+        });
+
         console.log('insert path test', mainScene);
         mainScene.addObjects([path, picture, circle1, richText]);
     }

@@ -51,17 +51,17 @@ export class FontAndBaseLine extends docExtension {
         }
 
         if (baselineOffset === BaselineOffset.SUBSCRIPT || baselineOffset === BaselineOffset.SUPERSCRIPT) {
-            const { renderConfig = {} } = this.extensionOffset;
+            // const { renderConfig = {} } = this.extensionOffset;
 
-            const { centerAngle = 0 } = renderConfig;
+            // const { centerAngle = 0 } = renderConfig;
 
             let offset = bBox.spo;
             if (baselineOffset === BaselineOffset.SUPERSCRIPT) {
                 offset = -bBox.sbo;
             }
 
-            const offsetSin = offset * Math.sin(centerAngle);
-            const offsetCos = offset * Math.cos(centerAngle);
+            // const offsetSin = offset * Math.sin(centerAngle);
+            // const offsetCos = offset * Math.cos(centerAngle);
 
             spanPointWithFont.y += offset;
 

@@ -49,7 +49,10 @@ export class RichText extends BaseObject {
 
         this._documentSkeleton = DocumentSkeleton.create(this._documentData, this._context);
 
-        this._documents = new Documents(`${this.oKey}_DOCUMENTS`, this._documentSkeleton);
+        this._documents = new Documents(`${this.oKey}_DOCUMENTS`, this._documentSkeleton, {
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
 
         this._initialProps(props);
 
@@ -59,11 +62,24 @@ export class RichText extends BaseObject {
                 this._documentSkeleton.updateDocumentDataPageSize(this.width);
                 this._documentSkeleton.makeDirty(true);
                 this._documentSkeleton.calculate();
-                const size = this._documentSkeleton.getLastPageSize();
+                const size = this.getDocsSkeletonPageSize();
                 this.height = size?.height || this.height;
                 this._setTransForm();
             }
         });
+    }
+
+    getDocsSkeletonPageSize() {
+        const skeletonData = this._documentSkeleton?.getSkeletonData();
+
+        if (!skeletonData) {
+            return;
+        }
+        const { pages } = skeletonData;
+        const lastPage = pages[pages.length - 1];
+
+        const { width, height } = lastPage;
+        return { width, height };
     }
 
     private convertToDocumentData(text: string) {
@@ -110,7 +126,7 @@ export class RichText extends BaseObject {
 
         this._documentSkeleton.calculate();
 
-        const contentSize = this._documentSkeleton.getLastPageSize();
+        const contentSize = this.getDocsSkeletonPageSize();
 
         this.transformByState({
             width: contentSize?.width || 0,

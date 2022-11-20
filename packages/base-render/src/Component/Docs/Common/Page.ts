@@ -1,4 +1,4 @@
-import { IBlockElement, IFooterData, IHeaderData, Nullable } from '@univer/core';
+import { IBlockElement, IFooterData, IHeaderData, Nullable, PageOrientType } from '@univer/core';
 import { createSkeletonSection } from './Section';
 import { BreakType, IDocumentSkeletonFooter, IDocumentSkeletonHeader, IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../Basics/IDocumentSkeletonCached';
 import { ISectionBreakConfig } from '../../../Basics/Interfaces';
@@ -17,6 +17,7 @@ export function createSkeletonPage(
     const {
         pageNumberStart = 1,
         pageSize = { width: Infinity, height: Infinity },
+        pageOrient = PageOrientType.PORTRAIT,
         headerIds = {},
         footerIds = {},
         useFirstPageHeaderFooter,
@@ -41,24 +42,13 @@ export function createSkeletonPage(
     page.pageNumber = pageNumber;
     page.pageNumberStart = pageNumberStart;
     page.renderConfig = renderConfig;
-    const sections = page.sections;
-    const lastSection = sections[sections.length - 1];
-    const { marginTop: curPageMT, marginBottom: curPageMB, marginLeft: curPageML, marginRight: curPageMR } = page;
-    const pageContentWidth = pageWidth - curPageML - curPageMR;
-    const pageContentHeight = pageHeight - curPageMT - curPageMB;
-    let lastSectionBottom = curPageMT;
-    if (lastSection) {
-        lastSectionBottom = lastSection.top + lastSection.height;
-    }
 
-    const newSection = createSkeletonSection(columnProperties, columnSeparatorType, lastSectionBottom, curPageML, pageContentWidth, pageContentHeight - lastSectionBottom);
-    newSection.parent = page;
-    sections.push(newSection);
     page.marginLeft = marginLeft;
     page.marginRight = marginRight;
     page.breakType = breakType;
-    page.width = pageWidth;
-    page.height = pageHeight;
+    page.width = page.pageWidth = pageWidth;
+    page.height = page.pageHeight = pageHeight;
+    page.pageOrient = pageOrient;
 
     const { defaultHeaderId, evenPageHeaderId, firstPageHeaderId } = headerIds;
     const { defaultFooterId, evenPageFooterId, firstPageFooterId } = footerIds;
@@ -98,6 +88,20 @@ export function createSkeletonPage(
     page.marginTop = _getVerticalMargin(marginTop, marginHeader, header);
     page.marginBottom = _getVerticalMargin(marginBottom, marginFooter, footer);
 
+    const sections = page.sections;
+    const lastSection = sections[sections.length - 1];
+    const { marginTop: curPageMT, marginBottom: curPageMB, marginLeft: curPageML, marginRight: curPageMR } = page;
+    const pageContentWidth = pageWidth - curPageML - curPageMR;
+    const pageContentHeight = pageHeight - curPageMT - curPageMB;
+    let lastSectionBottom = 0;
+    if (lastSection) {
+        lastSectionBottom = lastSection.top + lastSection.height;
+    }
+
+    const newSection = createSkeletonSection(columnProperties, columnSeparatorType, lastSectionBottom, 0, pageContentWidth, pageContentHeight - lastSectionBottom);
+    newSection.parent = page;
+    sections.push(newSection);
+
     return page;
 }
 
@@ -110,6 +114,9 @@ function _getNullPage() {
         headerId: '',
         footerId: '',
         // page
+        pageWidth: 0,
+        pageHeight: 0,
+        pageOrient: PageOrientType.PORTRAIT,
         pageNumber: 1,
         pageNumberStart: 1,
         verticalAlign: false,

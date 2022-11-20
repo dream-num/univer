@@ -1,5 +1,6 @@
 import { BooleanNumber, CommandManager, ISheetActionData, SheetActionBase } from '@univer/core';
 import { BaseComponentSheet, BaseComponentRender } from '@univer/base-component';
+import { CellRangeModal } from '@univer/style-universheet';
 import { SheetPlugin } from '../SheetPlugin';
 
 export class SheetContainerController {
@@ -93,6 +94,6 @@ export class SheetContainerController {
         for (let k in registerIcon) {
             this._plugin.registerComponent(k, registerIcon[k]);
         }
-        // this._plugin.registerModal(CellRangeModal.name, CellRangeModal);
+        this._plugin.registerModal(CellRangeModal.name, CellRangeModal);
     }
 }

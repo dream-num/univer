@@ -148,8 +148,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
         const layout = this._config.layout as ILayout;
 
-        this._sheetContainerController = new SheetContainerController(this);
         this._modalGroupController = new ModalGroupController(this);
+        this._sheetContainerController = new SheetContainerController(this);
 
         // TODO rightMenu config
         this._rightMenuControl = new RightMenuController(this);

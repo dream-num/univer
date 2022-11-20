@@ -8,6 +8,7 @@ import { SlideContainerController } from './Controller/SlideContainerController'
 import { InfoBarController } from './Controller/InfoBarController';
 import { BaseSlideContainerConfig, ISlidePluginConfigBase, SlideContainer } from './View/UI/SlideContainer';
 import { SlideBarController } from './Controller/SlideBarController';
+import { CanvasView } from './View/Render';
 
 export interface ISlidePluginConfig extends ISlidePluginConfigBase {
     container: HTMLElement | string;
@@ -38,6 +39,8 @@ export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
     private _showMainByNameFunc: Function;
 
     private _canvasEngine: Engine;
+
+    private _canvasView: CanvasView;
 
     private _toolBarControl: ToolBarController;
 
@@ -155,6 +158,8 @@ export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
         this._canvasEngine = engineInstance;
 
         engineInstance.setContainer(container);
+
+        this._canvasView = new CanvasView(engineInstance, this);
         window.onresize = () => {
             engineInstance.resize();
         };

@@ -196,6 +196,8 @@ export class DocsEditor {
             this._startOffsetX = evtOffsetX;
             this._startOffsetY = evtOffsetY;
 
+            console.log(this._documents?.findNodeByCoord(evtOffsetX, evtOffsetY));
+
             scene.disableEvent();
 
             const scrollTimer = ScrollTimer.create(scene);

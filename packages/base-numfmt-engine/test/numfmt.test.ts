@@ -39,3 +39,8 @@ test('numfmt percentage', () => {
     const formatter = numfmt('0.00%');
     expect(formatter(0.1)).toEqual('10.00%');
 });
+
+test('numfmt percentage', () => {
+    const formatter = numfmt('aaaa');
+    console.log(formatter(16));
+});

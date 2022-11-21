@@ -22,6 +22,8 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
 
     sheetContainerRef = createRef();
 
+    slideTabRoot = createRef();
+
     sheetContentRef = createRef();
 
     sheetBarContentRef = createRef();
@@ -225,6 +227,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
             slideTabBarItemActiveClassName: 'univer-slide-tab-active',
             slideTabBarItemClassName: 'univer-slide-tab-item',
             slideTabBarItemAutoSort: true,
+            slideTabRoot: this.slideTabRoot.current,
             onChangeName: (event: Event) => {
                 if (this.state.changeSheetName) {
                     this.state.changeSheetName(event);
@@ -265,7 +268,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         const NextIcon = this.Render.renderFunction('NextIcon');
 
         return (
-            <div className={styles.sheetBar}>
+            <div className={styles.sheetBar} ref={this.slideTabRoot}>
                 {/* user options button */}
                 <div className={styles.sheetBarOptions}>
                     <Button className={styles.sheetBarOptionsButton} onClick={addSheet} type="text">

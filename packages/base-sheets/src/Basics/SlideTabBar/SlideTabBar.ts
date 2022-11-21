@@ -5,6 +5,7 @@ export interface SlideTabBarConfig {
     slideTabBarClassName: string;
     slideTabBarItemActiveClassName: string;
     slideTabBarItemClassName: string;
+    slideTabRoot: HTMLElement;
     activeClassNameAutoController: boolean;
     slideTabBarItemAutoSort: boolean;
     onSlideEnd: (event: MouseEvent) => void;
@@ -232,8 +233,12 @@ export class SlideTabBar {
     }
 
     constructor(config: Partial<SlideTabBarConfig>) {
-        const slideTabBar = document.querySelector(`.${config.slideTabBarClassName ?? 'slide-tab-bar'}`);
-        const slideTabItems = document.querySelectorAll(`.${config.slideTabBarItemClassName ?? 'slide-tab-item'}`);
+        if (config.slideTabRoot == null) {
+            throw new Error('not found slide-tab-bar root element');
+        }
+
+        const slideTabBar = config.slideTabRoot.querySelector(`.${config.slideTabBarClassName ?? 'slide-tab-bar'}`);
+        const slideTabItems = config.slideTabRoot.querySelectorAll(`.${config.slideTabBarItemClassName ?? 'slide-tab-item'}`);
 
         if (slideTabBar == null) {
             throw new Error('not found slide-tab-bar');

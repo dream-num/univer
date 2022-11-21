@@ -43,6 +43,7 @@ export interface BaseSelectProps {
     name?: string;
     customLabel?: CustomComponent;
     customSuffix?: CustomComponent;
+    tooltip?: string;
 }
 
 interface IState {
@@ -299,13 +300,13 @@ export class Select extends Component<BaseSelectProps, IState> {
     // 普通下拉
     getSingle = () => {
         const { content, menu } = this.state;
-        const { className = '' } = this.props;
+        const { className = '', tooltip } = this.props;
         const Button = this.Render.renderFunction('Button');
 
         return (
             <div className={`${styles.selectSingle} ${className}`}>
                 <Button type="text">
-                    <Dropdown menu={{ menu, onClick: this.onClick }} showArrow>
+                    <Dropdown tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
                         <div>{content}</div>
                     </Dropdown>
                 </Button>
@@ -316,14 +317,14 @@ export class Select extends Component<BaseSelectProps, IState> {
     //Input下拉
     getInput = () => {
         const { content, menu } = this.state;
-        const { className = '' } = this.props;
+        const { className = '', tooltip } = this.props;
         const Input = this.Render.renderFunction('Input');
         const Button = this.Render.renderFunction('Button');
 
         return (
             <div className={`${styles.selectInput} ${className}`}>
                 <Button type="text">
-                    <Dropdown menu={{ menu, onClick: this.onClick }} showArrow>
+                    <Dropdown tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
                         <Input onKeyUp={this.onKeyUp} type="number" value={content as string} />
                     </Dropdown>
                 </Button>
@@ -333,7 +334,7 @@ export class Select extends Component<BaseSelectProps, IState> {
 
     //颜色选择器
     getColor = () => {
-        const { label, className = '' } = this.props;
+        const { label, className = '', tooltip } = this.props;
         const { color, menu } = this.state;
         const Button = this.Render.renderFunction('Button');
         const NextIcon = this.Render.renderFunction('NextIcon');
@@ -341,7 +342,7 @@ export class Select extends Component<BaseSelectProps, IState> {
         return (
             <div className={`${styles.selectColor} ${styles.selectDouble} ${className}`}>
                 <Button type="text">
-                    <Dropdown onClick={this.onClick} menu={{ menu, onClick: this.onClick }} icon={<NextIcon />}>
+                    <Dropdown tooltip={tooltip} onClick={this.onClick} menu={{ menu, onClick: this.onClick }} icon={<NextIcon />}>
                         <div className={styles.selectLabel}>{label}</div>
                         <div className={styles.selectLine} style={{ background: color }}></div>
                     </Dropdown>
@@ -352,14 +353,14 @@ export class Select extends Component<BaseSelectProps, IState> {
 
     getDouble = () => {
         const { content, menu } = this.state;
-        const { className = '' } = this.props;
+        const { className = '', tooltip } = this.props;
         const NextIcon = this.Render.renderFunction('NextIcon');
         const Button = this.Render.renderFunction('Button');
 
         return (
             <div className={`${styles.selectDouble} ${className}`}>
                 <Button type="text">
-                    <Dropdown menu={{ menu, onClick: this.onClick }} icon={<NextIcon />}>
+                    <Dropdown tooltip={tooltip} menu={{ menu, onClick: this.onClick }} icon={<NextIcon />}>
                         <div className={styles.selectLabel}>{content}</div>
                     </Dropdown>
                 </Button>
@@ -368,14 +369,14 @@ export class Select extends Component<BaseSelectProps, IState> {
     };
 
     getFix = () => {
-        const { label, className = '' } = this.props;
+        const { label, className = '', tooltip } = this.props;
         const { menu } = this.state;
         const Button = this.Render.renderFunction('Button');
 
         return (
             <div className={`${styles.selectDouble} ${className}`}>
                 <Button type="text">
-                    <Dropdown menu={{ menu, onClick: this.onClick }} showArrow>
+                    <Dropdown tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
                         <div className={styles.selectLabel}>{label}</div>
                     </Dropdown>
                 </Button>
@@ -384,7 +385,7 @@ export class Select extends Component<BaseSelectProps, IState> {
     };
 
     getDoubleFix = () => {
-        const { label, className = '' } = this.props;
+        const { label, className = '', tooltip } = this.props;
         const { menu } = this.state;
         const Button = this.Render.renderFunction('Button');
         const NextIcon = this.Render.renderFunction('NextIcon');
@@ -392,7 +393,7 @@ export class Select extends Component<BaseSelectProps, IState> {
         return (
             <div className={`${styles.selectDouble} ${className}`}>
                 <Button type="text">
-                    <Dropdown onClick={this.onClick} menu={{ menu, onClick: this.onClick }} icon={<NextIcon />}>
+                    <Dropdown tooltip={tooltip} onClick={this.onClick} menu={{ menu, onClick: this.onClick }} icon={<NextIcon />}>
                         <div className={styles.selectLabel}>{label}</div>
                     </Dropdown>
                 </Button>

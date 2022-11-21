@@ -24,8 +24,9 @@ export class FormulaBarController {
         manager.requiredObserver<FormulaBar>('onFormulaBarDidMountObservable', PLUGIN_NAMES.SPREADSHEET).add((component) => {
             this._formulaBar = component;
         });
-
+        debugger
         this._plugin.getObserver('onChangeSelectionObserver')?.add((selectionControl: SelectionControl) => {
+            debugger
             const currentCell = selectionControl.model.currentCell;
 
             if (currentCell) {
@@ -55,6 +56,7 @@ export class FormulaBarController {
                 if (cellData) {
                     let cellValue = cellData.m || `${cellData.v}` || '';
 
+                    debugger
                     // If the cell has a formula, it needs to be intercepted
                     const cell = this._cellInputExtensionManager.handle({
                         row: currentRangeData.startRow,

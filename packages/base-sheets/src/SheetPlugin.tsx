@@ -146,30 +146,32 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
         this._componentList = new Map();
 
-        const layout = this._config.layout as ILayout
+        const layout = this._config.layout as ILayout;
 
-        this._sheetContainerController = new SheetContainerController(this);
         this._modalGroupController = new ModalGroupController(this);
+        this._sheetContainerController = new SheetContainerController(this);
 
         // TODO rightMenu config
         this._rightMenuControl = new RightMenuController(this);
-        
-        if(layout === 'auto' || layout.toolBar){
+
+        if (layout === 'auto' || layout.toolBar) {
             this._toolBarControl = new ToolBarController(this);
         }
-        if(layout === 'auto' || layout.infoBar){
+        if (layout === 'auto' || layout.infoBar) {
             this._infoBarControl = new InfoBarController(this);
         }
-        if(layout === 'auto' || layout.sheetBar){
+        if (layout === 'auto' || layout.sheetBar) {
             this._sheetBarControl = new SheetBarControl(this);
         }
         this._cellEditorControl = new CellEditorController(this);
         this._antLineController = new AntLineControl(this);
 
-        if(layout === 'auto' || layout.countBar){
+        if (layout === 'auto' || layout.countBar) {
             this._countBarController = new CountBarController(this);
         }
-        // this._sheetContainerController = new SheetContainerController(this);
+        if (layout === 'auto' || layout.formulaBar) {
+            this._formulaBarController = new FormulaBarController(this);
+        }
 
         // render sheet container
         render(<SheetContainer config={config} />, sheetContainer);

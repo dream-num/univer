@@ -658,28 +658,6 @@ export class DocContainer extends Component<BaseDocContainerProps, IState> {
                                     }}
                                 >
                                     {/* innerLeft */}
-                                    {/* <FilterSelect />
-                                    <FilterSelect />
-                                    <FilterSelect /> */}
-                                    {/* <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            const rect = this.btnRef.current && this.btnRef.current.getBoundingClientRect();
-
-                                            this.cellRightRef.current && (this.cellRightRef.current as unknown as RightMenu).handleContextMenu(e, rect, true);
-                                        }}
-                                        ref={this.btnRef}
-                                    >
-                                        点击
-                                    </button>
-                                    {/* <PrintMode
-                                        visible={this.state.printVisible}
-                                        onCancel={() => {
-                                            this.setState({
-                                                printVisible: !this.state.printVisible,
-                                            });
-                                        }}
-                                    /> */}
                                 </Sider>
                                 <Content className={layout.contentSplit === 'vertical' ? style.contentContainerVertical : style.contentContainerHorizontal}>
                                     {/* extend main content */}

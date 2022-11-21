@@ -1,6 +1,7 @@
 import { IKeyboardEvent } from '@univer/base-render';
 import { Observable, Plugin } from '@univer/core';
 import { SlideContainer } from '../View/UI/SlideContainer';
+import { SlideBar } from '../View/UI/SlideBar/SlideBar';
 import { ToolBar } from '../View/UI/ToolBar/ToolBar';
 
 export type SlidePluginObserve = {
@@ -16,6 +17,7 @@ export type SlidePluginObserve = {
     onChangeCurrentSheetObserver: Observable<string>;
 
     onToolBarDidMountObservable: Observable<ToolBar>;
+    onSlideBarDidMountObservable: Observable<SlideBar>;
 
     onSlideContainerDidMountObservable: Observable<SlideContainer>;
 
@@ -40,6 +42,7 @@ export function uninstall(plugin: Plugin) {
     plugin.deleteObserve('onAfterChangeFontColorObservable');
 
     plugin.deleteObserve('onToolBarDidMountObservable');
+    plugin.deleteObserve('onSlideBarDidMountObservable');
 
     plugin.deleteObserve('onChangeCurrentSheetObserver');
     plugin.deleteObserve('onSlideContainerDidMountObservable');
@@ -77,6 +80,7 @@ export function install(plugin: Plugin) {
     plugin.pushToObserve('onSheetBarDidMountObservable');
     plugin.pushToObserve('onCountBarDidMountObservable');
     plugin.pushToObserve('onInfoBarDidMountObservable');
+    plugin.pushToObserve('onSlideBarDidMountObservable');
     plugin.pushToObserve('onRightMenuDidMountObservable');
     plugin.pushToObserve('onSlideContainerDidMountObservable');
     plugin.pushToObserve('onSpreadsheetKeyDownObservable');

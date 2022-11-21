@@ -1,6 +1,6 @@
-import { BooleanNumber, HorizontalAlign, Observable, VerticalAlign, WrapStrategy } from '@univer/core';
+import { BooleanNumber, HorizontalAlign, Nullable, Observable, Observer, VerticalAlign, WrapStrategy } from '@univer/core';
 import { DocComponent } from './DocComponent';
-import { IDocumentSkeletonPage, LineType, PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
+import { IDocumentSkeletonCached, IDocumentSkeletonPage, LineType, PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';
 import { DocumentsSpanAndLineExtensionRegistry, IExtensionConfig } from '../Extension';
 import { DocumentSkeleton } from './DocSkeleton';
@@ -8,11 +8,14 @@ import { DOCS_EXTENSION_TYPE } from './DocExtension';
 import './Extensions';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../Basics/Draw';
 import { fixLineWidthByScale, getScale, degToRad } from '../../Basics/Tools';
+import { DocsEditor } from './Document.Editor';
 
-export interface IDocumentsPageLayoutConfig {
+export interface IDocumentsConfig {
     pageMarginLeft?: number;
     pageMarginTop?: number;
     pageLayoutType?: PageLayoutType;
+    allowCache?: boolean;
+    hasEditor?: boolean;
 }
 
 export interface IPageRenderConfig {
@@ -29,7 +32,17 @@ export class Documents extends DocComponent {
 
     private _translateSaveList: Array<{ x: number; y: number }> = [];
 
+    private _hasEditor = false;
+
+    private _editor: DocsEditor;
+
+    private _skeletonObserver: Nullable<Observer<IDocumentSkeletonCached>>;
+
     // private _textAngleRotateOffset: number = 0;
+
+    pageWidth: number;
+
+    pageHeight: number;
 
     pageMarginLeft: number;
 
@@ -41,16 +54,28 @@ export class Documents extends DocComponent {
 
     onPageRenderObservable = new Observable<IPageRenderConfig>();
 
-    constructor(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsPageLayoutConfig, allowCache: boolean = true) {
-        super(oKey, documentSkeleton, allowCache);
+    constructor(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
+        super(oKey, documentSkeleton, config?.allowCache);
 
-        this.pageMarginLeft = config?.pageMarginLeft || 17;
+        if (config?.pageMarginLeft === undefined) {
+            this.pageMarginLeft = 17;
+        } else {
+            this.pageMarginLeft = config?.pageMarginLeft;
+        }
 
-        this.pageMarginTop = config?.pageMarginTop || 14;
+        if (config?.pageMarginTop === undefined) {
+            this.pageMarginTop = 14;
+        } else {
+            this.pageMarginTop = config?.pageMarginTop;
+        }
 
         this.pageLayoutType = config?.pageLayoutType || PageLayoutType.VERTICAL;
 
+        this._hasEditor = config?.hasEditor || false;
+
         this._initialDefaultExtension();
+
+        this._addSkeletonChangeObserver(documentSkeleton);
 
         this.makeDirty(true);
     }
@@ -123,6 +148,23 @@ export class Documents extends DocComponent {
         });
     }
 
+    enableEditor() {
+        if (this._hasEditor) {
+            return;
+        }
+        this._editor = DocsEditor.create(this);
+        this._hasEditor = true;
+    }
+
+    disableEditor() {
+        this._editor?.dispose();
+        this._hasEditor = false;
+    }
+
+    get hasEditor() {
+        return this._hasEditor;
+    }
+
     draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         const documentSkeleton = this.getSkeleton();
         if (!documentSkeleton) {
@@ -135,7 +177,7 @@ export class Documents extends DocComponent {
 
         this._translateBy(0, 0);
 
-        const skeletonData = documentSkeleton.getSkeleton();
+        const skeletonData = documentSkeleton.getSkeletonData();
 
         const { pages } = skeletonData;
         const parentScale = this.getParentScale();
@@ -181,9 +223,9 @@ export class Documents extends DocComponent {
             let pageLeft = 0;
 
             if (this.pageLayoutType === PageLayoutType.VERTICAL) {
-                pageTop = pageHeight * (pageNumber - 1) + this.pageMarginTop;
+                pageTop = (pageHeight + this.pageMarginTop) * (pageNumber - 1);
             } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
-                pageLeft = pageWidth * (pageNumber - 1) + this.pageMarginLeft;
+                pageLeft = (pageWidth + this.pageMarginLeft) * (pageNumber - 1);
             }
 
             this._translate(pageLeft, pageTop);
@@ -197,7 +239,6 @@ export class Documents extends DocComponent {
 
             this._startRotation(ctx, finalAngle);
 
-            // console.log('page', page, vertexAngle, centerAngle, verticalAlign, horizontalAlign);
             for (let section of sections) {
                 const { columns, top: sectionTop = 0 } = section;
 
@@ -230,7 +271,6 @@ export class Documents extends DocComponent {
 
                         horizontalOffset = this._horizontalHandler(exceedWidthFix, pagePaddingLeft, pagePaddingRight, horizontalAlign);
 
-                        // horizontalOffset = this._horizontalHandler(rotatedWidth, pagePaddingLeft, pagePaddingRight, horizontalAlign);
                         verticalOffset = this._verticalHandler(rotatedHeight, pagePaddingTop, pagePaddingBottom, verticalAlign);
 
                         let exceedHeightFix = verticalOffset - fixOffsetY;
@@ -246,22 +286,6 @@ export class Documents extends DocComponent {
                         this._translate(0, -rotateTranslateY);
 
                         rotateTranslateXListApply = rotateTranslateXList;
-
-                        // console.log('page', lines, {
-                        //     horizontalOffset,
-                        //     verticalOffset,
-                        //     rotateTranslateXList,
-                        //     rotatedHeight,
-                        //     rotatedWidth,
-                        //     fixOffsetX,
-                        //     fixOffsetY,
-                        //     rotateTranslateY,
-                        //     pageWidth,
-                        //     pageHeight,
-                        //     cellWidth: this.width,
-                        //     cellHeight: this.height,
-                        //     exceedHeightFix,
-                        // });
                     } else {
                         horizontalOffset = horizontalOffsetNoAngle;
                         verticalOffset = verticalOffsetNoAngle;
@@ -282,7 +306,7 @@ export class Documents extends DocComponent {
                             lineHeight = 0,
                         } = line;
 
-                        let maxLineAsc = asc + lineMarginTop + linePaddingTop;
+                        let maxLineAsc = asc;
 
                         const maxLineAscSin = maxLineAsc * Math.sin(centerAngle);
                         const maxLineAscCos = maxLineAsc * Math.cos(centerAngle);
@@ -290,8 +314,6 @@ export class Documents extends DocComponent {
                         if (type === LineType.BLOCK) {
                             for (let extension of extensions) {
                                 if (extension.type === DOCS_EXTENSION_TYPE.LINE) {
-                                    // extension.translateX = this._translateX;
-                                    // extension.translateY = this._translateY;
                                     extension.extensionOffset = {
                                         alignOffset,
                                         renderConfig,
@@ -302,7 +324,6 @@ export class Documents extends DocComponent {
                         } else {
                             this._translateSave();
                             const lineOffset = lineTop + lineMarginTop + linePaddingTop;
-                            // this._translate(lineOffset * Math.sin(centerAngle), lineOffset * Math.cos(centerAngle));
                             this._translate(0, lineOffset);
                             rotateTranslateXListApply && this._translate(rotateTranslateXListApply[i]); // x axis offset
 
@@ -312,7 +333,7 @@ export class Documents extends DocComponent {
                                 const { spanGroup, left: divideLeft, paddingLeft: dividePaddingLeft } = divide;
                                 this._translateSave();
                                 this._translate(divideLeft + dividePaddingLeft, 0);
-                                // console.log(divide, spanGroup, divideLeft, dividePaddingLeft);
+
                                 for (let span of spanGroup) {
                                     if (!span.content || span.content.length === 0) {
                                         continue;
@@ -348,25 +369,8 @@ export class Documents extends DocComponent {
                                         renderConfig,
                                     };
 
-                                    // console.log(span.content, { originTranslate, centerPoint, spanPointWithFont, _translateX: this._translateX, _translateY: this._translateY });
-
-                                    // console.log(
-                                    //     span.content,
-                                    //     this._translateX + horizontalOffset + spanLeft,
-                                    //     this._translateY + verticalOffset,
-                                    //     originTranslate,
-                                    //     spanStartPoint,
-                                    //     spanPointWithFont,
-                                    //     centerPoint,
-                                    //     alignOffset,
-                                    //     renderConfig,
-                                    //     finalAngle
-                                    // );
-
                                     for (let extension of extensions) {
                                         if (extension.type === DOCS_EXTENSION_TYPE.SPAN) {
-                                            // extension.translateX = this._translateX + horizontalOffset;
-                                            // extension.translateY = this._translateY + verticalOffset;
                                             extension.extensionOffset = extensionOffset;
                                             extension.draw(ctx, parentScale, span);
                                         }
@@ -376,10 +380,6 @@ export class Documents extends DocComponent {
                             }
                             this._translateRestore();
                         }
-
-                        // this._moveRotationOffset();
-                        // cumSpanHeight += contentHeight;
-                        // preLine = line;
                     }
                 }
             }
@@ -388,7 +388,190 @@ export class Documents extends DocComponent {
         }
     }
 
-    static create(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsPageLayoutConfig, allowCache: boolean = true) {
-        return new Documents(oKey, documentSkeleton, config, allowCache);
+    private _addSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
+        if (!skeleton) {
+            return;
+        }
+
+        this._skeletonObserver = skeleton.onRecalculateChangeObservable.add((data) => {
+            const pages = data.pages;
+            let width = 0;
+            let height = 0;
+            for (let i = 0, len = pages.length; i < len; i++) {
+                const page = pages[i];
+                const { pageWidth, pageHeight } = page;
+                if (this.pageLayoutType === PageLayoutType.VERTICAL) {
+                    height += pageHeight;
+                    if (i !== len - 1) {
+                        height += this.pageMarginTop;
+                    }
+                    width = Math.max(width, pageWidth);
+                } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
+                    width += pageWidth;
+                    if (i !== len - 1) {
+                        width += this.pageMarginLeft;
+                    }
+                    height = Math.max(height, pageHeight);
+                }
+            }
+
+            this.resize(width, height);
+        });
+    }
+
+    private _disposeSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
+        if (!skeleton) {
+            return;
+        }
+        skeleton.onRecalculateChangeObservable.remove(this._skeletonObserver);
+    }
+
+    changeSkeleton(newSkeleton: DocumentSkeleton) {
+        this._disposeSkeletonChangeObserver(this.getSkeleton());
+        this.setSkeleton(newSkeleton);
+        this._addSkeletonChangeObserver(newSkeleton);
+        return this;
+    }
+
+    findNodeByCoord(offsetX: number, offsetY: number) {
+        const scene = this.getScene();
+        const originCoord = scene.transformToSceneCoord(Vector2.FromArray([offsetX, offsetY]));
+
+        if (!originCoord) {
+            return false;
+        }
+
+        const coord = this._getInverseCoord(originCoord);
+        let { x, y } = coord;
+        const skeleton = this.getSkeleton();
+
+        if (!skeleton) {
+            return false;
+        }
+
+        const skeletonData = skeleton.getSkeletonData();
+
+        const pages = skeletonData.pages;
+
+        let pageStartX = 0;
+
+        let pageStartY = 0;
+
+        for (let i = 0, len = pages.length; i < len; i++) {
+            const page = pages[i];
+            const {
+                pageWidth,
+                pageHeight,
+                marginTop: pagePaddingTop = 0,
+                marginBottom: pagePaddingBottom = 0,
+                marginLeft: pagePaddingLeft = 0,
+                marginRight: pagePaddingRight = 0,
+            } = page;
+            let startX = -1;
+            let startY = -1;
+            let endX = -1;
+            let endY = -1;
+            if (this.pageLayoutType === PageLayoutType.VERTICAL) {
+                startX = 0;
+                endX = pageWidth;
+                startY = pageStartY;
+                endY = pageStartY + pageHeight;
+
+                pageStartY += pageHeight + this.pageMarginTop;
+            } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
+                startX = pageStartX;
+                endX = pageStartX + pageWidth;
+                startY = 0;
+                endY = pageHeight;
+
+                pageStartX += pageWidth + this.pageMarginLeft;
+            }
+
+            if (!(x >= startX && x <= endX && y >= startY && y <= endY)) {
+                continue;
+            }
+
+            x -= startX + pagePaddingLeft;
+            y -= startY + pagePaddingTop;
+
+            const sections = page.sections;
+            for (let section of sections) {
+                const { columns, top: sectionTop = 0, height } = section;
+
+                if (!(y >= sectionTop && y <= sectionTop + height)) {
+                    continue;
+                }
+
+                y -= sectionTop;
+
+                for (let column of columns) {
+                    const { lines, width: columnWidth, left: columnLeft } = column;
+
+                    if (!(x >= columnLeft && x <= columnLeft + columnWidth)) {
+                        continue;
+                    }
+
+                    x -= columnLeft;
+
+                    const linesCount = lines.length;
+
+                    for (let i = 0; i < linesCount; i++) {
+                        const line = lines[i];
+                        const {
+                            divides,
+                            top: lineTop,
+                            marginBottom: lineMarginBottom = 0,
+                            marginTop: lineMarginTop = 0,
+                            paddingTop: linePaddingTop = 0,
+                            paddingBottom: linePaddingBottom = 0,
+                            type,
+                            lineHeight = 0,
+                        } = line;
+
+                        if (type === LineType.BLOCK) {
+                            continue;
+                        } else {
+                            const lineOffset = lineTop + lineMarginTop + linePaddingTop;
+
+                            if (!(y >= lineOffset && y <= lineOffset + lineHeight)) {
+                                continue;
+                            }
+
+                            y -= lineOffset;
+
+                            const divideLength = divides.length;
+                            for (let i = 0; i < divideLength; i++) {
+                                const divide = divides[i];
+                                const { spanGroup, width: divideWidth, left: divideLeft, paddingLeft: dividePaddingLeft } = divide;
+                                const divideStart = divideLeft + dividePaddingLeft;
+                                if (!(x >= divideStart && x <= divideStart + divideWidth)) {
+                                    continue;
+                                }
+
+                                x -= divideStart;
+
+                                for (let span of spanGroup) {
+                                    if (!span.content || span.content.length === 0) {
+                                        continue;
+                                    }
+
+                                    const { width: spanWidth, left: spanLeft } = span;
+
+                                    if (!(x >= spanLeft && x <= spanLeft + spanWidth)) {
+                                        continue;
+                                    }
+
+                                    return span;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    static create(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
+        return new Documents(oKey, documentSkeleton, config);
     }
 }

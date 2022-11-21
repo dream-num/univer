@@ -143,8 +143,6 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
     private _initializeRender() {
         const engine = this.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
 
-        this._canvasView = new CanvasView(engine, this);
-
         this.register(engine);
     }
 
@@ -155,6 +153,9 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
         this._canvasEngine = engineInstance;
 
         engineInstance.setContainer(container);
+
+        this._canvasView = new CanvasView(engineInstance, this);
+
         window.onresize = () => {
             engineInstance.resize();
         };

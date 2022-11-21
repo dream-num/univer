@@ -45,8 +45,8 @@ export class Picture extends Shape<IPictureProps> {
     constructor(config: IPictureProps) {
         super(undefined, config);
         this._props = {
-            autoWidth: true,
-            autoHeight: true,
+            autoWidth: false,
+            autoHeight: false,
             ...config,
         };
         if (config.image) {

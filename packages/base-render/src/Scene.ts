@@ -7,7 +7,7 @@ import { IBoundRect, Vector2 } from './Basics/Vector2';
 
 import { EVENT_TYPE, CURSOR_TYPE, RENDER_CLASS_TYPE } from './Basics/Const';
 
-import { ISceneTransformState, ITransformChangeState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './Basics/Interfaces';
+import { IObjectFullState, ISceneTransformState, ITransformChangeState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './Basics/Interfaces';
 
 import { Transform } from './Basics/Transform';
 
@@ -222,10 +222,12 @@ export class Scene {
     }
 
     resize(width?: number, height?: number) {
+        const preWidth = this.width;
         if (width !== undefined) {
             this.width = width;
         }
 
+        const preHeight = this.height;
         if (height !== undefined) {
             this.height = height;
         }
@@ -237,15 +239,18 @@ export class Scene {
                 width: this.width,
                 height: this.height,
             },
+            preValue: { width: preWidth, height: preHeight },
         });
         return this;
     }
 
     scale(scaleX?: number, scaleY?: number) {
+        const preScaleX = this.scaleX;
         if (scaleX !== undefined) {
             this.scaleX = scaleX;
         }
 
+        const preScaleY = this.scaleY;
         if (scaleY !== undefined) {
             this.scaleY = scaleY;
         }
@@ -257,15 +262,17 @@ export class Scene {
                 scaleX: this.scaleX,
                 scaleY: this.scaleY,
             },
+            preValue: { scaleX: preScaleX, scaleY: preScaleY },
         });
         return this;
     }
 
     scaleBy(scaleX?: number, scaleY?: number) {
+        const preScaleX = this.scaleX;
         if (scaleX !== undefined) {
             this.scaleX += scaleX;
         }
-
+        const preScaleY = this.scaleY;
         if (scaleY !== undefined) {
             this.scaleY += scaleY;
         }
@@ -280,17 +287,20 @@ export class Scene {
                 scaleX: this.scaleX,
                 scaleY: this.scaleY,
             },
+            preValue: { scaleX: preScaleX, scaleY: preScaleY },
         });
         return this;
     }
 
     transformByState(state: ISceneTransformState) {
         const optionKeys = Object.keys(state);
+        const preKeys: IObjectFullState = {};
         if (optionKeys.length === 0) {
             return;
         }
         optionKeys.forEach((pKey) => {
             if (state[pKey] !== undefined) {
+                preKeys[pKey] = this[pKey];
                 this[pKey] = state[pKey];
             }
         });
@@ -300,6 +310,7 @@ export class Scene {
         this.onTransformChangeObservable.notifyObservers({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.all,
             value: state,
+            preValue: preKeys,
         });
     }
 
@@ -554,6 +565,18 @@ export class Scene {
         }
 
         this._transformer?.attachTo(o);
+    }
+
+    getTransformer() {
+        return this._transformer;
+    }
+
+    transformToSceneCoord(coord: Vector2) {
+        const pickedViewport = this._viewports.find((vp) => vp.isHit(coord));
+        if (!this._evented || !pickedViewport) {
+            return;
+        }
+        return pickedViewport.getRelativeVector(coord);
     }
 
     // Determine the only object selected

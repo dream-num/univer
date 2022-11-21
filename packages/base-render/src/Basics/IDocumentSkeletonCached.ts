@@ -1,4 +1,4 @@
-import { BulletAlignment, ColumnSeparatorType, IDrawing, INestingLevel, IParagraphStyle, ITextStyle, IDocumentRenderConfig, IIndentStart } from '@univer/core';
+import { BulletAlignment, ColumnSeparatorType, IDrawing, INestingLevel, IParagraphStyle, ITextStyle, IDocumentRenderConfig, IIndentStart, PageOrientType } from '@univer/core';
 
 export interface IDocumentSkeletonCached extends ISkeletonResourceReference {
     pages: IDocumentSkeletonPage[];
@@ -44,6 +44,10 @@ export interface IDocumentSkeletonPage {
     headerId: string;
     footerId: string;
     // page
+    pageWidth: number;
+    pageHeight: number;
+    pageOrient: PageOrientType;
+
     pageNumber: number; // page页数
     pageNumberStart: number; // page开始页序号
     verticalAlign: Boolean; // 垂直对齐，仅对一页生效

@@ -118,6 +118,10 @@ export class ScrollTimer {
         return viewports?.find((vp) => vp.isHit(Vector2.FromArray([this._offsetX, this._offsetY])));
     }
 
+    getScene() {
+        return this._scene;
+    }
+
     static create(scene: Scene, padding?: IPaddingData) {
         return new ScrollTimer(scene, padding);
     }

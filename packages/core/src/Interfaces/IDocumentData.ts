@@ -204,6 +204,8 @@ export interface IDocStyleBase extends IMargin {
     pageNumberStart?: number; // pageNumberStart
     pageSize?: ISizeData; // pageSize
 
+    pageOrient?: PageOrientType;
+
     marginHeader?: number; // marginHeader
     marginFooter?: number; // marginFooter
 
@@ -780,4 +782,9 @@ export enum characterSpacingControlType {
     compressPunctuation,
     compressPunctuationAndJapaneseKana,
     doNotCompress,
+}
+
+export enum PageOrientType {
+    PORTRAIT,
+    LANDSCAPE,
 }

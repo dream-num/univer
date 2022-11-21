@@ -15,6 +15,10 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
         return this._skeleton;
     }
 
+    setSkeleton(skeleton: DocumentSkeleton) {
+        this._skeleton = skeleton;
+    }
+
     constructor(oKey: string, private _skeleton?: DocumentSkeleton, private _allowCache: boolean = false) {
         super(oKey);
         if (this._allowCache) {
@@ -39,8 +43,9 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
         }
         // const ctx = this._cacheCanvas.getContext();
         // this._cacheCanvas.clear();
-
+        const m = this.transform.getMatrix();
         mainCtx.save();
+        mainCtx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
         // ctx.setTransform(mainCtx.getTransform());
         this._draw(mainCtx, bounds);
         mainCtx.restore();
@@ -53,11 +58,6 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
 
     protected _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         /* abstract */
-    }
-
-    changeSkeleton(newSkeleton: DocumentSkeleton) {
-        this._skeleton = newSkeleton;
-        return this;
     }
 
     getParentScale() {

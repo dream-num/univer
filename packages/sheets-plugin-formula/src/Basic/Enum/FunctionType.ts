@@ -1,0 +1,18 @@
+export enum FunctionType {
+    Math,
+    Statistical,
+    Lookup,
+    universheet,
+    dataMining,
+    Database,
+    Date,
+    Filter,
+    Financial,
+    Engineering,
+    Logical,
+    Operator,
+    Text,
+    Parser,
+    Array,
+    other,
+}

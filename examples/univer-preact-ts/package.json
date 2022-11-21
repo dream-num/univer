@@ -46,6 +46,8 @@
     "dependencies": {
         "@univer/base-render": "workspace:^0.0.1",
         "@univer/base-sheets": "^0.0.1",
+        "@univer/base-docs": "^0.0.1",
+        "@univer/base-slides": "^0.0.1",
         "@univer/common-plugin-data": "workspace:^0.0.1",
         "@univer/core": "^0.0.1",
         "@univer/style-universheet": "^0.0.1",

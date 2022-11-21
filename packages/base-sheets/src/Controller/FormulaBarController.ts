@@ -24,9 +24,9 @@ export class FormulaBarController {
         manager.requiredObserver<FormulaBar>('onFormulaBarDidMountObservable', PLUGIN_NAMES.SPREADSHEET).add((component) => {
             this._formulaBar = component;
         });
-        debugger
+        
         this._plugin.getObserver('onChangeSelectionObserver')?.add((selectionControl: SelectionControl) => {
-            debugger
+            
             const currentCell = selectionControl.model.currentCell;
 
             if (currentCell) {

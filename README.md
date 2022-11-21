@@ -1,10 +1,10 @@
 # Univer
 
-English| [简体中文](./README-zh.md)
+English | [简体中文](./README-zh.md)
 
 ## Introduction
 
-Univer,[Luckysheet 2.0](https://github.com/dream-num/luckysheet) upgrade version.
+🚀Univer, [Luckysheet 2.0](https://github.com/dream-num/luckysheet) upgrade version.
 
 > ⚠️ This project is still in development, only for testing and learning, not for production
 
@@ -14,25 +14,40 @@ Univer,[Luckysheet 2.0](https://github.com/dream-num/luckysheet) upgrade version
 
 [Node.js](https://nodejs.org/en/) Version >= 14.19
 
-
 ### Installation
 ````
 git clone http://github.com/dream-num/univer
 cd univer
 npm i -g pnpm # MacOS : sudo npm i -g pnpm
 npx playwright install
-pnmp i
+pnpm i
 ````
 ### Development
-````
+
+Start sheets
+```
 npm run dev
-````
+```
+
+Start docs
+```
+npm run dev:doc
+```
+
+Start slides
+```
+npm run dev:slide
+```
 
 For more development tutorials, please refer to [Contribution Guide](./.github/contributing.md).
 
 ## Issues
 
 Please file an issue at [Issues](http://github.com/dream-num/univer/issues).
+
+## Stargazers
+
+[![Stargazers repo roster for @dream-num/univer](https://reporoster.com/stars/dream-num/univer)](https://github.com/dream-num/univer/stargazers)
 
 ## Development Plan
 
@@ -71,7 +86,7 @@ Please file an issue at [Issues](http://github.com/dream-num/univer/issues).
   - [ ] formatter
   - [ ] currency format
   - [ ] percent format
-  - [ ] Decrease decimal places
+  - [ ] decrease decimal places
   - [ ] increase the number of decimal places
   - [ ] more formats
   - [x] font family
@@ -99,7 +114,7 @@ Please file an issue at [Issues](http://github.com/dream-num/univer/issues).
   - [ ] format
   - [ ] formula
   - [ ] image
-  - [ ] Frozen
+  - [ ] freeze
   - [ ] link
   - [ ] comment
   - [ ] pivot table
@@ -122,10 +137,10 @@ Please file an issue at [Issues](http://github.com/dream-num/univer/issues).
 
 - [x] render
 - [ ] UI
-- [ ] Pending
+- [ ] pending
 
 ### Slides
 
 - [ ] render
 - [ ] UI
-- [ ] Pending
+- [ ] pending

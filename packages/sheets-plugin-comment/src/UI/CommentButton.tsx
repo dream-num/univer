@@ -1,6 +1,6 @@
 import { BaseComponentRender, BaseComponentSheet, BaseSelectProps, Component, IToolBarItemProps } from '@univer/base-component';
-import { Nullable, Observer, WorkBook } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { Nullable, Observer, Workbook } from '@univer/core';
+import { SheetPlugin } from '@univer/base-sheets';
 
 import { IProps } from '../IData/IComment';
 
@@ -10,12 +10,12 @@ interface IState {
 }
 
 export class CommentButton extends Component<IProps, IState> {
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     Render: BaseComponentRender;
 
     initialize(props: IProps) {
-        const component = new SpreadsheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = new SheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this.Render = component.getComponentRender();
         const NextIcon = this.Render.renderFunction('NextIcon');
         const CommentIcon = this.Render.renderFunction('CommentIcon');
@@ -64,7 +64,7 @@ export class CommentButton extends Component<IProps, IState> {
 
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
@@ -74,7 +74,7 @@ export class CommentButton extends Component<IProps, IState> {
      * destory
      */
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     /**

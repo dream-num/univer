@@ -14,7 +14,7 @@ export class StringValueObject extends BaseValueObject {
             this._value = rawValue as string;
             return;
         }
-        let value = rawValue.toString().trim();
+        let value = rawValue.toString();
 
         if (value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') {
             value = value.slice(1, -1);

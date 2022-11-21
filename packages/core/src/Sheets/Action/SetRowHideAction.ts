@@ -1,13 +1,13 @@
 import { SetHideRow, SetShowRow } from '../Apply';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { WorkBook } from '../Domain';
 import { ISetRowShowActionData } from './SetRowShowAction';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface ISetRowHideActionData extends IActionData {
+export interface ISetRowHideActionData extends ISheetActionData {
     rowIndex: number;
     rowCount: number;
 }
@@ -17,16 +17,16 @@ export interface ISetRowHideActionData extends IActionData {
  *
  * @internal
  */
-export class SetRowHideAction extends ActionBase<
+export class SetRowHideAction extends SheetActionBase<
     ISetRowHideActionData,
     ISetRowShowActionData
 > {
     constructor(
         actionData: ISetRowHideActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],
@@ -37,6 +37,22 @@ export class SetRowHideAction extends ActionBase<
             convertor: [],
         };
         this.validate();
+    }
+
+    do(): void {
+        const worksheet = this.getWorkSheet();
+
+        SetHideRow(
+            this._doActionData.rowIndex,
+            this._doActionData.rowCount,
+            worksheet.getRowManager()
+        );
+
+        this._observers.notifyObservers({
+            type: ActionType.REDO,
+            data: this._doActionData,
+            action: this,
+        });
     }
 
     redo(): void {
@@ -55,22 +71,6 @@ export class SetRowHideAction extends ActionBase<
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
-            action: this,
-        });
-    }
-
-    do(): void {
-        const worksheet = this.getWorkSheet();
-
-        SetHideRow(
-            this._doActionData.rowIndex,
-            this._doActionData.rowCount,
-            worksheet.getRowManager()
-        );
-
-        this._observers.notifyObservers({
-            type: ActionType.REDO,
-            data: this._doActionData,
             action: this,
         });
     }

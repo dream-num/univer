@@ -1,16 +1,16 @@
 import { InsertDataRow, RemoveRowData } from '../Apply';
 import { ICellData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
-import { WorkBook } from '../Domain';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveRowDataActionData } from './RemoveRowDataAction';
 import { ObjectArray } from '../../Shared';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface IInsertRowDataActionData extends IActionData {
+export interface IInsertRowDataActionData extends ISheetActionData {
     rowIndex: number;
     rowData: ObjectMatrixPrimitiveType<ICellData>;
 }
@@ -20,16 +20,16 @@ export interface IInsertRowDataActionData extends IActionData {
  *
  * @internal
  */
-export class InsertRowDataAction extends ActionBase<
+export class InsertRowDataAction extends SheetActionBase<
     IInsertRowDataActionData,
     IRemoveRowDataActionData
 > {
     constructor(
         actionData: IInsertRowDataActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],

@@ -11,11 +11,12 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetPluginSpreadsheet',
-            formats: ['es', 'umd'],
+            name: 'UniverBaseSheets',
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-base-sheets',
         },
         outDir: './lib',
+        sourcemap: true
     },
     define: {
         pkgJson: { name, version },
@@ -31,6 +32,14 @@ export default defineConfig({
             },
         },
     },
+    // resolve: {
+    //     alias: [
+    //         {
+    //             find: '@',
+    //             replacement: path.resolve(__dirname, './node_modules')
+    //         }
+    //     ],
+    // },
     server: {
         port: 3103,
         open: true, // Automatically open the app in the browser on server start.
@@ -46,8 +55,12 @@ export default defineConfig({
             externals: {
                 '@univer/core': '@univer/core',
                 '@univer/base-render': '@univer/base-render',
+                '@univer/base-component': '@univer/base-component',
                 '@univer/style-universheet': '@univer/style-universheet',
+                'css-vars-ponyfill': 'css-vars-ponyfill',
+                'nanoid': 'nanoid',
                 preact: 'preact',
+                react: 'react',
             },
         }),
     ],
@@ -55,8 +68,8 @@ export default defineConfig({
         // preserveSymlinks: true,
         // alias: [
         //     {
-        //         find: '@Base',
-        //         replacement: path.resolve('..', '/src/Base'),
+        //         find: '@Basics',
+        //         replacement: path.resolve('..', '/src/Basics'),
         //     },
         // ],
         // alias: [

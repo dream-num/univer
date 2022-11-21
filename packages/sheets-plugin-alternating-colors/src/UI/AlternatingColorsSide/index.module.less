@@ -1,14 +1,13 @@
-@import '@univer/style-universheet/assets/css/skin/base.module.less';
 .alternating-colors-side {
     .section {
-        padding-top: @padding-base;
+        padding-top: var(--padding-base);
         h3 {
-            margin-bottom: @margin-base;
+            margin-bottom: var(--margin-base);
         }
     }
 
     .panel-body {
-        padding: 0 @padding-base;
+        padding: 0 var(--padding-base);
         position: relative;
 
         .panel-body-inner {
@@ -18,7 +17,7 @@
             .styles-checkbox {
                 display: flex;
                 > label {
-                    margin: 0 @margin-base @margin-base 0;
+                    margin: 0 var(--margin-base) var(--margin-base) 0;
                 }
             }
 
@@ -33,7 +32,7 @@
                 border: 1px solid var(--border-color-base);
                 border-radius: var(--border-radius-base);
                 .custom-style-add {
-                    padding: @padding-base;
+                    padding: var(--padding-base);
                     display: flex;
                     justify-content: center;
                     align-items: center;
@@ -67,7 +66,7 @@
                         width: 100%;
                         line-height: 1em;
                         text-align: center;
-                        color: @gray-8;
+                        color: var(--gray-8);
                     }
                 }
             }
@@ -94,7 +93,7 @@
                     .color-select-button {
                         &:hover {
                             cursor: pointer;
-                            background-color: @gray-4;
+                            background-color: var(--gray-4);
                         }
                     }
                 }
@@ -114,11 +113,11 @@
             display: flex;
             justify-content: center;
             border-top: 1px solid var(--border-color-base);
-            padding: 0.9em @padding-base;
-            margin: 0.9em @padding-base;
+            padding: 0.9em var(--padding-base);
+            margin: 0.9em var(--padding-base);
             &:hover {
                 cursor: pointer;
-                background-color: @gray-4;
+                background-color: var(--gray-4);
             }
             .icon-container {
                 font-size: 1.6em;

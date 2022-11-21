@@ -7,6 +7,14 @@ export class BaseFunction {
         return '';
     }
 
+    isAsync() {
+        return false;
+    }
+
+    isAddress() {
+        return false;
+    }
+
     calculate(...arg: FunctionVariantType[]): NodeValueType {
         return ErrorValueObject.create(ErrorType.VALUE);
     }

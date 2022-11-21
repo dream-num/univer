@@ -1,100 +1,145 @@
 import { IMouseEvent, IPointerEvent } from '@univer/base-render';
-import { Locale, PLUGIN_NAMES, WorkSheet } from '@univer/core';
-import { RightMenuModel, RightMenuProps } from '../Model/Domain/RightMenuModel';
-import { SpreadsheetPlugin } from '../SpreadsheetPlugin';
-import Style from '../View/UI/RightMenu/index.module.less';
+import { PLUGIN_NAMES } from '@univer/core';
+import { RightMenuConfig, RightMenuModel, RightMenuProps } from '../Model/RightMenuModel';
+import { SheetPlugin } from '../SheetPlugin';
 import { RightMenu } from '../View/UI/RightMenu';
 import { SelectionControl } from './Selection/SelectionController';
-import { SelectionModel } from '../Model/Domain/SelectionModel';
-
-type MenuFlag = 'row' | 'column';
+import { SelectionModel } from '../Model/SelectionModel';
+import { RightMenuInput } from '../View/UI/RightMenu/RightMenuInput';
+import { RightMenuButton } from '../View/UI/RightMenu/RightMenuButton';
+import { RightMenuSelect } from '../View/UI/RightMenu/RightMenuSelect';
+import { RightMenuItem } from '../View/UI/RightMenu/RightMenuItem';
+import styles from '../View/UI/RightMenu/index.module.less';
 
 export class RightMenuController {
     private _rightMenuModel: RightMenuModel;
 
-    private _plugin: SpreadsheetPlugin;
+    private _plugin: SheetPlugin;
 
     private _RightMenu: RightMenu;
 
     private _menuList: RightMenuProps[];
 
-    constructor(plugin: SpreadsheetPlugin) {
+    constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
+
+        this.initRegisterComponent();
 
         this._menuList = [
             {
                 locale: ['rightClick.insert', 'rightClick.row'],
                 onClick: this.insertRow,
-                flag: 'normal',
+                hide: RightMenuConfig.hideInsertRow,
             },
             {
                 locale: ['rightClick.insert', 'rightClick.column'],
                 onClick: this.insertColumn,
-                flag: 'normal',
+                hide: RightMenuConfig.hideInsertColumn,
             },
             {
-                locale: ['rightClick.to', 'rightClick.up', 'rightClick.add', { type: 'input', format: 'number', placeholder: 1 }, 'rightClick.row'],
-                flag: 'row',
+                customLabel: {
+                    name: RightMenuInput.name,
+                    props: {
+                        prefixLocale: ['rightClick.to', 'rightClick.top', 'rightClick.add'],
+                        suffixLocale: 'rightClick.row',
+                    },
+                },
+                hide: RightMenuConfig.hideAddRowTop,
             },
             {
-                locale: ['rightClick.to', 'rightClick.down', 'rightClick.add', { type: 'input', format: 'number', placeholder: 1 }, 'rightClick.row'],
-                flag: 'row',
-                border: true,
+                customLabel: {
+                    name: RightMenuInput.name,
+                    props: {
+                        prefixLocale: ['rightClick.to', 'rightClick.bottom', 'rightClick.add'],
+                        suffixLocale: 'rightClick.row',
+                    },
+                },
+                hide: RightMenuConfig.hideAddRowBottom,
             },
             {
-                locale: ['rightClick.to', 'rightClick.left', 'rightClick.add', { type: 'input', format: 'number', placeholder: 1 }, 'rightClick.column'],
-                flag: 'column',
+                customLabel: {
+                    name: RightMenuInput.name,
+                    props: {
+                        prefixLocale: ['rightClick.to', 'rightClick.left', 'rightClick.add'],
+                        suffixLocale: 'rightClick.column',
+                    },
+                },
+                hide: RightMenuConfig.hideAddColumnLeft,
             },
             {
-                locale: ['rightClick.to', 'rightClick.right', 'rightClick.add', { type: 'input', format: 'number', placeholder: 1 }, 'rightClick.column'],
-                flag: 'column',
-                border: true,
+                customLabel: {
+                    name: RightMenuInput.name,
+                    props: {
+                        prefixLocale: ['rightClick.to', 'rightClick.right', 'rightClick.add'],
+                        suffixLocale: 'rightClick.column',
+                    },
+                },
+                hide: RightMenuConfig.hideAddColumnRight,
             },
             {
                 locale: ['rightClick.deleteSelected', 'rightClick.row'],
                 onClick: this.deleteRow,
+                hide: RightMenuConfig.hideDeleteRow,
             },
             {
                 locale: ['rightClick.deleteSelected', 'rightClick.column'],
                 onClick: this.deleteColumn,
+                hide: RightMenuConfig.hideDeleteColumn,
             },
             {
                 locale: ['rightClick.hideSelected', 'rightClick.row'],
-                flag: 'row',
+                hide: RightMenuConfig.hideHideRow,
             },
             {
                 locale: ['rightClick.showHide', 'rightClick.row'],
-                flag: 'row',
+                hide: RightMenuConfig.hideShowRow,
             },
             {
-                locale: ['rightClick.row', 'rightClick.height', { type: 'input', format: 'number' }, 'px'],
-                flag: 'row',
+                customLabel: {
+                    name: RightMenuInput.name,
+                    props: {
+                        prefixLocale: ['rightClick.row', 'rightClick.height'],
+                        suffix: 'px',
+                    },
+                },
+                hide: RightMenuConfig.hideRowHeight,
             },
             {
                 locale: ['rightClick.hideSelected', 'rightClick.column'],
-                flag: 'column',
+                hide: RightMenuConfig.hideHideColumn,
             },
             {
                 locale: ['rightClick.showHide', 'rightClick.column'],
-                flag: 'column',
+                hide: RightMenuConfig.hideShowColumn,
             },
             {
-                locale: ['rightClick.column', 'rightClick.width', { type: 'input', format: 'number' }, 'px'],
-                flag: 'column',
+                customLabel: {
+                    name: RightMenuInput.name,
+                    props: {
+                        prefixLocale: ['rightClick.column', 'rightClick.width'],
+                        suffix: 'px',
+                    },
+                },
+                hide: RightMenuConfig.hideColumnWidth,
             },
             {
-                locale: ['rightClick.deleteCell'],
-                icon: 'RightIcon',
+                hide: RightMenuConfig.hideDeleteCell,
+                customLabel: {
+                    name: RightMenuItem.name,
+                    props: {
+                        locale: 'rightClick.deleteCell',
+                    },
+                },
                 border: true,
                 children: [
                     {
                         locale: ['rightClick.moveLeft'],
-                        className: Style.rightMenuCenter,
+                        className: styles.rightMenuCenter,
                         onClick: (...arg: any) => this.deleteCellLeft(...arg),
                     },
                     {
                         locale: ['rightClick.moveUp'],
-                        className: Style.rightMenuCenter,
+                        className: styles.rightMenuCenter,
                         onClick: (...arg: any) => this.deleteCellTop(...arg),
                     },
                 ],
@@ -102,35 +147,59 @@ export class RightMenuController {
             {
                 locale: ['rightClick.clearContent'],
                 onClick: (...arg: any) => this.clear(...arg),
+                border: true,
+                hide: RightMenuConfig.hideClearContent,
             },
             {
-                locale: ['rightClick.matrix'],
-                icon: 'RightIcon',
-                hideLi: true,
+                hide: RightMenuConfig.hideMatrix,
+                customLabel: {
+                    name: RightMenuItem.name,
+                    props: {
+                        locale: 'rightClick.matrix',
+                    },
+                },
                 children: [
                     {
-                        locale: [
-                            'rightClick.flip',
-                            { type: 'button', text: 'rightClick.upAndDown', locale: 'rightClick.upAndDown' },
-                            { type: 'button', text: 'rightClick.leftAndRight', locale: 'rightClick.leftAndRight' },
-                        ],
+                        customLabel: {
+                            name: RightMenuButton.name,
+                            props: {
+                                locale: 'rightClick.flip',
+                                children: [
+                                    {
+                                        locale: 'rightClick.upAndDown',
+                                    },
+                                    {
+                                        locale: 'rightClick.leftAndRight',
+                                    },
+                                ],
+                            },
+                        },
                     },
                     {
-                        locale: [
-                            'rightClick.flip',
-                            { type: 'button', text: 'rightClick.clockwise', locale: 'rightClick.clockwise' },
-                            { type: 'button', text: 'rightClick.counterclockwise', locale: 'rightClick.counterclockwise' },
-                        ],
+                        customLabel: {
+                            name: RightMenuButton.name,
+                            props: {
+                                locale: 'rightClick.flip',
+                                children: [
+                                    {
+                                        locale: 'rightClick.clockwise',
+                                    },
+                                    {
+                                        locale: 'rightClick.counterclockwise',
+                                    },
+                                ],
+                            },
+                        },
                     },
                     {
                         locale: ['rightClick.transpose'],
                     },
                     {
-                        locale: [
-                            'rightClick.matrixCalculation',
-                            {
-                                type: 'select',
-                                option: [
+                        customLabel: {
+                            name: RightMenuSelect.name,
+                            props: {
+                                locale: 'rightClick.matrixCalculation',
+                                options: [
                                     {
                                         locale: 'rightClick.plus',
                                     },
@@ -154,82 +223,88 @@ export class RightMenuController {
                                     },
                                 ],
                             },
-                            { type: 'input', format: 'number' },
-                        ],
+                        },
                     },
                     {
-                        locale: [
-                            'rightClick.delete0',
-                            { type: 'button', text: 'rightClick.byRow', locale: 'rightClick.byRow' },
-                            { type: 'button', text: 'rightClick.byCol', locale: 'rightClick.byCol' },
-                        ],
+                        customLabel: {
+                            name: RightMenuButton.name,
+                            props: {
+                                locale: 'rightClick.delete0',
+                                children: [
+                                    {
+                                        locale: 'rightClick.byRow',
+                                    },
+                                    {
+                                        locale: 'rightClick.byCol',
+                                    },
+                                ],
+                            },
+                        },
                     },
                     {
-                        locale: [
-                            'rightClick.removeDuplicate',
-                            { type: 'button', text: 'rightClick.byRow', locale: 'rightClick.byRow' },
-                            { type: 'button', text: 'rightClick.byCol', locale: 'rightClick.byCol' },
-                        ],
+                        customLabel: {
+                            name: RightMenuButton.name,
+                            props: {
+                                locale: 'rightClick.removeDuplicate',
+                                children: [
+                                    {
+                                        locale: 'rightClick.byRow',
+                                    },
+                                    {
+                                        locale: 'rightClick.byCol',
+                                    },
+                                ],
+                            },
+                        },
                     },
                 ],
             },
-            {
-                locale: ['rightClick.sortSelection'],
-                hideLi: true,
-            },
-            {
-                locale: ['rightClick.filterSelection'],
-                hideLi: true,
-            },
-            {
-                locale: ['rightClick.chartGeneration'],
-                hideLi: true,
-            },
-            {
-                locale: ['toolbar.insertImage'],
-                hideLi: true,
-            },
-            {
-                locale: ['toolbar.insertLink'],
-                hideLi: true,
-            },
-            {
-                locale: ['toolbar.dataValidation'],
-                hideLi: true,
-            },
-            {
-                locale: ['toolbar.cellFormat'],
-                hideLi: true,
-            },
+            // {
+            //     locale: ['rightClick.sortSelection'],
+            //     hide: true,
+            // },
+            // {
+            //     locale: ['rightClick.filterSelection'],
+            //     hide: true,
+            // },
+            // {
+            //     locale: ['rightClick.chartGeneration'],
+            //     hide: true,
+            // },
+            // {
+            //     locale: ['toolbar.insertImage'],
+            //     hide: true,
+            // },
+            // {
+            //     locale: ['toolbar.insertLink'],
+            //     hide: true,
+            // },
+            // {
+            //     locale: ['toolbar.dataValidation'],
+            //     hide: true,
+            // },
+            // {
+            //     locale: ['toolbar.cellFormat'],
+            //     hide: true,
+            // },
         ];
 
         this._rightMenuModel = new RightMenuModel();
-        this._init(this._menuList);
+        this._initialize();
     }
 
-    private _init(menuList: RightMenuProps[]) {
+    private _initialize() {
         const context = this._plugin.getContext();
         const manager = context.getObserverManager();
 
         manager.requiredObserver<RightMenu>('onRightMenuDidMountObservable', PLUGIN_NAMES.SPREADSHEET).add((component) => {
             this._RightMenu = component;
-            this.resetMenuList(menuList);
+
+            this.resetMenuList(this.resetMenuLabel(this._menuList));
         });
 
         context.getContextObserver('onAfterChangeUILocaleObservable').add(() => {
-            const locale = this._plugin.context.getLocale();
-
-            for (let i = 0; i < this._menuList.length; i++) {
-                const item = this._menuList[i];
-                item.label = this._jointJsx(item.locale, locale);
-                if (item.children) {
-                    for (let j = 0; j < item.children.length; j++) {
-                        item.children[j].label = this._jointJsx(item.children[j].locale, locale);
-                    }
-                }
-            }
-            this._rightMenuModel.setRightMenu(this._menuList);
-            this._RightMenu.setMenuList(this._menuList);
+            this.resetMenuList(this.resetMenuLabel(this._menuList));
         });
 
         context.getContextObserver('onSheetRenderDidMountObservable').add(() => {
@@ -239,7 +314,6 @@ export class RightMenuController {
                 const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
                 if (evt.button === 2) {
                     spreadSheet.oncontextmenu = () => false;
-                    this.resetMenuList(this._menuList);
                     this._RightMenu.handleContextMenu(evt);
                 }
             });
@@ -247,7 +321,7 @@ export class RightMenuController {
             //     const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
             //     if (evt.button === 2) {
             //         spreadSheet.oncontextmenu = () => false;
-            //         this.resetMenuList(this._menuList, 'row');
+            //         this.resetMenuLabel(this._menuList, 'row');
             //         this._RightMenu.handleContextMenu(evt);
             //     }
             // });
@@ -255,99 +329,79 @@ export class RightMenuController {
             //     const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
             //     if (evt.button === 2) {
             //         spreadSheet.oncontextmenu = () => false;
-            //         this.resetMenuList(this._menuList, 'column');
+            //         this.resetMenuLabel(this._menuList, 'column');
             //         this._RightMenu.handleContextMenu(evt);
             //     }
             // });
         });
     }
 
-    private _hideLi(item: RightMenuProps, flag?: MenuFlag) {
-        if (!flag) {
-            if (item.flag === 'row') {
-                item.hideLi = true;
-            }
-            if (item.flag === 'column') {
-                item.hideLi = true;
-            }
-            if (item.flag === 'normal') {
-                item.hideLi = false;
-            }
-        } else if (flag === 'row') {
-            if (item.flag === 'normal') {
-                item.hideLi = true;
-            }
-            if (item.flag === 'column') {
-                item.hideLi = true;
-            }
-            if (item.flag === 'row') {
-                item.hideLi = false;
-            }
-        } else {
-            if (item.flag === 'row') {
-                item.hideLi = true;
-            }
-            if (item.flag === 'column') {
-                item.hideLi = true;
-            }
-            if (item.flag === 'column') {
-                item.hideLi = false;
-            }
-        }
+    initRegisterComponent() {
+        this._plugin.registerComponent(RightMenuInput.name, RightMenuInput);
+        this._plugin.registerComponent(RightMenuButton.name, RightMenuButton);
+        this._plugin.registerComponent(RightMenuSelect.name, RightMenuSelect);
+        this._plugin.registerComponent(RightMenuItem.name, RightMenuItem);
     }
 
-    resetMenuList(menuList: RightMenuProps[], flag?: MenuFlag) {
+    resetLabel(label: string[] | string) {
         const locale = this._plugin.context.getLocale();
 
-        for (let i = 0; i < menuList.length; i++) {
-            let item = menuList[i];
-            item.label = this._jointJsx(item.locale, locale);
-            this._hideLi(item, flag);
-            if (item.children) {
-                for (let j = 0; j < item.children.length; j++) {
-                    item.children[j].label = this._jointJsx(item.children[j].locale, locale);
+        let str = '';
+
+        if (label instanceof Array) {
+            label.forEach((item) => {
+                if (item.includes('.')) {
+                    str += locale.get(item);
+                } else {
+                    str += item;
                 }
+            });
+        } else {
+            if (label.includes('.')) {
+                str = locale.get(label);
+            } else {
+                str += label;
             }
         }
-        this._rightMenuModel.setRightMenu(menuList);
-        this._RightMenu.setMenuList(menuList);
+
+        return str;
     }
 
-    private _jointJsx(option: any, locale: Locale) {
-        let label;
-        if (option.some((ele: any) => ele instanceof Object)) {
-            label = [];
-            for (let i = 0; i < option.length; i++) {
-                let item = option[i];
-                if (item instanceof Object) {
-                    if (item.type === 'input') {
-                        item.placeholder = locale.get(item.locale);
-                    } else if (item.type === 'button') {
-                        item.text = locale.get(item.locale);
-                    } else if (item.type === 'select') {
-                        item.option.forEach((ele: any) => {
-                            ele.text = locale.get(ele.locale);
-                        });
-                    }
-                    label.push(item);
-                } else {
-                    if (item.includes('.')) {
-                        item = locale.get(item);
-                    }
-                    label.push(item);
+    findLocale(obj: any) {
+        for (let k in obj) {
+            if (k === 'locale') {
+                obj.label = this.resetLabel(obj[k]);
+            } else if (k.endsWith('Locale')) {
+                const index = k.indexOf('Locale');
+                obj[k.slice(0, index)] = this.resetLabel(obj[k]);
+            } else if (!obj[k].$$typeof) {
+                if (Object.prototype.toString.call(obj[k]) === '[object Object]') {
+                    this.findLocale(obj[k]);
+                } else if (Object.prototype.toString.call(obj[k]) === '[object Array]') {
+                    this.resetMenuLabel(obj[k]);
                 }
-            }
-        } else {
-            label = '';
-            for (let i = 0; i < option.length; i++) {
-                let item = option[i];
-                if (item.includes('.')) {
-                    item = locale.get(item);
-                }
-                label += item;
             }
         }
-        return label;
+
+        return obj;
+    }
+
+    resetMenuLabel(menuList: RightMenuProps[]) {
+        for (let i = 0; i < menuList.length; i++) {
+            let item = menuList[i];
+
+            item = this.findLocale(item);
+
+            if (item.children) {
+                item.children = this.resetMenuLabel(item.children);
+            }
+        }
+
+        return menuList;
+    }
+
+    resetMenuList(menuList: RightMenuProps[]) {
+        this._RightMenu?.setMenuList(menuList);
     }
 
     private _getSelections() {
@@ -364,95 +418,69 @@ export class RightMenuController {
         return selections;
     }
 
-    private _render(sheet: WorkSheet) {
-        this._plugin.getCanvasView().updateToSheet(sheet);
-        this._plugin?.getMainComponent().makeDirty(true);
-    }
-
     insertRow = (...arg: any) => {
-        arg[1].ref.hideSelect();
-
         const selections = this._getSelections();
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
             sheet?.insertRowBefore(selections[0].startRow, selections[0].endRow - selections[0].startRow + 1);
-            this._render(sheet);
+            // this._render(sheet);
         }
     };
 
     deleteRow = (...arg: any) => {
-        arg[1].ref.hideSelect();
-
         const selections = this._getSelections();
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
             sheet?.deleteRows(selections[0].startRow, selections[0].endRow - selections[0].startRow + 1);
-            this._render(sheet);
         }
     };
 
     insertColumn = (...arg: any) => {
-        arg[1].ref.hideSelect();
-
         const selections = this._getSelections();
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
             sheet.insertColumnBefore(selections[0].startColumn, selections[0].endColumn - selections[0].startColumn + 1);
-            this._render(sheet);
         }
     };
 
     deleteColumn = (...arg: any) => {
-        arg[1].ref.hideSelect();
-
         const selections = this._getSelections();
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
             sheet.deleteColumns(selections[0].startColumn, selections[0].endColumn - selections[0].startColumn + 1);
-            this._render(sheet);
         }
     };
 
     clear = (...arg: any) => {
-        arg[1].ref.hideSelect();
-
         const selections = this._getSelections();
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
             sheet.getRange(selections[0]).clear();
-            this._render(sheet);
         }
     };
 
     deleteCellLeft = (...arg: any) => {
-        arg[1].ref.hideSelect();
-        arg[1].ref.getParent().hideSelect();
-
         const selections = this._getSelections();
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
             sheet.getRange(selections[0]).deleteCells(0);
-            this._render(sheet);
         }
     };
 
     deleteCellTop = (...arg: any) => {
-        arg[1].ref.hideSelect();
-        arg[1].ref.getParent().hideSelect();
-
         const selections = this._getSelections();
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
             sheet.getRange(selections[0]).deleteCells(1);
-            this._render(sheet);
         }
     };
 
     addItem = (item: RightMenuProps[] | RightMenuProps) => {
         if (item instanceof Array) {
-            this._menuList.unshift(...item);
+            this._menuList.push(...item);
         } else {
-            this._menuList.unshift(item);
+            this._menuList.push(item);
         }
+        this.resetMenuList(this.resetMenuLabel(this._menuList));
     };
 }

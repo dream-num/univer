@@ -1,13 +1,13 @@
 import { SetColumnHide, SetColumnShow } from '../Apply';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { WorkBook } from '../Domain';
 import { ISetColumnShowActionData } from './SetColumnShowAction';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface ISetColumnHideActionData extends IActionData {
+export interface ISetColumnHideActionData extends ISheetActionData {
     columnIndex: number;
     columnCount: number;
 }
@@ -17,16 +17,16 @@ export interface ISetColumnHideActionData extends IActionData {
  *
  * @internal
  */
-export class SetColumnHideAction extends ActionBase<
+export class SetColumnHideAction extends SheetActionBase<
     ISetColumnHideActionData,
     ISetColumnShowActionData
 > {
     constructor(
         actionData: ISetColumnHideActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],
@@ -37,6 +37,22 @@ export class SetColumnHideAction extends ActionBase<
             convertor: [],
         };
         this.validate();
+    }
+
+    do(): void {
+        const worksheet = this.getWorkSheet();
+
+        SetColumnHide(
+            this._doActionData.columnIndex,
+            this._doActionData.columnCount,
+            worksheet.getColumnManager()
+        );
+
+        this._observers.notifyObservers({
+            type: ActionType.REDO,
+            data: this._doActionData,
+            action: this,
+        });
     }
 
     redo(): void {
@@ -55,22 +71,6 @@ export class SetColumnHideAction extends ActionBase<
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
-            action: this,
-        });
-    }
-
-    do(): void {
-        const worksheet = this.getWorkSheet();
-
-        SetColumnHide(
-            this._doActionData.columnIndex,
-            this._doActionData.columnCount,
-            worksheet.getColumnManager()
-        );
-
-        this._observers.notifyObservers({
-            type: ActionType.REDO,
-            data: this._doActionData,
             action: this,
         });
     }

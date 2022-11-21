@@ -1,4 +1,4 @@
-import { Range, WorkSheet, WorkBook, Context, Command, CommandManager, Inject } from '@univer/core';
+import { Range, Worksheet, Workbook, SheetContext, Command, CommandManager, Inject } from '@univer/core';
 import { IAscSortData } from '../Action';
 import { ACTION_NAMES, SortOrderType, SortOrder } from '../Enum';
 
@@ -13,12 +13,12 @@ export class Sort {
     private _commandManager: CommandManager;
 
     @Inject('WorkBook')
-    private _workBook: WorkBook;
+    private _workbook: Workbook;
 
     @Inject('Context')
-    private _context: Context;
+    private _context: SheetContext;
 
-    private _workSheet: WorkSheet;
+    private _workSheet: Worksheet;
 
     private _range: Range;
 

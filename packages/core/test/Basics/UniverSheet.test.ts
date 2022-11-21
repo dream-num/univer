@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { Context, IOCContainer, UniverSheet, Plugin } from '../../src';
+import { SheetContext, IOCContainer, UniverSheet, Plugin } from '../../src';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
@@ -10,11 +10,12 @@ describe('UniverSheet', () => {
     beforeAll(async () => {
         univerSheet = UniverSheet.newInstance({
             id: 'workbook-01',
-            sheets: [
-                {
+            sheets: {
+                'sheet-01': {
                     name: 'first sheet',
+                    id: 'sheet-01',
                 },
-            ],
+            },
         });
     });
     afterAll(async () => {});
@@ -25,19 +26,19 @@ describe('UniverSheet', () => {
     });
     test('Test installPlugin/uninstallPlugin/getWorkBook/get context', () => {
         class TestPlugin extends Plugin {
-            context: Context;
+            context: SheetContext;
 
             constructor() {
                 super('testPlugin');
             }
 
-            initialize(context: Context): void {
+            initialize(context: SheetContext): void {
                 this.context = context;
             }
 
             onMapping(IOC: IOCContainer): void {}
 
-            onMounted(ctx: Context): void {
+            onMounted(ctx: SheetContext): void {
                 this.initialize(ctx);
             }
 
@@ -68,7 +69,7 @@ describe('UniverSheet', () => {
         expect(uninstalledPlugin).toEqual(undefined);
     });
 
-    test('Test Context', () => {
+    test('Test SheetContext', () => {
         // test get context
         let context = univerSheet.context;
 

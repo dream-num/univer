@@ -1,4 +1,4 @@
-import { WorkSheet } from '../Domain/WorkSheet';
+import { Worksheet } from '../Domain/Worksheet';
 import { BooleanNumber } from '../../Enum';
 
 /**
@@ -10,7 +10,7 @@ import { BooleanNumber } from '../../Enum';
  * @internal
  */
 export function SetWorkSheetHideService(
-    worksheet: WorkSheet,
+    worksheet: Worksheet,
     hidden: BooleanNumber
 ): BooleanNumber {
     // get config

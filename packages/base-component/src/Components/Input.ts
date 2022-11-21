@@ -1,3 +1,4 @@
+import { RefObject } from 'preact';
 import { BaseComponent, BaseComponentProps, JSXComponent } from '../BaseComponent';
 
 export interface BaseInputProps extends BaseComponentProps {
@@ -16,6 +17,7 @@ export interface BaseInputProps extends BaseComponentProps {
     className?: string;
     readonly?: boolean;
     id?: string;
+    ref?: RefObject<HTMLInputElement>;
 }
 
 export interface InputComponent extends BaseComponent<BaseInputProps> {

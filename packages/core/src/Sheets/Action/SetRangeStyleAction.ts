@@ -1,12 +1,12 @@
 import { SetRangeStyle } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
-import { WorkBook } from '../Domain';
 import { IRangeData, IStyleData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
+import { CommandUnit } from '../../Command';
 
-export interface ISetRangeStyleActionData extends IActionData {
+export interface ISetRangeStyleActionData extends ISheetActionData {
     value: ObjectMatrixPrimitiveType<IStyleData>; //
     rangeData: IRangeData;
 }
@@ -14,13 +14,13 @@ export interface ISetRangeStyleActionData extends IActionData {
 /**
  * @internal
  */
-export class SetRangeStyleAction extends ActionBase<ISetRangeStyleActionData> {
+export class SetRangeStyleAction extends SheetActionBase<ISetRangeStyleActionData> {
     constructor(
         actionData: ISetRangeStyleActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
 
         // store previous data
         this._oldActionData = {

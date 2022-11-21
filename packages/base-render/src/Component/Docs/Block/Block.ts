@@ -1,4 +1,4 @@
-import { BlockType, Context, IBlockElement } from '@univer/core';
+import { BlockType, ContextBase, IBlockElement } from '@univer/core';
 import { dealWidthParagraph, dealWithBlockError } from '.';
 import { updateBlockIndex } from '..';
 import { dealWidthCustomBlock, IDocumentSkeletonPage, ISectionBreakConfig, ISkeletonResourceReference } from '../../..';
@@ -9,7 +9,7 @@ export function dealWithBlocks(
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
     preRenderedBlockIdMap?: Map<string, boolean>,
-    context?: Context
+    context?: ContextBase
 ) {
     const allCurrentSkeletonPages: IDocumentSkeletonPage[] = [];
     const renderedBlockIdMap = new Map<string, boolean>();
@@ -40,7 +40,7 @@ export function dealWithBlocks(
 
         updateBlockIndex(blockSkeletonPages);
 
-        allCurrentSkeletonPages.push(...blockSkeletonPages);
+        _pushPage(allCurrentSkeletonPages, blockSkeletonPages);
 
         renderedBlockIdMap.set(blockId, true);
     }
@@ -49,6 +49,15 @@ export function dealWithBlocks(
         pages: allCurrentSkeletonPages,
         renderedBlockIdMap,
     };
+}
+
+function _pushPage(allCurrentSkeletonPages: IDocumentSkeletonPage[], blockSkeletonPages: IDocumentSkeletonPage[]) {
+    const lastOldPage = allCurrentSkeletonPages[allCurrentSkeletonPages.length - 1];
+    const firstNewPage = blockSkeletonPages[0];
+    if (lastOldPage === firstNewPage) {
+        blockSkeletonPages.splice(0, 1);
+    }
+    allCurrentSkeletonPages.push(...blockSkeletonPages);
 }
 
 // 当本节有多个列，且下一节为连续节类型的时候，需要按照列数分割，重新计算lines

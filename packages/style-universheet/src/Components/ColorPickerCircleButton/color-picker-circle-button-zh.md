@@ -14,12 +14,12 @@ cover: ''
 
 颜色选择器-圆形按钮的属性说明如下：
 
-| 属性     | 说明                     | 类型                                      | 默认值 |
-| -------- | ------------------------ | ----------------------------------------- | ------ |
-| color    | 初始化颜色               | `string`                                  | -      |
-| style    | 自定义 css 样式对象      | `JSX.CSSProperties`                       | -      |
-| onColor  | 用户选择颜色后的回调函数 | `(color: string, val?: boolean) => void;` | -      |
-| onCancel | 用户取消选择后的回调函数 | `() => void`                              | -      |
+| 属性     | 说明                     | 类型                       | 默认值 |
+| -------- | ------------------------ | -------------------------- | ------ |
+| color    | 初始化颜色               | `string`                   | -      |
+| style    | 自定义 css 样式对象      | `JSX.CSSProperties`        | -      |
+| onClick  | 用户选择颜色后的回调函数 | `(color: string) => void;` | -      |
+| onCancel | 用户取消选择后的回调函数 | `() => void`               | -      |
 
 ## 案例
 
@@ -51,7 +51,7 @@ class AlternatingColorsSide extends Component<IPanelProps, IState> {
             <ColorPickerCircleButton
                 color={'#ffffff'}
                 style={{ bottom: '30px', right: '0' }}
-                onColor={this.handleColorSelect.bind(this)}
+                onClick={this.handleColorSelect.bind(this)}
                 onCancel={this.handleColorCancel.bind(this)}
             />
         );

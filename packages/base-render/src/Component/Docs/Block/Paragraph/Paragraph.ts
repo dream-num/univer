@@ -1,4 +1,15 @@
-import { ColumnSeparatorType, Context, IBullet, IDrawing, IDrawings, IElementsOrder, IParagraph, ParagraphElementType, PositionedObjectLayoutType } from '@univer/core';
+import {
+    ColumnSeparatorType,
+    IBullet,
+    IDrawing,
+    IDrawings,
+    IElementsOrder,
+    IParagraph,
+    Nullable,
+    ParagraphElementType,
+    PositionedObjectLayoutType,
+    ContextBase,
+} from '@univer/core';
 import { dealWidthBullet, dealWidthInlineDrawing, dealWidthTextRun } from '.';
 import { createSkeletonPage, getLastNotFullColumnInfo, setColumnFullState } from '../..';
 import {
@@ -17,7 +28,7 @@ export function dealWidthParagraph(
     curPage: IDocumentSkeletonPage,
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
-    context?: Context
+    context?: ContextBase
 ): IDocumentSkeletonPage[] {
     const {
         pageNumberStart,
@@ -40,7 +51,7 @@ export function dealWidthParagraph(
         fontLocale,
     } = sectionBreakConfig;
 
-    const { elements, elementOrder, paragraphStyle, bullet } = paragraph;
+    const { elements, elementOrder, paragraphStyle = {}, bullet } = paragraph;
 
     // const paragraphAffectSkeDrawings = _changeDrawingToSkeletonFormat(drawingIds, drawings);
 
@@ -93,10 +104,13 @@ export function dealWidthParagraph(
     // 如果下一节是连续的，则按照1列进行计算，计算结果返回后，用来预估列高度，然后在接来下的流程进行二次计算
     elementOrder.forEach((elementOrderItem: IElementsOrder, elementIndex: number) => {
         const { elementId, paragraphElementType } = elementOrderItem;
-        const element = elements[elementId];
-        const { tr: textRun, st, ed } = element;
         let currentPages: IDocumentSkeletonPage[] = [];
-        if (paragraphElementType === ParagraphElementType.TEXT_RUN && textRun) {
+        if (paragraphElementType === ParagraphElementType.TEXT_RUN) {
+            const element = elements[elementId];
+            const { tr: textRun, st, ed } = element;
+            if (!textRun) {
+                return false;
+            }
             currentPages = dealWidthTextRun(textRun, elementIndex, sectionBreakConfig, lastPage, { ...paragraphConfig, paragraphAffectSkeDrawings }, fontLocale);
         } else if (paragraphElementType === ParagraphElementType.DRAWING) {
             const drawingOrigin = drawings[elementId];
@@ -109,7 +123,7 @@ export function dealWidthParagraph(
             // 换页标识，换页后还在同一个节内
             currentPages = [createSkeletonPage(sectionBreakConfig, skeletonResourceReference, _getNextPageNumber(lastPage), BreakType.PAGE)];
             paragraphAffectSkeDrawings.clear();
-        } else if (element.et === ParagraphElementType.COLUMN_BREAK) {
+        } else if (paragraphElementType === ParagraphElementType.COLUMN_BREAK) {
             // 换列标识，还在同一个节内
             const columnInfo = getLastNotFullColumnInfo(lastPage);
 
@@ -126,7 +140,7 @@ export function dealWidthParagraph(
     return pages;
 }
 
-function _getListLevelAncestors(bullet?: IBullet, listLevel?: Map<string, IDocumentSkeletonBullet[]>): IDocumentSkeletonBullet[] | undefined {
+function _getListLevelAncestors(bullet?: IBullet, listLevel?: Map<string, IDocumentSkeletonBullet[]>): Array<Nullable<IDocumentSkeletonBullet>> | undefined {
     if (!bullet || !listLevel) {
         return;
     }
@@ -137,18 +151,18 @@ function _getListLevelAncestors(bullet?: IBullet, listLevel?: Map<string, IDocum
 
     let level = nestingLevel;
 
-    const listLevelAncestors: IDocumentSkeletonBullet[] = [];
-
-    while (sameList?.[level]) {
-        const bs = sameList[level];
-        listLevelAncestors[level] = bs!;
-        level -= 1;
+    if (level < 0) {
+        level = 0;
     }
 
-    if (level > 0) {
-        // 证明sameList存储的信息确实，一个list的level要从0开始
-        return;
+    const listLevelAncestors: Array<Nullable<IDocumentSkeletonBullet>> = [];
+
+    for (let i = level; i >= 0; i--) {
+        const bs = sameList?.[i];
+        listLevelAncestors[i] = bs || null;
     }
+
+    // console.log('SymbolByBesting', sameList, listLevelAncestors, level, listId, listLevel);
 
     return listLevelAncestors;
 }
@@ -160,7 +174,7 @@ function _updateListLevelAncestors(bullet?: IBullet, bulletSkeleton?: IDocumentS
 
     const { listId, nestingLevel } = bullet;
 
-    const cacheItem: IDocumentSkeletonBullet[] = [...(listLevel?.[listId] || [])];
+    const cacheItem: IDocumentSkeletonBullet[] = [...(listLevel?.get(listId) || [])];
 
     // [[nestingLevel, bulletSkeleton]];
 

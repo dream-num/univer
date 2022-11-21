@@ -1,7 +1,5 @@
 # Univer
 
-## 
-
 简体中文 | [English](./README.md)
 
 ## 介绍
@@ -16,25 +14,41 @@
 
 [Node.js](https://nodejs.org/en/) Version >= 14.19
 
-
 ### 安装
 ```
 git clone http://github.com/dream-num/univer
 cd univer
 npm i -g pnpm # MacOS : sudo npm i -g pnpm
 npx playwright install
-pnmp i
+pnpm i
 ```
 ### 开发
+
+启动sheets
 ```
 npm run dev
 ```
+
+启动docs
+```
+npm run dev:doc
+```
+
+启动slides
+```
+npm run dev:slide
+```
+
 
 更多开发教程请参考 [贡献指南](./.github/contributing-zh.md)。
 
 ## 问题反馈
 
 请到 [Issues](http://github.com/dream-num/univer/issues) 提交问题。
+
+## 关注者
+
+[![Stargazers repo roster for @dream-num/univer](https://reporoster.com/stars/dream-num/univer)](https://github.com/dream-num/univer/stargazers)
 
 ## 开发计划
 

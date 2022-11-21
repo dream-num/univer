@@ -2,17 +2,17 @@ import { SetRangeData, ClearRange } from '../Apply';
 import { ACTION_NAMES } from '../../Const';
 import { CONVERTOR_OPERATION } from '../../Const/CONST';
 import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
-import { WorkBook } from '../Domain';
 import { ICellData, IOptionsData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { ISetRangeDataActionData } from './SetRangeDataAction';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface IClearRangeActionData extends IActionData {
+export interface IClearRangeActionData extends ISheetActionData {
     options: IOptionsData;
     rangeData: IRangeData;
 }
@@ -22,17 +22,17 @@ export interface IClearRangeActionData extends IActionData {
  *
  * @internal
  */
-export class ClearRangeAction extends ActionBase<
+export class ClearRangeAction extends SheetActionBase<
     IClearRangeActionData,
     ISetRangeDataActionData,
     ObjectMatrixPrimitiveType<ICellData>
 > {
     constructor(
         actionData: IClearRangeActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
 
         this._doActionData = {
             ...actionData,

@@ -23,7 +23,7 @@ import {
     ISectionBreakConfig,
     isFunction,
     SpanType,
-} from '../../../Base';
+} from '../../../Basics';
 
 export function getLastPage(pages: IDocumentSkeletonPage[]) {
     return pages?.[pages.length - 1];
@@ -213,8 +213,8 @@ export function getNumberUnitValue(unitValue: number | INumberUnit, benchMark: n
 }
 
 // 返回charSpaceApply，选择网格还是字体来计算一个tab的长度，一个tab代表1字符长度
-export function getCharSpaceApply(charSpace: number = 0, documentFontSize: number, defaultTabStop: number, gridType = GridType.LINES, snapToGrid = BooleanNumber.TRUE) {
-    let charSpaceApply = documentFontSize;
+export function getCharSpaceApply(charSpace: number = 0, defaultTabStop: number, gridType = GridType.LINES, snapToGrid = BooleanNumber.TRUE) {
+    let charSpaceApply = 1;
 
     if (validationGrid(gridType, snapToGrid)) {
         // 启用了char网格的情况下，defaultTabStop的参照物是charSpace
@@ -231,7 +231,7 @@ export function validationGrid(gridType = GridType.LINES, snapToGrid = BooleanNu
 export function getLineHeightConfig(sectionBreakConfig: ISectionBreakConfig, paragraphConfig: IParagraphConfig) {
     const { paragraphStyle = {} } = paragraphConfig;
 
-    const { linePitch = 15.6, gridType = GridType.LINES, paragraphLineGapDefault = 3 } = sectionBreakConfig;
+    const { linePitch = 15.6, gridType = GridType.LINES, paragraphLineGapDefault = 0 } = sectionBreakConfig;
 
     const { lineSpacing = 1, spacingRule = SpacingRule.AUTO, snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 
@@ -351,21 +351,14 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[]) {
 
             section.st = sectionStartIndex;
             section.ed = sectionEndIndex;
-            if (section.height === Infinity) {
-                section.height = maxSectionHeight;
-            }
+            section.height = maxSectionHeight;
             pageHeight += maxSectionHeight;
         }
 
         page.st = pageStartIndex;
         page.ed = pageEndIndex;
-        if (page.height === Infinity) {
-            page.height = pageHeight;
-        }
-
-        if (page.width === Infinity) {
-            page.width = maxPageWidth;
-        }
+        page.height = pageHeight;
+        page.width = maxPageWidth;
 
         prePageStartIndex = pageEndIndex;
     }
@@ -586,6 +579,7 @@ export function getPositionVertical(
         } else if (relativeFrom === ObjectRelativeFromV.PARAGRAPH) {
             absoluteTop = (isPageBreak ? 0 : blockAnchorTop || lineTop) + posOffset;
         }
+        return absoluteTop;
     } else if (percent) {
         const { height: pageHeight, marginBottom, marginTop } = page;
         if (relativeFrom === ObjectRelativeFromV.TOP_MARGIN) {

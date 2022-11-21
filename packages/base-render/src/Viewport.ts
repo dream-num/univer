@@ -1,20 +1,20 @@
-import { EventState, Observable } from '@univer/core';
-import { toPx } from './Base/Tools';
+import { EventState, Observable, Nullable } from '@univer/core';
+import { toPx } from './Basics/Tools';
 
-import { PointerInput, IWheelEvent, Nullable } from './Base/IEvents';
+import { PointerInput, IWheelEvent } from './Basics/IEvents';
 
 import { Canvas } from './Canvas';
 
 import { Scene } from './Scene';
 
-import { IBoundRect, Vector2 } from './Base/Vector2';
+import { IBoundRect, Vector2 } from './Basics/Vector2';
 
-import { Transform } from './Base/Transform';
+import { Transform } from './Basics/Transform';
 
 import { SceneViewer } from './SceneViewer';
 
 import { ScrollBar } from './Shape/ScrollBar';
-import { RENDER_CLASS_TYPE } from './Base/Const';
+import { RENDER_CLASS_TYPE } from './Basics/Const';
 
 interface IViewPosition {
     top?: number | string;
@@ -378,7 +378,7 @@ export class Viewport {
             this.makeDirty(true);
         }
 
-        const scroll = this._transformScroll();
+        const scroll = this.transformScroll();
         this.actualScrollX = scroll.x;
         this.actualScrollY = scroll.y;
 
@@ -397,10 +397,9 @@ export class Viewport {
         return limited;
     }
 
-    private _transformScroll() {
-        let x = this.scrollX;
-        let y = this.scrollY;
-
+    getActualScroll(scrollX: number, scrollY: number) {
+        let x = scrollX;
+        let y = scrollY;
         if (this._scrollBar) {
             x /= this._scrollBar.ratioScrollX; // 转换为内容区实际滚动距离
             y /= this._scrollBar.ratioScrollY;
@@ -420,6 +419,13 @@ export class Viewport {
             x,
             y,
         };
+    }
+
+    transformScroll() {
+        let x = this.scrollX;
+        let y = this.scrollY;
+
+        return this.getActualScroll(x, y);
     }
 
     getScrollBar() {
@@ -542,7 +548,7 @@ export class Viewport {
 
     getRelativeVector(coord: Vector2) {
         const sceneTrans = this.scene.transform.clone().invert();
-        const scroll = this._transformScroll();
+        const scroll = this.transformScroll();
 
         const svCoord = sceneTrans.applyPoint(coord).add(Vector2.FromArray([scroll.x, scroll.y]));
         return svCoord;
@@ -576,9 +582,12 @@ export class Viewport {
             return;
         }
         let isLimitedStore;
-        if (evt.inputIndex === PointerInput.MouseWheelX && evt.deltaX !== 0) {
+        if (evt.inputIndex === PointerInput.MouseWheelX) {
             const deltaFactor = Math.abs(evt.deltaX);
-            let scrollNum = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
+            // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
+            const allWidth = this._scene.width;
+            const viewWidth = this.width || 1;
+            let scrollNum = (viewWidth / allWidth) * deltaFactor;
 
             if (evt.deltaX > 0) {
                 isLimitedStore = this.scrollBy({
@@ -601,9 +610,12 @@ export class Viewport {
                 evt.preventDefault();
             }
         }
-        if (evt.inputIndex === PointerInput.MouseWheelY && evt.deltaY !== 0) {
+        if (evt.inputIndex === PointerInput.MouseWheelY) {
             const deltaFactor = Math.abs(evt.deltaY);
-            let scrollNum = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
+            const allHeight = this._scene.height;
+            const viewHeight = this.height || 1;
+            // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
+            let scrollNum = (viewHeight / allHeight) * deltaFactor;
             if (evt.shiftKey) {
                 if (evt.deltaY > 0) {
                     isLimitedStore = this.scrollBy({

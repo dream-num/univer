@@ -1,21 +1,21 @@
 import { ISlotElement } from '@univer/base-component';
-import { Command, Context, IRangeData, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { Command, SheetContext, IRangeData, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { SheetPlugin } from '@univer/base-sheets';
 import { en, zh } from './Locale';
 import { IConfig } from './IData';
 import { FilterButton } from './UI/FilterButton';
 import { ACTION_NAMES, FILTER_PLUGIN_NAME } from './Const';
-import { Filter, FilterList, IFilterList } from './Domain';
+import { Filter, FilterList, IFilterPluginConfig } from './Domain';
 
 export class FilterPlugin extends Plugin {
     private _filterList: FilterList;
 
-    constructor(config?: IFilterList) {
+    constructor(config?: IFilterPluginConfig) {
         super(FILTER_PLUGIN_NAME);
         this._filterList = FilterList.fromSequence(config || {});
     }
 
-    static create(config?: IFilterList) {
+    static create(config?: IFilterPluginConfig) {
         return new FilterPlugin(config);
     }
 
@@ -23,7 +23,7 @@ export class FilterPlugin extends Plugin {
         universheetInstance.installPlugin(this);
     }
 
-    onMounted(context: Context): void {
+    onMounted(context: SheetContext): void {
         const config: IConfig = {
             context,
         };
@@ -33,7 +33,7 @@ export class FilterPlugin extends Plugin {
         });
         context
             .getPluginManager()
-            .getRequirePluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)
+            .getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)
             .addButton({
                 locale: FILTER_PLUGIN_NAME,
                 type: ISlotElement.JSX,

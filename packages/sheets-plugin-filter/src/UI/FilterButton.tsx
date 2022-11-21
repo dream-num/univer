@@ -1,5 +1,5 @@
 import { BaseSelectProps, Component, IToolBarItemProps } from '@univer/base-component';
-import { Nullable, Observer, WorkBook } from '@univer/core';
+import { Nullable, Observer, Workbook } from '@univer/core';
 import { IProps } from '../IData';
 import { FilterPlugin } from '../FilterPlugin';
 
@@ -10,7 +10,7 @@ interface IState {
 }
 
 export class FilterButton extends Component<IProps, IState> {
-    protected _localeObserver: Nullable<Observer<WorkBook>>;
+    protected _localeObserver: Nullable<Observer<Workbook>>;
 
     initialize(props: IProps) {
         const FilterRankIcon = this.getComponentRender().renderFunction('FilterRankIcon');
@@ -52,7 +52,7 @@ export class FilterButton extends Component<IProps, IState> {
         // subscribe Locale change event
         this._localeObserver = this.getContext()
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
@@ -62,7 +62,7 @@ export class FilterButton extends Component<IProps, IState> {
      * destory
      */
     componentWillUnmount() {
-        this.getContext().getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        // this.getContext().getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     /**

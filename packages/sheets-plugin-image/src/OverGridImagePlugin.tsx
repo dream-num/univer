@@ -1,6 +1,6 @@
 import { ISlotElement, ISlotProps, IToolBarItemProps } from '@univer/base-component';
-import { Command, Plugin, PLUGIN_NAMES, Nullable, WorkSheet, IOCContainer, UniverSheet } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { Command, Plugin, PLUGIN_NAMES, Nullable, Worksheet, IOCContainer, UniverSheet } from '@univer/core';
+import { SheetPlugin } from '@univer/base-sheets';
 import { IPictureProps } from '@univer/base-render';
 import { ACTION_NAMES } from './Const';
 import { ImagePluginObserve, install, uninstall } from './Basic/Observer';
@@ -32,7 +32,7 @@ export interface OverGridImageProperty extends IPictureProps {
     borderWidth: number;
 }
 
-export interface OverGridImagePluginConfig {
+export interface IOverGridImagePluginConfig {
     value: OverGridImageProperty[];
 }
 
@@ -66,7 +66,7 @@ export class OverGridImage {
         return this._plugin;
     }
 
-    getSheet(): Nullable<WorkSheet> {
+    getSheet(): Nullable<Worksheet> {
         return this.getPlugin().getContext().getWorkBook().getSheetBySheetId(this._property.sheetId);
     }
 
@@ -82,17 +82,23 @@ export class OverGridImage {
     }
 }
 
+/**
+ * TODO: 考虑加入单元格图片的情况，
+ *
+ * 如果工具栏的“插入单元格图片”“插入浮动图片”是在一个按钮的下拉列表里，那么UI部分是重叠的，所以这里应该叫 ImagePlugin，下面再细分 OverGridImage 和 CellImage
+ *
+ */
 export class OverGridImagePlugin extends Plugin<ImagePluginObserve> {
-    protected _config: OverGridImagePluginConfig;
+    protected _config: IOverGridImagePluginConfig;
 
     protected _render: OverImageRender;
 
-    constructor(config: OverGridImagePluginConfig) {
+    constructor(config: IOverGridImagePluginConfig) {
         super(OVER_GRID_IMAGE_PLUGIN_NAME);
         this._config = config;
     }
 
-    static create(config: OverGridImagePluginConfig) {
+    static create(config: IOverGridImagePluginConfig) {
         return new OverGridImagePlugin(config);
     }
 
@@ -106,7 +112,7 @@ export class OverGridImagePlugin extends Plugin<ImagePluginObserve> {
 
     onMounted(): void {
         install(this);
-        const plugin = this.getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+        const plugin = this.getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
         const panel: ISlotProps = {
             name: OVER_GRID_IMAGE_PLUGIN_NAME,
             type: ISlotElement.JSX,
@@ -154,16 +160,16 @@ export class OverGridImagePlugin extends Plugin<ImagePluginObserve> {
     }
 
     hideOverImagePanel(): void {
-        const plugin: SpreadsheetPlugin = this.getPluginByName(PLUGIN_NAMES.SPREADSHEET)!;
+        const plugin: SheetPlugin = this.getPluginByName(PLUGIN_NAMES.SPREADSHEET)!;
         plugin.showSiderByName(OVER_GRID_IMAGE_PLUGIN_NAME, false);
     }
 
     showOverImagePanel(): void {
-        const plugin: SpreadsheetPlugin = this.getPluginByName(PLUGIN_NAMES.SPREADSHEET)!;
+        const plugin: SheetPlugin = this.getPluginByName(PLUGIN_NAMES.SPREADSHEET)!;
         plugin.showSiderByName(OVER_GRID_IMAGE_PLUGIN_NAME, true);
     }
 
-    getConfig(): OverGridImagePluginConfig {
+    getConfig(): IOverGridImagePluginConfig {
         return this._config;
     }
 

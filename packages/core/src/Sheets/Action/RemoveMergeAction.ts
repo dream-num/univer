@@ -1,14 +1,14 @@
 import { addMerge, RemoveMerge } from '../Apply';
-import { WorkBook } from '../Domain';
 import { IRangeData } from '../../Interfaces';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IAddMergeActionData } from './AddMergeAction';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface IRemoveMergeActionData extends IActionData {
+export interface IRemoveMergeActionData extends ISheetActionData {
     rectangles: IRangeData[];
 }
 
@@ -17,17 +17,17 @@ export interface IRemoveMergeActionData extends IActionData {
  *
  * @internal
  */
-export class RemoveMergeAction extends ActionBase<
+export class RemoveMergeAction extends SheetActionBase<
     IRemoveMergeActionData,
     IAddMergeActionData,
     IRangeData[]
 > {
     constructor(
         actionData: IRemoveMergeActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],
@@ -38,22 +38,6 @@ export class RemoveMergeAction extends ActionBase<
             convertor: [],
         };
         this.validate();
-    }
-
-    redo(): void {
-        this.do();
-    }
-
-    undo(): void {
-        const worksheet = this.getWorkSheet();
-
-        addMerge(worksheet.getMerges(), this._doActionData.rectangles);
-
-        this._observers.notifyObservers({
-            type: ActionType.UNDO,
-            data: this._oldActionData,
-            action: this,
-        });
     }
 
     do(): IRangeData[] {
@@ -71,6 +55,22 @@ export class RemoveMergeAction extends ActionBase<
         });
 
         return result;
+    }
+
+    redo(): void {
+        this.do();
+    }
+
+    undo(): void {
+        const worksheet = this.getWorkSheet();
+
+        addMerge(worksheet.getMerges(), this._doActionData.rectangles);
+
+        this._observers.notifyObservers({
+            type: ActionType.UNDO,
+            data: this._oldActionData,
+            action: this,
+        });
     }
 
     validate(): boolean {

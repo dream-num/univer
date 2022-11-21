@@ -10,7 +10,7 @@ import {
 import { InsertColumnAction, RemoveColumnAction } from '../Action';
 import { ACTION_NAMES } from '../../Const';
 import { IRangeData } from '../../Interfaces';
-import { WorkSheet } from './WorkSheet';
+import { Worksheet } from './Worksheet';
 import { Nullable, Tools } from '../../Shared';
 import { Rectangle } from '../../Shared/Rectangle';
 import { Tuples } from '../../Shared/Tuples';
@@ -21,9 +21,9 @@ import { Tuples } from '../../Shared/Tuples';
 export class Merges {
     private _rectangleList: IRangeData[];
 
-    private _worksheet: WorkSheet;
+    private _worksheet: Worksheet;
 
-    constructor(worksheet: WorkSheet, mergeData: any) {
+    constructor(worksheet: Worksheet, mergeData: any) {
         this._worksheet = worksheet;
         this._rectangleList = mergeData;
 
@@ -326,7 +326,13 @@ export class Merges {
             rectangles: currentMerge,
         };
 
-        const command = new Command(context.getWorkBook(), removeMerge, addMerge);
+        const command = new Command(
+            {
+                WorkBookUnit: context.getWorkBook(),
+            },
+            removeMerge,
+            addMerge
+        );
         commandManager.invoke(command);
     }
 }

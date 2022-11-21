@@ -1,22 +1,23 @@
-import { ActionBase, ActionObservers, ACTION_NAMES, CONVERTOR_OPERATION, IActionData, WorkBook, WorkSheetConvertor } from '@univer/core';
-import { SetProtectionService } from '../Service';
+import { SheetActionBase, ActionObservers, CONVERTOR_OPERATION, ISheetActionData, Workbook, WorkSheetConvertor } from '@univer/core';
+import { SetProtection } from '../Apply';
+import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
 
-export interface ISetProtectionActionData extends IActionData {
+export interface ISetProtectionActionData extends ISheetActionData {
     enable: boolean;
     password: string;
 }
 
-export class SetProtectionAction extends ActionBase<ISetProtectionActionData, ISetProtectionActionData> {
+export class SetProtectionAction extends SheetActionBase<ISetProtectionActionData, ISetProtectionActionData> {
     protected _oldValue: [boolean, string];
 
-    constructor(actionData: ISetProtectionActionData, workbook: WorkBook, observers: ActionObservers) {
+    constructor(actionData: ISetProtectionActionData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._doActionData = {
             ...actionData,
             convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
         this._oldActionData = {
-            actionName: ACTION_NAMES.SET_FROZEN_COLUMNS_ACTION,
+            actionName: ACTION_NAMES.SET_PROTECTION_ACTION,
             sheetId: actionData.sheetId,
             enable: actionData.enable,
             password: actionData.password,
@@ -32,12 +33,12 @@ export class SetProtectionAction extends ActionBase<ISetProtectionActionData, IS
 
     redo(): void {
         const worksheet = this.getWorkSheet();
-        this._oldValue = SetProtectionService(worksheet, this._doActionData.enable, this._doActionData.password);
+        this._oldValue = SetProtection(worksheet, this._doActionData.enable, this._doActionData.password);
     }
 
     undo(): void {
         const worksheet = this.getWorkSheet();
-        SetProtectionService(worksheet, this._oldValue[0], this._oldValue[1]);
+        SetProtection(worksheet, this._oldValue[0], this._oldValue[1]);
     }
 
     validate(): boolean {

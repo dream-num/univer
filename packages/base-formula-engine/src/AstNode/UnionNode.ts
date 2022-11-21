@@ -1,7 +1,7 @@
 import { matchToken, operatorToken, OPERATOR_TOKEN_SET, suffixToken } from '../Basics/Token';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
-import { NodeType } from './NodeType';
+import { NodeType, NODE_ORDER_MAP } from './NodeType';
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
 import { ErrorType } from '../Basics/ErrorType';
 import { ErrorNode } from './ErrorNode';
@@ -17,7 +17,7 @@ export class UnionNode extends BaseAstNode {
         return NodeType.UNION;
     }
     constructor(private _operatorString: string, private _functionExecutor: BaseFunction) {
-        super();
+        super(_operatorString);
     }
 
     execute() {
@@ -36,7 +36,7 @@ export class UnionNode extends BaseAstNode {
 
 export class UnionNodeFactory extends BaseAstNodeFactory {
     get zIndex() {
-        return 5;
+        return NODE_ORDER_MAP.get(NodeType.UNION) || 100;
     }
 
     create(param: string, parserDataLoader: ParserDataLoader): BaseAstNode {
@@ -56,6 +56,11 @@ export class UnionNodeFactory extends BaseAstNodeFactory {
         const token = param.getToken();
 
         const tokenTrim = token.trim();
+
+        if (tokenTrim.charAt(0) === '"' && tokenTrim.charAt(tokenTrim.length - 1) === '"') {
+            return false;
+        }
+
         if (tokenTrim !== matchToken.COLON) {
             return false;
         }

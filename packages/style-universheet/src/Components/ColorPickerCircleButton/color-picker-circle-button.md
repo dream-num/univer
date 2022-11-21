@@ -17,7 +17,7 @@ The properties of the Color Picker-Round Button are described as follows:
 | -------- | ---------------------------------------------------------- | ----------------------------------------- | ------------- |
 | color    | Initialize color                                           | `string`                                  | -             |
 | style    | custom css style object                                    | `JSX.CSSProperties`                       | -             |
-| onColor  | Callback function after user selects color                 | `(color: string, val?: boolean) => void;` | -             |
+| onClick  | Callback function after user selects color                 | `(color: string) => void;` | -             |
 | onCancel | The callback function after the user cancels the selection | `() => void`                              | -             |
 
 ## Case
@@ -50,7 +50,7 @@ class AlternatingColorsSide extends Component<IPanelProps, IState> {
             <ColorPickerCircleButton
                 color={'#ffffff'}
                 style={{ bottom: '30px', right: '0' }}
-                onColor={this.handleColorSelect.bind(this)}
+                onClick={this.handleColorSelect.bind(this)}
                 onCancel={this.handleColorCancel.bind(this)}
             />
         );

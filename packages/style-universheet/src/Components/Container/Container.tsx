@@ -1,4 +1,4 @@
-import { BaseContainerProps, ComponentChildren, ContainerComponent, forwardRef, JSXComponent, RefObject } from '@univer/base-component';
+import { BaseContainerProps, ComponentChildren, ContainerComponent, forwardRef, JSXComponent, Ref } from '@univer/base-component';
 
 type IProps = {
     children?: ComponentChildren;
@@ -7,7 +7,7 @@ type IProps = {
     onClick?: (e: MouseEvent) => void;
 };
 
-export const Container = forwardRef((props: IProps, ref: RefObject<HTMLDivElement>) => {
+export const Container = forwardRef((props: IProps, ref: Ref<HTMLDivElement>) => {
     const { children, style, className, onClick } = props;
 
     return (

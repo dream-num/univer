@@ -1,4 +1,5 @@
-import { EVENT_TYPE, getColor, Rect } from '@univer/base-render';
+import { EVENT_TYPE, getColor, Rect, Scene } from '@univer/base-render';
+import { SheetPlugin } from '../../../SheetPlugin';
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 
 export class TestView extends BaseView {
@@ -79,4 +80,16 @@ export class TestView extends BaseView {
     }
 }
 
-CanvasViewRegistry.add(new TestView());
+// CanvasViewRegistry.add(TestView);
+export class TestViewFactory {
+    /**
+     * Generate TestView Instance
+     * @param scene
+     * @param plugin
+     * @returns
+     */
+    create(scene: Scene, plugin: SheetPlugin): TestView {
+        return new TestView().initialize(scene, plugin);
+    }
+}
+// CanvasViewRegistry.add(new TestViewFactory());

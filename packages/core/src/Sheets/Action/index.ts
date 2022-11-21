@@ -1,6 +1,8 @@
 // @index('./*.ts', f => `export * from '${f.path}'`)
 export * from './AddMergeAction';
+export * from './AddNamedRangeAction';
 export * from './ClearRangeAction';
+export * from './DeleteNamedRangeAction';
 export * from './DeleteRangeAction';
 export * from './InsertColumnAction';
 export * from './InsertColumnDataAction';
@@ -15,20 +17,17 @@ export * from './RemoveRowAction';
 export * from './RemoveRowDataAction';
 export * from './RemoveSheetAction';
 export * from './SetBorderAction';
-export * from './SetCollapseAllColumnGroupsAction';
-export * from './SetCollapseAllRowGroupsAction';
 export * from './SetColumnHideAction';
 export * from './SetColumnShowAction';
 export * from './SetColumnWidthAction';
-export * from './SetFrozenColumnsAction';
-export * from './SetFrozenRowsAction';
 export * from './SetHiddenGridlinesAction';
+export * from './SetNamedRangeAction';
 export * from './SetRangeDataAction';
 export * from './SetRangeFormatAction';
 export * from './SetRangeFormulaAction';
 export * from './SetRangeNoteAction';
 export * from './SetRangeStyleAction';
-export * from './SetRangeValueAction';
+export * from './SetRangeFormattedValueAction';
 export * from './SetRightToLeftAction';
 export * from './SetRowHeightAction';
 export * from './SetRowHideAction';
@@ -40,4 +39,5 @@ export * from './SetWorkSheetActivateAction';
 export * from './SetWorkSheetHideAction';
 export * from './SetWorkSheetNameAction';
 export * from './SetWorkSheetStatusAction';
+export * from './SetZoomRatioAction';
 // @endindex

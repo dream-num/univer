@@ -1,0 +1,8 @@
+.eslintrc.js
+vite.config.ts
+**/*.test.js
+dist
+lib
+node_modules
+package.json
+tsconfig.json

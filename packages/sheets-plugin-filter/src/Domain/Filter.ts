@@ -1,4 +1,4 @@
-import { Command, Context, IRangeData, GroupModel, Nullable, Sequence, Serializer } from '@univer/core';
+import { Command, SheetContext, IRangeData, GroupModel, Nullable, Sequence, Serializer } from '@univer/core';
 import { ACTION_NAMES } from '../Const';
 import { FilterCriteria } from './FilterCriteria';
 import { FilterCriteriaColumn, IFilterCriteriaColumn } from './FilterCriteriaColumn';
@@ -11,7 +11,7 @@ export interface IFilter extends Sequence {
     };
 }
 
-export class Filter extends Serializer implements GroupModel<{ [column: number]: FilterCriteriaColumn }>, Context.WithContext<Filter> {
+export class Filter extends Serializer implements GroupModel<{ [column: number]: FilterCriteriaColumn }>, SheetContext.WithContext<Filter> {
     static newInstance(sequence: IFilter): Filter {
         const filter = new Filter(sequence.sheetId, sequence.range);
         const criteriaColumns = {};
@@ -22,7 +22,7 @@ export class Filter extends Serializer implements GroupModel<{ [column: number]:
         return filter;
     }
 
-    private _context: Context;
+    private _context: SheetContext;
 
     private _range: IRangeData;
 
@@ -39,12 +39,12 @@ export class Filter extends Serializer implements GroupModel<{ [column: number]:
         this._criteriaColumns = {};
     }
 
-    withContext(context: Context): Filter {
+    withContext(context: SheetContext): Filter {
         this._context = context;
         return this;
     }
 
-    getContext(): Context {
+    getContext(): SheetContext {
         return this._context;
     }
 

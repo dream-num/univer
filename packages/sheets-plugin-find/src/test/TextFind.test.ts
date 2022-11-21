@@ -4,7 +4,7 @@
 import {
     BooleanNumber,
     CommandManager,
-    Context,
+    SheetContext,
     Environment,
     HooksManager,
     IOCAttribute,
@@ -16,8 +16,8 @@ import {
     ServerHttp,
     ServerSocket,
     UndoManager,
-    WorkBook,
-    WorkSheet,
+    Workbook,
+    Worksheet,
 } from '@univer/core';
 import { TextFinder } from '../Domain';
 
@@ -48,15 +48,15 @@ export function IOCContainerStartUpReady(workbookConfig?: Partial<IWorkbookConfi
     container.addSingletonMapping('Server', ServerSocket);
     container.addSingletonMapping('ServerSocket', ServerSocket);
     container.addSingletonMapping('ServerHttp', ServerHttp);
-    container.addSingletonMapping('WorkBook', WorkBook);
+    container.addSingletonMapping('WorkBook', Workbook);
     container.addSingletonMapping('Locale', Locale);
-    container.addSingletonMapping('Context', Context);
+    container.addSingletonMapping('Context', SheetContext);
     container.addSingletonMapping('UndoManager', UndoManager);
     container.addSingletonMapping('CommandManager', CommandManager);
     container.addSingletonMapping('PluginManager', PluginManager);
     container.addSingletonMapping('ObserverManager', ObserverManager);
     container.addSingletonMapping('ObservableHooksManager', HooksManager);
-    container.addMapping('WorkSheet', WorkSheet);
+    container.addMapping('WorkSheet', Worksheet);
     return container;
 }
 
@@ -68,8 +68,8 @@ function demo() {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -115,7 +115,7 @@ function demo() {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>('WorkSheet', context, configure);
+    const worksheet = container.getInstance<Worksheet>('WorkSheet', context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 

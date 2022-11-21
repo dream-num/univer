@@ -1,0 +1,133 @@
+import { BooleanNumber, GridType, IDocStyleBase, IDocumentLayout, IParagraphStyle, IReferenceSource, ISectionBreakBase, ITextStyle } from '@univer/core';
+import {
+    IDocumentSkeletonBlockAnchor,
+    IDocumentSkeletonBullet,
+    IDocumentSkeletonDrawing,
+    IDocumentSkeletonFontStyle,
+    IDocumentSkeletonFooter,
+    IDocumentSkeletonHeader,
+} from './IDocumentSkeletonCached';
+import { Vector2 } from './Vector2';
+
+export interface ISize {
+    width?: number;
+    height?: number;
+}
+
+export interface IScale {
+    scaleX?: number;
+    scaleY?: number;
+}
+
+export interface IOffset {
+    left?: number;
+    top?: number;
+}
+
+export interface IRect extends ISize, IOffset {
+    points: Vector2[];
+}
+
+export interface ITransformState extends IOffset {
+    scaleX?: number;
+    scaleY?: number;
+    angle?: number;
+    skewX?: number;
+    skewY?: number;
+    flipX?: boolean;
+    flipY?: boolean;
+}
+
+export interface IObjectFullState extends ITransformState, ISize {
+    strokeWidth?: number;
+    zIndex?: number;
+    isTransformer?: boolean;
+}
+
+export interface ISceneTransformState extends ISize, IScale {}
+
+export enum TRANSFORM_CHANGE_OBSERVABLE_TYPE {
+    translate,
+    resize,
+    scale,
+    skew,
+    flip,
+    all,
+}
+
+export interface ITransformChangeState {
+    type: TRANSFORM_CHANGE_OBSERVABLE_TYPE;
+    value: number | string | boolean | { x: number | string | boolean; y: number | string | boolean } | IObjectFullState | ISceneTransformState;
+    preValue: number | string | boolean | { x: number | string | boolean; y: number | string | boolean } | IObjectFullState | ISceneTransformState;
+}
+
+export interface IFontLocale {
+    fontList: string[];
+    defaultFontSize: number;
+}
+
+export interface IMeasureTextCache {
+    fontBoundingBoxAscent: number;
+    fontBoundingBoxDescent: number;
+    actualBoundingBoxAscent: number;
+    actualBoundingBoxDescent: number;
+    width: number;
+}
+
+export interface IDocsConfig extends IReferenceSource, IDocumentLayout {
+    fontLocale: IFontLocale;
+    documentTextStyle?: ITextStyle;
+}
+
+export interface IHeaderIds {
+    defaultHeaderId?: string;
+    evenPageHeaderId?: string;
+    firstPageHeaderId?: string;
+}
+
+export interface IFooterIds {
+    defaultFooterId?: string;
+    evenPageFooterId?: string;
+    firstPageFooterId?: string;
+}
+
+export interface ISectionBreakConfig extends IDocStyleBase, ISectionBreakBase, IDocsConfig {
+    headerIds?: IHeaderIds;
+    footerIds?: IFooterIds;
+    useFirstPageHeaderFooter?: BooleanNumber;
+    useEvenPageHeaderFooter?: BooleanNumber;
+}
+
+export interface IParagraphConfig {
+    blockId: string;
+    paragraphAffectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
+    // headerAndFooterAffectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
+    bulletSkeleton?: IDocumentSkeletonBullet;
+    // pageContentWidth: number;
+    // pageContentHeight: number;
+    paragraphStyle?: IParagraphStyle;
+    skeHeaders: Map<string, Map<number, IDocumentSkeletonHeader>>;
+    skeFooters: Map<string, Map<number, IDocumentSkeletonFooter>>;
+    blockAnchor?: Map<string, IDocumentSkeletonBlockAnchor>;
+    // sectionBreakConfig: ISectionBreakConfig;
+}
+
+export interface IFontCreateConfig {
+    fontStyle: IDocumentSkeletonFontStyle;
+    textStyle: ITextStyle;
+    charSpace: number;
+    gridType?: GridType;
+    snapToGrid: BooleanNumber;
+    pageWidth?: number;
+}
+
+// export interface IPageConfig {
+//     pageNumberStart: number;
+//     pageSize: ISizeData;
+//     headerIds: IHeaderIds;
+//     footerIds: IFooterIds;
+//     footers?: IFooters;
+//     headers?: IHeaders;
+//     useFirstPageHeaderFooter?: boolean;
+//     useEvenPageHeaderFooter?: boolean;
+// }

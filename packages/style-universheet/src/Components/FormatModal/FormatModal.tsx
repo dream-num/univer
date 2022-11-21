@@ -1,5 +1,5 @@
 import { BaseFormatModalProps, Component, FormatModalComponent, JSXComponent } from '@univer/base-component';
-import { Nullable, Observer, WorkBook } from '@univer/core';
+import { Nullable, Observer, Workbook } from '@univer/core';
 import { Modal, Ul } from '../index';
 import styles from './index.module.less';
 
@@ -21,7 +21,7 @@ export class FormatModal extends Component<BaseFormatModalProps, FormatModalStat
 
     ModalRefs: Modal[] = [];
 
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     initialize(props: BaseFormatModalProps) {
         // super(props);
@@ -130,14 +130,14 @@ export class FormatModal extends Component<BaseFormatModalProps, FormatModalStat
 
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
     }
 
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     render(props: BaseFormatModalProps, state: FormatModalState) {

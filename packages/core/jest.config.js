@@ -14,7 +14,7 @@ module.exports = {
     coveragePathIgnorePatterns: [
         '<rootDir>/src/Server',
         '<rootDir>/src/Shared/RectTree',
-        '<rootDir>/src/Domain/Group.ts',
+        '<rootDir>/src/Controller/Group.ts',
         '<rootDir>/src/Module',
         '<rootDir>/src/Convertor',
         '<rootDir>/src/Shared/DropCell.ts',

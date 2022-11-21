@@ -1,9 +1,9 @@
 /**
  * @jest-environment jsdom
  */
-import { WorkBook, WorkSheet } from '../../src/Sheets/Domain';
+import { Workbook, Worksheet } from '../../src/Sheets/Domain';
 import { IOCContainerStartUpReady } from '../ContainerStartUp';
-import { Context } from '../../src/Basics';
+import { SheetContext } from '../../src/Basics';
 import {
     CommandManager,
     SetColumnHideAction,
@@ -14,11 +14,11 @@ jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
 test('Set a hide Column', () => {
     const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
 
     const sheetId = 'sheet1';
-    const worksheet = new WorkSheet(context, { id: sheetId });
+    const worksheet = new Worksheet(context, { id: sheetId });
     workbook.insertSheet(worksheet);
 
     const observers = CommandManager.getActionObservers();

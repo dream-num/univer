@@ -1,6 +1,6 @@
 import { BaseComponentRender, BaseComponentSheet, Component, IToolBarItemProps, ModalProps } from '@univer/base-component';
-import { Nullable, Observer, WorkBook } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { Nullable, Observer, Workbook } from '@univer/core';
+import { SheetPlugin } from '@univer/base-sheets';
 import { IProps } from '../IData/IDataValidation';
 import { DataValidationContent } from './DataValidationContent';
 import styles from './index.module.less';
@@ -18,13 +18,13 @@ type LabelProps = {
 };
 
 export class DataValidationButton extends Component<IProps, IState> {
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     Render: BaseComponentRender;
 
     initialize(props: IProps) {
         // super(props);
-        const component = new SpreadsheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = new SheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this.Render = component.getComponentRender();
 
         const CheckIcon = this.Render.renderFunction('CheckIcon');
@@ -90,7 +90,7 @@ export class DataValidationButton extends Component<IProps, IState> {
 
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
@@ -100,7 +100,7 @@ export class DataValidationButton extends Component<IProps, IState> {
      * destory
      */
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     /**

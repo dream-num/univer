@@ -11,7 +11,7 @@ export class ErrorNode extends BaseAstNode {
     private _errorValueObject: ErrorValueObject;
 
     constructor(errorType: ErrorType) {
-        super();
+        super(errorType);
         this._errorValueObject = ErrorValueObject.create(errorType);
     }
 

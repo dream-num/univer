@@ -2,16 +2,16 @@ import { SetRangeFormat } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { CONVERTOR_OPERATION } from '../../Const/CONST';
 import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
-import { WorkBook } from '../Domain';
 import { IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface ISetRangeFormatActionData extends IActionData {
+export interface ISetRangeFormatActionData extends ISheetActionData {
     cellFormat: ObjectMatrixPrimitiveType<string>;
     rangeData: IRangeData;
 }
@@ -19,17 +19,17 @@ export interface ISetRangeFormatActionData extends IActionData {
 /**
  * @internal
  */
-export class SetRangeFormatAction extends ActionBase<
+export class SetRangeFormatAction extends SheetActionBase<
     ISetRangeFormatActionData,
     ISetRangeFormatActionData,
     ObjectMatrixPrimitiveType<string>
 > {
     constructor(
         actionData: ISetRangeFormatActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
 
         this._doActionData = {
             ...actionData,

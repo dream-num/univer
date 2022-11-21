@@ -1,19 +1,19 @@
 import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
-import { Context, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetContext, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { SheetPlugin } from '@univer/base-sheets';
 import { SCREENSHOT_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 import { IConfig } from './IData/IScreenshot';
 import { en, zh } from './Locale';
 import { ScreenshotButton } from './UI/ScreenshotButton';
 
-type IPluginConfig = {};
+export interface IScreenshotPluginConfig {}
 
 export class ScreenshotPlugin extends Plugin {
-    constructor(config?: IPluginConfig) {
+    constructor(config?: IScreenshotPluginConfig) {
         super(SCREENSHOT_PLUGIN_NAME);
     }
 
-    static create(config?: IPluginConfig) {
+    static create(config?: IScreenshotPluginConfig) {
         return new ScreenshotPlugin(config);
     }
 
@@ -39,12 +39,12 @@ export class ScreenshotPlugin extends Plugin {
             show: true,
             label: <ScreenshotButton config={config} />,
         };
-        context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
+        context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
     }
 
     onMapping(IOC: IOCContainer): void {}
 
-    onMounted(ctx: Context): void {
+    onMounted(ctx: SheetContext): void {
         this.initialize();
     }
 

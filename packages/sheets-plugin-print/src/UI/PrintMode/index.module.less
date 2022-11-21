@@ -1,15 +1,12 @@
-// @import '../../assets/css/skin/base.module.less';
-@import '@univer/style-universheet/assets/css/skin/base.module.less';
-
 .print-mode {
     width: 100vw !important;
     height: 100vh !important;
-    background-color: @gray-14;
+    background-color: var(--gray-14);
     // background-color: #fff;
     position: fixed;
     left: 0;
     top: 0;
-    z-index: `getZindex('tooltip') `;
+    z-index: 200;
 
     .print-header {
         height: 10vh;

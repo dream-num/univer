@@ -1,4 +1,4 @@
-import { Context, IOCContainer, Observable, Plugin } from '@univer/core';
+import { SheetContext, IOCContainer, Observable, Plugin } from '@univer/core';
 
 export type BulletPluginObserve = {
     onAfterChangeFontFamilyObservable: Observable<any>;
@@ -12,7 +12,7 @@ export class BulletPlugin extends Plugin<BulletPluginObserve> {
 
     onMapping(IOC: IOCContainer): void {}
 
-    onMounted(ctx: Context): void {}
+    onMounted(ctx: SheetContext): void {}
 
     onDestroy(): void {}
 }

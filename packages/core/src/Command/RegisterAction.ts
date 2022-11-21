@@ -1,36 +1,34 @@
 import { ACTION_NAMES } from '../Const';
 import {
-    AddNamedRangeAction,
-    DeleteNamedRangeAction,
-    SetNamedRangeAction,
-} from '../Module/NamedRange/Action';
-import {
     AddMergeAction,
+    AddNamedRangeAction,
     ClearRangeAction,
+    DeleteNamedRangeAction,
     DeleteRangeAction,
+    InsertColumnAction,
     InsertColumnDataAction,
     InsertRangeAction,
     InsertRowAction,
     InsertRowDataAction,
+    InsertSheetAction,
+    RemoveColumnAction,
     RemoveColumnDataAction,
     RemoveMergeAction,
     RemoveRowAction,
     RemoveRowDataAction,
+    RemoveSheetAction,
     SetBorderAction,
-    SetCollapseAllColumnGroupsAction,
-    SetCollapseAllRowGroupsAction,
     SetColumnHideAction,
     SetColumnShowAction,
     SetColumnWidthAction,
-    SetFrozenColumnsAction,
-    SetFrozenRowsAction,
     SetHiddenGridlinesAction,
+    SetNamedRangeAction,
     SetRangeDataAction,
     SetRangeFormatAction,
     SetRangeFormulaAction,
     SetRangeNoteAction,
     SetRangeStyleAction,
-    SetRangeValueAction,
+    SetRangeFormattedValueAction,
     SetRightToLeftAction,
     SetRowHeightAction,
     SetRowHideAction,
@@ -42,12 +40,13 @@ import {
     SetWorkSheetHideAction,
     SetWorkSheetNameAction,
     SetWorkSheetStatusAction,
+    SetZoomRatioAction,
 } from '../Sheets/Action';
-import { InsertColumnAction } from '../Sheets/Action/InsertColumnAction';
-import { InsertSheetAction } from '../Sheets/Action/InsertSheetAction';
-import { RemoveColumnAction } from '../Sheets/Action/removeColumnAction';
-import { RemoveSheetAction } from '../Sheets/Action/RemoveSheetAction';
 import { CommandManager } from './CommandManager';
+
+/**
+ * All Commands are registered statically. For each new Command, a static registration method must be added here.
+ */
 
 CommandManager.register(ACTION_NAMES.INSERT_ROW_DATA_ACTION, InsertRowDataAction);
 CommandManager.register(ACTION_NAMES.INSERT_ROW_ACTION, InsertRowAction);
@@ -63,7 +62,10 @@ CommandManager.register(
     SetSelectionActivateAction
 );
 CommandManager.register(ACTION_NAMES.SET_RANGE_DATA_ACTION, SetRangeDataAction);
-CommandManager.register(ACTION_NAMES.SET_RANGE_VALUE_ACTION, SetRangeValueAction);
+CommandManager.register(
+    ACTION_NAMES.SET_RANGE_FORMATTED_VALUE_ACTION,
+    SetRangeFormattedValueAction
+);
 CommandManager.register(ACTION_NAMES.DELETE_RANGE_ACTION, DeleteRangeAction);
 CommandManager.register(ACTION_NAMES.CLEAR_RANGE_ACTION, ClearRangeAction);
 CommandManager.register(ACTION_NAMES.INSERT_RANGE_ACTION, InsertRangeAction);
@@ -90,19 +92,6 @@ CommandManager.register(
 CommandManager.register(ACTION_NAMES.SET_COLUMN_WIDTH_ACTION, SetColumnWidthAction);
 CommandManager.register(ACTION_NAMES.SET_ROW_HEIGHT_ACTION, SetRowHeightAction);
 CommandManager.register(ACTION_NAMES.SET_BORDER_ACTION, SetBorderAction);
-CommandManager.register(
-    ACTION_NAMES.SET_COLLAPSE_ALL_COLUMN_GROUPS_ACTION,
-    SetCollapseAllColumnGroupsAction
-);
-CommandManager.register(
-    ACTION_NAMES.SET_COLLAPSE_ALL_ROW_GROUPS_ACTION,
-    SetCollapseAllRowGroupsAction
-);
-CommandManager.register(
-    ACTION_NAMES.SET_FROZEN_COLUMNS_ACTION,
-    SetFrozenColumnsAction
-);
-CommandManager.register(ACTION_NAMES.SET_FROZEN_ROWS_ACTION, SetFrozenRowsAction);
 CommandManager.register(ACTION_NAMES.SET_RIGHT_TO_LEFT_ACTION, SetRightToLeftAction);
 CommandManager.register(
     ACTION_NAMES.INSERT_COLUMN_DATA_ACTION,
@@ -129,3 +118,5 @@ CommandManager.register(ACTION_NAMES.SET_RANGE_NOTE_ACTION, SetRangeNoteAction);
 CommandManager.register(ACTION_NAMES.INSERT_SHEET_ACTION, InsertSheetAction);
 CommandManager.register(ACTION_NAMES.REMOVE_SHEET_ACTION, RemoveSheetAction);
 CommandManager.register(ACTION_NAMES.SET_SHEET_ORDER_ACTION, SetSheetOrderAction);
+CommandManager.register(ACTION_NAMES.SET_SHEET_ORDER_ACTION, SetSheetOrderAction);
+CommandManager.register(ACTION_NAMES.SET_ZOOM_RATIO_ACTION, SetZoomRatioAction);

@@ -1,10 +1,10 @@
-// import { fixLineWidthByScale, getColor, IScale } from '@Base';
+// import { fixLineWidthByScale, getColor, IScale } from '@Basics';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';
 
 import { SpreadsheetExtensionRegistry } from '../../Extension';
-import { fixLineWidthByScale, getColor } from '../../../Base/Tools';
-import { IScale } from '../../../Base/Interfaces';
+import { fixLineWidthByScale, getColor } from '../../../Basics/Tools';
+import { IScale } from '../../../Basics/Interfaces';
 
 const UNIQUE_KEY = 'DefaultBackgroundExtension';
 

@@ -1,22 +1,22 @@
 import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
-import { Context, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetContext, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { SheetPlugin } from '@univer/base-sheets';
 import { en, zh } from './Locale';
 import { PivotTableButton } from './UI/PivotTableButton';
 
 import { IConfig } from './IData/IPivotTable';
 import { PIVOT_TABLE_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 
-type IPluginConfig = {};
+export interface IPivotTablePluginConfig {}
 
 export class PivotTablePlugin extends Plugin {
-    spreadsheetPlugin: any;
+    SheetPlugin: any;
 
-    constructor(config?: IPluginConfig) {
+    constructor(config?: IPivotTablePluginConfig) {
         super(PIVOT_TABLE_PLUGIN_NAME);
     }
 
-    static create(config?: IPluginConfig) {
+    static create(config?: IPivotTablePluginConfig) {
         return new PivotTablePlugin(config);
     }
 
@@ -43,15 +43,15 @@ export class PivotTablePlugin extends Plugin {
             label: <PivotTableButton config={config} />,
         };
         // get spreadsheet plugin
-        this.spreadsheetPlugin = context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
+        this.sheetPlugin = context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
 
         // extend comment
-        this.spreadsheetPlugin?.addButton(item);
+        this.sheetPlugin?.addButton(item);
     }
 
     onMapping(IOC: IOCContainer): void {}
 
-    onMounted(ctx: Context): void {
+    onMounted(ctx: SheetContext): void {
         this.initialize();
     }
 

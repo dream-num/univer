@@ -1,6 +1,6 @@
-import { Context, Environment } from '../src/Basics';
+import { SheetContext, Environment } from '../src/Basics';
 import { CommandManager, UndoManager } from '../src/Command';
-import { WorkBook, WorkSheet } from '../src/Sheets/Domain';
+import { Workbook, Worksheet } from '../src/Sheets/Domain';
 import { BooleanNumber } from '../src/Enum';
 import { IWorksheetConfig } from '../src/Interfaces';
 import { IOCAttribute, IOCContainer } from '../src/IOC';
@@ -39,15 +39,15 @@ export function IOCContainerStartUpReady(): IOCContainer {
     container.addSingletonMapping('Server', ServerSocket);
     container.addSingletonMapping('ServerSocket', ServerSocket);
     container.addSingletonMapping('ServerHttp', ServerHttp);
-    container.addSingletonMapping('WorkBook', WorkBook);
+    container.addSingletonMapping('WorkBook', Workbook);
     container.addSingletonMapping('Locale', Locale);
-    container.addSingletonMapping('Context', Context);
+    container.addSingletonMapping('Context', SheetContext);
     container.addSingletonMapping('UndoManager', UndoManager);
     container.addSingletonMapping('CommandManager', CommandManager);
     container.addSingletonMapping('PluginManager', PluginManager);
     container.addSingletonMapping('ObserverManager', ObserverManager);
     container.addSingletonMapping('ObservableHooksManager', HooksManager);
-    container.addMapping('WorkSheet', WorkSheet);
+    container.addMapping('WorkSheet', Worksheet);
     return container;
 }
 
@@ -76,12 +76,12 @@ export function TestInit(worksheetConfig?: Partial<IWorksheetConfig>) {
     const configure = Object.assign(defaultWorksheetConfigure, worksheetConfig);
 
     const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     // const worksheet = new WorkSheet(context, configure);
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -93,8 +93,8 @@ export function TestInit(worksheetConfig?: Partial<IWorksheetConfig>) {
 }
 export function TestInitTwoSheet() {
     const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const sheetOneConfigure = {
@@ -139,7 +139,7 @@ export function TestInitTwoSheet() {
         status: 0,
     };
 
-    const worksheetOne = container.getInstance<WorkSheet>(
+    const worksheetOne = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         sheetOneConfigure
@@ -147,7 +147,7 @@ export function TestInitTwoSheet() {
     workbook.insertSheet(worksheetOne);
     worksheetOne.setCommandManager(commandManager);
 
-    const worksheetTwo = container.getInstance<WorkSheet>(
+    const worksheetTwo = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         sheetTwoConfigure
@@ -161,10 +161,10 @@ export function TestInitTwoSheet() {
 export function TestInitSheetInstance(worksheetConfig?: Partial<IWorksheetConfig>) {
     const configure = Object.assign(defaultWorksheetConfigure, worksheetConfig);
     const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
-    const worksheet = new WorkSheet(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 

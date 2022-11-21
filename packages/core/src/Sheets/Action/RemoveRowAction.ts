@@ -1,15 +1,15 @@
 import { InsertRow, RemoveRow } from '../Apply';
 import { CONVERTOR_OPERATION } from '../../Const';
 import { WorkSheetConvertor } from '../../Convertor';
-import { WorkBook } from '../Domain';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertRowActionData } from './InsertRowAction';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface IRemoveRowActionData extends IActionData {
+export interface IRemoveRowActionData extends ISheetActionData {
     rowIndex: number;
     rowCount: number;
 }
@@ -19,16 +19,16 @@ export interface IRemoveRowActionData extends IActionData {
  *
  * @internal
  */
-export class RemoveRowAction extends ActionBase<
+export class RemoveRowAction extends SheetActionBase<
     IRemoveRowActionData,
     IInsertRowActionData
 > {
     constructor(
         actionData: IRemoveRowActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.REMOVE)],

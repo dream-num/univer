@@ -1,6 +1,6 @@
 import { BaseComponentRender, BaseComponentSheet, Component } from '@univer/base-component';
-import { Nullable, Observer, WorkBook } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { IKeyValue, Nullable, Observer, Workbook } from '@univer/core';
+import { SheetPlugin } from '@univer/base-sheets';
 
 import styles from './index.module.less';
 
@@ -9,11 +9,14 @@ type ConditionContentProps = {
     type: string;
     genre: string;
 };
+
+// TODO: remove IKeyValue
 type ConditionContentState = {
     condition: ConditionProps;
     setting: Record<string, LabelProps>;
     duplicateOption: LabelProps[];
-};
+} & IKeyValue;
+
 type LabelProps = {
     locale?: string;
     label?: string;
@@ -28,12 +31,12 @@ type ConditionProps = {
 };
 
 export class ConditionContent extends Component<ConditionContentProps, ConditionContentState> {
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     Render: BaseComponentRender;
 
     initialize() {
-        const component = new SpreadsheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = new SheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this.Render = component.getComponentRender();
 
         this.state = {
@@ -240,14 +243,14 @@ export class ConditionContent extends Component<ConditionContentProps, Condition
         // subscribe Locale change event
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
     }
 
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     setValue = (value: object, fn?: () => void) => {
@@ -334,11 +337,11 @@ export class ConditionContent extends Component<ConditionContentProps, Condition
                 <div className={styles.colorBox}>
                     <div className={styles.colorItem}>
                         <Checkbox>{setting.textColor.label}</Checkbox>
-                        <ColorPicker color="#9c0006" onColor={this.pickTextColor} onCancel={this.cancelColor}></ColorPicker>
+                        <ColorPicker color="#9c0006" onClick={this.pickTextColor} onCancel={this.cancelColor}></ColorPicker>
                     </div>
                     <div className={styles.colorItem}>
                         <Checkbox>{setting.cellColor.label}</Checkbox>
-                        <ColorPicker color="#ffc7ce" onColor={this.pickCellColor} onCancel={this.cancelColor}></ColorPicker>
+                        <ColorPicker color="#ffc7ce" onClick={this.pickCellColor} onCancel={this.cancelColor}></ColorPicker>
                     </div>
                 </div>
             </div>

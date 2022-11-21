@@ -1,5 +1,5 @@
 export * from './Locale';
-export * from './Base';
+export * from './Basics';
 export * from './Custom';
 export * from './Engine';
 export * from './BaseObject';
@@ -13,3 +13,4 @@ export * from './Group';
 export * from './Shape';
 export * from './Component';
 export * from './RenderEngine';
+export * from './ScrollTimer';

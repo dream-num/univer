@@ -11,9 +11,9 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetCustomBuild',
-            formats: ['es', 'umd'],
-            fileName: 'univer-custom-build',
+            name: 'UniverPreactTs',
+            formats: ['es', 'cjs', 'umd', 'iife'],
+            fileName: 'univer-preact-ts',
         },
         outDir: './lib',
     },
@@ -46,6 +46,7 @@ export default defineConfig({
                 // '@univer/core': '@univer/core',
                 // '@univer/style-universheet': '@univer/style-universheet',
                 // preact: 'preact',
+                // react: 'react',
             },
         }),
     ],

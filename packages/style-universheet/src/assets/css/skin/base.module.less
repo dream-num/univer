@@ -1,4 +1,3 @@
-
 /*
 1. 所有的变量加到这里，复用
 2. 组件要用的话，在这定义好，导入组件使用
@@ -40,6 +39,7 @@
 @gray-16: #ececec;
 @gray-17: #cbcbcb;
 
+
 // TODO remove
 @primary-color: #0188fb; // 全局主色 //也用作info-color信息色
 @primary-color-hover: #5391ff; // 全局主色 hover
@@ -54,17 +54,18 @@
 @border-color-base-hover: @gray-6; // 边框 hover高亮色
 @box-shadow-base: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05); // 浮层阴影
 
-// manage z-index
-.generateZIndex() {
-    @functions: ~`(function() {
-            let indexList=new Map([['toolbar', 100], ['tooltip', 200], ['bottom', 10],['rightMenu',100],['modal',500]]);
 
-            this.getZindex=function(param) {
-                return indexList.get(param);
-            }
-        }
+// // manage z-index
+// .generateZIndex() {
+//     @functions: ~`(function() {
+//             let indexList=new Map([['toolbar', 100], ['tooltip', 200], ['bottom', 10], ['rightMenu', 100], ['modal', 500]]);
 
-    )()`;
-}
+//             this.getZindex=function(param) {
+//                 return indexList.get(param);
+//             }
+//         }
 
-.generateZIndex();
+//     )()`;
+// }
+
+// .generateZIndex();

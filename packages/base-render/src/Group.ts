@@ -1,9 +1,9 @@
 import { Nullable, sortRules } from '@univer/core';
 import { Scene } from './Scene';
-import { isString } from './Base/Tools';
-import { IBoundRect, Vector2 } from './Base/Vector2';
+import { isString } from './Basics/Tools';
+import { IBoundRect, Vector2 } from './Basics/Vector2';
 import { BaseObject } from './BaseObject';
-import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './Base/Const';
+import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './Basics/Const';
 
 export class Group extends BaseObject {
     private _objects: BaseObject[] = [];
@@ -133,4 +133,11 @@ export class Group extends BaseObject {
 
     // 判断被选中的唯一对象
     pick(coord: Vector2) {}
+
+    dispose() {
+        this.getObjects().forEach((o) => {
+            o.dispose();
+        });
+        super.dispose();
+    }
 }

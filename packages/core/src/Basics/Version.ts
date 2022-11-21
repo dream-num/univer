@@ -1,3 +1,4 @@
+import pack from '../../package.json';
 /**
  * Default env
  */
@@ -6,4 +7,4 @@ export const VersionEnv = 'dev';
 /**
  * Default version
  */
-export const VersionCode = 'v3.0.0';
+export const VersionCode = pack.version;

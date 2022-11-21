@@ -2,10 +2,10 @@
  * @jest-environment jsdom
  */
 import { CommandManager, ServerHttp } from '../../src';
-import { Context } from '../../src/Basics/Context';
+import { SheetContext } from '../../src/Basics/SheetContext';
 import { Range } from '../../src/Sheets/Domain/Range';
-import { WorkBook } from '../../src/Sheets/Domain/WorkBook';
-import { WorkSheet } from '../../src/Sheets/Domain/WorkSheet';
+import { Workbook } from '../../src/Sheets/Domain/Workbook';
+import { Worksheet } from '../../src/Sheets/Domain/Worksheet';
 import { BooleanNumber } from '../../src/Enum';
 import { IOCContainerStartUpReady } from './Range.test';
 
@@ -15,7 +15,7 @@ test('Test _getDefaultWorkSheet', () => {
     const container = IOCContainerStartUpReady({
         sheets: { sheet1: { id: 'sheet1' }, sheet2: { id: 'sheet2' } },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     expect(workbook.getSheets().length).toEqual(2);
 });
 
@@ -23,7 +23,7 @@ test('Test _setServerBase', () => {
     const container = IOCContainerStartUpReady({
         sheets: { sheet1: { id: 'sheet1' }, sheet2: { id: 'sheet2' } },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     workbook.setServerBase(new ServerHttp());
     expect(workbook.getServer()).not.toBeUndefined();
 });
@@ -32,7 +32,7 @@ test('Test setDefaultActiveSheet', () => {
     const container = IOCContainerStartUpReady({
         sheets: { sheet1: { id: 'sheet1' }, sheet2: { id: 'sheet2' } },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     workbook.setDefaultActiveSheet();
     expect(workbook.getSheets()[0].getStatus()).toEqual(BooleanNumber.TRUE);
 });
@@ -41,8 +41,8 @@ test('Test setContext', () => {
     const container = IOCContainerStartUpReady({
         sheets: { sheet1: { id: 'sheet1' }, sheet2: { id: 'sheet2' } },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
-    const context = container.getSingleton<Context>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
     workbook.setContext(context);
     expect(workbook.getContext()).toBe(context);
 });
@@ -51,7 +51,7 @@ test('Test setCommandManager', () => {
     const container = IOCContainerStartUpReady({
         sheets: { sheet1: { id: 'sheet1' }, sheet2: { id: 'sheet2' } },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const manager = container.getSingleton<CommandManager>('CommandManager');
     workbook.setCommandManager(manager);
     expect(workbook.getCommandManager()).toBe(manager);
@@ -59,7 +59,7 @@ test('Test setCommandManager', () => {
 
 test('Test flush', () => {
     const container = IOCContainerStartUpReady({});
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     workbook.flush();
 });
 
@@ -78,12 +78,12 @@ test('Test activateSheet', () => {
             },
         },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
-    const context = container.getSingleton<Context>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet-01',
+        id: 'sheet-01',
         cellData: {
             0: {
                 0: {
@@ -95,12 +95,12 @@ test('Test activateSheet', () => {
         },
         status: BooleanNumber.TRUE,
     };
-    const worksheet = new WorkSheet(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
     const secondConfigure = {
-        sheetId: 'sheet-02',
+        id: 'sheet-02',
         cellData: {
             0: {
                 0: {
@@ -112,7 +112,7 @@ test('Test activateSheet', () => {
         },
         status: BooleanNumber.FALSE,
     };
-    const secondWorksheet = new WorkSheet(context, secondConfigure);
+    const secondWorksheet = new Worksheet(context, secondConfigure);
     workbook.insertSheet(secondWorksheet);
     secondWorksheet.setCommandManager(commandManager);
 
@@ -146,13 +146,13 @@ test('Test setActiveRange', () => {
             },
         },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
-    const context = container.getSingleton<Context>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
     const commandManager = workbook.getCommandManager();
     workbook.setContext(context);
 
     const secondConfigure = {
-        sheetId: 'sheet-02',
+        id: 'sheet-02',
         cellData: {
             0: {
                 0: {
@@ -164,7 +164,7 @@ test('Test setActiveRange', () => {
         },
         status: 0,
     };
-    const oneWorksheet = container.getInstance<WorkSheet>(
+    const oneWorksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         secondConfigure
@@ -204,13 +204,13 @@ test('Test getIndexBySheetId', () => {
             },
         },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
-    const context = container.getSingleton<Context>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
     const commandManager = workbook.getCommandManager();
     workbook.setContext(context);
 
     const secondConfigure = {
-        sheetId: 'sheet-02',
+        id: 'sheet-02',
         cellData: {
             0: {
                 0: {
@@ -222,7 +222,7 @@ test('Test getIndexBySheetId', () => {
         },
         status: 0,
     };
-    const oneWorksheet = new WorkSheet(context, secondConfigure);
+    const oneWorksheet = new Worksheet(context, secondConfigure);
     oneWorksheet.setCommandManager(commandManager);
     workbook.insertSheet(oneWorksheet);
 
@@ -244,13 +244,13 @@ test('Test insertSheet', () => {
             },
         },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
-    const context = container.getSingleton<Context>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
     const commandManager = workbook.getCommandManager();
     workbook.setContext(context);
 
     const oneConfigure = {
-        sheetId: 'sheet-02',
+        id: 'sheet-02',
         cellData: {
             0: {
                 0: {
@@ -262,7 +262,7 @@ test('Test insertSheet', () => {
         },
         status: 0,
     };
-    const oneWorksheet = new WorkSheet(context, oneConfigure);
+    const oneWorksheet = new Worksheet(context, oneConfigure);
     oneWorksheet.setCommandManager(commandManager);
     workbook.insertSheet(oneWorksheet);
 
@@ -289,8 +289,8 @@ test('Test insertSheet', () => {
     workbook.insertSheet(1, { name: 'sheet5' });
     expect(workbook.getSheets().length).toEqual(7);
 
-    const towConfigure = {
-        sheetId: 'sheet6',
+    const twoConfigure = {
+        id: 'sheet6',
         cellData: {
             0: {
                 0: {
@@ -302,7 +302,7 @@ test('Test insertSheet', () => {
         },
         status: 0,
     };
-    const towWorksheet = new WorkSheet(context, towConfigure);
+    const towWorksheet = new Worksheet(context, twoConfigure);
     oneWorksheet.setCommandManager(commandManager);
 
     workbook.insertSheet(1, towWorksheet);
@@ -311,7 +311,7 @@ test('Test insertSheet', () => {
 
 test('Test create', () => {
     const container = IOCContainerStartUpReady({});
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const worksheet = workbook.create('sheet1', 100, 100);
     expect(worksheet).not.toBeUndefined();
 });
@@ -331,13 +331,13 @@ test('Test getActiveRangeList', () => {
             },
         },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
-    const context = container.getSingleton<Context>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
     const commandManager = workbook.getCommandManager();
     workbook.setContext(context);
 
     const secondConfigure = {
-        sheetId: 'sheet-02',
+        id: 'sheet-02',
         cellData: {
             0: {
                 0: {
@@ -349,7 +349,7 @@ test('Test getActiveRangeList', () => {
         },
         status: 0,
     };
-    const oneWorksheet = container.getInstance<WorkSheet>(
+    const oneWorksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         secondConfigure
@@ -379,8 +379,8 @@ test('Test getSelection', () => {
             },
         },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
-    const context = container.getSingleton<Context>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
     workbook.setContext(context);
     expect(workbook.getSelection()).not.toEqual(null);
 });
@@ -400,13 +400,13 @@ test('Test getCurrentCell', () => {
             },
         },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     workbook.setContext(context);
 
     const secondConfigure = {
-        sheetId: 'sheet-02',
+        id: 'sheet-02',
         cellData: {
             0: {
                 0: {
@@ -418,7 +418,7 @@ test('Test getCurrentCell', () => {
         },
         status: 0,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         secondConfigure
@@ -455,13 +455,13 @@ test('Test setSheetOrder', () => {
             },
         },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     workbook.setContext(context);
 
     const secondConfigure = {
-        sheetId: 'sheet-02',
+        id: 'sheet-02',
         cellData: {
             0: {
                 0: {
@@ -473,7 +473,7 @@ test('Test setSheetOrder', () => {
         },
         status: 0,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         secondConfigure
@@ -501,13 +501,13 @@ test('Test removeSheetBySheetId', () => {
             },
         },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     workbook.setContext(context);
 
     const secondConfigure = {
-        sheetId: 'sheet-02',
+        id: 'sheet-02',
         cellData: {
             0: {
                 0: {
@@ -519,7 +519,7 @@ test('Test removeSheetBySheetId', () => {
         },
         status: 0,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         secondConfigure
@@ -548,13 +548,13 @@ test('Test getSheetBySheetName', () => {
             },
         },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     workbook.setContext(context);
 
     const secondConfigure = {
-        sheetId: 'sheet-02',
+        id: 'sheet-02',
         name: 'sheet-luck',
         cellData: {
             0: {
@@ -567,7 +567,7 @@ test('Test getSheetBySheetName', () => {
         },
         status: 0,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         secondConfigure
@@ -597,11 +597,11 @@ test('Test getSheetBySheetName', () => {
 //     });
 //     const workbook = container.getSingleton<WorkBook>('WorkBook');
 //     const commandManager = workbook.getCommandManager();
-//     const context = container.getSingleton<Context>('Context');
+//     const context = container.getSingleton<SheetContext>('SheetContext');
 //     workbook.setContext(context);
 
 //     const secondConfigure = {
-//         sheetId: 'sheet-02',
+//         id: 'sheet-02',
 //         name: 'sheet-luck',
 //         cellData: {
 //             0: {
@@ -631,7 +631,7 @@ test('Test setActiveRangeList', () => {
     const container = IOCContainerStartUpReady({
         sheets: { sheet1: { id: 'sheet1' }, sheet2: { id: 'sheet2' } },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     workbook.setActiveRangeList([
         { startRow: 1, startColumn: 1, endRow: 2, endColumn: 2 },
         { startRow: 3, startColumn: 3, endRow: 4, endColumn: 4 },
@@ -658,13 +658,13 @@ test('Test getSheetBySheetId', () => {
             },
         },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     workbook.setContext(context);
 
     const secondConfigure = {
-        sheetId: 'sheet-02',
+        id: 'sheet-02',
         name: 'sheet-luck',
         cellData: {
             0: {
@@ -677,7 +677,7 @@ test('Test getSheetBySheetId', () => {
         },
         status: 0,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         secondConfigure
@@ -705,13 +705,13 @@ test('Test setActiveSheet', () => {
             },
         },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     workbook.setContext(context);
 
     const secondConfigure = {
-        sheetId: 'sheet-02',
+        id: 'sheet-02',
         name: 'sheet-luck',
         cellData: {
             0: {
@@ -724,7 +724,7 @@ test('Test setActiveSheet', () => {
         },
         status: 0,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         secondConfigure
@@ -753,11 +753,11 @@ test('Test setActiveSheet', () => {
 //     });
 //     const workbook = container.getSingleton<WorkBook>('WorkBook');
 //     const commandManager = workbook.getCommandManager();
-//     const context = container.getSingleton<Context>('Context');
+//     const context = container.getSingleton<SheetContext>('SheetContext');
 //     workbook.setContext(context);
 
 //     const secondConfigure = {
-//         sheetId: 'sheet-02',
+//         id: 'sheet-02',
 //         name: 'sheet-luck',
 //         cellData: {
 //             0: {
@@ -800,11 +800,11 @@ test('Test setActiveSheet', () => {
 //     });
 //     const workbook = container.getSingleton<WorkBook>('WorkBook');
 //     const commandManager = workbook.getCommandManager();
-//     const context = container.getSingleton<Context>('Context');
+//     const context = container.getSingleton<SheetContext>('SheetContext');
 //     workbook.setContext(context);
 
 //     const secondConfigure = {
-//         sheetId: 'sheet-02',
+//         id: 'sheet-02',
 //         name: 'sheet-luck',
 //         cellData: {
 //             0: {
@@ -845,13 +845,13 @@ test('Test getCommandManager', () => {
             },
         },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
     workbook.setContext(context);
 
     const secondConfigure = {
-        sheetId: 'sheet-02',
+        id: 'sheet-02',
         name: 'sheet-luck',
         cellData: {
             0: {
@@ -864,7 +864,7 @@ test('Test getCommandManager', () => {
         },
         status: 0,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         secondConfigure
@@ -878,7 +878,7 @@ test('Test getCommandManager', () => {
 
 // test('Test newFilterCriteria', () => {
 //     const container = IOCContainerStartUpReady({
-//         sheets: [{ sheetId: 'sheet1' }, { sheetId: 'sheet2' }],
+//         sheets: [{ id: 'sheet1' }, { id: 'sheet2' }],
 //     });
 //     const workbook = container.getSingleton<WorkBook>('WorkBook');
 //     workbook.setPluginMeta('test', {});
@@ -889,14 +889,14 @@ test('Test getPluginMeta/setPluginMeta', () => {
     const container = IOCContainerStartUpReady({
         sheets: { sheet1: { id: 'sheet1' }, sheet2: { id: 'sheet2' } },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     workbook.setPluginMeta('test', {});
     expect(workbook.getPluginMeta('test')).not.toBeUndefined();
 });
 
 // test('Test newConditionalFormatRule', () => {
 //     const container = IOCContainerStartUpReady({
-//         sheets: [{ sheetId: 'sheet1' }, { sheetId: 'sheet2' }],
+//         sheets: [{ id: 'sheet1' }, { id: 'sheet2' }],
 //     });
 //     const workbook = container.getSingleton<WorkBook>('WorkBook');
 //     workbook.setPluginMeta('test', {});
@@ -907,7 +907,7 @@ test('Test getConfig', () => {
     const container = IOCContainerStartUpReady({
         sheets: { sheet1: { id: 'sheet1' }, sheet2: { id: 'sheet2' } },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     expect(workbook.getConfig()).not.toBeUndefined();
 });
 
@@ -915,12 +915,12 @@ test('Test setActiveSheet', () => {
     const container = IOCContainerStartUpReady({
         sheets: { sheet1: { id: 'sheet1' }, sheet2: { id: 'sheet2' } },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
-    const context = container.getSingleton<Context>('Context');
+    const context = container.getSingleton<SheetContext>('Context');
 
     const secondConfigure = {
-        sheetId: 'sheet-02',
+        id: 'sheet-02',
         name: 'sheet-luck',
         cellData: {
             0: {
@@ -933,7 +933,7 @@ test('Test setActiveSheet', () => {
         },
         status: 0,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         secondConfigure
@@ -947,18 +947,18 @@ test('Test setSheetOrder', () => {
     const container = IOCContainerStartUpReady({
         sheets: { sheet1: { id: 'sheet1' }, sheet2: { id: 'sheet2' } },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     workbook.setSheetOrder('sheet1', 1);
 });
 
 test('Test isIRangeType', () => {
     const rangeData = { startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 };
-    expect(WorkBook.isIRangeType(rangeData)).toEqual(true);
+    expect(Workbook.isIRangeType(rangeData)).toEqual(true);
 });
 
 test('Test rangeDataToRangeStringData', () => {
     const rangeData = { startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 };
-    expect(WorkBook.rangeDataToRangeStringData(rangeData)).toEqual('B2:B2');
+    expect(Workbook.rangeDataToRangeStringData(rangeData)).toEqual('B2:B2');
 });
 
 test('Test rangeDataToRangeStringData', () => {
@@ -972,7 +972,7 @@ test('Test rangeDataToRangeStringData', () => {
             },
         },
     });
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     expect(workbook.transformRangeType('A1:B1').rangeData).toEqual({
         startRow: 0,
         endRow: 0,

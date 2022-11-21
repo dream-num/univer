@@ -1,15 +1,15 @@
-import { ActionBase, ActionObservers, IActionData, Nullable, WorkBook } from '@univer/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, Nullable, Workbook } from '@univer/core';
 import { IFilter } from '../Domain';
 import { ACTION_NAMES, FILTER_PLUGIN_NAME } from '../Const';
 import { AddFilter, RemoveFilter } from '../Apply';
 import { IRemoveFilterActionData } from './RemoveFilterAction';
 
-export interface IAddFilterActionData extends IActionData {
+export interface IAddFilterActionData extends ISheetActionData {
     filter: Nullable<IFilter>;
 }
 
-export class AddFilterAction extends ActionBase<IAddFilterActionData, IRemoveFilterActionData> {
-    constructor(actionData: IAddFilterActionData, workbook: WorkBook, observers: ActionObservers) {
+export class AddFilterAction extends SheetActionBase<IAddFilterActionData, IRemoveFilterActionData> {
+    constructor(actionData: IAddFilterActionData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._doActionData = {
             ...actionData,

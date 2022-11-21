@@ -1,5 +1,5 @@
-import { IDrawing, PositionedObjectLayoutType, WrapTextType } from '@univer/core';
-import { IDocumentSkeletonBlockAnchor, IDocumentSkeletonDivide, IDocumentSkeletonDrawing, IDocumentSkeletonLine, LineType, Nullable, Path2, Transform, Vector2 } from '../../..';
+import { IDrawing, Nullable, PositionedObjectLayoutType, WrapTextType } from '@univer/core';
+import { IDocumentSkeletonBlockAnchor, IDocumentSkeletonDivide, IDocumentSkeletonDrawing, IDocumentSkeletonLine, LineType, Path2, Transform, Vector2 } from '../../..';
 
 interface IDrawingsSplit {
     left: number;
@@ -356,10 +356,12 @@ function _calculateDivideByDrawings(columnWidth: number, drawingSplit: IDrawings
         const { left, width } = split;
         if (left > start) {
             // 插入start到left的间隔divide
-            const divide = __getDivideSKe(start, left);
+            let width = left - start;
+            width = width < columnWidth ? width : columnWidth - start;
+            const divide = __getDivideSKe(start, width);
             divideSkeleton.push(divide);
-            start = Math.max(left + width, start);
         }
+        start = Math.max(left + width, start);
 
         if (i === splitLength - 1 && left + width < columnWidth) {
             // 最后一个split到右边界的divide

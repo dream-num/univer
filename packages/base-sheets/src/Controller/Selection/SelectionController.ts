@@ -1,18 +1,26 @@
-import { Rect, Group } from '@univer/base-render';
+import { Rect, Group, Spreadsheet } from '@univer/base-render';
 import { Nullable, ISelection, ICellInfo } from '@univer/core';
-import { SelectionModel } from '../../Model/Domain/SelectionModel';
+import { SelectionModel } from '../../Model/SelectionModel';
 import { SelectionControlDragAndDrop } from './SelectionControlDragDrop';
 import { SelectionControlFill } from './SelectionControlFill';
 import { SelectionManager } from './SelectionManager';
 
-export enum DEFAULT_SELECTION_CONFIG {
-    strokeColor = 'rgb(1,136,251)',
-    backgroundColor = 'rgba(1,136,251, 0.1)',
-    strokeWidth = 2,
-    fillSideLength = 6,
-    fillStrokeLength = 1,
-    fillStrokeColor = 'rgb(255,255,255)',
-}
+// export enum DEFAULT_SELECTION_CONFIG {
+//     strokeColor = 'rgb(1,136,251)',
+//     backgroundColor = 'rgba(1,136,251, 0.1)',
+//     strokeWidth = 2,
+//     fillSideLength = 6,
+//     fillStrokeLength = 1,
+//     fillStrokeColor = 'rgb(255,255,255)',
+// }
+export const DEFAULT_SELECTION_CONFIG = {
+    strokeColor: 'rgb(1,136,251)',
+    backgroundColor: 'rgba(1,136,251, 0.1)',
+    strokeWidth: 2,
+    fillSideLength: 6,
+    fillStrokeLength: 1,
+    fillStrokeColor: 'rgb(255,255,255)',
+};
 
 export enum SELECTION_TYPE {
     NORMAL,
@@ -33,7 +41,12 @@ enum SELECTION_MANAGER_KEY {
     fill = '__SpreadsheetSelectionFillControl__',
 }
 
+/**
+ * The main selection canvas component
+ */
 export class SelectionControl {
+    private _mainComponent: Spreadsheet;
+
     private _leftControl: Rect;
 
     private _rightControl: Rect;
@@ -69,45 +82,45 @@ export class SelectionControl {
         this._leftControl = new Rect(SELECTION_MANAGER_KEY.left + zIndex, {
             top: 0,
             left: -DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
-            width: DEFAULT_SELECTION_CONFIG.strokeWidth as number,
-            fill: DEFAULT_SELECTION_CONFIG.strokeColor as string,
+            width: DEFAULT_SELECTION_CONFIG.strokeWidth,
+            fill: DEFAULT_SELECTION_CONFIG.strokeColor,
             zIndex,
         });
         this._rightControl = new Rect(SELECTION_MANAGER_KEY.right + zIndex, {
-            width: DEFAULT_SELECTION_CONFIG.strokeWidth as number,
-            fill: DEFAULT_SELECTION_CONFIG.strokeColor as string,
+            width: DEFAULT_SELECTION_CONFIG.strokeWidth,
+            fill: DEFAULT_SELECTION_CONFIG.strokeColor,
             zIndex,
         });
         this._topControl = new Rect(SELECTION_MANAGER_KEY.top + zIndex, {
             top: -DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
             left: -DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
-            height: DEFAULT_SELECTION_CONFIG.strokeWidth as number,
-            fill: DEFAULT_SELECTION_CONFIG.strokeColor as string,
+            height: DEFAULT_SELECTION_CONFIG.strokeWidth,
+            fill: DEFAULT_SELECTION_CONFIG.strokeColor,
             zIndex,
         });
         this._bottomControl = new Rect(SELECTION_MANAGER_KEY.bottom + zIndex, {
-            height: DEFAULT_SELECTION_CONFIG.strokeWidth as number,
-            fill: DEFAULT_SELECTION_CONFIG.strokeColor as string,
+            height: DEFAULT_SELECTION_CONFIG.strokeWidth,
+            fill: DEFAULT_SELECTION_CONFIG.strokeColor,
             left: -DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
             zIndex,
         });
         this._backgroundControlTop = new Rect(SELECTION_MANAGER_KEY.backgroundTop + zIndex, {
-            fill: DEFAULT_SELECTION_CONFIG.backgroundColor as string,
+            fill: DEFAULT_SELECTION_CONFIG.backgroundColor,
             zIndex: zIndex - 1,
             evented: false,
         });
         this._backgroundControlBottom = new Rect(SELECTION_MANAGER_KEY.backgroundBottom + zIndex, {
-            fill: DEFAULT_SELECTION_CONFIG.backgroundColor as string,
+            fill: DEFAULT_SELECTION_CONFIG.backgroundColor,
             zIndex: zIndex - 1,
             evented: false,
         });
         this._backgroundControlMiddleLeft = new Rect(SELECTION_MANAGER_KEY.backgroundMiddleLeft + zIndex, {
-            fill: DEFAULT_SELECTION_CONFIG.backgroundColor as string,
+            fill: DEFAULT_SELECTION_CONFIG.backgroundColor,
             zIndex: zIndex - 1,
             evented: false,
         });
         this._backgroundControlMiddleRight = new Rect(SELECTION_MANAGER_KEY.backgroundMiddleRight + zIndex, {
-            fill: DEFAULT_SELECTION_CONFIG.backgroundColor as string,
+            fill: DEFAULT_SELECTION_CONFIG.backgroundColor,
             zIndex: zIndex - 1,
             evented: false,
         });
@@ -115,9 +128,9 @@ export class SelectionControl {
         this._fillControl = new Rect(SELECTION_MANAGER_KEY.fill + zIndex, {
             width: fillSideLength,
             height: fillSideLength,
-            fill: DEFAULT_SELECTION_CONFIG.strokeColor as string,
-            strokeWidth: DEFAULT_SELECTION_CONFIG.fillStrokeLength as number,
-            stroke: DEFAULT_SELECTION_CONFIG.fillStrokeColor as string,
+            fill: DEFAULT_SELECTION_CONFIG.strokeColor,
+            strokeWidth: DEFAULT_SELECTION_CONFIG.fillStrokeLength,
+            stroke: DEFAULT_SELECTION_CONFIG.fillStrokeColor,
             zIndex: zIndex + 1,
         });
         this._selectionShape = new Group(
@@ -133,7 +146,7 @@ export class SelectionControl {
             this._backgroundControlBottom
         );
 
-        this._selectionShape.visible = false;
+        this._selectionShape.hide();
 
         this._selectionShape.evented = false;
 
@@ -147,7 +160,16 @@ export class SelectionControl {
         scene.addObject(this._selectionShape);
     }
 
-    private _updateControl() {
+    get zIndex() {
+        return this._zIndex;
+    }
+
+    /**
+     * just handle the view
+     *
+     * inner update
+     */
+    _updateControl() {
         const { startX, startY, endX, endY } = this._selectionModel;
 
         this.leftControl.resize(undefined, endY - startY);
@@ -160,9 +182,13 @@ export class SelectionControl {
             width: endX - startX + DEFAULT_SELECTION_CONFIG.strokeWidth,
             top: endY - startY - DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
         });
+
         this.fillControl.translate(endX - startX - DEFAULT_SELECTION_CONFIG.fillSideLength / 2, endY - startY - DEFAULT_SELECTION_CONFIG.fillSideLength / 2);
+
         this._updateBackgroundControl();
-        this.selectionShape.visible = true;
+        this._updateDragAndFill();
+
+        this.selectionShape.show();
         this.selectionShape.translate(startX, startY);
 
         this.selectionShape.makeDirty(true);
@@ -186,6 +212,8 @@ export class SelectionControl {
         if (!highlightSelection) {
             this._backgroundControlTop.resize(endX - startX, endY - startY);
             this._backgroundControlBottom.resize(0, 0);
+            this._backgroundControlMiddleLeft.resize(0, 0);
+            this._backgroundControlMiddleRight.resize(0, 0);
             return;
         }
 
@@ -242,8 +270,68 @@ export class SelectionControl {
         this._backgroundControlBottom.transformByState(middleBottomConfig);
     }
 
+    /**
+     *  Updated DragAndDrop and fill controls, inactive selections need to hide them
+     */
+    private _updateDragAndFill() {
+        const highlightSelection = this._selectionModel.highlightToSelection();
+
+        if (!highlightSelection) {
+            this._selectionDragAndDrop.remove();
+
+            this._fillControl.resize(0, 0);
+            this._selectionControlFill.remove();
+        }
+    }
+
     update(newSelectionRange: ISelection, highlight: Nullable<ICellInfo>) {
         this._selectionModel.setValue(newSelectionRange, highlight);
+        this._updateControl();
+    }
+
+    // /**
+    //  *When switching to the current sheet
+    //  *
+    //  * 1. Reinitialize the rendering component
+    //  * 2. Calculate the position based on the current skeleton
+    //  * 3. Update data
+    //  * 4. Trigger rendering
+    //  */
+    // render() {
+    //     this._initialize();
+
+    //     let cellInfo = null;
+    //     const main = this._manager.getMainComponent();
+    //     const curCellRange = this._selectionModel.currentCell;
+
+    //     if (curCellRange) {
+    //         cellInfo = main.getCellByIndex(curCellRange.row, curCellRange.column);
+    //     }
+
+    //     const { startRow: finalStartRow, startColumn: finalStartColumn, endRow: finalEndRow, endColumn: finalEndColumn } = this._selectionModel;
+    //     const startCell = main.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn);
+    //     const endCell = main.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn);
+
+    //     this._manager.updateSelectionValue(
+    //         this,
+    //         {
+    //             startColumn: finalStartColumn,
+    //             startRow: finalStartRow,
+    //             endColumn: finalEndColumn,
+    //             endRow: finalEndRow,
+    //             startY: startCell?.startY || 0,
+    //             endY: endCell?.endY || 0,
+    //             startX: startCell?.startX || 0,
+    //             endX: endCell?.endX || 0,
+    //         },
+    //         cellInfo
+    //     );
+
+    //     this._updateControl();
+    // }
+
+    clearHighlight() {
+        this._selectionModel.clearCurrentCell();
         this._updateControl();
     }
 
@@ -258,6 +346,8 @@ export class SelectionControl {
         this._backgroundControlBottom?.dispose();
         this._fillControl?.dispose();
         this._selectionShape?.dispose();
+
+        this._selectionDragAndDrop.dispose();
     }
 
     getScene() {
@@ -294,6 +384,14 @@ export class SelectionControl {
 
     get backgroundControlBottom() {
         return this._backgroundControlBottom;
+    }
+
+    get backgroundControlMiddleLeft() {
+        return this._backgroundControlMiddleLeft;
+    }
+
+    get backgroundControlMiddleRight() {
+        return this._backgroundControlMiddleRight;
     }
 
     get selectionShape() {

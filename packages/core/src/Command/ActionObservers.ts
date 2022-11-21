@@ -1,11 +1,17 @@
 import { Observable } from '../Observer';
-import { ActionBase, IActionData } from './ActionBase';
+import { IActionData, ActionBase } from './ActionBase';
 
+/**
+ * Action type
+ */
 export enum ActionType {
     REDO,
     UNDO,
 }
 
+/**
+ * Action observer props
+ */
 export interface IActionObserverProps {
     type: ActionType;
     data: IActionData;
@@ -13,7 +19,7 @@ export interface IActionObserverProps {
 }
 
 /**
- * Observer for action base
+ * WorkBookObserver for action base
  *
  * @beta
  */

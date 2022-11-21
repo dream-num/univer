@@ -1,14 +1,15 @@
 import { SetWorkSheetActivate } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
-import { WorkBook } from '../Domain';
-import { ActionBase, ActionOperation, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { BooleanNumber } from '../../Enum';
+import { ActionOperationType } from '../../Command/ActionBase';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface ISetWorkSheetActivateActionData extends IActionData {
+export interface ISetWorkSheetActivateActionData extends ISheetActionData {
     status: BooleanNumber;
 }
 
@@ -23,17 +24,17 @@ export interface ISheetStatus {
 /**
  * @internal
  */
-export class SetWorkSheetActivateAction extends ActionBase<
+export class SetWorkSheetActivateAction extends SheetActionBase<
     ISetWorkSheetActivateActionData,
     ISetWorkSheetActivateActionData,
     ISheetStatus
 > {
     constructor(
         actionData: ISetWorkSheetActivateActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],
@@ -46,7 +47,7 @@ export class SetWorkSheetActivateAction extends ActionBase<
             convertor: [],
         };
         this.validate();
-        this.removeOperation(ActionOperation.SERVER_ACTION);
+        this.removeOperation(ActionOperationType.SERVER_ACTION);
     }
 
     do(): ISheetStatus {

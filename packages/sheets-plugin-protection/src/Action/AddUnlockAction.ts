@@ -1,19 +1,20 @@
-import { ActionBase, ActionObservers, ACTION_NAMES, CONVERTOR_OPERATION, IActionData, Range, WorkBook, WorkSheetConvertor } from '@univer/core';
-import { AddUnlockService, RemoveUnlockService } from '../Service';
+import { SheetActionBase, ActionObservers, CONVERTOR_OPERATION, ISheetActionData, Range, Workbook, WorkSheetConvertor } from '@univer/core';
+import { AddUnlock, RemoveUnlock } from '../Apply';
+import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
 
-export interface IAddUnlockActionData extends IActionData {
+export interface IAddUnlockActionData extends ISheetActionData {
     unlock: Range;
 }
 
-export class AddUnlockAction extends ActionBase<IAddUnlockActionData, IAddUnlockActionData> {
-    constructor(actionData: IAddUnlockActionData, workbook: WorkBook, observers: ActionObservers) {
+export class AddUnlockAction extends SheetActionBase<IAddUnlockActionData, IAddUnlockActionData> {
+    constructor(actionData: IAddUnlockActionData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._doActionData = {
             ...actionData,
             convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
         this._oldActionData = {
-            actionName: ACTION_NAMES.SET_FROZEN_COLUMNS_ACTION,
+            actionName: ACTION_NAMES.ADD_UNLOCK_ACTION,
             sheetId: actionData.sheetId,
             unlock: actionData.unlock,
             convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
@@ -28,12 +29,12 @@ export class AddUnlockAction extends ActionBase<IAddUnlockActionData, IAddUnlock
 
     redo(): void {
         const worksheet = this.getWorkSheet();
-        AddUnlockService(worksheet, this._doActionData.unlock);
+        AddUnlock(worksheet, this._doActionData.unlock);
     }
 
     undo(): void {
         const worksheet = this.getWorkSheet();
-        RemoveUnlockService(worksheet, this._doActionData.unlock);
+        RemoveUnlock(worksheet, this._doActionData.unlock);
     }
 
     validate(): boolean {

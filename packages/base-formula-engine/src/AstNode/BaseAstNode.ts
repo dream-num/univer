@@ -1,26 +1,48 @@
 import { LexerNode } from '../Analysis/LexerNode';
-import { AstNodePromiseType, FunctionVariantType, IInterpreterCalculateProps } from '../Basics/Common';
+import { AstNodePromiseType, FunctionVariantType, IInterpreterDatasetConfig, UnitDataType } from '../Basics/Common';
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
 
 import { NodeType } from './NodeType';
 
 interface AstNodeNodeJson {
     token: string;
-    children: Array<AstNodeNodeJson>;
+    children?: Array<AstNodeNodeJson>;
     nodeType: string;
 }
 
 export class BaseAstNode {
-    private _children: BaseAstNode[];
+    private _children: BaseAstNode[] = [];
 
     private _parent: BaseAstNode;
 
-    private _token: string;
-
     private _valueObject: FunctionVariantType;
+
+    private _calculateState = false;
+
+    private _async = false;
+
+    private _address = false;
 
     get nodeType() {
         return NodeType.BASE;
+    }
+
+    constructor(private _token: string) {}
+
+    isAsync() {
+        return this._async;
+    }
+
+    isAddress() {
+        return this._address;
+    }
+
+    setAsync() {
+        this._async = true;
+    }
+
+    setAddress() {
+        this._address = true;
     }
 
     getParent() {
@@ -29,6 +51,7 @@ export class BaseAstNode {
 
     setParent(node: BaseAstNode) {
         this._parent = node;
+        node.addChildren(this);
     }
 
     getChildren() {
@@ -51,11 +74,19 @@ export class BaseAstNode {
         return this._valueObject;
     }
 
-    execute(interpreterCalculateProps: IInterpreterCalculateProps) {
+    isCalculated() {
+        return this._calculateState;
+    }
+
+    setCalculated() {
+        this._calculateState = true;
+    }
+
+    execute(interpreterDatasetConfig?: IInterpreterDatasetConfig, runtimeData?: UnitDataType) {
         /* abstract */
     }
 
-    async executeAsync(interpreterCalculateProps: IInterpreterCalculateProps): Promise<AstNodePromiseType> {
+    async executeAsync(interpreterDatasetConfig?: IInterpreterDatasetConfig): Promise<AstNodePromiseType> {
         /* abstract */
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
@@ -66,15 +97,22 @@ export class BaseAstNode {
 
         const childrenSerialization: Array<AstNodeNodeJson> = [];
         const childrenCount = children.length;
+
         for (let i = 0; i < childrenCount; i++) {
             const item = children[i];
             childrenSerialization.push(item.serialize());
         }
-        return {
+
+        const result: AstNodeNodeJson = {
             token,
-            children: childrenSerialization,
             nodeType: this.nodeType,
         };
+
+        if (childrenCount > 0) {
+            result.children = childrenSerialization;
+        }
+
+        return result;
     }
 }
 
@@ -84,7 +122,13 @@ export class BaseAstNodeFactory {
     }
 
     create(param: LexerNode | string, parserDataLoader?: ParserDataLoader): BaseAstNode {
-        return new BaseAstNode();
+        let token;
+        if (param instanceof LexerNode) {
+            token = param.getToken();
+        } else {
+            token = param;
+        }
+        return new BaseAstNode(token);
     }
 
     checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader): false | BaseAstNode {

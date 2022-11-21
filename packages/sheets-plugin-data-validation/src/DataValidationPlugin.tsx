@@ -1,22 +1,22 @@
 import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
-import { Context, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetContext, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { SheetPlugin } from '@univer/base-sheets';
 import { en, zh } from './Locale';
 import { DataValidationButton } from './UI/DataValidationButton';
 
 import { IConfig } from './IData/IDataValidation';
 import { DATA_VALIDATION_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 
-type IPluginConfig = {};
+export interface IDataValidationPluginConfig {}
 
 export class DataValidationPlugin extends Plugin {
-    spreadsheetPlugin: any;
+    SheetPlugin: any;
 
-    constructor(config?: IPluginConfig) {
+    constructor(config?: IDataValidationPluginConfig) {
         super(DATA_VALIDATION_PLUGIN_NAME);
     }
 
-    static create(config?: IPluginConfig) {
+    static create(config?: IDataValidationPluginConfig) {
         return new DataValidationPlugin(config);
     }
 
@@ -43,13 +43,13 @@ export class DataValidationPlugin extends Plugin {
             label: <DataValidationButton config={config} />,
         };
         // get spreadsheet plugin
-        this.spreadsheetPlugin = context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
+        this.sheetPlugin = context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
 
         // extend comment
-        this.spreadsheetPlugin?.addButton(item);
+        this.sheetPlugin?.addButton(item);
     }
 
-    onMounted(ctx: Context): void {
+    onMounted(ctx: SheetContext): void {
         this.initialize();
     }
 

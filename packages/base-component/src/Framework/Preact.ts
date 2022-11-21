@@ -1,5 +1,5 @@
-import { BasePlugin, Context, Nullable } from '@univer/core';
-import { cloneElement, Component as PreactComponent, ComponentChildren, ComponentClass, createRef, JSX, RefObject, render, VNode, PreactContext } from 'preact';
+import { BasePlugin, SheetContext, Nullable } from '@univer/core';
+import { cloneElement, Component as PreactComponent, ComponentChildren, ComponentClass, createRef, JSX, RefObject, render, VNode, PreactContext, Ref } from 'preact';
 import { ForwardFn, forwardRef, PureComponent as PreactPureComponent } from 'preact/compat';
 import { BaseComponentRender, BaseComponentSheet } from '../BaseComponent';
 import { AppContext, AppContextValues } from '../Common';
@@ -10,7 +10,7 @@ import { AppContext, AppContextValues } from '../Common';
 abstract class Component<P = {}, S = {}> extends PreactComponent<P, S> {
     static contextType: PreactContext<Partial<AppContextValues>> = AppContext;
 
-    protected _context: Context;
+    protected _context: SheetContext;
 
     constructor(props?: P, context?: any) {
         super(props, context);
@@ -20,7 +20,7 @@ abstract class Component<P = {}, S = {}> extends PreactComponent<P, S> {
 
     protected initialize(props?: P): void {}
 
-    getContext(): Context {
+    getContext(): SheetContext {
         return this._context;
     }
 
@@ -36,7 +36,7 @@ abstract class Component<P = {}, S = {}> extends PreactComponent<P, S> {
 abstract class PureComponent<P = {}, S = {}> extends PreactPureComponent<P, S> {
     static contextType: PreactContext<Partial<AppContextValues>> = AppContext;
 
-    protected _context: Context;
+    protected _context: SheetContext;
 
     constructor(props?: P, context?: any) {
         super(props, context);
@@ -46,7 +46,7 @@ abstract class PureComponent<P = {}, S = {}> extends PreactPureComponent<P, S> {
 
     protected initialize(props?: P): void {}
 
-    getContext(): Context {
+    getContext(): SheetContext {
         return this._context;
     }
 
@@ -57,4 +57,4 @@ abstract class PureComponent<P = {}, S = {}> extends PreactPureComponent<P, S> {
 
 export { render, Component, forwardRef, createRef, PureComponent, cloneElement };
 
-export type { ComponentChildren, ComponentClass, ForwardFn, JSX, RefObject, VNode, PreactContext };
+export type { ComponentChildren, ComponentClass, ForwardFn, JSX, RefObject, VNode, PreactContext, Ref };

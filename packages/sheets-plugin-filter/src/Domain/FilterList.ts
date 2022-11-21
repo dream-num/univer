@@ -1,14 +1,14 @@
 import { GroupModel, Sequence, Serializer, Tools } from '@univer/core';
 import { Filter, IFilter } from './Filter';
 
-export interface IFilterList extends Sequence {
+export interface IFilterPluginConfig extends Sequence {
     filters?: {
         [sheetId: string]: IFilter;
     };
 }
 
 export class FilterList extends Serializer implements GroupModel<{ [sheetId: string]: Filter }> {
-    static newInstance(sequence: IFilterList): FilterList {
+    static newInstance(sequence: IFilterPluginConfig): FilterList {
         const listModel = new FilterList();
         const filters = sequence.filters ?? {};
         for (let key in filters) {
@@ -42,7 +42,7 @@ export class FilterList extends Serializer implements GroupModel<{ [sheetId: str
         return this._filters;
     }
 
-    toSequence(): IFilterList {
+    toSequence(): IFilterPluginConfig {
         let filters: {
             [sheetId: string]: IFilter;
         } = {};

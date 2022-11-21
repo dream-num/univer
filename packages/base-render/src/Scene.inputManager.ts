@@ -1,7 +1,7 @@
-import { Observer } from '@univer/core';
-import { IKeyboardEvent, IMouseEvent, IPointerEvent, IEvent, DeviceType, PointerInput, IWheelEvent, Nullable } from './Base/IEvents';
+import { Observer, Nullable } from '@univer/core';
+import { IKeyboardEvent, IMouseEvent, IPointerEvent, IEvent, DeviceType, PointerInput, IWheelEvent } from './Basics/IEvents';
 
-import { Vector2 } from './Base/Vector2';
+import { Vector2 } from './Basics/Vector2';
 
 import { BaseObject } from './BaseObject';
 
@@ -25,7 +25,7 @@ export class InputManager {
 
     private _alreadyAttachedTo: HTMLElement;
 
-    // Observer
+    // WorkBookObserver
     private _onInputObserver: Nullable<Observer<IEvent>>;
 
     // Pointers
@@ -56,6 +56,14 @@ export class InputManager {
         this._scene = scene;
     }
 
+    private _getCurrentObject(offsetX: number, offsetY: number) {
+        return this._scene?.pick(Vector2.FromArray([offsetX, offsetY]));
+    }
+
+    private _checkDirectSceneEventTrigger(isTrigger: boolean, notObject: boolean) {
+        return (!this._scene.evented && isTrigger) || notObject;
+    }
+
     // 处理事件，比如mouseleave,mouseenter的触发。
     mouseLeaveEnterHandler(o: Nullable<BaseObject | Scene>, evt: IMouseEvent) {
         if (o === null || o === undefined) {
@@ -82,17 +90,19 @@ export class InputManager {
                 (evt as IPointerEvent as any).pointerId = 0;
             }
 
-            const currentObject = this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]));
-            currentObject?.triggerPointerMove(evt);
+            const currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
+            const isStop = currentObject?.triggerPointerMove(evt);
 
             this.mouseLeaveEnterHandler(currentObject, evt);
 
-            if (this._scene.onPointerMove) {
-                this._scene.onPointerMove(evt);
-            }
+            if (this._checkDirectSceneEventTrigger(!isStop, !currentObject)) {
+                if (this._scene.onPointerMove) {
+                    this._scene.onPointerMove(evt);
+                }
 
-            if (this._scene.onPointerMoveObserver.hasObservers()) {
-                this._scene.onPointerMoveObserver.notifyObservers(evt);
+                if (this._scene.onPointerMoveObserver.hasObservers()) {
+                    this._scene.onPointerMoveObserver.notifyObservers(evt);
+                }
             }
         };
 
@@ -102,14 +112,18 @@ export class InputManager {
                 (evt as any).pointerId = 0;
             }
 
-            this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerPointerDown(evt);
+            const currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
 
-            if (this._scene.onPointerDown) {
-                this._scene.onPointerDown(evt);
-            }
+            const isStop = currentObject?.triggerPointerDown(evt);
 
-            if (this._scene.onPointerDownObserver.hasObservers()) {
-                this._scene.onPointerDownObserver.notifyObservers(evt);
+            if (this._checkDirectSceneEventTrigger(!isStop, !currentObject)) {
+                if (this._scene.onPointerDown) {
+                    this._scene.onPointerDown(evt);
+                }
+
+                if (this._scene.onPointerDownObserver.hasObservers()) {
+                    this._scene.onPointerDownObserver.notifyObservers(evt);
+                }
             }
         };
 
@@ -119,21 +133,25 @@ export class InputManager {
                 (evt as any).pointerId = 0;
             }
 
-            this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerPointerUp(evt);
+            const currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
+            const isStop = currentObject?.triggerPointerUp(evt);
 
-            if (this._scene.onPointerUp) {
-                this._scene.onPointerUp(evt);
-            }
+            if (this._checkDirectSceneEventTrigger(!isStop, !currentObject)) {
+                if (this._scene.onPointerUp) {
+                    this._scene.onPointerUp(evt);
+                }
 
-            if (this._scene.onPointerUpObserver.hasObservers()) {
-                this._scene.onPointerUpObserver.notifyObservers(evt);
+                if (this._scene.onPointerUpObserver.hasObservers()) {
+                    this._scene.onPointerUpObserver.notifyObservers(evt);
+                }
             }
 
             this._prePointerDoubleClick(evt);
         };
 
         this._onMouseWheel = (evt: IWheelEvent) => {
-            this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerMouseWheel(evt);
+            const currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
+            const isStop = currentObject?.triggerMouseWheel(evt);
 
             this._scene.getViewports().forEach((vp) => {
                 if (vp.onMouseWheelObserver.hasObservers()) {
@@ -141,13 +159,15 @@ export class InputManager {
                 }
             });
 
-            // if (this._scene.onMouseWheel) {
-            //     this._scene.onMouseWheel(evt);
-            // }
+            if (this._checkDirectSceneEventTrigger(!isStop, !currentObject)) {
+                if (this._scene.onMouseWheel) {
+                    this._scene.onMouseWheel(evt);
+                }
 
-            // if (this._scene.onMouseWheelObserver.hasObservers()) {
-            //     this._scene.onMouseWheelObserver.notifyObservers(evt);
-            // }
+                if (this._scene.onMouseWheelObserver.hasObservers()) {
+                    this._scene.onMouseWheelObserver.notifyObservers(evt);
+                }
+            }
         };
 
         this._onKeyDown = (evt: IKeyboardEvent) => {

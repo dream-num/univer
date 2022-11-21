@@ -1,5 +1,5 @@
 import { CellValueType, ICellData, IRangeData, Nullable, ObjectArray, ObjectMatrix } from '@univer/core';
-import { CalculateValueType, NodeValueType, SheetDataType, SheetNameMapType } from '../Basics/Common';
+import { CalculateValueType, NodeValueType, SheetDataType, SheetNameMapType, UnitDataType } from '../Basics/Common';
 import { ErrorType, ERROR_TYPE_SET } from '../Basics/ErrorType';
 import { ObjectClassType } from '../Basics/ObjectClassType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
@@ -17,11 +17,17 @@ export class BaseReferenceObject extends ObjectClassType {
 
     private _rangeData: IRangeData;
 
-    private _sheetData: SheetDataType;
+    private _unitData: UnitDataType;
 
     private _rowCount: number = 0;
 
     private _columnCount: number = 0;
+
+    private _defaultUnitId: string;
+
+    private _forcedUnitId: string;
+
+    private _runtimeData: UnitDataType;
 
     constructor(private _token: string) {
         super();
@@ -53,31 +59,18 @@ export class BaseReferenceObject extends ObjectClassType {
             endColumn = this._columnCount - 1;
         }
 
-        const activeSheetData = this._sheetData[this.getSheetId()];
-
-        if (!activeSheetData) {
-            return;
-        }
-
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
-                const cell = activeSheetData.getValue(r, c);
+                const cell = this.getCellData(r, c);
                 let result: Nullable<boolean> = false;
                 if (!cell) {
                     result = callback(new NumberValueObject(0, true), r, c);
-                    return;
+                    continue;
                 }
 
-                const value = cell.v || 0;
-                if (ERROR_TYPE_SET.has(value as string)) {
-                    result = callback(ErrorValueObject.create(value as ErrorType), r, c);
-                } else if (cell.t === CellValueType.BOOLEAN) {
-                    result = callback(new BooleanValueObject(value), r, c);
-                } else if (cell.t === CellValueType.NUMBER) {
-                    result = callback(new NumberValueObject(value), r, c);
-                } else {
-                    result = callback(new StringValueObject(value), r, c);
-                }
+                const resultObjectValue = this.getCellValueObject(cell);
+
+                result = callback(resultObjectValue, r, c);
 
                 if (result === false) {
                     return;
@@ -94,11 +87,26 @@ export class BaseReferenceObject extends ObjectClassType {
         this._rangeData = rangeData;
     }
 
+    getUnitId() {
+        if (this._forcedUnitId) {
+            return this._forcedUnitId;
+        }
+        return this._defaultUnitId;
+    }
+
     getSheetId() {
         if (this._forcedSheetId) {
             return this._forcedSheetId;
         }
         return this._defaultSheetId;
+    }
+
+    setForcedUnitIdDirect(unitId: string) {
+        this._forcedUnitId = unitId;
+    }
+
+    getForcedUnitId() {
+        return this._forcedUnitId;
     }
 
     setForcedSheetId(sheetNameMap: SheetNameMapType) {
@@ -129,12 +137,28 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._defaultSheetId;
     }
 
-    getSheetData() {
-        return this._sheetData;
+    setDefaultUnitId(sheetId: string) {
+        this._defaultUnitId = sheetId;
     }
 
-    setSheetData(sheetData: SheetDataType) {
-        this._sheetData = sheetData;
+    getDefaultUnitId() {
+        return this._defaultUnitId;
+    }
+
+    getUnitData() {
+        return this._unitData;
+    }
+
+    setUnitData(unitData: UnitDataType) {
+        this._unitData = unitData;
+    }
+
+    getRuntimeData() {
+        return this._runtimeData;
+    }
+
+    setRuntimeData(runtimeData: UnitDataType) {
+        this._runtimeData = runtimeData;
     }
 
     getRowCount() {
@@ -209,9 +233,23 @@ export class BaseReferenceObject extends ObjectClassType {
         return this.getCellByPosition(undefined, column);
     }
 
-    getCellByPosition(row?: number, column?: number) {
-        const activeSheetData = this._sheetData[this.getSheetId()];
+    getCurrentActiveSheetData() {
+        return this._unitData[this.getUnitId()][this.getSheetId()];
+    }
 
+    getCurrentRuntimeSheetData() {
+        return this._runtimeData?.[this.getUnitId()]?.[this.getSheetId()];
+    }
+
+    getCellData(row: number, column: number) {
+        const activeSheetData = this.getCurrentActiveSheetData();
+
+        const activeRuntimeData = this.getCurrentRuntimeSheetData();
+
+        return activeRuntimeData?.getValue(row, column) || activeSheetData.getValue(row, column);
+    }
+
+    getCellByPosition(row?: number, column?: number) {
         if (!row) {
             row = this._rangeData.startRow;
         }
@@ -220,7 +258,7 @@ export class BaseReferenceObject extends ObjectClassType {
             column = this._rangeData.startColumn;
         }
 
-        const cell = activeSheetData.getValue(row, column);
+        const cell = this.getCellData(row, column);
 
         if (!cell) {
             return ErrorValueObject.create(ErrorType.VALUE);
@@ -240,5 +278,13 @@ export class BaseReferenceObject extends ObjectClassType {
         });
 
         return arrayValueList;
+    }
+
+    toUnitRange() {
+        return {
+            rangeData: this._rangeData,
+            sheetId: this.getSheetId(),
+            unitId: this.getUnitId(),
+        };
     }
 }

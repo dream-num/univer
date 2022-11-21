@@ -1,5 +1,6 @@
+import { Nullable } from '@univer/core';
 import { createSkeletonLetterSpan, createSkeletonWordSpan } from '../..';
-import { hasArabic, hasCJK, hasTibetan, IDocumentSkeletonSpan, IFontCreateConfig, Nullable } from '../../../..';
+import { hasArabic, hasCJK, hasTibetan, IDocumentSkeletonSpan, IFontCreateConfig } from '../../../..';
 
 interface LanguageResult {
     charIndex: number;

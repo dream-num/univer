@@ -1,6 +1,6 @@
 import { Component, VNode } from '@univer/base-component';
 import { PLUGIN_NAMES } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetPlugin } from '@univer/base-sheets';
 import { BorderType } from '../../Enum/BorderType';
 import { NormalType } from '../../Enum/NormalType';
 import { OVER_GRID_IMAGE_PLUGIN_NAME } from '../../Const/PLUGIN_NAME';
@@ -107,7 +107,7 @@ export class ImagePanelUI extends Component<ImagePanelUIProps> {
                                         style={{ width: '152px', display: 'inline-block' }}
                                         color={'#000'}
                                         onCancel={() => {}}
-                                        onColor={(color: string) => {}}
+                                        onClick={(color: string) => {}}
                                     />
                                 </div>
                             </div>
@@ -119,7 +119,7 @@ export class ImagePanelUI extends Component<ImagePanelUIProps> {
     }
 
     closed() {
-        const plugin: SpreadsheetPlugin = this.getPluginByName(PLUGIN_NAMES.SPREADSHEET)!;
+        const plugin: SheetPlugin = this.getPluginByName(PLUGIN_NAMES.SPREADSHEET)!;
         plugin.showSiderByName(OVER_GRID_IMAGE_PLUGIN_NAME, false);
     }
 

@@ -2,32 +2,32 @@ import { SetTabColor } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { CONVERTOR_OPERATION } from '../../Const/CONST';
 import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
-import { WorkBook } from '../Domain';
 import { Nullable } from '../../Shared/Types';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface ISetTabColorActionData extends IActionData {
+export interface ISetTabColorActionData extends ISheetActionData {
     color: Nullable<string>;
 }
 
 /**
  * @internal
  */
-export class SetTabColorAction extends ActionBase<
+export class SetTabColorAction extends SheetActionBase<
     ISetTabColorActionData,
     ISetTabColorActionData,
     Nullable<string>
 > {
     constructor(
         actionData: ISetTabColorActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
 
         this._doActionData = {
             ...actionData,

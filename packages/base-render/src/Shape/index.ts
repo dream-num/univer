@@ -6,3 +6,6 @@ export * from './Selection';
 export * from './TextSelection';
 export * from './ScrollBar';
 export * from './Picture';
+export * from './Path';
+export * from './Circle';
+export * from './RichText';

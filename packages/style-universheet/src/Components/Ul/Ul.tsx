@@ -249,11 +249,7 @@ export class Ul extends Component<BaseUlProps, UlState> {
                                 {/* {'selected' in item ? <span className={styles.ulIcon}>{item.selected ? <Icon.Format.CorrectIcon style={{ fontSize: '13px' }} /> : ''}</span> : ''} */}
                                 {this.showIcon(item)}
                                 <div>
-                                    {item.selectType === 'jsx' ? (
-                                        <span>{cloneElement(item.label as VNode, { onClick: this.getParent()?.showSelect, onChange: this.getStyle })}</span>
-                                    ) : (
-                                        <span>{item.label}</span>
-                                    )}
+                                    {item.selectType === 'jsx' ? <span>{cloneElement(item.label as VNode, { onChange: this.getStyle })}</span> : <span>{item.label}</span>}
                                     {/* {item.icon ? <span className={styles.submenuArrow}>{item.icon}</span> : ''} */}
                                     {item.icon ? this.getIcon(item.icon) : ''}
                                 </div>

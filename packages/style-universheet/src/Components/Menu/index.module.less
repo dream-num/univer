@@ -1,11 +1,56 @@
-// @import '../../assets/css/skin/base.module.less';
-.menu {
-    padding: 2px 0;
-    .menu-item {
-        padding: 5px 5px 5px 0px;
+@import '../../assets/css/skin/base.module.less';
+
+.cols-menu {
+    .menu-button();
+    position: fixed;
+    width: max-content;
+    padding: 6px 0;
+    font-size: 13px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
+    overflow: hidden;
+    overflow-y: auto;
+    text-align: center;
+
+    .cols-menuitem {
+        min-width: 80px;
+        position: relative;
+        color: var(--text-color);
+        cursor: pointer;
+        list-style: none;
+        margin: 0;
+        white-space: nowrap;
+        vertical-align: middle;
+        user-select: none;
+        padding: 3px 0;
 
         &:hover {
-            background-color: rgba(233, 227, 227, 0.884);
+            background-color: @gray-14;
         }
     }
+
+    .cols-menuitem-line {
+        width: 100%;
+        height: 1px;
+        background: rgba(0, 0, 0, 0.2);
+        margin: 5px 0;
+    }
+
+    .cols-menuitem-disabled {
+        pointer-events: none;
+        color: @gray-15;
+    }
+}
+
+.menu-button() {
+    border-radius: 0;
+    transition: opacity 218ms;
+    background: var(--bg);
+    box-shadow: var(--box-shadow-base);
+    cursor: default;
+    margin: 0;
+    outline: 0;
+    z-index: 100;
+    box-sizing: border-box;
+    user-select: none;
 }

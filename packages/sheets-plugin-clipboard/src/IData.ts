@@ -1,8 +1,8 @@
-import { Context } from '@univer/core';
+import { SheetContext } from '@univer/core';
 import { ClipboardPlugin } from './ClipboardPlugin';
 
 export type IConfig = {
-    context: Context;
+    context: SheetContext;
 };
 
 // Types for props

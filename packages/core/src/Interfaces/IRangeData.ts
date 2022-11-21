@@ -45,6 +45,13 @@ export interface IGridRange {
 }
 
 /**
+ * Range data of Unit
+ */
+export interface IUnitRange extends IGridRange {
+    unitId: string;
+}
+
+/**
  * One of the range types,
  *
  * e.g.,"A1:B2","sheet1!A1:B2","A1","1:1","A:A","AA1:BB2"
@@ -88,11 +95,29 @@ export type IRangeArrayData = {
 };
 
 /**
+ * The row and column numbers represent a cell
+ */
+export type IRangeCellData = {
+    /**
+     * row
+     */
+    row: number;
+    /**
+     * column
+     */
+    column: number;
+};
+
+/**
  * range types
  *
  * Allow users to provide one of three formats, we need to convert to IRangeData to store
  */
-export type IRangeType = IRangeData | IRangeStringData | IRangeArrayData;
+export type IRangeType =
+    | IRangeData
+    | IRangeStringData
+    | IRangeArrayData
+    | IRangeCellData;
 
 // export interface IInfoObjData extends IRangeArrayData {
 //     sheetId?: Nullable<string>;
@@ -152,6 +177,6 @@ export interface IOptionsData extends IOptionData {
 }
 
 /**
- * Option of copyto function
+ * Option of copyTo function
  */
 export interface ICopyToOptionsData extends IOptionData {}

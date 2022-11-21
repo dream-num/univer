@@ -1,15 +1,15 @@
 import { EventState, IKeyValue, Observable, Observer, Nullable } from '@univer/core';
-import { IBoundRect, Vector2 } from './Base/Vector2';
+import { IBoundRect, Vector2 } from './Basics/Vector2';
 
-import { Transform } from './Base/Transform';
+import { Transform } from './Basics/Transform';
 
-import { IMouseEvent, IPointerEvent, IWheelEvent } from './Base/IEvents';
+import { IMouseEvent, IPointerEvent, IWheelEvent } from './Basics/IEvents';
 
-import { generateRandomKey, toPx } from './Base/Tools';
+import { generateRandomKey, toPx } from './Basics/Tools';
 
-import { EVENT_TYPE, CURSOR_TYPE, RENDER_CLASS_TYPE } from './Base/Const';
+import { EVENT_TYPE, CURSOR_TYPE, RENDER_CLASS_TYPE } from './Basics/Const';
 
-import { IObjectFullState, ITransformChangeState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './Base/Interfaces';
+import { IObjectFullState, ITransformChangeState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './Basics/Interfaces';
 
 export const BASE_OBJECT_ARRAY = ['top', 'left', 'width', 'height', 'angle', 'scaleX', 'scaleY', 'skewX', 'skewY', 'flipX', 'flipY', 'strokeWidth'];
 
@@ -65,6 +65,8 @@ export abstract class BaseObject {
     private __debounceParentTimeout: number;
 
     private _cursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
+
+    private _isTransformer = false;
 
     groupKey?: string;
 
@@ -132,10 +134,12 @@ export abstract class BaseObject {
     }
 
     translate(x?: number | string, y?: number | string) {
+        const preTop = this.top;
         if (y !== undefined) {
             this.top = y;
         }
 
+        const preLeft = this.left;
         if (x !== undefined) {
             this.left = x;
         }
@@ -144,17 +148,19 @@ export abstract class BaseObject {
 
         this.onTransformChangeObservable.notifyObservers({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.translate,
-            value: { x: this._top, y: this._left },
+            value: { top: this._top, left: this._left },
+            preValue: { top: preTop, left: preLeft },
         });
 
         return this;
     }
 
     resize(width?: number | string, height?: number | string) {
+        const preWidth = this.width;
         if (width !== undefined) {
             this.width = width;
         }
-
+        const preHeight = this.height;
         if (height !== undefined) {
             this.height = height;
         }
@@ -163,17 +169,20 @@ export abstract class BaseObject {
 
         this.onTransformChangeObservable.notifyObservers({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize,
-            value: { x: this._width, y: this._height },
+            value: { width: this._width, height: this._height },
+            preValue: { width: preWidth, height: preHeight },
         });
 
         return this;
     }
 
     scale(scaleX?: number, scaleY?: number) {
+        const preScaleX = this.scaleX;
         if (scaleX !== undefined) {
             this.scaleX = scaleX;
         }
 
+        const preScaleY = this.scaleY;
         if (scaleY !== undefined) {
             this.scaleY = scaleY;
         }
@@ -182,17 +191,20 @@ export abstract class BaseObject {
 
         this.onTransformChangeObservable.notifyObservers({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale,
-            value: { x: this._scaleX, y: this._scaleY },
+            value: { scaleX: this._scaleX, scaleY: this._scaleY },
+            preValue: { scaleX: preScaleX, scaleY: preScaleY },
         });
 
         return this;
     }
 
     skew(skewX?: number, skewY?: number) {
+        const preSkewX = skewX;
         if (skewX !== undefined) {
             this.skewX = skewX;
         }
 
+        const preSkewY = skewY;
         if (skewY !== undefined) {
             this.skewY = skewY;
         }
@@ -201,17 +213,19 @@ export abstract class BaseObject {
 
         this.onTransformChangeObservable.notifyObservers({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.skew,
-            value: { x: this._skewX, y: this._skewY },
+            value: { skewX: this._skewX, skewY: this._skewY },
+            preValue: { skewX: preSkewX, skewY: preSkewY },
         });
 
         return this;
     }
 
     flip(flipX?: boolean, flipY?: boolean) {
+        const preFlipX = flipX;
         if (flipX !== undefined) {
             this.flipX = flipX;
         }
-
+        const preFlipY = flipY;
         if (flipY !== undefined) {
             this.flipY = flipY;
         }
@@ -220,7 +234,8 @@ export abstract class BaseObject {
 
         this.onTransformChangeObservable.notifyObservers({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.flip,
-            value: { x: this._flipX, y: this._flipY },
+            value: { flipX: this._flipX, flipY: this._flipY },
+            preValue: { flipX: preFlipX, flipY: preFlipY },
         });
 
         return this;
@@ -228,11 +243,13 @@ export abstract class BaseObject {
 
     transformByState(option: IObjectFullState) {
         const optionKeys = Object.keys(option);
+        const preKeys: IObjectFullState = {};
         if (optionKeys.length === 0) {
             return;
         }
         optionKeys.forEach((pKey) => {
             if (option[pKey] !== undefined) {
+                preKeys[pKey] = this[pKey];
                 this[pKey] = option[pKey];
             }
         });
@@ -242,12 +259,13 @@ export abstract class BaseObject {
         this.onTransformChangeObservable.notifyObservers({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.all,
             value: option,
+            preValue: preKeys,
         });
 
         return this;
     }
 
-    private _setTransForm() {
+    protected _setTransForm() {
         const composeResult = Transform.create().composeMatrix({
             left: this.left + this.strokeWidth / 2,
             top: this.top + this.strokeWidth / 2,
@@ -271,7 +289,7 @@ export abstract class BaseObject {
         return this._top;
     }
 
-    private set top(num: number | string) {
+    protected set top(num: number | string) {
         this._topOrigin = num;
         this._top = toPx(num, this._parent?.height);
     }
@@ -280,7 +298,7 @@ export abstract class BaseObject {
         return this._left;
     }
 
-    private set left(num: number | string) {
+    protected set left(num: number | string) {
         this._leftOrigin = num;
         this._left = toPx(num, this._parent?.width);
     }
@@ -289,7 +307,7 @@ export abstract class BaseObject {
         return this._width;
     }
 
-    private set width(num: number | string) {
+    protected set width(num: number | string) {
         this._widthOrigin = num;
         this._width = toPx(num, this._parent?.width);
     }
@@ -298,7 +316,7 @@ export abstract class BaseObject {
         return this._height;
     }
 
-    private set height(num: number | string) {
+    protected set height(num: number | string) {
         this._heightOrigin = num;
         this._height = toPx(num, this._parent?.height);
     }
@@ -307,7 +325,7 @@ export abstract class BaseObject {
         return this._strokeWidth;
     }
 
-    private set strokeWidth(width: number) {
+    protected set strokeWidth(width: number) {
         this._strokeWidth = width;
     }
 
@@ -315,7 +333,7 @@ export abstract class BaseObject {
         return this._angle;
     }
 
-    private set angle(angle: number) {
+    protected set angle(angle: number) {
         this._angle = angle;
     }
 
@@ -323,7 +341,7 @@ export abstract class BaseObject {
         return this._scaleX;
     }
 
-    private set scaleX(scaleX: number) {
+    protected set scaleX(scaleX: number) {
         this._scaleX = scaleX;
     }
 
@@ -331,7 +349,7 @@ export abstract class BaseObject {
         return this._scaleY;
     }
 
-    private set scaleY(scaleY: number) {
+    protected set scaleY(scaleY: number) {
         this._scaleY = scaleY;
     }
 
@@ -349,7 +367,7 @@ export abstract class BaseObject {
         return this._skewX;
     }
 
-    private set skewX(skewX: number) {
+    protected set skewX(skewX: number) {
         this._skewX = skewX;
     }
 
@@ -357,7 +375,7 @@ export abstract class BaseObject {
         return this._skewY;
     }
 
-    private set skewY(skewY: number) {
+    protected set skewY(skewY: number) {
         this._skewY = skewY;
     }
 
@@ -365,7 +383,7 @@ export abstract class BaseObject {
         return this._flipX;
     }
 
-    private set flipX(flipX: boolean) {
+    protected set flipX(flipX: boolean) {
         this._flipX = flipX;
     }
 
@@ -373,7 +391,7 @@ export abstract class BaseObject {
         return this._flipY;
     }
 
-    private set flipY(flipY: boolean) {
+    protected set flipY(flipY: boolean) {
         this._flipY = flipY;
     }
 
@@ -413,16 +431,44 @@ export abstract class BaseObject {
         return this._visible;
     }
 
-    set visible(state: boolean) {
-        this._visible = state;
-    }
-
     get debounceParentDirty() {
         return this._debounceParentDirty;
     }
 
     set debounceParentDirty(state: boolean) {
         this._debounceParentDirty = state;
+    }
+
+    get isTransformer() {
+        return this._isTransformer;
+    }
+
+    set isTransformer(state: boolean) {
+        this._isTransformer = state;
+    }
+
+    getState() {
+        return {
+            left: this.left,
+            top: this.top,
+            width: this.width,
+            height: this.height,
+            scaleX: this.scaleX,
+            scaleY: this.scaleY,
+            angle: this.angle,
+            skewX: this.skewX,
+            skewY: this.skewY,
+            flipX: this.flipX,
+            flipY: this.flipY,
+        };
+    }
+
+    hide() {
+        this._visible = false;
+    }
+
+    show() {
+        this._visible = true;
     }
 
     render(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
@@ -473,31 +519,41 @@ export abstract class BaseObject {
     triggerPointerMove(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerMoveObserver.notifyObservers(evt)?.stopPropagation) {
             this._parent?.triggerPointerMove(evt);
+            return false;
         }
+        return true;
     }
 
     triggerPointerDown(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerDownObserver.notifyObservers(evt)?.stopPropagation) {
             this._parent?.triggerPointerDown(evt);
+            return false;
         }
+        return true;
     }
 
     triggerPointerUp(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerUpObserver.notifyObservers(evt)?.stopPropagation) {
             this._parent?.triggerPointerUp(evt);
+            return false;
         }
+        return true;
     }
 
     triggerDblclick(evt: IPointerEvent | IMouseEvent) {
         if (!this.onDblclickObserver.notifyObservers(evt)?.stopPropagation) {
             this._parent?.triggerDblclick(evt);
+            return false;
         }
+        return true;
     }
 
     triggerMouseWheel(evt: IWheelEvent) {
         if (!this.onMouseWheelObserver.notifyObservers(evt)?.stopPropagation) {
             this._parent?.triggerMouseWheel(evt);
+            return false;
         }
+        return true;
     }
 
     // triggerKeyDown(evt: IKeyboardEvent) {
@@ -513,25 +569,33 @@ export abstract class BaseObject {
     triggerPointerOut(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerOutObserver.notifyObservers(evt)?.stopPropagation) {
             this._parent?.triggerPointerOut(evt);
+            return false;
         }
+        return true;
     }
 
     triggerPointerLeave(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerLeaveObserver.notifyObservers(evt)?.stopPropagation) {
             this._parent?.triggerPointerLeave(evt);
+            return false;
         }
+        return true;
     }
 
     triggerPointerOver(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerOverObserver.notifyObservers(evt)) {
             this._parent?.triggerPointerOver(evt);
+            return false;
         }
+        return true;
     }
 
     triggerPointerEnter(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerEnterObserver.notifyObservers(evt)?.stopPropagation) {
             this._parent?.triggerPointerEnter(evt);
+            return false;
         }
+        return true;
     }
 
     dispose() {

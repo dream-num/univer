@@ -1,9 +1,9 @@
 import { Engine, EVENT_TYPE, IScrollObserverParam, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univer/base-render';
-import { EventState, WorkSheet, Plugin } from '@univer/core';
+import { EventState, Worksheet } from '@univer/core';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from './BaseView';
 import { SheetView } from './Views/SheetView';
 import './Views';
-import { SpreadsheetPlugin } from '../..';
+import { SheetPlugin } from '../..';
 
 // workbook
 export class CanvasView {
@@ -11,7 +11,7 @@ export class CanvasView {
 
     private _views: BaseView[] = []; // worksheet
 
-    constructor(private _engine: Engine, private _plugin: Plugin) {
+    constructor(private _engine: Engine, private _plugin: SheetPlugin) {
         this._initialize();
     }
 
@@ -31,6 +31,7 @@ export class CanvasView {
             width: 1200,
             height: 1000,
         });
+        scene.openTransformer();
         this._scene = scene;
         const viewMain = new Viewport(CANVAS_VIEW_KEY.VIEW_MAIN, scene, {
             left: rowTitle.width,
@@ -82,13 +83,8 @@ export class CanvasView {
 
         // sheet zoom [0 ~ 1]
         context.getContextObserver('onZoomRatioSheetObservable').add((value) => {
-            const plugin = this._plugin as SpreadsheetPlugin;
+            const plugin = this._plugin;
             this._scene.scale(value.zoomRatio, value.zoomRatio);
-            this._scene.makeDirty();
-            // update data
-            plugin.getCanvasView().updateToSheet(this._plugin.getContext().getWorkBook().getActiveSheet()!);
-            // update render
-            // plugin.getMainComponent().makeDirty(true);
         });
 
         scene.addViewport(viewMain, viewLeft, viewTop, viewLeftTop).attachControl();
@@ -128,7 +124,10 @@ export class CanvasView {
 
         engine.runRenderLoop(() => {
             scene.render();
-            document.getElementById('app')!.innerText = `fps:${Math.round(engine.getFps()).toString()}`;
+            const app = document.getElementById('app');
+            if (app) {
+                app.innerText = `fps:${Math.round(engine.getFps()).toString()}`;
+            }
         });
     }
 
@@ -144,19 +143,15 @@ export class CanvasView {
         return this.getView(CANVAS_VIEW_KEY.SHEET_VIEW) as SheetView;
     }
 
-    getSelectionModels() {
-        return this.getSheetView().getSelectionModels();
-    }
-
-    updateToSheet(worksheet: WorkSheet) {
+    updateToSheet(worksheet: Worksheet) {
         for (let view of this._views) {
             view.updateToSheet(worksheet);
         }
     }
 
-    private _viewLoader(scene: Scene, plugin: Plugin) {
-        CanvasViewRegistry.getData().forEach((view) => {
-            this._views.push(view.initialize(scene, plugin));
+    private _viewLoader(scene: Scene, plugin: SheetPlugin) {
+        CanvasViewRegistry.getData().forEach((viewFactory) => {
+            this._views.push(viewFactory.create(scene, plugin));
         });
     }
 }

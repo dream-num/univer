@@ -1,14 +1,14 @@
 import { BaselineOffset, getColorStyle } from '@univer/core';
-import { IScale } from '../../../Base/Interfaces';
+import { IScale } from '../../../Basics/Interfaces';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../Extension';
-import { docsExtension } from '../DocsExtension';
-import { IDocumentSkeletonSpan } from '../../../Base/IDocumentSkeletonCached';
-import { COLOR_BLACK_RGB } from '../../../Base/Const';
-import { Vector2 } from '../../../Base/Vector2';
+import { docExtension } from '../DocExtension';
+import { IDocumentSkeletonSpan } from '../../../Basics/IDocumentSkeletonCached';
+import { COLOR_BLACK_RGB } from '../../../Basics/Const';
+import { Vector2 } from '../../../Basics/Vector2';
 
 const UNIQUE_KEY = 'DefaultDocsFontAndBaseLineExtension';
 
-export class FontAndBaseLine extends docsExtension {
+export class FontAndBaseLine extends docExtension {
     uKey = UNIQUE_KEY;
 
     zIndex = 20;
@@ -51,17 +51,17 @@ export class FontAndBaseLine extends docsExtension {
         }
 
         if (baselineOffset === BaselineOffset.SUBSCRIPT || baselineOffset === BaselineOffset.SUPERSCRIPT) {
-            const { renderConfig = {} } = this.extensionOffset;
+            // const { renderConfig = {} } = this.extensionOffset;
 
-            const { centerAngle = 0 } = renderConfig;
+            // const { centerAngle = 0 } = renderConfig;
 
             let offset = bBox.spo;
-            if (baselineOffset === BaselineOffset.SUBSCRIPT) {
+            if (baselineOffset === BaselineOffset.SUPERSCRIPT) {
                 offset = -bBox.sbo;
             }
 
-            const offsetSin = offset * Math.sin(centerAngle);
-            const offsetCos = offset * Math.cos(centerAngle);
+            // const offsetSin = offset * Math.sin(centerAngle);
+            // const offsetCos = offset * Math.cos(centerAngle);
 
             spanPointWithFont.y += offset;
 

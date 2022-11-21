@@ -1,12 +1,13 @@
-import { IStyleConfig } from '@univer/base-component';
 import { IWorkbookConfig, UniverSheet } from '@univer/core';
-import { FilterPlugin } from '@univer/sheets-plugin-filter';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
-import { StyleUniver } from '@univer/style-universheet';
+import * as UniverCore from '@univer/core'
+import { RenderEngine } from '@univer/base-render';
+import { UniverComponentSheet } from '@univer/style-universheet';
+import { ISheetPluginConfig, SheetPlugin } from '@univer/base-sheets';
+import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
 
 interface IPropsCustom {
-    workbookConfig?: Partial<IWorkbookConfig>;
-    spreadsheetConfig?: IStyleConfig;
+    coreConfig?: Partial<IWorkbookConfig>;
+    baseSheetsConfig?: ISheetPluginConfig;
 }
 
 /**
@@ -15,13 +16,13 @@ interface IPropsCustom {
 class UniverSheetCustom {
     constructor() {}
     init(config: IPropsCustom = {}): UniverSheet {
-        const univerSheetUp = UniverSheet.newInstance(config.workbookConfig);
+        const universheet = UniverSheet.newInstance(config.coreConfig);
 
-        univerSheetUp.installPlugin(new StyleUniver(config.spreadsheetConfig));
-        univerSheetUp.installPlugin(new SpreadsheetPlugin());
-        univerSheetUp.installPlugin(new FilterPlugin());
+        universheet.installPlugin(new RenderEngine());
+        universheet.installPlugin(new UniverComponentSheet());
+        universheet.installPlugin(new SheetPlugin(config.baseSheetsConfig));
 
-        return univerSheetUp;
+        return universheet;
     }
 }
 /**
@@ -32,4 +33,4 @@ class UniverSheetCustom {
 const univerSheetCustom = function (config?: IPropsCustom) {
     return new UniverSheetCustom().init(config);
 };
-export { univerSheetCustom };
+export {UniverCore, univerSheetCustom, DEFAULT_WORKBOOK_DATA };

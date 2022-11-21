@@ -13,9 +13,9 @@ export class CellReferenceObject extends BaseReferenceObject {
     }
 
     private _createRange(newRangeData: IRangeData) {
-        const rangeReferenceObject = new RangeReferenceObject(newRangeData, this.getForcedSheetId());
+        const rangeReferenceObject = new RangeReferenceObject(newRangeData, this.getForcedSheetId(), this.getForcedUnitId());
 
-        rangeReferenceObject.setSheetData(this.getSheetData());
+        rangeReferenceObject.setUnitData(this.getUnitData());
 
         rangeReferenceObject.setDefaultSheetId(this.getDefaultSheetId());
 
@@ -23,7 +23,23 @@ export class CellReferenceObject extends BaseReferenceObject {
 
         rangeReferenceObject.setColumnCount(this.getColumnCount());
 
+        rangeReferenceObject.setDefaultUnitId(this.getDefaultUnitId());
+
+        // const forcedSheetID = this.getForcedSheetId();
+        // if (forcedSheetID) {
+        //     rangeReferenceObject.setForcedSheetIdDirect(forcedSheetID);
+        // }
+
+        // const forcedUnitId = this.getForcedUnitId();
+        // if (forcedUnitId) {
+        //     rangeReferenceObject.setForcedUnitIdDirect(forcedUnitId);
+        // }
+
         return rangeReferenceObject;
+    }
+
+    isCell() {
+        return true;
     }
 
     unionBy(referenceObject: BaseReferenceObject) {
@@ -32,9 +48,9 @@ export class CellReferenceObject extends BaseReferenceObject {
         }
 
         const cellReferenceObject = referenceObject as CellReferenceObject;
-        if (cellReferenceObject.getForcedSheetName() !== undefined) {
-            return ErrorValueObject.create(ErrorType.REF);
-        }
+        // if (cellReferenceObject.getForcedSheetName() !== undefined) {
+        //     return ErrorValueObject.create(ErrorType.REF);
+        // }
 
         const newRangeData = this.unionRange(this.getRangeData(), cellReferenceObject.getRangeData());
 
@@ -62,11 +78,11 @@ export class CellReferenceObject extends BaseReferenceObject {
         }
 
         if (startColumn1 > startColumn2) {
-            rangeData.startRow = startColumn2;
-            rangeData.endRow = startColumn1;
+            rangeData.startColumn = startColumn2;
+            rangeData.endColumn = startColumn1;
         } else {
-            rangeData.startRow = startColumn1;
-            rangeData.endRow = startColumn2;
+            rangeData.startColumn = startColumn1;
+            rangeData.endColumn = startColumn2;
         }
 
         return rangeData;

@@ -1,4 +1,4 @@
-import { BaseSelectProps, createRef, ISelectButton, IToolBarItemProps, JSXComponent, SelectComponent } from '@univer/base-component';
+import { BaseSelectProps, createRef, ISelectButton, JSXComponent, SelectComponent } from '@univer/base-component';
 import { PureComponent } from 'preact/compat';
 import { Button, ColorPicker, Input, Tooltip, Ul } from '../../index';
 import styles from './index.module.less';
@@ -130,11 +130,11 @@ export class Select extends PureComponent<BaseSelectProps, BaseSelectState> {
                 this.inputRef.current.setValue(label);
             }
 
-            const propsChildren = this.props.children as IToolBarItemProps[];
+            const propsChildren = this.props.children as any[];
 
             // border line get selected color
             if (propsChildren[10] && propsChildren[10].locale === 'borderLine.borderColor') {
-                const propsColorItem = propsChildren[10] as IToolBarItemProps;
+                const propsColorItem = propsChildren[10] as any;
                 const propsColorChildren = propsColorItem.children!;
 
                 let borderLineSelectedColor = propsColorChildren[0].value;
@@ -161,7 +161,7 @@ export class Select extends PureComponent<BaseSelectProps, BaseSelectState> {
         const children = this.state.children;
         const selected = children?.find((ele: BaseSelectProps) => ele.selected === true);
 
-        const propsChildren = this.props.children as IToolBarItemProps[];
+        const propsChildren = this.props.children as any[];
 
         // toolbar font color / fill color
         if (this.props.selectType === 'color') {
@@ -169,7 +169,7 @@ export class Select extends PureComponent<BaseSelectProps, BaseSelectState> {
         }
         // border line get selected color, TODO: do not use borderLine.borderColor, use new prop instead
         else if (propsChildren && propsChildren[10] && propsChildren[10].locale === 'borderLine.borderColor') {
-            const propsColorItem = propsChildren[10] as IToolBarItemProps;
+            const propsColorItem = propsChildren[10] as any;
             const propsColorChildren = propsColorItem.children!;
 
             let borderLineSelectedColor = propsColorChildren[0].value;
@@ -289,7 +289,7 @@ export class Select extends PureComponent<BaseSelectProps, BaseSelectState> {
                     {border ? <div className={styles.selectLine}></div> : ''}
                     <ColorPicker
                         color={'#000'}
-                        onColor={(col: string) => {
+                        onClick={(col: string) => {
                             this.setState(
                                 {
                                     selectColor: col,
@@ -299,7 +299,6 @@ export class Select extends PureComponent<BaseSelectProps, BaseSelectState> {
                                 }
                             );
                         }}
-                        onCancel={() => {}}
                         slot={slot!}
                         ref={this.ref}
                     />

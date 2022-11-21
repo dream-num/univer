@@ -1,12 +1,12 @@
 import { SetHideRow, SetShowRow } from '../Apply';
-import { WorkBook } from '../Domain';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface ISetRowShowActionData extends IActionData {
+export interface ISetRowShowActionData extends ISheetActionData {
     rowIndex: number;
     rowCount: number;
 }
@@ -14,13 +14,13 @@ export interface ISetRowShowActionData extends IActionData {
 /**
  * @internal
  */
-export class SetRowShowAction extends ActionBase<ISetRowShowActionData> {
+export class SetRowShowAction extends SheetActionBase<ISetRowShowActionData> {
     constructor(
         actionData: ISetRowShowActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],
@@ -31,6 +31,22 @@ export class SetRowShowAction extends ActionBase<ISetRowShowActionData> {
             convertor: [],
         };
         this.validate();
+    }
+
+    do(): void {
+        const worksheet = this.getWorkSheet();
+
+        SetShowRow(
+            this._doActionData.rowIndex,
+            this._doActionData.rowCount,
+            worksheet.getRowManager()
+        );
+
+        this._observers.notifyObservers({
+            type: ActionType.REDO,
+            data: this._doActionData,
+            action: this,
+        });
     }
 
     redo(): void {
@@ -49,22 +65,6 @@ export class SetRowShowAction extends ActionBase<ISetRowShowActionData> {
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
-            action: this,
-        });
-    }
-
-    do(): void {
-        const worksheet = this.getWorkSheet();
-
-        SetShowRow(
-            this._doActionData.rowIndex,
-            this._doActionData.rowCount,
-            worksheet.getRowManager()
-        );
-
-        this._observers.notifyObservers({
-            type: ActionType.REDO,
-            data: this._doActionData,
             action: this,
         });
     }

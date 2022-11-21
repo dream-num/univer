@@ -1,7 +1,7 @@
 /**
  * Use createContext to provide global language and skin settings
  */
-import { Context, Locale } from '@univer/core';
+import { ContextBase, Locale } from '@univer/core';
 import { createContext } from 'preact';
 
 export type AppContextValues = {
@@ -9,7 +9,7 @@ export type AppContextValues = {
     currentLocale: string;
     // skin: string; // skin string
     message: object; // detail Locale message
-    coreContext: Context;
+    coreContext: ContextBase;
 };
 
 const AppContext = createContext<Partial<AppContextValues>>({});

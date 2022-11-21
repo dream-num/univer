@@ -1,24 +1,24 @@
 import { InsertSheet, RemoveSheet } from '../Apply';
 import { IWorksheetConfig } from '../../Interfaces';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { WorkBook } from '../Domain';
 import { IInsertSheetActionData } from './InsertSheetAction';
+import { CommandUnit } from '../../Command';
 
-export interface IRemoveSheetActionData extends IActionData {
+export interface IRemoveSheetActionData extends ISheetActionData {
     sheetId: string;
 }
 
-export class RemoveSheetAction extends ActionBase<
+export class RemoveSheetAction extends SheetActionBase<
     IRemoveSheetActionData,
     IInsertSheetActionData
 > {
     constructor(
         actionData: IRemoveSheetActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],
@@ -28,6 +28,10 @@ export class RemoveSheetAction extends ActionBase<
             ...this.do(),
             convertor: [],
         };
+    }
+
+    do(): { index: number; sheet: IWorksheetConfig } {
+        return this.redo();
     }
 
     redo(): { index: number; sheet: IWorksheetConfig } {
@@ -49,10 +53,6 @@ export class RemoveSheetAction extends ActionBase<
             action: this,
         });
         InsertSheet(workbook, this._oldActionData.index, this._oldActionData.sheet);
-    }
-
-    do(): { index: number; sheet: IWorksheetConfig } {
-        return this.redo();
     }
 
     validate(): boolean {

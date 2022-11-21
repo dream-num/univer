@@ -1,11 +1,14 @@
-import { defaultWorkbookData, UniverSheet } from '@univer/core';
-import { UniverComponentSheet } from '@univer/style-universheet';
+import { UniverSheet } from '@univer/core';
 import { RenderEngine } from '@univer/base-render';
+import { UniverComponentSheet } from '@univer/style-universheet';
 import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
-import { FormulaPlugin } from '@univer/sheets-plugin-formula';
+import { NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
+import { DEFAULT_FORMULA_DATA, FormulaPlugin } from '@univer/sheets-plugin-formula';
+import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
+import { SheetPlugin } from './SheetPlugin';
 
 const uiDefaultConfigUp = {
-    containerId: 'universheet-demo-up',
+    container: 'universheet-demo-up',
     layout: {
         innerRight: false,
         outerLeft: false,
@@ -18,45 +21,114 @@ const uiDefaultConfigUp = {
             moreFormats: false,
         },
     },
+    selections: {
+        'sheet-01': [
+            {
+                selection: {
+                    startRow: 0,
+                    endRow: 0,
+                    startColumn: 3,
+                    endColumn: 3,
+                },
+                cell: {
+                    row: 0,
+                    column: 3,
+                },
+            },
+        ],
+        // 'sheet-01': [
+        //     {
+        //         selection: {
+        //             startRow: 13,
+        //             endRow: 14,
+        //             startColumn: 1,
+        //             endColumn: 2,
+        //         },
+        //     },
+        //     {
+        //         selection: {
+        //             startRow: 16,
+        //             endRow: 18,
+        //             startColumn: 1,
+        //             endColumn: 2,
+        //         },
+        //         cell: {
+        //             row: 16,
+        //             column: 1,
+        //         },
+        //     },
+        // ],
+        // 'sheet-02': [
+        //     {
+        //         selection: {
+        //             startRow: 17,
+        //             endRow: 20,
+        //             startColumn: 1,
+        //             endColumn: 2,
+        //         },
+        //     },
+        //     {
+        //         selection: {
+        //             startRow: 22,
+        //             endRow: 23,
+        //             startColumn: 1,
+        //             endColumn: 2,
+        //         },
+        //     },
+        //     {
+        //         selection: {
+        //             startRow: 25,
+        //             endRow: 27,
+        //             startColumn: 4,
+        //             endColumn: 6,
+        //         },
+        //         cell: {
+        //             row: 25,
+        //             column: 4,
+        //         },
+        //     },
+        // ],
+    },
 };
-const univerSheetUp = UniverSheet.newInstance(defaultWorkbookData);
+
+const univerSheetUp = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);
 univerSheetUp.installPlugin(new RenderEngine());
 univerSheetUp.installPlugin(new UniverComponentSheet());
-FormulaPlugin.create().installTo(univerSheetUp);
 
-// init spreadsheet plugin first
-import('./SpreadsheetPlugin').then(({ SpreadsheetPlugin }) => {
-    let spreadsheetPlugin = new SpreadsheetPlugin(uiDefaultConfigUp);
-    let clipboardPlugin = new ClipboardPlugin();
-    univerSheetUp.installPlugin(spreadsheetPlugin);
-    univerSheetUp.installPlugin(clipboardPlugin);
-    (window as any).spreadsheetPlugin = spreadsheetPlugin;
-});
+let sheetPlugin = new SheetPlugin(uiDefaultConfigUp);
+let clipboardPlugin = new ClipboardPlugin();
+univerSheetUp.installPlugin(sheetPlugin);
+univerSheetUp.installPlugin(clipboardPlugin);
+univerSheetUp.installPlugin(new NumfmtPlugin());
+FormulaPlugin.create(DEFAULT_FORMULA_DATA).installTo(univerSheetUp);
+
+(window as any).sheetPlugin = sheetPlugin;
 
 // const uiDefaultConfigDown = {
-//     containerId: 'universheet-demo-down',
-//     layout: {
-//         outerLeft: false,
-
-//         outerRight: true,
-
-//         innerLeft: false,
-
-//         innerRight: false,
-
-//         toolBar: true,
-
-//         toolBarConfig: {
-//             undoRedo: true,
-//             font: true,
-//         },
-//         contentSplit: true,
+//     container: 'universheet-demo-down',
+//     selections: {
+//         'sheet-0001': [
+//             {
+//                 selection: {
+//                     startRow: 2,
+//                     endRow: 2,
+//                     startColumn: 3,
+//                     endColumn: 3,
+//                 },
+//                 cell: {
+//                     row: 2,
+//                     column: 3,
+//                 },
+//             },
+//         ],
 //     },
 // };
 
-// const univerSheetDown = UniverSheet.newInstance(defaultWorkbookData);
+// const univerSheetDown = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DOWN);
+// univerSheetDown.installPlugin(new RenderEngine());
+// univerSheetDown.installPlugin(new UniverComponentSheet());
 
-// univerSheetDown.installPlugin(new StyleUniverSheet(uiDefaultConfigDown));
-
-// univerSheetDown.installPlugin(new FilterPlugin());
-// univerSheetDown.installPlugin(new SpreadsheetPlugin());
+// univerSheetDown.installPlugin(new SheetPlugin(uiDefaultConfigDown));
+// univerSheetDown.installPlugin(new ClipboardPlugin());
+// univerSheetDown.installPlugin(new NumfmtPlugin());
+// FormulaPlugin.create(DEFAULT_FORMULA_DATA_DOWN).installTo(univerSheetDown);

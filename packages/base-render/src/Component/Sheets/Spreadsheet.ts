@@ -3,7 +3,7 @@ import { Background } from './Extensions/Background';
 import { Border } from './Extensions/Border';
 import { Font } from './Extensions/Font';
 import { BorderAuxiliary } from './Extensions/BorderAuxiliary';
-import { IBoundRect, Vector2 } from '../../Base/Vector2';
+import { IBoundRect, Vector2 } from '../../Basics/Vector2';
 import { SpreadsheetSkeleton } from './SheetSkeleton';
 import { SheetComponent } from './SheetComponent';
 import { SpreadsheetExtensionRegistry } from '../Extension';
@@ -12,11 +12,13 @@ import { Engine } from '../../Engine';
 import { Scene } from '../../Scene';
 import { SceneViewer } from '../../SceneViewer';
 import { Viewport } from '../../Viewport';
-import { degToRad, fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getScale, mergeInfoOffset } from '../../Base/Tools';
-import { ITransformChangeState } from '../../Base/Interfaces';
+import { fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getScale, mergeInfoOffset } from '../../Basics/Tools';
+import { ITransformChangeState } from '../../Basics/Interfaces';
 import { BaseObject } from '../../BaseObject';
 import { Documents } from '../Docs/Document';
-import { RENDER_CLASS_TYPE } from '../../Base/Const';
+import { ORIENTATION_TYPE, RENDER_CLASS_TYPE } from '../../Basics/Const';
+import { columnIterator, DocumentSkeleton } from '../Docs';
+import { getRotateOffsetAndFarthestHypotenuse, getRotateOrientation, IDocumentSkeletonColumn } from '../../Basics';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 
@@ -37,7 +39,10 @@ export class Spreadsheet extends SheetComponent {
 
     private _cacheOffsetY = 0;
 
-    private _documents: Documents = new Documents(OBJECT_KEY);
+    private _documents: Documents = new Documents(OBJECT_KEY, undefined, {
+        pageMarginLeft: 0,
+        pageMarginTop: 0,
+    });
 
     constructor(oKey: string, spreadsheetSkeleton?: SpreadsheetSkeleton, private _allowCache: boolean = true) {
         super(oKey, spreadsheetSkeleton);
@@ -281,13 +286,6 @@ export class Spreadsheet extends SheetComponent {
             if (this.isDirty()) {
                 let newBounds = bounds;
                 const ctx = this._cacheCanvas.getContext();
-                // const canvasEle = this._cacheCanvas.getCanvasEle();
-
-                // if (bounds && this._boundsCache && this._checkSheetDifferentBounds(bounds, this._boundsCache)) {
-                //     newBounds = this._differentBounds(bounds);
-                // } else {
-                //     this._cacheCanvas.clear();
-                // }
 
                 if (newBounds) {
                     const { dx = 0, dy = 0 } = newBounds;
@@ -481,6 +479,56 @@ export class Spreadsheet extends SheetComponent {
     //     return horizontalAlign;
     // }
 
+    getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angle: number = 0) {
+        const skeletonData = documentSkeleton?.getSkeletonData();
+
+        if (!skeletonData) {
+            return;
+        }
+        const { pages } = skeletonData;
+        const lastPage = pages[pages.length - 1];
+
+        if (angle === 0) {
+            const { width, height } = lastPage;
+            return { width, height };
+        }
+
+        let allRotatedWidth = 0;
+        let allRotatedHeight = 0;
+
+        const orientation = getRotateOrientation(angle);
+        const widthArray: Array<{ rotatedWidth: number; spaceWidth: number }> = [];
+        columnIterator([lastPage], (column: IDocumentSkeletonColumn) => {
+            const { lines, width: columnWidth, spaceWidth } = column;
+
+            const { rotatedHeight, rotatedWidth } = getRotateOffsetAndFarthestHypotenuse(lines, columnWidth, angle);
+            allRotatedHeight += rotatedHeight;
+
+            widthArray.push({ rotatedWidth, spaceWidth });
+        });
+
+        const tanTheta = Math.tan(angle);
+        const sinTheta = Math.sin(angle);
+
+        const widthCount = widthArray.length;
+        for (let i = 0; i < widthCount; i++) {
+            const { rotatedWidth, spaceWidth } = widthArray[i];
+
+            if (i === 0) {
+                allRotatedWidth += rotatedWidth;
+            }
+
+            if ((orientation === ORIENTATION_TYPE.UP && i === 0) || (orientation === ORIENTATION_TYPE.DOWN && i === widthCount - 1)) {
+                allRotatedWidth += (rotatedWidth + spaceWidth / sinTheta) / tanTheta;
+            }
+        }
+
+        return {
+            width: allRotatedWidth,
+            height: allRotatedHeight,
+        };
+    }
+
     private _calculateOverflow() {
         const overflowCache = new ObjectMatrix<IRangeData>();
         const spreadsheetSkeleton = this.getSkeleton();
@@ -512,7 +560,7 @@ export class Spreadsheet extends SheetComponent {
                             cellValueType !== CellValueType.BOOLEAN &&
                             horizontalAlign !== HorizontalAlign.JUSTIFIED
                         ) {
-                            let contentSize = documentSkeleton.getLastPageSize(angle);
+                            let contentSize = this.getDocsSkeletonPageSize(documentSkeleton, angle);
 
                             if (!contentSize) {
                                 return true;
@@ -552,7 +600,7 @@ export class Spreadsheet extends SheetComponent {
                             const cellHeight = endY - startY;
                             documentSkeleton.updateDocumentDataPageSize(cellHeight);
                             documentSkeleton.calculate();
-                            const contentSize = documentSkeleton.getLastPageSize(degToRad(Math.abs(angle)));
+                            const contentSize = this.getDocsSkeletonPageSize(documentSkeleton, angle);
 
                             if (!contentSize) {
                                 return true;

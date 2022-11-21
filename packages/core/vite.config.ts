@@ -9,11 +9,12 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheet',
-            formats: ['es', 'umd'],
-            fileName: 'universheet-core',
+            name: 'Univer',
+            formats: ['es', 'umd', 'cjs'],
+            fileName: 'univer-core',
         },
         outDir: './lib',
+        sourcemap: true
     },
     define: {
         pkgJson: { name, version },
@@ -33,19 +34,20 @@ export default defineConfig({
         port: 3102,
         open: true, // // Automatically open the app in the browser on server start.
     },
-
-    resolve: {
-        alias: {
-            '@': path.resolve(__dirname, 'src'),
-        },
-    },
-
     plugins: [
         createExternal({
             externals: {
+                'dayjs': 'dayjs',
+                'nanoid': 'nanoid',
+                'numeral': 'numeral',
                 'es6-proxy-polyfill': 'es6-proxy-polyfill',
                 'reflect-metadata': 'reflect-metadata',
             },
         }),
     ],
+    resolve: {
+        alias: {
+            // '@': path.resolve(__dirname, 'src'),
+        },
+    },
 });

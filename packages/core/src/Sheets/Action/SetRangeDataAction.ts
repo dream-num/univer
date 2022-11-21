@@ -2,17 +2,17 @@ import { SetRangeData } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { CONVERTOR_OPERATION } from '../../Const/CONST';
 import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
-import { WorkBook } from '../Domain';
 import { ICellData, ICopyToOptionsData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface ISetRangeDataActionData extends IActionData {
-    cellValue: ObjectMatrixPrimitiveType<ICellData>;
+export interface ISetRangeDataActionData extends ISheetActionData {
+    cellValue: ObjectMatrixPrimitiveType<ICellData> | ICellData;
     rangeData: IRangeData;
     options?: ICopyToOptionsData;
 }
@@ -22,17 +22,17 @@ export interface ISetRangeDataActionData extends IActionData {
  *
  * @internal
  */
-export class SetRangeDataAction extends ActionBase<
+export class SetRangeDataAction extends SheetActionBase<
     ISetRangeDataActionData,
     ISetRangeDataActionData,
-    ObjectMatrixPrimitiveType<ICellData>
+    ObjectMatrixPrimitiveType<ICellData> | ICellData
 > {
     constructor(
         actionData: ISetRangeDataActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
 
         this._doActionData = {
             ...actionData,

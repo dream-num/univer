@@ -1,16 +1,16 @@
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
-import { WorkBook } from '../Domain';
 import { IRangeData } from '../../Interfaces';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { SetSelectionActivate } from '../Apply';
 import { CONVERTOR_OPERATION } from '../../Const/CONST';
 import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface ISetSelectionActivateActionData extends IActionData {
+export interface ISetSelectionActivateActionData extends ISheetActionData {
     activeRangeList: IRangeData | IRangeData[];
     activeRange: IRangeData;
     currentCell: IRangeData;
@@ -28,17 +28,17 @@ export interface ISetSelectionActivateServiceData {
 /**
  * @internal
  */
-export class SetSelectionActivateAction extends ActionBase<
+export class SetSelectionActivateAction extends SheetActionBase<
     ISetSelectionActivateActionData,
     ISetSelectionActivateActionData,
     ISetSelectionActivateServiceData
 > {
     constructor(
         actionData: ISetSelectionActivateActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
 
         this._doActionData = {
             ...actionData,

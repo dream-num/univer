@@ -21,14 +21,14 @@ export class ColorPickerCircleButton extends Component<BaseColorPickerCircleButt
     };
 
     render(props: BaseColorPickerCircleButtonProps) {
-        const { color, onColor, onCancel, style, colorPickerStyle } = props;
+        const { color, onClick, onCancel, style, colorPickerStyle } = props;
         const NextIcon = this.getComponentRender().renderFunction('NextIcon');
 
         return (
             <div style={style} className={Styles.colorPickerCircleButton} ref={this.ref} onClick={this.handleColorSelectButtonClick}>
                 <span className={`${Styles.colorSelectCircle} ${Styles.verticalMiddle}`} style={{ backgroundColor: color }}></span>
                 <NextIcon className={Styles.verticalMiddle} />
-                <ColorPicker color={color} onColor={onColor} onCancel={onCancel} style={colorPickerStyle} ref={this.colorRef} />
+                <ColorPicker color={color} onClick={onClick} onCancel={onCancel} style={colorPickerStyle} ref={this.colorRef} />
             </div>
         );
     }

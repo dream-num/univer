@@ -1,29 +1,29 @@
 /**
  * @jest-environment jsdom
  */
-import { WorkBook, WorkSheet } from '../../src/Sheets/Domain';
-import { Context } from '../../src/Basics';
+import { Workbook, Worksheet } from '../../src/Sheets/Domain';
+import { SheetContext } from '../../src/Basics';
 import {
-    SetRangeValueAction,
+    SetRangeFormattedValueAction,
     CommandManager,
-    ISetRangeValueActionData,
+    ISetRangeFormattedValueActionData,
 } from '../../src/Command';
 import { ICellV, ObjectMatrixPrimitiveType } from '../../src';
 import { IOCContainerStartUpReady } from '../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
-test('Test SetRangeValueAction', () => {
+test('Test SetRangeFormattedValueAction', () => {
     const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
 
     const sheetId = 'sheet1';
-    const worksheet = new WorkSheet(context, { id: sheetId });
+    const worksheet = new Worksheet(context, { id: sheetId });
     workbook.insertSheet(worksheet);
 
     const observers = CommandManager.getActionObservers();
-    const actionName = 'SetRangeValueAction';
+    const actionName = 'SetRangeFormattedValueAction';
 
     //  mock data
     const cellValue: ObjectMatrixPrimitiveType<ICellV> = {
@@ -38,14 +38,14 @@ test('Test SetRangeValueAction', () => {
         startColumn: 0,
         endColumn: 0,
     };
-    const configure: ISetRangeValueActionData = {
+    const configure: ISetRangeFormattedValueActionData = {
         actionName,
         sheetId,
         cellValue,
         rangeData,
     };
 
-    const action = new SetRangeValueAction(configure, workbook, observers);
+    const action = new SetRangeFormattedValueAction(configure, workbook, observers);
 
     const value = worksheet.getCellMatrix().getValue(0, 0);
     expect(value && value.v).toEqual(1);

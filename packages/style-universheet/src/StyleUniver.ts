@@ -9,7 +9,7 @@ import {
     FunctionComponent,
     PropsFrom,
 } from '@univer/base-component';
-import { Context, IOCContainer, Plugin } from '@univer/core';
+import { Plugin } from '@univer/core';
 // import { UniverSingleButton } from './Components';
 import { UniverButton } from './Components/Button/Button';
 import { UniverBorderDashDot } from './Components/CanvasIcon/BorderLine/BorderDashDot';
@@ -30,8 +30,9 @@ import { UniverCollapse, UniverPanel } from './Components/Collapse/Collapse';
 import { UniverColorPicker } from './Components/ColorPicker';
 import { UniverColorPickerCircleButton } from './Components/ColorPickerCircleButton';
 import { UniverContainer } from './Components/Container';
-import { UniverDemo } from './Components/Demo';
+// import { UniverDemo } from './Components/Demo';
 import { UniverFormatModal } from './Components/FormatModal';
+import { UniverMenu } from './Components/Menu/Menu';
 import {
     UniverBottomBorderIcon,
     UniverFillColorIcon,
@@ -75,7 +76,7 @@ import {
 import { UniverChartIcon, UniverLinkIcon, UniverPhotoIcon } from './Components/Icon/Insert';
 import { UniverLoadingIcon } from './Components/Icon/Loading';
 import { UniverLogoIcon } from './Components/Icon/Logo';
-import { UniverAddIcon, UniverAddNumIcon, UniverFxIcon, UniverMoneyIcon, UniverPercentIcon, UniverreduceIcon, UniverReduceNumIcon } from './Components/Icon/Math';
+import { UniverAddIcon, UniverAddNumIcon, UniverFxIcon, UniverMoneyIcon, UniverPercentIcon, UniverReduceIcon, UniverReduceNumIcon } from './Components/Icon/Math';
 import {
     UniverCommentIcon,
     UniverConditionalFormatIcon,
@@ -112,13 +113,13 @@ import { UniverInput } from './Components/Input';
 import { UniverContent, UniverFooter, UniverHeader, UniverLayout, UniverSider } from './Components/Layout';
 import { UniverModal } from './Components/Modal';
 import { UniverRadio, UniverRadioGroup } from './Components/Radio';
-import { UniverRichText } from './Components/RichText/RichText';
 import { UniverSelect } from './Components/SelectComponent';
 import { UniverSiderModal } from './Components/SiderModal';
 import { UniverSlider } from './Components/Slider';
 import { UniverTab, UniverTabPane } from './Components/Tabs';
 import { UniverTooltip } from './Components/Tooltip';
 import { UniverUl } from './Components/Ul';
+import { UniverDropdown } from './Components/Dropdown';
 
 /**
  *
@@ -133,10 +134,6 @@ export class UniverComponentSheet extends Plugin implements BaseComponentSheet {
     constructor() {
         super('ComponentSheet');
     }
-
-    onMapping(container: IOCContainer): void {}
-
-    onMounted(context: Context): void {}
 
     getComponentRender(): BaseComponentRender {
         return new UniverComponentRender(this.getComponentFactory());
@@ -206,9 +203,9 @@ export class UniverComponentFactory implements BaseComponentFactory {
             case 'Sider': {
                 return new UniverSider() as unknown as T;
             }
-            case 'Demo': {
-                return new UniverDemo() as unknown as T;
-            }
+            // case 'Demo': {
+            //     return new UniverDemo() as unknown as T;
+            // }
             case 'Checkbox': {
                 return new UniverCheckbox() as unknown as T;
             }
@@ -251,10 +248,12 @@ export class UniverComponentFactory implements BaseComponentFactory {
             case 'FormatModal': {
                 return new UniverFormatModal() as unknown as T;
             }
-            case 'RichText': {
-                return new UniverRichText() as unknown as T;
+            case 'Menu': {
+                return new UniverMenu() as unknown as T;
             }
-
+            case 'Dropdown': {
+                return new UniverDropdown() as unknown as T;
+            }
             // Icon
             case 'NextIcon': {
                 return new UniverNextIcon() as unknown as T;
@@ -421,8 +420,8 @@ export class UniverComponentFactory implements BaseComponentFactory {
             case 'AddIcon': {
                 return new UniverAddIcon() as unknown as T;
             }
-            case 'reduceIcon': {
-                return new UniverreduceIcon() as unknown as T;
+            case 'ReduceIcon': {
+                return new UniverReduceIcon() as unknown as T;
             }
             case 'DivideIcon': {
                 return new UniverDivideIcon() as unknown as T;
@@ -551,7 +550,7 @@ export class UniverComponentFactory implements BaseComponentFactory {
 //         return new GoogleComponentFactory();
 //     }
 //     onMapping(container: IOCContainer): void {}
-//     onMounted(ctx: Context): void {}
+//     onMounted(ctx: SheetContext): void {}
 // }
 //
 // export class GoogleComponentFactory implements ComponentFactory {

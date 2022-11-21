@@ -20,9 +20,9 @@ import {
     ServerSocket,
     UndoManager,
 } from '../../src';
-import { Context } from '../../src/Basics/Context';
-import { WorkBook } from '../../src/Sheets/Domain/WorkBook';
-import { WorkSheet } from '../../src/Sheets/Domain/WorkSheet';
+import { SheetContext } from '../../src/Basics/SheetContext';
+import { Workbook } from '../../src/Sheets/Domain/Workbook';
+import { Worksheet } from '../../src/Sheets/Domain/Worksheet';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
@@ -55,15 +55,15 @@ export function IOCContainerStartUpReady(
     container.addSingletonMapping('Server', ServerSocket);
     container.addSingletonMapping('ServerSocket', ServerSocket);
     container.addSingletonMapping('ServerHttp', ServerHttp);
-    container.addSingletonMapping('WorkBook', WorkBook);
+    container.addSingletonMapping('WorkBook', Workbook);
     container.addSingletonMapping('Locale', Locale);
-    container.addSingletonMapping('Context', Context);
+    container.addSingletonMapping('Context', SheetContext);
     container.addSingletonMapping('UndoManager', UndoManager);
     container.addSingletonMapping('CommandManager', CommandManager);
     container.addSingletonMapping('PluginManager', PluginManager);
     container.addSingletonMapping('ObserverManager', ObserverManager);
     container.addSingletonMapping('ObservableHooksManager', HooksManager);
-    container.addMapping('WorkSheet', WorkSheet);
+    container.addMapping('WorkSheet', Worksheet);
     return container;
 }
 
@@ -75,12 +75,12 @@ function demo() {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -119,7 +119,7 @@ function demo() {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -432,7 +432,7 @@ test('Test cellInRange', () => {
 test('Test getNextDataRange:top1', () => {
     const { workbook, worksheet } = demo();
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -661,12 +661,12 @@ test('Test getNextDataRange:top2', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -862,7 +862,7 @@ test('Test getNextDataRange:top2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -896,12 +896,12 @@ test('Test getNextDataRange:top2.1', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1095,7 +1095,7 @@ test('Test getNextDataRange:top2.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -1129,12 +1129,12 @@ test('Test getNextDataRange:top2.2', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1329,7 +1329,7 @@ test('Test getNextDataRange:top2.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -1364,12 +1364,12 @@ test('Test getNextDataRange:top2.3', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1468,7 +1468,7 @@ test('Test getNextDataRange:top2.3', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -1503,12 +1503,12 @@ test('Test getNextDataRange:top2.4', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1703,7 +1703,7 @@ test('Test getNextDataRange:top2.4', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -1738,12 +1738,12 @@ test('Test getNextDataRange:top2.5', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -1939,7 +1939,7 @@ test('Test getNextDataRange:top2.5', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -1982,12 +1982,12 @@ test('Test getNextDataRange:top3', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2183,7 +2183,7 @@ test('Test getNextDataRange:top3', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -2226,12 +2226,12 @@ test('Test getNextDataRange:top4', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2427,7 +2427,7 @@ test('Test getNextDataRange:top4', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -2470,12 +2470,12 @@ test('Test getNextDataRange:bottom1', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2607,7 +2607,7 @@ test('Test getNextDataRange:bottom1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -2644,12 +2644,12 @@ test('Test getNextDataRange:bottom1.1', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2779,7 +2779,7 @@ test('Test getNextDataRange:bottom1.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -2816,12 +2816,12 @@ test('Test getNextDataRange:bottom2.1', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -2985,7 +2985,7 @@ test('Test getNextDataRange:bottom2.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -3022,12 +3022,12 @@ test('Test getNextDataRange:bottom2.2', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3189,7 +3189,7 @@ test('Test getNextDataRange:bottom2.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -3226,12 +3226,12 @@ test('Test getNextDataRange:bottom3.1', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3393,7 +3393,7 @@ test('Test getNextDataRange:bottom3.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -3436,12 +3436,12 @@ test('Test getNextDataRange:bottom3.2', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3602,7 +3602,7 @@ test('Test getNextDataRange:bottom3.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -3645,12 +3645,12 @@ test('Test getNextDataRange:bottom4.1', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -3812,7 +3812,7 @@ test('Test getNextDataRange:bottom4.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -3855,12 +3855,12 @@ test('Test getNextDataRange:bottom4.2', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4023,7 +4023,7 @@ test('Test getNextDataRange:bottom4.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -4066,12 +4066,12 @@ test('Test getNextDataRange:left1.1', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4107,7 +4107,7 @@ test('Test getNextDataRange:left1.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -4150,12 +4150,12 @@ test('Test getNextDataRange:left1.2', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4188,7 +4188,7 @@ test('Test getNextDataRange:left1.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -4230,12 +4230,12 @@ test('Test getNextDataRange:left2.1', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4270,7 +4270,7 @@ test('Test getNextDataRange:left2.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -4312,12 +4312,12 @@ test('Test getNextDataRange:left2.2', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4354,7 +4354,7 @@ test('Test getNextDataRange:left2.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -4396,12 +4396,12 @@ test('Test getNextDataRange:left3.1', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4437,7 +4437,7 @@ test('Test getNextDataRange:left3.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -4474,12 +4474,12 @@ test('Test getNextDataRange:left3.2', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4513,7 +4513,7 @@ test('Test getNextDataRange:left3.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -4550,12 +4550,12 @@ test('Test getNextDataRange:left4.1', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4591,7 +4591,7 @@ test('Test getNextDataRange:left4.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -4628,12 +4628,12 @@ test('Test getNextDataRange:left4.2', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4667,7 +4667,7 @@ test('Test getNextDataRange:left4.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -4704,12 +4704,12 @@ test('Test getNextDataRange:right1.1', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4744,7 +4744,7 @@ test('Test getNextDataRange:right1.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -4781,12 +4781,12 @@ test('Test getNextDataRange:right1.2', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4819,7 +4819,7 @@ test('Test getNextDataRange:right1.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -4856,12 +4856,12 @@ test('Test getNextDataRange:right2.1', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4896,7 +4896,7 @@ test('Test getNextDataRange:right2.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -4933,12 +4933,12 @@ test('Test getNextDataRange:right2.2', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -4975,7 +4975,7 @@ test('Test getNextDataRange:right2.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -5012,12 +5012,12 @@ test('Test getNextDataRange:right3.1', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -5053,7 +5053,7 @@ test('Test getNextDataRange:right3.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -5096,12 +5096,12 @@ test('Test getNextDataRange:right3.2', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -5135,7 +5135,7 @@ test('Test getNextDataRange:right3.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -5179,12 +5179,12 @@ test('Test getNextDataRange:right4.1', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -5220,7 +5220,7 @@ test('Test getNextDataRange:right4.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure
@@ -5263,12 +5263,12 @@ test('Test getNextDataRange:right4.2', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -5305,7 +5305,7 @@ test('Test getNextDataRange:right4.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<WorkSheet>(
+    const worksheet = container.getInstance<Worksheet>(
         'WorkSheet',
         context,
         configure

@@ -1,15 +1,15 @@
 import { SetRangeNote } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
-import { WorkBook } from '../Domain';
 import { IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface ISetRangeNoteActionData extends IActionData {
+export interface ISetRangeNoteActionData extends ISheetActionData {
     cellNote: ObjectMatrixPrimitiveType<string>;
     rangeData: IRangeData;
 }
@@ -17,17 +17,17 @@ export interface ISetRangeNoteActionData extends IActionData {
 /**
  * @internal
  */
-export class SetRangeNoteAction extends ActionBase<
+export class SetRangeNoteAction extends SheetActionBase<
     ISetRangeNoteActionData,
     ISetRangeNoteActionData,
     ObjectMatrixPrimitiveType<string>
 > {
     constructor(
         actionData: ISetRangeNoteActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
 
         this._doActionData = {
             ...actionData,

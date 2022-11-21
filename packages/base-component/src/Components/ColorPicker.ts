@@ -2,13 +2,36 @@ import { BaseComponent, JSXComponent } from '../BaseComponent';
 import { IMainProps } from '../IData';
 
 export interface BaseColorPickerProps {
-    color?: string; // 当前颜色
-    onColor: (color: string, val?: boolean) => void; // 返回所选颜色
-    onCancel?: () => void; // 取消
-    onClick?: () => void;
-    onChange?: () => void;
+    /**
+     * init color
+     */
+    color?: string;
+
+    /**
+     * cancel select
+     */
+    onCancel?: () => void;
+
+    /**
+     * Change colors in real time
+     */
+    onChange?: (color: string, val?: boolean) => void;
+
+    /**
+     * style
+     */
     style?: JSX.CSSProperties;
+
+    onClick?: (color: string, e: MouseEvent) => void; // 返回所选颜色
+
+    /**
+     * class name
+     */
     className?: string;
+
+    /**
+     * slot
+     */
     slot?: {
         header?: IMainProps;
         footer?: IMainProps;

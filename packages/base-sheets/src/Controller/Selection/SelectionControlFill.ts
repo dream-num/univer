@@ -11,13 +11,17 @@ export class SelectionControlFill {
         const plugin = this._control.getPlugin();
         fillControl.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
             fillControl.cursor = CURSOR_TYPE.CROSSHAIR;
-            console.log(CURSOR_TYPE.CROSSHAIR, evt);
         });
 
         fillControl.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent) => {
             fillControl.resetCursor();
-            console.log(CURSOR_TYPE.CROSSHAIR, evt);
         });
+    }
+
+    remove() {
+        const { fillControl } = this._control;
+        fillControl.onPointerEnterObserver.clear();
+        fillControl.onPointerLeaveObserver.clear();
     }
 
     static create(control: SelectionControl) {

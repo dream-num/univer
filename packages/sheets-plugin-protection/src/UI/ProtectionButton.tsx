@@ -1,8 +1,8 @@
 import { BaseComponentSheet, BaseIconProps, BaseSingleButtonProps, Component, FunctionComponent, IToolBarItemProps } from '@univer/base-component';
-import { PLUGIN_NAMES, Nullable, Observer, WorkBook } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { PLUGIN_NAMES, Nullable, Observer, Workbook } from '@univer/core';
+import { SheetPlugin } from '@univer/base-sheets';
 
-import { PTOTECTION_PLUGIN_NAME } from '../Const';
+import { PROTECTION_PLUGIN_NAME } from '../Basic/Const';
 import { IProps } from '../IData/IProtection';
 
 // Types for state
@@ -11,7 +11,7 @@ interface IState {
 }
 
 export class ProtectionButton extends Component<IProps, IState> {
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     SingleButton: FunctionComponent<BaseSingleButtonProps>;
 
@@ -31,7 +31,7 @@ export class ProtectionButton extends Component<IProps, IState> {
             label: <this.LockIcon />,
             show: true,
             onClick: () => {
-                this._context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.showSiderByName(PTOTECTION_PLUGIN_NAME, true);
+                this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.showSiderByName(PROTECTION_PLUGIN_NAME, true);
             },
         };
         this.state = {
@@ -49,7 +49,7 @@ export class ProtectionButton extends Component<IProps, IState> {
 
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
@@ -59,7 +59,7 @@ export class ProtectionButton extends Component<IProps, IState> {
      * destory
      */
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     /**

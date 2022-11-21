@@ -1,4 +1,4 @@
-import { Context } from '../../Basics';
+import { SheetContext } from '../../Basics';
 import { Command, CommandManager } from '../../Command';
 import { ISetSelectionActivateActionData } from '../Action';
 import { ACTION_NAMES, DEFAULT_SELECTION } from '../../Const';
@@ -7,8 +7,8 @@ import { IRangeData, IRangeType, ISelectionData } from '../../Interfaces';
 import { Nullable, Tools } from '../../Shared';
 import { Range } from './Range';
 import { RangeList } from './RangeList';
-import { WorkBook } from './WorkBook';
-import { WorkSheet } from './WorkSheet';
+import { Workbook } from './Workbook';
+import { Worksheet } from './Worksheet';
 
 /**
  *
@@ -29,11 +29,11 @@ import { WorkSheet } from './WorkSheet';
 export class Selection {
     private _commandManager: CommandManager;
 
-    private _context: Context;
+    private _context: SheetContext;
 
-    private _workBook: WorkBook;
+    private _workbook: Workbook;
 
-    private _workSheet: WorkSheet;
+    private _workSheet: Worksheet;
 
     private _activeRange: Range;
 
@@ -41,11 +41,11 @@ export class Selection {
 
     private _activeRangeList: RangeList;
 
-    constructor(worksheet: WorkSheet) {
+    constructor(worksheet: Worksheet) {
         this._workSheet = worksheet;
         this._context = worksheet.getContext();
         this._commandManager = this._context.getCommandManager();
-        this._workBook = worksheet.getContext().getWorkBook();
+        this._workbook = worksheet.getContext().getWorkBook();
 
         // set default selection
         this._activeRangeList = this._workSheet.getRangeList([DEFAULT_SELECTION]);
@@ -53,7 +53,7 @@ export class Selection {
         this._currentCell = this._workSheet.getRange(DEFAULT_SELECTION);
     }
 
-    setWorkSheet(workSheet: WorkSheet): void {
+    setWorkSheet(workSheet: Worksheet): void {
         this._workSheet = workSheet;
     }
 
@@ -94,12 +94,12 @@ export class Selection {
                 startColumn: activeRange.startColumn,
                 endColumn: activeRange.startColumn,
             };
-        } else if (selection && WorkBook.isIRangeType(selection)) {
+        } else if (selection && Workbook.isIRangeType(selection)) {
             // Convert the selection passed in by the user into a standard format
-            // activeRange = new TransformTool(this._workBook).transformRangeType(
+            // activeRange = new TransformTool(this._workbook).transformRangeType(
             //     selection
             // );
-            activeRange = this._workBook.transformRangeType(selection).rangeData;
+            activeRange = this._workbook.transformRangeType(selection).rangeData;
             // The user entered an invalid range
             if (activeRange.startRow === -1) {
                 console.error('Invalid selection, default set startRow -1');
@@ -120,9 +120,9 @@ export class Selection {
 
             // Convert the selection passed in by the user into a standard format
             activeRangeList = selection.map((item: IRangeType) => {
-                // item = new TransformTool(this._workBook).transformRangeType(item);
+                // item = new TransformTool(this._workbook).transformRangeType(item);
                 const itemData: IRangeData =
-                    this._workBook.transformRangeType(item).rangeData;
+                    this._workbook.transformRangeType(item).rangeData;
                 // The user entered an invalid range
                 if (itemData.startRow === -1) {
                     console.error('Invalid selection, default set startRow -1');
@@ -148,8 +148,8 @@ export class Selection {
 
         // update current cell based on currentCell
         if (cell) {
-            // currentCell = new TransformTool(this._workBook).transformRangeType(cell);
-            currentCell = this._workBook.transformRangeType(cell).rangeData;
+            // currentCell = new TransformTool(this._workbook).transformRangeType(cell);
+            currentCell = this._workbook.transformRangeType(cell).rangeData;
             const activeRangeData: Nullable<IRangeData> = Selection.cellInRange(
                 activeRangeList,
                 currentCell
@@ -171,7 +171,12 @@ export class Selection {
             currentCell,
         };
 
-        const command = new Command(_context.getWorkBook(), setSelection);
+        const command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            setSelection
+        );
         _commandManager.invoke(command);
 
         // 设置后获取范围(以A1:B10形式)
@@ -217,8 +222,8 @@ export class Selection {
      *
      * @returns
      */
-    getActiveSheet(): Nullable<WorkSheet> {
-        return this._workBook.getActiveSheet();
+    getActiveSheet(): Nullable<Worksheet> {
+        return this._workbook.getActiveSheet();
     }
 
     /**
@@ -286,7 +291,12 @@ export class Selection {
             currentCell: range,
         };
 
-        const command = new Command(_context.getWorkBook(), setSelection);
+        const command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            setSelection
+        );
         _commandManager.invoke(command);
 
         return this;

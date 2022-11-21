@@ -10,6 +10,8 @@
         "test": "echo \"Error: run tests from root\" && exit 1",
         "dev": "vite",
         "build": "tsc && vite build",
+        "watch": "vite build",
+        "link": "pnpm link ./",
         "serve": "vite preview"
     },
     "devDependencies": {
@@ -27,7 +29,7 @@
         "eslint-plugin-jsx-a11y": "^6.5.1",
         "eslint-plugin-prettier": "^3.4.0",
         "eslint-plugin-react": "^7.28.0",
-        "eslint-plugin-react-hooks":"^4.3.0",
+        "eslint-plugin-react-hooks": "^4.3.0",
         "identity-obj-proxy": "^3.0.0",
         "jest-dev-server": "^6.1.1",
         "jest-environment-jsdom": "^29.0.3",
@@ -39,9 +41,10 @@
     },
     "dependencies": {
         "@univer/base-component": "^0.0.1",
+        "@univer/base-render": "workspace:^0.0.1",
+        "@univer/common-plugin-data": "workspace:^0.0.1",
         "@univer/core": "^0.0.1",
         "@univer/style-universheet": "^0.0.1",
-        "csstype": "^3.0.11",
         "preact": "^10.5.14"
     }
 }

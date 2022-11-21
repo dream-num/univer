@@ -8,14 +8,14 @@
     "main": "./src/index.ts",
     "module": "./src/index.ts",
     "types": "./src/Types/index.d.ts",
+    "publishConfig": {
+        "main": "./lib/univer-base-sheets.cjs.js",
+        "module": "./lib/univer-base-sheets.es.js",
+        "types": "./lib/index.d.ts"
+    },
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*"
-    },
-    "publishConfig": {
-        "main": "./lib/univer-base-sheets.umd.js",
-        "module": "./lib/univer-base-sheets.es.js",
-        "types": "./lib/univer-base-sheets.d.ts"
     },
     "directories": {
         "lib": "lib"
@@ -24,8 +24,10 @@
         "test": "jest",
         "test:play": "npx playwright test",
         "test:debug": "PWDEBUG=1 npx playwright test",
-        "dev": "tsc && vite",
+        "dev": "vite",
         "build": "tsc && vite build",
+        "watch": "vite build",
+        "link": "pnpm link ./",
         "serve": "vite preview"
     },
     "devDependencies": {
@@ -49,12 +51,13 @@
     "dependencies": {
         "@univer/base-component": "workspace:^0.0.1",
         "@univer/base-render": "workspace:^0.0.1",
+        "@univer/common-plugin-data": "workspace:^0.0.1",
         "@univer/core": "workspace:^0.0.1",
         "@univer/sheets-plugin-clipboard": "workspace:^0.0.1",
         "@univer/sheets-plugin-formula": "workspace:^0.0.1",
+        "@univer/sheets-plugin-numfmt": "workspace:^0.0.1",
         "@univer/style-universheet": "workspace:^0.0.1",
         "css-vars-ponyfill": "^2.4.6",
-        "csstype": "^3.0.11",
         "nanoid": "4.0.0",
         "preact": "^10.5.14"
     }

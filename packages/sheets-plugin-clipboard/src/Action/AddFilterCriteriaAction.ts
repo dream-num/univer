@@ -1,17 +1,17 @@
-import { ActionBase, ActionObservers, IActionData, Nullable, WorkBook } from '@univer/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, Nullable, Workbook } from '@univer/core';
 import { IFilterCriteriaColumn } from '../Domain/FilterCriteriaColumn';
 import { ACTION_NAMES } from '../Const/ACTION_NAME';
 import { FILTER_PLUGIN } from '../Const';
 import { AddFilterCriteria, RemoveFilterCriteria } from '../Apply';
 import { IRemoveFilterCriteriaAction } from './RemoveFilterCriteriaAction';
 
-export interface IAddFilterCriteriaActionData extends IActionData {
+export interface IAddFilterCriteriaActionData extends ISheetActionData {
     columnPosition: number;
     criteriaColumn: Nullable<IFilterCriteriaColumn>;
 }
 
-export class AddFilterCriteriaAction extends ActionBase<IAddFilterCriteriaActionData, IRemoveFilterCriteriaAction> {
-    constructor(actionData: IAddFilterCriteriaActionData, workbook: WorkBook, observers: ActionObservers) {
+export class AddFilterCriteriaAction extends SheetActionBase<IAddFilterCriteriaActionData, IRemoveFilterCriteriaAction> {
+    constructor(actionData: IAddFilterCriteriaActionData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._doActionData = {
             ...actionData,

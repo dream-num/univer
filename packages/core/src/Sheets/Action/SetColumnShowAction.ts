@@ -1,12 +1,12 @@
 import { SetColumnHide, SetColumnShow } from '../Apply';
-import { WorkBook } from '../Domain';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface ISetColumnShowActionData extends IActionData {
+export interface ISetColumnShowActionData extends ISheetActionData {
     columnIndex: number;
     columnCount: number;
 }
@@ -16,13 +16,13 @@ export interface ISetColumnShowActionData extends IActionData {
  *
  * @internal
  */
-export class SetColumnShowAction extends ActionBase<ISetColumnShowActionData> {
+export class SetColumnShowAction extends SheetActionBase<ISetColumnShowActionData> {
     constructor(
         actionData: ISetColumnShowActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],
@@ -33,6 +33,22 @@ export class SetColumnShowAction extends ActionBase<ISetColumnShowActionData> {
             convertor: [],
         };
         this.validate();
+    }
+
+    do(): void {
+        const worksheet = this.getWorkSheet();
+
+        SetColumnShow(
+            this._doActionData.columnIndex,
+            this._doActionData.columnCount,
+            worksheet.getColumnManager()
+        );
+
+        this._observers.notifyObservers({
+            type: ActionType.REDO,
+            data: this._doActionData,
+            action: this,
+        });
     }
 
     redo(): void {
@@ -51,22 +67,6 @@ export class SetColumnShowAction extends ActionBase<ISetColumnShowActionData> {
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
-            action: this,
-        });
-    }
-
-    do(): void {
-        const worksheet = this.getWorkSheet();
-
-        SetColumnShow(
-            this._doActionData.columnIndex,
-            this._doActionData.columnCount,
-            worksheet.getColumnManager()
-        );
-
-        this._observers.notifyObservers({
-            type: ActionType.REDO,
-            data: this._doActionData,
             action: this,
         });
     }

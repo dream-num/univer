@@ -1,14 +1,13 @@
-import { HorizontalAlign, WrapStrategy } from '@univer/core';
+import { HorizontalAlign, IColorStyle, ObjectMatrix, WrapStrategy } from '@univer/core';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';
-import { IScale } from '../../../Base/Interfaces';
+import { IScale } from '../../../Basics/Interfaces';
 import { SpreadsheetExtensionRegistry } from '../../Extension';
 import { Spreadsheet } from '../Spreadsheet';
-import { fixLineWidthByScale } from '../../../Base/Tools';
+import { fixLineWidthByScale } from '../../../Basics/Tools';
 import { fontCacheItem } from '../Interfaces';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
-
 export class Font extends SheetExtension {
     uKey = UNIQUE_KEY;
 
@@ -17,6 +16,12 @@ export class Font extends SheetExtension {
     getDocuments() {
         const parent = this.parent as Spreadsheet;
         return parent.getDocuments();
+    }
+
+    changeFontColor: ObjectMatrix<IColorStyle>;
+
+    setChangeFontColor(r: number, c: number, color: IColorStyle) {
+        this.changeFontColor.setValue(r, c, color);
     }
 
     draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {

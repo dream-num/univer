@@ -1,19 +1,27 @@
 import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
-import { Context, IOCContainer, IRangeType, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { SheetContext, IOCContainer, IRangeType, Plugin, PLUGIN_NAMES, UniverSheet } from '@univer/core';
+import { SheetPlugin } from '@univer/base-sheets';
 import { SORT_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 import { Sort } from './Domain';
 import { IConfig } from './IData/ISort';
 import { en, zh } from './Locale';
 import { SortButton } from './UI/SortButton';
 
-type IPluginConfig = {};
+export interface ISortPluginConfig {}
 
 export class SortPlugin extends Plugin {
     private _sort: Sort | null;
 
-    constructor(config?: IPluginConfig) {
+    constructor(config?: ISortPluginConfig) {
         super(SORT_PLUGIN_NAME);
+    }
+
+    static create(config?: ISortPluginConfig) {
+        return new SortPlugin(config);
+    }
+
+    installTo(universheetInstance: UniverSheet) {
+        universheetInstance.installPlugin(this);
     }
 
     initialize(): void {
@@ -34,12 +42,12 @@ export class SortPlugin extends Plugin {
             show: true,
             label: <SortButton config={config} />,
         };
-        context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
+        context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
     }
 
     onMapping(IOC: IOCContainer): void {}
 
-    onMounted(ctx: Context): void {
+    onMounted(ctx: SheetContext): void {
         this.initialize();
 
         // const sort = this.createSort('A1:B2').ASCSord();

@@ -1,9 +1,9 @@
 import { IKeyValue, Nullable } from '@univer/core';
 import { Canvas, getDevicePixelRatio } from '../Canvas';
 import { BaseObject, BASE_OBJECT_ARRAY } from '../BaseObject';
-import { IBoundRect, Vector2 } from '../Base/Vector2';
-import { IObjectFullState, IScale } from '../Base/Interfaces';
-import { SHAPE_TYPE } from '../Base/Const';
+import { IBoundRect, Vector2 } from '../Basics/Vector2';
+import { IObjectFullState, IScale } from '../Basics/Interfaces';
+import { SHAPE_TYPE } from '../Basics/Const';
 
 export type LineJoin = 'round' | 'bevel' | 'miter';
 export type LineCap = 'butt' | 'round' | 'square';
@@ -381,7 +381,7 @@ export abstract class Shape<T> extends BaseObject {
 
     /**
      * @private
-     * @param {CanvasRenderingContext2D} ctx Context to render on
+     * @param {CanvasRenderingContext2D} ctx SheetContext to render on
      */
     private static _renderFill(ctx: CanvasRenderingContext2D, props: IShapeProps) {
         if (!props.fill) {
@@ -400,7 +400,7 @@ export abstract class Shape<T> extends BaseObject {
 
     /**
      * @private
-     * @param {CanvasRenderingContext2D} ctx Context to render on
+     * @param {CanvasRenderingContext2D} ctx SheetContext to render on
      */
     private static _renderStroke(ctx: CanvasRenderingContext2D, props: IShapeProps) {
         let { stroke, strokeWidth, shadowEnabled, shadowForStrokeEnabled, strokeScaleEnabled, scaleX, scaleY, parent } = props;

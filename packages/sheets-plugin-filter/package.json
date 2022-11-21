@@ -7,15 +7,15 @@
     "license": "MIT",
     "main": "./src/index.ts",
     "module": "./src/index.ts",
-    "types": "./src/index.d.ts",
+    "types": "./src/Types/index.d.ts",
+    "publishConfig": {
+        "main": "./lib/univer-sheets-plugin-filter.cjs.js",
+        "module": "./lib/univer-sheets-plugin-filter.es.js",
+        "types": "./lib/index.d.ts"
+    },
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*"
-    },
-    "publishConfig": {
-        "main": "./lib/index.umd.js",
-        "module": "./lib/index.es.js",
-        "types": "./lib/index.d.ts"
     },
     "directories": {
         "lib": "lib"
@@ -24,6 +24,8 @@
         "test": "jest",
         "dev": "vite",
         "build": "tsc && vite build",
+        "watch": "vite build",
+        "link": "pnpm link ./",
         "serve": "vite preview"
     },
     "devDependencies": {
@@ -40,12 +42,12 @@
         "vite-plugin-external": "1.2.3"
     },
     "dependencies": {
-        "@univer/base-component": "workspace:^0.0.1",
+        "@univer/base-render": "workspace:^0.0.1",
+        "@univer/base-sheets": "workspace:^0.0.1",
+        "@univer/common-plugin-data": "workspace:^0.0.1",
         "@univer/core": "workspace:^0.0.1",
         "@univer/sheets-plugin-conditional-format": "workspace:^0.0.1",
-        "@univer/base-sheets": "workspace:^0.0.1",
         "@univer/style-universheet": "workspace:^0.0.1",
-        "csstype": "^3.0.11",
         "nanoid": "^4.0.0",
         "preact": "^10.5.14"
     }

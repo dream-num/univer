@@ -1,5 +1,5 @@
 import { BaseCellRangeModalProps, CellRangeModalComponent, Component, createRef, JSXComponent } from '@univer/base-component';
-import { Context, Nullable, Observer, WorkBook, WorkSheet } from '@univer/core';
+import { SheetContext, Nullable, Observer, Workbook, Worksheet } from '@univer/core';
 import { Icon, Input, Modal, ModalProps } from '../index';
 import styles from './index.module.less';
 
@@ -19,9 +19,9 @@ type placeholder = {
 };
 
 export class CellRangeModal extends Component<BaseCellRangeModalProps, CellModalState> {
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
-    private _localeObserver1: Nullable<Observer<WorkSheet>>;
+    private _localeObserver1: Nullable<Observer<Worksheet>>;
 
     ref = createRef();
     // refProp = createRef();
@@ -109,26 +109,26 @@ export class CellRangeModal extends Component<BaseCellRangeModalProps, CellModal
         // init Locale message
         this.setLocale();
 
-        const cellRangeContext = this._context as Context;
+        const cellRangeContext = this._context as SheetContext;
         // when change Locale, update Locale message
         // do not use componentWillUpdate,it will listen all state changes
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
 
         this._localeObserver1 = this._context
             .getObserverManager()
-            .getObserver<WorkSheet>('onAfterSetSelectionObservable', 'worksheet')
+            .getObserver<Worksheet>('onAfterSetSelectionObservable', 'worksheet')
             ?.add((text) => {
                 console.dir(text);
             });
     }
 
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
         // this._context.onAfterChangeUILocaleObservable.remove(this._localeObserver);
     }
 

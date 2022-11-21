@@ -1,6 +1,6 @@
 import { BaseComponentRender, BaseComponentSheet, Component } from '@univer/base-component';
-import { Nullable, Observer, WorkBook } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { Nullable, Observer, Workbook } from '@univer/core';
+import { SheetPlugin } from '@univer/base-sheets';
 import styles from './index.module.less';
 
 type SplitContextProps = {
@@ -20,12 +20,12 @@ type SplitGroup = {
 };
 
 export class SplitColumnContent extends Component<SplitContextProps, SplitContextState> {
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     Render: BaseComponentRender;
 
     initialize() {
-        const component = new SpreadsheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = new SheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this.Render = component.getComponentRender();
         this.state = {
             SplitGroup: [
@@ -84,14 +84,14 @@ export class SplitColumnContent extends Component<SplitContextProps, SplitContex
         // subscribe Locale change event
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
     }
 
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     render(props: SplitContextProps, state: SplitContextState) {

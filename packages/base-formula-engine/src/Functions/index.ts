@@ -12,3 +12,5 @@ export * from './Max';
 export * from './Min';
 export * from './Power';
 export * from './Sum';
+export * from './Offset';
+export * from './Indirect';

@@ -1,12 +1,11 @@
 import { UndoManager } from './UndoManager';
-import { Inject } from '../IOC';
-import { Command } from './Command';
+import { CommandBase } from './CommandBase';
 import { Class } from '../Shared';
 import { ActionBase, IActionData } from './ActionBase';
 import { ActionObservers } from './ActionObservers';
-import { WorkBook } from '../Sheets/Domain';
 import { CommandObservers } from './CommandObservers';
 import { CommandInjectorObservers } from './CommandInjectorObservers';
+import { ContextBase } from '../Basics/ContextBase';
 
 /**
  * Manage command
@@ -19,6 +18,12 @@ export class CommandManager {
     private static _actionObservers: ActionObservers;
 
     private static _commandInjectorObservers: CommandInjectorObservers;
+
+    private _undoManager: UndoManager;
+
+    constructor(context: ContextBase) {
+        this._undoManager = context.getUndoManager();
+    }
 
     static staticInitialize() {
         this._actionClass = new Map<string, Class<ActionBase<IActionData>>>();
@@ -47,38 +52,32 @@ export class CommandManager {
         return this._commandInjectorObservers;
     }
 
-    @Inject('WorkBook')
-    private _workbook: WorkBook;
-
-    @Inject('UndoManager')
-    private _undoManager: UndoManager;
-
     undo(): void {
-        const { _workbook, _undoManager } = this;
-        const server = _workbook.getServer();
+        const { _undoManager } = this;
+        // const server = _workbook.getServer();
         const command = _undoManager.undo();
         if (command) {
             command.undo();
-            server.pushMessageQueue(command.getOldData());
+            // server.pushMessageQueue(command.getOldData());
         }
     }
 
     redo(): void {
-        const { _workbook, _undoManager } = this;
-        const server = _workbook.getServer();
+        const { _undoManager } = this;
+        // const server = _workbook.getServer();
         const command = _undoManager.redo();
         if (command) {
             command.redo();
-            server.pushMessageQueue(command.getDoData());
+            // server.pushMessageQueue(command.getDoData());
         }
     }
 
-    invoke(command: Command): void {
-        const { _workbook, _undoManager } = this;
-        const server = _workbook.getServer();
+    invoke(command: CommandBase): void {
+        const { _undoManager } = this;
+        // const server = _workbook.getServer();
         command.invoke();
         _undoManager.push(command);
-        server.pushMessageQueue(command.getDoData());
+        // server.pushMessageQueue(command.getDoData());
     }
 }
 

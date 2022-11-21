@@ -2,22 +2,21 @@
  * @jest-environment jsdom
  */
 import { ACTION_NAMES } from '../../../../src';
-import { Context } from '../../../../src/Basics';
-import { ActionObservers } from '../../../../src/Command';
-import { WorkBook, WorkSheet } from '../../../../src/Sheets/Domain';
-import { AddNamedRangeAction } from '../../../../src/Module/NamedRange/Action';
-import { INamedRange } from '../../../../src/Module/NamedRange/INamedRange';
+import { SheetContext } from '../../../../src/Basics';
+import { ActionObservers, AddNamedRangeAction } from '../../../../src/Command';
+import { Workbook, Worksheet } from '../../../../src/Sheets/Domain';
+import { INamedRange } from '../../../../src/Interfaces/INamedRange';
 import { IOCContainerStartUpReady } from '../../../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
 test('Add NamedRange Action Test', () => {
     const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
 
     const sheetId = 'sheet1';
-    const worksheet = new WorkSheet(context, { id: sheetId });
+    const worksheet = new Worksheet(context, { id: sheetId });
     workbook.insertSheet(worksheet);
 
     const rangeData = {

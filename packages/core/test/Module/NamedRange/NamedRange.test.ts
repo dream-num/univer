@@ -1,12 +1,12 @@
 /**
  * @jest-environment jsdom
  */
-import { Context, WorkBook, WorkSheet } from '../../../src';
+import { SheetContext, Workbook, Worksheet } from '../../../src';
 import {
     DEFAULT_NAMED_RANGE,
     INamedRange,
-} from '../../../src/Module/NamedRange/INamedRange';
-import { NamedRange } from '../../../src/Module/NamedRange/NamedRange';
+} from '../../../src/Interfaces/INamedRange';
+import { NamedRange } from '../../../src/Sheets/Domain/NamedRange';
 import { IOCContainerStartUpReady } from '../../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
@@ -19,8 +19,8 @@ test('Test Named Range', () => {
     // const { workbook, worksheet } = TestInitSheetInstance();
 
     const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -36,7 +36,7 @@ test('Test Named Range', () => {
         },
         status: 1,
     };
-    const worksheet = new WorkSheet(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 

@@ -17,10 +17,10 @@ program
 
 // TODO:check npm package name conflict
 program
-    .command('create <plugin> [inner]')
+    .command('create [inner]')
     .description('Create a Univer plugin from a template')
-    .action((plugin) => {
-        create(plugin);
+    .action(() => {
+        create();
     });
 
 program.parse(process.argv);

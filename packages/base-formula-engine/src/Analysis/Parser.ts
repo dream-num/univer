@@ -7,47 +7,123 @@ import { ParserDataLoader } from '../Basics/ParserDataLoader';
 import '../AstNode';
 import { FORMULA_AST_NODE_REGISTRY, FORMULA_FUNCTION_REGISTRY } from '../Basics/Registry';
 import { LexerNode } from './LexerNode';
-import { DEFAULT_TOKEN_TYPE_PARAMETER } from '../Basics/TokenType';
+import { DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, DEFAULT_TOKEN_TYPE_PARAMETER, DEFAULT_TOKEN_TYPE_ROOT } from '../Basics/TokenType';
+import { LambdaNode } from '../AstNode';
+import { LambdaRuntime } from '../Basics/LambdaRuntime';
 export class AstTreeMaker {
     private _parserDataLoader = new ParserDataLoader();
     private _astNodeFactoryList: BaseAstNodeFactory[];
 
     parse(lexerNode: LexerNode) {
         this._astNodeFactoryList = FORMULA_AST_NODE_REGISTRY.getData() as BaseAstNodeFactory[];
-        const astNode = new AstRootNode();
+        this._parserDataLoader.setLambdaRuntime(new LambdaRuntime());
+        const astNode = new AstRootNode(DEFAULT_TOKEN_TYPE_ROOT);
         const node = this._parse(lexerNode, astNode);
-        return astNode;
+        return node;
     }
 
-    private _parse(lexerNode: LexerNode, parent: BaseAstNode): BaseAstNode {
+    private _lambdaParameterHandler(lexerNode: LexerNode, parent: LambdaNode) {
+        const lambdaId = parent.getLambdaId();
+        const parentAstNode = new AstRootNode(DEFAULT_TOKEN_TYPE_ROOT);
+
+        const lambdaRuntime = this._parserDataLoader.getLambdaRuntime();
+        const currentLambdaPrivacyVar = lambdaRuntime.getCurrentPrivacyVar(lambdaId);
+
+        if (!currentLambdaPrivacyVar) {
+            return false;
+        }
+
+        const currentLambdaPrivacyVarKeys = [...currentLambdaPrivacyVar.keys()];
+
         const children = lexerNode.getChildren();
         const childrenCount = children.length;
-        const calculateStack = [];
-        let currentAstNode: false | BaseAstNode = false;
-        if (lexerNode.getToken() === DEFAULT_TOKEN_TYPE_PARAMETER) {
-            currentAstNode = parent;
-        } else {
-            currentAstNode = this._checkAstNode(lexerNode);
-            if (currentAstNode === false) {
-                return ErrorNode.create(ErrorType.ERROR);
-            }
-
-            currentAstNode.setParent(parent);
-        }
 
         for (let i = 0; i < childrenCount; i++) {
             const item = children[i];
             let astNode: BaseAstNode | false = false;
             if (item instanceof LexerNode) {
+                astNode = this._parse(item, parentAstNode);
+            } else {
+                return false;
+            }
+
+            // astNode.setParent(parentAstNode);
+        }
+
+        const parentChildren = parentAstNode.getChildren();
+        const parentChildrenCount = parentChildren.length;
+
+        for (let i = 0; i < parentChildrenCount; i++) {
+            const item = parentChildren[i];
+            currentLambdaPrivacyVar.set(currentLambdaPrivacyVarKeys[i], item);
+        }
+
+        parentAstNode.setParent(parent);
+
+        return parent;
+    }
+
+    private _getTopParent(node: BaseAstNode) {
+        let parent: BaseAstNode = node;
+        while (parent.getParent()) {
+            parent = parent.getParent();
+            console.log(parent);
+        }
+        return parent;
+    }
+
+    private _parse(lexerNode: LexerNode, parent: BaseAstNode): BaseAstNode {
+        const children = lexerNode.getChildren();
+        const childrenCount = children.length;
+        const calculateStack: BaseAstNode[] = [];
+        let currentAstNode: false | BaseAstNode = false;
+        // console.log('lexerNode', lexerNode, children);
+        if (lexerNode.getToken() === DEFAULT_TOKEN_TYPE_PARAMETER) {
+            currentAstNode = parent;
+        } else {
+            if (lexerNode.getToken() === DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER) {
+                let resultNode: BaseAstNode | false = this._lambdaParameterHandler(lexerNode, parent as LambdaNode);
+                if (resultNode === false) {
+                    // console.log('error1', resultNode, currentAstNode, lexerNode);
+                    resultNode = ErrorNode.create(ErrorType.ERROR);
+                }
+
+                return resultNode;
+            }
+
+            currentAstNode = this._checkAstNode(lexerNode);
+            if (currentAstNode === false) {
+                // console.log('error2', currentAstNode, lexerNode);
+                return ErrorNode.create(ErrorType.ERROR);
+            }
+
+            // currentAstNode.setParent(parent);
+            // parent.addChildren(currentAstNode);
+        }
+        // console.log('currentAstNode', currentAstNode.nodeType, currentAstNode, lexerNode);
+        for (let i = 0; i < childrenCount; i++) {
+            if (currentAstNode.nodeType === NodeType.LAMBDA && parent.nodeType !== NodeType.LAMBDA && i !== 0 && i !== childrenCount - 1) {
+                continue;
+            }
+
+            const item = children[i];
+            let astNode: BaseAstNode | false = false;
+            if (item instanceof LexerNode) {
                 astNode = this._parse(item, currentAstNode);
+                if (astNode === currentAstNode) {
+                    continue;
+                }
             } else {
                 astNode = this._checkAstNode(item);
             }
 
             if (astNode === false) {
+                // console.log('error3', astNode, currentAstNode, lexerNode);
                 return ErrorNode.create(ErrorType.ERROR);
             }
 
+            astNode = this._getTopParent(astNode);
+            // console.log('bugfix1', astNode, astNode.nodeType, currentAstNode, lexerNode);
             switch (astNode.nodeType) {
                 case NodeType.ERROR:
                     return astNode;
@@ -58,12 +134,25 @@ export class AstTreeMaker {
                     calculateStack.push(astNode);
                     break;
                 case NodeType.LAMBDA_PARAMETER:
+                    calculateStack.push(astNode);
                     break;
                 case NodeType.OPERATOR:
                     const parameterNode1 = calculateStack.pop();
                     const parameterNode2 = calculateStack.pop();
-                    parameterNode1?.setParent(astNode);
-                    parameterNode2?.setParent(astNode);
+                    if (parameterNode2) {
+                        parameterNode2.setParent(astNode);
+                    } else {
+                        // console.log('error4', currentAstNode, lexerNode, children, i);
+                        return ErrorNode.create(ErrorType.ERROR);
+                    }
+
+                    if (parameterNode1) {
+                        parameterNode1.setParent(astNode);
+                    } else {
+                        // console.log('error5', currentAstNode, lexerNode, children, i);
+                        return ErrorNode.create(ErrorType.ERROR);
+                    }
+
                     calculateStack.push(astNode);
                     break;
                 case NodeType.REFERENCE:
@@ -85,8 +174,13 @@ export class AstTreeMaker {
                     calculateStack.push(astNode);
                     break;
             }
+        }
 
-            astNode.setParent(currentAstNode);
+        const calculateStackCount = calculateStack.length;
+
+        for (let i = 0; i < calculateStackCount; i++) {
+            const item = calculateStack[i];
+            item.setParent(currentAstNode);
         }
 
         return currentAstNode;
@@ -102,6 +196,7 @@ export class AstTreeMaker {
                 break;
             }
         }
+        // console.log('astNode111', astNode, item);
         return astNode;
     }
 

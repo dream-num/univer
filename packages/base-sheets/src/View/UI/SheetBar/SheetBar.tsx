@@ -1,7 +1,7 @@
 import { BaseComponentRender, BaseComponentSheet, BaseSheetBarProps, BaseUlProps, Component, createRef, RefObject } from '@univer/base-component';
-import { Nullable, Observer, PLUGIN_NAMES, WorkBook } from '@univer/core';
+import { Nullable, Observer, PLUGIN_NAMES, Workbook } from '@univer/core';
 import { Ul } from '@univer/style-universheet';
-import { SlideTabBar } from '../../../Model/Base/SlideTabBar/SlideTabBar';
+import { SlideTabBar } from '../../../Basics/SlideTabBar/SlideTabBar';
 import styles from './index.module.less';
 
 type SheetState = {
@@ -22,6 +22,8 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
 
     sheetContainerRef = createRef();
 
+    slideTabRoot = createRef();
+
     sheetContentRef = createRef();
 
     sheetBarContentRef = createRef();
@@ -30,7 +32,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
 
     Render: BaseComponentRender;
 
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     private _renderKey: number = 1;
 
@@ -58,11 +60,12 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
             }
             if (item.selectType && item.selectType === 'jsx') {
                 const JSX: any = this.Render.renderFunction(item.label);
+                // ColorPicker
                 item.label = (
                     <JSX
                         style={{ visibility: 'visible', marginTop: '-60px', marginLeft: '-50px' }}
-                        onColor={(color: string) => {
-                            item.onColor(color);
+                        onClick={(color: string) => {
+                            item.onClick(color);
                         }}
                     />
                 );
@@ -212,7 +215,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
      * destory
      */
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     componentDidUpdate() {
@@ -224,6 +227,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
             slideTabBarItemActiveClassName: 'univer-slide-tab-active',
             slideTabBarItemClassName: 'univer-slide-tab-item',
             slideTabBarItemAutoSort: true,
+            slideTabRoot: this.slideTabRoot.current,
             onChangeName: (event: Event) => {
                 if (this.state.changeSheetName) {
                     this.state.changeSheetName(event);
@@ -264,7 +268,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         const NextIcon = this.Render.renderFunction('NextIcon');
 
         return (
-            <div className={styles.sheetBar}>
+            <div className={styles.sheetBar} ref={this.slideTabRoot}>
                 {/* user options button */}
                 <div className={styles.sheetBarOptions}>
                     <Button className={styles.sheetBarOptionsButton} onClick={addSheet} type="text">

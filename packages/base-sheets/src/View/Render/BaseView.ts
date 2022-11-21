@@ -1,12 +1,13 @@
 import { Scene } from '@univer/base-render';
-import { Plugin, Registry, WorkSheet } from '@univer/core';
+import { Registry, Worksheet } from '@univer/core';
+import { SheetPlugin } from '../../SheetPlugin';
 
 export class BaseView {
     viewKey = '';
 
     private _scene: Scene;
 
-    private _plugin: Plugin;
+    private _plugin: SheetPlugin;
 
     // constructor(private _scene: Scene, private _plugin: Plugin) {
     //     this._initialize();
@@ -24,11 +25,11 @@ export class BaseView {
         return this._plugin.getContext();
     }
 
-    updateToSheet(worksheet: WorkSheet) {}
+    updateToSheet(worksheet: Worksheet) {}
 
     protected _initialize() {}
 
-    initialize(scene: Scene, plugin: Plugin) {
+    initialize(scene: Scene, plugin: SheetPlugin) {
         this._scene = scene;
         this._plugin = plugin;
         this._initialize();

@@ -1,25 +1,25 @@
 import { SetHiddenGridlines } from '../Apply';
-import { WorkBook } from '../Domain/WorkBook';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface ISetHiddenGridlinesActionData extends IActionData {
+export interface ISetHiddenGridlinesActionData extends ISheetActionData {
     hideGridlines: boolean;
 }
 
 /**
  * @internal
  */
-export class SetHiddenGridlinesAction extends ActionBase<ISetHiddenGridlinesActionData> {
+export class SetHiddenGridlinesAction extends SheetActionBase<ISetHiddenGridlinesActionData> {
     constructor(
         actionData: ISetHiddenGridlinesActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],

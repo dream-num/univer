@@ -9,7 +9,7 @@ import {
     HeaderComponent,
     JSXComponent,
     LayoutComponent,
-    RefObject,
+    Ref,
     SiderComponent,
 } from '@univer/base-component';
 import styles from './index.module.less';
@@ -86,7 +86,7 @@ const Footer = (props: BaseLayoutProps) => {
 /**
  * use forwardRef, get hold of a specific reference further down the tree
  */
-const Content = forwardRef((props: BaseLayoutProps, ref: RefObject<HTMLElement>) => {
+const Content = forwardRef((props: BaseLayoutProps, ref: Ref<HTMLElement>) => {
     const { children, style, className } = props;
 
     return (

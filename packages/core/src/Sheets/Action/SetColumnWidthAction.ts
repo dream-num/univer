@@ -1,12 +1,12 @@
 import { SetColumnWidth } from '../Apply';
-import { WorkBook } from '../Domain';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface ISetColumnWidthActionData extends IActionData {
+export interface ISetColumnWidthActionData extends ISheetActionData {
     columnIndex: number;
     columnWidth: number[];
 }
@@ -16,13 +16,13 @@ export interface ISetColumnWidthActionData extends IActionData {
  *
  * @internal
  */
-export class SetColumnWidthAction extends ActionBase<ISetColumnWidthActionData> {
+export class SetColumnWidthAction extends SheetActionBase<ISetColumnWidthActionData> {
     constructor(
         actionData: ISetColumnWidthActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],
@@ -33,6 +33,24 @@ export class SetColumnWidthAction extends ActionBase<ISetColumnWidthActionData> 
             convertor: [],
         };
         this.validate();
+    }
+
+    do(): number[] {
+        const worksheet = this.getWorkSheet();
+
+        const result = SetColumnWidth(
+            this._doActionData.columnIndex,
+            this._doActionData.columnWidth,
+            worksheet.getColumnManager()
+        );
+
+        this._observers.notifyObservers({
+            type: ActionType.REDO,
+            data: this._doActionData,
+            action: this,
+        });
+
+        return result;
     }
 
     redo(): void {
@@ -51,24 +69,6 @@ export class SetColumnWidthAction extends ActionBase<ISetColumnWidthActionData> 
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
-            action: this,
-        });
-
-        return result;
-    }
-
-    do(): number[] {
-        const worksheet = this.getWorkSheet();
-
-        const result = SetColumnWidth(
-            this._doActionData.columnIndex,
-            this._doActionData.columnWidth,
-            worksheet.getColumnManager()
-        );
-
-        this._observers.notifyObservers({
-            type: ActionType.REDO,
-            data: this._doActionData,
             action: this,
         });
 

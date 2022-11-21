@@ -28,7 +28,7 @@ class ColorPickerPanel extends Component<IProps, IState> {
 
     render() {
         return (
-            <div className={styles.colorPickerPanel}>
+            <div className={styles.colorPickerPanel} onClick={(e) => e.stopPropagation()}>
                 <RgbaStringColorPicker className={styles.colorPicker} color={this.state.color} onChange={debounce(this.setColor.bind(this), 500)} />
                 <div className={styles.colorPickerPanelSetting}>
                     <div className={styles.panelInput}>

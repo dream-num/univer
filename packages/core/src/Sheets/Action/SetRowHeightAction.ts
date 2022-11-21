@@ -1,12 +1,12 @@
 import { SetRowHeight } from '../Apply';
-import { WorkBook } from '../Domain';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface ISetRowHeightActionData extends IActionData {
+export interface ISetRowHeightActionData extends ISheetActionData {
     rowIndex: number;
     rowHeight: number[];
 }
@@ -16,13 +16,13 @@ export interface ISetRowHeightActionData extends IActionData {
  *
  * @internal
  */
-export class SetRowHeightAction extends ActionBase<ISetRowHeightActionData> {
+export class SetRowHeightAction extends SheetActionBase<ISetRowHeightActionData> {
     constructor(
         actionData: ISetRowHeightActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],
@@ -33,6 +33,24 @@ export class SetRowHeightAction extends ActionBase<ISetRowHeightActionData> {
             convertor: [],
         };
         this.validate();
+    }
+
+    do(): number[] {
+        const worksheet = this.getWorkSheet();
+
+        const result = SetRowHeight(
+            this._doActionData.rowIndex,
+            this._doActionData.rowHeight,
+            worksheet.getRowManager()
+        );
+
+        this._observers.notifyObservers({
+            type: ActionType.REDO,
+            data: this._doActionData,
+            action: this,
+        });
+
+        return result;
     }
 
     redo(): void {
@@ -51,24 +69,6 @@ export class SetRowHeightAction extends ActionBase<ISetRowHeightActionData> {
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
-            action: this,
-        });
-
-        return result;
-    }
-
-    do(): number[] {
-        const worksheet = this.getWorkSheet();
-
-        const result = SetRowHeight(
-            this._doActionData.rowIndex,
-            this._doActionData.rowHeight,
-            worksheet.getRowManager()
-        );
-
-        this._observers.notifyObservers({
-            type: ActionType.REDO,
-            data: this._doActionData,
             action: this,
         });
 

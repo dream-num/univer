@@ -1,8 +1,6 @@
-import { ColorBuilder } from '../Sheets/Domain/ColorBuilder';
 import { Environment } from '../Basics';
-import { ICellData, ICellInfo, IColorStyle, ISelection } from '../Interfaces';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from './ObjectMatrix';
-import { Class, IKeyValue, Nullable } from './Types';
+import { Class, IKeyValue } from './Types';
 
 const rmsPrefix = /^-ms-/;
 const rDashAlpha = /-([a-z])/g;
@@ -666,76 +664,4 @@ export class Tools {
 
         return resultJsonObject as unknown as T;
     }
-}
-
-export function makeCellToSelection(
-    cellInfo: Nullable<ICellInfo>
-): Nullable<ISelection> {
-    if (!cellInfo) {
-        return;
-    }
-    let { row, column, startY, endY, startX, endX, isMerged, mergeInfo } = cellInfo;
-    let startRow = row;
-    let startColumn = column;
-    let endRow = row;
-    let endColumn = column;
-    if (isMerged && mergeInfo) {
-        const {
-            startRow: mergeStartRow,
-            startColumn: mergeStartColumn,
-            endRow: mergeEndRow,
-            endColumn: mergeEndColumn,
-            startY: mergeStartY,
-            endY: mergeEndY,
-            startX: mergeStartX,
-            endX: mergeEndX,
-        } = mergeInfo;
-        startRow = mergeStartRow;
-        startColumn = mergeStartColumn;
-        endRow = mergeEndRow;
-        endColumn = mergeEndColumn;
-        startY = mergeStartY;
-        endY = mergeEndY;
-        startX = mergeStartX;
-        endX = mergeEndX;
-    }
-
-    return {
-        startRow,
-        startColumn,
-        endRow,
-        endColumn,
-        startY,
-        endY,
-        startX,
-        endX,
-    };
-}
-
-export function isEmptyCell(cell: Nullable<ICellData>) {
-    if (!cell) {
-        return true;
-    }
-
-    const content = cell?.m || '';
-    if (content.length === 0 && !cell.p) {
-        return true;
-    }
-    return false;
-}
-
-export function getColorStyle(color: Nullable<IColorStyle>): Nullable<string> {
-    if (color) {
-        if (color.rgb) {
-            return color.rgb;
-        }
-        if (color.th) {
-            return new ColorBuilder()
-                .setThemeColor(color.th)
-                .asThemeColor()
-                .asRgbColor()
-                .getCssString();
-        }
-    }
-    return null;
 }

@@ -1,18 +1,18 @@
 import { InsertDataColumn, RemoveColumnData } from '../Apply';
-import { WorkBook } from '../Domain';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ICellData } from '../../Interfaces';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveColumnDataAction } from './RemoveColumnDataAction';
 import { ObjectArray } from '../../Shared';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface IInsertColumnDataActionData extends IActionData {
+export interface IInsertColumnDataActionData extends ISheetActionData {
     columnIndex: number;
-    columnData: ObjectMatrixPrimitiveType<ICellData>;
+    columnData: ObjectMatrixPrimitiveType<ICellData>; // TODO Does it need to be merged with IKeyValue
 }
 
 /**
@@ -20,16 +20,16 @@ export interface IInsertColumnDataActionData extends IActionData {
  *
  * @internal
  */
-export class InsertColumnDataAction extends ActionBase<
+export class InsertColumnDataAction extends SheetActionBase<
     IInsertColumnDataActionData,
     IRemoveColumnDataAction
 > {
     constructor(
         actionData: IInsertColumnDataActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],

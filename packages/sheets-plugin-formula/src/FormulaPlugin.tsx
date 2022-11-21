@@ -1,26 +1,28 @@
-import { Context, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
-import { FormulaEnginePlugin } from '../../base-formula-engine';
-import { FormulaButton } from './UI/FormulaButton';
+import { SheetContext, IOCContainer, UniverSheet, Plugin, ActionExtensionManager } from '@univer/core';
+import { CellEditExtensionManager, CellInputExtensionManager } from '@univer/base-sheets';
+import { FormulaEnginePlugin } from '@univer/base-formula-engine';
 import { zh, en } from './Locale';
 
-import { IConfig } from './Basic/IFormula';
-import { FORMULA_PLUGIN_NAME } from './Basic/PLUGIN_NAME';
+import { IFormulaConfig } from './Basic/Interfaces/IFormula';
+import { FORMULA_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
+import { FormulaController } from './Controller/FormulaController';
+import { firstLoader } from './Controller/FirstLoader';
+import { FormulaCellEditExtensionFactory } from './Basic/Register/FormulaCellEditExtension';
+import { FormulaCellInputExtensionFactory } from './Basic/Register/FormulaCellInputExtension';
+import { FormulaActionExtensionFactory } from './Basic/Register';
+import { FormulaPluginObserve, install } from './Basic/Observer';
+import { SearchFormulaController } from './Controller/SearchFormulaModalController';
 
-type IPluginConfig = {};
+export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
+    private _formulaController: FormulaController;
 
-export class FormulaPlugin extends Plugin {
-    protected _config: IPluginConfig;
+    private _searchFormulaController: SearchFormulaController;
 
-    private _formulaEngine: FormulaEnginePlugin;
-
-    constructor(config?: IPluginConfig) {
+    constructor(private _config?: IFormulaConfig) {
         super(FORMULA_PLUGIN_NAME);
-        this._config = config || {};
     }
 
-    static create(config?: IPluginConfig) {
+    static create(config?: IFormulaConfig) {
         return new FormulaPlugin(config);
     }
 
@@ -33,11 +35,18 @@ export class FormulaPlugin extends Plugin {
             formulaEngine = new FormulaEnginePlugin();
             universheetInstance.installPlugin(formulaEngine);
         }
-        this._formulaEngine = formulaEngine;
+
+        this._formulaController = new FormulaController(this, this._config);
+
+        this._searchFormulaController = new SearchFormulaController(this);
+
+        this._formulaController.setFormulaEngine(formulaEngine);
+
+        firstLoader(this._formulaController);
     }
 
-    initialize(): void {
-        const context = this.getContext();
+    initialize(context: SheetContext): void {
+        this.context = context;
         /**
          * load more Locale object
          */
@@ -46,26 +55,39 @@ export class FormulaPlugin extends Plugin {
             zh,
         });
 
-        const config: IConfig = { context };
-
-        const item: IToolBarItemProps = {
-            locale: FORMULA_PLUGIN_NAME,
-            type: ISlotElement.JSX,
-            show: true,
-            label: <FormulaButton config={config} />,
-        };
-        context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
+        this.registerExtension();
     }
 
     onMapping(IOC: IOCContainer): void {}
 
-    onMounted(ctx: Context): void {
-        this.initialize();
+    onMounted(context: SheetContext): void {
+        install(this);
+
+        this.initialize(context);
     }
 
     onDestroy(): void {}
 
+    registerExtension() {
+        const cellEditRegister = CellEditExtensionManager.create();
+        cellEditRegister.add(new FormulaCellEditExtensionFactory(this));
+
+        const cellInputRegister = CellInputExtensionManager.create();
+        cellInputRegister.add(new FormulaCellInputExtensionFactory(this));
+
+        const actionRegister = ActionExtensionManager.create();
+        actionRegister.add(new FormulaActionExtensionFactory(this));
+    }
+
     getFormulaEngine() {
-        return this._formulaEngine;
+        return this._formulaController.getFormulaEngine();
+    }
+
+    getFormulaController() {
+        return this._formulaController;
+    }
+
+    getSearchFormulaController() {
+        return this._searchFormulaController;
     }
 }

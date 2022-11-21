@@ -1,6 +1,8 @@
 // @index('./*.ts', f => `export * from '${f.path}'`)
 export * from './AddMerge';
+export * from './AddNamedRange';
 export * from './ClearRange';
+export * from './DeleteNamedRange';
 export * from './DeleteRange';
 export * from './HideSheet';
 export * from './InsertColumn';
@@ -16,21 +18,18 @@ export * from './RemoveRow';
 export * from './RemoveRowData';
 export * from './RemoveSheet';
 export * from './SetBorder';
-export * from './SetCollapseAllColumnGroups';
-export * from './SetCollapseAllRowGroups';
 export * from './SetColumnHide';
 export * from './SetColumnShow';
 export * from './SetColumnWidth';
-export * from './SetFrozenColumns';
-export * from './SetFrozenRows';
 export * from './SetHiddenGridlines';
 export * from './SetHideRows';
+export * from './SetNamedRange';
 export * from './SetRangeData';
 export * from './SetRangeFormat';
 export * from './SetRangeFormula';
 export * from './SetRangeNote';
 export * from './SetRangeStyle';
-export * from './SetRangeValue';
+export * from './SetRangeFormattedValue';
 export * from './SetRightToLeft';
 export * from './SetRowHeight';
 export * from './SetSelectionActivate';
@@ -40,4 +39,5 @@ export * from './SetTabColor';
 export * from './SetWorkSheetActivate';
 export * from './SetWorkSheetName';
 export * from './SetWorkSheetStatus';
+export * from './SetZoomRatio';
 // @endindex

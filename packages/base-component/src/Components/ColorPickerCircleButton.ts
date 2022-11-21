@@ -5,18 +5,24 @@ export interface BaseColorPickerCircleButtonProps {
      * init color
      */
     color: string;
-    /**
-     * get color by user choose
-     */
-    onColor: (color: string, val?: boolean) => void;
-    /**
-     * cancel choose
-     */
-    onCancel: () => void;
 
-    // forwardRef?: RefObject<HTMLDivElement>;
+    /**
+     * Listen to the confirm button
+     */
+    onClick: (color: string, e?: MouseEvent) => void;
+    /**
+     * cancel select
+     */
+    onCancel?: () => void;
+
+    /**
+     * style
+     */
     style?: JSX.CSSProperties;
 
+    /**
+     * color picker style
+     */
     colorPickerStyle?: JSX.CSSProperties;
 }
 

@@ -1,5 +1,5 @@
 export type IConfig = {
-    // context: Context;
+    // context: SheetContext;
 };
 
 // Types for props

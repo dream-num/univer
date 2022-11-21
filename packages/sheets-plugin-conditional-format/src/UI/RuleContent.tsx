@@ -1,6 +1,6 @@
 import { BaseComponentRender, BaseComponentSheet, Component, joinClassNames } from '@univer/base-component';
-import { Nullable, Observer, WorkBook } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { Nullable, Observer, Workbook } from '@univer/core';
+import { SheetPlugin } from '@univer/base-sheets';
 import styles from './index.module.less';
 
 type RuleContentProps = {
@@ -20,12 +20,12 @@ type LabelProps = {
 };
 
 export class RuleContent extends Component<RuleContentProps, RuleContentState> {
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     Render: BaseComponentRender;
 
     initialize() {
-        const component = new SpreadsheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = new SheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this.Render = component.getComponentRender();
 
         this.state = {
@@ -96,14 +96,14 @@ export class RuleContent extends Component<RuleContentProps, RuleContentState> {
         // subscribe Locale change event
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
     }
 
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     setValue = (value: object, fn?: () => void) => {
@@ -184,12 +184,12 @@ type RuleEditState = {
 
 // edit rule content
 class RuleEditContent extends Component<RuleEditProps, RuleEditState> {
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     Render: BaseComponentRender;
 
     initialize() {
-        const component = new SpreadsheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = new SheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this.Render = component.getComponentRender();
 
         this.state = {
@@ -449,14 +449,14 @@ class RuleEditContent extends Component<RuleEditProps, RuleEditState> {
         // subscribe Locale change event
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
     }
 
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     setValue = (value: object, fn?: () => void) => {
@@ -674,11 +674,11 @@ class RuleEditContent extends Component<RuleEditProps, RuleEditState> {
                 <div className={styles.colorBox}>
                     <div className={styles.colorItem}>
                         <Checkbox>{setting.textColor.label}</Checkbox>
-                        <ColorPicker color="#9c0006" onColor={this.pickTextColor} onCancel={this.cancelColor}></ColorPicker>
+                        <ColorPicker color="#9c0006" onClick={this.pickTextColor} onCancel={this.cancelColor}></ColorPicker>
                     </div>
                     <div className={styles.colorItem}>
                         <Checkbox>{setting.cellColor.label}</Checkbox>
-                        <ColorPicker color="#ffc7ce" onColor={this.pickCellColor} onCancel={this.cancelColor}></ColorPicker>
+                        <ColorPicker color="#ffc7ce" onClick={this.pickCellColor} onCancel={this.cancelColor}></ColorPicker>
                     </div>
                 </div>
             </div>

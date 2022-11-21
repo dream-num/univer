@@ -1,30 +1,20 @@
 import { ActionBase, IActionData } from './ActionBase';
-import { WorkBook } from '../Sheets/Domain';
 import { CommandManager } from './CommandManager';
-import { CommandType } from './CommandObservers';
 import { CommandInjector } from './CommandInjectorObservers';
 import { Class, Nullable } from '../Shared';
+// import { ActionType } from './ActionObservers';
+import { ActionType } from './ActionObservers';
+import { ActionExtensionManager } from './ActionExtensionManager';
+
 /**
  * Manage action instances and action data
  */
 export class CommandBase {
     protected _actions: Array<ActionBase<IActionData>>;
 
-    protected _workbook: WorkBook;
-
-    constructor(workbook: WorkBook, ...list: IActionData[]) {
-        this._workbook = workbook;
-        this._actions = [];
-        list.forEach((data) => {
-            const ActionClass = CommandManager.getAction(data.actionName);
-            const observers = CommandManager.getActionObservers();
-            const action = new ActionClass(data, this._workbook, observers);
-            this._actions.push(action);
-        });
-        CommandManager.getCommandObservers().notifyObservers({
-            type: CommandType.REDO,
-            actions: this._actions,
-        });
+    constructor(list: IActionData[]) {
+        const actionExtensionManager = new ActionExtensionManager();
+        actionExtensionManager.handle(list);
     }
 
     getDoData(): IActionData[] {
@@ -55,5 +45,31 @@ export class CommandBase {
                 return null;
             }
         })();
+    }
+
+    redo(): void {
+        this._actions.forEach((action) => action.redo());
+        CommandManager.getCommandObservers().notifyObservers({
+            type: ActionType.REDO,
+            actions: this._actions,
+        });
+    }
+
+    undo(): void {
+        this._actions.forEach((action) => action.undo());
+        CommandManager.getCommandObservers().notifyObservers({
+            type: ActionType.UNDO,
+            actions: this._actions,
+        });
+    }
+
+    invoke(): void {
+        CommandManager.getCommandInjectorObservers().notifyObservers(
+            this.getInjector()
+        );
+        CommandManager.getCommandObservers().notifyObservers({
+            type: ActionType.REDO,
+            actions: this._actions,
+        });
     }
 }

@@ -3,7 +3,7 @@ import { AvatarComponent } from './Avatar';
 import { CheckboxComponent, CheckboxGroupComponent } from './Checkbox';
 import { ColorPickerCircleButtonComponent } from './ColorPickerCircleButton';
 import { SiderModalComponent } from './SiderModal';
-import { ButtonComponent, CellRangeModalComponent, DemoComponent } from '../BaseComponent';
+import { ButtonComponent, CellRangeModalComponent } from '../BaseComponent';
 import { IconComponent } from './Icon';
 import { InputComponent } from './Input';
 import { TabComponent, TabPaneComponent } from './Tab';
@@ -16,8 +16,9 @@ import { ColorPickerComponent } from './ColorPicker';
 import { TooltipComponent } from './Tooltip';
 import { CollapseComponent, PanelComponent } from './Collapse';
 import { UlComponent } from './Ul';
-import { RichTextComponent } from './RichText';
 import { SliderComponent } from './Slider';
+import { MenuComponent } from './Menu';
+import { DropdownComponent } from './Dropdown';
 
 export interface Description {
     Button: ButtonComponent;
@@ -33,7 +34,6 @@ export interface Description {
     Footer: FooterComponent;
     Content: ContentComponent;
     Sider: SiderComponent;
-    Demo: DemoComponent;
     Checkbox: CheckboxComponent;
     CheckboxGroup: CheckboxGroupComponent;
     ColorPicker: ColorPickerComponent;
@@ -49,7 +49,8 @@ export interface Description {
     Collapse: CollapseComponent;
     Panel: PanelComponent;
     FormatModal: FormatModalComponent;
-    RichText: RichTextComponent;
+    Menu: MenuComponent;
+    Dropdown: DropdownComponent;
 
     // Icon
     NextIcon: IconComponent;
@@ -107,7 +108,7 @@ export interface Description {
     MoneyIcon: IconComponent;
     FxIcon: IconComponent;
     AddIcon: IconComponent;
-    reduceIcon: IconComponent;
+    ReduceIcon: IconComponent;
     DivideIcon: IconComponent;
     LockIcon: IconComponent;
     LocationIcon: IconComponent;
@@ -236,7 +237,7 @@ export enum DescriptionEnum {
     MoneyIcon,
     FxIcon,
     AddIcon,
-    reduceIcon,
+    ReduceIcon,
     DivideIcon,
     LockIcon,
     LocationIcon,

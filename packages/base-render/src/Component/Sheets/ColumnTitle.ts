@@ -1,9 +1,9 @@
 import { ColumnTitleLayout } from '.';
-import { IBoundRect, Vector2 } from '../../Base/Vector2';
+import { IBoundRect, Vector2 } from '../../Basics/Vector2';
 import { SpreadsheetSkeleton } from './SheetSkeleton';
 import { SpreadsheetTitle } from './SheetComponent';
 import { SheetColumnTitleExtensionRegistry } from '../Extension';
-import { fixLineWidthByScale, getScale } from '../../Base/Tools';
+import { fixLineWidthByScale, getScale } from '../../Basics/Tools';
 
 export class SpreadsheetColumnTitle extends SpreadsheetTitle {
     private _columnTitleLayoutExtension: ColumnTitleLayout;

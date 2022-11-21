@@ -1,13 +1,13 @@
 import { getColorStyle } from '@univer/core';
-import { IScale } from '../../../Base/Interfaces';
+import { IScale } from '../../../Basics/Interfaces';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../Extension';
-import { docsExtension } from '../DocsExtension';
-import { IDocumentSkeletonSpan } from '../../../Base/IDocumentSkeletonCached';
-import { Vector2 } from '../../../Base/Vector2';
+import { docExtension } from '../DocExtension';
+import { IDocumentSkeletonSpan } from '../../../Basics/IDocumentSkeletonCached';
+import { Vector2 } from '../../../Basics/Vector2';
 
 const UNIQUE_KEY = 'DefaultDocsBackgroundExtension';
 
-export class Background extends docsExtension {
+export class Background extends docExtension {
     uKey = UNIQUE_KEY;
 
     zIndex = 10;

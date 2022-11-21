@@ -1,7 +1,8 @@
 import { ErrorType } from '../Basics/ErrorType';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, DEFAULT_TOKEN_TYPE_PARAMETER, DEFAULT_TOKEN_TYPE_ROOT } from '../Basics/TokenType';
 import { LexerNode } from './LexerNode';
-import { operatorToken, matchToken, OPERATOR_TOKEN_SET, OPERATOR_TOKEN_PRIORITY, suffixToken, SUFFIX_TOKEN_SET } from '../Basics/Token';
+import { operatorToken, matchToken, OPERATOR_TOKEN_SET, OPERATOR_TOKEN_PRIORITY, suffixToken, SUFFIX_TOKEN_SET, prefixToken } from '../Basics/Token';
+import { Nullable } from '@univer/core';
 
 enum bracketType {
     NORMAL,
@@ -11,6 +12,8 @@ enum bracketType {
 
 export class LexerTreeMaker {
     private _currentLexerNode: LexerNode;
+
+    private _upLevel = 0;
 
     private _segment = '';
 
@@ -39,6 +42,13 @@ export class LexerTreeMaker {
     private _pushNodeToChildren(value: LexerNode | string, isUnshift = false) {
         if (value !== '') {
             const children = this._currentLexerNode.getChildren();
+            if (!(value instanceof LexerNode) && this.isColonOpen()) {
+                const subLexerNode_ref = new LexerNode();
+                subLexerNode_ref.setToken(value);
+                subLexerNode_ref.setParent(this._currentLexerNode);
+
+                value = subLexerNode_ref;
+            }
             if (isUnshift) {
                 children.unshift(value);
             } else {
@@ -48,7 +58,7 @@ export class LexerTreeMaker {
 
         if (this.isColonOpen()) {
             this._setAncestorCurrentLexerNode();
-            this._closeColon();
+            this._closeColon(); /*  */
         }
     }
 
@@ -97,12 +107,18 @@ export class LexerTreeMaker {
         this._lambdaState = false;
     }
 
-    private _openColon() {
+    private _openColon(upLevel: number) {
+        this._upLevel = upLevel;
         this._colonState = true;
     }
 
     private _closeColon() {
+        this._upLevel = 0;
         this._colonState = false;
+    }
+
+    getUpLevel() {
+        return this._upLevel;
     }
 
     isColonClose() {
@@ -169,22 +185,30 @@ export class LexerTreeMaker {
 
     private _setAncestorCurrentLexerNode() {
         const parent = this._currentLexerNode?.getParent();
+        let state = false;
         if (parent && parent.getToken() === DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER) {
             // lambda will skip to more one level
             if (parent?.getParent()?.getParent()) {
                 this._currentLexerNode = this._currentLexerNode.getParent()?.getParent().getParent();
-                return true;
+                state = true;
             }
-
-            return false;
         } else {
             if (parent?.getParent()) {
                 this._currentLexerNode = this._currentLexerNode.getParent().getParent();
-                return true;
+                state = true;
             }
-
-            return false;
         }
+
+        for (let i = 0; i < this._upLevel; i++) {
+            this._currentLexerNode = this._currentLexerNode?.getParent();
+            if (this._currentLexerNode) {
+                state = true;
+            } else {
+                state = false;
+            }
+        }
+
+        return state;
     }
 
     private _segmentCount() {
@@ -460,9 +484,57 @@ export class LexerTreeMaker {
 
                 subLexerNode_op.getChildren().push(subLexerNode_left, subLexerNode_right);
 
+                let subLexerNode_main = subLexerNode_op;
+                let upLevel = 0;
                 if (this._segmentCount() > 0) {
                     // e.g. A1:B5
-                    subLexerNode_left.getChildren().push(this._segment);
+                    // -@A4:B5
+                    let subLexerNode_minus: Nullable<LexerNode>;
+                    let subLexerNode_at: Nullable<LexerNode>;
+                    let sliceLength = 0;
+                    if (new RegExp(prefixToken.MINUS, 'g').test(this._segment)) {
+                        subLexerNode_minus = new LexerNode();
+                        subLexerNode_minus.setToken(prefixToken.MINUS);
+                        sliceLength++;
+                    }
+
+                    if (new RegExp(prefixToken.AT, 'g').test(this._segment)) {
+                        subLexerNode_at = new LexerNode();
+                        subLexerNode_at.setToken(prefixToken.AT);
+
+                        if (subLexerNode_minus) {
+                            subLexerNode_minus.addChildren(subLexerNode_at);
+                            subLexerNode_at.setParent(subLexerNode_minus);
+                        }
+
+                        sliceLength++;
+                    }
+
+                    if (sliceLength > 0) {
+                        this._segment = this._segment.slice(sliceLength);
+                    }
+
+                    upLevel = sliceLength;
+
+                    if (subLexerNode_at) {
+                        subLexerNode_at.addChildren(subLexerNode_op);
+                        subLexerNode_op.setParent(subLexerNode_at);
+                        if (subLexerNode_at.getParent()) {
+                            subLexerNode_main = subLexerNode_at.getParent();
+                        } else {
+                            subLexerNode_main = subLexerNode_at;
+                        }
+                    } else if (subLexerNode_minus) {
+                        subLexerNode_main = subLexerNode_minus;
+                        subLexerNode_minus.addChildren(subLexerNode_op);
+                        subLexerNode_op.setParent(subLexerNode_minus);
+                    }
+
+                    const subLexerNode_ref = new LexerNode();
+                    subLexerNode_ref.setToken(this._segment);
+                    subLexerNode_ref.setParent(subLexerNode_left);
+
+                    subLexerNode_left.getChildren().push(subLexerNode_ref);
                     this._resetSegment();
                 } else {
                     // e.g. indirect("A5"):B10
@@ -472,9 +544,9 @@ export class LexerTreeMaker {
                     }
                 }
 
-                this._setCurrentLexerNode(subLexerNode_op);
+                this._setCurrentLexerNode(subLexerNode_main);
                 this._currentLexerNode = subLexerNode_right;
-                this._openColon();
+                this._openColon(upLevel);
             } else if (SUFFIX_TOKEN_SET.has(currentString) && this.isSingleQuotationClose() && this.isDoubleQuotationClose()) {
                 this._pushNodeToChildren(this._segment);
 

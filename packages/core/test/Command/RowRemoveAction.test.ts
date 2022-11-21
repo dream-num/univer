@@ -3,10 +3,10 @@
  */
 import {
     CommandManager,
-    Context,
+    SheetContext,
     RemoveRowAction,
-    WorkBook,
-    WorkSheet,
+    Workbook,
+    Worksheet,
 } from '../../src';
 import { IOCContainerStartUpReady } from '../ContainerStartUp';
 
@@ -14,12 +14,12 @@ jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
 test('Remove a new column', () => {
     const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
 
     const rowData = { 0: { hd: 0, h: 50 } };
     const sheetId = 'sheet1';
-    const worksheet = new WorkSheet(context, { id: sheetId, rowData });
+    const worksheet = new Worksheet(context, { id: sheetId, rowData });
     workbook.insertSheet(worksheet);
     expect(worksheet.getRowManager().getSize()).toEqual(1);
 
@@ -37,12 +37,12 @@ test('Remove a new column', () => {
 
 test('Remove Undo column', () => {
     const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
 
     const rowData = { 0: { hd: 0, h: 50 } };
     const sheetId = 'sheet1';
-    const worksheet = new WorkSheet(context, { id: sheetId, rowData });
+    const worksheet = new Worksheet(context, { id: sheetId, rowData });
     workbook.insertSheet(worksheet);
     expect(worksheet.getRowManager().getSize()).toEqual(1);
 

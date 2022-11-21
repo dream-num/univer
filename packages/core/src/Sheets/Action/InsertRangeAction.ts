@@ -1,17 +1,17 @@
 import { DeleteRange, InsertRange } from '../Apply';
 import { ACTION_NAMES } from '../../Const';
-import { WorkBook } from '../Domain';
 import { Dimension } from '../../Enum/Dimension';
 import { ICellData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IDeleteRangeActionData } from './DeleteRangeAction';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface IInsertRangeActionData extends IActionData {
+export interface IInsertRangeActionData extends ISheetActionData {
     shiftDimension: Dimension;
     rangeData: IRangeData;
     cellValue: ObjectMatrixPrimitiveType<ICellData>;
@@ -22,16 +22,16 @@ export interface IInsertRangeActionData extends IActionData {
  *
  * @internal
  */
-export class InsertRangeAction extends ActionBase<
+export class InsertRangeAction extends SheetActionBase<
     IInsertRangeActionData,
     IDeleteRangeActionData
 > {
     constructor(
         actionData: IInsertRangeActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],

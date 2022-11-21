@@ -1,7 +1,5 @@
 import { Tools } from '.';
 import { LocaleType } from '../Enum';
-import { IWorkbookConfig } from '../Interfaces';
-import { Attribute, IOCAttribute, PostConstruct } from '../IOC';
 import { Nullable } from './Types';
 
 /**
@@ -54,16 +52,9 @@ const en = {};
  * @beta
  */
 export class Locale {
-    @Attribute()
-    private _attribute: IOCAttribute;
-
     options: ILocaleOptions;
 
-    @PostConstruct()
-    init() {
-        const config: IWorkbookConfig = this._attribute.getValue();
-        const locale = config.locale;
-
+    initialize(locale: Nullable<LocaleType>) {
         this.options = {
             // use config first, or get language setting from browser
             currentLocale:

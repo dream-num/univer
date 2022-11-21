@@ -13,10 +13,11 @@ export default defineConfig({
         lib: {
             entry: resolve('src/index.ts'),
             name: 'StyleUniver',
-            formats: ['es', 'umd'],
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-style-univer',
         },
         outDir: './lib',
+        sourcemap: true
     },
     define: {
         pkgJson: { name, version },
@@ -45,9 +46,10 @@ export default defineConfig({
         createExternal({
             externals: {
                 '@univer/core': '@univer/core',
+                '@univer/base-component': '@univer/base-component',
                 'css-vars-ponyfill': 'css-vars-ponyfill',
+                'nanoid': 'nanoid',
                 'react-colorful': 'react-colorful',
-                // TODO: build ,still have "new Component$1()).isPureReactComponent"
                 preact: 'preact',
                 react: 'react',
             },

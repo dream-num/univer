@@ -1,9 +1,9 @@
 import { EventState } from '@univer/core';
-import { Vector2 } from '../Base/Vector2';
-import { IMouseEvent, IPointerEvent } from '../Base/IEvents';
-import { COLORS, EVENT_TYPE, RENDER_CLASS_TYPE } from '../Base/Const';
-import { getColor } from '../Base/Tools';
-import { Transform } from '../Base/Transform';
+import { Vector2 } from '../Basics/Vector2';
+import { IMouseEvent, IPointerEvent } from '../Basics/IEvents';
+import { COLORS, EVENT_TYPE, RENDER_CLASS_TYPE } from '../Basics/Const';
+import { getColor } from '../Basics/Tools';
+import { Transform } from '../Basics/Transform';
 import { Scene } from '../Scene';
 import { Viewport } from '../Viewport';
 import { Rect } from './Rect';
@@ -203,6 +203,7 @@ export class ScrollBar {
                     fill: this._thumbActiveBackgroundColor!,
                 });
                 this.makeViewDirty(true);
+                mainScene.disableEvent();
                 state.stopPropagation();
             });
             mainScene.on(EVENT_TYPE.PointerMove, (evt: unknown, state: EventState) => {
@@ -219,6 +220,7 @@ export class ScrollBar {
                 const e = evt as IPointerEvent | IMouseEvent;
                 const srcElement = this._horizonThumbRect;
                 this._isHorizonMove = false;
+                mainScene.enableEvent();
                 // srcElement.fill = this._thumbBackgroundColor!;
                 srcElement.setProps({
                     fill: this._thumbBackgroundColor!,
@@ -252,6 +254,7 @@ export class ScrollBar {
                 srcElement.setProps({
                     fill: this._thumbActiveBackgroundColor!,
                 });
+                mainScene.disableEvent();
                 this.makeViewDirty(true);
                 state.stopPropagation();
             });
@@ -270,6 +273,7 @@ export class ScrollBar {
                 const srcElement = this._verticalThumbRect;
                 this._isVerticalMove = false;
                 // srcElement.fill = this._thumbBackgroundColor!;
+                mainScene.enableEvent();
                 srcElement.setProps({
                     fill: this._thumbBackgroundColor!,
                 });

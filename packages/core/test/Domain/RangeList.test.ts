@@ -1,9 +1,9 @@
 /**
  * @jest-environment jsdom
  */
-import { Context } from '../../src/Basics/Context';
-import { WorkBook } from '../../src/Sheets/Domain/WorkBook';
-import { WorkSheet } from '../../src/Sheets/Domain/WorkSheet';
+import { SheetContext } from '../../src/Basics/SheetContext';
+import { Workbook } from '../../src/Sheets/Domain/Workbook';
+import { Worksheet } from '../../src/Sheets/Domain/Worksheet';
 import { BooleanNumber, WrapStrategy } from '../../src/Enum';
 import { TestInit } from '../ContainerStartUp';
 import { IOCContainerStartUpReady } from './Range.test';
@@ -24,12 +24,12 @@ test('Test RangeList setValue', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -46,7 +46,7 @@ test('Test RangeList setValue', () => {
         },
         status: 1,
     };
-    const worksheet = new WorkSheet(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -78,12 +78,12 @@ test('Test RangeList clear', () => {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -100,7 +100,7 @@ test('Test RangeList clear', () => {
         },
         status: 1,
     };
-    const worksheet = new WorkSheet(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -135,12 +135,12 @@ function demo() {
             },
         },
     });
-    const context = container.getSingleton<Context>('Context');
-    const workbook = container.getSingleton<WorkBook>('WorkBook');
+    const context = container.getSingleton<SheetContext>('Context');
+    const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
-        sheetId: 'sheet',
+        id: 'sheet',
         cellData: {
             0: {
                 0: {
@@ -157,7 +157,7 @@ function demo() {
         },
         status: 1,
     };
-    const worksheet = new WorkSheet(context, configure);
+    const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
     return worksheet;

@@ -1,5 +1,6 @@
 import { EVENT_TYPE, IWheelEvent, Layer, Rect, Scene, SceneViewer, ScrollBar, Viewport } from '@univer/base-render';
 import { EventState } from '@univer/core';
+import { SheetPlugin } from '../../../SheetPlugin';
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 
 export class SceneViewerTestView extends BaseView {
@@ -31,9 +32,7 @@ export class SceneViewerTestView extends BaseView {
 
         // 鼠标滚轮缩放
         scene.on(EVENT_TYPE.wheel, (evt: unknown, state: EventState) => {
-            return;
             const e = evt as IWheelEvent;
-            console.log('Wheel11112312313123132');
             if (e.ctrlKey) {
                 const deltaFactor = Math.abs(e.deltaX);
                 let scrollNum = deltaFactor < 40 ? 0.05 : deltaFactor < 80 ? 0.02 : 0.01;
@@ -89,4 +88,17 @@ export class SceneViewerTestView extends BaseView {
     }
 }
 
-CanvasViewRegistry.add(new SceneViewerTestView());
+// CanvasViewRegistry.add(SceneViewerTestView);
+
+export class SceneViewerTestViewFactory {
+    /**
+     * Generate SceneViewerTestView Instance
+     * @param scene
+     * @param plugin
+     * @returns
+     */
+    create(scene: Scene, plugin: SheetPlugin): SceneViewerTestView {
+        return new SceneViewerTestView().initialize(scene, plugin);
+    }
+}
+// CanvasViewRegistry.add(new SceneViewerTestViewFactory());

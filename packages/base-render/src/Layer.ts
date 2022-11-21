@@ -2,7 +2,7 @@ import { sortRules } from '@univer/core';
 import { BaseObject } from './BaseObject';
 import { Scene } from './Scene';
 import { Group } from './Group';
-import { RENDER_CLASS_TYPE } from './Base';
+import { RENDER_CLASS_TYPE } from './Basics';
 
 export class Layer {
     constructor(private _scene: Scene, private _objects: BaseObject[] = [], private _zIndex: number = 1) {
@@ -60,6 +60,7 @@ export class Layer {
         }
         this._objects.push(o);
         this.scene.setObjectBehavior(o);
+        this.scene.applyTransformer(o);
 
         return this;
     }

@@ -1,9 +1,8 @@
-import { getColor, Rect, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, SpreadsheetSkeleton } from '@univer/base-render';
-import { WorkSheet } from '@univer/core';
+import { getColor, Rect, Scene, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, SpreadsheetSkeleton } from '@univer/base-render';
+import { Worksheet } from '@univer/core';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from '../BaseView';
 import { SelectionManager } from '../../../Controller/Selection/SelectionManager';
-import { SelectionModel } from '../../../Model/Domain/SelectionModel';
-import { SheetViewKeyboardEvent } from './SheetViewKeyboardEvent';
+import { SheetPlugin } from '../../../SheetPlugin';
 
 export enum SHEET_VIEW_KEY {
     MAIN = '__SpreadsheetRender__',
@@ -70,9 +69,6 @@ export class SheetView extends BaseView {
         this._updateViewport(rowTitleWidth, columnTitleHeight);
 
         this._selectionManager = new SelectionManager(this);
-
-        // init keyboard event
-        new SheetViewKeyboardEvent(scene);
     }
 
     getSelectionManager() {
@@ -81,18 +77,6 @@ export class SheetView extends BaseView {
 
     getSelectionControls() {
         return this._selectionManager.getCurrentControls();
-    }
-
-    getSelectionModels() {
-        const controls = this.getSelectionControls();
-        if (!controls) {
-            return;
-        }
-        const selectionModels: SelectionModel[] = [];
-        for (let control of controls) {
-            selectionModels.push(control.model);
-        }
-        return selectionModels;
     }
 
     getSpreadsheetSkeleton() {
@@ -115,7 +99,7 @@ export class SheetView extends BaseView {
         return this._spreadsheetLeftTopPlaceholder;
     }
 
-    updateToSheet(worksheet: WorkSheet) {
+    updateToSheet(worksheet: Worksheet) {
         const scene = this.getScene();
         const spreadsheetSkeleton = this._buildSkeleton(worksheet);
         const { rowTotalHeight, columnTotalWidth, rowTitleWidth, columnTitleHeight } = spreadsheetSkeleton;
@@ -168,7 +152,7 @@ export class SheetView extends BaseView {
         });
     }
 
-    private _buildSkeleton(worksheet: WorkSheet) {
+    private _buildSkeleton(worksheet: Worksheet) {
         const context = this.getContext();
         const workbook = context.getWorkBook();
         const config = worksheet.getConfig();
@@ -178,17 +162,28 @@ export class SheetView extends BaseView {
         return spreadsheetSkeleton;
     }
 
-    private _rowHeightByTitle(worksheet: WorkSheet) {
+    private _rowHeightByTitle(worksheet: Worksheet) {
         const config = worksheet?.getConfig();
         const columnTitle = config?.columnTitle.height || 0;
         return columnTitle;
     }
 
-    private _columnWidthByTitle(worksheet: WorkSheet) {
+    private _columnWidthByTitle(worksheet: Worksheet) {
         const config = worksheet?.getConfig();
         const rowTitle = config?.rowTitle.width || 0;
         return rowTitle;
     }
 }
 
-CanvasViewRegistry.add(new SheetView());
+export class SheetViewFactory {
+    /**
+     * Generate SheetView Instance
+     * @param scene
+     * @param plugin
+     * @returns
+     */
+    create(scene: Scene, plugin: SheetPlugin): SheetView {
+        return new SheetView().initialize(scene, plugin);
+    }
+}
+CanvasViewRegistry.add(new SheetViewFactory());

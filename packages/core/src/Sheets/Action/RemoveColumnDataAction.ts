@@ -1,17 +1,17 @@
 import { InsertDataColumn, RemoveColumnData } from '../Apply';
 import { CONVERTOR_OPERATION } from '../../Const';
 import { WorkSheetConvertor } from '../../Convertor';
-import { WorkBook } from '../Domain';
 import { ICellData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertColumnDataActionData } from './InsertColumnDataAction';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface IRemoveColumnDataAction extends IActionData {
+export interface IRemoveColumnDataAction extends ISheetActionData {
     columnIndex: number;
     columnCount: number;
 }
@@ -21,16 +21,16 @@ export interface IRemoveColumnDataAction extends IActionData {
  *
  * @internal
  */
-export class RemoveColumnDataAction extends ActionBase<
+export class RemoveColumnDataAction extends SheetActionBase<
     IRemoveColumnDataAction,
     IInsertColumnDataActionData
 > {
     constructor(
         actionData: IRemoveColumnDataAction,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.REMOVE)],

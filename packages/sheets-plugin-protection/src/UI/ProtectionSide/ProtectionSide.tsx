@@ -1,11 +1,12 @@
 import { BaseComponentSheet, BaseSiderModalProps, Component, createRef, FunctionComponent } from '@univer/base-component';
-import { Context, IRangeData, Nullable, Observer, WorkBook } from '@univer/core';
-import { PTOTECTION_PLUGIN_NAME } from '../../Const';
-import { Protection } from '../../Domain';
+import { SheetContext, IRangeData, Nullable, Observer, Workbook } from '@univer/core';
+import { PROTECTION_PLUGIN_NAME } from '../../Basic/Const';
+import { Protection } from '../../Controller/Protection';
+
 import styles from './index.module.less';
 
 type IConfig = {
-    context: Context;
+    context: SheetContext;
     rangeData: IRangeData;
     protection: Protection;
 };
@@ -21,7 +22,7 @@ interface IState {
 }
 
 class ProtectionSide extends Component<IProps, IState> {
-    private _localeObserv: Nullable<Observer<WorkBook>>;
+    private _localeObserv: Nullable<Observer<Workbook>>;
 
     protectionRef = createRef();
 
@@ -51,14 +52,14 @@ class ProtectionSide extends Component<IProps, IState> {
 
         this._localeObserv = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
     }
 
     componentWillUnmount() {
-        this.context.coreContext.getObserverManager().getObserver('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserv);
+        // this.context.coreContext.getObserverManager().getObserver('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserv);
     }
 
     setLocale() {
@@ -89,10 +90,10 @@ class ProtectionSide extends Component<IProps, IState> {
             <this.SiderModal
                 title={this.state.locale.protectionLabel}
                 closeSide={() => {
-                    // this.context.coreContext.getPluginManager().getPluginByName<StyleUniverSheet>('styleUniverSheet')?.showSiderByName(PTOTECTION_PLUGIN_NAME, false);
+                    // this.context.coreContext.getPluginManager().getPluginByName<StyleUniverSheet>('styleUniverSheet')?.showSiderByName(PROTECTION_PLUGIN_NAME, false);
                 }}
                 footer={this.footer()}
-                pluginName={PTOTECTION_PLUGIN_NAME}
+                pluginName={PROTECTION_PLUGIN_NAME}
                 className={styles.protectionSide}
                 style={{ ...style }}
             >

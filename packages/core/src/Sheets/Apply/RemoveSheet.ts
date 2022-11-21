@@ -1,14 +1,14 @@
-import { WorkBook } from '../Domain';
+import { Workbook } from '../Domain';
 import { IWorksheetConfig } from '../../Interfaces';
 
 export function RemoveSheet(
-    workbook: WorkBook,
+    workbook: Workbook,
     sheetId: string
 ): {
     index: number;
     sheet: IWorksheetConfig;
 } {
-    const iSheets = workbook._getWorksheets();
+    const iSheets = workbook.getWorksheets();
     const config = workbook.getConfig();
     const { sheets } = config;
     if (sheets[sheetId] == null) {

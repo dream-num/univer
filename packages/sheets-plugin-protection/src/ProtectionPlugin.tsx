@@ -1,23 +1,23 @@
 import { ISlotElement, ISlotProps, IToolBarItemProps } from '@univer/base-component';
-import { Context, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
-import { PTOTECTION_PLUGIN_NAME } from './Const/PLUGIN_NAME';
-import { Protection } from './Domain/Protection';
+import { SheetContext, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { SheetPlugin } from '@univer/base-sheets';
+import { PROTECTION_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
 import { IConfig } from './IData/IProtection';
 import { en, zh } from './Locale';
 import { ProtectionButton } from './UI/ProtectionButton';
 import { ProtectionSide } from './UI/ProtectionSide';
+import { Protection } from './Controller';
 
-type IPluginConfig = {};
+export interface IProtectionPluginConfig {}
 
 export class ProtectionPlugin extends Plugin {
-    _protectionSilder: Protection;
+    _protectionSlider: Protection;
 
-    constructor(config?: IPluginConfig) {
-        super(PTOTECTION_PLUGIN_NAME);
+    constructor(config?: IProtectionPluginConfig) {
+        super(PROTECTION_PLUGIN_NAME);
     }
 
-    static create(config?: IPluginConfig) {
+    static create(config?: IProtectionPluginConfig) {
         return new ProtectionPlugin(config);
     }
 
@@ -40,15 +40,15 @@ export class ProtectionPlugin extends Plugin {
         };
 
         const item: IToolBarItemProps = {
-            locale: PTOTECTION_PLUGIN_NAME,
+            locale: PROTECTION_PLUGIN_NAME,
             type: ISlotElement.JSX,
             show: true,
             label: <ProtectionButton config={config} />,
         };
-        context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
+        context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
 
         // TODO
-        this._protectionSilder = new Protection();
+        this._protectionSlider = new Protection();
 
         const rangeData = {
             startRow: 0,
@@ -60,14 +60,14 @@ export class ProtectionPlugin extends Plugin {
         const siderItem: ISlotProps = {
             name: 'protection',
             type: ISlotElement.JSX,
-            label: <ProtectionSide config={{ rangeData, context, protection: this._protectionSilder }} />,
+            label: <ProtectionSide config={{ rangeData, context, protection: this._protectionSlider }} />,
         };
-        context.getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addSider(siderItem);
+        context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addSider(siderItem);
     }
 
     onMapping(IOC: IOCContainer): void {}
 
-    onMounted(ctx: Context): void {
+    onMounted(ctx: SheetContext): void {
         this.initialize();
     }
 

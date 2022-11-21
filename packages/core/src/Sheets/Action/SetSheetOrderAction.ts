@@ -1,23 +1,23 @@
 import { SetSheetOrder } from '../Apply';
-import { WorkBook } from '../Domain';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
+import { CommandUnit } from '../../Command';
 
-export interface ISetSheetOrderActionData extends IActionData {
+export interface ISetSheetOrderActionData extends ISheetActionData {
     sheetId: string;
     order: number;
 }
 
-export class SetSheetOrderAction extends ActionBase<
+export class SetSheetOrderAction extends SheetActionBase<
     ISetSheetOrderActionData,
     ISetSheetOrderActionData
 > {
     constructor(
         actionData: ISetSheetOrderActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],
@@ -31,10 +31,6 @@ export class SetSheetOrderAction extends ActionBase<
     }
 
     do(): number {
-        return this.redo();
-    }
-
-    redo(): number {
         const worksheet = this.getWorkSheet();
         const context = worksheet.getContext();
         const workbook = context.getWorkBook();
@@ -49,6 +45,10 @@ export class SetSheetOrderAction extends ActionBase<
             action: this,
         });
         return result;
+    }
+
+    redo(): void {
+        this.do();
     }
 
     undo(): void {

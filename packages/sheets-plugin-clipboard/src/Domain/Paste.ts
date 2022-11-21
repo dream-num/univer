@@ -1,9 +1,7 @@
 import { handleDomToJson, handleStringToStyle } from '@univer/base-component';
 import { SelectionControl } from '@univer/base-sheets/src/Controller/Selection/SelectionController';
-import { Context, ICellData, PLUGIN_NAMES, Tools } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
-import { SelectionModel } from '@univer/base-sheets/src/Model/Domain/SelectionModel';
-import { RightMenuProps } from '@univer/base-sheets/src/Model/Domain/RightMenuModel';
+import { SheetContext, ICellData, PLUGIN_NAMES, Tools } from '@univer/core';
+import { RightMenuProps, SelectionModel, SheetPlugin } from '@univer/base-sheets';
 import { Clipboard } from './Clipboard';
 
 export interface PasteType {
@@ -12,18 +10,20 @@ export interface PasteType {
 }
 
 export abstract class Paste {
-    private _context: Context;
+    private _context: SheetContext;
 
-    constructor(context: Context, pasteList: RightMenuProps[]) {
+    constructor(context: SheetContext, pasteList: RightMenuProps[]) {
         this._context = context;
-        const spreadSheetPlugin = this._context.getPluginManager().getRequirePluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
-        spreadSheetPlugin.addRightMenu(pasteList);
+        const SheetPlugin = this._context.getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
+        SheetPlugin.addRightMenu(pasteList);
 
-        // spreadSheetPlugin.getCellEditorControl().isEditMode
+        // SheetPlugin.getCellEditorControl().isEditMode
         const manager = this._context.getObserverManager();
         manager.requiredObserver<ClipboardEvent>('onSpreadsheetKeyPasteObservable', PLUGIN_NAMES.SPREADSHEET).add((e) => {
             this.paste(e);
         });
+
+        // TODO 注册机制 Paste， PasteManager.handle() 匹配 WPSPaste/GoogleSheetPaste/ExcelPaste
     }
 
     getContext() {
@@ -34,7 +34,7 @@ export abstract class Paste {
 }
 
 export class UniverPaste extends Paste {
-    constructor(context: Context) {
+    constructor(context: SheetContext) {
         const pasteList = [
             {
                 locale: ['rightClick.paste'],
@@ -42,7 +42,6 @@ export class UniverPaste extends Paste {
                     arg[1].ref.hideSelect();
                     this.pasteTo();
                 },
-                border: true,
             },
         ];
         super(context, pasteList);
@@ -168,11 +167,11 @@ export class UniverPaste extends Paste {
         if (data.length === 0) return;
         const sheet = this.getContext().getWorkBook().getActiveSheet();
         if (!sheet) return;
-        const spreadSheetPlugin = this.getContext().getPluginManager().getPluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
-        if (!spreadSheetPlugin) return;
-        const spreadsheet = spreadSheetPlugin?.getMainComponent();
+        const SheetPlugin = this.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
+        if (!SheetPlugin) return;
+        const spreadsheet = SheetPlugin?.getMainComponent();
         if (!spreadsheet) return;
-        const controls = spreadSheetPlugin?.getSelectionManager().getCurrentControls();
+        const controls = SheetPlugin?.getSelectionManager().getCurrentControls();
         const selections: any = controls?.map((control: SelectionControl) => {
             const model: SelectionModel = control.model;
             return {
@@ -226,8 +225,6 @@ export class UniverPaste extends Paste {
         }
 
         sheet.getRange(minH, minC, maxH, maxC).setRangeDatas(data);
-        spreadSheetPlugin.getCanvasView().updateToSheet(spreadSheetPlugin.getContext().getWorkBook().getActiveSheet()!);
-        spreadsheet.makeDirty(true);
     }
 
     paste(e: ClipboardEvent) {

@@ -1,7 +1,7 @@
-import { Context, GlyphType, numberToListABC } from '@univer/core';
+import { ContextBase, GlyphType, numberToListABC } from '@univer/core';
 import { dealWidthCustomBulletOrderedSymbol } from '../../../../Custom/UseCustom';
 
-export function getBulletOrderedSymbol(startIndex: number, startNumber: number, glyphType: GlyphType | string, context?: Context) {
+export function getBulletOrderedSymbol(startIndex: number, startNumber: number, glyphType: GlyphType | string, context?: ContextBase) {
     if (!(glyphType in GlyphType)) {
         return dealWidthCustomBulletOrderedSymbol(startIndex, startNumber, glyphType as string, context); // 插件定义更多类型的bullet
     }
@@ -50,12 +50,12 @@ function zeroDecimal(startIndex: number, startNumber: number) {
 
 // 	An uppercase letter, like A, B, or C.
 function upperAlpha(startIndex: number, startNumber: number) {
-    return numberToListABC(startIndex + startNumber, true);
+    return numberToListABC(startIndex + startNumber - 1, true);
 }
 
 // 	A lowercase letter, like a, b, or c.
 function alpha(startIndex: number, startNumber: number) {
-    return numberToListABC(startIndex + startNumber, false);
+    return numberToListABC(startIndex + startNumber - 1, false);
 }
 
 // 	An uppercase Roman numeral, like I, II, or III.

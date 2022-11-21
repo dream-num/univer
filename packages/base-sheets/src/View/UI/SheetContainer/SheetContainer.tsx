@@ -1,30 +1,24 @@
 import {
     AppContext,
-    BaseSheetContainerProps,
-    ILayout,
     IMainProps,
     IMainState,
     ISiderState,
     ISlotElement,
     ISlotProps,
-    JSXComponent,
-    SheetContainerComponent,
     Component,
     BaseComponentSheet,
     BaseComponentRender,
-    Description,
     createRef,
     RefObject,
     cloneElement,
+    BaseComponentProps,
 } from '@univer/base-component';
-import { IKeyType, LocaleType, PLUGIN_NAMES, Tools, WorkBook } from '@univer/core';
+import { AsyncFunction, SheetContext, IKeyType, LocaleType, PLUGIN_NAMES, Tools, Workbook } from '@univer/core';
 import cssVars from 'css-vars-ponyfill';
-
 import {
     Container,
     Content,
     Footer,
-    FormulaBar,
     Header,
     // InfoBar,
     Layout,
@@ -36,13 +30,89 @@ import darkSkin from '@univer/style-universheet/assets/css/skin/dark.module.less
 // All skins' less file
 import greenSkin from '@univer/style-universheet/assets/css/skin/green.module.less';
 // app context for skin and Locale
-import { SpreadsheetPlugin } from '@SpreadsheetPlugin';
 import { RightMenu } from '../RightMenu';
 import { InfoBar } from '../InfoBar';
-import { SheetBar } from '../SheetBar';
 import style from './index.module.less';
 import { ToolBar } from '../ToolBar';
 import { CountBar } from '../CountBar/CountBar';
+import { IShowToolBarConfig } from '../../../Model/ToolBarModel';
+import { ModalGroup } from '../ModalGroup/ModalGroup';
+import { SheetPlugin } from '../../../SheetPlugin';
+import { FormulaBar } from '../FormulaBar';
+import { SideGroup } from '../SideGroup/SideGroup';
+import { SheetBar } from '../SheetBar';
+
+export interface ILayout {
+    outerLeft?: boolean;
+
+    outerRight?: boolean;
+
+    header?: boolean;
+
+    footer?: boolean;
+
+    innerLeft?: boolean;
+
+    innerRight?: boolean;
+
+    frozenHeaderLT?: boolean;
+
+    frozenHeaderRT?: boolean;
+
+    frozenHeaderLM?: boolean;
+
+    frozenContent?: boolean;
+
+    infoBar?: boolean;
+
+    formulaBar?: boolean;
+
+    countBar?: boolean;
+
+    sheetBar?: boolean;
+
+    // Whether to show the toolbar
+    toolBar?: boolean;
+
+    // Custom configuration toolbar,can be used in conjunction with showToolBar, showToolBarConfig has a higher priority
+    toolBarConfig?: IShowToolBarConfig;
+
+    // TODO: 支持 infoBar sheetBar, countBar, rightMenu rightMenuConfig(base-sheets)
+
+    /**
+     * 左右或者上下分割content区域
+     *
+     * undefined: no split
+     * false: no split
+     * true: horizontal split
+     * "horizontal": horizontal split
+     * "vertical": vertical split
+     */
+
+    contentSplit?: boolean | string;
+}
+
+export interface ISheetPluginConfigBase {
+    layout: string | ILayout;
+}
+
+export interface BaseSheetContainerConfig extends BaseComponentProps, ISheetPluginConfigBase {
+    container: HTMLElement;
+    skin: string;
+    context: SheetContext;
+    getSplitLeftRef: (ref: RefObject<HTMLDivElement>) => void;
+    getContentRef: (ref: RefObject<HTMLDivElement>) => void;
+    addButton: (cb: Function) => void;
+    addSider: (cb: AsyncFunction<ISlotProps>) => void;
+    addMain: (cb: Function) => void;
+    showSiderByName: (cb: Function) => void;
+    showMainByName: (cb: Function) => void;
+    onDidMount: () => void;
+}
+
+export interface BaseSheetContainerProps {
+    config: BaseSheetContainerConfig;
+}
 
 export const defaultLayout: ILayout = {
     outerLeft: false,
@@ -65,7 +135,15 @@ export const defaultLayout: ILayout = {
 
     frozenContent: true,
 
+    infoBar: true,
+
+    formulaBar: true,
+
     toolBar: true,
+
+    countBar: true,
+
+    sheetBar: true,
 
     toolBarConfig: {
         undoRedo: true, // Undo redo
@@ -74,7 +152,6 @@ export const defaultLayout: ILayout = {
         percentageFormat: true, // Percentage format
         numberDecrease: true, // 'Decrease the number of decimal places'
         numberIncrease: true, // 'Increase the number of decimal places
-        moreFormats: true, // 'More Formats'
         font: true, // 'font'
         fontSize: true, // 'Font size'
         bold: true, // 'Bold (Ctrl+B)'
@@ -89,21 +166,6 @@ export const defaultLayout: ILayout = {
         verticalAlignMode: true, // 'Vertical alignment'
         textWrapMode: true, // 'Wrap mode'
         textRotateMode: true, // 'Text Rotation Mode'
-        image: true, // 'Insert picture'
-        link: true, // 'Insert link'
-        chart: true, // 'chart' (the icon is hidden, but if the chart plugin is configured, you can still create a new chart by right click)
-        comment: true, // 'comment'
-        pivotTable: true, // 'PivotTable'
-        function: true, // 'formula'
-        frozenMode: true, // 'freeze mode'
-        sortAndFilter: true, // 'Sort and filter'
-        conditionalFormat: true, // 'Conditional Format'
-        dataValidation: true, // 'Data Validation'
-        splitColumn: true, // 'Split column'
-        screenshot: true, // 'screenshot'
-        findAndReplace: true, // 'Find and Replace'
-        protection: true, // 'Worksheet protection'
-        print: true, // 'Print'
     },
 
     contentSplit: false,
@@ -112,9 +174,6 @@ export const defaultLayout: ILayout = {
 /**
  * SheetContainer
  */
-
-// Types for props
-// type BaseSheetContainerProps = { config: ISheetContainerConfig };
 
 // Types for state
 type IState = {
@@ -128,10 +187,16 @@ type IState = {
     showSider: boolean;
     renderState: number;
 };
+
+/**
+ * One universheet instance DOM container
+ */
 export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
     splitLeftRef = createRef<HTMLDivElement>();
 
     rightRef = createRef<HTMLDivElement>();
+
+    menuRef = createRef();
 
     cellRightRef = createRef<HTMLDivElement>();
 
@@ -185,6 +250,8 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
             showSider: false,
             renderState: 0,
         };
+
+        console.log('this.state', this.state);
     }
 
     /**
@@ -223,7 +290,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
         let currentSkin = skins[skin];
 
         // transform "primaryColor" to "--primary-color"
-        currentSkin = Object.fromEntries(Object.keys(currentSkin).map((item) => [`--${item.replace(/([A-Z])/g, '-$1').toLowerCase()}`, currentSkin[item]]));
+        currentSkin = Object.fromEntries(Object.keys(currentSkin).map((item) => [`--${item.replace(/([A-Z0-9])/g, '-$1').toLowerCase()}`, currentSkin[item]]));
 
         // ie11 does not support css variables, use css-vars-ponyfill to handle
         if (Tools.isIEBrowser()) {
@@ -317,7 +384,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
         // https://www.webtips.dev/how-to-make-an-animated-day-and-night-toggle-switch;
 
         // publish
-        this.props.config.context.getObserverManager().getObserver<WorkBook>('onAfterChangeUISkinObservable')?.notifyObservers(this.props.config.context.getWorkBook());
+        this.props.config.context.getObserverManager().getObserver<Workbook>('onAfterChangeUISkinObservable')?.notifyObservers(this.props.config.context.getWorkBook());
         // this.props.config.context.onAfterChangeUISkinObservable.notifyObservers(this.props.config.context.getWorkBook())
     }
 
@@ -556,7 +623,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                 // After the mount is successful, an observe is issued to notify other plug-ins that they can start using dom
                 this.getContext()
                     .getPluginManager()
-                    .getRequirePluginByName<SpreadsheetPlugin>(PLUGIN_NAMES.SPREADSHEET)
+                    .getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)
                     .getObserver('onSheetContainerDidMountObservable')
                     ?.notifyObservers(this);
             }
@@ -588,15 +655,9 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                         <Sider style={{ display: layout.outerLeft ? 'block' : 'none' }}></Sider>
                         <Layout className={style.mainContent} style={{ position: 'relative' }}>
                             <Header style={{ display: layout.header ? 'block' : 'none' }}>
-                                <InfoBar></InfoBar>
-                                <ToolBar
-                                    style={{
-                                        display: layout.toolBar ? 'block' : 'none',
-                                    }}
-                                    toolList={[]}
-                                    func={{ addButton }}
-                                ></ToolBar>
-                                <FormulaBar></FormulaBar>
+                                {layout.infoBar && <InfoBar></InfoBar>}
+                                {layout.toolBar && <ToolBar toolList={[]}></ToolBar>}
+                                {layout.formulaBar && <FormulaBar></FormulaBar>}
                             </Header>
                             <Layout>
                                 <Sider
@@ -630,7 +691,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                 </Sider>
                                 <Content className={layout.contentSplit === 'vertical' ? style.contentContainerVertical : style.contentContainerHorizontal}>
                                     {/* extend main content */}
-                                    {mainList.map((item: IMainState, i) => {
+                                    {/* {mainList.map((item: IMainState, i) => {
                                         // if (!item.show) return null;
 
                                         if (item.type === ISlotElement.JSX) {
@@ -649,7 +710,9 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                             return <JSXElement ref={this.refMap[item.name]} style={{ display: item.show ? '' : 'none' }} />;
                                         }
                                         return item;
-                                    })}
+                                    })} */}
+
+                                    <ModalGroup></ModalGroup>
 
                                     {!!layout.contentSplit && (
                                         <Container ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>
@@ -659,7 +722,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                     <Container ref={this.contentRef} className={style.contentInnerRightContainer} onClick={this.handleContentClick}>
                                         <RightMenu />
 
-                                        {/* <div style={{ position: 'fixed', right: '200px', top: '10px', fontSize: '14px' }}>
+                                        <div style={{ position: 'fixed', right: '200px', top: '10px', fontSize: '14px' }}>
                                             <span style={{ display: 'inline-block', width: 50, margin: '5px 0 0 5px' }}>皮肤</span>
                                             <select value={currentSkin} onChange={this.changeSkin.bind(this)} style={{ width: 55 }}>
                                                 <option value="default">默认</option>
@@ -675,7 +738,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                             </select>
 
                                             <span style={{ visibility: 'hidden' }}>{renderState}</span>
-                                        </div> */}
+                                        </div>
                                     </Container>
                                 </Content>
                                 <Sider
@@ -684,6 +747,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                     }}
                                 >
                                     {/* innerRight */}
+                                    <SideGroup></SideGroup>
                                 </Sider>
                             </Layout>
                             <Footer
@@ -691,8 +755,8 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                     display: layout.footer ? 'block' : 'none',
                                 }}
                             >
-                                <SheetBar></SheetBar>
-                                <CountBar></CountBar>
+                                {layout.sheetBar && <SheetBar></SheetBar>}
+                                {layout.countBar && <CountBar></CountBar>}
                             </Footer>
                         </Layout>
                         <Sider
@@ -715,11 +779,5 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                 </Container>
             </AppContext.Provider>
         );
-    }
-}
-
-export class UniverSheetContainer implements SheetContainerComponent {
-    render(): JSXComponent<BaseSheetContainerProps> {
-        return SheetContainer;
     }
 }

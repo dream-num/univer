@@ -1,4 +1,4 @@
-import { BooleanNumber, GridType, HorizontalAlign, INumberUnit, NamedStyleType, SpacingRule } from '@univer/core';
+import { BooleanNumber, GridType, HorizontalAlign, INumberUnit, IParagraphStyle, NamedStyleType, SpacingRule } from '@univer/core';
 import {
     calculateLineTopByDrawings,
     createAndUpdateBlockAnchor,
@@ -27,7 +27,7 @@ import {
     setSpanGroupLeft,
 } from '../..';
 import {
-    DEFAULT_DOCUMENT_FONTSIZE,
+    IDocumentSkeletonBullet,
     IDocumentSkeletonColumn,
     IDocumentSkeletonDrawing,
     IDocumentSkeletonLine,
@@ -52,13 +52,13 @@ export function calculateParagraphLayout(
         if (paragraphConfig.bulletSkeleton) {
             const { bulletSkeleton, paragraphStyle = {} } = paragraphConfig;
             // 如果是一个段落的开头，需要加入bullet
-            const { gridType = GridType.LINES, charSpace = 0, documentTextStyle = {}, defaultTabStop = 1 } = sectionBreakConfig;
-
-            const { fs: documentFontSize = DEFAULT_DOCUMENT_FONTSIZE } = documentTextStyle;
+            const { gridType = GridType.LINES, charSpace = 0, defaultTabStop = 1 } = sectionBreakConfig;
 
             const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 
-            const charSpaceApply = getCharSpaceApply(charSpace, documentFontSize, defaultTabStop, gridType, snapToGrid);
+            const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
+
+            __bulletIndentHandler(paragraphStyle, bulletSkeleton, charSpaceApply);
 
             const bulletSpan = createSkeletonBulletSpan(spanGroup[0], bulletSkeleton, charSpaceApply);
             _lineOperator([bulletSpan, ...spanGroup], pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan);
@@ -258,8 +258,8 @@ function _lineOperator(
 
     // line不超过Col高度，或者行超列高列中没有其他内容，或者行超页高页中没有其他内容；
     const lineIndex = line ? line.lineIndex + 1 : 0;
-    const { charSpace, documentFontSize, defaultTabStop } = getCharSpaceConfig(sectionBreakConfig, paragraphConfig);
-    const charSpaceApply = getCharSpaceApply(charSpace, documentFontSize, defaultTabStop, gridType, snapToGrid);
+    const { charSpace, defaultTabStop } = getCharSpaceConfig(sectionBreakConfig, paragraphConfig);
+    const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
     const { paddingLeft, paddingRight, changeBulletWidth } = __getIndentPadding(spanGroup[0], indentFirstLine, hanging, indentStart, indentEnd, charSpaceApply);
     if (changeBulletWidth.state) {
         // 为了保持__getIndentPadding的纯函数特性，把修改首行列表宽度的逻辑外置到这里
@@ -327,6 +327,9 @@ function _pageOperator(
     _columnOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
 }
 
+/**
+ * 17.3.1.12 ind (Paragraph Indentation)
+ */
 function __getIndentPadding(
     span: IDocumentSkeletonSpan,
     indentFirstLine: INumberUnit | number = 0,
@@ -585,4 +588,18 @@ function __getSpanGroupByLine(line: IDocumentSkeletonLine) {
         spanGroup.push(...divide.spanGroup);
     }
     return spanGroup;
+}
+
+function __bulletIndentHandler(paragraphStyle: IParagraphStyle, bulletSkeleton: IDocumentSkeletonBullet, charSpaceApply: number) {
+    const { hanging, indentStart } = paragraphStyle;
+
+    const { hanging: hangingBullet, indentStart: indentStartBullet } = bulletSkeleton;
+
+    if (hanging === undefined) {
+        paragraphStyle.hanging = hangingBullet;
+    }
+
+    if (indentStart === undefined) {
+        paragraphStyle.indentStart = getNumberUnitValue(indentStartBullet || 0, charSpaceApply) - getNumberUnitValue(hangingBullet || 0, charSpaceApply);
+    }
 }

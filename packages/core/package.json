@@ -5,11 +5,11 @@
     "author": "",
     "main": "./src/index.ts",
     "module": "./src/index.ts",
-    "types": "./src/type.d.ts",
+    "types": "./src/Types/index.d.ts",
     "publishConfig": {
-        "main": "./lib/index.umd.js",
-        "module": "./lib/index.es.js",
-        "types": "./dist/core.d.ts"
+        "main": "./lib/univer-core.js",
+        "module": "./lib/univer-core.mjs",
+        "types": "./lib/index.d.ts"
     },
     "exports": {
         ".": "./src/index.ts",
@@ -25,6 +25,8 @@
         "test": "cross-env NODE_ENV=--experimental-vm-modules jest --config=jest.config.js",
         "dev": "vite",
         "build": "tsc && vite build",
+        "watch": "vite build",
+        "link": "pnpm link ./",
         "api": "node ./api.js",
         "tsc": "tsc",
         "serve": "node test/Server/server.js"
@@ -52,6 +54,6 @@
         "ts-node": "^10.9.1",
         "typescript": "^4.7.4",
         "vite": "^3.0.9",
-        "vite-plugin-external": "1.2.4"
+        "vite-plugin-external": "1.2.3"
     }
 }

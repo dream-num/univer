@@ -14,7 +14,7 @@ const buildTargets = [
     '@univer/sheets-plugin-data-validation', // success
     '@univer/sheets-plugin-filter', // success
     '@univer/sheets-plugin-find', // success
-    '@univer/sheets-plugin-frozen', // success
+    '@univer/sheets-plugin-freeze', // success
     '@univer/sheets-plugin-image', // success
     '@univer/sheets-plugin-insert-link', // success
     '@univer/sheets-plugin-pivot-table', // success

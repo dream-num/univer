@@ -1,16 +1,16 @@
-import { ActionBase, ActionObservers, CONVERTOR_OPERATION, IActionData, WorkBook, WorkSheetConvertor } from '@univer/core';
+import { SheetActionBase, ActionObservers, CONVERTOR_OPERATION, ISheetActionData, Workbook, WorkSheetConvertor } from '@univer/core';
 import { AlternatingColorsPlugin } from '../../AlternatingColorsPlugin';
 import { SetBanding } from '../../Apply/SetBanding';
 import { ALTERNATING_COLORS_PLUGIN_NAME } from '../../Const';
 import { IBandedRange } from '../../IBandedRange';
 import { ACTION_NAMES } from '../ACTION_NAMES';
 
-export interface ISetBandingActionData extends IActionData {
+export interface ISetBandingActionData extends ISheetActionData {
     bandedRange: IBandedRange;
 }
 
-export class SetBandingAction extends ActionBase<ISetBandingActionData, ISetBandingActionData, IBandedRange> {
-    constructor(actionData: ISetBandingActionData, workbook: WorkBook, observers: ActionObservers) {
+export class SetBandingAction extends SheetActionBase<ISetBandingActionData, ISetBandingActionData, IBandedRange> {
+    constructor(actionData: ISetBandingActionData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
 
         this._doActionData = {

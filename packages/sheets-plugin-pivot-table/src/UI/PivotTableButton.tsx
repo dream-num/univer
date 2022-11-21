@@ -1,6 +1,6 @@
 import { BaseComponentRender, BaseComponentSheet, Component, IToolBarItemProps } from '@univer/base-component';
-import { Nullable, Observer, WorkBook } from '@univer/core';
-import { SpreadsheetPlugin } from '@univer/base-sheets';
+import { Nullable, Observer, Workbook } from '@univer/core';
+import { SheetPlugin } from '@univer/base-sheets';
 import { PIVOT_TABLE_PLUGIN_NAME } from '../Const/PLUGIN_NAME';
 import { IProps } from '../IData/IPivotTable';
 import styles from './index.module.less';
@@ -12,13 +12,13 @@ interface IState {
 }
 
 export class PivotTableButton extends Component<IProps, IState> {
-    private _localeObserver: Nullable<Observer<WorkBook>>;
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     Render: BaseComponentRender;
 
     initialize(props: IProps) {
         // super(props);
-        const component = new SpreadsheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = new SheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this.Render = component.getComponentRender();
 
         const PivotableIcon = this.Render.renderFunction('PivotableIcon');
@@ -43,7 +43,7 @@ export class PivotTableButton extends Component<IProps, IState> {
 
         this._localeObserver = this._context
             .getObserverManager()
-            .getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')
+            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
                 this.setLocale();
             });
@@ -53,7 +53,7 @@ export class PivotTableButton extends Component<IProps, IState> {
      * destory
      */
     componentWillUnmount() {
-        this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     /**

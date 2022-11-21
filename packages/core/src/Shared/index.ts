@@ -1,5 +1,6 @@
 // @index(['./*.ts','./**/index.ts'], f => `export * from '${f.path}'`)
 export * from './ArraySearch';
+export * from './Common';
 export * from './DateTime';
 export * from './DropCell';
 export * from './ExcelDateTime';
@@ -16,10 +17,13 @@ export * from './NameGen';
 export * from './ObjectArray';
 export * from './ObjectMatrix';
 export * from './Rectangle';
+export * from './Reference';
+export * from './Sequence';
 export * from './Serialize/index';
+export * from './SortRules';
 export * from './Tools';
 export * from './Tuples';
 export * from './Types';
 export * from './TypeStore';
-export * from './Reference';
+export * from './HashAlgorithm';
 // @endindex

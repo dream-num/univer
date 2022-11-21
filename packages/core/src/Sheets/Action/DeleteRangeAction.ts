@@ -2,18 +2,18 @@ import { DeleteRange, InsertRange } from '../Apply';
 import { ACTION_NAMES } from '../../Const';
 import { CONVERTOR_OPERATION } from '../../Const/CONST';
 import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
-import { WorkBook } from '../Domain';
 import { Dimension } from '../../Enum/Dimension';
 import { ICellData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertRangeActionData } from './InsertRangeAction';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface IDeleteRangeActionData extends IActionData {
+export interface IDeleteRangeActionData extends ISheetActionData {
     shiftDimension: Dimension;
     rangeData: IRangeData;
 }
@@ -23,17 +23,17 @@ export interface IDeleteRangeActionData extends IActionData {
  *
  * @internal
  */
-export class DeleteRangeAction extends ActionBase<
+export class DeleteRangeAction extends SheetActionBase<
     IDeleteRangeActionData,
     IInsertRangeActionData,
     ObjectMatrixPrimitiveType<ICellData>
 > {
     constructor(
         actionData: IDeleteRangeActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
 
         this._doActionData = {
             ...actionData,

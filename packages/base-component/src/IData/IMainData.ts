@@ -1,5 +1,4 @@
-import { ISlotElementType } from '@univer/base-component';
-import { JSX } from 'preact';
+import { ISlotElementType } from '../Enum/ISlotElement';
 
 export interface IMainProps {
     /**

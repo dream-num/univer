@@ -1,12 +1,12 @@
 import { ABCToNumber } from '@univer/core';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
-import { NodeType } from './NodeType';
+import { NodeType, NODE_ORDER_MAP } from './NodeType';
 import { REFERENCE_SINGLE_RANGE_REGEX, REFERENCE_REGEX_SINGLE_ROW, REFERENCE_REGEX_SINGLE_COLUMN, $SUPER_TABLE_COLUMN_REGEX } from '../Basics/Regex';
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
 import { LexerNode } from '../Analysis/LexerNode';
 import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
-import { SheetDataType, IInterpreterCalculateProps } from '../Basics/Common';
+import { SheetDataType, IInterpreterDatasetConfig, UnitDataType } from '../Basics/Common';
 import { CellReferenceObject } from '../ReferenceObject/CellReferenceObject';
 import { RowReferenceObject } from '../ReferenceObject/RowReferenceObject';
 import { ColumnReferenceObject } from '../ReferenceObject/ColumnReferenceObject';
@@ -20,17 +20,23 @@ export class ReferenceNode extends BaseAstNode {
         return NodeType.REFERENCE;
     }
     constructor(private _operatorString: string, private _referenceObject: BaseReferenceObject) {
-        super();
+        super(_operatorString);
     }
 
-    execute(interpreterCalculateProps: IInterpreterCalculateProps) {
+    execute(interpreterCalculateProps?: IInterpreterDatasetConfig, runtimeData?: UnitDataType) {
         const props = interpreterCalculateProps;
+        if (props) {
+            this._referenceObject.setUnitData(props.unitData);
+            this._referenceObject.setDefaultSheetId(props.currentSheetId);
+            this._referenceObject.setForcedSheetId(props.sheetNameMap);
+            this._referenceObject.setRowCount(props.rowCount);
+            this._referenceObject.setColumnCount(props.columnCount);
+            this._referenceObject.setDefaultUnitId(props.currentUnitId);
+        }
 
-        this._referenceObject.setSheetData(props.sheetData);
-        this._referenceObject.setDefaultSheetId(props.currentSheetId);
-        this._referenceObject.setForcedSheetId(props.sheetNameMap);
-        this._referenceObject.setRowCount(props.rowCount);
-        this._referenceObject.setColumnCount(props.columnCount);
+        if (runtimeData) {
+            this._referenceObject.setRuntimeData(runtimeData);
+        }
 
         this.setValue(this._referenceObject);
     }
@@ -38,34 +44,43 @@ export class ReferenceNode extends BaseAstNode {
 
 export class ReferenceNodeFactory extends BaseAstNodeFactory {
     get zIndex() {
-        return 1;
+        return NODE_ORDER_MAP.get(NodeType.REFERENCE) || 100;
     }
 
     checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
+        let isLexerNode = false;
+        let tokenTrim: string;
         if (param instanceof LexerNode) {
-            return false;
+            isLexerNode = true;
+            tokenTrim = param.getToken().trim();
+        } else {
+            tokenTrim = param.trim();
         }
 
-        const tokenTrim = param.trim();
+        // const tokenTrim = param.trim();
         // if (new RegExp(REFERENCE_MULTIPLE_RANGE_REGEX).test(tokenTrim)) {
         //     return true;
         // }
+
+        if (!isLexerNode && tokenTrim.charAt(0) === '"' && tokenTrim.charAt(tokenTrim.length - 1) === '"') {
+            return false;
+        }
 
         if (new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(tokenTrim)) {
             return new ReferenceNode(tokenTrim, new CellReferenceObject(tokenTrim));
         }
 
-        if (new RegExp(REFERENCE_REGEX_SINGLE_ROW).test(tokenTrim)) {
+        if (isLexerNode && new RegExp(REFERENCE_REGEX_SINGLE_ROW).test(tokenTrim)) {
             return new ReferenceNode(tokenTrim, new RowReferenceObject(tokenTrim));
         }
 
-        if (new RegExp(REFERENCE_REGEX_SINGLE_COLUMN).test(tokenTrim)) {
+        if (isLexerNode && new RegExp(REFERENCE_REGEX_SINGLE_COLUMN).test(tokenTrim)) {
             return new ReferenceNode(tokenTrim, new ColumnReferenceObject(tokenTrim));
         }
 
         const nameMap = parserDataLoader.getDefinedNameMap();
 
-        if (nameMap.has(tokenTrim)) {
+        if (!isLexerNode && nameMap.has(tokenTrim)) {
             const nameString = nameMap.get(tokenTrim)!;
             const lexerTreeMaker = new LexerTreeMaker(nameString);
             const lexerNode = lexerTreeMaker.treeMaker();
@@ -79,7 +94,7 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         const tableMap = parserDataLoader.getTableMap();
         const $regex = $SUPER_TABLE_COLUMN_REGEX;
         const tableName = tokenTrim.replace($regex, '');
-        if (tableMap.has(tableName)) {
+        if (!isLexerNode && tableMap.has(tableName)) {
             const columnResult = $regex.exec(tokenTrim);
             let columnDataString = '';
             if (columnResult) {

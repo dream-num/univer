@@ -1,12 +1,12 @@
-import { WorkBook, WorkSheet } from '../Domain';
+import { Workbook, Worksheet } from '../Domain';
 import { IWorksheetConfig } from '../../Interfaces';
 
 export function InsertSheet(
-    workbook: WorkBook,
+    workbook: Workbook,
     index: number,
     worksheetConfig: IWorksheetConfig
 ): string {
-    const iSheets = workbook._getWorksheets();
+    const iSheets = workbook.getWorksheets();
     const config = workbook.getConfig();
     const { sheets, sheetOrder } = config;
     if (sheets[worksheetConfig.id]) {
@@ -16,7 +16,7 @@ export function InsertSheet(
     sheetOrder.splice(index, 0, worksheetConfig.id);
     iSheets.set(
         worksheetConfig.id,
-        new WorkSheet(workbook.getContext(), worksheetConfig)
+        new Worksheet(workbook.getContext(), worksheetConfig)
     );
     return worksheetConfig.id;
 }

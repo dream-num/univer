@@ -1,16 +1,16 @@
 import { Observable } from '@univer/core';
-import { DeviceType, IEvent, IKeyboardEvent, IPointerEvent, PointerInput } from './Base/IEvents';
+import { DeviceType, IEvent, IKeyboardEvent, IPointerEvent, PointerInput } from './Basics/IEvents';
 
-import { getPointerPrefix, IsSafari, requestNewFrame } from './Base/Tools';
+import { getPointerPrefix, IsSafari, requestNewFrame } from './Basics/Tools';
 
-import { ITransformChangeState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './Base/Interfaces';
+import { ITransformChangeState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './Basics/Interfaces';
 
-import { PerformanceMonitor } from './Base/PerformanceMonitor';
+import { PerformanceMonitor } from './Basics/PerformanceMonitor';
 
 import { Canvas } from './Canvas';
 
 import { Scene } from './Scene';
-import { RENDER_CLASS_TYPE } from './Base/Const';
+import { RENDER_CLASS_TYPE } from './Basics/Const';
 
 export class Engine {
     private _container: HTMLElement;
@@ -135,12 +135,18 @@ export class Engine {
     }
 
     resizeBySize(width: number, height: number) {
+        const preWidth = this.width;
+        const preHeight = this.height;
         this._canvas.setSize(width, height);
         this.onTransformChangeObservable.notifyObservers({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize,
             value: {
-                x: width,
-                y: height,
+                width,
+                height,
+            },
+            preValue: {
+                width: preWidth,
+                height: preHeight,
             },
         });
     }
@@ -373,7 +379,7 @@ export class Engine {
                 deviceEvent.currentState = this.__pointer[PointerInput.Horizontal];
 
                 this.onInputChangedObservable.notifyObservers(deviceEvent);
-                console.log('pointerDownEvent_clientX');
+                // console.log('pointerDownEvent_clientX');
             }
             if (previousVertical !== evt.clientY) {
                 deviceEvent.inputIndex = PointerInput.Vertical;
@@ -381,14 +387,14 @@ export class Engine {
                 deviceEvent.currentState = this.__pointer[PointerInput.Vertical];
 
                 this.onInputChangedObservable.notifyObservers(deviceEvent);
-                console.log('pointerDownEvent_clientY');
+                // console.log('pointerDownEvent_clientY');
             }
 
             deviceEvent.inputIndex = evt.button + 2;
             deviceEvent.previousState = previousButton;
             deviceEvent.currentState = this.__pointer[evt.button + 2];
             this.onInputChangedObservable.notifyObservers(deviceEvent);
-            console.log('pointerDownEvent_2', previousHorizontal, evt.clientX, previousVertical, evt.clientY, this.__pointer);
+            // console.log('pointerDownEvent_2', previousHorizontal, evt.clientX, previousVertical, evt.clientY, this.__pointer);
         };
 
         const pointerUpEvent = (evt: any) => {

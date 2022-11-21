@@ -2,8 +2,12 @@ import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
 import { BaseValueObject } from '../ValueObject/BaseValueObject';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { AsyncObject } from '../OtherObject/AsyncObject';
-import { BooleanNumber, ICellData, IRangeData, Nullable, ObjectMatrix, ObjectMatrixType } from '@univer/core';
+import { BooleanNumber, ICellData, IRangeData, Nullable, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univer/core';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
+import { ReferenceNode } from '../AstNode/ReferenceNode';
+import { UnionNode } from '../AstNode/UnionNode';
+import { PrefixNode } from '../AstNode/PrefixNode';
+import { SuffixNode } from '../AstNode/SuffixNode';
 
 export type NodeValueType = BaseValueObject | BaseReferenceObject | ErrorValueObject | AsyncObject;
 
@@ -13,15 +17,20 @@ export type LambdaPrivacyVarType = Map<string, Nullable<BaseAstNode>>;
 
 export type SheetDataType = { [sheetId: string]: ObjectMatrix<ICellData> };
 
+export type UnitDataType = { [unitId: string]: SheetDataType };
+
 export type CalculateValueType = BaseValueObject | ErrorValueObject;
 
+export type PreCalculateNodeType = ReferenceNode | UnionNode | PrefixNode | SuffixNode;
+
 export interface IFormulaData {
-    fs: string; // formulaString
+    formula: string; // formulaString
     row: number;
     column: number;
+    sheetId: string;
 }
 
-export type FormulaDataType = { [sheetId: string]: ObjectMatrixType<IFormulaData> };
+export type FormulaDataType = { [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<IFormulaData> } };
 
 export type SheetNameMapType = { [sheetName: string]: string };
 
@@ -50,13 +59,14 @@ export enum TableOptionType {
     TOTALS = '#Totals',
 }
 
-export interface IInterpreterCalculateProps {
-    sheetData: SheetDataType;
+export interface IInterpreterDatasetConfig {
+    unitData: UnitDataType;
     formulaData: FormulaDataType;
     sheetNameMap: SheetNameMapType;
     currentRow: number;
     currentColumn: number;
     currentSheetId: string;
+    currentUnitId: string;
     rowCount: number;
     columnCount: number;
 }

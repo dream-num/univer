@@ -1,13 +1,13 @@
 import { RemoveColumn, InsertColumn } from '../Apply';
-import { WorkBook } from '../Domain';
-import { ActionBase, IActionData } from '../../Command/ActionBase';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveColumnAction } from './removeColumnAction';
+import { CommandUnit } from '../../Command';
 
 /**
  * @internal
  */
-export interface IInsertColumnActionData extends IActionData {
+export interface IInsertColumnActionData extends ISheetActionData {
     columnIndex: number;
     columnCount: number;
 }
@@ -17,16 +17,16 @@ export interface IInsertColumnActionData extends IActionData {
  *
  * @internal
  */
-export class InsertColumnAction extends ActionBase<
+export class InsertColumnAction extends SheetActionBase<
     IInsertColumnActionData,
     IRemoveColumnAction
 > {
     constructor(
         actionData: IInsertColumnActionData,
-        workbook: WorkBook,
+        commandUnit: CommandUnit,
         observers: ActionObservers
     ) {
-        super(actionData, workbook, observers);
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
             convertor: [],

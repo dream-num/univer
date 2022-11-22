@@ -108,19 +108,19 @@ export function SetRangeData(
                 cell.s = styles.setValue(merge);
             }
 
-            // update other value
-            if (value.p) {
-                cell.p = value.p;
-            }
-            if (value.v) {
+            // update other value TODO: move
+            // if (value.p != null) {
+            //     cell.p = value.p;
+            // }
+            if (value.v != null) {
                 cell.v = value.v;
             }
-            if (value.m) {
+            if (value.m != null) {
                 cell.m = value.m;
             } else {
                 cell.m = String(cell.v);
             }
-            if (value.t) {
+            if (value.t != null) {
                 cell.t = value.t;
             }
 

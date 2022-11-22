@@ -41,7 +41,7 @@ export function firstLoader(formulaController: FormulaController) {
             });
         }
 
-        const command = new Command({WorkBookUnit:workBook}, ...actionList);
+        const command = new Command({ WorkBookUnit: workBook }, ...actionList);
         commandManager.invoke(command);
     });
 }

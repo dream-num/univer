@@ -1,9 +1,7 @@
-import { IFormulaData } from '@univer/base-formula-engine';
 import {
     ACTION_NAMES,
     BaseActionExtension,
     BaseActionExtensionFactory,
-    ContextBase,
     ICellData,
     ISetRangeDataActionData,
     isFormulaString,
@@ -11,10 +9,8 @@ import {
     IUnitRange,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
-    Plugin,
     Tools,
 } from '@univer/core';
-import { IActionData } from '@univer/core/src/Command/ActionBase';
 import { FormulaPlugin } from '../../FormulaPlugin';
 
 export class FormulaActionExtension extends BaseActionExtension<ISetRangeDataActionData, FormulaPlugin> {
@@ -26,7 +22,7 @@ export class FormulaActionExtension extends BaseActionExtension<ISetRangeDataAct
         const rangeData = this.actionData.rangeData;
         let cellValue = this.actionData.cellValue;
 
-        const cellData: IFormulaData = formulaData[unitId][sheetId];
+        const cellData = new ObjectMatrix(formulaData[unitId][sheetId]);
 
         // a range
         if (!isNaN(parseInt(Object.keys(cellValue)[0]))) {
@@ -34,9 +30,14 @@ export class FormulaActionExtension extends BaseActionExtension<ISetRangeDataAct
 
             // update formula string
             rangeMatrix.forValue((r, c, cell) => {
-                const formulaString = cell.v;
-                if (cellData[r] && cellData[r]._array[c] && isFormulaString(formulaString)) {
-                    cellData[r]._array[c].formula = formulaString;
+                const formulaString = cell.m;
+                if (isFormulaString(formulaString)) {
+                    cellData.setValue(r, c, {
+                        formula: formulaString,
+                        row: r,
+                        column: c,
+                        sheetId,
+                    });
                 }
             });
         }
@@ -44,24 +45,32 @@ export class FormulaActionExtension extends BaseActionExtension<ISetRangeDataAct
         else {
             const { startRow: r, startColumn: c } = rangeData;
             let cell: ICellData = cellValue;
-            const formulaString = cell.v;
-            if (cellData[r] && cellData[r]._array[c] && isFormulaString(formulaString)) {
-                cellData[r]._array[c].formula = formulaString;
+            const formulaString = cell.m;
+            if (isFormulaString(formulaString)) {
+                cellData.setValue(r, c, {
+                    formula: formulaString,
+                    row: r,
+                    column: c,
+                    sheetId,
+                });
             }
+
+            const unitRange: IUnitRange[] = [
+                {
+                    unitId,
+                    sheetId,
+                    rangeData,
+                },
+            ];
+
+            // cell.v = 55;
+            // cell.t = 1;
+            engine.execute(unitId, formulaData, undefined, undefined, unitRange).then((sheetData) => {
+                const cellCalculate = sheetData[sheetId].getValue(r, c);
+                cell.v = cellCalculate?.v;
+                cell.t = cellCalculate?.t;
+            });
         }
-
-        console.log('formulaData=====', formulaData);
-
-        const unitRange: IUnitRange[] = [
-            {
-                unitId,
-                sheetId,
-                rangeData,
-            },
-        ];
-        engine.execute(unitId, formulaData, undefined, undefined, unitRange).then((sheetData) => {
-            console.log('sheetData---', sheetData);
-        });
 
         // const setNumfmtRangeDataAction = {
         //     actionName: ACTION_NAMES,
@@ -84,9 +93,5 @@ export class FormulaActionExtensionFactory extends BaseActionExtensionFactory<IS
 
     create(actionData: ISetRangeDataActionData, actionDataList: ISheetActionData[]): BaseActionExtension<ISetRangeDataActionData> {
         return new FormulaActionExtension(actionData, actionDataList, this._plugin);
-    }
-
-    check(actionData: ISetRangeDataActionData, actionDataList: IActionData[]): false | BaseActionExtension<ISetRangeDataActionData, Plugin<any, ContextBase>> {
-        return false;
     }
 }

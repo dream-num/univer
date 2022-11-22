@@ -4,7 +4,7 @@ import { UniverComponentSheet } from '@univer/style-universheet';
 import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
 import { NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
 import { DEFAULT_FORMULA_DATA, FormulaPlugin } from '@univer/sheets-plugin-formula';
-import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
+import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DOWN } from '@univer/common-plugin-data';
 import { SheetPlugin } from './SheetPlugin';
 
 const uiDefaultConfigUp = {
@@ -104,31 +104,31 @@ FormulaPlugin.create(DEFAULT_FORMULA_DATA).installTo(univerSheetUp);
 
 (window as any).sheetPlugin = sheetPlugin;
 
-// const uiDefaultConfigDown = {
-//     container: 'universheet-demo-down',
-//     selections: {
-//         'sheet-0001': [
-//             {
-//                 selection: {
-//                     startRow: 2,
-//                     endRow: 2,
-//                     startColumn: 3,
-//                     endColumn: 3,
-//                 },
-//                 cell: {
-//                     row: 2,
-//                     column: 3,
-//                 },
-//             },
-//         ],
-//     },
-// };
+const uiDefaultConfigDown = {
+    container: 'universheet-demo-down',
+    selections: {
+        'sheet-0001': [
+            {
+                selection: {
+                    startRow: 2,
+                    endRow: 2,
+                    startColumn: 3,
+                    endColumn: 3,
+                },
+                cell: {
+                    row: 2,
+                    column: 3,
+                },
+            },
+        ],
+    },
+};
 
-// const univerSheetDown = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DOWN);
-// univerSheetDown.installPlugin(new RenderEngine());
-// univerSheetDown.installPlugin(new UniverComponentSheet());
+const univerSheetDown = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DOWN);
+univerSheetDown.installPlugin(new RenderEngine());
+univerSheetDown.installPlugin(new UniverComponentSheet());
 
-// univerSheetDown.installPlugin(new SheetPlugin(uiDefaultConfigDown));
-// univerSheetDown.installPlugin(new ClipboardPlugin());
-// univerSheetDown.installPlugin(new NumfmtPlugin());
+univerSheetDown.installPlugin(new SheetPlugin(uiDefaultConfigDown));
+univerSheetDown.installPlugin(new ClipboardPlugin());
+univerSheetDown.installPlugin(new NumfmtPlugin());
 // FormulaPlugin.create(DEFAULT_FORMULA_DATA_DOWN).installTo(univerSheetDown);

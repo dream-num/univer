@@ -7,13 +7,26 @@ export class ActionExtensionManager {
         BaseActionExtensionFactory<IActionData>
     >;
 
+    // 挂载到实例上
+    private _register: ActionExtensionRegister;
+
+    getRegister(): ActionExtensionRegister {
+        return this._register;
+    }
+
+    constructor() {
+        this._register = new ActionExtensionRegister();
+        this._register.initialize();
+    }
+
     /**
      * inject all actions
      * @param command
      */
     handle(actions: IActionData[]) {
-        const actionExtensionFactoryList = ActionExtensionManager?.register?.actionExtensionFactoryList
-        if (!actionExtensionFactoryList) return
+        const actionExtensionFactoryList =
+            this._register?.actionExtensionFactoryList;
+        if (!actionExtensionFactoryList) return;
         // get the sorted list
         // get the dynamically added list
         this._actionExtensionFactoryList = actionExtensionFactoryList;
@@ -31,22 +44,11 @@ export class ActionExtensionManager {
         actions.forEach((action) => {
             this._actionExtensionFactoryList.forEach((actionExtensionFactory) => {
                 const extension = actionExtensionFactory.check(action, actions);
-                // TODO 可能只需执行一次
+                // Both formula and formatting need to execute
                 if (extension !== false) {
                     extension.execute();
                 }
             });
         });
-    }
-
-    static register: ActionExtensionRegister;
-
-    static create(): ActionExtensionRegister {
-        if (!this.register) {
-            this.register = new ActionExtensionRegister();
-            this.register.initialize();
-        }
-
-        return this.register;
     }
 }

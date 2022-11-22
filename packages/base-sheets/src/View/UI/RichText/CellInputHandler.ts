@@ -227,7 +227,7 @@ export class CellInputHandler {
                 return pfri;
             }
             if (p.length === n.length) {
-                if (vp_a[i + 1] !== null && v_a[i + 1] !== null && vp_a[i + 1].length < v_a[i + 1].length) {
+                if (vp_a[i + 1] != null && v_a[i + 1] != null && vp_a[i + 1].length < v_a[i + 1].length) {
                     pfri[0] += 1;
                     pfri[1] = 1;
                 }
@@ -235,7 +235,7 @@ export class CellInputHandler {
                 return pfri;
             }
             if (p.length > n.length) {
-                if (p !== null && v_a[i + 1] !== null && v_a[i + 1].substr(0, 1) === '"' && (p.indexOf('{') > -1 || p.indexOf('}') > -1)) {
+                if (p != null && v_a[i + 1] != null && v_a[i + 1].substr(0, 1) === '"' && (p.indexOf('{') > -1 || p.indexOf('}') > -1)) {
                     pfri[0] += 1;
                     pfri[1] = 1;
                 }
@@ -266,16 +266,16 @@ export class CellInputHandler {
                     pfri[1] = 0;
                 }
             } else if (p.length === n.length) {
-                if (v_a[i + 1] !== null && (v_a[i + 1].substr(0, 1) === '"' || v_a[i + 1].substr(0, 1) === '{' || v_a[i + 1].substr(0, 1) === '}')) {
+                if (v_a[i + 1] != null && (v_a[i + 1].substr(0, 1) === '"' || v_a[i + 1].substr(0, 1) === '{' || v_a[i + 1].substr(0, 1) === '}')) {
                     pfri[0] += 1;
                     pfri[1] = 1;
-                } else if (p !== null && p.length > 2 && p.substr(0, 1) === '"' && p.substr(p.length - 1, 1) === '"') {
+                } else if (p != null && p.length > 2 && p.substr(0, 1) === '"' && p.substr(p.length - 1, 1) === '"') {
                     // pfri[1] = n.length-1;
-                } else if (v_a[i] !== null && v_a[i] === '")') {
+                } else if (v_a[i] != null && v_a[i] === '")') {
                     pfri[1] = 1;
-                } else if (v_a[i] !== null && v_a[i] === '"}') {
+                } else if (v_a[i] != null && v_a[i] === '"}') {
                     pfri[1] = 1;
-                } else if (v_a[i] !== null && v_a[i] === '{)') {
+                } else if (v_a[i] != null && v_a[i] === '{)') {
                     pfri[1] = 1;
                 } else {
                     pfri[1] = n.length;
@@ -283,7 +283,7 @@ export class CellInputHandler {
 
                 return pfri;
             } else if (p.length > n.length) {
-                if (v_a[i + 1] !== null && (v_a[i + 1].substr(0, 1) === '"' || v_a[i + 1].substr(0, 1) === '{' || v_a[i + 1].substr(0, 1) === '}')) {
+                if (v_a[i + 1] != null && (v_a[i + 1].substr(0, 1) === '"' || v_a[i + 1].substr(0, 1) === '{' || v_a[i + 1].substr(0, 1) === '}')) {
                     pfri[0] += 1;
                     pfri[1] = 1;
                 }
@@ -304,20 +304,20 @@ export class CellInputHandler {
             if (p == null) {
                 pfri[0] = v_a.length - 1;
 
-                if (n !== null) {
+                if (n != null) {
                     pfri[1] = n.length;
                 } else {
                     pfri[1] = 1;
                 }
             } else if (p.length === n.length) {
-                if (vp_a[i + 1] !== null && (vp_a[i + 1].substr(0, 1) === '"' || vp_a[i + 1].substr(0, 1) === '{' || vp_a[i + 1].substr(0, 1) === '}')) {
+                if (vp_a[i + 1] != null && (vp_a[i + 1].substr(0, 1) === '"' || vp_a[i + 1].substr(0, 1) === '{' || vp_a[i + 1].substr(0, 1) === '}')) {
                     pfri[1] = n.length;
-                } else if (v_a[i + 1] !== null && v_a[i + 1].substr(0, 1) === '"' && (v_a[i + 1].substr(0, 1) === '{' || v_a[i + 1].substr(0, 1) === '}')) {
+                } else if (v_a[i + 1] != null && v_a[i + 1].substr(0, 1) === '"' && (v_a[i + 1].substr(0, 1) === '{' || v_a[i + 1].substr(0, 1) === '}')) {
                     pfri[0] += 1;
                     pfri[1] = 1;
-                } else if (n !== null && n.substr(0, 1) === '"' && n.substr(n.length - 1, 1) === '"' && p.substr(0, 1) === '"' && p.substr(p.length - 1, 1) === ')') {
+                } else if (n != null && n.substr(0, 1) === '"' && n.substr(n.length - 1, 1) === '"' && p.substr(0, 1) === '"' && p.substr(p.length - 1, 1) === ')') {
                     pfri[1] = n.length;
-                } else if (n !== null && n.substr(0, 1) === '{' && n.substr(n.length - 1, 1) === '}' && p.substr(0, 1) === '{' && p.substr(p.length - 1, 1) === ')') {
+                } else if (n != null && n.substr(0, 1) === '{' && n.substr(n.length - 1, 1) === '}' && p.substr(0, 1) === '{' && p.substr(p.length - 1, 1) === ')') {
                     pfri[1] = n.length;
                 } else {
                     pfri[0] = pfri[0] + vlen - vplen;
@@ -330,16 +330,16 @@ export class CellInputHandler {
 
                 return pfri;
             } else if (p.length > n.length) {
-                if (p !== null && p.substr(0, 1) === '"') {
+                if (p != null && p.substr(0, 1) === '"') {
                     pfri[1] = n.length;
-                } else if (v_a[i + 1] !== null && /{.*?}/.test(v_a[i + 1])) {
+                } else if (v_a[i + 1] != null && /{.*?}/.test(v_a[i + 1])) {
                     pfri[0] += 1;
                     pfri[1] = v_a[i + 1].length;
-                } else if (p !== null && v_a[i + 1].substr(0, 1) === '"' && (p.indexOf('{') > -1 || p.indexOf('}') > -1)) {
+                } else if (p != null && v_a[i + 1].substr(0, 1) === '"' && (p.indexOf('{') > -1 || p.indexOf('}') > -1)) {
                     pfri[0] += 1;
                     pfri[1] = 1;
                 }
-                //  else if (p !== null && (p.indexOf('{') > -1 || p.indexOf('}') > -1)) {
+                //  else if (p != null && (p.indexOf('{') > -1 || p.indexOf('}') > -1)) {
                 // }
                 else {
                     pfri[0] = pfri[0] + vlen - vplen - 1;
@@ -383,7 +383,7 @@ export class CellInputHandler {
         if (fri == null && currSelection) {
             currSelection.selectAllChildren(obj[0]);
             currSelection.collapseToEnd();
-        } else if (fri !== null) {
+        } else if (fri != null) {
             let span = $$('span', obj);
 
             _this.setCaretPosition(Array.isArray(span) ? span[fri[0]] : span, 0, fri[1]);

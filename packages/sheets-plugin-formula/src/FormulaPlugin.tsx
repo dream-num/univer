@@ -1,4 +1,4 @@
-import { SheetContext, IOCContainer, UniverSheet, Plugin, ActionExtensionManager } from '@univer/core';
+import { SheetContext, IOCContainer, UniverSheet, Plugin } from '@univer/core';
 import { CellEditExtensionManager, CellInputExtensionManager } from '@univer/base-sheets';
 import { FormulaEnginePlugin } from '@univer/base-formula-engine';
 import { zh, en } from './Locale';
@@ -17,6 +17,8 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
     private _formulaController: FormulaController;
 
     private _searchFormulaController: SearchFormulaController;
+
+    protected _formulaActionExtensionFactory: FormulaActionExtensionFactory;
 
     constructor(private _config?: IFormulaConfig) {
         super(FORMULA_PLUGIN_NAME);
@@ -66,7 +68,10 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
         this.initialize(context);
     }
 
-    onDestroy(): void {}
+    onDestroy(): void {
+        const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
+        actionRegister.delete(this._formulaActionExtensionFactory);
+    }
 
     registerExtension() {
         const cellEditRegister = CellEditExtensionManager.create();
@@ -75,8 +80,9 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
         const cellInputRegister = CellInputExtensionManager.create();
         cellInputRegister.add(new FormulaCellInputExtensionFactory(this));
 
-        const actionRegister = ActionExtensionManager.create();
-        actionRegister.add(new FormulaActionExtensionFactory(this));
+        const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
+        this._formulaActionExtensionFactory = new FormulaActionExtensionFactory(this);
+        actionRegister.add(this._formulaActionExtensionFactory);
     }
 
     getFormulaEngine() {

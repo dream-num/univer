@@ -56,7 +56,6 @@ export class FormulaBarController {
                 if (cellData) {
                     let cellValue = cellData.m || `${cellData.v}` || '';
 
-                    debugger
                     // If the cell has a formula, it needs to be intercepted
                     const cell = this._cellInputExtensionManager.handle({
                         row: currentRangeData.startRow,

@@ -156,7 +156,7 @@ export class FormulaDependencyGenerator {
             return false;
         }
 
-        const rangeObjectMatrix = sheetObjectMatrix.get(unitId)!;
+        const rangeObjectMatrix = sheetObjectMatrix.get(sheetId)!;
 
         if (rangeObjectMatrix.getValue(row, column)) {
             return true;

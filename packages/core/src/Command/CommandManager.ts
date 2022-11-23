@@ -85,6 +85,7 @@ export class CommandManager {
         const { _actionDataList, _unit, _actionList } = command;
         // const server = _workbook.getServer();
         this._actionExtensionManager.handle(_actionDataList);
+
         _actionDataList.forEach((data) => {
             const ActionClass = CommandManager.getAction(data.actionName);
             const observers = CommandManager.getActionObservers();

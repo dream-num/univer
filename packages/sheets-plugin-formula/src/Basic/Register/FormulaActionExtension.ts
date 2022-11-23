@@ -1,7 +1,9 @@
 import {
+    ActionOperation,
     ACTION_NAMES,
     BaseActionExtension,
     BaseActionExtensionFactory,
+    Command,
     ICellData,
     ISetRangeDataActionData,
     isFormulaString,
@@ -12,14 +14,20 @@ import {
     Tools,
 } from '@univer/core';
 import { FormulaPlugin } from '../../FormulaPlugin';
+import { ACTION_NAMES as PLUGIN_ACTION_NAMES } from '../Enum';
 
 export class FormulaActionExtension extends BaseActionExtension<ISetRangeDataActionData, FormulaPlugin> {
     execute() {
         const engine = this._plugin.getFormulaEngine();
-        const formulaData = Tools.deepClone(this._plugin.getFormulaController().getDataModel().getFormulaData());
+        const formulaController = this._plugin.getFormulaController();
+        const formulaDataModel = formulaController.getDataModel();
+        const formulaData = Tools.deepClone(formulaDataModel.getFormulaData());
         const unitId = this._plugin.getContext().getWorkBook().getUnitId();
         const sheetId = this.actionData.sheetId;
         const rangeData = this.actionData.rangeData;
+        const commandManager = this._plugin.getContext().getCommandManager();
+
+        const workBook = this._plugin.getContext().getWorkBook();
         let cellValue = this.actionData.cellValue;
 
         const cellData = new ObjectMatrix(formulaData[unitId][sheetId]);
@@ -53,32 +61,54 @@ export class FormulaActionExtension extends BaseActionExtension<ISetRangeDataAct
                     column: c,
                     sheetId,
                 });
+
+                const unitRange: IUnitRange[] = [
+                    {
+                        unitId,
+                        sheetId,
+                        rangeData,
+                    },
+                ];
+
+                // cell.v = 55;
+                // cell.t = 1;
+
+                engine.execute(unitId, formulaData, formulaController.toInterpreterCalculateProps(), true, unitRange).then((sheetData) => {
+                    const cellCalculate = sheetData[sheetId].getValue(r, c);
+                    // cell.v = cellCalculate?.v;
+                    // cell.t = cellCalculate?.t;
+                    if (cellCalculate && cellCalculate.p) {
+                        delete cellCalculate.p;
+                    }
+
+                    const action: ISetRangeDataActionData = {
+                        actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+                        sheetId,
+                        rangeData: {
+                            startColumn: c,
+                            endColumn: c,
+                            startRow: r,
+                            endRow: r,
+                        },
+                        cellValue: {
+                            [r]: {
+                                [c]: cellCalculate,
+                            },
+                        },
+                    };
+
+                    const setFormulaDataAction = {
+                        actionName: PLUGIN_ACTION_NAMES.SET_FORMULA_RANGE_DATA_ACTION,
+                        sheetId: this.actionData.sheetId,
+                        rangeData: this.actionData.rangeData,
+                        formulaData,
+                    };
+                    const actionData = ActionOperation.make<ISetRangeDataActionData>(action).removeCollaboration().removeUndo().getAction();
+                    const command = new Command({ WorkBookUnit: workBook }, actionData, setFormulaDataAction);
+                    commandManager.invoke(command);
+                });
             }
-
-            const unitRange: IUnitRange[] = [
-                {
-                    unitId,
-                    sheetId,
-                    rangeData,
-                },
-            ];
-
-            // cell.v = 55;
-            // cell.t = 1;
-            engine.execute(unitId, formulaData, undefined, undefined, unitRange).then((sheetData) => {
-                const cellCalculate = sheetData[sheetId].getValue(r, c);
-                cell.v = cellCalculate?.v;
-                cell.t = cellCalculate?.t;
-            });
         }
-
-        // const setNumfmtRangeDataAction = {
-        //     actionName: ACTION_NAMES,
-        //     sheetId: this.actionData.sheetId,
-        //     rangeData: this.actionData.rangeData,
-        //     cellValue: formulaMatrix.toJSON(),
-        // };
-        // this.push(setNumfmtRangeDataAction);
     }
 }
 

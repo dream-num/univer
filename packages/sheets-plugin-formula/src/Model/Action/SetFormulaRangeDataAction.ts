@@ -1,12 +1,12 @@
-import { IFormulaData } from '@univer/base-formula-engine';
-import { SheetActionBase, ActionObservers, ISheetActionData, ObjectMatrixPrimitiveType, Workbook } from '@univer/core';
+import { FormulaDataType } from '@univer/base-formula-engine';
+import { SheetActionBase, ActionObservers, ISheetActionData, Workbook } from '@univer/core';
 import { SetFormulaRangeData } from '../Apply/SetFormulaRangeData';
 
 export interface ISetFormulaRangeActionData extends ISheetActionData {
-    formulaData: IFormulaData;
+    formulaData: FormulaDataType;
 }
 
-export class SetFormulaRangeDataAction extends SheetActionBase<ISetFormulaRangeActionData, IFormulaData> {
+export class SetFormulaRangeDataAction extends SheetActionBase<ISetFormulaRangeActionData, ISetFormulaRangeActionData, FormulaDataType> {
     constructor(actionData: ISetFormulaRangeActionData, workbook: Workbook, observers: ActionObservers) {
         super(actionData, workbook, observers);
         this._doActionData = {
@@ -18,16 +18,20 @@ export class SetFormulaRangeDataAction extends SheetActionBase<ISetFormulaRangeA
         };
     }
 
-    do(): ObjectMatrixPrimitiveType<string> {
+    do(): FormulaDataType {
         return this.redo();
     }
 
-    redo(): IFormulaData {
-        return SetFormulaRangeData();
+    redo(): FormulaDataType {
+        const { _workbook } = this;
+        const { formulaData } = this._doActionData;
+        return SetFormulaRangeData(_workbook, formulaData);
     }
 
     undo(): void {
-        SetFormulaRangeData();
+        const { _workbook } = this;
+        const { formulaData } = this._oldActionData;
+        SetFormulaRangeData(_workbook, formulaData);
     }
 
     validate(): boolean {

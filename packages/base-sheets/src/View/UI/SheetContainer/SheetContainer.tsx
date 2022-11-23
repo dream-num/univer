@@ -15,16 +15,7 @@ import {
 } from '@univer/base-component';
 import { AsyncFunction, SheetContext, IKeyType, LocaleType, PLUGIN_NAMES, Tools, Workbook } from '@univer/core';
 import cssVars from 'css-vars-ponyfill';
-import {
-    Container,
-    Content,
-    Footer,
-    Header,
-    // InfoBar,
-    Layout,
-    // SheetBar,
-    Sider,
-} from '@univer/style-universheet';
+import { Container, Content, Footer, Header, Layout, Sider } from '@univer/style-universheet';
 import defaultSkin from '@univer/style-universheet/assets/css/skin/default.module.less';
 import darkSkin from '@univer/style-universheet/assets/css/skin/dark.module.less';
 // All skins' less file
@@ -638,7 +629,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
      * @returns {void}
      */
     render() {
-        const { addButton, context } = this.props.config;
+        const { context } = this.props.config;
         const { layout, currentLocale, currentSkin, siderPanelList, mainList, showSider, renderState } = this.state;
 
         // Set Provider for entire Container
@@ -666,51 +657,9 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                     }}
                                 >
                                     {/* innerLeft */}
-                                    {/* <FilterSelect />
-                                    <FilterSelect />
-                                    <FilterSelect /> */}
-                                    {/* <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            const rect = this.btnRef.current && this.btnRef.current.getBoundingClientRect();
-
-                                            this.cellRightRef.current && (this.cellRightRef.current as unknown as RightMenu).handleContextMenu(e, rect, true);
-                                        }}
-                                        ref={this.btnRef}
-                                    >
-                                        点击
-                                    </button>
-                                    {/* <PrintMode
-                                        visible={this.state.printVisible}
-                                        onCancel={() => {
-                                            this.setState({
-                                                printVisible: !this.state.printVisible,
-                                            });
-                                        }}
-                                    /> */}
                                 </Sider>
                                 <Content className={layout.contentSplit === 'vertical' ? style.contentContainerVertical : style.contentContainerHorizontal}>
                                     {/* extend main content */}
-                                    {/* {mainList.map((item: IMainState, i) => {
-                                        // if (!item.show) return null;
-
-                                        if (item.type === ISlotElement.JSX) {
-                                            // return item.content;
-                                            return cloneElement(item.content as JSX.Element, {
-                                                style: { display: item.show ? '' : 'none' },
-                                            });
-                                        }
-                                        if (item.type === ISlotElement.JSX_STRING) {
-                                            // if (item.content === 'RichText') {
-                                            //     const RichText = this.Render.renderFunction('RichText');
-                                            //     return <RichText />;
-                                            // }
-                                            const JSXElement = this.Render.renderFunction(item.content as keyof Description);
-                                            this.refMap[item.name] = createRef<HTMLDivElement>();
-                                            return <JSXElement ref={this.refMap[item.name]} style={{ display: item.show ? '' : 'none' }} />;
-                                        }
-                                        return item;
-                                    })} */}
 
                                     <ModalGroup></ModalGroup>
 

@@ -1,21 +1,28 @@
-import { BaseComponentRender, BaseComponentSheet, Component, createRef, ModalButtonGroup } from '@univer/base-component';
+import { BaseComponentRender, BaseComponentSheet, Component, createRef } from '@univer/base-component';
+import { PLUGIN_NAMES } from '@univer/core';
 
-interface CellRangeModalProps {
+interface childrenProps {
     placeholder?: string;
+}
+
+export interface CellRangeModalProps {
     value?: string;
     title?: string;
     confirmText?: string;
     onClick?: () => void;
+    group?: any[];
+    children?: childrenProps;
+    show?: boolean;
 }
+
+interface IProps {}
 
 interface CellRangeModalState {
-    show: boolean;
+    modalData: CellRangeModalProps;
 }
 
-export class CellRangeModal extends Component<CellRangeModalProps, CellRangeModalState> {
+export class CellRangeModal extends Component<IProps, CellRangeModalState> {
     private _render: BaseComponentRender;
-
-    private _group: ModalButtonGroup[];
 
     inputRef = createRef<HTMLInputElement>();
 
@@ -25,40 +32,33 @@ export class CellRangeModal extends Component<CellRangeModalProps, CellRangeModa
         const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this._render = component.getComponentRender();
 
-        this._group = [
-            {
-                label: this.props.confirmText,
-                type: 'primary',
-                onClick: this.confirmRange,
-            },
-        ];
-
         this.state = {
-            show: false,
+            modalData: {},
         };
     }
 
-    componentDidMount() {}
-
-    showModal(show: boolean) {
-        this.setState({
-            show,
-        });
+    componentDidMount() {
+        this._context.getObserverManager().getObserver<CellRangeModal>('onCellRangeModalDidMountObservable', PLUGIN_NAMES.SPREADSHEET)?.notifyObservers(this);
     }
 
     confirmRange() {
         const value = this.inputRef.current?.value;
     }
 
+    setModal(modalData: CellRangeModalProps) {
+        this.setState({
+            modalData,
+        });
+    }
+
     render() {
-        const { value, title, placeholder } = this.props;
-        const { show } = this.state;
+        const { value, title, children, group, show } = this.state.modalData;
         const Input = this._render.renderFunction('Input');
         const Modal = this._render.renderFunction('Modal');
-
+        if (!show) return;
         return (
-            <Modal title={title} visible={show} group={this._group} ref={this.modalRef} mask={false}>
-                <Input ref={this.inputRef} readonly={true} placeholder={placeholder} value={value}></Input>
+            <Modal isDrag={true} visible={show} title={title} group={group} mask={false}>
+                <Input ref={this.inputRef} readonly={true} placeholder={children?.placeholder} value={value}></Input>
             </Modal>
         );
     }

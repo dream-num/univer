@@ -7,6 +7,7 @@ import { ToolBar } from '../View/UI/ToolBar/ToolBar';
 import { LineColor } from '../View/UI/Common/Line/LineColor';
 import { ModalGroup } from '../View/UI/ModalGroup/ModalGroup';
 import { RichText } from '../View/UI/RichText/RichText';
+import { CellRangeModal } from '../View/UI/Common/CellRange/CellRangeModal';
 
 interface ISelectionControlFillConfig {}
 
@@ -49,7 +50,7 @@ export type SheetPluginObserve = {
     onLineColorDidMountObservable: Observable<LineColor>;
 
     onSheetContainerDidMountObservable: Observable<SheetContainer>;
-    // onSheetContainerDidMountObservable: Observable<SheetContainer>;
+    onCellRangeModalDidMountObservable: Observable<CellRangeModal>;
 
     onSpreadsheetKeyDownObservable: Observable<IKeyboardEvent>;
     onSpreadsheetKeyUpObservable: Observable<IKeyboardEvent>;
@@ -86,6 +87,7 @@ export function uninstall(plugin: Plugin) {
 
     plugin.deleteObserve('onChangeCurrentSheetObserver');
     plugin.deleteObserve('onSheetContainerDidMountObservable');
+    plugin.deleteObserve('onCellRangeModalDidMountObservable');
     plugin.deleteObserve('onSpreadsheetKeyDownObservable');
     plugin.deleteObserve('onSpreadsheetKeyUpObservable');
     plugin.deleteObserve('onSpreadsheetKeyCopyObservable');
@@ -117,6 +119,7 @@ export function install(plugin: Plugin) {
     plugin.pushToObserve('onChangeCurrentSheetObserver');
 
     plugin.pushToObserve('onToolBarDidMountObservable');
+    plugin.pushToObserve('onCellRangeModalDidMountObservable');
     plugin.pushToObserve('onModalGroupDidMountObservable');
     plugin.pushToObserve('onRichTextDidMountObservable');
     plugin.pushToObserve('onFormulaBarDidMountObservable');

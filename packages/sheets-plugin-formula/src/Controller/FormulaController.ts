@@ -64,7 +64,7 @@ export class FormulaController {
                 },
                 {
                     locale: 'formula.formula.more',
-                    onClick: () => this._plugin.getSearchFormulaController().showModal('SearchFormula', true),
+                    onClick: () => this._plugin.getSearchFormulaController().showFormulaModal('SearchFormula', true),
                 },
             ],
         });

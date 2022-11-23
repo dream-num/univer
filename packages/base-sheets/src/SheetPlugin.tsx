@@ -344,6 +344,10 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         return this._cellEditorControl;
     }
 
+    getModalGroupControl() {
+        return this._modalGroupController;
+    }
+
     addSider(item: ISlotProps): Promise<void> {
         return this._addSiderFunc(item);
     }

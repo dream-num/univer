@@ -8,6 +8,8 @@ interface IState {
 }
 
 export class ModalGroup extends Component<any, IState> {
+    refs: any[] = [];
+
     initialize() {
         this.state = {
             modalGroup: [],
@@ -21,10 +23,10 @@ export class ModalGroup extends Component<any, IState> {
     setModalGroup(group: ModalGroupProps) {
         const plugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
 
-        const modalGroup = group.map((item) => {
+        const modalGroup = group.map((item, index) => {
             const Modal = plugin?.getRegisterComponent(item);
             if (Modal) {
-                return <Modal />;
+                return <Modal ref={(ele: any) => (this.refs[index] = ele)} />;
             }
             return null;
         });
@@ -32,6 +34,10 @@ export class ModalGroup extends Component<any, IState> {
         this.setState({
             modalGroup,
         });
+    }
+
+    getModalGroup() {
+        return this.refs;
     }
 
     render() {

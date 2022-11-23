@@ -32,7 +32,7 @@ export class SearchFormulaModal extends Component<IProps, IState> {
         const SheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
 
         modalData.forEach((item) => {
-            const Label = SheetPlugin.getRegisterComponent(item.children.name);
+            const Label = SheetPlugin.getRegisterComponent(item.children.name!);
             if (Label) {
                 const props = item.children.props ?? {};
                 item.modal = <Label {...props} />;

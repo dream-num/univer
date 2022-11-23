@@ -1,14 +1,14 @@
 @import '../../../assets/css/skin/base.module.less';
 
 .active() {
-    border-right-width: @border-width-base !important;
+    border-right-width: @border-width-base  !important;
     outline: 0;
     box-shadow: var(--box-shadow-base);
 }
 
 .hover(@color: var(--primary-color-hover)) {
     border-color: @color;
-    border-right-width: @border-width-base !important;
+    border-right-width: @border-width-base  !important;
 }
 
 .disabled() {
@@ -29,6 +29,7 @@
     display: inline-block;
     width: 100%;
     min-width: 0;
+    box-sizing: border-box;
     padding: 2px 7px;
     color: var(--text-color);
     font-size: @font-size-base;

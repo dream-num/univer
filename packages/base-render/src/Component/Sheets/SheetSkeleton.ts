@@ -732,7 +732,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             const documentSkeleton = DocumentSkeleton.create(documentData, this.getContext());
             if (angle === 0 || wrapStrategy !== WrapStrategy.WRAP) {
                 documentSkeleton.calculate();
-                console.log(cell.v, documentSkeleton);
+                // console.log(cell.v, documentSkeleton);
             }
             fontCache.setValue(r, c, {
                 documentSkeleton,

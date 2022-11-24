@@ -269,8 +269,17 @@ export class CellEditorController {
      */
     enterEditMode() {
         this.focusEditEle();
+        // setTimeout(() => {
+        //     this.richTextEditEle.focus();
+
+        // }, 1);
 
         if (this.isEditMode) return;
+
+        // set focus to last position
+        setTimeout(() => {
+            this.richText.cellInputHandler.setLastCaretPosition();
+        }, 1);
 
         this.isEditMode = true;
 
@@ -325,7 +334,7 @@ export class CellEditorController {
         });
 
         if (cell) {
-            cellValue = cell.value;
+            cellValue = this.richText.cellInputHandler.functionHTMLGenerate(cell.value);
         }
 
         this.richText.setValue(cellValue);
@@ -380,7 +389,7 @@ export class CellEditorController {
         // If there is no settimeout, the first letter will be intercepted in Chinese state
         setTimeout(() => {
             this.richTextEditEle.focus();
-        }, 1);
+        }, 100);
     }
 
     setCurrentEditRangeData() {

@@ -32,7 +32,7 @@ export class FormulaActionExtension extends BaseActionExtension<ISetRangeDataAct
 
         const cellData = new ObjectMatrix(formulaData[unitId][sheetId]);
 
-        // a range
+        // a range TODO api will trigger here
         if (!isNaN(parseInt(Object.keys(cellValue)[0]))) {
             const rangeMatrix = new ObjectMatrix(cellValue as ObjectMatrixPrimitiveType<ICellData>);
 
@@ -74,11 +74,15 @@ export class FormulaActionExtension extends BaseActionExtension<ISetRangeDataAct
                 // cell.t = 1;
 
                 engine.execute(unitId, formulaData, formulaController.toInterpreterCalculateProps(), true, unitRange).then((sheetData) => {
-                    const cellCalculate = sheetData[sheetId].getValue(r, c);
+                    const cellCalculate = sheetData[sheetId].getValue(r, c) as ICellData;
                     // cell.v = cellCalculate?.v;
                     // cell.t = cellCalculate?.t;
                     if (cellCalculate && cellCalculate.p) {
                         delete cellCalculate.p;
+                    }
+
+                    if (cellCalculate && Number.isNaN(cellCalculate.v)) {
+                        cellCalculate.v = 0;
                     }
 
                     const action: ISetRangeDataActionData = {
@@ -90,11 +94,7 @@ export class FormulaActionExtension extends BaseActionExtension<ISetRangeDataAct
                             startRow: r,
                             endRow: r,
                         },
-                        cellValue: {
-                            [r]: {
-                                [c]: cellCalculate,
-                            },
-                        },
+                        cellValue: cellCalculate,
                     };
 
                     const setFormulaDataAction = {

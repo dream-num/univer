@@ -2,7 +2,6 @@ import { Component, createRef } from '@univer/base-component';
 import { KeyCode } from '@univer/core';
 import { CellInputHandler } from './CellInputHandler';
 import { CellTextStyle } from './CellTextStyle';
-import { HelpFunction, SearchFunction } from './FormulaPrompt';
 import styles from './index.module.less';
 // interface IProps {
 //     style?: {};
@@ -282,9 +281,8 @@ export class RichText extends Component<BaseRichTextProps, IState> {
                     dangerouslySetInnerHTML={{ __html: text || '' }}
                     contentEditable
                 ></div>
-                {this.state.searchActive && !this.state.helpFormulaActive ? <SearchFunction value={this.state.formula} active={this.state.funIndex} /> : null}
-                {!this.state.searchActive && this.state.helpFormulaActive ? <HelpFunction funName={this.state.formulaName} paramIndex={this.state.paramIndex} /> : null}
-                {/* <HelpFunction funName={this.state.formulaName} paramIndex={this.state.paramIndex} /> */}
+                {/* {this.state.searchActive && !this.state.helpFormulaActive ? <SearchFunction value={this.state.formula} active={this.state.funIndex} /> : null}
+                {!this.state.searchActive && this.state.helpFormulaActive ? <HelpFunction funName={this.state.formulaName} paramIndex={this.state.paramIndex} /> : null} */}
             </div>
         );
     }

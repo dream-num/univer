@@ -372,6 +372,12 @@ export class CellInputHandler {
         }
     }
 
+    setLastCaretPosition() {
+        const range = window.getSelection();
+        range && range.selectAllChildren(this.editor);
+        range && range.collapseToEnd();
+    }
+
     functionRange(obj: HTMLElement, v: string, vp: string) {
         let _this = this;
 

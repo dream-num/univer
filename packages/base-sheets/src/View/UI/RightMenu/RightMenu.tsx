@@ -135,6 +135,11 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
         }
     };
 
+    // 显示隐藏菜单栏
+    showRightMenu(show: boolean) {
+        this.ulRef.current.showMenu(show);
+    }
+
     render() {
         if (!this.state.children.length) {
             return;

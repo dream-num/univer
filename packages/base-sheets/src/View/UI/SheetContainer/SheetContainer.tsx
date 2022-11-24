@@ -241,8 +241,6 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
             showSider: false,
             renderState: 0,
         };
-
-        console.log('this.state', this.state);
     }
 
     /**

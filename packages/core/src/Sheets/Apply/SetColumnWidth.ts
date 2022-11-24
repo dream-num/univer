@@ -17,8 +17,8 @@ export function SetColumnWidth(
     const result: number[] = [];
     for (let i = columnIndex; i < columnIndex + columnWidth.length; i++) {
         const column = columnManager.getColumnOrCreate(i);
-        result[i] = column.w;
-        column.w = columnWidth[i];
+        result[i - columnIndex] = column.w;
+        column.w = columnWidth[i - columnIndex];
     }
     return result;
 }

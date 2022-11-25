@@ -12,7 +12,7 @@ export abstract class Copy {
         this._context = context;
         const SheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
 
-        this.initRegisterComponent(componentList);
+        this._initRegisterComponent(componentList);
         SheetPlugin?.addRightMenu(copyList);
 
         const manager = this._context.getObserverManager();
@@ -29,7 +29,7 @@ export abstract class Copy {
         e.preventDefault();
     }
 
-    initRegisterComponent(component: any[]) {
+    private _initRegisterComponent(component: any[]) {
         const SheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
         for (let i = 0; i < component.length; i++) {
             SheetPlugin.registerComponent(CLIPBOARD_PLUGIN + component[i].name, component[i]);

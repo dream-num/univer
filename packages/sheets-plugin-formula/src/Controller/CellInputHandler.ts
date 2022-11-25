@@ -1,7 +1,6 @@
-import { $$, getNodeindex } from '@univer/base-component';
+import { $$, getNodeindex, xssDeal } from '@univer/base-component';
 import { Nullable, Tools } from '@univer/core';
 import { lang } from './locale';
-import styles from './index.module.less';
 
 /**
  * Random color for formula cell input
@@ -68,9 +67,9 @@ export class CellInputHandler {
 
     searchFunctionCell: any;
 
-    editor: HTMLDivElement;
+    editor: HTMLElement;
 
-    constructor(ele: HTMLDivElement) {
+    constructor(ele: HTMLElement) {
         this.functionHTMLIndex = 0;
         this.functionRangeIndex = [];
         this.operator = '===|!==|<>|<=|>=|=|+|-|>|<|/|*|%|&|^';
@@ -107,7 +106,7 @@ export class CellInputHandler {
      * @param value
      */
     setInputValue(value: string) {
-        this.editor.innerHTML = this.xssDeal(value);
+        this.editor.innerHTML = xssDeal(value);
     }
 
     getHelpFormula() {
@@ -124,13 +123,12 @@ export class CellInputHandler {
      * @param $input
      * @param kcode
      */
-    functionInputHandler($input: HTMLDivElement, kcode: number) {
+    functionInputHandler($input: HTMLElement, kcode: number) {
         let _this = this;
 
         let $editer = $input;
         let value1 = $editer.innerHTML;
         let value1txt = $editer.textContent || '';
-        let xssDeal = this.xssDeal;
 
         // You must use setTimeout to get the current input value
         setTimeout(() => {
@@ -186,11 +184,6 @@ export class CellInputHandler {
                 // _this.inputValue = value;
             }
         }, 1);
-    }
-
-    xssDeal(str: string) {
-        if (typeof str !== 'string') return str;
-        return str.replace(/<script>/g, '&lt;script&gt;').replace(/<\/script>/, '&lt;/script&gt;');
     }
 
     findrangeindex(v: string, vp: string) {
@@ -372,12 +365,6 @@ export class CellInputHandler {
         }
     }
 
-    setLastCaretPosition() {
-        const range = window.getSelection();
-        range && range.selectAllChildren(this.editor);
-        range && range.collapseToEnd();
-    }
-
     functionRange(obj: HTMLElement, v: string, vp: string) {
         let _this = this;
 
@@ -405,7 +392,7 @@ export class CellInputHandler {
 
         _this.functionHTMLIndex = 0;
 
-        return `<span dir="auto" class="${styles.formulaTextColor}">=</span>${_this.functionHTML(txt)}`;
+        return `<span dir="auto" class="universheet-formula-text-color">=</span>${_this.functionHTML(txt)}`;
     }
 
     functionHTML(txt: string) {
@@ -476,9 +463,9 @@ export class CellInputHandler {
                     matchConfig.dquote += 1;
 
                     if (str.length > 0) {
-                        function_str += `${_this.functionHTML(str)}<span dir="auto" class="${styles.formulaTextString}">"`;
+                        function_str += `${_this.functionHTML(str)}<span dir="auto" class="universheet-formula-text-string">"`;
                     } else {
-                        function_str += `<span dir="auto" class="${styles.formulaTextString}">"`;
+                        function_str += `<span dir="auto" class="universheet-formula-text-string">"`;
                     }
 
                     str = '';
@@ -552,18 +539,18 @@ export class CellInputHandler {
                         let alltxt = '';
 
                         if (arraystart > 0) {
-                            alltxt += `<span dir="auto" class="${styles.formulaTextColor}">${str.substr(0, arraystart)}</span>`;
+                            alltxt += `<span dir="auto" class="universheet-formula-text-color">${str.substr(0, arraystart)}</span>`;
                         }
 
                         alltxt += `<span dir="auto" style="color:#959a05" class="universheet-formula-text-array">${arraytxt}</span>`;
 
                         if (arraystart + arraytxt.length < str.length) {
-                            alltxt += `<span dir="auto" class="${styles.formulaTextColor}">${str.substr(arraystart + arraytxt.length, str.length)}</span>`;
+                            alltxt += `<span dir="auto" class="universheet-formula-text-color">${str.substr(arraystart + arraytxt.length, str.length)}</span>`;
                         }
 
                         function_str += alltxt;
                     } else {
-                        function_str += `<span dir="auto" class="${styles.formulaTextColor}">${str}</span>`;
+                        function_str += `<span dir="auto" class="universheet-formula-text-color">${str}</span>`;
                     }
                 }
             }
@@ -652,7 +639,7 @@ export class CellInputHandler {
             lasttxt = txt.substring(anchorOffset - 1, 1);
             return anchor.parentNode;
         }
-        if (anchor!.parentElement!.className === styles.richTextEditor) {
+        if (anchor!.parentElement!.className === 'universheet-rich-text-editor') {
             // const a = anchor.querySelectorAll('span');
             // let txt = anchor.parentElement!.querySelectorAll('span')[anchorLength.length - 1].textContent!.trim();
             let txt = anchor.textContent?.trim()!;
@@ -708,7 +695,7 @@ export class CellInputHandler {
         return null;
     }
 
-    searchFunction($editer: HTMLDivElement) {
+    searchFunction($editer: HTMLElement) {
         let _this = this;
         const locale = 'zh';
         this.formula = [];
@@ -722,7 +709,9 @@ export class CellInputHandler {
         if ($cell == null || $editer == null) {
             return;
         }
-        let inputContent = $editer.innerHTML;
+
+        // Use innerText instead of innerHTML because rich text styles will appear"<span dir="auto" class="univer-formula-text-color">=</span><span dir="auto" class="univer-formula -text-color ">su</span>", resulting in inaccurate judgment of inputContent.substr(0, 1)
+        let inputContent = $editer.innerText;
         let searchtxt = $cell.textContent!.toUpperCase();
         let reg = /^[a-zA-Z]|[a-zA-Z_]+$/;
         if (!reg.test(searchtxt) || inputContent.substr(0, 1) !== '=') {
@@ -763,7 +752,7 @@ export class CellInputHandler {
         // }
     }
 
-    helpFunctionExe($editer: HTMLDivElement, currSelection: HTMLSpanElement) {
+    helpFunctionExe($editer: HTMLElement, currSelection: HTMLSpanElement) {
         let _this = this;
         const locale = 'zh';
         let functionlist = lang[`${locale}`];
@@ -787,7 +776,7 @@ export class CellInputHandler {
         }
         let funcName = null;
         let paramindex = null;
-        if ($span[`${i}`].className === styles.richTextEditor) {
+        if ($span[`${i}`].className === 'universheet-rich-text-editor') {
             funcName = $span[`${i}`].textContent;
         } else {
             let $cur = null;

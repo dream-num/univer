@@ -47,7 +47,7 @@ export class ToolBarController {
 
         const pluginName = this._plugin.getPluginName();
 
-        this.initRegisterComponent();
+        this._initRegisterComponent();
 
         const config =
             this._plugin.config.layout === 'auto'
@@ -220,7 +220,7 @@ export class ToolBarController {
             ?.add(() => {});
     }
 
-    initRegisterComponent() {
+    private _initRegisterComponent() {
         const component = this._plugin.context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         const pluginName = this._plugin.getPluginName();
         this.Render = component.getComponentRender();

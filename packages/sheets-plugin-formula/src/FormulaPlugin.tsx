@@ -12,11 +12,14 @@ import { FormulaCellInputExtensionFactory } from './Basic/Register/FormulaCellIn
 import { FormulaActionExtensionFactory } from './Basic/Register';
 import { FormulaPluginObserve, install } from './Basic/Observer';
 import { SearchFormulaController } from './Controller/SearchFormulaModalController';
+import { FormulaPromptController } from './Controller/FormulaPromptController';
 
 export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
     private _formulaController: FormulaController;
 
     private _searchFormulaController: SearchFormulaController;
+
+    private _formulaPromptController: FormulaPromptController;
 
     protected _formulaActionExtensionFactory: FormulaActionExtensionFactory;
 
@@ -41,6 +44,7 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
         this._formulaController = new FormulaController(this, this._config);
 
         this._searchFormulaController = new SearchFormulaController(this);
+        this._formulaPromptController = new FormulaPromptController(this);
 
         this._formulaController.setFormulaEngine(formulaEngine);
 

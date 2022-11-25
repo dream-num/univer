@@ -17,7 +17,7 @@ export abstract class Paste {
         const SheetPlugin = this._context.getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
         SheetPlugin.addRightMenu(pasteList);
 
-        // SheetPlugin.getCellEditorControl().isEditMode
+        // SheetPlugin.getCellEditorController().isEditMode
         const manager = this._context.getObserverManager();
         manager.requiredObserver<ClipboardEvent>('onSpreadsheetKeyPasteObservable', PLUGIN_NAMES.SPREADSHEET).add((e) => {
             this.paste(e);

@@ -90,12 +90,12 @@ export class NumfmtModalController {
             },
         ];
 
-        this.initRegisterComponent();
+        this._initRegisterComponent();
 
-        this.init();
+        this._initialize();
     }
 
-    init() {
+    private _initialize() {
         this._plugin.getObserver('onNumfmtModalDidMountObservable')!.add((component) => {
             this._numfmtModal = component;
 
@@ -103,7 +103,7 @@ export class NumfmtModalController {
         });
     }
 
-    initRegisterComponent() {
+    private _initRegisterComponent() {
         this._sheetPlugin.registerComponent(NUMFMT_PLUGIN_NAME + FormatContent.name, FormatContent);
         this._sheetPlugin.registerModal(NUMFMT_PLUGIN_NAME + NumfmtModal.name, NumfmtModal);
     }

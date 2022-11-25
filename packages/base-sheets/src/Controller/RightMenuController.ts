@@ -23,7 +23,7 @@ export class RightMenuController {
     constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
 
-        this.initRegisterComponent();
+        this._initRegisterComponent();
 
         this._menuList = [
             {
@@ -339,7 +339,7 @@ export class RightMenuController {
         });
     }
 
-    initRegisterComponent() {
+    private _initRegisterComponent() {
         this._plugin.registerComponent(RightMenuInput.name, RightMenuInput);
         this._plugin.registerComponent(RightMenuButton.name, RightMenuButton);
         this._plugin.registerComponent(RightMenuSelect.name, RightMenuSelect);

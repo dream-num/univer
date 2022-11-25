@@ -66,7 +66,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     private _sheetBarControl: SheetBarControl;
 
-    private _cellEditorControl: CellEditorController;
+    private _cellEditorController: CellEditorController;
 
     private _antLineController: AntLineControl;
 
@@ -163,7 +163,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         if (layout === 'auto' || layout.sheetBar) {
             this._sheetBarControl = new SheetBarControl(this);
         }
-        this._cellEditorControl = new CellEditorController(this);
+        this._cellEditorController = new CellEditorController(this);
         this._antLineController = new AntLineControl(this);
 
         if (layout === 'auto' || layout.countBar) {
@@ -340,8 +340,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         return this._sheetBarControl;
     }
 
-    getCellEditorControl() {
-        return this._cellEditorControl;
+    getCellEditorController() {
+        return this._cellEditorController;
     }
 
     getModalGroupControl() {

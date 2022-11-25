@@ -1,5 +1,5 @@
 import { BaseComponentRender } from '@univer/base-component';
-import { Tools, BorderType, BorderStyleTypes, HorizontalAlign, VerticalAlign, WrapStrategy, DEFAULT_STYLES } from '@univer/core';
+import { Range, Tools, BorderType, BorderStyleTypes, HorizontalAlign, VerticalAlign, WrapStrategy, DEFAULT_STYLES } from '@univer/core';
 import { ColorPicker } from '@univer/style-universheet';
 import { SheetPlugin } from '../SheetPlugin';
 import { defaultLayout, ILayout } from '../View/UI/SheetContainer';
@@ -47,6 +47,28 @@ export class ToolBarController {
 
     private _borderInfo: BorderInfo; //存储边框信息
 
+    private _initSelectedObserver(): void {
+        const manager = this._plugin.getSelectionManager();
+        this._plugin.getObserver('onChangeSelectionObserver')?.add(() => {
+            const range = manager?.getCurrentCell();
+            if (range) {
+                this._changeToolBarState(range);
+            }
+        });
+    }
+
+    private _changeToolBarState(range: Range): void {
+        const workbook = this._plugin.getContext().getWorkBook();
+        const worksheet = workbook.getActiveSheet();
+        if (worksheet) {
+            const cellMatrix = worksheet.getCellMatrix();
+            const fontSize = range.getFontSize();
+            const horizontalAlign = range.getHorizontalAlignment();
+            const fontName = range.getFontFamily();
+            const verticalAlign = range.getVerticalAlignment();
+        }
+    }
+
     constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
 
@@ -68,6 +90,7 @@ export class ToolBarController {
             {
                 toolbarType: 1,
                 tooltipLocale: 'toolbar.undo',
+                name: 'undo',
                 customLabel: {
                     name: 'ForwardIcon',
                 },
@@ -82,6 +105,7 @@ export class ToolBarController {
                 customLabel: {
                     name: 'BackIcon',
                 },
+                name: 'redo',
                 show: config.undoRedo,
                 onClick: () => {
                     this.setRedo();
@@ -122,6 +146,7 @@ export class ToolBarController {
                 tooltipLocale: 'toolbar.font',
                 className: styles.selectLabelString,
                 show: config.font,
+                name: 'font',
                 border: true,
                 onClick: (fontFamily: string) => {
                     this._plugin.getObserver('onAfterChangeFontFamilyObservable')?.notifyObservers(fontFamily);
@@ -133,6 +158,7 @@ export class ToolBarController {
                 tooltipLocale: 'toolbar.fontSize',
                 label: String(DEFAULT_STYLES.fs),
                 show: config.fontSize,
+                name: 'fontSize',
                 onClick: (fontSize: number) => {
                     this._plugin.getObserver('onAfterChangeFontSizeObservable')?.notifyObservers(fontSize);
                 },
@@ -148,6 +174,7 @@ export class ToolBarController {
                     name: 'BoldIcon',
                 },
                 show: config.bold,
+                name: 'bold',
                 onClick: (isBold: boolean) => {
                     this._plugin.getObserver('onAfterChangeFontWeightObservable')?.notifyObservers(isBold);
                 },
@@ -159,6 +186,7 @@ export class ToolBarController {
                     name: 'ItalicIcon',
                 },
                 show: config.italic,
+                name: 'italic',
                 onClick: (isItalic: boolean) => {
                     this._plugin.getObserver('onAfterChangeFontItalicObservable')?.notifyObservers(isItalic);
                 },
@@ -170,6 +198,7 @@ export class ToolBarController {
                     name: 'DeleteLineIcon',
                 },
                 show: config.strikethrough,
+                name: 'strikethrough',
                 onClick: (isStrikethrough: boolean) => {
                     this._plugin.getObserver('onAfterChangeFontStrikethroughObservable')?.notifyObservers(isStrikethrough);
                 },
@@ -181,6 +210,7 @@ export class ToolBarController {
                     name: 'UnderLineIcon',
                 },
                 show: config.underline,
+                name: 'underline',
                 onClick: (isItalic: boolean) => {
                     this._plugin.getObserver('onAfterChangeFontUnderlineObservable')?.notifyObservers(isItalic);
                 },
@@ -192,6 +222,7 @@ export class ToolBarController {
                     name: 'TextColorIcon',
                 },
                 show: config.textColor,
+                name: 'textColor',
                 onClick: (color: string) => {
                     this._plugin.getObserver('onAfterChangeFontColorObservable')?.notifyObservers(color);
                 },
@@ -203,6 +234,7 @@ export class ToolBarController {
                     name: 'FillColorIcon',
                 },
                 show: config.fillColor,
+                name: 'fillColor',
                 onClick: (color: string) => {
                     this._plugin.getObserver('onAfterChangeFontBackgroundObservable')?.notifyObservers(color);
                 },
@@ -217,6 +249,7 @@ export class ToolBarController {
                     // console.dir(type);
                     // console.dir(this._borderInfo);
                 },
+                name: 'border',
                 children: [
                     ...BORDER_LINE_CHILDREN,
                     {
@@ -271,6 +304,7 @@ export class ToolBarController {
                 onClick: (value: string) => {
                     this.setMerge(value);
                 },
+                name: 'mergeCell',
                 children: MERGE_CHILDREN,
             },
             {
@@ -279,6 +313,7 @@ export class ToolBarController {
                 className: styles.selectDoubleString,
                 display: 1,
                 show: config.horizontalAlignMode,
+                name: 'horizontalAlignMode',
                 onClick: (value: HorizontalAlign) => {
                     this.setHorizontalAlignment(value);
                 },
@@ -290,6 +325,7 @@ export class ToolBarController {
                 className: styles.selectDoubleString,
                 display: 1,
                 show: config.verticalAlignMode,
+                name: 'verticalAlignMode',
                 onClick: (value: VerticalAlign) => {
                     this.setVerticalAlignment(value);
                 },
@@ -301,6 +337,7 @@ export class ToolBarController {
                 tooltipLocale: 'toolbar.textWrapMode.main',
                 display: 1,
                 show: config.textWrapMode,
+                name: 'textWrapMode',
                 onClick: (value: WrapStrategy) => {
                     this.setWrapStrategy(value);
                 },
@@ -309,6 +346,7 @@ export class ToolBarController {
             {
                 type: 3,
                 className: styles.selectDoubleString,
+                name: 'textRotateMode',
                 tooltipLocale: 'toolbar.textRotateMode.main',
                 display: 1,
                 show: config.textRotateMode,
@@ -432,6 +470,10 @@ export class ToolBarController {
 
                 const cellData = this._plugin.getWorkbook().getActiveSheet().getRange(currentRangeData).getObjectValue({ isIncludeStyle: true });
             }
+        });
+
+        this._plugin.context.getContextObserver('onSheetRenderDidMountObservable').add(() => {
+            this._initSelectedObserver();
         });
     }
 

@@ -36,7 +36,6 @@ export class ToolBar extends Component<IProps, IState> {
     initialize() {
         const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this.Render = component.getComponentRender();
-
         this.state = {
             // Button contains main button and drop down arrow, translation file contains main and right
             showMore: false,

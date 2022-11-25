@@ -1,7 +1,7 @@
 import { ComponentChildren } from '@univer/base-component';
 import { SheetPlugin } from '@univer/base-sheets';
 import { PLUGIN_NAMES } from '@univer/core';
-import { NUMFMT_PLUGIN_NAME } from '../Basic/Const';
+import { NUMBERFORMAT, NUMFMT_PLUGIN_NAME } from '../Basic/Const';
 import { CURRENCYDETAIL, DATEFMTLISG } from '../Basic/Const/FORMATDETAIL';
 import { NumfmtPlugin } from '../NumfmtPlugin';
 import { FormatContent } from '../View/UI/FormatContent';
@@ -11,6 +11,7 @@ interface GroupProps {
     locale: string;
     label?: string;
     type?: string;
+    onClick?: () => void;
 }
 
 export interface ModalDataProps {
@@ -48,14 +49,18 @@ export class NumfmtModalController {
                 show: false,
                 group: [
                     {
-                        locale: 'button.cancel',
+                        locale: 'button.confirm',
                         type: 'primary',
+                        onClick: () => {},
                     },
                     {
                         locale: 'button.cancel',
+                        onClick: () => {},
                     },
                 ],
-                onCancel: () => this.showModal('currency', false),
+                onCancel: () => {
+                    this.showModal('currency', false);
+                },
                 children: {
                     name: NUMFMT_PLUGIN_NAME + FormatContent.name,
                     props: {
@@ -72,18 +77,44 @@ export class NumfmtModalController {
                 show: false,
                 group: [
                     {
-                        locale: 'button.cancel',
+                        locale: 'button.confirm',
                         type: 'primary',
                     },
                     {
                         locale: 'button.cancel',
                     },
                 ],
-                onCancel: () => this.showModal('currency', false),
+                onCancel: () => {
+                    this.showModal('currency', false);
+                },
                 children: {
                     name: NUMFMT_PLUGIN_NAME + FormatContent.name,
                     props: {
                         data: DATEFMTLISG,
+                        onClick: (value: string) => console.dir(value),
+                    },
+                },
+            },
+            {
+                name: 'number',
+                locale: 'toolbar.numberFormat',
+                show: false,
+                group: [
+                    {
+                        locale: 'button.confirm',
+                        type: 'primary',
+                    },
+                    {
+                        locale: 'button.cancel',
+                    },
+                ],
+                onCancel: () => {
+                    this.showModal('number', false);
+                },
+                children: {
+                    name: NUMFMT_PLUGIN_NAME + FormatContent.name,
+                    props: {
+                        data: NUMBERFORMAT,
                         onClick: (value: string) => console.dir(value),
                     },
                 },
@@ -140,7 +171,6 @@ export class NumfmtModalController {
         const index = this._modalData.findIndex((item) => item.name === name);
         if (index > -1) {
             this._modalData[index].show = show;
-
             this.resetModalData();
         }
     }

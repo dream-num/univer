@@ -85,12 +85,21 @@ export class Workbook {
             sheets[DEFAULT_WORKSHEET.id] = DEFAULT_WORKSHEET;
         }
 
+        let firstWorksheet = null;
+
         for (let sheetId in sheets) {
             let config = sheets[sheetId];
             config.name = NameGen.getSheetName(config.name);
             const worksheet = new Worksheet(_context, config);
             _worksheets.set(worksheet.getSheetId(), worksheet);
             sheetOrder.push(worksheet.getSheetId());
+            if (firstWorksheet == null) {
+                firstWorksheet = worksheet;
+            }
+        }
+
+        if (firstWorksheet) {
+            firstWorksheet.activate();
         }
     }
 

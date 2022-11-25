@@ -263,6 +263,7 @@ class SheetBarUIController {
             hidden: sheet.isSheetHidden(),
             selected: sheet.getStatus() === 1,
             onClick: (e: MouseEvent) => {
+                console.log('000000000');
                 const target = e.currentTarget as HTMLDivElement;
                 this._dataId = target.dataset.id as string;
                 sheet.showSheet();

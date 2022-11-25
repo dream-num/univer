@@ -91,7 +91,7 @@ export const DEFAULT_WORKSHEET: IWorksheetConfig = {
     cellData: {},
     rowData: {},
     columnData: {},
-    status: BooleanNumber.TRUE,
+    status: BooleanNumber.FALSE,
     showGridlines: BooleanNumber.TRUE,
     rowTitle: {
         width: 46,

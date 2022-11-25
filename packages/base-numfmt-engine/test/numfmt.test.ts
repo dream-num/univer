@@ -41,6 +41,6 @@ test('numfmt percentage', () => {
 });
 
 test('numfmt percentage', () => {
-    const formatter = numfmt('aaaa');
-    console.log(formatter(16));
+    const formatter = numfmt();
+    console.log(formatter(0));
 });

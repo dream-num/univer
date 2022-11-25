@@ -250,6 +250,7 @@ export const HORIZONTAL_ALIGN_CHILDREN = [
     },
     {
         locale: 'align.center',
+        selected: true,
         customSuffix: {
             name: 'CenterAlignIcon',
         },

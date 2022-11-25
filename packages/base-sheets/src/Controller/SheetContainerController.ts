@@ -45,6 +45,7 @@ export class SheetContainerController {
         });
     }
 
+    // 注册常用icon和组件
     private _initRegisterComponent() {
         const component = this._plugin.context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this._render = component.getComponentRender();

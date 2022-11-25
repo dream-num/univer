@@ -17,8 +17,8 @@ export function SetRowHeight(
     const result: number[] = [];
     for (let i = rowIndex; i < rowIndex + rowHeight.length; i++) {
         const row = rowManager.getRowOrCreate(i);
-        result[i] = row.h;
-        row.h = rowHeight[i];
+        result[i - rowIndex] = row.h;
+        row.h = rowHeight[i - rowIndex];
     }
     return result;
 }

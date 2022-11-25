@@ -100,8 +100,10 @@ export class RightMenuController {
                     props: {
                         prefixLocale: ['rightClick.row', 'rightClick.height'],
                         suffix: 'px',
+                        onKeyUp: this.setRowHeight.bind(this),
                     },
                 },
+                onClick: (...arg) => console.dir(arg),
                 hide: RightMenuConfig.hideRowHeight,
             },
             {
@@ -118,6 +120,7 @@ export class RightMenuController {
                     props: {
                         prefixLocale: ['rightClick.column', 'rightClick.width'],
                         suffix: 'px',
+                        onKeyUp: this.setColumnWidth.bind(this),
                     },
                 },
                 hide: RightMenuConfig.hideColumnWidth,
@@ -474,6 +477,32 @@ export class RightMenuController {
             sheet.getRange(selections[0]).deleteCells(1);
         }
     };
+
+    setColumnWidth(e: Event) {
+        if ((e as KeyboardEvent).key !== 'Enter') {
+            return;
+        }
+        const width = (e.target as HTMLInputElement).value;
+        const selections = this._getSelections();
+        if (selections?.length === 1) {
+            const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
+            sheet.setColumnWidth(selections[0].startColumn, selections[0].endColumn - selections[0].startColumn + 1, Number(width));
+        }
+        this._RightMenu.showRightMenu(false);
+    }
+
+    setRowHeight(e: Event) {
+        if ((e as KeyboardEvent).key !== 'Enter') {
+            return;
+        }
+        const height = (e.target as HTMLInputElement).value;
+        const selections = this._getSelections();
+        if (selections?.length === 1) {
+            const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
+            sheet.setRowHeights(selections[0].startRow, selections[0].endRow - selections[0].startRow + 1, Number(height));
+        }
+        this._RightMenu.showRightMenu(false);
+    }
 
     addItem = (item: RightMenuProps[] | RightMenuProps) => {
         if (item instanceof Array) {

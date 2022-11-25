@@ -25,4 +25,8 @@ export class FormulaDataModel {
     getFormulaData() {
         return this._formulaData;
     }
+
+    setFormulaData(value: FormulaDataType) {
+        this._formulaData = value;
+    }
 }

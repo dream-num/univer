@@ -32,10 +32,10 @@ export const RightMenuConfig: IHideRightMenuConfig = {
     hideDeleteColumn: false,
     hideHideRow: true,
     hideShowRow: true,
-    hideRowHeight: true,
+    hideRowHeight: false,
     hideHideColumn: true,
     hideShowColumn: true,
-    hideColumnWidth: true,
+    hideColumnWidth: false,
     hideDeleteCell: false,
     hideClearContent: false,
     hideMatrix: true,
@@ -54,6 +54,7 @@ interface CustomLabelProps {
     locale?: string;
     label?: string;
     children?: CustomLabelProps[];
+    onKeyUp?: (e: Event) => void;
 }
 
 export interface RightMenuProps extends BaseMenuItem {

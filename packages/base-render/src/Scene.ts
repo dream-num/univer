@@ -469,6 +469,20 @@ export class Scene {
         }
     }
 
+    fuzzyMathObjects(oKey: string) {
+        const objects: BaseObject[] = [];
+        for (let layer of this._layers) {
+            const objects = layer.getObjectsByOrder();
+            for (let object of objects) {
+                if (object.oKey.indexOf(oKey) > -1) {
+                    objects.push(object);
+                }
+            }
+        }
+
+        return objects;
+    }
+
     addViewport(...viewport: Viewport[]) {
         this._viewports.push(...viewport);
         return this;
@@ -554,8 +568,11 @@ export class Scene {
         this._transformerOpenState = true;
     }
 
-    closeTransformer() {
-        this._transformer = null;
+    closeTransformer(isDestroyed = false) {
+        if (isDestroyed) {
+            this._transformer = null;
+        }
+
         this._transformerOpenState = false;
     }
 
@@ -573,7 +590,7 @@ export class Scene {
 
     transformToSceneCoord(coord: Vector2) {
         const pickedViewport = this._viewports.find((vp) => vp.isHit(coord));
-        if (!this._evented || !pickedViewport) {
+        if (!pickedViewport) {
             return;
         }
         return pickedViewport.getRelativeVector(coord);
@@ -738,7 +755,7 @@ export class Scene {
     }
 
     triggerPointerDown(evt: IPointerEvent | IMouseEvent) {
-        console.log(this, 'scene');
+        // console.log(this, 'scene');
         if (!this.onPointerDownObserver.notifyObservers(evt)?.stopPropagation && this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
             (this._parent as SceneViewer)?.triggerPointerDown(evt);
             return false;

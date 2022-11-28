@@ -67,6 +67,10 @@ export class DocumentSkeleton extends Skeleton {
 
         const drawing = drawings[id];
 
+        if (!drawing) {
+            return;
+        }
+
         const objectProperties = drawing.objectProperties;
 
         objectProperties.size.width = config.width;

@@ -1,6 +1,7 @@
 import { Nullable, Observable, Observer } from '@univer/core';
 import { BaseObject } from './BaseObject';
-import { CURSOR_TYPE, IMouseEvent, IPointerEvent } from './Basics';
+import { CURSOR_TYPE } from './Basics/Const';
+import { IMouseEvent, IPointerEvent } from './Basics/IEvents';
 import { getCurrentScrollXY } from './Basics/Position';
 import { Group } from './Group';
 import { Scene } from './Scene';

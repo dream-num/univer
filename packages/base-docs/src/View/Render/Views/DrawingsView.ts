@@ -54,7 +54,6 @@ export class DrawingsView extends BaseView {
         }
         scene.openTransformer();
         scene.addObjects(objectList);
-
         scene.getTransformer()?.onChangingObservable.add((state) => {
             const { objects } = state;
 
@@ -74,6 +73,7 @@ export class DrawingsView extends BaseView {
 
             docsSkeleton?.calculate();
         });
+        scene.closeTransformer();
 
         // scene.addObjects([pageBackground], 0);
     }

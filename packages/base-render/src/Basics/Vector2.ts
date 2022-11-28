@@ -1,7 +1,12 @@
 import { DeepImmutable, FloatArray } from '.';
 import { Transform } from './Transform';
 
-export class Vector2 {
+export interface IPoint {
+    x: number;
+    y: number;
+}
+
+export class Vector2 implements IPoint {
     /**
      * Creates a new Vector2 from the given x and y coordinates
      * @param x defines the first coordinate
@@ -151,6 +156,10 @@ export class Vector2 {
      */
     subtract(otherVector: Vector2): Vector2 {
         return new Vector2(this.x - otherVector.x, this.y - otherVector.y);
+    }
+
+    subtractByPoint(x: number, y: number) {
+        return new Vector2(this.x - x, this.y - y);
     }
 
     /**

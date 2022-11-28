@@ -47,25 +47,72 @@ export class ToolBarController {
 
     private _borderInfo: BorderInfo; //存储边框信息
 
-    private _initSelectedObserver(): void {
-        const manager = this._plugin.getSelectionManager();
-        this._plugin.getObserver('onChangeSelectionObserver')?.add(() => {
-            const range = manager?.getCurrentCell();
-            if (range) {
-                this._changeToolBarState(range);
-            }
-        });
-    }
-
     private _changeToolBarState(range: Range): void {
         const workbook = this._plugin.getContext().getWorkBook();
         const worksheet = workbook.getActiveSheet();
         if (worksheet) {
             const cellMatrix = worksheet.getCellMatrix();
             const fontSize = range.getFontSize();
-            const horizontalAlign = range.getHorizontalAlignment();
             const fontName = range.getFontFamily();
+            const fontItalic = range.getFontStyle();
+            const fontWeight = range.getFontWeight();
+            const strikeThrough = range.getStrikeThrough();
+            const underline = range.getUnderline();
+            const horizontalAlign = range.getHorizontalAlignment();
             const verticalAlign = range.getVerticalAlignment();
+
+            console.log('cellMatrix:', cellMatrix);
+            console.log('fontSize:', fontSize);
+            console.log('horizontalAlign:', horizontalAlign);
+            console.log('fontName:', fontName);
+            console.log('verticalAlign:', verticalAlign);
+            console.log('fontItalic:', fontItalic);
+            console.log('fontWeight:', fontWeight);
+            console.log('strikeThrough:', strikeThrough);
+
+            const fontNameItem = this._toolList.find((item) => item.name === 'font');
+            const fontSizeItem = this._toolList.find((item) => item.name === 'fontSize');
+            const fontBoldItem = this._toolList.find((item) => item.name === 'bold');
+            const fontItalicItem = this._toolList.find((item) => item.name === 'italic');
+            const strikethroughItem = this._toolList.find((item) => item.name === 'strikethrough');
+            const underlineItem = this._toolList.find((item) => item.name === 'underline');
+            const horizontalAlignModeItem = this._toolList.find((item) => item.name === 'horizontalAlignMode');
+            const verticalAlignModeItem = this._toolList.find((item) => item.name === 'verticalAlignMode');
+
+            if (fontNameItem) {
+                fontNameItem.children?.forEach((item) => {
+                    item.selected = fontName === item.value;
+                });
+            }
+            if (fontSizeItem) {
+                fontSizeItem.children?.forEach((item) => {
+                    item.value = fontSize;
+                });
+            }
+            if (fontBoldItem) {
+                fontBoldItem.active = !!fontWeight;
+            }
+            if (fontItalicItem) {
+                fontItalicItem.active = !!fontItalic;
+            }
+            if (strikethroughItem) {
+                strikethroughItem.active = !!strikeThrough.s;
+            }
+            if (underlineItem) {
+                underlineItem.active = !!underline.s;
+            }
+            if (horizontalAlignModeItem) {
+                horizontalAlignModeItem.children?.forEach((item) => {
+                    item.selected = horizontalAlign === item.value;
+                });
+            }
+            if (verticalAlignModeItem) {
+                verticalAlignModeItem.children?.forEach((item) => {
+                    item.selected = verticalAlign === item.value;
+                });
+            }
+
+            this.resetToolBarList();
         }
     }
 
@@ -173,6 +220,7 @@ export class ToolBarController {
                 customLabel: {
                     name: 'BoldIcon',
                 },
+                active: false,
                 show: config.bold,
                 name: 'bold',
                 onClick: (isBold: boolean) => {
@@ -444,36 +492,37 @@ export class ToolBarController {
 
         // Monitor selection changes, update toolbar button status and values TODO: 根据不同的焦点对象，接受
         this._plugin.getObserver('onChangeSelectionObserver')?.add((selectionControl: SelectionControl) => {
-            const currentCell = selectionControl.model.currentCell;
-
-            if (currentCell) {
-                let currentRangeData;
-
-                if (currentCell.isMerged) {
-                    const mergeInfo = currentCell.mergeInfo;
-
-                    currentRangeData = {
-                        startRow: mergeInfo.startRow,
-                        endRow: mergeInfo.endRow,
-                        startColumn: mergeInfo.startColumn,
-                        endColumn: mergeInfo.endColumn,
-                    };
-                } else {
-                    const { row, column } = currentCell;
-                    currentRangeData = {
-                        startRow: row,
-                        endRow: row,
-                        startColumn: column,
-                        endColumn: column,
-                    };
-                }
-
-                const cellData = this._plugin.getWorkbook().getActiveSheet().getRange(currentRangeData).getObjectValue({ isIncludeStyle: true });
+            // const currentCell = selectionControl.model.currentCell;
+            //
+            // if (currentCell) {
+            //     let currentRangeData;
+            //
+            //     if (currentCell.isMerged) {
+            //         const mergeInfo = currentCell.mergeInfo;
+            //
+            //         currentRangeData = {
+            //             startRow: mergeInfo.startRow,
+            //             endRow: mergeInfo.endRow,
+            //             startColumn: mergeInfo.startColumn,
+            //             endColumn: mergeInfo.endColumn,
+            //         };
+            //     } else {
+            //         const { row, column } = currentCell;
+            //         currentRangeData = {
+            //             startRow: row,
+            //             endRow: row,
+            //             startColumn: column,
+            //             endColumn: column,
+            //         };
+            //     }
+            //
+            //     const cellData = this._plugin.getWorkbook().getActiveSheet().getRange(currentRangeData).getObjectValue({ isIncludeStyle: true });
+            // }
+            const manager = this._plugin.getSelectionManager();
+            const range = manager?.getCurrentCell();
+            if (range) {
+                this._changeToolBarState(range);
             }
-        });
-
-        this._plugin.context.getContextObserver('onSheetRenderDidMountObservable').add(() => {
-            this._initSelectedObserver();
         });
     }
 

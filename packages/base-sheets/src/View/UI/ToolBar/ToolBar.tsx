@@ -221,7 +221,7 @@ export class ToolBar extends Component<IProps, IState> {
                 if (item.show) {
                     return (
                         <Tooltip title={item.tooltip} placement={'bottom'}>
-                            <TextButton label={item.label} onClick={item.onClick}></TextButton>
+                            <TextButton active={item.active} label={item.label} onClick={item.onClick}></TextButton>
                         </Tooltip>
                     );
                 }

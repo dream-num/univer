@@ -26,6 +26,8 @@ export class FormulaBarController {
 
         manager.requiredObserver<FormulaBar>('onFormulaBarDidMountObservable', PLUGIN_NAMES.SPREADSHEET).add((component) => {
             this._formulaBar = component;
+
+            // update named ranges data
             this._namedRanges = this._plugin.getContext().getWorkBook().getConfig().namedRanges;
 
             const list = this._namedRanges.map((namedRange) => ({

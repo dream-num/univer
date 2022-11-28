@@ -225,7 +225,8 @@ export class Select extends Component<BaseSelectProps, IState> {
         this.initData();
     }
 
-    componentWillReceiveProps() {
+    componentWillReceiveProps(nextProps: BaseSelectProps) {
+        this.props = Object.assign(this.props, nextProps);
         this.initData();
     }
 

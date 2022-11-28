@@ -166,8 +166,6 @@ export class SearchFormulaController {
         this._plugin.getObserver('onSearchFormulaModalDidMountObservable')!.add((component) => {
             this._formulaModal = component;
 
-            console.log('_formulaModal', component);
-
             this._modalData = this._resetLabel(this._modalData);
             this._cellRangeModalData = this._resetLabel(this._cellRangeModalData);
         });

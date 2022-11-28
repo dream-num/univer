@@ -926,7 +926,34 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookConfig = {
             name: 'sheet6',
         },
     },
-    namedRanges: [],
+    namedRanges: [
+        {
+            namedRangeId: 'named-range-01',
+            name: 'namedRange01',
+            range: {
+                sheetId: 'sheet-01',
+                rangeData: {
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 1,
+                    endColumn: 1,
+                },
+            },
+        },
+        {
+            namedRangeId: 'named-range-02',
+            name: 'namedRange02',
+            range: {
+                sheetId: 'sheet-01',
+                rangeData: {
+                    startRow: 4,
+                    startColumn: 2,
+                    endRow: 5,
+                    endColumn: 3,
+                },
+            },
+        },
+    ],
 };
 /**
  * Default workbook data
@@ -1270,5 +1297,19 @@ export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookConfig = {
             name: 'sheet0003',
         },
     },
-    namedRanges: [],
+    namedRanges: [
+        {
+            namedRangeId: 'named-range-0001',
+            name: 'namedRange0001',
+            range: {
+                sheetId: 'sheet-0001',
+                rangeData: {
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 1,
+                    endColumn: 1,
+                },
+            },
+        },
+    ],
 };

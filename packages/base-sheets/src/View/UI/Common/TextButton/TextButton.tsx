@@ -31,6 +31,14 @@ export class TextButton extends Component<BaseTextButtonProps, IState> {
         });
     };
 
+    componentWillReceiveProps(nextProps: Readonly<BaseTextButtonProps>, nextContext: any) {
+        if (nextProps.active !== this.props.active) {
+            this.setState({
+                active: nextProps.active,
+            });
+        }
+    }
+
     render() {
         const { label } = this.props;
         const { active } = this.state;

@@ -22,6 +22,7 @@ import { IToolBarItemProps } from './Model/ToolBarModel';
 import { ModalGroupController } from './Controller/ModalGroupController';
 import { ISheetPluginConfig, DEFAULT_SPREADSHEET_PLUGIN_DATA } from './Basics';
 import { FormulaBarController } from './Controller/FormulaBarController';
+import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeActionExtension';
 
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
@@ -77,6 +78,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     private _modalGroupController: ModalGroupController;
 
     private _componentList: Map<string, any>;
+
+    protected _namedRangeActionExtensionFactory: NamedRangeActionExtensionFactory;
 
     constructor(config: Partial<ISheetPluginConfig> = {}) {
         super(PLUGIN_NAMES.SPREADSHEET);
@@ -183,6 +186,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         // =1+(3*4=4)*5+1
         // =(-(1+2)--@A1:B2 + 5)/2 + -sum(indirect("A5"):B10# + B6# + A1:offset("C5", 1, 1)  ,  100) + {1,2,3;4,5,6;7,8,10} + lambda(x,y,z, x*y*z)(sum(1,(1+2)*3),2,lambda(x,y, @offset(A1:B0,x#*y#))(1,2):C20) & "美国人才" + sum((1+2%)*30%, 1+2)%
         // formulaEngine?.calculate(`=lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+1-max(100,200)`);
+
+        this.registerExtension();
     }
 
     /**
@@ -254,6 +259,15 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     onDestroy(): void {
         super.onDestroy();
         uninstall(this);
+
+        const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
+        actionRegister.delete(this._namedRangeActionExtensionFactory);
+    }
+
+    registerExtension() {
+        const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
+        this._namedRangeActionExtensionFactory = new NamedRangeActionExtensionFactory(this);
+        actionRegister.add(this._namedRangeActionExtensionFactory);
     }
 
     getSplitLeftRef(): RefObject<HTMLDivElement> {

@@ -195,7 +195,7 @@ export class ToolBar extends Component<IProps, IState> {
     };
 
     resetUl = () => {
-        const wrapper = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.getContentRef().current!;
+        const wrapper = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.getSheetContainerControl().getContentRef().current!;
         const height = `${(wrapper as HTMLDivElement).offsetHeight}px`;
         const ul = this.toolbarRef.current.querySelectorAll('ul');
         for (let i = 0; i < ul.length; i++) {

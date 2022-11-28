@@ -55,11 +55,11 @@ export interface IToolBarItemProps extends BaseToolBarSelectProps, BaseTextButto
 }
 
 export class ToolBarModel {
-    private _config: IShowToolBarConfig[];
+    private _config: IShowToolBarConfig;
 
     private _toolList: IToolBarItemProps[];
 
-    get config(): IShowToolBarConfig[] {
+    get config(): IShowToolBarConfig {
         return this._config;
     }
 
@@ -67,7 +67,7 @@ export class ToolBarModel {
         return this._toolList;
     }
 
-    set config(value: IShowToolBarConfig[]) {
+    set config(value: IShowToolBarConfig) {
         this._config = value;
     }
 

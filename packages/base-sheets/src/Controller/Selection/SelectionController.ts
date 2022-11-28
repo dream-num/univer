@@ -39,6 +39,9 @@ enum SELECTION_MANAGER_KEY {
     backgroundMiddleRight = '__SpreadsheetSelectionBackgroundControlMiddleRight__',
     backgroundBottom = '__SpreadsheetSelectionBackgroundControlBottom__',
     fill = '__SpreadsheetSelectionFillControl__',
+    lineMain = '__SpreadsheetDragLineMainControl__',
+    lineContent = '__SpreadsheetDragLineContentControl__',
+    line = '__SpreadsheetDragLineControl__',
 }
 
 /**

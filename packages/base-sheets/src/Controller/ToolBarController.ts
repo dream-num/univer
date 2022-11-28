@@ -2,13 +2,12 @@ import { BaseComponentRender } from '@univer/base-component';
 import { Range, Tools, BorderType, BorderStyleTypes, HorizontalAlign, VerticalAlign, WrapStrategy, DEFAULT_STYLES } from '@univer/core';
 import { ColorPicker } from '@univer/style-universheet';
 import { SheetPlugin } from '../SheetPlugin';
-import { defaultLayout, ILayout } from '../View/UI/SheetContainer';
 
 import { SelectionControl } from './Selection/SelectionController';
 
 import { LineColor } from '../View/UI/Common/Line/LineColor';
 import { SelectionModel } from '../Model';
-import { IToolBarItemProps, ToolBarModel } from '../Model/ToolBarModel';
+import { IShowToolBarConfig, IToolBarItemProps, ToolBarModel } from '../Model/ToolBarModel';
 import { ToolBar } from '../View/UI/ToolBar';
 import styles from '../View/UI/ToolBar/index.module.less';
 import {
@@ -21,6 +20,7 @@ import {
     TEXT_WRAP_CHILDREN,
     VERTICAL_ALIGN_CHILDREN,
 } from '../View/UI/ToolBar/Const';
+import { DefaultToolbarConfig } from '../Basics';
 
 interface BorderInfo {
     color: string;
@@ -123,17 +123,14 @@ export class ToolBarController {
         }
     }
 
-    constructor(plugin: SheetPlugin) {
+    constructor(plugin: SheetPlugin, config?: IShowToolBarConfig) {
         this._plugin = plugin;
 
         const pluginName = this._plugin.getPluginName();
 
         this._initRegisterComponent();
 
-        const config =
-            this._plugin.config.layout === 'auto'
-                ? Tools.deepClone(defaultLayout.toolBarConfig)
-                : Tools.deepMerge(defaultLayout.toolBarConfig, (this._plugin.config.layout as ILayout).toolBarConfig);
+        const toolbarConfig = config ? Tools.deepClone(DefaultToolbarConfig) : Tools.deepMerge(DefaultToolbarConfig, config);
 
         this._borderInfo = {
             color: '#000',
@@ -148,7 +145,7 @@ export class ToolBarController {
                 customLabel: {
                     name: 'ForwardIcon',
                 },
-                show: config.undoRedo,
+                show: toolbarConfig.undoRedo,
                 onClick: () => {
                     this.setUndo();
                 },
@@ -160,7 +157,7 @@ export class ToolBarController {
                     name: 'BackIcon',
                 },
                 name: 'redo',
-                show: config.undoRedo,
+                show: toolbarConfig.undoRedo,
                 onClick: () => {
                     this.setRedo();
                 },
@@ -169,38 +166,38 @@ export class ToolBarController {
             //     toolbarType: 1,
             //     tooltipLocale: 'paintFormat',
             //     label: 'FormatIcon',
-            //     show: config.paintFormat,
+            //     show: toolbarConfig.paintFormat,
             // },
             // {
             //     toolbarType: 1,
             //     tooltipLocale: 'currencyFormat',
             //     label: 'MoneyIcon',
-            //     show: config.currencyFormat,
+            //     show: toolbarConfig.currencyFormat,
             // },
             // {
             //     toolbarType: 1,
             //     tooltipLocale: 'percentageFormat',
             //     label: 'PercentIcon',
-            //     show: config.percentageFormat,
+            //     show: toolbarConfig.percentageFormat,
             // },
             // {
             //     toolbarType: 1,
             //     tooltipLocale: 'numberDecrease',
             //     label: 'ReduceNumIcon',
-            //     show: config.numberDecrease,
+            //     show: toolbarConfig.numberDecrease,
             // },
             // {
             //     toolbarType: 1,
             //     tooltipLocale: 'numberIncrease',
             //     label: 'AddNumIcon',
-            //     show: config.numberIncrease,
+            //     show: toolbarConfig.numberIncrease,
             // },
             {
                 type: 0,
                 tooltipLocale: 'toolbar.font',
                 className: styles.selectLabelString,
-                show: config.font,
                 name: 'font',
+                show: toolbarConfig.font,
                 border: true,
                 onClick: (fontFamily: string) => {
                     this._plugin.getObserver('onAfterChangeFontFamilyObservable')?.notifyObservers(fontFamily);
@@ -211,8 +208,8 @@ export class ToolBarController {
                 type: 1,
                 tooltipLocale: 'toolbar.fontSize',
                 label: String(DEFAULT_STYLES.fs),
-                show: config.fontSize,
                 name: 'fontSize',
+                show: toolbarConfig.fontSize,
                 onClick: (fontSize: number) => {
                     this._plugin.getObserver('onAfterChangeFontSizeObservable')?.notifyObservers(fontSize);
                 },
@@ -228,8 +225,8 @@ export class ToolBarController {
                     name: 'BoldIcon',
                 },
                 active: false,
-                show: config.bold,
                 name: 'bold',
+                show: toolbarConfig.bold,
                 onClick: (isBold: boolean) => {
                     this._plugin.getObserver('onAfterChangeFontWeightObservable')?.notifyObservers(isBold);
                 },
@@ -240,8 +237,8 @@ export class ToolBarController {
                 customLabel: {
                     name: 'ItalicIcon',
                 },
-                show: config.italic,
                 name: 'italic',
+                show: toolbarConfig.italic,
                 onClick: (isItalic: boolean) => {
                     this._plugin.getObserver('onAfterChangeFontItalicObservable')?.notifyObservers(isItalic);
                 },
@@ -252,8 +249,8 @@ export class ToolBarController {
                 customLabel: {
                     name: 'DeleteLineIcon',
                 },
-                show: config.strikethrough,
                 name: 'strikethrough',
+                show: toolbarConfig.strikethrough,
                 onClick: (isStrikethrough: boolean) => {
                     this._plugin.getObserver('onAfterChangeFontStrikethroughObservable')?.notifyObservers(isStrikethrough);
                 },
@@ -264,8 +261,8 @@ export class ToolBarController {
                 customLabel: {
                     name: 'UnderLineIcon',
                 },
-                show: config.underline,
                 name: 'underline',
+                show: toolbarConfig.underline,
                 onClick: (isItalic: boolean) => {
                     this._plugin.getObserver('onAfterChangeFontUnderlineObservable')?.notifyObservers(isItalic);
                 },
@@ -276,8 +273,8 @@ export class ToolBarController {
                 customLabel: {
                     name: 'TextColorIcon',
                 },
-                show: config.textColor,
                 name: 'textColor',
+                show: toolbarConfig.textColor,
                 onClick: (color: string) => {
                     this._plugin.getObserver('onAfterChangeFontColorObservable')?.notifyObservers(color);
                 },
@@ -288,8 +285,8 @@ export class ToolBarController {
                 customLabel: {
                     name: 'FillColorIcon',
                 },
-                show: config.fillColor,
                 name: 'fillColor',
+                show: toolbarConfig.fillColor,
                 onClick: (color: string) => {
                     this._plugin.getObserver('onAfterChangeFontBackgroundObservable')?.notifyObservers(color);
                 },
@@ -297,7 +294,7 @@ export class ToolBarController {
             {
                 type: 3,
                 display: 1,
-                show: config.border,
+                show: toolbarConfig.border,
                 tooltipLocale: 'toolbar.border.main',
                 className: styles.selectDoubleString,
                 onClick: (type) => {
@@ -355,7 +352,7 @@ export class ToolBarController {
                 customLabel: {
                     name: 'MergeIcon',
                 },
-                show: config.mergeCell,
+                show: toolbarConfig.mergeCell,
                 onClick: (value: string) => {
                     this.setMerge(value);
                 },
@@ -367,8 +364,8 @@ export class ToolBarController {
                 tooltipLocale: 'toolbar.horizontalAlignMode.main',
                 className: styles.selectDoubleString,
                 display: 1,
-                show: config.horizontalAlignMode,
                 name: 'horizontalAlignMode',
+                show: toolbarConfig.horizontalAlignMode,
                 onClick: (value: HorizontalAlign) => {
                     this.setHorizontalAlignment(value);
                 },
@@ -379,8 +376,8 @@ export class ToolBarController {
                 tooltipLocale: 'toolbar.verticalAlignMode.main',
                 className: styles.selectDoubleString,
                 display: 1,
-                show: config.verticalAlignMode,
                 name: 'verticalAlignMode',
+                show: toolbarConfig.verticalAlignMode,
                 onClick: (value: VerticalAlign) => {
                     this.setVerticalAlignment(value);
                 },
@@ -391,8 +388,8 @@ export class ToolBarController {
                 className: styles.selectDoubleString,
                 tooltipLocale: 'toolbar.textWrapMode.main',
                 display: 1,
-                show: config.textWrapMode,
                 name: 'textWrapMode',
+                show: toolbarConfig.textWrapMode,
                 onClick: (value: WrapStrategy) => {
                     this.setWrapStrategy(value);
                 },
@@ -404,7 +401,7 @@ export class ToolBarController {
                 name: 'textRotateMode',
                 tooltipLocale: 'toolbar.textRotateMode.main',
                 display: 1,
-                show: config.textRotateMode,
+                show: toolbarConfig.textRotateMode,
                 onClick: (value: number | string) => {
                     this.setTextRotation(value);
                 },
@@ -415,7 +412,7 @@ export class ToolBarController {
         this._moreText = { more: 'toolbar.toolMore', tip: 'toolbar.toolMoreTip' };
 
         this._toolBarModel = new ToolBarModel();
-        this._toolBarModel.config = config;
+        this._toolBarModel.config = toolbarConfig;
         this._toolBarModel.toolList = this._toolList;
 
         this.init();

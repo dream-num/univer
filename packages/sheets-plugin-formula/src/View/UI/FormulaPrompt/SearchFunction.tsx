@@ -62,7 +62,7 @@ export class SearchFunction extends Component<IProps, IState> {
     componentWillUpdate(nextProps: any) {}
 
     setLocale() {
-        const locale = this.context.locale.options.currentLocale;
+        const locale = this._context.getLocale().options.currentLocale as string;
 
         this.setState({
             lang: locale,

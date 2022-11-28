@@ -1,6 +1,6 @@
 import { IMouseEvent, IPointerEvent } from '@univer/base-render';
-import { PLUGIN_NAMES } from '@univer/core';
-import { RightMenuConfig, RightMenuModel, RightMenuProps } from '../Model/RightMenuModel';
+import { PLUGIN_NAMES, Tools } from '@univer/core';
+import { RightMenuModel, RightMenuProps } from '../Model/RightMenuModel';
 import { SheetPlugin } from '../SheetPlugin';
 import { RightMenu } from '../View/UI/RightMenu';
 import { SelectionControl } from './Selection/SelectionController';
@@ -10,6 +10,27 @@ import { RightMenuButton } from '../View/UI/RightMenu/RightMenuButton';
 import { RightMenuSelect } from '../View/UI/RightMenu/RightMenuSelect';
 import { RightMenuItem } from '../View/UI/RightMenu/RightMenuItem';
 import styles from '../View/UI/RightMenu/index.module.less';
+import { DefaultRightMenuConfig } from '../Basics';
+
+export interface IHideRightMenuConfig {
+    hideInsertRow?: boolean;
+    hideInsertColumn?: boolean;
+    hideAddRowTop?: boolean;
+    hideAddRowBottom?: boolean;
+    hideAddColumnLeft?: boolean;
+    hideAddColumnRight?: boolean;
+    hideDeleteRow?: boolean;
+    hideDeleteColumn?: boolean;
+    hideHideRow?: boolean;
+    hideShowRow?: boolean;
+    hideRowHeight?: boolean;
+    hideHideColumn?: boolean;
+    hideShowColumn?: boolean;
+    hideColumnWidth?: boolean;
+    hideDeleteCell?: boolean;
+    hideClearContent?: boolean;
+    hideMatrix?: boolean;
+}
 
 export class RightMenuController {
     private _rightMenuModel: RightMenuModel;
@@ -20,10 +41,12 @@ export class RightMenuController {
 
     private _menuList: RightMenuProps[];
 
-    constructor(plugin: SheetPlugin) {
+    constructor(plugin: SheetPlugin, config?: IHideRightMenuConfig) {
         this._plugin = plugin;
 
         this._initRegisterComponent();
+
+        const RightMenuConfig = config ? Tools.deepClone(DefaultRightMenuConfig) : Tools.deepMerge(DefaultRightMenuConfig, config);
 
         this._menuList = [
             {
@@ -311,7 +334,7 @@ export class RightMenuController {
         });
 
         context.getContextObserver('onSheetRenderDidMountObservable').add(() => {
-            const spreadSheet = this._plugin.getContentRef().current;
+            const spreadSheet = this._plugin.getSheetContainerControl().getContentRef().current;
             if (!spreadSheet) return;
             this._plugin.getMainComponent().onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
                 const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
@@ -320,6 +343,7 @@ export class RightMenuController {
                     this._RightMenu.handleContextMenu(evt);
                 }
             });
+
             // this._plugin.getRowComponent().onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
             //     const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
             //     if (evt.button === 2) {

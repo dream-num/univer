@@ -34,12 +34,22 @@ const define = <T>(value?: T): value is T => value !== undefined && value !== nu
  * @beta
  */
 export class ObjectArray<T> {
+    static objectKeys<T>(array: Nullable<ObjectArrayPrimitiveType<T>>) {
+        if (array) {
+            const keys = Object.keys(array);
+            const index = keys.indexOf('length');
+            keys.splice(index, 1);
+            return keys;
+        }
+        return [];
+    }
+
     static getMaxLength<T>(array: Nullable<ObjectArrayPrimitiveType<T>>) {
         if (array) {
             if (array.length) {
                 return array.length;
             }
-            const keys: unknown[] = Object.keys(array);
+            const keys: unknown[] = ObjectArray.objectKeys(array);
             if (keys.length) {
                 return Math.max(...(keys as number[])) + 1;
             }
@@ -86,7 +96,7 @@ export class ObjectArray<T> {
     }
 
     getKeys(): string[] {
-        return Object.keys(this._array);
+        return ObjectArray.objectKeys(this._array);
     }
 
     get(index: number): Nullable<T> {

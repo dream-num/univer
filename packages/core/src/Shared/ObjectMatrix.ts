@@ -183,7 +183,7 @@ export class ObjectMatrix<T> {
 
     insertColumns(columnIndex: number, columnData: ObjectMatrix<T>) {
         const count = columnData.getRow(0)!.getLength();
-        this._matrix.forEach((index, value) => {
+        this.forEach((index, value) => {
             for (let i = columnIndex; i < columnIndex + count; i++) {
                 const data = columnData.getRow(index)?.get(i - columnIndex);
                 value.insert(i, columnData.getRow(index)?.get(i - columnIndex) as T);

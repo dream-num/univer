@@ -1,9 +1,9 @@
 import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, debounce } from '@univer/base-component';
-import { Select } from '../Common/Select/Select';
+import { BaseSelectChildrenProps, Select } from '../Common/Select/Select';
 import styles from './index.module.less';
 
 type FormulaState = {
-    data: Record<string, any>;
+    namedRanges: BaseSelectChildrenProps[];
     spanClass: string;
     formulaContent: string;
 };
@@ -22,9 +22,7 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
         const NextIcon = this.Render.renderFunction('NextIcon');
 
         this.state = {
-            data: {
-                children: [],
-            },
+            namedRanges: [],
             spanClass: styles.formulaGrey,
             formulaContent: '',
         };
@@ -46,12 +44,20 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
         });
     }
 
+    setNamedRanges(namedRanges: BaseSelectChildrenProps[]) {
+        console.log('namedRanges', namedRanges);
+
+        this.setState({
+            namedRanges,
+        });
+    }
+
     componentDidMount() {
         this._context.getObserverManager().getObserver<FormulaBar>('onFormulaBarDidMountObservable')?.notifyObservers(this);
     }
 
     render(props: BaseFormulaBarProps, state: FormulaState) {
-        const { data } = state;
+        const { namedRanges } = state;
 
         const CloseIcon = this.Render.renderFunction('CloseIcon');
         const CorrectIcon = this.Render.renderFunction('CorrectIcon');
@@ -59,7 +65,7 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
 
         return (
             <div className={styles.formulaBox}>
-                <Select children={data.children}></Select>
+                <Select children={namedRanges}></Select>
                 <div className={styles.formulaBar}>
                     <div className={styles.formulaIcon}>
                         <span className={state.spanClass}>

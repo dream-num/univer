@@ -500,6 +500,9 @@ export class SelectionManager {
             const scrollTimer = ScrollTimer.create(this.getScene());
             scrollTimer.startScroll(evtOffsetX, evtOffsetY);
 
+            // update model
+            this.setSelectionModel();
+
             // Notification toolbar updates button state and value
             this._plugin.getObserver('onChangeSelectionObserver')?.notifyObservers(selectionControl);
 
@@ -539,8 +542,6 @@ export class SelectionManager {
      * @returns
      */
     moving(moveEvt: IPointerEvent | IMouseEvent, selectionControl: Nullable<SelectionControl>) {
-        console.log('moving');
-
         const main = this._mainComponent;
         const { offsetX: moveOffsetX, offsetY: moveOffsetY, clientX, clientY } = moveEvt;
         const { startRow, startColumn, endRow, endColumn } = this._startSelectionRange;
@@ -588,6 +589,8 @@ export class SelectionManager {
 
         if (oldStartColumn !== finalStartColumn || oldStartRow !== finalStartRow || oldEndColumn !== finalEndColumn || oldEndRow !== finalEndRow) {
             selectionControl && selectionControl.update(newSelectionRange);
+            // update model
+            this.setSelectionModel();
             selectionControl && this._plugin.getObserver('onChangeSelectionObserver')?.notifyObservers(selectionControl);
         }
     }

@@ -28,6 +28,7 @@ import { Selection } from './Selection';
 import { Styles } from './Styles';
 import { Worksheet } from './Worksheet';
 import { IInsertSheetActionData, IRemoveSheetActionData } from '../Action';
+import { NamedRange } from './NamedRange';
 
 /**
  * Access and create Univer Sheets files
@@ -59,6 +60,8 @@ export class Workbook {
 
     private _commandManager: CommandManager;
 
+    private _namedRange: NamedRange;
+
     constructor(workbookData: Partial<IWorkbookConfig> = {}, context: SheetContext) {
         this._config = Tools.commonExtend(DEFAULT_WORKBOOK, workbookData);
         this._context = context;
@@ -70,6 +73,9 @@ export class Workbook {
         this._commandManager = context.getCommandManager();
         // this._formatManage = new FormatManager();
         this._getDefaultWorkSheet();
+
+        // namedRange
+        this._namedRange = new NamedRange(this);
     }
 
     /**
@@ -216,6 +222,10 @@ export class Workbook {
 
     getWorksheets(): Map<string, Worksheet> {
         return this._worksheets;
+    }
+
+    getNamedRang(): NamedRange {
+        return this._namedRange;
     }
 
     nextSheet(start: number): Nullable<Worksheet> {

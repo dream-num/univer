@@ -7,7 +7,7 @@ import {
     ISetNamedRangeActionData,
 } from '../../Command';
 import { ACTION_NAMES } from '../../Const';
-import { Workbook, Worksheet } from './index';
+import { Workbook } from './index';
 
 import { INamedRange } from '../../Interfaces/INamedRange';
 
@@ -19,8 +19,6 @@ import { INamedRange } from '../../Interfaces/INamedRange';
 export class NamedRange {
     private _workbook: Workbook;
 
-    private _worksheet: Worksheet;
-
     private _commandManager: CommandManager;
 
     private _context: SheetContext;
@@ -29,11 +27,10 @@ export class NamedRange {
     // private _range: Range;
     // private _namedRangeId: string;
 
-    constructor(worksheet: Worksheet) {
-        this._worksheet = worksheet;
-        this._workbook = this._worksheet.getContext().getWorkBook();
-        this._commandManager = this._worksheet.getCommandManager();
-        this._context = this._worksheet.getContext();
+    constructor(workbook: Workbook) {
+        this._workbook = workbook;
+        this._commandManager = this._workbook.getCommandManager();
+        this._context = this._workbook.getContext();
 
         // this._name = name;
         // this._range = range;
@@ -42,7 +39,7 @@ export class NamedRange {
     }
 
     addNamedRange(namedRange: INamedRange) {
-        const { _context, _commandManager } = this;
+        const { _workbook, _context, _commandManager } = this;
 
         // const namedRange: INamedRange = {
         //     namedRangeId: this._namedRangeId,
@@ -56,13 +53,13 @@ export class NamedRange {
         const actionData: IAddNamedRangeActionData = {
             actionName: ACTION_NAMES.ADD_NAMED_RANGE_ACTION,
             namedRange,
-            sheetId: this._worksheet.getSheetId(),
+            sheetId: namedRange.range.sheetId,
         };
 
         // Execute action
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: _workbook,
             },
             actionData
         );
@@ -73,7 +70,7 @@ export class NamedRange {
     }
 
     setNamedRange(namedRange: INamedRange) {
-        const { _context, _commandManager } = this;
+        const { _workbook, _commandManager } = this;
 
         // const namedRange: INamedRange = {
         //     namedRangeId: this._namedRangeId,
@@ -87,13 +84,13 @@ export class NamedRange {
         const actionData: ISetNamedRangeActionData = {
             actionName: ACTION_NAMES.SET_NAMED_RANGE_ACTION,
             namedRange,
-            sheetId: this._worksheet.getSheetId(),
+            sheetId: namedRange.range.sheetId,
         };
 
         // Execute action
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: _workbook,
             },
             actionData
         );
@@ -158,19 +155,19 @@ export class NamedRange {
      * Deletes this named range.
      */
     remove(namedRangeId: string): void {
-        const { _context, _commandManager } = this;
+        const { _context, _workbook, _commandManager } = this;
 
         // Organize action data
         const actionData: IDeleteNamedRangeActionData = {
             actionName: ACTION_NAMES.DELETE_NAMED_RANGE_ACTION,
             namedRangeId,
-            sheetId: this._worksheet.getSheetId(),
+            sheetId: _workbook.getActiveSheet().getSheetId(),
         };
 
         // Execute action
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: _workbook,
             },
             actionData
         );

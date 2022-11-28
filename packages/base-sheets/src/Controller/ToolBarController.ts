@@ -60,6 +60,7 @@ export class ToolBarController {
             const underline = range.getUnderline();
             const horizontalAlign = range.getHorizontalAlignment();
             const verticalAlign = range.getVerticalAlignment();
+            const rotation = range.getTextRotation();
 
             console.log('cellMatrix:', cellMatrix);
             console.log('fontSize:', fontSize);
@@ -78,6 +79,7 @@ export class ToolBarController {
             const underlineItem = this._toolList.find((item) => item.name === 'underline');
             const horizontalAlignModeItem = this._toolList.find((item) => item.name === 'horizontalAlignMode');
             const verticalAlignModeItem = this._toolList.find((item) => item.name === 'verticalAlignMode');
+            const textRotateModeItem = this._toolList.find((item) => item.name === 'textRotateMode');
 
             if (fontNameItem) {
                 fontNameItem.children?.forEach((item) => {
@@ -109,6 +111,11 @@ export class ToolBarController {
             if (verticalAlignModeItem) {
                 verticalAlignModeItem.children?.forEach((item) => {
                     item.selected = verticalAlign === item.value;
+                });
+            }
+            if (textRotateModeItem) {
+                textRotateModeItem.children?.forEach((item) => {
+                    item.selected = rotation === item.value;
                 });
             }
 

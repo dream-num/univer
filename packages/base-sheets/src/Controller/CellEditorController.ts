@@ -1,4 +1,4 @@
-import { getRefElement, handleDomToJson, handleJsonToDom, handleStyleToString, handleStringToStyle, $$ } from '@univer/base-component';
+import { getRefElement, handleDomToJson, handleJsonToDom, handleStyleToString, handleStringToStyle, $$, setLastCaretPosition } from '@univer/base-component';
 import { Direction, IDocumentData, IRangeData, IStyleData, Nullable, ICellData, Tools, isKeyPrintable, PLUGIN_NAMES } from '@univer/core';
 import { DeviceType, IKeyboardEvent, IMouseEvent, IPointerEvent } from '@univer/base-render';
 import { SheetPlugin } from '../SheetPlugin';
@@ -32,14 +32,14 @@ export class CellEditorController {
     constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
 
-        // this.initRegisterComponent();
+        // this._initRegisterComponent();
 
         this._initialize();
     }
 
     private _initialize() {
         this._plugin.getObserver('onSheetContainerDidMountObservable')?.add((sheetContainer: SheetContainer) => {
-            this.initRegisterComponent();
+            this._initRegisterComponent();
 
             this._sheetContainer = sheetContainer;
             // const mainItem: IMainProps = {
@@ -50,7 +50,7 @@ export class CellEditorController {
             // };
 
             // init RichText component
-            this.initRegisterComponent();
+            this._initRegisterComponent();
             this._plugin.getObserver('onRichTextDidMountObservable')?.add((cellEditor) => {
                 this.richTextEle = getRefElement(cellEditor.container);
                 this.richTextEditEle = $$('div', this.richTextEle);
@@ -64,6 +64,15 @@ export class CellEditorController {
 
                 // init event
                 this._handleKeyboardAction();
+
+                // Get the display status of the formula prompt box
+                this.richText.hooks.set('onKeyDown', (event: KeyboardEvent) => {
+                    this._plugin.getObserver('onRichTextKeyDownObservable')?.notifyObservers(event);
+                });
+                // Get the display status of the formula prompt box
+                this.richText.hooks.set('onKeyUp', (event: KeyboardEvent) => {
+                    this._plugin.getObserver('onRichTextKeyUpObservable')?.notifyObservers(event);
+                });
             });
         });
         // If other plugins are loaded asynchronously, they may be initialized after the rendering layer is loaded, and they will not receive obs listeners.
@@ -157,9 +166,10 @@ export class CellEditorController {
     /**
      * Register custom components
      */
-    initRegisterComponent() {
+    private _initRegisterComponent() {
         // this._plugin.registerComponent(PLUGIN_NAMES.SPREADSHEET + RichText.name, RichText, { activeKey: 'cellEdit' });
-        this._plugin.registerModal(PLUGIN_NAMES.SPREADSHEET + RichText.name, RichText);
+        this._plugin.registerModal(`${PLUGIN_NAMES.SPREADSHEET + RichText.name}cell`, RichText);
+        this._plugin.registerModal(`${PLUGIN_NAMES.SPREADSHEET + RichText.name}formula`, RichText);
     }
 
     /**
@@ -269,8 +279,17 @@ export class CellEditorController {
      */
     enterEditMode() {
         this.focusEditEle();
+        // setTimeout(() => {
+        //     this.richTextEditEle.focus();
+
+        // }, 1);
 
         if (this.isEditMode) return;
+
+        // set focus to last position
+        setTimeout(() => {
+            setLastCaretPosition(this.richTextEditEle);
+        }, 1);
 
         this.isEditMode = true;
 
@@ -325,6 +344,7 @@ export class CellEditorController {
         });
 
         if (cell) {
+            // cellValue = this.richText.cellInputHandler.functionHTMLGenerate(cell.value);
             cellValue = cell.value;
         }
 
@@ -380,7 +400,7 @@ export class CellEditorController {
         // If there is no settimeout, the first letter will be intercepted in Chinese state
         setTimeout(() => {
             this.richTextEditEle.focus();
-        }, 1);
+        }, 100);
     }
 
     setCurrentEditRangeData() {

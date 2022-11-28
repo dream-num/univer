@@ -121,7 +121,7 @@ export class ToolBarController {
 
         const pluginName = this._plugin.getPluginName();
 
-        this.initRegisterComponent();
+        this._initRegisterComponent();
 
         const config =
             this._plugin.config.layout === 'auto'
@@ -416,59 +416,59 @@ export class ToolBarController {
 
     init() {
         this._plugin.getObserver('onAfterChangeFontFamilyObservable')?.add((value: string) => {
-            if (!this._plugin.getCellEditorControl().isEditMode) {
+            if (!this._plugin.getCellEditorController().isEditMode) {
                 this.setFontFamily(value);
             } else {
-                this._plugin.getCellEditorControl().richText.cellTextStyle.updateFormat('ff', value);
+                this._plugin.getCellEditorController().richText.cellTextStyle.updateFormat('ff', value);
             }
         });
         this._plugin.getObserver('onAfterChangeFontSizeObservable')?.add((value: number) => {
-            if (!this._plugin.getCellEditorControl().isEditMode) {
+            if (!this._plugin.getCellEditorController().isEditMode) {
                 this.setFontSize(value);
             } else {
-                this._plugin.getCellEditorControl().richText.cellTextStyle.updateFormat('fs', value);
+                this._plugin.getCellEditorController().richText.cellTextStyle.updateFormat('fs', value);
             }
         });
         this._plugin.getObserver('onAfterChangeFontWeightObservable')?.add((value: boolean) => {
-            if (!this._plugin.getCellEditorControl().isEditMode) {
+            if (!this._plugin.getCellEditorController().isEditMode) {
                 this.setFontWeight(value);
             } else {
-                this._plugin.getCellEditorControl().richText.cellTextStyle.updateFormat('bl', value ? '1' : '0');
+                this._plugin.getCellEditorController().richText.cellTextStyle.updateFormat('bl', value ? '1' : '0');
             }
         });
         this._plugin.getObserver('onAfterChangeFontItalicObservable')?.add((value: boolean) => {
-            if (!this._plugin.getCellEditorControl().isEditMode) {
+            if (!this._plugin.getCellEditorController().isEditMode) {
                 this.setFontStyle(value);
             } else {
-                this._plugin.getCellEditorControl().richText.cellTextStyle.updateFormat('it', value ? '1' : '0');
+                this._plugin.getCellEditorController().richText.cellTextStyle.updateFormat('it', value ? '1' : '0');
             }
         });
         this._plugin.getObserver('onAfterChangeFontStrikethroughObservable')?.add((value: boolean) => {
-            if (!this._plugin.getCellEditorControl().isEditMode) {
+            if (!this._plugin.getCellEditorController().isEditMode) {
                 this.setStrikeThrough(value);
             } else {
-                this._plugin.getCellEditorControl().richText.cellTextStyle.updateFormat('cl', value ? '1' : '0');
+                this._plugin.getCellEditorController().richText.cellTextStyle.updateFormat('cl', value ? '1' : '0');
             }
         });
         this._plugin.getObserver('onAfterChangeFontUnderlineObservable')?.add((value: boolean) => {
-            if (!this._plugin.getCellEditorControl().isEditMode) {
+            if (!this._plugin.getCellEditorController().isEditMode) {
                 this.setUnderline(value);
             } else {
-                this._plugin.getCellEditorControl().richText.cellTextStyle.updateFormat('un', value ? '1' : '0');
+                this._plugin.getCellEditorController().richText.cellTextStyle.updateFormat('un', value ? '1' : '0');
             }
         });
         this._plugin.getObserver('onAfterChangeFontColorObservable')?.add((value: string) => {
-            if (!this._plugin.getCellEditorControl().isEditMode) {
+            if (!this._plugin.getCellEditorController().isEditMode) {
                 this.setFontColor(value);
             } else {
-                this._plugin.getCellEditorControl().richText.cellTextStyle.updateFormat('fc', value);
+                this._plugin.getCellEditorController().richText.cellTextStyle.updateFormat('fc', value);
             }
         });
         this._plugin.getObserver('onAfterChangeFontBackgroundObservable')?.add((value: string) => {
-            if (!this._plugin.getCellEditorControl().isEditMode) {
+            if (!this._plugin.getCellEditorController().isEditMode) {
                 this.setBackground(value);
             } else {
-                this._plugin.getCellEditorControl().richText.cellTextStyle.updateFormat('bg', value);
+                this._plugin.getCellEditorController().richText.cellTextStyle.updateFormat('bg', value);
             }
         });
 
@@ -526,7 +526,7 @@ export class ToolBarController {
         });
     }
 
-    initRegisterComponent() {
+    private _initRegisterComponent() {
         const pluginName = this._plugin.getPluginName();
 
         // 注册自定义组件

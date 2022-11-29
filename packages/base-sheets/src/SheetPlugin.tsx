@@ -1,6 +1,18 @@
 import { getRefElement, IMainProps, isElement, ISlotProps, RefObject, render } from '@univer/base-component';
 import { Engine, RenderEngine } from '@univer/base-render';
-import { AsyncFunction, SheetContext, IWorkbookConfig, Plugin, PLUGIN_NAMES, Tools } from '@univer/core';
+import {
+    AsyncFunction,
+    SheetContext,
+    IWorkbookConfig,
+    Plugin,
+    PLUGIN_NAMES,
+    Tools,
+    CommandManager,
+    IActionObserverProps,
+    SheetActionBase,
+    ACTION_NAMES,
+    ISetNamedRangeActionData,
+} from '@univer/core';
 
 import { install, SheetPluginObserve, uninstall } from './Basics/Observer';
 import { RightMenuProps } from './Model/RightMenuModel';
@@ -240,6 +252,19 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         // }
 
         // this._initializeRender(ctx);
+
+        CommandManager.getActionObservers().add((actionObs: IActionObserverProps): void => {
+            const currentUnitId = this.getContext().getWorkBook().getUnitId();
+            const action = actionObs.action as SheetActionBase<ISetNamedRangeActionData, ISetNamedRangeActionData>;
+            const actionData = action.getDoActionData();
+            const actionUnitId = action.getWorkSheet().getContext().getWorkBook().getUnitId();
+
+            if (currentUnitId !== actionUnitId) return;
+
+            if (actionData.actionName === ACTION_NAMES.SET_NAMED_RANGE_ACTION) {
+                const namedRange = actionData.namedRange;
+            }
+        });
     }
 
     get config() {

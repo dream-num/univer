@@ -1,6 +1,7 @@
 import { ACTION_NAMES } from '../Const';
 import { IActionData } from './ActionBase';
 import { Plugin } from '../Plugin';
+import { ActionOperation } from './ActionOperation';
 
 /**
  * Manipulate the list of actions in a command
@@ -79,7 +80,11 @@ export class BaseActionExtensionFactory<
         actionData: T,
         actionDataList: IActionData[]
     ): false | BaseActionExtension<T> {
-        if (actionData.actionName !== this.actionName) {
+        if (
+            actionData.actionName !== this.actionName ||
+            (actionData.operation != null &&
+                !ActionOperation.hasExtension(actionData))
+        ) {
             return false;
         }
 

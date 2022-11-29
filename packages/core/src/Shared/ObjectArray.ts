@@ -38,7 +38,9 @@ export class ObjectArray<T> {
         if (array) {
             const keys = Object.keys(array);
             const index = keys.indexOf('length');
-            keys.splice(index, 1);
+            if (index > -1) {
+                keys.splice(index, 1);
+            }
             return keys;
         }
         return [];

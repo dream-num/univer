@@ -484,7 +484,6 @@ export class ToolBarController {
             this._toolBarComponent = component;
             this.resetToolBarList();
         });
-
         this._plugin.getObserver('onLineColorDidMountObservable')?.add((component) => {
             //初始化视图
             this._lineColor = component;

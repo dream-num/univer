@@ -1,58 +1,71 @@
-import { Command, Range, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType, PLUGIN_NAMES, ACTION_NAMES } from '@univer/core';
+import { Command, Range, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType, PLUGIN_NAMES, ACTION_NAMES as CORE_ACTION_NAME } from '@univer/core';
 import { BaseComponentRender } from '@univer/base-component';
 import { IToolBarItemProps, SheetPlugin } from '@univer/base-sheets';
-import { IActionData } from '@univer/core/src/Command/ActionBase';
+import { numfmt } from '@univer/base-numfmt-engine';
+import { ACTION_NAMES } from '../Basic/Enum';
+import { DEFAULT_DATA, NUMFMT_PLUGIN_NAME, NumftmConfig } from '../Basic/Const';
 import { NumfmtModel } from '../Model/NumfmtModel';
-import { DEFAULT_DATA } from '../Basic/Const/DEFAULT_DATA';
-import { NUMFMT_PLUGIN_NAME, NumftmConfig } from '../Basic/Const';
 import { NumfmtPlugin } from '../NumfmtPlugin';
+
 import styles from '../View/UI/index.module.less';
 
 export class NumfmtController {
-    protected _plugin: NumfmtPlugin;
+    protected _sheetPlugin: SheetPlugin;
 
     protected _model: NumfmtModel;
 
-    private _sheetPlugin: SheetPlugin;
+    protected _numfmtList: IToolBarItemProps;
 
-    private _numfmtList: IToolBarItemProps;
+    protected _plugin: NumfmtPlugin;
 
-    private _render: BaseComponentRender;
+    protected _render: BaseComponentRender;
 
     constructor(plugin: NumfmtPlugin) {
         this._model = new NumfmtModel();
         this._plugin = plugin;
         this._sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
 
-        const wrappingRangeData = (row: number, col: number): IRangeData => ({
-            startRow: row,
-            endRow: row,
-            startColumn: col,
-            endColumn: col,
-        });
         const executeFormatter = (type: string): void => {
+            const manager = this._sheetPlugin.getSelectionManager();
             const workbook = this._plugin.getContext().getWorkBook();
-            const selectManager = this._sheetPlugin.getSelectionManager();
-            const selectRangeList = selectManager.getActiveRangeList();
-            if (selectRangeList == null) {
+            const activeSheet = workbook.getActiveSheet();
+            const activeRange = manager.getActiveRangeList();
+            const cellMatrix = activeSheet.getCellMatrix();
+            if (activeRange == null) {
                 return;
             }
-            selectRangeList.getRangeList().forEach((value) => {
-                const actions: IActionData[] = [];
-                Range.foreach(value, (row, col) => {
-                    const setRangeAction = {
-                        actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-                        cellValue: { m: type },
-                        rangeData: wrappingRangeData(row, col),
-                    };
-                    actions.push(setRangeAction);
+            // update cell data
+            activeRange.getRangeList().forEach((range) => {
+                let matrix = new ObjectMatrix();
+                Range.foreach(range, (row, col) => {
+                    const cell = cellMatrix.getValue(row, col);
+                    if (cell) {
+                        const formatter = numfmt(type);
+                        matrix.setValue(row, col, { v: cell.v, m: formatter(cell.v) });
+                    }
                 });
-                new Command(
-                    {
-                        WorkBookUnit: workbook,
-                    },
-                    ...actions
-                );
+                const setRangeDataAction = {
+                    sheetId: activeSheet.getSheetId(),
+                    actionName: CORE_ACTION_NAME.SET_RANGE_DATA_ACTION,
+                    rangeData: range,
+                    cellValue: matrix.getData(),
+                };
+                const cmd = new Command({ WorkBookUnit: workbook }, setRangeDataAction);
+                workbook.getCommandManager().invoke(cmd);
+            });
+            // update numfmt data
+            activeRange.getRangeList().forEach((range) => {
+                let matrix = new ObjectMatrix();
+                Range.foreach(range, (row, col) => {
+                    matrix.setValue(row, col, type);
+                });
+                const setNumfmtRangeDataAction = {
+                    sheetId: activeSheet.getSheetId(),
+                    actionName: ACTION_NAMES.SET_NUMFMT_RANGE_DATA_ACTION,
+                    numfmtMatrix: matrix.getData(),
+                };
+                const cmd = new Command({ WorkBookUnit: workbook }, setNumfmtRangeDataAction);
+                cmd.invoke();
             });
         };
         const CHILDREN_DATA = DEFAULT_DATA.map((item, index) => ({
@@ -168,7 +181,7 @@ export class NumfmtController {
         const pluginContext = this._plugin.getContext();
         const commandManager = pluginContext.getCommandManager();
         const config = {
-            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+            actionName: CORE_ACTION_NAME.SET_RANGE_DATA_ACTION,
             sheetId,
             rangeData: numfmtRange,
             cellValue: numfmtMatrix.toJSON(),
@@ -189,7 +202,7 @@ export class NumfmtController {
         const pluginContext = this._plugin.getContext();
         const commandManager = pluginContext.getCommandManager();
         const config = {
-            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+            actionName: CORE_ACTION_NAME.SET_RANGE_DATA_ACTION,
             sheetId,
             rangeData: numfmtRange,
             cellValue: numfmtMatrix.toJSON(),

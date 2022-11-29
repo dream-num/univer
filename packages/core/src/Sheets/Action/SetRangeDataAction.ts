@@ -58,6 +58,7 @@ export class SetRangeDataAction extends SheetActionBase<
             this._doActionData.options
         );
 
+        debugger;
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,

@@ -91,7 +91,7 @@ export class ToolBarController {
             }
             if (fontSizeItem) {
                 fontSizeItem.children?.forEach((item) => {
-                    item.value = fontSize;
+                    item.selected = fontSize === item.value;
                 });
             }
             if (fontBoldItem) {

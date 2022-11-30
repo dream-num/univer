@@ -1,4 +1,14 @@
-import { Command, Range, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType, PLUGIN_NAMES, ACTION_NAMES as CORE_ACTION_NAME } from '@univer/core';
+import {
+    Command,
+    Range,
+    IRangeData,
+    ObjectMatrix,
+    ObjectMatrixPrimitiveType,
+    PLUGIN_NAMES,
+    ACTION_NAMES as CORE_ACTION_NAME,
+    ActionOperation,
+    ISetRangeDataActionData,
+} from '@univer/core';
 import { BaseComponentRender } from '@univer/base-component';
 import { IToolBarItemProps, SheetPlugin } from '@univer/base-sheets';
 import { numfmt } from '@univer/base-numfmt-engine';
@@ -50,7 +60,8 @@ export class NumfmtController {
                     rangeData: range,
                     cellValue: matrix.getData(),
                 };
-                const cmd = new Command({ WorkBookUnit: workbook }, setRangeDataAction);
+                const newSetRangeDataAction = ActionOperation.make<ISetRangeDataActionData>(setRangeDataAction).removeExtension().getAction();
+                const cmd = new Command({ WorkBookUnit: workbook }, newSetRangeDataAction);
                 workbook.getCommandManager().invoke(cmd);
             });
             // update numfmt data

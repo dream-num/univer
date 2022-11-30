@@ -214,6 +214,7 @@ export class ToolBarController {
                 show: config.fontSize,
                 name: 'fontSize',
                 onClick: (fontSize: number) => {
+                    debugger;
                     this._plugin.getObserver('onAfterChangeFontSizeObservable')?.notifyObservers(fontSize);
                 },
                 onKeyUp: (fontSize: number) => {

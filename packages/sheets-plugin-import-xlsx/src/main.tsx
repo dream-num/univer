@@ -4,11 +4,11 @@ import { SheetPlugin } from '@univer/base-sheets';
 import { UniverComponentSheet } from '@univer/style-universheet';
 import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
 
-import { <%= projectUpperValue %>Plugin } from './<%= projectUpperValue %>Plugin';
+import { ImportXlsxPlugin } from './ImportXlsxPlugin';
 
 
 const uiDefaultConfigUp = {
-    container: 'universheet',
+    container: 'universheet-demo',
     layout: 'auto',
 };
 
@@ -18,4 +18,4 @@ univerSheetUp.installPlugin(new RenderEngine());
 univerSheetUp.installPlugin(new UniverComponentSheet());
 
 univerSheetUp.installPlugin(new SheetPlugin(uiDefaultConfigUp));
-univerSheetUp.installPlugin(new <%= projectUpperValue %>Plugin());
+univerSheetUp.installPlugin(new ImportXlsxPlugin());

@@ -1,6 +1,6 @@
 export default {
-    <%= projectValue %>: {
-        tooltip: '<%= projectUpperValue %>',
+    importXlsx: {
+        tooltip: 'ImportXlsx',
         one:'one',
         two:'two',
         three:'three',

@@ -1,8 +1,13 @@
 import { Nullable, Observer } from '@univer/core';
-import { CURSOR_TYPE, IMouseEvent, injectStyle, IPointerEvent } from '../../Basics';
+import { IDocumentSkeletonSpan } from '../../Basics/IDocumentSkeletonCached';
+import { CURSOR_TYPE } from '../../Basics/Const';
+import { injectStyle } from '../../Basics/Tools';
+import { IMouseEvent, IPointerEvent } from '../../Basics/IEvents';
 import { getCurrentScrollXY } from '../../Basics/Position';
 import { ScrollTimer } from '../../ScrollTimer';
+
 import { Documents } from './Document';
+import { INodePosition, TextSelection } from './Common/TextSelection';
 
 export class DocsEditor {
     private _container: HTMLDivElement;
@@ -30,6 +35,10 @@ export class DocsEditor {
     private _viewportScrollX: number;
 
     private _viewportScrollY: number;
+
+    private _textSelectionList: TextSelection[] = [];
+
+    private _startNodePosition: INodePosition;
 
     constructor(private _documents?: Documents) {
         this._initialDom();
@@ -165,10 +174,208 @@ export class DocsEditor {
         this._cursor.style.display = 'none';
     }
 
+    private _getSkeletonData() {
+        return this._documents?.getSkeleton()?.getSkeletonData();
+    }
+
+    private _getNodePosition(span: IDocumentSkeletonSpan | false) {
+        if (span === false) {
+            return;
+        }
+
+        const divide = span.parent;
+
+        const line = divide?.parent;
+
+        const column = line?.parent;
+
+        const section = column?.parent;
+
+        const page = section?.parent;
+
+        const skeletonData = this._getSkeletonData();
+
+        if (!divide || !column || !section || !page || !skeletonData) {
+            return;
+        }
+
+        const spanIndex = divide.spanGroup.indexOf(span);
+
+        const divideIndex = line.divides.indexOf(divide);
+
+        const lineIndex = column.lines.indexOf(line);
+
+        const columnIndex = section.columns.indexOf(column);
+
+        const sectionIndex = page.sections.indexOf(section);
+
+        const pageIndex = skeletonData.pages.indexOf(page);
+
+        return {
+            span: spanIndex,
+            divide: divideIndex,
+            line: lineIndex,
+            column: columnIndex,
+            section: sectionIndex,
+            page: pageIndex,
+        };
+    }
+
+    private _compareNodePosition(pos1: INodePosition, pos2: INodePosition) {
+        if (pos1.page > pos2.page) {
+            return false;
+        }
+
+        if (pos1.page < pos2.page) {
+            return true;
+        }
+
+        if (pos1.section > pos2.section) {
+            return false;
+        }
+
+        if (pos1.section < pos2.section) {
+            return true;
+        }
+
+        if (pos1.column > pos2.column) {
+            return false;
+        }
+
+        if (pos1.column < pos2.column) {
+            return true;
+        }
+
+        if (pos1.line > pos2.line) {
+            return false;
+        }
+
+        if (pos1.line < pos2.line) {
+            return true;
+        }
+
+        if (pos1.divide > pos2.divide) {
+            return false;
+        }
+
+        if (pos1.divide < pos2.divide) {
+            return true;
+        }
+
+        if (pos1.span > pos2.span) {
+            return false;
+        }
+
+        if (pos1.span < pos2.span) {
+            return true;
+        }
+
+        return true;
+    }
+
+    private _interactTextSelection(activeTextSelection: TextSelection) {
+        const newTextSelection: TextSelection[] = [];
+        let hasIntersection = false;
+        this._textSelectionList.forEach((textSelection) => {
+            if (!activeTextSelection.isIntersection(textSelection)) {
+                newTextSelection.push(textSelection);
+            } else {
+                hasIntersection = true;
+                textSelection.dispose();
+            }
+        });
+
+        if (!hasIntersection) {
+            return;
+        }
+        newTextSelection.push(activeTextSelection);
+        this._textSelectionList = newTextSelection;
+    }
+
+    private _deleteAllTextSelection() {
+        this._textSelectionList.forEach((textSelection) => {
+            textSelection.dispose();
+        });
+    }
+
+    private _deactivateTextSelection() {
+        this._textSelectionList.forEach((textSelection) => {
+            textSelection.deactivate();
+        });
+    }
+
+    private _addTextSelection(textSelection: TextSelection) {
+        this._deactivateTextSelection();
+        textSelection.activate();
+        this._textSelectionList.push(textSelection);
+    }
+
+    private _updateTextSelection(position: INodePosition) {
+        let lastTextSelection = this._textSelectionList.pop();
+        if (!lastTextSelection) {
+            if (!this._documents) {
+                return;
+            }
+            lastTextSelection = new TextSelection(this._documents.getScene(), position);
+        }
+        this._deleteAllTextSelection();
+        lastTextSelection.activate();
+        lastTextSelection.startNodePosition = position;
+        this._textSelectionList = [lastTextSelection];
+    }
+
+    private _getActiveTextSelection() {
+        const list = this._textSelectionList;
+        for (let textSelection of list) {
+            if (textSelection.isActive()) {
+                return textSelection;
+            }
+        }
+    }
+
+    private _isEmptyTextSelection() {
+        return this._textSelectionList.length === 0;
+    }
+
     private _moving(moveOffsetX: number, moveOffsetY: number, scrollTimer: ScrollTimer) {
         const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
         const endX = moveOffsetX - this._viewportScrollX + scrollX;
         const endY = moveOffsetY - this._viewportScrollY + scrollY;
+
+        if (!this._documents) {
+            return;
+        }
+
+        const endNode = this._documents.findNodeByCoord(endX, endY);
+
+        const endPosition = this._getNodePosition(endNode);
+
+        // console.log('endNode', endNode, { moveOffsetX, moveOffsetY, _viewportScrollY: this._viewportScrollY, scrollX });
+
+        if (!endPosition) {
+            return;
+        }
+
+        const activeTextSelection = this._getActiveTextSelection();
+
+        if (!activeTextSelection) {
+            return;
+        }
+
+        const compare = this._compareNodePosition(this._startNodePosition, endPosition);
+
+        if (!compare) {
+            activeTextSelection.startNodePosition = endPosition;
+            activeTextSelection.endNodePosition = this._startNodePosition;
+        } else {
+            activeTextSelection.endNodePosition = endPosition;
+        }
+
+        activeTextSelection.generate(this._documents);
+
+        this._interactTextSelection(activeTextSelection);
+
+        // const points = this._generatePoints(this._startNodePosition, endPosition);
 
         // const startCoord = this._documents!.getInverseCoord(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
 
@@ -191,12 +398,50 @@ export class DocsEditor {
             scene.resetCursor();
         });
         const scene = documents.getScene();
+        // this._downObserver = documents.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+        //     const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
+        //     this._startOffsetX = evtOffsetX;
+        //     this._startOffsetY = evtOffsetY;
+
+        //     if (!this._documents) {
+        //         return;
+        //     }
+
+        //     const startNode = this._documents.findNodeByCoord(evtOffsetX, evtOffsetY);
+
+        //     const position = this._getNodePosition(startNode);
+
+        //     console.log('startNode', startNode);
+        // });
+
         this._downObserver = documents.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
             const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
             this._startOffsetX = evtOffsetX;
             this._startOffsetY = evtOffsetY;
 
-            console.log(this._documents?.findNodeByCoord(evtOffsetX, evtOffsetY));
+            if (!this._documents) {
+                return;
+            }
+
+            const startNode = this._documents.findNodeByCoord(evtOffsetX, evtOffsetY);
+
+            const position = this._getNodePosition(startNode);
+
+            console.log(startNode, evtOffsetX, evtOffsetY);
+
+            if (!position) {
+                this._deleteAllTextSelection();
+                return;
+            }
+
+            if (evt.ctrlKey || this._isEmptyTextSelection()) {
+                const newTextSelection = new TextSelection(this._documents.getScene(), position);
+                this._addTextSelection(newTextSelection);
+            } else {
+                this._updateTextSelection(position);
+            }
+
+            this._startNodePosition = position;
 
             scene.disableEvent();
 
@@ -211,9 +456,9 @@ export class DocsEditor {
             this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
                 const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
                 this._moving(moveOffsetX, moveOffsetY, scrollTimer);
-                scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
-                    this._moving(moveOffsetX, moveOffsetY, scrollTimer);
-                });
+                // scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
+                //     this._moving(moveOffsetX, moveOffsetY, scrollTimer);
+                // });
                 scene.setCursor(CURSOR_TYPE.TEXT);
             });
 

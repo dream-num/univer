@@ -611,6 +611,8 @@ export abstract class BaseObject {
         this.onIsAddedToParentObserver.clear();
 
         this.parent?.removeObject(this);
+
+        this.onDisposeObserver.notifyObservers(this);
     }
 
     onPointerDownObserver = new Observable<IPointerEvent | IMouseEvent>();
@@ -634,6 +636,8 @@ export abstract class BaseObject {
     onPointerEnterObserver = new Observable<IPointerEvent | IMouseEvent>();
 
     onIsAddedToParentObserver = new Observable<any>();
+
+    onDisposeObserver = new Observable<BaseObject>();
 
     toJson() {
         const props: IKeyValue = {};

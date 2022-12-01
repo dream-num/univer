@@ -1,7 +1,6 @@
 export default {
-    <%= projectValue %>Label: '<%= projectUpperValue %>',
-    <%= projectValue %>RightLabel: 'more <%= projectUpperValue %>',
     <%= projectValue %>: {
+        tooltip: '<%= projectUpperValue %>',
         one:'one',
         two:'two',
         three:'three',

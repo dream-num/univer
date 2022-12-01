@@ -95,6 +95,7 @@ export class SheetContainerController {
             const plugin: SheetPlugin = this._plugin;
 
             if (!plugin) return;
+            if (!actions || actions.length === 0) return;
             const action = actions[0] as SheetActionBase<ISheetActionData, ISheetActionData, void>;
             const worksheet = action.getWorkSheet();
 

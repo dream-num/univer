@@ -1297,5 +1297,19 @@ export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookConfig = {
             name: 'sheet0003',
         },
     },
-    namedRanges: [],
+    namedRanges: [
+        {
+            namedRangeId: 'named-range-0001',
+            name: 'namedRange0001',
+            range: {
+                sheetId: 'sheet-0001',
+                rangeData: {
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 1,
+                    endColumn: 1,
+                },
+            },
+        },
+    ],
 };

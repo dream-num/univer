@@ -3,7 +3,7 @@ import { ColorPicker, Dropdown } from '@univer/style-universheet';
 import { BaseItemProps, Item } from '../Item/Item';
 import styles from './index.module.less';
 
-enum SelectTypes {
+export enum SelectTypes {
     SINGLE, // 普通下拉
     INPUT,
     COLOR,
@@ -225,7 +225,8 @@ export class Select extends Component<BaseSelectProps, IState> {
         this.initData();
     }
 
-    componentWillReceiveProps() {
+    componentWillReceiveProps(nextProps: BaseSelectProps) {
+        this.props = Object.assign(this.props, nextProps);
         this.initData();
     }
 

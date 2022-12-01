@@ -1,17 +1,14 @@
-import { Context, Plugin, PLUGIN_NAMES, UniverSheet } from '@univer/core';
-import { <%= projectUpperValue %>Button } from './View/UI/<%= projectUpperValue %>Button';
+import { Plugin, SheetContext, UniverSheet } from '@univer/core';
 import { zh, en } from './Locale';
-
-import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
-import { IOCContainer } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
 import { <%= projectConstantValue %>_PLUGIN_NAME} from './Basic/Const/PLUGIN_NAME'
+import { <%= projectUpperValue %>Controller } from './Controller/<%= projectUpperValue %>Controller';
 
 export interface I<%= projectUpperValue %>PluginConfig {}
 
-export class <%= projectUpperValue %>Plugin extends Plugin {
+export class <%= projectUpperValue %>Plugin extends Plugin<any, SheetContext> {
+    private _<%= projectValue %>Controller: <%= projectUpperValue %>Controller;
 
-    constructor(config ?: IPluginConfig) {
+    constructor(config ?: I<%= projectUpperValue %>PluginConfig) {
         super(<%= projectConstantValue %>_PLUGIN_NAME);
     }
 
@@ -35,20 +32,12 @@ export class <%= projectUpperValue %>Plugin extends Plugin {
             zh: zh,
         });
 
-        const item: IToolBarItemProps = {
-            locale: '<%= projectValue %>',
-            type: ISlotElement.JSX,
-            show: true,
-            label: <<%= projectUpperValue %>Button />
-        }
-        context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addToolButton(item)
-}
+        this._<%= projectValue %>Controller = new <%= projectUpperValue %>Controller(this);
+    }
 
-onMapping(IOC: IOCContainer): void {}
+    onMounted(): void {
+        this.initialize()
+    }
 
-onMounted(ctx: Context): void {
-    this.initialize()
-}
-
-onDestroy(): void {}
+    onDestroy(): void {}
 }

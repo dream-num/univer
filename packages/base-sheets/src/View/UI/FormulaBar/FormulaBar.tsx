@@ -22,7 +22,12 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
         const NextIcon = this.Render.renderFunction('NextIcon');
 
         this.state = {
-            namedRanges: [],
+            namedRanges: [
+                {
+                    value: '1',
+                    label: '1',
+                },
+            ],
             spanClass: styles.formulaGrey,
             formulaContent: '',
         };
@@ -45,8 +50,6 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
     }
 
     setNamedRanges(namedRanges: BaseSelectChildrenProps[]) {
-        console.log('namedRanges', namedRanges);
-
         this.setState({
             namedRanges,
         });
@@ -65,7 +68,7 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
 
         return (
             <div className={styles.formulaBox}>
-                <Select children={namedRanges}></Select>
+                <Select children={namedRanges} type={0}></Select>
                 <div className={styles.formulaBar}>
                     <div className={styles.formulaIcon}>
                         <span className={state.spanClass}>

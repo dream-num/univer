@@ -47,6 +47,7 @@
         "vite-plugin-external": "1.2.3"
     },
     "dependencies": {
-        "@univer/core": "workspace:^0.0.1"
+        "@univer/core": "workspace:^0.0.1",
+        "nanoid": "4.0.0"
     }
 }

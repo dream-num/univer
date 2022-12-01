@@ -52,11 +52,11 @@ export class ToolBarController {
         const worksheet = workbook.getActiveSheet();
         if (worksheet) {
             const cellMatrix = worksheet.getCellMatrix();
+            const strikeThrough = range.getStrikeThrough();
             const fontSize = range.getFontSize();
+            const fontWeight = range.getFontWeight();
             const fontName = range.getFontFamily();
             const fontItalic = range.getFontStyle();
-            const fontWeight = range.getFontWeight();
-            const strikeThrough = range.getStrikeThrough();
             const underline = range.getUnderline();
             const horizontalAlign = range.getHorizontalAlignment();
             const verticalAlign = range.getVerticalAlignment();
@@ -71,16 +71,19 @@ export class ToolBarController {
             console.log('fontWeight:', fontWeight);
             console.log('strikeThrough:', strikeThrough);
 
-            const fontNameItem = this._toolList.find((item) => item.name === 'font');
+            const textRotateModeItem = this._toolList.find((item) => item.name === 'textRotateMode');
             const fontSizeItem = this._toolList.find((item) => item.name === 'fontSize');
+            const fontNameItem = this._toolList.find((item) => item.name === 'font');
             const fontBoldItem = this._toolList.find((item) => item.name === 'bold');
             const fontItalicItem = this._toolList.find((item) => item.name === 'italic');
             const strikethroughItem = this._toolList.find((item) => item.name === 'strikethrough');
             const underlineItem = this._toolList.find((item) => item.name === 'underline');
             const horizontalAlignModeItem = this._toolList.find((item) => item.name === 'horizontalAlignMode');
             const verticalAlignModeItem = this._toolList.find((item) => item.name === 'verticalAlignMode');
-            const textRotateModeItem = this._toolList.find((item) => item.name === 'textRotateMode');
 
+            if (strikethroughItem) {
+                strikethroughItem.active = !!strikeThrough.s;
+            }
             if (fontNameItem) {
                 fontNameItem.children?.forEach((item) => {
                     item.selected = fontName === item.value;
@@ -88,7 +91,7 @@ export class ToolBarController {
             }
             if (fontSizeItem) {
                 fontSizeItem.children?.forEach((item) => {
-                    item.value = fontSize;
+                    item.selected = fontSize === item.value;
                 });
             }
             if (fontBoldItem) {
@@ -96,9 +99,6 @@ export class ToolBarController {
             }
             if (fontItalicItem) {
                 fontItalicItem.active = !!fontItalic;
-            }
-            if (strikethroughItem) {
-                strikethroughItem.active = !!strikeThrough.s;
             }
             if (underlineItem) {
                 underlineItem.active = !!underline.s;
@@ -108,14 +108,14 @@ export class ToolBarController {
                     item.selected = horizontalAlign === item.value;
                 });
             }
-            if (verticalAlignModeItem) {
-                verticalAlignModeItem.children?.forEach((item) => {
-                    item.selected = verticalAlign === item.value;
-                });
-            }
             if (textRotateModeItem) {
                 textRotateModeItem.children?.forEach((item) => {
                     item.selected = rotation === item.value;
+                });
+            }
+            if (verticalAlignModeItem) {
+                verticalAlignModeItem.children?.forEach((item) => {
+                    item.selected = verticalAlign === item.value;
                 });
             }
 
@@ -211,7 +211,6 @@ export class ToolBarController {
                 name: 'fontSize',
                 show: toolbarConfig.fontSize,
                 onClick: (fontSize: number) => {
-                    console.dir(fontSize);
                     this._plugin.getObserver('onAfterChangeFontSizeObservable')?.notifyObservers(fontSize);
                 },
                 onKeyUp: (fontSize: number) => {
@@ -482,7 +481,6 @@ export class ToolBarController {
             this._toolBarComponent = component;
             this.resetToolBarList();
         });
-
         this._plugin.getObserver('onLineColorDidMountObservable')?.add((component) => {
             //初始化视图
             this._lineColor = component;

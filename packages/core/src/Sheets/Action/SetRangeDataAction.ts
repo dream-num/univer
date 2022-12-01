@@ -1,12 +1,15 @@
 import { SetRangeData } from '../Apply';
-import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
-import { CONVERTOR_OPERATION } from '../../Const/CONST';
-import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
-import { ICellData, ICopyToOptionsData, IRangeData } from '../../Interfaces';
-import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandUnit } from '../../Command';
+import { ACTION_NAMES, CONVERTOR_OPERATION } from '../../Const';
+import { WorkSheetConvertor } from '../../Convertor';
+import { ObjectMatrixPrimitiveType } from '../../Shared';
+import {
+    SheetActionBase,
+    ISheetActionData,
+    ActionObservers,
+    ActionType,
+    CommandUnit,
+} from '../../Command';
+import { ICopyToOptionsData, ICellData, IRangeData } from '../../Interfaces';
 
 /**
  * @internal

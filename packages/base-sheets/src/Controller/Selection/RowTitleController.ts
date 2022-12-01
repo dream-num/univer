@@ -3,10 +3,10 @@ import { Nullable } from '@univer/core';
 import { DragLineDirection } from './DragLineController';
 import { SelectionManager } from './SelectionManager';
 
-export class ColumnTitleController {
+export class RowTitleController {
     private _manager: SelectionManager;
 
-    private _leftTopWidth: number;
+    private _leftTopHeight: number;
 
     private _startOffsetX: number = 0;
 
@@ -14,18 +14,19 @@ export class ColumnTitleController {
 
     private _index: number = 0;
 
-    private _currentWidth: number = 0;
+    private _currentHeight: number = 0;
 
     private _highlightItem: Rect;
 
     constructor(manager: SelectionManager) {
         this._manager = manager;
-        this._leftTopWidth = this._manager.getSheetView().getSpreadsheetLeftTopPlaceholder().getState().width;
+        this._leftTopHeight = this._manager.getSheetView().getSpreadsheetLeftTopPlaceholder().getState().height;
+
         // 创建高亮item
-        this._highlightItem = new Rect('HighLightColumnTitle', {
-            width: 0,
-            height: this._manager.getSheetView().getSpreadsheetSkeleton().columnTitleHeight,
-            left: 0,
+        this._highlightItem = new Rect('HighLightRowTitle', {
+            width: this._manager.getSheetView().getSpreadsheetSkeleton().rowTitleWidth,
+            height: 0,
+            top: 0,
             fill: 'rgb(220,220,220,0.5)',
         });
 
@@ -45,93 +46,93 @@ export class ColumnTitleController {
         this._startOffsetY = evtOffsetY;
         const scrollXY = main.getAncestorScrollXY(this._startOffsetX, this._startOffsetY);
         const contentRef = this._manager.getPlugin().getSheetContainerControl().getContentRef();
-        const clientX = e.clientX - scrollXY.x - this._leftTopWidth - contentRef.current!.getBoundingClientRect().left;
-        const columnWidthAccumulation = main.getSkeleton()?.columnWidthAccumulation ?? [];
+        const clientY = e.clientY + scrollXY.y - this._leftTopHeight - contentRef.current!.getBoundingClientRect().top;
+        const rowHeightAccumulation = main.getSkeleton()?.rowHeightAccumulation ?? [];
 
-        for (let i = 0; i < columnWidthAccumulation?.length; i++) {
-            if (columnWidthAccumulation[i] >= clientX) {
+        for (let i = 0; i < rowHeightAccumulation?.length; i++) {
+            if (rowHeightAccumulation[i] >= clientY) {
                 this._index = i;
                 break;
             }
         }
         // 当前列宽度
-        this._currentWidth = columnWidthAccumulation[0];
+        this._currentHeight = rowHeightAccumulation[0];
         if (this._index) {
-            this._currentWidth = columnWidthAccumulation[this._index] - columnWidthAccumulation[this._index - 1];
+            this._currentHeight = rowHeightAccumulation[this._index] - rowHeightAccumulation[this._index - 1];
         }
+
         // 显示拖动线
-        if (columnWidthAccumulation[this._index] - clientX <= 5) {
-            const end = columnWidthAccumulation[this._index] + this._leftTopWidth;
-            const start = (this._index ? columnWidthAccumulation[this._index - 1] : 0) + this._leftTopWidth;
+        if (rowHeightAccumulation[this._index] - clientY <= 5) {
+            const end = rowHeightAccumulation[this._index] + this._leftTopHeight;
+            const start = (this._index ? rowHeightAccumulation[this._index - 1] : 0) + this._leftTopHeight;
 
             this._manager.getDragLineControl().create({
-                direction: DragLineDirection.VERTICAL,
+                direction: DragLineDirection.HORIZONTAL,
                 end,
                 start,
-                dragUp: this.setColumnWidth.bind(this),
+                dragUp: this.setRowHeight.bind(this),
             });
             this._manager.getDragLineControl().dragDown(e);
         }
-        // 高亮当前列
-        this.highlightColumn();
+        // 高亮当前行
+        this.highlightRow();
     }
 
-    setColumnWidth(width: Nullable<number>) {
+    setRowHeight(height: Nullable<number>) {
         const plugin = this._manager.getPlugin();
         const sheet = plugin.getContext().getWorkBook().getActiveSheet();
-        if (width === null) {
-            sheet.setColumnWidth(this._index, 1, 5);
+        if (height === null) {
+            sheet.setRowHeights(this._index, 1, 5);
         } else {
-            sheet.setColumnWidth(this._index, 1, width! + this._currentWidth);
+            sheet.setRowHeights(this._index, 1, height! + this._currentHeight);
         }
-        this.highlightColumn();
+        this.highlightRow();
     }
 
-    highlightColumn() {
+    highlightRow() {
         this._manager.clearSelectionControls();
         const sheet = this._manager.getPlugin().getWorkbook().getActiveSheet();
         this._manager.addControlToCurrentByRangeData({
-            startRow: 0,
-            startColumn: this._index,
-            endColumn: this._index,
-            endRow: sheet.getRowCount() - 1,
+            startRow: this._index,
+            startColumn: 0,
+            endColumn: sheet.getColumnCount() - 1,
+            endRow: this._index,
         });
     }
 
-    highlightColumnTitle(e: IPointerEvent | IMouseEvent) {
+    highlightRowTitle(e: IPointerEvent | IMouseEvent) {
         const main = this._manager.getMainComponent();
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = e;
         this._startOffsetX = evtOffsetX;
         this._startOffsetY = evtOffsetY;
         const scrollXY = main.getAncestorScrollXY(this._startOffsetX, this._startOffsetY);
         const contentRef = this._manager.getPlugin().getSheetContainerControl().getContentRef();
-        const clientX = e.clientX - scrollXY.x - this._leftTopWidth - contentRef.current!.getBoundingClientRect().left;
-        const columnWidthAccumulation = main.getSkeleton()?.columnWidthAccumulation ?? [];
+        const clientY = e.clientY + scrollXY.y - this._leftTopHeight - contentRef.current!.getBoundingClientRect().top;
+        const rowHeightAccumulation = main.getSkeleton()?.rowHeightAccumulation ?? [];
 
-        for (let i = 0; i < columnWidthAccumulation?.length; i++) {
-            if (columnWidthAccumulation[i] >= clientX) {
+        for (let i = 0; i < rowHeightAccumulation?.length; i++) {
+            if (rowHeightAccumulation[i] >= clientY) {
                 this._index = i;
                 break;
             }
         }
-
-        // 当前列宽度
-        this._currentWidth = columnWidthAccumulation[0];
-        let left = this._leftTopWidth;
+        // 当前行高
+        this._currentHeight = rowHeightAccumulation[0];
+        let top = this._leftTopHeight;
         if (this._index) {
-            this._currentWidth = columnWidthAccumulation[this._index] - columnWidthAccumulation[this._index - 1];
-            left = this._leftTopWidth + columnWidthAccumulation[this._index - 1];
+            this._currentHeight = rowHeightAccumulation[this._index] - rowHeightAccumulation[this._index - 1];
+            top = this._leftTopHeight + rowHeightAccumulation[this._index - 1];
         }
 
         this._highlightItem.transformByState({
-            width: this._currentWidth,
-            left,
+            height: this._currentHeight,
+            top,
         });
 
         this._highlightItem.show();
     }
 
-    unHighlightColumnTitle() {
+    unHighlightRowTitle() {
         this._highlightItem.hide();
     }
 }

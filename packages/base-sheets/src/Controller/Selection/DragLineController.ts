@@ -14,9 +14,22 @@ const DEFAULT_DRAG_LINE_CONFIG = {
     fillStrokeWidth: 5,
 };
 
+export enum DragLineDirection {
+    VERTICAL,
+    HORIZONTAL,
+}
+
 interface State {
-    left: number;
-    clientX: number;
+    left?: number;
+    top?: number;
+    distance: number;
+}
+
+interface Option {
+    direction: DragLineDirection;
+    end: number; // 当前列/行尾距离屏幕距离
+    start: number; //当前列/行首距离屏幕距离
+    dragUp: (distance: Nullable<number>) => void;
 }
 
 export class DragLineController {
@@ -34,44 +47,71 @@ export class DragLineController {
 
     private _state: State;
 
+    private _direction: DragLineDirection;
+
+    private _end: number; // 初始线距离屏幕的距离
+
+    private _start: number;
+
+    private _dragUp: (distance: Nullable<number>) => void;
+
     constructor(manager: SelectionManager) {
         this._manager = manager;
+    }
 
-        this._dragLineControlMain = new Rect(DRAG_LINE_KEY.lineMain, {
-            width: DEFAULT_DRAG_LINE_CONFIG.fillStrokeWidth,
-            height: 20,
-            fill: DEFAULT_DRAG_LINE_CONFIG.strokeColor,
-            zIndex: 2,
-        });
+    create(option: Option) {
+        const { direction, end, dragUp, start } = option;
+        this._direction = direction;
+        this._end = end;
+        this._start = start;
+        this._dragUp = dragUp;
 
-        this._dragLineControlContent = new Rect(DRAG_LINE_KEY.lineContent, {
-            width: DEFAULT_DRAG_LINE_CONFIG.strokeWidth,
-            height: 1000,
-            fill: DEFAULT_DRAG_LINE_CONFIG.strokeColor,
-            zIndex: 1,
-        });
+        const skeleton = this._manager.getSheetView().getSpreadsheetColumnTitle().getSkeleton();
+        if (direction) {
+            const width = skeleton?.rowTitleWidth;
+            const contentWidth = skeleton?.columnTotalWidth;
+            this._dragLineControlMain = new Rect(DRAG_LINE_KEY.lineMain, {
+                width,
+                height: 5,
+                top: this._end - 5,
+                fill: DEFAULT_DRAG_LINE_CONFIG.strokeColor,
+            });
+
+            this._dragLineControlContent = new Rect(DRAG_LINE_KEY.lineContent, {
+                width: contentWidth,
+                height: 2,
+                top: this._end - 2,
+                left: width,
+                fill: DEFAULT_DRAG_LINE_CONFIG.strokeColor,
+            });
+        } else {
+            const height = skeleton?.columnTitleHeight;
+            const contentHeight = skeleton?.rowTotalHeight;
+            this._dragLineControlMain = new Rect(DRAG_LINE_KEY.lineMain, {
+                width: DEFAULT_DRAG_LINE_CONFIG.fillStrokeWidth,
+                height,
+                left: this._end - 5,
+                fill: DEFAULT_DRAG_LINE_CONFIG.strokeColor,
+            });
+
+            this._dragLineControlContent = new Rect(DRAG_LINE_KEY.lineContent, {
+                width: DEFAULT_DRAG_LINE_CONFIG.strokeWidth,
+                height: contentHeight,
+                top: height,
+                left: this._end - 2,
+                fill: DEFAULT_DRAG_LINE_CONFIG.strokeColor,
+            });
+        }
 
         this._dragLine = new Group(DRAG_LINE_KEY.line, this._dragLineControlMain, this._dragLineControlContent);
 
-        // this._dragLine.hide();
+        this._dragLine.hide();
 
         this._dragLine.evented = false;
 
         const scene = this._manager.getScene();
 
         scene.addObject(this._dragLine, 3);
-
-        this._dragLine.onPointerDownObserver.add((e: IPointerEvent | IMouseEvent) => {
-            this.dragDown(e);
-        });
-    }
-
-    show() {
-        this._dragLine.show();
-    }
-
-    hide() {
-        this._dragLine.hide();
     }
 
     dragDown(e: IPointerEvent | IMouseEvent) {
@@ -80,16 +120,17 @@ export class DragLineController {
         scene.disableEvent();
 
         this._state = {
-            left: this._dragLine.getState().left,
-            clientX: e.clientX,
+            distance: this._direction ? e.clientY : e.clientX,
         };
+
+        this._dragLine.show();
 
         this._moveObserver = scene.onPointerMoveObserver.add((e: IPointerEvent | IMouseEvent) => {
             this.dragMoving(e);
         });
 
         this._upObserver = scene.onPointerUpObserver.add((e: IPointerEvent | IMouseEvent) => {
-            this.dragUp();
+            this.dragUp(e);
             scene.onPointerMoveObserver.remove(this._moveObserver);
             scene.onPointerUpObserver.remove(this._upObserver);
             scene.enableEvent();
@@ -97,10 +138,39 @@ export class DragLineController {
     }
 
     dragMoving(e: IPointerEvent | IMouseEvent) {
-        this._dragLine.transformByState({
-            left: this._state.left + e.clientX - this._state.clientX,
-        });
+        if (this._direction) {
+            if (e.clientY < this._state.distance && this._state.distance - e.clientY >= this._end - this._start - 5) {
+                //留一丝空隙
+                return;
+            }
+            this._dragLine.transformByState({
+                top: e.clientY - this._state.distance,
+            });
+        } else {
+            if (e.clientX < this._state.distance && this._state.distance - e.clientX >= this._end - this._start - 5) {
+                //留一丝空隙
+                return;
+            }
+            this._dragLine.transformByState({
+                left: e.clientX - this._state.distance,
+            });
+        }
     }
 
-    dragUp() {}
+    dragUp(e: IPointerEvent | IMouseEvent) {
+        let distance;
+        if (this._direction) {
+            distance = e.clientY - this._state.distance;
+            if (e.clientY < this._state.distance && this._state.distance - e.clientY >= this._end - this._start - 5) {
+                distance = null;
+            }
+        } else {
+            distance = e.clientX - this._state.distance;
+            if (e.clientX < this._state.distance && this._state.distance - e.clientX >= this._end - this._start - 5) {
+                distance = null;
+            }
+        }
+        this._dragUp(distance);
+        this._dragLine.dispose();
+    }
 }

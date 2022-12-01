@@ -6,9 +6,8 @@ import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
 
 import { ImportXlsxPlugin } from './ImportXlsxPlugin';
 
-
 const uiDefaultConfigUp = {
-    container: 'universheet-demo',
+    container: 'universheet',
     layout: 'auto',
 };
 

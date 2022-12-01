@@ -1,8 +1,6 @@
 export default {
     importXlsx: {
-        tooltip: 'ImportXlsx',
-        one:'一',
-        two:'二',
-        three:'三',
+        tooltip: '导入',
+        upload: '上传XLSX',
     },
 };

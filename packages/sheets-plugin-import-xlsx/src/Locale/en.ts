@@ -1,8 +1,6 @@
 export default {
     importXlsx: {
-        tooltip: 'ImportXlsx',
-        one:'one',
-        two:'two',
-        three:'three',
+        tooltip: 'Import',
+        upload: 'Upload XLSX',
     },
 };

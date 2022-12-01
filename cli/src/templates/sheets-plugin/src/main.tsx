@@ -8,14 +8,14 @@ import { <%= projectUpperValue %>Plugin } from './<%= projectUpperValue %>Plugin
 
 
 const uiDefaultConfigUp = {
-    container: 'universheet-demo',
+    container: 'universheet',
     layout: 'auto',
 };
 
-const univerSheetUp = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);
+const univerSheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);
 
-univerSheetUp.installPlugin(new RenderEngine());
-univerSheetUp.installPlugin(new UniverComponentSheet());
+univerSheet.installPlugin(new RenderEngine());
+univerSheet.installPlugin(new UniverComponentSheet());
 
-univerSheetUp.installPlugin(new SheetPlugin(uiDefaultConfigUp));
-univerSheetUp.installPlugin(new <%= projectUpperValue %>Plugin());
+univerSheet.installPlugin(new SheetPlugin(uiDefaultConfigUp));
+univerSheet.installPlugin(new <%= projectUpperValue %>Plugin());

@@ -6,7 +6,7 @@ import { install, SlidePluginObserve } from './Basic/Observer';
 import { ToolBarController } from './Controller/ToolBarController';
 import { SlideContainerController } from './Controller/SlideContainerController';
 import { InfoBarController } from './Controller/InfoBarController';
-import { BaseSlideContainerConfig, ISlidePluginConfigBase, SlideContainer } from './View/UI/SlideContainer';
+import { BaseSlideContainerConfig, ILayout, ISlidePluginConfigBase, SlideContainer } from './View/UI/SlideContainer';
 import { SlideBarController } from './Controller/SlideBarController';
 import { CanvasView } from './View/Render';
 
@@ -81,9 +81,16 @@ export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
 
         this._componentList = new Map();
 
-        this._toolBarControl = new ToolBarController(this);
+        const layout = this._config.layout as ILayout;
+
+        if (layout === 'auto' || layout.toolBar) {
+            this._toolBarControl = new ToolBarController(this);
+        }
+        if (layout === 'auto' || layout.infoBar) {
+            this._infoBarControl = new InfoBarController(this);
+        }
+        
         this._slideBarControl = new SlideBarController(this);
-        this._infoBarControl = new InfoBarController(this);
         this._slideContainerController = new SlideContainerController(this);
 
         const slideContainer = this._initContainer(this._config.container);

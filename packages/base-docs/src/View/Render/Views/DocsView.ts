@@ -60,7 +60,7 @@ export class DocsView extends BaseView {
                 sceneHeight = docsHeight + pageMarginTop * 2;
             }
 
-            scene.resize(sceneWidth, sceneHeight);
+            scene.resize(sceneWidth, sceneHeight + 200);
 
             documents.translate(docsLeft, docsTop);
         }

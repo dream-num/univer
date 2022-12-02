@@ -127,6 +127,78 @@ export class Documents extends DocComponent {
         });
     }
 
+    private _addSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
+        if (!skeleton) {
+            return;
+        }
+
+        this._skeletonObserver = skeleton.onRecalculateChangeObservable.add((data) => {
+            const pages = data.pages;
+            let width = 0;
+            let height = 0;
+            for (let i = 0, len = pages.length; i < len; i++) {
+                const page = pages[i];
+                const { pageWidth, pageHeight } = page;
+                if (this.pageLayoutType === PageLayoutType.VERTICAL) {
+                    height += pageHeight;
+                    if (i !== len - 1) {
+                        height += this.pageMarginTop;
+                    }
+                    width = Math.max(width, pageWidth);
+                } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
+                    width += pageWidth;
+                    if (i !== len - 1) {
+                        width += this.pageMarginLeft;
+                    }
+                    height = Math.max(height, pageHeight);
+                }
+            }
+
+            this.resize(width, height);
+        });
+    }
+
+    private _disposeSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
+        if (!skeleton) {
+            return;
+        }
+        skeleton.onRecalculateChangeObservable.remove(this._skeletonObserver);
+    }
+
+    private _getPageBoundingBox(page: IDocumentSkeletonPage) {
+        const { pageWidth, pageHeight } = page;
+        let { x: startX, y: startY } = this._findLiquid;
+
+        let endX = -1;
+        let endY = -1;
+        if (this.pageLayoutType === PageLayoutType.VERTICAL) {
+            endX = pageWidth;
+            endY = startY + pageHeight;
+        } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
+            endX = startX + pageWidth;
+            endY = pageHeight;
+        }
+
+        return {
+            startX,
+            startY,
+            endX,
+            endY,
+        };
+    }
+
+    getFirstViewport() {
+        return (this.getScene() as Scene).getViewports()[0];
+    }
+
+    getActiveViewportByCoord(offsetX: number, offsetY: number) {
+        return (this.getScene() as Scene).getActiveViewportByCoord(Vector2.FromArray([offsetX, offsetY]));
+    }
+
+    getEngine() {
+        return (this.getScene() as Scene).getEngine();
+    }
+
     enableEditor() {
         if (this._hasEditor) {
             return;
@@ -354,71 +426,11 @@ export class Documents extends DocComponent {
         }
     }
 
-    private _addSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
-        if (!skeleton) {
-            return;
-        }
-
-        this._skeletonObserver = skeleton.onRecalculateChangeObservable.add((data) => {
-            const pages = data.pages;
-            let width = 0;
-            let height = 0;
-            for (let i = 0, len = pages.length; i < len; i++) {
-                const page = pages[i];
-                const { pageWidth, pageHeight } = page;
-                if (this.pageLayoutType === PageLayoutType.VERTICAL) {
-                    height += pageHeight;
-                    if (i !== len - 1) {
-                        height += this.pageMarginTop;
-                    }
-                    width = Math.max(width, pageWidth);
-                } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
-                    width += pageWidth;
-                    if (i !== len - 1) {
-                        width += this.pageMarginLeft;
-                    }
-                    height = Math.max(height, pageHeight);
-                }
-            }
-
-            this.resize(width, height);
-        });
-    }
-
-    private _disposeSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
-        if (!skeleton) {
-            return;
-        }
-        skeleton.onRecalculateChangeObservable.remove(this._skeletonObserver);
-    }
-
     changeSkeleton(newSkeleton: DocumentSkeleton) {
         this._disposeSkeletonChangeObserver(this.getSkeleton());
         this.setSkeleton(newSkeleton);
         this._addSkeletonChangeObserver(newSkeleton);
         return this;
-    }
-
-    private _getPageBoundingBox(page: IDocumentSkeletonPage) {
-        const { pageWidth, pageHeight } = page;
-        let { x: startX, y: startY } = this._findLiquid;
-
-        let endX = -1;
-        let endY = -1;
-        if (this.pageLayoutType === PageLayoutType.VERTICAL) {
-            endX = pageWidth;
-            endY = startY + pageHeight;
-        } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
-            endX = startX + pageWidth;
-            endY = pageHeight;
-        }
-
-        return {
-            startX,
-            startY,
-            endX,
-            endY,
-        };
     }
 
     findNodeByCoord(offsetX: number, offsetY: number) {
@@ -491,7 +503,11 @@ export class Documents extends DocComponent {
 
                             const { y: startY } = this._findLiquid;
 
-                            if (!(y >= startY && y <= startY + lineHeight)) {
+                            const startY_fin = startY;
+
+                            const endY_fin = startY + lineHeight;
+
+                            if (!(y >= startY_fin && y <= endY_fin)) {
                                 this._findLiquid.translateRestore();
                                 continue;
                             }
@@ -518,11 +534,19 @@ export class Documents extends DocComponent {
 
                                     const { width: spanWidth, left: spanLeft } = span;
 
-                                    if (!(x >= startX + spanLeft && x <= startX + spanLeft + spanWidth)) {
+                                    const startX_fin = startX + spanLeft;
+
+                                    const endX_fin = startX + spanLeft + spanWidth;
+
+                                    if (!(x >= startX_fin && x <= endX_fin)) {
                                         continue;
                                     }
 
-                                    return span;
+                                    return {
+                                        node: span,
+                                        ratioX: x / (startX_fin + endX_fin),
+                                        ratioY: y / (startY_fin + endY_fin),
+                                    };
                                 }
                                 this._findLiquid.translateRestore();
                             }

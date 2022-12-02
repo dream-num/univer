@@ -104,8 +104,8 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     constructor(private _config: IWorksheetConfig, private _cellData: ObjectMatrix<ICellData>, private _styles: Styles, context: SheetContext) {
         super(context);
-        this.updateMatrix();
-        this.updateDataMergeCacheAll();
+        this.updateLayout();
+        this.updateDataMerge();
     }
 
     getWorksheetConfig() {
@@ -169,7 +169,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             return;
         }
 
-        this.dirty && this.updateMatrix();
+        this.updateLayout();
 
         if (!this._rowHeightAccumulation || !this._columnWidthAccumulation) {
             return;
@@ -184,7 +184,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this;
     }
 
-    updateMatrix() {
+    updateLayout() {
         if (!this.dirty) {
             return;
         }
@@ -205,7 +205,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this;
     }
 
-    updateDataMergeCacheAll() {
+    updateDataMerge() {
         const { mergeData } = this._config;
         this._dataMergeCacheAll = mergeData && this._getMergeCells(mergeData);
     }

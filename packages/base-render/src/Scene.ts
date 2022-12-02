@@ -588,17 +588,18 @@ export class Scene {
         return this._transformer;
     }
 
+    getActiveViewportByCoord(coord: Vector2) {
+        return this._viewports.find((vp) => vp.isHit(coord));
+    }
+
     transformToSceneCoord(coord: Vector2) {
-        const pickedViewport = this._viewports.find((vp) => vp.isHit(coord));
-        if (!pickedViewport) {
-            return;
-        }
-        return pickedViewport.getRelativeVector(coord);
+        const pickedViewport = this.getActiveViewportByCoord(coord);
+        return pickedViewport?.getRelativeVector(coord);
     }
 
     // Determine the only object selected
     pick(coord: Vector2): Nullable<BaseObject | Scene> {
-        const pickedViewport = this._viewports.find((vp) => vp.isHit(coord));
+        const pickedViewport = this.getActiveViewportByCoord(coord);
         if (!this._evented || !pickedViewport) {
             return;
         }

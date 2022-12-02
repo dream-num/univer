@@ -20,11 +20,8 @@ import {
     Container,
     Content,
     Footer,
-    FormulaBar,
     Header,
-    // InfoBar,
     Layout,
-    // SheetBar,
     Sider,
 } from '@univer/style-universheet';
 import defaultSkin from '@univer/style-universheet/assets/css/skin/default.module.less';
@@ -102,6 +99,8 @@ export interface ILayout {
 
     frozenContent?: boolean;
 
+    infoBar?: boolean;
+
     // Whether to show the toolbar
     toolBar?: boolean;
 
@@ -163,6 +162,8 @@ export const defaultLayout: ILayout = {
     frozenHeaderLM: true,
 
     frozenContent: true,
+
+    infoBar: true,
 
     toolBar: true,
 
@@ -648,8 +649,8 @@ export class DocContainer extends Component<BaseDocContainerProps, IState> {
                         <Sider style={{ display: layout.outerLeft ? 'block' : 'none' }}></Sider>
                         <Layout className={style.mainContent} style={{ position: 'relative' }}>
                             <Header style={{ display: layout.header ? 'block' : 'none' }}>
-                                <InfoBar></InfoBar>
-                                <ToolBar toolList={[]}></ToolBar>
+                                {layout.infoBar && <InfoBar></InfoBar>}
+                                {layout.toolBar && <ToolBar toolList={[]}></ToolBar>}
                             </Header>
                             <Layout>
                                 <Sider

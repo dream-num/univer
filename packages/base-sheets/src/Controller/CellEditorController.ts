@@ -1,3 +1,4 @@
+import { RegisterPlugin, REGISTER_PLUGIN_NAME } from '@univer/common-plugin-register';
 import { getRefElement, handleDomToJson, handleJsonToDom, handleStyleToString, handleStringToStyle, $$, setLastCaretPosition } from '@univer/base-component';
 import { Direction, IDocumentData, IRangeData, IStyleData, Nullable, ICellData, Tools, isKeyPrintable, PLUGIN_NAMES } from '@univer/core';
 import { DeviceType, IKeyboardEvent, IMouseEvent, IPointerEvent } from '@univer/base-render';
@@ -159,6 +160,16 @@ export class CellEditorController {
         });
         this._plugin.getObserver('onSpreadsheetKeyCompositionUpdateObservable')?.add((evt: IKeyboardEvent) => {});
         this._plugin.getObserver('onSpreadsheetKeyCompositionEndObservable')?.add((evt: IKeyboardEvent) => {});
+
+        this._plugin.getObserver('onSpreadsheetKeyPasteObservable')?.add((e) => {
+            console.log('cell edit onSpreadsheetKeyPasteObservable====', e);
+            const clipboardExtensionManager = this._plugin
+                .getContext()
+                .getPluginManager()
+                .getRequirePluginByName<RegisterPlugin>(REGISTER_PLUGIN_NAME)
+                .getClipboardExtensionManager();
+            // clipboardExtensionManager.handle()
+        });
 
         this._cellEditExtensionManager = new CellEditExtensionManager();
     }

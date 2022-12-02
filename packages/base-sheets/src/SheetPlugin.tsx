@@ -91,7 +91,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     private _componentList: Map<string, any>;
 
-    protected _namedRangeActionExtensionFactory: NamedRangeInsertRowActionExtensionFactory;
+    private _namedRangeActionExtensionFactory: NamedRangeInsertRowActionExtensionFactory;
 
     constructor(config: Partial<ISheetPluginConfig> = {}) {
         super(PLUGIN_NAMES.SPREADSHEET);

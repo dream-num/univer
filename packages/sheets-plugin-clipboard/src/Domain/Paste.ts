@@ -23,7 +23,7 @@ export abstract class Paste {
             this.paste(e);
         });
 
-        // TODO 注册机制 Paste， PasteManager.handle() 匹配 WPSPaste/GoogleSheetPaste/ExcelPaste
+        // TODO 注册机制 Paste， PasteManager.handle() 匹配 WpsPaste/GooglePaste/OfficePaste
     }
 
     getContext() {

@@ -1,7 +1,9 @@
 import { SheetContext, Plugin, UniverSheet } from '@univer/core';
+import { RegisterPlugin, REGISTER_PLUGIN_NAME } from '@univer/common-plugin-register';
 import { en, zh } from './Locale';
 import { CLIPBOARD_PLUGIN } from './Const';
 import { Copy, UniverCopy, Paste, UniverPaste } from './Domain';
+import { ClipboardExtensionFactory } from './Basics/Register/ClipboardExtension';
 
 interface CopyResolver {
     name: string;
@@ -18,6 +20,8 @@ export class ClipboardPlugin extends Plugin<any, SheetContext> {
 
     private _pasteResolvers: PasteResolver[] = [];
 
+    private _clipboardExtensionFactory: ClipboardExtensionFactory;
+
     constructor() {
         super(CLIPBOARD_PLUGIN);
     }
@@ -26,8 +30,24 @@ export class ClipboardPlugin extends Plugin<any, SheetContext> {
         return new ClipboardPlugin();
     }
 
+    initialize() {
+        this.registerExtension();
+    }
+
+    registerExtension() {
+        const clipboardRegister = this.getContext().getPluginManager().getRequirePluginByName<RegisterPlugin>(REGISTER_PLUGIN_NAME).getClipboardExtensionManager().getRegister();
+
+        this._clipboardExtensionFactory = new ClipboardExtensionFactory(this);
+        clipboardRegister.add(this._clipboardExtensionFactory);
+    }
+
     installTo(universheetInstance: UniverSheet) {
         universheetInstance.installPlugin(this);
+    }
+
+    onDestroy(): void {
+        const clipboardRegister = this.getContext().getPluginManager().getRequirePluginByName<RegisterPlugin>(REGISTER_PLUGIN_NAME).getClipboardExtensionManager().getRegister();
+        clipboardRegister.delete(this._clipboardExtensionFactory);
     }
 
     onMounted(context: SheetContext): void {
@@ -38,6 +58,7 @@ export class ClipboardPlugin extends Plugin<any, SheetContext> {
         });
         this.installPasteResolver({ name: 'univerPaste', resolver: new UniverPaste(context) });
         this.installCopyResolver({ name: 'univerCopy', resolver: new UniverCopy(context) });
+        this.initialize();
     }
 
     installCopyResolver(resolver: CopyResolver) {

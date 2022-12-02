@@ -4,6 +4,7 @@ import { BlockType, SheetContext, IDocumentData, IKeyValue, ParagraphElementType
 import { Canvas } from '..';
 import { BaseObject } from '../BaseObject';
 import { IBoundRect, IObjectFullState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../Basics';
+import { transformBoundingCoord } from '../Basics/Position';
 import { Documents, DocumentSkeleton } from '../Component';
 
 export interface IRichTextProps extends IObjectFullState {
@@ -175,18 +176,7 @@ export class RichText extends BaseObject {
 
         // Temporarily ignore the on-demand display of elements within a group：this.isInGroup
         if (bounds && !this.isInGroup) {
-            const tl = this.transform.clone().invert().applyPoint(bounds.tl);
-            const tr = this.transform.clone().invert().applyPoint(bounds.tr);
-            const bl = this.transform.clone().invert().applyPoint(bounds.bl);
-            const br = this.transform.clone().invert().applyPoint(bounds.br);
-
-            const xList = [tl.x, tr.x, bl.x, br.x];
-            const yList = [tl.y, tr.y, bl.y, br.y];
-
-            const maxX = Math.max(...xList);
-            const minX = Math.min(...xList);
-            const maxY = Math.max(...yList);
-            const minY = Math.min(...yList);
+            const { minX, maxX, minY, maxY } = transformBoundingCoord(this, bounds);
 
             if (this.width + this.strokeWidth < minX || maxX < 0 || this.height + this.strokeWidth < minY || maxY < 0) {
                 // console.warn('ignore object', this);

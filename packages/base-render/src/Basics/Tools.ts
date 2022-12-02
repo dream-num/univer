@@ -23,7 +23,7 @@ export const getColor = (RgbArray: number[], opacity?: number): string => {
         return `${RGB_PAREN}0,0,0)`;
     }
 
-    if (opacity) {
+    if (opacity != null) {
         return `${RGBA_PAREN + RgbArray.join(',')},${opacity})`;
     }
     return `${RGB_PAREN + RgbArray.join(',')})`;
@@ -585,4 +585,14 @@ export function injectStyle(styles: string[]) {
     for (let style of styles) {
         styleSheet?.insertRule(style, styleSheet.cssRules.length);
     }
+}
+
+export function checkStyle(content: string) {
+    for (let i = 0, len = document.head.childNodes.length; i < len; i++) {
+        const node = document.head.childNodes[i];
+        if (node.nodeName === 'STYLE' && node.textContent && node.textContent.indexOf(content) > -1) {
+            return true;
+        }
+    }
+    return false;
 }

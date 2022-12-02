@@ -1,10 +1,18 @@
 import { IPosition, Nullable } from '@univer/core';
 import { nanoid } from 'nanoid';
 import { COLORS } from '../../../Basics/Const';
-import { IDocumentSkeletonColumn, IDocumentSkeletonDivide, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonSection } from '../../../Basics/IDocumentSkeletonCached';
+import {
+    IDocumentSkeletonColumn,
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonSection,
+    SpanType,
+} from '../../../Basics/IDocumentSkeletonCached';
 import { getColor } from '../../../Basics/Tools';
 import { IPoint } from '../../../Basics/Vector2';
 import { Scene } from '../../../Scene';
+import { Rect } from '../../../Shape/Rect';
 import { RegularPolygon } from '../../../Shape/RegularPolygon';
 import { DocumentSkeleton } from '../DocSkeleton';
 import { Documents } from '../Document';
@@ -43,7 +51,9 @@ interface ICurrentNodePositionState {
     span: NodePositionStateType;
 }
 
-const TEXT_POLYGON_KEY_PREFIX = '__TestSelection__';
+const TEXT_RANGE_KEY_PREFIX = '__TestSelectionRange__';
+
+const TEXT_ANCHOR_KEY_PREFIX = '__TestSelectionAnchor__';
 
 export interface INodePosition {
     page: number;
@@ -52,6 +62,7 @@ export interface INodePosition {
     line: number;
     divide: number;
     span: number;
+    isBack: boolean;
 }
 
 export class TextSelection {
@@ -59,7 +70,9 @@ export class TextSelection {
 
     private _Liquid = new Liquid();
 
-    private _polygon: Nullable<RegularPolygon>;
+    private _rangeShape: Nullable<RegularPolygon>;
+
+    private _anchorShape: Nullable<Rect>;
 
     private _currentStartState: ICurrentNodePositionState = {
         page: NodePositionStateType.NORMAL,
@@ -79,19 +92,7 @@ export class TextSelection {
         span: NodePositionStateType.NORMAL,
     };
 
-    constructor(private _scene: Scene, public startNodePosition?: INodePosition, public endNodePosition?: INodePosition) {}
-
-    isActive() {
-        return this._current === true;
-    }
-
-    activate() {
-        this._current = true;
-    }
-
-    deactivate() {
-        this._current = false;
-    }
+    constructor(private _scene: Scene, public startNodePosition?: Nullable<INodePosition>, public endNodePosition?: Nullable<INodePosition>) {}
 
     private _resetCurrentNodePositionState() {
         this._currentStartState = {
@@ -110,6 +111,72 @@ export class TextSelection {
             line: NodePositionStateType.NORMAL,
             divide: NodePositionStateType.NORMAL,
             span: NodePositionStateType.NORMAL,
+        };
+    }
+
+    private _compareNodePositionLogic(pos1: INodePosition, pos2: INodePosition) {
+        if (pos1.page > pos2.page) {
+            return false;
+        }
+
+        if (pos1.page < pos2.page) {
+            return true;
+        }
+
+        if (pos1.section > pos2.section) {
+            return false;
+        }
+
+        if (pos1.section < pos2.section) {
+            return true;
+        }
+
+        if (pos1.column > pos2.column) {
+            return false;
+        }
+
+        if (pos1.column < pos2.column) {
+            return true;
+        }
+
+        if (pos1.line > pos2.line) {
+            return false;
+        }
+
+        if (pos1.line < pos2.line) {
+            return true;
+        }
+
+        if (pos1.divide > pos2.divide) {
+            return false;
+        }
+
+        if (pos1.divide < pos2.divide) {
+            return true;
+        }
+
+        if (pos1.span > pos2.span) {
+            return false;
+        }
+
+        if (pos1.span < pos2.span) {
+            return true;
+        }
+
+        return true;
+    }
+
+    private _compareNodePosition(pos1: INodePosition, pos2: INodePosition) {
+        const compare = this._compareNodePositionLogic(pos1, pos2);
+        if (compare) {
+            return {
+                start: pos1,
+                end: pos2,
+            };
+        }
+        return {
+            start: pos2,
+            end: pos1,
         };
     }
 
@@ -223,53 +290,12 @@ export class TextSelection {
         return points;
     }
 
-    isEmpty() {
-        return this.startNodePosition === undefined && this.endNodePosition === undefined;
-    }
-
-    isCollapsed() {
-        if (this.startNodePosition !== undefined && this.endNodePosition === undefined) {
-            return true;
-        }
-
-        if (this.isSamePosition()) {
-            return true;
-        }
-
-        return false;
-    }
-
-    isRange() {
-        const start = this.startNodePosition;
-
-        const end = this.endNodePosition;
-
-        if (start === undefined || end === undefined) {
-            return false;
-        }
-
-        if (this.isSamePosition()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    dispose() {
-        this._polygon?.dispose();
-        this._polygon = null;
-    }
-
-    isIntersection(textSelection: TextSelection) {
-        return false;
-    }
-
     private isSamePosition() {
         const start = this.startNodePosition;
 
         const end = this.endNodePosition;
 
-        if (start === undefined || end === undefined) {
+        if (start == null || end == null) {
             return false;
         }
 
@@ -287,14 +313,15 @@ export class TextSelection {
         return true;
     }
 
-    private _createAndUpdatePolygon(pointsGroup: IPoint[][], left: number, top: number) {
-        if (this._polygon) {
-            this._polygon.translate(left, top);
-            this._polygon.updatePointGroup(pointsGroup);
+    private _createAndUpdateRange(pointsGroup: IPoint[][], left: number, top: number) {
+        if (this._rangeShape) {
+            this._rangeShape.translate(left, top);
+            this._rangeShape.updatePointGroup(pointsGroup);
+            this._rangeShape.show();
             return;
         }
 
-        const polygon = new RegularPolygon(TEXT_POLYGON_KEY_PREFIX + nanoid(6), {
+        const polygon = new RegularPolygon(TEXT_RANGE_KEY_PREFIX + nanoid(6), {
             pointsGroup,
             fill: getColor(COLORS.black, 0.2),
             left,
@@ -302,58 +329,97 @@ export class TextSelection {
             evented: false,
         });
 
-        this._polygon = polygon;
+        this._rangeShape = polygon;
 
         this._scene.addObject(polygon, 2);
     }
 
-    generate(documents: Documents) {
-        const skeleton = documents.getSkeleton();
+    private _getAnchorBounding(pointsGroup: IPoint[][]) {
+        const points = pointsGroup[0];
+        const startPoint = points[0];
+        const endPoint = points[2];
 
-        if (!skeleton) {
+        const { x: startX, y: startY } = startPoint;
+
+        const { x: endX, y: endY } = endPoint;
+
+        return {
+            left: startX,
+            top: startY,
+            width: endX - startX,
+            height: endY - startY,
+        };
+    }
+
+    private _createAndUpdateAnchor(pointsGroup: IPoint[][], docsLeft: number, docsTop: number) {
+        const bounding = this._getAnchorBounding(pointsGroup);
+        const { left, top, width, height } = bounding;
+        if (this._anchorShape) {
+            this._anchorShape.transformByState({ left: left + docsLeft, top: top + docsTop, height });
+            this._anchorShape.show();
             return;
         }
 
+        const anchor = new Rect(TEXT_ANCHOR_KEY_PREFIX + nanoid(6), {
+            left: left + docsLeft,
+            top: top + docsTop,
+            height,
+            strokeWidth: 1,
+            stroke: getColor(COLORS.black),
+            evented: false,
+        });
+
+        this._anchorShape = anchor;
+
+        this._scene.addObject(anchor, 2);
+    }
+
+    private _getRangePointData(startOrigin: INodePosition, endOrigin: INodePosition, skeleton: DocumentSkeleton) {
         const pointGroup: IPoint[][] = [];
 
-        const start = this.startNodePosition;
-
-        const end = this.endNodePosition;
-
-        if (this.isEmpty()) {
-            return pointGroup;
-        }
-
-        if (this.isCollapsed()) {
+        if (startOrigin == null || endOrigin == null) {
             return;
         }
+
+        const { start, end } = this._compareNodePosition(startOrigin, endOrigin);
+
+        const isStartBack = start.isBack;
+
+        const isEndBack = end.isBack;
 
         this._selectionIterator(start!, end!, skeleton, (start_sp, end_sp, divide, line) => {
             const { lineHeight } = line;
             const spanGroup = divide.spanGroup;
 
-            const { width: divideWidth } = divide;
-
             const { x: startX, y: startY } = this._Liquid;
 
             let position: IPosition;
+
+            const firstSpan = spanGroup[start_sp];
+            const lastSpan = spanGroup[end_sp];
+
+            const firstSpanLeft = firstSpan?.left || 0;
+            const firstSpanWidth = firstSpan?.width || 0;
+
+            const lastSpanLeft = lastSpan?.left || 0;
+            const lastSpanWidth = lastSpan?.width || 0;
+
+            let isList = firstSpan?.spanType === SpanType.LIST;
+
             if (start_sp === 0 && end_sp === spanGroup.length - 1) {
                 position = {
-                    startX,
+                    startX: startX + firstSpanLeft + (isList ? firstSpanWidth : 0),
                     startY,
-                    endX: startX + divideWidth,
+                    endX: startX + lastSpanLeft + lastSpanWidth,
                     endY: startY + lineHeight,
                 };
             } else {
-                const firstSpan = spanGroup[start_sp];
-                const lastSpan = spanGroup[end_sp];
-
                 // console.log('span', firstSpan, lastSpan, start_sp, end_sp);
 
                 position = {
-                    startX: startX + firstSpan.left,
+                    startX: startX + firstSpanLeft + ((isStartBack || start_sp === 0) && !isList ? 0 : firstSpanWidth),
                     startY,
-                    endX: startX + lastSpan.left + lastSpan.width,
+                    endX: startX + lastSpanLeft + (!isEndBack || end_sp === spanGroup.length - 1 ? lastSpanWidth : 0),
                     endY: startY + lineHeight,
                 };
 
@@ -365,8 +431,6 @@ export class TextSelection {
 
             pointGroup.push(this._pushToPoints(position));
         });
-        // console.log('pointGroup', pointGroup);
-        this._createAndUpdatePolygon(pointGroup, documents.left, documents.top);
         return pointGroup;
     }
 
@@ -451,5 +515,119 @@ export class TextSelection {
                 }
             }
         }
+    }
+
+    getAnchor() {
+        return this._anchorShape;
+    }
+
+    activeStatic() {
+        this._anchorShape?.setProps({
+            stroke: getColor(COLORS.black, 1),
+        });
+    }
+
+    deactivateStatic() {
+        this._anchorShape?.setProps({
+            stroke: getColor(COLORS.black, 0),
+        });
+    }
+
+    isActive() {
+        return this._current === true;
+    }
+
+    activate() {
+        this._current = true;
+    }
+
+    deactivate() {
+        this._current = false;
+    }
+
+    isEmpty() {
+        return this.startNodePosition == null && this.endNodePosition == null;
+    }
+
+    isCollapsed() {
+        if (this.startNodePosition != null && this.endNodePosition == null) {
+            return true;
+        }
+
+        if (this.isSamePosition()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    isRange() {
+        const start = this.startNodePosition;
+
+        const end = this.endNodePosition;
+
+        if (start == null || end == null) {
+            return false;
+        }
+
+        if (this.isSamePosition()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    dispose() {
+        this._rangeShape?.dispose();
+        this._rangeShape = null;
+        this._anchorShape?.dispose();
+        this._anchorShape = null;
+    }
+
+    isIntersection(textSelection: TextSelection) {
+        return false;
+    }
+
+    refresh(documents: Documents) {
+        const skeleton = documents.getSkeleton();
+
+        if (!skeleton) {
+            return;
+        }
+
+        const start = this.startNodePosition;
+
+        const end = this.endNodePosition;
+
+        this._anchorShape?.hide();
+        this._rangeShape?.hide();
+
+        if (this.isEmpty()) {
+            return;
+        }
+
+        if (this.isCollapsed()) {
+            const pointGroup = this._getRangePointData(start!, start!, skeleton);
+            pointGroup && this._createAndUpdateAnchor(pointGroup, documents.left, documents.top);
+            return;
+        }
+
+        const pointGroup = this._getRangePointData(start!, end!, skeleton);
+
+        pointGroup && this._createAndUpdateRange(pointGroup, documents.left, documents.top);
+    }
+
+    getStart() {
+        if (this.startNodePosition == null) {
+            return this.endNodePosition;
+        }
+
+        if (this.endNodePosition == null) {
+            return this.startNodePosition;
+        }
+
+        const { start } = this._compareNodePosition(this.startNodePosition, this.endNodePosition);
+
+        return start;
     }
 }

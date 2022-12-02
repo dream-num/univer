@@ -82,7 +82,7 @@ export class ToolBarController {
             const verticalAlignModeItem = this._toolList.find((item) => item.name === 'verticalAlignMode');
 
             if (strikethroughItem) {
-                strikethroughItem.active = !!strikeThrough.s;
+                // strikethroughItem.active = !!strikeThrough.s;
             }
             if (fontNameItem) {
                 fontNameItem.children?.forEach((item) => {
@@ -101,7 +101,7 @@ export class ToolBarController {
                 fontItalicItem.active = !!fontItalic;
             }
             if (underlineItem) {
-                underlineItem.active = !!underline.s;
+                // underlineItem.active = !!underline.s;
             }
             if (horizontalAlignModeItem) {
                 horizontalAlignModeItem.children?.forEach((item) => {

@@ -10,7 +10,7 @@ enum DRAG_LINE_KEY {
 
 const DEFAULT_DRAG_LINE_CONFIG = {
     strokeColor: 'rgb(1,136,251)',
-    strokeWidth: 2,
+    strokeWidth: 1,
     fillStrokeWidth: 5,
 };
 
@@ -79,8 +79,8 @@ export class DragLineController {
 
             this._dragLineControlContent = new Rect(DRAG_LINE_KEY.lineContent, {
                 width: contentWidth,
-                height: 2,
-                top: this._end - 2,
+                height: 1,
+                top: this._end - 1,
                 left: width,
                 fill: DEFAULT_DRAG_LINE_CONFIG.strokeColor,
             });
@@ -98,7 +98,7 @@ export class DragLineController {
                 width: DEFAULT_DRAG_LINE_CONFIG.strokeWidth,
                 height: contentHeight,
                 top: height,
-                left: this._end - 2,
+                left: this._end - 1,
                 fill: DEFAULT_DRAG_LINE_CONFIG.strokeColor,
             });
         }

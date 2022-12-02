@@ -38,8 +38,7 @@ export class UniverPaste extends Paste {
         const pasteList = [
             {
                 locale: ['rightClick.paste'],
-                onClick: (...arg: any) => {
-                    arg[1].ref.hideSelect();
+                onClick: () => {
                     this.pasteTo();
                 },
             },

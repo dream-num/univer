@@ -15,18 +15,17 @@
         "resolveJsonModule": true,
         "strict": true,
         "allowJs": true,
-        "downlevelIteration": true,
 
         "baseUrl": "./",
         "skipLibCheck": true,
-        "esModuleInterop": true, // auto allowSyntheticDefaultImports true
+        "esModuleInterop": true, // auto allowSyntheticDefaultImports tru
+        "suppressImplicitAnyIndexErrors": true,
+        "experimentalDecorators": true,
         "jsx": "preserve",
         "jsxFactory": "h",
         "jsxFragmentFactory": "Fragment",
-        "experimentalDecorators": true,
-        "emitDecoratorMetadata": true,
-        "suppressImplicitAnyIndexErrors": true,
         "strictPropertyInitialization": false,
+        "types": ["jest", "node", "@types/jest"]
     },
     "include": ["src/**/*", "test/**/*.test.(ts|tsx|js)"]
 }

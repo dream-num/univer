@@ -1,4 +1,4 @@
-import { Plugin, UniverSheet, UniverDoc, UniverSlide } from '@univer/core';
+import { Plugin, UniverSheet, UniverDoc, UniverSlide, PLUGIN_NAMES } from '@univer/core';
 import { zh, en } from './Locale';
 import { REGISTER_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
 import { ClipboardExtensionManager } from './Basic/Register';

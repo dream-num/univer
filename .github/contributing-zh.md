@@ -293,20 +293,41 @@ pnpm install
     npm i
     ```
 
-    然后再回到主目录运行生成插件的命令
-
 2. 运行 cli 命令来选择插件
+
+    先确保回到项目主目录
+
+    ```sh
+    cd ..
+    ```
+
+    再运行生成插件的命令
 
     ```shell
     npm run univer-cli create inner
     ```
 
-    其中 create 表示创建一个插件，inner 表示在 Univer 主仓库内部新建插件，也就是放到 packages 文件夹下。如果想在自己电脑的一个空白目录用脚手架新建一个插件，就不用加 inner，运行`npm run univer-cli create`即可。
+    其中 create 表示创建一个插件，inner 表示在 Univer 主仓库内部新建插件，也就是放到 packages 文件夹下。inner 模式下，还需要项目根目录的 [tsconfig.json](../tsconfig.json) 文件中，增加当前添加插件的引用地址，必须这样写：
+
+    ```json
+    {
+        // 其他配置...
+        "references": [
+            // 已有配置
+            { "path": "./packages/core/tsconfig.ref.json" },
+            { "path": "./packages/base-render/tsconfig.ref.json" },
+            // 新加的配置
+            { "path": "./packages/sheets-plugin-data-validation/tsconfig.ref.json" }
+        ]
+    }
+    ```
+
+    如果想在自己电脑的一个空白目录用脚手架新建一个插件，就不用加 inner，运行`npm run univer-cli create`即可。
 
     接着选择你想要的模板
 
     - base：基础插件，构建类似 `base-sheets`、`base-docs`、`base-slides` 的插件
-    - sheets-plugin：表格插件，构建类似 `sheet-plugin-sort`、`sheet-plugin-data-validation`的插件
+    - sheets-plugin：表格插件，构建类似 `sheets-plugin-sort`、`sheets-plugin-data-validation`的插件
 
     接着再填写你的插件名称，比如填写 `data-validation`，程序将会在 `packages` 文件夹下，生成一个完整的插件模板，比如`packages/sheets-plugin-data-validation`。
 

@@ -5,6 +5,7 @@ import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
 import { NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
 import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DOWN } from '@univer/common-plugin-data';
 import { RegisterPlugin } from '@univer/common-plugin-register';
+import { ClipboardOfficePlugin } from '@univer/sheets-plugin-clipboard-office';
 import { SheetPlugin } from './SheetPlugin';
 
 const uiDefaultConfigUp = {
@@ -12,15 +13,16 @@ const uiDefaultConfigUp = {
     layout: {
         innerRight: false,
         outerLeft: false,
+        toolBarConfig: {
+            paintFormat: false,
+            currencyFormat: false,
+            percentageFormat: false,
+            numberDecrease: false,
+            numberIncrease: false,
+            moreFormats: false,
+        },
     },
-    toolBarConfig: {
-        paintFormat: false,
-        currencyFormat: false,
-        percentageFormat: false,
-        numberDecrease: false,
-        numberIncrease: false,
-        moreFormats: false,
-    },
+
     selections: {
         'sheet-01': [
             {
@@ -97,10 +99,10 @@ univerSheetUp.installPlugin(new UniverComponentSheet());
 
 let sheetPlugin = new SheetPlugin(uiDefaultConfigUp);
 
-let clipboardPlugin = new ClipboardPlugin();
 univerSheetUp.installPlugin(sheetPlugin);
 univerSheetUp.installPlugin(new RegisterPlugin());
-univerSheetUp.installPlugin(clipboardPlugin);
+univerSheetUp.installPlugin(new ClipboardPlugin());
+univerSheetUp.installPlugin(new ClipboardOfficePlugin());
 univerSheetUp.installPlugin(new NumfmtPlugin());
 // FormulaPlugin.create(DEFAULT_FORMULA_DATA).installTo(univerSheetUp);
 

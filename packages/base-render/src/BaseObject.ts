@@ -265,6 +265,14 @@ export abstract class BaseObject {
         return this;
     }
 
+    private _makeDirtyMix() {
+        if (this.debounceParentDirty) {
+            this.makeDirty(true);
+        } else {
+            this.makeDirtyNoDebounce(true);
+        }
+    }
+
     protected _setTransForm() {
         const composeResult = Transform.create().composeMatrix({
             left: this.left + this.strokeWidth / 2,
@@ -278,11 +286,7 @@ export abstract class BaseObject {
             flipY: this.flipY,
         });
         this.transform = composeResult;
-        if (this.debounceParentDirty) {
-            this.makeDirty(true);
-        } else {
-            this.makeDirtyNoDebounce(true);
-        }
+        this._makeDirtyMix();
     }
 
     get top(): number {
@@ -465,10 +469,12 @@ export abstract class BaseObject {
 
     hide() {
         this._visible = false;
+        this._makeDirtyMix();
     }
 
     show() {
         this._visible = true;
+        this._makeDirtyMix();
     }
 
     render(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {

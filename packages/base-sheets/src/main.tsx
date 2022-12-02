@@ -3,7 +3,6 @@ import { RenderEngine } from '@univer/base-render';
 import { UniverComponentSheet } from '@univer/style-universheet';
 import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
 import { NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
-import { DEFAULT_FORMULA_DATA, FormulaPlugin } from '@univer/sheets-plugin-formula';
 import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DOWN } from '@univer/common-plugin-data';
 import { RegisterPlugin } from '@univer/common-plugin-register';
 import { SheetPlugin } from './SheetPlugin';
@@ -13,14 +12,14 @@ const uiDefaultConfigUp = {
     layout: {
         innerRight: false,
         outerLeft: false,
-        toolBarConfig: {
-            paintFormat: false,
-            currencyFormat: false,
-            percentageFormat: false,
-            numberDecrease: false,
-            numberIncrease: false,
-            moreFormats: false,
-        },
+    },
+    toolBarConfig: {
+        paintFormat: false,
+        currencyFormat: false,
+        percentageFormat: false,
+        numberDecrease: false,
+        numberIncrease: false,
+        moreFormats: false,
     },
     selections: {
         'sheet-01': [
@@ -103,7 +102,7 @@ univerSheetUp.installPlugin(sheetPlugin);
 univerSheetUp.installPlugin(new RegisterPlugin());
 univerSheetUp.installPlugin(clipboardPlugin);
 univerSheetUp.installPlugin(new NumfmtPlugin());
-FormulaPlugin.create(DEFAULT_FORMULA_DATA).installTo(univerSheetUp);
+// FormulaPlugin.create(DEFAULT_FORMULA_DATA).installTo(univerSheetUp);
 
 (window as any).sheetPlugin = sheetPlugin;
 

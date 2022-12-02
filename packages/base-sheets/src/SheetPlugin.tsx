@@ -1,4 +1,4 @@
-import { getRefElement, IMainProps, isElement, ISlotProps, RefObject, render } from '@univer/base-component';
+import { getRefElement, isElement, ISlotProps, RefObject, render } from '@univer/base-component';
 import { Engine, RenderEngine } from '@univer/base-render';
 import {
     AsyncFunction,
@@ -19,7 +19,7 @@ import { RightMenuProps } from './Model/RightMenuModel';
 import { en, zh } from './Locale';
 import { CANVAS_VIEW_KEY } from './View/Render/BaseView';
 import { CanvasView } from './View/Render/CanvasView';
-import { BaseSheetContainerConfig, ILayout, SheetContainer } from './View/UI/SheetContainer';
+import { SheetContainer } from './View/UI/SheetContainer';
 import {
     RightMenuController,
     InfoBarController,
@@ -29,6 +29,8 @@ import {
     CountBarController,
     SheetContainerController,
     ToolBarController,
+    BaseSheetContainerConfig,
+    IShowContainerConfig,
 } from './Controller';
 import { IToolBarItemProps } from './Model/ToolBarModel';
 import { ModalGroupController } from './Controller/ModalGroupController';
@@ -39,10 +41,6 @@ import { NamedRangeInsertRowActionExtensionFactory } from './Basics/Register/Nam
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
  */
-interface ComponentChildrenProps {
-    component: any;
-    props?: any;
-}
 
 export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     private _config: ISheetPluginConfig;
@@ -101,7 +99,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     register(engineInstance: Engine) {
         // The preact ref component cannot determine whether ref.current or ref.current.base is DOM
-        let container: HTMLElement = getRefElement(this.getContentRef());
+        let container: HTMLElement = getRefElement(this._sheetContainerController.getContentRef());
 
         this._canvasEngine = engineInstance;
 
@@ -113,10 +111,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     initialize(context: SheetContext): void {
         this.context = context;
-
-        this.getObserver('onSheetContainerDidMountObservable')?.add(() => {
-            this._initializeRender(context);
-        });
 
         /**
          * load more Locale object
@@ -134,62 +128,52 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
             skin: configure.skin || 'default',
             layout: this._config.layout,
             container: sheetContainer,
-            context,
-            getSplitLeftRef: (ref) => {
-                this._splitLeftRef = ref;
-            },
-            getContentRef: (ref) => {
-                this._contentRef = ref;
-            },
-            addButton: (cb: Function) => {
-                this._addButtonFunc = cb;
-            },
-            addSider: (cb: AsyncFunction<ISlotProps>) => {
-                this._addSiderFunc = cb;
-            },
-            addMain: (cb: Function) => {
-                this._addMainFunc = cb;
-            },
-            showSiderByName: (cb: Function) => {
-                this._showSiderByNameFunc = cb;
-            },
-            showMainByName: (cb: Function) => {
-                this._showMainByNameFunc = cb;
-            },
             onDidMount: () => {},
+            context,
         };
 
         this._componentList = new Map();
 
-        const layout = this._config.layout as ILayout;
+        const sheetContainerConfig = this._config.layout?.sheetContainerConfig;
+        const rightMenuConfig = this._config.layout?.rightMenuConfig;
+        const toolBarConfig = this._config.layout?.toolBarConfig;
 
         this._modalGroupController = new ModalGroupController(this);
-        this._sheetContainerController = new SheetContainerController(this);
+        this._sheetContainerController = new SheetContainerController(this, config);
 
         // TODO rightMenu config
-        this._rightMenuControl = new RightMenuController(this);
-
-        if (layout === 'auto' || layout.toolBar) {
-            this._toolBarControl = new ToolBarController(this);
+        if (sheetContainerConfig === 'auto' || (sheetContainerConfig as IShowContainerConfig).rightMenu) {
+            this._rightMenuControl = new RightMenuController(this, rightMenuConfig);
         }
-        if (layout === 'auto' || layout.infoBar) {
+
+        if (sheetContainerConfig === 'auto' || (sheetContainerConfig as IShowContainerConfig).toolBar) {
+            this._toolBarControl = new ToolBarController(this, toolBarConfig);
+        }
+        if (sheetContainerConfig === 'auto' || (sheetContainerConfig as IShowContainerConfig).infoBar) {
             this._infoBarControl = new InfoBarController(this);
         }
-        if (layout === 'auto' || layout.sheetBar) {
+        if (sheetContainerConfig === 'auto' || (sheetContainerConfig as IShowContainerConfig).sheetBar) {
             this._sheetBarControl = new SheetBarControl(this);
         }
         this._cellEditorController = new CellEditorController(this);
         this._antLineController = new AntLineControl(this);
 
-        if (layout === 'auto' || layout.countBar) {
+        if (sheetContainerConfig === 'auto' || (sheetContainerConfig as IShowContainerConfig).countBar) {
             this._countBarController = new CountBarController(this);
         }
-        if (layout === 'auto' || layout.formulaBar) {
+        if (sheetContainerConfig === 'auto' || (sheetContainerConfig as IShowContainerConfig).formulaBar) {
             this._formulaBarController = new FormulaBarController(this);
         }
 
+        this.getObserver('onSheetContainerDidMountObservable')?.add(() => {
+            this._initializeRender(context);
+        });
+
         // render sheet container
-        render(<SheetContainer config={config} />, sheetContainer);
+        render(
+            <SheetContainer changeLocale={this._sheetContainerController.changeLocale} changeSkin={this._sheetContainerController.changeSkin} config={config} />,
+            sheetContainer
+        );
 
         // const formulaEngine = this.getPluginByName<FormulaPlugin>('formula')?.getFormulaEngine();
         // =(sum(max(B1:C10,10)*5-100,((1+1)*2+5)/2,10)+count(B1:C10,10*5-100))*5-100
@@ -227,31 +211,10 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         return sheetContainer;
     }
 
-    /**
-     * Initialize all selections
-     */
-    private _initSelection() {}
-
     onMounted(ctx: SheetContext): void {
         install(this);
 
-        // this.initialize(ctx);
-
-        // When executing setContainer, occasionally ContentRef has not been mounted, because the didmount mount of preact is asynchronous, so let's judge here, if there is no DOM, we will execute our mount through the hook of the completion of the mount Rendering logic.
-
-        // if (!this.getContentRef().current) {
-        // this.context
-        //     .getObserverManager()
-        //     .getObserver('onSheetContainerDidMountObservable', 'workbook')
-        //     ?.add((e) => {
-        //         this._initializeRender(ctx);
-        //     });
-
         this.initialize(ctx);
-        // return;
-        // }
-
-        // this._initializeRender(ctx);
 
         CommandManager.getActionObservers().add((actionObs: IActionObserverProps): void => {
             const currentUnitId = this.getContext().getWorkBook().getUnitId();
@@ -293,18 +256,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
         this._namedRangeActionExtensionFactory = new NamedRangeInsertRowActionExtensionFactory(this);
         actionRegister.add(this._namedRangeActionExtensionFactory);
-    }
-
-    getSplitLeftRef(): RefObject<HTMLDivElement> {
-        return this._splitLeftRef;
-    }
-
-    // getContentRef(): RefObject<HTMLDivElement | Component> {
-    //     return this._contentRef;
-    // }
-
-    getContentRef(): RefObject<HTMLDivElement> {
-        return this._contentRef;
     }
 
     addButton(item: IToolBarItemProps): void {
@@ -387,21 +338,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         return this._modalGroupController;
     }
 
-    addSider(item: ISlotProps): Promise<void> {
-        return this._addSiderFunc(item);
-    }
-
-    addMain(item: IMainProps): Promise<void> {
-        return this._addMainFunc(item);
-    }
-
-    showSiderByName(name: string, show: boolean): Promise<void> {
-        return this._showSiderByNameFunc(name, show);
-        // TODO 是否可以直接 this.sheetContainer.showSiderByName();
-    }
-
-    showMainByName(name: string, show: boolean): Promise<void> {
-        return this._showMainByNameFunc(name, show);
+    getSheetContainerControl() {
+        return this._sheetContainerController;
     }
 
     addRightMenu(item: RightMenuProps[] | RightMenuProps) {

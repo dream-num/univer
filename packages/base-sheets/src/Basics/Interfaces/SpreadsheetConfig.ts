@@ -1,4 +1,4 @@
-import { ISheetPluginConfigBase } from '../../View/UI/SheetContainer';
+import { ISheetPluginConfigBase } from '../../Controller';
 import { ISelectionsConfig } from './SelectionConfig';
 
 export interface ISheetPluginConfig extends ISheetPluginConfigBase {

@@ -78,7 +78,7 @@ export class HelpFunction extends Component<IProps, IState> {
     }
 
     setLocale() {
-        const locale = this.context.locale.options.currentLocale;
+        const locale = this._context.getLocale().options.currentLocale as string;
         this.setState({
             lang: locale,
             formula: lang[`${locale}`],

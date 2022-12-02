@@ -1,19 +1,92 @@
-import { BooleanNumber, CommandManager, ISheetActionData, SheetActionBase } from '@univer/core';
-import { BaseComponentSheet, BaseComponentRender } from '@univer/base-component';
+import { BooleanNumber, CommandManager, ContextBase, ISheetActionData, LocaleType, PLUGIN_NAMES, SheetActionBase, Tools, Workbook } from '@univer/core';
+import { BaseComponentSheet, BaseComponentRender, BaseComponentProps } from '@univer/base-component';
+
 import { CellRangeModal } from '../View/UI/Common/CellRange/CellRangeModal';
 import { SheetPlugin } from '../SheetPlugin';
+import { IShowToolBarConfig } from '../Model';
+import { SheetContainer } from '../View/UI/SheetContainer';
+import { DefaultSheetContainerConfig } from '../Basics';
+import { IHideRightMenuConfig } from './RightMenuController';
+// All skins' less file
+
+export interface IShowContainerConfig {
+    outerLeft?: boolean;
+
+    outerRight?: boolean;
+
+    header?: boolean;
+
+    footer?: boolean;
+
+    innerLeft?: boolean;
+
+    innerRight?: boolean;
+
+    frozenHeaderLT?: boolean;
+
+    frozenHeaderRT?: boolean;
+
+    frozenHeaderLM?: boolean;
+
+    frozenContent?: boolean;
+
+    infoBar?: boolean;
+
+    formulaBar?: boolean;
+
+    countBar?: boolean;
+
+    sheetBar?: boolean;
+
+    // Whether to show the toolbar
+    toolBar?: boolean;
+
+    rightMenu?: boolean;
+
+    contentSplit?: boolean | string;
+}
+
+export interface ILayout {
+    sheetContainerConfig?: IShowContainerConfig | string;
+    toolBarConfig?: IShowToolBarConfig;
+    rightMenuConfig?: IHideRightMenuConfig;
+}
+
+export interface ISheetPluginConfigBase extends ILayout {
+    layout?: ILayout;
+}
+
+export interface BaseSheetContainerConfig extends BaseComponentProps, ISheetPluginConfigBase {
+    container: HTMLElement;
+    skin: string;
+    onDidMount: () => void;
+    context: ContextBase;
+}
 
 export class SheetContainerController {
     private _plugin: SheetPlugin;
 
     private _render: BaseComponentRender;
 
-    constructor(plugin: SheetPlugin) {
+    private _config: BaseSheetContainerConfig;
+
+    private _defaultLayout: IShowContainerConfig;
+
+    private _sheetContainer: SheetContainer;
+
+    constructor(plugin: SheetPlugin, config: BaseSheetContainerConfig) {
         this._plugin = plugin;
+
+        this._config = config;
 
         this._initRegisterComponent();
 
         this._initialize();
+
+        this._defaultLayout =
+            this._config.layout === 'auto'
+                ? Tools.deepClone(DefaultSheetContainerConfig) // The defaultLayout must be cloned, otherwise the layout object will be referenced in multiple instances
+                : Tools.deepMerge(DefaultSheetContainerConfig, this._config.layout?.sheetContainerConfig);
     }
 
     private _initialize() {
@@ -44,6 +117,19 @@ export class SheetContainerController {
                 }
             }
         });
+
+        this._plugin
+            .getContext()
+            .getObserverManager()
+            .requiredObserver<SheetContainer>('onSheetContainerDidMountObservable', PLUGIN_NAMES.SPREADSHEET)
+            .add((component) => {
+                this._sheetContainer = component;
+
+                this._sheetContainer.setState({
+                    layout: this._defaultLayout,
+                    currentLocale: this._plugin.getContext().getLocale().options.currentLocale,
+                });
+            });
     }
 
     // 注册常用icon和组件
@@ -97,5 +183,43 @@ export class SheetContainerController {
             this._plugin.registerComponent(k, registerIcon[k]);
         }
         this._plugin.registerModal(CellRangeModal.name, CellRangeModal);
+    }
+
+    /**
+     * Change skin
+     * @param {String} lang new skin
+     */
+    changeSkin = () => {
+        // publish
+        this._plugin.getContext().getObserverManager().getObserver<Workbook>('onAfterChangeUISkinObservable')?.notifyObservers(this._plugin.getContext().getWorkBook());
+    };
+
+    /**
+     * Change language
+     * @param {String} lang new language
+     *
+     * e: {target: HTMLSelectElement } reference from  https://stackoverflow.com/a/48443771
+     *
+     */
+    changeLocale = (locale: string) => {
+        this._plugin
+            .getContext()
+            .getLocale()
+            .change(locale as LocaleType);
+
+        // publish
+        this._plugin.getContext().getContextObserver('onAfterChangeUILocaleObservable')?.notifyObservers();
+    };
+
+    getContentRef() {
+        return this._sheetContainer.getContentRef();
+    }
+
+    getSplitLeftRef() {
+        return this._sheetContainer.getSplitLeftRef();
+    }
+
+    getLayoutContainerRef() {
+        return this._sheetContainer.getLayoutContainerRef();
     }
 }

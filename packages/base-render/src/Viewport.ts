@@ -95,6 +95,8 @@ export class Viewport {
 
     private _allowCache: boolean = false;
 
+    private _scrollStopNum: number;
+
     scrollX: number = 0;
 
     scrollY: number = 0;
@@ -342,6 +344,30 @@ export class Viewport {
         };
     }
 
+    private _triggerScrollStop(
+        scroll: {
+            x: number;
+            y: number;
+        },
+        x?: number,
+        y?: number
+    ) {
+        window.clearTimeout(this._scrollStopNum);
+        this._scrollStopNum = window.setTimeout(() => {
+            this.onScrollStopObserver.notifyObservers({
+                viewport: this,
+                scrollX: this.scrollX,
+                scrollY: this.scrollY,
+                x,
+                y,
+                actualScrollX: scroll.x,
+                actualScrollY: scroll.y,
+                limitX: this._scrollBar?.limitX,
+                limitY: this._scrollBar?.limitY,
+            });
+        }, 0);
+    }
+
     private _scroll(scrollType: SCROLL_TYPE, pos: IScrollBarPosition) {
         const { x, y } = pos;
         if (x !== undefined) {
@@ -393,6 +419,8 @@ export class Viewport {
             limitX: this._scrollBar?.limitX,
             limitY: this._scrollBar?.limitY,
         });
+
+        this._triggerScrollStop(scroll, x, y);
 
         return limited;
     }
@@ -510,6 +538,10 @@ export class Viewport {
         this._scrollRendered();
     }
 
+    getBounding() {
+        return this._calViewportRelativeBounding();
+    }
+
     private _calViewportRelativeBounding() {
         let ratioScrollX = this._scrollBar?.ratioScrollX ?? 1;
         let ratioScrollY = this._scrollBar?.ratioScrollY ?? 1;
@@ -551,6 +583,14 @@ export class Viewport {
         const scroll = this.transformScroll();
 
         const svCoord = sceneTrans.applyPoint(coord).add(Vector2.FromArray([scroll.x, scroll.y]));
+        return svCoord;
+    }
+
+    getAbsoluteVector(coord: Vector2) {
+        const sceneTrans = this.scene.transform.clone();
+        const scroll = this.transformScroll();
+
+        const svCoord = sceneTrans.applyPoint(coord).subtract(Vector2.FromArray([scroll.x, scroll.y]));
         return svCoord;
     }
 
@@ -694,4 +734,6 @@ export class Viewport {
     onScrollAfterObserver = new Observable<IScrollObserverParam>();
 
     onScrollBeforeObserver = new Observable<IScrollObserverParam>();
+
+    onScrollStopObserver = new Observable<IScrollObserverParam>();
 }

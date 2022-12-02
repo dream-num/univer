@@ -5,7 +5,7 @@ import { Component, getRefElement, isElement, ISlotProps, RefObject, render } fr
 import { DocPluginObserve, install } from './Basic/Observer';
 import { ToolBarController } from './Controller/ToolBarController';
 import { DocContainerController } from './Controller/DocContainerController';
-import { BaseDocContainerConfig, DocContainer, IDocPluginConfigBase } from './View/UI/DocContainer';
+import { BaseDocContainerConfig, DocContainer, IDocPluginConfigBase, ILayout } from './View/UI/DocContainer';
 import { InfoBarController } from './Controller/InfoBarController';
 import { Engine, RenderEngine } from '@univer/base-render';
 import { CanvasView } from './View/Render/CanvasView';
@@ -77,6 +77,15 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
 
         this._componentList = new Map();
 
+        const layout = this._config.layout as ILayout;
+
+        if (layout === 'auto' || layout.toolBar) {
+            this._toolBarControl = new ToolBarController(this);
+        }
+        if (layout === 'auto' || layout.infoBar) {
+            this._infoBarControl = new InfoBarController(this);
+        }
+        
         this._toolBarControl = new ToolBarController(this);
         this._infoBarControl = new InfoBarController(this);
         this._docContainerController = new DocContainerController(this);

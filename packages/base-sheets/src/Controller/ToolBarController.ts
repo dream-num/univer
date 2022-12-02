@@ -91,7 +91,7 @@ export class ToolBarController {
             }
             if (fontSizeItem) {
                 fontSizeItem.children?.forEach((item) => {
-                    item.value = fontSize;
+                    item.selected = fontSize === item.value;
                 });
             }
             if (fontBoldItem) {
@@ -214,6 +214,7 @@ export class ToolBarController {
                 show: config.fontSize,
                 name: 'fontSize',
                 onClick: (fontSize: number) => {
+                    debugger;
                     this._plugin.getObserver('onAfterChangeFontSizeObservable')?.notifyObservers(fontSize);
                 },
                 onKeyUp: (fontSize: number) => {
@@ -484,7 +485,6 @@ export class ToolBarController {
             this._toolBarComponent = component;
             this.resetToolBarList();
         });
-
         this._plugin.getObserver('onLineColorDidMountObservable')?.add((component) => {
             //初始化视图
             this._lineColor = component;

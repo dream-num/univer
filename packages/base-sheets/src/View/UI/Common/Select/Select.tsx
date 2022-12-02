@@ -3,7 +3,7 @@ import { ColorPicker, Dropdown } from '@univer/style-universheet';
 import { BaseItemProps, Item } from '../Item/Item';
 import styles from './index.module.less';
 
-enum SelectTypes {
+export enum SelectTypes {
     SINGLE, // 普通下拉
     INPUT,
     COLOR,

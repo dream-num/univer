@@ -1,8 +1,7 @@
 import { ComponentChildren } from '@univer/base-component';
 import { SheetPlugin } from '@univer/base-sheets';
 import { PLUGIN_NAMES } from '@univer/core';
-import { NUMBERFORMAT, NUMFMT_PLUGIN_NAME } from '../Basic/Const';
-import { CURRENCYDETAIL, DATEFMTLISG } from '../Basic/Const/FORMATDETAIL';
+import { NUMBERFORMAT, NUMFMT_PLUGIN_NAME, CURRENCYDETAIL, DATEFMTLISG } from '../Basic/Const';
 import { NumfmtPlugin } from '../NumfmtPlugin';
 import { FormatContent } from '../View/UI/FormatContent';
 import { NumfmtModal } from '../View/UI/NumfmtModal';
@@ -38,10 +37,9 @@ export class NumfmtModalController {
     private _modalData: ModalDataProps[];
 
     constructor(plugin: NumfmtPlugin) {
+        const locale = plugin.getContext().getLocale();
         this._plugin = plugin;
         this._sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
-        const locale = this._plugin.getContext().getLocale();
-
         this._modalData = [
             {
                 name: 'currency',
@@ -120,16 +118,13 @@ export class NumfmtModalController {
                 },
             },
         ];
-
         this._initRegisterComponent();
-
         this._initialize();
     }
 
     private _initialize() {
         this._plugin.getObserver('onNumfmtModalDidMountObservable')!.add((component) => {
             this._numfmtModal = component;
-
             this.resetModalData();
         });
     }
@@ -141,20 +136,17 @@ export class NumfmtModalController {
 
     resetContentData(data: any[]) {
         const locale = this._plugin.getContext().getLocale();
-
         for (let i = 0; i < data.length; i++) {
             if (data[i].locale) {
                 data[i].label = locale.get(data[i].locale);
             }
         }
-
         return data;
     }
 
     // 渲染所需数据
     resetModalData() {
         const locale = this._plugin.getContext().getLocale();
-
         this._modalData.forEach((item) => {
             item.title = locale.get(item.locale);
             if (item.group && item.group.length) {
@@ -163,7 +155,6 @@ export class NumfmtModalController {
                 });
             }
         });
-
         this._numfmtModal.setModal(this._modalData);
     }
 

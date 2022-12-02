@@ -30,9 +30,14 @@ export enum ActionOperationType {
     UNDO_ACTION = 3,
 
     /**
+     * action extension
+     */
+    EXTENSION_ACTION = 4,
+
+    /**
      * default obs
      */
-    DEFAULT_ACTION = 1 | 2 | 3,
+    DEFAULT_ACTION = 1 | 2 | 3 | 4,
 }
 
 /**

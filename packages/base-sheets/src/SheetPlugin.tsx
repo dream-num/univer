@@ -1,6 +1,18 @@
 import { getRefElement, IMainProps, isElement, ISlotProps, RefObject, render } from '@univer/base-component';
 import { Engine, RenderEngine } from '@univer/base-render';
-import { AsyncFunction, SheetContext, IWorkbookConfig, Plugin, PLUGIN_NAMES, Tools } from '@univer/core';
+import {
+    AsyncFunction,
+    SheetContext,
+    IWorkbookConfig,
+    Plugin,
+    PLUGIN_NAMES,
+    Tools,
+    CommandManager,
+    IActionObserverProps,
+    SheetActionBase,
+    ACTION_NAMES,
+    ISetNamedRangeActionData,
+} from '@univer/core';
 
 import { install, SheetPluginObserve, uninstall } from './Basics/Observer';
 import { RightMenuProps } from './Model/RightMenuModel';
@@ -22,7 +34,7 @@ import { IToolBarItemProps } from './Model/ToolBarModel';
 import { ModalGroupController } from './Controller/ModalGroupController';
 import { ISheetPluginConfig, DEFAULT_SPREADSHEET_PLUGIN_DATA } from './Basics';
 import { FormulaBarController } from './Controller/FormulaBarController';
-import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeActionExtension';
+import { NamedRangeInsertRowActionExtensionFactory } from './Basics/Register/NamedRangeInsertRowActionExtension';
 
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
@@ -79,7 +91,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     private _componentList: Map<string, any>;
 
-    protected _namedRangeActionExtensionFactory: NamedRangeActionExtensionFactory;
+    protected _namedRangeActionExtensionFactory: NamedRangeInsertRowActionExtensionFactory;
 
     constructor(config: Partial<ISheetPluginConfig> = {}) {
         super(PLUGIN_NAMES.SPREADSHEET);
@@ -240,6 +252,19 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         // }
 
         // this._initializeRender(ctx);
+
+        CommandManager.getActionObservers().add((actionObs: IActionObserverProps): void => {
+            const currentUnitId = this.getContext().getWorkBook().getUnitId();
+            const action = actionObs.action as SheetActionBase<ISetNamedRangeActionData, ISetNamedRangeActionData>;
+            const actionData = action.getDoActionData();
+            const actionUnitId = action.getWorkSheet().getContext().getWorkBook().getUnitId();
+
+            if (currentUnitId !== actionUnitId) return;
+
+            if (actionData.actionName === ACTION_NAMES.SET_NAMED_RANGE_ACTION) {
+                const namedRange = actionData.namedRange;
+            }
+        });
     }
 
     get config() {
@@ -266,7 +291,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     registerExtension() {
         const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
-        this._namedRangeActionExtensionFactory = new NamedRangeActionExtensionFactory(this);
+        this._namedRangeActionExtensionFactory = new NamedRangeInsertRowActionExtensionFactory(this);
         actionRegister.add(this._namedRangeActionExtensionFactory);
     }
 

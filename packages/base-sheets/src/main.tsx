@@ -19,7 +19,7 @@ const uiDefaultConfigUp = {
             numberDecrease: false,
             numberIncrease: false,
             moreFormats: false,
-        },
+        }
     },
     selections: {
         'sheet-01': [

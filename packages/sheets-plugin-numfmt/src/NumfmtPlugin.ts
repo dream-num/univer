@@ -9,7 +9,7 @@ import { NumfmtActionExtensionFactory } from './Basic/Register/NumfmtActionExten
 export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
     protected _controller: NumfmtController;
 
-    private _NumfmtModalController: NumfmtModalController;
+    protected _numfmtModalController: NumfmtModalController;
 
     protected _numfmtActionExtensionFactory: NumfmtActionExtensionFactory;
 
@@ -26,7 +26,7 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
         });
 
         this._numfmtActionExtensionFactory = new NumfmtActionExtensionFactory(this);
-        this._NumfmtModalController = new NumfmtModalController(this);
+        this._numfmtModalController = new NumfmtModalController(this);
         this._controller = new NumfmtController(this);
         const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
         actionRegister.add(this._numfmtActionExtensionFactory);
@@ -51,6 +51,6 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
     }
 
     getNumfmtModalController() {
-        return this._NumfmtModalController;
+        return this._numfmtModalController;
     }
 }

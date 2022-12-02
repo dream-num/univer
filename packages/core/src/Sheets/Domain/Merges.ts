@@ -27,6 +27,8 @@ export class Merges {
         this._worksheet = worksheet;
         this._rectangleList = mergeData;
 
+        // TODO 1. insertRowData, insertColumnData,insertRange
+        // 2. remove getCommandInjectorObservers, replace with ActionExtension
         CommandManager.getCommandInjectorObservers().add((inject) => {
             let insertRowAction = inject.include(InsertRowAction);
             let insertColumnAction = inject.include(InsertColumnAction);

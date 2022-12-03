@@ -86,12 +86,15 @@ export function isFormulaString(value: any): boolean {
     return Tools.isString(value) && value.indexOf('=') === 0 && value.length > 1;
 }
 
-export function getStyle(styles: Styles, cell: Nullable<ICellData>): IStyleData {
+export function getStyle(
+    styles: Nullable<Styles>,
+    cell: Nullable<ICellData>
+): IStyleData {
     let style;
     if (cell && Tools.isObject(cell.s)) {
         style = cell.s as IStyleData;
     } else {
-        style = cell && cell.s && styles.get(cell.s);
+        style = cell?.s && styles?.get(cell.s);
     }
 
     return style || DEFAULT_STYLES;

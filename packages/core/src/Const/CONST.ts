@@ -207,3 +207,8 @@ export const CONVERTOR_OPERATION = {
     REMOVE: 'remove',
     CHANGE: 'change',
 };
+
+export const DEFAULT_DOC = {
+    documentId: 'default_doc',
+    documentStyle: {},
+};

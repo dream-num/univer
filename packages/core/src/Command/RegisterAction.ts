@@ -43,6 +43,8 @@ import {
     SetZoomRatioAction,
 } from '../Sheets/Action';
 import { CommandManager } from './CommandManager';
+import { DOC_ACTION_NAMES } from '../Const/DOC_ACTION_NAMES';
+import { InsertTextAction } from '../Docs/Action/InsertTextAction';
 
 /**
  * All Commands are registered statically. For each new Command, a static registration method must be added here.
@@ -120,3 +122,10 @@ CommandManager.register(ACTION_NAMES.REMOVE_SHEET_ACTION, RemoveSheetAction);
 CommandManager.register(ACTION_NAMES.SET_SHEET_ORDER_ACTION, SetSheetOrderAction);
 CommandManager.register(ACTION_NAMES.SET_SHEET_ORDER_ACTION, SetSheetOrderAction);
 CommandManager.register(ACTION_NAMES.SET_ZOOM_RATIO_ACTION, SetZoomRatioAction);
+
+///====================================================================================================
+///====================================================================================================
+///====================================================================================================
+///====================================================================================================
+
+CommandManager.register(DOC_ACTION_NAMES.INSERT_TEXT_ACTION_NAME, InsertTextAction);

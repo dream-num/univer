@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UniverDoc</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="file" id="file"/>
+</body>
+<script type="module">
+    import { Document } from './src/main.ts';
+
+    const input = document.getElementById('file');
+    input.addEventListener('change', (ev) => {
+        const file = input.files[0];
+        const docx = Document.parse(file);
+        console.log(docx)
+    })
+</script>
+</html>

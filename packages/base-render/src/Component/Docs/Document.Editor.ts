@@ -423,7 +423,7 @@ export class DocsEditor {
 
             const anchor = textSelection?.getAnchor();
 
-            if (!anchor) {
+            if (!anchor || (anchor && !anchor.visible)) {
                 return;
             }
 

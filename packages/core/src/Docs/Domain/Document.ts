@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid';
 import { DocContext } from '../../Basics';
 import { Command } from '../../Command';
 import { IDocumentData } from '../../Interfaces';
@@ -8,9 +9,16 @@ export class Document {
 
     private _context: DocContext;
 
+    private _unitId: string;
+
     constructor(config: Partial<IDocumentData>, context: DocContext) {
         this._context = context;
         this._config = { ...DEFAULT_DOC, ...config };
+        this._unitId = this._config.documentId ?? nanoid(6);
+    }
+
+    getUnitId(): string {
+        return this._unitId;
     }
 
     insertText(text: string): Document {

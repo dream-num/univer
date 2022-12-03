@@ -44,6 +44,7 @@ export enum CANVAS_VIEW_KEY {
     VIEW_LEFT = 'viewLeft',
     VIEW_LEFT_TOP = 'viewLeftTop',
     SHEET_VIEW = 'sheetView',
+    DRAG_LINE_VIEW = 'dragLineView',
 }
 
 export const CanvasViewRegistry = Registry.create();

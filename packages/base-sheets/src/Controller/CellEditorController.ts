@@ -160,6 +160,19 @@ export class CellEditorController {
         this._plugin.getObserver('onSpreadsheetKeyCompositionUpdateObservable')?.add((evt: IKeyboardEvent) => {});
         this._plugin.getObserver('onSpreadsheetKeyCompositionEndObservable')?.add((evt: IKeyboardEvent) => {});
 
+        // this._plugin.getObserver('onSpreadsheetKeyPasteObservable')?.add((e) => {
+        //     console.log('cell edit onSpreadsheetKeyPasteObservable====', e);
+        //     const clipboardExtensionManager = this._plugin
+        //         .getContext()
+        //         .getPluginManager()
+        //         .getRequirePluginByName<RegisterPlugin>(REGISTER_PLUGIN_NAME)
+        //         .getClipboardExtensionManager();
+
+        //     clipboardExtensionManager.pasteResolver(e).then((data: IClipboardData) => {
+        //         clipboardExtensionManager.handle(data);
+        //     });
+        // });
+
         this._cellEditExtensionManager = new CellEditExtensionManager();
     }
 

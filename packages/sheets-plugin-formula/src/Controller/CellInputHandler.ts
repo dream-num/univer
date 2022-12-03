@@ -639,7 +639,7 @@ export class CellInputHandler {
             lasttxt = txt.substring(anchorOffset - 1, 1);
             return anchor.parentNode;
         }
-        if (anchor!.parentElement!.className === 'universheet-rich-text-editor') {
+        if (anchor?.parentElement?.className === 'universheet-rich-text-editor') {
             // const a = anchor.querySelectorAll('span');
             // let txt = anchor.parentElement!.querySelectorAll('span')[anchorLength.length - 1].textContent!.trim();
             let txt = anchor.textContent?.trim()!;

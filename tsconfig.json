@@ -18,6 +18,10 @@
         { "path": "./packages/sheets-plugin-sort/tsconfig.ref.json" },
         { "path": "./packages/sheets-plugin-filter/tsconfig.ref.json" },
         { "path": "./packages/sheets-plugin-find/tsconfig.ref.json" },
-        { "path": "./packages/sheets-plugin-numfmt/tsconfig.ref.json" }
+        { "path": "./packages/sheets-plugin-numfmt/tsconfig.ref.json" },
+        { "path": "./packages/sheets-plugin-import-xlsx/tsconfig.ref.json" },
+        { "path": "./packages/common-plugin-register/tsconfig.ref.json" },
+        { "path": "./packages/common-plugin-clipboard/tsconfig.ref.json" },
+        { "path": "./packages/common-plugin-clipboard-office/tsconfig.ref.json" }
     ]
 }

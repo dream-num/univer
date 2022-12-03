@@ -15,13 +15,18 @@
         "resolveJsonModule": true,
         "strict": true,
         "allowJs": true,
+        "downlevelIteration": true,
 
         "baseUrl": "./",
         "skipLibCheck": true,
         "esModuleInterop": true, // auto allowSyntheticDefaultImports true
         "jsx": "preserve",
         "jsxFactory": "h",
-        "jsxFragmentFactory": "Fragment"
+        "jsxFragmentFactory": "Fragment",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "strictPropertyInitialization": false,
     },
     "include": ["src/**/*", "test/**/*.test.(ts|tsx|js)"]
 }

@@ -42,7 +42,7 @@ export class UniverCopy extends Copy {
         const copyList = [
             {
                 locale: ['rightClick.copy'],
-                onClick: (...arg: any) => this.copyTo(...arg),
+                onClick: () => this.copyTo(),
             },
             {
                 customLabel: {
@@ -54,19 +54,19 @@ export class UniverCopy extends Copy {
                 children: [
                     {
                         locale: ['Json', 'rightClick.firstLineTitle'],
-                        onClick: (...arg: any) => this.copyJsonHead(...arg),
+                        onClick: () => this.copyJsonHead(),
                     },
                     {
                         locale: ['Json', 'rightClick.untitled'],
-                        onClick: (...arg: any) => this.copyJsonNoHead(...arg),
+                        onClick: () => this.copyJsonNoHead(),
                     },
                     {
                         locale: ['rightClick.array1'],
-                        onClick: (...arg: any) => this.copyArray1(...arg),
+                        onClick: () => this.copyArray1(),
                     },
                     {
                         locale: ['rightClick.array2'],
-                        onClick: (...arg: any) => this.copyArray2(...arg),
+                        onClick: () => this.copyArray2(),
                     },
                     {
                         customLabel: {
@@ -298,8 +298,6 @@ export class UniverCopy extends Copy {
     }
 
     async copyTo(...arg: any) {
-        arg[1].ref.hideSelect();
-
         const table = this._getCopyContent();
         if (table) {
             const isWrite = await Clipboard.write({
@@ -310,9 +308,6 @@ export class UniverCopy extends Copy {
 
     //复制为json格式字符串，首行为标题
     async copyJsonHead(...arg: any) {
-        arg[1].ref.hideSelect();
-        arg[1].ref.getParent().hideSelect();
-
         const Range = this._getRangeInfo();
         if (!Range) return;
         const { range, rangeData } = Range;
@@ -350,9 +345,6 @@ export class UniverCopy extends Copy {
 
     //复制为json格式字符串，无标题，采用ABCD作为标题
     async copyJsonNoHead(...arg: any) {
-        arg[1].ref.hideSelect();
-        arg[1].ref.getParent().hideSelect();
-
         const Range = this._getRangeInfo();
         if (!Range) return;
         const { range, rangeData } = Range;
@@ -372,9 +364,6 @@ export class UniverCopy extends Copy {
 
     //复制为一维数组
     async copyArray1(...arg: any) {
-        arg[1].ref.hideSelect();
-        arg[1].ref.getParent().hideSelect();
-
         const Range = this._getRangeInfo();
         if (!Range) return;
         const { range, rangeData } = Range;
@@ -392,9 +381,6 @@ export class UniverCopy extends Copy {
 
     //复制为二维数组
     async copyArray2(...arg: any) {
-        arg[1].ref.hideSelect();
-        arg[1].ref.getParent().hideSelect();
-
         const Range = this._getRangeInfo();
         if (!Range) return;
         const { range, rangeData } = Range;

@@ -10,6 +10,7 @@
         "dev": "node scripts/dev",
         "dev:doc": "pnpm run --filter @univer/base-docs dev",
         "dev:slide": "pnpm run --filter @univer/base-slides dev",
+        "d": "pnpm run --filter univer-vanilla-ts dev",
         "api": "node scripts/api",
         "lighthouse-dev": "start /B node scripts/dev && lighthouse http://127.0.0.1:3103 --output html --output-path ./report.html",
         "build": "node scripts/build.js",

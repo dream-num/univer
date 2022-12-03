@@ -12,11 +12,12 @@
 
 </body>
 <script>
-    const a = 'abcLocale'
-    const index = a.indexOf('Locale')
-    console.dir(index)
-    b = a.slice(0, index)
-    console.dir(b)
+    const a = { b: 1 }
+    function test(a) {
+        a.b = 2
+    }
+    test(a)
+    console.dir(a)
 </script>
 
 </html>

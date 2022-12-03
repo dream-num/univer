@@ -3,8 +3,9 @@ import { RenderEngine } from '@univer/base-render';
 import { UniverComponentSheet } from '@univer/style-universheet';
 import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
 import { NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
-import { DEFAULT_FORMULA_DATA, FormulaPlugin } from '@univer/sheets-plugin-formula';
 import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DOWN } from '@univer/common-plugin-data';
+import { RegisterPlugin } from '@univer/common-plugin-register';
+import { ClipboardOfficePlugin } from '@univer/sheets-plugin-clipboard-office';
 import { SheetPlugin } from './SheetPlugin';
 
 const uiDefaultConfigUp = {
@@ -19,8 +20,9 @@ const uiDefaultConfigUp = {
             numberDecrease: false,
             numberIncrease: false,
             moreFormats: false,
-        }
+        },
     },
+
     selections: {
         'sheet-01': [
             {
@@ -96,11 +98,13 @@ univerSheetUp.installPlugin(new RenderEngine());
 univerSheetUp.installPlugin(new UniverComponentSheet());
 
 let sheetPlugin = new SheetPlugin(uiDefaultConfigUp);
-let clipboardPlugin = new ClipboardPlugin();
+
 univerSheetUp.installPlugin(sheetPlugin);
-univerSheetUp.installPlugin(clipboardPlugin);
+univerSheetUp.installPlugin(new RegisterPlugin());
+univerSheetUp.installPlugin(new ClipboardPlugin());
+univerSheetUp.installPlugin(new ClipboardOfficePlugin());
 univerSheetUp.installPlugin(new NumfmtPlugin());
-FormulaPlugin.create(DEFAULT_FORMULA_DATA).installTo(univerSheetUp);
+// FormulaPlugin.create(DEFAULT_FORMULA_DATA).installTo(univerSheetUp);
 
 (window as any).sheetPlugin = sheetPlugin;
 
@@ -129,6 +133,5 @@ univerSheetDown.installPlugin(new RenderEngine());
 univerSheetDown.installPlugin(new UniverComponentSheet());
 
 univerSheetDown.installPlugin(new SheetPlugin(uiDefaultConfigDown));
-univerSheetDown.installPlugin(new ClipboardPlugin());
 univerSheetDown.installPlugin(new NumfmtPlugin());
 // FormulaPlugin.create(DEFAULT_FORMULA_DATA_DOWN).installTo(univerSheetDown);

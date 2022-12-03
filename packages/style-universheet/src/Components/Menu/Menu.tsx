@@ -17,12 +17,9 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
 
     handleClick = (e: MouseEvent, item: BaseMenuItem, index: number) => {
         const { deep = 0 } = this.props;
-        // e.stopPropagation();
-        if (item.onClick) {
-            item.onClick.call(null, e, item.value, index, deep);
-        } else if (this.props.onClick) {
-            this.props.onClick.call(null, e, item.value, index, deep);
-        }
+
+        item.onClick?.call(null, e, item.value, index, deep);
+        this.props.onClick?.call(null, e, item.value, index, deep);
         this.showMenu(false);
     };
 

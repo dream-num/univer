@@ -2,11 +2,14 @@ import { Class, Nullable } from '../Shared';
 import { Workbook } from '../Sheets/Domain';
 import { ActionBase, IActionData } from './ActionBase';
 import { ActionType } from './ActionObservers';
+import { Document } from '../Docs/Domain/Document';
 import { CommandInjector } from './CommandInjectorObservers';
 import { CommandManager } from './CommandManager';
 
 export class CommandUnit {
-    WorkBookUnit: Workbook;
+    WorkBookUnit?: Workbook;
+
+    DocumentUnit?: Document;
 }
 
 /**
@@ -23,7 +26,6 @@ export class Command {
 
     constructor(commandUnit: CommandUnit, ...list: IActionData[]) {
         this._unit = commandUnit;
-
         this._actionDataList = list;
         this._actionList = [];
     }

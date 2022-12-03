@@ -1,3 +1,2 @@
-import { <%= projectUpperValue %>Plugin } from './<%= projectUpperValue %>Plugin';
+export * from './<%= projectUpperValue %>Plugin';
 
-export { <%= projectUpperValue %>Plugin };

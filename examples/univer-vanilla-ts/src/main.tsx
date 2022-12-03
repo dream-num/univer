@@ -60,28 +60,16 @@ univerSheetUp.installPlugin(new RegisterPlugin());
 univerSheetUp.installPlugin(new ClipboardPlugin());
 univerSheetUp.installPlugin(new ClipboardOfficePlugin());
 
-const uiDefaultConfigDown = {
-    container: 'universheet-demo-down',
-    selections: {
-        'sheet-0001': [
-            {
-                selection: {
-                    startRow: 2,
-                    endRow: 2,
-                    startColumn: 3,
-                    endColumn: 3,
-                },
-                cell: {
-                    row: 2,
-                    column: 3,
-                },
-            },
-        ],
-    },
-};
 
-const univerSheetDown = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DOWN);
+
+const univerSheetDown = UniverSheet.newInstance();
 univerSheetDown.installPlugin(new RenderEngine());
 univerSheetDown.installPlugin(new UniverComponentSheet());
 
-univerSheetDown.installPlugin(new SheetPlugin(uiDefaultConfigDown));
+univerSheetDown.installPlugin(new SheetPlugin());
+univerSheetDown.installPlugin(new NumfmtPlugin());
+FormulaPlugin.create().installTo(univerSheetDown);
+
+univerSheetDown.installPlugin(new RegisterPlugin());
+univerSheetDown.installPlugin(new ClipboardPlugin());
+univerSheetDown.installPlugin(new ClipboardOfficePlugin());

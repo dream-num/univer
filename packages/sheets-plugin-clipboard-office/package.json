@@ -51,6 +51,7 @@
     },
     "dependencies": {
         "@univer/common-plugin-register": "workspace:^0.0.1",
-        "@univer/core": "workspace:^0.0.1"
+        "@univer/core": "workspace:^0.0.1",
+        "preact": "^10.5.14"
     }
 }

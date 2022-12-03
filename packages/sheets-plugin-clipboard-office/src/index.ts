@@ -1,3 +1,1 @@
-import { ClipboardOfficePlugin } from './ClipboardOfficePlugin';
-
-export { ClipboardOfficePlugin };
+export * from './ClipboardOfficePlugin';

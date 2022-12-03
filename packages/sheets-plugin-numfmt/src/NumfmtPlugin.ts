@@ -6,6 +6,8 @@ import { NumfmtModalController } from './Controller/NumfmtModalController';
 import { en, zh } from './Locale';
 import { NumfmtActionExtensionFactory } from './Basic/Register/NumfmtActionExtension';
 
+export interface INumfmtPluginConfig {}
+
 export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
     protected _controller: NumfmtController;
 
@@ -13,8 +15,12 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
 
     protected _numfmtActionExtensionFactory: NumfmtActionExtensionFactory;
 
-    constructor() {
+    constructor(config?: INumfmtPluginConfig) {
         super(NUMFMT_PLUGIN_NAME);
+    }
+
+    static create(config?: INumfmtPluginConfig) {
+        return new NumfmtPlugin(config);
     }
 
     onMounted(context: SheetContext): void {

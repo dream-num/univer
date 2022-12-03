@@ -1,4 +1,3 @@
 export * from './Basic';
-import { RegisterPlugin } from './RegisterPlugin';
+export * from './RegisterPlugin';
 
-export { RegisterPlugin };

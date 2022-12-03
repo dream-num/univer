@@ -50,6 +50,7 @@
         "vite": "^2.4.4"
     },
     "dependencies": {
-        "@univer/core": "workspace:^0.0.1"
+        "@univer/core": "workspace:^0.0.1",
+        "preact": "^10.5.14"
     }
 }

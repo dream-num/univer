@@ -1,3 +1,1 @@
-import { SlidePlugin } from './SlidePlugin';
-
-export { SlidePlugin };
+export * from './SlidePlugin';

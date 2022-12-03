@@ -1,4 +1,4 @@
-import { IDocumentData } from '../Interfaces/IDocumentData';
+import { IDocumentData } from '../Interfaces';
 import { ContextBase } from './ContextBase';
 import { Document } from '../Docs/Domain/Document';
 
@@ -15,4 +15,8 @@ export class DocContext extends ContextBase {
     }
 
     protected _setObserver(): void {}
+
+    getDocument(): Document {
+        return this._document;
+    }
 }

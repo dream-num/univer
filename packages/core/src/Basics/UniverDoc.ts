@@ -51,6 +51,13 @@ export class UniverDoc {
     }
 
     /**
+     * get unit id
+     */
+    getUnitId(): string {
+        return this._context.getDocument().getUnitId();
+    }
+
+    /**
      * install plugin
      *
      * @param plugin - install plugin

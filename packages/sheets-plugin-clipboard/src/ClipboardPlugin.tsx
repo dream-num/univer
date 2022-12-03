@@ -2,7 +2,7 @@ import { SheetContext, Plugin, UniverSheet } from '@univer/core';
 import { RegisterPlugin, REGISTER_PLUGIN_NAME } from '@univer/common-plugin-register';
 import { en, zh } from './Locale';
 import { CLIPBOARD_PLUGIN } from './Const';
-import { Copy, UniverCopy, Paste, UniverPaste } from './Domain';
+import { Copy, Paste, UniverCopy, UniverPaste } from './Domain';
 import { ClipboardExtensionFactory } from './Basics/Register/ClipboardExtension';
 
 interface CopyResolver {
@@ -19,6 +19,8 @@ export class ClipboardPlugin extends Plugin<any, SheetContext> {
     private _copyResolvers: CopyResolver[] = [];
 
     private _pasteResolvers: PasteResolver[] = [];
+
+    private _univerPaste: UniverPaste;
 
     private _clipboardExtensionFactory: ClipboardExtensionFactory;
 
@@ -56,9 +58,14 @@ export class ClipboardPlugin extends Plugin<any, SheetContext> {
             en,
             zh,
         });
-        this.installPasteResolver({ name: 'univerPaste', resolver: new UniverPaste(context) });
+        // this.installPasteResolver({ name: 'univerPaste', resolver: new UniverPaste(context) });
+        this._univerPaste = new UniverPaste(context);
         this.installCopyResolver({ name: 'univerCopy', resolver: new UniverCopy(context) });
         this.initialize();
+    }
+
+    getUniverPaste() {
+        return this._univerPaste;
     }
 
     installCopyResolver(resolver: CopyResolver) {
@@ -67,9 +74,9 @@ export class ClipboardPlugin extends Plugin<any, SheetContext> {
         this._copyResolvers.push(resolver);
     }
 
-    installPasteResolver(resolver: PasteResolver) {
-        const index = this._pasteResolvers.findIndex((item) => item.name === resolver.name);
-        if (index > -1) return false;
-        this._pasteResolvers.push(resolver);
-    }
+    // installPasteResolver(resolver: PasteResolver) {
+    //     const index = this._pasteResolvers.findIndex((item) => item.name === resolver.name);
+    //     if (index > -1) return false;
+    //     this._pasteResolvers.push(resolver);
+    // }
 }

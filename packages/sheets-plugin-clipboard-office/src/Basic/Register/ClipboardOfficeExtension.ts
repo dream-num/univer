@@ -7,7 +7,7 @@ export class ClipboardOfficeExtension extends BaseClipboardExtension {
 
 export class ClipboardOfficeExtensionFactory extends BaseClipboardExtensionFactory<ClipboardOfficePlugin> {
     get zIndex(): number {
-        return 1;
+        return 2;
     }
 
     create(data: IClipboardData): BaseClipboardExtension {
@@ -15,8 +15,6 @@ export class ClipboardOfficeExtensionFactory extends BaseClipboardExtensionFacto
     }
 
     check(data: IClipboardData): false | BaseClipboardExtension {
-        console.log('截获 office data', data);
-
         return false;
     }
 }

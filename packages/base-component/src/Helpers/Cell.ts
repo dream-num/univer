@@ -738,8 +738,8 @@ export function handelTableToJson(table: string) {
             }
             let txt = td.innerText;
             if (txt.trim().length === 0) {
-                cell.v = null;
-                cell.m = null;
+                cell.v = '';
+                cell.m = '';
             } else {
                 // Todo,处理格式
                 cell.v = txt;
@@ -804,8 +804,8 @@ export function handlePlainToJson(plain: string) {
         for (let j = 0; j < data[i].length; j++) {
             if (data[i][j].length) {
                 data[i][j] = {
-                    v: data[i][j],
-                    m: data[i][j],
+                    v: data[i][j] || '',
+                    m: data[i][j] || '',
                 };
             } else {
                 data[i][j] = null;

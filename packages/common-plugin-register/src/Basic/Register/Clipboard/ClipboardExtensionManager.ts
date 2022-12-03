@@ -32,7 +32,6 @@ export class ClipboardExtensionManager {
         const extension = this._checkExtension(data);
         if (extension) {
             extension.execute();
-            return extension.getJSON();
         }
     }
 

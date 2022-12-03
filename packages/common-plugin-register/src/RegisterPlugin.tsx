@@ -38,8 +38,6 @@ export class RegisterPlugin extends Plugin {
 
         if (onKeyPasteObservable && !onKeyPasteObservable.hasObservers()) {
             onKeyPasteObservable.add((evt: ClipboardEvent) => {
-                console.log('cell edit onKeyPasteObservable====', evt);
-
                 this._clipboardExtensionManager.pasteResolver(evt).then((data: IClipboardData) => {
                     this._clipboardExtensionManager.handle(data);
                 });

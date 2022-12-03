@@ -617,6 +617,24 @@ const s = `${style.AlternatingColorsSideSetting}`;
 
 ### 处理国际化
 
+## 注册快捷键
+
+`base-component`插件中向核心提供了`onKeyDownObservable`，可以用来快捷注册键盘快捷键。
+
+我们允许为同一组快捷键注册多个监听。
+
+```ts
+const onKeyDownObservable = this._plugin.getContext().getObserverManager().getObserver<KeyboardEvent>('onKeyDownObservable', 'core');
+
+onKeyDownObservable?.add((evt: KeyboardEvent) => {
+    // handle Ctrl + A
+    if (evt.ctrlKey && evt.key === 'a') {
+        // custom function
+        this.handleCtrlA();
+    }
+});
+```
+
 ## 测试
 
 核心代码测试使用

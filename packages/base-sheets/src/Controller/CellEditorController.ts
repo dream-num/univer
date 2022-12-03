@@ -60,8 +60,8 @@ export class CellEditorController {
 
                 // // focus
                 // this.richTextEditEle.focus();
-                // this.richTextEditEle.tabIndex = 1;
 
+                // this.focusEditEle();
                 this.hideEditContainer();
 
                 // init event
@@ -279,11 +279,12 @@ export class CellEditorController {
     // }
 
     hideEditContainer() {
-        this.richTextEle.style.maxHeight = '0px';
-        this.richTextEle.style.maxWidth = '0px';
+        // It cannot be set to 0px, otherwise the paste event cannot be listened
+        this.richTextEle.style.maxHeight = '1px';
+        this.richTextEle.style.maxWidth = '1px';
 
-        this.richTextEle.style.minWidth = `0px`;
-        this.richTextEle.style.minHeight = `0px`;
+        this.richTextEle.style.minWidth = `1px`;
+        this.richTextEle.style.minHeight = `1px`;
 
         this.richTextEle.style.borderWidth = '0px';
     }

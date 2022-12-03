@@ -4,20 +4,20 @@ import { IKeyValue, Plugin } from '@univer/core';
 /**
  * 转化table html/json为json
  */
-export class BaseClipboardExtension {
-    protected _json: IKeyValue;
-    constructor(protected _data: IClipboardData) {}
+export class BaseClipboardExtension<T extends Plugin = Plugin> {
+    // protected _json: IKeyValue;
+    constructor(protected _data: IClipboardData, protected _plugin: T) {}
 
-    getJSON(): IKeyValue {
-        return this._json;
-    }
+    // getJSON(): IKeyValue {
+    //     return this._json;
+    // }
 
-    /**
-     * Modify the value
-     */
-    setJSON(json: IKeyValue) {
-        this._json = json;
-    }
+    // /**
+    //  * Modify the value
+    //  */
+    // setJSON(json: IKeyValue) {
+    //     this._json = json;
+    // }
 
     /**
      * Execute the core logic after the check is successful
@@ -41,7 +41,7 @@ export class BaseClipboardExtensionFactory<T extends Plugin = Plugin> {
      * @returns
      */
     create(data: IClipboardData): BaseClipboardExtension {
-        return new BaseClipboardExtension(data);
+        return new BaseClipboardExtension(data, this._plugin);
     }
 
     /**

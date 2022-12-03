@@ -5,22 +5,16 @@
     "keywords": [],
     "author": "DreamNum <msoffice2@126.com>",
     "license": "MIT",
-    "main": "./lib/univer-common-plugin-register.cjs.js",
-    "module": "./lib/univer-common-plugin-register.es.js",
-    "browser": {
-        "./lib/univer-common-plugin-register.cjs.js": "./src/index.ts",
-        "./lib/univer-common-plugin-register.es.js": "./src/index.ts"
-    },
+    "main": "./src/index.ts",
+    "module": "./src/index.ts",
     "types": "./src/Types/index.d.ts",
+    "publishConfig": {
+        "main": "./lib/univer-common-plugin-register.cjs.js",
+        "module": "./lib/univer-common-plugin-register.es.js",
+        "types": "./lib/index.d.ts"
+    },
     "exports": {
-        ".": {
-            "import": {
-                "node": "./lib/univer-common-plugin-register.cjs.js",
-                "default": "./lib/univer-common-plugin-register.es.js"
-            },
-            "require": "./lib/univer-common-plugin-register.cjs.js",
-            "types": "./lib/univer-common-plugin-register.d.ts"
-        },
+        ".": "./src/index.ts",
         "./*": "./src/*"
     },
     "directories": {

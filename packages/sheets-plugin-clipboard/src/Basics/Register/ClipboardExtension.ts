@@ -15,7 +15,10 @@ export class ClipboardExtensionFactory extends BaseClipboardExtensionFactory<Cli
     }
 
     check(data: IClipboardData): false | BaseClipboardExtension {
-        console.log('截获data', data);
+        const content = data.html || data.plain;
+        if (content && content.indexOf('<table') > -1 && content.indexOf('<td') > -1) {
+            return this.create(data);
+        }
 
         return false;
     }

@@ -4,7 +4,7 @@ English| [简体中文](./README-zh.md)
 
 ## Introduction
 
-UniverSheet vanilla ts project case
+Univer vanilla ts project case
 
 ## Usage
 

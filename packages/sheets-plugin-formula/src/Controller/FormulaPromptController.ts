@@ -146,8 +146,6 @@ export class FormulaPromptController {
                     }
                 }
             }
-
-            console.log('key up=== 33w');
         });
 
         this._plugin.getObserver('onSearchFunctionDidMountObservable')!.add((component) => {

@@ -18,10 +18,10 @@ export abstract class Paste {
         SheetPlugin.addRightMenu(pasteList);
 
         // SheetPlugin.getCellEditorController().isEditMode
-        const manager = this._context.getObserverManager();
-        manager.requiredObserver<ClipboardEvent>('onSpreadsheetKeyPasteObservable', PLUGIN_NAMES.SPREADSHEET).add((e) => {
-            this.paste(e);
-        });
+        // const manager = this._context.getObserverManager();
+        // manager.requiredObserver<ClipboardEvent>('onSpreadsheetKeyPasteObservable', PLUGIN_NAMES.SPREADSHEET).add((e) => {
+        //     this.paste(e);
+        // });
 
         // TODO 注册机制 Paste， PasteManager.handle() 匹配 WpsPaste/GooglePaste/OfficePaste
     }

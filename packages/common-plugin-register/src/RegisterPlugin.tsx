@@ -2,6 +2,7 @@ import { Plugin, UniverSheet, UniverDoc, UniverSlide, PLUGIN_NAMES } from '@univ
 import { zh, en } from './Locale';
 import { REGISTER_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
 import { ClipboardExtensionManager } from './Basic/Register';
+import { IClipboardData } from './Basic';
 
 export class RegisterPlugin extends Plugin {
     private _clipboardExtensionManager: ClipboardExtensionManager;
@@ -33,6 +34,17 @@ export class RegisterPlugin extends Plugin {
     }
 
     setExtensionManager() {
+        const onKeyPasteObservable = this.getContext().getObserverManager().getObserver<ClipboardEvent>('onKeyPasteObservable', 'core');
+
+        if (onKeyPasteObservable && !onKeyPasteObservable.hasObservers()) {
+            onKeyPasteObservable.add((evt: ClipboardEvent) => {
+                console.log('cell edit onKeyPasteObservable====', evt);
+
+                this._clipboardExtensionManager.pasteResolver(evt).then((data: IClipboardData) => {
+                    this._clipboardExtensionManager.handle(data);
+                });
+            });
+        }
         this._clipboardExtensionManager = new ClipboardExtensionManager();
     }
 

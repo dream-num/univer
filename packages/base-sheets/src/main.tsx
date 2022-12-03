@@ -1,11 +1,8 @@
 import { UniverSheet } from '@univer/core';
 import { RenderEngine } from '@univer/base-render';
 import { UniverComponentSheet } from '@univer/style-universheet';
-import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
 import { NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
 import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DOWN } from '@univer/common-plugin-data';
-import { RegisterPlugin } from '@univer/common-plugin-register';
-import { ClipboardOfficePlugin } from '@univer/sheets-plugin-clipboard-office';
 import { SheetPlugin } from './SheetPlugin';
 
 const uiDefaultConfigUp = {
@@ -100,9 +97,6 @@ univerSheetUp.installPlugin(new UniverComponentSheet());
 let sheetPlugin = new SheetPlugin(uiDefaultConfigUp);
 
 univerSheetUp.installPlugin(sheetPlugin);
-univerSheetUp.installPlugin(new RegisterPlugin());
-univerSheetUp.installPlugin(new ClipboardPlugin());
-univerSheetUp.installPlugin(new ClipboardOfficePlugin());
 univerSheetUp.installPlugin(new NumfmtPlugin());
 // FormulaPlugin.create(DEFAULT_FORMULA_DATA).installTo(univerSheetUp);
 

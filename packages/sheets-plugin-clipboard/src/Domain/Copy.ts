@@ -16,7 +16,7 @@ export abstract class Copy {
         SheetPlugin?.addRightMenu(copyList);
 
         const manager = this._context.getObserverManager();
-        manager.requiredObserver<ClipboardEvent>('onSpreadsheetKeyCopyObservable', PLUGIN_NAMES.SPREADSHEET).add((e) => {
+        manager.requiredObserver<ClipboardEvent>('onKeyCopyObservable', 'core').add((e) => {
             this.copy(e);
         });
     }

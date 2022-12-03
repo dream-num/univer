@@ -1,7 +1,22 @@
-import { univerSheetCustom, DEFAULT_WORKBOOK_DATA } from '.';
+import { UniverSheet } from '@univer/core';
+import { RenderEngine } from '@univer/base-render';
+import { UniverComponentSheet } from '@univer/style-universheet';
+import { SheetPlugin } from '@univer/base-sheets';
+import {
+    DEFAULT_FORMULA_DATA,
+    FormulaPlugin,
+} from '@univer/sheets-plugin-formula';
+import { NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
+import {
+    DEFAULT_WORKBOOK_DATA,
+    DEFAULT_WORKBOOK_DATA_DOWN,
+} from '@univer/common-plugin-data';
+import { RegisterPlugin } from '@univer/common-plugin-register';
+import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
+import { ClipboardOfficePlugin } from '@univer/sheets-plugin-clipboard-office';
 
-const sheetConfig = {
-    container: 'universheet-demo',
+const uiDefaultConfigUp = {
+    container: 'universheet-demo-up',
     layout: {
         innerRight: false,
         outerLeft: false,
@@ -14,6 +29,7 @@ const sheetConfig = {
             moreFormats: false,
         },
     },
+
     selections: {
         'sheet-01': [
             {
@@ -32,7 +48,40 @@ const sheetConfig = {
     },
 };
 
-univerSheetCustom({
-    coreConfig: DEFAULT_WORKBOOK_DATA,
-    baseSheetsConfig: sheetConfig,
-});
+const univerSheetUp = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);
+univerSheetUp.installPlugin(new RenderEngine());
+univerSheetUp.installPlugin(new UniverComponentSheet());
+univerSheetUp.installPlugin(new SheetPlugin(uiDefaultConfigUp));
+
+univerSheetUp.installPlugin(new NumfmtPlugin());
+FormulaPlugin.create(DEFAULT_FORMULA_DATA).installTo(univerSheetUp);
+
+univerSheetUp.installPlugin(new RegisterPlugin());
+univerSheetUp.installPlugin(new ClipboardPlugin());
+univerSheetUp.installPlugin(new ClipboardOfficePlugin());
+
+const uiDefaultConfigDown = {
+    container: 'universheet-demo-down',
+    selections: {
+        'sheet-0001': [
+            {
+                selection: {
+                    startRow: 2,
+                    endRow: 2,
+                    startColumn: 3,
+                    endColumn: 3,
+                },
+                cell: {
+                    row: 2,
+                    column: 3,
+                },
+            },
+        ],
+    },
+};
+
+const univerSheetDown = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DOWN);
+univerSheetDown.installPlugin(new RenderEngine());
+univerSheetDown.installPlugin(new UniverComponentSheet());
+
+univerSheetDown.installPlugin(new SheetPlugin(uiDefaultConfigDown));

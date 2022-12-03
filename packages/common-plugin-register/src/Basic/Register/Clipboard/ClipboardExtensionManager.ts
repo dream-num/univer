@@ -1,6 +1,8 @@
 import { IClipboardData } from '../../Interfaces/IClipboardData';
+import { PasteType } from '../../Interfaces/PasteType';
 import { BaseClipboardExtension, BaseClipboardExtensionFactory } from './ClipboardExtensionFactory';
 import { ClipboardExtensionRegister } from './ClipboardExtensionRegister';
+import { Clipboard } from '../../Shared/Clipboard';
 
 export class ClipboardExtensionManager {
     private _clipboardExtensionFactoryList: Array<BaseClipboardExtensionFactory>;
@@ -51,5 +53,27 @@ export class ClipboardExtensionManager {
             }
         }
         return extension;
+    }
+
+    pasteResolver(e?: ClipboardEvent) {
+        return new Promise((resolve: (value: IClipboardData) => void, reject) => {
+            Clipboard.read(e).then((file: Array<PasteType | null> | null) => {
+                if (!file) return [];
+                const HtmlIndex = file.findIndex((item: PasteType | null, index: number) => item && item.type === 'text/html');
+                const PlainIndex = file.findIndex((item: PasteType | null, index: number) => item && item.type === 'text/plain');
+
+                const data: IClipboardData = {};
+                if (HtmlIndex > -1) {
+                    const html = file[HtmlIndex]?.result as string;
+                    data.html = html;
+                }
+                if (PlainIndex > -1) {
+                    const plain = file[PlainIndex]?.result as string;
+                    data.plain = plain;
+                }
+
+                resolve(data);
+            });
+        });
     }
 }

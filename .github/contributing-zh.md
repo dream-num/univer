@@ -346,7 +346,7 @@ pnpm install
 
 ```sh
 │  index.ts # 插件出口
-│  main.tsx # 插件调试预览入口
+│  main.ts # 插件调试预览入口
 │  preact.d.ts # preact 声明文件
 │  SheetPlugin.tsx # 插件核心导出类（实际名称会根据插件名称替换）
 │
@@ -590,7 +590,7 @@ const s = `${style.AlternatingColorsSideSetting}`;
 ### 测试数据
 
 1. 如果是单元测试需要使用的数据，直接放在 `src` 同级的 `test` 目录下
-2. 如果是插件的初始化的入参数据，可以直接写在 `main.tsx` 中，或者自己建立一个新的文件夹，如 `src/Data` 文件夹，文件名推荐使用 `DEFAULT_[NAME]_DATA` 的格式，如 `DEFAULT_WORKBOOK_DATA`
+2. 如果是插件的初始化的入参数据，可以直接写在 `main.ts` 中，或者自己建立一个新的文件夹，如 `src/Data` 文件夹，文件名推荐使用 `DEFAULT_[NAME]_DATA` 的格式，如 `DEFAULT_WORKBOOK_DATA`
 
 ### 不使用 preact 构造插件 UI
 

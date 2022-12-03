@@ -30,6 +30,9 @@ export abstract class SheetActionBase<
         observers: ActionObservers
     ) {
         super(actionData, observers);
+        if (commandUnit.WorkBookUnit == null) {
+            throw new Error('action workbook domain can not be null!');
+        }
         this._workbook = commandUnit.WorkBookUnit;
     }
 

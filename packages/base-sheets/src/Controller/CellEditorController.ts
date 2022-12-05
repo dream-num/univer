@@ -87,7 +87,10 @@ export class CellEditorController {
                 const main = this._plugin.getMainComponent();
 
                 main.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
-                    this.enterEditMode();
+                    // Prevent left + right double click
+                    if (evt.button !== 2) {
+                        this.enterEditMode();
+                    }
                 });
                 main.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
                     this.exitEditMode();

@@ -30,7 +30,7 @@ export class FormulaActionExtension extends BaseActionExtension<ISetRangeDataAct
         const workBook = this._plugin.getContext().getWorkBook();
         let cellValue = this.actionData.cellValue;
 
-        if(Tools.isEmptyObject(formulaData)) return
+        if (Tools.isEmptyObject(formulaData)) return;
 
         const cellData = new ObjectMatrix(formulaData[unitId][sheetId]);
 

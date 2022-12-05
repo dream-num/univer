@@ -62,14 +62,14 @@ export class ToolBarController {
             const verticalAlign = range.getVerticalAlignment();
             const rotation = range.getTextRotation();
 
-            console.log('cellMatrix:', cellMatrix);
-            console.log('fontSize:', fontSize);
-            console.log('horizontalAlign:', horizontalAlign);
-            console.log('fontName:', fontName);
-            console.log('verticalAlign:', verticalAlign);
-            console.log('fontItalic:', fontItalic);
-            console.log('fontWeight:', fontWeight);
-            console.log('strikeThrough:', strikeThrough);
+            // console.log('cellMatrix:', cellMatrix);
+            // console.log('fontSize:', fontSize);
+            // console.log('horizontalAlign:', horizontalAlign);
+            // console.log('fontName:', fontName);
+            // console.log('verticalAlign:', verticalAlign);
+            // console.log('fontItalic:', fontItalic);
+            // console.log('fontWeight:', fontWeight);
+            // console.log('strikeThrough:', strikeThrough);
 
             const textRotateModeItem = this._toolList.find((item) => item.name === 'textRotateMode');
             const fontSizeItem = this._toolList.find((item) => item.name === 'fontSize');

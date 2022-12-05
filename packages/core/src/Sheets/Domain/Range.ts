@@ -45,7 +45,6 @@ import {
     ITextDecoration,
 } from '../../Interfaces';
 import {
-    getStyle,
     Nullable,
     ObjectArrayPrimitiveType,
     ObjectMatrix,
@@ -455,8 +454,9 @@ export class Range {
             row.map((cell: Nullable<ICellData>) => {
                 const styles = this._context.getWorkBook().getStyles();
 
-                const style = getStyle(styles, cell);
-                return style[arg];
+                // const style = getStyle(styles, cell);
+                const style = styles && styles.getStyleByCell(cell);
+                return (style && style[arg]) || DEFAULT_STYLES[arg];
             })
         );
     }

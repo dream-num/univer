@@ -313,7 +313,7 @@ export class CellEditorController {
 
         this.isEditMode = true;
 
-        const currentCell = this._plugin.getSelectionManager().getCurrentModel();
+        const currentCell = this._plugin.getSelectionManager().getCurrentCellModel();
 
         if (!currentCell) {
             return false;
@@ -424,7 +424,7 @@ export class CellEditorController {
     }
 
     setCurrentEditRangeData() {
-        const model = this._plugin.getSelectionManager().getCurrentModel();
+        const model = this._plugin.getSelectionManager().getCurrentCellModel();
         if (!model) return;
 
         this.currentEditRangeData = {

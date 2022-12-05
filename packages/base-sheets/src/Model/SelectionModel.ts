@@ -1,5 +1,6 @@
 import { ICellInfo, ISelection, Nullable, makeCellToSelection } from '@univer/core';
 import { SELECTION_TYPE } from '../Controller/Selection/SelectionController';
+import { SheetPlugin } from '../SheetPlugin';
 
 export class SelectionModel implements ISelection {
     private _startColumn: number;
@@ -22,29 +23,32 @@ export class SelectionModel implements ISelection {
 
     private _currentCell: Nullable<ICellInfo>;
 
-    constructor(type: SELECTION_TYPE) {
+    private _plugin: SheetPlugin;
+
+    constructor(type: SELECTION_TYPE = SELECTION_TYPE.NORMAL, plugin: SheetPlugin) {
         this._type = type;
+        this._plugin = plugin;
     }
 
-    isEqual(selectionRange: ISelection, newType: SELECTION_TYPE) {
+    isEqual(selectionRange: ISelection) {
         const { startColumn, startRow, endColumn, endRow, type } = this;
         const { startColumn: newStartColumn, startRow: newStartRow, endColumn: newEndColumn, endRow: newEndRow } = selectionRange;
-        if (type !== newType) {
-            return false;
-        }
+        // if (type !== newType) {
+        //     return false;
+        // }
         if (startColumn === newStartColumn && startRow === newStartRow && endColumn === newEndColumn && endRow === newEndRow) {
             return true;
         }
         return false;
     }
 
-    isInclude(selectionRange: ISelection, newType: SELECTION_TYPE) {
+    isInclude(selectionRange: ISelection) {
         const { startColumn, startRow, endColumn, endRow, type } = this;
         const { startColumn: newStartColumn, startRow: newStartRow, endColumn: newEndColumn, endRow: newEndRow } = selectionRange;
 
-        if (type !== newType) {
-            return false;
-        }
+        // if (type !== newType) {
+        //     return false;
+        // }
 
         if (!(newEndColumn < startColumn || newStartColumn > endColumn || newStartRow > endRow || newEndRow < startRow)) {
             return true;
@@ -114,7 +118,6 @@ export class SelectionModel implements ISelection {
     }
 
     setValue(newSelectionRange: ISelection, currentCell: Nullable<ICellInfo>) {
-        // TODO action触发
         const {
             startColumn,
             startRow,
@@ -143,6 +146,8 @@ export class SelectionModel implements ISelection {
 
         this._endY = endY;
 
+        this.setTypeByData();
+
         this.setCurrentCell(currentCell);
     }
 
@@ -154,5 +159,22 @@ export class SelectionModel implements ISelection {
 
     clearCurrentCell() {
         this._currentCell = null;
+    }
+
+    /**
+     * Determine the type type based on the data
+     */
+    setTypeByData() {
+        const rowCount = this._plugin.getWorkbook().getActiveSheet().getConfig().rowCount;
+        const columnCount = this._plugin.getWorkbook().getActiveSheet().getConfig().columnCount;
+
+        if (this._startRow === 0 && this._endRow === rowCount - 1) {
+            return (this._type = SELECTION_TYPE.COLUMN);
+        }
+        if (this._startColumn === 0 && this._endColumn === columnCount - 1) {
+            return (this._type = SELECTION_TYPE.ROW);
+        }
+
+        return (this._type = SELECTION_TYPE.NORMAL);
     }
 }

@@ -148,7 +148,7 @@ export class SelectionControlDragAndDrop {
 
         // reset model
         const selection = this._model.getValue().selection;
-        this._model = new SelectionModel(SELECTION_TYPE.NORMAL);
+        this._model = new SelectionModel(SELECTION_TYPE.NORMAL, this._control.getPlugin());
         this._model.setValue(selection);
 
         // update control

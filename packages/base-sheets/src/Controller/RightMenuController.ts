@@ -340,6 +340,10 @@ export class RightMenuController {
                 const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
                 if (evt.button === 2) {
                     spreadSheet.oncontextmenu = () => false;
+
+                    const selecionModel = this._plugin.getSelectionManager().getCurrentModel();
+                    console.log('selecionModel', selecionModel?.type);
+
                     this._RightMenu.handleContextMenu(evt);
                 }
             });

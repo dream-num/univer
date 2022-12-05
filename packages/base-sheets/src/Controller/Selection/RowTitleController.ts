@@ -92,12 +92,18 @@ export class RowTitleController {
     highlightRow() {
         this._manager.clearSelectionControls();
         const sheet = this._manager.getPlugin().getWorkbook().getActiveSheet();
-        this._manager.addControlToCurrentByRangeData({
-            startRow: this._index,
-            startColumn: 0,
-            endColumn: sheet.getColumnCount() - 1,
-            endRow: this._index,
-        });
+        this._manager.addControlToCurrentByRangeData(
+            {
+                startRow: this._index,
+                startColumn: 0,
+                endColumn: sheet.getColumnCount() - 1,
+                endRow: this._index,
+            },
+            {
+                row: this._index,
+                column: 0,
+            }
+        );
     }
 
     highlightRowTitle(e: IPointerEvent | IMouseEvent) {

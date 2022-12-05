@@ -240,22 +240,20 @@ export class FormulaDependencyGenerator {
             for (let sheetId of sheetDataKeys) {
                 const matrixData = new ObjectMatrix(sheetData[sheetId]);
 
-                matrixData.forEach((row, rangeRow) => {
-                    rangeRow.forEach((column, formulaData) => {
-                        const formulaString = formulaData.formula;
-                        const node = generateAstNode(formulaString);
+                matrixData.forValue((row, column, formulaData) => {
+                    const formulaString = formulaData.formula;
+                    const node = generateAstNode(formulaString);
 
-                        const FDtree = new FormulaDependencyTree();
+                    const FDtree = new FormulaDependencyTree();
 
-                        FDtree.node = node;
-                        FDtree.formula = formulaString;
-                        FDtree.unitId = unitId;
-                        FDtree.sheetId = sheetId;
-                        FDtree.row = row;
-                        FDtree.column = column;
+                    FDtree.node = node;
+                    FDtree.formula = formulaString;
+                    FDtree.unitId = unitId;
+                    FDtree.sheetId = sheetId;
+                    FDtree.row = row;
+                    FDtree.column = column;
 
-                        treeList.push(FDtree);
-                    });
+                    treeList.push(FDtree);
                 });
             }
         }

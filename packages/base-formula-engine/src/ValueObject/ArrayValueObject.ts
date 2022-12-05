@@ -1,4 +1,5 @@
 import { CellValueType, Nullable, ObjectArray, ObjectMatrix } from '@univer/core';
+import { fromObjectToString } from '../Basics/Calculate';
 import { CalculateValueType, IArrayValueObject } from '../Basics/Common';
 import { ErrorType, ERROR_TYPE_SET } from '../Basics/ErrorType';
 import { compareToken } from '../Basics/Token';
@@ -64,14 +65,16 @@ export class ArrayValueObject extends BaseValueObject {
 
         return result;
     }
-    constructor(rawValue: string | ObjectMatrix<CalculateValueType>) {
-        let rawString = '';
-        if (rawValue instanceof String) {
-            rawString = rawValue as string;
-        }
-        super(rawString);
 
-        this._value = this._formatValue(rawString);
+    constructor(rawValue: string | IArrayValueObject) {
+        if (rawValue instanceof String) {
+            super(rawValue as string);
+        } else {
+            const rawString = fromObjectToString(rawValue as IArrayValueObject);
+            super(rawString);
+        }
+
+        this._value = this._formatValue(rawValue);
     }
 
     getRowCount() {
@@ -102,16 +105,27 @@ export class ArrayValueObject extends BaseValueObject {
         return true;
     }
 
-    iterator(callback: (valueObject: CalculateValueType, rowIndex: number, columnIndex: number) => Nullable<boolean>) {
+    getRangePosition() {
         let startRow = 0;
         let rowCount = this.getRowCount();
         let startColumn = 0;
         let columnCount = this.getColumnCount();
 
+        return {
+            startRow,
+            endRow: rowCount - 1,
+            startColumn,
+            endColumn: columnCount - 1,
+        };
+    }
+
+    iterator(callback: (valueObject: CalculateValueType, rowIndex: number, columnIndex: number) => Nullable<boolean>) {
+        const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
+
         const valueList = this.getArrayValue();
 
-        for (let r = startRow; r < rowCount; r++) {
-            for (let c = startColumn; c < columnCount; c++) {
+        for (let r = startRow; r <= endRow; r++) {
+            for (let c = startColumn; c <= endColumn; c++) {
                 if (callback(valueList[r][c], r, c) === false) {
                     return;
                 }

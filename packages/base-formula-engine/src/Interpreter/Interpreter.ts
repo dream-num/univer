@@ -145,8 +145,9 @@ export class Interpreter {
         const sheetData = unitData[sheetId];
         if (functionVariant.isReferenceObject() || (functionVariant.isValueObject() && (functionVariant as BaseValueObject).isArray())) {
             const objectValueRefOrArray = functionVariant as BaseReferenceObject | ArrayValueObject;
+            const { startRow, startColumn } = objectValueRefOrArray.getRangePosition();
             objectValueRefOrArray.iterator((valueObject, rowIndex, columnIndex) => {
-                sheetData.setValue(rowIndex, columnIndex, this._objectValueToCellValue(valueObject));
+                sheetData.setValue(rowIndex - startRow + row, columnIndex - startRow + column, this._objectValueToCellValue(valueObject));
             });
         } else {
             sheetData.setValue(row, column, this._objectValueToCellValue(functionVariant as CalculateValueType));

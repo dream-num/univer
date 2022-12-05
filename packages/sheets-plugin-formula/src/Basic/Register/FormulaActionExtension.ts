@@ -8,7 +8,6 @@ import {
     ISetRangeDataActionData,
     isFormulaString,
     ISheetActionData,
-    IUnitRange,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
     Tools,
@@ -63,53 +62,60 @@ export class FormulaActionExtension extends BaseActionExtension<ISetRangeDataAct
                     column: c,
                     sheetId,
                 });
-
-                const unitRange: IUnitRange[] = [
-                    {
-                        unitId,
-                        sheetId,
-                        rangeData,
-                    },
-                ];
-
-                // cell.v = 55;
-                // cell.t = 1;
-
-                engine.execute(unitId, formulaData, formulaController.toInterpreterCalculateProps(), true, unitRange).then((sheetData) => {
-                    const cellCalculate = sheetData[sheetId].getValue(r, c) as ICellData;
-                    // cell.v = cellCalculate?.v;
-                    // cell.t = cellCalculate?.t;
-                    if (cellCalculate && cellCalculate.p) {
-                        delete cellCalculate.p;
-                    }
-
-                    if (cellCalculate && Number.isNaN(cellCalculate.v)) {
-                        cellCalculate.v = 0;
-                    }
-
-                    const action: ISetRangeDataActionData = {
-                        actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-                        sheetId,
-                        rangeData: {
-                            startColumn: c,
-                            endColumn: c,
-                            startRow: r,
-                            endRow: r,
-                        },
-                        cellValue: cellCalculate,
-                    };
-
-                    const setFormulaDataAction = {
-                        actionName: PLUGIN_ACTION_NAMES.SET_FORMULA_RANGE_DATA_ACTION,
-                        sheetId: this.actionData.sheetId,
-                        rangeData: this.actionData.rangeData,
-                        formulaData,
-                    };
-                    const actionData = ActionOperation.make<ISetRangeDataActionData>(action).removeCollaboration().removeUndo().getAction();
-                    const command = new Command({ WorkBookUnit: workBook }, actionData, setFormulaDataAction);
-                    commandManager.invoke(command);
-                });
             }
+            // const unitRange: IUnitRange[] = [
+            //     {
+            //         unitId,
+            //         sheetId,
+            //         rangeData,
+            //     },
+            // ];
+
+            // cell.v = 55;
+            // cell.t = 1;
+
+            engine.execute(unitId, formulaData, formulaController.toInterpreterCalculateProps()).then((sheetData) => {
+                const sheetIds = Object.keys(sheetData);
+                sheetIds.forEach((sheetId) => {
+                    const cellData = sheetData[sheetId];
+                    cellData.forValue((r, c, value) => {});
+                });
+
+                //下面是错误的逻辑
+                const cellCalculate = sheetData[sheetId].getValue(r, c) as ICellData;
+
+                // cell.v = cellCalculate?.v;
+                // cell.t = cellCalculate?.t;
+                if (cellCalculate && cellCalculate.p) {
+                    delete cellCalculate.p;
+                }
+
+                if (cellCalculate && Number.isNaN(cellCalculate.v)) {
+                    cellCalculate.v = 0;
+                }
+
+                const action: ISetRangeDataActionData = {
+                    actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+                    sheetId,
+                    rangeData: {
+                        startColumn: c,
+                        endColumn: c,
+                        startRow: r,
+                        endRow: r,
+                    },
+                    cellValue: cellCalculate,
+                };
+
+                const setFormulaDataAction = {
+                    actionName: PLUGIN_ACTION_NAMES.SET_FORMULA_RANGE_DATA_ACTION,
+                    sheetId: this.actionData.sheetId,
+                    rangeData: this.actionData.rangeData,
+                    formulaData,
+                };
+                const actionData = ActionOperation.make<ISetRangeDataActionData>(action).removeCollaboration().removeUndo().getAction();
+                const command = new Command({ WorkBookUnit: workBook }, actionData, setFormulaDataAction);
+                commandManager.invoke(command);
+            });
         }
     }
 }

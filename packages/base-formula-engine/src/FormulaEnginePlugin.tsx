@@ -18,7 +18,15 @@ export class FormulaEnginePlugin extends Plugin<FormulaEnginePluginObserver> {
     constructor(config?: IFormulaEnginePlugin) {
         super('pluginFormulaEngine');
     }
-
+    /**
+     *
+     * @param unitId
+     * @param formulaData
+     * @param interpreterDatasetConfig
+     * @param forceCalculate force calculate all formula, and ignore dependency relationship
+     * @param updateRangeList input external unit data for multi workbook
+     * @returns
+     */
     async execute(unitId: string, formulaData: FormulaDataType, interpreterDatasetConfig?: IInterpreterDatasetConfig, forceCalculate = false, updateRangeList: IUnitRange[] = []) {
         const dependencyGenerator = FormulaDependencyGenerator.create(formulaData, forceCalculate);
 
@@ -41,7 +49,10 @@ export class FormulaEnginePlugin extends Plugin<FormulaEnginePluginObserver> {
             interpreter.setRuntimeData(tree.row, tree.column, tree.sheetId, tree.unitId, value);
         }
 
-        return interpreter.getSheetData(unitId);
+        return {
+            sheetData: interpreter.getSheetData(unitId),
+            arrayFormulaData: interpreter.getSheetArrayFormula(unitId),
+        };
     }
 
     calculate(formulaString: string) {

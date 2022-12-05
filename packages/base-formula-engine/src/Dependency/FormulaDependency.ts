@@ -9,7 +9,7 @@ import { Interpreter } from '../Interpreter/Interpreter';
 import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
 import { FormulaDependencyTree } from './DependencyTree';
 export class FormulaDependencyGenerator {
-    private _updateRangeFlattenCache = new Map<string, Map<string, ObjectMatrix<boolean>>>();
+    private _updateRangeFlattenCache = new Map<string, Map<string, IRangeData>>();
 
     constructor(private _formulaData: FormulaDataType, private _forceCalculate = false) {}
 
@@ -17,7 +17,7 @@ export class FormulaDependencyGenerator {
         if (this._forceCalculate) {
             return;
         }
-        this._updateRangeFlattenCache = new Map<string, Map<string, ObjectMatrix<boolean>>>();
+        this._updateRangeFlattenCache = new Map<string, Map<string, IRangeData>>();
         for (let i = 0; i < updateRangeList.length; i++) {
             const gridRange = updateRangeList[i];
             const range = gridRange.rangeData;
@@ -31,31 +31,33 @@ export class FormulaDependencyGenerator {
     private _addFlattenCache(unitId: string, sheetId: string, rangeData: IRangeData) {
         let unitMatrix = this._updateRangeFlattenCache.get(unitId);
         if (!unitMatrix) {
-            unitMatrix = new Map<string, ObjectMatrix<boolean>>();
+            unitMatrix = new Map<string, IRangeData>();
             this._updateRangeFlattenCache.set(unitId, unitMatrix);
         }
 
-        let sheetMatrix = unitMatrix.get(sheetId);
-        if (!sheetMatrix) {
-            sheetMatrix = new ObjectMatrix<boolean>();
-            unitMatrix.set(sheetId, sheetMatrix);
-        }
+        unitMatrix.set(sheetId, rangeData);
 
-        // don't use destructuring assignment
-        const startRow = rangeData.startRow;
+        // let sheetMatrix = unitMatrix.get(sheetId);
+        // if (!sheetMatrix) {
+        //     sheetMatrix = new ObjectMatrix<IRangeData>();
+        //     unitMatrix.set(sheetId, sheetMatrix);
+        // }
 
-        const startColumn = rangeData.startColumn;
+        // // don't use destructuring assignment
+        // const startRow = rangeData.startRow;
 
-        const endRow = rangeData.endRow;
+        // const startColumn = rangeData.startColumn;
 
-        const endColumn = rangeData.endColumn;
+        // const endRow = rangeData.endRow;
 
-        // don't use chained calls
-        for (let r = startRow; r <= endRow; r++) {
-            for (let c = startColumn; c <= endColumn; c++) {
-                sheetMatrix.setValue(r, c, true);
-            }
-        }
+        // const endColumn = rangeData.endColumn;
+
+        // // don't use chained calls
+        // for (let r = startRow; r <= endRow; r++) {
+        //     for (let c = startColumn; c <= endColumn; c++) {
+        //         sheetMatrix.setValue(r, c, true);
+        //     }
+        // }
     }
 
     private _isPreCalculateNode(node: BaseAstNode) {
@@ -140,37 +142,42 @@ export class FormulaDependencyGenerator {
         return rangeList;
     }
 
-    private _includeTree(tree: FormulaDependencyTree) {
-        const unitId = tree.unitId;
-        const sheetId = tree.sheetId;
-        const row = tree.row;
-        const column = tree.column;
+    // private _includeTree(tree: FormulaDependencyTree) {
+    //     const unitId = tree.unitId;
+    //     const sheetId = tree.sheetId;
+    //     // const row = tree.row;
+    //     // const column = tree.column;
 
-        if (!this._updateRangeFlattenCache.has(unitId)) {
-            return false;
-        }
+    //     // if (!this._updateRangeFlattenCache.has(unitId)) {
+    //     //     return false;
+    //     // }
 
-        const sheetObjectMatrix = this._updateRangeFlattenCache.get(unitId)!;
+    //     // const sheetRangeMap = this._updateRangeFlattenCache.get(unitId)!;
 
-        if (!sheetObjectMatrix.has(sheetId)) {
-            return false;
-        }
+    //     // if (!sheetRangeMap.has(sheetId)) {
+    //     //     return false;
+    //     // }
 
-        const rangeObjectMatrix = sheetObjectMatrix.get(sheetId)!;
+    //     // const rangeData = sheetRangeMap.get(sheetId)!;
 
-        if (rangeObjectMatrix.getValue(row, column)) {
-            return true;
-        }
+    //     if (tree.compareRangeData(rangeData)) {
+    //         return true;
+    //     }
 
-        return false;
-    }
+    //     // if (rangeObjectMatrix.getValue(row, column)) {
+    //     //     return true;
+    //     // }
+
+    //     return false;
+    // }
 
     private _getUpdateTreeListAndMakeDependency(treeList: FormulaDependencyTree[]) {
         const newTreeList: FormulaDependencyTree[] = [];
+        const existTree = new Set<FormulaDependencyTree>();
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
             for (let m = 0, mLen = treeList.length; m < mLen; m++) {
-                const treeMatch = treeList[i];
+                const treeMatch = treeList[m];
                 if (tree === treeMatch) {
                     continue;
                 }
@@ -180,8 +187,9 @@ export class FormulaDependencyGenerator {
                 }
             }
 
-            if (this._forceCalculate || this._includeTree(tree)) {
+            if ((this._forceCalculate || tree.dependencyRange(this._updateRangeFlattenCache)) && !existTree.has(tree)) {
                 newTreeList.push(tree);
+                existTree.add(tree);
             }
         }
 

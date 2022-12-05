@@ -56,6 +56,41 @@ export class FormulaDependencyTree implements IFormulaData {
         return true;
     }
 
+    dependencyRange(dependencyRangeList: Map<string, Map<string, IRangeData>>) {
+        if (this.rangeList.length === 0) {
+            return false;
+        }
+
+        for (let r = 0, len = this.rangeList.length; r < len; r++) {
+            const unitRange = this.rangeList[r];
+            const unitId = unitRange.unitId;
+            const sheetId = unitRange.sheetId;
+            const rangeData = unitRange.rangeData;
+
+            if (!dependencyRangeList.has(unitId)) {
+                continue;
+            }
+
+            const sheetRangeMap = dependencyRangeList.get(unitId)!;
+
+            if (!sheetRangeMap.has(sheetId)) {
+                continue;
+            }
+
+            const dependencyRange = sheetRangeMap.get(sheetId)!;
+
+            const { startRow, startColumn, endRow, endColumn } = dependencyRange;
+
+            if (rangeData.startRow > endRow || rangeData.endRow < startRow || rangeData.startColumn > endColumn || rangeData.endColumn < startColumn) {
+                continue;
+            } else {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     pushChildren(tree: FormulaDependencyTree) {
         this.children.push(tree);
         tree._pushParent(this);

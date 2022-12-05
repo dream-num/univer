@@ -1,8 +1,16 @@
-import { CellValueType, ICellData, ObjectMatrix } from '@univer/core';
+import { CellValueType, ICellData, IRangeData, ObjectMatrix } from '@univer/core';
 import { FunctionNode } from '../AstNode';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { NodeType } from '../AstNode/NodeType';
-import { AstNodePromiseType, CalculateValueType, FunctionVariantType, IInterpreterDatasetConfig, PreCalculateNodeType, UnitDataType } from '../Basics/Common';
+import {
+    AstNodePromiseType,
+    CalculateValueType,
+    FunctionVariantType,
+    IInterpreterDatasetConfig,
+    PreCalculateNodeType,
+    UnitArrayFormulaDataType,
+    UnitDataType,
+} from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
@@ -11,6 +19,8 @@ import { BaseValueObject } from '../ValueObject/BaseValueObject';
 
 export class Interpreter {
     private _runtimeData: UnitDataType = {};
+
+    private _unitArrayFormulaData: UnitArrayFormulaDataType = {};
 
     private _checkAsyncNode(node: BaseAstNode, resultList: boolean[]) {
         const children = node.getChildren();
@@ -142,12 +152,30 @@ export class Interpreter {
             unitData[sheetId] = new ObjectMatrix<ICellData>();
         }
 
+        if (this._unitArrayFormulaData[unitId] === undefined) {
+            this._unitArrayFormulaData[unitId] = {};
+        }
+
+        const arrayFormulaData = this._unitArrayFormulaData[unitId];
+
+        if (arrayFormulaData[sheetId] === undefined) {
+            arrayFormulaData[sheetId] = new ObjectMatrix<IRangeData>();
+        }
+
         const sheetData = unitData[sheetId];
+        const arrayData = arrayFormulaData[sheetId];
         if (functionVariant.isReferenceObject() || (functionVariant.isValueObject() && (functionVariant as BaseValueObject).isArray())) {
             const objectValueRefOrArray = functionVariant as BaseReferenceObject | ArrayValueObject;
-            const { startRow, startColumn } = objectValueRefOrArray.getRangePosition();
+            const { startRow, startColumn, endRow, endColumn } = objectValueRefOrArray.getRangePosition();
             objectValueRefOrArray.iterator((valueObject, rowIndex, columnIndex) => {
-                sheetData.setValue(rowIndex - startRow + row, columnIndex - startRow + column, this._objectValueToCellValue(valueObject));
+                sheetData.setValue(rowIndex - startRow + row, columnIndex - startColumn + column, this._objectValueToCellValue(valueObject));
+            });
+
+            arrayData.setValue(row, column, {
+                startRow: row,
+                startColumn: column,
+                endRow: endRow - startRow + 1 + row,
+                endColumn: endColumn - startColumn + 1 + column,
             });
         } else {
             sheetData.setValue(row, column, this._objectValueToCellValue(functionVariant as CalculateValueType));
@@ -156,6 +184,10 @@ export class Interpreter {
 
     getSheetData(unitId: string) {
         return this._runtimeData[unitId];
+    }
+
+    getSheetArrayFormula(unitId: string) {
+        return this._unitArrayFormulaData[unitId];
     }
 
     setProps(interpreterDatasetConfig: IInterpreterDatasetConfig) {

@@ -8,6 +8,7 @@ import {
     ISetRangeDataActionData,
     isFormulaString,
     ISheetActionData,
+    IUnitRange,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
     Tools,
@@ -32,6 +33,11 @@ export class FormulaActionExtension extends BaseActionExtension<ISetRangeDataAct
         if (Tools.isEmptyObject(formulaData)) return;
 
         const cellData = new ObjectMatrix(formulaData[unitId][sheetId]);
+
+        // cellValue 在公式更新后，还是会触发，并且为空，这里要看看
+        if (cellValue == null) {
+            return;
+        }
 
         // a range TODO api will trigger here
         if (!isNaN(parseInt(Object.keys(cellValue)[0]))) {
@@ -63,18 +69,19 @@ export class FormulaActionExtension extends BaseActionExtension<ISetRangeDataAct
                     sheetId,
                 });
             }
-            // const unitRange: IUnitRange[] = [
-            //     {
-            //         unitId,
-            //         sheetId,
-            //         rangeData,
-            //     },
-            // ];
+            const unitRange: IUnitRange[] = [
+                {
+                    unitId,
+                    sheetId,
+                    rangeData,
+                },
+            ];
 
             // cell.v = 55;
             // cell.t = 1;
 
-            engine.execute(unitId, formulaData, formulaController.toInterpreterCalculateProps()).then((sheetData) => {
+            engine.execute(unitId, formulaData, formulaController.toInterpreterCalculateProps(), false, unitRange).then((data) => {
+                const { sheetData, arrayFormulaData } = data;
                 const sheetIds = Object.keys(sheetData);
                 sheetIds.forEach((sheetId) => {
                     const cellData = sheetData[sheetId];

@@ -11,8 +11,9 @@ export function firstLoader(formulaController: FormulaController) {
 
     const workBook = formulaController.getWorkbook();
 
-    sheetDataPromise.then((sheetData) => {
-        if (!sheetData) return;
+    sheetDataPromise.then((data) => {
+        if (!data) return;
+        const { sheetData, arrayFormulaData } = data;
         const sheetIds = Object.keys(sheetData);
 
         const actionList: ISetRangeDataActionData[] = [];

@@ -71,7 +71,6 @@ export class ClearRangeAction extends SheetActionBase<
         this._oldActionData = {
             actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
             sheetId,
-            rangeData,
             cellValue: this.do(),
             convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.INSERT)],
         };
@@ -79,11 +78,11 @@ export class ClearRangeAction extends SheetActionBase<
 
     undo(): void {
         const worksheet = this.getWorkSheet();
-        const { rangeData, cellValue } = this._oldActionData;
+        const { cellValue } = this._oldActionData;
         const styles = this._workbook.getStyles();
 
         if (worksheet) {
-            SetRangeData(worksheet.getCellMatrix(), cellValue, rangeData, styles);
+            SetRangeData(worksheet.getCellMatrix(), cellValue, styles);
             // no need update current data
 
             this._observers.notifyObservers({

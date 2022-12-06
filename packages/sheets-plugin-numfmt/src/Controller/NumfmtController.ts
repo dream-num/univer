@@ -57,7 +57,6 @@ export class NumfmtController {
                 const setRangeDataAction = {
                     sheetId: activeSheet.getSheetId(),
                     actionName: CORE_ACTION_NAME.SET_RANGE_DATA_ACTION,
-                    rangeData: range,
                     cellValue: matrix.getData(),
                 };
                 const newSetRangeDataAction = ActionOperation.make<ISetRangeDataActionData>(setRangeDataAction).removeExtension().getAction();

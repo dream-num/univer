@@ -1,4 +1,4 @@
-import { ActionOperation, ACTION_NAMES, ISetRangeDataActionData, Command } from '@univer/core';
+import { ActionOperation, ACTION_NAMES, ISetRangeDataActionData, Command, ObjectMatrix, ICellData } from '@univer/core';
 import { FormulaController } from './FormulaController';
 
 export function firstLoader(formulaController: FormulaController) {
@@ -20,17 +20,11 @@ export function firstLoader(formulaController: FormulaController) {
 
         for (let i = 0, len = sheetIds.length; i < len; i++) {
             const sheetId = sheetIds[i];
-            const cellData = sheetData[sheetId];
+            const cellData: ObjectMatrix<ICellData> = sheetData[sheetId];
             cellData.forValue((row, column, mainCell) => {
                 const action = {
                     actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                     sheetId,
-                    rangeData: {
-                        startColumn: column,
-                        endColumn: column,
-                        startRow: row,
-                        endRow: row,
-                    },
                     cellValue: {
                         [row]: {
                             [column]: mainCell,

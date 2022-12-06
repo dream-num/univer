@@ -45,7 +45,6 @@ test('Test SetRangeDataAction', () => {
         actionName,
         sheetId,
         cellValue,
-        rangeData,
     };
 
     const action = new SetRangeDataAction(configure, workbook, observers);

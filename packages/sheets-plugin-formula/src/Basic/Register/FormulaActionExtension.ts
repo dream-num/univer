@@ -104,19 +104,16 @@ export class FormulaActionExtension extends BaseActionExtension<ISetRangeDataAct
                 const action: ISetRangeDataActionData = {
                     actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                     sheetId,
-                    rangeData: {
-                        startColumn: c,
-                        endColumn: c,
-                        startRow: r,
-                        endRow: r,
+                    cellValue: {
+                        [r]: {
+                            [c]: cellCalculate,
+                        },
                     },
-                    cellValue: cellCalculate,
                 };
 
                 const setFormulaDataAction = {
                     actionName: PLUGIN_ACTION_NAMES.SET_FORMULA_RANGE_DATA_ACTION,
                     sheetId: this.actionData.sheetId,
-                    rangeData: this.actionData.rangeData,
                     formulaData,
                 };
                 const actionData = ActionOperation.make<ISetRangeDataActionData>(action).removeCollaboration().removeUndo().getAction();

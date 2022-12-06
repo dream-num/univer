@@ -42,7 +42,6 @@ export class NumfmtActionExtension extends BaseActionExtension<ISetRangeDataActi
         const setNumfmtRangeDataAction = {
             actionName: PLUGIN_ACTION_NAMES.SET_NUMFMT_RANGE_DATA_ACTION,
             sheetId: this.actionData.sheetId,
-            rangeData: this.actionData.rangeData,
             cellValue: numfmtMatrix.toJSON(),
         };
         this.push(setNumfmtRangeDataAction);

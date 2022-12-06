@@ -1,11 +1,11 @@
-import { IClipboardData } from '../../Interfaces/IClipboardData';
+import { IClipboardData } from '../../Interfaces';
 import { PasteType } from '../../Interfaces/PasteType';
 import { BaseClipboardExtension, BaseClipboardExtensionFactory } from './ClipboardExtensionFactory';
 import { ClipboardExtensionRegister } from './ClipboardExtensionRegister';
 import { Clipboard } from '../../Shared/Clipboard';
 
 export class ClipboardExtensionManager {
-    private _clipboardExtensionFactoryList: Array<BaseClipboardExtensionFactory>;
+    private _clipboardExtensionFactoryList: BaseClipboardExtensionFactory[];
 
     // mounted on the instance
     private _register: ClipboardExtensionRegister;

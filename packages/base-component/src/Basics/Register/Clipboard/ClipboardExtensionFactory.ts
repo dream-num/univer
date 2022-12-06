@@ -1,5 +1,5 @@
-import { IClipboardData } from './../../Interfaces/IClipboardData';
-import { IKeyValue, Plugin } from '@univer/core';
+import { Plugin } from '@univer/core';
+import { IClipboardData } from '../../Interfaces/IClipboardData';
 
 /**
  * 转化table html/json为json

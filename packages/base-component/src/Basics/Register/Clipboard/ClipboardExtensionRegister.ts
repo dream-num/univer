@@ -1,15 +1,14 @@
 import { sortRules } from '@univer/core';
-import { IClipboardData } from '../../Interfaces/IClipboardData';
 import { BaseClipboardExtensionFactory } from './ClipboardExtensionFactory';
 
 export class ClipboardExtensionRegister {
-    private _clipboardExtensionFactoryList: Array<BaseClipboardExtensionFactory> = [];
+    private _clipboardExtensionFactoryList: BaseClipboardExtensionFactory[] = [];
 
-    get clipboardExtensionFactoryList(): Array<BaseClipboardExtensionFactory> {
+    get clipboardExtensionFactoryList(): BaseClipboardExtensionFactory[] {
         return this._clipboardExtensionFactoryList;
     }
 
-    add(...extensionFactoryList: Array<BaseClipboardExtensionFactory>) {
+    add(...extensionFactoryList: BaseClipboardExtensionFactory[]) {
         this._clipboardExtensionFactoryList.push(...extensionFactoryList);
         this._clipboardExtensionFactoryList.sort(sortRules);
     }

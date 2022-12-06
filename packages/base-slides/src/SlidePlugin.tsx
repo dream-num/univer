@@ -6,7 +6,7 @@ import { install, SlidePluginObserve } from './Basic/Observer';
 import { ToolBarController } from './Controller/ToolBarController';
 import { SlideContainerController } from './Controller/SlideContainerController';
 import { InfoBarController } from './Controller/InfoBarController';
-import { BaseSlideContainerConfig, ILayout, ISlidePluginConfigBase, SlideContainer } from './View/UI/SlideContainer';
+import { BaseSlideContainerConfig, defaultLayout, ILayout, ISlidePluginConfigBase, SlideContainer } from './View/UI/SlideContainer';
 import { SlideBarController } from './Controller/SlideBarController';
 import { CanvasView } from './View/Render';
 
@@ -16,7 +16,7 @@ export interface ISlidePluginConfig extends ISlidePluginConfigBase {
 
 const DEFAULT_SLIDE_PLUGIN_DATA = {
     container: 'universlide',
-    layout: 'auto',
+    layout: defaultLayout,
 };
 
 export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
@@ -83,13 +83,13 @@ export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
 
         const layout = this._config.layout as ILayout;
 
-        if (layout === 'auto' || layout.toolBar) {
+        if (layout.toolBar) {
             this._toolBarControl = new ToolBarController(this);
         }
-        if (layout === 'auto' || layout.infoBar) {
+        if (layout.infoBar) {
             this._infoBarControl = new InfoBarController(this);
         }
-        
+
         this._slideBarControl = new SlideBarController(this);
         this._slideContainerController = new SlideContainerController(this);
 

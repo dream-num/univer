@@ -16,14 +16,7 @@ import {
 } from '@univer/base-component';
 import { AsyncFunction, SlideContext, IKeyType, LocaleType, PLUGIN_NAMES, Tools, Workbook } from '@univer/core';
 import cssVars from 'css-vars-ponyfill';
-import {
-    Container,
-    Content,
-    Footer,
-    Header,
-    Layout,
-    Sider,
-} from '@univer/style-universheet';
+import { Container, Content, Footer, Header, Layout, Sider } from '@univer/style-universheet';
 import defaultSkin from '@univer/style-universheet/assets/css/skin/default.module.less';
 import darkSkin from '@univer/style-universheet/assets/css/skin/dark.module.less';
 // All skins' less file
@@ -36,7 +29,7 @@ import { InfoBar } from '../InfoBar';
 import { SlideBar } from '../SlideBar/SlideBar';
 
 export interface ISlidePluginConfigBase {
-    layout: string | ILayout;
+    layout: ILayout;
 }
 
 interface IShowToolBarConfig {
@@ -122,7 +115,7 @@ export interface ILayout {
 }
 
 export interface ISlidePluginConfigBase {
-    layout: string | ILayout;
+    layout: ILayout;
 }
 
 export interface BaseSlideContainerConfig extends BaseComponentProps, ISlidePluginConfigBase {
@@ -654,8 +647,8 @@ export class SlideContainer extends Component<BaseSlideContainerProps, IState> {
                         <Sider style={{ display: layout.outerLeft ? 'block' : 'none' }}></Sider>
                         <Layout className={style.mainContent} style={{ position: 'relative' }}>
                             <Header style={{ display: layout.header ? 'block' : 'none' }}>
-                            {layout.infoBar && <InfoBar></InfoBar>}
-                            {layout.toolBar && <ToolBar toolList={[]}></ToolBar>}
+                                {layout.infoBar && <InfoBar></InfoBar>}
+                                {layout.toolBar && <ToolBar toolList={[]}></ToolBar>}
                             </Header>
                             <Layout>
                                 <Sider

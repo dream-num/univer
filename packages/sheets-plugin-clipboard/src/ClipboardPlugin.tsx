@@ -1,9 +1,10 @@
-import { SheetContext, Plugin, UniverSheet } from '@univer/core';
-import { RegisterPlugin, REGISTER_PLUGIN_NAME } from '@univer/common-plugin-register';
+import { SheetContext, Plugin, UniverSheet, PLUGIN_NAMES } from '@univer/core';
+import { BaseComponentPlugin } from '@univer/base-component';
 import { en, zh } from './Locale';
 import { CLIPBOARD_PLUGIN } from './Const';
 import { Copy, Paste, UniverCopy, UniverPaste } from './Domain';
 import { ClipboardExtensionFactory } from './Basics/Register/ClipboardExtension';
+import { ClipboardOfficeExtensionFactory } from './Basics/Register/ClipboardOfficeExtension';
 
 interface CopyResolver {
     name: string;
@@ -24,6 +25,8 @@ export class ClipboardPlugin extends Plugin<any, SheetContext> {
 
     private _clipboardExtensionFactory: ClipboardExtensionFactory;
 
+    private _clipboardOfficeExtensionFactory: ClipboardOfficeExtensionFactory;
+
     constructor() {
         super(CLIPBOARD_PLUGIN);
     }
@@ -37,10 +40,19 @@ export class ClipboardPlugin extends Plugin<any, SheetContext> {
     }
 
     registerExtension() {
-        const clipboardRegister = this.getContext().getPluginManager().getRequirePluginByName<RegisterPlugin>(REGISTER_PLUGIN_NAME).getClipboardExtensionManager().getRegister();
+        const clipboardRegister = this.getContext()
+            .getPluginManager()
+            .getRequirePluginByName<BaseComponentPlugin>(PLUGIN_NAMES.BASE_COMPONENT)
+            .getRegisterManager()
+            .getClipboardExtensionManager()
+            .getRegister();
+        // const clipboardRegister = this.getContext().getPluginManager().getRequirePluginByName<RegisterPlugin>(REGISTER_PLUGIN_NAME).getClipboardExtensionManager().getRegister();
 
         this._clipboardExtensionFactory = new ClipboardExtensionFactory(this);
         clipboardRegister.add(this._clipboardExtensionFactory);
+
+        this._clipboardOfficeExtensionFactory = new ClipboardOfficeExtensionFactory(this);
+        clipboardRegister.add(this._clipboardOfficeExtensionFactory);
     }
 
     installTo(universheetInstance: UniverSheet) {
@@ -48,8 +60,15 @@ export class ClipboardPlugin extends Plugin<any, SheetContext> {
     }
 
     onDestroy(): void {
-        const clipboardRegister = this.getContext().getPluginManager().getRequirePluginByName<RegisterPlugin>(REGISTER_PLUGIN_NAME).getClipboardExtensionManager().getRegister();
+        const clipboardRegister = this.getContext()
+            .getPluginManager()
+            .getRequirePluginByName<BaseComponentPlugin>(PLUGIN_NAMES.BASE_COMPONENT)
+            .getRegisterManager()
+            .getClipboardExtensionManager()
+            .getRegister();
         clipboardRegister.delete(this._clipboardExtensionFactory);
+
+        clipboardRegister.delete(this._clipboardOfficeExtensionFactory);
     }
 
     onMounted(context: SheetContext): void {

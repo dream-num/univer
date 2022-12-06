@@ -1,5 +1,5 @@
 import { BaseComponentRender } from '@univer/base-component';
-import { Range, Tools, BorderType, BorderStyleTypes, HorizontalAlign, VerticalAlign, WrapStrategy, DEFAULT_STYLES } from '@univer/core';
+import { Range, BorderType, BorderStyleTypes, HorizontalAlign, VerticalAlign, WrapStrategy, DEFAULT_STYLES } from '@univer/core';
 import { ColorPicker } from '@univer/style-universheet';
 import { SheetPlugin } from '../SheetPlugin';
 
@@ -130,7 +130,8 @@ export class ToolBarController {
 
         this._initRegisterComponent();
 
-        const toolbarConfig = config ? Tools.deepClone(DefaultToolbarConfig) : Tools.deepMerge(DefaultToolbarConfig, config);
+        // const toolbarConfig = config ? Tools.deepClone(DefaultToolbarConfig) : Tools.deepMerge(DefaultToolbarConfig, config);
+        const toolbarConfig = config || DefaultToolbarConfig;
 
         this._borderInfo = {
             color: '#000',

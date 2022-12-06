@@ -9,7 +9,6 @@ import { <%= projectUpperValue %>Plugin } from './<%= projectUpperValue %>Plugin
 
 const uiDefaultConfigUp = {
     container: 'universheet',
-    layout: 'auto',
 };
 
 const univerSheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);

@@ -277,8 +277,10 @@ pnpm install
 核心能力的扩展，依靠 Plugin、Registry 和 Register 来提供
 
 1. Plugin：大的功能块，使用插件扩展核心能力，核心提供了 install 安装插件
-2. Registry：插件内部小的功能块，使用核心提供的一个 Registry 静态注册方法，方便在项目初始化的时候快速搜集内部模块的扩展实例
+2. Registry：插件内部小的功能块，使用核心提供的一个 Registry 静态注册方法，方便在项目初始化的时候快速搜集内部模块的扩展实例。它是一种设计模式
 3. Register：Register 将上一步 Registry 注册的方法，再统一动态注册管理，并且提供直接将内部模块动态注册上去的方法，以便开发者在外部进行动态扩增加某一个模块
+
+通常情况下，一个插件内部的小模块，就是使用静态 load 的方式快速搜集模块，再动态 add 到核心的注册管理器上。如果模块比较简单，也可以直接将插件内部的模块直接 add 到注册管理器。
 
 ## 插件开发实践
 
@@ -1238,7 +1240,6 @@ univerSheetUp.installPlugin(new UniverComponentSheet());
 univerSheetUp.installPlugin(
     new SheetPlugin({
         container: 'universheet-demo-up',
-        layout: 'auto',
     })
 );
 // 加载筛选插件
@@ -1278,7 +1279,6 @@ univerSheetUp.installPlugin(new UniverComponentSheet());
 univerSheetUp.installPlugin(
     new SheetPlugin({
         container: 'universheet-demo-up',
-        layout: 'auto',
     })
 );
 
@@ -1330,7 +1330,6 @@ const workbookConfig = {
 // 可选的spreadsheetConfig插件配置
 const spreadsheetConfig = {
     container: 'universheet-demo-up',
-    layout: 'auto',
 };
 
 // 统一配置入口

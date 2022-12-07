@@ -364,7 +364,6 @@ export class CellEditorController {
         });
 
         if (cell) {
-            // cellValue = this.richText.cellInputHandler.functionHTMLGenerate(cell.value);
             cellValue = cell.value;
         }
 

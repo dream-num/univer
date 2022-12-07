@@ -94,11 +94,13 @@ export class FormulaPromptController {
                 const formula = this.cellInputHandler.getFormula();
                 let helpFormula = this.cellInputHandler.getHelpFormula();
 
-                const richTextEleRect = this.richTextEle.getBoundingClientRect();
+                const left = parseInt(this.richTextEle.style.left);
+                const top = parseInt(this.richTextEle.style.top) + parseInt(this.richTextEle.style.minHeight);
                 const position = {
-                    left: richTextEleRect.left,
-                    top: richTextEleRect.top + richTextEleRect.height,
+                    left,
+                    top,
                 };
+
                 if (formula[0]) {
                     this._searchFunction.updateState(true, formula, 0, position);
                     this._helpFunction.updateState(false);

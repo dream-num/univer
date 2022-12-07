@@ -142,34 +142,34 @@ export class FormulaDependencyGenerator {
         return rangeList;
     }
 
-    // private _includeTree(tree: FormulaDependencyTree) {
-    //     const unitId = tree.unitId;
-    //     const sheetId = tree.sheetId;
-    //     // const row = tree.row;
-    //     // const column = tree.column;
+    private _includeTree(tree: FormulaDependencyTree) {
+        const unitId = tree.unitId;
+        const sheetId = tree.sheetId;
+        // const row = tree.row;
+        // const column = tree.column;
 
-    //     // if (!this._updateRangeFlattenCache.has(unitId)) {
-    //     //     return false;
-    //     // }
+        if (!this._updateRangeFlattenCache.has(unitId)) {
+            return false;
+        }
 
-    //     // const sheetRangeMap = this._updateRangeFlattenCache.get(unitId)!;
+        const sheetRangeMap = this._updateRangeFlattenCache.get(unitId)!;
 
-    //     // if (!sheetRangeMap.has(sheetId)) {
-    //     //     return false;
-    //     // }
+        if (!sheetRangeMap.has(sheetId)) {
+            return false;
+        }
 
-    //     // const rangeData = sheetRangeMap.get(sheetId)!;
+        const rangeData = sheetRangeMap.get(sheetId)!;
 
-    //     if (tree.compareRangeData(rangeData)) {
-    //         return true;
-    //     }
+        if (tree.compareRangeData(rangeData)) {
+            return true;
+        }
 
-    //     // if (rangeObjectMatrix.getValue(row, column)) {
-    //     //     return true;
-    //     // }
+        // if (rangeObjectMatrix.getValue(row, column)) {
+        //     return true;
+        // }
 
-    //     return false;
-    // }
+        return false;
+    }
 
     private _getUpdateTreeListAndMakeDependency(treeList: FormulaDependencyTree[]) {
         const newTreeList: FormulaDependencyTree[] = [];
@@ -187,7 +187,7 @@ export class FormulaDependencyGenerator {
                 }
             }
 
-            if ((this._forceCalculate || tree.dependencyRange(this._updateRangeFlattenCache)) && !existTree.has(tree)) {
+            if ((this._forceCalculate || tree.dependencyRange(this._updateRangeFlattenCache) || this._includeTree(tree)) && !existTree.has(tree)) {
                 newTreeList.push(tree);
                 existTree.add(tree);
             }

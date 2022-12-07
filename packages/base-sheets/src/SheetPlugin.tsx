@@ -35,7 +35,7 @@ import { IToolBarItemProps } from './Model/ToolBarModel';
 import { ModalGroupController } from './Controller/ModalGroupController';
 import { ISheetPluginConfig, DEFAULT_SPREADSHEET_PLUGIN_DATA } from './Basics';
 import { FormulaBarController } from './Controller/FormulaBarController';
-import { NamedRangeInsertRowActionExtensionFactory } from './Basics/Register/NamedRangeInsertRowActionExtension';
+import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeActionExtension';
 
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
@@ -88,7 +88,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     private _componentList: Map<string, any>;
 
-    private _namedRangeActionExtensionFactory: NamedRangeInsertRowActionExtensionFactory;
+    private _namedRangeActionExtensionFactory: NamedRangeActionExtensionFactory;
 
     constructor(config: Partial<ISheetPluginConfig> = {}) {
         super(PLUGIN_NAMES.SPREADSHEET);
@@ -253,7 +253,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     registerExtension() {
         const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
-        this._namedRangeActionExtensionFactory = new NamedRangeInsertRowActionExtensionFactory(this);
+        this._namedRangeActionExtensionFactory = new NamedRangeActionExtensionFactory(this);
         actionRegister.add(this._namedRangeActionExtensionFactory);
     }
 

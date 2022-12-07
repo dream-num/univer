@@ -961,6 +961,14 @@ export class AlternatingColorsPlugin extends Plugin {
 Tips:
 核心是否要包装插件 API，要看核心是否提供了 Action，不允许核心调用插件 API，如 Find 插件提供 createTextFinder，核心不提供
 
+8. Action 扩展
+
+当用户输入 `100%`，我们需要自动将单元格格式改为`百分比`，当用户输入`=SUM(2)`时候需要计算公式，这种情况下，我们需要使用到数字格式和公式插件的能力来转换这些数据。所以需要在 Command 执行前做个 Action 拦截的动作，拦截 ActionData 传入到数字格式 Action 扩展和公式 Action 扩展，做完计算之后，直接修改这个 ActionData，并且增加自己的数字格式 Action 和公式 Action，来实现这两种计算。
+
+在编辑单元格的时候，我们是不知道用户是否安装了数字格式插件或者公式插件的，所以我们还做了一个 Action 扩展注册机制，只有按照规范注册了的扩展，才会在 Action 拦截的时候使用，其中，扩展管理的地方负责检验 Action 数据是否打中扩展，打中的扩展就会执行。
+
+ActionOperation 有一个 removeExtension 可以移除 action 拦截。一般情况下，Action 都会走拦截，但是在初始化（比如公式）或者已经拦截的 ActionExtension 里触发的 Action（比如 FormulaActionExtension），这两种情况是不需要拦截的，所以要做过滤。
+
 ## 组件开发
 
 ### 技术原理

@@ -62,7 +62,12 @@ const univerSheetDown = UniverSheet.newInstance();
 univerSheetDown.installPlugin(new RenderEngine());
 univerSheetDown.installPlugin(new UniverComponentSheet());
 
-univerSheetDown.installPlugin(new SheetPlugin());
+univerSheetDown.installPlugin(
+    new SheetPlugin({
+        container: 'universheet-demo-down',
+    })
+);
+univerSheetDown.installPlugin(new BaseComponentPlugin());
 univerSheetDown.installPlugin(new NumfmtPlugin());
 FormulaPlugin.create().installTo(univerSheetDown);
 

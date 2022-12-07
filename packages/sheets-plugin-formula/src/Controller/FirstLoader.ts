@@ -14,6 +14,11 @@ export function firstLoader(formulaController: FormulaController) {
     sheetDataPromise.then((data) => {
         if (!data) return;
         const { sheetData, arrayFormulaData } = data;
+
+        if (!sheetData) {
+            return;
+        }
+
         const sheetIds = Object.keys(sheetData);
 
         const actionList: ISetRangeDataActionData[] = [];
@@ -32,7 +37,7 @@ export function firstLoader(formulaController: FormulaController) {
                     },
                 };
 
-                actionList.push(ActionOperation.make<ISetRangeDataActionData>(action).removeCollaboration().removeUndo().getAction());
+                actionList.push(ActionOperation.make<ISetRangeDataActionData>(action).removeCollaboration().removeUndo().removeExtension().getAction());
             });
         }
 

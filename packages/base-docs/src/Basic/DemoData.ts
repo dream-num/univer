@@ -304,8 +304,8 @@ export const docsDemoData: IDocumentData = {
             },
             fourParagraph: {
                 blockId: 'fourParagraph',
-                st: 230,
-                ed: 321,
+                st: 231,
+                ed: 322,
                 blockType: BlockType.PARAGRAPH,
                 paragraph: {
                     bullet: {
@@ -318,8 +318,8 @@ export const docsDemoData: IDocumentData = {
                     elements: {
                         oneElement: {
                             eId: 'oneElement',
-                            st: 230,
-                            ed: 285,
+                            st: 231,
+                            ed: 286,
                             et: ParagraphElementType.TEXT_RUN,
                             tr: {
                                 ct: '国家主席习近平以视频方式出席在上海举行的第五届中国国际进口博览会开幕式并发表题为《共创开放繁荣的美好未来》的致辞',
@@ -327,8 +327,8 @@ export const docsDemoData: IDocumentData = {
                         },
                         twoElement: {
                             eId: 'twoElement',
-                            st: 286,
-                            ed: 321,
+                            st: 287,
+                            ed: 322,
                             et: ParagraphElementType.TEXT_RUN,
                             tr: {
                                 ct: '中国将推动各国各方共享深化国际合作机遇，全面深入参与世界贸易组织改革谈判',
@@ -349,8 +349,8 @@ export const docsDemoData: IDocumentData = {
             },
             fiveParagraph: {
                 blockId: 'fiveParagraph',
-                st: 322,
-                ed: 399,
+                st: 323,
+                ed: 400,
                 blockType: BlockType.PARAGRAPH,
                 paragraph: {
                     bullet: {
@@ -363,8 +363,8 @@ export const docsDemoData: IDocumentData = {
                     elements: {
                         oneElement: {
                             eId: 'oneElement',
-                            st: 322,
-                            ed: 359,
+                            st: 323,
+                            ed: 360,
                             et: ParagraphElementType.TEXT_RUN,
                             tr: {
                                 ct: '中国男排两名现役国手彭世坤和张秉龙分别效力的三得利太阳鸟和东京大熊本轮遭遇。',
@@ -372,8 +372,8 @@ export const docsDemoData: IDocumentData = {
                         },
                         twoElement: {
                             eId: 'twoElement',
-                            st: 360,
-                            ed: 399,
+                            st: 361,
+                            ed: 400,
                             et: ParagraphElementType.TEXT_RUN,
                             tr: {
                                 ct: '双方经过激战，主场作战的卫冕冠军三得利技高一筹3-2逆转击败对手，力夺第3场胜利',

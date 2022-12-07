@@ -110,6 +110,7 @@ function _divideOperator(
                 // 一个字符超列宽
                 setColumnFullState(column, true);
                 if (isBlankColumn(column)) {
+                    console.log(spanGroup);
                     divide.spanGroup.push(...spanGroup);
                 } else {
                     _columnOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
@@ -157,6 +158,7 @@ function _divideOperator(
             for (let span of spanGroup) {
                 span.parent = divide;
             }
+            // console.log('spanGroup', spanGroup, spanGroup.length, spanGroup[0].content);
             divide.spanGroup.push(...spanGroup);
         }
     } else {

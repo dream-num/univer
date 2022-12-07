@@ -264,25 +264,25 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[]) {
     //     return;
     // }
 
-    let prePageStartIndex = firstPageStartIndex;
+    let prePageStartIndex = -1;
     for (let page of pages) {
         const { sections } = page;
         let pageStartIndex = prePageStartIndex;
         let pageEndIndex = pageStartIndex;
-        let preSectionStartIndex = 0;
+        let preSectionStartIndex = pageStartIndex;
         let maxPageWidth = -Infinity;
         let pageHeight = 0;
         for (let section of sections) {
             const { columns } = section;
             let sectionStartIndex = preSectionStartIndex;
             let sectionEndIndex = pageStartIndex;
-            let preColumnStartIndex = 0;
+            let preColumnStartIndex = sectionStartIndex;
             let maxSectionHeight = -Infinity;
             for (let column of columns) {
                 const { lines } = column;
                 let columStartIndex = preColumnStartIndex;
                 let columnEndIndex = columStartIndex;
-                let preLineStartIndex = 0;
+                let preLineStartIndex = columStartIndex;
                 let columnHeight = 0;
                 let maxColumnWidth = -Infinity;
                 let preLine: Nullable<IDocumentSkeletonLine> = null;
@@ -290,7 +290,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[]) {
                     const { divides, lineHeight } = line;
                     let lineStartIndex = preLineStartIndex;
                     let lineEndIndex = lineStartIndex;
-                    let preDivideStartIndex = 0;
+                    let preDivideStartIndex = lineStartIndex;
                     let actualWidth = 0;
                     let maxLineAsc = 0;
                     columnHeight += lineHeight;
@@ -298,15 +298,22 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[]) {
                     for (let i = 0; i < divideLength; i++) {
                         const divide = divides[i];
                         const { spanGroup } = divide;
+
+                        if (spanGroup.length === 0) {
+                            continue;
+                        }
+
                         let divStartIndex = preDivideStartIndex;
                         let divEndIndex = divStartIndex;
                         for (let span of spanGroup) {
                             const increaseValue = span.spanType === SpanType.LIST ? 0 : span.count || 1;
-                            pageEndIndex += increaseValue;
-                            sectionEndIndex += increaseValue;
-                            columnEndIndex += increaseValue;
-                            lineEndIndex += increaseValue;
+                            // pageEndIndex += increaseValue;
+                            // sectionEndIndex += increaseValue;
+                            // columnEndIndex += increaseValue;
+                            // lineEndIndex += increaseValue;
                             divEndIndex += increaseValue;
+
+                            // console.log('span', span, increaseValue, divEndIndex);
 
                             const bBox = span.bBox;
                             const { ba } = bBox;
@@ -328,39 +335,46 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[]) {
                             actualWidth += divide.left;
                         }
 
-                        divide.st = divStartIndex;
-                        divide.ed = divEndIndex;
+                        divide.st = divStartIndex === 0 ? 0 : divStartIndex + 1;
+                        divide.ed = divEndIndex >= divide.st ? divEndIndex : divide.st;
+                        preDivideStartIndex = divide.ed;
+                        // console.log('divide', divide, divide.st, divide.ed);
                     }
-                    line.st = lineStartIndex;
-                    line.ed = lineEndIndex;
+                    line.st = lineStartIndex === 0 ? 0 : lineStartIndex + 1;
+                    line.ed = preDivideStartIndex >= line.st ? preDivideStartIndex : line.st;
                     line.width = actualWidth;
                     line.asc = maxLineAsc;
                     maxColumnWidth = Math.max(maxColumnWidth, actualWidth);
                     line.top = (preLine?.top || 0) + (preLine?.lineHeight || 0);
                     preLine = line;
+                    preLineStartIndex = line.ed;
                 }
-                column.st = columStartIndex;
-                column.ed = columnEndIndex;
+                column.st = columStartIndex === 0 ? 0 : columStartIndex + 1;
+                column.ed = preLineStartIndex >= column.st ? preLineStartIndex : column.st;
                 column.height = columnHeight;
                 if (column.width === Infinity) {
                     column.width = maxColumnWidth;
                 }
                 maxPageWidth = Math.max(maxPageWidth, maxColumnWidth);
                 maxSectionHeight = Math.max(maxSectionHeight, column.height);
+
+                preColumnStartIndex = column.ed;
             }
 
-            section.st = sectionStartIndex;
-            section.ed = sectionEndIndex;
+            section.st = sectionStartIndex === 0 ? 0 : sectionStartIndex + 1;
+            section.ed = preColumnStartIndex >= section.st ? preColumnStartIndex : section.st;
             section.height = maxSectionHeight;
             pageHeight += maxSectionHeight;
+
+            preSectionStartIndex = preColumnStartIndex;
         }
 
-        page.st = pageStartIndex;
-        page.ed = pageEndIndex;
+        page.st = pageStartIndex === 0 ? 0 : pageStartIndex + 1;
+        page.ed = preSectionStartIndex >= page.st ? preSectionStartIndex : page.st;
         page.height = pageHeight;
         page.width = maxPageWidth;
 
-        prePageStartIndex = pageEndIndex;
+        prePageStartIndex = page.ed;
     }
 }
 

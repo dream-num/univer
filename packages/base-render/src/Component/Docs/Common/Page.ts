@@ -176,7 +176,7 @@ function _createSkeletonHeader(
     });
 
     const areaPage = createSkeletonPage(headerConfig, skeletonResourceReference);
-    const page = dealWithBlocks(blockElementArray, areaPage, headerConfig, skeletonResourceReference)[0];
+    const page = dealWithBlocks(blockElementArray, areaPage, headerConfig, skeletonResourceReference).pages[0];
     const column = page.sections[0].columns[0];
     const height = column.height || 0;
     const { skeDrawings, st, ed } = page;

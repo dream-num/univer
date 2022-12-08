@@ -18,17 +18,15 @@ export function SetBorder(
 ): ObjectMatrixPrimitiveType<IStyleData> {
     const wrapper = new ObjectMatrix(primitiveStyles);
     const result = new ObjectMatrix<IStyleData>();
-    wrapper.forEach((row, array) => {
-        array.forEach((column, value) => {
-            const cell = matrix.getValue(row, column);
-            if (cell) {
-                const old = globalStyles.get(cell.s);
-                if (old) {
-                    result.setValue(row, column, old);
-                }
-                cell.s = globalStyles.setValue(value);
+    wrapper.forValue((row, column, value) => {
+        const cell = matrix.getValue(row, column);
+        if (cell) {
+            const old = globalStyles.get(cell.s);
+            if (old) {
+                result.setValue(row, column, old);
             }
-        });
+            cell.s = globalStyles.setValue(value);
+        }
     });
     return result.toJSON();
 }

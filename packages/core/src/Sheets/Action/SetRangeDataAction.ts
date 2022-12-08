@@ -9,14 +9,13 @@ import {
     ActionType,
     CommandUnit,
 } from '../../Command';
-import { ICopyToOptionsData, ICellData, IRangeData } from '../../Interfaces';
+import { ICopyToOptionsData, ICellData } from '../../Interfaces';
 
 /**
  * @internal
  */
 export interface ISetRangeDataActionData extends ISheetActionData {
-    cellValue: ObjectMatrixPrimitiveType<ICellData> | ICellData;
-    rangeData: IRangeData;
+    cellValue: ObjectMatrixPrimitiveType<ICellData>;
     options?: ICopyToOptionsData;
 }
 
@@ -28,7 +27,7 @@ export interface ISetRangeDataActionData extends ISheetActionData {
 export class SetRangeDataAction extends SheetActionBase<
     ISetRangeDataActionData,
     ISetRangeDataActionData,
-    ObjectMatrixPrimitiveType<ICellData> | ICellData
+    ObjectMatrixPrimitiveType<ICellData>
 > {
     constructor(
         actionData: ISetRangeDataActionData,
@@ -56,7 +55,6 @@ export class SetRangeDataAction extends SheetActionBase<
         const result = SetRangeData(
             worksheet.getCellMatrix(),
             this._doActionData.cellValue,
-            this._doActionData.rangeData,
             styles,
             this._doActionData.options
         );
@@ -72,18 +70,17 @@ export class SetRangeDataAction extends SheetActionBase<
 
     redo(): void {
         // update pre data
-        const { sheetId, rangeData, options } = this._doActionData;
+        const { sheetId, options } = this._doActionData;
         this._oldActionData = {
             actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
             sheetId,
             cellValue: this.do(),
-            rangeData,
             options,
         };
     }
 
     undo(): void {
-        const { rangeData, sheetId, cellValue, options } = this._oldActionData;
+        const { sheetId, cellValue, options } = this._oldActionData;
         const worksheet = this.getWorkSheet();
         const styles = this._workbook.getStyles();
         if (worksheet) {
@@ -94,10 +91,8 @@ export class SetRangeDataAction extends SheetActionBase<
                 cellValue: SetRangeData(
                     worksheet.getCellMatrix(),
                     cellValue,
-                    rangeData,
                     styles
                 ),
-                rangeData,
                 options,
             };
 

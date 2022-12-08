@@ -1,3 +1,4 @@
+import { IArrayValueObject } from './Common';
 import { compareToken } from './Token';
 
 export function reverseCompareOperator(operator: compareToken): compareToken {
@@ -23,4 +24,8 @@ export function reverseCompareOperator(operator: compareToken): compareToken {
             break;
     }
     return result;
+}
+
+export function fromObjectToString(array: IArrayValueObject) {
+    return '';
 }

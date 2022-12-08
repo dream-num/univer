@@ -8,7 +8,6 @@ import { <%= projectUpperValue %>Plugin } from './<%= projectUpperValue %>Plugin
 
 const uiDefaultConfigUp = {
     container: 'univerdoc',
-    layout: 'auto',
 };
 
 const univerDoc = UniverDoc.newInstance();

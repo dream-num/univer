@@ -107,13 +107,25 @@ export class SelectionManager {
         return this._selectionModels.get(worksheetId);
     }
 
-    getCurrentModel(): Nullable<ICellInfo> {
+    getCurrentCellModel(): Nullable<ICellInfo> {
         const models = this.getCurrentModels();
         if (models && models.length > 0) {
             for (const model of models) {
                 const currentCell = model.currentCell;
                 if (currentCell) {
                     return currentCell;
+                }
+            }
+        }
+    }
+
+    getCurrentModel(): Nullable<SelectionModel> {
+        const models = this.getCurrentModels();
+        if (models && models.length > 0) {
+            for (const model of models) {
+                const currentCell = model.currentCell;
+                if (currentCell) {
+                    return model;
                 }
             }
         }
@@ -321,7 +333,7 @@ export class SelectionManager {
         }
 
         const models = selections.map(({ selection, cell }) => {
-            const model = new SelectionModel(SELECTION_TYPE.NORMAL);
+            const model = new SelectionModel(SELECTION_TYPE.NORMAL, this._plugin);
             model.setValue(selection, cell);
             return model;
         });
@@ -337,7 +349,7 @@ export class SelectionManager {
      * @returns
      */
     move(direction: Direction): void {
-        const currentCell = this.getCurrentModel();
+        const currentCell = this.getCurrentCellModel();
 
         if (!currentCell) return;
 
@@ -459,12 +471,12 @@ export class SelectionManager {
 
             for (let control of curControls) {
                 // right click
-                if (evt.button === 2 && control.model.isInclude(startSelectionRange, SELECTION_TYPE.NORMAL)) {
+                if (evt.button === 2 && control.model.isInclude(startSelectionRange)) {
                     selectionControl = control;
                     return;
                 }
                 // Click to an existing selection
-                if (control.model.isEqual(startSelectionRange, SELECTION_TYPE.NORMAL)) {
+                if (control.model.isEqual(startSelectionRange)) {
                     selectionControl = control;
                     break;
                 }
@@ -680,7 +692,7 @@ export class SelectionManager {
                 const { startColumn, startRow, endColumn, endRow } = selectionConfig.selection;
                 const cell = selectionConfig.cell;
 
-                const model = new SelectionModel(SELECTION_TYPE.NORMAL);
+                const model = new SelectionModel(SELECTION_TYPE.NORMAL, this._plugin);
 
                 const cellInfo = cell
                     ? {

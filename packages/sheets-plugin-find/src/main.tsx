@@ -1,6 +1,5 @@
 const uiDefaultConfigUp = {
     container: 'universheet-demo-up',
-    layout: 'auto',
 };
 const uiDefaultConfigDown = {
     container: 'universheet-demo-down',
@@ -24,9 +23,7 @@ const uiDefaultConfigDown = {
 };
 const uiDefaultConfigLeft = {
     container: 'universheet-demo-left',
-    layout: 'auto',
 };
 const uiDefaultConfigRight = {
     container: 'universheet-demo-right',
-    layout: 'auto',
 };

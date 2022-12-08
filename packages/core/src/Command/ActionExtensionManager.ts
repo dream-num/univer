@@ -3,9 +3,7 @@ import { BaseActionExtensionFactory } from './ActionExtensionFactory';
 import { ActionExtensionRegister } from './ActionExtensionRegister';
 
 export class ActionExtensionManager {
-    private _actionExtensionFactoryList: Array<
-        BaseActionExtensionFactory<IActionData>
-    >;
+    private _actionExtensionFactoryList: BaseActionExtensionFactory[];
 
     // 挂载到实例上
     private _register: ActionExtensionRegister;
@@ -30,6 +28,9 @@ export class ActionExtensionManager {
         // get the sorted list
         // get the dynamically added list
         this._actionExtensionFactoryList = actionExtensionFactoryList;
+
+        if (actions.length === 0) return;
+
         this._checkExtension(actions);
     }
 
@@ -41,14 +42,12 @@ export class ActionExtensionManager {
     private _checkExtension(actions: IActionData[]) {
         if (!this._actionExtensionFactoryList) return false;
 
-        actions.forEach((action) => {
-            this._actionExtensionFactoryList.forEach((actionExtensionFactory) => {
-                const extension = actionExtensionFactory.check(action, actions);
-                // Both formula and formatting need to execute
-                if (extension !== false) {
-                    extension.execute();
-                }
-            });
+        this._actionExtensionFactoryList.forEach((actionExtensionFactory) => {
+            const extension = actionExtensionFactory.check(actions);
+            // Both formula and formatting need to execute
+            if (extension !== false) {
+                extension.execute();
+            }
         });
     }
 }

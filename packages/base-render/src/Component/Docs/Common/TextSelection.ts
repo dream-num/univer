@@ -55,6 +55,12 @@ const TEXT_RANGE_KEY_PREFIX = '__TestSelectionRange__';
 
 const TEXT_ANCHOR_KEY_PREFIX = '__TestSelectionAnchor__';
 
+interface ISelectionCursor {
+    cursorStart: number;
+    cursorEnd: number;
+    isCollapse: boolean;
+}
+
 export interface INodePosition {
     page: number;
     section: number;
@@ -73,6 +79,8 @@ export class TextSelection {
     private _rangeShape: Nullable<RegularPolygon>;
 
     private _anchorShape: Nullable<Rect>;
+
+    private _cursor: number = 0;
 
     private _currentStartState: ICurrentNodePositionState = {
         page: NodePositionStateType.NORMAL,
@@ -377,8 +385,13 @@ export class TextSelection {
     private _getRangePointData(startOrigin: INodePosition, endOrigin: INodePosition, skeleton: DocumentSkeleton) {
         const pointGroup: IPoint[][] = [];
 
+        const cursorList: ISelectionCursor[] = [];
+
         if (startOrigin == null || endOrigin == null) {
-            return;
+            return {
+                pointGroup,
+                cursorList,
+            };
         }
 
         const { start, end } = this._compareNodePosition(startOrigin, endOrigin);
@@ -389,7 +402,8 @@ export class TextSelection {
 
         this._selectionIterator(start!, end!, skeleton, (start_sp, end_sp, divide, line) => {
             const { lineHeight } = line;
-            const spanGroup = divide.spanGroup;
+
+            const { spanGroup, st } = divide;
 
             const { x: startX, y: startY } = this._Liquid;
 
@@ -404,11 +418,19 @@ export class TextSelection {
             const lastSpanLeft = lastSpan?.left || 0;
             const lastSpanWidth = lastSpan?.width || 0;
 
-            let isList = firstSpan?.spanType === SpanType.LIST;
+            let isCurrentList = firstSpan?.spanType === SpanType.LIST;
+
+            let hasList = spanGroup[0]?.spanType === SpanType.LIST;
+
+            let cursorStart = start_sp + st;
+
+            let cursorEnd = end_sp + st;
+
+            const isCollapse = start === end;
 
             if (start_sp === 0 && end_sp === spanGroup.length - 1) {
                 position = {
-                    startX: startX + firstSpanLeft + (isList ? firstSpanWidth : 0),
+                    startX: startX + firstSpanLeft + (isCurrentList ? firstSpanWidth : 0),
                     startY,
                     endX: startX + lastSpanLeft + lastSpanWidth,
                     endY: startY + lineHeight,
@@ -416,10 +438,22 @@ export class TextSelection {
             } else {
                 // console.log('span', firstSpan, lastSpan, start_sp, end_sp);
 
+                const isStartBackFin = (isStartBack || start_sp === 0) && !isCurrentList;
+
+                const isEndBackFin = isEndBack && end_sp !== spanGroup.length - 1;
+
+                cursorStart += isStartBackFin ? 0 : 1;
+
+                cursorStart -= hasList ? 1 : 0;
+
+                cursorEnd += isEndBackFin ? 0 : 1;
+
+                cursorEnd -= hasList ? 1 : 0;
+
                 position = {
-                    startX: startX + firstSpanLeft + ((isStartBack || start_sp === 0) && !isList ? 0 : firstSpanWidth),
+                    startX: startX + firstSpanLeft + (isStartBackFin ? 0 : firstSpanWidth),
                     startY,
-                    endX: startX + lastSpanLeft + (!isEndBack || end_sp === spanGroup.length - 1 ? lastSpanWidth : 0),
+                    endX: startX + lastSpanLeft + (isEndBackFin ? 0 : lastSpanWidth),
                     endY: startY + lineHeight,
                 };
 
@@ -430,8 +464,17 @@ export class TextSelection {
             }
 
             pointGroup.push(this._pushToPoints(position));
+            cursorList.push({
+                cursorStart,
+                cursorEnd,
+                isCollapse,
+            });
         });
-        return pointGroup;
+
+        return {
+            pointGroup,
+            cursorList,
+        };
     }
 
     private _selectionIterator(
@@ -515,6 +558,22 @@ export class TextSelection {
                 }
             }
         }
+    }
+
+    private _setCursor(cursorList: ISelectionCursor[]) {
+        if (cursorList.length === 0) {
+            return;
+        }
+
+        const firstCursor = cursorList[0];
+
+        this._cursor = firstCursor.cursorStart;
+
+        console.log('this._cursor', this._cursor);
+    }
+
+    get cursor() {
+        return this._cursor;
     }
 
     getAnchor() {
@@ -607,14 +666,17 @@ export class TextSelection {
         }
 
         if (this.isCollapsed()) {
-            const pointGroup = this._getRangePointData(start!, start!, skeleton);
-            pointGroup && this._createAndUpdateAnchor(pointGroup, documents.left, documents.top);
+            const data = this._getRangePointData(start!, start!, skeleton);
+            const { pointGroup, cursorList } = data;
+            this._setCursor(cursorList);
+            pointGroup.length > 0 && this._createAndUpdateAnchor(pointGroup, documents.left, documents.top);
             return;
         }
 
-        const pointGroup = this._getRangePointData(start!, end!, skeleton);
-
-        pointGroup && this._createAndUpdateRange(pointGroup, documents.left, documents.top);
+        const data = this._getRangePointData(start!, end!, skeleton);
+        const { pointGroup, cursorList } = data;
+        this._setCursor(cursorList);
+        pointGroup.length > 0 && this._createAndUpdateRange(pointGroup, documents.left, documents.top);
     }
 
     getStart() {

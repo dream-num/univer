@@ -90,12 +90,18 @@ export class ColumnTitleController {
     highlightColumn() {
         this._manager.clearSelectionControls();
         const sheet = this._manager.getPlugin().getWorkbook().getActiveSheet();
-        this._manager.addControlToCurrentByRangeData({
-            startRow: 0,
-            startColumn: this._index,
-            endColumn: this._index,
-            endRow: sheet.getRowCount() - 1,
-        });
+        this._manager.addControlToCurrentByRangeData(
+            {
+                startRow: 0,
+                startColumn: this._index,
+                endColumn: this._index,
+                endRow: sheet.getRowCount() - 1,
+            },
+            {
+                row: 0,
+                column: this._index,
+            }
+        );
     }
 
     highlightColumnTitle(e: IPointerEvent | IMouseEvent) {

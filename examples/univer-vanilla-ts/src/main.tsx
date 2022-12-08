@@ -11,9 +11,8 @@ import {
     DEFAULT_WORKBOOK_DATA,
     DEFAULT_WORKBOOK_DATA_DOWN,
 } from '@univer/common-plugin-data';
-import { RegisterPlugin } from '@univer/common-plugin-register';
 import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
-import { ClipboardOfficePlugin } from '@univer/sheets-plugin-clipboard-office';
+import { BaseComponentPlugin } from '@univer/base-component';
 
 const uiDefaultConfigUp = {
     container: 'universheet-demo-up',
@@ -50,26 +49,26 @@ const uiDefaultConfigUp = {
 
 const univerSheetUp = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);
 univerSheetUp.installPlugin(new RenderEngine());
+
 univerSheetUp.installPlugin(new UniverComponentSheet());
 univerSheetUp.installPlugin(new SheetPlugin(uiDefaultConfigUp));
-
+univerSheetUp.installPlugin(new BaseComponentPlugin());
 univerSheetUp.installPlugin(new NumfmtPlugin());
 FormulaPlugin.create(DEFAULT_FORMULA_DATA).installTo(univerSheetUp);
 
-univerSheetUp.installPlugin(new RegisterPlugin());
 univerSheetUp.installPlugin(new ClipboardPlugin());
-univerSheetUp.installPlugin(new ClipboardOfficePlugin());
-
-
 
 const univerSheetDown = UniverSheet.newInstance();
 univerSheetDown.installPlugin(new RenderEngine());
 univerSheetDown.installPlugin(new UniverComponentSheet());
 
-univerSheetDown.installPlugin(new SheetPlugin());
+univerSheetDown.installPlugin(
+    new SheetPlugin({
+        container: 'universheet-demo-down',
+    })
+);
+univerSheetDown.installPlugin(new BaseComponentPlugin());
 univerSheetDown.installPlugin(new NumfmtPlugin());
 FormulaPlugin.create().installTo(univerSheetDown);
 
-univerSheetDown.installPlugin(new RegisterPlugin());
 univerSheetDown.installPlugin(new ClipboardPlugin());
-univerSheetDown.installPlugin(new ClipboardOfficePlugin());

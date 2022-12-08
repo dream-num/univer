@@ -63,20 +63,19 @@ export class RichText extends Component<BaseRichTextProps, IRichTextState> {
     }
 
     onKeyDown(event: KeyboardEvent) {
-        let ctrlKey = event.ctrlKey;
-        let altKey = event.altKey;
-        let shiftKey = event.shiftKey;
-        let kcode = event.keyCode;
+        // let ctrlKey = event.ctrlKey;
+        // let altKey = event.altKey;
+        // let shiftKey = event.shiftKey;
+        // let kcode = event.keyCode;
 
         // execute hooks
         const onKeyDown = this.hooks.get('onKeyDown');
         onKeyDown && onKeyDown(event);
 
-        // // stop edit
-        // if (kcode === KeyCode.ENTER) {
-        //     this.ref.current?.blur();
-        //     event.preventDefault();
-        // }
+        // stop edit
+        if (event.key === 'Enter') {
+            event.preventDefault();
+        }
 
         // let $inputbox = $('#universheet-input-box');
         // if (kcode === keycode.ESC && parseInt($('#universheet-input-box').css('top')) > 0) {
@@ -135,6 +134,11 @@ export class RichText extends Component<BaseRichTextProps, IRichTextState> {
     onKeyUp(event: KeyboardEvent) {
         const onKeyUp = this.hooks.get('onKeyUp');
         onKeyUp && onKeyUp(event);
+
+        // stop edit
+        if (event.key === 'Enter') {
+            event.preventDefault();
+        }
         // if (kcode === KeyCode.DOWN) {
         //     this.cellTextStyle.convertSpanToShareString(this.ref.current);
         // }

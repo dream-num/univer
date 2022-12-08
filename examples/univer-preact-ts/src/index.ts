@@ -1,5 +1,5 @@
 import { IDocumentData, ISlideData, IWorkbookConfig, UniverDoc, UniverSheet, UniverSlide } from '@univer/core';
-import * as UniverCore from '@univer/core'
+import * as UniverCore from '@univer/core';
 import { RenderEngine } from '@univer/base-render';
 import { UniverComponentSheet } from '@univer/style-universheet';
 import { ISheetPluginConfig, SheetPlugin } from '@univer/base-sheets';
@@ -8,14 +8,12 @@ import { ISlidePluginConfig, SlidePlugin } from '@univer/base-slides';
 import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
 import { DEFAULT_FORMULA_DATA, FormulaPlugin, IFormulaConfig } from '@univer/sheets-plugin-formula';
 import { INumfmtPluginConfig, NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
-import { RegisterPlugin } from '@univer/common-plugin-register';
 import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
-import { ClipboardOfficePlugin } from '@univer/sheets-plugin-clipboard-office';
 
 interface ISheetPropsCustom {
     coreConfig?: Partial<IWorkbookConfig>;
     baseSheetsConfig?: ISheetPluginConfig;
-    numfmtConfig?:INumfmtPluginConfig;
+    numfmtConfig?: INumfmtPluginConfig;
     formulaConfig?: IFormulaConfig;
 }
 
@@ -33,9 +31,7 @@ class UniverSheetCustom {
         universheet.installPlugin(new NumfmtPlugin(config.numfmtConfig));
         FormulaPlugin.create(config.formulaConfig).installTo(universheet);
 
-        universheet.installPlugin(new RegisterPlugin());
         universheet.installPlugin(new ClipboardPlugin());
-        universheet.installPlugin(new ClipboardOfficePlugin());
 
         return universheet;
     }
@@ -107,4 +103,4 @@ const univerSlideCustom = function (config?: ISlidePropsCustom) {
     return new UniverSlideCustom().init(config);
 };
 
-export {UniverCore, univerSheetCustom,univerDocCustom,univerSlideCustom, DEFAULT_WORKBOOK_DATA, DEFAULT_FORMULA_DATA };
+export { UniverCore, univerSheetCustom, univerDocCustom, univerSlideCustom, DEFAULT_WORKBOOK_DATA, DEFAULT_FORMULA_DATA };

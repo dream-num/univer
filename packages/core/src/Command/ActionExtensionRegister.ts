@@ -2,16 +2,10 @@ import { sortRules } from '../Shared';
 import { BaseActionExtensionFactory } from './ActionExtensionFactory';
 import { REGISTRY_ACTION_FACTORY } from './RegistryFactory';
 
-import { IActionData } from './ActionBase';
-
 export class ActionExtensionRegister {
-    private _actionExtensionFactoryList: Array<
-        BaseActionExtensionFactory<IActionData>
-    > = [];
+    private _actionExtensionFactoryList: BaseActionExtensionFactory[] = [];
 
-    get actionExtensionFactoryList(): Array<
-        BaseActionExtensionFactory<IActionData>
-    > {
+    get actionExtensionFactoryList(): BaseActionExtensionFactory[] {
         return this._actionExtensionFactoryList;
     }
 
@@ -19,12 +13,12 @@ export class ActionExtensionRegister {
         this._initExtensions();
     }
 
-    add(...extensionFactoryList: Array<BaseActionExtensionFactory<IActionData>>) {
+    add(...extensionFactoryList: BaseActionExtensionFactory[]) {
         this._actionExtensionFactoryList.push(...extensionFactoryList);
         this._actionExtensionFactoryList.sort(sortRules);
     }
 
-    delete(extensionFactory: BaseActionExtensionFactory<IActionData>) {
+    delete(extensionFactory: BaseActionExtensionFactory) {
         const index = this._actionExtensionFactoryList.indexOf(extensionFactory);
         this._actionExtensionFactoryList.splice(index, 1);
     }

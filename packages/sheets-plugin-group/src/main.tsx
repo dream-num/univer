@@ -8,7 +8,6 @@ import { GroupPlugin } from './GroupPlugin';
 
 const uiDefaultConfigUp = {
     container: 'universheet-demo',
-    layout: 'auto',
 };
 
 const univerSheetUp = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);

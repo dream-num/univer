@@ -70,7 +70,7 @@ export class SelectionControl {
 
     private _selectionShape: Group;
 
-    private _selectionModel: SelectionModel = new SelectionModel(SELECTION_TYPE.NORMAL);
+    private _selectionModel: SelectionModel;
 
     private _selectionDragAndDrop: SelectionControlDragAndDrop;
 
@@ -81,6 +81,7 @@ export class SelectionControl {
     }
 
     private _initialize() {
+        this._selectionModel = new SelectionModel(SELECTION_TYPE.NORMAL, this._manager.getPlugin());
         const zIndex = this._zIndex;
         this._leftControl = new Rect(SELECTION_MANAGER_KEY.left + zIndex, {
             top: 0,

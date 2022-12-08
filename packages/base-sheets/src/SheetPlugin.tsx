@@ -30,13 +30,12 @@ import {
     SheetContainerController,
     ToolBarController,
     BaseSheetContainerConfig,
-    IShowContainerConfig,
 } from './Controller';
 import { IToolBarItemProps } from './Model/ToolBarModel';
 import { ModalGroupController } from './Controller/ModalGroupController';
 import { ISheetPluginConfig, DEFAULT_SPREADSHEET_PLUGIN_DATA } from './Basics';
 import { FormulaBarController } from './Controller/FormulaBarController';
-import { NamedRangeInsertRowActionExtensionFactory } from './Basics/Register/NamedRangeInsertRowActionExtension';
+import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeActionExtension';
 
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
@@ -89,7 +88,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     private _componentList: Map<string, any>;
 
-    private _namedRangeActionExtensionFactory: NamedRangeInsertRowActionExtensionFactory;
+    private _namedRangeActionExtensionFactory: NamedRangeActionExtensionFactory;
 
     constructor(config: Partial<ISheetPluginConfig> = {}) {
         super(PLUGIN_NAMES.SPREADSHEET);
@@ -142,26 +141,26 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         this._sheetContainerController = new SheetContainerController(this, config);
 
         // TODO rightMenu config
-        if (sheetContainerConfig === 'auto' || (sheetContainerConfig as IShowContainerConfig).rightMenu) {
+        if (sheetContainerConfig?.rightMenu) {
             this._rightMenuControl = new RightMenuController(this, rightMenuConfig);
         }
 
-        if (sheetContainerConfig === 'auto' || (sheetContainerConfig as IShowContainerConfig).toolBar) {
+        if (sheetContainerConfig?.toolBar) {
             this._toolBarControl = new ToolBarController(this, toolBarConfig);
         }
-        if (sheetContainerConfig === 'auto' || (sheetContainerConfig as IShowContainerConfig).infoBar) {
+        if (sheetContainerConfig?.infoBar) {
             this._infoBarControl = new InfoBarController(this);
         }
-        if (sheetContainerConfig === 'auto' || (sheetContainerConfig as IShowContainerConfig).sheetBar) {
+        if (sheetContainerConfig?.sheetBar) {
             this._sheetBarControl = new SheetBarControl(this);
         }
         this._cellEditorController = new CellEditorController(this);
         this._antLineController = new AntLineControl(this);
 
-        if (sheetContainerConfig === 'auto' || (sheetContainerConfig as IShowContainerConfig).countBar) {
+        if (sheetContainerConfig?.countBar) {
             this._countBarController = new CountBarController(this);
         }
-        if (sheetContainerConfig === 'auto' || (sheetContainerConfig as IShowContainerConfig).formulaBar) {
+        if (sheetContainerConfig?.formulaBar) {
             this._formulaBarController = new FormulaBarController(this);
         }
 
@@ -254,7 +253,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     registerExtension() {
         const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
-        this._namedRangeActionExtensionFactory = new NamedRangeInsertRowActionExtensionFactory(this);
+        this._namedRangeActionExtensionFactory = new NamedRangeActionExtensionFactory(this);
         actionRegister.add(this._namedRangeActionExtensionFactory);
     }
 

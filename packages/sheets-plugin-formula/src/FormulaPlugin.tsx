@@ -100,4 +100,8 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
     getSearchFormulaController() {
         return this._searchFormulaController;
     }
+
+    getFormulaPromptController() {
+        return this._formulaPromptController;
+    }
 }

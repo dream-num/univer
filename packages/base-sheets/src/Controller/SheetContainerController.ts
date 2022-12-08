@@ -53,7 +53,7 @@ export interface ILayout {
 }
 
 export interface ISheetPluginConfigBase extends ILayout {
-    layout?: ILayout;
+    layout: ILayout;
 }
 
 export interface BaseSheetContainerConfig extends BaseComponentProps, ISheetPluginConfigBase {

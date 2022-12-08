@@ -64,3 +64,20 @@ export const DEFAULT_FORMULA_DATA_DOWN: IFormulaConfig = {
         },
     },
 };
+
+export const DEFAULT_FORMULA_DATA_DEMO: IFormulaConfig = {
+    formulaData: {
+        'workbook-03': {
+            'sheet-0003': {
+                '19': {
+                    '5': {
+                        formula: '=SUM(F12:F19)',
+                        row: 19,
+                        column: 5,
+                        sheetId: 'sheet-0003',
+                    },
+                },
+            },
+        },
+    },
+};

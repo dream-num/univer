@@ -17,6 +17,7 @@ export class Univer {
     }
 
     addUniverSheet(univerSheet: UniverSheet): void {
+        univerSheet.context.onUniver(this);
         this._univerSheets.push(univerSheet);
     }
 

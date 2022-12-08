@@ -15,7 +15,6 @@ export class CommandUnit {
 /**
  * Execute the undo-redo command
  *
- * TODO: SlideCommand/DocCommand
  */
 export class Command {
     _unit: CommandUnit;
@@ -69,7 +68,11 @@ export class Command {
     }
 
     undo(): void {
-        this._actionList.forEach((action) => action.undo());
+        // Reverse is required, such as moving C:E to the back of column A, after copying the data of C:E
+        // 1. removeColumn C:E 2.insertColumnData A,
+        // when undo, it should be
+        // 1. removeColumn A, 2. insertColumnData C:E
+        this._actionList.reverse().forEach((action) => action.undo());
         CommandManager.getCommandObservers().notifyObservers({
             type: ActionType.UNDO,
             actions: this._actionList,

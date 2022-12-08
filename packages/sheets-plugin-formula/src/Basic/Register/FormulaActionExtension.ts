@@ -36,6 +36,7 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
 
             // Filter out Actions that contain formulas, inject setRangeDataAction
             if (actionData.actionName === ACTION_NAMES.SET_RANGE_DATA_ACTION) {
+                // TODO FALSE PASS
                 const { sheetId, cellValue } = actionData;
 
                 if (Tools.isEmptyObject(formulaData)) return;

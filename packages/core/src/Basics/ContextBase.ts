@@ -24,6 +24,8 @@ export abstract class ContextBase {
 
     protected _observerManager: ObserverManager;
 
+    protected _univer: Univer;
+
     protected abstract _setObserver(): void;
 
     constructor() {
@@ -36,7 +38,9 @@ export abstract class ContextBase {
         this._observerManager = new ObserverManager();
     }
 
-    onUniver(univer: Univer): void {}
+    onUniver(univer: Univer): void {
+        this._univer = univer;
+    }
 
     getHook<T>(path: string): Nullable<ObservableHooks<T>> {
         return this._hooksManager.getHooks<T>(path);

@@ -1,7 +1,9 @@
-import { UniverSheet } from '@univer/core';
+import { UniverSheet, UniverDoc, UniverSlide } from '@univer/core';
 import { RenderEngine } from '@univer/base-render';
 import { UniverComponentSheet } from '@univer/style-universheet';
 import { SheetPlugin } from '@univer/base-sheets';
+import { DocPlugin } from '@univer/base-docs';
+import { SlidePlugin } from '@univer/base-slides';
 import {
     DEFAULT_FORMULA_DATA,
     FormulaPlugin,
@@ -15,7 +17,7 @@ import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
 import { BaseComponentPlugin } from '@univer/base-component';
 
 const uiDefaultConfigUp = {
-    container: 'universheet-demo-up',
+    container: 'universheet-up',
     layout: {
         innerRight: false,
         outerLeft: false,
@@ -64,7 +66,7 @@ univerSheetDown.installPlugin(new UniverComponentSheet());
 
 univerSheetDown.installPlugin(
     new SheetPlugin({
-        container: 'universheet-demo-down',
+        container: 'universheet-down',
     })
 );
 univerSheetDown.installPlugin(new BaseComponentPlugin());
@@ -72,3 +74,30 @@ univerSheetDown.installPlugin(new NumfmtPlugin());
 FormulaPlugin.create().installTo(univerSheetDown);
 
 univerSheetDown.installPlugin(new ClipboardPlugin());
+
+// doc
+
+const docPluginConfig = {
+    container: 'univerdoc',
+};
+const univerDoc = UniverDoc.newInstance();
+
+univerDoc.installPlugin(new RenderEngine());
+univerDoc.installPlugin(new UniverComponentSheet());
+
+univerDoc.installPlugin(new DocPlugin(docPluginConfig));
+univerDoc.installPlugin(new BaseComponentPlugin());
+
+// SlidePlugin
+
+const slidePluginConfig = {
+    container: 'universlide',
+};
+
+const univerSlide = UniverSlide.newInstance();
+
+univerSlide.installPlugin(new RenderEngine());
+univerSlide.installPlugin(new UniverComponentSheet());
+
+univerSlide.installPlugin(new SlidePlugin(slidePluginConfig));
+univerSlide.installPlugin(new BaseComponentPlugin());

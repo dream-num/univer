@@ -5,7 +5,6 @@ import { NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
 import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DEMO, DEFAULT_WORKBOOK_DATA_DOWN } from '@univer/common-plugin-data';
 import { DEFAULT_FORMULA_DATA, DEFAULT_FORMULA_DATA_DEMO, FormulaPlugin } from '@univer/sheets-plugin-formula';
 import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
-import { RegisterPlugin } from '@univer/common-plugin-register';
 import { SheetPlugin } from './SheetPlugin';
 
 const uiDefaultConfigUp = {
@@ -157,6 +156,5 @@ const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 univerSheetDemo.installPlugin(new RenderEngine());
 univerSheetDemo.installPlugin(new UniverComponentSheet());
 univerSheetDemo.installPlugin(new SheetPlugin(uiDefaultConfigDemo));
-RegisterPlugin.create().installTo(univerSheetDemo);
 univerSheetDemo.installPlugin(new ClipboardPlugin());
 FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(univerSheetDemo);

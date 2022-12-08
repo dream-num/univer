@@ -1,12 +1,12 @@
 import { Plugin } from '@univer/core';
-import { IClipboardData } from '../../Interfaces/IClipboardData';
+import { IDragAndDropData } from '../../Interfaces';
 
 /**
  * 转化table html/json为json
  */
-export class BaseClipboardExtension<T extends Plugin = Plugin> {
+export class BaseDragAndDropExtension<T extends Plugin = Plugin> {
     // protected _json: IKeyValue;
-    constructor(protected _data: IClipboardData, protected _plugin: T) {}
+    constructor(protected _data: IDragAndDropData, protected _plugin: T) {}
 
     /**
      * Execute the core logic after the check is successful
@@ -15,9 +15,9 @@ export class BaseClipboardExtension<T extends Plugin = Plugin> {
 }
 
 /**
- * Determine whether to intercept and create BaseClipboardExtension
+ * Determine whether to intercept and create BaseDragAndDropExtension
  */
-export class BaseClipboardExtensionFactory<T extends Plugin = Plugin> {
+export class BaseDragAndDropExtensionFactory<T extends Plugin = Plugin> {
     constructor(protected _plugin: T) {}
 
     get zIndex() {
@@ -29,8 +29,8 @@ export class BaseClipboardExtensionFactory<T extends Plugin = Plugin> {
      * @param data
      * @returns
      */
-    create(data: IClipboardData): BaseClipboardExtension {
-        return new BaseClipboardExtension(data, this._plugin);
+    create(data: IDragAndDropData): BaseDragAndDropExtension {
+        return new BaseDragAndDropExtension(data, this._plugin);
     }
 
     /**
@@ -38,7 +38,7 @@ export class BaseClipboardExtensionFactory<T extends Plugin = Plugin> {
      * @param data
      * @returns
      */
-    check(data: IClipboardData): false | BaseClipboardExtension {
+    check(data: IDragAndDropData): false | BaseDragAndDropExtension {
         return false;
     }
 }

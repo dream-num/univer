@@ -1,5 +1,5 @@
 import { BooleanNumber, CommandManager, ContextBase, ISheetActionData, LocaleType, PLUGIN_NAMES, SheetActionBase, Workbook } from '@univer/core';
-import { BaseComponentSheet, BaseComponentRender, BaseComponentProps } from '@univer/base-component';
+import { BaseComponentSheet, BaseComponentRender, BaseComponentProps, DragManager, getRefElement } from '@univer/base-component';
 
 import { CellRangeModal } from '../View/UI/Common/CellRange/CellRangeModal';
 import { SheetPlugin } from '../SheetPlugin';
@@ -74,6 +74,8 @@ export class SheetContainerController {
 
     private _sheetContainer: SheetContainer;
 
+    private _dragManager: DragManager;
+
     constructor(plugin: SheetPlugin, config: BaseSheetContainerConfig) {
         this._plugin = plugin;
 
@@ -130,7 +132,12 @@ export class SheetContainerController {
                     layout: this._defaultLayout,
                     currentLocale: this._plugin.getContext().getLocale().options.currentLocale,
                 });
+
+                // handle drag event
+                this._dragManager.handleDragAction(getRefElement(component));
             });
+
+        this._dragManager = new DragManager(this._plugin);
     }
 
     // 注册常用icon和组件

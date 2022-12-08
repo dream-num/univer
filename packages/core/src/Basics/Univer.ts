@@ -22,10 +22,12 @@ export class Univer {
     }
 
     addUniverDoc(univerDoc: UniverDoc): void {
+        univerDoc.context.onUniver(this);
         this._univerDocs.push(univerDoc);
     }
 
     addUniverSlide(univerSlide: UniverSlide): void {
+        univerSlide.context.onUniver(this);
         this._univerSlides.push(univerSlide);
     }
 

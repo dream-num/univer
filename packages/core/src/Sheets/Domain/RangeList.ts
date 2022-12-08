@@ -127,7 +127,6 @@ export class RangeList {
                 sheetId: _worksheet.getSheetId(),
                 actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                 cellValue: cellValue.getData(),
-                rangeData: range,
             };
             return setValue;
         });

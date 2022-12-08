@@ -6,7 +6,6 @@ import { UniverComponentSheet } from '@univer/style-universheet';
 
 const uiDefaultConfigUp = {
     container: 'universheet-demo-up',
-    layout: 'auto',
 };
 const univerSheetUp = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);
 univerSheetUp.installPlugin(new RenderEngine());

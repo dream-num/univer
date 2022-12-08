@@ -277,8 +277,10 @@ pnpm install
 核心能力的扩展，依靠 Plugin、Registry 和 Register 来提供
 
 1. Plugin：大的功能块，使用插件扩展核心能力，核心提供了 install 安装插件
-2. Registry：插件内部小的功能块，使用核心提供的一个 Registry 静态注册方法，方便在项目初始化的时候快速搜集内部模块的扩展实例
+2. Registry：插件内部小的功能块，使用核心提供的一个 Registry 静态注册方法，方便在项目初始化的时候快速搜集内部模块的扩展实例。它是一种设计模式
 3. Register：Register 将上一步 Registry 注册的方法，再统一动态注册管理，并且提供直接将内部模块动态注册上去的方法，以便开发者在外部进行动态扩增加某一个模块
+
+通常情况下，一个插件内部的小模块，就是使用静态 load 的方式快速搜集模块，再动态 add 到核心的注册管理器上。如果模块比较简单，也可以直接将插件内部的模块直接 add 到注册管理器。
 
 ## 插件开发实践
 
@@ -959,6 +961,14 @@ export class AlternatingColorsPlugin extends Plugin {
 Tips:
 核心是否要包装插件 API，要看核心是否提供了 Action，不允许核心调用插件 API，如 Find 插件提供 createTextFinder，核心不提供
 
+8. Action 扩展
+
+当用户输入 `100%`，我们需要自动将单元格格式改为`百分比`，当用户输入`=SUM(2)`时候需要计算公式，这种情况下，我们需要使用到数字格式和公式插件的能力来转换这些数据。所以需要在 Command 执行前做个 Action 拦截的动作，拦截 ActionData 传入到数字格式 Action 扩展和公式 Action 扩展，做完计算之后，直接修改这个 ActionData，并且增加自己的数字格式 Action 和公式 Action，来实现这两种计算。
+
+在编辑单元格的时候，我们是不知道用户是否安装了数字格式插件或者公式插件的，所以我们还做了一个 Action 扩展注册机制，只有按照规范注册了的扩展，才会在 Action 拦截的时候使用，其中，扩展管理的地方负责检验 Action 数据是否打中扩展，打中的扩展就会执行。
+
+ActionOperation 有一个 removeExtension 可以移除 action 拦截。一般情况下，Action 都会走拦截，但是在初始化（比如公式）或者已经拦截的 ActionExtension 里触发的 Action（比如 FormulaActionExtension），这两种情况是不需要拦截的，所以要做过滤。
+
 ## 组件开发
 
 ### 技术原理
@@ -1238,7 +1248,6 @@ univerSheetUp.installPlugin(new UniverComponentSheet());
 univerSheetUp.installPlugin(
     new SheetPlugin({
         container: 'universheet-demo-up',
-        layout: 'auto',
     })
 );
 // 加载筛选插件
@@ -1278,7 +1287,6 @@ univerSheetUp.installPlugin(new UniverComponentSheet());
 univerSheetUp.installPlugin(
     new SheetPlugin({
         container: 'universheet-demo-up',
-        layout: 'auto',
     })
 );
 
@@ -1330,7 +1338,6 @@ const workbookConfig = {
 // 可选的spreadsheetConfig插件配置
 const spreadsheetConfig = {
     container: 'universheet-demo-up',
-    layout: 'auto',
 };
 
 // 统一配置入口

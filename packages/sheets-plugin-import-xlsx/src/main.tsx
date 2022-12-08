@@ -8,7 +8,6 @@ import { ImportXlsxPlugin } from './ImportXlsxPlugin';
 
 const uiDefaultConfigUp = {
     container: 'universheet',
-    layout: 'auto',
 };
 
 const univerSheetUp = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);

@@ -29,7 +29,6 @@ import {
     Nullable,
     getColorStyle,
     IDocumentRenderConfig,
-    getStyle,
 } from '@univer/core';
 import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../Basics/Const';
 import { IStylesCache, BorderCache } from './Interfaces';
@@ -664,7 +663,8 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         // style supports inline styles
         // const style = styles && styles.get(cell.s);
-        const style = getStyle(styles, cell);
+        // const style = getStyle(styles, cell);
+        const style = styles && styles.getStyleByCell(cell);
 
         if (!skipBackgroundAndBorder && style && style.bg && style.bg.rgb) {
             const rgb = style.bg.rgb;

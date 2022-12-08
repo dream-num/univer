@@ -87,7 +87,10 @@ export class CellEditorController {
                 const main = this._plugin.getMainComponent();
 
                 main.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
-                    this.enterEditMode();
+                    // Prevent left + right double click
+                    if (evt.button !== 2) {
+                        this.enterEditMode();
+                    }
                 });
                 main.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
                     this.exitEditMode();
@@ -310,7 +313,7 @@ export class CellEditorController {
 
         this.isEditMode = true;
 
-        const currentCell = this._plugin.getSelectionManager().getCurrentModel();
+        const currentCell = this._plugin.getSelectionManager().getCurrentCellModel();
 
         if (!currentCell) {
             return false;
@@ -361,7 +364,6 @@ export class CellEditorController {
         });
 
         if (cell) {
-            // cellValue = this.richText.cellInputHandler.functionHTMLGenerate(cell.value);
             cellValue = cell.value;
         }
 
@@ -421,7 +423,7 @@ export class CellEditorController {
     }
 
     setCurrentEditRangeData() {
-        const model = this._plugin.getSelectionManager().getCurrentModel();
+        const model = this._plugin.getSelectionManager().getCurrentCellModel();
         if (!model) return;
 
         this.currentEditRangeData = {

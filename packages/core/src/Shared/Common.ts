@@ -1,14 +1,7 @@
 import { Tools } from './Tools';
 import { Nullable } from '.';
-import {
-    ICellInfo,
-    ISelection,
-    ICellData,
-    IColorStyle,
-    IStyleData,
-} from '../Interfaces';
-import { ColorBuilder, Styles } from '../Sheets/Domain';
-import { DEFAULT_STYLES } from '../Const';
+import { ICellInfo, ISelection, ICellData, IColorStyle } from '../Interfaces';
+import { ColorBuilder } from '../Sheets/Domain';
 
 export function makeCellToSelection(
     cellInfo: Nullable<ICellInfo>
@@ -86,16 +79,19 @@ export function isFormulaString(value: any): boolean {
     return Tools.isString(value) && value.indexOf('=') === 0 && value.length > 1;
 }
 
-export function getStyle(
-    styles: Nullable<Styles>,
-    cell: Nullable<ICellData>
-): IStyleData {
-    let style;
-    if (cell && Tools.isObject(cell.s)) {
-        style = cell.s as IStyleData;
-    } else {
-        style = cell?.s && styles?.get(cell.s);
-    }
+/**
+ * move to Styles.getStyleByCell
+ */
+// export function getStyle(
+//     styles: Nullable<Styles>,
+//     cell: Nullable<ICellData>
+// ): Nullable<IStyleData> {
+//     let style;
+//     if (cell && Tools.isObject(cell.s)) {
+//         style = cell.s as IStyleData;
+//     } else {
+//         style = cell?.s && styles?.get(cell.s);
+//     }
 
-    return style || DEFAULT_STYLES;
-}
+//     return style as IStyleData;
+// }

@@ -1,5 +1,4 @@
-import { handelTableToJson, handlePlainToJson } from '@univer/base-component';
-import { BaseClipboardExtension, BaseClipboardExtensionFactory, IClipboardData } from '@univer/common-plugin-register';
+import { BaseClipboardExtension, BaseClipboardExtensionFactory, handelTableToJson, handlePlainToJson, IClipboardData } from '@univer/base-component';
 import { ClipboardPlugin } from '../../ClipboardPlugin';
 
 export class ClipboardExtension extends BaseClipboardExtension<ClipboardPlugin> {

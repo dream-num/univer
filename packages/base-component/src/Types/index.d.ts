@@ -1,2 +1,2 @@
 export * from '../index';
-declare module '@univer/base-component' { }
+declare module '@univer/base-component' {}

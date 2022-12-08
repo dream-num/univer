@@ -1,10 +1,5 @@
 import { Styles } from '../Domain';
-import {
-    ICellData,
-    ICopyToOptionsData,
-    IRangeData,
-    IStyleData,
-} from '../../Interfaces';
+import { ICellData, ICopyToOptionsData, IStyleData } from '../../Interfaces';
 import { Nullable, Tools } from '../../Shared';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { mergeStyle, transformStyle } from './SetRangeStyle';
@@ -21,61 +16,46 @@ import { mergeStyle, transformStyle } from './SetRangeStyle';
  */
 export function SetRangeData(
     cellMatrix: ObjectMatrix<ICellData>,
-    addMatrix: ObjectMatrixPrimitiveType<ICellData> | ICellData,
-    rangeData: IRangeData,
+    addMatrix: ObjectMatrixPrimitiveType<ICellData>,
     styles: Styles,
     options?: ICopyToOptionsData
 ): ObjectMatrixPrimitiveType<ICellData> {
-    let target;
-    if (!isNaN(parseInt(Object.keys(addMatrix)[0]))) {
-        target = new ObjectMatrix(addMatrix as ObjectMatrixPrimitiveType<ICellData>);
-    }
+    let target = new ObjectMatrix(addMatrix);
+
     const result = new ObjectMatrix<ICellData>();
 
-    const { startRow, endRow, startColumn, endColumn } = rangeData;
-
     if (options) {
-        for (let r = startRow; r <= endRow; r++) {
-            for (let c = startColumn; c <= endColumn; c++) {
-                const value: Nullable<ICellData> = target
-                    ? target.getValue(r, c)
-                    : addMatrix;
-                const cell = cellMatrix.getValue(r, c);
-                const newCell: ICellData = {};
+        target.forValue((r, c, value) => {
+            const cell = cellMatrix.getValue(r, c);
+            const newCell: ICellData = {};
 
-                if (options.contentsOnly) {
-                    newCell.m = cell?.m;
-                    newCell.v = cell?.v;
-                }
-
-                if (options.formatOnly) {
-                    // newCell.f = cell?.f;
-                    newCell.v = cell?.v;
-                    newCell.m = cell?.m;
-                }
-
-                result.setValue(r, c, newCell || {});
-
-                cellMatrix.setValue(r, c, value || {});
+            if (options.contentsOnly) {
+                newCell.m = cell?.m;
+                newCell.v = cell?.v;
             }
-        }
+
+            if (options.formatOnly) {
+                // newCell.f = cell?.f;
+                newCell.v = cell?.v;
+                newCell.m = cell?.m;
+            }
+
+            result.setValue(r, c, newCell || {});
+
+            cellMatrix.setValue(r, c, value || {});
+        });
+
         return result.getData();
     }
 
-    for (let r = startRow; r <= endRow; r++) {
-        for (let c = startColumn; c <= endColumn; c++) {
-            const value: Nullable<ICellData> = target
-                ? target.getValue(r, c)
-                : addMatrix;
-            const cell = cellMatrix.getValue(r, c) || {};
+    target.forValue((r, c, value) => {
+        const cell = cellMatrix.getValue(r, c) || {};
 
-            // set null, clear cell
-            if (!value) {
-                cellMatrix.setValue(r, c, value);
-                result.setValue(r, c, cell);
-                continue;
-            }
-
+        // set null, clear cell
+        if (!value) {
+            cellMatrix.setValue(r, c, value);
+            result.setValue(r, c, cell);
+        } else {
             // update style
 
             // use null to clear style
@@ -126,6 +106,6 @@ export function SetRangeData(
 
             cellMatrix.setValue(r, c, cell);
         }
-    }
+    });
     return result.getData();
 }

@@ -1,6 +1,7 @@
 import { ErrorType } from '../Basics/ErrorType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { FunctionVariantType, NodeValueType } from '../Basics/Common';
+import { BaseValueObject } from '../ValueObject/BaseValueObject';
 
 export class BaseFunction {
     get name() {
@@ -17,6 +18,10 @@ export class BaseFunction {
 
     calculate(...arg: FunctionVariantType[]): NodeValueType {
         return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    checkArrayType(variant: FunctionVariantType) {
+        return variant.isReferenceObject() || (variant.isValueObject() && (variant as BaseValueObject).isArray());
     }
 
     static functionMap: Map<string, BaseFunction> = new Map();

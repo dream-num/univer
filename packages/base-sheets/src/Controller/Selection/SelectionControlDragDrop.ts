@@ -83,22 +83,18 @@ export class SelectionControlDragAndDrop {
 
         bottomControl.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
             bottomControl.cursor = CURSOR_TYPE.MOVE;
-            console.log('onPointerEnterObserver');
         });
 
         bottomControl.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent) => {
             bottomControl.resetCursor();
-            console.log('onPointerLeaveObserver');
         });
 
         bottomControl.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            console.log('onPointerDownObserver');
             this.dragDown(evt, Direction.BOTTOM);
         });
 
         bottomControl.onPointerUpObserver.add((evt: IPointerEvent | IMouseEvent) => {
             bottomControl.resetCursor();
-            console.log('onPointerUpObserver');
         });
 
         // init drag render box
@@ -148,7 +144,7 @@ export class SelectionControlDragAndDrop {
 
         // reset model
         const selection = this._model.getValue().selection;
-        this._model = new SelectionModel(SELECTION_TYPE.NORMAL);
+        this._model = new SelectionModel(SELECTION_TYPE.NORMAL, this._control.getPlugin());
         this._model.setValue(selection);
 
         // update control

@@ -45,7 +45,6 @@ import {
     ITextDecoration,
 } from '../../Interfaces';
 import {
-    getStyle,
     Nullable,
     ObjectArrayPrimitiveType,
     ObjectMatrix,
@@ -455,8 +454,9 @@ export class Range {
             row.map((cell: Nullable<ICellData>) => {
                 const styles = this._context.getWorkBook().getStyles();
 
-                const style = getStyle(styles, cell);
-                return style[arg];
+                // const style = getStyle(styles, cell);
+                const style = styles && styles.getStyleByCell(cell);
+                return (style && style[arg]) || DEFAULT_STYLES[arg];
             })
         );
     }
@@ -1787,7 +1787,6 @@ export class Range {
             sheetId: _worksheet.getSheetId(),
             actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
             cellValue: matrix.getData(),
-            rangeData: destination._rangeData,
         };
         const command = new Command(
             {
@@ -2140,7 +2139,6 @@ export class Range {
                     sheetId: _worksheet.getSheetId(),
                     actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                     cellValue: cellValue.getData(),
-                    rangeData: range,
                 };
                 const command = new Command(
                     {
@@ -2226,7 +2224,6 @@ export class Range {
                 sheetId: _worksheet.getSheetId(),
                 actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                 cellValue: cellValue.getData(),
-                rangeData: range,
                 options,
             };
             const command = new Command(
@@ -2249,7 +2246,6 @@ export class Range {
                 sheetId: _worksheet.getSheetId(),
                 actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                 cellValue: cellValue.getData(),
-                rangeData: range,
             };
             const command = new Command(
                 {
@@ -2462,12 +2458,6 @@ export class Range {
             sheetId: _worksheet.getSheetId(),
             actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
             cellValue: targetMatrix.getData(),
-            rangeData: {
-                startRow: targetStartRow,
-                endRow: targetStartRow + (endRow - startRow),
-                startColumn: targetStartColumn,
-                endColumn: targetStartColumn + (endColumn - startColumn),
-            },
         };
 
         const command = new Command(
@@ -3276,12 +3266,15 @@ export class Range {
      */
     setRangeData(value: ICellData): Range {
         const { _rangeData, _context, _commandManager, _worksheet } = this;
-
+        const { startRow, startColumn } = _rangeData;
         const setValue: ISetRangeDataActionData = {
             sheetId: _worksheet.getSheetId(),
             actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-            cellValue: value,
-            rangeData: _rangeData,
+            cellValue: {
+                [startRow]: {
+                    [startColumn]: value,
+                },
+            },
         };
         const command = new Command(
             {
@@ -3319,7 +3312,6 @@ export class Range {
                 sheetId: _worksheet.getSheetId(),
                 actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                 cellValue: cellValue.getData(),
-                rangeData: this._rangeData,
             };
             const command = new Command(
                 {
@@ -3333,7 +3325,6 @@ export class Range {
                 sheetId: _worksheet.getSheetId(),
                 actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                 cellValue: values,
-                rangeData: this._rangeData,
             };
             const command = new Command(
                 {
@@ -3698,7 +3689,6 @@ export class Range {
                 sheetId: _worksheet.getSheetId(),
                 actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                 cellValue: newData,
-                rangeData: _rangeData,
             },
         ];
         const command = new Command(
@@ -3898,7 +3888,6 @@ export class Range {
             sheetId: _worksheet.getSheetId(),
             actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
             cellValue: cellValue.getData(),
-            rangeData: _rangeData,
         };
         const command = new Command(
             {

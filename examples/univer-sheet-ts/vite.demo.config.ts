@@ -47,10 +47,10 @@ export default defineConfig({
     },
     plugins: [
         preact(),
-        legacy({
-            targets: ['ie >= 11'],
-            additionalLegacyPolyfills: ['regenerator-runtime/runtime'],
-        }),
+        // legacy({
+        //     targets: ['ie >= 11'],
+        //     additionalLegacyPolyfills: ['regenerator-runtime/runtime'],
+        // }),
         createExternal({
             externals: {
                 // '@univer/core': '@univer/core',

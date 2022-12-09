@@ -15,6 +15,7 @@ import {
 } from '@univer/common-plugin-data';
 import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
 import { BaseComponentPlugin } from '@univer/base-component';
+import { ImportXlsxPlugin } from '@univer/sheets-plugin-import-xlsx';
 
 const uiDefaultConfigUp = {
     container: 'universheet-up',
@@ -59,6 +60,7 @@ univerSheetUp.installPlugin(new NumfmtPlugin());
 FormulaPlugin.create(DEFAULT_FORMULA_DATA).installTo(univerSheetUp);
 
 univerSheetUp.installPlugin(new ClipboardPlugin());
+univerSheetUp.installPlugin(new ImportXlsxPlugin());
 
 const univerSheetDown = UniverSheet.newInstance();
 univerSheetDown.installPlugin(new RenderEngine());

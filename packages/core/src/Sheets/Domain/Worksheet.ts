@@ -501,8 +501,6 @@ export class Worksheet {
      * @returns WorkSheet Configures
      */
     getConfig(): IWorksheetConfig {
-        // update merge data
-        this._config.mergeData = this._merges.getMergeData();
         return this._config;
     }
 

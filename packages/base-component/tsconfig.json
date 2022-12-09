@@ -4,7 +4,7 @@
         "outDir": "lib",
         "target": "ESNext",
 
-        "lib": ["ESNext", "DOM", "WebWorker"],
+        "lib": ["ESNext", "DOM", "WebWorker", "dom.iterable"],
         "module": "ESNext",
         "moduleResolution": "Node", //This value is needed for Node.js.
 

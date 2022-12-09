@@ -54,9 +54,9 @@ export class ClipboardExtensionManager {
         return extension;
     }
 
-    pasteResolver(e?: ClipboardEvent) {
+    pasteResolver(evt?: ClipboardEvent) {
         return new Promise((resolve: (value: IClipboardData) => void, reject) => {
-            Clipboard.read(e).then((file: Array<PasteType | null> | null) => {
+            Clipboard.read(evt).then((file: Array<PasteType | null> | null) => {
                 if (!file) return [];
                 const HtmlIndex = file.findIndex((item: PasteType | null, index: number) => item && item.type === 'text/html');
                 const PlainIndex = file.findIndex((item: PasteType | null, index: number) => item && item.type === 'text/plain');

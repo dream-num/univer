@@ -1,5 +1,5 @@
 import { Plugin } from '@univer/core';
-import { IClipboardData } from '../Basics/Interfaces';
+import { IClipboardData, IDragAndDropData } from '../Basics/Interfaces';
 import { ClipboardExtensionManager, DragAndDropExtensionManager } from '../Basics/Register';
 
 export class RegisterManager {
@@ -36,7 +36,10 @@ export class RegisterManager {
 
         if (onDropObservable && !onDropObservable.hasObservers()) {
             onDropObservable.add((evt: DragEvent) => {
-                console.log('onDropObservable event======', evt);
+                this._dragAndDropExtensionManager.dragResolver(evt).then((dataList: IDragAndDropData[]) => {
+                    if (dataList.length === 0) return;
+                    this._dragAndDropExtensionManager.handle(dataList);
+                });
             });
         }
     }

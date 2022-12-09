@@ -6,7 +6,7 @@ import { IDragAndDropData } from '../../Interfaces';
  */
 export class BaseDragAndDropExtension<T extends Plugin = Plugin> {
     // protected _json: IKeyValue;
-    constructor(protected _data: IDragAndDropData, protected _plugin: T) {}
+    constructor(protected _data: File[], protected _plugin: T) {}
 
     /**
      * Execute the core logic after the check is successful
@@ -29,7 +29,7 @@ export class BaseDragAndDropExtensionFactory<T extends Plugin = Plugin> {
      * @param data
      * @returns
      */
-    create(data: IDragAndDropData): BaseDragAndDropExtension {
+    create(data: File[]): BaseDragAndDropExtension {
         return new BaseDragAndDropExtension(data, this._plugin);
     }
 
@@ -38,7 +38,7 @@ export class BaseDragAndDropExtensionFactory<T extends Plugin = Plugin> {
      * @param data
      * @returns
      */
-    check(data: IDragAndDropData): false | BaseDragAndDropExtension {
+    check(data: IDragAndDropData[]): false | BaseDragAndDropExtension {
         return false;
     }
 }

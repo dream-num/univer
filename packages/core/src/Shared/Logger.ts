@@ -2,9 +2,15 @@
  * Logging tool
  */
 export class Logger {
-    static info(...value: unknown[]): void {
+    static log(...value: unknown[]): void {
         if (console) {
             console.log(...value);
+        }
+    }
+
+    static info(...value: unknown[]): void {
+        if (console) {
+            console.info(...value);
         }
     }
 

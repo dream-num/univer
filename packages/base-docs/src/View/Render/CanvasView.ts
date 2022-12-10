@@ -66,7 +66,7 @@ export class CanvasView {
         engine.runRenderLoop(() => {
             scene.render();
             const app = document.getElementById('app');
-            if(app){
+            if (app) {
                 app.innerText = `fps:${Math.round(engine.getFps()).toString()}`;
             }
         });

@@ -13,7 +13,7 @@ import {
  * Properties of document
  */
 export interface IDocumentData extends IReferenceSource {
-    documentId: string;
+    documentId: string; // unit id
     locale?: LocaleType;
     title?: string;
     body?: IDocumentBody;

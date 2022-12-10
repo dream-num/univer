@@ -1,6 +1,6 @@
 import { BooleanNumber, HorizontalAlign, Nullable, Observable, Observer, VerticalAlign, WrapStrategy } from '@univer/core';
 import { DocComponent } from './DocComponent';
-import { IDocumentSkeletonCached, IDocumentSkeletonPage, LineType, PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
+import { IDocumentSkeletonCached, IDocumentSkeletonPage, IDocumentSkeletonSpan, LineType, PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';
 import { DocumentsSpanAndLineExtensionRegistry, IExtensionConfig } from '../Extension';
 import { DocumentSkeleton } from './DocSkeleton';
@@ -11,6 +11,7 @@ import { fixLineWidthByScale, getScale, degToRad } from '../../Basics/Tools';
 import { DocsEditor } from './Document.Editor';
 import { Liquid } from './Common';
 import { Scene } from '../../Scene';
+import { TextSelection } from './Common/TextSelection';
 
 export interface IDocumentsConfig {
     pageMarginLeft?: number;
@@ -210,6 +211,36 @@ export class Documents extends DocComponent {
     disableEditor() {
         this._editor?.dispose();
         this._hasEditor = false;
+    }
+
+    getEditorInputEvent() {
+        if (!this._hasEditor) {
+            return;
+        }
+        const { onInputObservable, onCompositionstartObservable, onCompositionupdateObservable, onCompositionendObservable, onKeydownObservable } = this._editor;
+        return { onInputObservable, onCompositionstartObservable, onCompositionupdateObservable, onCompositionendObservable, onKeydownObservable };
+    }
+
+    remainActiveSelection() {
+        if (!this._hasEditor) {
+            return;
+        }
+        return this._editor.remain();
+    }
+
+    addSelection(textSelection: TextSelection) {
+        if (!this._hasEditor) {
+            return;
+        }
+        return this._editor.add(textSelection);
+    }
+
+    syncSelection() {
+        if (!this._hasEditor) {
+            return;
+        }
+
+        return this._editor.sync();
     }
 
     get hasEditor() {
@@ -431,6 +462,105 @@ export class Documents extends DocComponent {
         this.setSkeleton(newSkeleton);
         this._addSkeletonChangeObserver(newSkeleton);
         return this;
+    }
+
+    findPositionBySpan(span: IDocumentSkeletonSpan) {
+        const divide = span.parent;
+
+        const line = divide?.parent;
+
+        const column = line?.parent;
+
+        const section = column?.parent;
+
+        const page = section?.parent;
+
+        const skeletonData = this.getSkeleton()?.getSkeletonData();
+
+        if (!divide || !column || !section || !page || !skeletonData) {
+            return;
+        }
+
+        let spanIndex = divide.spanGroup.indexOf(span);
+
+        const divideIndex = line.divides.indexOf(divide);
+
+        const lineIndex = column.lines.indexOf(line);
+
+        const columnIndex = section.columns.indexOf(column);
+
+        const sectionIndex = page.sections.indexOf(section);
+
+        const pageIndex = skeletonData.pages.indexOf(page);
+
+        return {
+            span: spanIndex,
+            divide: divideIndex,
+            line: lineIndex,
+            column: columnIndex,
+            section: sectionIndex,
+            page: pageIndex,
+        };
+    }
+
+    findNodeByCharIndex(charIndex: number): Nullable<IDocumentSkeletonSpan> {
+        const skeleton = this.getSkeleton();
+
+        if (!skeleton) {
+            return;
+        }
+
+        const skeletonData = skeleton.getSkeletonData();
+
+        const pages = skeletonData.pages;
+
+        for (let page of pages) {
+            const { sections, st, ed } = page;
+
+            if (charIndex < st || charIndex > ed) {
+                continue;
+            }
+
+            for (let section of sections) {
+                const { columns, st, ed } = section;
+
+                if (charIndex < st || charIndex > ed) {
+                    continue;
+                }
+
+                for (let column of columns) {
+                    const { lines, st, ed } = column;
+
+                    if (charIndex < st || charIndex > ed) {
+                        continue;
+                    }
+
+                    for (let line of lines) {
+                        const { divides, lineHeight, st, ed } = line;
+                        const divideLength = divides.length;
+
+                        if (charIndex < st || charIndex > ed) {
+                            continue;
+                        }
+
+                        for (let i = 0; i < divideLength; i++) {
+                            const divide = divides[i];
+                            const { spanGroup, st, ed } = divide;
+
+                            if (charIndex < st || charIndex > ed) {
+                                continue;
+                            }
+
+                            const span = spanGroup[charIndex - st];
+
+                            if (span) {
+                                return span;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     findNodeByCoord(offsetX: number, offsetY: number) {

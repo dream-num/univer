@@ -42,3 +42,11 @@ export enum KeyCode {
     NUM_LOCK = 144,
     SCROLL_LOCK = 145,
 }
+
+/**
+ * https://www.freecodecamp.org/news/javascript-keycode-list-keypress-event-key-codes/
+ */
+export enum KeyboardKeyType {
+    backspace = 'Backspace',
+    delete = 'Delete',
+}

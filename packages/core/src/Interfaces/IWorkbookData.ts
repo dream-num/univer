@@ -10,7 +10,7 @@ import { INamedRange } from './INamedRange';
 export interface IWorkbookConfig {
     createdTime: string;
     lastModifiedBy: string;
-    id: string;
+    id: string; // unit id
     locale: LocaleType;
     name: string;
     theme: string;

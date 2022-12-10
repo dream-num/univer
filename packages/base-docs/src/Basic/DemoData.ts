@@ -12,7 +12,7 @@ import {
     WrapTextType,
 } from '@univer/core';
 
-export const docsDemoData: IDocumentData = {
+export const DOCS_DEMO_DATA: IDocumentData = {
     documentId: 'd',
     drawings: {
         shapeTest1: {

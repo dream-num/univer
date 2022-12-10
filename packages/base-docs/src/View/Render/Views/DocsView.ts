@@ -1,5 +1,5 @@
 import { getColor, Rect, Documents, DocumentSkeleton } from '@univer/base-render';
-import { docsDemoData } from '../../../Basic/DemoData';
+import { IDocumentData } from '@univer/core';
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 import { CANVAS_VIEW_KEY } from '../BaseView';
 
@@ -20,7 +20,9 @@ export class DocsView extends BaseView {
         const scene = this.getScene();
         const context = this.getContext();
 
-        const documentSkeleton = this._buildSkeleton();
+        const docsModel = context.getDocument();
+
+        const documentSkeleton = this._buildSkeleton(docsModel.getSnapshot());
 
         const documents = new Documents(DOCS_VIEW_KEY.MAIN, documentSkeleton);
         documents.zIndex = 1000;
@@ -76,10 +78,10 @@ export class DocsView extends BaseView {
         return this._documents;
     }
 
-    private _buildSkeleton() {
+    private _buildSkeleton(snapshot: IDocumentData) {
         const context = this.getContext();
 
-        const docsSkeleton = DocumentSkeleton.create(docsDemoData, context);
+        const docsSkeleton = DocumentSkeleton.create(snapshot, context);
 
         return docsSkeleton;
     }

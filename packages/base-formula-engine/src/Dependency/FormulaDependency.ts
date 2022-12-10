@@ -145,8 +145,6 @@ export class FormulaDependencyGenerator {
     private _includeTree(tree: FormulaDependencyTree) {
         const unitId = tree.unitId;
         const sheetId = tree.sheetId;
-        // const row = tree.row;
-        // const column = tree.column;
 
         if (!this._updateRangeFlattenCache.has(unitId)) {
             return false;
@@ -163,10 +161,6 @@ export class FormulaDependencyGenerator {
         if (tree.compareRangeData(rangeData)) {
             return true;
         }
-
-        // if (rangeObjectMatrix.getValue(row, column)) {
-        //     return true;
-        // }
 
         return false;
     }
@@ -187,6 +181,11 @@ export class FormulaDependencyGenerator {
                 }
             }
 
+            /**
+             * forceCalculate: Mandatory calculation, adding all formulas to dependencies
+             * tree.dependencyRange: Formula dependent modification range
+             * includeTree: modification range contains formula
+             */
             if ((this._forceCalculate || tree.dependencyRange(this._updateRangeFlattenCache) || this._includeTree(tree)) && !existTree.has(tree)) {
                 newTreeList.push(tree);
                 existTree.add(tree);

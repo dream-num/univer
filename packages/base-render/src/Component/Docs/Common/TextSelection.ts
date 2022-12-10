@@ -568,11 +568,9 @@ export class TextSelection {
         const firstCursor = cursorList[0];
 
         this._cursor = firstCursor.cursorStart;
-
-        console.log('this._cursor', this._cursor);
     }
 
-    get cursor() {
+    getCursor() {
         return this._cursor;
     }
 

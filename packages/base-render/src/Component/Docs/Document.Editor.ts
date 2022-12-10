@@ -1,4 +1,4 @@
-import { Nullable, Observer } from '@univer/core';
+import { Nullable, Observable, Observer } from '@univer/core';
 import { IDocumentSkeletonCached, IDocumentSkeletonSpan } from '../../Basics/IDocumentSkeletonCached';
 import { CURSOR_TYPE } from '../../Basics/Const';
 import { IMouseEvent, IPointerEvent } from '../../Basics/IEvents';
@@ -10,7 +10,9 @@ import { INodePosition, TextSelection } from './Common/TextSelection';
 import { IScrollObserverParam, Viewport } from '../../Viewport';
 import { checkStyle, injectStyle } from '../../Basics/Tools';
 
-import { Vector2 } from '../../Basics';
+import { Vector2 } from '../../Basics/Vector2';
+
+import { IEditorInputConfig } from '../../Basics/Interfaces';
 
 interface INodeInfo {
     node: IDocumentSkeletonSpan;
@@ -39,17 +41,11 @@ export class DocsEditor {
 
     private _skeletonObserver: Nullable<Observer<IDocumentSkeletonCached>>;
 
-    private _startOffsetX: number;
-
-    private _startOffsetY: number;
-
     private _viewportScrollX: number;
 
     private _viewportScrollY: number;
 
     private _textSelectionList: TextSelection[] = [];
-
-    private _startNodePosition: INodePosition;
 
     private _activeViewport: Nullable<Viewport>;
 
@@ -60,6 +56,16 @@ export class DocsEditor {
             scrollBefore: Nullable<Observer<IScrollObserverParam>>;
         }
     >();
+
+    onKeydownObservable = new Observable<IEditorInputConfig>();
+
+    onInputObservable = new Observable<IEditorInputConfig>();
+
+    onCompositionstartObservable = new Observable<IEditorInputConfig>();
+
+    onCompositionupdateObservable = new Observable<IEditorInputConfig>();
+
+    onCompositionendObservable = new Observable<IEditorInputConfig>();
 
     constructor(private _documents?: Documents) {
         this._initialDom();
@@ -209,41 +215,14 @@ export class DocsEditor {
 
         const { node: span, ratioX, ratioY } = node;
 
-        const divide = span.parent;
+        const position = this._documents?.findPositionBySpan(span);
 
-        const line = divide?.parent;
-
-        const column = line?.parent;
-
-        const section = column?.parent;
-
-        const page = section?.parent;
-
-        const skeletonData = this._getSkeletonData();
-
-        if (!divide || !column || !section || !page || !skeletonData) {
+        if (position == null) {
             return;
         }
 
-        const spanIndex = divide.spanGroup.indexOf(span);
-
-        const divideIndex = line.divides.indexOf(divide);
-
-        const lineIndex = column.lines.indexOf(line);
-
-        const columnIndex = section.columns.indexOf(column);
-
-        const sectionIndex = page.sections.indexOf(section);
-
-        const pageIndex = skeletonData.pages.indexOf(page);
-
         return {
-            span: spanIndex,
-            divide: divideIndex,
-            line: lineIndex,
-            column: columnIndex,
-            section: sectionIndex,
-            page: pageIndex,
+            ...position,
             isBack: ratioX < 0.5,
         };
     }
@@ -346,7 +325,7 @@ export class DocsEditor {
 
         this._cursor.style.height = `${height}px`;
 
-        console.log('_syncDomToSelection', left, top, absoluteCoord?.x || 0, absoluteCoord?.y || 0);
+        // console.log('_syncDomToSelection', left, top, absoluteCoord?.x || 0, absoluteCoord?.y || 0);
 
         let { left: canvasLeft, top: canvasTop } = this._getCanvasOffset();
 
@@ -359,8 +338,8 @@ export class DocsEditor {
 
     private _moving(moveOffsetX: number, moveOffsetY: number, scrollTimer: ScrollTimer) {
         const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
-        const endX = moveOffsetX - this._viewportScrollX + scrollX;
-        const endY = moveOffsetY - this._viewportScrollY + scrollY;
+        // const endX = moveOffsetX - this._viewportScrollX + scrollX;
+        // const endY = moveOffsetY - this._viewportScrollY + scrollY;
 
         if (!this._documents) {
             return;
@@ -451,44 +430,103 @@ export class DocsEditor {
     private _isIMEInputApply = false;
 
     private _attachInputEvent() {
+        this._input.addEventListener('keydown', (e) => {
+            if (this._isIMEInputApply) {
+                return;
+            }
+            const selection = this._getActiveTextSelection();
+            if (this._documents == null) {
+                return;
+            }
+            this.onKeydownObservable.notifyObservers({
+                event: e,
+                content: '',
+                document: this._documents,
+                selection,
+            });
+        });
+
         this._input.addEventListener('input', (e) => {
             if (this._isIMEInputApply) {
                 return;
             }
 
-            const content = this._input.innerHTML;
+            const content = this._input.textContent || '';
+
+            this._input.innerHTML = '';
 
             const selection = this._getActiveTextSelection();
 
-            const inputStart = selection?.getStart();
-
-            if (!inputStart) {
+            if (this._documents == null) {
                 return;
             }
 
-            console.log(1);
+            this.onInputObservable.notifyObservers({
+                event: e,
+                content,
+                document: this._documents,
+                selection,
+            });
         });
 
         this._input.addEventListener('compositionstart', (e) => {
             this._isIMEInputApply = true;
+
+            const content = this._input.textContent || '';
+
+            this._input.innerHTML = '';
+
+            const selection = this._getActiveTextSelection();
+
+            if (this._documents == null) {
+                return;
+            }
+
+            this.onCompositionstartObservable.notifyObservers({
+                event: e,
+                content,
+                document: this._documents,
+                selection,
+            });
         });
 
         this._input.addEventListener('compositionend', (e) => {
             this._isIMEInputApply = false;
-            const content = this._input.innerHTML;
+            const content = this._input.textContent || '';
+
+            this._input.innerHTML = '';
+
+            const selection = this._getActiveTextSelection();
+
+            if (this._documents == null) {
+                return;
+            }
+
+            this.onCompositionendObservable.notifyObservers({
+                event: e,
+                content,
+                document: this._documents,
+                selection,
+            });
         });
 
         this._input.addEventListener('compositionupdate', (e) => {
-            console.log('onCompositionUpdate', this._input.innerHTML);
-            const content = this._input.innerHTML;
-            // ctx.fillText(content, 10, 90);
-            // const measure = ctx.measureText(content);
-            // const { width, fontBoundingBoxAscent, fontBoundingBoxDescent } = measure;
-            // ctx.beginPath();
-            // ctx.setLineDash([1, 2]);
-            // ctx.moveTo(10, 90 + fontBoundingBoxDescent);
-            // ctx.lineTo(10 + width, 90 + fontBoundingBoxDescent);
-            // ctx.stroke();
+            const content = this._input.textContent || '';
+
+            this._input.innerHTML = '';
+
+            const selection = this._getActiveTextSelection();
+
+            if (this._documents == null) {
+                return;
+            }
+
+            this.onCompositionupdateObservable.notifyObservers({
+                event: e,
+                content,
+                document: this._documents,
+                selection,
+            });
         });
     }
 
@@ -505,8 +543,6 @@ export class DocsEditor {
 
         this._downObserver = documents.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
             const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
-            this._startOffsetX = evtOffsetX;
-            this._startOffsetY = evtOffsetY;
 
             if (!this._documents) {
                 return;
@@ -535,8 +571,6 @@ export class DocsEditor {
             this._activeSelectionRefresh();
 
             this._syncDomToSelection();
-
-            this._startNodePosition = position;
 
             scene.disableEvent();
 
@@ -574,6 +608,11 @@ export class DocsEditor {
         documents.onPointerLeaveObserver.remove(this._moveOutObserver);
         documents.onPointerDownObserver.remove(this._downObserver);
         documents.getSkeleton()?.onRecalculateChangeObservable.remove(this._skeletonObserver);
+        this.onKeydownObservable.clear();
+        this.onInputObservable.clear();
+        this.onCompositionstartObservable.clear();
+        this.onCompositionupdateObservable.clear();
+        this.onCompositionendObservable.clear();
     }
 
     private _activeSelectionRefresh() {
@@ -583,6 +622,24 @@ export class DocsEditor {
         const activeSelection = this._getActiveTextSelection();
 
         activeSelection?.refresh(this._documents);
+    }
+
+    add(textSelection: TextSelection) {
+        this._addTextSelection(textSelection);
+    }
+
+    remain() {
+        const activeSelection = this._getActiveTextSelection();
+        if (activeSelection == null) {
+            return;
+        }
+        const index = this._textSelectionList.indexOf(activeSelection);
+
+        return this._textSelectionList.splice(index, 1)[0];
+    }
+
+    sync() {
+        this._syncDomToSelection();
     }
 
     active(x: number, y: number) {

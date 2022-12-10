@@ -1,22 +1,22 @@
 import { IDocumentData } from '../Interfaces';
 import { ContextBase } from './ContextBase';
-import { Document } from '../Docs/Domain/Document';
+import { DocumentModel } from '../Docs/Domain/DocumentModel';
 
 /**
  * Core context, mount important instances, managers
  */
 export class DocContext extends ContextBase {
-    protected _document: Document;
+    protected _document: DocumentModel;
 
     constructor(univerDocData: Partial<IDocumentData> = {}) {
         super();
         this._locale.initialize(univerDocData.locale);
-        this._document = new Document(univerDocData, this);
+        this._document = new DocumentModel(univerDocData, this);
     }
 
     protected _setObserver(): void {}
 
-    getDocument(): Document {
+    getDocument(): DocumentModel {
         return this._document;
     }
 }

@@ -1,24 +1,23 @@
 import { BooleanNumber } from '../../Enum/TextStyle';
 import {
     BlockType,
-    IBlockElement,
     IParagraph,
     ParagraphElementType,
 } from '../../Interfaces/IDocumentData';
 import { DocumentModel } from '../Domain/DocumentModel';
 import {
+    deleteContent,
     getTextStartByAnchor,
-    insertTextToContent,
     moveBlockCharIndex,
     moveElementCharIndex,
 } from './Common';
 
-export function InsertTextApply(
+export function DeleteTextApply(
     document: DocumentModel,
-    config: { text: string; start: number; length: number; segmentId?: string }
+    config: { start: number; length: number; segmentId?: string }
 ) {
     const doc = document.getSnapshot();
-    const { text, start, length, segmentId } = config;
+    const { start, length, segmentId } = config;
 
     const textStart = getTextStartByAnchor(start);
 
@@ -51,45 +50,42 @@ export function InsertTextApply(
             continue;
         }
 
-        const { blockType } = blockElement;
+        const { st, ed, blockType } = blockElement;
+
+        if (isApplied) {
+            switch (blockType) {
+                case BlockType.PARAGRAPH:
+                    moveBlockCharIndex(blockElement, -length);
+                    break;
+            }
+            continue;
+        }
+
+        if (textStart < st || textStart > ed) {
+            continue;
+        }
 
         switch (blockType) {
             case BlockType.PARAGRAPH:
                 isApplied = paragraphApply(
-                    text,
                     start,
                     textStart,
                     length,
-                    blockElement,
-                    blockElement.paragraph,
-                    isApplied
+                    blockElement.paragraph
                 );
-                blockElement.ed += length;
+                blockElement.ed -= length;
                 break;
         }
     }
 }
 
 function paragraphApply(
-    text: string,
     start: number,
     textStart: number,
     length: number,
-    blockElement: IBlockElement,
-    paragraph?: IParagraph,
-    isApplied: boolean = false
+    paragraph?: IParagraph
 ) {
-    if (isApplied) {
-        moveBlockCharIndex(blockElement, length);
-    }
-
-    const { st, ed } = blockElement;
-
     let isApply = false;
-
-    if (textStart < st) {
-        return isApply;
-    }
 
     if (paragraph == null) {
         return isApply;
@@ -101,18 +97,10 @@ function paragraphApply(
         const { elementId, paragraphElementType } = elementInfo;
         const element = elements[elementId];
 
-        if (paragraphElementType === ParagraphElementType.DRAWING) {
-            continue;
-        }
-
         const { st, ed, tr } = element;
 
-        if (isApply || isApplied) {
-            moveElementCharIndex(element, length);
-        }
-
-        if (isApplied) {
-            continue;
+        if (isApply) {
+            moveElementCharIndex(element, -length);
         }
 
         if (textStart < st || textStart > ed) {
@@ -136,16 +124,12 @@ function paragraphApply(
                 continue;
             }
 
-            const newContent = insertTextToContent(tr.ct || '', relative, text);
+            const newContent = deleteContent(tr.ct || '', relative, length);
 
             tr.ct = newContent;
 
             element.ed += length;
         }
-    }
-
-    if (isApplied) {
-        return true;
     }
 
     return isApply;

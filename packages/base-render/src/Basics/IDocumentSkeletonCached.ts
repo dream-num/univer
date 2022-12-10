@@ -1,4 +1,15 @@
-import { BulletAlignment, ColumnSeparatorType, IDrawing, INestingLevel, IParagraphStyle, ITextStyle, IDocumentRenderConfig, IIndentStart, PageOrientType } from '@univer/core';
+import {
+    BulletAlignment,
+    ColumnSeparatorType,
+    IDrawing,
+    INestingLevel,
+    IParagraphStyle,
+    ITextStyle,
+    IDocumentRenderConfig,
+    IIndentStart,
+    PageOrientType,
+    IElement,
+} from '@univer/core';
 
 export interface IDocumentSkeletonCached extends ISkeletonResourceReference {
     pages: IDocumentSkeletonPage[];
@@ -14,12 +25,13 @@ export interface ISkeletonResourceReference {
     /* Global cache, does not participate in rendering, only helps skeleton generation */
     skeListLevel?: Map<string, IDocumentSkeletonBullet[]>; // 有序列表缓存，id：{ level: max(width)的bullet }
     blockAnchor?: Map<string, IDocumentSkeletonBlockAnchor>; // Anchor point to assist floating element positioning
+    features?: Map<string, IDocumentSkeletonSpanFeature>;
 }
 
 export interface IDocumentSkeletonBlockAnchor {
     elements: IDocumentSkeletonLine[]; // element: lines, tr
     blockId: string; // block id
-    top: number; // top 相对于上一个block的高度
+    top: number; // relative height for previous block
 }
 
 export interface IDocumentSkeletonHeaderFooterBase {
@@ -71,8 +83,8 @@ export interface IDocumentSkeletonSection {
     // section坐标系相对于page
     height: number; // 设置的高度， 如果未指定则与pageContentHeight相同 = pageHeight - marginTop - marginBottom
     top: number; // 根据pre height计算下一个section开始位置
-    st?: number; // startIndex 文本开始索引
-    ed?: number; // endIndex 文本结束索引
+    st: number; // startIndex 文本开始索引
+    ed: number; // endIndex 文本结束索引
     parent?: IDocumentSkeletonPage;
 }
 
@@ -137,16 +149,17 @@ export interface IDocumentSkeletonSpan {
     // word or letter or image or custom
     eId?: string; // elementId, For custom cases
     spanType: SpanType; // SpanType
-    width: number; // 总宽度
-    bBox: IDocumentSkeletonBoundingBox; // bBox Span的宽高信息
-    paddingLeft: number; // paddingLeft，左侧间隔，调整文字在内部的对齐
+    width: number; // cum width
+    bBox: IDocumentSkeletonBoundingBox; // bBox: size of Span
+    paddingLeft: number; // paddingLeft, adjust text align in span
     left: number; // left
     count?: number; // count, content，default 1
     content?: string; // content
-    ts?: ITextStyle; // 文字样式
-    fontStyle?: IDocumentSkeletonFontStyle; // fontStyle 从ITextStyle转换为canvas font
+    ts?: ITextStyle; // text style
+    fontStyle?: IDocumentSkeletonFontStyle; // fontStyle : ITextStyle convert to canvas font
     parent?: IDocumentSkeletonDivide;
-    url?: string; // image url链接;
+    url?: string; // image url
+    featureId?: string; // support interaction for feature ,eg. hyperLine person
 }
 
 export interface IDocumentSkeletonBullet extends IIndentStart {
@@ -173,6 +186,11 @@ export interface IDocumentSkeletonDrawing {
     angle: number; // 旋转
     initialState: boolean; // 是否初始化
     drawingOrigin: IDrawing;
+}
+
+export interface IDocumentSkeletonSpanFeature {
+    featureId: string;
+    element: IElement;
 }
 
 export interface IDocumentSkeletonFontStyle {

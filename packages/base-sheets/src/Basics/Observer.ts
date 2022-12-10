@@ -4,6 +4,7 @@ import { SelectionControl } from '../Controller/Selection/SelectionController';
 import { SheetContainer } from '../View/UI/SheetContainer';
 import { ToolBar } from '../View/UI/ToolBar/ToolBar';
 import { LineColor } from '../View/UI/Common/Line/LineColor';
+import { LineBold } from '../View/UI/Common/Line/LineBold';
 import { ModalGroup } from '../View/UI/ModalGroup/ModalGroup';
 import { RichText } from '../View/UI/RichText/RichText';
 import { CellRangeModal } from '../View/UI/Common/CellRange/CellRangeModal';
@@ -49,6 +50,7 @@ export type SheetPluginObserve = {
     onFormulaBarDidMountObservable: Observable<FormulaBar>;
 
     onLineColorDidMountObservable: Observable<LineColor>;
+    onLineBoldDidMountObservable: Observable<LineBold>;
 
     onSheetContainerDidMountObservable: Observable<SheetContainer>;
     onCellRangeModalDidMountObservable: Observable<CellRangeModal>;
@@ -130,6 +132,8 @@ export function install(plugin: Plugin) {
     plugin.pushToObserve('onFormulaBarDidMountObservable');
 
     plugin.pushToObserve('onLineColorDidMountObservable');
+    plugin.pushToObserve('onLineBoldDidMountObservable');
+
     plugin.pushToObserve('onSheetBarDidMountObservable');
     plugin.pushToObserve('onCountBarDidMountObservable');
     plugin.pushToObserve('onInfoBarDidMountObservable');

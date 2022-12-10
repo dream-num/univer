@@ -1,5 +1,5 @@
 import { BaseComponentRender } from '@univer/base-component';
-import { Range, BorderType, BorderStyleTypes, HorizontalAlign, VerticalAlign, WrapStrategy, DEFAULT_STYLES } from '@univer/core';
+import { Range, HorizontalAlign, VerticalAlign, WrapStrategy, DEFAULT_STYLES, BorderType } from '@univer/core';
 import { ColorPicker } from '@univer/style-universheet';
 import { SheetPlugin } from '../SheetPlugin';
 
@@ -12,6 +12,7 @@ import { ToolBar } from '../View/UI/ToolBar';
 import styles from '../View/UI/ToolBar/index.module.less';
 import {
     BORDER_LINE_CHILDREN,
+    BORDER_SIZE_CHILDREN,
     FONT_FAMILY_CHILDREN,
     FONT_SIZE_CHILDREN,
     HORIZONTAL_ALIGN_CHILDREN,
@@ -21,10 +22,11 @@ import {
     VERTICAL_ALIGN_CHILDREN,
 } from '../View/UI/ToolBar/Const';
 import { DefaultToolbarConfig } from '../Basics';
+import { LineBold } from '../View/UI/Common/Line/LineBold';
 
 interface BorderInfo {
     color: string;
-    width: string;
+    type: number;
 }
 
 /**
@@ -42,6 +44,8 @@ export class ToolBarController {
     private _moreText: Record<string, string>;
 
     private _lineColor: LineColor;
+
+    private _lineBold: LineBold;
 
     Render: BaseComponentRender;
 
@@ -130,12 +134,11 @@ export class ToolBarController {
 
         this._initRegisterComponent();
 
-        // const toolbarConfig = config ? Tools.deepClone(DefaultToolbarConfig) : Tools.deepMerge(DefaultToolbarConfig, config);
         const toolbarConfig = config || DefaultToolbarConfig;
 
         this._borderInfo = {
-            color: '#000',
-            width: '1',
+            color: 'rgb(217, 217, 217)',
+            type: 1,
         };
 
         this._toolList = [
@@ -298,9 +301,10 @@ export class ToolBarController {
                 show: toolbarConfig.border,
                 tooltipLocale: 'toolbar.border.main',
                 className: styles.selectDoubleString,
-                onClick: (type) => {
-                    // console.dir(type);
-                    // console.dir(this._borderInfo);
+                onClick: (value) => {
+                    if (value) {
+                        this.setBorder(value);
+                    }
                 },
                 name: 'border',
                 children: [
@@ -325,26 +329,18 @@ export class ToolBarController {
                             },
                         ],
                     },
-                    // {
-                    //     locale: 'borderLine.borderSize',
-                    //     suffix: 'RightIcon',
-                    //     value: 1,
-                    //     unSelectable: true,
-                    //     children: [
-                    //         { locale: 'borderLine.borderNone', value: 0 },
-                    //         { label: 'BorderThin', value: 1 },
-                    //         { label: 'BorderHair', value: 2 },
-                    //         { label: 'BorderDotted', value: 3 },
-                    //         { label: 'BorderDashed', value: 4 },
-                    //         { label: 'BorderDashDot', value: 5 },
-                    //         { label: 'BorderDashDotDot', value: 6 },
-                    //         { label: 'BorderMedium', value: 7 },
-                    //         { label: 'BorderMediumDashed', value: 8 },
-                    //         { label: 'BorderMediumDashDot', value: 9 },
-                    //         { label: 'BorderMediumDashDotDot', value: 10 },
-                    //         { label: 'BorderThick', value: 12 },
-                    //     ],
-                    // },
+                    {
+                        customLabel: {
+                            name: pluginName + LineBold.name,
+                            props: {
+                                locale: 'borderLine.borderSize',
+                            },
+                        },
+                        onClick: (...arg) => this.handleLineBold(arg[1], arg[2], arg[0]),
+                        className: styles.selectLineBoldParent,
+                        unSelectable: true,
+                        children: BORDER_SIZE_CHILDREN,
+                    },
                 ],
             },
             {
@@ -486,6 +482,10 @@ export class ToolBarController {
             //初始化视图
             this._lineColor = component;
         });
+        this._plugin.getObserver('onLineBoldDidMountObservable')?.add((component) => {
+            //初始化视图
+            this._lineBold = component;
+        });
 
         this._plugin.context
             .getObserverManager()
@@ -535,6 +535,7 @@ export class ToolBarController {
 
         // 注册自定义组件
         this._plugin.registerComponent(pluginName + LineColor.name, LineColor);
+        this._plugin.registerComponent(pluginName + LineBold.name, LineBold);
         this._plugin.registerComponent(pluginName + ColorPicker.name, ColorPicker);
     }
 
@@ -660,7 +661,7 @@ export class ToolBarController {
         }
     }
 
-    setBorder(type: BorderType, color: string, style: BorderStyleTypes) {
+    setBorder(type: BorderType) {
         const controls = this._plugin.getSelectionManager().getCurrentControls();
 
         if (controls && controls.length > 0) {
@@ -673,7 +674,7 @@ export class ToolBarController {
                     endColumn: model.endColumn,
                 };
 
-                this._plugin.getContext().getWorkBook().getActiveSheet().getRange(range).setBorderByType(type, color, style);
+                this._plugin.getContext().getWorkBook().getActiveSheet().getRange(range).setBorderByType(type, this._borderInfo.color, this._borderInfo.type);
             });
         }
     }
@@ -683,6 +684,14 @@ export class ToolBarController {
         e.stopPropagation();
         this._lineColor.setColor(color);
         this._borderInfo.color = color;
+    }
+
+    // 改变边框线粗细
+    handleLineBold(value: string, index: number, e: MouseEvent) {
+        e.stopPropagation();
+        if (!value) return;
+        this._lineBold.setLineType(value);
+        this._borderInfo.type = index;
     }
 
     addToolButton(config: IToolBarItemProps) {

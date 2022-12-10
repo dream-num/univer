@@ -81,7 +81,6 @@ export class Clipboard {
         const result = [];
         const clipboardData = e?.clipboardData;
         const types = clipboardData?.types;
-        console.dir(types);
         if (!types) return null;
         for (let i = 0; i < types.length; i++) {
             result.push({

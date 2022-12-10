@@ -184,6 +184,17 @@ export class SheetContainerController {
             SearchIcon: this._render.renderFunction('SearchIcon'),
             ReplaceIcon: this._render.renderFunction('ReplaceIcon'),
             LocationIcon: this._render.renderFunction('LocationIcon'),
+            BorderDashDot: this._render.renderFunction('BorderDashDot'),
+            BorderDashDotDot: this._render.renderFunction('BorderDashDotDot'),
+            BorderDashed: this._render.renderFunction('BorderDashed'),
+            BorderDotted: this._render.renderFunction('BorderDotted'),
+            BorderHair: this._render.renderFunction('BorderHair'),
+            BorderMedium: this._render.renderFunction('BorderMedium'),
+            BorderMediumDashDot: this._render.renderFunction('BorderMediumDashDot'),
+            BorderMediumDashDotDot: this._render.renderFunction('BorderMediumDashDotDot'),
+            BorderMediumDashed: this._render.renderFunction('BorderMediumDashed'),
+            BorderThick: this._render.renderFunction('BorderThick'),
+            BorderThin: this._render.renderFunction('BorderThin'),
         };
 
         // 注册自定义组件

@@ -2,7 +2,10 @@ import { IconComponent, JSXComponent } from '@univer/base-component';
 import { Component, createRef, RefObject } from 'preact';
 import { CanvasIcon } from '../CanvasIcon';
 
-interface IProps {}
+interface IProps {
+    width?: string;
+    height?: string;
+}
 interface IState {}
 
 class BorderMediumDashed extends Component<IProps, IState> {
@@ -17,7 +20,8 @@ class BorderMediumDashed extends Component<IProps, IState> {
     }
 
     render() {
-        return <CanvasIcon ref={this.ref} width="100" height="10" drawLine={(dom) => this.drawLine(dom)} />;
+        const { width = '100', height = '10' } = this.props;
+        return <CanvasIcon ref={this.ref} width={width} height={height} drawLine={(dom) => this.drawLine(dom)} />;
     }
 }
 

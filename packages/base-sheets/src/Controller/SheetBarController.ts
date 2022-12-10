@@ -34,15 +34,24 @@ class SheetBarUIController {
         this._sheetUl = [
             {
                 locale: 'sheetConfig.delete',
-                onClick: () => barControl.deleteSheet(),
+                onClick: (...arg) => {
+                    arg[1].ref.hideSelect();
+                    barControl.deleteSheet();
+                },
             },
             {
                 locale: 'sheetConfig.copy',
-                onClick: () => barControl.copySheet(),
+                onClick: (...arg) => {
+                    arg[1].ref.hideSelect();
+                    barControl.copySheet();
+                },
             },
             {
                 locale: 'sheetConfig.rename',
-                onClick: () => barControl.reNameSheet(),
+                onClick: (...arg) => {
+                    arg[1].ref.hideSelect();
+                    barControl.reNameSheet();
+                },
             },
             {
                 locale: 'sheetConfig.changeColor',
@@ -60,20 +69,32 @@ class SheetBarUIController {
             {
                 locale: 'sheetConfig.hide',
                 border: true,
-                onClick: () => barControl.hideSheet(),
+                onClick: (...arg) => {
+                    arg[1].ref.hideSelect();
+                    barControl.hideSheet();
+                },
             },
             {
                 locale: 'sheetConfig.unhide',
-                onClick: () => barControl.unHideSheet(),
+                onClick: (...arg) => {
+                    arg[1].ref.hideSelect();
+                    barControl.unHideSheet();
+                },
             },
             {
                 locale: 'sheetConfig.moveLeft',
                 border: true,
-                onClick: () => barControl.moveSheet('left'),
+                onClick: (...arg) => {
+                    arg[1].ref.hideSelect();
+                    barControl.moveSheet('left');
+                },
             },
             {
                 locale: 'sheetConfig.moveRight',
-                onClick: () => barControl.moveSheet('right'),
+                onClick: (...arg) => {
+                    arg[1].ref.hideSelect();
+                    barControl.moveSheet('right');
+                },
             },
         ];
         this._initializeData();

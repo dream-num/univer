@@ -471,7 +471,7 @@ export class OtherViewTest extends BaseView {
         });
 
         console.log('insert path test', mainScene);
-        mainScene.addObjects([path, picture, circle1, richText]);
+        // mainScene.addObjects([path, picture, circle1, richText]);
     }
 }
 

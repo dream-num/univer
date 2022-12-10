@@ -127,7 +127,7 @@ export class Ul extends Component<BaseUlProps, UlState> {
 
         // TODO 业务组件
         const spreadsheet: any = this.getContext().getPluginManager().getPluginByName('spreadsheet');
-        const contentRef = spreadsheet.getContentRef();
+        const contentRef = spreadsheet.getSheetContainerControl().getContentRef();
         const wrapper = contentRef.current!;
         // const wrapper = $$('.univer-content-inner-right-container');
         docPosition = wrapper.getBoundingClientRect();

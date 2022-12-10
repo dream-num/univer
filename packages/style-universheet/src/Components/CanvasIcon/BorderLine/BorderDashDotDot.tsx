@@ -1,7 +1,10 @@
 import { Component, createRef, IconComponent, JSXComponent, RefObject } from '@univer/base-component';
 import { CanvasIcon } from '../CanvasIcon';
 
-interface IProps {}
+interface IProps {
+    width?: string;
+    height?: string;
+}
 interface IState {}
 
 class BorderDashDotDot extends Component<IProps, IState> {
@@ -16,7 +19,8 @@ class BorderDashDotDot extends Component<IProps, IState> {
     }
 
     render() {
-        return <CanvasIcon ref={this.ref} width="100" height="10" drawLine={(dom) => this.drawLine(dom)} />;
+        const { width = '100', height = '10' } = this.props;
+        return <CanvasIcon ref={this.ref} width={width} height={height} drawLine={(dom) => this.drawLine(dom)} />;
     }
 }
 

@@ -64,3 +64,37 @@ export const DEFAULT_FORMULA_DATA_DOWN: IFormulaConfig = {
         },
     },
 };
+
+export const DEFAULT_FORMULA_DATA_DEMO: IFormulaConfig = {
+    formulaData: {
+        'workbook-03': {
+            'sheet-0003': {
+                '19': {
+                    '6': {
+                        formula: '=SUM(G12:G19)',
+                        row: 19,
+                        column: 6,
+                        sheetId: 'sheet-0003',
+                    },
+                },
+            },
+        },
+    },
+};
+
+export const DEFAULT_FORMULA_DATA_DEMO1: IFormulaConfig = {
+    formulaData: {
+        'workbook-04': {
+            'sheet-0003': {
+                '19': {
+                    '6': {
+                        formula: '=SUM(G12:G19)',
+                        row: 19,
+                        column: 6,
+                        sheetId: 'sheet-0003',
+                    },
+                },
+            },
+        },
+    },
+};

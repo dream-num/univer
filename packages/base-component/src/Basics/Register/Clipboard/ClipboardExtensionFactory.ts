@@ -8,17 +8,6 @@ export class BaseClipboardExtension<T extends Plugin = Plugin> {
     // protected _json: IKeyValue;
     constructor(protected _data: IClipboardData, protected _plugin: T) {}
 
-    // getJSON(): IKeyValue {
-    //     return this._json;
-    // }
-
-    // /**
-    //  * Modify the value
-    //  */
-    // setJSON(json: IKeyValue) {
-    //     this._json = json;
-    // }
-
     /**
      * Execute the core logic after the check is successful
      */

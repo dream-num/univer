@@ -1,4 +1,4 @@
-import { migrate, PLUGIN_NAMES, Tools } from '@univer/core';
+import { IKeyValue, migrate, PLUGIN_NAMES, Tools } from '@univer/core';
 import { BaseComponentRender } from '@univer/base-component';
 import { IToolBarItemProps, SelectTypes, SheetPlugin } from '@univer/base-sheets';
 
@@ -44,57 +44,60 @@ export class ImportXlsxController {
         input.accept = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
         input.addEventListener('change', (evt) => {
-            const files = evt.target.files;
-            if (files == null || files.length == 0) {
-                alert('No files wait for import');
-                return;
-            }
-
-            let name = files[0].name;
-            let suffixArr = name.split('.');
-            let suffix = suffixArr[suffixArr.length - 1];
-            if (suffix != 'xlsx') {
-                alert('Currently only supports the import of xlsx files');
-                return;
-            }
-            const transformExcelToLucky = LuckyExcel.default.transformExcelToLucky;
-
-            transformExcelToLucky(files[0], (exportJson, luckysheetfile) => {
-                if (exportJson.sheets == null || exportJson.sheets.length == 0) {
-                    alert('Failed to read the content of the excel file, currently does not support xls files!');
-                    return;
-                }
-
-                const luckysheetConfig = {
-                    container: 'universheet',
-                    data: exportJson.sheets,
-                    title: exportJson.info.name,
-                };
-                const univerWorkbookConfig = migrate(luckysheetConfig);
-
-                const sheets = univerWorkbookConfig.sheets;
-
-                if (!sheets) {
-                    return alert('No content');
-                }
-
-                const workbook = this._plugin.getContext().getWorkBook();
-
-                const order = Tools.deepClone(workbook.getConfig().sheetOrder);
-
-                // add new sheets
-                Object.keys(sheets).forEach((sheetId) => {
-                    const sheetData = sheets[sheetId];
-                    workbook.insertSheet(sheetData);
-                });
-
-                // remove other sheets
-                // order.forEach((sheetId: string) => {
-                //     workbook.removeSheetBySheetId(sheetId);
-                // });
-            });
+            const element = evt.currentTarget as HTMLInputElement;
+            this.handleFiles(element.files);
         });
 
         input.click();
+    }
+    handleFiles(files: File[] | FileList | null) {
+        if (files == null || files.length == 0) {
+            alert('No files wait for import');
+            return;
+        }
+
+        let name = files[0].name;
+        let suffixArr = name.split('.');
+        let suffix = suffixArr[suffixArr.length - 1];
+        if (suffix != 'xlsx') {
+            alert('Currently only supports the import of xlsx files');
+            return;
+        }
+        const transformExcelToLucky = LuckyExcel.default.transformExcelToLucky;
+
+        transformExcelToLucky(files[0], (exportJson: IKeyValue) => {
+            if (exportJson.sheets == null || exportJson.sheets.length == 0) {
+                alert('Failed to read the content of the excel file, currently does not support xls files!');
+                return;
+            }
+
+            const luckysheetConfig = {
+                container: 'universheet',
+                data: exportJson.sheets,
+                title: exportJson.info.name,
+            };
+            const univerWorkbookConfig = migrate(luckysheetConfig);
+
+            const sheets = univerWorkbookConfig.sheets;
+
+            if (!sheets) {
+                return alert('No content');
+            }
+
+            const workbook = this._plugin.getContext().getWorkBook();
+
+            const order = Tools.deepClone(workbook.getConfig().sheetOrder);
+
+            // add new sheets
+            Object.keys(sheets).forEach((sheetId) => {
+                const sheetData = sheets[sheetId];
+                workbook.insertSheet(sheetData);
+            });
+
+            // remove other sheets
+            // order.forEach((sheetId: string) => {
+            //     workbook.removeSheetBySheetId(sheetId);
+            // });
+        });
     }
 }

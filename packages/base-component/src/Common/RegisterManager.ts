@@ -1,19 +1,23 @@
 import { Plugin } from '@univer/core';
-import { IClipboardData } from '../Basics/Interfaces';
-import { ClipboardExtensionManager } from '../Basics/Register';
+import { IClipboardData, IDragAndDropData } from '../Basics/Interfaces';
+import { ClipboardExtensionManager, DragAndDropExtensionManager } from '../Basics/Register';
 
 export class RegisterManager {
     private _clipboardExtensionManager: ClipboardExtensionManager;
+
+    private _dragAndDropExtensionManager: DragAndDropExtensionManager;
 
     constructor(private _plugin: Plugin) {
         this.initialize();
     }
 
     initialize(): void {
-        this.setExtensionManager();
+        this.setClipboardExtensionManager();
+        this.setDragAndDropExtensionManager();
     }
 
-    setExtensionManager() {
+    setClipboardExtensionManager() {
+        this._clipboardExtensionManager = new ClipboardExtensionManager();
         const onKeyPasteObservable = this._plugin.getContext().getObserverManager().getObserver<ClipboardEvent>('onKeyPasteObservable', 'core');
 
         if (onKeyPasteObservable && !onKeyPasteObservable.hasObservers()) {
@@ -23,7 +27,21 @@ export class RegisterManager {
                 });
             });
         }
-        this._clipboardExtensionManager = new ClipboardExtensionManager();
+    }
+
+    setDragAndDropExtensionManager() {
+        this._dragAndDropExtensionManager = new DragAndDropExtensionManager();
+
+        const onDropObservable = this._plugin.getContext().getObserverManager().getObserver<DragEvent>('onDropObservable', 'core');
+
+        if (onDropObservable && !onDropObservable.hasObservers()) {
+            onDropObservable.add((evt: DragEvent) => {
+                this._dragAndDropExtensionManager.dragResolver(evt).then((dataList: IDragAndDropData[]) => {
+                    if (dataList.length === 0) return;
+                    this._dragAndDropExtensionManager.handle(dataList);
+                });
+            });
+        }
     }
 
     /**
@@ -32,6 +50,10 @@ export class RegisterManager {
      */
     getClipboardExtensionManager(): ClipboardExtensionManager {
         return this._clipboardExtensionManager;
+    }
+
+    getDragAndDropExtensionManager(): DragAndDropExtensionManager {
+        return this._dragAndDropExtensionManager;
     }
 
     onMounted(): void {

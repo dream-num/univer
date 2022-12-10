@@ -17,14 +17,17 @@ export class Univer {
     }
 
     addUniverSheet(univerSheet: UniverSheet): void {
+        univerSheet.context.onUniver(this);
         this._univerSheets.push(univerSheet);
     }
 
     addUniverDoc(univerDoc: UniverDoc): void {
+        univerDoc.context.onUniver(this);
         this._univerDocs.push(univerDoc);
     }
 
     addUniverSlide(univerSlide: UniverSlide): void {
+        univerSlide.context.onUniver(this);
         this._univerSlides.push(univerSlide);
     }
 

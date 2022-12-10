@@ -16,7 +16,7 @@ export default defineConfig({
             fileName: 'univer-base-sheets',
         },
         outDir: './lib',
-        sourcemap: true
+        sourcemap: true,
     },
     define: {
         pkgJson: { name, version },
@@ -58,7 +58,7 @@ export default defineConfig({
                 '@univer/base-component': '@univer/base-component',
                 '@univer/style-universheet': '@univer/style-universheet',
                 'css-vars-ponyfill': 'css-vars-ponyfill',
-                'nanoid': 'nanoid',
+                nanoid: 'nanoid',
                 preact: 'preact',
                 react: 'react',
             },

@@ -3,8 +3,6 @@ import { ImportXlsxPlugin } from '../../ImportXlsxPlugin';
 
 export class DragAndDropExtension extends BaseDragAndDropExtension<ImportXlsxPlugin> {
     execute() {
-        console.log('this._data----', this._data);
-
         this._plugin.getImportXlsxController().handleFiles(this._data);
     }
 }

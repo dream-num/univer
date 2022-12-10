@@ -9,15 +9,13 @@ import { SheetPlugin } from './SheetPlugin';
 const uiDefaultConfigUp = {
     container: 'universheet-demo-up',
     layout: {
-        innerRight: false,
-        outerLeft: false,
-        toolBarConfig: {
-            paintFormat: false,
-            currencyFormat: false,
-            percentageFormat: false,
-            numberDecrease: false,
-            numberIncrease: false,
-            moreFormats: false,
+        sheetContainerConfig:{
+            infoBar:true,
+            formulaBar:true,
+            toolBar:true,
+            sheetBar:true,
+            countBar:true,
+            rightMenu:true,
         },
     },
 
@@ -36,58 +34,6 @@ const uiDefaultConfigUp = {
                 },
             },
         ],
-        // 'sheet-01': [
-        //     {
-        //         selection: {
-        //             startRow: 13,
-        //             endRow: 14,
-        //             startColumn: 1,
-        //             endColumn: 2,
-        //         },
-        //     },
-        //     {
-        //         selection: {
-        //             startRow: 16,
-        //             endRow: 18,
-        //             startColumn: 1,
-        //             endColumn: 2,
-        //         },
-        //         cell: {
-        //             row: 16,
-        //             column: 1,
-        //         },
-        //     },
-        // ],
-        // 'sheet-02': [
-        //     {
-        //         selection: {
-        //             startRow: 17,
-        //             endRow: 20,
-        //             startColumn: 1,
-        //             endColumn: 2,
-        //         },
-        //     },
-        //     {
-        //         selection: {
-        //             startRow: 22,
-        //             endRow: 23,
-        //             startColumn: 1,
-        //             endColumn: 2,
-        //         },
-        //     },
-        //     {
-        //         selection: {
-        //             startRow: 25,
-        //             endRow: 27,
-        //             startColumn: 4,
-        //             endColumn: 6,
-        //         },
-        //         cell: {
-        //             row: 25,
-        //             column: 4,
-        //         },
-        //     },
-        // ],
     },
 };
 
@@ -105,6 +51,16 @@ FormulaPlugin.create(DEFAULT_FORMULA_DATA).installTo(univerSheetUp);
 
 const uiDefaultConfigDown = {
     container: 'universheet-demo-down',
+    layout:{
+        sheetContainerConfig:{
+            infoBar:true,
+            formulaBar:true,
+            toolBar:true,
+            sheetBar:true,
+            countBar:true,
+            rightMenu:true,
+        },
+    },
     selections: {
         'sheet-0001': [
             {

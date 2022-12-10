@@ -664,4 +664,15 @@ export class Tools {
 
         return resultJsonObject as unknown as T;
     }
+
+    static arrayToObject(array:IKeyValue[][]){
+        const obj = {}
+        array.forEach((row,i)=>{
+            obj[i] = {}
+            row.forEach((column,j)=>{
+                obj[i][j] =column
+            })
+        })
+        return obj
+    }
 }

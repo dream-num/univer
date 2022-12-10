@@ -342,11 +342,11 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     }
 
     addRightMenu(item: RightMenuProps[] | RightMenuProps) {
-        this._rightMenuControl.addItem(item);
+        this._rightMenuControl && this._rightMenuControl.addItem(item);
     }
 
     addToolButton(config: IToolBarItemProps) {
-        this._toolBarControl.addToolButton(config);
+        this._toolBarControl && this._toolBarControl.addToolButton(config);
     }
 
     registerComponent(name: string, component: any, props?: any) {

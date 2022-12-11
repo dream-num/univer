@@ -3,6 +3,7 @@ import { createSkeletonSection } from './Section';
 import { BreakType, IDocumentSkeletonFooter, IDocumentSkeletonHeader, IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../Basics/IDocumentSkeletonCached';
 import { ISectionBreakConfig } from '../../../Basics/Interfaces';
 import { dealWithBlocks } from '../Block';
+import { updateBlockIndex } from './Tools';
 
 // 新增数据结构框架
 // 判断奇数和偶数页码
@@ -177,6 +178,7 @@ function _createSkeletonHeader(
 
     const areaPage = createSkeletonPage(headerConfig, skeletonResourceReference);
     const page = dealWithBlocks(blockElementArray, areaPage, headerConfig, skeletonResourceReference).pages[0];
+    updateBlockIndex([page]);
     const column = page.sections[0].columns[0];
     const height = column.height || 0;
     const { skeDrawings, st, ed } = page;

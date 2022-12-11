@@ -321,7 +321,7 @@ export class Spreadsheet extends SheetComponent {
 
     resizeCacheCanvas() {
         const parentSize = this._getAncestorSize();
-        if (!parentSize) {
+        if (!parentSize || this._cacheCanvas == null) {
             return;
         }
         const { width, height } = parentSize;

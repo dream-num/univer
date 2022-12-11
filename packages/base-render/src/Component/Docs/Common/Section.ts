@@ -18,16 +18,19 @@ export function createSkeletonSection(
     } else {
         for (let i = 0; i < columnProperties.length; i++) {
             const { width, paddingEnd } = columnProperties[i];
-            if (i === columnProperties.length - 1) {
-                colWidth = sectionWidth !== Infinity ? sectionWidth - colWidth : width;
-                spaceWidth = 0;
-            } else {
-                spaceWidth = paddingEnd;
-                colWidth = width;
-            }
+
+            spaceWidth = paddingEnd;
+            colWidth = width;
+
             columns.push(_getSkeletonColumn(left, colWidth, spaceWidth, columnSeparatorType));
 
             left += colWidth + spaceWidth;
+
+            if (i === columnProperties.length - 1) {
+                colWidth = sectionWidth !== Infinity ? sectionWidth - colWidth : width;
+                spaceWidth = 0;
+                columns.push(_getSkeletonColumn(left, colWidth, spaceWidth, columnSeparatorType));
+            }
         }
     }
     const newSection = {

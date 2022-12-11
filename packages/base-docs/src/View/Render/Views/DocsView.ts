@@ -33,39 +33,41 @@ export class DocsView extends BaseView {
 
         scene.addObjects([documents], 0);
 
-        const engine = scene.getEngine();
-        if (engine) {
-            const { width: engineWidth, height: engineHeight } = engine;
+        // const engine = scene.getEngine();
+        // if (engine) {
+        //     const { width: engineWidth, height: engineHeight } = engine;
 
-            const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = documents;
+        //     const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = documents;
 
-            let docsLeft = 0;
-            let docsTop = 0;
+        //     let docsLeft = 0;
+        //     let docsTop = 0;
 
-            let sceneWidth = 0;
+        //     let sceneWidth = 0;
 
-            let sceneHeight = 0;
+        //     let sceneHeight = 0;
 
-            if (engineWidth > docsWidth) {
-                docsLeft = engineWidth / 2 - docsWidth / 2;
-                sceneWidth = engineWidth - 30;
-            } else {
-                docsLeft = pageMarginLeft;
-                sceneWidth = docsWidth + pageMarginLeft * 2;
-            }
+        //     if (engineWidth > docsWidth) {
+        //         docsLeft = engineWidth / 2 - docsWidth / 2;
+        //         sceneWidth = engineWidth - 30;
+        //     } else {
+        //         docsLeft = pageMarginLeft;
+        //         sceneWidth = docsWidth + pageMarginLeft * 2;
+        //     }
 
-            if (engineHeight > docsHeight) {
-                docsTop = engineHeight / 2 - docsHeight / 2;
-                sceneHeight = engineHeight - 30;
-            } else {
-                docsTop = pageMarginTop;
-                sceneHeight = docsHeight + pageMarginTop * 2;
-            }
+        //     if (engineHeight > docsHeight) {
+        //         docsTop = engineHeight / 2 - docsHeight / 2;
+        //         sceneHeight = engineHeight - 30;
+        //     } else {
+        //         docsTop = pageMarginTop;
+        //         sceneHeight = docsHeight + pageMarginTop * 2;
+        //     }
 
-            scene.resize(sceneWidth, sceneHeight + 200);
+        //     scene.resize(sceneWidth, sceneHeight + 200);
 
-            documents.translate(docsLeft, docsTop);
-        }
+        //     documents.translate(docsLeft, docsTop);
+        // }
+
+        documents.calculatePagePosition();
 
         documents.enableEditor();
     }

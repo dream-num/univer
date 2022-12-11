@@ -72,8 +72,10 @@ export class Liquid {
             marginBottom: pagePaddingBottom = 0,
             marginLeft: pagePaddingLeft = 0,
             marginRight: pagePaddingRight = 0,
-            width: pageWidth,
-            height: pageHeight,
+            pageWidth,
+            pageHeight,
+            width,
+            height,
             pageNumber = 1,
             renderConfig = {},
         } = page;

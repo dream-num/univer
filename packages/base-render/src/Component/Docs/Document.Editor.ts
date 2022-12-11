@@ -438,6 +438,7 @@ export class DocsEditor {
             if (this._documents == null) {
                 return;
             }
+            this._input.innerHTML = '';
             this.onKeydownObservable.notifyObservers({
                 event: e,
                 content: '',

@@ -2,8 +2,8 @@ import { UniverSheet } from '@univer/core';
 import { RenderEngine } from '@univer/base-render';
 import { UniverComponentSheet } from '@univer/style-universheet';
 import { NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
-import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DEMO, DEFAULT_WORKBOOK_DATA_DOWN } from '@univer/common-plugin-data';
-import { DEFAULT_FORMULA_DATA, DEFAULT_FORMULA_DATA_DEMO, FormulaPlugin } from '@univer/sheets-plugin-formula';
+import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
+import { DEFAULT_FORMULA_DATA, FormulaPlugin } from '@univer/sheets-plugin-formula';
 import { SheetPlugin } from './SheetPlugin';
 
 const uiDefaultConfigUp = {
@@ -123,12 +123,12 @@ const uiDefaultConfigDown = {
     },
 };
 
-const univerSheetDown = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DOWN);
-univerSheetDown.installPlugin(new RenderEngine());
-univerSheetDown.installPlugin(new UniverComponentSheet());
+// const univerSheetDown = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DOWN);
+// univerSheetDown.installPlugin(new RenderEngine());
+// univerSheetDown.installPlugin(new UniverComponentSheet());
 
-univerSheetDown.installPlugin(new SheetPlugin(uiDefaultConfigDown));
-univerSheetDown.installPlugin(new NumfmtPlugin());
+// univerSheetDown.installPlugin(new SheetPlugin(uiDefaultConfigDown));
+// univerSheetDown.installPlugin(new NumfmtPlugin());
 // FormulaPlugin.create(DEFAULT_FORMULA_DATA_DOWN).installTo(univerSheetDown);
 
 // const uiDefaultConfigDemo = {

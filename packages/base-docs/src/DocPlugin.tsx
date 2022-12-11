@@ -10,6 +10,7 @@ import { InfoBarController } from './Controller/InfoBarController';
 import { Engine, RenderEngine } from '@univer/base-render';
 import { CanvasView } from './View/Render/CanvasView';
 import { CANVAS_VIEW_KEY } from './View/Render';
+import { DocsView } from './View/Render/Views';
 
 export interface IDocPluginConfig extends IDocPluginConfigBase {
     container: HTMLElement | string;
@@ -194,7 +195,7 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
     }
 
     getMainComponent() {
-        return this.getDocsView().getDocs();
+        return (this.getDocsView() as DocsView).getDocs();
     }
 
     getInputEvent() {

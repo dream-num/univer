@@ -136,7 +136,6 @@ export function dealWidthParagraph(
 
         lastPage = _checkAndPush(pages, currentPages); // The layout engine does not have a page break, so it does not need to be added to the page array
     });
-
     return pages;
 }
 
@@ -215,7 +214,7 @@ function _checkAndPush(pages: IDocumentSkeletonPage[], currentPages: IDocumentSk
         if (currentPages.length === 1) {
             return curLast;
         }
-        currentPages.unshift();
+        currentPages.shift();
     }
 
     pages.push(...currentPages);

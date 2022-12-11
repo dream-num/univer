@@ -64,8 +64,6 @@ export function InsertTextApply(
                     blockElement.paragraph,
                     isApplied
                 );
-                blockElement.ed += length;
-                break;
         }
     }
 }
@@ -87,7 +85,7 @@ function paragraphApply(
 
     let isApply = false;
 
-    if (textStart < st) {
+    if (textStart > ed) {
         return isApply;
     }
 
@@ -107,21 +105,26 @@ function paragraphApply(
 
         const { st, ed, tr } = element;
 
-        if (isApply || isApplied) {
+        if ((isApply || isApplied) && textStart > ed) {
             moveElementCharIndex(element, length);
-        }
-
-        if (isApplied) {
-            continue;
-        }
-
-        if (textStart < st || textStart > ed) {
-            continue;
         }
 
         if (tr == null) {
             continue;
         }
+        if (textStart < st || textStart > ed || isApplied) {
+            continue;
+        }
+
+        console.log(
+            'paragraphApply',
+            textStart,
+            st,
+            ed,
+            isApplied,
+            element,
+            textStart < st || textStart > ed || isApplied
+        );
 
         if (paragraphElementType === ParagraphElementType.TEXT_RUN) {
             let relative = textStart - st + 1;
@@ -142,6 +145,10 @@ function paragraphApply(
 
             element.ed += length;
         }
+    }
+
+    if (isApply === true && isApplied === false) {
+        blockElement.ed += length;
     }
 
     if (isApplied) {

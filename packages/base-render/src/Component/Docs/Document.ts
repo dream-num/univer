@@ -156,6 +156,7 @@ export class Documents extends DocComponent {
             }
 
             this.resize(width, height);
+            this.calculatePagePosition();
         });
     }
 
@@ -186,6 +187,42 @@ export class Documents extends DocComponent {
             endX,
             endY,
         };
+    }
+
+    calculatePagePosition() {
+        const scene = this.getScene() as Scene;
+        const engine = scene?.getEngine();
+        const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = this;
+        if (engine == null) {
+            return;
+        }
+        const { width: engineWidth, height: engineHeight } = engine;
+        let docsLeft = 0;
+        let docsTop = 0;
+
+        let sceneWidth = 0;
+
+        let sceneHeight = 0;
+
+        if (engineWidth > docsWidth) {
+            docsLeft = engineWidth / 2 - docsWidth / 2;
+            sceneWidth = engineWidth - 30;
+        } else {
+            docsLeft = pageMarginLeft;
+            sceneWidth = docsWidth + pageMarginLeft * 2;
+        }
+
+        if (engineHeight > docsHeight) {
+            docsTop = engineHeight / 2 - docsHeight / 2;
+            sceneHeight = engineHeight - 30;
+        } else {
+            docsTop = pageMarginTop;
+            sceneHeight = docsHeight + pageMarginTop * 2;
+        }
+
+        scene.resize(sceneWidth, sceneHeight + 200);
+
+        this.translate(docsLeft, docsTop);
     }
 
     getFirstViewport() {

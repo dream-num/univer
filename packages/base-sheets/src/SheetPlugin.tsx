@@ -238,7 +238,9 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
         this.register(engine);
 
-        this._canvasView = new CanvasView(engine, this);
+        if (this._canvasView == null) {
+            this._canvasView = new CanvasView(engine, this);
+        }
 
         this.context.getContextObserver('onSheetRenderDidMountObservable')?.notifyObservers();
     }

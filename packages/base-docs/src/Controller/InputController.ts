@@ -47,6 +47,8 @@ export class InputController {
                 const span = document.findNodeByCharIndex(cursor - 2);
 
                 this._adjustSelection(document, selectionRemain, span);
+
+                this._resetIME();
             }
         });
 
@@ -54,6 +56,8 @@ export class InputController {
             const { event, content = '', document, selection } = config;
 
             const cursor = selection?.getCursor() || 0;
+
+            console.log('cursor', cursor, selection);
 
             const skeleton = document.getSkeleton();
 
@@ -111,7 +115,7 @@ export class InputController {
 
             const span = document.findNodeByCharIndex(cursor + content.length - 1);
 
-            // console.log('Compositionupdate', content, this._previousIMEContent, e.data, cursor, span);
+            console.log('Compositionupdate', content, this._previousIMEContent, e.data, cursor, span, skeleton.getSkeletonData(), skeleton);
 
             this._adjustSelection(document, selectionRemain, span);
 
@@ -119,10 +123,14 @@ export class InputController {
         });
 
         onCompositionendObservable.add((config) => {
-            this._previousIMEContent = '';
-
-            this._previousIMEStart = -1;
+            this._resetIME();
         });
+    }
+
+    private _resetIME() {
+        this._previousIMEContent = '';
+
+        this._previousIMEStart = -1;
     }
 
     private _getIncreaseText(current: string, old: string) {

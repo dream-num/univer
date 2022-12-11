@@ -657,6 +657,11 @@ export abstract class BaseObject {
 
     getScene() {
         let parent: any = this.parent;
+
+        if (parent == null) {
+            return;
+        }
+
         if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
             return parent;
         }

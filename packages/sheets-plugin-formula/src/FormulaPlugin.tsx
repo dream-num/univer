@@ -35,7 +35,7 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
         universheetInstance.installPlugin(this);
 
         const context = this.getContext();
-        let formulaEngine = context.getPluginManager().getPluginByName<FormulaEnginePlugin>('pluginFormulaEngine');
+        let formulaEngine = context.getPluginManager().getPluginByName<FormulaEnginePlugin>('formulaEngine');
         if (!formulaEngine) {
             formulaEngine = new FormulaEnginePlugin();
             universheetInstance.installPlugin(formulaEngine);

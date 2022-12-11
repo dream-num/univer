@@ -62,8 +62,10 @@ export class SheetView extends BaseView {
         scene.addObjects([spreadsheet], 0);
         scene.addObjects([spreadsheetRowTitle, spreadsheetColumnTitle, SpreadsheetLeftTopPlaceholder], 2);
         scene.transformByState({
-            width: this._columnWidthByTitle(worksheet) + columnTotalWidth + 100,
-            height: this._rowHeightByTitle(worksheet) + rowTotalHeight + 200,
+            width: this._columnWidthByTitle(worksheet),
+            height: this._rowHeightByTitle(worksheet) + rowTotalHeight,
+            // width: this._columnWidthByTitle(worksheet) + columnTotalWidth + 100,
+            // height: this._rowHeightByTitle(worksheet) + rowTotalHeight + 200,
         });
 
         this._updateViewport(rowTitleWidth, columnTitleHeight);
@@ -114,8 +116,10 @@ export class SheetView extends BaseView {
         });
 
         scene.transformByState({
-            width: this._columnWidthByTitle(worksheet) + columnTotalWidth + 100,
-            height: this._rowHeightByTitle(worksheet) + rowTotalHeight + 200,
+            width: this._columnWidthByTitle(worksheet),
+            height: this._rowHeightByTitle(worksheet)+rowTotalHeight,
+            // width: this._columnWidthByTitle(worksheet) + columnTotalWidth + 100,
+            // height: this._rowHeightByTitle(worksheet) + rowTotalHeight + 200,
         });
         this._updateViewport(rowTitleWidth, columnTitleHeight);
         this._selectionManager.updateToSheet(worksheet);

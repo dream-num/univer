@@ -45,7 +45,7 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
 
             // 是否激活
             if (sheet.hasOwnProperty('status')) {
-                newSheet.status = sheet.status;
+                newSheet.status = parseInt(sheet.status);
             }
 
             // sheet 名称

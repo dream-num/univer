@@ -33,7 +33,6 @@
         "@testing-library/preact": "^2.0.1",
         "@types/jest": "^27.5.2",
         "@types/node": "^16.4.6",
-        "@vitejs/plugin-legacy": "^1.5.1",
         "eslint": "^8.22.0",
         "eslint-config-airbnb-typescript": "^17.0.0",
         "eslint-config-prettier": "^8.3.0",

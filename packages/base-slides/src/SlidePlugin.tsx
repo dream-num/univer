@@ -167,9 +167,12 @@ export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
         engineInstance.setContainer(container);
 
         this._canvasView = new CanvasView(engineInstance, this);
-        window.onresize = () => {
+        window.addEventListener('resize', () => {
             engineInstance.resize();
-        };
+        });
+        // window.onresize = () => {
+        //     engineInstance.resize();
+        // };
     }
 
     get config() {

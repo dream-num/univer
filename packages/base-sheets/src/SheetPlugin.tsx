@@ -103,9 +103,12 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         this._canvasEngine = engineInstance;
 
         engineInstance.setContainer(container);
-        window.onresize = () => {
+        window.addEventListener('resize', () => {
             engineInstance.resize();
-        };
+        });
+        // window.onresize = () => {
+        //     engineInstance.resize();
+        // };
     }
 
     initialize(context: SheetContext): void {

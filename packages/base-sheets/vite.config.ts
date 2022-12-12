@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite';
 import path from 'path';
 import preact from '@preact/preset-vite';
-import legacy from '@vitejs/plugin-legacy';
 import { name, version } from './package.json';
 import createExternal from 'vite-plugin-external';
 
@@ -47,10 +46,6 @@ export default defineConfig({
     },
     plugins: [
         preact(),
-        // legacy({
-        //     targets: ['ie >= 11'],
-        //     additionalLegacyPolyfills: ['regenerator-runtime/runtime'],
-        // }),
         createExternal({
             externals: {
                 '@univer/core': '@univer/core',

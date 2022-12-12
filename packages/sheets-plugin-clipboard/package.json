@@ -32,7 +32,6 @@
         "@preact/preset-vite": "2.0.0",
         "@testing-library/preact": "2.0.1",
         "@types/jest": "27.0.3",
-        "@vitejs/plugin-legacy": "1.5.1",
         "jest": "29.0.0",
         "jest-environment-jsdom": "^29.0.3",
         "less": "4.1.1",

@@ -79,27 +79,27 @@ univerSheetDown.installPlugin(new ClipboardPlugin());
 
 // doc
 
-// const docPluginConfig = {
-//     container: 'univerdoc',
-// };
-// const univerDoc = UniverDoc.newInstance();
+const docPluginConfig = {
+    container: 'univerdoc',
+};
+const univerDoc = UniverDoc.newInstance();
 
-// univerDoc.installPlugin(new RenderEngine());
-// univerDoc.installPlugin(new UniverComponentSheet());
+univerDoc.installPlugin(new RenderEngine());
+univerDoc.installPlugin(new UniverComponentSheet());
 
-// univerDoc.installPlugin(new DocPlugin(docPluginConfig));
-// univerDoc.installPlugin(new BaseComponentPlugin());
+univerDoc.installPlugin(new DocPlugin(docPluginConfig));
+univerDoc.installPlugin(new BaseComponentPlugin());
 
-// // SlidePlugin
+// SlidePlugin
 
-// const slidePluginConfig = {
-//     container: 'universlide',
-// };
+const slidePluginConfig = {
+    container: 'universlide',
+};
 
-// const univerSlide = UniverSlide.newInstance();
+const univerSlide = UniverSlide.newInstance();
 
-// univerSlide.installPlugin(new RenderEngine());
-// univerSlide.installPlugin(new UniverComponentSheet());
+univerSlide.installPlugin(new RenderEngine());
+univerSlide.installPlugin(new UniverComponentSheet());
 
-// univerSlide.installPlugin(new SlidePlugin(slidePluginConfig));
-// univerSlide.installPlugin(new BaseComponentPlugin());
+univerSlide.installPlugin(new SlidePlugin(slidePluginConfig));
+univerSlide.installPlugin(new BaseComponentPlugin());

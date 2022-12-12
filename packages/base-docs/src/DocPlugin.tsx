@@ -169,9 +169,12 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
 
         this._canvasView = new CanvasView(engineInstance, this);
 
-        window.onresize = () => {
+        window.addEventListener('resize', () => {
             engineInstance.resize();
-        };
+        });
+        // window.onresize = () => {
+        //     engineInstance.resize();
+        // };
     }
 
     get config() {

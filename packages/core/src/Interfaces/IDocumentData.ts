@@ -7,6 +7,8 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '../Enum';
+import { IImageProperties } from './IImageProperties';
+import { IShapeProperties } from './IShapeProperties';
 
 // 注意：所有的尺寸单位，若无特殊说明，都是指pt，1 pt = 1 / 72 in
 /**
@@ -449,35 +451,6 @@ export interface IObjectProperties {
  * ChartProperties
  */
 export interface IChartProperties {}
-
-/**
- * ShapeProperties
- */
-export interface IShapeProperties {}
-
-/**
- * Properties of Image
- */
-export interface IImageProperties {
-    contentUrl: string;
-    sourceUrl?: string;
-    brightness?: number;
-    contrast?: number;
-    transparency?: number;
-    cropProperties?: ICropProperties;
-    angle?: number;
-}
-
-/**
- * Properties of crop image
- */
-export interface ICropProperties {
-    offsetLeft: number;
-    offsetRight: number;
-    offsetTop: number;
-    offsetBottom: number;
-    angle: number;
-}
 
 // export enum BulletType {
 //     NONE,

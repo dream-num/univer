@@ -1,5 +1,9 @@
 import { LocaleType, ThemeColorType } from '../Enum';
+import { ShapeType } from '../Enum/ShapeType';
 import { ICustomBlock, ILists, ISizeData } from './IDocumentData';
+import { IImageProperties } from './IImageProperties';
+import { IPlaceholder } from './IPlaceholder';
+import { IShapeProperties } from './IShapeProperties';
 import { IColorStyle } from './IStyleData';
 
 export interface ISlideData extends IReferenceSource {
@@ -82,8 +86,8 @@ export interface IPageElement {
 
     // Union field element_kind can be only one of the following:
     // elementGroup: IGroup;
-    // shape: IShapeProperties;
-    // image: IImageProperties;
+    shape: IShape;
+    image: IImage;
     // video: IVideo;
     // line: ILine;
     // table: ITable;
@@ -97,4 +101,36 @@ export enum PageType {
     LAYOUT, //	A layout page.
     HANDOUT_MASTER, //	A handout master page.
     NOTES_MASTER, //	A notes master page.
+}
+
+/**
+ * IShape
+ */
+export interface IShape {
+    shapeType: ShapeType;
+    text: string;
+    shapeProperties: IShapeProperties;
+    placeholder: IPlaceholder;
+    link: ILink;
+}
+
+export interface IImage {
+    imageProperties?: IImageProperties;
+    placeholder: IPlaceholder;
+    link: ILink;
+}
+
+export interface ILink {
+    url: string;
+    relativeLink: RelativeSlideLink;
+    pageObjectId: string;
+    slideIndex: number;
+}
+
+export enum RelativeSlideLink {
+    RELATIVE_SLIDE_LINK_UNSPECIFIED, //	An unspecified relative slide link.
+    NEXT_SLIDE, //	A link to the next slide.
+    PREVIOUS_SLIDE, //	A link to the previous slide.
+    FIRST_SLIDE, //	A link to the first slide in the presentation.
+    LAST_SLIDE, //	A link to the last slide in the presentation.
 }

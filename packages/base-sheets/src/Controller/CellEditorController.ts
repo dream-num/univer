@@ -121,7 +121,7 @@ export class CellEditorController {
             onKeyDownObservable.add((evt: KeyboardEvent) => {
                 if (!evt.ctrlKey && isKeyPrintable(evt.key)) {
                     // character key
-                    this.handleEnter(true);
+                    this.enterEditMode(true);
                 } else {
                     // control key
                     switch (evt.key) {
@@ -129,8 +129,11 @@ export class CellEditorController {
                             if (this.isEditMode) {
                                 this.exitEditMode();
 
-                                // move to cell below
-                                this._plugin.getSelectionManager().move(Direction.BOTTOM);
+                                const currentCell = this._plugin.getSelectionManager().getCurrentCellModel();
+                                if (!currentCell?.isMerged) {
+                                    // move to cell below
+                                    this._plugin.getSelectionManager().move(Direction.BOTTOM);
+                                }
                             } else {
                                 this.enterEditMode();
                             }
@@ -427,14 +430,26 @@ export class CellEditorController {
     }
 
     setCurrentEditRangeData() {
-        const model = this._plugin.getSelectionManager().getCurrentCellModel();
-        if (!model) return;
+        const currentCell = this._plugin.getSelectionManager().getCurrentCellModel();
+        if (!currentCell) return;
+
+        let row;
+        let column;
+
+        if (currentCell.isMerged) {
+            const mergeInfo = currentCell.mergeInfo;
+            row = mergeInfo.startRow;
+            column = mergeInfo.startColumn;
+        } else {
+            row = currentCell.row;
+            column = currentCell.column;
+        }
 
         this.currentEditRangeData = {
-            startRow: model.row,
-            startColumn: model.column,
-            endRow: model.row,
-            endColumn: model.column,
+            startRow: row,
+            startColumn: column,
+            endRow: row,
+            endColumn: column,
         };
     }
 
@@ -482,10 +497,6 @@ export class CellEditorController {
         }
 
         // this._plugin.getMainComponent().makeDirty(true);
-    }
-
-    handleEnter(clear: boolean = false) {
-        this.enterEditMode(clear);
     }
 
     handleBackSpace() {}

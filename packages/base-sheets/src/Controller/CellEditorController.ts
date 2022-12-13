@@ -121,7 +121,7 @@ export class CellEditorController {
             onKeyDownObservable.add((evt: KeyboardEvent) => {
                 if (!evt.ctrlKey && isKeyPrintable(evt.key)) {
                     // character key
-                    this.handleEnter();
+                    this.handleEnter(true);
                 } else {
                     // control key
                     switch (evt.key) {
@@ -138,7 +138,7 @@ export class CellEditorController {
 
                         case 'Space':
                             if (!this.isEditMode) {
-                                this.enterEditMode();
+                                this.enterEditMode(true);
                             }
                             break;
 
@@ -183,7 +183,7 @@ export class CellEditorController {
         if (onKeyCompositionStartObservable && !onKeyCompositionStartObservable.hasObservers()) {
             onKeyCompositionStartObservable.add((evt: CompositionEvent) => {
                 if (!this.isEditMode) {
-                    this.enterEditMode();
+                    this.enterEditMode(true);
                 }
             });
         }
@@ -295,9 +295,10 @@ export class CellEditorController {
     /**
      * 1. When a printable character is entered, trigger editing
      * 2. When CompositionStart, trigger editing
+     * @param clear Whether to clear the cell
      * @returns
      */
-    enterEditMode() {
+    enterEditMode(clear: boolean = false) {
         this.focusEditEle();
         // setTimeout(() => {
         //     this.richTextEditEle.focus();
@@ -367,6 +368,9 @@ export class CellEditorController {
             cellValue = cell.value;
         }
 
+        if (clear) {
+            cellValue = '';
+        }
         this.richText.setValue(cellValue);
 
         const style = this.getSelectionStyle();
@@ -480,8 +484,8 @@ export class CellEditorController {
         // this._plugin.getMainComponent().makeDirty(true);
     }
 
-    handleEnter() {
-        this.enterEditMode();
+    handleEnter(clear: boolean = false) {
+        this.enterEditMode(clear);
     }
 
     handleBackSpace() {}

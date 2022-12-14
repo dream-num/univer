@@ -687,7 +687,28 @@ export class ToolBarController {
     }
 
     // 改变边框线粗细
+    /**
+     * 由于
+     * @param value
+     * @param index
+     * @param e
+     * @returns
+     */
     handleLineBold(value: string, index: number, e: MouseEvent) {
+        console.log('handleLineBold===', value, index, e);
+
+        if (index === 7) {
+            index = 8;
+        } else if (index === 8) {
+            index = 9;
+        } else if (index === 9) {
+            index = 10;
+        } else if (index === 10) {
+            index = 11;
+        } else if (index === 11) {
+            index = 13;
+        }
+
         e.stopPropagation();
         if (!value) return;
         this._lineBold.setLineType(value);

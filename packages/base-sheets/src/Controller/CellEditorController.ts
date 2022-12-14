@@ -121,7 +121,7 @@ export class CellEditorController {
             onKeyDownObservable.add((evt: KeyboardEvent) => {
                 if (!evt.ctrlKey && isKeyPrintable(evt.key)) {
                     // character key
-                    this.handleEnter();
+                    this.enterEditMode(true);
                 } else {
                     // control key
                     switch (evt.key) {
@@ -129,8 +129,11 @@ export class CellEditorController {
                             if (this.isEditMode) {
                                 this.exitEditMode();
 
-                                // move to cell below
-                                this._plugin.getSelectionManager().move(Direction.BOTTOM);
+                                const currentCell = this._plugin.getSelectionManager().getCurrentCellModel();
+                                if (!currentCell?.isMerged) {
+                                    // move to cell below
+                                    this._plugin.getSelectionManager().move(Direction.BOTTOM);
+                                }
                             } else {
                                 this.enterEditMode();
                             }
@@ -138,7 +141,7 @@ export class CellEditorController {
 
                         case 'Space':
                             if (!this.isEditMode) {
-                                this.enterEditMode();
+                                this.enterEditMode(true);
                             }
                             break;
 
@@ -183,7 +186,7 @@ export class CellEditorController {
         if (onKeyCompositionStartObservable && !onKeyCompositionStartObservable.hasObservers()) {
             onKeyCompositionStartObservable.add((evt: CompositionEvent) => {
                 if (!this.isEditMode) {
-                    this.enterEditMode();
+                    this.enterEditMode(true);
                 }
             });
         }
@@ -295,9 +298,10 @@ export class CellEditorController {
     /**
      * 1. When a printable character is entered, trigger editing
      * 2. When CompositionStart, trigger editing
+     * @param clear Whether to clear the cell
      * @returns
      */
-    enterEditMode() {
+    enterEditMode(clear: boolean = false) {
         this.focusEditEle();
         // setTimeout(() => {
         //     this.richTextEditEle.focus();
@@ -367,6 +371,9 @@ export class CellEditorController {
             cellValue = cell.value;
         }
 
+        if (clear) {
+            cellValue = '';
+        }
         this.richText.setValue(cellValue);
 
         const style = this.getSelectionStyle();
@@ -423,14 +430,26 @@ export class CellEditorController {
     }
 
     setCurrentEditRangeData() {
-        const model = this._plugin.getSelectionManager().getCurrentCellModel();
-        if (!model) return;
+        const currentCell = this._plugin.getSelectionManager().getCurrentCellModel();
+        if (!currentCell) return;
+
+        let row;
+        let column;
+
+        if (currentCell.isMerged) {
+            const mergeInfo = currentCell.mergeInfo;
+            row = mergeInfo.startRow;
+            column = mergeInfo.startColumn;
+        } else {
+            row = currentCell.row;
+            column = currentCell.column;
+        }
 
         this.currentEditRangeData = {
-            startRow: model.row,
-            startColumn: model.column,
-            endRow: model.row,
-            endColumn: model.column,
+            startRow: row,
+            startColumn: column,
+            endRow: row,
+            endColumn: column,
         };
     }
 
@@ -478,10 +497,6 @@ export class CellEditorController {
         }
 
         // this._plugin.getMainComponent().makeDirty(true);
-    }
-
-    handleEnter() {
-        this.enterEditMode();
     }
 
     handleBackSpace() {}

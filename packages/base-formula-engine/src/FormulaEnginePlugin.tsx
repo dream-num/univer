@@ -16,7 +16,7 @@ interface FormulaEngineConfig {}
 
 export class FormulaEnginePlugin extends Plugin<FormulaEnginePluginObserver> {
     constructor(config?: IFormulaEnginePlugin) {
-        super('pluginFormulaEngine');
+        super('formulaEngine');
     }
     /**
      *

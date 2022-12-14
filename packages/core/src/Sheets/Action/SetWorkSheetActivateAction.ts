@@ -37,14 +37,12 @@ export class SetWorkSheetActivateAction extends SheetActionBase<
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
         const { oldSheetId, status } = this.do();
         this._oldActionData = {
             ...actionData,
             sheetId: oldSheetId,
             status,
-            convertor: [],
         };
         this.validate();
         this.removeOperation(ActionOperationType.SERVER_ACTION);

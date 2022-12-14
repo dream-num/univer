@@ -3,8 +3,6 @@ import { IRangeData } from '../../Interfaces';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { SetSelectionActivate } from '../Apply';
-import { CONVERTOR_OPERATION } from '../../Const/CONST';
-import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
 import { CommandUnit } from '../../Command';
 
 /**
@@ -42,7 +40,6 @@ export class SetSelectionActivateAction extends SheetActionBase<
 
         this._doActionData = {
             ...actionData,
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
 
         const { activeRangeList, activeRange, currentCell } = this.do();

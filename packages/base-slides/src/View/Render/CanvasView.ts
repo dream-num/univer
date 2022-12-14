@@ -1,16 +1,16 @@
 import { Engine, EVENT_TYPE, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univer/base-render';
 import { EventState, sortRules } from '@univer/core';
 import { BaseView, CanvasViewRegistry, CANVAS_VIEW_KEY } from './BaseView';
-import { DocsView } from './Views/SlideView';
+import { SlideView } from './Views/SlideView';
 import './Views';
-import { DocPlugin } from '../../DocPlugin';
+import { SlidePlugin } from '../../SlidePlugin';
 
 export class CanvasView {
     private _scene: Scene;
 
     private _views: BaseView[] = [];
 
-    constructor(private _engine: Engine, private _plugin: DocPlugin) {
+    constructor(private _engine: Engine, private _plugin: SlidePlugin) {
         this._initialize();
     }
 
@@ -23,7 +23,7 @@ export class CanvasView {
             height: 2000,
         });
         this._scene = scene;
-        const viewMain = new Viewport(CANVAS_VIEW_KEY.DOCS_VIEW, scene, {
+        const viewMain = new Viewport(CANVAS_VIEW_KEY.SLIDE_VIEW, scene, {
             left: 0,
             top: 0,
             bottom: 0,
@@ -66,7 +66,7 @@ export class CanvasView {
         engine.runRenderLoop(() => {
             scene.render();
             const app = document.getElementById('app');
-            if(app){
+            if (app) {
                 app.innerText = `fps:${Math.round(engine.getFps()).toString()}`;
             }
         });
@@ -80,11 +80,11 @@ export class CanvasView {
         }
     }
 
-    getDocsView(): DocsView {
-        return this.getView(CANVAS_VIEW_KEY.DOCS_VIEW) as DocsView;
+    getDocsView(): SlideView {
+        return this.getView(CANVAS_VIEW_KEY.SLIDE_VIEW) as SlideView;
     }
 
-    private _viewLoader(scene: Scene, plugin: DocPlugin) {
+    private _viewLoader(scene: Scene, plugin: SlidePlugin) {
         CanvasViewRegistry.getData()
             .sort(sortRules)
             .forEach((view) => {

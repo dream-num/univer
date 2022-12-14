@@ -25,12 +25,10 @@ export class SetRowHeightAction extends SheetActionBase<ISetRowHeightActionData>
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
         this._oldActionData = {
             ...actionData,
             rowHeight: this.do(),
-            convertor: [],
         };
         this.validate();
     }

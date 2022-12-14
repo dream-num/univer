@@ -22,13 +22,11 @@ export class SetHiddenGridlinesAction extends SheetActionBase<ISetHiddenGridline
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
 
         this._oldActionData = {
             ...actionData,
             hideGridlines: this.do(),
-            convertor: [],
         };
         this.validate();
     }

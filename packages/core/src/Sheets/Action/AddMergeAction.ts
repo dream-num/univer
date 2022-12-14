@@ -1,7 +1,5 @@
 import { addMerge } from '../Apply/AddMerge';
 import { RemoveMerge } from '../Apply/RemoveMerge';
-import { CONVERTOR_OPERATION } from '../../Const';
-import { WorkSheetConvertor } from '../../Convertor';
 import { IRangeData } from '../../Interfaces';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers } from '../../Command/ActionObservers';
@@ -34,12 +32,10 @@ export class AddMergeAction extends SheetActionBase<
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.INSERT)],
         };
         this._oldActionData = {
             ...actionData,
             rectangles: this.do(),
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.REMOVE)],
         };
         this.validate();
     }

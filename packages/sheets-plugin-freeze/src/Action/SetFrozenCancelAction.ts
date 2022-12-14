@@ -1,4 +1,4 @@
-import { SheetActionBase, ISheetActionData, Workbook, ActionObservers, WorkSheetConvertor, CONVERTOR_OPERATION, ActionType } from '@univer/core';
+import { SheetActionBase, ISheetActionData, Workbook, ActionObservers, ActionType } from '@univer/core';
 import { SetFrozenCancel } from '../Apply/SetFrozenCancel';
 import { SetFrozenColumns } from '../Apply/SetFrozenColumns';
 import { SetFrozenRows } from '../Apply/SetFrozenRows';
@@ -11,12 +11,10 @@ export class SetFrozenCancelAction extends SheetActionBase<ISheetActionData> {
         super(actionData, workbook, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
         this._oldActionData = {
             actionName: ACTION_NAMES.SET_FROZEN_COLUMNS_ACTION,
             sheetId: actionData.sheetId,
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
         this.do();
         this.validate();

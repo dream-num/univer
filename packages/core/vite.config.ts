@@ -43,7 +43,7 @@ export default defineConfig({
                 'es6-proxy-polyfill': 'es6-proxy-polyfill',
                 'reflect-metadata': 'reflect-metadata',
             },
-        }),
+        })
     ],
     resolve: {
         alias: {

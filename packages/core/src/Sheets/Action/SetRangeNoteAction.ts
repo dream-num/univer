@@ -31,12 +31,10 @@ export class SetRangeNoteAction extends SheetActionBase<
 
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
         this._oldActionData = {
             ...actionData,
             cellNote: this.do(),
-            convertor: [],
         };
 
         this.validate();

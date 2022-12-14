@@ -1,4 +1,4 @@
-import { SheetActionBase, ActionObservers, CONVERTOR_OPERATION, ISheetActionData, Workbook, WorkSheetConvertor } from '@univer/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, Workbook } from '@univer/core';
 import { AlternatingColorsPlugin } from '../../AlternatingColorsPlugin';
 import { AddBanding } from '../../Apply/AddBanding';
 import { DeleteBanding } from '../../Apply/DeleteBanding';
@@ -17,7 +17,6 @@ export class AddBandingAction extends SheetActionBase<IAddBandingActionData, IDe
 
         this._doActionData = {
             ...actionData,
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
         this.do();
         this._oldActionData = {

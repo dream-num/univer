@@ -436,9 +436,7 @@ export class TextSelection {
                     endY: startY + lineHeight,
                 };
             } else {
-                // console.log('span', firstSpan, lastSpan, start_sp, end_sp);
-
-                const isStartBackFin = (isStartBack || start_sp === 0) && !isCurrentList;
+                const isStartBackFin = (isStartBack || (start_sp === 0 && !isCollapse)) && !isCurrentList;
 
                 const isEndBackFin = isEndBack && end_sp !== spanGroup.length - 1;
 
@@ -449,6 +447,21 @@ export class TextSelection {
                 cursorEnd += isEndBackFin ? 0 : 1;
 
                 cursorEnd -= hasList ? 1 : 0;
+
+                console.log('span', {
+                    hasList,
+                    isStartBackFin,
+                    isEndBackFin,
+                    firstSpan,
+                    lastSpan,
+                    start_sp,
+                    end_sp,
+                    isStartBack,
+                    isEndBack,
+                    cursorStart,
+                    cursorEnd,
+                    isCurrentList,
+                });
 
                 position = {
                     startX: startX + firstSpanLeft + (isStartBackFin ? 0 : firstSpanWidth),
@@ -569,10 +582,10 @@ export class TextSelection {
 
         this._cursor = firstCursor.cursorStart;
 
-        console.log('this._cursor', this._cursor);
+        console.log('_setCursor', firstCursor.cursorStart, firstCursor);
     }
 
-    get cursor() {
+    getCursor() {
         return this._cursor;
     }
 

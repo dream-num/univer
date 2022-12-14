@@ -31,12 +31,10 @@ export class SetRangeFormulaAction extends SheetActionBase<
 
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
         this._oldActionData = {
             ...actionData,
             cellFormula: this.do(),
-            convertor: [],
         };
 
         this.validate();

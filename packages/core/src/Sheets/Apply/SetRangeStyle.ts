@@ -156,7 +156,9 @@ export function mergeStyle(
     isRichText: boolean = false
 ): Nullable<IStyleData> {
     // clear style
-    if (!newStyle) return newStyle;
+    if (newStyle === null) return newStyle;
+    // don't operate
+    if (newStyle === undefined) return oldStyle;
 
     const backupStyle = Tools.deepClone(oldStyle) || {};
 

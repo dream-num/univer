@@ -198,17 +198,16 @@ export const DEFAULT_STYLES: IStyleData = {
     },
 };
 
-/**
- * Convertor operation
- */
-export const CONVERTOR_OPERATION = {
-    SET: 'set',
-    INSERT: 'insert',
-    REMOVE: 'remove',
-    CHANGE: 'change',
+export const DEFAULT_DOC = {
+    id: 'default_doc',
+    documentStyle: {},
 };
 
-export const DEFAULT_DOC = {
-    documentId: 'default_doc',
-    documentStyle: {},
+export const DEFAULT_SLIDE = {
+    id: 'default_slide',
+    title: 'defaultSlide',
+    pageSize: {
+        width: 300,
+        height: 300,
+    },
 };

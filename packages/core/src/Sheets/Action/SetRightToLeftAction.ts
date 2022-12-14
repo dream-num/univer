@@ -23,13 +23,11 @@ export class SetRightToLeftAction extends SheetActionBase<ISetRightToLeftActionD
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
 
         this._oldActionData = {
             ...actionData,
             rightToLeft: this.do(),
-            convertor: [],
         };
         this.validate();
     }

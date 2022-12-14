@@ -25,12 +25,10 @@ export class SetColumnShowAction extends SheetActionBase<ISetColumnShowActionDat
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
         this.do();
         this._oldActionData = {
             ...actionData,
-            convertor: [],
         };
         this.validate();
     }

@@ -1,4 +1,6 @@
 import { BooleanNumber, GridType, IDocStyleBase, IDocumentLayout, IParagraphStyle, IReferenceSource, ISectionBreakBase, ITextStyle } from '@univer/core';
+import { TextSelection } from '../Component/Docs/Common/TextSelection';
+import { Documents } from '../Component/Docs/Document';
 import {
     IDocumentSkeletonBlockAnchor,
     IDocumentSkeletonBullet,
@@ -119,6 +121,13 @@ export interface IFontCreateConfig {
     gridType?: GridType;
     snapToGrid: BooleanNumber;
     pageWidth?: number;
+}
+
+export interface IEditorInputConfig {
+    event: Event | CompositionEvent | KeyboardEvent;
+    content?: string;
+    document: Documents;
+    selection?: TextSelection;
 }
 
 // export interface IPageConfig {

@@ -1,5 +1,5 @@
 import { ActionBase, IActionData } from './ActionBase';
-import { Document } from '../Docs/Domain/Document';
+import { DocumentModel } from '../Docs/Domain/DocumentModel';
 import { CommandUnit } from './Command';
 import { ActionObservers } from './ActionObservers';
 
@@ -10,7 +10,7 @@ export abstract class DocActionBase<
     O extends IDocActionData = D,
     R = void
 > extends ActionBase<D, O, R> {
-    protected _document: Document;
+    protected _document: DocumentModel;
 
     protected constructor(
         actionData: D,
@@ -24,7 +24,7 @@ export abstract class DocActionBase<
         this._document = commandUnit.DocumentUnit;
     }
 
-    getDocument(): Document {
+    getDocument(): DocumentModel {
         return this._document;
     }
 }

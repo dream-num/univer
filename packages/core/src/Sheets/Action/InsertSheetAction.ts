@@ -22,12 +22,10 @@ export class InsertSheetAction extends SheetActionBase<
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
         this._oldActionData = {
             ...actionData,
             sheetId: this.do(),
-            convertor: [],
         };
     }
 

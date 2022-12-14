@@ -1,7 +1,5 @@
 import { SetRangeData, ClearRange } from '../Apply';
 import { ACTION_NAMES } from '../../Const';
-import { CONVERTOR_OPERATION } from '../../Const/CONST';
-import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
 import { ICellData, IOptionsData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
@@ -36,12 +34,10 @@ export class ClearRangeAction extends SheetActionBase<
 
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
         this._oldActionData = {
             ...actionData,
             cellValue: this.do(),
-            convertor: [],
         };
         this.validate();
     }
@@ -72,7 +68,6 @@ export class ClearRangeAction extends SheetActionBase<
             actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
             sheetId,
             cellValue: this.do(),
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.INSERT)],
         };
     }
 

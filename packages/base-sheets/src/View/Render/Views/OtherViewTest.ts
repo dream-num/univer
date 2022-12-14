@@ -16,7 +16,7 @@ import { SheetPlugin } from '../../../SheetPlugin';
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 
 const richTextTest: IDocumentData = {
-    documentId: 'd',
+    id: 'd',
     drawings: {
         shapeTest1: {
             objectId: 'shapeTest1',
@@ -439,6 +439,8 @@ export class OtherViewTest extends BaseView {
             top: 500,
             left: 800,
             zIndex: 13,
+            autoHeight: true,
+            autoWidth: true,
             isTransformer: true,
         });
 
@@ -471,7 +473,7 @@ export class OtherViewTest extends BaseView {
         });
 
         console.log('insert path test', mainScene);
-        // mainScene.addObjects([path, picture, circle1, richText]);
+        mainScene.addObjects([path, picture, circle1, richText]);
     }
 }
 

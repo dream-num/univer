@@ -9,15 +9,13 @@ import { SheetPlugin } from './SheetPlugin';
 const uiDefaultConfigUp = {
     container: 'universheet-demo-up',
     layout: {
-        innerRight: false,
-        outerLeft: false,
-        toolBarConfig: {
-            paintFormat: false,
-            currencyFormat: false,
-            percentageFormat: false,
-            numberDecrease: false,
-            numberIncrease: false,
-            moreFormats: false,
+        sheetContainerConfig: {
+            infoBar: true,
+            formulaBar: true,
+            toolBar: true,
+            sheetBar: true,
+            countBar: true,
+            rightMenu: true,
         },
     },
 
@@ -36,58 +34,6 @@ const uiDefaultConfigUp = {
                 },
             },
         ],
-        // 'sheet-01': [
-        //     {
-        //         selection: {
-        //             startRow: 13,
-        //             endRow: 14,
-        //             startColumn: 1,
-        //             endColumn: 2,
-        //         },
-        //     },
-        //     {
-        //         selection: {
-        //             startRow: 16,
-        //             endRow: 18,
-        //             startColumn: 1,
-        //             endColumn: 2,
-        //         },
-        //         cell: {
-        //             row: 16,
-        //             column: 1,
-        //         },
-        //     },
-        // ],
-        // 'sheet-02': [
-        //     {
-        //         selection: {
-        //             startRow: 17,
-        //             endRow: 20,
-        //             startColumn: 1,
-        //             endColumn: 2,
-        //         },
-        //     },
-        //     {
-        //         selection: {
-        //             startRow: 22,
-        //             endRow: 23,
-        //             startColumn: 1,
-        //             endColumn: 2,
-        //         },
-        //     },
-        //     {
-        //         selection: {
-        //             startRow: 25,
-        //             endRow: 27,
-        //             startColumn: 4,
-        //             endColumn: 6,
-        //         },
-        //         cell: {
-        //             row: 25,
-        //             column: 4,
-        //         },
-        //     },
-        // ],
     },
 };
 
@@ -107,6 +53,16 @@ univerSheetUp.refreshWorkbook(DEFAULT_WORKBOOK_DATA_DOWN);
 
 const uiDefaultConfigDown = {
     container: 'universheet-demo-down',
+    layout: {
+        sheetContainerConfig: {
+            infoBar: true,
+            formulaBar: true,
+            toolBar: true,
+            sheetBar: true,
+            countBar: true,
+            rightMenu: true,
+        },
+    },
     selections: {
         'sheet-0001': [
             {
@@ -125,12 +81,12 @@ const uiDefaultConfigDown = {
     },
 };
 
-const univerSheetDown = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DOWN);
-univerSheetDown.installPlugin(new RenderEngine());
-univerSheetDown.installPlugin(new UniverComponentSheet());
+// const univerSheetDown = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DOWN);
+// univerSheetDown.installPlugin(new RenderEngine());
+// univerSheetDown.installPlugin(new UniverComponentSheet());
 
-univerSheetDown.installPlugin(new SheetPlugin(uiDefaultConfigDown));
-univerSheetDown.installPlugin(new NumfmtPlugin());
+// univerSheetDown.installPlugin(new SheetPlugin(uiDefaultConfigDown));
+// univerSheetDown.installPlugin(new NumfmtPlugin());
 // FormulaPlugin.create(DEFAULT_FORMULA_DATA_DOWN).installTo(univerSheetDown);
 
 // const uiDefaultConfigDemo = {

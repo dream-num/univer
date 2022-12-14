@@ -17,7 +17,6 @@ export class SetSelectionValueAction extends SheetActionBase<ISetSelectionValueA
 
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
 
         const selections = this.do();

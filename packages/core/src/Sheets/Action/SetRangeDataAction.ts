@@ -1,6 +1,5 @@
 import { SetRangeData } from '../Apply';
-import { ACTION_NAMES, CONVERTOR_OPERATION } from '../../Const';
-import { WorkSheetConvertor } from '../../Convertor';
+import { ACTION_NAMES } from '../../Const';
 import { ObjectMatrixPrimitiveType } from '../../Shared';
 import {
     SheetActionBase,
@@ -38,7 +37,6 @@ export class SetRangeDataAction extends SheetActionBase<
 
         this._doActionData = {
             ...actionData,
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
         this._oldActionData = {
             ...actionData,

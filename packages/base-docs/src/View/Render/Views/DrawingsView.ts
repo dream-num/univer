@@ -49,6 +49,8 @@ export class DrawingsView extends BaseView {
                     marginTop,
                 });
 
+                console.log('pageMarginCache', aTop, docsTop, marginTop, aTop + docsTop + marginTop, rect);
+
                 objectList.push(rect);
             });
         }
@@ -62,6 +64,8 @@ export class DrawingsView extends BaseView {
                 const cache = pageMarginCache.get(oKey);
                 const marginLeft = cache?.marginLeft || 0;
                 const marginTop = cache?.marginTop || 0;
+
+                console.log('onChangingObservable', top, docsTop, marginTop, top - docsTop - marginTop);
 
                 docsSkeleton?.updateDrawing(oKey, {
                     left: left - docsLeft - marginLeft,

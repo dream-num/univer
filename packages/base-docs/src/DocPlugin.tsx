@@ -4,11 +4,13 @@ import { IOCContainer } from '@univer/core';
 import { Component, getRefElement, isElement, ISlotProps, RefObject, render } from '@univer/base-component';
 import { DocPluginObserve, install } from './Basic/Observer';
 import { ToolBarController } from './Controller/ToolBarController';
-import { DocContainerController } from './Controller/DocContainerController';
+import { DocumentController } from './Controller/DocumentController';
 import { BaseDocContainerConfig, defaultLayout, DocContainer, IDocPluginConfigBase, ILayout } from './View/UI/DocContainer';
 import { InfoBarController } from './Controller/InfoBarController';
 import { Engine, RenderEngine } from '@univer/base-render';
 import { CanvasView } from './View/Render/CanvasView';
+import { CANVAS_VIEW_KEY } from './View/Render';
+import { DocsView } from './View/Render/Views';
 
 export interface IDocPluginConfig extends IDocPluginConfigBase {
     container: HTMLElement | string;
@@ -43,7 +45,9 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
     private _canvasEngine: Engine;
 
     private _toolBarControl: ToolBarController;
-    private _docContainerController: DocContainerController;
+
+    private _documentController: DocumentController;
+
     private _componentList: Map<string, any>;
 
     constructor(config: Partial<IDocPluginConfig> = {}) {
@@ -88,7 +92,7 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
 
         this._toolBarControl = new ToolBarController(this);
         this._infoBarControl = new InfoBarController(this);
-        this._docContainerController = new DocContainerController(this);
+        this._documentController = new DocumentController(this, this.config);
 
         const docContainer = this._initContainer(this._config.container);
 
@@ -165,13 +169,40 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
 
         this._canvasView = new CanvasView(engineInstance, this);
 
-        window.onresize = () => {
+        window.addEventListener('resize', () => {
             engineInstance.resize();
-        };
+        });
+        // window.onresize = () => {
+        //     engineInstance.resize();
+        // };
     }
 
     get config() {
         return this._config;
+    }
+
+    getCanvasEngine() {
+        return this._canvasEngine;
+    }
+
+    getCanvasView() {
+        return this._canvasView;
+    }
+
+    getMainScene() {
+        return this._canvasEngine.getScene(CANVAS_VIEW_KEY.MAIN_SCENE);
+    }
+
+    getDocsView() {
+        return this.getCanvasView().getDocsView();
+    }
+
+    getMainComponent() {
+        return (this.getDocsView() as DocsView).getDocs();
+    }
+
+    getInputEvent() {
+        return this.getMainComponent().getEditorInputEvent();
     }
 
     getContentRef(): RefObject<HTMLDivElement> {

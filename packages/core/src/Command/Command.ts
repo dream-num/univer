@@ -2,14 +2,14 @@ import { Class, Nullable } from '../Shared';
 import { Workbook } from '../Sheets/Domain';
 import { ActionBase, IActionData } from './ActionBase';
 import { ActionType } from './ActionObservers';
-import { Document } from '../Docs/Domain/Document';
+import { DocumentModel } from '../Docs/Domain/DocumentModel';
 import { CommandInjector } from './CommandInjectorObservers';
 import { CommandManager } from './CommandManager';
 
 export class CommandUnit {
     WorkBookUnit?: Workbook;
 
-    DocumentUnit?: Document;
+    DocumentUnit?: DocumentModel;
 }
 
 /**

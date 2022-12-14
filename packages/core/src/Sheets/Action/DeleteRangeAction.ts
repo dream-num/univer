@@ -1,7 +1,5 @@
 import { DeleteRange, InsertRange } from '../Apply';
 import { ACTION_NAMES } from '../../Const';
-import { CONVERTOR_OPERATION } from '../../Const/CONST';
-import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
 import { Dimension } from '../../Enum/Dimension';
 import { ICellData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
@@ -37,12 +35,10 @@ export class DeleteRangeAction extends SheetActionBase<
 
         this._doActionData = {
             ...actionData,
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
         this._oldActionData = {
             ...actionData,
             cellValue: this.do(),
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.INSERT)],
         };
         this.validate();
     }
@@ -78,7 +74,6 @@ export class DeleteRangeAction extends SheetActionBase<
             shiftDimension,
             rangeData,
             cellValue: this.do(),
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.INSERT)],
         };
     }
 

@@ -32,13 +32,11 @@ export class InsertColumnDataAction extends SheetActionBase<
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
         this.do();
         this._oldActionData = {
             ...actionData,
             columnCount: ObjectArray.getMaxLength(actionData.columnData[0]),
-            convertor: [],
         };
         this.validate();
     }

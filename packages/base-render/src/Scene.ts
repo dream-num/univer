@@ -599,7 +599,10 @@ export class Scene {
 
     // Determine the only object selected
     pick(coord: Vector2): Nullable<BaseObject | Scene> {
-        const pickedViewport = this.getActiveViewportByCoord(coord);
+        let pickedViewport = this.getActiveViewportByCoord(coord);
+        if (!pickedViewport) {
+            pickedViewport = this._viewports[0];
+        }
         if (!this._evented || !pickedViewport) {
             return;
         }

@@ -21,7 +21,7 @@ import {
 } from '@univer/core';
 
 const richTextTestFloat: IDocumentData = {
-    documentId: 'd',
+    id: 'd',
     drawings: {
         shapeTest1: {
             objectId: 'shapeTest1',
@@ -416,7 +416,7 @@ const richTextTestFloat: IDocumentData = {
 };
 
 const richTextTest: IDocumentData = {
-    documentId: 'd',
+    id: 'd',
     body: {
         blockElements: {
             oneParagraph: {

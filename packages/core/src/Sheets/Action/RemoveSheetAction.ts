@@ -21,12 +21,10 @@ export class RemoveSheetAction extends SheetActionBase<
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
         this._oldActionData = {
             ...actionData,
             ...this.do(),
-            convertor: [],
         };
     }
 

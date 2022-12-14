@@ -10,12 +10,10 @@ export class SetNumfmtRangeDataAction extends SheetActionBase<ISetNumfmtRangeAct
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
         this._oldActionData = {
             ...actionData,
             numfmtMatrix: this.do(),
-            convertor: [],
         };
     }
 

@@ -20,6 +20,11 @@ export interface ITextDecoration {
     t?: TextDecoration; // lineType
 }
 
+export interface ISolidFill {
+    color: IColorStyle;
+    alpha: number;
+}
+
 /**
  * RGB color or theme color
  */

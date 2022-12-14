@@ -256,7 +256,7 @@ export function getCharSpaceConfig(sectionBreakConfig: ISectionBreakConfig, para
     };
 }
 
-export function updateBlockIndex(pages: IDocumentSkeletonPage[]) {
+export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number = -1) {
     const firstPage = pages[0];
     const { st: firstPageStartIndex } = firstPage;
     // if (firstPageStartIndex > endIndex) {
@@ -264,7 +264,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[]) {
     //     return;
     // }
 
-    let prePageStartIndex = -1;
+    let prePageStartIndex = start;
     for (let page of pages) {
         const { sections } = page;
         let pageStartIndex = prePageStartIndex;
@@ -366,7 +366,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[]) {
             section.height = maxSectionHeight;
             pageHeight += maxSectionHeight;
 
-            preSectionStartIndex = preColumnStartIndex;
+            preSectionStartIndex = section.ed;
         }
 
         page.st = pageStartIndex === 0 ? 0 : pageStartIndex + 1;
@@ -591,7 +591,7 @@ export function getPositionVertical(
         } else if (relativeFrom === ObjectRelativeFromV.PAGE) {
             absoluteTop = posOffset;
         } else if (relativeFrom === ObjectRelativeFromV.PARAGRAPH) {
-            absoluteTop = (isPageBreak ? 0 : blockAnchorTop || lineTop) + posOffset;
+            absoluteTop = (isPageBreak ? 0 : blockAnchorTop == null ? lineTop : blockAnchorTop) + posOffset;
         }
         return absoluteTop;
     } else if (percent) {

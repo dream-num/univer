@@ -8,6 +8,9 @@ export class Registry {
     private _data: any[] = [];
 
     add(dataInstance: any) {
+        if (this._data.indexOf(dataInstance) > -1) {
+            return;
+        }
         this._data.push(dataInstance);
     }
 

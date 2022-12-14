@@ -17,12 +17,10 @@ export class SetCollapseAllRowGroupsAction extends SheetActionBase<ISetCollapseA
         super(actionData, workbook, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
         this.do();
         this._oldActionData = {
             ...actionData,
-            convertor: [],
         };
         this.validate();
     }

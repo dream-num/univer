@@ -1,6 +1,6 @@
 import { IDocumentData, ISlideData, IWorkbookConfig, UniverDoc, UniverSheet, UniverSlide } from '@univer/core';
-import * as UniverCore from '@univer/core';
 import { RenderEngine } from '@univer/base-render';
+import { BaseComponentPlugin } from '@univer/base-component';
 import { UniverComponentSheet } from '@univer/style-universheet';
 import { ISheetPluginConfig, SheetPlugin } from '@univer/base-sheets';
 import { IDocPluginConfig, DocPlugin } from '@univer/base-docs';
@@ -9,6 +9,7 @@ import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
 import { DEFAULT_FORMULA_DATA, FormulaPlugin, IFormulaConfig } from '@univer/sheets-plugin-formula';
 import { INumfmtPluginConfig, NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
 import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
+import { ImportXlsxPlugin } from '@univer/sheets-plugin-import-xlsx';
 
 interface ISheetPropsCustom {
     coreConfig?: Partial<IWorkbookConfig>;
@@ -28,10 +29,12 @@ class UniverSheetCustom {
         universheet.installPlugin(new RenderEngine());
         universheet.installPlugin(new UniverComponentSheet());
         universheet.installPlugin(new SheetPlugin(config.baseSheetsConfig));
+        universheet.installPlugin(new BaseComponentPlugin());
         universheet.installPlugin(new NumfmtPlugin(config.numfmtConfig));
         FormulaPlugin.create(config.formulaConfig).installTo(universheet);
 
         universheet.installPlugin(new ClipboardPlugin());
+        universheet.installPlugin(new ImportXlsxPlugin());
 
         return universheet;
     }
@@ -103,4 +106,17 @@ const univerSlideCustom = function (config?: ISlidePropsCustom) {
     return new UniverSlideCustom().init(config);
 };
 
-export { UniverCore, univerSheetCustom, univerDocCustom, univerSlideCustom, DEFAULT_WORKBOOK_DATA, DEFAULT_FORMULA_DATA };
+export { univerSheetCustom, univerDocCustom, univerSlideCustom };
+
+export * as UniverCore from '@univer/core';
+export * as BaseRender from '@univer/base-render';
+export * as BaseComponent from '@univer/base-component';
+export * as StyleUniver from '@univer/style-universheet';
+export * as BaseSheets from '@univer/base-sheets';
+export * as BaseDocs from '@univer/base-docs';
+export * as BaseSlides from '@univer/base-slides';
+export * as CommonPluginData from '@univer/common-plugin-data';
+export * as SheetsPluginFormula from '@univer/sheets-plugin-formula';
+export * as SheetsPluginNumfmt from '@univer/sheets-plugin-numfmt';
+export * as SheetsPluginClipboard from '@univer/sheets-plugin-clipboard';
+export * as SheetsPluginImportXlsx from '@univer/sheets-plugin-import-xlsx';

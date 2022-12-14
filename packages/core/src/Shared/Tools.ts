@@ -415,6 +415,10 @@ export class Tools {
         return this.getValueType(value) === '[object Number]';
     }
 
+    static isStringNumber(value?: any): boolean {
+        return !isNaN(parseFloat(value)) && isFinite(value);
+    }
+
     static isObject<T>(value?: any): value is T {
         return this.getValueType(value) === '[object Object]';
     }
@@ -672,5 +676,16 @@ export class Tools {
             }
         }
         return extendJson as unknown as T;
+    }
+
+    static arrayToObject(array: IKeyValue[][]) {
+        const obj = {};
+        array.forEach((row, i) => {
+            obj[i] = {};
+            row.forEach((column, j) => {
+                obj[i][j] = column;
+            });
+        });
+        return obj;
     }
 }

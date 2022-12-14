@@ -103,9 +103,12 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         this._canvasEngine = engineInstance;
 
         engineInstance.setContainer(container);
-        window.onresize = () => {
+        window.addEventListener('resize', () => {
             engineInstance.resize();
-        };
+        });
+        // window.onresize = () => {
+        //     engineInstance.resize();
+        // };
     }
 
     initialize(context: SheetContext): void {
@@ -238,7 +241,9 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
         this.register(engine);
 
-        this._canvasView = new CanvasView(engine, this);
+        if (this._canvasView == null) {
+            this._canvasView = new CanvasView(engine, this);
+        }
 
         this.context.getContextObserver('onSheetRenderDidMountObservable')?.notifyObservers();
     }
@@ -342,11 +347,11 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     }
 
     addRightMenu(item: RightMenuProps[] | RightMenuProps) {
-        this._rightMenuControl.addItem(item);
+        this._rightMenuControl && this._rightMenuControl.addItem(item);
     }
 
     addToolButton(config: IToolBarItemProps) {
-        this._toolBarControl.addToolButton(config);
+        this._toolBarControl && this._toolBarControl.addToolButton(config);
     }
 
     registerComponent(name: string, component: any, props?: any) {

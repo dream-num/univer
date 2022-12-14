@@ -13,7 +13,7 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univer/core';
-import { getLastPage } from './Common/Tools';
+import { getLastPage, updateBlockIndex } from './Common/Tools';
 
 import { createSkeletonPage } from './Common/Page';
 
@@ -156,7 +156,10 @@ export class DocumentSkeleton extends Skeleton {
                 columnSeparatorType: ColumnSeparatorType.NONE,
                 sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
             };
-            documentContentMapArr.push(documentContentMap);
+
+            if (documentContentMap.blockElements.length > 0) {
+                documentContentMapArr.push(documentContentMap);
+            }
         }
         // console.log('documentContentMapArr', documentContentMapArr, blockElements);
         return documentContentMapArr;
@@ -331,8 +334,6 @@ export class DocumentSkeleton extends Skeleton {
             }
 
             const { pages, renderedBlockIdMap } = blockInfo;
-            // 计算页和节的位置信息
-            pages.forEach((page: IDocumentSkeletonPage) => {});
 
             // renderedBlockIdMap.forEach((value, blockId) => {
             //     this._renderedBlockIdMap.set(blockId, value);
@@ -340,6 +341,9 @@ export class DocumentSkeleton extends Skeleton {
 
             allSkeletonPages.push(...pages);
         }
+
+        // 计算页和节的位置信息
+        updateBlockIndex(allSkeletonPages);
 
         return skeleton;
     }

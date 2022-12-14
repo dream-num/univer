@@ -3,17 +3,19 @@ import {
     BlockType,
     BooleanNumber,
     BulletAlignment,
+    ColumnSeparatorType,
     GlyphType,
     IDocumentData,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     ParagraphElementType,
     PositionedObjectLayoutType,
+    SectionType,
     WrapTextType,
 } from '@univer/core';
 
-export const docsDemoData: IDocumentData = {
-    documentId: 'd',
+export const DOCS_DEMO_DATA: IDocumentData = {
+    id: 'd',
     drawings: {
         shapeTest1: {
             objectId: 'shapeTest1',
@@ -392,8 +394,26 @@ export const docsDemoData: IDocumentData = {
                     ],
                 },
             },
+            oneSectionBreak: {
+                blockId: 'oneSectionBreak',
+                st: 0,
+                ed: 0,
+                blockType: BlockType.SECTION_BREAK,
+                sectionBreak: {
+                    columnProperties: [
+                        {
+                            width: 200,
+                            paddingEnd: 20,
+                        },
+                    ],
+                    columnSeparatorType: ColumnSeparatorType.NONE,
+                    sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
+                    // textDirection: textDirectionDocument,
+                    // contentDirection: textDirection!,
+                },
+            },
         },
-        blockElementOrder: ['oneParagraph', 'twoParagraph', 'threeParagraph', 'fourParagraph', 'fiveParagraph'],
+        blockElementOrder: ['oneParagraph', 'twoParagraph', 'threeParagraph', 'fourParagraph', 'fiveParagraph', 'oneSectionBreak'],
     },
     documentStyle: {
         pageSize: {

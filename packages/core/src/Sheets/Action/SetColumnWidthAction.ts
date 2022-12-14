@@ -25,12 +25,10 @@ export class SetColumnWidthAction extends SheetActionBase<ISetColumnWidthActionD
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
         this._oldActionData = {
             ...actionData,
             columnWidth: this.do(),
-            convertor: [],
         };
         this.validate();
     }

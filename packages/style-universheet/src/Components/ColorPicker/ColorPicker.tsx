@@ -1,5 +1,4 @@
 import { BaseColorPickerProps, ColorPickerComponent, Component, createRef, JSXComponent } from '@univer/base-component';
-import { Nullable, Observer, Workbook } from '@univer/core';
 import { Button, Tooltip } from '../index';
 import { ColorPickerPanel } from './ColorPickerPanel';
 import styles from './index.module.less';
@@ -23,15 +22,10 @@ interface IState {
     setting: boolean;
     styles?: JSX.CSSProperties;
     currentLocale: string;
-    locale: {
-        [index: string]: string;
-    };
     root: Element | null;
 }
 
 class ColorPicker extends Component<BaseColorPickerProps, IState> {
-    private _localeObserver: Nullable<Observer<Workbook>>;
-
     ulRef = createRef();
 
     initialize(props: BaseColorPickerProps) {
@@ -43,31 +37,8 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
             setting: false,
             styles: {},
             currentLocale: '',
-            locale: {},
             root: null,
         };
-    }
-
-    componentWillMount() {
-        // // this.setLocale();
-        // this._localeObserver = this._context
-        //     .getObserverManager()
-        //     .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'core')
-        //     ?.add(() => {
-        //         // this.setLocale();
-        //     });
-    }
-
-    componentWillUnmount() {
-        // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'core')?.remove(this._localeObserver);
-    }
-
-    setLocale() {
-        const locale = this.context.locale;
-        const changeLocale = locale.get('toolbar');
-        this.setState({
-            locale: changeLocale,
-        });
     }
 
     /**
@@ -159,9 +130,16 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
     render() {
         const obj = Object.assign(this.state.styles || {}, this.props.style);
 
+        this.props.lang = this.props.lang ?? {
+            collapse: '',
+            customColor: '',
+            confirmColor: '',
+            cancelColor: '',
+            change: '',
+        };
+
         return (
             <div className={`${styles.colorPickerOuter} ${this.props.className}`} ref={this.ulRef} style={{ ...obj }}>
-                {this.props.slot && this.props.slot.header ? <div className={styles.colorPickerSlot}>{this.props.slot.header.content}</div> : null}
                 <div
                     className={styles.colorPicker}
                     onClick={(e: MouseEvent) => {
@@ -191,7 +169,7 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                             ))}
                         </div>
                         <div>
-                            <Button onClick={this.onSwitch}>{this.state.setting ? this.state.locale.collapse : this.state.locale.customColor}</Button>
+                            <Button onClick={this.onSwitch}>{this.state.setting ? this.props.lang.collapse : this.props.lang.customColor}</Button>
                         </div>
                     </div>
 
@@ -207,7 +185,7 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                                         // this.hideSelect();
                                     }}
                                 >
-                                    {this.state.locale.confirmColor}
+                                    {this.props.lang.confirmColor}
                                 </Button>
                                 <Button
                                     danger
@@ -215,7 +193,7 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                                         this.onCancel();
                                     }}
                                 >
-                                    {this.state.locale.cancelColor}
+                                    {this.props.lang.cancelColor}
                                 </Button>
                                 <Button
                                     onClick={(e: MouseEvent) => {
@@ -225,7 +203,7 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                                         });
                                     }}
                                 >
-                                    {this.state.locale.change}
+                                    {this.props.lang.change}
                                 </Button>
                             </div>
                         </div>

@@ -8,6 +8,7 @@ import { LineBold } from '../View/UI/Common/Line/LineBold';
 import { ModalGroup } from '../View/UI/ModalGroup/ModalGroup';
 import { RichText } from '../View/UI/RichText/RichText';
 import { CellRangeModal } from '../View/UI/Common/CellRange/CellRangeModal';
+import { ColorSelect } from '../View/UI/Common/ColorSelect/ColorSelect';
 
 interface ISelectionControlFillConfig {}
 
@@ -51,6 +52,7 @@ export type SheetPluginObserve = {
 
     onLineColorDidMountObservable: Observable<LineColor>;
     onLineBoldDidMountObservable: Observable<LineBold>;
+    onColorSelectDidMountObservable: Observable<ColorSelect>;
 
     onSheetContainerDidMountObservable: Observable<SheetContainer>;
     onCellRangeModalDidMountObservable: Observable<CellRangeModal>;
@@ -133,6 +135,7 @@ export function install(plugin: Plugin) {
 
     plugin.pushToObserve('onLineColorDidMountObservable');
     plugin.pushToObserve('onLineBoldDidMountObservable');
+    plugin.pushToObserve('onColorSelectDidMountObservable');
 
     plugin.pushToObserve('onSheetBarDidMountObservable');
     plugin.pushToObserve('onCountBarDidMountObservable');

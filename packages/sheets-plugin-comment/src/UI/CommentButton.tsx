@@ -12,13 +12,13 @@ interface IState {
 export class CommentButton extends Component<IProps, IState> {
     private _localeObserver: Nullable<Observer<Workbook>>;
 
-    Render: BaseComponentRender;
+    private _render: BaseComponentRender;
 
     initialize(props: IProps) {
         const component = new SheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this.Render = component.getComponentRender();
-        const NextIcon = this.Render.renderFunction('NextIcon');
-        const CommentIcon = this.Render.renderFunction('CommentIcon');
+        this._render = component.getComponentRender();
+        const NextIcon = this._render.renderFunction('NextIcon');
+        const CommentIcon = this._render.renderFunction('CommentIcon');
 
         // super(props);
         const commentState: IToolBarItemProps = {
@@ -102,12 +102,12 @@ export class CommentButton extends Component<IProps, IState> {
     }
 
     /**
-     * Render the component's HTML
+     * _render the component's HTML
      *
      * @returns {void}
      */
     render(props: IProps, state: IState) {
-        const Select = this.Render.renderFunction('Select');
+        const Select = this._render.renderFunction('Select');
 
         const { comment } = state;
         // Set Provider for entire Container

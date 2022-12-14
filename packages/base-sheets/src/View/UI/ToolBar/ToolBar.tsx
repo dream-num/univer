@@ -29,13 +29,13 @@ export class ToolBar extends Component<IProps, IState> {
 
     SelectRef = createRef();
 
-    Render: BaseComponentRender;
+    private _render: BaseComponentRender;
 
     clientWidth = 0;
 
     initialize() {
         const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this.Render = component.getComponentRender();
+        this._render = component.getComponentRender();
         this.state = {
             // Button contains main button and drop down arrow, translation file contains main and right
             showMore: false,
@@ -214,7 +214,7 @@ export class ToolBar extends Component<IProps, IState> {
 
     // 渲染dom
     getToolBarList(list: IToolBarItemProps[]) {
-        const Tooltip = this.Render.renderFunction('Tooltip');
+        const Tooltip = this._render.renderFunction('Tooltip');
 
         return list.map((item) => {
             if (item.toolbarType) {
@@ -252,9 +252,9 @@ export class ToolBar extends Component<IProps, IState> {
     render() {
         const { defaultToolList, moreToolList, moreText, showMore } = this.state;
 
-        const Button = this.Render.renderFunction('Button');
-        const Container = this.Render.renderFunction('Container');
-        const Tooltip = this.Render.renderFunction('Tooltip');
+        const Button = this._render.renderFunction('Button');
+        const Container = this._render.renderFunction('Container');
+        const Tooltip = this._render.renderFunction('Tooltip');
 
         return (
             <Container style={{ position: 'relative' }}>

@@ -247,8 +247,8 @@ class SheetBarUIController {
         // });
         CommandManager.getActionObservers().add((actionEvent) => {
             const action = actionEvent.action as SheetActionBase<any>;
-            const worksheet = action.getWorkSheet();
-            const actionUnitId = worksheet.getContext().getWorkBook().getUnitId();
+            const workbook = action.getWorkBook();
+            const actionUnitId = workbook.getUnitId();
             if (unitId !== actionUnitId) return;
 
             const { data } = actionEvent;

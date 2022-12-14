@@ -69,6 +69,30 @@ export const DEFAULT_FORMULA_DATA_DEMO: IFormulaConfig = {
     formulaData: {
         'workbook-03': {
             'sheet-0003': {
+                '11': {
+                    '6': {
+                        formula: '=PRODUCT(E12:F12)',
+                        row: 11,
+                        column: 6,
+                        sheetId: 'sheet-0003',
+                    },
+                },
+                '12': {
+                    '6': {
+                        formula: '=PRODUCT(E13:F13)',
+                        row: 12,
+                        column: 6,
+                        sheetId: 'sheet-0003',
+                    },
+                },
+                '13': {
+                    '6': {
+                        formula: '=LAMBDA(x,x+2)(E14)',
+                        row: 13,
+                        column: 6,
+                        sheetId: 'sheet-0003',
+                    },
+                },
                 '19': {
                     '6': {
                         formula: '=SUM(G12:G19)',
@@ -86,6 +110,30 @@ export const DEFAULT_FORMULA_DATA_DEMO1: IFormulaConfig = {
     formulaData: {
         'workbook-04': {
             'sheet-0003': {
+                '11': {
+                    '6': {
+                        formula: '=PRODUCT(E12:F12)',
+                        row: 11,
+                        column: 6,
+                        sheetId: 'sheet-0003',
+                    },
+                },
+                '12': {
+                    '6': {
+                        formula: '=PRODUCT(E13:F13)',
+                        row: 12,
+                        column: 6,
+                        sheetId: 'sheet-0003',
+                    },
+                },
+                '13': {
+                    '6': {
+                        formula: '=LAMBDA(x,x+2)(E14)',
+                        row: 13,
+                        column: 6,
+                        sheetId: 'sheet-0003',
+                    },
+                },
                 '19': {
                     '6': {
                         formula: '=SUM(G12:G19)',

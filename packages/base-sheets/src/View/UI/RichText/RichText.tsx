@@ -163,7 +163,7 @@ export class RichText extends Component<BaseRichTextProps, IRichTextState> {
     }
 
     render(props: BaseRichTextProps, state: IRichTextState) {
-        const { style, className, onClick, text } = props;
+        const { style, className = '', onClick, text } = props;
         return (
             <div className={`${styles.richTextEditorContainer} ${className}`} style={style} ref={this.container}>
                 <div

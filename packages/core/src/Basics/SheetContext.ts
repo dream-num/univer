@@ -34,4 +34,8 @@ export class SheetContext extends ContextBase {
     ): Observable<PropsFrom<WorkBookObserver[Key]>> {
         return this.getObserverManager().requiredObserver(value, 'core');
     }
+
+    refreshWorkbook(univerSheetData: Partial<IWorkbookConfig> = {}) {
+        this._workbook = new Workbook(univerSheetData, this);
+    }
 }

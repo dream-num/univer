@@ -1,4 +1,3 @@
-import { BaseComponentRender } from '@univer/base-component';
 import { Range, HorizontalAlign, VerticalAlign, WrapStrategy, DEFAULT_STYLES, BorderType } from '@univer/core';
 import { ColorPicker } from '@univer/style-universheet';
 import { SheetPlugin } from '../SheetPlugin';
@@ -23,6 +22,7 @@ import {
 } from '../View/UI/ToolBar/Const';
 import { DefaultToolbarConfig } from '../Basics';
 import { LineBold } from '../View/UI/Common/Line/LineBold';
+import { ColorSelect } from '../View/UI/Common/ColorSelect/ColorSelect';
 
 interface BorderInfo {
     color: string;
@@ -47,7 +47,7 @@ export class ToolBarController {
 
     private _lineBold: LineBold;
 
-    Render: BaseComponentRender;
+    private _colorSelect: ColorSelect[] = [];
 
     private _borderInfo: BorderInfo; //存储边框信息
 
@@ -272,28 +272,82 @@ export class ToolBarController {
                 },
             },
             {
-                type: 2,
+                type: 5,
                 tooltipLocale: 'toolbar.textColor.main',
                 customLabel: {
-                    name: 'TextColorIcon',
+                    name: pluginName + ColorSelect.name,
+                    props: {
+                        customLabel: {
+                            name: 'TextColorIcon',
+                        },
+                        id: 'textColor',
+                    },
                 },
+                hideSelectedIcon: true,
+                className: styles.selectColorPickerParent,
+                children: [
+                    {
+                        customLabel: {
+                            name: pluginName + ColorPicker.name,
+                            props: {
+                                onClick: (color: string, e: MouseEvent) => {
+                                    const colorSelect = this._colorSelect.find((item) => item.getId() === 'textColor');
+                                    colorSelect?.setColor(color);
+                                    this._plugin.getObserver('onAfterChangeFontColorObservable')?.notifyObservers(color);
+                                },
+                                lang: {
+                                    collapseLocale: 'colorPicker.collapse',
+                                    customColorLocale: 'colorPicker.customColor',
+                                    confirmColorLocale: 'colorPicker.confirmColor',
+                                    cancelColorLocale: 'colorPicker.cancelColor',
+                                    changeLocale: 'colorPicker.change',
+                                },
+                            },
+                        },
+                        className: styles.selectColorPicker,
+                    },
+                ],
                 name: 'textColor',
                 show: toolbarConfig.textColor,
-                onClick: (color: string) => {
-                    this._plugin.getObserver('onAfterChangeFontColorObservable')?.notifyObservers(color);
-                },
             },
             {
-                type: 2,
+                type: 5,
                 tooltipLocale: 'toolbar.fillColor.main',
                 customLabel: {
-                    name: 'FillColorIcon',
+                    name: pluginName + ColorSelect.name,
+                    props: {
+                        customLabel: {
+                            name: 'FillColorIcon',
+                        },
+                        id: 'fillColor',
+                    },
                 },
+                hideSelectedIcon: true,
+                className: styles.selectColorPickerParent,
+                children: [
+                    {
+                        customLabel: {
+                            name: pluginName + ColorPicker.name,
+                            props: {
+                                onClick: (color: string, e: MouseEvent) => {
+                                    const colorSelect = this._colorSelect.find((item) => item.getId() === 'fillColor');
+                                    colorSelect?.setColor(color);
+                                    this._plugin.getObserver('onAfterChangeFontBackgroundObservable')?.notifyObservers(color);
+                                },
+                                lang: {
+                                    collapseLocale: 'colorPicker.collapse',
+                                    customColorLocale: 'colorPicker.customColor',
+                                    confirmColorLocale: 'colorPicker.confirmColor',
+                                    cancelColorLocale: 'colorPicker.cancelColor',
+                                    changeLocale: 'colorPicker.change',
+                                },
+                            },
+                        },
+                        className: styles.selectColorPicker,
+                    },
+                ],
                 name: 'fillColor',
                 show: toolbarConfig.fillColor,
-                onClick: (color: string) => {
-                    this._plugin.getObserver('onAfterChangeFontBackgroundObservable')?.notifyObservers(color);
-                },
             },
             {
                 type: 3,
@@ -322,7 +376,16 @@ export class ToolBarController {
                             {
                                 customLabel: {
                                     name: pluginName + ColorPicker.name,
-                                    props: { onClick: (color: string, e: MouseEvent) => this.handleLineColor(color, e) },
+                                    props: {
+                                        onClick: (color: string, e: MouseEvent) => this.handleLineColor(color, e),
+                                        lang: {
+                                            collapseLocale: 'colorPicker.collapse',
+                                            customColorLocale: 'colorPicker.customColor',
+                                            confirmColorLocale: 'colorPicker.confirmColor',
+                                            cancelColorLocale: 'colorPicker.cancelColor',
+                                            changeLocale: 'colorPicker.change',
+                                        },
+                                    },
                                 },
                                 className: styles.selectColorPicker,
                                 onClick: this.handleLineColor,
@@ -486,6 +549,10 @@ export class ToolBarController {
             //初始化视图
             this._lineBold = component;
         });
+        this._plugin.getObserver('onColorSelectDidMountObservable')?.add((component) => {
+            //初始化视图
+            this._colorSelect.push(component);
+        });
 
         this._plugin.context
             .getObserverManager()
@@ -536,37 +603,71 @@ export class ToolBarController {
         // 注册自定义组件
         this._plugin.registerComponent(pluginName + LineColor.name, LineColor);
         this._plugin.registerComponent(pluginName + LineBold.name, LineBold);
+        this._plugin.registerComponent(pluginName + ColorSelect.name, ColorSelect);
         this._plugin.registerComponent(pluginName + ColorPicker.name, ColorPicker);
     }
 
-    resetLocale(toolList: any[]) {
+    resetLabel(label: string[] | string) {
         const locale = this._plugin.context.getLocale();
 
-        for (let i = 0; i < toolList.length; i++) {
-            const item = toolList[i];
-            if (item.tooltipLocale) {
-                item.tooltip = locale.get(item.tooltipLocale);
-            }
-            if (item.locale) {
-                item.label = locale.get(item.locale);
-            }
-            if (item.suffixLocale) {
-                item.suffix = locale.get(item.suffixLocale);
-            }
-            if (item.customLabel?.props?.locale) {
-                item.customLabel.props.label = locale.get(item.customLabel.props.locale);
-            }
-            if (item.children) {
-                item.children = this.resetLocale(item.children);
+        let str = '';
+
+        if (label instanceof Array) {
+            label.forEach((item) => {
+                if (item.includes('.')) {
+                    str += locale.get(item);
+                } else {
+                    str += item;
+                }
+            });
+        } else {
+            if (label.includes('.')) {
+                str = locale.get(label);
+            } else {
+                str += label;
             }
         }
+
+        return str;
+    }
+
+    findLocale(obj: any) {
+        for (let k in obj) {
+            if (k === 'locale') {
+                obj.label = this.resetLabel(obj[k]);
+            } else if (k.endsWith('Locale')) {
+                const index = k.indexOf('Locale');
+                obj[k.slice(0, index)] = this.resetLabel(obj[k]);
+            } else if (!obj[k].$$typeof) {
+                if (Object.prototype.toString.call(obj[k]) === '[object Object]') {
+                    this.findLocale(obj[k]);
+                } else if (Object.prototype.toString.call(obj[k]) === '[object Array]') {
+                    this.resetToolListLabel(obj[k]);
+                }
+            }
+        }
+
+        return obj;
+    }
+
+    resetToolListLabel(toolList: IToolBarItemProps[]) {
+        for (let i = 0; i < toolList.length; i++) {
+            let item = toolList[i];
+
+            item = this.findLocale(item);
+
+            if (item.children) {
+                item.children = this.resetToolListLabel(item.children);
+            }
+        }
+
         return toolList;
     }
 
     resetToolBarList() {
         const locale = this._plugin.context.getLocale();
 
-        const toolList = this.resetLocale(this._toolList);
+        const toolList = this.resetToolListLabel(this._toolList);
         this._toolBarComponent.setToolBar(toolList, {
             more: locale.get(this._moreText.more),
             tip: locale.get(this._moreText.tip),

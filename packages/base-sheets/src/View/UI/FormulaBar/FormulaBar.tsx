@@ -11,15 +11,15 @@ type FormulaState = {
 export interface BaseFormulaBarProps extends BaseComponentProps {}
 
 export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
-    Render: BaseComponentRender;
+    private _render: BaseComponentRender;
 
     // formulaContent = createRef<HTMLDivElement>();
 
     initialize(props?: BaseFormulaBarProps) {
         const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this.Render = component.getComponentRender();
+        this._render = component.getComponentRender();
 
-        const NextIcon = this.Render.renderFunction('NextIcon');
+        const NextIcon = this._render.renderFunction('NextIcon');
 
         this.state = {
             namedRanges: [
@@ -62,9 +62,9 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
     render(props: BaseFormulaBarProps, state: FormulaState) {
         const { namedRanges } = state;
 
-        const CloseIcon = this.Render.renderFunction('CloseIcon');
-        const CorrectIcon = this.Render.renderFunction('CorrectIcon');
-        const FxIcon = this.Render.renderFunction('FxIcon');
+        const CloseIcon = this._render.renderFunction('CloseIcon');
+        const CorrectIcon = this._render.renderFunction('CorrectIcon');
+        const FxIcon = this._render.renderFunction('FxIcon');
 
         return (
             <div className={styles.formulaBox}>

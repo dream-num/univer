@@ -131,4 +131,8 @@ export class UniverSheet {
 
         return { workbookConfig, ...pluginConfig };
     }
+
+    refreshWorkbook(univerSheetData: Partial<IWorkbookConfig> = {}) {
+        this._context.refreshWorkbook(univerSheetData);
+    }
 }

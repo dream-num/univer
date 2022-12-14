@@ -16,8 +16,8 @@ import { ModalGroup } from '../ModalGroup/ModalGroup';
 import { SheetPlugin } from '../../../SheetPlugin';
 import { FormulaBar } from '../FormulaBar';
 import { SideGroup } from '../SideGroup/SideGroup';
-import { SheetBar } from '../SheetBar';
 import { BaseSheetContainerConfig, IShowContainerConfig } from '../../../Controller';
+import { SheetBar } from '../SheetBar';
 
 export interface BaseSheetContainerProps {
     config: BaseSheetContainerConfig;
@@ -50,13 +50,13 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
 
     rightBorderY: number;
 
-    Render: BaseComponentRender;
+    private _render: BaseComponentRender;
 
     constructor(props: BaseSheetContainerProps) {
         super(props, { coreContext: props.config.context });
 
         const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this.Render = component.getComponentRender();
+        this._render = component.getComponentRender();
 
         // init state
         this.state = {

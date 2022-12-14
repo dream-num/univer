@@ -183,6 +183,9 @@ function _lineOperator(
         lastPage = getLastPage(pages);
         columnInfo = getLastNotFullColumnInfo(lastPage);
     }
+    // Todo: demo4导入的时候columnInfo会不存在,先return了
+    if (!columnInfo) return;
+
     const column = columnInfo!.column;
     const line = getLastLineByColumn(column);
 

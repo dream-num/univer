@@ -664,4 +664,13 @@ export class Tools {
 
         return resultJsonObject as unknown as T;
     }
+
+    static commonExtend1<T>(originJson: object, extendJson: object): T {
+        for (let attr in originJson) {
+            if (extendJson[attr] == null) {
+                extendJson[attr] = originJson[attr];
+            }
+        }
+        return extendJson as unknown as T;
+    }
 }

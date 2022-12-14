@@ -22,11 +22,11 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
             const newSheet: Partial<IWorksheetConfig> = {};
 
             //  id
-            if (sheet.hasOwnProperty('index')) {
-                newSheet.id = sheet.index as string;
-            } else {
-                newSheet.id = nanoid(6);
-            }
+            // if (sheet.hasOwnProperty('index')) {
+            //     newSheet.id = sheet.index as string;
+            // } else {
+            newSheet.id = nanoid(6);
+            // }
 
             // 缩放比例
             if (sheet.hasOwnProperty('zoomRatio')) {

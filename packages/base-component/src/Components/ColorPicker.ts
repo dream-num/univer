@@ -1,5 +1,4 @@
 import { BaseComponent, JSXComponent } from '../BaseComponent';
-import { IMainProps } from '../IData';
 
 export interface BaseColorPickerProps {
     /**
@@ -29,12 +28,8 @@ export interface BaseColorPickerProps {
      */
     className?: string;
 
-    /**
-     * slot
-     */
-    slot?: {
-        header?: IMainProps;
-        footer?: IMainProps;
+    lang: {
+        [index: string]: string;
     };
 }
 

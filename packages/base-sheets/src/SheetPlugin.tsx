@@ -219,7 +219,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
             const currentUnitId = this.getContext().getWorkBook().getUnitId();
             const action = actionObs.action as SheetActionBase<ISetNamedRangeActionData, ISetNamedRangeActionData>;
             const actionData = action.getDoActionData();
-            const actionUnitId = action.getWorkSheet().getContext().getWorkBook().getUnitId();
+            const actionUnitId = action.getWorkBook().getUnitId();
 
             if (currentUnitId !== actionUnitId) return;
 

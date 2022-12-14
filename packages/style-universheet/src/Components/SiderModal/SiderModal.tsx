@@ -15,7 +15,7 @@ class SiderModal extends Component<BaseSiderModalProps> {
     }
 
     render(props: BaseSiderModalProps) {
-        const { className, style } = props;
+        const { className = '', style } = props;
         return (
             <div className={`${Style.siderModal} ${className}`} style={{ ...style }}>
                 <div className={Style.siderModalHeader}>

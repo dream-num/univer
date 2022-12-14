@@ -1,5 +1,5 @@
 import { BaseComponentRender, BaseComponentSheet, BaseMenuItem, Component, ComponentChildren } from '@univer/base-component';
-import { ColorPicker, Dropdown } from '@univer/style-universheet';
+import { Dropdown } from '@univer/style-universheet';
 import { BaseItemProps, Item } from '../Item/Item';
 import styles from './index.module.less';
 
@@ -54,7 +54,7 @@ interface IState {
 }
 
 export class Select extends Component<BaseSelectProps, IState> {
-    Render: BaseComponentRender;
+    private _render: BaseComponentRender;
 
     ColorRef: any;
 
@@ -64,7 +64,7 @@ export class Select extends Component<BaseSelectProps, IState> {
 
     initialize() {
         const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this.Render = component.getComponentRender();
+        this._render = component.getComponentRender();
 
         const { children = [], hideSelectedIcon } = this.props;
         const list = this.resetMenu(children, hideSelectedIcon);
@@ -83,8 +83,6 @@ export class Select extends Component<BaseSelectProps, IState> {
                 return this.getSingle();
             case 1:
                 return this.getInput();
-            case 2:
-                return this.getColor();
             case 3:
                 return this.getDouble();
             case 4:
@@ -251,34 +249,6 @@ export class Select extends Component<BaseSelectProps, IState> {
             }
         }
 
-        // 颜色下拉塞入colorPicker
-        if (this.props.type === 2) {
-            list[0] = {
-                label: (
-                    <Item
-                        label={
-                            <ColorPicker
-                                style={{ display: 'block' }}
-                                ref={(ele) => (this.ColorRef = ele)}
-                                color={'#000'}
-                                onClick={(col: string) => {
-                                    this.ColorRef.hideSelect();
-                                    this.setState(
-                                        {
-                                            color: col,
-                                        },
-                                        () => {
-                                            this.onClick();
-                                        }
-                                    );
-                                }}
-                            />
-                        }
-                    ></Item>
-                ),
-            };
-        }
-
         return list;
     }
 
@@ -302,7 +272,7 @@ export class Select extends Component<BaseSelectProps, IState> {
     getSingle = () => {
         const { content, menu } = this.state;
         const { className = '', tooltip } = this.props;
-        const Button = this.Render.renderFunction('Button');
+        const Button = this._render.renderFunction('Button');
 
         return (
             <div className={`${styles.selectSingle} ${className}`}>
@@ -319,8 +289,8 @@ export class Select extends Component<BaseSelectProps, IState> {
     getInput = () => {
         const { content, menu } = this.state;
         const { className = '', tooltip } = this.props;
-        const Input = this.Render.renderFunction('Input');
-        const Button = this.Render.renderFunction('Button');
+        const Input = this._render.renderFunction('Input');
+        const Button = this._render.renderFunction('Button');
 
         return (
             <div className={`${styles.selectInput} ${className}`}>
@@ -333,30 +303,11 @@ export class Select extends Component<BaseSelectProps, IState> {
         );
     };
 
-    //颜色选择器
-    getColor = () => {
-        const { label, className = '', tooltip } = this.props;
-        const { color, menu } = this.state;
-        const Button = this.Render.renderFunction('Button');
-        const NextIcon = this.Render.renderFunction('NextIcon');
-
-        return (
-            <div className={`${styles.selectColor} ${styles.selectDouble} ${className}`}>
-                <Button type="text">
-                    <Dropdown tooltip={tooltip} onClick={this.onClick} menu={{ menu, onClick: this.onClick }} icon={<NextIcon />}>
-                        <div className={styles.selectLabel}>{label}</div>
-                        <div className={styles.selectLine} style={{ background: color }}></div>
-                    </Dropdown>
-                </Button>
-            </div>
-        );
-    };
-
     getDouble = () => {
         const { content, menu } = this.state;
         const { className = '', tooltip } = this.props;
-        const NextIcon = this.Render.renderFunction('NextIcon');
-        const Button = this.Render.renderFunction('Button');
+        const NextIcon = this._render.renderFunction('NextIcon');
+        const Button = this._render.renderFunction('Button');
 
         return (
             <div className={`${styles.selectDouble} ${className}`}>
@@ -372,7 +323,7 @@ export class Select extends Component<BaseSelectProps, IState> {
     getFix = () => {
         const { label, className = '', tooltip } = this.props;
         const { menu } = this.state;
-        const Button = this.Render.renderFunction('Button');
+        const Button = this._render.renderFunction('Button');
 
         return (
             <div className={`${styles.selectDouble} ${className}`}>
@@ -388,8 +339,8 @@ export class Select extends Component<BaseSelectProps, IState> {
     getDoubleFix = () => {
         const { label, className = '', tooltip } = this.props;
         const { menu } = this.state;
-        const Button = this.Render.renderFunction('Button');
-        const NextIcon = this.Render.renderFunction('NextIcon');
+        const Button = this._render.renderFunction('Button');
+        const NextIcon = this._render.renderFunction('NextIcon');
 
         return (
             <div className={`${styles.selectDouble} ${className}`}>

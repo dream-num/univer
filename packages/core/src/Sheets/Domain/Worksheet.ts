@@ -63,8 +63,6 @@ export class Worksheet {
 
     protected _context: SheetContext;
 
-    protected _workbook: Workbook;
-
     protected _config: IWorksheetConfig;
 
     protected _initialized: boolean;
@@ -104,7 +102,8 @@ export class Worksheet {
         if (Tools.hasLength(argument, 2)) {
             this._context = argument[0];
             // this._config = argument[1];
-            this._config = Tools.commonExtend(DEFAULT_WORKSHEET, argument[1]);
+
+            this._config = Tools.commonExtend1(DEFAULT_WORKSHEET, argument[1]);
             // this._config = Tools.deepMerge({}, DEFAULT_WORKSHEET, argument[1]);
 
             const { columnData, rowData, cellData } = this._config;
@@ -114,7 +113,6 @@ export class Worksheet {
             // this._borderStyles = new BorderStyles(this);
             this._cellData = new ObjectMatrix<ICellData>(cellData);
             // this._protection = new Protection();
-            this._workbook = this._context.getWorkBook();
             this._commandManager = this._context.getCommandManager();
             // this._selection.setWorkSheet(this);
             this._rowManager = new RowManager(this, rowData);
@@ -907,7 +905,8 @@ export class Worksheet {
      * @returns Sheet — The current sheet.
      */
     hideSheet(): Worksheet {
-        const { _context, _workbook, _commandManager } = this;
+        const { _context, _commandManager } = this;
+        const _workbook = _context.getWorkBook();
         if (!this._config.hidden) {
             const observer = _context.getContextObserver('onHideSheetObservable');
             const setHiddenAction: ISetWorkSheetHideActionData = {

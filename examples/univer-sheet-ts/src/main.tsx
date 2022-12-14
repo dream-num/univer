@@ -44,17 +44,17 @@ const uiDefaultConfigDemo = {
     },
 };
 
-const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
+// const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO1);
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO2);
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO3);
-// const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO4);
+const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO4);
 univerSheetDemo.installPlugin(new RenderEngine());
 univerSheetDemo.installPlugin(new UniverComponentSheet());
 univerSheetDemo.installPlugin(new SheetPlugin(uiDefaultConfigDemo));
 univerSheetDemo.installPlugin(new BaseComponentPlugin());
 univerSheetDemo.installPlugin(new NumfmtPlugin());
-FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(univerSheetDemo);
+// FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(univerSheetDemo);
 // FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO1).installTo(univerSheetDemo);
 
 univerSheetDemo.installPlugin(new ClipboardPlugin());

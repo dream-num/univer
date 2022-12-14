@@ -100,14 +100,14 @@ export class SheetContainerController {
             if (!plugin) return;
             if (!actions || actions.length === 0) return;
             const action = actions[0] as SheetActionBase<ISheetActionData, ISheetActionData, void>;
-            const worksheet = action.getWorkSheet();
 
             const currentUnitId = plugin.context.getWorkBook().getUnitId();
-            const actionUnitId = worksheet.getContext().getWorkBook().getUnitId();
+            const actionUnitId = action.getWorkBook().getUnitId();
 
             if (currentUnitId !== actionUnitId) return;
 
             // Only the currently active worksheet needs to be refreshed
+            const worksheet = action.getWorkBook().getActiveSheet();
             if (worksheet.getConfig().status === BooleanNumber.TRUE) {
                 try {
                     const canvasView = plugin.getCanvasView();

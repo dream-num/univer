@@ -30,7 +30,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
 
     slideTabBar: SlideTabBar;
 
-    Render: BaseComponentRender;
+    private _render: BaseComponentRender;
 
     private _localeObserver: Nullable<Observer<Workbook>>;
 
@@ -38,7 +38,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
 
     initialize(props: BaseSheetBarProps) {
         const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this.Render = component.getComponentRender();
+        this._render = component.getComponentRender();
 
         this.state = {
             sheetList: [],
@@ -55,11 +55,11 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     jointJsx(list: BaseSheetBarProps[] | BaseUlProps[]) {
         list.forEach((item: any) => {
             if (item.icon && typeof item.icon === 'string' && /Icon$/.test(item.icon)) {
-                const Icon = this.Render.renderFunction(item.icon);
+                const Icon = this._render.renderFunction(item.icon);
                 item.icon = <Icon />;
             }
             if (item.selectType && item.selectType === 'jsx') {
-                const JSX: any = this.Render.renderFunction(item.label);
+                const JSX: any = this._render.renderFunction(item.label);
                 // ColorPicker
                 item.label = (
                     <JSX
@@ -261,11 +261,11 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
 
         if (!addSheet || !selectSheet || !contextMenu) return;
 
-        const Button = this.Render.renderFunction('Button');
-        const Ul = this.Render.renderFunction('Ul');
-        const AddIcon = this.Render.renderFunction('AddIcon');
-        const MenuIcon = this.Render.renderFunction('MenuIcon');
-        const NextIcon = this.Render.renderFunction('NextIcon');
+        const Button = this._render.renderFunction('Button');
+        const Ul = this._render.renderFunction('Ul');
+        const AddIcon = this._render.renderFunction('AddIcon');
+        const MenuIcon = this._render.renderFunction('MenuIcon');
+        const NextIcon = this._render.renderFunction('NextIcon');
 
         return (
             <div className={styles.sheetBar} ref={this.slideTabRoot}>

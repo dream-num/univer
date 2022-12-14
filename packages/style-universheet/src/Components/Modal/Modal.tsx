@@ -48,7 +48,7 @@ class Modal extends Component<BaseModalProps, IState> {
     };
 
     render() {
-        const { title, width = 500, top = 0, style, children, className, group = [], isDrag = false, mask = true, footer = true } = this.props;
+        const { title, width = 500, top = 0, style, children, className = '', group = [], isDrag = false, mask = true, footer = true } = this.props;
         const { visible } = this.state;
 
         return (

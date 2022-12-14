@@ -113,7 +113,7 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
 
     const blockId = nanoid(6);
     let p = {
-        documentId: nanoid(6),
+        id: nanoid(6),
         body: {
             blockElements: {
                 [blockId]: {

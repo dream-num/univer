@@ -15,7 +15,7 @@ export class DocumentModel {
     constructor(snapshot: Partial<IDocumentData>, context: DocContext) {
         this._context = context;
         this._snapshot = { ...DEFAULT_DOC, ...snapshot };
-        this._unitId = this._snapshot.documentId ?? nanoid(6);
+        this._unitId = this._snapshot.id ?? nanoid(6);
     }
 
     getSnapshot() {

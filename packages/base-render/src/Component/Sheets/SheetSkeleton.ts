@@ -816,7 +816,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             textDirectionDocument = TextDirectionType.TBRL;
         }
         const documentData: IDocumentData = {
-            documentId: 'd',
+            id: 'd',
             body: {
                 blockElements: {
                     oneParagraph: {

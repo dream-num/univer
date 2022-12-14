@@ -209,6 +209,15 @@ export const CONVERTOR_OPERATION = {
 };
 
 export const DEFAULT_DOC = {
-    documentId: 'default_doc',
+    id: 'default_doc',
     documentStyle: {},
+};
+
+export const DEFAULT_SLIDE = {
+    id: 'default_slide',
+    title: 'defaultSlide',
+    pageSize: {
+        width: 300,
+        height: 300,
+    },
 };

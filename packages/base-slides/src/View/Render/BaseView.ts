@@ -1,6 +1,6 @@
 import { Scene } from '@univer/base-render';
 import { Registry, Worksheet } from '@univer/core';
-import { DocPlugin } from '../../DocPlugin';
+import { SlidePlugin } from '../../SlidePlugin';
 
 export class BaseView {
     zIndex = 0;
@@ -8,7 +8,7 @@ export class BaseView {
 
     private _scene: Scene;
 
-    private _plugin: DocPlugin;
+    private _plugin: SlidePlugin;
 
     // constructor(private _scene: Scene, private _plugin: Plugin) {
     //     this._initialize();
@@ -30,7 +30,7 @@ export class BaseView {
 
     protected _initialize() {}
 
-    initialize(scene: Scene, plugin: DocPlugin) {
+    initialize(scene: Scene, plugin: SlidePlugin) {
         this._scene = scene;
         this._plugin = plugin;
         this._initialize();
@@ -40,7 +40,7 @@ export class BaseView {
 
 export enum CANVAS_VIEW_KEY {
     MAIN_SCENE = 'mainScene',
-    DOCS_VIEW = 'docsView',
+    SLIDE_VIEW = 'slideView',
 }
 
 export const CanvasViewRegistry = Registry.create();

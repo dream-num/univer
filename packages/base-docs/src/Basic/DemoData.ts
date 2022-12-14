@@ -15,7 +15,7 @@ import {
 } from '@univer/core';
 
 export const DOCS_DEMO_DATA: IDocumentData = {
-    documentId: 'd',
+    id: 'd',
     drawings: {
         shapeTest1: {
             objectId: 'shapeTest1',

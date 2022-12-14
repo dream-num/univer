@@ -16,7 +16,7 @@ import { SheetPlugin } from '../../../SheetPlugin';
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 
 const richTextTest: IDocumentData = {
-    documentId: 'd',
+    id: 'd',
     drawings: {
         shapeTest1: {
             objectId: 'shapeTest1',

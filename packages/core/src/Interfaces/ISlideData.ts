@@ -9,9 +9,9 @@ import { IColorStyle } from './IStyleData';
 export interface ISlideData extends IReferenceSource {
     id: string; // unit id
     locale?: LocaleType;
-    title?: string;
+    title: string;
     pageSize: ISizeData;
-    body: ISlidePageBody;
+    body?: ISlidePageBody;
 }
 
 interface IReferenceSource {
@@ -120,7 +120,7 @@ export interface IImage {
     link: ILink;
 }
 
-export interface ILink {
+interface ILink {
     url: string;
     relativeLink: RelativeSlideLink;
     pageObjectId: string;

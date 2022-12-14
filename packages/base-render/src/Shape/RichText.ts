@@ -1,6 +1,6 @@
 // import { IShapeProps, Shape, IObjectFullState, Group, Scene } from '.';
 
-import { BlockType, SheetContext, IDocumentData, IKeyValue, ParagraphElementType } from '@univer/core';
+import { BlockType, IDocumentData, IKeyValue, ParagraphElementType, ContextBase } from '@univer/core';
 import { Canvas } from '..';
 import { BaseObject } from '../BaseObject';
 import { IBoundRect, IObjectFullState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../Basics';
@@ -17,7 +17,7 @@ export const RICHTEXT_OBJECT_ARRAY = ['text', 'richText'];
 export class RichText extends BaseObject {
     private _documentData: IDocumentData;
 
-    private _context: SheetContext;
+    private _context: ContextBase;
 
     private _allowCache: boolean = false;
 
@@ -31,7 +31,7 @@ export class RichText extends BaseObject {
         return this._documentData;
     }
 
-    constructor(context: SheetContext, key?: string, props?: IRichTextProps) {
+    constructor(context: ContextBase, key?: string, props?: IRichTextProps) {
         super(key);
         if (props?.richText) {
             this._documentData = props.richText;
@@ -86,7 +86,7 @@ export class RichText extends BaseObject {
     private convertToDocumentData(text: string) {
         const contentLength = text.length;
         const documentData: IDocumentData = {
-            documentId: 'd',
+            id: 'd',
             body: {
                 blockElements: {
                     oneParagraph: {

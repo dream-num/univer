@@ -15,7 +15,7 @@ import { IShapeProperties } from './IShapeProperties';
  * Properties of document
  */
 export interface IDocumentData extends IReferenceSource {
-    documentId: string; // unit id
+    id: string; // unit id
     locale?: LocaleType;
     title?: string;
     body?: IDocumentBody;
@@ -470,7 +470,7 @@ export interface ITextStyle extends IStyleBase {
 /**
  * 3 选 1
  */
-export interface ILink {
+interface ILink {
     url?: string;
     bookmarkId?: string; // bookmarkId
     headingId?: string; // headingId

@@ -117,7 +117,7 @@ export class SheetView extends BaseView {
 
         scene.transformByState({
             width: this._columnWidthByTitle(worksheet),
-            height: this._rowHeightByTitle(worksheet)+rowTotalHeight,
+            height: this._rowHeightByTitle(worksheet) + rowTotalHeight,
             // width: this._columnWidthByTitle(worksheet) + columnTotalWidth + 100,
             // height: this._rowHeightByTitle(worksheet) + rowTotalHeight + 200,
         });

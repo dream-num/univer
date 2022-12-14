@@ -9,7 +9,7 @@ export enum DOCS_VIEW_KEY {
 }
 
 const richTextTest: IDocumentData = {
-    documentId: 'd',
+    id: 'd',
     body: {
         blockElements: {
             twoParagraph: {
@@ -58,10 +58,10 @@ const richTextTest: IDocumentData = {
     },
 };
 
-export class DocsView extends BaseView {
+export class SlideView extends BaseView {
     zIndex = 1;
 
-    viewKey = CANVAS_VIEW_KEY.DOCS_VIEW;
+    viewKey = CANVAS_VIEW_KEY.SLIDE_VIEW;
 
     private _documentSkeleton: DocumentSkeleton;
 
@@ -138,4 +138,4 @@ export class DocsView extends BaseView {
     }
 }
 
-CanvasViewRegistry.add(new DocsView());
+CanvasViewRegistry.add(new SlideView());

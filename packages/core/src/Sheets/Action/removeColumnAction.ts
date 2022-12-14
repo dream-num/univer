@@ -29,12 +29,10 @@ export class RemoveColumnAction extends SheetActionBase<
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
         this._oldActionData = {
             ...actionData,
             columnCount: this.do(),
-            convertor: [],
         };
         this.validate();
     }

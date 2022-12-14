@@ -20,12 +20,10 @@ export class SetSheetOrderAction extends SheetActionBase<
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
         this._oldActionData = {
             ...actionData,
             order: this.do(),
-            convertor: [],
         };
         this.validate();
     }

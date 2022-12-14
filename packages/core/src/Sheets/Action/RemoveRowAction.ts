@@ -1,6 +1,4 @@
 import { InsertRow, RemoveRow } from '../Apply';
-import { CONVERTOR_OPERATION } from '../../Const';
-import { WorkSheetConvertor } from '../../Convertor';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertRowActionData } from './InsertRowAction';
@@ -31,12 +29,10 @@ export class RemoveRowAction extends SheetActionBase<
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.REMOVE)],
         };
         this._oldActionData = {
             ...actionData,
             rowCount: this.do(),
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.REMOVE)],
         };
         this.validate();
     }

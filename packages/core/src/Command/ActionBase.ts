@@ -5,7 +5,6 @@ import { ActionObservers } from './ActionObservers';
  */
 export interface IActionData {
     actionName: string;
-    convertor?: object[];
     memberId?: string;
     operation?: ActionOperationType;
 }

@@ -5,8 +5,7 @@ import {
     ActionType,
     CommandUnit,
 } from '../../Command';
-import { CONVERTOR_OPERATION, ACTION_NAMES } from '../../Const';
-import { WorkSheetConvertor } from '../../Convertor';
+import { ACTION_NAMES } from '../../Const';
 import { INamedRange } from '../../Interfaces/INamedRange';
 import { AddNamedRange } from '../Apply/AddNamedRange';
 import { DeleteNamedRange } from '../Apply/DeleteNamedRange';
@@ -30,7 +29,6 @@ export class DeleteNamedRangeAction extends SheetActionBase<
 
         this._doActionData = {
             ...actionData,
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
         this._oldActionData = {
             actionName: ACTION_NAMES.ADD_NAMED_RANGE_ACTION,
@@ -59,7 +57,6 @@ export class DeleteNamedRangeAction extends SheetActionBase<
             sheetId,
             actionName: ACTION_NAMES.ADD_BANDING_ACTION,
             namedRange: this.do(),
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.INSERT)],
         };
     }
 

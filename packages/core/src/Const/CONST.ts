@@ -198,16 +198,6 @@ export const DEFAULT_STYLES: IStyleData = {
     },
 };
 
-/**
- * Convertor operation
- */
-export const CONVERTOR_OPERATION = {
-    SET: 'set',
-    INSERT: 'insert',
-    REMOVE: 'remove',
-    CHANGE: 'change',
-};
-
 export const DEFAULT_DOC = {
     id: 'default_doc',
     documentStyle: {},

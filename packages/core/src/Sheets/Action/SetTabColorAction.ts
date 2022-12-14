@@ -1,7 +1,5 @@
 import { SetTabColor } from '../Apply';
 import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
-import { CONVERTOR_OPERATION } from '../../Const/CONST';
-import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
 import { Nullable } from '../../Shared/Types';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
@@ -31,7 +29,6 @@ export class SetTabColorAction extends SheetActionBase<
 
         this._doActionData = {
             ...actionData,
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
         this._oldActionData = {
             ...actionData,

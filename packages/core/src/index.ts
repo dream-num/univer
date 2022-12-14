@@ -15,7 +15,6 @@
 export * from './Basics';
 export * from './Command';
 export * from './Const';
-export * from './Convertor';
 export * from './Sheets/Domain';
 export * from './Docs/Domain';
 export * from './Enum';

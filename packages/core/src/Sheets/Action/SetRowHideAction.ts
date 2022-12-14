@@ -29,12 +29,10 @@ export class SetRowHideAction extends SheetActionBase<
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
         this.do();
         this._oldActionData = {
             ...actionData,
-            convertor: [],
         };
         this.validate();
     }

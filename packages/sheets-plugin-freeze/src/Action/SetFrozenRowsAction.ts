@@ -1,4 +1,4 @@
-import { ISheetActionData, SheetActionBase, Workbook, ActionObservers, WorkSheetConvertor, CONVERTOR_OPERATION, ActionType } from '@univer/core';
+import { ISheetActionData, SheetActionBase, Workbook, ActionObservers, ActionType } from '@univer/core';
 import { SetFrozenRows } from '../Apply/SetFrozenRows';
 import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
 
@@ -11,14 +11,12 @@ export class SetFrozenRowsAction extends SheetActionBase<ISetFrozenRowsActionDat
         super(actionData, workbook, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
 
         this._oldActionData = {
             actionName: ACTION_NAMES.SET_FROZEN_ROWS_ACTION,
             sheetId: actionData.sheetId,
             numRows: this.do(),
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
         this.validate();
     }

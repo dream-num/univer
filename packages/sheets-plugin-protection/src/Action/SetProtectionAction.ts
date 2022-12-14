@@ -1,4 +1,4 @@
-import { SheetActionBase, ActionObservers, CONVERTOR_OPERATION, ISheetActionData, Workbook, WorkSheetConvertor } from '@univer/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, Workbook } from '@univer/core';
 import { SetProtection } from '../Apply';
 import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
 
@@ -14,14 +14,12 @@ export class SetProtectionAction extends SheetActionBase<ISetProtectionActionDat
         super(actionData, workbook, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
         this._oldActionData = {
             actionName: ACTION_NAMES.SET_PROTECTION_ACTION,
             sheetId: actionData.sheetId,
             enable: actionData.enable,
             password: actionData.password,
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
         this.do();
         this.validate();

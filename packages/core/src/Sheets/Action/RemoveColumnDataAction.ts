@@ -1,6 +1,4 @@
 import { InsertDataColumn, RemoveColumnData } from '../Apply';
-import { CONVERTOR_OPERATION } from '../../Const';
-import { WorkSheetConvertor } from '../../Convertor';
 import { ICellData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
@@ -33,12 +31,10 @@ export class RemoveColumnDataAction extends SheetActionBase<
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.REMOVE)],
         };
         this._oldActionData = {
             ...actionData,
             columnData: this.do(),
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.INSERT)],
         };
         this.validate();
     }

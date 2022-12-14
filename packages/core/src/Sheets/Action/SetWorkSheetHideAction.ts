@@ -28,12 +28,10 @@ export class SetWorkSheetHideAction extends SheetActionBase<
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
         this._oldActionData = {
             ...actionData,
             hidden: this.do(),
-            convertor: [],
         };
         this.validate();
     }

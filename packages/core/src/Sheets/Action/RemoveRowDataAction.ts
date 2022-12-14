@@ -31,12 +31,10 @@ export class RemoveRowDataAction extends SheetActionBase<
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
         this._oldActionData = {
             ...actionData,
             rowData: this.do(),
-            convertor: [],
         };
         this.validate();
     }

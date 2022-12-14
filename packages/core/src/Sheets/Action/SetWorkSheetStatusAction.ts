@@ -24,13 +24,11 @@ export class SetWorkSheetStatusAction extends SheetActionBase<ISetWorkSheetStatu
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
 
         this._oldActionData = {
             ...actionData,
             sheetStatus: this.do(),
-            convertor: [],
         };
         this.validate();
     }

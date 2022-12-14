@@ -1,4 +1,4 @@
-import { SheetActionBase, ActionObservers, CONVERTOR_OPERATION, ISheetActionData, Range, Workbook, WorkSheetConvertor } from '@univer/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, Range, Workbook } from '@univer/core';
 import { AddUnlock, RemoveUnlock } from '../Apply';
 import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
 
@@ -11,13 +11,11 @@ export class AddUnlockAction extends SheetActionBase<IAddUnlockActionData, IAddU
         super(actionData, workbook, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
         this._oldActionData = {
             actionName: ACTION_NAMES.ADD_UNLOCK_ACTION,
             sheetId: actionData.sheetId,
             unlock: actionData.unlock,
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
         this.do();
         this.validate();

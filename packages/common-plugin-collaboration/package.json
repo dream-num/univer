@@ -1,8 +1,10 @@
 {
     "name": "@univer/common-plugin-collaboration",
     "version": "0.0.1",
-    "description": "",
-    "author": "",
+    "description": "UniverSheet normal common-plugin-collaboration",
+    "keywords": [],
+    "author": "DreamNum <msoffice2@126.com>",
+    "license": "MIT",
     "main": "./src/index.ts",
     "module": "./src/index.ts",
     "types": "./src/Types/index.d.ts",
@@ -18,37 +20,44 @@
     "directories": {
         "lib": "lib"
     },
-    "files": [
-        "package.json",
-        "lib"
-    ],
     "scripts": {
-        "test": "cross-env NODE_ENV=--experimental-vm-modules jest",
+        "test": "jest",
         "dev": "vite",
         "build": "tsc && vite build",
         "watch": "vite build",
         "link": "pnpm link ./",
         "serve": "vite preview"
     },
-    "license": "MIT",
-    "dependencies": {
-        "@univer/core": "workspace:^0.0.1"
-    },
     "devDependencies": {
-        "@types/jest": "^27.5.2",
+        "@preact/preset-vite": "2.0.0",
+        "@testing-library/preact": "^2.0.1",
+        "@types/jest": "^27.0.1",
         "@types/node": "^16.4.6",
-        "@typescript-eslint/eslint-plugin": "^4.28.5",
-        "@typescript-eslint/parser": "^4.28.5",
-        "debug": "^4.3.3",
-        "identity-obj-proxy": "^3.0.0",
-        "jest": "29.0.0",
-        "jest-dev-server": "^6.1.1",
-        "jest-environment-jsdom": "^29.0.3",
+        "@vitejs/plugin-legacy": "^1.5.1",
+        "eslint": "^8.22.0",
+        "eslint-config-airbnb-typescript": "^17.0.0",
+        "eslint-config-prettier": "^8.3.0",
+        "eslint-plugin-import": "^2.23.4",
+        "eslint-plugin-prettier": "^3.4.0",
+        "eslint-plugin-jsx-a11y": "^6.5.1",
+        "eslint-plugin-react": "^7.28.0",
+        "eslint-plugin-react-hooks": "^4.3.0",
         "less": "^4.1.1",
+        "prettier": "^2.3.2",
         "ts-jest": "29.0.1",
         "ts-node": "^10.2.1",
         "typescript": "^4.4.1-rc",
-        "vite": "^2.4.4",
-        "vite-plugin-external": "1.2.3"
+        "vite": "^2.4.4"
+    },
+    "dependencies": {
+        "@univer/common-plugin-data": "workspace:^0.0.1",
+        "@univer/base-component": "workspace:^0.0.1",
+        "@univer/base-render": "workspace:^0.0.1",
+        "@univer/core": "workspace:^0.0.1",
+        "@univer/base-sheets": "workspace:^0.0.1",
+        "@univer/base-docs": "workspace:^0.0.1",
+        "@univer/base-slides": "workspace:^0.0.1",
+        "@univer/style-universheet": "workspace:^0.0.1",
+        "preact": "^10.5.14"
     }
 }

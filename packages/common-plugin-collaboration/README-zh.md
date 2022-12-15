@@ -1,18 +1,18 @@
 # style-universheet
 
-English| [简体中文](./README-zh.md)
+简体中文 | [English](./README.md)
 
-## Introduction
+## 介绍
 
-UniverSheet Plugin Collaboration
+UniverSheet Collaboration插件
 
-### Installation
+### 安装
 
 ```bash
 npm i @univer/common-plugin-collaboration
 ```
 
-### Usage
+### 使用
 
 ```js
 impport {Collaboration} from '@univer/common-plugin-collaboration'
@@ -21,35 +21,35 @@ const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Collaboration());
 ```
 
-## Local development
+## 本地开发
 
-### Requirements
+### 环境
 
 -   [Node.js](https://nodejs.org/en/) Version >= 10
 -   [npm](https://www.npmjs.com/) Version >= 6
 
-### Installation
+### 安装
 
 ```
 pnpm install
 ```
 
-### Development
+### 开发
 
 ```
-# Current directory ./packages/common-plugin-collaboration/
+# 当前目录 ./packages/common-plugin-collaboration/
 npm run dev
 
-# Or project root directory ./
+# 或者项目根目录 ./
 pnpm run --filter  @univer/common-plugin-collaboration dev
 ```
 
-### Package
+### 打包
 
 ```
-# Current directory ./packages/common-plugin-collaboration/
+# 当前目录 ./packages/common-plugin-collaboration/
 npm run build
 
-# Or root directory ./
+# 或者根目录 ./
 pnpm run --filter  @univer/common-plugin-collaboration build
 ```

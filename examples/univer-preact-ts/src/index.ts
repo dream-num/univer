@@ -10,12 +10,14 @@ import { DEFAULT_FORMULA_DATA, FormulaPlugin, IFormulaConfig } from '@univer/she
 import { INumfmtPluginConfig, NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
 import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
 import { ImportXlsxPlugin } from '@univer/sheets-plugin-import-xlsx';
+import { CollaborationPlugin, ICollaborationPluginConfig } from '@univer/common-plugin-collaboration';
 
 interface ISheetPropsCustom {
     coreConfig?: Partial<IWorkbookConfig>;
     baseSheetsConfig?: ISheetPluginConfig;
     numfmtConfig?: INumfmtPluginConfig;
     formulaConfig?: IFormulaConfig;
+    collaborationConfig?: ICollaborationPluginConfig;
 }
 
 /**
@@ -35,6 +37,7 @@ class UniverSheetCustom {
 
         universheet.installPlugin(new ClipboardPlugin());
         universheet.installPlugin(new ImportXlsxPlugin());
+        universheet.installPlugin(new CollaborationPlugin(config.collaborationConfig));
 
         return universheet;
     }

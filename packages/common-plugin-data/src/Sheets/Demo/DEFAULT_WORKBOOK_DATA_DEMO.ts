@@ -215,7 +215,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
     theme: 'default',
     locale: LocaleType.EN,
     creator: 'univer',
-    name: 'universheet',
+    name: 'UniverSheet Demo',
     skin: 'default',
     socketUrl: '',
     socketEnable: BooleanNumber.FALSE,

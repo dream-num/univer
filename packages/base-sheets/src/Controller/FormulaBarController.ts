@@ -66,7 +66,7 @@ export class FormulaBarController {
                 const cellData = this._plugin.getWorkbook().getActiveSheet().getRange(currentRangeData).getObjectValue({ isIncludeStyle: true });
 
                 if (cellData) {
-                    let cellValue = cellData.m || `${cellData.v}` || '';
+                    let cellValue = String(cellData.m || cellData.v || '');
 
                     // If the cell has a formula, it needs to be intercepted
                     const cell = this._cellInputExtensionManager.handle({

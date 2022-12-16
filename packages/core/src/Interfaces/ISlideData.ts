@@ -1,10 +1,33 @@
 import { LocaleType, ThemeColorType } from '../Enum';
 import { ShapeType } from '../Enum/ShapeType';
-import { ICustomBlock, ILists, ISizeData } from './IDocumentData';
+import { ICustomBlock, IDocumentData, ILists, ISizeData } from './IDocumentData';
 import { IImageProperties } from './IImageProperties';
 import { IPlaceholder } from './IPlaceholder';
 import { IShapeProperties } from './IShapeProperties';
-import { IColorStyle } from './IStyleData';
+import { IColorStyle, IStyleBase } from './IStyleData';
+
+export interface ISize {
+    width?: number;
+    height?: number;
+}
+
+export interface IScale {
+    scaleX?: number;
+    scaleY?: number;
+}
+
+export interface IOffset {
+    left?: number;
+    top?: number;
+}
+
+export interface ITransformState extends IOffset, ISize, IScale {
+    angle?: number;
+    skewX?: number;
+    skewY?: number;
+    flipX?: boolean;
+    flipY?: boolean;
+}
 
 export interface ISlideData extends IReferenceSource {
     id: string; // unit id
@@ -23,19 +46,19 @@ interface IReferenceSource {
 }
 
 interface ISlidePageBody {
-    slides: { [id: string]: ISlidePage };
-    slideOrder: string[];
+    pages: { [id: string]: ISlidePage };
+    pageOrder: string[];
 }
 
 export interface ISlidePage {
     id: string;
     pageType: PageType;
+    zIndex: number;
     title: string;
     description: string;
     pageBackgroundFill: IColorStyle;
     colorScheme?: ThemeColorType;
     pageElements: { [elementId: string]: IPageElement };
-    pageElementOrder: string[];
     // Union field properties. Properties that are specific for each page type. Masters do not require any additional properties. properties can be only one of the following:
     slideProperties?: ISlideProperties;
     layoutProperties?: ILayoutProperties;
@@ -67,27 +90,36 @@ interface IMasterProperties {
     name: string;
 }
 
+export interface IRichTextProps extends ITransformState, IStyleBase {
+    text?: string;
+    rich?: IDocumentData;
+}
+
 export interface IPageElement {
     id: string;
-    left: number;
-    top: number;
-    width: number;
-    height: number;
-    angle: number;
-    scaleX: number;
-    scaleY: number;
-    skewX: number;
-    skewY: number;
-    flipX: boolean;
-    flipY: boolean;
+    zIndex: number;
+    left?: number;
+    top?: number;
+    width?: number;
+    height?: number;
+    angle?: number;
+    scaleX?: number;
+    scaleY?: number;
+    skewX?: number;
+    skewY?: number;
+    flipX?: boolean;
+    flipY?: boolean;
 
     title: string;
     description: string;
 
+    type: PageElementType;
+
     // Union field element_kind can be only one of the following:
     // elementGroup: IGroup;
-    shape: IShape;
-    image: IImage;
+    shape?: IShape;
+    image?: IImage;
+    richText?: IRichTextProps;
     // video: IVideo;
     // line: ILine;
     // table: ITable;
@@ -103,6 +135,12 @@ export enum PageType {
     NOTES_MASTER, //	A notes master page.
 }
 
+export enum PageElementType {
+    SHAPE,
+    IMAGE,
+    TEXT,
+}
+
 /**
  * IShape
  */
@@ -110,21 +148,20 @@ export interface IShape {
     shapeType: ShapeType;
     text: string;
     shapeProperties: IShapeProperties;
-    placeholder: IPlaceholder;
-    link: ILink;
+    placeholder?: IPlaceholder;
+    link?: ILink;
 }
 
 export interface IImage {
     imageProperties?: IImageProperties;
-    placeholder: IPlaceholder;
-    link: ILink;
+    placeholder?: IPlaceholder;
+    link?: ILink;
 }
 
 interface ILink {
-    url: string;
     relativeLink: RelativeSlideLink;
-    pageObjectId: string;
-    slideIndex: number;
+    pageId?: string;
+    slideIndex?: number;
 }
 
 export enum RelativeSlideLink {

@@ -110,10 +110,6 @@ export class InputManager {
             this.mouseLeaveEnterHandler(currentObject, evt);
 
             if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
-                if (this._scene.onPointerMove) {
-                    this._scene.onPointerMove(evt);
-                }
-
                 if (this._scene.onPointerMoveObserver.hasObservers()) {
                     this._scene.onPointerMoveObserver.notifyObservers(evt);
                 }
@@ -131,9 +127,9 @@ export class InputManager {
             const isStop = currentObject?.triggerPointerDown(evt);
 
             if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
-                if (this._scene.onPointerDown) {
-                    this._scene.onPointerDown(evt);
-                }
+                // if (this._scene.onPointerDown) {
+                //     this._scene.onPointerDown(evt);
+                // }
 
                 if (this._scene.onPointerDownObserver.hasObservers()) {
                     this._scene.onPointerDownObserver.notifyObservers(evt);
@@ -151,10 +147,6 @@ export class InputManager {
             const isStop = currentObject?.triggerPointerUp(evt);
 
             if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
-                if (this._scene.onPointerUp) {
-                    this._scene.onPointerUp(evt);
-                }
-
                 if (this._scene.onPointerUpObserver.hasObservers()) {
                     this._scene.onPointerUpObserver.notifyObservers(evt);
                 }
@@ -174,10 +166,6 @@ export class InputManager {
             });
 
             if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
-                if (this._scene.onMouseWheel) {
-                    this._scene.onMouseWheel(evt);
-                }
-
                 if (this._scene.onMouseWheelObserver.hasObservers()) {
                     this._scene.onMouseWheelObserver.notifyObservers(evt);
                 }
@@ -294,9 +282,9 @@ export class InputManager {
 
         this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerDblclick(evt);
 
-        if (this._scene.onDblclick) {
-            this._scene.onDblclick(evt);
-        }
+        // if (this._scene.onDblclick) {
+        //     this._scene.onDblclick(evt);
+        // }
 
         if (this._scene.onDblclickObserver.hasObservers()) {
             this._scene.onDblclickObserver.notifyObservers(evt);

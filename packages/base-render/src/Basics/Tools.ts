@@ -1,7 +1,7 @@
-import { FontStyleType, ICellInfo, ISelection, IStyleBase, Nullable, ObjectMatrix, Tools, IRangeData, BaselineOffset } from '@univer/core';
+import { FontStyleType, ICellInfo, ISelection, IStyleBase, Nullable, ObjectMatrix, Tools, IRangeData, BaselineOffset, IScale } from '@univer/core';
 import { DEFAULT_FONTFACE_PLANE } from './Const';
 import { IBoundRectNoAngle } from './Vector2';
-import { IFontLocale, IScale } from './Interfaces';
+import { IFontLocale } from './Interfaces';
 import { FontCache } from './FontCache';
 
 const OBJECT_ARRAY = '[object Array]';
@@ -595,4 +595,21 @@ export function checkStyle(content: string) {
         }
     }
     return false;
+}
+
+export function pxToNum(unit: string) {
+    return Number(unit.replace(/px/gi, ''));
+}
+
+export function getSizeForDom(dom: HTMLElement) {
+    const style = getComputedStyle(dom);
+    const { borderTopWidth, borderLeftWidth, borderRightWidth, borderBottomWidth, width, height } = style;
+    return {
+        top: pxToNum(borderTopWidth),
+        left: pxToNum(borderLeftWidth),
+        right: pxToNum(borderRightWidth),
+        bottom: pxToNum(borderBottomWidth),
+        width: pxToNum(width),
+        height: pxToNum(height),
+    };
 }

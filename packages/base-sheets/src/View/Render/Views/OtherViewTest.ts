@@ -434,7 +434,7 @@ export class OtherViewTest extends BaseView {
             stroke: 'rgba(102,111,99, 0.8)',
             zIndex: 11,
         });
-        const picture = new Picture({
+        const picture = new Picture('picture_1', {
             url: 'https://cnbabylon.com/assets/img/agents.png',
             top: 500,
             left: 800,

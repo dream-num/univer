@@ -18,4 +18,5 @@ export * from './RelativeDate';
 export * from './SheetTypes';
 export * from './TextStyle';
 export * from './ThemeColorType';
+export * from './ShapeType';
 // @endindex

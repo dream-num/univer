@@ -1,10 +1,11 @@
-import { ISolidFill } from './IStyleData';
+import { IColorStyle } from './IStyleData';
 
 /**
  * ShapeProperties
  */
 export interface IShapeProperties {
-    shapeBackgroundFill: ISolidFill;
+    shapeBackgroundFill: IColorStyle;
+    radius?: number;
     // outline: IOutline;
     // shadow: IShadow;
     // link: ILink;

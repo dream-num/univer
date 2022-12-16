@@ -70,6 +70,7 @@ export class SlideView extends BaseView {
     protected _initialize() {
         const scene = this.getScene();
         const context = this.getContext();
+        const slideModel = context.getSlide();
 
         const engine = scene.getEngine();
         if (!engine) {
@@ -97,7 +98,7 @@ export class SlideView extends BaseView {
             zIndex: 3,
         });
 
-        const picture = new Picture({
+        const picture = new Picture('picture', {
             url: 'https://cnbabylon.com/assets/img/banner_doc_cnbabylon.jpg',
             top: top + 68,
             left,

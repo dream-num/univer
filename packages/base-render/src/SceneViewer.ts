@@ -126,6 +126,11 @@ export class SceneViewer extends BaseObject {
         this.makeDirty(true);
     }
 
+    dispose() {
+        super.dispose();
+        this._childrenScene.dispose();
+    }
+
     // resizeCacheCanvas() {
     //     this._cacheCanvas.setSize(this.width + this.strokeWidth, this.height + this.strokeWidth);
     //     this.makeDirty(true);

@@ -101,6 +101,14 @@ export class ScrollBar {
         return this._verticalBarHeight - this._verticalThumbHeight;
     }
 
+    get horizontalThumbWidth() {
+        return this._horizontalThumbWidth;
+    }
+
+    get verticalThumbHeight() {
+        return this._verticalThumbHeight;
+    }
+
     setProps(props?: IScrollBarProps) {
         if (!props) {
             return;
@@ -445,5 +453,17 @@ export class ScrollBar {
         }
 
         return null;
+    }
+
+    dispose() {
+        this._horizonBarRect.dispose();
+        this._horizonThumbRect.dispose();
+        this._verticalBarRect.dispose();
+        this._verticalThumbRect.dispose();
+        this._placeholderBarRect.dispose();
+    }
+
+    static attachTo(view: Viewport, props?: IScrollBarProps) {
+        return new ScrollBar(view, props);
     }
 }

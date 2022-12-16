@@ -68,6 +68,8 @@ export abstract class BaseObject {
 
     private _isTransformer = false;
 
+    private _forceRender = false;
+
     groupKey?: string;
 
     isInGroup: boolean = false;
@@ -263,6 +265,13 @@ export abstract class BaseObject {
         });
 
         return this;
+    }
+
+    isRender(bounds?: IBoundRect) {
+        if (this._forceRender) {
+            return false;
+        }
+        return bounds && !this.isInGroup;
     }
 
     private _makeDirtyMix() {

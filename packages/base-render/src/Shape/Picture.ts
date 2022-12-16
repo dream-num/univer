@@ -21,8 +21,8 @@ export class Picture extends Shape<IPictureProps> {
         }
     }
 
-    static fromURL(url: string, callback?: () => void): Picture {
-        return new Picture({ url, success: callback });
+    static create(id: string, url: string, callback?: () => void): Picture {
+        return new Picture(id, { url, success: callback });
     }
 
     protected _props: IPictureProps;
@@ -35,15 +35,15 @@ export class Picture extends Shape<IPictureProps> {
 
     protected _init(): void {
         if (this._props.autoWidth) {
-            this.resize(this._native.width, undefined);
+            this.resize(this._native.width);
         }
         if (this._props.autoHeight) {
             this.resize(undefined, this._native.height);
         }
     }
 
-    constructor(config: IPictureProps) {
-        super(undefined, config);
+    constructor(id: string, config: IPictureProps) {
+        super(id, config);
         this._props = {
             autoWidth: false,
             autoHeight: false,

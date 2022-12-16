@@ -1,10 +1,10 @@
-import { IKeyValue, Nullable } from '@univer/core';
+import { IKeyValue, IScale, Nullable } from '@univer/core';
 import { Canvas, getDevicePixelRatio } from '../Canvas';
 import { BaseObject, BASE_OBJECT_ARRAY } from '../BaseObject';
 import { IBoundRect, Vector2 } from '../Basics/Vector2';
-import { IObjectFullState, IScale } from '../Basics/Interfaces';
 import { SHAPE_TYPE } from '../Basics/Const';
 import { transformBoundingCoord } from '../Basics/Position';
+import { IObjectFullState } from '../Basics/Interfaces';
 
 export type LineJoin = 'round' | 'bevel' | 'miter';
 export type LineCap = 'butt' | 'round' | 'square';
@@ -238,8 +238,8 @@ export abstract class Shape<T> extends BaseObject {
         }
 
         // Temporarily ignore the on-demand display of elements within a group：this.isInGroup
-        if (bounds && !this.isInGroup) {
-            const { minX, maxX, minY, maxY } = transformBoundingCoord(this, bounds);
+        if (this.isRender()) {
+            const { minX, maxX, minY, maxY } = transformBoundingCoord(this, bounds!);
 
             if (this.width + this.strokeWidth < minX || maxX < 0 || this.height + this.strokeWidth < minY || maxY < 0) {
                 // console.warn('ignore object', this);

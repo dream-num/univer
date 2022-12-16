@@ -76,7 +76,7 @@ export class Scene {
         if (this._parent.classType === RENDER_CLASS_TYPE.ENGINE) {
             const parent = this._parent as Engine;
             parent.addScene(this);
-            if (parent.hasActiveScene()) {
+            if (!parent.hasActiveScene()) {
                 parent.setActiveScene(sceneKey);
             }
             this._inputManager = new InputManager(this);
@@ -325,7 +325,7 @@ export class Scene {
 
         let parent: any = this._parent; // type:  SceneViewer | Engine | BaseObject | Scene
         while (parent) {
-            if (parent === RENDER_CLASS_TYPE.ENGINE) {
+            if (parent.classType === RENDER_CLASS_TYPE.ENGINE) {
                 return parent;
             }
             parent = parent?.getParent();
@@ -597,6 +597,34 @@ export class Scene {
         return pickedViewport?.getRelativeVector(coord);
     }
 
+    clearLayer() {
+        this._layers = [];
+    }
+
+    clearViewports() {
+        this._viewports = [];
+    }
+
+    dispose() {
+        this.getLayers().forEach((layer) => {
+            layer.dispose();
+        });
+        this.getViewports().forEach((viewport) => {
+            viewport.dispose();
+        });
+        this.clearLayer();
+        this.clearViewports();
+        this.detachControl();
+        this._transformer?.dispose();
+        this.onPointerDownObserver.clear();
+        this.onPointerMoveObserver.clear();
+        this.onPointerUpObserver.clear();
+        this.onDblclickObserver.clear();
+        this.onMouseWheelObserver.clear();
+        this.onKeyDownObservable.clear();
+        this.onKeyUpObservable.clear();
+    }
+
     // Determine the only object selected
     pick(coord: Vector2): Nullable<BaseObject | Scene> {
         let pickedViewport = this.getActiveViewportByCoord(coord);
@@ -672,15 +700,15 @@ export class Scene {
         return { cumLeft, cumTop };
     }
 
-    onPointerMove: (evt: IPointerEvent | IMouseEvent) => void;
+    // onPointerMove: (evt: IPointerEvent | IMouseEvent) => void;
 
-    onPointerDown: (evt: IPointerEvent | IMouseEvent) => void;
+    // onPointerDown: (evt: IPointerEvent | IMouseEvent) => void;
 
-    onPointerUp: (evt: IPointerEvent | IMouseEvent) => void;
+    // onPointerUp: (evt: IPointerEvent | IMouseEvent) => void;
 
-    onDblclick: (evt: IPointerEvent | IMouseEvent) => void;
+    // onDblclick: (evt: IPointerEvent | IMouseEvent) => void;
 
-    onMouseWheel: (evt: IWheelEvent) => void;
+    // onMouseWheel: (evt: IWheelEvent) => void;
 
     onPointerDownObserver = new Observable<IPointerEvent | IMouseEvent>();
 

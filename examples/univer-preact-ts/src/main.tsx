@@ -62,7 +62,7 @@ univerSheetCustom({
     coreConfig: defaultWorkbookData,
     baseSheetsConfig: sheetConfig,
     collaborationConfig: {
-        url: 'ws://localhost:8448/ws',
+        url: 'ws://luckysheet.lashuju.com/ws',
     },
 });
 

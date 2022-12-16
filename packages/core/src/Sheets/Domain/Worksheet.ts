@@ -1320,7 +1320,7 @@ export class Worksheet {
         tr.forEach((row, column) => {
             const cell = matrix.getValue(row, column);
             if (cell) {
-                const cellStyle = styles.get(cell.s);
+                const cellStyle = styles.getStyleByCell(cell);
                 if (cellStyle) {
                     const copy: IStyleData = Tools.deepClone(cellStyle);
                     if (copy.bd) {
@@ -1333,7 +1333,7 @@ export class Worksheet {
         br.forEach((row, column) => {
             const cell = matrix.getValue(row, column);
             if (cell) {
-                const cellStyle = styles.get(cell.s);
+                const cellStyle = styles.getStyleByCell(cell);
                 if (cellStyle) {
                     const copy: IStyleData = Tools.deepClone(cellStyle);
                     if (copy.bd) {
@@ -1346,7 +1346,7 @@ export class Worksheet {
         lr.forEach((row, column) => {
             const cell = matrix.getValue(row, column);
             if (cell) {
-                const cellStyle = styles.get(cell.s);
+                const cellStyle = styles.getStyleByCell(cell);
                 if (cellStyle) {
                     const copy: IStyleData = Tools.deepClone(cellStyle);
                     if (copy.bd) {
@@ -1359,7 +1359,7 @@ export class Worksheet {
         rr.forEach((row, column) => {
             const cell = matrix.getValue(row, column);
             if (cell) {
-                const cellStyle = styles.get(cell.s);
+                const cellStyle = styles.getStyleByCell(cell);
                 if (cellStyle) {
                     const copy: IStyleData = Tools.deepClone(cellStyle);
                     if (copy.bd) {

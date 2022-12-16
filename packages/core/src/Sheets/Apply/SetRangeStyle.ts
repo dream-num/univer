@@ -31,7 +31,7 @@ export function SetRangeStyle(
         for (let c = startColumn; c <= endColumn; c++) {
             const cell = cellMatrix.getValue(r, c) || {};
             // use null to clear style
-            const old = cell.s ? styles.get(cell.s) : null;
+            const old = styles.getStyleByCell(cell);
 
             if (old == null) {
                 // clear

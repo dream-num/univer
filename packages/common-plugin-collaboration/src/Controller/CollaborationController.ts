@@ -113,19 +113,19 @@ export class CollaborationController {
         }
     }
     onError(data) {
-        // console.log('onError====', data);
+        console.log('onError====', data);
     }
     onOpen(data) {
-        // console.log('onOpen====', data);
+        console.log('onOpen====', data);
     }
     onClose(data) {
-        // console.log('onClose====', data);
+        console.log('onClose====', data);
     }
     onRetry(data) {
-        // console.log('onRetry====', data);
+        console.log('onRetry====', data);
     }
     onDestroy(data) {
-        // console.log('onDestroy====', data);
+        console.log('onDestroy====', data);
     }
 
     refresh(config) {

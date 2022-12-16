@@ -48,6 +48,7 @@
         "@univer/base-render": "workspace:^0.0.1",
         "@univer/base-sheets": "workspace:^0.0.1",
         "@univer/base-slides": "workspace:^0.0.1",
+        "@univer/common-plugin-collaboration": "workspace:^0.0.1",
         "@univer/common-plugin-data": "workspace:^0.0.1",
         "@univer/core": "workspace:^0.0.1",
         "@univer/sheets-plugin-clipboard": "workspace:^0.0.1",

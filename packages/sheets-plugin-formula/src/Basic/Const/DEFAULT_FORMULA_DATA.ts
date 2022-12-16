@@ -67,11 +67,11 @@ export const DEFAULT_FORMULA_DATA_DOWN: IFormulaConfig = {
 
 export const DEFAULT_FORMULA_DATA_DEMO: IFormulaConfig = {
     formulaData: {
-        'workbook-03': {
+        'workbook-01': {
             'sheet-0003': {
                 '11': {
                     '6': {
-                        formula: '=PRODUCT(E12:F12)',
+                        formula: '=E12*F12',
                         row: 11,
                         column: 6,
                         sheetId: 'sheet-0003',
@@ -79,7 +79,7 @@ export const DEFAULT_FORMULA_DATA_DEMO: IFormulaConfig = {
                 },
                 '12': {
                     '6': {
-                        formula: '=PRODUCT(E13:F13)',
+                        formula: '=E13*F13',
                         row: 12,
                         column: 6,
                         sheetId: 'sheet-0003',
@@ -108,11 +108,11 @@ export const DEFAULT_FORMULA_DATA_DEMO: IFormulaConfig = {
 
 export const DEFAULT_FORMULA_DATA_DEMO1: IFormulaConfig = {
     formulaData: {
-        'workbook-04': {
+        'workbook-01': {
             'sheet-0003': {
                 '11': {
                     '6': {
-                        formula: '=PRODUCT(E12:F12)',
+                        formula: '=E12*F12',
                         row: 11,
                         column: 6,
                         sheetId: 'sheet-0003',
@@ -120,7 +120,7 @@ export const DEFAULT_FORMULA_DATA_DEMO1: IFormulaConfig = {
                 },
                 '12': {
                     '6': {
-                        formula: '=PRODUCT(E13:F13)',
+                        formula: '=E13*F13',
                         row: 12,
                         column: 6,
                         sheetId: 'sheet-0003',

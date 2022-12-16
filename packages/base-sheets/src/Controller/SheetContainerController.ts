@@ -1,4 +1,4 @@
-import { BooleanNumber, CommandManager, ContextBase, ISheetActionData, LocaleType, PLUGIN_NAMES, SheetActionBase, Workbook } from '@univer/core';
+import { CommandManager, ContextBase, ISheetActionData, LocaleType, PLUGIN_NAMES, SheetActionBase, Workbook } from '@univer/core';
 import { BaseComponentSheet, BaseComponentRender, BaseComponentProps, DragManager, getRefElement } from '@univer/base-component';
 
 import { CellRangeModal } from '../View/UI/Common/CellRange/CellRangeModal';
@@ -108,7 +108,7 @@ export class SheetContainerController {
 
             // Only the currently active worksheet needs to be refreshed
             const worksheet = action.getWorkBook().getActiveSheet();
-            if (worksheet.getConfig().status === BooleanNumber.TRUE) {
+            if (worksheet) {
                 try {
                     const canvasView = plugin.getCanvasView();
                     if (canvasView) {

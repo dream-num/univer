@@ -1,7 +1,7 @@
 import { BooleanNumber, BorderStyleTypes, IWorkbookConfig, LocaleType, SheetTypes } from '@univer/core';
 
 export const DEFAULT_WORKBOOK_DATA_DEMO2: IWorkbookConfig = {
-    id: 'workbook-05',
+    id: 'workbook-01',
     theme: 'default',
     locale: LocaleType.EN,
     creator: 'univer',

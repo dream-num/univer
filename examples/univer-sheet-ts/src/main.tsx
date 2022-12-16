@@ -2,8 +2,6 @@ import { UniverSheet, UniverDoc, UniverSlide } from '@univer/core';
 import { RenderEngine } from '@univer/base-render';
 import { UniverComponentSheet } from '@univer/style-universheet';
 import { SheetPlugin } from '@univer/base-sheets';
-import { DocPlugin } from '@univer/base-docs';
-import { SlidePlugin } from '@univer/base-slides';
 import {
     DEFAULT_FORMULA_DATA,
     DEFAULT_FORMULA_DATA_DEMO,
@@ -48,13 +46,13 @@ const uiDefaultConfigDemo = {
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO1);
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO2);
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO3);
-const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO4);
+const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 univerSheetDemo.installPlugin(new RenderEngine());
 univerSheetDemo.installPlugin(new UniverComponentSheet());
 univerSheetDemo.installPlugin(new SheetPlugin(uiDefaultConfigDemo));
 univerSheetDemo.installPlugin(new BaseComponentPlugin());
 univerSheetDemo.installPlugin(new NumfmtPlugin());
-// FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(univerSheetDemo);
+FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(univerSheetDemo);
 // FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO1).installTo(univerSheetDemo);
 
 univerSheetDemo.installPlugin(new ClipboardPlugin());

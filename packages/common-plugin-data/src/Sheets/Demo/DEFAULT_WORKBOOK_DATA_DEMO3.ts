@@ -142,7 +142,7 @@ const richTextDemo: IDocumentData = {
 };
 
 export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookConfig = {
-    id: 'workbook-06',
+    id: 'workbook-01',
     theme: 'default',
     locale: LocaleType.EN,
     creator: 'univer',

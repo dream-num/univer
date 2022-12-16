@@ -18,10 +18,12 @@
 
         "baseUrl": "./",
         "skipLibCheck": true,
-        "esModuleInterop": true, // auto allowSyntheticDefaultImports true
-        "jsx": "preserve",
-        "experimentalDecorators": true,
+        "esModuleInterop": true, // auto allowSyntheticDefaultImports tru
         "suppressImplicitAnyIndexErrors": true,
+        "experimentalDecorators": true,
+        "jsx": "preserve",
+        "jsxFactory": "h",
+        "jsxFragmentFactory": "Fragment",
         "strictPropertyInitialization": false,
         "types": ["jest", "node", "@types/jest"]
     },

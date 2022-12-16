@@ -274,11 +274,7 @@ export class Range {
             row.map((cell: Nullable<ICellData>) => {
                 const styles = this._context.getWorkBook().getStyles();
                 let rgbColor: string = DEFAULT_STYLES.bg?.rgb!;
-
-                if (cell?.s) {
-                    rgbColor = styles.get(cell?.s)?.bg?.rgb!;
-                }
-
+                rgbColor = styles.getStyleByCell(cell)?.bg?.rgb!;
                 return rgbColor;
             })
         );
@@ -380,8 +376,9 @@ export class Range {
         return this.getValues().map((row) =>
             row.map((cell: Nullable<ICellData>) => {
                 const styles = this._context.getWorkBook().getStyles();
+                const cellStyle = styles.getStyleByCell(cell)
                 return (
-                    (cell?.s && styles.get(cell.s)?.cl?.rgb) ||
+                    cellStyle?.cl?.rgb ||
                     DEFAULT_STYLES.cl?.rgb
                 );
             })
@@ -773,10 +770,7 @@ export class Range {
         return this.getValues().map((row) =>
             row.map((cell: Nullable<ICellData>) => {
                 const styles = this._context.getWorkBook().getStyles();
-                if (cell && cell.s) {
-                    return styles.get(cell.s);
-                }
-                return null;
+                return styles.getStyleByCell(cell);
             })
         );
     }
@@ -2157,7 +2151,7 @@ export class Range {
                         stylesMatrix.setValue(
                             r,
                             c,
-                            cell.s ? styles.get(cell.s) : {}
+                            styles.getStyleByCell(cell) || {}
                         );
                     })
                 );
@@ -2314,8 +2308,8 @@ export class Range {
         value.map((row, r) =>
             row.map((cell, c) => {
                 cell = cell as ICellData;
-                stylesMatrix.setValue(r, c, cell.s ? styles.get(cell.s) : {});
-                return cell.s ? styles.get(cell.s) : {};
+                stylesMatrix.setValue(r, c, styles.getStyleByCell(cell) || {});
+                return styles.getStyleByCell(cell) || {};
             })
         );
 

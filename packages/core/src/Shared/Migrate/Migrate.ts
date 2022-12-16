@@ -273,6 +273,8 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                         // 显示值
                         if (cell.hasOwnProperty('m')) {
                             newCell.m = cell.m;
+                        }else{
+                            newCell.m = String(cell.v || '')
                         }
 
                         const cellStyle: IStyleData = {};

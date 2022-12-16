@@ -6,6 +6,7 @@ import { ISheetPluginConfig, SheetPlugin } from '@univer/base-sheets';
 import { IDocPluginConfig, DocPlugin } from '@univer/base-docs';
 import { ISlidePluginConfig, SlidePlugin } from '@univer/base-slides';
 import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
+import { CollaborationPlugin, ICollaborationPluginConfig } from '@univer/common-plugin-collaboration';
 import { DEFAULT_FORMULA_DATA, FormulaPlugin, IFormulaConfig } from '@univer/sheets-plugin-formula';
 import { INumfmtPluginConfig, NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
 import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
@@ -16,6 +17,7 @@ interface ISheetPropsCustom {
     baseSheetsConfig?: ISheetPluginConfig;
     numfmtConfig?: INumfmtPluginConfig;
     formulaConfig?: IFormulaConfig;
+    collaborationConfig?: ICollaborationPluginConfig;
 }
 
 /**
@@ -35,6 +37,7 @@ class UniverSheetCustom {
 
         universheet.installPlugin(new ClipboardPlugin());
         universheet.installPlugin(new ImportXlsxPlugin());
+        universheet.installPlugin(new CollaborationPlugin(config.collaborationConfig));
 
         return universheet;
     }
@@ -116,6 +119,7 @@ export * as BaseSheets from '@univer/base-sheets';
 export * as BaseDocs from '@univer/base-docs';
 export * as BaseSlides from '@univer/base-slides';
 export * as CommonPluginData from '@univer/common-plugin-data';
+export * as CommonPluginCollaboration from '@univer/common-plugin-collaboration';
 export * as SheetsPluginFormula from '@univer/sheets-plugin-formula';
 export * as SheetsPluginNumfmt from '@univer/sheets-plugin-numfmt';
 export * as SheetsPluginClipboard from '@univer/sheets-plugin-clipboard';

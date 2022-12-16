@@ -51,7 +51,9 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
                 // update formula string，Any modification to cellData will be linked to formulaData
                 rangeMatrix.forValue((r, c, cell) => {
                     const formulaString = cell.m;
-                    if (isFormulaString(formulaString) || Tools.isStringNumber(formulaString)) {
+                    if (Tools.isStringNumber(formulaString)) {
+                        isCalculate = true;
+                    } else if (isFormulaString(formulaString)) {
                         isCalculate = true;
                         cellData.setValue(r, c, {
                             formula: formulaString,

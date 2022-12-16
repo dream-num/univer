@@ -59,7 +59,7 @@ export function SetRangeData(
             // update style
 
             // use null to clear style
-            const old = cell.s ? styles.get(cell.s) : null;
+            const old = styles.getStyleByCell(cell);
 
             // store old data
             const oldCellStyle = transformStyle(

@@ -52,7 +52,7 @@ univerSheetDemo.installPlugin(new UniverComponentSheet());
 univerSheetDemo.installPlugin(new SheetPlugin(uiDefaultConfigDemo));
 univerSheetDemo.installPlugin(new BaseComponentPlugin());
 univerSheetDemo.installPlugin(new NumfmtPlugin());
-// FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(univerSheetDemo);
+FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(univerSheetDemo);
 // FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO1).installTo(univerSheetDemo);
 
 univerSheetDemo.installPlugin(new ClipboardPlugin());

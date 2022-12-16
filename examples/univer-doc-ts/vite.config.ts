@@ -10,9 +10,9 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetTs',
+            name: 'UniverDocTs',
             formats: ['es', 'cjs', 'umd', 'iife'],
-            fileName: 'univer-sheet-ts',
+            fileName: 'univer-doc-ts',
         },
         outDir: './lib',
     },

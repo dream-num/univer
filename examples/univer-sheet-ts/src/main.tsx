@@ -2,8 +2,6 @@ import { UniverSheet, UniverDoc, UniverSlide } from '@univer/core';
 import { RenderEngine } from '@univer/base-render';
 import { UniverComponentSheet } from '@univer/style-universheet';
 import { SheetPlugin } from '@univer/base-sheets';
-import { DocPlugin } from '@univer/base-docs';
-import { SlidePlugin } from '@univer/base-slides';
 import {
     DEFAULT_FORMULA_DATA,
     DEFAULT_FORMULA_DATA_DEMO,

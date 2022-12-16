@@ -19,6 +19,8 @@ export type SlidePluginObserve = {
     onToolBarDidMountObservable: Observable<ToolBar>;
     onSlideBarDidMountObservable: Observable<SlideBar>;
 
+    onSlideBarMousedownObservable: Observable<string>;
+
     onSlideContainerDidMountObservable: Observable<SlideContainer>;
 
     onSpreadsheetKeyDownObservable: Observable<IKeyboardEvent>;
@@ -43,6 +45,8 @@ export function uninstall(plugin: Plugin) {
 
     plugin.deleteObserve('onToolBarDidMountObservable');
     plugin.deleteObserve('onSlideBarDidMountObservable');
+
+    plugin.deleteObserve('onSlideBarMousedownObservable');
 
     plugin.deleteObserve('onChangeCurrentSheetObserver');
     plugin.deleteObserve('onSlideContainerDidMountObservable');
@@ -76,6 +80,8 @@ export function install(plugin: Plugin) {
     plugin.pushToObserve('onChangeCurrentSheetObserver');
 
     plugin.pushToObserve('onToolBarDidMountObservable');
+
+    plugin.pushToObserve('onSlideBarMousedownObservable');
 
     plugin.pushToObserve('onSheetBarDidMountObservable');
     plugin.pushToObserve('onCountBarDidMountObservable');

@@ -173,7 +173,7 @@ export class Transformer implements ITransformerConfig {
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
-    private _observerMap = new Map<string, Observer>();
+    private _cancelFocusObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
     private _transformerControlMap = new Map<string, Group>();
 
@@ -187,10 +187,6 @@ export class Transformer implements ITransformerConfig {
 
     constructor(private _scene: Scene, config?: ITransformerConfig) {
         this._initialProps(config);
-        this._scene.onPointerDownObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
-            this._selectedObjectMap.clear();
-            this._clearControl();
-        });
     }
 
     private _initialProps(props?: ITransformerConfig) {
@@ -312,11 +308,15 @@ export class Transformer implements ITransformerConfig {
             this._startOffsetX = evtOffsetX;
             this._startOffsetY = evtOffsetY;
 
-            const scene = this.getScene();
+            const scene = this._getTopScene();
+
+            if (scene == null) {
+                return;
+            }
 
             scene.disableEvent();
 
-            const scrollTimer = ScrollTimer.create(this.getScene());
+            const scrollTimer = ScrollTimer.create(scene);
             scrollTimer.startScroll(evtOffsetX, evtOffsetY);
 
             const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
@@ -353,7 +353,11 @@ export class Transformer implements ITransformerConfig {
             this._startOffsetX = evtOffsetX;
             this._startOffsetY = evtOffsetY;
 
-            const scene = this.getScene();
+            const scene = this._getTopScene();
+
+            if (scene == null) {
+                return;
+            }
 
             scene.disableEvent();
 
@@ -686,6 +690,11 @@ export class Transformer implements ITransformerConfig {
         return this._scene;
     }
 
+    private _getTopScene() {
+        const currentScene = this.getScene();
+        return currentScene.getEngine()?.activeScene;
+    }
+
     private _moving(moveOffsetX: number, moveOffsetY: number, scrollTimer: ScrollTimer) {
         const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
         const x = moveOffsetX - this._viewportScrollX + scrollX;
@@ -722,6 +731,15 @@ export class Transformer implements ITransformerConfig {
         this._createControl(applyObject);
     }
 
+    private _addCancelObserver(scene: Scene) {
+        scene.onPointerDownObserver.remove(this._cancelFocusObserver);
+        this._cancelFocusObserver = scene.onPointerDownObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+            this._selectedObjectMap.clear();
+            this._clearControl();
+            scene.onPointerDownObserver.remove(this._cancelFocusObserver);
+        });
+    }
+
     attachTo(applyObject: BaseObject) {
         if (!applyObject.isTransformer) {
             return;
@@ -737,7 +755,13 @@ export class Transformer implements ITransformerConfig {
             this._startOffsetX = evtOffsetX;
             this._startOffsetY = evtOffsetY;
 
-            const scene = this.getScene();
+            const scene = this._getTopScene();
+
+            if (!scene) {
+                return;
+            }
+
+            this._addCancelObserver(scene);
 
             scene.disableEvent();
 
@@ -777,5 +801,19 @@ export class Transformer implements ITransformerConfig {
         });
 
         return applyObject;
+    }
+
+    dispose() {
+        this._moveObserver = null;
+        this._upObserver = null;
+        this._transformerControlMap.forEach((control) => {
+            control.dispose();
+        });
+        this._selectedObjectMap.forEach((control) => {
+            control.dispose();
+        });
+        this.onChangeStartObservable.clear();
+        this.onChangingObservable.clear();
+        this.onChangeEndObservable.clear();
     }
 }

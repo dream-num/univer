@@ -1,9 +1,9 @@
 import { BaseComponentRender, BaseComponentSheet, Component, createRef } from '@univer/base-component';
-import { PLUGIN_NAMES } from '@univer/core';
+import { PLUGIN_NAMES, ISlidePage } from '@univer/core';
 import styles from './index.module.less';
 
 interface SlideBarState {
-    slideList: any[];
+    slideList: ISlidePage[];
 }
 
 interface IProps {
@@ -13,7 +13,7 @@ interface IProps {
 export class SlideBar extends Component<IProps, SlideBarState> {
     private _render: BaseComponentRender;
 
-    slideBarRef = createRef();
+    slideBarRef = createRef<HTMLDivElement>();
 
     initialize() {
         const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
@@ -34,12 +34,17 @@ export class SlideBar extends Component<IProps, SlideBarState> {
         });
     }
 
-    handleClick(index: number) {
-        const item = this.slideBarRef.current.querySelectorAll(`.${styles.slideBarItem}`);
+    handleClick(pageId: string, index: number) {
+        const item = this.slideBarRef.current?.querySelectorAll(`.${styles.slideBarItem}`);
+        if (item == null) {
+            return;
+        }
         for (let i = 0; i < item.length; i++) {
             item[i].classList.remove(styles.slideBarItemActive);
         }
         item[index].classList.add(styles.slideBarItemActive);
+
+        this._context.getObserverManager().getObserver<string>('onSlideBarMousedownObservable', PLUGIN_NAMES.SLIDE)?.notifyObservers(pageId);
     }
 
     render() {
@@ -52,7 +57,7 @@ export class SlideBar extends Component<IProps, SlideBarState> {
                 <div className={styles.slideBarContent}>
                     {slideList.map((item, index) => {
                         return (
-                            <div className={styles.slideBarItem} onClick={() => this.handleClick(index)}>
+                            <div className={styles.slideBarItem} onClick={() => this.handleClick(item.id, index)}>
                                 <span>{index + 1}</span>
                                 <div className={styles.slideBarBox}></div>
                             </div>

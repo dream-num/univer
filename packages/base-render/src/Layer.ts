@@ -96,4 +96,15 @@ export class Layer {
         });
         return this;
     }
+
+    clear() {
+        this._objects = [];
+    }
+
+    dispose() {
+        this.getObjects().forEach((o) => {
+            o.dispose();
+        });
+        this.clear();
+    }
 }

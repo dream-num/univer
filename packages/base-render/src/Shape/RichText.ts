@@ -1,15 +1,31 @@
 // import { IShapeProps, Shape, IObjectFullState, Group, Scene } from '.';
 
-import { BlockType, IDocumentData, IKeyValue, ParagraphElementType, ContextBase } from '@univer/core';
+import {
+    BlockType,
+    IDocumentData,
+    IKeyValue,
+    ParagraphElementType,
+    ContextBase,
+    ITransformState,
+    IStyleBase,
+    BooleanNumber,
+    ITextDecoration,
+    IColorStyle,
+    IBorderData,
+    Nullable,
+} from '@univer/core';
 import { Canvas } from '..';
 import { BaseObject } from '../BaseObject';
-import { IBoundRect, IObjectFullState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../Basics';
+import { IBoundRect, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../Basics';
 import { transformBoundingCoord } from '../Basics/Position';
 import { Documents, DocumentSkeleton } from '../Component';
 
-export interface IRichTextProps extends IObjectFullState {
+export interface IRichTextProps extends ITransformState, IStyleBase {
     text?: string;
     richText?: IDocumentData;
+    zIndex: number;
+    isTransformer?: boolean;
+    forceRender?: boolean;
 }
 
 export const RICHTEXT_OBJECT_ARRAY = ['text', 'richText'];
@@ -27,6 +43,26 @@ export class RichText extends BaseObject {
 
     private _documents: Documents;
 
+    private _ff?: Nullable<string>;
+
+    private _fs?: number;
+
+    private _it?: BooleanNumber;
+
+    private _bl?: BooleanNumber;
+
+    private _ul?: ITextDecoration;
+
+    private _st?: ITextDecoration;
+
+    private _ol?: ITextDecoration;
+
+    private _bg?: IColorStyle;
+
+    private _bd?: IBorderData;
+
+    private _cl?: IColorStyle;
+
     get documentData() {
         return this._documentData;
     }
@@ -35,8 +71,19 @@ export class RichText extends BaseObject {
         super(key);
         if (props?.richText) {
             this._documentData = props.richText;
-        } else {
-            this._documentData = this.convertToDocumentData(props?.text || '');
+        } else if (props) {
+            this._fs = props.fs;
+            this._ff = props.ff;
+            this._it = props.it;
+            this._bl = props.bl;
+            this._ul = props.ul;
+            this._st = props.st;
+            this._ol = props.ol;
+            this._bg = props.bg;
+            this._bd = props.bd;
+            this._cl = props.cl;
+
+            this._documentData = this.convertToDocumentData(props.text || '');
         }
 
         if (this._allowCache) {
@@ -103,6 +150,18 @@ export class RichText extends BaseObject {
                                     et: ParagraphElementType.TEXT_RUN,
                                     tr: {
                                         ct: text,
+                                        ts: {
+                                            fs: this._fs || 14,
+                                            ff: this._ff,
+                                            it: this._it,
+                                            bl: this._bl,
+                                            ul: this._ul,
+                                            st: this._st,
+                                            ol: this._ol,
+                                            bg: this._bg,
+                                            bd: this._bd,
+                                            cl: this._cl,
+                                        },
                                     },
                                 },
                             },
@@ -175,8 +234,8 @@ export class RichText extends BaseObject {
         }
 
         // Temporarily ignore the on-demand display of elements within a group：this.isInGroup
-        if (bounds && !this.isInGroup) {
-            const { minX, maxX, minY, maxY } = transformBoundingCoord(this, bounds);
+        if (this.isRender()) {
+            const { minX, maxX, minY, maxY } = transformBoundingCoord(this, bounds!);
 
             if (this.width + this.strokeWidth < minX || maxX < 0 || this.height + this.strokeWidth < minY || maxY < 0) {
                 // console.warn('ignore object', this);

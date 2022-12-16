@@ -4,7 +4,7 @@ import { Engine, RenderEngine } from '@univer/base-render';
 import { zh, en } from './Locale';
 import { install, SlidePluginObserve } from './Basic/Observer';
 import { ToolBarController } from './Controller/ToolBarController';
-import { SlideContainerController } from './Controller/SlideContainerController';
+import { SlideController } from './Controller/SlideController';
 import { InfoBarController } from './Controller/InfoBarController';
 import { BaseSlideContainerConfig, defaultLayout, ILayout, ISlidePluginConfigBase, SlideContainer } from './View/UI/SlideContainer';
 import { SlideBarController } from './Controller/SlideBarController';
@@ -46,7 +46,7 @@ export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
 
     private _slideBarControl: SlideBarController;
 
-    private _slideContainerController: SlideContainerController;
+    private _SlideController: SlideController;
 
     private _componentList: Map<string, any>;
 
@@ -91,7 +91,7 @@ export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
         }
 
         this._slideBarControl = new SlideBarController(this);
-        this._slideContainerController = new SlideContainerController(this);
+        this._SlideController = new SlideController(this);
 
         const slideContainer = this._initContainer(this._config.container);
 
@@ -193,6 +193,10 @@ export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
 
     getSlideBarControl() {
         return this._slideBarControl;
+    }
+
+    getCanvasView() {
+        return this._canvasView;
     }
 
     onMounted(): void {

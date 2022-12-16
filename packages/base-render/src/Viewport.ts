@@ -105,6 +105,8 @@ export class Viewport {
 
     private _preScrollY: Nullable<number> = 0;
 
+    private _renderClipState = true;
+
     actualScrollX: number;
 
     actualScrollY: number;
@@ -306,6 +308,10 @@ export class Viewport {
         return this._scroll(SCROLL_TYPE.scrollBy, pos);
     }
 
+    private _getApplyCanvasState() {
+        return this._allowCache && this._renderClipState;
+    }
+
     private _scrollRendered() {
         this._preScrollX = this.scrollX;
         this._preScrollY = this.scrollY;
@@ -425,6 +431,30 @@ export class Viewport {
         return limited;
     }
 
+    getBarScroll(actualX: number, actualY: number) {
+        let x = actualX;
+        let y = actualY;
+        if (this._scrollBar) {
+            x *= this._scrollBar.ratioScrollX; // convert to scroll coord
+            y *= this._scrollBar.ratioScrollY;
+            const { scaleX, scaleY } = this.scene;
+            x = Math.round(x) * scaleX;
+            y = Math.round(y) * scaleY;
+        } else {
+            if (this.scrollX !== undefined) {
+                x = this.scrollX;
+            }
+
+            if (this.scrollY !== undefined) {
+                y = this.scrollY;
+            }
+        }
+        return {
+            x,
+            y,
+        };
+    }
+
     getActualScroll(scrollX: number, scrollY: number) {
         let x = scrollX;
         let y = scrollY;
@@ -506,7 +536,10 @@ export class Viewport {
         if (!ctx) {
             return;
         }
-        if (this._allowCache) {
+
+        const applyCanvasState = this._getApplyCanvasState();
+
+        if (applyCanvasState) {
             sceneTrans.multiply(Transform.create([1, 0, 0, 1, -this.left / this._scene.scaleX, -this.top / this._scene.scaleY]));
             ctx = this._cacheCanvas.getContext();
             this._cacheCanvas.clear();
@@ -515,7 +548,7 @@ export class Viewport {
         const m = sceneTrans.getMatrix();
         const n = this.getScrollBarTransForm().getMatrix();
         ctx.save();
-        if (!this._allowCache) {
+        if (!applyCanvasState && this._renderClipState) {
             ctx.beginPath();
             ctx.rect(this.left, this.top, this.width || 0, this.height || 0);
             ctx.clip();
@@ -532,7 +565,7 @@ export class Viewport {
             ctx.restore();
         }
 
-        if (this._allowCache) this._applyCache(mainCtx);
+        if (applyCanvasState) this._applyCache(mainCtx);
 
         this.makeDirty(false);
         this._scrollRendered();
@@ -727,6 +760,22 @@ export class Viewport {
         const scrollBarTrans = this.getScrollBarTransForm(true);
         const svCoord = scrollBarTrans.invert().applyPoint(coord);
         return this._scrollBar.pick(svCoord);
+    }
+
+    openClip() {
+        this._renderClipState = true;
+    }
+
+    closeClip() {
+        this._renderClipState = false;
+    }
+
+    dispose() {
+        this.onMouseWheelObserver.clear();
+        this.onScrollAfterObserver.clear();
+        this.onScrollBeforeObserver.clear();
+        this.onScrollStopObserver.clear();
+        this._scrollBar?.dispose();
     }
 
     onMouseWheelObserver = new Observable<IWheelEvent>();

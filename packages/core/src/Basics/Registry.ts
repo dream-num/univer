@@ -38,6 +38,9 @@ export class RegistryAsMap {
     private _data: Map<string, any> = new Map();
 
     add(id: string, dataInstance: any) {
+        if (this._data.has(id)) {
+            return;
+        }
         this._data.set(id, dataInstance);
     }
 

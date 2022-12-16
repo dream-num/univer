@@ -13,7 +13,7 @@ import {
     WrapTextType,
 } from '@univer/core';
 import { SheetPlugin } from '../../../SheetPlugin';
-import { BaseView, CanvasViewRegistry } from '../BaseView';
+import { BaseView } from '../BaseView';
 
 const richTextTest: IDocumentData = {
     id: 'd',
@@ -488,4 +488,4 @@ export class OtherViewTestFactory {
         return new OtherViewTest().initialize(scene, plugin);
     }
 }
-CanvasViewRegistry.add(new OtherViewTestFactory());
+// CanvasViewRegistry.add(new OtherViewTestFactory());

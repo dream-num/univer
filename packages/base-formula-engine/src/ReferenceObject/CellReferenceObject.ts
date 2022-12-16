@@ -25,6 +25,14 @@ export class CellReferenceObject extends BaseReferenceObject {
 
         rangeReferenceObject.setDefaultUnitId(this.getDefaultUnitId());
 
+        rangeReferenceObject.setRuntimeData(this.getRuntimeData());
+
+        const forceId = this.getForcedUnitId();
+
+        if (forceId != null) {
+            rangeReferenceObject.setForcedSheetIdDirect(this.getForcedUnitId());
+        }
+
         // const forcedSheetID = this.getForcedSheetId();
         // if (forcedSheetID) {
         //     rangeReferenceObject.setForcedSheetIdDirect(forcedSheetID);

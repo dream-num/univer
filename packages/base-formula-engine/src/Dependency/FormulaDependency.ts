@@ -81,7 +81,7 @@ export class FormulaDependencyGenerator {
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
             const item = children[i];
-            if (this._isPreCalculateNode(node)) {
+            if (this._isPreCalculateNode(item)) {
                 result.push(item as PreCalculateNodeType);
                 continue;
             } else if (item.nodeType === NodeType.REFERENCE) {
@@ -104,6 +104,16 @@ export class FormulaDependencyGenerator {
         }
     }
 
+    private async _executeNode(node: PreCalculateNodeType | FunctionNode, formulaInterpreter: Interpreter) {
+        let value: BaseReferenceObject;
+        if (formulaInterpreter.checkAsyncNode(node)) {
+            value = (await formulaInterpreter.executeAsync(node)) as BaseReferenceObject;
+        } else {
+            value = formulaInterpreter.execute(node) as BaseReferenceObject;
+        }
+        return value;
+    }
+
     private async _getRangeListByNode(node: BaseAstNode, formulaInterpreter: Interpreter) {
         // ref function in offset indirect INDEX
         const preCalculateNodeList: PreCalculateNodeType[] = [];
@@ -118,7 +128,7 @@ export class FormulaDependencyGenerator {
         for (let i = 0, len = preCalculateNodeList.length; i < len; i++) {
             const node = preCalculateNodeList[i];
 
-            const value = formulaInterpreter.executePreCalculateNode(node) as BaseReferenceObject;
+            let value: BaseReferenceObject = await this._executeNode(node, formulaInterpreter);
 
             const gridRange = value.toUnitRange();
 
@@ -127,12 +137,7 @@ export class FormulaDependencyGenerator {
 
         for (let i = 0, len = referenceFunctionList.length; i < len; i++) {
             const node = referenceFunctionList[i];
-            let value: BaseReferenceObject;
-            if (formulaInterpreter.checkAsyncNode(node)) {
-                value = (await formulaInterpreter.executeAsync(node)) as BaseReferenceObject;
-            } else {
-                value = formulaInterpreter.execute(node) as BaseReferenceObject;
-            }
+            let value: BaseReferenceObject = await this._executeNode(node, formulaInterpreter);
 
             const gridRange = value.toUnitRange();
 

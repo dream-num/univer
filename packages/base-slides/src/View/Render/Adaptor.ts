@@ -1,3 +1,4 @@
+import { Scene } from '@univer/base-render';
 import { ContextBase, IPageElement, PageElementType, Registry } from '@univer/core';
 
 export class ObjectAdaptor {
@@ -11,7 +12,7 @@ export class ObjectAdaptor {
         return this;
     }
 
-    convert(pageElement: IPageElement, context?: ContextBase) {}
+    convert(pageElement: IPageElement, mainScene: Scene, context?: ContextBase) {}
 }
 
 export const CanvasObjectProviderRegistry = Registry.create();

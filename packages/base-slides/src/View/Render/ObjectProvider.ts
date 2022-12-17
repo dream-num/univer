@@ -1,4 +1,4 @@
-import { BaseObject } from '@univer/base-render';
+import { BaseObject, Scene } from '@univer/base-render';
 import { ContextBase, IPageElement, sortRules } from '@univer/core';
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from './Adaptor';
 import './Adaptors';
@@ -10,12 +10,12 @@ export class ObjectProvider {
         this._adaptorLoader();
     }
 
-    convertToRenderObjects(pageElements: { [elementId: string]: IPageElement }, context: ContextBase) {
+    convertToRenderObjects(pageElements: { [elementId: string]: IPageElement }, mainScene: Scene, context: ContextBase) {
         const pageKeys = Object.keys(pageElements);
         const objects: BaseObject[] = [];
         pageKeys.forEach((key) => {
             const pageElement = pageElements[key];
-            const o = this._executor(pageElement, context);
+            const o = this._executor(pageElement, mainScene, context);
             if (o != null) {
                 objects.push(o);
             }
@@ -23,11 +23,11 @@ export class ObjectProvider {
         return objects;
     }
 
-    private _executor(pageElement: IPageElement, context: ContextBase) {
+    private _executor(pageElement: IPageElement, mainScene: Scene, context: ContextBase) {
         const { id: pageElementId, type } = pageElement;
 
         for (let adaptor of this._adaptors) {
-            const o = adaptor.check(type)?.convert(pageElement, context);
+            const o = adaptor.check(type)?.convert(pageElement, mainScene, context);
             if (o != null) {
                 return o;
             }

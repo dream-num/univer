@@ -17,7 +17,16 @@ export class ShapeAdaptor extends ObjectAdaptor {
         const { id, zIndex, left = 0, top = 0, width, height, angle, scaleX, scaleY, skewX, skewY, flipX, flipY, title, description } = pageElement;
         const { shapeType, text, shapeProperties, placeholder, link } = pageElement.shape || {};
 
-        const fill = shapeProperties == null ? '' : getColorStyle(shapeProperties.shapeBackgroundFill) || '';
+        const fill = shapeProperties == null ? '' : getColorStyle(shapeProperties.shapeBackgroundFill) || 'rgba(255,255,255,1)';
+
+        const outline = shapeProperties?.outline;
+        const strokeStyle: { [key: string]: string | number } = {};
+        if (outline) {
+            const { outlineFill, weight } = outline;
+
+            strokeStyle.strokeWidth = weight;
+            strokeStyle.stroke = getColorStyle(outlineFill) || 'rgba(0,0,0,1)';
+        }
 
         if (shapeType === ShapeType.RECTANGLE) {
             return new Rect(id, {
@@ -36,6 +45,7 @@ export class ShapeAdaptor extends ObjectAdaptor {
                 flipY,
                 isTransformer: true,
                 forceRender: true,
+                ...strokeStyle,
             });
         } else if (shapeType === ShapeType.ROUND_RECTANGLE) {
             const radius = shapeProperties?.radius || 0;
@@ -56,6 +66,7 @@ export class ShapeAdaptor extends ObjectAdaptor {
                 isTransformer: true,
                 forceRender: true,
                 radius,
+                ...strokeStyle,
             });
         } else if (shapeType === ShapeType.ELLIPSE) {
         }

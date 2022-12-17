@@ -83,7 +83,7 @@ export class Scene {
         } else if (this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
             // 挂载到sceneViewer的scene需要响应前者的transform
             const parent = this._parent as SceneViewer;
-            parent.addObject(this);
+            parent.addSubScene(this);
         }
         this._parent?.onTransformChangeObservable.add((change: ITransformChangeState) => {
             this._resetViewportSize();
@@ -407,7 +407,10 @@ export class Scene {
         return this;
     }
 
-    removeObject(object: BaseObject | string) {
+    removeObject(object?: BaseObject | string) {
+        if (object == null) {
+            return;
+        }
         const layers = this.getLayers();
         for (let layer of layers) {
             layer.removeObject(object);
@@ -664,7 +667,7 @@ export class Scene {
                     if (pickedObject) {
                         isPickedObject = pickedObject;
                     } else {
-                        isPickedObject = (o as SceneViewer).scene;
+                        isPickedObject = (o as SceneViewer).getActiveSubScene();
                     }
                 } else {
                     isPickedObject = o;

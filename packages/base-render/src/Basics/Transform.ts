@@ -1,4 +1,6 @@
-import { degToRad, IRect, ITransformState, precisionTo, radToDeg } from '.';
+import { ITransformState } from '@univer/core';
+import { degToRad, precisionTo, radToDeg } from './Tools';
+import { IRect } from './Interfaces';
 import { Vector2 } from './Vector2';
 
 export const INITIAL_MATRIX: number[] = [1, 0, 0, 1, 0, 0];

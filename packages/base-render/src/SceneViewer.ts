@@ -1,3 +1,4 @@
+import { Nullable } from '@univer/core';
 import { IBoundRect, Vector2 } from './Basics/Vector2';
 import { BaseObject } from './BaseObject';
 import { Scene } from './Scene';
@@ -6,19 +7,13 @@ import { RENDER_CLASS_TYPE } from './Basics/Const';
 import { transformBoundingCoord } from './Basics/Position';
 
 export class SceneViewer extends BaseObject {
-    private _childrenScene: Scene;
+    private _subScenes = new Map<string, Scene>();
 
-    // protected _cacheCanvas = new Canvas();
-
-    // allowCache: boolean = false;
+    private _activeSubScene: Nullable<Scene>;
 
     constructor(key?: string, props?: IObjectFullState) {
         super(key);
         this._initialProps(props);
-    }
-
-    get scene() {
-        return this._childrenScene;
     }
 
     get classType() {
@@ -43,59 +38,65 @@ export class SceneViewer extends BaseObject {
         const m = this.transform.getMatrix();
         mainCtx.save();
         mainCtx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
-        // if (this.allowCache) {
-        //     if (this.isDirty()) {
-        //         const ctx = this._cacheCanvas.getContext();
-        //         this._cacheCanvas.clear();
-        //         ctx.save();
-        //         ctx.translate(this.strokeWidth / 2, this.strokeWidth / 2); //边框会按照宽度画在边界上，分别占据内外二分之一
-        //         this._childrenScene?.makeDirtyNoParent(true).render(ctx);
-        //         ctx.restore();
-        //     }
-        //     this._applyCache(mainCtx);
-        // } else {
-        //     this._childrenScene?.makeDirtyNoParent(true).render(mainCtx);
-        // }
-        this._childrenScene?.makeDirtyNoParent(true).render(mainCtx);
+
+        this._activeSubScene?.makeDirtyNoParent(true).render(mainCtx);
         mainCtx.restore();
         this.makeDirty(false);
         return this;
     }
 
-    // protected _applyCache(ctx?: CanvasRenderingContext2D) {
-    //     if (!ctx) {
-    //         return;
-    //     }
-    //     const pixelRatio = this._cacheCanvas.getPixelRatio();
-    //     const width = this._cacheCanvas.getWidth() * pixelRatio;
-    //     const height = this._cacheCanvas.getHeight() * pixelRatio;
-    //     ctx.drawImage(
-    //         this._cacheCanvas.getCanvasEle(),
-    //         0,
-    //         0,
-    //         width,
-    //         height,
-    //         -this.strokeWidth / 2,
-    //         -this.strokeWidth / 2,
-    //         this.width + this.strokeWidth,
-    //         this.height + this.strokeWidth
-    //     );
-    // }
+    getSubScenes() {
+        return this._subScenes;
+    }
 
-    addObject(o: Scene) {
-        this._childrenScene = o;
+    getActiveSubScene() {
+        return this._activeSubScene;
+    }
+
+    getSubScene(sceneKey: string) {
+        for (let [key, scene] of this._subScenes) {
+            if (key === sceneKey) {
+                return scene;
+            }
+        }
+    }
+
+    addSubScene(scene: Scene) {
+        this._activeSubScene = scene;
+        this._subScenes.set(scene.sceneKey, scene);
+        this.makeDirty();
+    }
+
+    removeSubScene(key: string) {
+        const subScene = this._subScenes.get(key);
+        this._subScenes.delete(key);
+        if (this._activeSubScene === subScene) {
+            this._activeSubScene = this._subScenes.values().next().value;
+        }
+        this.makeDirty();
+    }
+
+    activeSubScene(key: Nullable<string>) {
+        if (key == null) {
+            return;
+        }
+        const subScene = this._subScenes.get(key);
+        if (this._activeSubScene !== subScene) {
+            this._activeSubScene = subScene;
+            this.makeDirty();
+        }
     }
 
     // 判断被选中的唯一对象
     pick(coord: Vector2) {
-        if (this._childrenScene === undefined) {
+        if (this._activeSubScene === undefined) {
             return;
         }
 
         const trans = this.transform.clone().invert();
         const tCoord = trans.applyPoint(coord);
 
-        return this._childrenScene.pick(tCoord);
+        return this._activeSubScene?.pick(tCoord);
     }
 
     private _initialProps(props?: IObjectFullState) {
@@ -128,27 +129,9 @@ export class SceneViewer extends BaseObject {
 
     dispose() {
         super.dispose();
-        this._childrenScene.dispose();
+
+        this._subScenes.forEach((scene) => {
+            scene.dispose();
+        });
     }
-
-    // resizeCacheCanvas() {
-    //     this._cacheCanvas.setSize(this.width + this.strokeWidth, this.height + this.strokeWidth);
-    //     this.makeDirty(true);
-    // }
-
-    // scaleCacheCanvas() {
-    //     let scaleX = this.getParent()?.ancestorScaleX || 1;
-    //     let scaleY = this.getParent()?.ancestorScaleX || 1;
-    //     this._cacheCanvas.setPixelRatio(Math.max(scaleX, scaleY) * getDevicePixelRatio());
-
-    //     this._childrenScene.onTransformChangeObservable.notifyObservers({
-    //         type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale,
-    //         value: {
-    //             scaleX,
-    //             scaleY,
-    //         },
-    //     });
-
-    //     this.makeDirty(true);
-    // }
 }

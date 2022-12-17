@@ -88,7 +88,9 @@ export class Workbook {
 
         // One worksheet by default
         if (Tools.isEmptyObject(sheets)) {
-            sheets[DEFAULT_WORKSHEET.id] = Object.assign(DEFAULT_WORKSHEET,{status: BooleanNumber.TRUE});
+            sheets[DEFAULT_WORKSHEET.id] = Object.assign(DEFAULT_WORKSHEET, {
+                status: BooleanNumber.TRUE,
+            });
         }
 
         let firstWorksheet = null;

@@ -396,6 +396,14 @@ export function hasTibetan(text: string) {
     return true;
 }
 
+export function hasSpaceAndTab(text: string) {
+    let pattern = /\s+|\t+/g;
+    if (!pattern.exec(text)) {
+        return false;
+    }
+    return true;
+}
+
 // 返回屏幕DPI
 let dpi_cache: Nullable<number>;
 export function getDPI() {

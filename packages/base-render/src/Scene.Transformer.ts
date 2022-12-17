@@ -185,6 +185,10 @@ export class Transformer implements ITransformerConfig {
 
     onChangeEndObservable = new Observable<IChangeObserverConfig>();
 
+    onClearControlObservable = new Observable<null>();
+
+    onCreateControlObservable = new Observable<Group>();
+
     constructor(private _scene: Scene, config?: ITransformerConfig) {
         this._initialProps(config);
     }
@@ -598,6 +602,8 @@ export class Transformer implements ITransformerConfig {
             control.dispose();
         });
         this._transformerControlMap.clear();
+
+        this.onClearControlObservable.notifyObservers(null);
     }
 
     private _createControl(applyObject: BaseObject) {
@@ -682,6 +688,8 @@ export class Transformer implements ITransformerConfig {
         console.log(scene, applyObject);
 
         this._transformerControlMap.set(oKey, transformerControl);
+
+        this.onCreateControlObservable.notifyObservers(transformerControl);
 
         return transformerControl;
     }

@@ -1,4 +1,4 @@
-import { IRichTextProps, RichText } from '@univer/base-render';
+import { IRichTextProps, RichText, Scene } from '@univer/base-render';
 import { ContextBase, IPageElement, PageElementType } from '@univer/core';
 
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
@@ -14,7 +14,7 @@ export class RichTextAdaptor extends ObjectAdaptor {
         return this;
     }
 
-    convert(pageElement: IPageElement, context?: ContextBase) {
+    convert(pageElement: IPageElement, mainScene: Scene, context?: ContextBase) {
         if (context == null) {
             return;
         }

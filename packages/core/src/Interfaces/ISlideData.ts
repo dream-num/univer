@@ -1,10 +1,12 @@
 import { LocaleType, ThemeColorType } from '../Enum';
 import { ShapeType } from '../Enum/ShapeType';
+import { IKeyType, Nullable } from '../Shared/Types';
 import { ICustomBlock, IDocumentData, ILists, ISizeData } from './IDocumentData';
 import { IImageProperties } from './IImageProperties';
 import { IPlaceholder } from './IPlaceholder';
 import { IShapeProperties } from './IShapeProperties';
-import { IColorStyle, IStyleBase } from './IStyleData';
+import { IColorStyle, IStyleBase, IStyleData } from './IStyleData';
+import { IWorksheetConfig } from './IWorksheetData';
 
 export interface ISize {
     width?: number;
@@ -120,6 +122,10 @@ export interface IPageElement {
     shape?: IShape;
     image?: IImage;
     richText?: IRichTextProps;
+    spreadsheet?: {
+        worksheet: IWorksheetConfig;
+        styles: IKeyType<Nullable<IStyleData>>;
+    };
     // video: IVideo;
     // line: ILine;
     // table: ITable;
@@ -139,6 +145,7 @@ export enum PageElementType {
     SHAPE,
     IMAGE,
     TEXT,
+    SPREADSHEET,
 }
 
 /**

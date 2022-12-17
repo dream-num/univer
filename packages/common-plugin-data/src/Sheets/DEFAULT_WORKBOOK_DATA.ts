@@ -526,7 +526,7 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookConfig = {
     socketUrl: '',
     socketEnable: BooleanNumber.FALSE,
     extensions: [],
-    sheetOrder: [],
+    sheetOrder: ['sheet-01', 'sheet-02', 'sheet-03', 'sheet-04', 'sheet-05', 'sheet-06'],
     pluginMeta: {},
     styles: {
         '1': {

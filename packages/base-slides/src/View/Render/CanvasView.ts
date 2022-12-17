@@ -1,22 +1,23 @@
-import { Engine, EVENT_TYPE, IWheelEvent, Layer, Rect, Scene, SceneViewer, ScrollBar, Viewport } from '@univer/base-render';
-import { EventState, ISlidePage, Nullable, Registry, sortRules } from '@univer/core';
-import { BaseView, CanvasViewRegistry, CANVAS_VIEW_KEY } from './BaseView';
-import { SlideView } from './Views/SlideView';
-import './Views';
+import { Engine, EVENT_TYPE, IWheelEvent, Layer, Rect, Scene, SceneViewer, ScrollBar, Slide, Viewport } from '@univer/base-render';
+import { EventState, getColorStyle, IColorStyle, IPageElement, ISlidePage, Nullable, Registry, sortRules } from '@univer/core';
 import { SlidePlugin } from '../../SlidePlugin';
 import { SlideBar } from '../UI/SlideBar/SlideBar';
 import { ObjectProvider } from './ObjectProvider';
 
+export enum SLIDE_KEY {
+    COMPONENT = '__slideRender__',
+    SCENE = '__mainScene__',
+    VIEW = '__mainView__',
+}
+
 export class CanvasView {
     private _scene: Scene;
 
-    private _views: BaseView[] = [];
-
     private _slideThumbEngine = new Map<string, Engine>();
 
-    private _ObjectProvider = new ObjectProvider();
+    private _slide: Slide;
 
-    private _pageScene = new Map<string, SceneViewer>();
+    private _ObjectProvider = new ObjectProvider();
 
     private _activePageId: string;
 
@@ -24,53 +25,74 @@ export class CanvasView {
         this._initialize();
     }
 
-    getView(key: string) {
-        for (let view of this._views) {
-            if (view.viewKey === key) {
-                return view;
-            }
-        }
-    }
-
-    getDocsView(): SlideView {
-        return this.getView(CANVAS_VIEW_KEY.SLIDE_VIEW) as SlideView;
-    }
-
-    createSideThumb(slideBar: SlideBar, pages: ISlidePage[]) {
+    createSlidePages(slideBar: SlideBar, pages: ISlidePage[]) {
         const slideBarRef = slideBar.slideBarRef;
         const thumbList = slideBarRef.current?.childNodes[0].childNodes;
         if (thumbList == null || thumbList.length !== pages.length) {
             return;
         }
 
-        const context = this._plugin.context;
-
         for (var i = 0, len = thumbList.length; i < len; i++) {
             const thumbDom = (thumbList[i] as HTMLElement).querySelector('div');
-            const { id, pageElements } = pages[i];
+            const page = pages[i];
+            const { id } = page;
             if (this._slideThumbEngine.has(id) || !thumbDom) {
                 continue;
             }
-            const thumbScene = this._createThumb(thumbDom as HTMLElement, id);
 
-            const objects = this._ObjectProvider.convertToRenderObjects(pageElements, context);
+            this._createThumb(thumbDom as HTMLElement, id);
 
-            thumbScene.addObjects(objects);
+            this._createScene(id, this._slide, pages[i]);
 
-            this._thumbSceneRender(thumbScene);
+            this._thumbSceneRender(id);
         }
+
+        this._activePageId = pages[0].id;
+
+        this._slide.activeFirstPage();
+    }
+
+    activePage(pageId?: string) {
+        const model = this._plugin.context.getSlide();
+        let page: Nullable<ISlidePage>;
+        if (pageId) {
+            page = model.getPage(pageId);
+        } else {
+            const pageElements = model.getPages();
+            const pageOrder = model.getPageOrder();
+            if (pageOrder == null || pageElements == null) {
+                return;
+            }
+            page = pageElements[pageOrder[0]];
+
+            pageId = page.id;
+        }
+
+        if (page == null) {
+            return;
+        }
+
+        const { id } = page;
+
+        this._activePageId = pageId;
+
+        if (this._slide.hasPage(id)) {
+            this._slide.changePage(id);
+            return;
+        }
+
+        this._createScene(id, this._slide, page);
     }
 
     private _initialize() {
         const engine = this._engine;
-        const context = this._plugin.getContext();
 
-        const scene = new Scene(CANVAS_VIEW_KEY.MAIN_SCENE, engine, {
+        const scene = new Scene(SLIDE_KEY.SCENE, engine, {
             width: 2400,
             height: 1800,
         });
         this._scene = scene;
-        const viewMain = new Viewport(CANVAS_VIEW_KEY.SLIDE_VIEW, scene, {
+        const viewMain = new Viewport(SLIDE_KEY.VIEW, scene, {
             left: 0,
             top: 0,
             bottom: 0,
@@ -104,11 +126,9 @@ export class CanvasView {
             }
         });
 
-        const scrollBar = ScrollBar.attachTo(viewMain);
+        ScrollBar.attachTo(viewMain);
 
         const { left: viewPortLeft, top: viewPortTop } = this._getCenterPositionViewPort();
-
-        const { horizontalThumbWidth, verticalThumbHeight } = scrollBar;
 
         const { x, y } = viewMain.getBarScroll(viewPortLeft, viewPortTop);
 
@@ -117,9 +137,7 @@ export class CanvasView {
             y,
         });
 
-        // scene.addLayer(Layer.create(scene, [], 0), Layer.create(scene, [], 2));
-
-        // this._viewLoader(scene, this._plugin);
+        this._createSlide();
 
         this.activePage();
 
@@ -132,37 +150,17 @@ export class CanvasView {
         });
     }
 
-    activePage(pageId?: string) {
+    private _createSlide() {
         const model = this._plugin.context.getSlide();
-        let page: Nullable<ISlidePage>;
-        if (pageId) {
-            page = model.getPage(pageId);
-        } else {
-            const pageElements = model.getPages();
-            const pageOrder = model.getPageOrder();
-            if (pageOrder == null || pageElements == null) {
-                return;
-            }
-            page = pageElements[pageOrder[0]];
-
-            pageId = page.id;
-        }
-
-        if (page == null) {
-            return;
-        }
-
         const mainScene = this._scene;
 
         const { width: sceneWidth, height: sceneHeight } = mainScene;
-
-        const { id, pageElements } = page;
 
         const pageSize = model.getPageSize();
 
         const { width = 100, height = 100 } = pageSize;
 
-        const sceneViewer = new SceneViewer(id, {
+        const slideComponent = new Slide(SLIDE_KEY.COMPONENT, {
             left: (sceneWidth - width) / 2,
             top: (sceneHeight - height) / 2,
             width,
@@ -170,26 +168,14 @@ export class CanvasView {
             zIndex: 10,
         });
 
-        const scene = this._createScene(id, sceneViewer);
+        slideComponent.enableNav();
 
-        const objects = this._ObjectProvider.convertToRenderObjects(pageElements, this._plugin.context);
+        this._slide = slideComponent;
 
-        scene.openTransformer();
-
-        this._addBackgroundRect(scene);
-
-        scene.addObjects(objects);
-
-        const prePageSceneViewer = mainScene.getObject(this._activePageId);
-
-        prePageSceneViewer?.dispose();
-
-        mainScene.addObject(sceneViewer);
-
-        this._activePageId = pageId;
+        mainScene.addObject(slideComponent);
     }
 
-    private _addBackgroundRect(scene: Scene) {
+    private _addBackgroundRect(scene: Scene, fill: IColorStyle) {
         const model = this._plugin.context.getSlide();
 
         const pageSize = model.getPageSize();
@@ -203,7 +189,7 @@ export class CanvasView {
             height: pageHeight,
             strokeWidth: 1,
             stroke: 'rgba(198,198,198, 1)',
-            fill: 'rgba(255,255,255, 1)',
+            fill: getColorStyle(fill) || 'rgba(255,255,255, 1)',
             zIndex: 0,
             evented: false,
         });
@@ -224,55 +210,32 @@ export class CanvasView {
         };
     }
 
-    // private _getCenterPositionViewPort() {
-    //     const model = this._plugin.context.getSlide();
+    private _thumbSceneRender(id: string) {
+        const thumbEngine = this._slideThumbEngine.get(id);
 
-    //     const pageSize = model.getPageSize();
+        if (thumbEngine == null) {
+            return;
+        }
 
-    //     const { width, height } = this._scene;
+        const { width, height } = this._slide;
 
-    //     const { width: pageWidth = width, height: pageHeight = height } = pageSize;
+        const { width: pageWidth = width, height: pageHeight = height } = thumbEngine;
 
-    //     return {
-    //         left: (width - pageWidth) / 2,
-    //         top: (height - pageHeight) / 2,
-    //     };
-    // }
+        const thumbContext = thumbEngine.getCanvas().getContext();
 
-    private _thumbSceneRender(scene: Scene) {
-        const model = this._plugin.context.getSlide();
-
-        const pageSize = model.getPageSize();
-
-        const { width, height } = scene;
-
-        const { width: pageWidth = width, height: pageHeight = height } = pageSize;
-
-        scene.scale(width / pageWidth, height / pageHeight);
-
-        scene.render();
+        this._slide.renderToThumb(thumbContext, id, pageWidth / width, pageHeight / height);
     }
 
     private _createThumb(thumbDom: HTMLElement, pageId: string) {
         const engine = new Engine();
         engine.setContainer(thumbDom);
         this._slideThumbEngine.set(pageId, engine);
-
-        return this._createScene(pageId, engine);
     }
 
-    private _createScene(pageId: string, parent: Engine | SceneViewer, pageWidth?: number, pageHeight?: number) {
+    private _createScene(pageId: string, parent: Engine | Slide, page: ISlidePage) {
         let { width, height } = parent;
 
-        if (pageWidth != null) {
-            width = pageWidth;
-        }
-
-        if (pageHeight != null) {
-            height = pageHeight;
-        }
-
-        const scene = new Scene('Page_' + pageId, parent, {
+        const scene = new Scene(pageId, parent, {
             width,
             height,
         });
@@ -288,14 +251,28 @@ export class CanvasView {
 
         scene.addViewport(viewMain);
 
-        return scene;
-    }
+        const { pageElements, pageBackgroundFill } = page;
 
-    private _viewLoader(scene: Scene, plugin: SlidePlugin) {
-        CanvasViewRegistry.getData()
-            .sort(sortRules)
-            .forEach((view) => {
-                this._views.push(view.initialize(scene, plugin));
-            });
+        const objects = this._ObjectProvider.convertToRenderObjects(pageElements, this._scene, this._plugin.context);
+
+        scene.openTransformer();
+
+        this._addBackgroundRect(scene, pageBackgroundFill);
+
+        scene.addObjects(objects);
+
+        const transformer = scene.getTransformer();
+
+        transformer?.onChangeEndObservable.add(() => {
+            this._thumbSceneRender(this._activePageId);
+        });
+
+        transformer?.onClearControlObservable.add(() => {
+            this._thumbSceneRender(this._activePageId);
+        });
+
+        this._slide.addPage(scene);
+
+        return scene;
     }
 }

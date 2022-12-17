@@ -4,6 +4,7 @@ import styles from './index.module.less';
 
 interface SlideBarState {
     slideList: ISlidePage[];
+    activePageId?: string;
 }
 
 interface IProps {
@@ -28,21 +29,38 @@ export class SlideBar extends Component<IProps, SlideBarState> {
         this._context.getObserverManager().getObserver<SlideBar>('onSlideBarDidMountObservable', PLUGIN_NAMES.SLIDE)?.notifyObservers(this);
     }
 
-    setSlide(slideList: any[]) {
+    isActive(pageId: string, index: number = 0) {
+        if (this.state.activePageId == null && index == 0) {
+            return styles.slideBarItemActive;
+        } else if (this.state.activePageId === pageId) {
+            return styles.slideBarItemActive;
+        }
+        return '';
+    }
+
+    setSlide(slideList: ISlidePage[]) {
         this.setState({
             slideList,
         });
     }
 
     handleClick(pageId: string, index: number) {
-        const item = this.slideBarRef.current?.querySelectorAll(`.${styles.slideBarItem}`);
-        if (item == null) {
+        // const item = this.slideBarRef.current?.querySelectorAll(`.${styles.slideBarItem}`);
+        // if (item == null) {
+        //     return;
+        // }
+        // for (let i = 0; i < item.length; i++) {
+        //     item[i].classList.remove(styles.slideBarItemActive);
+        // }
+        // item[index].classList.add(styles.slideBarItemActive);
+
+        if (this.state.activePageId === pageId) {
             return;
         }
-        for (let i = 0; i < item.length; i++) {
-            item[i].classList.remove(styles.slideBarItemActive);
-        }
-        item[index].classList.add(styles.slideBarItemActive);
+
+        this.setState({
+            activePageId: pageId,
+        });
 
         this._context.getObserverManager().getObserver<string>('onSlideBarMousedownObservable', PLUGIN_NAMES.SLIDE)?.notifyObservers(pageId);
     }
@@ -57,7 +75,7 @@ export class SlideBar extends Component<IProps, SlideBarState> {
                 <div className={styles.slideBarContent}>
                     {slideList.map((item, index) => {
                         return (
-                            <div className={styles.slideBarItem} onClick={() => this.handleClick(item.id, index)}>
+                            <div className={`${styles.slideBarItem} ${this.isActive(item.id, index)}`} onClick={() => this.handleClick(item.id, index)}>
                                 <span>{index + 1}</span>
                                 <div className={styles.slideBarBox}></div>
                             </div>

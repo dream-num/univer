@@ -29,7 +29,12 @@ export class SlideBarController {
             this._plugin.getObserver('onSlideContainerDidMountObservable')?.add(() => {
                 const canvasView = this._getCanvasView();
 
-                canvasView.createSideThumb(this._slideBar, this._pages);
+                canvasView.createSlidePages(this._slideBar, this._pages);
+            });
+
+            this._plugin.getObserver('onSlideBarMousedownObservable')?.add((pageId) => {
+                const canvasView = this._getCanvasView();
+                canvasView.activePage(pageId);
             });
         });
     }
@@ -59,6 +64,6 @@ export class SlideBarController {
 
         this._slideBar.setSlide(this._pages);
 
-        canvasView.createSideThumb(this._slideBar, this._pages);
+        canvasView.createSlidePages(this._slideBar, this._pages);
     }
 }

@@ -12,7 +12,6 @@ import { DocsEditor } from './Document.Editor';
 import { Liquid } from './Common';
 import { Scene } from '../../Scene';
 import { TextSelection } from './Common/TextSelection';
-import { Engine } from '../..';
 
 export interface IDocumentsConfig {
     pageMarginLeft?: number;
@@ -190,17 +189,15 @@ export class Documents extends DocComponent {
         };
     }
 
-    calculatePagePosition(engine: Nullable<Engine>) {
+    calculatePagePosition() {
         const scene = this.getScene() as Scene;
 
-        if (engine == null) {
-            engine = scene?.getEngine();
-        }
+        let parent = scene?.getParent();
         const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = this;
-        if (engine == null) {
+        if (parent == null) {
             return;
         }
-        const { width: engineWidth, height: engineHeight } = engine;
+        const { width: engineWidth, height: engineHeight } = parent;
         let docsLeft = 0;
         let docsTop = 0;
 

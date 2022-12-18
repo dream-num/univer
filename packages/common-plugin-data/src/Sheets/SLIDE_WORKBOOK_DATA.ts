@@ -1,4 +1,5 @@
 import { BooleanNumber, BorderStyleTypes, IWorkbookConfig, LocaleType, SheetTypes } from '@univer/core';
+import { PAGE5_RICHTEXT_1 } from '../Slides/RichText/PAGE5_RICHTEXT_1';
 
 export const SLIDE_WORKBOOK_DATA: IWorkbookConfig = {
     id: 'workbook-01',
@@ -164,6 +165,43 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookConfig = {
                 },
             },
         },
+        '6': {
+            ht: 1,
+            vt: 2,
+            tb: 3,
+            bg: {
+                rgb: 'rgba(244,79,86)',
+            },
+            cl: {
+                rgb: 'rgb(255,255,255)',
+            },
+            bd: {
+                t: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+                l: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+                r: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+                b: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+            },
+        },
     },
     timeZone: 'GMT+8',
     createdTime: '2021-11-28 12:10:10',
@@ -199,6 +237,10 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookConfig = {
                     '3': {
                         v: 'UGC Buzz volume',
                         s: '2',
+                    },
+                    '9': {
+                        p: PAGE5_RICHTEXT_1,
+                        s: '6',
                     },
                 },
                 '2': {
@@ -517,7 +559,14 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookConfig = {
                     startColumn: 1,
                     endColumn: 1,
                 },
+                {
+                    startRow: 1,
+                    endRow: 10,
+                    startColumn: 9,
+                    endColumn: 10,
+                },
             ],
+
             rowData: {
                 '0': {
                     h: 20,
@@ -529,6 +578,24 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookConfig = {
                 },
                 '2': {
                     w: 120,
+                },
+                '3': {
+                    w: 60,
+                },
+                '4': {
+                    w: 60,
+                },
+                '5': {
+                    w: 60,
+                },
+                '6': {
+                    w: 60,
+                },
+                '7': {
+                    w: 60,
+                },
+                '8': {
+                    w: 60,
                 },
             },
             status: 1,

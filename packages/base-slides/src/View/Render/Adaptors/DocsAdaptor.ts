@@ -105,7 +105,7 @@ export class DocsAdaptor extends ObjectAdaptor {
 
         scene.addObject(documents);
 
-        documents.calculatePagePosition(mainScene.getEngine());
+        documents.calculatePagePosition();
 
         const pageSize = documents.getSkeleton()?.getPageSize();
 

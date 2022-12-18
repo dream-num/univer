@@ -10,7 +10,7 @@
 
 ## Demo
 
--   [Univer Demo](dream-num.github.io/univer-demo/)
+-   [Univer Demo](https://dream-num.github.io/univer-demo/)
 
 ## 开发
 
@@ -33,7 +33,7 @@ pnpm i
 启动 sheets
 
 ```
-npm run dev
+npm run dev:sheet
 ```
 
 启动 docs

@@ -1096,7 +1096,7 @@ jest 单元测试
 | 快照测试 | Jest          |
 | E2E 测试 | Playwright    |
 
-每一个组件都应该至少包含一个完整的 jest 单元测试，我们使用 preact 官房推荐的`@testing-library/preact`库来做 DOM 测试，
+每一个组件都应该至少包含一个完整的 jest 单元测试，我们使用 preact 官方推荐的`@testing-library/preact`库来做 DOM 测试，
 
 > [preact 组件测试](https://preactjs.com/guide/v10/preact-testing-library/)
 

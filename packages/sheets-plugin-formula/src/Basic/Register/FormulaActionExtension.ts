@@ -53,6 +53,12 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
                     const formulaString = cell.m;
                     if (Tools.isStringNumber(formulaString)) {
                         isCalculate = true;
+
+                        // if change formula to number, remove formula
+                        const formulaCell = cellData.getRow(r)?.get(c);
+                        if (formulaCell) {
+                            cellData.deleteValue(r, c);
+                        }
                     } else if (isFormulaString(formulaString)) {
                         isCalculate = true;
                         cellData.setValue(r, c, {

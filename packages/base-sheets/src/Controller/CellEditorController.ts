@@ -293,6 +293,7 @@ export class CellEditorController {
         this.richTextEle.style.minHeight = `1px`;
 
         this.richTextEle.style.borderWidth = '0px';
+        this.richTextEle.style.transform = 'scale(0)';
     }
 
     /**
@@ -356,6 +357,8 @@ export class CellEditorController {
 
         this.richTextEle.style.maxWidth = `${sheetContentRect.width - startX + scrollX}px`;
         this.richTextEle.style.maxHeight = `${sheetContentRect.height - startY + scrollY}px`;
+
+        this.richTextEle.style.transform = '';
 
         // this._plugin.showMainByName('cellEditor', true).then(() => {
         let cellValue = this.getSelectionValue();

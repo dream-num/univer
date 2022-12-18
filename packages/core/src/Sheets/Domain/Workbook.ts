@@ -99,8 +99,10 @@ export class Workbook {
             let config = sheets[sheetId];
             config.name = NameGen.getSheetName(config.name);
             const worksheet = new Worksheet(_context, config);
-            _worksheets.set(worksheet.getSheetId(), worksheet);
-            sheetOrder.push(worksheet.getSheetId());
+            _worksheets.set(sheetId, worksheet);
+            if (!sheetOrder.includes(sheetId)) {
+                sheetOrder.push(sheetId);
+            }
             if (firstWorksheet == null) {
                 firstWorksheet = worksheet;
             }

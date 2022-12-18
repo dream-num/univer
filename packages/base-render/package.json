@@ -33,7 +33,6 @@
         "@testing-library/preact": "^2.0.1",
         "@types/jest": "^27.5.2",
         "@types/node": "^16.4.6",
-        "@vitejs/plugin-legacy": "^1.5.1",
         "enzyme": "^3.11.0",
         "enzyme-adapter-preact-pure": "^3.3.0",
         "identity-obj-proxy": "^3.0.0",
@@ -47,6 +46,7 @@
         "vite-plugin-external": "1.2.3"
     },
     "dependencies": {
-        "@univer/core": "workspace:^0.0.1"
+        "@univer/core": "workspace:^0.0.1",
+        "nanoid": "4.0.0"
     }
 }

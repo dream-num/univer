@@ -1,92 +1,147 @@
-import { IFormulaData } from '@univer/base-formula-engine';
 import {
+    ActionOperation,
     ACTION_NAMES,
     BaseActionExtension,
     BaseActionExtensionFactory,
-    ContextBase,
-    ICellData,
+    Command,
     ISetRangeDataActionData,
     isFormulaString,
     ISheetActionData,
     IUnitRange,
     ObjectMatrix,
-    ObjectMatrixPrimitiveType,
-    Plugin,
     Tools,
 } from '@univer/core';
-import { IActionData } from '@univer/core/src/Command/ActionBase';
 import { FormulaPlugin } from '../../FormulaPlugin';
+import { ACTION_NAMES as PLUGIN_ACTION_NAMES } from '../Enum';
 
-export class FormulaActionExtension extends BaseActionExtension<ISetRangeDataActionData, FormulaPlugin> {
+export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
     execute() {
         const engine = this._plugin.getFormulaEngine();
-        const formulaData = Tools.deepClone(this._plugin.getFormulaController().getDataModel().getFormulaData());
+        const formulaController = this._plugin.getFormulaController();
+        const formulaDataModel = formulaController.getDataModel();
+        // The purpose of deep copy is to trigger the modification of formulaData through Command instead of reference relationship
+        const formulaData = Tools.deepClone(formulaDataModel.getFormulaData());
         const unitId = this._plugin.getContext().getWorkBook().getUnitId();
-        const sheetId = this.actionData.sheetId;
-        const rangeData = this.actionData.rangeData;
-        let cellValue = this.actionData.cellValue;
+        const actionDataList = this.actionDataList as ISetRangeDataActionData[];
 
-        const cellData: IFormulaData = formulaData[unitId][sheetId];
+        const unitRange: IUnitRange[] = [];
+        let isCalculate = false;
 
-        // a range
-        if (!isNaN(parseInt(Object.keys(cellValue)[0]))) {
-            const rangeMatrix = new ObjectMatrix(cellValue as ObjectMatrixPrimitiveType<ICellData>);
-
-            // update formula string
-            rangeMatrix.forValue((r, c, cell) => {
-                const formulaString = cell.v;
-                if (cellData[r] && cellData[r]._array[c] && isFormulaString(formulaString)) {
-                    cellData[r]._array[c].formula = formulaString;
-                }
-            });
-        }
-        // a cell
-        else {
-            const { startRow: r, startColumn: c } = rangeData;
-            let cell: ICellData = cellValue;
-            const formulaString = cell.v;
-            if (cellData[r] && cellData[r]._array[c] && isFormulaString(formulaString)) {
-                cellData[r]._array[c].formula = formulaString;
+        // handle each action
+        actionDataList.forEach((actionData) => {
+            if (actionData.operation != null && !ActionOperation.hasExtension(actionData)) {
+                return false;
             }
-        }
 
-        console.log('formulaData=====', formulaData);
+            // Filter out Actions that contain formulas, inject setRangeDataAction
+            if (actionData.actionName === ACTION_NAMES.SET_RANGE_DATA_ACTION) {
+                // TODO FALSE PASS
+                const { sheetId, cellValue } = actionData;
 
-        const unitRange: IUnitRange[] = [
-            {
-                unitId,
-                sheetId,
-                rangeData,
-            },
-        ];
-        engine.execute(unitId, formulaData, undefined, undefined, unitRange).then((sheetData) => {
-            console.log('sheetData---', sheetData);
+                if (Tools.isEmptyObject(formulaData)) return;
+
+                const cellData = new ObjectMatrix(formulaData[unitId][sheetId]);
+
+                if (cellValue == null) {
+                    return;
+                }
+
+                const rangeMatrix = new ObjectMatrix(cellValue);
+
+                // update formula string，Any modification to cellData will be linked to formulaData
+                rangeMatrix.forValue((r, c, cell) => {
+                    const formulaString = cell.m;
+                    if (Tools.isStringNumber(formulaString)) {
+                        isCalculate = true;
+
+                        // if change formula to number, remove formula
+                        const formulaCell = cellData.getRow(r)?.get(c);
+                        if (formulaCell) {
+                            cellData.deleteValue(r, c);
+                        }
+                    } else if (isFormulaString(formulaString)) {
+                        isCalculate = true;
+                        cellData.setValue(r, c, {
+                            formula: formulaString,
+                            row: r,
+                            column: c,
+                            sheetId,
+                        });
+                    }
+                });
+
+                unitRange.push({
+                    unitId,
+                    sheetId,
+                    rangeData: rangeMatrix.getDataRange(),
+                });
+            }
         });
 
-        // const setNumfmtRangeDataAction = {
-        //     actionName: ACTION_NAMES,
-        //     sheetId: this.actionData.sheetId,
-        //     rangeData: this.actionData.rangeData,
-        //     cellValue: formulaMatrix.toJSON(),
-        // };
-        // this.push(setNumfmtRangeDataAction);
+        if (unitRange.length === 0 || !isCalculate) return;
+
+        // Add command after calculating the formula
+        engine.execute(unitId, formulaData, formulaController.toInterpreterCalculateProps(), false, unitRange).then((data) => {
+            // TODO arrayFormulaData
+            const { sheetData, arrayFormulaData } = data;
+
+            if (!sheetData) {
+                console.error('No sheetData from Formula Engine!');
+                return;
+            }
+            const sheetIds = Object.keys(sheetData);
+
+            // Update each calculated value, possibly involving all cells
+            const actionDatas: ISetRangeDataActionData[] = [];
+            sheetIds.forEach((sheetId) => {
+                const cellData = sheetData[sheetId];
+                cellData.forValue((r, c, value) => {
+                    const cellCalculate = cellData.getValue(r, c);
+
+                    // cell.v = cellCalculate?.v;
+                    // cell.t = cellCalculate?.t;
+                    if (cellCalculate && cellCalculate.p) {
+                        delete cellCalculate.p;
+                    }
+
+                    if (cellCalculate && Number.isNaN(cellCalculate.v)) {
+                        cellCalculate.v = 0;
+                    }
+
+                    const action = {
+                        actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+                        sheetId,
+                        cellValue: {
+                            [r]: {
+                                [c]: cellCalculate || {},
+                            },
+                        },
+                    };
+
+                    const actionData = ActionOperation.make<ISetRangeDataActionData>(action).removeCollaboration().removeUndo().removeExtension().getAction();
+                    actionDatas.push(actionData);
+                });
+            });
+
+            const setFormulaDataAction = {
+                actionName: PLUGIN_ACTION_NAMES.SET_FORMULA_RANGE_DATA_ACTION,
+                sheetId: actionDataList[0].sheetId, // Any sheetId can be passed in, it has no practical effect
+                formulaData,
+            };
+            const workBook = this._plugin.getContext().getWorkBook();
+            const commandManager = this._plugin.getContext().getCommandManager();
+            const command = new Command({ WorkBookUnit: workBook }, ...actionDatas, setFormulaDataAction);
+            commandManager.invoke(command);
+        });
     }
 }
 
-export class FormulaActionExtensionFactory extends BaseActionExtensionFactory<ISetRangeDataActionData, FormulaPlugin> {
+export class FormulaActionExtensionFactory extends BaseActionExtensionFactory<FormulaPlugin> {
     get zIndex(): number {
         return 1;
     }
 
-    get actionName(): ACTION_NAMES {
-        return ACTION_NAMES.SET_RANGE_DATA_ACTION;
-    }
-
-    create(actionData: ISetRangeDataActionData, actionDataList: ISheetActionData[]): BaseActionExtension<ISetRangeDataActionData> {
-        return new FormulaActionExtension(actionData, actionDataList, this._plugin);
-    }
-
-    check(actionData: ISetRangeDataActionData, actionDataList: IActionData[]): false | BaseActionExtension<ISetRangeDataActionData, Plugin<any, ContextBase>> {
-        return false;
+    create(actionDataList: ISheetActionData[]): BaseActionExtension<FormulaPlugin> {
+        return new FormulaActionExtension(actionDataList, this._plugin);
     }
 }

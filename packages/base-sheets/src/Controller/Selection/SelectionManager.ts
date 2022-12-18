@@ -5,6 +5,9 @@ import { ISelectionModelValue, ISetSelectionValueActionData } from '../../Model/
 import { SelectionModel } from '../../Model/SelectionModel';
 import { SheetPlugin } from '../../SheetPlugin';
 import { SheetView } from '../../View/Render/Views/SheetView';
+import { ColumnTitleController } from './ColumnTitleController';
+import { DragLineController } from './DragLineController';
+import { RowTitleController } from './RowTitleController';
 import { SelectionControl, SELECTION_TYPE } from './SelectionController';
 
 /**
@@ -39,7 +42,17 @@ export class SelectionManager {
 
     private _worksheet: Nullable<Worksheet>;
 
+    private _columnTitleControl: ColumnTitleController;
+
+    private _rowTitleControl: RowTitleController;
+
+    private _dragLineControl: DragLineController;
+
     hasSelection: boolean = false;
+
+    getSheetView() {
+        return this._sheetView;
+    }
 
     getScene() {
         return this._sheetView.getScene();
@@ -94,13 +107,25 @@ export class SelectionManager {
         return this._selectionModels.get(worksheetId);
     }
 
-    getCurrentModel(): Nullable<ICellInfo> {
+    getCurrentCellModel(): Nullable<ICellInfo> {
         const models = this.getCurrentModels();
         if (models && models.length > 0) {
             for (const model of models) {
                 const currentCell = model.currentCell;
                 if (currentCell) {
                     return currentCell;
+                }
+            }
+        }
+    }
+
+    getCurrentModel(): Nullable<SelectionModel> {
+        const models = this.getCurrentModels();
+        if (models && models.length > 0) {
+            for (const model of models) {
+                const currentCell = model.currentCell;
+                if (currentCell) {
+                    return model;
                 }
             }
         }
@@ -308,7 +333,7 @@ export class SelectionManager {
         }
 
         const models = selections.map(({ selection, cell }) => {
-            const model = new SelectionModel(SELECTION_TYPE.NORMAL);
+            const model = new SelectionModel(SELECTION_TYPE.NORMAL, this._plugin);
             model.setValue(selection, cell);
             return model;
         });
@@ -324,7 +349,7 @@ export class SelectionManager {
      * @returns
      */
     move(direction: Direction): void {
-        const currentCell = this.getCurrentModel();
+        const currentCell = this.getCurrentCellModel();
 
         if (!currentCell) return;
 
@@ -400,6 +425,12 @@ export class SelectionManager {
         this._worksheet = this.getContext().getWorkBook().getActiveSheet();
 
         this._initModels();
+
+        this._dragLineControl = new DragLineController(this);
+
+        this._columnTitleControl = new ColumnTitleController(this);
+
+        this._rowTitleControl = new RowTitleController(this);
     }
 
     private _mainEventInitial() {
@@ -440,12 +471,12 @@ export class SelectionManager {
 
             for (let control of curControls) {
                 // right click
-                if (evt.button === 2 && control.model.isInclude(startSelectionRange, SELECTION_TYPE.NORMAL)) {
+                if (evt.button === 2 && control.model.isInclude(startSelectionRange)) {
                     selectionControl = control;
                     return;
                 }
                 // Click to an existing selection
-                if (control.model.isEqual(startSelectionRange, SELECTION_TYPE.NORMAL)) {
+                if (control.model.isEqual(startSelectionRange)) {
                     selectionControl = control;
                     break;
                 }
@@ -500,6 +531,9 @@ export class SelectionManager {
             const scrollTimer = ScrollTimer.create(this.getScene());
             scrollTimer.startScroll(evtOffsetX, evtOffsetY);
 
+            // update model
+            this.setSelectionModel();
+
             // Notification toolbar updates button state and value
             this._plugin.getObserver('onChangeSelectionObserver')?.notifyObservers(selectionControl);
 
@@ -539,8 +573,7 @@ export class SelectionManager {
      * @returns
      */
     moving(moveEvt: IPointerEvent | IMouseEvent, selectionControl: Nullable<SelectionControl>) {
-        console.log('moving');
-
+        // console.log('moving');
         const main = this._mainComponent;
         const { offsetX: moveOffsetX, offsetY: moveOffsetY, clientX, clientY } = moveEvt;
         const { startRow, startColumn, endRow, endColumn } = this._startSelectionRange;
@@ -588,6 +621,8 @@ export class SelectionManager {
 
         if (oldStartColumn !== finalStartColumn || oldStartRow !== finalStartRow || oldEndColumn !== finalEndColumn || oldEndRow !== finalEndRow) {
             selectionControl && selectionControl.update(newSelectionRange);
+            // update model
+            this.setSelectionModel();
             selectionControl && this._plugin.getObserver('onChangeSelectionObserver')?.notifyObservers(selectionControl);
         }
     }
@@ -606,14 +641,32 @@ export class SelectionManager {
     private _rowEventInitial() {
         const row = this._rowComponent;
         row.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            console.log('rowTitle_moveObserver', evt);
+            this._rowTitleControl.pointerDown(evt);
+        });
+        row.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this._rowTitleControl.highlightRowTitle(evt);
+        });
+        row.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this._rowTitleControl.highlightRowTitle(evt);
+        });
+        row.onPointerLeaveObserver.add(() => {
+            this._rowTitleControl.unHighlightRowTitle();
         });
     }
 
     private _columnEventInitial() {
         const column = this._columnComponent;
         column.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            console.log('columnTitle_moveObserver', evt);
+            this._columnTitleControl.pointerDown(evt);
+        });
+        column.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this._columnTitleControl.highlightColumnTitle(evt);
+        });
+        column.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this._columnTitleControl.highlightColumnTitle(evt);
+        });
+        column.onPointerLeaveObserver.add(() => {
+            this._columnTitleControl.unHighlightColumnTitle();
         });
     }
 
@@ -639,7 +692,7 @@ export class SelectionManager {
                 const { startColumn, startRow, endColumn, endRow } = selectionConfig.selection;
                 const cell = selectionConfig.cell;
 
-                const model = new SelectionModel(SELECTION_TYPE.NORMAL);
+                const model = new SelectionModel(SELECTION_TYPE.NORMAL, this._plugin);
 
                 const cellInfo = cell
                     ? {
@@ -835,5 +888,9 @@ export class SelectionManager {
     getCurrentCell(): Nullable<Range> {
         const rangeData = this.getCurrentCellData();
         return rangeData && this._worksheet?.getRange(rangeData);
+    }
+
+    getDragLineControl() {
+        return this._dragLineControl;
     }
 }

@@ -1,7 +1,7 @@
 import { Observable } from '@univer/core';
 import { DeviceType, IEvent, IKeyboardEvent, IPointerEvent, PointerInput } from './Basics/IEvents';
 
-import { getPointerPrefix, IsSafari, requestNewFrame } from './Basics/Tools';
+import { getSizeForDom, getPointerPrefix, IsSafari, requestNewFrame } from './Basics/Tools';
 
 import { ITransformChangeState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './Basics/Interfaces';
 
@@ -45,6 +45,16 @@ export class Engine {
     private _deltaTime = 0;
 
     private _performanceMonitor = new PerformanceMonitor();
+
+    private _pointerMoveEvent: (evt: any) => void;
+
+    private _pointerDownEvent: (evt: any) => void;
+
+    private _pointerUpEvent: (evt: any) => void;
+
+    private _pointerBlurEvent: (evt: any) => void;
+
+    private _pointerWheelEvent: (evt: any) => void;
 
     /**
      * Observable raised when the engine begins a new frame
@@ -112,7 +122,7 @@ export class Engine {
     }
 
     hasActiveScene(): boolean {
-        return !!this._activeScene;
+        return this._activeScene != null;
     }
 
     get activeScene() {
@@ -130,8 +140,9 @@ export class Engine {
             return;
         }
 
-        const { offsetWidth, offsetHeight } = this._container;
-        this.resizeBySize(offsetWidth, offsetHeight);
+        // const { offsetWidth, offsetHeight } = this._container;
+        const { width, height } = getSizeForDom(this._container);
+        this.resizeBySize(width, height);
     }
 
     resizeBySize(width: number, height: number) {
@@ -149,6 +160,35 @@ export class Engine {
                 height: preHeight,
             },
         });
+    }
+
+    dispose() {
+        const scenes = this.getScenes();
+        const sceneKeys = Object.keys(scenes);
+        sceneKeys.forEach((key) => {
+            scenes[key].dispose();
+        });
+        const eventPrefix = getPointerPrefix();
+        this._canvasEle.removeEventListener(`${eventPrefix}move`, this._pointerMoveEvent);
+        this._canvasEle.removeEventListener(`${eventPrefix}down`, this._pointerDownEvent);
+        this._canvasEle.removeEventListener(`${eventPrefix}up`, this._pointerUpEvent);
+        this._canvasEle.removeEventListener('blur', this._pointerBlurEvent);
+        this._canvasEle.removeEventListener(this._getWheelEventName(), this._pointerWheelEvent);
+
+        this._activeRenderLoops = [];
+        this._canvas.dispose();
+        this.onBeginFrameObservable.clear();
+        this.onEndFrameObservable.clear();
+        this.onTransformChangeObservable.clear();
+    }
+
+    remainScene(key: string) {
+        const scenes = this.getScenes();
+        if (scenes[key]) {
+            const scene = scenes[key];
+            delete scenes[key];
+            return scene;
+        }
     }
 
     /**
@@ -284,7 +324,7 @@ export class Engine {
     private _handlePointerAction() {
         const eventPrefix = getPointerPrefix();
 
-        const pointerMoveEvent = (evt: any) => {
+        this._pointerMoveEvent = (evt: any) => {
             const deviceType = this.__getPointerType(evt);
             // Store previous values for event
             const previousHorizontal = this.__pointer[PointerInput.Horizontal];
@@ -339,7 +379,7 @@ export class Engine {
             }
         };
 
-        const pointerDownEvent = (evt: any) => {
+        this._pointerDownEvent = (evt: any) => {
             const deviceType = this.__getPointerType(evt);
             const previousHorizontal = this.__pointer[PointerInput.Horizontal];
             const previousVertical = this.__pointer[PointerInput.Vertical];
@@ -397,7 +437,7 @@ export class Engine {
             // console.log('pointerDownEvent_2', previousHorizontal, evt.clientX, previousVertical, evt.clientY, this.__pointer);
         };
 
-        const pointerUpEvent = (evt: any) => {
+        this._pointerUpEvent = (evt: any) => {
             const deviceType = this.__getPointerType(evt);
             const previousHorizontal = this.__pointer[PointerInput.Horizontal];
             const previousVertical = this.__pointer[PointerInput.Vertical];
@@ -443,7 +483,7 @@ export class Engine {
             }
         };
 
-        const pointerBlurEvent = (evt: any) => {
+        this._pointerBlurEvent = (evt: any) => {
             if (this.__mouseId >= 0 && this._canvasEle.hasPointerCapture(this.__mouseId)) {
                 this._canvasEle.releasePointerCapture(this.__mouseId);
                 this.__mouseId = -1;
@@ -452,7 +492,7 @@ export class Engine {
             this.__pointer = {};
         };
 
-        const pointerWheelEvent = (evt: any) => {
+        this._pointerWheelEvent = (evt: any) => {
             const deviceType = DeviceType.Mouse;
             // Store previous values for event
             let previousWheelScrollX = this.__pointer[PointerInput.MouseWheelX];
@@ -486,11 +526,11 @@ export class Engine {
             }
         };
 
-        this._canvasEle.addEventListener(`${eventPrefix}move`, pointerMoveEvent);
-        this._canvasEle.addEventListener(`${eventPrefix}down`, pointerDownEvent);
-        this._canvasEle.addEventListener(`${eventPrefix}up`, pointerUpEvent);
-        this._canvasEle.addEventListener('blur', pointerBlurEvent);
-        this._canvasEle.addEventListener(this._getWheelEventName(), pointerWheelEvent, this._getPassive() ? { passive: false } : false);
+        this._canvasEle.addEventListener(`${eventPrefix}move`, this._pointerMoveEvent);
+        this._canvasEle.addEventListener(`${eventPrefix}down`, this._pointerDownEvent);
+        this._canvasEle.addEventListener(`${eventPrefix}up`, this._pointerUpEvent);
+        this._canvasEle.addEventListener('blur', this._pointerBlurEvent);
+        this._canvasEle.addEventListener(this._getWheelEventName(), this._pointerWheelEvent, this._getPassive() ? { passive: false } : false);
     }
 
     private _getWheelEventName(): string {

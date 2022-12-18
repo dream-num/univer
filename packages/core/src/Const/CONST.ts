@@ -91,7 +91,7 @@ export const DEFAULT_WORKSHEET: IWorksheetConfig = {
     cellData: {},
     rowData: {},
     columnData: {},
-    status: BooleanNumber.TRUE,
+    status: BooleanNumber.FALSE,
     showGridlines: BooleanNumber.TRUE,
     rowTitle: {
         width: 46,
@@ -198,12 +198,16 @@ export const DEFAULT_STYLES: IStyleData = {
     },
 };
 
-/**
- * Convertor operation
- */
-export const CONVERTOR_OPERATION = {
-    SET: 'set',
-    INSERT: 'insert',
-    REMOVE: 'remove',
-    CHANGE: 'change',
+export const DEFAULT_DOC = {
+    id: 'default_doc',
+    documentStyle: {},
+};
+
+export const DEFAULT_SLIDE = {
+    id: 'default_slide',
+    title: 'defaultSlide',
+    pageSize: {
+        width: 300,
+        height: 300,
+    },
 };

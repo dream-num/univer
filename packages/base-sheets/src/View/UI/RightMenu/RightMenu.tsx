@@ -15,11 +15,11 @@ interface IState {
 export class RightMenu extends Component<BaseRightMenuProps, IState> {
     ulRef = createRef();
 
-    Render: BaseComponentRender;
+    private _render: BaseComponentRender;
 
     initialize() {
         const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this.Render = component.getComponentRender();
+        this._render = component.getComponentRender();
 
         this.state = {
             visible: false,
@@ -135,6 +135,11 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
         }
     };
 
+    // 显示隐藏菜单栏
+    showRightMenu(show: boolean) {
+        this.ulRef.current.showMenu(show);
+    }
+
     render() {
         if (!this.state.children.length) {
             return;
@@ -142,7 +147,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
 
         const wrapStyles = { ...this.props.style };
         const { visible } = this.state;
-        const Menu = this.Render.renderFunction('Menu');
+        const Menu = this._render.renderFunction('Menu');
 
         return (
             visible && (

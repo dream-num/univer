@@ -47,8 +47,10 @@ export enum IOSocketListenType {
 
 const defaultConfig = {
     url: '',
-    heartbeatTime: 1000 * 6,
+    heartbeatTime: 1000 * 30,
 };
+
+export const HEART_BEAT_MESSAGE = 'heart_beat_message';
 
 /**
  * IOSocket send body
@@ -68,17 +70,18 @@ export class IOSocket {
     private _socket: WebSocket;
 
     constructor(config: IOSocketConfig) {
-        const setting = extend(
-            {},
-            defaultConfig,
-            config
-        ) as Required<IOSocketConfig>;
+        const setting = Object.assign(defaultConfig, config);
+        // const setting = extend(
+        //     {},
+        //     defaultConfig,
+        //     config
+        // ) as Required<IOSocketConfig>;
         if (isBlank(setting.url)) {
             throw new Error('url must be input');
         }
         this._listens = new Map();
         this._timer = -1;
-        this._config = config;
+        this._config = setting;
     }
 
     private _create(): void {
@@ -87,10 +90,34 @@ export class IOSocket {
     }
 
     private _bind(): void {
-        this._socket.addEventListener(IOSocketListenType.MESSAGE, this._message);
-        this._socket.addEventListener(IOSocketListenType.OPEN, this._open);
-        this._socket.addEventListener(IOSocketListenType.CLOSE, this._close);
-        this._socket.addEventListener(IOSocketListenType.ERROR, this._error);
+        this._socket.addEventListener(
+            IOSocketListenType.MESSAGE,
+            this._message.bind(this)
+        );
+        this._socket.addEventListener(
+            IOSocketListenType.OPEN,
+            this._open.bind(this)
+        );
+        this._socket.addEventListener(
+            IOSocketListenType.CLOSE,
+            this._close.bind(this)
+        );
+        this._socket.addEventListener(
+            IOSocketListenType.ERROR,
+            this._error.bind(this)
+        );
+        // this._socket.addEventListener(IOSocketListenType.MESSAGE, (event: Event) => {
+        //     this._message(event);
+        // });
+        // this._socket.addEventListener(IOSocketListenType.OPEN, (event: Event) => {
+        //     this._open(event);
+        // });
+        // this._socket.addEventListener(IOSocketListenType.CLOSE, (event: Event) => {
+        //     this._close(event);
+        // });
+        // this._socket.addEventListener(IOSocketListenType.ERROR, (event: Event) => {
+        //     this._error(event);
+        // });
     }
 
     private _message(event: Event): void {
@@ -129,18 +156,30 @@ export class IOSocket {
             clearInterval(this._timer);
         }
         this._timer = -1;
-        this._socket.removeEventListener(IOSocketListenType.MESSAGE, this._message);
-        this._socket.removeEventListener(IOSocketListenType.OPEN, this._open);
-        this._socket.removeEventListener(IOSocketListenType.CLOSE, this._close);
-        this._socket.removeEventListener(IOSocketListenType.ERROR, this._error);
-        this._socket.close();
+        this._socket.removeEventListener(
+            IOSocketListenType.MESSAGE,
+            this._message.bind(this)
+        );
+        this._socket.removeEventListener(
+            IOSocketListenType.OPEN,
+            this._open.bind(this)
+        );
+        this._socket.removeEventListener(
+            IOSocketListenType.CLOSE,
+            this._close.bind(this)
+        );
+        this._socket.removeEventListener(
+            IOSocketListenType.ERROR,
+            this._error.bind(this)
+        );
+        // this._socket.close();
     }
 
     private _heartbeat(): void {
         const { _socket, _config } = this;
         const { heartbeatTime } = _config;
         function handle() {
-            _socket.send('heartbea_message');
+            _socket.send(HEART_BEAT_MESSAGE);
         }
         this._timer = setInterval(handle, heartbeatTime) as unknown as number;
     }
@@ -173,7 +212,11 @@ export class IOSocket {
         this._listens.clear();
     }
 
-    on(type: string, listen: Function): void {
-        this._listens[type] = listen;
+    on(type: IOSocketListenType, listen: Function): void {
+        this._listens.set(type, listen);
+    }
+
+    close(): void {
+        this._socket && this._socket.close();
     }
 }

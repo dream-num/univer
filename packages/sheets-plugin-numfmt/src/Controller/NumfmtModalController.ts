@@ -1,8 +1,7 @@
 import { ComponentChildren } from '@univer/base-component';
 import { SheetPlugin } from '@univer/base-sheets';
 import { PLUGIN_NAMES } from '@univer/core';
-import { NUMFMT_PLUGIN_NAME } from '../Basic/Const';
-import { CURRENCYDETAIL, DATEFMTLISG } from '../Basic/Const/FORMATDETAIL';
+import { NUMBERFORMAT, NUMFMT_PLUGIN_NAME, CURRENCYDETAIL, DATEFMTLISG } from '../Basic/Const';
 import { NumfmtPlugin } from '../NumfmtPlugin';
 import { FormatContent } from '../View/UI/FormatContent';
 import { NumfmtModal } from '../View/UI/NumfmtModal';
@@ -11,6 +10,7 @@ interface GroupProps {
     locale: string;
     label?: string;
     type?: string;
+    onClick?: () => void;
 }
 
 export interface ModalDataProps {
@@ -37,10 +37,9 @@ export class NumfmtModalController {
     private _modalData: ModalDataProps[];
 
     constructor(plugin: NumfmtPlugin) {
+        const locale = plugin.getContext().getLocale();
         this._plugin = plugin;
         this._sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
-        const locale = this._plugin.getContext().getLocale();
-
         this._modalData = [
             {
                 name: 'currency',
@@ -48,14 +47,18 @@ export class NumfmtModalController {
                 show: false,
                 group: [
                     {
-                        locale: 'button.cancel',
+                        locale: 'button.confirm',
                         type: 'primary',
+                        onClick: () => {},
                     },
                     {
                         locale: 'button.cancel',
+                        onClick: () => {},
                     },
                 ],
-                onCancel: () => this.showModal('currency', false),
+                onCancel: () => {
+                    this.showModal('currency', false);
+                },
                 children: {
                     name: NUMFMT_PLUGIN_NAME + FormatContent.name,
                     props: {
@@ -72,14 +75,16 @@ export class NumfmtModalController {
                 show: false,
                 group: [
                     {
-                        locale: 'button.cancel',
+                        locale: 'button.confirm',
                         type: 'primary',
                     },
                     {
                         locale: 'button.cancel',
                     },
                 ],
-                onCancel: () => this.showModal('currency', false),
+                onCancel: () => {
+                    this.showModal('currency', false);
+                },
                 children: {
                     name: NUMFMT_PLUGIN_NAME + FormatContent.name,
                     props: {
@@ -88,42 +93,60 @@ export class NumfmtModalController {
                     },
                 },
             },
+            {
+                name: 'number',
+                locale: 'toolbar.numberFormat',
+                show: false,
+                group: [
+                    {
+                        locale: 'button.confirm',
+                        type: 'primary',
+                    },
+                    {
+                        locale: 'button.cancel',
+                    },
+                ],
+                onCancel: () => {
+                    this.showModal('number', false);
+                },
+                children: {
+                    name: NUMFMT_PLUGIN_NAME + FormatContent.name,
+                    props: {
+                        data: NUMBERFORMAT,
+                        onClick: (value: string) => console.dir(value),
+                    },
+                },
+            },
         ];
-
-        this.initRegisterComponent();
-
-        this.init();
+        this._initRegisterComponent();
+        this._initialize();
     }
 
-    init() {
+    private _initialize() {
         this._plugin.getObserver('onNumfmtModalDidMountObservable')!.add((component) => {
             this._numfmtModal = component;
-
             this.resetModalData();
         });
     }
 
-    initRegisterComponent() {
+    private _initRegisterComponent() {
         this._sheetPlugin.registerComponent(NUMFMT_PLUGIN_NAME + FormatContent.name, FormatContent);
         this._sheetPlugin.registerModal(NUMFMT_PLUGIN_NAME + NumfmtModal.name, NumfmtModal);
     }
 
     resetContentData(data: any[]) {
         const locale = this._plugin.getContext().getLocale();
-
         for (let i = 0; i < data.length; i++) {
             if (data[i].locale) {
                 data[i].label = locale.get(data[i].locale);
             }
         }
-
         return data;
     }
 
     // 渲染所需数据
     resetModalData() {
         const locale = this._plugin.getContext().getLocale();
-
         this._modalData.forEach((item) => {
             item.title = locale.get(item.locale);
             if (item.group && item.group.length) {
@@ -132,7 +155,6 @@ export class NumfmtModalController {
                 });
             }
         });
-
         this._numfmtModal.setModal(this._modalData);
     }
 
@@ -140,7 +162,6 @@ export class NumfmtModalController {
         const index = this._modalData.findIndex((item) => item.name === name);
         if (index > -1) {
             this._modalData[index].show = show;
-
             this.resetModalData();
         }
     }

@@ -49,17 +49,17 @@ export interface IToolBarItemProps extends BaseToolBarSelectProps, BaseTextButto
     show?: boolean; //是否显示按钮
     toolbarType?: ToolbarType;
     locale?: string; //label国际化
-    tooltipLocale?: string; //tooltip国际化
+    tooltipLocale?: string; //tooltip国际化 TODO: need right label
     tooltip?: string; //tooltip文字
     border?: boolean;
 }
 
 export class ToolBarModel {
-    private _config: IShowToolBarConfig[];
+    private _config: IShowToolBarConfig;
 
     private _toolList: IToolBarItemProps[];
 
-    get config(): IShowToolBarConfig[] {
+    get config(): IShowToolBarConfig {
         return this._config;
     }
 
@@ -67,7 +67,7 @@ export class ToolBarModel {
         return this._toolList;
     }
 
-    set config(value: IShowToolBarConfig[]) {
+    set config(value: IShowToolBarConfig) {
         this._config = value;
     }
 

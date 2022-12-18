@@ -29,14 +29,13 @@ export class ToolBar extends Component<IProps, IState> {
 
     SelectRef = createRef();
 
-    Render: BaseComponentRender;
+    private _render: BaseComponentRender;
 
     clientWidth = 0;
 
     initialize() {
         const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this.Render = component.getComponentRender();
-
+        this._render = component.getComponentRender();
         this.state = {
             // Button contains main button and drop down arrow, translation file contains main and right
             showMore: false,
@@ -196,7 +195,7 @@ export class ToolBar extends Component<IProps, IState> {
     };
 
     resetUl = () => {
-        const wrapper = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.getContentRef().current!;
+        const wrapper = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.getSheetContainerControl().getContentRef().current!;
         const height = `${(wrapper as HTMLDivElement).offsetHeight}px`;
         const ul = this.toolbarRef.current.querySelectorAll('ul');
         for (let i = 0; i < ul.length; i++) {
@@ -215,14 +214,14 @@ export class ToolBar extends Component<IProps, IState> {
 
     // 渲染dom
     getToolBarList(list: IToolBarItemProps[]) {
-        const Tooltip = this.Render.renderFunction('Tooltip');
+        const Tooltip = this._render.renderFunction('Tooltip');
 
         return list.map((item) => {
             if (item.toolbarType) {
                 if (item.show) {
                     return (
                         <Tooltip title={item.tooltip} placement={'bottom'}>
-                            <TextButton label={item.label} onClick={item.onClick}></TextButton>
+                            <TextButton active={item.active} label={item.label} onClick={item.onClick}></TextButton>
                         </Tooltip>
                     );
                 }
@@ -253,9 +252,9 @@ export class ToolBar extends Component<IProps, IState> {
     render() {
         const { defaultToolList, moreToolList, moreText, showMore } = this.state;
 
-        const Button = this.Render.renderFunction('Button');
-        const Container = this.Render.renderFunction('Container');
-        const Tooltip = this.Render.renderFunction('Tooltip');
+        const Button = this._render.renderFunction('Button');
+        const Container = this._render.renderFunction('Container');
+        const Tooltip = this._render.renderFunction('Tooltip');
 
         return (
             <Container style={{ position: 'relative' }}>

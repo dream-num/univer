@@ -1,0 +1,79 @@
+import { Observable, ObserverManager, Plugin } from '@univer/core';
+
+export type KeyboardObserver = {
+    onKeyDownObservable: Observable<KeyboardEvent>;
+    onKeyUpObservable: Observable<KeyboardEvent>;
+    onKeyCopyObservable: Observable<ClipboardEvent>;
+    onKeyPasteObservable: Observable<ClipboardEvent>;
+    onKeyCutObservable: Observable<ClipboardEvent>;
+    onKeyCompositionStartObservable: Observable<CompositionEvent>;
+    onKeyCompositionUpdateObservable: Observable<CompositionEvent>;
+    onKeyCompositionEndObservable: Observable<CompositionEvent>;
+};
+
+export class KeyboardManager {
+    private _observerManager: ObserverManager;
+
+    constructor(private _plugin: Plugin) {
+        this._observerManager = this._plugin.getContext().getObserverManager();
+        this._installObserver();
+    }
+
+    private _installObserver() {
+        // keyboard
+        this._observerManager.addObserver('onKeyDownObservable', 'core', new Observable());
+        this._observerManager.addObserver('onKeyUpObservable', 'core', new Observable());
+        this._observerManager.addObserver('onKeyCopyObservable', 'core', new Observable());
+        this._observerManager.addObserver('onKeyPasteObservable', 'core', new Observable());
+        this._observerManager.addObserver('onKeyCutObservable', 'core', new Observable());
+        this._observerManager.addObserver('onKeyCompositionStartObservable', 'core', new Observable());
+        this._observerManager.addObserver('onKeyCompositionUpdateObservable', 'core', new Observable());
+        this._observerManager.addObserver('onKeyCompositionEndObservable', 'core', new Observable());
+    }
+
+    /**
+     * init keyboard listener
+     *
+     * add to docs/slides/
+     */
+    handleKeyboardAction(element: HTMLElement) {
+        const keyboardDownEvent = (evt: KeyboardEvent) => {
+            this._observerManager.requiredObserver<KeyboardEvent>('onKeyDownObservable', 'core')?.notifyObservers(evt);
+        };
+
+        const keyboardUpEvent = (evt: KeyboardEvent) => {
+            this._observerManager.requiredObserver<KeyboardEvent>('onKeyUpObservable', 'core')?.notifyObservers(evt);
+        };
+
+        // Maybe move to Clipboard.ts
+        const keyboardCopyEvent = (evt: ClipboardEvent) => {
+            this._observerManager.requiredObserver<ClipboardEvent>('onKeyCopyObservable', 'core')?.notifyObservers(evt);
+        };
+
+        const keyboardPasteEvent = (evt: ClipboardEvent) => {
+            this._observerManager.requiredObserver<ClipboardEvent>('onKeyPasteObservable', 'core')?.notifyObservers(evt);
+        };
+        const keyboardCutEvent = (evt: ClipboardEvent) => {
+            this._observerManager.requiredObserver<ClipboardEvent>('onKeyCutObservable', 'core')?.notifyObservers(evt);
+        };
+
+        const keyboardCompositionStartEvent = (evt: CompositionEvent) => {
+            this._observerManager.requiredObserver<CompositionEvent>('onKeyCompositionStartObservable', 'core')?.notifyObservers(evt);
+        };
+        const keyboardCompositionUpdateEvent = (evt: CompositionEvent) => {
+            this._observerManager.requiredObserver<CompositionEvent>('onKeyCompositionUpdateObservable', 'core')?.notifyObservers(evt);
+        };
+        const keyboardCompositionEndEvent = (evt: CompositionEvent) => {
+            this._observerManager.requiredObserver<CompositionEvent>('onKeyCompositionEndObservable', 'core')?.notifyObservers(evt);
+        };
+
+        element.addEventListener('keydown', keyboardDownEvent);
+        element.addEventListener('keyup', keyboardUpEvent);
+        element.addEventListener('copy', keyboardCopyEvent);
+        element.addEventListener('paste', keyboardPasteEvent);
+        element.addEventListener('cut', keyboardCutEvent);
+        element.addEventListener('compositionstart', keyboardCompositionStartEvent);
+        element.addEventListener('compositionupdate', keyboardCompositionUpdateEvent);
+        element.addEventListener('compositionend', keyboardCompositionEndEvent);
+    }
+}

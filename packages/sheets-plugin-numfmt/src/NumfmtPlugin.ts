@@ -1,4 +1,4 @@
-import { ActionExtensionManager, SheetContext, IRangeData, ObjectMatrixPrimitiveType, Plugin } from '@univer/core';
+import { SheetContext, IRangeData, ObjectMatrixPrimitiveType, Plugin } from '@univer/core';
 import { NumfmtPluginObserve, install } from './Basic/Observer';
 import { NUMFMT_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
 import { NumfmtController } from './Controller/NumfmtController';
@@ -6,15 +6,21 @@ import { NumfmtModalController } from './Controller/NumfmtModalController';
 import { en, zh } from './Locale';
 import { NumfmtActionExtensionFactory } from './Basic/Register/NumfmtActionExtension';
 
+export interface INumfmtPluginConfig {}
+
 export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
     protected _controller: NumfmtController;
 
-    private _NumfmtModalController: NumfmtModalController;
+    protected _numfmtModalController: NumfmtModalController;
 
     protected _numfmtActionExtensionFactory: NumfmtActionExtensionFactory;
 
-    constructor() {
+    constructor(config?: INumfmtPluginConfig) {
         super(NUMFMT_PLUGIN_NAME);
+    }
+
+    static create(config?: INumfmtPluginConfig) {
+        return new NumfmtPlugin(config);
     }
 
     onMounted(context: SheetContext): void {
@@ -26,14 +32,16 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
         });
 
         this._numfmtActionExtensionFactory = new NumfmtActionExtensionFactory(this);
-        this._NumfmtModalController = new NumfmtModalController(this);
+        this._numfmtModalController = new NumfmtModalController(this);
         this._controller = new NumfmtController(this);
-        ActionExtensionManager.create().add(this._numfmtActionExtensionFactory);
+        const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
+        actionRegister.add(this._numfmtActionExtensionFactory);
     }
 
     onDestroy() {
         super.onDestroy();
-        ActionExtensionManager.create().delete(this._numfmtActionExtensionFactory);
+        const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
+        actionRegister.delete(this._numfmtActionExtensionFactory);
     }
 
     getNumfmtBySheetIdConfig(sheetId: string): ObjectMatrixPrimitiveType<string> {
@@ -49,6 +57,6 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
     }
 
     getNumfmtModalController() {
-        return this._NumfmtModalController;
+        return this._numfmtModalController;
     }
 }

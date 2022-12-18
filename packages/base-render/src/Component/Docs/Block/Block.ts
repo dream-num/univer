@@ -1,7 +1,9 @@
 import { BlockType, ContextBase, IBlockElement } from '@univer/core';
-import { dealWidthParagraph, dealWithBlockError } from '.';
-import { updateBlockIndex } from '..';
-import { dealWidthCustomBlock, IDocumentSkeletonPage, ISectionBreakConfig, ISkeletonResourceReference } from '../../..';
+import { dealWidthParagraph } from './Paragraph';
+import { dealWithBlockError } from './BlockError';
+import { IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../Basics/IDocumentSkeletonCached';
+import { ISectionBreakConfig } from '../../../Basics/Interfaces';
+import { dealWidthCustomBlock } from '../../../Custom/UseCustom';
 
 export function dealWithBlocks(
     Blocks: IBlockElement[],
@@ -38,8 +40,6 @@ export function dealWithBlocks(
             blockSkeletonPages = dealWithBlockError();
         }
 
-        updateBlockIndex(blockSkeletonPages);
-
         _pushPage(allCurrentSkeletonPages, blockSkeletonPages);
 
         renderedBlockIdMap.set(blockId, true);
@@ -52,11 +52,14 @@ export function dealWithBlocks(
 }
 
 function _pushPage(allCurrentSkeletonPages: IDocumentSkeletonPage[], blockSkeletonPages: IDocumentSkeletonPage[]) {
-    const lastOldPage = allCurrentSkeletonPages[allCurrentSkeletonPages.length - 1];
+    const lastIndex = allCurrentSkeletonPages.length - 1;
+    const lastOldPage = allCurrentSkeletonPages[lastIndex];
     const firstNewPage = blockSkeletonPages[0];
+
     if (lastOldPage === firstNewPage) {
         blockSkeletonPages.splice(0, 1);
     }
+
     allCurrentSkeletonPages.push(...blockSkeletonPages);
 }
 

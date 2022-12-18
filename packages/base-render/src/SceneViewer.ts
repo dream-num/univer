@@ -1,23 +1,21 @@
+import { Nullable } from '@univer/core';
 import { IBoundRect, Vector2 } from './Basics/Vector2';
 import { BaseObject } from './BaseObject';
 import { Scene } from './Scene';
 import { IObjectFullState } from './Basics/Interfaces';
 import { RENDER_CLASS_TYPE } from './Basics/Const';
+import { transformBoundingCoord } from './Basics/Position';
 
 export class SceneViewer extends BaseObject {
-    private _childrenScene: Scene;
+    private _subScenes = new Map<string, Scene>();
 
-    // protected _cacheCanvas = new Canvas();
+    private _activeSubScene: Nullable<Scene>;
 
-    // allowCache: boolean = false;
+    private _allowSelectedClipElement = false;
 
     constructor(key?: string, props?: IObjectFullState) {
         super(key);
         this._initialProps(props);
-    }
-
-    get scene() {
-        return this._childrenScene;
     }
 
     get classType() {
@@ -31,18 +29,7 @@ export class SceneViewer extends BaseObject {
         }
 
         if (bounds) {
-            const tl = this.transform.clone().invert().applyPoint(bounds.tl);
-            const tr = this.transform.clone().invert().applyPoint(bounds.tr);
-            const bl = this.transform.clone().invert().applyPoint(bounds.bl);
-            const br = this.transform.clone().invert().applyPoint(bounds.br);
-
-            const xList = [tl.x, tr.x, bl.x, br.x];
-            const yList = [tl.y, tr.y, bl.y, br.y];
-
-            const maxX = Math.max(...xList);
-            const minX = Math.min(...xList);
-            const maxY = Math.max(...yList);
-            const minY = Math.min(...yList);
+            const { minX, maxX, minY, maxY } = transformBoundingCoord(this, bounds);
 
             if (this.width + this.strokeWidth < minX || maxX < 0 || this.height + this.strokeWidth < minY || maxY < 0) {
                 // console.warn('ignore object', this);
@@ -53,59 +40,77 @@ export class SceneViewer extends BaseObject {
         const m = this.transform.getMatrix();
         mainCtx.save();
         mainCtx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
-        // if (this.allowCache) {
-        //     if (this.isDirty()) {
-        //         const ctx = this._cacheCanvas.getContext();
-        //         this._cacheCanvas.clear();
-        //         ctx.save();
-        //         ctx.translate(this.strokeWidth / 2, this.strokeWidth / 2); //边框会按照宽度画在边界上，分别占据内外二分之一
-        //         this._childrenScene?.makeDirtyNoParent(true).render(ctx);
-        //         ctx.restore();
-        //     }
-        //     this._applyCache(mainCtx);
-        // } else {
-        //     this._childrenScene?.makeDirtyNoParent(true).render(mainCtx);
-        // }
-        this._childrenScene?.makeDirtyNoParent(true).render(mainCtx);
+
+        this._activeSubScene?.makeDirtyNoParent(true).render(mainCtx);
         mainCtx.restore();
         this.makeDirty(false);
         return this;
     }
 
-    // protected _applyCache(ctx?: CanvasRenderingContext2D) {
-    //     if (!ctx) {
-    //         return;
-    //     }
-    //     const pixelRatio = this._cacheCanvas.getPixelRatio();
-    //     const width = this._cacheCanvas.getWidth() * pixelRatio;
-    //     const height = this._cacheCanvas.getHeight() * pixelRatio;
-    //     ctx.drawImage(
-    //         this._cacheCanvas.getCanvasEle(),
-    //         0,
-    //         0,
-    //         width,
-    //         height,
-    //         -this.strokeWidth / 2,
-    //         -this.strokeWidth / 2,
-    //         this.width + this.strokeWidth,
-    //         this.height + this.strokeWidth
-    //     );
-    // }
+    getSubScenes() {
+        return this._subScenes;
+    }
 
-    addObject(o: Scene) {
-        this._childrenScene = o;
+    getActiveSubScene() {
+        return this._activeSubScene;
+    }
+
+    getSubScene(sceneKey: string) {
+        for (let [key, scene] of this._subScenes) {
+            if (key === sceneKey) {
+                return scene;
+            }
+        }
+    }
+
+    addSubScene(scene: Scene) {
+        this._activeSubScene = scene;
+        this._subScenes.set(scene.sceneKey, scene);
+        this.makeDirty();
+    }
+
+    removeSubScene(key: string) {
+        const subScene = this._subScenes.get(key);
+        this._subScenes.delete(key);
+        if (this._activeSubScene === subScene) {
+            this._activeSubScene = this._subScenes.values().next().value;
+        }
+        this.makeDirty();
+    }
+
+    activeSubScene(key: Nullable<string>) {
+        if (key == null) {
+            return;
+        }
+        const subScene = this._subScenes.get(key);
+        if (this._activeSubScene !== subScene) {
+            this._activeSubScene = subScene;
+            this.makeDirty();
+        }
+    }
+
+    enableSelectedClipElement() {
+        this._allowSelectedClipElement = true;
+    }
+
+    disableSelectedClipElement() {
+        this._allowSelectedClipElement = false;
+    }
+
+    allowSelectedClipElement() {
+        return this._allowSelectedClipElement;
     }
 
     // 判断被选中的唯一对象
     pick(coord: Vector2) {
-        if (this._childrenScene === undefined) {
+        if (this._activeSubScene === undefined) {
             return;
         }
 
         const trans = this.transform.clone().invert();
         const tCoord = trans.applyPoint(coord);
 
-        return this._childrenScene.pick(tCoord);
+        return this._activeSubScene?.pick(tCoord);
     }
 
     private _initialProps(props?: IObjectFullState) {
@@ -136,24 +141,11 @@ export class SceneViewer extends BaseObject {
         this.makeDirty(true);
     }
 
-    // resizeCacheCanvas() {
-    //     this._cacheCanvas.setSize(this.width + this.strokeWidth, this.height + this.strokeWidth);
-    //     this.makeDirty(true);
-    // }
+    dispose() {
+        super.dispose();
 
-    // scaleCacheCanvas() {
-    //     let scaleX = this.getParent()?.ancestorScaleX || 1;
-    //     let scaleY = this.getParent()?.ancestorScaleX || 1;
-    //     this._cacheCanvas.setPixelRatio(Math.max(scaleX, scaleY) * getDevicePixelRatio());
-
-    //     this._childrenScene.onTransformChangeObservable.notifyObservers({
-    //         type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale,
-    //         value: {
-    //             scaleX,
-    //             scaleY,
-    //         },
-    //     });
-
-    //     this.makeDirty(true);
-    // }
+        this._subScenes.forEach((scene) => {
+            scene.dispose();
+        });
+    }
 }

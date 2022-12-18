@@ -59,6 +59,9 @@
 .toolbar .select-color-picker-parent .select-color-picker .select-item {
   padding: 0;
 }
+.toolbar .select-line-bold-parent .select-item-content {
+  width: 100%;
+}
 .toolbar button {
   padding: 0;
   height: 26px;

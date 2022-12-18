@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import { IStyleData } from '../../Interfaces';
+import { ICellData, IStyleData } from '../../Interfaces';
 import { IKeyType, Nullable, Tools } from '../../Shared';
 
 /**
@@ -57,5 +57,16 @@ export class Styles {
 
     toJSON(): IKeyType<Nullable<IStyleData>> {
         return this._styles;
+    }
+
+    getStyleByCell(cell: Nullable<ICellData>): Nullable<IStyleData> {
+        let style;
+        if (cell && Tools.isObject(cell.s)) {
+            style = cell.s as IStyleData;
+        } else {
+            style = cell?.s && this.get(cell.s);
+        }
+
+        return style as IStyleData;
     }
 }

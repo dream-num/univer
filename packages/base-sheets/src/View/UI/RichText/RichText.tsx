@@ -1,8 +1,6 @@
-import { Component, createRef } from '@univer/base-component';
-import { KeyCode } from '@univer/core';
-import { CellInputHandler } from './CellInputHandler';
+import { Component, createRef, xssDeal } from '@univer/base-component';
+// import { CellInputHandler } from '@univer/sheets-plugin-formula/src/Controller/CellInputHandler';
 import { CellTextStyle } from './CellTextStyle';
-import { HelpFunction, SearchFunction } from './FormulaPrompt';
 import styles from './index.module.less';
 // interface IProps {
 //     style?: {};
@@ -11,15 +9,7 @@ import styles from './index.module.less';
 //     text?: string;
 // }
 
-interface IState {
-    // value: string;
-    helpFormulaActive: boolean;
-    formulaName: string;
-    funIndex: number;
-    paramIndex: number;
-    searchActive: boolean;
-    formula: any[];
-}
+export interface IRichTextState {}
 
 export interface BaseRichTextProps {
     style?: {};
@@ -43,39 +33,25 @@ export interface BaseRichTextProps {
  *
  * Rich Text Cell Editor Component
  */
-export class RichText extends Component<BaseRichTextProps, IState> {
-    // private _fontFamilyObserv: Nullable<WorkBookObserver<string>>;
-
-    // private _fontSizeObserv: Nullable<WorkBookObserver<number>>;
-
+export class RichText extends Component<BaseRichTextProps, IRichTextState> {
     container = createRef<HTMLDivElement>();
 
     ref = createRef<HTMLDivElement>();
 
     cellTextStyle: CellTextStyle;
 
-    cellInputHandler: CellInputHandler;
-
     hooks = new Map<string, (args: any) => void>();
 
-    initialize(props: BaseRichTextProps) {
-        // super(props);
-        this.state = {
-            searchActive: false,
-            formula: [],
-            funIndex: 0, // 公式下标
-            helpFormulaActive: false,
-            formulaName: '', // 公式名
-            paramIndex: 0, // 公式提示 参数下标
-        };
-    }
+    initialize(props: BaseRichTextProps) {}
 
     setValue(value: string) {
-        this.cellInputHandler.setInputValue(value);
+        if (this.ref.current) {
+            this.ref.current.innerHTML = xssDeal(value);
+        }
     }
 
     getValue(): string {
-        return this.cellInputHandler.getInputValue();
+        return this.ref.current?.innerHTML || '';
     }
 
     show() {
@@ -86,20 +62,18 @@ export class RichText extends Component<BaseRichTextProps, IState> {
         this.container.current!.style.display = 'none';
     }
 
-    // TODO 键盘事件
     onKeyDown(event: KeyboardEvent) {
-        let ctrlKey = event.ctrlKey;
-        let altKey = event.altKey;
-        let shiftKey = event.shiftKey;
-        let kcode = event.keyCode;
+        // let ctrlKey = event.ctrlKey;
+        // let altKey = event.altKey;
+        // let shiftKey = event.shiftKey;
+        // let kcode = event.keyCode;
 
         // execute hooks
         const onKeyDown = this.hooks.get('onKeyDown');
         onKeyDown && onKeyDown(event);
 
         // stop edit
-        if (kcode === KeyCode.ENTER) {
-            this.ref.current?.blur();
+        if (event.key === 'Enter') {
             event.preventDefault();
         }
 
@@ -141,109 +115,29 @@ export class RichText extends Component<BaseRichTextProps, IState> {
         // else if (kcode === keycode.RIGHT && parseInt($inputbox.css("top")) > 0) {
         //     formulaMoveEvent("right", ctrlKey, shiftKey,event);
         // }
-        // else
-        if (
-            !(
-                (kcode >= 112 && kcode <= 123) ||
-                kcode <= 46 ||
-                kcode === 144 ||
-                kcode === 108 ||
-                event.ctrlKey ||
-                event.altKey ||
-                (event.shiftKey && (kcode === 37 || kcode === 38 || kcode === 39 || kcode === 40 || kcode === KeyCode.WIN || kcode === KeyCode.WIN_R || kcode === KeyCode.MENU))
-            ) ||
-            kcode === 8 ||
-            kcode === 32 ||
-            kcode === 46 ||
-            (event.ctrlKey && kcode === 86)
-        ) {
-            // if(event.target.id!=="universheet-input-box" && event.target.id!=="universheet-rich-text-editor"){
-            const container = this.ref.current as HTMLDivElement;
-            // handle input
-            // const handler = new CellInputHandler();
-            this.cellInputHandler.functionInputHandler(container, kcode);
-            // setCenterInputPosition(Store.universheetCellUpdate[0], Store.universheetCellUpdate[1], Store.flowdata);
-            // }
-        } else {
-            // event.preventDefault();
-            // event.stopPropagation();
-        }
 
-        if (kcode === KeyCode.UP) {
-            let index = this.state.funIndex;
-            if (index !== 0) index--;
-            this.setState({
-                funIndex: index,
-            });
-        } else if (kcode === KeyCode.DOWN) {
-            let index = this.state.funIndex;
-            if (index !== 10) index++;
-            this.setState({
-                funIndex: index,
-            });
-        }
+        // if (kcode === KeyCode.UP) {
+        //     let index = this.state.funIndex;
+        //     if (index !== 0) index--;
+        //     this.setState({
+        //         funIndex: index,
+        //     });
+        // } else if (kcode === KeyCode.DOWN) {
+        //     let index = this.state.funIndex;
+        //     if (index !== 10) index++;
+        //     this.setState({
+        //         funIndex: index,
+        //     });
+        // }
     }
 
     onKeyUp(event: KeyboardEvent) {
-        let kcode = event.keyCode;
-        if (
-            !(
-                (kcode >= 112 && kcode <= 123) ||
-                kcode <= 46 ||
-                kcode === 144 ||
-                kcode === 108 ||
-                event.ctrlKey ||
-                event.altKey ||
-                (event.shiftKey && (kcode === 37 || kcode === 38 || kcode === 39 || kcode === 40 || kcode === KeyCode.WIN || kcode === KeyCode.WIN_R || kcode === KeyCode.MENU))
-            ) ||
-            kcode === 8 ||
-            kcode === 32 ||
-            kcode === 46 ||
-            (event.ctrlKey && kcode === 86)
-        ) {
-            this.cellInputHandler.searchFunction(this.ref.current!);
+        const onKeyUp = this.hooks.get('onKeyUp');
+        onKeyUp && onKeyUp(event);
 
-            const formula = this.cellInputHandler.getFormula();
-            let helpFormula = this.cellInputHandler.getHelpFormula();
-
-            if (formula[0]) {
-                this.setState({
-                    formula,
-                    searchActive: true,
-                    helpFormulaActive: false,
-                });
-            } else if (helpFormula[0]) {
-                this.setState({
-                    formulaName: (helpFormula[0] as string).toUpperCase(),
-                    paramIndex: helpFormula[1] as number,
-                    helpFormulaActive: true,
-                    searchActive: false,
-                });
-            } else {
-                this.setState({
-                    formula,
-                    searchActive: false,
-                    helpFormulaActive: false,
-                });
-            }
-        }
-        const value = this.cellInputHandler.getInputValue();
-        if (value.length > 0 && value.substr(0, 1) === '=' && (kcode !== 229 || value.length === 1)) {
-            if (kcode === 13) {
-                event.preventDefault();
-                event.stopPropagation();
-
-                // 搜索公式框打开时选择公式，关闭时执行公式
-                if (this.state.searchActive) {
-                    this.cellInputHandler.searchFunctionEnter(this.state.formula[this.state.funIndex].n);
-                    this.setState({
-                        formulaName: this.state.formula[this.state.funIndex].n,
-                        paramIndex: 0,
-                        helpFormulaActive: true,
-                        searchActive: false,
-                    });
-                }
-            }
+        // stop edit
+        if (event.key === 'Enter') {
+            event.preventDefault();
         }
         // if (kcode === KeyCode.DOWN) {
         //     this.cellTextStyle.convertSpanToShareString(this.ref.current);
@@ -257,7 +151,6 @@ export class RichText extends Component<BaseRichTextProps, IState> {
 
     componentDidMount() {
         this.cellTextStyle = new CellTextStyle(this.ref.current!);
-        this.cellInputHandler = new CellInputHandler(this.ref.current!);
 
         this._context.getObserverManager().getObserver<RichText>('onRichTextDidMountObservable')?.notifyObservers(this);
     }
@@ -269,8 +162,8 @@ export class RichText extends Component<BaseRichTextProps, IState> {
         // this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
-    render(props: BaseRichTextProps, state: IState) {
-        const { style, className, onClick, text } = props;
+    render(props: BaseRichTextProps, state: IRichTextState) {
+        const { style, className = '', onClick, text } = props;
         return (
             <div className={`${styles.richTextEditorContainer} ${className}`} style={style} ref={this.container}>
                 <div
@@ -282,9 +175,6 @@ export class RichText extends Component<BaseRichTextProps, IState> {
                     dangerouslySetInnerHTML={{ __html: text || '' }}
                     contentEditable
                 ></div>
-                {this.state.searchActive && !this.state.helpFormulaActive ? <SearchFunction value={this.state.formula} active={this.state.funIndex} /> : null}
-                {!this.state.searchActive && this.state.helpFormulaActive ? <HelpFunction funName={this.state.formulaName} paramIndex={this.state.paramIndex} /> : null}
-                {/* <HelpFunction funName={this.state.formulaName} paramIndex={this.state.paramIndex} /> */}
             </div>
         );
     }

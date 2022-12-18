@@ -19,6 +19,7 @@ export type DocPluginObserve = {
 
     onDocContainerDidMountObservable: Observable<DocContainer>;
 
+    // ready to move to core as onKeyDownObservable
     onSpreadsheetKeyDownObservable: Observable<IKeyboardEvent>;
     onSpreadsheetKeyUpObservable: Observable<IKeyboardEvent>;
     onSpreadsheetKeyCopyObservable: Observable<IKeyboardEvent>;

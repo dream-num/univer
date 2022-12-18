@@ -5,8 +5,7 @@ import {
     ActionType,
     CommandUnit,
 } from '../../Command';
-import { CONVERTOR_OPERATION, ACTION_NAMES } from '../../Const';
-import { WorkSheetConvertor } from '../../Convertor';
+import { ACTION_NAMES } from '../../Const';
 import { INamedRange } from '../../Interfaces/INamedRange';
 import { AddNamedRange } from '../Apply/AddNamedRange';
 import { DeleteNamedRange } from '../Apply/DeleteNamedRange';
@@ -30,7 +29,6 @@ export class AddNamedRangeAction extends SheetActionBase<
 
         this._doActionData = {
             ...actionData,
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
         this.do();
         this._oldActionData = {

@@ -274,11 +274,7 @@ export class Range {
             row.map((cell: Nullable<ICellData>) => {
                 const styles = this._context.getWorkBook().getStyles();
                 let rgbColor: string = DEFAULT_STYLES.bg?.rgb!;
-
-                if (cell?.s) {
-                    rgbColor = styles.get(cell?.s)?.bg?.rgb!;
-                }
-
+                rgbColor = styles.getStyleByCell(cell)?.bg?.rgb!;
                 return rgbColor;
             })
         );
@@ -380,8 +376,9 @@ export class Range {
         return this.getValues().map((row) =>
             row.map((cell: Nullable<ICellData>) => {
                 const styles = this._context.getWorkBook().getStyles();
+                const cellStyle = styles.getStyleByCell(cell)
                 return (
-                    (cell?.s && styles.get(cell.s)?.cl?.rgb) ||
+                    cellStyle?.cl?.rgb ||
                     DEFAULT_STYLES.cl?.rgb
                 );
             })
@@ -446,16 +443,17 @@ export class Range {
 
     /**
      *
-     * @param arge Shorthand for the style that gets
+     * @param arg Shorthand for the style that gets
      * @returns style value
      */
-    private _getStyles(arge: string) {
+    private _getStyles(arg: string) {
         return this.getValues().map((row) =>
             row.map((cell: Nullable<ICellData>) => {
                 const styles = this._context.getWorkBook().getStyles();
-                return (
-                    (cell?.s && styles.get(cell.s)![arge]) || DEFAULT_STYLES[arge]
-                );
+
+                // const style = getStyle(styles, cell);
+                const style = styles && styles.getStyleByCell(cell);
+                return (style && style[arg]) || DEFAULT_STYLES[arg];
             })
         );
     }
@@ -772,10 +770,7 @@ export class Range {
         return this.getValues().map((row) =>
             row.map((cell: Nullable<ICellData>) => {
                 const styles = this._context.getWorkBook().getStyles();
-                if (cell && cell.s) {
-                    return styles.get(cell.s);
-                }
-                return null;
+                return styles.getStyleByCell(cell);
             })
         );
     }
@@ -1786,7 +1781,6 @@ export class Range {
             sheetId: _worksheet.getSheetId(),
             actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
             cellValue: matrix.getData(),
-            rangeData: destination._rangeData,
         };
         const command = new Command(
             {
@@ -2139,7 +2133,6 @@ export class Range {
                     sheetId: _worksheet.getSheetId(),
                     actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                     cellValue: cellValue.getData(),
-                    rangeData: range,
                 };
                 const command = new Command(
                     {
@@ -2158,7 +2151,7 @@ export class Range {
                         stylesMatrix.setValue(
                             r,
                             c,
-                            cell.s ? styles.get(cell.s) : {}
+                            styles.getStyleByCell(cell) || {}
                         );
                     })
                 );
@@ -2225,7 +2218,6 @@ export class Range {
                 sheetId: _worksheet.getSheetId(),
                 actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                 cellValue: cellValue.getData(),
-                rangeData: range,
                 options,
             };
             const command = new Command(
@@ -2248,7 +2240,6 @@ export class Range {
                 sheetId: _worksheet.getSheetId(),
                 actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                 cellValue: cellValue.getData(),
-                rangeData: range,
             };
             const command = new Command(
                 {
@@ -2317,8 +2308,8 @@ export class Range {
         value.map((row, r) =>
             row.map((cell, c) => {
                 cell = cell as ICellData;
-                stylesMatrix.setValue(r, c, cell.s ? styles.get(cell.s) : {});
-                return cell.s ? styles.get(cell.s) : {};
+                stylesMatrix.setValue(r, c, styles.getStyleByCell(cell) || {});
+                return styles.getStyleByCell(cell) || {};
             })
         );
 
@@ -2461,12 +2452,6 @@ export class Range {
             sheetId: _worksheet.getSheetId(),
             actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
             cellValue: targetMatrix.getData(),
-            rangeData: {
-                startRow: targetStartRow,
-                endRow: targetStartRow + (endRow - startRow),
-                startColumn: targetStartColumn,
-                endColumn: targetStartColumn + (endColumn - startColumn),
-            },
         };
 
         const command = new Command(
@@ -3275,12 +3260,15 @@ export class Range {
      */
     setRangeData(value: ICellData): Range {
         const { _rangeData, _context, _commandManager, _worksheet } = this;
-
+        const { startRow, startColumn } = _rangeData;
         const setValue: ISetRangeDataActionData = {
             sheetId: _worksheet.getSheetId(),
             actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-            cellValue: value,
-            rangeData: _rangeData,
+            cellValue: {
+                [startRow]: {
+                    [startColumn]: value,
+                },
+            },
         };
         const command = new Command(
             {
@@ -3318,7 +3306,6 @@ export class Range {
                 sheetId: _worksheet.getSheetId(),
                 actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                 cellValue: cellValue.getData(),
-                rangeData: this._rangeData,
             };
             const command = new Command(
                 {
@@ -3332,7 +3319,6 @@ export class Range {
                 sheetId: _worksheet.getSheetId(),
                 actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                 cellValue: values,
-                rangeData: this._rangeData,
             };
             const command = new Command(
                 {
@@ -3697,7 +3683,6 @@ export class Range {
                 sheetId: _worksheet.getSheetId(),
                 actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                 cellValue: newData,
-                rangeData: _rangeData,
             },
         ];
         const command = new Command(
@@ -3897,7 +3882,6 @@ export class Range {
             sheetId: _worksheet.getSheetId(),
             actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
             cellValue: cellValue.getData(),
-            rangeData: _rangeData,
         };
         const command = new Command(
             {

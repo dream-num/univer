@@ -1,4 +1,4 @@
-import { ActionOperation, ACTION_NAMES, ISetRangeDataActionData, Command } from '@univer/core';
+import { ActionOperation, ACTION_NAMES, ISetRangeDataActionData, Command, ObjectMatrix, ICellData } from '@univer/core';
 import { FormulaController } from './FormulaController';
 
 export function firstLoader(formulaController: FormulaController) {
@@ -11,25 +11,25 @@ export function firstLoader(formulaController: FormulaController) {
 
     const workBook = formulaController.getWorkbook();
 
-    sheetDataPromise.then((sheetData) => {
-        if (!sheetData) return;
+    sheetDataPromise.then((data) => {
+        if (!data) return;
+        const { sheetData, arrayFormulaData } = data;
+
+        if (!sheetData) {
+            return;
+        }
+
         const sheetIds = Object.keys(sheetData);
 
         const actionList: ISetRangeDataActionData[] = [];
 
         for (let i = 0, len = sheetIds.length; i < len; i++) {
             const sheetId = sheetIds[i];
-            const cellData = sheetData[sheetId];
+            const cellData: ObjectMatrix<ICellData> = sheetData[sheetId];
             cellData.forValue((row, column, mainCell) => {
                 const action = {
                     actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                     sheetId,
-                    rangeData: {
-                        startColumn: column,
-                        endColumn: column,
-                        startRow: row,
-                        endRow: row,
-                    },
                     cellValue: {
                         [row]: {
                             [column]: mainCell,
@@ -37,11 +37,11 @@ export function firstLoader(formulaController: FormulaController) {
                     },
                 };
 
-                actionList.push(ActionOperation.make<ISetRangeDataActionData>(action).removeCollaboration().removeUndo().getAction());
+                actionList.push(ActionOperation.make<ISetRangeDataActionData>(action).removeCollaboration().removeUndo().removeExtension().getAction());
             });
         }
 
-        const command = new Command({WorkBookUnit:workBook}, ...actionList);
+        const command = new Command({ WorkBookUnit: workBook }, ...actionList);
         commandManager.invoke(command);
     });
 }

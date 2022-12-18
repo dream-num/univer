@@ -11,7 +11,6 @@ import { <%= projectUpperValue %>Plugin } from './<%= projectUpperValue %>Plugin
 // sheet
 const sheetPluginConfig = {
     container: 'universheet',
-    layout: 'auto',
 };
 
 const univerSheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);
@@ -26,7 +25,6 @@ univerSheet.installPlugin(new <%= projectUpperValue %>Plugin());
 
 const docPluginConfig = {
     container: 'univerdoc',
-    layout: 'auto',
 };
 const univerDoc = UniverDoc.newInstance();
 
@@ -41,7 +39,6 @@ univerDoc.installPlugin(new <%= projectUpperValue %>Plugin());
 
 const slidePluginConfig = {
     container: 'universlide',
-    layout: 'auto'
 };
 
 const univerSlide = UniverSlide.newInstance();

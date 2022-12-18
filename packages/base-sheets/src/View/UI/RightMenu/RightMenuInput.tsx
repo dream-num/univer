@@ -3,6 +3,7 @@ import { BaseComponentRender, BaseComponentSheet, Component } from '@univer/base
 interface IProps {
     prefix: string[];
     suffix: string;
+    onKeyUp?: (e: Event) => void;
 }
 
 export class RightMenuInput extends Component<IProps> {
@@ -13,6 +14,15 @@ export class RightMenuInput extends Component<IProps> {
         this._render = component.getComponentRender();
     }
 
+    handleClick(e: Event) {
+        e.stopPropagation();
+    }
+
+    handleKeyUp(e: Event) {
+        const { onKeyUp } = this.props;
+        onKeyUp?.(e);
+    }
+
     render() {
         const { prefix, suffix } = this.props;
         const Input = this._render.renderFunction('Input');
@@ -20,7 +30,7 @@ export class RightMenuInput extends Component<IProps> {
         return (
             <div>
                 {prefix}
-                <Input type="number" placeholder="1"></Input>
+                <Input onKeyUp={this.handleKeyUp.bind(this)} type="number" placeholder="1" onClick={this.handleClick}></Input>
                 {suffix}
             </div>
         );

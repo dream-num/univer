@@ -1,8 +1,7 @@
-import { IRangeData, ObjectMatrix } from '@univer/core';
+import { BooleanNumber, IRangeData, IScale, ObjectMatrix } from '@univer/core';
 import { fixLineWidthByScale, getColor } from '../../../Basics/Tools';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';
-import { IScale } from '../../../Basics/Interfaces';
 import { SpreadsheetExtensionRegistry } from '../../Extension';
 
 const UNIQUE_KEY = 'DefaultBorderAuxiliaryExtension';
@@ -13,10 +12,10 @@ export class BorderAuxiliary extends SheetExtension {
     zIndex = 10;
 
     draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
-        const { rowColumnSegment, rowTitleWidth = 0, columnTitleHeight = 0, dataMergeCache, overflowCache, stylesCache } = spreadsheetSkeleton;
+        const { rowColumnSegment, rowTitleWidth = 0, columnTitleHeight = 0, dataMergeCache, overflowCache, stylesCache, showGridlines } = spreadsheetSkeleton;
 
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
-        if (!spreadsheetSkeleton) {
+        if (!spreadsheetSkeleton || showGridlines === BooleanNumber.FALSE) {
             return;
         }
 

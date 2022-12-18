@@ -3,17 +3,19 @@ import {
     BlockType,
     BooleanNumber,
     BulletAlignment,
+    ColumnSeparatorType,
     GlyphType,
     IDocumentData,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     ParagraphElementType,
     PositionedObjectLayoutType,
+    SectionType,
     WrapTextType,
 } from '@univer/core';
 
-export const docsDemoData: IDocumentData = {
-    documentId: 'd',
+export const DOCS_DEMO_DATA: IDocumentData = {
+    id: 'd',
     drawings: {
         shapeTest1: {
             objectId: 'shapeTest1',
@@ -125,7 +127,7 @@ export const docsDemoData: IDocumentData = {
             oneParagraph: {
                 blockId: 'oneParagraph',
                 st: 0,
-                ed: 15,
+                ed: 59,
                 blockType: BlockType.PARAGRAPH,
                 paragraph: {
                     bullet: {
@@ -156,8 +158,8 @@ export const docsDemoData: IDocumentData = {
                         },
                         smallSub: {
                             eId: 'smallSub',
-                            st: 0,
-                            ed: 15,
+                            st: 16,
+                            ed: 17,
                             et: ParagraphElementType.TEXT_RUN,
                             tr: {
                                 ct: '上标',
@@ -175,8 +177,8 @@ export const docsDemoData: IDocumentData = {
                         },
                         twoElement: {
                             eId: 'twoElement',
-                            st: 0,
-                            ed: 15,
+                            st: 18,
+                            ed: 59,
                             et: ParagraphElementType.TEXT_RUN,
                             tr: {
                                 ct: '日期列单元格数据验证，限制只能输入日期（介于1949年1月1日至2099年1月1日）',
@@ -214,8 +216,8 @@ export const docsDemoData: IDocumentData = {
             },
             twoParagraph: {
                 blockId: 'twoParagraph',
-                st: 0,
-                ed: 15,
+                st: 60,
+                ed: 88,
                 blockType: BlockType.PARAGRAPH,
                 paragraph: {
                     bullet: {
@@ -228,8 +230,8 @@ export const docsDemoData: IDocumentData = {
                     elements: {
                         oneElement: {
                             eId: 'oneElement',
-                            st: 0,
-                            ed: 15,
+                            st: 60,
+                            ed: 74,
                             et: ParagraphElementType.TEXT_RUN,
                             tr: {
                                 ct: '细化埋点上报链路和指标方案梳理',
@@ -237,8 +239,8 @@ export const docsDemoData: IDocumentData = {
                         },
                         twoElement: {
                             eId: 'twoElement',
-                            st: 0,
-                            ed: 15,
+                            st: 75,
+                            ed: 88,
                             et: ParagraphElementType.TEXT_RUN,
                             tr: {
                                 ct: '目前通过每日定时任务发送报告',
@@ -259,8 +261,8 @@ export const docsDemoData: IDocumentData = {
             },
             threeParagraph: {
                 blockId: 'threeParagraph',
-                st: 0,
-                ed: 15,
+                st: 89,
+                ed: 230,
                 blockType: BlockType.PARAGRAPH,
                 paragraph: {
                     bullet: {
@@ -273,8 +275,8 @@ export const docsDemoData: IDocumentData = {
                     elements: {
                         oneElement: {
                             eId: 'oneElement',
-                            st: 0,
-                            ed: 15,
+                            st: 89,
+                            ed: 138,
                             et: ParagraphElementType.TEXT_RUN,
                             tr: {
                                 ct: '自2018年首届进博会举办以来，进博会已经成为全球新品的首发地、前沿技术的首选地、创新服务的首推地。',
@@ -282,8 +284,8 @@ export const docsDemoData: IDocumentData = {
                         },
                         twoElement: {
                             eId: 'twoElement',
-                            st: 0,
-                            ed: 15,
+                            st: 139,
+                            ed: 230,
                             et: ParagraphElementType.TEXT_RUN,
                             tr: {
                                 ct: '中国这十年”对外开放成就展湖北展区主要以图文、图表、数据、视频、企业展品、实物模型、光电科技等体现湖北十年开放成就、重大开放平台及产业。湖北省共计17家企业、机构的展品将在这一展区展示',
@@ -304,8 +306,8 @@ export const docsDemoData: IDocumentData = {
             },
             fourParagraph: {
                 blockId: 'fourParagraph',
-                st: 0,
-                ed: 15,
+                st: 231,
+                ed: 322,
                 blockType: BlockType.PARAGRAPH,
                 paragraph: {
                     bullet: {
@@ -318,8 +320,8 @@ export const docsDemoData: IDocumentData = {
                     elements: {
                         oneElement: {
                             eId: 'oneElement',
-                            st: 0,
-                            ed: 15,
+                            st: 231,
+                            ed: 286,
                             et: ParagraphElementType.TEXT_RUN,
                             tr: {
                                 ct: '国家主席习近平以视频方式出席在上海举行的第五届中国国际进口博览会开幕式并发表题为《共创开放繁荣的美好未来》的致辞',
@@ -327,8 +329,8 @@ export const docsDemoData: IDocumentData = {
                         },
                         twoElement: {
                             eId: 'twoElement',
-                            st: 0,
-                            ed: 15,
+                            st: 287,
+                            ed: 322,
                             et: ParagraphElementType.TEXT_RUN,
                             tr: {
                                 ct: '中国将推动各国各方共享深化国际合作机遇，全面深入参与世界贸易组织改革谈判',
@@ -349,8 +351,8 @@ export const docsDemoData: IDocumentData = {
             },
             fiveParagraph: {
                 blockId: 'fiveParagraph',
-                st: 0,
-                ed: 15,
+                st: 323,
+                ed: 400,
                 blockType: BlockType.PARAGRAPH,
                 paragraph: {
                     bullet: {
@@ -363,8 +365,8 @@ export const docsDemoData: IDocumentData = {
                     elements: {
                         oneElement: {
                             eId: 'oneElement',
-                            st: 0,
-                            ed: 15,
+                            st: 323,
+                            ed: 360,
                             et: ParagraphElementType.TEXT_RUN,
                             tr: {
                                 ct: '中国男排两名现役国手彭世坤和张秉龙分别效力的三得利太阳鸟和东京大熊本轮遭遇。',
@@ -372,8 +374,8 @@ export const docsDemoData: IDocumentData = {
                         },
                         twoElement: {
                             eId: 'twoElement',
-                            st: 0,
-                            ed: 15,
+                            st: 361,
+                            ed: 400,
                             et: ParagraphElementType.TEXT_RUN,
                             tr: {
                                 ct: '双方经过激战，主场作战的卫冕冠军三得利技高一筹3-2逆转击败对手，力夺第3场胜利',
@@ -392,8 +394,26 @@ export const docsDemoData: IDocumentData = {
                     ],
                 },
             },
+            oneSectionBreak: {
+                blockId: 'oneSectionBreak',
+                st: 0,
+                ed: 0,
+                blockType: BlockType.SECTION_BREAK,
+                sectionBreak: {
+                    columnProperties: [
+                        {
+                            width: 200,
+                            paddingEnd: 20,
+                        },
+                    ],
+                    columnSeparatorType: ColumnSeparatorType.NONE,
+                    sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
+                    // textDirection: textDirectionDocument,
+                    // contentDirection: textDirection!,
+                },
+            },
         },
-        blockElementOrder: ['oneParagraph', 'twoParagraph', 'threeParagraph', 'fourParagraph', 'fiveParagraph'],
+        blockElementOrder: ['oneParagraph', 'twoParagraph', 'threeParagraph', 'fourParagraph', 'fiveParagraph', 'oneSectionBreak'],
     },
     documentStyle: {
         pageSize: {

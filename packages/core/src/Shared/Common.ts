@@ -76,5 +76,22 @@ export function getColorStyle(color: Nullable<IColorStyle>): Nullable<string> {
 }
 
 export function isFormulaString(value: any): boolean {
-    return Tools.isString(value) && value.indexOf('=') === 0;
+    return Tools.isString(value) && value.indexOf('=') === 0 && value.length > 1;
 }
+
+/**
+ * move to Styles.getStyleByCell
+ */
+// export function getStyle(
+//     styles: Nullable<Styles>,
+//     cell: Nullable<ICellData>
+// ): Nullable<IStyleData> {
+//     let style;
+//     if (cell && Tools.isObject(cell.s)) {
+//         style = cell.s as IStyleData;
+//     } else {
+//         style = cell?.s && styles?.get(cell.s);
+//     }
+
+//     return style as IStyleData;
+// }

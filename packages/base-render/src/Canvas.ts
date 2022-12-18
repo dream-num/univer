@@ -137,6 +137,11 @@ export class Canvas {
         this.setSize(this._width, this._height, pixelRatio);
     }
 
+    dispose() {
+        this.clear();
+        this._canvasEle.remove();
+    }
+
     clear() {
         const ctx = this.getContext();
         ctx.clearRect(0, 0, this._width * this._pixelRatio, this._height * this._pixelRatio);

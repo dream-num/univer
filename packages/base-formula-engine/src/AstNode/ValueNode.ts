@@ -12,6 +12,9 @@ export class ValueNode extends BaseAstNode {
     }
     constructor(private _operatorString: string) {
         super(_operatorString);
+    }
+
+    execute() {
         this.setValue(ValueObjectFactory.create(this._operatorString));
     }
 }

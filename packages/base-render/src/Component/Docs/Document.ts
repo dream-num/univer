@@ -1,6 +1,6 @@
 import { BooleanNumber, HorizontalAlign, Nullable, Observable, Observer, VerticalAlign, WrapStrategy } from '@univer/core';
 import { DocComponent } from './DocComponent';
-import { IDocumentSkeletonCached, IDocumentSkeletonPage, LineType, PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
+import { IDocumentSkeletonCached, IDocumentSkeletonPage, IDocumentSkeletonSpan, LineType, PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';
 import { DocumentsSpanAndLineExtensionRegistry, IExtensionConfig } from '../Extension';
 import { DocumentSkeleton } from './DocSkeleton';
@@ -9,6 +9,9 @@ import './Extensions';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../Basics/Draw';
 import { fixLineWidthByScale, getScale, degToRad } from '../../Basics/Tools';
 import { DocsEditor } from './Document.Editor';
+import { Liquid } from './Common';
+import { Scene } from '../../Scene';
+import { TextSelection } from './Common/TextSelection';
 
 export interface IDocumentsConfig {
     pageMarginLeft?: number;
@@ -26,11 +29,9 @@ export interface IPageRenderConfig {
 }
 
 export class Documents extends DocComponent {
-    private _translateX: number = 0;
+    private _drawLiquid: Liquid;
 
-    private _translateY: number = 0;
-
-    private _translateSaveList: Array<{ x: number; y: number }> = [];
+    private _findLiquid: Liquid;
 
     private _hasEditor = false;
 
@@ -71,6 +72,10 @@ export class Documents extends DocComponent {
 
         this.pageLayoutType = config?.pageLayoutType || PageLayoutType.VERTICAL;
 
+        this._drawLiquid = new Liquid();
+
+        this._findLiquid = new Liquid();
+
         this._hasEditor = config?.hasEditor || false;
 
         this._initialDefaultExtension();
@@ -82,31 +87,6 @@ export class Documents extends DocComponent {
 
     protected _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         this.draw(ctx, bounds);
-    }
-
-    private _translateBy(x: number = 0, y: number = 0) {
-        this._translateX = x;
-        this._translateY = y;
-    }
-
-    private _translate(x: number = 0, y: number = 0) {
-        this._translateX += x;
-        this._translateY += y;
-    }
-
-    private _translateSave() {
-        this._translateSaveList.push({
-            x: this._translateX,
-            y: this._translateY,
-        });
-    }
-
-    private _translateRestore() {
-        const save = this._translateSaveList.pop();
-        if (save) {
-            this._translateX = save.x;
-            this._translateY = save.y;
-        }
     }
 
     private _horizontalHandler(pageWidth: number, pagePaddingLeft: number, pagePaddingRight: number, horizontalAlign: HorizontalAlign) {
@@ -148,6 +128,116 @@ export class Documents extends DocComponent {
         });
     }
 
+    private _addSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
+        if (!skeleton) {
+            return;
+        }
+
+        this._skeletonObserver = skeleton.onRecalculateChangeObservable.add((data) => {
+            const pages = data.pages;
+            let width = 0;
+            let height = 0;
+            for (let i = 0, len = pages.length; i < len; i++) {
+                const page = pages[i];
+                const { pageWidth, pageHeight } = page;
+                if (this.pageLayoutType === PageLayoutType.VERTICAL) {
+                    height += pageHeight;
+                    if (i !== len - 1) {
+                        height += this.pageMarginTop;
+                    }
+                    width = Math.max(width, pageWidth);
+                } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
+                    width += pageWidth;
+                    if (i !== len - 1) {
+                        width += this.pageMarginLeft;
+                    }
+                    height = Math.max(height, pageHeight);
+                }
+            }
+
+            this.resize(width, height);
+            this.calculatePagePosition();
+        });
+    }
+
+    private _disposeSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
+        if (!skeleton) {
+            return;
+        }
+        skeleton.onRecalculateChangeObservable.remove(this._skeletonObserver);
+    }
+
+    private _getPageBoundingBox(page: IDocumentSkeletonPage) {
+        const { pageWidth, pageHeight } = page;
+        let { x: startX, y: startY } = this._findLiquid;
+
+        let endX = -1;
+        let endY = -1;
+        if (this.pageLayoutType === PageLayoutType.VERTICAL) {
+            endX = pageWidth;
+            endY = startY + pageHeight;
+        } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
+            endX = startX + pageWidth;
+            endY = pageHeight;
+        }
+
+        return {
+            startX,
+            startY,
+            endX,
+            endY,
+        };
+    }
+
+    calculatePagePosition() {
+        const scene = this.getScene() as Scene;
+
+        let parent = scene?.getParent();
+        const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = this;
+        if (parent == null) {
+            return;
+        }
+        const { width: engineWidth, height: engineHeight } = parent;
+        let docsLeft = 0;
+        let docsTop = 0;
+
+        let sceneWidth = 0;
+
+        let sceneHeight = 0;
+
+        if (engineWidth > docsWidth) {
+            docsLeft = engineWidth / 2 - docsWidth / 2;
+            sceneWidth = engineWidth - 30;
+        } else {
+            docsLeft = pageMarginLeft;
+            sceneWidth = docsWidth + pageMarginLeft * 2;
+        }
+
+        if (engineHeight > docsHeight) {
+            docsTop = engineHeight / 2 - docsHeight / 2;
+            sceneHeight = engineHeight - 30;
+        } else {
+            docsTop = pageMarginTop;
+            sceneHeight = docsHeight + pageMarginTop * 2;
+        }
+
+        scene.resize(sceneWidth, sceneHeight + 200);
+
+        this.translate(docsLeft, docsTop);
+    }
+
+    getFirstViewport() {
+        return (this.getScene() as Scene).getViewports()[0];
+    }
+
+    getActiveViewportByCoord(offsetX: number, offsetY: number) {
+        return (this.getScene() as Scene).getActiveViewportByCoord(Vector2.FromArray([offsetX, offsetY]));
+    }
+
+    getEngine() {
+        return (this.getScene() as Scene).getEngine();
+    }
+
     enableEditor() {
         if (this._hasEditor) {
             return;
@@ -159,6 +249,36 @@ export class Documents extends DocComponent {
     disableEditor() {
         this._editor?.dispose();
         this._hasEditor = false;
+    }
+
+    getEditorInputEvent() {
+        if (!this._hasEditor) {
+            return;
+        }
+        const { onInputObservable, onCompositionstartObservable, onCompositionupdateObservable, onCompositionendObservable, onKeydownObservable } = this._editor;
+        return { onInputObservable, onCompositionstartObservable, onCompositionupdateObservable, onCompositionendObservable, onKeydownObservable };
+    }
+
+    remainActiveSelection() {
+        if (!this._hasEditor) {
+            return;
+        }
+        return this._editor.remain();
+    }
+
+    addSelection(textSelection: TextSelection) {
+        if (!this._hasEditor) {
+            return;
+        }
+        return this._editor.add(textSelection);
+    }
+
+    syncSelection() {
+        if (!this._hasEditor) {
+            return;
+        }
+
+        return this._editor.sync();
     }
 
     get hasEditor() {
@@ -175,7 +295,7 @@ export class Documents extends DocComponent {
         //     documentSkeleton.calculate(bounds);
         // }
 
-        this._translateBy(0, 0);
+        this._drawLiquid.reset();
 
         const skeletonData = documentSkeleton.getSkeletonData();
 
@@ -187,7 +307,12 @@ export class Documents extends DocComponent {
             extension.clearCache();
         }
 
-        for (let page of pages) {
+        let pageTop = 0;
+
+        let pageLeft = 0;
+
+        for (let i = 0, len = pages.length; i < len; i++) {
+            const page = pages[i];
             const {
                 sections,
                 marginTop: pagePaddingTop = 0,
@@ -196,7 +321,6 @@ export class Documents extends DocComponent {
                 marginRight: pagePaddingRight = 0,
                 width: pageWidth,
                 height: pageHeight,
-                pageNumber = 1,
                 renderConfig = {},
             } = page;
             const {
@@ -218,18 +342,6 @@ export class Documents extends DocComponent {
 
             const finalAngle = vertexAngle - centerAngle;
 
-            let pageTop = 0;
-
-            let pageLeft = 0;
-
-            if (this.pageLayoutType === PageLayoutType.VERTICAL) {
-                pageTop = (pageHeight + this.pageMarginTop) * (pageNumber - 1);
-            } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
-                pageLeft = (pageWidth + this.pageMarginLeft) * (pageNumber - 1);
-            }
-
-            this._translate(pageLeft, pageTop);
-
             this.onPageRenderObservable.notifyObservers({
                 page,
                 pageLeft,
@@ -240,19 +352,17 @@ export class Documents extends DocComponent {
             this._startRotation(ctx, finalAngle);
 
             for (let section of sections) {
-                const { columns, top: sectionTop = 0 } = section;
+                const { columns } = section;
 
-                this._translate(0, sectionTop);
+                this._drawLiquid.translateSection(section);
 
                 for (let column of columns) {
-                    const { lines, width: columnWidth, left: columnLeft } = column;
+                    const { lines, width: columnWidth } = column;
 
-                    this._translate(columnLeft, 0);
+                    this._drawLiquid.translateColumn(column);
 
                     const linesCount = lines.length;
 
-                    let horizontalOffset;
-                    let verticalOffset;
                     let alignOffset;
                     let rotateTranslateXListApply = null;
                     if (vertexAngle !== 0) {
@@ -269,9 +379,9 @@ export class Documents extends DocComponent {
                             }
                         }
 
-                        horizontalOffset = this._horizontalHandler(exceedWidthFix, pagePaddingLeft, pagePaddingRight, horizontalAlign);
+                        const horizontalOffset = this._horizontalHandler(exceedWidthFix, pagePaddingLeft, pagePaddingRight, horizontalAlign);
 
-                        verticalOffset = this._verticalHandler(rotatedHeight, pagePaddingTop, pagePaddingBottom, verticalAlign);
+                        const verticalOffset = this._verticalHandler(rotatedHeight, pagePaddingTop, pagePaddingBottom, verticalAlign);
 
                         let exceedHeightFix = verticalOffset - fixOffsetY;
                         if (rotatedHeight > this.height) {
@@ -283,12 +393,10 @@ export class Documents extends DocComponent {
                         }
                         alignOffset = Vector2.create(horizontalOffset + fixOffsetX, exceedHeightFix);
 
-                        this._translate(0, -rotateTranslateY);
+                        this._drawLiquid.translate(0, -rotateTranslateY);
 
                         rotateTranslateXListApply = rotateTranslateXList;
                     } else {
-                        horizontalOffset = horizontalOffsetNoAngle;
-                        verticalOffset = verticalOffsetNoAngle;
                         alignOffset = alignOffsetNoAngle;
                     }
 
@@ -296,11 +404,7 @@ export class Documents extends DocComponent {
                         const line = lines[i];
                         const {
                             divides,
-                            top: lineTop,
-                            marginBottom: lineMarginBottom = 0,
-                            marginTop: lineMarginTop = 0,
-                            paddingTop: linePaddingTop = 0,
-                            paddingBottom: linePaddingBottom = 0,
+
                             asc = 0,
                             type,
                             lineHeight = 0,
@@ -322,27 +426,26 @@ export class Documents extends DocComponent {
                                 }
                             }
                         } else {
-                            this._translateSave();
-                            const lineOffset = lineTop + lineMarginTop + linePaddingTop;
-                            this._translate(0, lineOffset);
-                            rotateTranslateXListApply && this._translate(rotateTranslateXListApply[i]); // x axis offset
+                            this._drawLiquid.translateSave();
+
+                            this._drawLiquid.translateLine(line, true);
+                            rotateTranslateXListApply && this._drawLiquid.translate(rotateTranslateXListApply[i]); // x axis offset
 
                             const divideLength = divides.length;
                             for (let i = 0; i < divideLength; i++) {
                                 const divide = divides[i];
-                                const { spanGroup, left: divideLeft, paddingLeft: dividePaddingLeft } = divide;
-                                this._translateSave();
-                                this._translate(divideLeft + dividePaddingLeft, 0);
+                                const { spanGroup } = divide;
+                                this._drawLiquid.translateSave();
 
+                                this._drawLiquid.translateDivide(divide);
                                 for (let span of spanGroup) {
                                     if (!span.content || span.content.length === 0) {
                                         continue;
                                     }
 
-                                    // this._rotationTranslate(vertexAngle, cumSpanHeight);
-
                                     const { width: spanWidth, left: spanLeft } = span;
-                                    const originTranslate = Vector2.create(fixLineWidthByScale(this._translateX, scale), fixLineWidthByScale(this._translateY, scale));
+                                    const { x: translateX, y: translateY } = this._drawLiquid;
+                                    const originTranslate = Vector2.create(fixLineWidthByScale(translateX, scale), fixLineWidthByScale(translateY, scale));
                                     const centerPoint = Vector2.create(fixLineWidthByScale(spanWidth / 2, scale), fixLineWidthByScale(lineHeight / 2, scale));
                                     const spanStartPoint = calculateRectRotate(
                                         originTranslate.addByPoint(fixLineWidthByScale(spanLeft, scale), 0),
@@ -376,54 +479,20 @@ export class Documents extends DocComponent {
                                         }
                                     }
                                 }
-                                this._translateRestore();
+                                this._drawLiquid.translateRestore();
                             }
-                            this._translateRestore();
+                            this._drawLiquid.translateRestore();
                         }
                     }
                 }
             }
 
             this._resetRotation(ctx, finalAngle);
+
+            const { x, y } = this._drawLiquid.translatePage(page, this.pageLayoutType, this.pageMarginLeft, this.pageMarginTop);
+            pageLeft += x;
+            pageTop += y;
         }
-    }
-
-    private _addSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
-        if (!skeleton) {
-            return;
-        }
-
-        this._skeletonObserver = skeleton.onRecalculateChangeObservable.add((data) => {
-            const pages = data.pages;
-            let width = 0;
-            let height = 0;
-            for (let i = 0, len = pages.length; i < len; i++) {
-                const page = pages[i];
-                const { pageWidth, pageHeight } = page;
-                if (this.pageLayoutType === PageLayoutType.VERTICAL) {
-                    height += pageHeight;
-                    if (i !== len - 1) {
-                        height += this.pageMarginTop;
-                    }
-                    width = Math.max(width, pageWidth);
-                } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
-                    width += pageWidth;
-                    if (i !== len - 1) {
-                        width += this.pageMarginLeft;
-                    }
-                    height = Math.max(height, pageHeight);
-                }
-            }
-
-            this.resize(width, height);
-        });
-    }
-
-    private _disposeSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
-        if (!skeleton) {
-            return;
-        }
-        skeleton.onRecalculateChangeObservable.remove(this._skeletonObserver);
     }
 
     changeSkeleton(newSkeleton: DocumentSkeleton) {
@@ -433,8 +502,107 @@ export class Documents extends DocComponent {
         return this;
     }
 
+    findPositionBySpan(span: IDocumentSkeletonSpan) {
+        const divide = span.parent;
+
+        const line = divide?.parent;
+
+        const column = line?.parent;
+
+        const section = column?.parent;
+
+        const page = section?.parent;
+
+        const skeletonData = this.getSkeleton()?.getSkeletonData();
+
+        if (!divide || !column || !section || !page || !skeletonData) {
+            return;
+        }
+
+        let spanIndex = divide.spanGroup.indexOf(span);
+
+        const divideIndex = line.divides.indexOf(divide);
+
+        const lineIndex = column.lines.indexOf(line);
+
+        const columnIndex = section.columns.indexOf(column);
+
+        const sectionIndex = page.sections.indexOf(section);
+
+        const pageIndex = skeletonData.pages.indexOf(page);
+
+        return {
+            span: spanIndex,
+            divide: divideIndex,
+            line: lineIndex,
+            column: columnIndex,
+            section: sectionIndex,
+            page: pageIndex,
+        };
+    }
+
+    findNodeByCharIndex(charIndex: number): Nullable<IDocumentSkeletonSpan> {
+        const skeleton = this.getSkeleton();
+
+        if (!skeleton) {
+            return;
+        }
+
+        const skeletonData = skeleton.getSkeletonData();
+
+        const pages = skeletonData.pages;
+
+        for (let page of pages) {
+            const { sections, st, ed } = page;
+
+            if (charIndex < st || charIndex > ed) {
+                continue;
+            }
+
+            for (let section of sections) {
+                const { columns, st, ed } = section;
+
+                if (charIndex < st || charIndex > ed) {
+                    continue;
+                }
+
+                for (let column of columns) {
+                    const { lines, st, ed } = column;
+
+                    if (charIndex < st || charIndex > ed) {
+                        continue;
+                    }
+
+                    for (let line of lines) {
+                        const { divides, lineHeight, st, ed } = line;
+                        const divideLength = divides.length;
+
+                        if (charIndex < st || charIndex > ed) {
+                            continue;
+                        }
+
+                        for (let i = 0; i < divideLength; i++) {
+                            const divide = divides[i];
+                            const { spanGroup, st, ed } = divide;
+
+                            if (charIndex < st || charIndex > ed) {
+                                continue;
+                            }
+
+                            const span = spanGroup[charIndex - st];
+
+                            if (span) {
+                                return span;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     findNodeByCoord(offsetX: number, offsetY: number) {
-        const scene = this.getScene();
+        const scene = this.getScene() as Scene;
         const originCoord = scene.transformToSceneCoord(Vector2.FromArray([offsetX, offsetY]));
 
         if (!originCoord) {
@@ -449,106 +617,84 @@ export class Documents extends DocComponent {
             return false;
         }
 
+        this._findLiquid.reset();
+
         const skeletonData = skeleton.getSkeletonData();
 
         const pages = skeletonData.pages;
 
-        let pageStartX = 0;
-
-        let pageStartY = 0;
-
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
-            const {
-                pageWidth,
-                pageHeight,
-                marginTop: pagePaddingTop = 0,
-                marginBottom: pagePaddingBottom = 0,
-                marginLeft: pagePaddingLeft = 0,
-                marginRight: pagePaddingRight = 0,
-            } = page;
-            let startX = -1;
-            let startY = -1;
-            let endX = -1;
-            let endY = -1;
-            if (this.pageLayoutType === PageLayoutType.VERTICAL) {
-                startX = 0;
-                endX = pageWidth;
-                startY = pageStartY;
-                endY = pageStartY + pageHeight;
 
-                pageStartY += pageHeight + this.pageMarginTop;
-            } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
-                startX = pageStartX;
-                endX = pageStartX + pageWidth;
-                startY = 0;
-                endY = pageHeight;
-
-                pageStartX += pageWidth + this.pageMarginLeft;
-            }
+            const { startX, startY, endX, endY } = this._getPageBoundingBox(page);
 
             if (!(x >= startX && x <= endX && y >= startY && y <= endY)) {
+                this._translatePage(page);
                 continue;
             }
 
-            x -= startX + pagePaddingLeft;
-            y -= startY + pagePaddingTop;
+            this._findLiquid.translatePagePadding(page);
 
             const sections = page.sections;
             for (let section of sections) {
-                const { columns, top: sectionTop = 0, height } = section;
+                const { columns, height } = section;
 
-                if (!(y >= sectionTop && y <= sectionTop + height)) {
+                this._findLiquid.translateSection(section);
+
+                const { y: startY } = this._findLiquid;
+
+                if (!(y >= startY && y <= startY + height)) {
                     continue;
                 }
 
-                y -= sectionTop;
-
                 for (let column of columns) {
-                    const { lines, width: columnWidth, left: columnLeft } = column;
+                    const { lines, width: columnWidth } = column;
 
-                    if (!(x >= columnLeft && x <= columnLeft + columnWidth)) {
+                    this._findLiquid.translateColumn(column);
+
+                    const { x: startX } = this._findLiquid;
+
+                    if (!(x >= startX && x <= startX + columnWidth)) {
                         continue;
                     }
-
-                    x -= columnLeft;
 
                     const linesCount = lines.length;
 
                     for (let i = 0; i < linesCount; i++) {
                         const line = lines[i];
-                        const {
-                            divides,
-                            top: lineTop,
-                            marginBottom: lineMarginBottom = 0,
-                            marginTop: lineMarginTop = 0,
-                            paddingTop: linePaddingTop = 0,
-                            paddingBottom: linePaddingBottom = 0,
-                            type,
-                            lineHeight = 0,
-                        } = line;
+                        const { divides, type, lineHeight = 0 } = line;
 
                         if (type === LineType.BLOCK) {
                             continue;
                         } else {
-                            const lineOffset = lineTop + lineMarginTop + linePaddingTop;
+                            this._findLiquid.translateSave();
+                            this._findLiquid.translateLine(line);
 
-                            if (!(y >= lineOffset && y <= lineOffset + lineHeight)) {
+                            const { y: startY } = this._findLiquid;
+
+                            const startY_fin = startY;
+
+                            const endY_fin = startY + lineHeight;
+
+                            if (!(y >= startY_fin && y <= endY_fin)) {
+                                this._findLiquid.translateRestore();
                                 continue;
                             }
-
-                            y -= lineOffset;
 
                             const divideLength = divides.length;
                             for (let i = 0; i < divideLength; i++) {
                                 const divide = divides[i];
-                                const { spanGroup, width: divideWidth, left: divideLeft, paddingLeft: dividePaddingLeft } = divide;
-                                const divideStart = divideLeft + dividePaddingLeft;
-                                if (!(x >= divideStart && x <= divideStart + divideWidth)) {
+                                const { spanGroup, width: divideWidth } = divide;
+
+                                this._findLiquid.translateSave();
+                                this._findLiquid.translateDivide(divide);
+
+                                const { x: startX } = this._findLiquid;
+
+                                if (!(x >= startX && x <= startX + divideWidth)) {
+                                    this._findLiquid.translateRestore();
                                     continue;
                                 }
-
-                                x -= divideStart;
 
                                 for (let span of spanGroup) {
                                     if (!span.content || span.content.length === 0) {
@@ -557,18 +703,36 @@ export class Documents extends DocComponent {
 
                                     const { width: spanWidth, left: spanLeft } = span;
 
-                                    if (!(x >= spanLeft && x <= spanLeft + spanWidth)) {
+                                    const startX_fin = startX + spanLeft;
+
+                                    const endX_fin = startX + spanLeft + spanWidth;
+
+                                    if (!(x >= startX_fin && x <= endX_fin)) {
                                         continue;
                                     }
 
-                                    return span;
+                                    return {
+                                        node: span,
+                                        ratioX: x / (startX_fin + endX_fin),
+                                        ratioY: y / (startY_fin + endY_fin),
+                                    };
                                 }
+                                this._findLiquid.translateRestore();
                             }
+                            this._findLiquid.translateRestore();
                         }
                     }
                 }
             }
+            this._findLiquid.restorePagePadding(page);
+            this._translatePage(page);
         }
+
+        return false;
+    }
+
+    private _translatePage(page: IDocumentSkeletonPage) {
+        this._findLiquid.translatePage(page, this.pageLayoutType, this.pageMarginLeft, this.pageMarginTop);
     }
 
     static create(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {

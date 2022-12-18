@@ -221,6 +221,79 @@ export const BORDER_LINE_CHILDREN = [
     },
 ];
 
+export const BORDER_SIZE_CHILDREN = [
+    {
+        locale: 'borderLine.borderNone',
+        value: '',
+    },
+    {
+        customLabel: {
+            name: 'BorderThin',
+        },
+        value: 'BorderThin',
+    },
+    {
+        customLabel: {
+            name: 'BorderHair',
+        },
+        value: 'BorderHair',
+    },
+    {
+        customLabel: {
+            name: 'BorderDotted',
+        },
+        value: 'BorderDotted',
+    },
+    {
+        customLabel: {
+            name: 'BorderDashed',
+        },
+        value: 'BorderDashed',
+    },
+    {
+        customLabel: {
+            name: 'BorderDashDot',
+        },
+        value: 'BorderDashDot',
+    },
+    {
+        customLabel: {
+            name: 'BorderDashDotDot',
+        },
+        value: 'BorderDashDotDot',
+    },
+    {
+        customLabel: {
+            name: 'BorderMedium',
+        },
+        value: 'BorderMedium',
+    },
+    {
+        customLabel: {
+            name: 'BorderMediumDashed',
+        },
+        value: 'BorderMediumDashed',
+    },
+    {
+        customLabel: {
+            name: 'BorderMediumDashDot',
+        },
+        value: 'BorderMediumDashDot',
+    },
+    {
+        customLabel: {
+            name: 'BorderMediumDashDotDot',
+        },
+        value: 'BorderMediumDashDotDot',
+    },
+    {
+        customLabel: {
+            name: 'BorderThick',
+        },
+        value: 'BorderThick',
+    },
+];
+
 export const MERGE_CHILDREN = [
     {
         locale: 'merge.all',
@@ -250,6 +323,7 @@ export const HORIZONTAL_ALIGN_CHILDREN = [
     },
     {
         locale: 'align.center',
+        selected: true,
         customSuffix: {
             name: 'CenterAlignIcon',
         },

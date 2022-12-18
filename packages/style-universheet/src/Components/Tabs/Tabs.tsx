@@ -85,7 +85,7 @@ export class Tab extends PureComponent<BaseTabProps> {
     };
 
     render(props: BaseTabProps, state: BaseTabState) {
-        const { children, type = 'line', className } = props;
+        const { children, type = 'line', className = '' } = props;
         const classes = joinClassNames(
             styles.tabs,
             {

@@ -6,17 +6,33 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        .main {
+            width: 100px;
+            height: 100px;
+            background: #abcdef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
 </head>
 
 <body>
-
+    <div class="main">嘿嘿嘿</div>
+    <button>click</button>
 </body>
 <script>
-    const a = 'abcLocale'
-    const index = a.indexOf('Locale')
-    console.dir(index)
-    b = a.slice(0, index)
-    console.dir(b)
+    const btn = document.querySelector('button')
+    const dom = document.querySelector('div')
+    btn.onclick = () => {
+        dom.style.position = 'fixed'
+        dom.style.left = '0'
+        dom.style.top = '0'
+        dom.style.width = '100vw'
+        dom.style.height = '100vh'
+        dom.style.zIndex = '999'
+    }
 </script>
 
 </html>

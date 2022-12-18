@@ -152,7 +152,28 @@ pnpm install
     }
     ```
 
-3. 变量名、方法名等取名字应该遵循的规则是，在表达清楚含义的前提下尽量简洁。推荐使用完整的单词，切勿使用汉字、拼音，如果想不到好的单词，可以到 [codelf](https://unbug.github.io/codelf/) 搜索下。
+3. 如果一个私有方法 `_funcUse`调用了另一个私有方法 `_func`，但是后续开发中需要公开 `_func` 提供的功能，我们建议另外包装一个公共方法出来，比如
+
+    ```ts
+    class MyClass {
+        // 私有
+        private _func() {}
+
+        // 公用
+        func() {
+            this._func()
+        }
+
+        private _funcUse() {
+            // 私有的方法调用私有的方法
+            this._func()
+
+            // 其它逻辑
+        }
+    }
+    ```
+
+4. 变量名、方法名等取名字应该遵循的规则是，在表达清楚含义的前提下尽量简洁。推荐使用完整的单词，切勿使用汉字、拼音，如果想不到好的单词，可以到 [codelf](https://unbug.github.io/codelf/) 搜索下。
 
 ### 语言特性
 
@@ -272,13 +293,17 @@ pnpm install
 
 5. Action 默认情况下需要加入撤销重做栈、发送后台、修改本地数据，但是有的操作可能不需要撤销重做或者发送协同后台，这时候要配置 operationType。比如：切换 sheet 页，不需要发送协同；切换选区功能，不需要进撤销重做栈。
 
+6. 不要直接使用 `console.log` 原生方法，推荐使用 `Logger` 静态类提供的方法来打印日志，便于我们对日志进行更精细的控制。
+
 ## 能力扩展
 
 核心能力的扩展，依靠 Plugin、Registry 和 Register 来提供
 
 1. Plugin：大的功能块，使用插件扩展核心能力，核心提供了 install 安装插件
-2. Registry：插件内部小的功能块，使用核心提供的一个 Registry 静态注册方法，方便在项目初始化的时候快速搜集内部模块的扩展实例
+2. Registry：插件内部小的功能块，使用核心提供的一个 Registry 静态注册方法，方便在项目初始化的时候快速搜集内部模块的扩展实例。它是一种设计模式
 3. Register：Register 将上一步 Registry 注册的方法，再统一动态注册管理，并且提供直接将内部模块动态注册上去的方法，以便开发者在外部进行动态扩增加某一个模块
+
+通常情况下，一个插件内部的小模块，就是使用静态 load 的方式快速搜集模块，再动态 add 到核心的注册管理器上。如果模块比较简单，也可以直接将插件内部的模块直接 add 到注册管理器。
 
 ## 插件开发实践
 
@@ -293,20 +318,41 @@ pnpm install
     npm i
     ```
 
-    然后再回到主目录运行生成插件的命令
-
 2. 运行 cli 命令来选择插件
+
+    先确保回到项目主目录
+
+    ```sh
+    cd ..
+    ```
+
+    再运行生成插件的命令
 
     ```shell
     npm run univer-cli create inner
     ```
 
-    其中 create 表示创建一个插件，inner 表示在 Univer 主仓库内部新建插件，也就是放到 packages 文件夹下。如果想在自己电脑的一个空白目录用脚手架新建一个插件，就不用加 inner，运行`npm run univer-cli create`即可。
+    其中 create 表示创建一个插件，inner 表示在 Univer 主仓库内部新建插件，也就是放到 packages 文件夹下。inner 模式下，还需要项目根目录的 [tsconfig.json](../tsconfig.json) 文件中，增加当前添加插件的引用地址，必须这样写：
+
+    ```json
+    {
+        // 其他配置...
+        "references": [
+            // 已有配置
+            { "path": "./packages/core/tsconfig.ref.json" },
+            { "path": "./packages/base-render/tsconfig.ref.json" },
+            // 新加的配置
+            { "path": "./packages/sheets-plugin-data-validation/tsconfig.ref.json" }
+        ]
+    }
+    ```
+
+    如果想在自己电脑的一个空白目录用脚手架新建一个插件，就不用加 inner，运行`npm run univer-cli create`即可。
 
     接着选择你想要的模板
 
     - base：基础插件，构建类似 `base-sheets`、`base-docs`、`base-slides` 的插件
-    - sheets-plugin：表格插件，构建类似 `sheet-plugin-sort`、`sheet-plugin-data-validation`的插件
+    - sheets-plugin：表格插件，构建类似 `sheets-plugin-sort`、`sheets-plugin-data-validation`的插件
 
     接着再填写你的插件名称，比如填写 `data-validation`，程序将会在 `packages` 文件夹下，生成一个完整的插件模板，比如`packages/sheets-plugin-data-validation`。
 
@@ -346,7 +392,7 @@ pnpm install
 
 ```sh
 │  index.ts # 插件出口
-│  main.tsx # 插件调试预览入口
+│  main.ts # 插件调试预览入口
 │  preact.d.ts # preact 声明文件
 │  SheetPlugin.tsx # 插件核心导出类（实际名称会根据插件名称替换）
 │
@@ -590,11 +636,29 @@ const s = `${style.AlternatingColorsSideSetting}`;
 ### 测试数据
 
 1. 如果是单元测试需要使用的数据，直接放在 `src` 同级的 `test` 目录下
-2. 如果是插件的初始化的入参数据，可以直接写在 `main.tsx` 中，或者自己建立一个新的文件夹，如 `src/Data` 文件夹，文件名推荐使用 `DEFAULT_[NAME]_DATA` 的格式，如 `DEFAULT_WORKBOOK_DATA`
+2. 如果是插件的初始化的入参数据，可以直接写在 `main.ts` 中，或者自己建立一个新的文件夹，如 `src/Data` 文件夹，文件名推荐使用 `DEFAULT_[NAME]_DATA` 的格式，如 `DEFAULT_WORKBOOK_DATA`
 
 ### 不使用 preact 构造插件 UI
 
 ### 处理国际化
+
+## 注册快捷键
+
+`base-component`插件中向核心提供了`onKeyDownObservable`，可以用来快捷注册键盘快捷键。
+
+我们允许为同一组快捷键注册多个监听。
+
+```ts
+const onKeyDownObservable = this._plugin.getContext().getObserverManager().getObserver<KeyboardEvent>('onKeyDownObservable', 'core');
+
+onKeyDownObservable?.add((evt: KeyboardEvent) => {
+    // handle Ctrl + A
+    if (evt.ctrlKey && evt.key === 'a') {
+        // custom function
+        this.handleCtrlA();
+    }
+});
+```
 
 ## 测试
 
@@ -920,6 +984,14 @@ export class AlternatingColorsPlugin extends Plugin {
 Tips:
 核心是否要包装插件 API，要看核心是否提供了 Action，不允许核心调用插件 API，如 Find 插件提供 createTextFinder，核心不提供
 
+8. Action 扩展
+
+当用户输入 `100%`，我们需要自动将单元格格式改为`百分比`，当用户输入`=SUM(2)`时候需要计算公式，这种情况下，我们需要使用到数字格式和公式插件的能力来转换这些数据。所以需要在 Command 执行前做个 Action 拦截的动作，拦截 ActionData 传入到数字格式 Action 扩展和公式 Action 扩展，做完计算之后，直接修改这个 ActionData，并且增加自己的数字格式 Action 和公式 Action，来实现这两种计算。
+
+在编辑单元格的时候，我们是不知道用户是否安装了数字格式插件或者公式插件的，所以我们还做了一个 Action 扩展注册机制，只有按照规范注册了的扩展，才会在 Action 拦截的时候使用，其中，扩展管理的地方负责检验 Action 数据是否打中扩展，打中的扩展就会执行。
+
+ActionOperation 有一个 removeExtension 可以移除 action 拦截。一般情况下，Action 都会走拦截，但是在初始化（比如公式）或者已经拦截的 ActionExtension 里触发的 Action（比如 FormulaActionExtension），这两种情况是不需要拦截的，所以要做过滤。
+
 ## 组件开发
 
 ### 技术原理
@@ -1003,6 +1075,12 @@ Tips:
      }
 
     ```
+
+### 工具栏如何加一个按钮
+
+### 如何增加一个侧边栏
+
+### 如何加一个弹窗
 
 ## 单元测试
 
@@ -1193,7 +1271,6 @@ univerSheetUp.installPlugin(new UniverComponentSheet());
 univerSheetUp.installPlugin(
     new SheetPlugin({
         container: 'universheet-demo-up',
-        layout: 'auto',
     })
 );
 // 加载筛选插件
@@ -1233,7 +1310,6 @@ univerSheetUp.installPlugin(new UniverComponentSheet());
 univerSheetUp.installPlugin(
     new SheetPlugin({
         container: 'universheet-demo-up',
-        layout: 'auto',
     })
 );
 
@@ -1285,7 +1361,6 @@ const workbookConfig = {
 // 可选的spreadsheetConfig插件配置
 const spreadsheetConfig = {
     container: 'universheet-demo-up',
-    layout: 'auto',
 };
 
 // 统一配置入口

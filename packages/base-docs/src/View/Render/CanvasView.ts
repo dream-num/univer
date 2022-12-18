@@ -1,7 +1,6 @@
 import { Engine, EVENT_TYPE, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univer/base-render';
 import { EventState, sortRules } from '@univer/core';
 import { BaseView, CanvasViewRegistry, CANVAS_VIEW_KEY } from './BaseView';
-import { DocsView } from './Views/DocsView';
 import './Views';
 import { DocPlugin } from '../../DocPlugin';
 
@@ -65,7 +64,10 @@ export class CanvasView {
 
         engine.runRenderLoop(() => {
             scene.render();
-            document.getElementById('app')!.innerText = `fps:${Math.round(engine.getFps()).toString()}`;
+            const app = document.getElementById('app');
+            if (app) {
+                app.innerText = `fps:${Math.round(engine.getFps()).toString()}`;
+            }
         });
     }
 
@@ -77,8 +79,8 @@ export class CanvasView {
         }
     }
 
-    getDocsView(): DocsView {
-        return this.getView(CANVAS_VIEW_KEY.DOCS_VIEW) as DocsView;
+    getDocsView() {
+        return this.getView(CANVAS_VIEW_KEY.DOCS_VIEW);
     }
 
     private _viewLoader(scene: Scene, plugin: DocPlugin) {

@@ -68,6 +68,8 @@ export abstract class BaseObject {
 
     private _isTransformer = false;
 
+    private _forceRender = false;
+
     groupKey?: string;
 
     isInGroup: boolean = false;
@@ -265,6 +267,21 @@ export abstract class BaseObject {
         return this;
     }
 
+    isRender(bounds?: IBoundRect) {
+        if (this._forceRender) {
+            return false;
+        }
+        return bounds && !this.isInGroup;
+    }
+
+    private _makeDirtyMix() {
+        if (this.debounceParentDirty) {
+            this.makeDirty(true);
+        } else {
+            this.makeDirtyNoDebounce(true);
+        }
+    }
+
     protected _setTransForm() {
         const composeResult = Transform.create().composeMatrix({
             left: this.left + this.strokeWidth / 2,
@@ -278,11 +295,7 @@ export abstract class BaseObject {
             flipY: this.flipY,
         });
         this.transform = composeResult;
-        if (this.debounceParentDirty) {
-            this.makeDirty(true);
-        } else {
-            this.makeDirtyNoDebounce(true);
-        }
+        this._makeDirtyMix();
     }
 
     get top(): number {
@@ -465,10 +478,12 @@ export abstract class BaseObject {
 
     hide() {
         this._visible = false;
+        this._makeDirtyMix();
     }
 
     show() {
         this._visible = true;
+        this._makeDirtyMix();
     }
 
     render(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
@@ -611,6 +626,8 @@ export abstract class BaseObject {
         this.onIsAddedToParentObserver.clear();
 
         this.parent?.removeObject(this);
+
+        this.onDisposeObserver.notifyObservers(this);
     }
 
     onPointerDownObserver = new Observable<IPointerEvent | IMouseEvent>();
@@ -635,6 +652,8 @@ export abstract class BaseObject {
 
     onIsAddedToParentObserver = new Observable<any>();
 
+    onDisposeObserver = new Observable<BaseObject>();
+
     toJson() {
         const props: IKeyValue = {};
         BASE_OBJECT_ARRAY.forEach((key) => {
@@ -647,6 +666,11 @@ export abstract class BaseObject {
 
     getScene() {
         let parent: any = this.parent;
+
+        if (parent == null) {
+            return;
+        }
+
         if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
             return parent;
         }

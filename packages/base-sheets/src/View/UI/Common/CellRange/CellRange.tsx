@@ -1,7 +1,4 @@
 import { BaseComponentRender, BaseComponentSheet, Component, createRef, ModalButtonGroup } from '@univer/base-component';
-import { PLUGIN_NAMES } from '@univer/core';
-import { SheetPlugin } from '../../../..';
-import { CellRangeModal } from './CellRangeModal';
 import styles from './index.module.less';
 
 interface CellRangeProps {
@@ -51,15 +48,6 @@ export class CellRange extends Component<CellRangeProps, CellRangeState> {
         });
     }
 
-    showModal() {
-        const { onTableClick } = this.props;
-        const sheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
-        const cellRangeModal = sheetPlugin.getRegisterComponent(CellRangeModal.name);
-        console.dir(cellRangeModal);
-
-        onTableClick?.();
-    }
-
     confirmRange() {
         const value = this.inputRef.current?.value;
 
@@ -74,14 +62,14 @@ export class CellRange extends Component<CellRangeProps, CellRangeState> {
     }
 
     render() {
-        const { placeholder, value } = this.props;
+        const { placeholder, value, onTableClick } = this.props;
         const Input = this._render.renderFunction('Input');
         const TableIcon = this._render.renderFunction('TableIcon');
 
         return (
-            <div className={styles.cellRangeModal}>
+            <div className={styles.cellRange}>
                 <Input onClick={this.handleClick.bind(this)} placeholder={placeholder} value={value} onChange={this.changeInput}></Input>
-                <span className={styles.cellModalIcon} onClick={this.showModal.bind(this)}>
+                <span className={styles.cellModalIcon} onClick={onTableClick}>
                     <TableIcon />
                 </span>
             </div>

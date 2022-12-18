@@ -1,4 +1,19 @@
-import { BooleanNumber, GridType, IDocStyleBase, IDocumentLayout, IParagraphStyle, IReferenceSource, ISectionBreakBase, ITextStyle } from '@univer/core';
+import {
+    BooleanNumber,
+    GridType,
+    IDocStyleBase,
+    IDocumentLayout,
+    IOffset,
+    IParagraphStyle,
+    IReferenceSource,
+    IScale,
+    ISectionBreakBase,
+    ISize,
+    ITextStyle,
+    ITransformState,
+} from '@univer/core';
+import { TextSelection } from '../Component/Docs/Common/TextSelection';
+import { Documents } from '../Component/Docs/Document';
 import {
     IDocumentSkeletonBlockAnchor,
     IDocumentSkeletonBullet,
@@ -9,39 +24,15 @@ import {
 } from './IDocumentSkeletonCached';
 import { Vector2 } from './Vector2';
 
-export interface ISize {
-    width?: number;
-    height?: number;
-}
-
-export interface IScale {
-    scaleX?: number;
-    scaleY?: number;
-}
-
-export interface IOffset {
-    left?: number;
-    top?: number;
+export interface IObjectFullState extends ITransformState {
+    strokeWidth?: number;
+    zIndex?: number;
+    isTransformer?: boolean;
+    forceRender?: boolean;
 }
 
 export interface IRect extends ISize, IOffset {
     points: Vector2[];
-}
-
-export interface ITransformState extends IOffset {
-    scaleX?: number;
-    scaleY?: number;
-    angle?: number;
-    skewX?: number;
-    skewY?: number;
-    flipX?: boolean;
-    flipY?: boolean;
-}
-
-export interface IObjectFullState extends ITransformState, ISize {
-    strokeWidth?: number;
-    zIndex?: number;
-    isTransformer?: boolean;
 }
 
 export interface ISceneTransformState extends ISize, IScale {}
@@ -119,6 +110,13 @@ export interface IFontCreateConfig {
     gridType?: GridType;
     snapToGrid: BooleanNumber;
     pageWidth?: number;
+}
+
+export interface IEditorInputConfig {
+    event: Event | CompositionEvent | KeyboardEvent;
+    content?: string;
+    document: Documents;
+    selection?: TextSelection;
 }
 
 // export interface IPageConfig {

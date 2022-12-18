@@ -1,5 +1,5 @@
 import { getColor, Rect, Documents, DocumentSkeleton } from '@univer/base-render';
-import { docsDemoData } from '../../../Basic/DemoData';
+import { IDocumentData } from '@univer/core';
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 import { CANVAS_VIEW_KEY } from '../BaseView';
 
@@ -20,7 +20,9 @@ export class DocsView extends BaseView {
         const scene = this.getScene();
         const context = this.getContext();
 
-        const documentSkeleton = this._buildSkeleton();
+        const docsModel = context.getDocument();
+
+        const documentSkeleton = this._buildSkeleton(docsModel.getSnapshot());
 
         const documents = new Documents(DOCS_VIEW_KEY.MAIN, documentSkeleton);
         documents.zIndex = 1000;
@@ -31,39 +33,41 @@ export class DocsView extends BaseView {
 
         scene.addObjects([documents], 0);
 
-        const engine = scene.getEngine();
-        if (engine) {
-            const { width: engineWidth, height: engineHeight } = engine;
+        // const engine = scene.getEngine();
+        // if (engine) {
+        //     const { width: engineWidth, height: engineHeight } = engine;
 
-            const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = documents;
+        //     const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = documents;
 
-            let docsLeft = 0;
-            let docsTop = 0;
+        //     let docsLeft = 0;
+        //     let docsTop = 0;
 
-            let sceneWidth = 0;
+        //     let sceneWidth = 0;
 
-            let sceneHeight = 0;
+        //     let sceneHeight = 0;
 
-            if (engineWidth > docsWidth) {
-                docsLeft = engineWidth / 2 - docsWidth / 2;
-                sceneWidth = engineWidth - 30;
-            } else {
-                docsLeft = pageMarginLeft;
-                sceneWidth = docsWidth + pageMarginLeft * 2;
-            }
+        //     if (engineWidth > docsWidth) {
+        //         docsLeft = engineWidth / 2 - docsWidth / 2;
+        //         sceneWidth = engineWidth - 30;
+        //     } else {
+        //         docsLeft = pageMarginLeft;
+        //         sceneWidth = docsWidth + pageMarginLeft * 2;
+        //     }
 
-            if (engineHeight > docsHeight) {
-                docsTop = engineHeight / 2 - docsHeight / 2;
-                sceneHeight = engineHeight - 30;
-            } else {
-                docsTop = pageMarginTop;
-                sceneHeight = docsHeight + pageMarginTop * 2;
-            }
+        //     if (engineHeight > docsHeight) {
+        //         docsTop = engineHeight / 2 - docsHeight / 2;
+        //         sceneHeight = engineHeight - 30;
+        //     } else {
+        //         docsTop = pageMarginTop;
+        //         sceneHeight = docsHeight + pageMarginTop * 2;
+        //     }
 
-            scene.resize(sceneWidth, sceneHeight);
+        //     scene.resize(sceneWidth, sceneHeight + 200);
 
-            documents.translate(docsLeft, docsTop);
-        }
+        //     documents.translate(docsLeft, docsTop);
+        // }
+
+        documents.calculatePagePosition();
 
         documents.enableEditor();
     }
@@ -76,10 +80,10 @@ export class DocsView extends BaseView {
         return this._documents;
     }
 
-    private _buildSkeleton() {
+    private _buildSkeleton(snapshot: IDocumentData) {
         const context = this.getContext();
 
-        const docsSkeleton = DocumentSkeleton.create(docsDemoData, context);
+        const docsSkeleton = DocumentSkeleton.create(snapshot, context);
 
         return docsSkeleton;
     }

@@ -1,1 +1,1 @@
-export * from './Render';
+export * from './Slide';

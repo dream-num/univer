@@ -33,6 +33,16 @@ export class ActionOperation<T extends IActionData> {
         return false;
     }
 
+    static hasExtension<U extends IActionData>(action: U): boolean {
+        if (action.operation) {
+            return (
+                (action.operation & ActionOperationType.EXTENSION_ACTION) ===
+                ActionOperationType.EXTENSION_ACTION
+            );
+        }
+        return false;
+    }
+
     static make<U extends IActionData>(action: U) {
         action.operation = ActionOperationType.DEFAULT_ACTION;
         return new ActionOperation<U>(action);
@@ -59,6 +69,13 @@ export class ActionOperation<T extends IActionData> {
     removeCollaboration() {
         if (this._action.operation) {
             this._action.operation &= ~ActionOperationType.SERVER_ACTION;
+        }
+        return this;
+    }
+
+    removeExtension() {
+        if (this._action.operation) {
+            this._action.operation &= ~ActionOperationType.EXTENSION_ACTION;
         }
         return this;
     }

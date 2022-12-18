@@ -13,10 +13,10 @@ import {
     WrapTextType,
 } from '@univer/core';
 import { SheetPlugin } from '../../../SheetPlugin';
-import { BaseView, CanvasViewRegistry } from '../BaseView';
+import { BaseView } from '../BaseView';
 
 const richTextTest: IDocumentData = {
-    documentId: 'd',
+    id: 'd',
     drawings: {
         shapeTest1: {
             objectId: 'shapeTest1',
@@ -434,11 +434,13 @@ export class OtherViewTest extends BaseView {
             stroke: 'rgba(102,111,99, 0.8)',
             zIndex: 11,
         });
-        const picture = new Picture({
+        const picture = new Picture('picture_1', {
             url: 'https://cnbabylon.com/assets/img/agents.png',
             top: 500,
             left: 800,
             zIndex: 13,
+            autoHeight: true,
+            autoWidth: true,
             isTransformer: true,
         });
 
@@ -486,4 +488,4 @@ export class OtherViewTestFactory {
         return new OtherViewTest().initialize(scene, plugin);
     }
 }
-CanvasViewRegistry.add(new OtherViewTestFactory());
+// CanvasViewRegistry.add(new OtherViewTestFactory());

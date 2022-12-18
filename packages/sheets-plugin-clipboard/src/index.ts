@@ -1,3 +1,2 @@
-import { ClipboardPlugin } from './ClipboardPlugin';
+export * from './ClipboardPlugin';
 
-export { ClipboardPlugin };

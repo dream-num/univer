@@ -2,7 +2,6 @@
 export * from './SheetActionBase';
 export * from './ActionObservers';
 export * from './Command';
-export * from './CommandBase';
 export * from './CommandManager';
 export * from './UndoManager';
 export * from './ActionExtensionManager';

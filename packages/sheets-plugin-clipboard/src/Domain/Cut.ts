@@ -27,7 +27,7 @@ export abstract class Cut {
         e.preventDefault();
     }
 
-    initRegisterComponent(component: any[]) {
+    private _initRegisterComponent(component: any[]) {
         const SheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
         for (let i = 0; i < component.length; i++) {
             SheetPlugin.registerComponent(CLIPBOARD_PLUGIN + component[i].name, component[i]);

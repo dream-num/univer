@@ -1,6 +1,8 @@
 import { Nullable } from '@univer/core';
-import { createSkeletonLetterSpan, createSkeletonWordSpan } from '../..';
-import { hasArabic, hasCJK, hasTibetan, IDocumentSkeletonSpan, IFontCreateConfig } from '../../../..';
+import { createSkeletonLetterSpan, createSkeletonWordSpan } from '../../Common/Span';
+import { hasArabic, hasCJK, hasSpaceAndTab, hasTibetan } from '../../../../Basics/Tools';
+import { IDocumentSkeletonSpan } from '../../../../Basics/IDocumentSkeletonCached';
+import { IFontCreateConfig } from '../../../../Basics/Interfaces';
 
 interface LanguageResult {
     charIndex: number;
@@ -29,7 +31,7 @@ function notCJKHandler(char: string, charIndex: number, charArray: string[], con
     let newCharIndex = charIndex;
     for (let i = charIndex + 1; i < charArray.length; i++) {
         const newChar = charArray[i];
-        if (!hasCJK(newChar)) {
+        if (!hasCJK(newChar) && !hasSpaceAndTab(newChar)) {
             const newSpan = createSkeletonLetterSpan(newChar, config);
             const newCharWidth = newSpan.width;
             if (allWidth + newCharWidth > pageWidth) {

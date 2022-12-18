@@ -8,6 +8,10 @@ English | [简体中文](./README-zh.md)
 
 > ⚠️ This project is still in development, only for testing and learning, not for production
 
+## Demo
+
+-   [Univer Demo](dream-num.github.io/univer-demo/)
+
 ## Development
 
 ### Requirements
@@ -15,26 +19,31 @@ English | [简体中文](./README-zh.md)
 [Node.js](https://nodejs.org/en/) Version >= 14.19
 
 ### Installation
-````
+
+```
 git clone http://github.com/dream-num/univer
 cd univer
 npm i -g pnpm # MacOS : sudo npm i -g pnpm
 npx playwright install
 pnpm i
-````
+```
+
 ### Development
 
 Start sheets
+
 ```
 npm run dev
 ```
 
 Start docs
+
 ```
 npm run dev:doc
 ```
 
 Start slides
+
 ```
 npm run dev:slide
 ```
@@ -53,94 +62,98 @@ Please file an issue at [Issues](http://github.com/dream-num/univer/issues).
 
 ### Sheets
 
-- Basic ability
-  - [x] core data structures
-  - [x] render
-  - [x] UI
-  - [x] cell editing
+-   Basic ability
 
-- Sheet operation
-  - [x] sheet delete
-  - [x] sheet copy
-  - [x] sheet sort
-  - [x] sheet rename
-  - [x] sheet change color
-  - [x] sheet hide
-  - [x] sheet unhide
-  - [x] sheet move left
-  - [x] sheet moves right
+    -   [x] core data structures
+    -   [x] render
+    -   [x] UI
+    -   [x] cell editing
 
-- Right click menu
-  - [x] copy
-  - [x] paste
-  - [x] insert row
-  - [x] insert column
-  - [x] delete selected rows
-  - [x] delete selected columns
-  - [x] delete cell
-  - [x] clear content
+-   Sheet operation
 
-- Toolbar
-  - [x] undo
-  - [x] redo
-  - [ ] formatter
-  - [ ] currency format
-  - [ ] percent format
-  - [ ] decrease decimal places
-  - [ ] increase the number of decimal places
-  - [ ] more formats
-  - [x] font family
-  - [x] font size
-  - [x] bold
-  - [x] italic
-  - [x] strikethrough
-  - [x] underscore
-  - [x] text color
-  - [x] fill color
-  - [x] border
-  - [x] merge cells
-  - [x] horizontal alignment
-  - [x] vertical alignment
-  - [x] text wrap
-  - [x] text rotation
+    -   [x] sheet delete
+    -   [x] sheet copy
+    -   [x] sheet sort
+    -   [x] sheet rename
+    -   [x] sheet change color
+    -   [x] sheet hide
+    -   [x] sheet unhide
+    -   [x] sheet move left
+    -   [x] sheet moves right
 
-- Count bar
-  - [x] count
-  - [x] zoom
+-   Right click menu
 
+    -   [x] copy
+    -   [x] paste
+    -   [x] insert row
+    -   [x] insert column
+    -   [x] delete selected rows
+    -   [x] delete selected columns
+    -   [x] delete cell
+    -   [x] clear content
 
-- Plugins
-  - [x] clipboard
-  - [ ] format
-  - [ ] formula
-  - [ ] image
-  - [ ] freeze
-  - [ ] link
-  - [ ] comment
-  - [ ] pivot table
-  - [ ] chart
-  - [ ] sort
-  - [ ] filter
-  - [ ] conditional format
-  - [ ] alternating colors
-  - [ ] data validation
-  - [ ] split column
-  - [ ] screenshot
-  - [ ] find
-  - [ ] replace
-  - [ ] protection
-  - [ ] print
-  - [ ] import and export
-  - [ ] collaboration
+-   Toolbar
+
+    -   [x] undo
+    -   [x] redo
+    -   [ ] formatter
+    -   [ ] currency format
+    -   [ ] percent format
+    -   [ ] decrease decimal places
+    -   [ ] increase the number of decimal places
+    -   [ ] more formats
+    -   [x] font family
+    -   [x] font size
+    -   [x] bold
+    -   [x] italic
+    -   [x] strikethrough
+    -   [x] underscore
+    -   [x] text color
+    -   [x] fill color
+    -   [x] border
+    -   [x] merge cells
+    -   [x] horizontal alignment
+    -   [x] vertical alignment
+    -   [x] text wrap
+    -   [x] text rotation
+
+-   Count bar
+
+    -   [x] count
+    -   [x] zoom
+
+-   Plugins
+    -   [x] clipboard
+    -   [ ] format
+    -   [ ] formula
+    -   [ ] image
+    -   [ ] freeze
+    -   [ ] link
+    -   [ ] comment
+    -   [ ] pivot table
+    -   [ ] chart
+    -   [ ] sort
+    -   [ ] filter
+    -   [ ] conditional format
+    -   [ ] alternating colors
+    -   [ ] data validation
+    -   [ ] split column
+    -   [ ] screenshot
+    -   [ ] find
+    -   [ ] replace
+    -   [ ] protection
+    -   [ ] print
+    -   [ ] import and export
+    -   [ ] collaboration
 
 ### Docs
 
-- [x] render
-- [ ] UI
-- [ ] pending
+-   [x] render
+-   [ ] UI
+-   [ ] pending
 
 ### Slides
 
-- [ ] render
-- [ ] UI
-- [ ] pending
+-   [ ] render
+-   [ ] UI
+-   [ ] pending

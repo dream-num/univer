@@ -13,7 +13,7 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univer/core';
-import { getLastPage } from './Common/Tools';
+import { getLastPage, updateBlockIndex } from './Common/Tools';
 
 import { createSkeletonPage } from './Common/Page';
 
@@ -66,6 +66,10 @@ export class DocumentSkeleton extends Skeleton {
         }
 
         const drawing = drawings[id];
+
+        if (!drawing) {
+            return;
+        }
 
         const objectProperties = drawing.objectProperties;
 
@@ -152,7 +156,10 @@ export class DocumentSkeleton extends Skeleton {
                 columnSeparatorType: ColumnSeparatorType.NONE,
                 sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
             };
-            documentContentMapArr.push(documentContentMap);
+
+            if (documentContentMap.blockElements.length > 0) {
+                documentContentMapArr.push(documentContentMap);
+            }
         }
         // console.log('documentContentMapArr', documentContentMapArr, blockElements);
         return documentContentMapArr;
@@ -312,8 +319,11 @@ export class DocumentSkeleton extends Skeleton {
             };
 
             let curSkeletonPage: IDocumentSkeletonPage = getLastPage(allSkeletonPages);
+            let isContinuous = false;
             if (sectionType === SectionType.CONTINUOUS) {
+                updateBlockIndex(allSkeletonPages);
                 this.__addNewSectionByContinuous(curSkeletonPage, columnProperties, columnSeparatorType);
+                isContinuous = true;
             } else {
                 curSkeletonPage = createSkeletonPage(sectionBreakConfig, skeletonResourceReference, curSkeletonPage?.pageNumber);
             }
@@ -327,15 +337,20 @@ export class DocumentSkeleton extends Skeleton {
             }
 
             const { pages, renderedBlockIdMap } = blockInfo;
-            // 计算页和节的位置信息
-            pages.forEach((page: IDocumentSkeletonPage) => {});
 
             // renderedBlockIdMap.forEach((value, blockId) => {
             //     this._renderedBlockIdMap.set(blockId, value);
             // });
 
+            if (isContinuous) {
+                pages.splice(0, 1);
+            }
+
             allSkeletonPages.push(...pages);
         }
+
+        // 计算页和节的位置信息
+        updateBlockIndex(allSkeletonPages);
 
         return skeleton;
     }
@@ -344,11 +359,11 @@ export class DocumentSkeleton extends Skeleton {
     private __addNewSectionByContinuous(curSkeletonPage: IDocumentSkeletonPage, columnProperties: ISectionColumnProperties[], columnSeparatorType: ColumnSeparatorType) {
         const sections = curSkeletonPage.sections;
         const lastSection = sections[sections.length - 1];
-        const { width, height, marginTop: curPageMT, marginBottom: curPageMB, marginLeft: curPageML, marginRight: curPageMR } = curSkeletonPage;
-        const pageContentWidth = width - curPageML - curPageMR;
-        const pageContentHeight = height - curPageMT - curPageMB;
+        const { pageWidth, pageHeight, marginTop: curPageMT, marginBottom: curPageMB, marginLeft: curPageML, marginRight: curPageMR } = curSkeletonPage;
+        const pageContentWidth = pageWidth - curPageML - curPageMR;
+        const pageContentHeight = pageHeight - curPageMT - curPageMB;
         const lastSectionBottom = (lastSection?.top || 0) + (lastSection?.height || 0);
-        const newSection = createSkeletonSection(columnProperties, columnSeparatorType, lastSectionBottom, pageContentWidth, pageContentHeight - lastSectionBottom);
+        const newSection = createSkeletonSection(columnProperties, columnSeparatorType, lastSectionBottom, 0, pageContentWidth, pageContentHeight - lastSectionBottom);
         newSection.parent = curSkeletonPage;
         sections.push(newSection);
     }

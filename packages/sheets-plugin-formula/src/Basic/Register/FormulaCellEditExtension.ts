@@ -40,7 +40,8 @@ export class FormulaCellEditExtensionFactory extends BaseCellEditExtensionFactor
                     const rowArray = cellData[cellRow];
                     rowArray.forEach((cellColumn: number, value: IFormulaData) => {
                         if (Number(cellRow) === row && cellColumn === column) {
-                            formula = value.formula;
+                            // Get the content of the formula and convert it into a DOM structure
+                            formula = this._plugin.getFormulaPromptController().cellInputHandler.functionHTMLGenerate(value.formula);
                             return false;
                         }
                     });

@@ -1,13 +1,15 @@
 {
     "name": "univer-vanilla-ts",
     "version": "0.0.1",
-    "description": "UniverSheet vanilla ts demo project",
+    "description": "Univer vanilla ts demo project",
     "keywords": [],
     "author": "DreamNum <msoffice2@126.com>",
     "license": "MIT",
-    "type": "module",
+    "directories": {
+        "lib": "lib"
+    },
     "scripts": {
-        "test": "echo \"Error: run tests from root\" && exit 1",
+        "test": "jest",
         "dev": "vite",
         "build": "tsc && vite build",
         "watch": "vite build",
@@ -15,13 +17,13 @@
         "serve": "vite preview"
     },
     "devDependencies": {
-        "@preact/preset-vite": "^2.1.0",
+        "@preact/preset-vite": "2.0.0",
+        "@testing-library/preact": "^2.0.1",
         "@types/jest": "^27.5.2",
         "@types/node": "^16.4.6",
-        "@vitejs/plugin-legacy": "^1.5.1",
-        "debug": "^4.3.3",
         "enzyme": "^3.11.0",
         "enzyme-adapter-preact-pure": "^3.3.0",
+        "esbuild": "^0.16.4",
         "eslint": "^8.22.0",
         "eslint-config-airbnb-typescript": "^17.0.0",
         "eslint-config-prettier": "^8.3.0",
@@ -35,16 +37,25 @@
         "jest-environment-jsdom": "^29.0.3",
         "less": "^4.1.1",
         "prettier": "^2.3.2",
+        "ts-jest": "29.0.1",
+        "ts-node": "^10.2.1",
         "typescript": "^4.4.1-rc",
         "vite": "^2.4.4",
         "vite-plugin-external": "1.2.3"
     },
     "dependencies": {
-        "@univer/base-component": "^0.0.1",
+        "@univer/base-component": "workspace:^0.0.1",
+        "@univer/base-docs": "workspace:^0.0.1",
         "@univer/base-render": "workspace:^0.0.1",
+        "@univer/base-sheets": "workspace:^0.0.1",
+        "@univer/base-slides": "workspace:^0.0.1",
         "@univer/common-plugin-data": "workspace:^0.0.1",
-        "@univer/core": "^0.0.1",
-        "@univer/style-universheet": "^0.0.1",
+        "@univer/core": "workspace:^0.0.1",
+        "@univer/sheets-plugin-clipboard": "workspace:^0.0.1",
+        "@univer/sheets-plugin-formula": "workspace:^0.0.1",
+        "@univer/sheets-plugin-import-xlsx": "workspace:^0.0.1",
+        "@univer/sheets-plugin-numfmt": "workspace:^0.0.1",
+        "@univer/style-universheet": "workspace:^0.0.1",
         "preact": "^10.5.14"
     }
 }

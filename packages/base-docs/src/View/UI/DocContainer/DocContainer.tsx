@@ -16,17 +16,7 @@ import {
 } from '@univer/base-component';
 import { AsyncFunction, ContextBase, DocContext, IKeyType, LocaleType, PLUGIN_NAMES, Tools, Workbook } from '@univer/core';
 import cssVars from 'css-vars-ponyfill';
-import {
-    Container,
-    Content,
-    Footer,
-    FormulaBar,
-    Header,
-    // InfoBar,
-    Layout,
-    // SheetBar,
-    Sider,
-} from '@univer/style-universheet';
+import { Container, Content, Footer, Header, Layout, Sider } from '@univer/style-universheet';
 import defaultSkin from '@univer/style-universheet/assets/css/skin/default.module.less';
 import darkSkin from '@univer/style-universheet/assets/css/skin/dark.module.less';
 // All skins' less file
@@ -38,7 +28,7 @@ import { DocPlugin } from '../../../DocPlugin';
 import { InfoBar } from '../InfoBar';
 
 export interface IDocPluginConfigBase {
-    layout: string | ILayout;
+    layout: ILayout;
 }
 
 interface IShowToolBarConfig {
@@ -102,6 +92,8 @@ export interface ILayout {
 
     frozenContent?: boolean;
 
+    infoBar?: boolean;
+
     // Whether to show the toolbar
     toolBar?: boolean;
 
@@ -122,7 +114,7 @@ export interface ILayout {
 }
 
 export interface IDocPluginConfigBase {
-    layout: string | ILayout;
+    layout: ILayout;
 }
 
 export interface BaseDocContainerConfig extends BaseComponentProps, IDocPluginConfigBase {
@@ -163,6 +155,8 @@ export const defaultLayout: ILayout = {
     frozenHeaderLM: true,
 
     frozenContent: true,
+
+    infoBar: true,
 
     toolBar: true,
 
@@ -648,8 +642,8 @@ export class DocContainer extends Component<BaseDocContainerProps, IState> {
                         <Sider style={{ display: layout.outerLeft ? 'block' : 'none' }}></Sider>
                         <Layout className={style.mainContent} style={{ position: 'relative' }}>
                             <Header style={{ display: layout.header ? 'block' : 'none' }}>
-                                <InfoBar></InfoBar>
-                                <ToolBar toolList={[]}></ToolBar>
+                                {layout.infoBar && <InfoBar></InfoBar>}
+                                {layout.toolBar && <ToolBar toolList={[]}></ToolBar>}
                             </Header>
                             <Layout>
                                 <Sider

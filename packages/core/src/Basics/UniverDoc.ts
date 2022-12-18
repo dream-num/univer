@@ -3,7 +3,6 @@ import { Plugin } from '../Plugin';
 import { IOHttp, IOHttpConfig, Logger } from '../Shared';
 import { DocContext } from './DocContext';
 import { VersionCode, VersionEnv } from './Version';
-import { ColorBuilder } from '../Sheets/Domain/ColorBuilder';
 
 /**
  * Externally provided UniverDoc root instance
@@ -42,10 +41,6 @@ export class UniverDoc {
         return IOHttp({ ...config, type: 'POST' });
     }
 
-    static newColor(): ColorBuilder {
-        return new ColorBuilder();
-    }
-
     private _context: DocContext;
 
     /**
@@ -53,6 +48,13 @@ export class UniverDoc {
      */
     get context() {
         return this._context;
+    }
+
+    /**
+     * get unit id
+     */
+    getUnitId(): string {
+        return this._context.getDocument().getUnitId();
     }
 
     /**

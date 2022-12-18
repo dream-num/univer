@@ -23,6 +23,10 @@ export type CalculateValueType = BaseValueObject | ErrorValueObject;
 
 export type PreCalculateNodeType = ReferenceNode | UnionNode | PrefixNode | SuffixNode;
 
+export type ArrayFormulaDataType = { [sheetId: string]: ObjectMatrix<IRangeData> };
+
+export type UnitArrayFormulaDataType = { [unitId: string]: ArrayFormulaDataType };
+
 export interface IFormulaData {
     formula: string; // formulaString
     row: number;

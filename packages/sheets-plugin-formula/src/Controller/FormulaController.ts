@@ -25,7 +25,7 @@ export class FormulaController {
 
         this._sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
 
-        this.initRegisterComponent();
+        this._initRegisterComponent();
 
         this._sheetPlugin.addToolButton({
             name: FORMULA_PLUGIN_NAME,
@@ -64,13 +64,13 @@ export class FormulaController {
                 },
                 {
                     locale: 'formula.formula.more',
-                    onClick: () => this._plugin.getSearchFormulaController().showModal('SearchFormula', true),
+                    onClick: () => this._plugin.getSearchFormulaController().showFormulaModal('SearchFormula', true),
                 },
             ],
         });
     }
 
-    initRegisterComponent() {
+    private _initRegisterComponent() {
         this._sheetPlugin.registerComponent(FORMULA_PLUGIN_NAME + FormulaLabel.name, FormulaLabel);
     }
 

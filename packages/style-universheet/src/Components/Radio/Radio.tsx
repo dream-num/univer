@@ -23,7 +23,7 @@ class RadioGroup extends Component<BaseRadioGroupProps, IState> {
     }
 
     render() {
-        const { vertical, className } = this.props;
+        const { vertical, className = '' } = this.props;
         return (
             <div className={`${vertical ? styles.radioGroup : ''} ${className || ''}`}>
                 {this.props.children.map((item: VNode<BaseRadioIProps>) => {

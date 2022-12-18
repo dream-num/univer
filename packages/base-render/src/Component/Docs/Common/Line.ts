@@ -1,5 +1,15 @@
 import { IDrawing, Nullable, PositionedObjectLayoutType, WrapTextType } from '@univer/core';
-import { IDocumentSkeletonBlockAnchor, IDocumentSkeletonDivide, IDocumentSkeletonDrawing, IDocumentSkeletonLine, LineType, Path2, Transform, Vector2 } from '../../..';
+import {
+    IDocumentSkeletonBlockAnchor,
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonDrawing,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonSpan,
+    LineType,
+    Path2,
+    Transform,
+    Vector2,
+} from '../../..';
 
 interface IDrawingsSplit {
     left: number;
@@ -426,4 +436,26 @@ export function createAndUpdateBlockAnchor(blockId: string, line: IDocumentSkele
             top,
         });
     }
+}
+
+export function addSpanToDivide(divide: IDocumentSkeletonDivide, spanGroup: IDocumentSkeletonSpan[]) {
+    const line = divide.parent;
+    if (line != null) {
+        const isFirstLine = line.divides[0].spanGroup[0] == null;
+        const firstSpan = spanGroup[0];
+        const firstSpanContent = firstSpan.content || ' ';
+        if (isFirstLine && firstSpanContent === ' ') {
+            const width = firstSpan.width;
+            firstSpan.width = 0;
+            for (let span of spanGroup) {
+                if (span === firstSpan) {
+                    continue;
+                }
+
+                span.left -= width;
+            }
+        }
+    }
+
+    divide.spanGroup.push(...spanGroup);
 }

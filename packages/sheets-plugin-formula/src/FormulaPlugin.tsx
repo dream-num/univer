@@ -1,4 +1,4 @@
-import { SheetContext, IOCContainer, UniverSheet, Plugin, ActionExtensionManager } from '@univer/core';
+import { SheetContext, IOCContainer, UniverSheet, Plugin } from '@univer/core';
 import { CellEditExtensionManager, CellInputExtensionManager } from '@univer/base-sheets';
 import { FormulaEnginePlugin } from '@univer/base-formula-engine';
 import { zh, en } from './Locale';
@@ -12,11 +12,16 @@ import { FormulaCellInputExtensionFactory } from './Basic/Register/FormulaCellIn
 import { FormulaActionExtensionFactory } from './Basic/Register';
 import { FormulaPluginObserve, install } from './Basic/Observer';
 import { SearchFormulaController } from './Controller/SearchFormulaModalController';
+import { FormulaPromptController } from './Controller/FormulaPromptController';
 
 export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
     private _formulaController: FormulaController;
 
     private _searchFormulaController: SearchFormulaController;
+
+    private _formulaPromptController: FormulaPromptController;
+
+    protected _formulaActionExtensionFactory: FormulaActionExtensionFactory;
 
     constructor(private _config?: IFormulaConfig) {
         super(FORMULA_PLUGIN_NAME);
@@ -30,7 +35,7 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
         universheetInstance.installPlugin(this);
 
         const context = this.getContext();
-        let formulaEngine = context.getPluginManager().getPluginByName<FormulaEnginePlugin>('pluginFormulaEngine');
+        let formulaEngine = context.getPluginManager().getPluginByName<FormulaEnginePlugin>('formulaEngine');
         if (!formulaEngine) {
             formulaEngine = new FormulaEnginePlugin();
             universheetInstance.installPlugin(formulaEngine);
@@ -39,6 +44,7 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
         this._formulaController = new FormulaController(this, this._config);
 
         this._searchFormulaController = new SearchFormulaController(this);
+        this._formulaPromptController = new FormulaPromptController(this);
 
         this._formulaController.setFormulaEngine(formulaEngine);
 
@@ -66,7 +72,10 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
         this.initialize(context);
     }
 
-    onDestroy(): void {}
+    onDestroy(): void {
+        const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
+        actionRegister.delete(this._formulaActionExtensionFactory);
+    }
 
     registerExtension() {
         const cellEditRegister = CellEditExtensionManager.create();
@@ -75,8 +84,9 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
         const cellInputRegister = CellInputExtensionManager.create();
         cellInputRegister.add(new FormulaCellInputExtensionFactory(this));
 
-        const actionRegister = ActionExtensionManager.create();
-        actionRegister.add(new FormulaActionExtensionFactory(this));
+        const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
+        this._formulaActionExtensionFactory = new FormulaActionExtensionFactory(this);
+        actionRegister.add(this._formulaActionExtensionFactory);
     }
 
     getFormulaEngine() {
@@ -89,5 +99,9 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
 
     getSearchFormulaController() {
         return this._searchFormulaController;
+    }
+
+    getFormulaPromptController() {
+        return this._formulaPromptController;
     }
 }

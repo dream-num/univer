@@ -5,23 +5,17 @@
     "keywords": [],
     "author": "DreamNum <msoffice2@126.com>",
     "license": "MIT",
-    "main": "./lib/univer-<%= projectName %>.cjs.js",
-    "module": "./lib/univer-<%= projectName %>.es.js",
-    "browser": {
-        "./lib/univer-<%= projectName %>.cjs.js": "./src/index.ts",
-        "./lib/univer-<%= projectName %>.es.js": "./src/index.ts"
-    },
+    "main": "./src/index.ts",
+    "module": "./src/index.ts",
     "types": "./src/Types/index.d.ts",
+    "publishConfig": {
+        "main": "./lib/univer-<%= projectName %>.cjs.js",
+        "module": "./lib/univer-<%= projectName %>.es.js",
+        "types": "./lib/index.d.ts"
+    },
     "exports": {
-        ".": {
-            "import": {
-              "node": "./lib/univer-<%= projectName %>.cjs.js",
-              "default": "./lib/univer-<%= projectName %>.es.js"
-            },
-            "require": "./lib/univer-<%= projectName %>.cjs.js",
-            "types": "./lib/univer-<%= projectName %>.d.ts"
-          },
-          "./*": "./src/*"
+        ".": "./src/index.ts",
+        "./*": "./src/*"
     },
     "directories": {
         "lib": "lib"
@@ -58,11 +52,11 @@
         "vite": "^2.4.4"
     },
     "dependencies": {
-        "@univer/<%= projectName %>": "workspace:^0.0.1",
+        "@univer/common-plugin-data": "workspace:^0.0.1",
+        "@univer/base-component": "workspace:^0.0.1",
         "@univer/base-render": "workspace:^0.0.1",
         "@univer/core": "workspace:^0.0.1",
         "@univer/base-sheets": "workspace:^0.0.1",
-        "@univer/sheets-plugin-filter": "workspace:^0.0.1",
         "@univer/style-universheet": "workspace:^0.0.1",
         "preact": "^10.5.14"
     }

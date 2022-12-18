@@ -1,12 +1,14 @@
-import { IKeyboardEvent } from '@univer/base-render';
 import { Observable, Plugin } from '@univer/core';
 import { FormulaBar } from '../View/UI/FormulaBar/FormulaBar';
 import { SelectionControl } from '../Controller/Selection/SelectionController';
 import { SheetContainer } from '../View/UI/SheetContainer';
 import { ToolBar } from '../View/UI/ToolBar/ToolBar';
 import { LineColor } from '../View/UI/Common/Line/LineColor';
+import { LineBold } from '../View/UI/Common/Line/LineBold';
 import { ModalGroup } from '../View/UI/ModalGroup/ModalGroup';
 import { RichText } from '../View/UI/RichText/RichText';
+import { CellRangeModal } from '../View/UI/Common/CellRange/CellRangeModal';
+import { ColorSelect } from '../View/UI/Common/ColorSelect/ColorSelect';
 
 interface ISelectionControlFillConfig {}
 
@@ -43,22 +45,26 @@ export type SheetPluginObserve = {
     onModalGroupDidMountObservable: Observable<ModalGroup>;
 
     onRichTextDidMountObservable: Observable<RichText>;
+    onRichTextKeyDownObservable: Observable<KeyboardEvent>;
+    onRichTextKeyUpObservable: Observable<KeyboardEvent>;
 
     onFormulaBarDidMountObservable: Observable<FormulaBar>;
 
     onLineColorDidMountObservable: Observable<LineColor>;
+    onLineBoldDidMountObservable: Observable<LineBold>;
+    onColorSelectDidMountObservable: Observable<ColorSelect>;
 
     onSheetContainerDidMountObservable: Observable<SheetContainer>;
-    // onSheetContainerDidMountObservable: Observable<SheetContainer>;
+    onCellRangeModalDidMountObservable: Observable<CellRangeModal>;
 
-    onSpreadsheetKeyDownObservable: Observable<IKeyboardEvent>;
-    onSpreadsheetKeyUpObservable: Observable<IKeyboardEvent>;
-    onSpreadsheetKeyCopyObservable: Observable<IKeyboardEvent>;
-    onSpreadsheetKeyPasteObservable: Observable<IKeyboardEvent>;
-    onSpreadsheetKeyCutObservable: Observable<IKeyboardEvent>;
-    onSpreadsheetKeyCompositionStartObservable: Observable<IKeyboardEvent>;
-    onSpreadsheetKeyCompositionUpdateObservable: Observable<IKeyboardEvent>;
-    onSpreadsheetKeyCompositionEndObservable: Observable<IKeyboardEvent>;
+    // onSpreadsheetKeyDownObservable: Observable<IKeyboardEvent>;
+    // onSpreadsheetKeyUpObservable: Observable<IKeyboardEvent>;
+    // onSpreadsheetKeyCopyObservable: Observable<IKeyboardEvent>;
+    // onSpreadsheetKeyPasteObservable: Observable<IKeyboardEvent>;
+    // onSpreadsheetKeyCutObservable: Observable<IKeyboardEvent>;
+    // onSpreadsheetKeyCompositionStartObservable: Observable<IKeyboardEvent>;
+    // onSpreadsheetKeyCompositionUpdateObservable: Observable<IKeyboardEvent>;
+    // onSpreadsheetKeyCompositionEndObservable: Observable<IKeyboardEvent>;
 };
 
 export function uninstall(plugin: Plugin) {
@@ -82,18 +88,21 @@ export function uninstall(plugin: Plugin) {
     plugin.deleteObserve('onToolBarDidMountObservable');
     plugin.deleteObserve('onModalGroupDidMountObservable');
     plugin.deleteObserve('onRichTextDidMountObservable');
+    plugin.deleteObserve('onRichTextKeyDownObservable');
+    plugin.deleteObserve('onRichTextKeyUpObservable');
     plugin.deleteObserve('onFormulaBarDidMountObservable');
 
     plugin.deleteObserve('onChangeCurrentSheetObserver');
     plugin.deleteObserve('onSheetContainerDidMountObservable');
-    plugin.deleteObserve('onSpreadsheetKeyDownObservable');
-    plugin.deleteObserve('onSpreadsheetKeyUpObservable');
-    plugin.deleteObserve('onSpreadsheetKeyCopyObservable');
-    plugin.deleteObserve('onSpreadsheetKeyPasteObservable');
-    plugin.deleteObserve('onSpreadsheetKeyCutObservable');
-    plugin.deleteObserve('onSpreadsheetKeyCompositionStartObservable');
-    plugin.deleteObserve('onSpreadsheetKeyCompositionUpdateObservable');
-    plugin.deleteObserve('onSpreadsheetKeyCompositionEndObservable');
+    plugin.deleteObserve('onCellRangeModalDidMountObservable');
+    // plugin.deleteObserve('onSpreadsheetKeyDownObservable');
+    // plugin.deleteObserve('onSpreadsheetKeyUpObservable');
+    // plugin.deleteObserve('onSpreadsheetKeyCopyObservable');
+    // plugin.deleteObserve('onSpreadsheetKeyPasteObservable');
+    // plugin.deleteObserve('onSpreadsheetKeyCutObservable');
+    // plugin.deleteObserve('onSpreadsheetKeyCompositionStartObservable');
+    // plugin.deleteObserve('onSpreadsheetKeyCompositionUpdateObservable');
+    // plugin.deleteObserve('onSpreadsheetKeyCompositionEndObservable');
 }
 
 export function install(plugin: Plugin) {
@@ -117,22 +126,28 @@ export function install(plugin: Plugin) {
     plugin.pushToObserve('onChangeCurrentSheetObserver');
 
     plugin.pushToObserve('onToolBarDidMountObservable');
+    plugin.pushToObserve('onCellRangeModalDidMountObservable');
     plugin.pushToObserve('onModalGroupDidMountObservable');
     plugin.pushToObserve('onRichTextDidMountObservable');
+    plugin.pushToObserve('onRichTextKeyDownObservable');
+    plugin.pushToObserve('onRichTextKeyUpObservable');
     plugin.pushToObserve('onFormulaBarDidMountObservable');
 
     plugin.pushToObserve('onLineColorDidMountObservable');
+    plugin.pushToObserve('onLineBoldDidMountObservable');
+    plugin.pushToObserve('onColorSelectDidMountObservable');
+
     plugin.pushToObserve('onSheetBarDidMountObservable');
     plugin.pushToObserve('onCountBarDidMountObservable');
     plugin.pushToObserve('onInfoBarDidMountObservable');
     plugin.pushToObserve('onRightMenuDidMountObservable');
     plugin.pushToObserve('onSheetContainerDidMountObservable');
-    plugin.pushToObserve('onSpreadsheetKeyDownObservable');
-    plugin.pushToObserve('onSpreadsheetKeyUpObservable');
-    plugin.pushToObserve('onSpreadsheetKeyCopyObservable');
-    plugin.pushToObserve('onSpreadsheetKeyPasteObservable');
-    plugin.pushToObserve('onSpreadsheetKeyCutObservable');
-    plugin.pushToObserve('onSpreadsheetKeyCompositionStartObservable');
-    plugin.pushToObserve('onSpreadsheetKeyCompositionUpdateObservable');
-    plugin.pushToObserve('onSpreadsheetKeyCompositionEndObservable');
+    // plugin.pushToObserve('onSpreadsheetKeyDownObservable');
+    // plugin.pushToObserve('onSpreadsheetKeyUpObservable');
+    // plugin.pushToObserve('onSpreadsheetKeyCopyObservable');
+    // plugin.pushToObserve('onSpreadsheetKeyPasteObservable');
+    // plugin.pushToObserve('onSpreadsheetKeyCutObservable');
+    // plugin.pushToObserve('onSpreadsheetKeyCompositionStartObservable');
+    // plugin.pushToObserve('onSpreadsheetKeyCompositionUpdateObservable');
+    // plugin.pushToObserve('onSpreadsheetKeyCompositionEndObservable');
 }

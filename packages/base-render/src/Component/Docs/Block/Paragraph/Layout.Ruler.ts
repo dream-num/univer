@@ -1,10 +1,5 @@
 import { BooleanNumber, GridType, HorizontalAlign, INumberUnit, IParagraphStyle, NamedStyleType, SpacingRule } from '@univer/core';
 import {
-    calculateLineTopByDrawings,
-    createAndUpdateBlockAnchor,
-    createSkeletonBulletSpan,
-    createSkeletonLine,
-    createSkeletonPage,
     getCharSpaceApply,
     getCharSpaceConfig,
     getColumnByDivide,
@@ -21,11 +16,11 @@ import {
     isBlankColumn,
     isBlankPage,
     isColumnFull,
-    isParagraphStart,
-    setColumnFullState,
-    setDivideFullState,
-    setSpanGroupLeft,
-} from '../..';
+} from '../../Common/Tools';
+import { createSkeletonPage } from '../../Common/Page';
+import { addSpanToDivide, calculateLineTopByDrawings, createAndUpdateBlockAnchor, createSkeletonLine, isParagraphStart, setDivideFullState } from '../../Common/Line';
+import { createSkeletonBulletSpan, setSpanGroupLeft } from '../../Common/Span';
+import { setColumnFullState } from '../../Common/Section';
 import {
     IDocumentSkeletonBullet,
     IDocumentSkeletonColumn,
@@ -33,11 +28,10 @@ import {
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
     IDocumentSkeletonSpan,
-    IParagraphConfig,
-    ISectionBreakConfig,
     LineType,
     SpanType,
-} from '../../../..';
+} from '../../../../Basics/IDocumentSkeletonCached';
+import { IParagraphConfig, ISectionBreakConfig } from '../../../../Basics/Interfaces';
 
 export function calculateParagraphLayout(
     spanGroup: IDocumentSkeletonSpan[],
@@ -101,7 +95,8 @@ function _divideOperator(
             if (width > pageContentWidth) {
                 // 一个字符超页内容宽
                 if (isBlankPage(lastPage)) {
-                    divide.spanGroup.push(...spanGroup);
+                    addSpanToDivide(divide, spanGroup);
+                    // divide.spanGroup.push(...spanGroup);
                     __makeColumnsFull(column?.parent?.columns);
                 } else {
                     _pageOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
@@ -110,7 +105,9 @@ function _divideOperator(
                 // 一个字符超列宽
                 setColumnFullState(column, true);
                 if (isBlankColumn(column)) {
-                    divide.spanGroup.push(...spanGroup);
+                    console.log(spanGroup);
+                    addSpanToDivide(divide, spanGroup);
+                    // divide.spanGroup.push(...spanGroup);
                 } else {
                     _columnOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
                 }
@@ -157,7 +154,9 @@ function _divideOperator(
             for (let span of spanGroup) {
                 span.parent = divide;
             }
-            divide.spanGroup.push(...spanGroup);
+            // console.log('spanGroup', spanGroup, spanGroup.length, spanGroup[0].content);
+            addSpanToDivide(divide, spanGroup);
+            // divide.spanGroup.push(...spanGroup);
         }
     } else {
         _lineOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
@@ -181,6 +180,9 @@ function _lineOperator(
         lastPage = getLastPage(pages);
         columnInfo = getLastNotFullColumnInfo(lastPage);
     }
+    // Todo: demo4导入的时候columnInfo会不存在,先return了
+    if (!columnInfo) return;
+
     const column = columnInfo!.column;
     const line = getLastLineByColumn(column);
 
@@ -249,8 +251,9 @@ function _lineOperator(
 
     const newLineTop = calculateLineTopByDrawings(lineHeight, lineTop, elementIndex, lastPage.skeDrawings, headersDrawings, footersDrawings); // WRAP_TOP_AND_BOTTOM的drawing会改变行的起始top
 
-    if (lineHeight + newLineTop > section.height && column.lines.length > 0 && lastPage.sections.length > 1) {
+    if (lineHeight + newLineTop > section.height && column.lines.length > 0 && lastPage.sections.length > 0) {
         // 行高超过Col高度，且列中已存在一行以上，且section大于一个；
+        // console.log('_lineOperator', { spanGroup, pages, lineHeight, newLineTop, sectionHeight: section.height, lastPage });
         setColumnFullState(column, true);
         _columnOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
         return;
@@ -290,7 +293,7 @@ function _lineOperator(
     );
     column.lines.push(newLine);
     newLine.parent = column;
-    createAndUpdateBlockAnchor(blockId, line, lineTop, blockAnchor);
+    createAndUpdateBlockAnchor(blockId, newLine, lineTop, blockAnchor);
     _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
 }
 
@@ -490,6 +493,8 @@ function __updateDrawingPosition(
 
     const drawings: Map<string, IDocumentSkeletonDrawing> = new Map();
     const isPageBreak = __checkPageBreak(column);
+
+    // console.log('__updateDrawingPosition', lineTop, lineHeight, column, blockAnchorTop, paragraphAffectSkeDrawings);
 
     paragraphAffectSkeDrawings.forEach((drawing) => {
         if (!drawing) {

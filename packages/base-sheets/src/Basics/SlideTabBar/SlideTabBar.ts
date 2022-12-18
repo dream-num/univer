@@ -292,7 +292,6 @@ export class SlideTabBar {
                         lastPageY = 0;
                         return;
                     }
-
                     const slideItemIndex = this._slideTabItems.findIndex((item) => item.equals(new SlideTabItem(downEvent.currentTarget as HTMLElement, this)));
                     if (slideItemIndex > -1) {
                         this._compareIndex = slideItemIndex;

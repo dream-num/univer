@@ -385,6 +385,7 @@ const nextToken = (str, node, data) => {
 };
 
 export function parseDate(str, opts) {
+    if (!str) return null;
     // possible shortcut: quickly dismiss if there isn't a number?
     const date = nextToken(str.trim(), dateTrie, { path: '' });
     if (date) {

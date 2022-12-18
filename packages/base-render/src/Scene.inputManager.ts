@@ -6,6 +6,7 @@ import { Vector2 } from './Basics/Vector2';
 import { BaseObject } from './BaseObject';
 
 import { Scene } from './Scene';
+import { RENDER_CLASS_TYPE } from './Basics/Const';
 
 export class InputManager {
     /** The distance in pixel that you have to move to prevent some events */
@@ -60,8 +61,21 @@ export class InputManager {
         return this._scene?.pick(Vector2.FromArray([offsetX, offsetY]));
     }
 
-    private _checkDirectSceneEventTrigger(isTrigger: boolean, notObject: boolean) {
-        return (!this._scene.evented && isTrigger) || notObject;
+    private _checkDirectSceneEventTrigger(isTrigger: boolean, currentObject: Nullable<Scene | BaseObject>) {
+        let notObject = false;
+        if (currentObject == null) {
+            notObject = true;
+        }
+
+        let isNotInSceneViewer = true;
+        if (currentObject && currentObject.classType === RENDER_CLASS_TYPE.BASE_OBJECT) {
+            const scene = (currentObject as BaseObject).getScene() as Scene;
+            if (scene) {
+                const parent = scene.getParent();
+                isNotInSceneViewer = parent.classType !== RENDER_CLASS_TYPE.SCENE_VIEWER;
+            }
+        }
+        return (!this._scene.evented && isTrigger && isNotInSceneViewer) || notObject;
     }
 
     // 处理事件，比如mouseleave,mouseenter的触发。
@@ -95,11 +109,7 @@ export class InputManager {
 
             this.mouseLeaveEnterHandler(currentObject, evt);
 
-            if (this._checkDirectSceneEventTrigger(!isStop, !currentObject)) {
-                if (this._scene.onPointerMove) {
-                    this._scene.onPointerMove(evt);
-                }
-
+            if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
                 if (this._scene.onPointerMoveObserver.hasObservers()) {
                     this._scene.onPointerMoveObserver.notifyObservers(evt);
                 }
@@ -116,10 +126,10 @@ export class InputManager {
 
             const isStop = currentObject?.triggerPointerDown(evt);
 
-            if (this._checkDirectSceneEventTrigger(!isStop, !currentObject)) {
-                if (this._scene.onPointerDown) {
-                    this._scene.onPointerDown(evt);
-                }
+            if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
+                // if (this._scene.onPointerDown) {
+                //     this._scene.onPointerDown(evt);
+                // }
 
                 if (this._scene.onPointerDownObserver.hasObservers()) {
                     this._scene.onPointerDownObserver.notifyObservers(evt);
@@ -136,11 +146,7 @@ export class InputManager {
             const currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
             const isStop = currentObject?.triggerPointerUp(evt);
 
-            if (this._checkDirectSceneEventTrigger(!isStop, !currentObject)) {
-                if (this._scene.onPointerUp) {
-                    this._scene.onPointerUp(evt);
-                }
-
+            if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
                 if (this._scene.onPointerUpObserver.hasObservers()) {
                     this._scene.onPointerUpObserver.notifyObservers(evt);
                 }
@@ -159,11 +165,7 @@ export class InputManager {
                 }
             });
 
-            if (this._checkDirectSceneEventTrigger(!isStop, !currentObject)) {
-                if (this._scene.onMouseWheel) {
-                    this._scene.onMouseWheel(evt);
-                }
-
+            if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
                 if (this._scene.onMouseWheelObserver.hasObservers()) {
                     this._scene.onMouseWheelObserver.notifyObservers(evt);
                 }
@@ -280,9 +282,9 @@ export class InputManager {
 
         this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerDblclick(evt);
 
-        if (this._scene.onDblclick) {
-            this._scene.onDblclick(evt);
-        }
+        // if (this._scene.onDblclick) {
+        //     this._scene.onDblclick(evt);
+        // }
 
         if (this._scene.onDblclickObserver.hasObservers()) {
             this._scene.onDblclickObserver.notifyObservers(evt);

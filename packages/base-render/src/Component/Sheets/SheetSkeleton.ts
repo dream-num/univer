@@ -102,10 +102,12 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     private _stylesCache: IStylesCache;
 
+    private _showGridlines: BooleanNumber;
+
     constructor(private _config: IWorksheetConfig, private _cellData: ObjectMatrix<ICellData>, private _styles: Styles, context: SheetContext) {
         super(context);
-        this.updateMatrix();
-        this.updateDataMergeCacheAll();
+        this.updateLayout();
+        this.updateDataMerge();
     }
 
     getWorksheetConfig() {
@@ -160,6 +162,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._overflowCache;
     }
 
+    get showGridlines() {
+        return this._showGridlines;
+    }
+
     setOverflowCache(value: ObjectMatrix<IRangeData>) {
         this._overflowCache = value;
     }
@@ -169,7 +175,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             return;
         }
 
-        this.dirty && this.updateMatrix();
+        this.updateLayout();
 
         if (!this._rowHeightAccumulation || !this._columnWidthAccumulation) {
             return;
@@ -184,11 +190,11 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this;
     }
 
-    updateMatrix() {
+    updateLayout() {
         if (!this.dirty) {
             return;
         }
-        const { rowData, columnData, defaultRowHeight, defaultColumnWidth, rowCount, columnCount, rowTitle, columnTitle } = this._config;
+        const { rowData, columnData, defaultRowHeight, defaultColumnWidth, rowCount, columnCount, rowTitle, columnTitle, showGridlines } = this._config;
         const { rowTotalHeight, rowHeightAccumulation } = this._generateRowMatrixCache(rowCount, rowData, defaultRowHeight);
         const { columnTotalWidth, columnWidthAccumulation } = this._generateColumnMatrixCache(columnCount, columnData, defaultColumnWidth);
 
@@ -199,13 +205,14 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._rowHeightAccumulation = rowHeightAccumulation;
         this._columnTotalWidth = columnTotalWidth;
         this._columnWidthAccumulation = columnWidthAccumulation;
+        this._showGridlines = showGridlines;
 
         this.makeDirty(true);
 
         return this;
     }
 
-    updateDataMergeCacheAll() {
+    updateDataMerge() {
         const { mergeData } = this._config;
         this._dataMergeCacheAll = mergeData && this._getMergeCells(mergeData);
     }
@@ -660,7 +667,11 @@ export class SpreadsheetSkeleton extends Skeleton {
         if (!cell) {
             return true;
         }
-        const style = styles && styles.get(cell.s);
+
+        // style supports inline styles
+        // const style = styles && styles.get(cell.s);
+        // const style = getStyle(styles, cell);
+        const style = styles && styles.getStyleByCell(cell);
 
         if (!skipBackgroundAndBorder && style && style.bg && style.bg.rgb) {
             const rgb = style.bg.rgb;
@@ -732,7 +743,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             const documentSkeleton = DocumentSkeleton.create(documentData, this.getContext());
             if (angle === 0 || wrapStrategy !== WrapStrategy.WRAP) {
                 documentSkeleton.calculate();
-                console.log(cell.v, documentSkeleton);
+                // console.log(cell.v, documentSkeleton);
             }
             fontCache.setValue(r, c, {
                 documentSkeleton,
@@ -812,7 +823,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             textDirectionDocument = TextDirectionType.TBRL;
         }
         const documentData: IDocumentData = {
-            documentId: 'd',
+            id: 'd',
             body: {
                 blockElements: {
                     oneParagraph: {

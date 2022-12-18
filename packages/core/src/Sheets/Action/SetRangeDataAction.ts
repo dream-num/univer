@@ -1,19 +1,20 @@
 import { SetRangeData } from '../Apply';
-import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
-import { CONVERTOR_OPERATION } from '../../Const/CONST';
-import { WorkSheetConvertor } from '../../Convertor/WorkSheetConvertor';
-import { ICellData, ICopyToOptionsData, IRangeData } from '../../Interfaces';
-import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandUnit } from '../../Command';
+import { ACTION_NAMES } from '../../Const';
+import { ObjectMatrixPrimitiveType } from '../../Shared';
+import {
+    SheetActionBase,
+    ISheetActionData,
+    ActionObservers,
+    ActionType,
+    CommandUnit,
+} from '../../Command';
+import { ICopyToOptionsData, ICellData } from '../../Interfaces';
 
 /**
  * @internal
  */
 export interface ISetRangeDataActionData extends ISheetActionData {
-    cellValue: ObjectMatrixPrimitiveType<ICellData> | ICellData;
-    rangeData: IRangeData;
+    cellValue: ObjectMatrixPrimitiveType<ICellData>;
     options?: ICopyToOptionsData;
 }
 
@@ -25,7 +26,7 @@ export interface ISetRangeDataActionData extends ISheetActionData {
 export class SetRangeDataAction extends SheetActionBase<
     ISetRangeDataActionData,
     ISetRangeDataActionData,
-    ObjectMatrixPrimitiveType<ICellData> | ICellData
+    ObjectMatrixPrimitiveType<ICellData>
 > {
     constructor(
         actionData: ISetRangeDataActionData,
@@ -36,7 +37,6 @@ export class SetRangeDataAction extends SheetActionBase<
 
         this._doActionData = {
             ...actionData,
-            convertor: [new WorkSheetConvertor(CONVERTOR_OPERATION.SET)],
         };
         this._oldActionData = {
             ...actionData,
@@ -53,7 +53,6 @@ export class SetRangeDataAction extends SheetActionBase<
         const result = SetRangeData(
             worksheet.getCellMatrix(),
             this._doActionData.cellValue,
-            this._doActionData.rangeData,
             styles,
             this._doActionData.options
         );
@@ -69,18 +68,17 @@ export class SetRangeDataAction extends SheetActionBase<
 
     redo(): void {
         // update pre data
-        const { sheetId, rangeData, options } = this._doActionData;
+        const { sheetId, options } = this._doActionData;
         this._oldActionData = {
             actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
             sheetId,
             cellValue: this.do(),
-            rangeData,
             options,
         };
     }
 
     undo(): void {
-        const { rangeData, sheetId, cellValue, options } = this._oldActionData;
+        const { sheetId, cellValue, options } = this._oldActionData;
         const worksheet = this.getWorkSheet();
         const styles = this._workbook.getStyles();
         if (worksheet) {
@@ -91,10 +89,8 @@ export class SetRangeDataAction extends SheetActionBase<
                 cellValue: SetRangeData(
                     worksheet.getCellMatrix(),
                     cellValue,
-                    rangeData,
                     styles
                 ),
-                rangeData,
                 options,
             };
 

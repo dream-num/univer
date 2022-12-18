@@ -1,10 +1,9 @@
-import { Workbook } from '../Sheets/Domain';
+import { Workbook, ColorBuilder } from '../Sheets/Domain';
 import { IWorkbookConfig } from '../Interfaces';
 import { BasePlugin, Plugin } from '../Plugin';
 import { IOHttp, IOHttpConfig, Logger } from '../Shared';
 import { SheetContext } from './SheetContext';
 import { VersionCode, VersionEnv } from './Version';
-import { ColorBuilder } from '../Sheets/Domain/ColorBuilder';
 
 /**
  * Externally provided UniverSheet root instance
@@ -79,6 +78,13 @@ export class UniverSheet {
     }
 
     /**
+     * get unit id
+     */
+    getUnitId(): string {
+        return this.getWorkBook().getUnitId();
+    }
+
+    /**
      * install plugin
      *
      * @param plugin - install plugin
@@ -124,5 +130,9 @@ export class UniverSheet {
             });
 
         return { workbookConfig, ...pluginConfig };
+    }
+
+    refreshWorkbook(univerSheetData: Partial<IWorkbookConfig> = {}) {
+        this._context.refreshWorkbook(univerSheetData);
     }
 }

@@ -50,7 +50,7 @@ class Layout extends Component<BaseLayoutProps, IState> {
     }
 
     render(props: BaseLayoutProps, state: IState) {
-        const { children, style, className } = props;
+        const { children, style, className = '' } = props;
         const { isAside } = state;
         return (
             <section
@@ -65,7 +65,7 @@ class Layout extends Component<BaseLayoutProps, IState> {
 }
 
 const Header = (props: BaseLayoutProps) => {
-    const { children, style, className } = props;
+    const { children, style, className = '' } = props;
 
     return (
         <header style={style} className={`${styles.headerWrapper} ${className}`}>
@@ -74,7 +74,7 @@ const Header = (props: BaseLayoutProps) => {
     );
 };
 const Footer = (props: BaseLayoutProps) => {
-    const { children, style, className } = props;
+    const { children, style, className = '' } = props;
 
     return (
         <footer style={style} className={`${styles.footerWrapper} ${className}`}>
@@ -87,7 +87,7 @@ const Footer = (props: BaseLayoutProps) => {
  * use forwardRef, get hold of a specific reference further down the tree
  */
 const Content = forwardRef((props: BaseLayoutProps, ref: Ref<HTMLElement>) => {
-    const { children, style, className } = props;
+    const { children, style, className = '' } = props;
 
     return (
         <main ref={ref} style={style} className={`${styles.contentWrapper} ${className}`}>
@@ -96,7 +96,7 @@ const Content = forwardRef((props: BaseLayoutProps, ref: Ref<HTMLElement>) => {
     );
 });
 const Sider = (props: BaseLayoutProps) => {
-    const { children, style, className } = props;
+    const { children, style, className = '' } = props;
 
     return (
         <aside style={style} className={`${styles.siderWrapper} ${className}`}>

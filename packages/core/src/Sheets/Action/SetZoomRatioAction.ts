@@ -24,12 +24,10 @@ export class SetZoomRatioAction extends SheetActionBase<
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
         this._oldActionData = {
             ...actionData,
             zoom: this.do(),
-            convertor: [],
         };
         this.validate();
     }

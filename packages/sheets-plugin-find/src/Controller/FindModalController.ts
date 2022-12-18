@@ -71,7 +71,7 @@ export class FindModalController {
             },
         ];
 
-        this.initRegisterComponent();
+        this._initRegisterComponent();
 
         this.init();
     }
@@ -87,7 +87,7 @@ export class FindModalController {
     }
 
     // 注册自定义组件
-    initRegisterComponent() {
+    private _initRegisterComponent() {
         this._sheetPlugin.registerModal(FIND_PLUGIN_NAME + FindModal.name, 100, FindModal);
         this._sheetPlugin.registerComponent(FIND_PLUGIN_NAME + SearchContent.name, SearchContent, { activeKey: 'find' });
     }

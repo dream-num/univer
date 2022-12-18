@@ -8,6 +8,8 @@ export interface BaseIconProps extends BaseComponentProps {
     className?: string;
     children?: ComponentChildren;
     name?: string;
+    width?: string;
+    height?: string;
 }
 
 export interface IconComponent extends BaseComponent<BaseIconProps> {

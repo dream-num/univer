@@ -31,7 +31,7 @@ export function SetRangeStyle(
         for (let c = startColumn; c <= endColumn; c++) {
             const cell = cellMatrix.getValue(r, c) || {};
             // use null to clear style
-            const old = cell.s ? styles.get(cell.s) : null;
+            const old = styles.getStyleByCell(cell);
 
             if (old == null) {
                 // clear
@@ -156,7 +156,9 @@ export function mergeStyle(
     isRichText: boolean = false
 ): Nullable<IStyleData> {
     // clear style
-    if (!newStyle) return newStyle;
+    if (newStyle === null) return newStyle;
+    // don't operate
+    if (newStyle === undefined) return oldStyle;
 
     const backupStyle = Tools.deepClone(oldStyle) || {};
 

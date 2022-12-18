@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite';
 import path from 'path';
 import preact from '@preact/preset-vite';
-import legacy from '@vitejs/plugin-legacy';
 import { name, version } from './package.json';
 import createExternal from 'vite-plugin-external';
 
@@ -16,7 +15,7 @@ export default defineConfig({
             fileName: 'univer-base-sheets',
         },
         outDir: './lib',
-        sourcemap: true
+        sourcemap: true,
     },
     define: {
         pkgJson: { name, version },
@@ -47,10 +46,6 @@ export default defineConfig({
     },
     plugins: [
         preact(),
-        // legacy({
-        //     targets: ['ie >= 11'],
-        //     additionalLegacyPolyfills: ['regenerator-runtime/runtime'],
-        // }),
         createExternal({
             externals: {
                 '@univer/core': '@univer/core',
@@ -58,7 +53,7 @@ export default defineConfig({
                 '@univer/base-component': '@univer/base-component',
                 '@univer/style-universheet': '@univer/style-universheet',
                 'css-vars-ponyfill': 'css-vars-ponyfill',
-                'nanoid': 'nanoid',
+                nanoid: 'nanoid',
                 preact: 'preact',
                 react: 'react',
             },

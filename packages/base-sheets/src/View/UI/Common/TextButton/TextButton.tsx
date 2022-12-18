@@ -12,11 +12,11 @@ interface IState {
 }
 
 export class TextButton extends Component<BaseTextButtonProps, IState> {
-    Render: BaseComponentRender;
+    private _render: BaseComponentRender;
 
     initialize() {
         const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this.Render = component.getComponentRender();
+        this._render = component.getComponentRender();
         this.state = {
             active: this.props.active,
         };
@@ -31,10 +31,18 @@ export class TextButton extends Component<BaseTextButtonProps, IState> {
         });
     };
 
+    componentWillReceiveProps(nextProps: Readonly<BaseTextButtonProps>, nextContext: any) {
+        if (nextProps.active !== this.props.active) {
+            this.setState({
+                active: nextProps.active,
+            });
+        }
+    }
+
     render() {
         const { label } = this.props;
         const { active } = this.state;
-        const Button = this.Render.renderFunction('Button');
+        const Button = this._render.renderFunction('Button');
 
         return (
             <div className={styles.textButton}>

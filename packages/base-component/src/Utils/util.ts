@@ -226,3 +226,14 @@ export function printableCharacter(keycode: number) {
 
     return valid;
 }
+
+export function xssDeal(str: string) {
+    if (typeof str !== 'string') return str;
+    return str.replace(/<script>/g, '&lt;script&gt;').replace(/<\/script>/, '&lt;/script&gt;');
+}
+
+export function setLastCaretPosition(dom: HTMLElement) {
+    const range = window.getSelection();
+    range && range.selectAllChildren(dom);
+    range && range.collapseToEnd();
+}

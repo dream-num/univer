@@ -32,13 +32,11 @@ export class InsertRowDataAction extends SheetActionBase<
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
-            convertor: [],
         };
         this.do();
         this._oldActionData = {
             ...actionData,
             rowCount: ObjectArray.getMaxLength(actionData.rowData[0]),
-            convertor: [],
         };
         this.validate();
     }

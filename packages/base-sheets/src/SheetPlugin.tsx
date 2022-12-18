@@ -1,13 +1,25 @@
-import { getRefElement, IMainProps, isElement, ISlotProps, RefObject, render } from '@univer/base-component';
+import { getRefElement, isElement, ISlotProps, RefObject, render } from '@univer/base-component';
 import { Engine, RenderEngine } from '@univer/base-render';
-import { AsyncFunction, SheetContext, IWorkbookConfig, Plugin, PLUGIN_NAMES, Tools } from '@univer/core';
+import {
+    AsyncFunction,
+    SheetContext,
+    IWorkbookConfig,
+    Plugin,
+    PLUGIN_NAMES,
+    Tools,
+    CommandManager,
+    IActionObserverProps,
+    SheetActionBase,
+    ACTION_NAMES,
+    ISetNamedRangeActionData,
+} from '@univer/core';
 
 import { install, SheetPluginObserve, uninstall } from './Basics/Observer';
 import { RightMenuProps } from './Model/RightMenuModel';
 import { en, zh } from './Locale';
 import { CANVAS_VIEW_KEY } from './View/Render/BaseView';
 import { CanvasView } from './View/Render/CanvasView';
-import { BaseSheetContainerConfig, ILayout, SheetContainer } from './View/UI/SheetContainer';
+import { SheetContainer } from './View/UI/SheetContainer';
 import {
     RightMenuController,
     InfoBarController,
@@ -17,19 +29,17 @@ import {
     CountBarController,
     SheetContainerController,
     ToolBarController,
+    BaseSheetContainerConfig,
 } from './Controller';
 import { IToolBarItemProps } from './Model/ToolBarModel';
 import { ModalGroupController } from './Controller/ModalGroupController';
 import { ISheetPluginConfig, DEFAULT_SPREADSHEET_PLUGIN_DATA } from './Basics';
 import { FormulaBarController } from './Controller/FormulaBarController';
+import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeActionExtension';
 
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
  */
-interface ComponentChildrenProps {
-    component: any;
-    props?: any;
-}
 
 export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     private _config: ISheetPluginConfig;
@@ -66,7 +76,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     private _sheetBarControl: SheetBarControl;
 
-    private _cellEditorControl: CellEditorController;
+    private _cellEditorController: CellEditorController;
 
     private _antLineController: AntLineControl;
 
@@ -78,6 +88,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     private _componentList: Map<string, any>;
 
+    private _namedRangeActionExtensionFactory: NamedRangeActionExtensionFactory;
+
     constructor(config: Partial<ISheetPluginConfig> = {}) {
         super(PLUGIN_NAMES.SPREADSHEET);
 
@@ -86,22 +98,21 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     register(engineInstance: Engine) {
         // The preact ref component cannot determine whether ref.current or ref.current.base is DOM
-        let container: HTMLElement = getRefElement(this.getContentRef());
+        let container: HTMLElement = getRefElement(this._sheetContainerController.getContentRef());
 
         this._canvasEngine = engineInstance;
 
         engineInstance.setContainer(container);
-        window.onresize = () => {
+        window.addEventListener('resize', () => {
             engineInstance.resize();
-        };
+        });
+        // window.onresize = () => {
+        //     engineInstance.resize();
+        // };
     }
 
     initialize(context: SheetContext): void {
         this.context = context;
-
-        this.getObserver('onSheetContainerDidMountObservable')?.add(() => {
-            this._initializeRender(context);
-        });
 
         /**
          * load more Locale object
@@ -119,62 +130,52 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
             skin: configure.skin || 'default',
             layout: this._config.layout,
             container: sheetContainer,
-            context,
-            getSplitLeftRef: (ref) => {
-                this._splitLeftRef = ref;
-            },
-            getContentRef: (ref) => {
-                this._contentRef = ref;
-            },
-            addButton: (cb: Function) => {
-                this._addButtonFunc = cb;
-            },
-            addSider: (cb: AsyncFunction<ISlotProps>) => {
-                this._addSiderFunc = cb;
-            },
-            addMain: (cb: Function) => {
-                this._addMainFunc = cb;
-            },
-            showSiderByName: (cb: Function) => {
-                this._showSiderByNameFunc = cb;
-            },
-            showMainByName: (cb: Function) => {
-                this._showMainByNameFunc = cb;
-            },
             onDidMount: () => {},
+            context,
         };
 
         this._componentList = new Map();
 
-        const layout = this._config.layout as ILayout;
+        const sheetContainerConfig = this._config.layout?.sheetContainerConfig;
+        const rightMenuConfig = this._config.layout?.rightMenuConfig;
+        const toolBarConfig = this._config.layout?.toolBarConfig;
 
         this._modalGroupController = new ModalGroupController(this);
-        this._sheetContainerController = new SheetContainerController(this);
+        this._sheetContainerController = new SheetContainerController(this, config);
 
         // TODO rightMenu config
-        this._rightMenuControl = new RightMenuController(this);
-
-        if (layout === 'auto' || layout.toolBar) {
-            this._toolBarControl = new ToolBarController(this);
+        if (sheetContainerConfig?.rightMenu) {
+            this._rightMenuControl = new RightMenuController(this, rightMenuConfig);
         }
-        if (layout === 'auto' || layout.infoBar) {
+
+        if (sheetContainerConfig?.toolBar) {
+            this._toolBarControl = new ToolBarController(this, toolBarConfig);
+        }
+        if (sheetContainerConfig?.infoBar) {
             this._infoBarControl = new InfoBarController(this);
         }
-        if (layout === 'auto' || layout.sheetBar) {
+        if (sheetContainerConfig?.sheetBar) {
             this._sheetBarControl = new SheetBarControl(this);
         }
-        this._cellEditorControl = new CellEditorController(this);
+        this._cellEditorController = new CellEditorController(this);
         this._antLineController = new AntLineControl(this);
 
-        if (layout === 'auto' || layout.countBar) {
+        if (sheetContainerConfig?.countBar) {
             this._countBarController = new CountBarController(this);
         }
-        if (layout === 'auto' || layout.formulaBar) {
+        if (sheetContainerConfig?.formulaBar) {
             this._formulaBarController = new FormulaBarController(this);
         }
 
+        this.getObserver('onSheetContainerDidMountObservable')?.add(() => {
+            this._initializeRender(context);
+        });
+
         // render sheet container
-        render(<SheetContainer config={config} />, sheetContainer);
+        render(
+            <SheetContainer changeLocale={this._sheetContainerController.changeLocale} changeSkin={this._sheetContainerController.changeSkin} config={config} />,
+            sheetContainer
+        );
 
         // const formulaEngine = this.getPluginByName<FormulaPlugin>('formula')?.getFormulaEngine();
         // =(sum(max(B1:C10,10)*5-100,((1+1)*2+5)/2,10)+count(B1:C10,10*5-100))*5-100
@@ -183,6 +184,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         // =1+(3*4=4)*5+1
         // =(-(1+2)--@A1:B2 + 5)/2 + -sum(indirect("A5"):B10# + B6# + A1:offset("C5", 1, 1)  ,  100) + {1,2,3;4,5,6;7,8,10} + lambda(x,y,z, x*y*z)(sum(1,(1+2)*3),2,lambda(x,y, @offset(A1:B0,x#*y#))(1,2):C20) & "美国人才" + sum((1+2%)*30%, 1+2)%
         // formulaEngine?.calculate(`=lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+1-max(100,200)`);
+
+        this.registerExtension();
     }
 
     /**
@@ -210,31 +213,23 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         return sheetContainer;
     }
 
-    /**
-     * Initialize all selections
-     */
-    private _initSelection() {}
-
     onMounted(ctx: SheetContext): void {
         install(this);
 
-        // this.initialize(ctx);
-
-        // When executing setContainer, occasionally ContentRef has not been mounted, because the didmount mount of preact is asynchronous, so let's judge here, if there is no DOM, we will execute our mount through the hook of the completion of the mount Rendering logic.
-
-        // if (!this.getContentRef().current) {
-        // this.context
-        //     .getObserverManager()
-        //     .getObserver('onSheetContainerDidMountObservable', 'workbook')
-        //     ?.add((e) => {
-        //         this._initializeRender(ctx);
-        //     });
-
         this.initialize(ctx);
-        // return;
-        // }
 
-        // this._initializeRender(ctx);
+        CommandManager.getActionObservers().add((actionObs: IActionObserverProps): void => {
+            const currentUnitId = this.getContext().getWorkBook().getUnitId();
+            const action = actionObs.action as SheetActionBase<ISetNamedRangeActionData, ISetNamedRangeActionData>;
+            const actionData = action.getDoActionData();
+            const actionUnitId = action.getWorkBook().getUnitId();
+
+            if (currentUnitId !== actionUnitId) return;
+
+            if (actionData.actionName === ACTION_NAMES.SET_NAMED_RANGE_ACTION) {
+                const namedRange = actionData.namedRange;
+            }
+        });
     }
 
     get config() {
@@ -246,7 +241,9 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
         this.register(engine);
 
-        this._canvasView = new CanvasView(engine, this);
+        if (this._canvasView == null) {
+            this._canvasView = new CanvasView(engine, this);
+        }
 
         this.context.getContextObserver('onSheetRenderDidMountObservable')?.notifyObservers();
     }
@@ -254,18 +251,15 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     onDestroy(): void {
         super.onDestroy();
         uninstall(this);
+
+        const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
+        actionRegister.delete(this._namedRangeActionExtensionFactory);
     }
 
-    getSplitLeftRef(): RefObject<HTMLDivElement> {
-        return this._splitLeftRef;
-    }
-
-    // getContentRef(): RefObject<HTMLDivElement | Component> {
-    //     return this._contentRef;
-    // }
-
-    getContentRef(): RefObject<HTMLDivElement> {
-        return this._contentRef;
+    registerExtension() {
+        const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
+        this._namedRangeActionExtensionFactory = new NamedRangeActionExtensionFactory(this);
+        actionRegister.add(this._namedRangeActionExtensionFactory);
     }
 
     addButton(item: IToolBarItemProps): void {
@@ -340,33 +334,24 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         return this._sheetBarControl;
     }
 
-    getCellEditorControl() {
-        return this._cellEditorControl;
+    getCellEditorController() {
+        return this._cellEditorController;
     }
 
-    addSider(item: ISlotProps): Promise<void> {
-        return this._addSiderFunc(item);
+    getModalGroupControl() {
+        return this._modalGroupController;
     }
 
-    addMain(item: IMainProps): Promise<void> {
-        return this._addMainFunc(item);
-    }
-
-    showSiderByName(name: string, show: boolean): Promise<void> {
-        return this._showSiderByNameFunc(name, show);
-        // TODO 是否可以直接 this.sheetContainer.showSiderByName();
-    }
-
-    showMainByName(name: string, show: boolean): Promise<void> {
-        return this._showMainByNameFunc(name, show);
+    getSheetContainerControl() {
+        return this._sheetContainerController;
     }
 
     addRightMenu(item: RightMenuProps[] | RightMenuProps) {
-        this._rightMenuControl.addItem(item);
+        this._rightMenuControl && this._rightMenuControl.addItem(item);
     }
 
     addToolButton(config: IToolBarItemProps) {
-        this._toolBarControl.addToolButton(config);
+        this._toolBarControl && this._toolBarControl.addToolButton(config);
     }
 
     registerComponent(name: string, component: any, props?: any) {

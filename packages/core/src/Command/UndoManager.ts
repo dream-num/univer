@@ -1,23 +1,23 @@
-import { CommandBase } from './CommandBase';
+import { Command } from './Command';
 
 /**
  * Manage Undo Redo
  */
 export class UndoManager {
-    private _undoStack: CommandBase[];
+    private _undoStack: Command[];
 
-    private _redoStack: CommandBase[];
+    private _redoStack: Command[];
 
     constructor() {
         this._undoStack = [];
         this._redoStack = [];
     }
 
-    push(command: CommandBase): void {
+    push(command: Command): void {
         this._redoStack.push(command);
     }
 
-    undo(): CommandBase | undefined {
+    undo(): Command | undefined {
         const command = this._redoStack.pop();
         if (command) {
             this._undoStack.push(command);
@@ -25,7 +25,7 @@ export class UndoManager {
         }
     }
 
-    redo(): CommandBase | undefined {
+    redo(): Command | undefined {
         const command = this._undoStack.pop();
         if (command) {
             this._redoStack.push(command);

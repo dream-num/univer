@@ -34,4 +34,9 @@ export class ModalGroupController {
             this._ModalGroupComponent?.setModalGroup(this._ModalGroup);
         }
     }
+
+    getModal(name: string) {
+        const ModalGroup = this._ModalGroupComponent.getModalGroup();
+        return ModalGroup.find((item) => item.constructor.name === name);
+    }
 }

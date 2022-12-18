@@ -10,14 +10,14 @@ interface IProps {
 }
 
 export class LineColor extends Component<IProps, IState> {
-    Render: BaseComponentRender;
+    private _render: BaseComponentRender;
 
     initialize() {
         const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this.Render = component.getComponentRender();
+        this._render = component.getComponentRender();
 
         this.state = {
-            color: this.props.color ?? '#000',
+            color: 'rgb(217,217,217)',
         };
     }
 
@@ -32,7 +32,7 @@ export class LineColor extends Component<IProps, IState> {
     }
 
     render() {
-        const RightIcon = this.Render.renderFunction('RightIcon');
+        const RightIcon = this._render.renderFunction('RightIcon');
         const { color } = this.state;
         const { label } = this.props;
 

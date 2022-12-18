@@ -76,14 +76,14 @@ export class Scene {
         if (this._parent.classType === RENDER_CLASS_TYPE.ENGINE) {
             const parent = this._parent as Engine;
             parent.addScene(this);
-            if (parent.hasActiveScene()) {
+            if (!parent.hasActiveScene()) {
                 parent.setActiveScene(sceneKey);
             }
             this._inputManager = new InputManager(this);
         } else if (this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
             // 挂载到sceneViewer的scene需要响应前者的transform
             const parent = this._parent as SceneViewer;
-            parent.addObject(this);
+            parent.addSubScene(this);
         }
         this._parent?.onTransformChangeObservable.add((change: ITransformChangeState) => {
             this._resetViewportSize();
@@ -325,7 +325,7 @@ export class Scene {
 
         let parent: any = this._parent; // type:  SceneViewer | Engine | BaseObject | Scene
         while (parent) {
-            if (parent === RENDER_CLASS_TYPE.ENGINE) {
+            if (parent.classType === RENDER_CLASS_TYPE.ENGINE) {
                 return parent;
             }
             parent = parent?.getParent();
@@ -407,7 +407,10 @@ export class Scene {
         return this;
     }
 
-    removeObject(object: BaseObject | string) {
+    removeObject(object?: BaseObject | string) {
+        if (object == null) {
+            return;
+        }
         const layers = this.getLayers();
         for (let layer of layers) {
             layer.removeObject(object);
@@ -467,6 +470,20 @@ export class Scene {
                 }
             }
         }
+    }
+
+    fuzzyMathObjects(oKey: string) {
+        const objects: BaseObject[] = [];
+        for (let layer of this._layers) {
+            const objects = layer.getObjectsByOrder();
+            for (let object of objects) {
+                if (object.oKey.indexOf(oKey) > -1) {
+                    objects.push(object);
+                }
+            }
+        }
+
+        return objects;
     }
 
     addViewport(...viewport: Viewport[]) {
@@ -554,8 +571,11 @@ export class Scene {
         this._transformerOpenState = true;
     }
 
-    closeTransformer() {
-        this._transformer = null;
+    closeTransformer(isDestroyed = false) {
+        if (isDestroyed) {
+            this._transformer = null;
+        }
+
         this._transformerOpenState = false;
     }
 
@@ -571,17 +591,49 @@ export class Scene {
         return this._transformer;
     }
 
+    getActiveViewportByCoord(coord: Vector2) {
+        return this._viewports.find((vp) => vp.isHit(coord));
+    }
+
     transformToSceneCoord(coord: Vector2) {
-        const pickedViewport = this._viewports.find((vp) => vp.isHit(coord));
-        if (!this._evented || !pickedViewport) {
-            return;
-        }
-        return pickedViewport.getRelativeVector(coord);
+        const pickedViewport = this.getActiveViewportByCoord(coord);
+        return pickedViewport?.getRelativeVector(coord);
+    }
+
+    clearLayer() {
+        this._layers = [];
+    }
+
+    clearViewports() {
+        this._viewports = [];
+    }
+
+    dispose() {
+        this.getLayers().forEach((layer) => {
+            layer.dispose();
+        });
+        this.getViewports().forEach((viewport) => {
+            viewport.dispose();
+        });
+        this.clearLayer();
+        this.clearViewports();
+        this.detachControl();
+        this._transformer?.dispose();
+        this.onPointerDownObserver.clear();
+        this.onPointerMoveObserver.clear();
+        this.onPointerUpObserver.clear();
+        this.onDblclickObserver.clear();
+        this.onMouseWheelObserver.clear();
+        this.onKeyDownObservable.clear();
+        this.onKeyUpObservable.clear();
     }
 
     // Determine the only object selected
     pick(coord: Vector2): Nullable<BaseObject | Scene> {
-        const pickedViewport = this._viewports.find((vp) => vp.isHit(coord));
+        let pickedViewport = this.getActiveViewportByCoord(coord);
+        if (!pickedViewport) {
+            pickedViewport = this._viewports[0];
+        }
         if (!this._evented || !pickedViewport) {
             return;
         }
@@ -615,13 +667,13 @@ export class Scene {
                     if (pickedObject) {
                         isPickedObject = pickedObject;
                     } else {
-                        isPickedObject = (o as SceneViewer).scene;
+                        isPickedObject = (o as SceneViewer).getActiveSubScene();
                     }
                 } else {
                     isPickedObject = o;
                 }
                 break;
-            } else if (o.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+            } else if (o.classType === RENDER_CLASS_TYPE.SCENE_VIEWER && (o as SceneViewer).allowSelectedClipElement()) {
                 const pickedObject = (o as SceneViewer).pick(svCoord);
                 if (pickedObject) {
                     isPickedObject = pickedObject;
@@ -651,15 +703,15 @@ export class Scene {
         return { cumLeft, cumTop };
     }
 
-    onPointerMove: (evt: IPointerEvent | IMouseEvent) => void;
+    // onPointerMove: (evt: IPointerEvent | IMouseEvent) => void;
 
-    onPointerDown: (evt: IPointerEvent | IMouseEvent) => void;
+    // onPointerDown: (evt: IPointerEvent | IMouseEvent) => void;
 
-    onPointerUp: (evt: IPointerEvent | IMouseEvent) => void;
+    // onPointerUp: (evt: IPointerEvent | IMouseEvent) => void;
 
-    onDblclick: (evt: IPointerEvent | IMouseEvent) => void;
+    // onDblclick: (evt: IPointerEvent | IMouseEvent) => void;
 
-    onMouseWheel: (evt: IWheelEvent) => void;
+    // onMouseWheel: (evt: IWheelEvent) => void;
 
     onPointerDownObserver = new Observable<IPointerEvent | IMouseEvent>();
 
@@ -738,7 +790,7 @@ export class Scene {
     }
 
     triggerPointerDown(evt: IPointerEvent | IMouseEvent) {
-        console.log(this, 'scene');
+        // console.log(this, 'scene');
         if (!this.onPointerDownObserver.notifyObservers(evt)?.stopPropagation && this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
             (this._parent as SceneViewer)?.triggerPointerDown(evt);
             return false;

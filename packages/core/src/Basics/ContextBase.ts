@@ -4,6 +4,7 @@ import { HooksManager } from '../Observer/HooksManager';
 import { PluginManager } from '../Plugin';
 import { Locale, Nullable } from '../Shared';
 import { Environment } from './Environment';
+import { Univer } from './Univer';
 
 /**
  * Core context, mount important instances, managers
@@ -23,6 +24,8 @@ export abstract class ContextBase {
 
     protected _observerManager: ObserverManager;
 
+    protected _univer: Univer;
+
     protected abstract _setObserver(): void;
 
     constructor() {
@@ -33,6 +36,10 @@ export abstract class ContextBase {
         this._locale = new Locale();
         this._pluginManager = new PluginManager(this);
         this._observerManager = new ObserverManager();
+    }
+
+    onUniver(univer: Univer): void {
+        this._univer = univer;
     }
 
     getHook<T>(path: string): Nullable<ObservableHooks<T>> {

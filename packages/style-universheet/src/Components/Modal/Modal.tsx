@@ -27,6 +27,14 @@ class Modal extends Component<BaseModalProps, IState> {
         }));
     };
 
+    componentWillReceiveProps(props: BaseModalProps) {
+        if (props.visible !== this.state.visible) {
+            this.setState({
+                visible: props.visible,
+            });
+        }
+    }
+
     // maskClick = (e: MouseEvent) => {
     //     const mask = document.querySelector(`.${styles.modalMask}`);
     //     if (e.target === mask) {
@@ -35,12 +43,12 @@ class Modal extends Component<BaseModalProps, IState> {
     //     }
     // };
     handleClick = (cb?: () => void) => {
-        // this.showModal(false);
+        this.showModal(false);
         if (cb) cb();
     };
 
     render() {
-        const { title, width = 500, top = 0, style, children, className, group = [], isDrag = false, mask = true, footer = true } = this.props;
+        const { title, width = 500, top = 0, style, children, className = '', group = [], isDrag = false, mask = true, footer = true } = this.props;
         const { visible } = this.state;
 
         return (

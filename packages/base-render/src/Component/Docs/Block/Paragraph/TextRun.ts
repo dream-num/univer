@@ -93,6 +93,7 @@ export function dealWidthTextRun(
 
     for (let charIndex = 0; charIndex < arrayText.length; charIndex++) {
         const char = arrayText[charIndex];
+        const isFirstSpan = charIndex === 0;
         const languageHandlerResult = composeCharForLanguage(char, charIndex, arrayText, fontCreateConfig); // Handling special languages such as Tibetan, Arabic
         let newSpanGroup = [];
         if (languageHandlerResult) {
@@ -104,7 +105,7 @@ export function dealWidthTextRun(
             newSpanGroup.push(span);
         }
 
-        allPages = calculateParagraphLayout(newSpanGroup, allPages, sectionBreakConfig, paragraphConfig, elementIndex, charIndex === 0);
+        allPages = calculateParagraphLayout(newSpanGroup, allPages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan);
     }
 
     lineIterator(allPages, (line: IDocumentSkeletonLine) => {

@@ -5,8 +5,10 @@ import { Group } from './Group';
 import { RENDER_CLASS_TYPE } from './Basics';
 
 export class Layer {
-    constructor(private _scene: Scene, private _objects: BaseObject[] = [], private _zIndex: number = 1) {
-        this.addObjects(this._objects);
+    private _objects: BaseObject[] = [];
+
+    constructor(private _scene: Scene, objects: BaseObject[] = [], private _zIndex: number = 1) {
+        this.addObjects(objects);
     }
 
     static create(scene: Scene, objects: BaseObject[] = [], zIndex: number = 1000) {
@@ -93,5 +95,16 @@ export class Layer {
             this.addObject(o);
         });
         return this;
+    }
+
+    clear() {
+        this._objects = [];
+    }
+
+    dispose() {
+        this.getObjects().forEach((o) => {
+            o.dispose();
+        });
+        this.clear();
     }
 }

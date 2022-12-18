@@ -8,15 +8,15 @@ export interface BaseItemProps extends BaseMenuItem {
 }
 
 export class Item extends Component<BaseItemProps> {
-    Render: BaseComponentRender;
+    private _render: BaseComponentRender;
 
     initialize() {
         const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this.Render = component.getComponentRender();
+        this._render = component.getComponentRender();
     }
 
     render() {
-        const CorrectIcon = this.Render.renderFunction('CorrectIcon');
+        const CorrectIcon = this._render.renderFunction('CorrectIcon');
         const { selected, label, suffix, disabled } = this.props;
         return (
             <div className={joinClassNames(styles.selectItem, disabled ? styles.selectDisabledItem : '')}>

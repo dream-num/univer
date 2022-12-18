@@ -1,8 +1,9 @@
 import { CellValueType, ICellData, IRangeData, Nullable, ObjectArray, ObjectMatrix } from '@univer/core';
-import { CalculateValueType, NodeValueType, SheetDataType, SheetNameMapType, UnitDataType } from '../Basics/Common';
+import { CalculateValueType, IArrayValueObject, NodeValueType, SheetDataType, SheetNameMapType, UnitDataType } from '../Basics/Common';
 import { ErrorType, ERROR_TYPE_SET } from '../Basics/ErrorType';
 import { ObjectClassType } from '../Basics/ObjectClassType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
+import { ArrayValueObject } from '../ValueObject/ArrayValueObject';
 import { BaseValueObject } from '../ValueObject/BaseValueObject';
 import { BooleanValueObject } from '../ValueObject/BooleanValueObject';
 import { NumberValueObject } from '../ValueObject/NumberValueObject';
@@ -33,11 +34,7 @@ export class BaseReferenceObject extends ObjectClassType {
         super();
     }
 
-    isReferenceObject() {
-        return true;
-    }
-
-    iterator(callback: (valueObject: CalculateValueType, rowIndex: number, columnIndex: number) => Nullable<boolean>) {
+    getRangePosition() {
         let startRow = this._rangeData.startRow;
         let endRow = this._rangeData.endRow;
         let startColumn = this._rangeData.startColumn;
@@ -58,6 +55,21 @@ export class BaseReferenceObject extends ObjectClassType {
         if (endColumn === -1) {
             endColumn = this._columnCount - 1;
         }
+
+        return {
+            startRow,
+            endRow,
+            startColumn,
+            endColumn,
+        };
+    }
+
+    isReferenceObject() {
+        return true;
+    }
+
+    iterator(callback: (valueObject: CalculateValueType, rowIndex: number, columnIndex: number) => Nullable<boolean>) {
+        const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
 
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
@@ -267,17 +279,28 @@ export class BaseReferenceObject extends ObjectClassType {
         return this.getCellValueObject(cell);
     }
 
-    toArrayValueObject() {
-        const arrayValueList: CalculateValueType[][] = [];
+    toArrayValueObject(): ArrayValueObject {
+        const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
+        const rowSize = endRow - startRow + 1;
+        const columnSize = endColumn - startColumn + 1;
+        const arrayValueList: CalculateValueType[][] = new Array(rowSize);
         this.iterator((valueObject: CalculateValueType, rowIndex: number, columnIndex: number) => {
-            if (!arrayValueList[rowIndex]) {
-                arrayValueList[rowIndex] = [];
+            const row = rowIndex - startRow;
+            const column = columnIndex - startColumn;
+            if (!arrayValueList[row]) {
+                arrayValueList[row] = new Array(columnSize);
             }
 
-            arrayValueList[rowIndex][columnIndex] = valueObject;
+            arrayValueList[row][column] = valueObject;
         });
 
-        return arrayValueList;
+        const arrayValueObject: IArrayValueObject = {
+            calculateValueList: arrayValueList,
+            rowCount: arrayValueList.length,
+            columnCount: arrayValueList[0].length,
+        };
+
+        return new ArrayValueObject(arrayValueObject);
     }
 
     toUnitRange() {

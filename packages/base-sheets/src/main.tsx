@@ -1,9 +1,9 @@
 import { UniverSheet } from '@univer/core';
 import { RenderEngine } from '@univer/base-render';
 import { UniverComponentSheet } from '@univer/style-universheet';
-import { NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
+// import { NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
 import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
-import { DEFAULT_FORMULA_DATA, FormulaPlugin } from '@univer/sheets-plugin-formula';
+// import { DEFAULT_FORMULA_DATA, FormulaPlugin } from '@univer/sheets-plugin-formula';
 import { SheetPlugin } from './SheetPlugin';
 
 const uiDefaultConfigUp = {
@@ -44,8 +44,8 @@ univerSheetUp.installPlugin(new UniverComponentSheet());
 let sheetPlugin = new SheetPlugin(uiDefaultConfigUp);
 
 univerSheetUp.installPlugin(sheetPlugin);
-univerSheetUp.installPlugin(new NumfmtPlugin());
-FormulaPlugin.create(DEFAULT_FORMULA_DATA).installTo(univerSheetUp);
+// univerSheetUp.installPlugin(new NumfmtPlugin());
+// FormulaPlugin.create(DEFAULT_FORMULA_DATA).installTo(univerSheetUp);
 
 // univerSheetUp.refreshWorkbook(DEFAULT_WORKBOOK_DATA_DOWN);
 

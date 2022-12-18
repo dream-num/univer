@@ -10,7 +10,7 @@ English | [简体中文](./README-zh.md)
 
 ## Demo
 
--   [Univer Demo](dream-num.github.io/univer-demo/)
+-   [Univer Demo](https://dream-num.github.io/univer-demo/)
 
 ## Development
 
@@ -33,7 +33,7 @@ pnpm i
 Start sheets
 
 ```
-npm run dev
+npm run dev:sheet
 ```
 
 Start docs

@@ -7,6 +7,9 @@ import { DEFAULT_SLIDE_DATA } from '@univer/common-plugin-data';
 
 const slidePluginConfig = {
     container: 'universlide',
+    layout: {
+        innerLeft: true,
+    },
 };
 
 const univerSlide = UniverSlide.newInstance(DEFAULT_SLIDE_DATA);

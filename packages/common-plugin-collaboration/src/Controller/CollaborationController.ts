@@ -10,6 +10,8 @@ export class CollaborationController {
 
     socket: IOSocket;
 
+    previousMessage: string;
+
     constructor(plugin: CollaborationPlugin) {
         this._plugin = plugin;
         this._initialize();
@@ -85,8 +87,10 @@ export class CollaborationController {
                             type: 'workbookData',
                             config,
                         };
-                        console.log('config===', message);
-                        this.socket.send(JSON.stringify(message));
+
+                        const stringMessage = JSON.stringify(message);
+                        this.previousMessage = stringMessage;
+                        this.socket.send(stringMessage);
                     }, 100);
                 } catch (error) {
                     console.info(error);
@@ -98,14 +102,17 @@ export class CollaborationController {
     onMessage(data) {
         const json = JSON.parse(data);
         const content = json.content;
-        if (content === HEART_BEAT_MESSAGE) {
+        if (content === HEART_BEAT_MESSAGE || this.previousMessage === content) {
             return;
         }
+
+        this.previousMessage = content;
 
         try {
             const message = JSON.parse(content);
 
             if (message && message.type === 'workbookData') {
+                console.log('refresh');
                 this.refresh(message.config);
             }
         } catch (error) {
@@ -126,6 +133,10 @@ export class CollaborationController {
     }
     onDestroy(data) {
         console.log('onDestroy====', data);
+    }
+
+    close() {
+        this.socket.close();
     }
 
     refresh(config) {

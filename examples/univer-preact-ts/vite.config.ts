@@ -16,6 +16,7 @@ export default defineConfig({
             fileName: 'univer-preact-ts',
         },
         outDir: './lib',
+        sourcemap: true,
     },
     define: {
         pkgJson: { name, version },

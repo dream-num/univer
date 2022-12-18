@@ -1,4 +1,4 @@
-import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DOWN } from '@univer/common-plugin-data';
+import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DEMO3, DEFAULT_WORKBOOK_DATA_DOWN } from '@univer/common-plugin-data';
 import { IWorkbookConfig, IWorksheetConfig, SheetTypes, Tools } from '@univer/core';
 import { univerSheetCustom } from '.';
 
@@ -36,33 +36,34 @@ let columnCount = 8;
 if (window.innerWidth < 1366) {
     columnCount = 5;
 }
-const defaultWorkbookData = Tools.deepClone(DEFAULT_WORKBOOK_DATA);
-defaultWorkbookData.id = 'workbook-01';
-defaultWorkbookData.styles = null;
-defaultWorkbookData.namedRanges = null;
-defaultWorkbookData.sheets = {
-    'sheet-01': {
-        type: 0,
-        id: 'sheet-01',
-        name: 'sheet1',
-        columnCount,
-        status: 1,
-        cellData: {
-            '0': {
-                '0': {
-                    m: '',
-                    v: '',
-                },
-            },
-        },
-    },
-};
+const defaultWorkbookData = Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO3);
+// defaultWorkbookData.id = 'workbook-01';
+// defaultWorkbookData.styles = null;
+// defaultWorkbookData.namedRanges = null;
+// defaultWorkbookData.sheets = {
+//     'sheet-01': {
+//         type: 0,
+//         id: 'sheet-01',
+//         name: 'sheet1',
+//         columnCount,
+//         status: 1,
+//         cellData: {
+//             '0': {
+//                 '0': {
+//                     m: '',
+//                     v: '',
+//                 },
+//             },
+//         },
+//     },
+// };
 
 univerSheetCustom({
     coreConfig: defaultWorkbookData,
     baseSheetsConfig: sheetConfig,
     collaborationConfig: {
-        url: 'ws://luckysheet.lashuju.com/ws',
+        url: 'ws://localhost:8448/ws',
+        // url: 'ws://luckysheet.lashuju.com/ws',
     },
 });
 

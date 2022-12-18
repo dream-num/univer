@@ -215,4 +215,8 @@ export class IOSocket {
     on(type: IOSocketListenType, listen: Function): void {
         this._listens.set(type, listen);
     }
+
+    close(): void {
+        this._socket && this._socket.close();
+    }
 }

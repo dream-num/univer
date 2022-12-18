@@ -48,4 +48,8 @@ export class CollaborationPlugin extends Plugin {
     getConfig() {
         return this.config;
     }
+
+    getCollaborationController() {
+        return this._collaborationController;
+    }
 }

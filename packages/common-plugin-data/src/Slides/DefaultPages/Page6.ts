@@ -1,15 +1,12 @@
-import { IWorksheetConfig, PageElementType, PageType, ShapeType } from '@univer/core';
-import { SLIDE_WORKBOOK_DATA } from '../../Sheets/SLIDE_WORKBOOK_DATA';
+import { PageElementType, PageType, ShapeType } from '@univer/core';
+import { DEFAULT_DOCUMENT_DATA_EN } from '../../Docs/DEFAULT_DOCUMENT_DATA_EN';
 
-const worksheetConfig = SLIDE_WORKBOOK_DATA.sheets[SLIDE_WORKBOOK_DATA.sheetOrder[0]] as IWorksheetConfig;
-const spreadStyles = SLIDE_WORKBOOK_DATA.styles;
-
-export const DEFAULT_FORTH_PAGE = {
-    id: 'business_1',
+export const DEFAULT_SIXTH_PAGE = {
+    id: 'richText_1',
     pageType: PageType.SLIDE,
     zIndex: 2,
     title: 'business',
-    description: 'this is second page, business',
+    description: 'this is fix page, rich text',
     pageBackgroundFill: {
         rgb: 'rgb(255,255,255)',
     },
@@ -67,7 +64,7 @@ export const DEFAULT_FORTH_PAGE = {
             description: '',
             type: PageElementType.TEXT,
             richText: {
-                text: 'The Business Objectives',
+                text: 'The Work-like Editor',
                 fs: 32,
                 cl: {
                     rgb: 'rgb(244,79,86)',
@@ -85,14 +82,14 @@ export const DEFAULT_FORTH_PAGE = {
             description: '',
             type: PageElementType.TEXT,
             richText: {
-                text: 'What we hope to achieve in the short and long run',
+                text: 'Open source WYSIWYG editor built for the modern web',
                 fs: 18,
                 cl: {
                     rgb: 'rgb(127,127,127)',
                 },
             },
         },
-        spreadSheet1: {
+        document: {
             id: 'table1',
             zIndex: 3,
             left: 30,
@@ -101,11 +98,8 @@ export const DEFAULT_FORTH_PAGE = {
             height: 400,
             title: 'table1',
             description: '',
-            type: PageElementType.SPREADSHEET,
-            spreadsheet: {
-                worksheet: worksheetConfig,
-                styles: spreadStyles,
-            },
+            type: PageElementType.DOCUMENT,
+            document: DEFAULT_DOCUMENT_DATA_EN,
         },
     },
 };

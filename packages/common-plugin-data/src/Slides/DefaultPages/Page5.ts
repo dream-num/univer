@@ -1,6 +1,6 @@
 import { PageElementType, PageType, ShapeType } from '@univer/core';
 
-export const DEFAULT_Fifth_PAGE = {
+export const DEFAULT_FIFTH_PAGE = {
     id: 'technology_1',
     pageType: PageType.SLIDE,
     zIndex: 2,

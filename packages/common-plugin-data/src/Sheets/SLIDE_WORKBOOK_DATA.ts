@@ -1,0 +1,566 @@
+import { BooleanNumber, BorderStyleTypes, IWorkbookConfig, LocaleType, SheetTypes } from '@univer/core';
+
+export const SLIDE_WORKBOOK_DATA: IWorkbookConfig = {
+    id: 'workbook-01',
+    theme: 'default',
+    locale: LocaleType.EN,
+    creator: 'univer',
+    name: 'universheet',
+    skin: 'default',
+    socketUrl: '',
+    socketEnable: BooleanNumber.FALSE,
+    extensions: [],
+    sheetOrder: ['sheet-0001'],
+    pluginMeta: {},
+    styles: {
+        '1': {
+            vt: 2,
+            ht: 2,
+            bl: 1,
+            fs: 14,
+            bg: {
+                rgb: 'rgb(105,126,146)',
+            },
+            cl: {
+                rgb: 'rgb(255,255,255)',
+            },
+        },
+        '2': {
+            vt: 2,
+            ht: 2,
+            bl: 1,
+            fs: 20,
+            bg: {
+                rgb: 'rgb(244,79,86)',
+            },
+            cl: {
+                rgb: 'rgb(255,255,255)',
+            },
+            bd: {
+                t: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+                l: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+                r: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+                b: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+            },
+        },
+        '3': {
+            vt: 2,
+            bg: {
+                rgb: 'rgb(105,126,146)',
+            },
+            cl: {
+                rgb: 'rgb(255,255,255)',
+            },
+            fs: 14,
+            ht: 2,
+            bd: {
+                t: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+                l: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+                r: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+                b: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+            },
+        },
+        '4': {
+            fs: 12,
+            vt: 2,
+            pd: {
+                l: 5,
+            },
+            ht: 2,
+            bd: {
+                t: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+                l: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+                r: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+                b: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+            },
+        },
+        '5': {
+            ht: 2,
+            vt: 2,
+            bd: {
+                t: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+                l: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+                r: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+                b: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+            },
+        },
+    },
+    timeZone: 'GMT+8',
+    createdTime: '2021-11-28 12:10:10',
+    modifiedTime: '2021-11-29 12:10:10',
+    appVersion: '3.0.0-alpha',
+    lastModifiedBy: 'univer',
+    sheets: {
+        'sheet-0001': {
+            type: SheetTypes.GRID,
+            id: 'sheet-0001',
+            name: 'sheet-0001',
+            tabColor: 'blue',
+            hidden: BooleanNumber.FALSE,
+            freezeColumn: 1,
+            rowCount: 12,
+            columnCount: 11,
+            freezeRow: 1,
+            zoomRatio: 1,
+            scrollTop: 200,
+            scrollLeft: 100,
+            defaultColumnWidth: 93,
+            defaultRowHeight: 40,
+            cellData: {
+                '1': {
+                    '1': {
+                        v: 'Variants',
+                        s: '2',
+                    },
+                    '2': {
+                        v: 'Platform',
+                        s: '2',
+                    },
+                    '3': {
+                        v: 'UGC Buzz volume',
+                        s: '2',
+                    },
+                },
+                '2': {
+                    '3': {
+                        v: "Jul'21",
+                        s: '1',
+                    },
+                    '4': {
+                        v: "Aug'21",
+                        s: '1',
+                    },
+                    '5': {
+                        v: "Sep'21",
+                        s: '1',
+                    },
+                    '6': {
+                        v: "Oct'21",
+                        s: '1',
+                    },
+                    '7': {
+                        v: "Nov'21",
+                        s: '1',
+                    },
+                    '8': {
+                        v: "Dec'21",
+                        s: '1',
+                    },
+                },
+                '3': {
+                    '1': {
+                        v: 'Eleva',
+                        s: '3',
+                    },
+                    '2': {
+                        v: 'Amazon',
+                        s: '4',
+                    },
+                    '3': {
+                        v: '4',
+                        s: '5',
+                    },
+                    '4': {
+                        v: '145',
+                        s: '5',
+                    },
+                    '5': {
+                        v: '44',
+                        s: '5',
+                    },
+                    '6': {
+                        v: '20',
+                        s: '5',
+                    },
+                    '7': {
+                        v: '7',
+                        s: '5',
+                    },
+                    '8': {
+                        v: '12',
+                        s: '5',
+                    },
+                },
+                '4': {
+                    '2': {
+                        v: 'Google',
+                        s: '4',
+                    },
+                    '3': {
+                        v: '2',
+                        s: '5',
+                    },
+                    '4': {
+                        v: '6',
+                        s: '5',
+                    },
+                    '5': {
+                        v: '5',
+                        s: '5',
+                    },
+                    '6': {
+                        v: '6',
+                        s: '5',
+                    },
+                    '7': {
+                        v: '12',
+                        s: '5',
+                    },
+                    '8': {
+                        v: '3113',
+                        s: '5',
+                    },
+                },
+                '5': {
+                    '2': {
+                        v: 'Amazon',
+                        s: '4',
+                    },
+                    '3': {
+                        v: '14',
+                        s: '5',
+                    },
+                    '4': {
+                        v: '13',
+                        s: '5',
+                    },
+                    '5': {
+                        v: '6',
+                        s: '5',
+                    },
+                    '6': {
+                        v: '6',
+                        s: '5',
+                    },
+                    '7': {
+                        v: '11',
+                        s: '5',
+                    },
+                    '8': {
+                        v: '2',
+                        s: '5',
+                    },
+                },
+                '6': {
+                    '1': {
+                        v: 'Similac',
+                        s: '3',
+                    },
+                    '2': {
+                        v: 'SaleForce',
+                        s: '4',
+                    },
+                    '3': {
+                        v: '451',
+                        s: '5',
+                    },
+                    '4': {
+                        v: '255',
+                        s: '5',
+                    },
+                    '5': {
+                        v: '72',
+                        s: '5',
+                    },
+                    '6': {
+                        v: '23',
+                        s: '5',
+                    },
+                    '7': {
+                        v: '163',
+                        s: '5',
+                    },
+                    '8': {
+                        v: '22',
+                        s: '5',
+                    },
+                },
+                '7': {
+                    '2': {
+                        v: 'Oracle',
+                        s: '4',
+                    },
+                    '3': {
+                        v: '0',
+                        s: '5',
+                    },
+                    '4': {
+                        v: '1',
+                        s: '5',
+                    },
+                    '5': {
+                        v: '1136',
+                        s: '5',
+                    },
+                    '6': {
+                        v: '11',
+                        s: '5',
+                    },
+                    '7': {
+                        v: '2',
+                        s: '5',
+                    },
+                    '8': {
+                        v: '1',
+                        s: '5',
+                    },
+                },
+                '8': {
+                    '2': {
+                        v: 'Apple',
+                        s: '4',
+                    },
+                    '3': {
+                        v: '7',
+                        s: '5',
+                    },
+                    '4': {
+                        v: '2',
+                        s: '5',
+                    },
+                    '5': {
+                        v: '10',
+                        s: '5',
+                    },
+                    '6': {
+                        v: '5',
+                        s: '5',
+                    },
+                    '7': {
+                        v: '6',
+                        s: '5',
+                    },
+                    '8': {
+                        v: '3',
+                        s: '5',
+                    },
+                },
+                '9': {
+                    '1': {
+                        v: 'TC',
+                        s: '3',
+                    },
+                    '2': {
+                        v: 'IBM',
+                        s: '4',
+                    },
+                    '3': {
+                        v: '1',
+                        s: '5',
+                    },
+                    '4': {
+                        v: '12',
+                        s: '5',
+                    },
+                    '5': {
+                        v: '2',
+                        s: '5',
+                    },
+                    '6': {
+                        v: '1',
+                        s: '5',
+                    },
+                    '7': {
+                        v: '1',
+                        s: '5',
+                    },
+                    '8': {
+                        v: '1',
+                        s: '5',
+                    },
+                },
+                '10': {
+                    '2': {
+                        v: 'Google',
+                        s: '4',
+                    },
+                    '3': {
+                        v: '26',
+                        s: '5',
+                    },
+                    '4': {
+                        v: '33',
+                        s: '5',
+                    },
+                    '5': {
+                        v: '33',
+                        s: '5',
+                    },
+                    '6': {
+                        v: '6',
+                        s: '5',
+                    },
+                    '7': {
+                        v: '22',
+                        s: '5',
+                    },
+                    '8': {
+                        v: '8',
+                        s: '5',
+                    },
+                },
+            },
+            mergeData: [
+                {
+                    startRow: 1,
+                    endRow: 2,
+                    startColumn: 1,
+                    endColumn: 1,
+                },
+                {
+                    startRow: 1,
+                    endRow: 2,
+                    startColumn: 2,
+                    endColumn: 2,
+                },
+                {
+                    startRow: 1,
+                    endRow: 1,
+                    startColumn: 3,
+                    endColumn: 8,
+                },
+                {
+                    startRow: 3,
+                    endRow: 5,
+                    startColumn: 1,
+                    endColumn: 1,
+                },
+                {
+                    startRow: 6,
+                    endRow: 8,
+                    startColumn: 1,
+                    endColumn: 1,
+                },
+                {
+                    startRow: 9,
+                    endRow: 10,
+                    startColumn: 1,
+                    endColumn: 1,
+                },
+            ],
+            rowData: {
+                '0': {
+                    h: 20,
+                },
+            },
+            columnData: {
+                '0': {
+                    w: 20,
+                },
+                '2': {
+                    w: 120,
+                },
+            },
+            status: 1,
+            showGridlines: 0,
+            hideRow: [],
+            hideColumn: [],
+            rowTitle: {
+                width: 46,
+                hidden: BooleanNumber.FALSE,
+            },
+            columnTitle: {
+                height: 20,
+                hidden: BooleanNumber.FALSE,
+            },
+            selections: ['A2'],
+            rightToLeft: BooleanNumber.FALSE,
+            pluginMeta: {},
+        },
+    },
+    namedRanges: [
+        {
+            namedRangeId: 'named-rang',
+            name: 'namedRange',
+            range: {
+                sheetId: 'sheet-0001',
+                rangeData: {
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 1,
+                    endColumn: 1,
+                },
+            },
+        },
+    ],
+};

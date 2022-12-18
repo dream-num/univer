@@ -30,6 +30,16 @@ export class SlideBarController {
                 const canvasView = this._getCanvasView();
 
                 canvasView.createSlidePages(this._slideBar, this._pages);
+
+                canvasView.getSlide().onSlideChangePageByNavigationObservable.add((pageId) => {
+                    if (this._slideBar.state.activePageId === pageId || pageId == null) {
+                        return;
+                    }
+                    this._slideBar.setState({
+                        activePageId: pageId,
+                    });
+                    canvasView.activePage(pageId);
+                });
             });
 
             this._plugin.getObserver('onSlideBarMousedownObservable')?.add((pageId) => {

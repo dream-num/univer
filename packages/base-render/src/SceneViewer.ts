@@ -11,6 +11,8 @@ export class SceneViewer extends BaseObject {
 
     private _activeSubScene: Nullable<Scene>;
 
+    private _allowSelectedClipElement = false;
+
     constructor(key?: string, props?: IObjectFullState) {
         super(key);
         this._initialProps(props);
@@ -85,6 +87,18 @@ export class SceneViewer extends BaseObject {
             this._activeSubScene = subScene;
             this.makeDirty();
         }
+    }
+
+    enableSelectedClipElement() {
+        this._allowSelectedClipElement = true;
+    }
+
+    disableSelectedClipElement() {
+        this._allowSelectedClipElement = false;
+    }
+
+    allowSelectedClipElement() {
+        return this._allowSelectedClipElement;
     }
 
     // 判断被选中的唯一对象

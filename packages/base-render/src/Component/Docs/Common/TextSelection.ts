@@ -14,7 +14,6 @@ import { IPoint } from '../../../Basics/Vector2';
 import { Scene } from '../../../Scene';
 import { Rect } from '../../../Shape/Rect';
 import { RegularPolygon } from '../../../Shape/RegularPolygon';
-import { DocumentSkeleton } from '../DocSkeleton';
 import { Documents } from '../Document';
 import { Liquid } from './Liquid';
 
@@ -382,7 +381,7 @@ export class TextSelection {
         this._scene.addObject(anchor, 2);
     }
 
-    private _getRangePointData(startOrigin: INodePosition, endOrigin: INodePosition, skeleton: DocumentSkeleton) {
+    private _getRangePointData(startOrigin: INodePosition, endOrigin: INodePosition, documents: Documents) {
         const pointGroup: IPoint[][] = [];
 
         const cursorList: ISelectionCursor[] = [];
@@ -400,7 +399,7 @@ export class TextSelection {
 
         const isEndBack = end.isBack;
 
-        this._selectionIterator(start!, end!, skeleton, (start_sp, end_sp, divide, line) => {
+        this._selectionIterator(start!, end!, documents, (start_sp, end_sp, divide, line) => {
             const { lineHeight } = line;
 
             const { spanGroup, st } = divide;
@@ -493,7 +492,7 @@ export class TextSelection {
     private _selectionIterator(
         startPosition: INodePosition,
         endPosition: INodePosition,
-        skeleton: DocumentSkeleton,
+        documents: Documents,
         func: (
             startSpanIndex: number,
             endSpanIndex: number,
@@ -504,6 +503,7 @@ export class TextSelection {
             page: IDocumentSkeletonPage
         ) => void
     ) {
+        const skeleton = documents.getSkeleton();
         if (!skeleton) {
             return [];
         }
@@ -519,6 +519,11 @@ export class TextSelection {
         const { page: endPage } = endPosition;
 
         this._resetCurrentNodePositionState();
+
+        for (let p = 0; p <= page - 1; p++) {
+            const page = pages[p];
+            this._Liquid.translatePage(page, documents.pageLayoutType, documents.pageMarginLeft, documents.pageMarginTop);
+        }
 
         for (let p = page; p <= endPage; p++) {
             const page = pages[p];
@@ -661,12 +666,6 @@ export class TextSelection {
     }
 
     refresh(documents: Documents) {
-        const skeleton = documents.getSkeleton();
-
-        if (!skeleton) {
-            return;
-        }
-
         const start = this.startNodePosition;
 
         const end = this.endNodePosition;
@@ -679,14 +678,14 @@ export class TextSelection {
         }
 
         if (this.isCollapsed()) {
-            const data = this._getRangePointData(start!, start!, skeleton);
+            const data = this._getRangePointData(start!, start!, documents);
             const { pointGroup, cursorList } = data;
             this._setCursor(cursorList);
             pointGroup.length > 0 && this._createAndUpdateAnchor(pointGroup, documents.left, documents.top);
             return;
         }
 
-        const data = this._getRangePointData(start!, end!, skeleton);
+        const data = this._getRangePointData(start!, end!, documents);
         const { pointGroup, cursorList } = data;
         this._setCursor(cursorList);
         pointGroup.length > 0 && this._createAndUpdateRange(pointGroup, documents.left, documents.top);

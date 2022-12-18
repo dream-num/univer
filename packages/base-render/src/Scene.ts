@@ -673,7 +673,7 @@ export class Scene {
                     isPickedObject = o;
                 }
                 break;
-            } else if (o.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+            } else if (o.classType === RENDER_CLASS_TYPE.SCENE_VIEWER && (o as SceneViewer).allowSelectedClipElement()) {
                 const pickedObject = (o as SceneViewer).pick(svCoord);
                 if (pickedObject) {
                     isPickedObject = pickedObject;

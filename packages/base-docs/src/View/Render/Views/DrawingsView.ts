@@ -1,4 +1,4 @@
-import { getColor, Rect, Documents, DocumentSkeleton, CustomObject, IPageRenderConfig, Transform, ptToPx, BaseObject } from '@univer/base-render';
+import { getColor, Rect, Documents, DocumentSkeleton, CustomObject, IPageRenderConfig, Transform, ptToPx, BaseObject, Picture, Liquid } from '@univer/base-render';
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 import { DOCS_VIEW_KEY } from './DocsView';
 
@@ -8,6 +8,8 @@ export class DrawingsView extends BaseView {
     zIndex = 3;
 
     viewKey = DRAWINGS_VIEW_BACKGROUND;
+
+    private _liquid = new Liquid();
 
     protected _initialize() {
         const scene = this.getScene();
@@ -28,31 +30,42 @@ export class DrawingsView extends BaseView {
         const { pages } = skeletonData;
         const objectList: BaseObject[] = [];
         const pageMarginCache = new Map<string, { marginLeft: number; marginTop: number }>();
-        for (let page of pages) {
-            const { skeDrawings, marginLeft, marginTop } = page;
+
+        let cumPageLeft = 0;
+        let cumPageTop = 0;
+
+        for (let i = 0, len = pages.length; i < len; i++) {
+            const page = pages[i];
+            const { skeDrawings, marginLeft, marginTop, pageWidth, pageHeight } = page;
+
+            // cumPageLeft + = pageWidth + documents.pageMarginLeft;
+
+            this._liquid.translatePagePadding(page);
 
             skeDrawings.forEach((drawing) => {
-                const { aLeft, aTop, height, width } = drawing;
+                const { aLeft, aTop, height, width, drawingOrigin } = drawing;
 
-                const rect = new Rect(drawing.objectId, {
-                    left: aLeft + docsLeft + marginLeft,
-                    top: aTop + docsTop + marginTop,
+                const { objectProperties } = drawingOrigin;
+
+                const rect = new Picture(drawing.objectId, {
+                    url: objectProperties.imageProperties?.contentUrl || '',
+                    left: aLeft + docsLeft + this._liquid.x,
+                    top: aTop + docsTop + this._liquid.y,
                     width: width,
                     height: height,
-                    fill: 'rgba(102,111,99, 0.8)',
                     zIndex: 11,
                     isTransformer: true,
                 });
 
                 pageMarginCache.set(drawing.objectId, {
-                    marginLeft,
-                    marginTop,
+                    marginLeft: this._liquid.x,
+                    marginTop: this._liquid.y,
                 });
-
-                console.log('pageMarginCache', aTop, docsTop, marginTop, aTop + docsTop + marginTop, rect);
 
                 objectList.push(rect);
             });
+
+            this._liquid.translatePage(page, documents.pageLayoutType, documents.pageMarginLeft, documents.pageMarginTop);
         }
         scene.openTransformer();
         scene.addObjects(objectList);
@@ -65,7 +78,7 @@ export class DrawingsView extends BaseView {
                 const marginLeft = cache?.marginLeft || 0;
                 const marginTop = cache?.marginTop || 0;
 
-                console.log('onChangingObservable', top, docsTop, marginTop, top - docsTop - marginTop);
+                // console.log('onChangingObservable', top, docsTop, marginTop, top - docsTop - marginTop);
 
                 docsSkeleton?.updateDrawing(oKey, {
                     left: left - docsLeft - marginLeft,

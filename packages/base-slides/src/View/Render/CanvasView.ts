@@ -25,6 +25,10 @@ export class CanvasView {
         this._initialize();
     }
 
+    getSlide() {
+        return this._slide;
+    }
+
     createSlidePages(slideBar: SlideBar, pages: ISlidePage[]) {
         const slideBarRef = slideBar.slideBarRef;
         const thumbList = slideBarRef.current?.childNodes[0].childNodes;
@@ -169,6 +173,8 @@ export class CanvasView {
         });
 
         slideComponent.enableNav();
+
+        slideComponent.enableSelectedClipElement();
 
         this._slide = slideComponent;
 

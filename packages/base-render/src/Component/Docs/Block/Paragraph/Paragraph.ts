@@ -99,6 +99,19 @@ export function dealWidthParagraph(
     _updateListLevelAncestors(bullet, bulletSkeleton, skeListLevel); // 更新最新的level缓存列表
     paragraphConfig.bulletSkeleton = bulletSkeleton;
 
+    elementOrder.forEach((elementOrderItem: IElementsOrder, elementIndex: number) => {
+        const { elementId, paragraphElementType } = elementOrderItem;
+        let currentPages: IDocumentSkeletonPage[] = [];
+        if (paragraphElementType === ParagraphElementType.DRAWING) {
+            const drawingOrigin = drawings[elementId];
+            if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
+                currentPages = dealWidthInlineDrawing(drawingOrigin, elementIndex, sectionBreakConfig, lastPage, paragraphConfig, fontLocale);
+            } else {
+                paragraphAffectSkeDrawings.set(elementId, _getDrawingSkeletonFormat(drawingOrigin));
+            }
+        }
+    });
+
     // let currentLine = createSkeletonLine({ ...paragraphConfig, bulletSkeleton, affectSkeDrawings: affectAllSkeDrawings });
     // 处理1列的情况
     // 如果下一节是连续的，则按照1列进行计算，计算结果返回后，用来预估列高度，然后在接来下的流程进行二次计算
@@ -112,13 +125,6 @@ export function dealWidthParagraph(
                 return false;
             }
             currentPages = dealWidthTextRun(textRun, elementIndex, sectionBreakConfig, lastPage, { ...paragraphConfig, paragraphAffectSkeDrawings }, fontLocale);
-        } else if (paragraphElementType === ParagraphElementType.DRAWING) {
-            const drawingOrigin = drawings[elementId];
-            if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
-                currentPages = dealWidthInlineDrawing(drawingOrigin, elementIndex, sectionBreakConfig, lastPage, paragraphConfig, fontLocale);
-            } else {
-                paragraphAffectSkeDrawings.set(elementId, _getDrawingSkeletonFormat(drawingOrigin));
-            }
         } else if (paragraphElementType === ParagraphElementType.PAGE_BREAK) {
             // 换页标识，换页后还在同一个节内
             currentPages = [createSkeletonPage(sectionBreakConfig, skeletonResourceReference, _getNextPageNumber(lastPage), BreakType.PAGE)];

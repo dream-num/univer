@@ -12,6 +12,7 @@ import { DocsEditor } from './Document.Editor';
 import { Liquid } from './Common';
 import { Scene } from '../../Scene';
 import { TextSelection } from './Common/TextSelection';
+import { Engine } from '../..';
 
 export interface IDocumentsConfig {
     pageMarginLeft?: number;
@@ -189,9 +190,12 @@ export class Documents extends DocComponent {
         };
     }
 
-    calculatePagePosition() {
+    calculatePagePosition(engine: Nullable<Engine>) {
         const scene = this.getScene() as Scene;
-        const engine = scene?.getEngine();
+
+        if (engine == null) {
+            engine = scene?.getEngine();
+        }
         const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = this;
         if (engine == null) {
             return;
@@ -427,7 +431,7 @@ export class Documents extends DocComponent {
                         } else {
                             this._drawLiquid.translateSave();
 
-                            this._drawLiquid.translateLine(line);
+                            this._drawLiquid.translateLine(line, true);
                             rotateTranslateXListApply && this._drawLiquid.translate(rotateTranslateXListApply[i]); // x axis offset
 
                             const divideLength = divides.length;
@@ -489,8 +493,8 @@ export class Documents extends DocComponent {
             this._resetRotation(ctx, finalAngle);
 
             const { x, y } = this._drawLiquid.translatePage(page, this.pageLayoutType, this.pageMarginLeft, this.pageMarginTop);
-            pageLeft = x;
-            pageTop = y;
+            pageLeft += x;
+            pageTop += y;
         }
     }
 
@@ -628,6 +632,7 @@ export class Documents extends DocComponent {
             const { startX, startY, endX, endY } = this._getPageBoundingBox(page);
 
             if (!(x >= startX && x <= endX && y >= startY && y <= endY)) {
+                this._translatePage(page);
                 continue;
             }
 
@@ -723,10 +728,14 @@ export class Documents extends DocComponent {
                 }
             }
             this._findLiquid.restorePagePadding(page);
-            this._findLiquid.translatePage(page, this.pageLayoutType, this.pageMarginLeft, this.pageMarginTop);
+            this._translatePage(page);
         }
 
         return false;
+    }
+
+    private _translatePage(page: IDocumentSkeletonPage) {
+        this._findLiquid.translatePage(page, this.pageLayoutType, this.pageMarginLeft, this.pageMarginTop);
     }
 
     static create(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {

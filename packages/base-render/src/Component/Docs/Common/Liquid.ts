@@ -118,9 +118,9 @@ export class Liquid {
         };
     }
 
-    translateLine(line: IDocumentSkeletonLine) {
+    translateLine(line: IDocumentSkeletonLine, isDraw = false) {
         const { top: lineTop, marginBottom: lineMarginBottom = 0, marginTop: lineMarginTop = 0, paddingTop: linePaddingTop = 0, paddingBottom: linePaddingBottom = 0 } = line;
-        const lineOffset = lineTop + lineMarginTop + linePaddingTop;
+        const lineOffset = lineTop + (isDraw === true ? lineMarginTop : 0) + linePaddingTop;
         this.translate(0, lineOffset);
         return {
             x: 0,

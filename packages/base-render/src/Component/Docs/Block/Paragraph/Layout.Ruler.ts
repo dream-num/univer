@@ -18,7 +18,7 @@ import {
     isColumnFull,
 } from '../../Common/Tools';
 import { createSkeletonPage } from '../../Common/Page';
-import { calculateLineTopByDrawings, createAndUpdateBlockAnchor, createSkeletonLine, isParagraphStart, setDivideFullState } from '../../Common/Line';
+import { addSpanToDivide, calculateLineTopByDrawings, createAndUpdateBlockAnchor, createSkeletonLine, isParagraphStart, setDivideFullState } from '../../Common/Line';
 import { createSkeletonBulletSpan, setSpanGroupLeft } from '../../Common/Span';
 import { setColumnFullState } from '../../Common/Section';
 import {
@@ -95,7 +95,8 @@ function _divideOperator(
             if (width > pageContentWidth) {
                 // 一个字符超页内容宽
                 if (isBlankPage(lastPage)) {
-                    divide.spanGroup.push(...spanGroup);
+                    addSpanToDivide(divide, spanGroup);
+                    // divide.spanGroup.push(...spanGroup);
                     __makeColumnsFull(column?.parent?.columns);
                 } else {
                     _pageOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
@@ -105,7 +106,8 @@ function _divideOperator(
                 setColumnFullState(column, true);
                 if (isBlankColumn(column)) {
                     console.log(spanGroup);
-                    divide.spanGroup.push(...spanGroup);
+                    addSpanToDivide(divide, spanGroup);
+                    // divide.spanGroup.push(...spanGroup);
                 } else {
                     _columnOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
                 }
@@ -153,7 +155,8 @@ function _divideOperator(
                 span.parent = divide;
             }
             // console.log('spanGroup', spanGroup, spanGroup.length, spanGroup[0].content);
-            divide.spanGroup.push(...spanGroup);
+            addSpanToDivide(divide, spanGroup);
+            // divide.spanGroup.push(...spanGroup);
         }
     } else {
         _lineOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
@@ -250,7 +253,7 @@ function _lineOperator(
 
     if (lineHeight + newLineTop > section.height && column.lines.length > 0 && lastPage.sections.length > 0) {
         // 行高超过Col高度，且列中已存在一行以上，且section大于一个；
-        console.log('_lineOperator', { spanGroup, pages, lineHeight, newLineTop, sectionHeight: section.height, lastPage });
+        // console.log('_lineOperator', { spanGroup, pages, lineHeight, newLineTop, sectionHeight: section.height, lastPage });
         setColumnFullState(column, true);
         _columnOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
         return;

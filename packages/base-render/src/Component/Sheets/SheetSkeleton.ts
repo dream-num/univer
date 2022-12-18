@@ -102,6 +102,8 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     private _stylesCache: IStylesCache;
 
+    private _showGridlines: BooleanNumber;
+
     constructor(private _config: IWorksheetConfig, private _cellData: ObjectMatrix<ICellData>, private _styles: Styles, context: SheetContext) {
         super(context);
         this.updateLayout();
@@ -160,6 +162,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._overflowCache;
     }
 
+    get showGridlines() {
+        return this._showGridlines;
+    }
+
     setOverflowCache(value: ObjectMatrix<IRangeData>) {
         this._overflowCache = value;
     }
@@ -188,7 +194,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         if (!this.dirty) {
             return;
         }
-        const { rowData, columnData, defaultRowHeight, defaultColumnWidth, rowCount, columnCount, rowTitle, columnTitle } = this._config;
+        const { rowData, columnData, defaultRowHeight, defaultColumnWidth, rowCount, columnCount, rowTitle, columnTitle, showGridlines } = this._config;
         const { rowTotalHeight, rowHeightAccumulation } = this._generateRowMatrixCache(rowCount, rowData, defaultRowHeight);
         const { columnTotalWidth, columnWidthAccumulation } = this._generateColumnMatrixCache(columnCount, columnData, defaultColumnWidth);
 
@@ -199,6 +205,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._rowHeightAccumulation = rowHeightAccumulation;
         this._columnTotalWidth = columnTotalWidth;
         this._columnWidthAccumulation = columnWidthAccumulation;
+        this._showGridlines = showGridlines;
 
         this.makeDirty(true);
 

@@ -3,7 +3,8 @@ import { DEFAULT_FIRST_PAGE } from './DefaultPages/Page1';
 import { DEFAULT_SECOND_PAGE } from './DefaultPages/Page2';
 import { DEFAULT_THIRD_PAGE } from './DefaultPages/Page3';
 import { DEFAULT_FORTH_PAGE } from './DefaultPages/Page4';
-import { DEFAULT_Fifth_PAGE } from './DefaultPages/Page5';
+import { DEFAULT_FIFTH_PAGE } from './DefaultPages/Page5';
+import { DEFAULT_SIXTH_PAGE } from './DefaultPages/Page6';
 
 export const DEFAULT_SLIDE_DATA: ISlideData = {
     id: 'slide_test',
@@ -17,9 +18,10 @@ export const DEFAULT_SLIDE_DATA: ISlideData = {
             cover_1: DEFAULT_FIRST_PAGE,
             catalog_1: DEFAULT_SECOND_PAGE,
             strategic_1: DEFAULT_THIRD_PAGE,
+            technology_1: DEFAULT_FIFTH_PAGE,
+            richText_1: DEFAULT_SIXTH_PAGE,
             business_1: DEFAULT_FORTH_PAGE,
-            technology_1: DEFAULT_Fifth_PAGE,
         },
-        pageOrder: ['cover_1', 'catalog_1', 'strategic_1', 'business_1', 'technology_1'],
+        pageOrder: ['cover_1', 'catalog_1', 'strategic_1', 'technology_1', 'richText_1', 'business_1'],
     },
 };

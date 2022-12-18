@@ -57,6 +57,10 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
 
         const { rowTotalHeight, columnTotalWidth, rowTitleWidth, columnTitleHeight } = spreadsheetSkeleton;
 
+        const allWidth = columnTotalWidth + worksheet.rowTitle.width || 0;
+
+        const allHeight = rowTotalHeight + worksheet.columnTitle.height || 0;
+
         const sv = new SceneViewer(SHEET_VIEW_KEY.SCENE_VIEWER + id, {
             top,
             left,
@@ -74,8 +78,8 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
             forceRender: true,
         });
         const scene = new Scene(SHEET_VIEW_KEY.SCENE + id, sv, {
-            width: 800,
-            height: 800,
+            width: allWidth,
+            height: allHeight,
         });
 
         this._updateViewport(id, rowTitleWidth, columnTitleHeight, scene, mainScene);

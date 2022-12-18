@@ -126,6 +126,7 @@ export interface IPageElement {
         worksheet: IWorksheetConfig;
         styles: IKeyType<Nullable<IStyleData>>;
     };
+    document?: IDocumentData;
     // video: IVideo;
     // line: ILine;
     // table: ITable;
@@ -146,6 +147,7 @@ export enum PageElementType {
     IMAGE,
     TEXT,
     SPREADSHEET,
+    DOCUMENT,
 }
 
 /**

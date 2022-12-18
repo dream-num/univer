@@ -2,9 +2,9 @@ import { UniverDoc } from '@univer/core';
 import { RenderEngine } from '@univer/base-render';
 import { UniverComponentSheet } from '@univer/style-universheet';
 import { DocPlugin } from './DocPlugin';
-import { DOCS_DEMO_DATA } from './Basic/DemoData';
+import { DEFAULT_DOCUMENT_DATA_EN } from '@univer/common-plugin-data';
 
-const univerDocUp = UniverDoc.newInstance(DOCS_DEMO_DATA);
+const univerDocUp = UniverDoc.newInstance(DEFAULT_DOCUMENT_DATA_EN);
 
 univerDocUp.installPlugin(new RenderEngine());
 univerDocUp.installPlugin(new UniverComponentSheet());

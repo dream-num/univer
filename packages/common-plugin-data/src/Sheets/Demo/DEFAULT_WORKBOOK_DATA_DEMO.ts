@@ -1,7 +1,7 @@
 import { BlockType, BooleanNumber, BorderStyleTypes, IDocumentData, IWorkbookConfig, LocaleType, ParagraphElementType, SheetTypes } from '@univer/core';
 
 const richTextDemo: IDocumentData = {
-    documentId: 'd',
+    id: 'd',
     body: {
         blockElements: {
             oneParagraph: {
@@ -142,7 +142,7 @@ const richTextDemo: IDocumentData = {
 };
 
 const richTextDemo1: IDocumentData = {
-    documentId: 'd',
+    id: 'd',
     body: {
         blockElements: {
             oneParagraph: {

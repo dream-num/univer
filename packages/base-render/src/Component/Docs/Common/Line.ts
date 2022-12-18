@@ -6,10 +6,13 @@ import {
     IDocumentSkeletonLine,
     IDocumentSkeletonSpan,
     LineType,
-    Path2,
-    Transform,
-    Vector2,
-} from '../../..';
+} from '../../../Basics/IDocumentSkeletonCached';
+
+import { Vector2 } from '../../../Basics/Vector2';
+
+import { Path2 } from '../../../Basics/Path2';
+
+import { Transform } from '../../../Basics/Transform';
 
 interface IDrawingsSplit {
     left: number;

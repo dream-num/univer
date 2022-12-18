@@ -1,9 +1,8 @@
-import { BorderStyleTypes, IRangeData, ObjectMatrix } from '@univer/core';
+import { BorderStyleTypes, IRangeData, ObjectMatrix, IScale } from '@univer/core';
 import { BorderCacheItem } from '../Interfaces';
 import { fixLineWidthByScale } from '../../../Basics/Tools';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';
-import { IScale } from '../../../Basics/Interfaces';
 import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../../Basics/Const';
 import { SpreadsheetExtensionRegistry } from '../../Extension';
 import { drawLineByBorderType, getLineWidth, setLineType } from '../../../Basics/Draw';

@@ -14,11 +14,13 @@ import {
     IBorderData,
     Nullable,
 } from '@univer/core';
-import { Canvas } from '..';
+import { Canvas } from '../Canvas';
 import { BaseObject } from '../BaseObject';
-import { IBoundRect, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../Basics';
+import { IBoundRect } from '../Basics/Vector2';
+import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../Basics/Interfaces';
 import { transformBoundingCoord } from '../Basics/Position';
-import { Documents, DocumentSkeleton } from '../Component';
+import { DocumentSkeleton } from '../Component/Docs/DocSkeleton';
+import { Documents } from '../Component/Docs/Document';
 
 export interface IRichTextProps extends ITransformState, IStyleBase {
     text?: string;

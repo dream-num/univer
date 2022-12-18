@@ -1,7 +1,6 @@
-import { HorizontalAlign, IColorStyle, ObjectMatrix, WrapStrategy } from '@univer/core';
+import { HorizontalAlign, IColorStyle, ObjectMatrix, WrapStrategy, IScale } from '@univer/core';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';
-import { IScale } from '../../../Basics/Interfaces';
 import { SpreadsheetExtensionRegistry } from '../../Extension';
 import { Spreadsheet } from '../Spreadsheet';
 import { fixLineWidthByScale } from '../../../Basics/Tools';

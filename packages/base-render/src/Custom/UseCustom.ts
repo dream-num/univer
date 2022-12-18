@@ -1,6 +1,8 @@
 import { ContextBase } from '@univer/core';
-import { IDocumentSkeletonPage, ISectionBreakConfig, ISkeletonResourceReference } from '..';
-import { BlockPlugin, BulletPlugin } from '.';
+import { BlockPlugin } from './BlockPlugin';
+import { BulletPlugin } from './BulletPlugin';
+import { IDocumentSkeletonPage, ISkeletonResourceReference } from '../Basics/IDocumentSkeletonCached';
+import { ISectionBreakConfig } from '../Basics/Interfaces';
 
 const DOCUMENT_CUSTOM_BLOCK = 'documentCustomBlock';
 const DOCUMENT_CUSTOM_BULLET = 'documentCustomBullet';

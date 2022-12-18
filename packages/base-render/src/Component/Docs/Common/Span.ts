@@ -1,6 +1,8 @@
 import { BooleanNumber, BulletAlignment, GridType } from '@univer/core';
-import { validationGrid } from '..';
-import { FontCache, IDocumentSkeletonBullet, IDocumentSkeletonSpan, IFontCreateConfig, SpanType } from '../../..';
+import { validationGrid } from './Tools';
+import { IDocumentSkeletonBullet, IDocumentSkeletonSpan, SpanType } from '../../../Basics/IDocumentSkeletonCached';
+import { FontCache } from '../../../Basics/FontCache';
+import { IFontCreateConfig } from '../../../Basics/Interfaces';
 
 export function createSkeletonWordSpan(content: string, config: IFontCreateConfig, spanWidth?: number): IDocumentSkeletonSpan {
     return _createSkeletonWordOrLetter(SpanType.WORD, content, config, spanWidth);

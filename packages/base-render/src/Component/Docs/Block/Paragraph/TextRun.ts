@@ -1,16 +1,12 @@
 import { BooleanNumber, GridType, HorizontalAlign, ITextRun, NamedStyleType, SpacingRule } from '@univer/core';
-import { calculateParagraphLayout, composeCharForLanguage } from '.';
-import {
-    createSkeletonTabSpan,
-    createSkeletonWordSpan,
-    getCharSpaceApply,
-    getFontStyleString,
-    getSpanGroupWidth,
-    IFontLocale,
-    IParagraphConfig,
-    ISectionBreakConfig,
-    lineIterator,
-} from '../../../..';
+import { composeCharForLanguage } from './Language.Ruler';
+import { calculateParagraphLayout } from './Layout.Ruler';
+
+import { IFontLocale, IParagraphConfig, ISectionBreakConfig } from '../../../../Basics/Interfaces';
+import { getCharSpaceApply, getSpanGroupWidth, lineIterator } from '../../Common/Tools';
+import { createSkeletonTabSpan, createSkeletonWordSpan } from '../../Common/Span';
+import { getFontStyleString } from '../../../../Basics/Tools';
+
 // import { getCharSpaceApply, getSpanGroupWidth, lineIterator } from '../../Common/Tools';
 // import { createSkeletonTabSpan, createSkeletonWordSpan } from '../../Common/Span';
 import { IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../../../Basics/IDocumentSkeletonCached';

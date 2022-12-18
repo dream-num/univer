@@ -2,7 +2,7 @@ import { sortRules } from '@univer/core';
 import { BaseObject } from './BaseObject';
 import { Scene } from './Scene';
 import { Group } from './Group';
-import { RENDER_CLASS_TYPE } from './Basics';
+import { RENDER_CLASS_TYPE } from './Basics/Const';
 
 export class Layer {
     private _objects: BaseObject[] = [];

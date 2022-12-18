@@ -1,8 +1,8 @@
+import { IScale } from '@univer/core';
 import { fixLineWidthByScale, getColor } from '../../../Basics/Tools';
 import { MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../Basics/Const';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';
-import { IScale } from '../../../Basics/Interfaces';
 import { SheetRowTitleExtensionRegistry } from '../../Extension';
 
 const UNIQUE_KEY = 'DefaultRowTitleLayoutExtension';

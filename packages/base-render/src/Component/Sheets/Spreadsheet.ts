@@ -17,8 +17,10 @@ import { ITransformChangeState } from '../../Basics/Interfaces';
 import { BaseObject } from '../../BaseObject';
 import { Documents } from '../Docs/Document';
 import { ORIENTATION_TYPE, RENDER_CLASS_TYPE } from '../../Basics/Const';
-import { columnIterator, DocumentSkeleton } from '../Docs';
-import { getRotateOffsetAndFarthestHypotenuse, getRotateOrientation, IDocumentSkeletonColumn } from '../../Basics';
+import { columnIterator } from '../Docs/Common/Tools';
+import { DocumentSkeleton } from '../Docs/DocSkeleton';
+import { IDocumentSkeletonColumn } from '../../Basics/IDocumentSkeletonCached';
+import { getRotateOffsetAndFarthestHypotenuse, getRotateOrientation } from '../../Basics/Draw';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 

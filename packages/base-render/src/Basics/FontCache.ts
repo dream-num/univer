@@ -1,4 +1,6 @@
-import { DEFAULT_MEASURE_TEXT, IDocumentSkeletonBoundingBox, IDocumentSkeletonFontStyle, IMeasureTextCache } from '.';
+import { IDocumentSkeletonBoundingBox, IDocumentSkeletonFontStyle } from './IDocumentSkeletonCached';
+import { DEFAULT_MEASURE_TEXT } from './Const';
+import { IMeasureTextCache } from './Interfaces';
 
 const getDefaultBaselineOffset = (fontSize: number) => ({
     sbr: 0.5,

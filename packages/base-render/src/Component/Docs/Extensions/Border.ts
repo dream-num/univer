@@ -1,5 +1,4 @@
-import { BorderStyleTypes, getColorStyle, IBorderData, IBorderStyleData, Nullable } from '@univer/core';
-import { IScale } from '../../../Basics/Interfaces';
+import { BorderStyleTypes, getColorStyle, IBorderData, IBorderStyleData, Nullable, IScale } from '@univer/core';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../Extension';
 import { docExtension } from '../DocExtension';
 import { IDocumentSkeletonSpan } from '../../../Basics/IDocumentSkeletonCached';

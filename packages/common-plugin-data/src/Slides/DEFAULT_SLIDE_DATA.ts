@@ -5,6 +5,7 @@ import { DEFAULT_THIRD_PAGE } from './DefaultPages/Page3';
 import { DEFAULT_FORTH_PAGE } from './DefaultPages/Page4';
 import { DEFAULT_FIFTH_PAGE } from './DefaultPages/Page5';
 import { DEFAULT_SIXTH_PAGE } from './DefaultPages/Page6';
+import { DEFAULT_SEVEN_PAGE } from './DefaultPages/Page7';
 
 export const DEFAULT_SLIDE_DATA: ISlideData = {
     id: 'slide_test',
@@ -21,7 +22,8 @@ export const DEFAULT_SLIDE_DATA: ISlideData = {
             technology_1: DEFAULT_FIFTH_PAGE,
             richText_1: DEFAULT_SIXTH_PAGE,
             business_1: DEFAULT_FORTH_PAGE,
+            unlimited_1: DEFAULT_SEVEN_PAGE,
         },
-        pageOrder: ['cover_1', 'catalog_1', 'strategic_1', 'technology_1', 'richText_1', 'business_1'],
+        pageOrder: ['cover_1', 'catalog_1', 'strategic_1', 'technology_1', 'richText_1', 'business_1', 'unlimited_1'],
     },
 };

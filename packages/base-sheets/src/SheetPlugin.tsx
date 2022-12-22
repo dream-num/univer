@@ -338,6 +338,10 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         return this._cellEditorController;
     }
 
+    getFormulaBarController() {
+        return this._formulaBarController;
+    }
+
     getModalGroupControl() {
         return this._modalGroupController;
     }

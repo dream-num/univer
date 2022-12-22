@@ -17,6 +17,7 @@ export * from './Command';
 export * from './Const';
 export * from './Sheets/Domain';
 export * from './Docs/Domain';
+export * from './Slides/Domain';
 export * from './Enum';
 export * from './Interfaces';
 export * from './IOC';

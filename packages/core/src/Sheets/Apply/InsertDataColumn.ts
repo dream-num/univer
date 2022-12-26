@@ -1,5 +1,6 @@
 import { ICellData } from '../../Interfaces';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
+import { CommandUnit, IInsertColumnDataActionData } from '../../Command';
 
 /**
  *
@@ -16,4 +17,15 @@ export function InsertDataColumn(
 ) {
     const wrapper = new ObjectMatrix(primitiveData);
     wrapper.insertColumns(columnIndex, new ObjectMatrix(columnData));
+}
+
+export function InsertDataColumnApply(
+    unit: CommandUnit,
+    data: IInsertColumnDataActionData
+) {
+    const worksheet = unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
+    const primitiveData = worksheet!.getCellMatrix().toJSON();
+
+    const wrapper = new ObjectMatrix(primitiveData);
+    wrapper.insertColumns(data.columnIndex, new ObjectMatrix(data.columnData));
 }

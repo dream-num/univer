@@ -32,3 +32,5 @@ export function RemoveSheet(
         sheet: removeSheet as IWorksheetConfig,
     };
 }
+
+export function RemoveSheetApply() {}

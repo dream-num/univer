@@ -259,65 +259,68 @@ export class Merges {
         return rectList.length ? rectList : null;
     }
 
-    // remove(rectangle: IRangeData): IRangeData[] {
-    //     const { _rectangleList } = this;
-    //     const { length } = _rectangleList;
-    //     const target = new Rectangle(rectangle);
-    //     const result = [];
-    //     const remove = [];
-    //     for (let i = 0; i < length; i++) {
-    //         const current = _rectangleList[i];
-    //         if (target.intersects(new Rectangle(current))) {
-    //             remove.push(current);
-    //             continue;
-    //         }
-    //         result.push(current);
-    //     }
-    //     this._rectangleList = result;
-    //     return remove;
-    // }
-    remove(rectangle: IRangeData): Merges {
+    remove(rectangle: IRangeData): IRangeData[] {
         const { _rectangleList } = this;
+        const { length } = _rectangleList;
         const target = new Rectangle(rectangle);
-
-        let index = _rectangleList.findIndex((current) => {
+        const result = [];
+        const remove = [];
+        for (let i = 0; i < length; i++) {
+            const current = _rectangleList[i];
             if (target.intersects(new Rectangle(current))) {
-                return true;
+                remove.push(current);
+                continue;
             }
-            return false;
-        });
-        if (index !== -1) {
-            _rectangleList.splice(index, 1);
+            result.push(current);
         }
-        return this;
+        this._rectangleList.length = 0;
+        for (let i = 0; i < result.length; i++) {
+            this._rectangleList.push(result[i]);
+        }
+        return remove;
     }
+    // remove(rectangle: IRangeData): Merges {
+    //     const { _rectangleList } = this;
+    //     const target = new Rectangle(rectangle);
+    //
+    //     let index = _rectangleList.findIndex((current) => {
+    //         if (target.intersects(new Rectangle(current))) {
+    //             return true;
+    //         }
+    //         return false;
+    //     });
+    //     if (index !== -1) {
+    //         _rectangleList.splice(index, 1);
+    //     }
+    //     return this;
+    // }
 
     size() {
         return this._rectangleList.length;
     }
 
-    // add(rectangle: IRangeData): IRangeData[] {
-    //     const result = this.remove(rectangle);
-    //     this._rectangleList.push(rectangle);
-    //     return result;
-    // }
-    add(rectangle: IRangeData): Merges {
-        const { _rectangleList } = this;
-        const target = new Rectangle(rectangle);
-
-        let index = _rectangleList.findIndex((current) => {
-            if (target.intersects(new Rectangle(current))) {
-                return true;
-            }
-            return false;
-        });
-
-        if (index === -1) {
-            this._rectangleList.push(rectangle);
-        }
-
-        return this;
+    add(rectangle: IRangeData): IRangeData[] {
+        const result = this.remove(rectangle);
+        this._rectangleList.push(rectangle);
+        return result;
     }
+    // add(rectangle: IRangeData): Merges {
+    //     const { _rectangleList } = this;
+    //     const target = new Rectangle(rectangle);
+    //
+    //     let index = _rectangleList.findIndex((current) => {
+    //         if (target.intersects(new Rectangle(current))) {
+    //             return true;
+    //         }
+    //         return false;
+    //     });
+    //
+    //     if (index === -1) {
+    //         this._rectangleList.push(rectangle);
+    //     }
+    //
+    //     return this;
+    // }
 
     union(rectangle: IRangeData): IRangeData {
         const { _rectangleList } = this;

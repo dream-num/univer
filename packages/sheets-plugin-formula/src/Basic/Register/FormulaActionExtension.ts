@@ -4,10 +4,12 @@ import {
     BaseActionExtension,
     BaseActionExtensionFactory,
     Command,
+    IRangeData,
     ISetRangeDataActionData,
     isFormulaString,
     ISheetActionData,
     IUnitRange,
+    Nullable,
     ObjectMatrix,
     Tools,
 } from '@univer/core';
@@ -33,43 +35,61 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
                 return false;
             }
 
+            if (actionData.actionName !== ACTION_NAMES.SET_RANGE_DATA_ACTION) {
+                return false;
+            }
+
             // Filter out Actions that contain formulas, inject setRangeDataAction
-            if (actionData.actionName === ACTION_NAMES.SET_RANGE_DATA_ACTION) {
-                // TODO FALSE PASS
-                const { sheetId, cellValue } = actionData;
+            const { sheetId, cellValue } = actionData;
 
-                if (Tools.isEmptyObject(formulaData)) return;
+            if (Tools.isEmptyObject(formulaData)) return;
 
-                const cellData = new ObjectMatrix(formulaData[unitId][sheetId]);
+            if (!formulaData[unitId][sheetId]) {
+                formulaData[unitId][sheetId] = {};
+            }
+            const cellData = new ObjectMatrix(formulaData[unitId][sheetId]);
 
-                if (cellValue == null) {
-                    return;
-                }
+            if (cellValue == null) {
+                return;
+            }
 
-                const rangeMatrix = new ObjectMatrix(cellValue);
+            const rangeMatrix = new ObjectMatrix(cellValue);
 
-                // update formula string，Any modification to cellData will be linked to formulaData
-                rangeMatrix.forValue((r, c, cell) => {
-                    const formulaString = cell.m;
-                    if (Tools.isStringNumber(formulaString)) {
-                        isCalculate = true;
+            let isArrayForm = false;
 
-                        // if change formula to number, remove formula
-                        const formulaCell = cellData.getRow(r)?.get(c);
-                        if (formulaCell) {
-                            cellData.deleteValue(r, c);
-                        }
-                    } else if (isFormulaString(formulaString)) {
-                        isCalculate = true;
-                        cellData.setValue(r, c, {
-                            formula: formulaString,
-                            row: r,
-                            column: c,
-                            sheetId,
-                        });
+            // update formula string，Any modification to cellData will be linked to formulaData
+            rangeMatrix.forValue((r, c, cell) => {
+                const arrayFormCellRangeData = this.checkArrayFormValue(r, c);
+                const formulaString = cell.m;
+                if (arrayFormCellRangeData && formulaString === '') {
+                    isArrayForm = true;
+                    isCalculate = true;
+
+                    unitRange.push({
+                        unitId,
+                        sheetId,
+                        rangeData: arrayFormCellRangeData,
+                    });
+                } else if (Tools.isStringNumber(formulaString)) {
+                    isCalculate = true;
+
+                    // if change formula to number, remove formula
+                    const formulaCell = cellData.getRow(r)?.get(c);
+                    if (formulaCell) {
+                        cellData.deleteValue(r, c);
                     }
-                });
+                } else if (isFormulaString(formulaString)) {
+                    isCalculate = true;
+                    cellData.setValue(r, c, {
+                        formula: formulaString,
+                        row: r,
+                        column: c,
+                        sheetId,
+                    });
+                }
+            });
 
+            if (!isArrayForm) {
                 unitRange.push({
                     unitId,
                     sheetId,
@@ -82,13 +102,17 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
 
         // Add command after calculating the formula
         engine.execute(unitId, formulaData, formulaController.toInterpreterCalculateProps(), false, unitRange).then((data) => {
-            // TODO arrayFormulaData
             const { sheetData, arrayFormulaData } = data;
 
             if (!sheetData) {
                 console.error('No sheetData from Formula Engine!');
                 return;
             }
+
+            if (arrayFormulaData) {
+                this._plugin.getFormulaController().setArrayFormulaData(arrayFormulaData);
+            }
+
             const sheetIds = Object.keys(sheetData);
 
             // Update each calculated value, possibly involving all cells
@@ -133,6 +157,32 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
             const command = new Command({ WorkBookUnit: workBook }, ...actionDatas, setFormulaDataAction);
             commandManager.invoke(command);
         });
+    }
+
+    checkArrayFormValue(row: number, column: number): Nullable<IRangeData> {
+        let formula;
+        const arrayFormulaData = this._plugin.getFormulaController().getArrayFormulaData();
+
+        if (!arrayFormulaData) return null;
+
+        Object.keys(arrayFormulaData).forEach((sheetId) => {
+            const sheetData = arrayFormulaData[sheetId];
+
+            sheetData.forValue((rowIndex: number, columnIndex: number, value: IRangeData) => {
+                const { startRow, startColumn, endRow, endColumn } = value;
+                if (row >= startRow && row < endRow && column >= startColumn && column < endColumn) {
+                    formula = {
+                        startRow,
+                        endRow: startRow,
+                        startColumn,
+                        endColumn: startColumn,
+                    };
+                    return false;
+                }
+            });
+        });
+
+        return formula;
     }
 }
 

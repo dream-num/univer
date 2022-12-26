@@ -80,11 +80,19 @@ export class FormulaBarController {
                     }
                     this._formulaBar.setFormulaContent(cellValue);
                 }
+                // empty cell
+                else {
+                    this._formulaBar.setFormulaContent('');
+                }
             }
         });
 
         this._cellInputExtensionManager = new CellInputExtensionManager();
 
         // set NamedRange data
+    }
+
+    getFormulaBar() {
+        return this._formulaBar;
     }
 }

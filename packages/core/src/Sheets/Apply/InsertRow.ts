@@ -1,5 +1,6 @@
 import { IRowData } from '../../Interfaces';
-import { ObjectArray, ObjectArrayPrimitiveType } from '../../Shared/ObjectArray';
+import { ObjectArray, ObjectArrayPrimitiveType } from '../../Shared';
+import { CommandUnit, IInsertRowActionData } from '../../Command';
 
 /**
  * Inserts addData into rowData
@@ -16,4 +17,13 @@ export function InsertRow(
 ) {
     const wrapper = new ObjectArray(primitiveData);
     wrapper.inserts(rowIndex, new ObjectArray(rowCount));
+}
+
+export function InsertRowApply(unit: CommandUnit, data: IInsertRowActionData) {
+    const worksheet = unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
+    const rowManager = worksheet!.getRowManager()!;
+    const primitiveData = rowManager.getRowData().toJSON();
+
+    const wrapper = new ObjectArray(primitiveData);
+    wrapper.inserts(data.rowIndex, new ObjectArray(data.rowCount));
 }

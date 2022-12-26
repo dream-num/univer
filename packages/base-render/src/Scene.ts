@@ -591,8 +591,57 @@ export class Scene {
         return this._transformer;
     }
 
-    getActiveViewportByCoord(coord: Vector2) {
+    getActiveViewportByRelativeCoord(coord: Vector2) {
         return this._viewports.find((vp) => vp.isHit(coord));
+    }
+
+    getActiveViewportByCoord(coord: Vector2) {
+        // let parent: any = this.getParent();
+        // while (parent) {
+        //     if (parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+        //         const sv = parent as SceneViewer;
+        //         const transform = sv.transform.clone().invert();
+        //         coord = transform.applyPoint(coord);
+        //     }
+        //     parent = parent?.getParent && parent?.getParent();
+        // }
+
+        coord = this.getRelativeCoord(coord);
+
+        return this.getActiveViewportByRelativeCoord(coord);
+    }
+
+    getRelativeCoord(coord: Vector2) {
+        let parent: any = this.getParent();
+
+        const parentList: any[] = [];
+
+        while (parent) {
+            if (parent.classType === RENDER_CLASS_TYPE.SCENE || parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                parentList.push(parent);
+            }
+            parent = parent?.getParent && parent?.getParent();
+        }
+
+        parentList.reverse();
+
+        for (let parent of parentList) {
+            if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
+                const scene = parent as Scene;
+                const viewPort = scene.getActiveViewportByCoord(coord);
+                if (viewPort) {
+                    const actualX = viewPort.actualScrollX || 0;
+                    const actualY = viewPort.actualScrollY || 0;
+                    coord = coord.addByPoint(actualX, actualY);
+                }
+            } else if (parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                const sv = parent as SceneViewer;
+                const transform = sv.transform.clone().invert();
+                coord = transform.applyPoint(coord);
+            }
+        }
+
+        return coord;
     }
 
     transformToSceneCoord(coord: Vector2) {

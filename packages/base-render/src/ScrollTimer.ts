@@ -26,7 +26,7 @@ export class ScrollTimer {
 
     constructor(private _scene: Scene, private _padding?: IPaddingData, private _smoothRatioX = 0.05, private _smoothRatioY = 0.05) {
         if (!this._padding) {
-            this._padding = { t: 20, b: 20, l: 46, r: 20 };
+            this._padding = { t: 20, b: 20, l: 46, r: 60 };
         }
     }
 
@@ -114,8 +114,9 @@ export class ScrollTimer {
     }
 
     getViewportByCoord(scene?: Scene) {
-        const viewports = scene?.getViewports();
-        return viewports?.find((vp) => vp.isHit(Vector2.FromArray([this._offsetX, this._offsetY])));
+        // return scene?.getActiveViewportByCoord(Vector2.FromArray([this._offsetX, this._offsetY]));
+
+        return scene?.getActiveViewportByRelativeCoord(Vector2.FromArray([this._offsetX, this._offsetY]));
     }
 
     getScene() {

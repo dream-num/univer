@@ -116,6 +116,8 @@ export class SceneViewerTestView extends BaseView {
             height: allHeight,
         });
 
+        spreadsheet.enableSelection();
+
         mainScene.addObject(sv);
     }
 

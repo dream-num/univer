@@ -190,6 +190,14 @@ export class Interpreter {
         return this._unitArrayFormulaData[unitId];
     }
 
+    getUnitData() {
+        return this._runtimeData;
+    }
+
+    getUnitArrayFormula() {
+        return this._unitArrayFormulaData;
+    }
+
     setProps(interpreterDatasetConfig: IInterpreterDatasetConfig) {
         this._interpreterDatasetConfig = interpreterDatasetConfig;
     }

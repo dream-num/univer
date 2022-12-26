@@ -1,4 +1,5 @@
 import { BlockType, BooleanNumber, BorderStyleTypes, IDocumentData, IWorkbookConfig, LocaleType, ParagraphElementType, SheetTypes } from '@univer/core';
+import { PAGE5_RICHTEXT_1 } from '../../Slides/RichText/PAGE5_RICHTEXT_1';
 
 const richTextDemo: IDocumentData = {
     id: 'd',
@@ -1432,6 +1433,43 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
                 b: null,
             },
         },
+        '57': {
+            ht: 1,
+            vt: 2,
+            tb: 3,
+            bg: {
+                rgb: '#6fa8dc',
+            },
+            cl: {
+                rgb: 'rgb(255,255,255)',
+            },
+            bd: {
+                t: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+                l: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+                r: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+                b: {
+                    s: BorderStyleTypes.THIN,
+                    cl: {
+                        rgb: 'rgb(217,217,217)',
+                    },
+                },
+            },
+        },
     },
     timeZone: 'GMT+8',
     createdTime: '2021-11-28 12:10:10',
@@ -1821,6 +1859,10 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
                     },
                     '6': {
                         s: '31',
+                    },
+                    '7': {
+                        p: PAGE5_RICHTEXT_1,
+                        s: '57',
                     },
                 },
                 '1': {
@@ -2393,7 +2435,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
                     w: 80,
                 },
                 '7': {
-                    w: 30,
+                    w: 200,
                 },
             },
             status: 0,

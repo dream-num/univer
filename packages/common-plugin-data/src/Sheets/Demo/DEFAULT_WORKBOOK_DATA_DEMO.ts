@@ -2262,7 +2262,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             tabColor: 'green',
             hidden: BooleanNumber.FALSE,
             freezeColumn: 1,
-            rowCount: 27,
+            rowCount: 100,
             columnCount: 8,
             freezeRow: 1,
             zoomRatio: 1,

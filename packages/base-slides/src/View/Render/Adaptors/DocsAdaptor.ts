@@ -107,6 +107,8 @@ export class DocsAdaptor extends ObjectAdaptor {
 
         documents.calculatePagePosition();
 
+        // documents.enableEditor();
+
         const pageSize = documents.getSkeleton()?.getPageSize();
 
         documents.onPageRenderObservable.add((config: IPageRenderConfig) => {

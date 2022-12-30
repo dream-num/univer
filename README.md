@@ -4,7 +4,7 @@ English | [简体中文](./README-zh.md)
 
 ## Introduction
 
-🚀Univer, [Luckysheet 2.0](https://github.com/dream-num/luckysheet) upgrade version.
+🚀Univer, [Luckysheet 2.0](https://github.com/dream-num/luckysheet) upgrade version. a open source javascript framework for building document, spreadsheet, slide
 
 > ⚠️ This project is still in development, only for testing and learning, not for production
 

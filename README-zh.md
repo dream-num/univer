@@ -4,7 +4,7 @@
 
 ## 介绍
 
-🚀Univer，原 [Luckysheet 2.0](https://github.com/dream-num/Luckysheet) 升级。
+🚀Univer，原 [Luckysheet 2.0](https://github.com/dream-num/Luckysheet) 升级，一个基于 javascript 的前端开源框架，可以把文档，电子表格，幻灯片嵌入到你的系统内。
 
 > ⚠️ 该项目仍在开发中，仅用于测试和学习，不得用于生产
 

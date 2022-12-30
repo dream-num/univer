@@ -1,5 +1,5 @@
 import { BaseObject } from '../BaseObject';
-import { IBoundRect, Vector2 } from '../Basics';
+import { IBoundRect, Vector2 } from '../Basics/Vector2';
 import { transformBoundingCoord } from '../Basics/Position';
 
 export class CustomObject extends BaseObject {

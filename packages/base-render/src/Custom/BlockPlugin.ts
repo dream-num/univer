@@ -1,5 +1,6 @@
 import { SheetContext, IOCContainer, Observable, Plugin } from '@univer/core';
-import { IDocumentSkeletonPage, ISectionBreakConfig, ISkeletonResourceReference } from '..';
+import { IDocumentSkeletonPage, ISkeletonResourceReference } from '../Basics/IDocumentSkeletonCached';
+import { ISectionBreakConfig } from '../Basics/Interfaces';
 
 export type BlockPluginObserve = {
     onAfterChangeFontFamilyObservable: Observable<any>;

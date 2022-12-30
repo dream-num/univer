@@ -1,6 +1,5 @@
-import { IDocumentRenderConfig, Registry } from '@univer/core';
+import { IDocumentRenderConfig, Registry, IScale } from '@univer/core';
 import { getScale } from '../Basics/Tools';
-import { IScale } from '../Basics/Interfaces';
 import { RenderComponent } from './Component';
 import { Vector2 } from '../Basics/Vector2';
 

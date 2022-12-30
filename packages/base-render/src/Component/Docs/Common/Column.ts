@@ -1,5 +1,5 @@
 import { ColumnSeparatorType, ISectionColumnProperties } from '@univer/core';
-import { IDocumentSkeletonColumn } from '../../..';
+import { IDocumentSkeletonColumn } from '../../../Basics/IDocumentSkeletonCached';
 
 export function createSkeletonColumn(
     columnIndex: number = 0,

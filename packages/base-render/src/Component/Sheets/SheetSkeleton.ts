@@ -289,6 +289,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._columnWidthAccumulation.length;
     }
 
+    getRowCount() {
+        return this._rowHeightAccumulation.length;
+    }
+
     get dataMergeCacheAll() {
         return this._dataMergeCacheAll;
     }

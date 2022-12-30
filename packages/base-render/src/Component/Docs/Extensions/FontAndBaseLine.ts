@@ -1,5 +1,4 @@
-import { BaselineOffset, getColorStyle } from '@univer/core';
-import { IScale } from '../../../Basics/Interfaces';
+import { BaselineOffset, getColorStyle, IScale } from '@univer/core';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../Extension';
 import { docExtension } from '../DocExtension';
 import { IDocumentSkeletonSpan } from '../../../Basics/IDocumentSkeletonCached';

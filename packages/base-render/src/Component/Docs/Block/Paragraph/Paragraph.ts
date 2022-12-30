@@ -10,17 +10,16 @@ import {
     PositionedObjectLayoutType,
     ContextBase,
 } from '@univer/core';
-import { dealWidthBullet, dealWidthInlineDrawing, dealWidthTextRun } from '.';
-import { createSkeletonPage, getLastNotFullColumnInfo, setColumnFullState } from '../..';
-import {
-    BreakType,
-    IDocumentSkeletonBullet,
-    IDocumentSkeletonDrawing,
-    IDocumentSkeletonPage,
-    IParagraphConfig,
-    ISectionBreakConfig,
-    ISkeletonResourceReference,
-} from '../../../..';
+import { dealWidthTextRun } from './TextRun';
+import { dealWidthBullet } from './Bullet';
+import { dealWidthInlineDrawing } from './InlineDrawing';
+
+import { getLastNotFullColumnInfo } from '../../Common/Tools';
+import { createSkeletonPage } from '../../Common/Page';
+import { setColumnFullState } from '../../Common/Section';
+
+import { BreakType, IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../../Basics/IDocumentSkeletonCached';
+import { IParagraphConfig, ISectionBreakConfig } from '../../../../Basics/Interfaces';
 
 export function dealWidthParagraph(
     blockId: string,

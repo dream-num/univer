@@ -1,5 +1,6 @@
 import { BaseCellInputExtension, BaseCellInputExtensionFactory, ICell } from '@univer/base-sheets';
 import { IFormulaData } from '@univer/base-formula-engine';
+import { IRangeData, Nullable } from '@univer/core';
 import { FormulaPlugin } from '../../FormulaPlugin';
 
 export class FormulaCellInputExtension extends BaseCellInputExtension {
@@ -22,11 +23,20 @@ export class FormulaCellInputExtensionFactory extends BaseCellInputExtensionFact
     }
 
     check(cell: ICell) {
+        const unitId = this._plugin.getContext().getWorkBook().getUnitId();
+        let formula = this.checkFormulaValue(cell) || this.checkArrayFormValue(cell, unitId);
+
+        if (!formula) {
+            return false;
+        }
+
+        return this.create(cell, formula);
+    }
+
+    checkFormulaValue(cell: ICell): Nullable<string> {
         const { row, column } = cell;
-
-        const formulaData = this._plugin.getFormulaController().getDataModel().getFormulaData();
-
         let formula;
+        const formulaData = this._plugin.getFormulaController().getDataModel().getFormulaData();
 
         Object.keys(formulaData).forEach((unitId) => {
             const sheetData = formulaData[unitId];
@@ -48,10 +58,31 @@ export class FormulaCellInputExtensionFactory extends BaseCellInputExtensionFact
             }
         });
 
-        if (!formula) {
-            return false;
-        }
+        return formula;
+    }
 
-        return this.create(cell, formula);
+    checkArrayFormValue(cell: ICell, unitId: string): Nullable<string> {
+        const { row, column } = cell;
+        let formula;
+        const formulaData = this._plugin.getFormulaController().getDataModel().getFormulaData();
+        const arrayFormulaData = this._plugin.getFormulaController().getArrayFormulaData();
+
+        if (!arrayFormulaData) return null;
+
+        Object.keys(arrayFormulaData).forEach((sheetId) => {
+            const sheetData = arrayFormulaData[sheetId];
+
+            sheetData.forValue((rowIndex: number, columnIndex: number, value: IRangeData) => {
+                const { startRow, startColumn, endRow, endColumn } = value;
+                if (row >= startRow && row < endRow && column >= startColumn && column < endColumn) {
+                    const cellData = formulaData[unitId][sheetId];
+                    // TODO: cellData[startRow] is ObjectArray?
+                    formula = cellData[startRow].get(startColumn).formula;
+                    return false;
+                }
+            });
+        });
+
+        return formula;
     }
 }

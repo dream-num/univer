@@ -44,12 +44,25 @@ export class CanvasView {
                 continue;
             }
 
-            this._createThumb(thumbDom as HTMLElement, id);
-
             this._createScene(id, this._slide, pages[i]);
 
-            this._thumbSceneRender(id);
+            // this._thumbSceneRender(id);
         }
+
+        setTimeout(() => {
+            for (var i = 0, len = thumbList.length; i < len; i++) {
+                const thumbDom = (thumbList[i] as HTMLElement).querySelector('div');
+                const page = pages[i];
+                const { id } = page;
+                if (this._slideThumbEngine.has(id) || !thumbDom) {
+                    continue;
+                }
+
+                this._createThumb(thumbDom as HTMLElement, id);
+
+                this._thumbSceneRender(id);
+            }
+        }, 300);
 
         this._activePageId = pages[0].id;
 

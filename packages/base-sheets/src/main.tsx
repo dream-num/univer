@@ -35,7 +35,29 @@ const uiDefaultConfigUp = {
             },
         ],
     },
+
+    render: {
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: 11,
+        angle: 0,
+        scaleX: 0,
+        scaleY: 0,
+        skewX: 0,
+        skewY: 0,
+        flipX: false,
+        flipY: false,
+        isTransformer: false,
+        forceRender: false,
+    },
 };
+
+// const univer = new Univer();
+// univer.installPlugin(new RenderEngine());
+// univer.installPlugin(new UniverComponentSheet());
+// univer.installPlugin(new FormulaEngine());
 
 const univerSheetUp = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);
 univerSheetUp.installPlugin(new RenderEngine());

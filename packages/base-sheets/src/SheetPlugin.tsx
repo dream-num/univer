@@ -106,6 +106,12 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         window.addEventListener('resize', () => {
             engineInstance.resize();
         });
+
+        // should be clear
+        setTimeout(() => {
+            engineInstance.resize();
+        }, 0);
+
         // window.onresize = () => {
         //     engineInstance.resize();
         // };
@@ -336,6 +342,10 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     getCellEditorController() {
         return this._cellEditorController;
+    }
+
+    getFormulaBarController() {
+        return this._formulaBarController;
     }
 
     getModalGroupControl() {

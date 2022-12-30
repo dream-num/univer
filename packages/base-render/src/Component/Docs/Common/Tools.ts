@@ -13,17 +13,16 @@ import {
     SpacingRule,
 } from '@univer/core';
 import {
-    DEFAULT_DOCUMENT_FONTSIZE,
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
     IDocumentSkeletonSpan,
-    IParagraphConfig,
-    ISectionBreakConfig,
-    isFunction,
     SpanType,
-} from '../../../Basics';
+} from '../../../Basics/IDocumentSkeletonCached';
+import { isFunction } from '../../../Basics/Tools';
+import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../Basics/Const';
+import { IParagraphConfig, ISectionBreakConfig } from '../../../Basics/Interfaces';
 
 export function getLastPage(pages: IDocumentSkeletonPage[]) {
     return pages?.[pages.length - 1];

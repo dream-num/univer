@@ -101,7 +101,7 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
         spreadsheet.zIndex = 10;
         scene.addObjects([spreadsheet], 1);
         scene.addObjects([spreadsheetRowTitle, spreadsheetColumnTitle, SpreadsheetLeftTopPlaceholder], 2);
-
+        spreadsheet.enableSelection();
         return sv;
     }
 

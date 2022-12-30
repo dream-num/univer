@@ -1,4 +1,4 @@
-import { ColumnTitleLayout } from '.';
+import { ColumnTitleLayout } from './Extensions/ColumnTitleLayout';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';
 import { SpreadsheetSkeleton } from './SheetSkeleton';
 import { SpreadsheetTitle } from './SheetComponent';

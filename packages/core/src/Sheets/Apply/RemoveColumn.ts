@@ -1,5 +1,6 @@
 import { IColumnData } from '../../Interfaces';
 import { ObjectArray, ObjectArrayPrimitiveType } from '../../Shared';
+import { CommandUnit, IRemoveColumnAction } from '../../Command';
 
 /**
  * Deletes the specified number of columns in columnData
@@ -24,5 +25,24 @@ export function RemoveColumn(
             result.set(i, splice.first() as IColumnData);
         }
     }
+    return result.getLength();
+}
+
+export function RemoveColumnApply(unit: CommandUnit, data: IRemoveColumnAction) {
+    const worksheet = unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
+    const columnManager = worksheet!.getColumnManager();
+    const primitiveData = columnManager.getColumnData().toJSON();
+
+    const wrapper = new ObjectArray(primitiveData);
+    const result = new ObjectArray<IColumnData>();
+    const start = data.columnIndex;
+    const end = data.columnIndex + data.columnCount;
+    for (let i = start; i < end; i++) {
+        const splice = wrapper.splice(data.columnIndex, 1);
+        if (splice.getLength()) {
+            result.set(i, splice.first() as IColumnData);
+        }
+    }
+
     return result.getLength();
 }

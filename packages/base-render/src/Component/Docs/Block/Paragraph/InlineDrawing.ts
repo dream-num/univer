@@ -1,5 +1,6 @@
 import { IDrawing } from '@univer/core';
-import { IDocumentSkeletonPage, IFontLocale, IParagraphConfig, ISectionBreakConfig } from '../../../..';
+import { IDocumentSkeletonPage } from '../../../../Basics/IDocumentSkeletonCached';
+import { IFontLocale, IParagraphConfig, ISectionBreakConfig } from '../../../../Basics/Interfaces';
 
 export function dealWidthInlineDrawing(
     drawing: IDrawing,

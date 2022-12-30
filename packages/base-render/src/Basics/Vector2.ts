@@ -1,4 +1,4 @@
-import { DeepImmutable, FloatArray } from '.';
+import { DeepImmutable, FloatArray } from './IEvents';
 import { Transform } from './Transform';
 
 export interface IPoint {

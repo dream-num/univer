@@ -1,4 +1,4 @@
-import { FormulaEnginePlugin, IInterpreterDatasetConfig, SheetDataType, UnitDataType, SheetNameMapType } from '@univer/base-formula-engine';
+import { FormulaEnginePlugin, IInterpreterDatasetConfig, SheetDataType, UnitDataType, SheetNameMapType, ArrayFormulaDataType } from '@univer/base-formula-engine';
 import { SheetPlugin } from '@univer/base-sheets';
 import { PLUGIN_NAMES, SheetContext } from '@univer/core';
 import { FORMULA_PLUGIN_NAME, CONFIG } from '../Basic';
@@ -9,6 +9,8 @@ import { FormulaLabel } from '../View/UI/FormulaLabel';
 
 export class FormulaController {
     private _formulaDataModel: FormulaDataModel;
+
+    private _arrayFormulaData: ArrayFormulaDataType;
 
     private _formulaEngine: FormulaEnginePlugin;
 
@@ -140,5 +142,13 @@ export class FormulaController {
             rowCount,
             columnCount,
         };
+    }
+
+    getArrayFormulaData(): ArrayFormulaDataType {
+        return this._arrayFormulaData;
+    }
+
+    setArrayFormulaData(value: ArrayFormulaDataType) {
+        this._arrayFormulaData = value;
     }
 }

@@ -1,4 +1,4 @@
-import { createCanvasElement } from '.';
+import { createCanvasElement } from './Basics/Tools';
 
 export interface IContext2D extends CanvasRenderingContext2D {
     webkitBackingStorePixelRatio: number;

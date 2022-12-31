@@ -119,7 +119,7 @@ Univer formula engine, supports asynchronous calculation, lambda function and ra
 ##### 🔨Operation
 
 -   **Undo/Redo** `2023Q1`
--   **Copy/Paste/Cut** `2023Q2`
+-   **Copy/Paste/Cut** `2023Q1`
 -   **Hot key** `2023Q2`
 -   **Format Painter** `2023Q4`
 -   **Selection by drag and dropping** `2023Q1`
@@ -176,7 +176,7 @@ Univer formula engine, supports asynchronous calculation, lambda function and ra
 
 ### Docs
 
-#### 📚 Write & edit
+#### 💌 Write & edit
 
 -   **Add and edit text** `2023Q1`
 -   **Find and replace text** `2023Q4`
@@ -184,7 +184,7 @@ Univer formula engine, supports asynchronous calculation, lambda function and ra
 -   **Show word count** `2023Q1`
 -   **Insert and remove hyperlinks** `2023Q2`
 
-#### 📚 Format text
+#### 🛀 Format text
 
 -   **Add and format text** `2023Q1`
 -   **Create a bulleted or numbered list** `2023Q1`
@@ -192,7 +192,7 @@ Univer formula engine, supports asynchronous calculation, lambda function and ra
 -   **Apply styles** `2023Q1`
 -   **Apply themes** `2024Q1`
 
-#### 📚 Lay out pages
+#### 🗺️ Lay out pages
 
 -   **Change margins** `2023Q1`
 -   **Create newsletter columns** `2023Q1`
@@ -203,7 +203,7 @@ Univer formula engine, supports asynchronous calculation, lambda function and ra
 -   **Insert a page break** `2023Q2`
 -   **Insert a table of contents** `2024Q2`
 
-#### 📚 Lay out pages
+#### 🧭 Lay out pages
 
 -   **Insert a table** `2023Q2`
 -   **Insert pictures** `2023Q1`
@@ -214,13 +214,13 @@ Univer formula engine, supports asynchronous calculation, lambda function and ra
 -   **Rotate a picture or shape** `2023Q1`
 -   **Wrap text around a picture in Word** `2023Q1`
 
-#### 📚 For school
+#### 🛎️ For school
 
 -   **Write an equation or formula** `2024Q2`
 -   **Indent the first line of a paragraph** `2023Q1`
 -   **Double-space the lines in a document** `2023Q1`
 
-#### 📚 Edit & print &
+#### 🧳 Edit & print &
 
 -   **Convert or save to PDF** `2024Q4`
 -   **Edit a PDF** `2024Q4`
@@ -229,7 +229,7 @@ Univer formula engine, supports asynchronous calculation, lambda function and ra
 -   **Comment** `2023Q4`
 -   **mobile device** `2024Q4`
 
-#### 📚 Other
+#### 🕰️ Other
 
 -   **Insert a Sheet** `2023Q2`
 -   **Insert a Slide** `2023Q2`
@@ -237,7 +237,7 @@ Univer formula engine, supports asynchronous calculation, lambda function and ra
 
 ### Slides
 
-#### 📚 Slides & layouts
+#### 📻 Slides & layouts
 
 -   **Slide master** `2023Q3`
 -   **Apply a slide layout** `2023Q3`
@@ -248,7 +248,7 @@ Univer formula engine, supports asynchronous calculation, lambda function and ra
 -   **Rotate or flip an object** `2023Q2`
 -   **Change the order** `2023Q2`
 
-#### 📚 Text & tables
+#### 📱 Text & tables
 
 -   **WordArt** `2024Q3`
 -   **Hyperlink** `2023Q3`
@@ -257,7 +257,7 @@ Univer formula engine, supports asynchronous calculation, lambda function and ra
 -   **Add slide numbers, page numbers, or the date and time** `2023Q4`
 -   **Set text direction and position in a shape or text box** `2023Q3`
 
-#### 📚 Pictures & graphics
+#### 📀 Pictures & graphics
 
 -   **Insert a picture** `2023Q1`
 -   **Edit pictures** `2024Q2`
@@ -267,7 +267,7 @@ Univer formula engine, supports asynchronous calculation, lambda function and ra
 -   **Shape** `2023Q2`
 -   **Insert icons** `2023Q2`
 
-#### 📚 Present slideshows
+#### 🧮 Present slideshows
 
 -   **Presenter view** `2023Q2`
 -   **Speaker notes** `2023Q4`
@@ -276,7 +276,7 @@ Univer formula engine, supports asynchronous calculation, lambda function and ra
 -   **Print your PowerPoint slides, handouts, or notes** `2024Q4`
 -   **Self-running presentation** `2024Q4`
 
-#### 📚 Animation, video & audio
+#### 📒 Animation, video & audio
 
 -   **Transitions between slides** `2024Q2`
 -   **Animate text or objects** `2024Q1`
@@ -285,7 +285,7 @@ Univer formula engine, supports asynchronous calculation, lambda function and ra
 -   **Audio** `2023Q4`
 -   **Record screen** `2024Q4`
 
-#### 📚 Other
+#### 📫 Other
 
 -   **Collaborate** `2023Q4`
 -   **Convert a presentation as a video** `2024Q4`

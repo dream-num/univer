@@ -21,6 +21,7 @@ import { columnIterator } from '../Docs/Common/Tools';
 import { DocumentSkeleton } from '../Docs/DocSkeleton';
 import { IDocumentSkeletonColumn } from '../../Basics/IDocumentSkeletonCached';
 import { getRotateOffsetAndFarthestHypotenuse, getRotateOrientation } from '../../Basics/Draw';
+import { SelectionManager } from './Selection/SelectionManager';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 
@@ -40,6 +41,10 @@ export class Spreadsheet extends SheetComponent {
     private _cacheOffsetX = 0;
 
     private _cacheOffsetY = 0;
+
+    private _hasSelection = false;
+
+    private _selection: SelectionManager;
 
     private _documents: Documents = new Documents(OBJECT_KEY, undefined, {
         pageMarginLeft: 0,
@@ -248,15 +253,33 @@ export class Spreadsheet extends SheetComponent {
         };
     }
 
-    getAncestorScrollXY(offsetX: number, offsetY: number) {
-        let parent: any = this.getParent();
+    getScrollXYByRelativeCoords(coord: Vector2) {
+        let scene = this.getParent() as Scene;
         let x = 0;
         let y = 0;
+        const viewPort = scene.getActiveViewportByRelativeCoord(coord);
+        if (viewPort) {
+            const actualX = viewPort.actualScrollX || 0;
+            const actualY = viewPort.actualScrollY || 0;
+            x += actualX;
+            y += actualY;
+        }
+        return {
+            x,
+            y,
+        };
+    }
+
+    getAncestorScrollXY(offsetX: number, offsetY: number) {
+        let parent: any = this.getParent();
+
+        let x = 0;
+        let y = 0;
+        let coord = Vector2.FromArray([offsetX, offsetY]);
         while (parent) {
             if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
-                const viewports = (parent as Scene).getViewports();
-                const viewPort = viewports.find((vp) => vp.isHit(Vector2.FromArray([offsetX, offsetY])));
-                // const viewPort = this._getHasScrollViewport(viewports);
+                const scene = parent as Scene;
+                const viewPort = scene.getActiveViewportByCoord(coord);
                 if (viewPort) {
                     const actualX = viewPort.actualScrollX || 0;
                     const actualY = viewPort.actualScrollY || 0;
@@ -337,6 +360,19 @@ export class Spreadsheet extends SheetComponent {
 
         this._cacheCanvas.setSize(width, height);
         this.makeDirty(true);
+    }
+
+    enableSelection() {
+        if (this._hasSelection) {
+            return;
+        }
+        this._selection = SelectionManager.create(this);
+        this._hasSelection = true;
+    }
+
+    disableSelection() {
+        this._selection?.dispose();
+        this._hasSelection = false;
     }
 
     private _getAncestorSize() {

@@ -16,7 +16,7 @@ import {
 } from '@univer/base-render';
 import { EventState, Worksheet } from '@univer/core';
 import { SheetPlugin } from '../../../SheetPlugin';
-import { BaseView, CanvasViewRegistry } from '../BaseView';
+import { BaseView } from '../BaseView';
 
 enum SHEET_VIEW_KEY {
     MAIN = '__SpreadsheetRender__Test',
@@ -115,6 +115,8 @@ export class SceneViewerTestView extends BaseView {
             width: allWidth,
             height: allHeight,
         });
+
+        spreadsheet.enableSelection();
 
         mainScene.addObject(sv);
     }
@@ -243,4 +245,4 @@ export class SceneViewerTestViewFactory {
         return new SceneViewerTestView().initialize(scene, plugin);
     }
 }
-CanvasViewRegistry.add(new SceneViewerTestViewFactory());
+// CanvasViewRegistry.add(new SceneViewerTestViewFactory());

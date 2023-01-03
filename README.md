@@ -4,7 +4,9 @@ English | [简体中文](./README-zh.md)
 
 ## Introduction
 
-🚀Univer, [Luckysheet 2.0](https://github.com/dream-num/luckysheet) upgrade version. A canvas-based javascript framework for building documents, spreadsheets, slides.
+Univer is an open source collabrative solution,  which aims to empower the collaboration capability into all systems. With Univer, users can synchronously edit the file content, making files flowing smoothly within different types of systems and avoid downloading and uploading Microsoft Office files anymore. 
+
+We provide javascript part of code in the repository, including a canvas-based framework for building documents, spreadsheets, slides.
 
 > ⚠️ This project is still in development, only for testing and learning, not for production
 

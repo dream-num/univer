@@ -97,6 +97,25 @@ export class Layer {
         return this;
     }
 
+    removeObjects(objects: BaseObject[] | string[]) {
+        const allObjects = this.getObjects();
+        const allObjectsLength = allObjects.length;
+
+        for (let i = allObjectsLength; i >= 0; i--) {
+            let o: BaseObject | string = allObjects[i];
+            const objectsLength = objects.length;
+            for (let j = 0; j < objectsLength; j++) {
+                const object = objects[j];
+                o = object instanceof BaseObject ? o : (o as BaseObject).oKey;
+                if (o === object) {
+                    allObjects.splice(i, 1);
+                    objects.splice(j, 1);
+                    break;
+                }
+            }
+        }
+    }
+
     clear() {
         this._objects = [];
     }

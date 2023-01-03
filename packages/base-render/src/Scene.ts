@@ -418,6 +418,17 @@ export class Scene {
         return this;
     }
 
+    removeObjects(objects?: BaseObject[] | string[]) {
+        if (objects == null) {
+            return;
+        }
+        const layers = this.getLayers();
+        for (let layer of layers) {
+            layer.removeObjects(objects);
+        }
+        return this;
+    }
+
     // addBackObjects(...argument: BaseObject[]) {
     //     argument.forEach((o: BaseObject) => {
     //         this.addObjectBack(o);

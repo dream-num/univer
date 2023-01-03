@@ -1,6 +1,7 @@
 import { PLUGIN_NAMES, Workbook } from '@univer/core';
-import { Path, Scene } from '@univer/base-render';
+import { Rect, Scene } from '@univer/base-render';
 import { SheetPlugin, SheetView } from '@univer/base-sheets';
+import { ArrayFormulaDataType } from '@univer/base-formula-engine';
 import { ArrayFormLine, ArrayFormLineModel, IArrayFormLineRange } from '../Model/ArrayFormLineModel';
 import { FormulaPlugin } from '../FormulaPlugin';
 
@@ -11,6 +12,7 @@ enum ARRAY_FORM_LINE_MANAGER_KEY {
     right = '__ArrayFormLineRightControl__',
 }
 
+const LINE_COLOR = '#3969b9';
 /**
  * Ant Line Controller
  */
@@ -58,11 +60,11 @@ export class ArrayFormLineControl {
     }
 
     /**
-     * Create A Sheet ArrayFormLine Path
+     * Create A Sheet ArrayFormLine Rect
      * @param sheetId
      * @param range
      */
-    private _createArrayFormLinePathBySheetIdAndRange(sheetId: string, range: IArrayFormLineRange): Path[] {
+    private _createArrayFormLinePathBySheetIdAndRange(sheetId: string, range: IArrayFormLineRange): Rect[] {
         let workbook = this.getWorkBook();
         let worksheet = workbook.getSheetBySheetId(sheetId);
 
@@ -94,49 +96,52 @@ export class ArrayFormLineControl {
             offsetLeft += columnManager.getColumnWidth(i);
         }
 
+        // TODO: Gradient shadows
+        // dark gray #ebebeb
+        // light gray #fefefe
         return [
-            new Path(ARRAY_FORM_LINE_MANAGER_KEY.left, {
-                stroke: 'yellow',
+            new Rect(ARRAY_FORM_LINE_MANAGER_KEY.left, {
+                stroke: LINE_COLOR,
                 strokeWidth: 1,
                 left: offsetLeft + rowTitleWidth,
                 top: offsetTop + columnTitleHeight,
                 height: totalHeight,
-                width: 1,
+                width: 0.1,
                 shadowOffsetX: 10,
                 shadowOffsetY: 10,
                 shadowColor: 'LightSkyBlue',
                 shadowBlur: 5,
             }),
-            new Path(ARRAY_FORM_LINE_MANAGER_KEY.top, {
-                stroke: 'green',
+            new Rect(ARRAY_FORM_LINE_MANAGER_KEY.top, {
+                stroke: LINE_COLOR,
                 strokeWidth: 1,
                 left: offsetLeft + rowTitleWidth,
-                top: offsetTop + columnTitleHeight + totalHeight,
-                height: 1,
+                top: offsetTop + columnTitleHeight,
+                height: 0.1,
                 width: totalWidth,
                 shadowOffsetX: 10,
                 shadowOffsetY: 10,
                 shadowColor: 'LightSkyBlue',
                 shadowBlur: 5,
             }),
-            new Path(ARRAY_FORM_LINE_MANAGER_KEY.right, {
-                stroke: 'yellow',
+            new Rect(ARRAY_FORM_LINE_MANAGER_KEY.right, {
+                stroke: LINE_COLOR,
                 strokeWidth: 1,
                 left: offsetLeft + rowTitleWidth + totalWidth,
                 top: offsetTop + columnTitleHeight,
                 height: totalHeight,
-                width: 1,
+                width: 0.1,
                 shadowOffsetX: 10,
                 shadowOffsetY: 10,
                 shadowColor: 'LightSkyBlue',
                 shadowBlur: 5,
             }),
-            new Path(ARRAY_FORM_LINE_MANAGER_KEY.bottom, {
-                stroke: 'green',
+            new Rect(ARRAY_FORM_LINE_MANAGER_KEY.bottom, {
+                stroke: LINE_COLOR,
                 strokeWidth: 1,
                 left: offsetLeft + rowTitleWidth,
                 top: offsetTop + columnTitleHeight + totalHeight,
-                height: 1,
+                height: 0.1,
                 width: totalWidth,
                 shadowOffsetX: 10,
                 shadowOffsetY: 10,
@@ -178,7 +183,6 @@ export class ArrayFormLineControl {
                 let arrayFormLine = arrayFormLineList[j];
                 let antPath = this._createArrayFormLinePathBySheetIdAndRange(arrayFormLineModel.getSheetId(), arrayFormLine.getRange());
                 arrayFormLine.setPath(antPath);
-                console.log(antPath);
                 this.getSheetViewScene().addObjects(antPath);
             }
         }
@@ -226,6 +230,21 @@ export class ArrayFormLineControl {
         const arrayFormLineModel = this._findArrayFormLineModelBySheetId(sheetId, new ArrayFormLineModel(sheetId));
         arrayFormLineModel.addArrayFormLine(new ArrayFormLine(range));
         this._saveOrUpdateArrayFormLineModel(arrayFormLineModel);
+        this._makeUpdateSceneArrayFormLinePath();
+    }
+
+    refreshArrayFormLine(value: ArrayFormulaDataType) {
+        this._arrayFormLineModelList.length = 0;
+
+        Object.keys(value).forEach((sheetId) => {
+            const arrayFormula = value[sheetId];
+            arrayFormula.forValue((r, c, v) => {
+                const arrayFormLineModel = new ArrayFormLineModel(sheetId);
+                arrayFormLineModel.addArrayFormLine(new ArrayFormLine(v));
+                this._arrayFormLineModelList.push(arrayFormLineModel);
+            });
+        });
+
         this._makeUpdateSceneArrayFormLinePath();
     }
 

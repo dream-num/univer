@@ -101,15 +101,18 @@ export class Layer {
         const allObjects = this.getObjects();
         const allObjectsLength = allObjects.length;
 
-        for (let i = allObjectsLength; i >= 0; i--) {
+        for (let i = allObjectsLength - 1; i >= 0; i--) {
             let o: BaseObject | string = allObjects[i];
             const objectsLength = objects.length;
+
+            if (objectsLength === 0) break;
+
             for (let j = 0; j < objectsLength; j++) {
                 const object = objects[j];
                 o = object instanceof BaseObject ? o : (o as BaseObject).oKey;
                 if (o === object) {
                     allObjects.splice(i, 1);
-                    objects.splice(j, 1);
+                    // objects.splice(j, 1);
                     break;
                 }
             }

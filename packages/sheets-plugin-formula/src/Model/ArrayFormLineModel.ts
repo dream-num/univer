@@ -1,4 +1,4 @@
-import { Path } from '@univer/base-render';
+import { Rect } from '@univer/base-render';
 import { IRangeData, Nullable } from '@univer/core';
 
 export interface IArrayFormLineRange extends IRangeData {
@@ -8,7 +8,7 @@ export interface IArrayFormLineRange extends IRangeData {
 export class ArrayFormLine {
     private _range: IArrayFormLineRange;
 
-    private _rect: Nullable<Path[]>;
+    private _rect: Nullable<Rect[]>;
 
     constructor(range: IArrayFormLineRange) {
         this._range = range;
@@ -18,11 +18,11 @@ export class ArrayFormLine {
         return this._range;
     }
 
-    getPath(): Nullable<Path[]> {
+    getPath(): Nullable<Rect[]> {
         return this._rect;
     }
 
-    setPath(rect: Path[]): void {
+    setPath(rect: Rect[]): void {
         this._rect = rect;
     }
 

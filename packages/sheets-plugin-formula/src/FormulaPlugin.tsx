@@ -68,15 +68,33 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
 
         this._arrayFormLineControl = new ArrayFormLineControl(this);
 
-        this._arrayFormLineControl.addArrayFormLineToSheet(
-            {
-                startRow: 1,
-                endRow: 3,
-                startColumn: 1,
-                endColumn: 3,
-            },
-            'sheet-0004'
-        );
+        // this._arrayFormLineControl.addArrayFormLineToSheet(
+        //     {
+        //         startRow: 1,
+        //         endRow: 3,
+        //         startColumn: 1,
+        //         endColumn: 3,
+        //     },
+        //     'sheet-0004'
+        // );
+        // this._arrayFormLineControl.addArrayFormLineToSheet(
+        //     {
+        //         startRow: 4,
+        //         endRow: 5,
+        //         startColumn: 4,
+        //         endColumn: 5,
+        //     },
+        //     'sheet-0004'
+        // );
+        // this._arrayFormLineControl.addArrayFormLineToSheet(
+        //     {
+        //         startRow: 5,
+        //         endRow: 6,
+        //         startColumn: 5,
+        //         endColumn: 6,
+        //     },
+        //     'sheet-0003'
+        // );
     }
 
     onMapping(IOC: IOCContainer): void {}
@@ -118,5 +136,9 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
 
     getFormulaPromptController() {
         return this._formulaPromptController;
+    }
+
+    getArrayFormLineControl() {
+        return this._arrayFormLineControl;
     }
 }

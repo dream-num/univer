@@ -1,4 +1,4 @@
-import { PLUGIN_NAMES, Workbook } from '@univer/core';
+import { PLUGIN_NAMES, Tools, Workbook } from '@univer/core';
 import { Rect, Scene } from '@univer/base-render';
 import { SheetPlugin, SheetView } from '@univer/base-sheets';
 import { ArrayFormulaDataType } from '@univer/base-formula-engine';
@@ -95,12 +95,13 @@ export class ArrayFormLineControl {
         for (let i = 0; i <= range.startColumn - 1; i++) {
             offsetLeft += columnManager.getColumnWidth(i);
         }
+        const id = Tools.generateRandomId();
 
         // TODO: Gradient shadows
         // dark gray #ebebeb
         // light gray #fefefe
         return [
-            new Rect(ARRAY_FORM_LINE_MANAGER_KEY.left, {
+            new Rect(ARRAY_FORM_LINE_MANAGER_KEY.left + id, {
                 stroke: LINE_COLOR,
                 strokeWidth: 1,
                 left: offsetLeft + rowTitleWidth,
@@ -112,7 +113,7 @@ export class ArrayFormLineControl {
                 shadowColor: 'LightSkyBlue',
                 shadowBlur: 5,
             }),
-            new Rect(ARRAY_FORM_LINE_MANAGER_KEY.top, {
+            new Rect(ARRAY_FORM_LINE_MANAGER_KEY.top + id, {
                 stroke: LINE_COLOR,
                 strokeWidth: 1,
                 left: offsetLeft + rowTitleWidth,
@@ -124,7 +125,7 @@ export class ArrayFormLineControl {
                 shadowColor: 'LightSkyBlue',
                 shadowBlur: 5,
             }),
-            new Rect(ARRAY_FORM_LINE_MANAGER_KEY.right, {
+            new Rect(ARRAY_FORM_LINE_MANAGER_KEY.right + id, {
                 stroke: LINE_COLOR,
                 strokeWidth: 1,
                 left: offsetLeft + rowTitleWidth + totalWidth,
@@ -136,7 +137,7 @@ export class ArrayFormLineControl {
                 shadowColor: 'LightSkyBlue',
                 shadowBlur: 5,
             }),
-            new Rect(ARRAY_FORM_LINE_MANAGER_KEY.bottom, {
+            new Rect(ARRAY_FORM_LINE_MANAGER_KEY.bottom + id, {
                 stroke: LINE_COLOR,
                 strokeWidth: 1,
                 left: offsetLeft + rowTitleWidth,
@@ -162,7 +163,12 @@ export class ArrayFormLineControl {
                 let arrayFormLine = arrayFormLineList[j];
                 let antPath = arrayFormLine.getPath();
                 if (antPath) {
-                    this.getSheetViewScene().removeObjects(antPath);
+                    for (let index = 0; index < antPath.length; index++) {
+                        const element = antPath[index];
+                        element.hide();
+                        // element.dispose();
+                    }
+                    // this.getSheetViewScene().removeObjects(antPath);
                 }
             }
         }
@@ -173,6 +179,8 @@ export class ArrayFormLineControl {
      */
     private _makeUpdateSceneArrayFormLinePath(): void {
         this._deleteSceneAllArrayFormLinePath();
+        // this.getSheetViewScene().makeDirty(true);
+        // this._sheetPlugin.getMainComponent().makeDirty(true);
         for (let i = 0; i < this._arrayFormLineModelList.length; i++) {
             let arrayFormLineModel = this._arrayFormLineModelList[i];
             let arrayFormLineList = arrayFormLineModel.getArrayFormLineList();
@@ -210,6 +218,10 @@ export class ArrayFormLineControl {
                 this._activeSheetId = this._sheetPlugin.getWorkbook().getActiveSheet().getSheetId();
                 this._makeUpdateSceneArrayFormLinePath();
             });
+        this._sheetPlugin.getObserver('onChangeSelectionObserver')?.add(() => {
+            const currentCell = this._sheetPlugin.getSelectionManager().getCurrentCell();
+            console.log('current cell', currentCell);
+        });
     }
 
     /**

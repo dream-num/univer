@@ -50,6 +50,7 @@ const uiDefaultConfigUp = {
     },
 };
 
+// sheet up
 const univerSheetUp = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);
 univerSheetUp.installPlugin(new RenderEngine());
 
@@ -62,6 +63,7 @@ FormulaPlugin.create(DEFAULT_FORMULA_DATA).installTo(univerSheetUp);
 univerSheetUp.installPlugin(new ClipboardPlugin());
 univerSheetUp.installPlugin(new ImportXlsxPlugin());
 
+// sheet down
 const univerSheetDown = UniverSheet.newInstance();
 univerSheetDown.installPlugin(new RenderEngine());
 univerSheetDown.installPlugin(new UniverComponentSheet());

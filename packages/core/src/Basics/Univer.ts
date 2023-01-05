@@ -58,7 +58,7 @@ export class Univer {
      *
      * @param plugin - install plugin
      */
-    installPlugin(plugin: Plugin): void {
+    install(plugin: Plugin): void {
         this._context.getPluginManager().install(plugin);
     }
 
@@ -67,7 +67,7 @@ export class Univer {
      *
      * @param name - plugin name
      */
-    uninstallPlugin(name: string): void {
+    uninstall(name: string): void {
         this._context.getPluginManager().uninstall(name);
     }
 }

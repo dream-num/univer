@@ -43,9 +43,9 @@ const uiDefaultConfigDemo = {
 };
 
 const univer = new Univer();
-univer.installPlugin(new RenderEngine());
-univer.installPlugin(new UniverComponentSheet());
-univer.installPlugin(new BaseComponentPlugin());
+univer.install(new RenderEngine());
+univer.install(new UniverComponentSheet());
+univer.install(new BaseComponentPlugin());
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO1);
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO2);

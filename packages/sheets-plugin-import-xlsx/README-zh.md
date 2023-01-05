@@ -1,10 +1,10 @@
-# style-universheet
+# style-univer
 
 简体中文 | [English](./README.md)
 
 ## 介绍
 
-UniverSheet ImportXlsx插件
+UniverSheet ImportXlsx 插件
 
 ### 安装
 

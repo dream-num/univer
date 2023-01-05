@@ -3,7 +3,7 @@ import { RenderEngine } from '@univer/base-render';
 import { SheetPlugin } from '@univer/base-sheets';
 import { DocPlugin } from '@univer/base-docs';
 import { SlidePlugin } from '@univer/base-slides';
-import { UniverComponentSheet } from '@univer/style-universheet';
+import { UniverComponentSheet } from '@univer/style-univer';
 import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
 
 import { <%= projectUpperValue %>Plugin } from './<%= projectUpperValue %>Plugin';

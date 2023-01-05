@@ -1,9 +1,9 @@
 import { Component, BaseComponentSheet, BaseComponentRender, createRef, AppContext } from '@univer/base-component';
 import { PLUGIN_NAMES, Tools } from '@univer/core';
-import { Container, Content, Footer, Header, Layout, Sider } from '@univer/style-universheet';
-import defaultSkin from '@univer/style-universheet/assets/css/skin/default.module.less';
-import darkSkin from '@univer/style-universheet/assets/css/skin/dark.module.less';
-import greenSkin from '@univer/style-universheet/assets/css/skin/green.module.less';
+import { Container, Content, Footer, Header, Layout, Sider } from '@univer/style-univer';
+import defaultSkin from '@univer/style-univer/assets/css/skin/default.module.less';
+import darkSkin from '@univer/style-univer/assets/css/skin/dark.module.less';
+import greenSkin from '@univer/style-univer/assets/css/skin/green.module.less';
 import cssVars from 'css-vars-ponyfill';
 
 // app context for skin and Locale

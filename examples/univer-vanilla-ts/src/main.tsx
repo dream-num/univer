@@ -1,6 +1,6 @@
 import { UniverSheet, UniverDoc, UniverSlide } from '@univer/core';
 import { RenderEngine } from '@univer/base-render';
-import { UniverComponentSheet } from '@univer/style-universheet';
+import { UniverComponentSheet } from '@univer/style-univer';
 import { SheetPlugin } from '@univer/base-sheets';
 import { DocPlugin } from '@univer/base-docs';
 import { SlidePlugin } from '@univer/base-slides';

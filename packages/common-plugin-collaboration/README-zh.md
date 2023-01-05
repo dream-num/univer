@@ -1,10 +1,10 @@
-# style-universheet
+# style-univer
 
 简体中文 | [English](./README.md)
 
 ## 介绍
 
-UniverSheet Collaboration插件
+UniverSheet Collaboration 插件
 
 ### 安装
 

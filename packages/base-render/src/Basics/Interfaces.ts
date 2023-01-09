@@ -116,7 +116,8 @@ export interface IEditorInputConfig {
     event: Event | CompositionEvent | KeyboardEvent;
     content?: string;
     document: Documents;
-    selection?: TextSelection;
+    activeSelection?: TextSelection;
+    selectionList?: TextSelection[];
 }
 
 // export interface IPageConfig {

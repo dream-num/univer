@@ -67,7 +67,10 @@ export class Workbook {
         this._context = context;
 
         const { styles } = this._config;
-        this._unitId = this._config.id ?? nanoid(6);
+        if (this._config.id === '') {
+            this._config.id = nanoid(6);
+        }
+        this._unitId = this._config.id;
         this._styles = new Styles(styles);
         this._worksheets = new Map<string, Worksheet>();
         this._commandManager = context.getCommandManager();

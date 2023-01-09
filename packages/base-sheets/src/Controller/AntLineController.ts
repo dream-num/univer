@@ -99,6 +99,7 @@ export class AntLineControl {
             height: totalHeight,
             width: totalWidth,
             strokeDashArray: [5],
+            evented: false,
         });
     }
 

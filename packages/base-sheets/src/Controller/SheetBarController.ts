@@ -665,6 +665,13 @@ class SheetBarAPIControl {
         const context = plugin.getContext();
         const workbook = context.getWorkBook();
         workbook.insertSheet();
+
+        const size = workbook.getSheetSize();
+        const sheets = workbook.getSheets();
+        const lastSheet = sheets[size - 1];
+        if (lastSheet) {
+            lastSheet.activate();
+        }
     }
 
     /**

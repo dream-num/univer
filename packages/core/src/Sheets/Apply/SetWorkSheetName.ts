@@ -1,4 +1,4 @@
-import { Worksheet } from '../Domain/Worksheet';
+import { Worksheet } from '../Domain';
 
 /**
  *
@@ -21,3 +21,5 @@ export function SetWorkSheetName(worksheet: Worksheet, sheetName: string): strin
     // return old sheet name to undo
     return oldSheetName;
 }
+
+export function SetWorkSheetNameApply() {}

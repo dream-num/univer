@@ -161,7 +161,7 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
 
     checkArrayFormValue(row: number, column: number): Nullable<IRangeData> {
         let formula;
-        const arrayFormulaData = this._plugin.getFormulaController().getArrayFormulaData();
+        const arrayFormulaData = this._plugin.getFormulaController().getDataModel().getArrayFormulaData();
 
         if (!arrayFormulaData) return null;
 

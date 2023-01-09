@@ -28,3 +28,11 @@ export interface ICellInfo extends IPosition {
 }
 
 export interface ISelection extends IPosition, IRangeData {}
+
+export interface ITextSelectionRange {
+    cursorStart: number;
+    cursorEnd: number;
+    isStartBack: boolean;
+    isEndBack: boolean;
+    isCollapse: boolean;
+}

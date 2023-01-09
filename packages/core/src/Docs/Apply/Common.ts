@@ -1,4 +1,8 @@
-import { IBlockElement, IElement } from '../../Interfaces/IDocumentData';
+import {
+    IBlockElement,
+    IDocumentData,
+    IElement,
+} from '../../Interfaces/IDocumentData';
 
 export function getTextStartByAnchor(start: number) {
     let textStart = start - 1;
@@ -36,4 +40,19 @@ export function moveBlockCharIndex(
 
     blockElement.st += moveIndex;
     blockElement.ed += moveIndex;
+}
+
+export function getDocsUpdateBody(model: IDocumentData, segmentId?: string) {
+    let body = model.body;
+
+    if (segmentId) {
+        const { headers, footers } = model;
+        if (headers?.[segmentId]) {
+            body = headers[segmentId].body;
+        } else if (footers?.[segmentId]) {
+            body = footers[segmentId].body;
+        }
+    }
+
+    return body;
 }

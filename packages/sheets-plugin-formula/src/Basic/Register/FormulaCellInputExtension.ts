@@ -65,7 +65,7 @@ export class FormulaCellInputExtensionFactory extends BaseCellInputExtensionFact
         const { row, column } = cell;
         let formula;
         const formulaData = this._plugin.getFormulaController().getDataModel().getFormulaData();
-        const arrayFormulaData = this._plugin.getFormulaController().getArrayFormulaData();
+        const arrayFormulaData = this._plugin.getFormulaController().getDataModel().getArrayFormulaData();
 
         if (!arrayFormulaData) return null;
 

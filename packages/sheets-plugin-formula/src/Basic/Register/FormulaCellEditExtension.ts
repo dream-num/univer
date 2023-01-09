@@ -65,7 +65,7 @@ export class FormulaCellEditExtensionFactory extends BaseCellEditExtensionFactor
     checkArrayFormValue(cell: ICell, unitId: string): Nullable<string> {
         const { row, column } = cell;
         let formula;
-        const arrayFormulaData = this._plugin.getFormulaController().getArrayFormulaData();
+        const arrayFormulaData = this._plugin.getFormulaController().getDataModel().getArrayFormulaData();
 
         if (!arrayFormulaData) return null;
 

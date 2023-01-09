@@ -13,7 +13,6 @@ import { FormulaActionExtensionFactory } from './Basic/Register';
 import { FormulaPluginObserve, install } from './Basic/Observer';
 import { SearchFormulaController } from './Controller/SearchFormulaModalController';
 import { FormulaPromptController } from './Controller/FormulaPromptController';
-import { ArrayFormLineControl } from './Controller/ArrayFormLineController';
 
 export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
     private _formulaController: FormulaController;
@@ -21,8 +20,6 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
     private _searchFormulaController: SearchFormulaController;
 
     private _formulaPromptController: FormulaPromptController;
-
-    private _arrayFormLineControl: ArrayFormLineControl;
 
     protected _formulaActionExtensionFactory: FormulaActionExtensionFactory;
 
@@ -65,8 +62,6 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
         });
 
         this.registerExtension();
-
-        this._arrayFormLineControl = new ArrayFormLineControl(this);
 
         // this._arrayFormLineControl.addArrayFormLineToSheet(
         //     {
@@ -136,9 +131,5 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
 
     getFormulaPromptController() {
         return this._formulaPromptController;
-    }
-
-    getArrayFormLineControl() {
-        return this._arrayFormLineControl;
     }
 }

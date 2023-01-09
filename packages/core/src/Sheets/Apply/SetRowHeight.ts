@@ -1,4 +1,5 @@
-import { RowManager } from '../Domain/RowManager';
+import { RowManager } from '../Domain';
+import { CommandUnit, ISetRowHeightActionData } from '../../Command';
 
 /**
  *
@@ -14,6 +15,22 @@ export function SetRowHeight(
     rowHeight: number[],
     rowManager: RowManager
 ) {
+    const result: number[] = [];
+    for (let i = rowIndex; i < rowIndex + rowHeight.length; i++) {
+        const row = rowManager.getRowOrCreate(i);
+        result[i - rowIndex] = row.h;
+        row.h = rowHeight[i - rowIndex];
+    }
+    return result;
+}
+
+export function SetRowHeightApply(unit: CommandUnit, data: ISetRowHeightActionData) {
+    const workbook = unit.WorkBookUnit;
+    const worksheet = workbook!.getSheetBySheetId(data.sheetId);
+    const rowIndex = data.rowIndex;
+    const rowHeight = data.rowHeight;
+    const rowManager = worksheet!.getRowManager();
+
     const result: number[] = [];
     for (let i = rowIndex; i < rowIndex + rowHeight.length; i++) {
         const row = rowManager.getRowOrCreate(i);

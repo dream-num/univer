@@ -9,3 +9,13 @@ export * from './SplitParagraphAction';
 export * from './UpdateDocumentAction';
 export * from './UpdateParagraphAction';
 export * from './UpdateSectionAction';
+export * from './InsertParagraphAction';
+
+export * from './DeleteBulletAction';
+export * from './DeleteParagraphBulletAction';
+export * from './DeleteSectionAction';
+export * from './InsertBulletAction';
+export * from './InsertParagraphBulletAction';
+export * from './InsertSectionAction';
+export * from './UpdateBulletAction';
+export * from './UpdateParagraphBulletAction';

@@ -40,6 +40,7 @@
     overflow-y: hidden;
     scrollbar-width: none;
 }
+
 .slide-tab-bar::-webkit-scrollbar {
     display: none;
 }
@@ -63,16 +64,20 @@
     height: 100%;
     background-color: var(--bg);
 }
+
 .slide-tab-item:first-child .slide-tab-divider {
     opacity: 0;
 }
+
 .slide-tab-item:hover {
     background: #efefef;
 }
+
 .slide-tab-item:hover .slide-tab-divider {
     opacity: 0;
 }
-.slide-tab-item:hover + .slide-tab-item .slide-tab-divider {
+
+.slide-tab-item:hover+.slide-tab-item .slide-tab-divider {
     opacity: 0;
 }
 
@@ -85,12 +90,14 @@
     align-items: center;
     flex-grow: 1;
 }
+
 .slide-tab-title {
     font-size: 14px;
     color: #676464;
     margin-right: 3px;
     margin-left: 6px;
 }
+
 .slide-tab-icon {
     width: 16px;
     height: 16px;
@@ -98,19 +105,23 @@
     color: #a1a1a1;
     margin-right: 6px;
 }
+
 .slide-tab-divider {
     width: 1px;
     height: 16px;
     background: var(--border-color-base);
 }
+
 .slide-tab-active .slide-tab-content {
     background: #efefef;
     color: #222;
 }
+
 .slide-tab-active .slide-tab-divider {
     opacity: 0;
 }
-.slide-tab-active + .slide-tab-item .slide-tab-divider {
+
+.slide-tab-active+.slide-tab-item .slide-tab-divider {
     opacity: 0;
 }
 
@@ -122,10 +133,74 @@
     width: 100%;
     flex-grow: 0;
 }
+
 .slide-tab-active-bar {
     height: 2px;
     width: 100%;
 }
+
 .slide-tab-active .slide-tab-active-bar {
     background: #d0d0d0;
+}
+
+.sheet-ul {
+    .cols-menuitem {
+        text-align: left;
+        padding: 5px 5px 5px 25px;
+    }
+
+    .select-color-picker-parent {
+        .select-item-content {
+            width: 100%;
+        }
+
+        ul {
+            padding: 0;
+        }
+
+        .select-color-picker {
+            padding: 0;
+
+            .select-item {
+                padding: 0;
+            }
+        }
+    }
+}
+
+.sheet-bar-menu {
+    position: absolute;
+    bottom: 120%;
+    left: 0;
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 0;
+    transition: opacity 218ms;
+    background: var(--bg);
+    margin: 0;
+    outline: 0;
+    z-index: 100;
+    box-sizing: border-box;
+    user-select: none;
+
+    li {
+        list-style: none;
+    }
+
+    .sheet-bar-menu-item {
+        position: relative;
+        padding: 5px 10px 5px 20px;
+
+        .sheet-bar-menu-icon {
+            position: absolute;
+            left: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        &-hide {
+            pointer-events: none;
+            color: #eee;
+        }
+    }
 }

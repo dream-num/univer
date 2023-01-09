@@ -640,33 +640,15 @@ export class SelectionManager {
 
     private _rowEventInitial() {
         const row = this._rowComponent;
-        row.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._rowTitleControl.pointerDown(evt);
-        });
         row.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
             this._rowTitleControl.highlightRowTitle(evt);
-        });
-        row.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._rowTitleControl.highlightRowTitle(evt);
-        });
-        row.onPointerLeaveObserver.add(() => {
-            this._rowTitleControl.unHighlightRowTitle();
         });
     }
 
     private _columnEventInitial() {
         const column = this._columnComponent;
-        column.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._columnTitleControl.pointerDown(evt);
-        });
         column.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
             this._columnTitleControl.highlightColumnTitle(evt);
-        });
-        column.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._columnTitleControl.highlightColumnTitle(evt);
-        });
-        column.onPointerLeaveObserver.add(() => {
-            this._columnTitleControl.unHighlightColumnTitle();
         });
     }
 

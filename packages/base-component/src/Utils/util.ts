@@ -139,7 +139,7 @@ export function joinClassNames(...args: any) {
                 }
             }
         } else {
-            result += ` ${item}`;
+            result += item ? ` ${item}` : '';
         }
     });
     return result;

@@ -93,7 +93,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     constructor(config: Partial<ISheetPluginConfig> = {}) {
         super(PLUGIN_NAMES.SPREADSHEET);
 
-        this._config = Tools.deepMerge(DEFAULT_SPREADSHEET_PLUGIN_DATA, config);
+        this._config = Tools.deepMerge({}, DEFAULT_SPREADSHEET_PLUGIN_DATA, config);
     }
 
     register(engineInstance: Engine) {

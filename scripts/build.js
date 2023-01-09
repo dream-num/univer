@@ -25,7 +25,7 @@ const buildTargets = [
     '@univer/sheets-plugin-split-column', // success
 
     // '@univer/style-google',
-    '@univer/style-universheet', // success
+    '@univer/style-univer', // success
     // '@univer/style-office365',
     // '@univer/style-mobile',
 ];

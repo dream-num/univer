@@ -161,12 +161,12 @@ pnpm install
 
         // 公用
         func() {
-            this._func()
+            this._func();
         }
 
         private _funcUse() {
             // 私有的方法调用私有的方法
-            this._func()
+            this._func();
 
             // 其它逻辑
         }
@@ -692,9 +692,9 @@ npx playwright install
 npm run test:ui
 ```
 
-UI 测试主要是测试`@univer/style-universheet`的组件
+UI 测试主要是测试`@univer/style-univer`的组件
 
--   未与核心耦合、未使用核心`SheetContext`/`locale`的无状态组件，编写单元测试，测试文件的目录和组件在一个层级，参照`./packages/style-universheet/src/components/Container>`组件
+-   未与核心耦合、未使用核心`SheetContext`/`locale`的无状态组件，编写单元测试，测试文件的目录和组件在一个层级，参照`./packages/style-univer/src/components/Container>`组件
 
     ```sh
       Container
@@ -710,7 +710,7 @@ UI 测试主要是测试`@univer/style-universheet`的组件
 
     如果您想为`Container`组件增加测试代码，直接在`Container.test.tsx`文件中增加`test`方法即可。
 
--   与核心耦合、使用了核心`SheetContext`/`locale`的有状态组件，编写 e2e 测试，技术上采用`Playwright`。因为要启动一个浏览器实例和本地服务，所以我们将所有需要 e2e 测试的组件放在一个文件中管理，测试文件为`./packages/style-universheet/test/components.e2e.spec.ts`，每个组件编写一个`it`用例即可，不要和之前的函数命名冲突即可。
+-   与核心耦合、使用了核心`SheetContext`/`locale`的有状态组件，编写 e2e 测试，技术上采用`Playwright`。因为要启动一个浏览器实例和本地服务，所以我们将所有需要 e2e 测试的组件放在一个文件中管理，测试文件为`./packages/style-univer/test/components.e2e.spec.ts`，每个组件编写一个`it`用例即可，不要和之前的函数命名冲突即可。
 
 Tips:
 
@@ -1041,7 +1041,7 @@ ActionOperation 有一个 removeExtension 可以移除 action 拦截。一般情
 
     这时候如果`Container`这里报错了，说明在`JSXElement`需要增加 `Container`的类型
 
-4. 在`style-universheet/src/StyleUniver.ts`中的`UniverComponentFactory`类下，在`createComponent`中增加导出`UniverContainer`组件实例
+4. 在`style-univer/src/StyleUniver.ts`中的`UniverComponentFactory`类下，在`createComponent`中增加导出`UniverContainer`组件实例
 5. 组件已经构造好了，可以测试一下。比如在`base-sheets`中引入使用，在`base-sheets/src/Domain/Spreadsheet.ts`中定义组件类型
 
     ```ts
@@ -1103,7 +1103,7 @@ jest 单元测试
 比如测试一个`Container`组件是否正常渲染
 
 ```tsx
-// --- ./packages/style-universheet/src/Components/Container/test/Container.test.tsx ---
+// --- ./packages/style-univer/src/Components/Container/test/Container.test.tsx ---
 import { h } from 'preact';
 
 import { render } from '@testing-library/preact';
@@ -1194,7 +1194,7 @@ cover: ''
 ## 案例
 
 ```jsx
-import { Button } from '@univer/style-universheet';
+import { Button } from '@univer/style-univer';
 
 const ToolBar = () => {
     const buttonText = '确认';
@@ -1241,10 +1241,10 @@ npm run build
 
 ### 安装插件
 
-先用 npm 安装核心包`@univer/core`、渲染引擎 `@univer/base-render`、表格组件插件`@univer/base-sheets`、基础 UI 插件`@univer/style-universheet`和筛选插件`@univer/sheets-plugin-filter`
+先用 npm 安装核心包`@univer/core`、渲染引擎 `@univer/base-render`、表格组件插件`@univer/base-sheets`、基础 UI 插件`@univer/style-univer`和筛选插件`@univer/sheets-plugin-filter`
 
 ```sh
-npm i @univer/core @univer/base-render @univer/base-sheets @univer/style-universheet @univer/sheets-plugin-filter
+npm i @univer/core @univer/base-render @univer/base-sheets @univer/style-univer @univer/sheets-plugin-filter
 ```
 
 然后再引入插件使用
@@ -1252,7 +1252,7 @@ npm i @univer/core @univer/base-render @univer/base-sheets @univer/style-univers
 ```js
 import { UniverSheet } from '@univer/core';
 import '@univer/core/lib/style.css';
-import { UniverComponentSheet } from '@univer/style-universheet';
+import { UniverComponentSheet } from '@univer/style-univer';
 import { RenderEngine } from '@univer/base-render';
 import { SheetPlugin } from '@univer/base-sheets';
 
@@ -1283,7 +1283,7 @@ univerSheet.installPlugin(new FilterPlugin());
 先用 npm 安装插件
 
 ```sh
-npm i @univer/core @univer/base-render @univer/base-sheets @univer/style-universheet @univer/sheets-plugin-filter
+npm i @univer/core @univer/base-render @univer/base-sheets @univer/style-univer @univer/sheets-plugin-filter
 ```
 
 然后再动态引入插件使用
@@ -1291,7 +1291,7 @@ npm i @univer/core @univer/base-render @univer/base-sheets @univer/style-univers
 ```js
 import { UniverSheet } from '@univer/core';
 import '@univer/core/lib/style.css';
-import { UniverComponentSheet } from '@univer/style-universheet';
+import { UniverComponentSheet } from '@univer/style-univer';
 import { RenderEngine } from '@univer/base-render';
 import { SheetPlugin } from '@univer/base-sheets';
 

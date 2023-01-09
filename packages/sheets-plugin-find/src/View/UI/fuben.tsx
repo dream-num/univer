@@ -1,7 +1,7 @@
 import { BaseComponentRender, BaseComponentSheet, Component } from '@univer/base-component';
 import { Nullable, Observer, Workbook } from '@univer/core';
 import { SheetPlugin } from '@univer/base-sheets';
-// import { Button, CheckboxGroup, Input, Tab, TabPane } from '@univer/style-universheet';
+// import { Button, CheckboxGroup, Input, Tab, TabPane } from '@univer/style-univer';
 import styles from './index.module.less';
 import { FindPlugin } from '../../FindPlugin';
 

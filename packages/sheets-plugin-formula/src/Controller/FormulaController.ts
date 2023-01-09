@@ -1,6 +1,6 @@
 import { FormulaEnginePlugin, IInterpreterDatasetConfig, SheetDataType, UnitDataType, SheetNameMapType, ArrayFormulaDataType } from '@univer/base-formula-engine';
 import { SheetPlugin } from '@univer/base-sheets';
-import { PLUGIN_NAMES, SheetContext } from '@univer/core';
+import { ObjectMatrix, PLUGIN_NAMES, SheetContext } from '@univer/core';
 import { FORMULA_PLUGIN_NAME, CONFIG } from '../Basic';
 import { IFormulaConfig } from '../Basic/Interfaces/IFormula';
 import { FormulaPlugin } from '../FormulaPlugin';
@@ -10,7 +10,7 @@ import { FormulaLabel } from '../View/UI/FormulaLabel';
 export class FormulaController {
     private _formulaDataModel: FormulaDataModel;
 
-    private _arrayFormulaData: ArrayFormulaDataType;
+    private _arrayFormulaData: ArrayFormulaDataType = {};
 
     private _formulaEngine: FormulaEnginePlugin;
 
@@ -148,7 +148,17 @@ export class FormulaController {
         return this._arrayFormulaData;
     }
 
-    setArrayFormulaData(value: ArrayFormulaDataType) {
-        this._arrayFormulaData = value;
+    addArrayFormulaData(value: ArrayFormulaDataType) {
+        Object.keys(value).forEach((sheetId) => {
+            const arrayFormula = value[sheetId];
+            if (!this._arrayFormulaData[sheetId]) {
+                this._arrayFormulaData[sheetId] = new ObjectMatrix();
+            }
+            arrayFormula.forValue((r, c, v) => {
+                this._arrayFormulaData[sheetId].setValue(r, c, v);
+            });
+        });
+        const arrayFormLineControl = this._plugin.getArrayFormLineControl();
+        arrayFormLineControl.refreshArrayFormLine(this._arrayFormulaData);
     }
 }

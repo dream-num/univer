@@ -8,6 +8,7 @@ export * from './SlideContext';
 export * from './UniverDoc';
 export * from './UniverSheet';
 export * from './UniverSlide';
+export * from './Univer';
 export * from './Version';
 export * from './WorkBookObserver';
 export * from './WorkBookObserverImpl';

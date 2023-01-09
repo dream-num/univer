@@ -43,7 +43,7 @@ export default defineConfig({
         createExternal({
             externals: {
                 // '@univer/core': '@univer/core',
-                // '@univer/style-universheet': '@univer/style-universheet',
+                // '@univer/style-univer': '@univer/style-univer',
                 // preact: 'preact',
                 // react: 'react',
             },

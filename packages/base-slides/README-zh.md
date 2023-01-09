@@ -1,10 +1,10 @@
-# style-universheet
+# style-univer
 
 简体中文 | [English](./README.md)
 
 ## 介绍
 
-UniverSheet Slides插件
+UniverSheet Slides 插件
 
 ### 安装
 

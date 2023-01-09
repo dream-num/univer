@@ -1,4 +1,4 @@
-# style-universheet
+# style-univer
 
 简体中文 | [English](./README.md)
 
@@ -16,16 +16,16 @@ UniverSheet 官方 UI 组件库
 ### 安装
 
 ```bash
-npm i @univer/style-universheet
+npm i @univer/style-univer
 ```
 
 ### 使用
 
 ```js
-impport baseUI from '@univer/style-universheet'
+impport baseUI from '@univer/style-univer'
 universheet.install(baseUI)
 universheet.create({
-    plugins:['style-universheet']
+    plugins:['style-univer']
 })
 ```
 
@@ -45,21 +45,21 @@ npm i
 ### 开发
 
 ```
-# 当前目录 ./packages/style-universheet/
+# 当前目录 ./packages/style-univer/
 npm run dev
 
 # 或者项目根目录 ./
-npm run dev -w @univer/style-universheet
+npm run dev -w @univer/style-univer
 ```
 
 ### 打包
 
 ```
-# 当前目录 ./packages/style-universheet/
+# 当前目录 ./packages/style-univer/
 npm run build
 
 # 或者根目录 ./
-npm run build -w @univer/style-universheet
+npm run build -w @univer/style-univer
 ```
 
 ## 组件库文档
@@ -80,7 +80,7 @@ npm i
 npm run start
 
 # 或者根目录
-npm run start -w @univer/style-universheet
+npm run start -w @univer/style-univer
 ```
 
 此命令启动本地开发服务器并打开浏览器窗口。 大多数更改都会实时刷新，而无需重新启动服务器。
@@ -92,7 +92,7 @@ npm run start -w @univer/style-universheet
 npm run build:doc
 
 # 或者根目录
-npm run build:doc -w @univer/style-universheet
+npm run build:doc -w @univer/style-univer
 ```
 
 此命令将静态内容生成到 `build` 目录中，并且可以使用任何静态内容托管服务来提供。

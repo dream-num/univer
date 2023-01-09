@@ -1,7 +1,7 @@
 import { IDocumentData, ISlideData, IWorkbookConfig, UniverDoc, UniverSheet, UniverSlide } from '@univer/core';
 import { RenderEngine } from '@univer/base-render';
 import { BaseComponentPlugin } from '@univer/base-component';
-import { UniverComponentSheet } from '@univer/style-universheet';
+import { UniverComponentSheet } from '@univer/style-univer';
 import { ISheetPluginConfig, SheetPlugin } from '@univer/base-sheets';
 import { IDocPluginConfig, DocPlugin } from '@univer/base-docs';
 import { ISlidePluginConfig, SlidePlugin } from '@univer/base-slides';
@@ -114,7 +114,7 @@ export { univerSheetCustom, univerDocCustom, univerSlideCustom };
 export * as UniverCore from '@univer/core';
 export * as BaseRender from '@univer/base-render';
 export * as BaseComponent from '@univer/base-component';
-export * as StyleUniver from '@univer/style-universheet';
+export * as StyleUniver from '@univer/style-univer';
 export * as BaseSheets from '@univer/base-sheets';
 export * as BaseDocs from '@univer/base-docs';
 export * as BaseSlides from '@univer/base-slides';

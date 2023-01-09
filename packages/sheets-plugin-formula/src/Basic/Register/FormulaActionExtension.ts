@@ -110,7 +110,7 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
             }
 
             if (arrayFormulaData) {
-                this._plugin.getFormulaController().setArrayFormulaData(arrayFormulaData);
+                this._plugin.getFormulaController().addArrayFormulaData(arrayFormulaData);
             }
 
             const sheetIds = Object.keys(sheetData);

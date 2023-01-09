@@ -2,7 +2,7 @@ import { UniverSheet } from '@univer/core';
 import { RenderEngine } from '@univer/base-render';
 import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
 import { SheetPlugin } from '@univer/base-sheets';
-import { UniverComponentSheet } from '@univer/style-universheet';
+import { UniverComponentSheet } from '@univer/style-univer';
 import { FilterPlugin } from '@univer/sheets-plugin-filter';
 import { GroupPlugin } from './GroupPlugin';
 

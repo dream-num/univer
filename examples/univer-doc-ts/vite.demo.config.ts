@@ -56,7 +56,7 @@ export default defineConfig({
                 // '@univer/core': '@univer/core',
                 // '@univer/base-render': '@univer/base-render',
                 // '@univer/base-component': '@univer/base-component',
-                // '@univer/style-universheet': '@univer/style-universheet',
+                // '@univer/style-univer': '@univer/style-univer',
                 // 'css-vars-ponyfill': 'css-vars-ponyfill',
                 // nanoid: 'nanoid',
                 // preact: 'preact',

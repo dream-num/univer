@@ -16,11 +16,11 @@ import {
 } from '@univer/base-component';
 import { AsyncFunction, SlideContext, IKeyType, LocaleType, PLUGIN_NAMES, Tools, Workbook } from '@univer/core';
 import cssVars from 'css-vars-ponyfill';
-import { Container, Content, Footer, Header, Layout, Sider } from '@univer/style-universheet';
-import defaultSkin from '@univer/style-universheet/assets/css/skin/default.module.less';
-import darkSkin from '@univer/style-universheet/assets/css/skin/dark.module.less';
+import { Container, Content, Footer, Header, Layout, Sider } from '@univer/style-univer';
+import defaultSkin from '@univer/style-univer/assets/css/skin/default.module.less';
+import darkSkin from '@univer/style-univer/assets/css/skin/dark.module.less';
 // All skins' less file
-import greenSkin from '@univer/style-universheet/assets/css/skin/green.module.less';
+import greenSkin from '@univer/style-univer/assets/css/skin/green.module.less';
 // app context for skin and Locale
 import style from './index.module.less';
 import { ToolBar } from '../ToolBar';

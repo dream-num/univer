@@ -1,6 +1,6 @@
-import { UniverSheet, UniverDoc, UniverSlide } from '@univer/core';
+import { UniverSheet, UniverDoc, UniverSlide, Univer } from '@univer/core';
 import { RenderEngine } from '@univer/base-render';
-import { UniverComponentSheet } from '@univer/style-universheet';
+import { UniverComponentSheet } from '@univer/style-univer';
 import { SheetPlugin } from '@univer/base-sheets';
 import {
     DEFAULT_FORMULA_DATA,
@@ -42,6 +42,10 @@ const uiDefaultConfigDemo = {
     },
 };
 
+const univer = new Univer();
+univer.install(new RenderEngine());
+univer.install(new UniverComponentSheet());
+univer.install(new BaseComponentPlugin());
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO1);
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO2);

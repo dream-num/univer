@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import { UniverSheet } from '@univer/core';
-import { StyleUniverSheet } from '@univer/style-universheet';
+import { StyleUniverSheet } from '@univer/style-univer';
 import { AlternatingColorsPlugin } from '../src';
 // TODO 补充单元测试
 test('Test Banding', () => {

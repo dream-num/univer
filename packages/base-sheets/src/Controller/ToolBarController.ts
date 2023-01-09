@@ -1,5 +1,5 @@
 import { Range, HorizontalAlign, VerticalAlign, WrapStrategy, DEFAULT_STYLES, BorderType } from '@univer/core';
-import { ColorPicker } from '@univer/style-universheet';
+import { ColorPicker } from '@univer/style-univer';
 import { SheetPlugin } from '../SheetPlugin';
 
 import { SelectionControl } from './Selection/SelectionController';

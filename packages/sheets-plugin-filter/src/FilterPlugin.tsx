@@ -6,6 +6,7 @@ import { IConfig } from './IData';
 import { FilterButton } from './UI/FilterButton';
 import { ACTION_NAMES, FILTER_PLUGIN_NAME } from './Const';
 import { Filter, FilterList, IFilterPluginConfig } from './Domain';
+import { Univer } from '@univer/core/src/Basics/Univer';
 
 export class FilterPlugin extends Plugin {
     private _filterList: FilterList;

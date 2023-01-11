@@ -33,7 +33,10 @@ export class Merges {
         // 2. remove getCommandInjectorObservers, replace with ActionExtension
         // CommandManager.getCommandInjectorObservers().add((inject) => {
         //     let insertRowAction = inject.include(InsertRowAction);
-        //     let insertColumnAction = inject.include(InsertColumnAction);
+        //     let insertColumnAction = inject.include(Insert
+        //
+        //
+        //     ColumnAction);
         //     let deleteRowAction = inject.include(RemoveRowAction);
         //     let deleteColumnAction = inject.include(RemoveColumnAction);
         //     let deleteRangeAction = inject.include(DeleteRangeAction);

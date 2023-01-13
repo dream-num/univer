@@ -17,6 +17,8 @@ export interface ISetColumnWidthActionData extends ISheetActionData {
  * @internal
  */
 export class SetColumnWidthAction extends SheetActionBase<ISetColumnWidthActionData> {
+    static NAME = 'SetColumnWidthAction';
+
     constructor(
         actionData: ISetColumnWidthActionData,
         commandUnit: CommandUnit,

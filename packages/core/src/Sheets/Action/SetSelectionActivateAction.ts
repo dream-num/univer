@@ -31,6 +31,8 @@ export class SetSelectionActivateAction extends SheetActionBase<
     ISetSelectionActivateActionData,
     ISetSelectionActivateServiceData
 > {
+    static NAME = 'SetSelectionActivateAction';
+
     constructor(
         actionData: ISetSelectionActivateActionData,
         commandUnit: CommandUnit,

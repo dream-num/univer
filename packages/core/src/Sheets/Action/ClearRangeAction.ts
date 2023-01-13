@@ -25,6 +25,8 @@ export class ClearRangeAction extends SheetActionBase<
     ISetRangeDataActionData,
     ObjectMatrixPrimitiveType<ICellData>
 > {
+    static NAME = 'ClearRangeAction';
+
     constructor(
         actionData: IClearRangeActionData,
         commandUnit: CommandUnit,

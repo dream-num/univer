@@ -19,6 +19,8 @@ export class SetWorkSheetNameAction extends SheetActionBase<
     ISetWorkSheetNameActionData,
     string
 > {
+    static NAME = 'SetWorkSheetNameAction';
+
     constructor(
         actionData: ISetWorkSheetNameActionData,
         commandUnit: CommandUnit,

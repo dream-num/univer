@@ -20,6 +20,8 @@ export class SetWorkSheetHideAction extends SheetActionBase<
     ISetWorkSheetHideActionData,
     BooleanNumber
 > {
+    static NAME = 'SetWorkSheetHideAction';
+
     constructor(
         actionData: ISetWorkSheetHideActionData,
         commandUnit: CommandUnit,

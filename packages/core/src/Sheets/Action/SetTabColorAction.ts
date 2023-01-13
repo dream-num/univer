@@ -20,6 +20,8 @@ export class SetTabColorAction extends SheetActionBase<
     ISetTabColorActionData,
     Nullable<string>
 > {
+    static NAME = 'SetTabColorAction';
+
     constructor(
         actionData: ISetTabColorActionData,
         commandUnit: CommandUnit,

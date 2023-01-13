@@ -17,6 +17,8 @@ export interface ISetRowHeightActionData extends ISheetActionData {
  * @internal
  */
 export class SetRowHeightAction extends SheetActionBase<ISetRowHeightActionData> {
+    static NAME = 'SetRowHeightAction';
+
     constructor(
         actionData: ISetRowHeightActionData,
         commandUnit: CommandUnit,

@@ -15,6 +15,8 @@ export interface ISetRightToLeftActionData extends ISheetActionData {
  * @internal
  */
 export class SetRightToLeftAction extends SheetActionBase<ISetRightToLeftActionData> {
+    static NAME = 'SetRightToLeftAction';
+
     constructor(
         actionData: ISetRightToLeftActionData,
         commandUnit: CommandUnit,

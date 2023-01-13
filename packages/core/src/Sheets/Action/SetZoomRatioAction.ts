@@ -16,6 +16,8 @@ export class SetZoomRatioAction extends SheetActionBase<
     ISetZoomRatioActionData,
     ISetZoomRatioActionData
 > {
+    static NAME = 'SetZoomRatioAction';
+
     constructor(
         actionData: ISetZoomRatioActionData,
         commandUnit: CommandUnit,

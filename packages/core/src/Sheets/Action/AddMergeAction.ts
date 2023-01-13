@@ -24,6 +24,8 @@ export class AddMergeAction extends SheetActionBase<
     IRemoveMergeActionData,
     IRangeData[]
 > {
+    static NAME = 'AddMergeAction';
+
     constructor(
         actionData: IAddMergeActionData,
         commandUnit: CommandUnit,

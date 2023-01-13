@@ -21,6 +21,8 @@ export class SetRowHideAction extends SheetActionBase<
     ISetRowHideActionData,
     ISetRowShowActionData
 > {
+    static NAME = 'SetRowHideAction';
+
     constructor(
         actionData: ISetRowHideActionData,
         commandUnit: CommandUnit,

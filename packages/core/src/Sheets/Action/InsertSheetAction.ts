@@ -14,6 +14,8 @@ export class InsertSheetAction extends SheetActionBase<
     IInsertSheetActionData,
     IRemoveSheetActionData
 > {
+    static NAME = 'InsertSheetAction';
+
     constructor(
         actionData: IInsertSheetActionData,
         commandUnit: CommandUnit,

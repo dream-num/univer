@@ -22,6 +22,8 @@ export class SetRangeNoteAction extends SheetActionBase<
     ISetRangeNoteActionData,
     ObjectMatrixPrimitiveType<string>
 > {
+    static NAME = 'SetRangeNoteAction';
+
     constructor(
         actionData: ISetRangeNoteActionData,
         commandUnit: CommandUnit,

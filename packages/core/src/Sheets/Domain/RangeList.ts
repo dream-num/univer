@@ -1,22 +1,28 @@
 import { Worksheet } from './index';
 import { SheetContext } from '../../Basics';
+
 import {
-    Command,
-    CommandManager,
+    ISetRangeStyleActionData,
     IClearRangeActionData,
     ISetRangeDataActionData,
+    Command,
+    CommandManager,
     ISetRangeFormulaActionData,
-    ISetRangeStyleActionData,
     ISetRangeFormattedValueActionData,
+    SetRangeDataAction,
+    ClearRangeAction,
+    SetRangeStyleAction,
 } from '../../Command';
 
 import { ACTION_NAMES } from '../../Const';
+
 import {
     BooleanNumber,
     HorizontalAlign,
     VerticalAlign,
     WrapStrategy,
 } from '../../Enum';
+
 import {
     ICellData,
     ICellV,
@@ -26,8 +32,11 @@ import {
     IStyleData,
     ITextDecoration,
 } from '../../Interfaces';
-import { Nullable, ObjectMatrix, Tools, Tuples } from '../../Shared';
+
 import { Workbook } from './Workbook';
+
+import { Nullable, ObjectMatrix, Tools, Tuples } from '../../Shared';
+
 /**
  * A collection of one or more Range instances in the same sheet.
  *
@@ -125,7 +134,7 @@ export class RangeList {
 
             let setValue: ISetRangeDataActionData = {
                 sheetId: _worksheet.getSheetId(),
-                actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+                actionName: SetRangeDataAction.NAME,
                 cellValue: cellValue.getData(),
             };
             return setValue;
@@ -174,7 +183,7 @@ export class RangeList {
         const clearList = _rangeList.map((range) => {
             let clearRange: IClearRangeActionData = {
                 sheetId: _worksheet.getSheetId(),
-                actionName: ACTION_NAMES.CLEAR_RANGE_ACTION,
+                actionName: ClearRangeAction.NAME,
                 options,
                 rangeData: range,
             };
@@ -248,9 +257,9 @@ export class RangeList {
 
             const setStyle: ISetRangeStyleActionData = {
                 sheetId: _worksheet.getSheetId(),
-                actionName: ACTION_NAMES.SET_RANGE_STYLE_ACTION,
                 value: stylesMatrix,
                 rangeData: range,
+                actionName: SetRangeStyleAction.NAME,
             };
 
             return setStyle;

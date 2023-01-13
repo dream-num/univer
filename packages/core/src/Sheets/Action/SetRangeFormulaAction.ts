@@ -22,6 +22,8 @@ export class SetRangeFormulaAction extends SheetActionBase<
     ISetRangeFormulaActionData,
     ObjectMatrixPrimitiveType<string>
 > {
+    static NAME = 'SetRangeFormulaAction';
+
     constructor(
         actionData: ISetRangeFormulaActionData,
         commandUnit: CommandUnit,

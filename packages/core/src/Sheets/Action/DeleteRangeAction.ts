@@ -26,6 +26,8 @@ export class DeleteRangeAction extends SheetActionBase<
     IInsertRangeActionData,
     ObjectMatrixPrimitiveType<ICellData>
 > {
+    static NAME = 'DeleteRangeAction';
+
     constructor(
         actionData: IDeleteRangeActionData,
         commandUnit: CommandUnit,

@@ -15,6 +15,8 @@ export interface ISetRangeStyleActionData extends ISheetActionData {
  * @internal
  */
 export class SetRangeStyleAction extends SheetActionBase<ISetRangeStyleActionData> {
+    static NAME = 'SetRangeStyleAction';
+
     constructor(
         actionData: ISetRangeStyleActionData,
         commandUnit: CommandUnit,

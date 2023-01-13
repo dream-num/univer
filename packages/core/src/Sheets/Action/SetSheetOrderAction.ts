@@ -12,6 +12,8 @@ export class SetSheetOrderAction extends SheetActionBase<
     ISetSheetOrderActionData,
     ISetSheetOrderActionData
 > {
+    static NAME = 'SetSheetOrderAction';
+
     constructor(
         actionData: ISetSheetOrderActionData,
         commandUnit: CommandUnit,

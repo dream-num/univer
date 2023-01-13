@@ -18,6 +18,8 @@ export class SetNamedRangeAction extends SheetActionBase<
     ISetNamedRangeActionData,
     INamedRange
 > {
+    static NAME = 'SetNamedRangeAction';
+
     constructor(
         actionData: ISetNamedRangeActionData,
         commandUnit: CommandUnit,

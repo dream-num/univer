@@ -22,6 +22,8 @@ export class SetRangeFormatAction extends SheetActionBase<
     ISetRangeFormatActionData,
     ObjectMatrixPrimitiveType<string>
 > {
+    static NAME = 'SetRangeFormatAction';
+
     constructor(
         actionData: ISetRangeFormatActionData,
         commandUnit: CommandUnit,

@@ -15,6 +15,8 @@ export interface ISetRowShowActionData extends ISheetActionData {
  * @internal
  */
 export class SetRowShowAction extends SheetActionBase<ISetRowShowActionData> {
+    static NAME = 'SetRowShowAction';
+
     constructor(
         actionData: ISetRowShowActionData,
         commandUnit: CommandUnit,

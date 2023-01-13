@@ -20,6 +20,8 @@ export class DeleteNamedRangeAction extends SheetActionBase<
     IAddNamedRangeActionData,
     INamedRange
 > {
+    static NAME = 'DeleteNamedRangeAction';
+
     constructor(
         actionData: IDeleteNamedRangeActionData,
         commandUnit: CommandUnit,

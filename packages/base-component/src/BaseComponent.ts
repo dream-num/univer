@@ -9,7 +9,10 @@ export interface BaseComponentSheet extends BasePlugin {
     getComponentRender(): BaseComponentRender;
     getComponentFactory(): BaseComponentFactory;
 }
-export interface BaseComponentProps {}
+export interface BaseComponentProps {
+    getComponent?: (ref: any) => void; //获取自身组件
+    id?: string; // 组件id
+}
 
 export interface BaseComponent<T = any> {
     render(): JSXComponent<T>;

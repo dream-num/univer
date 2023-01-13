@@ -1,4 +1,4 @@
-import { Group, IMouseEvent, IPointerEvent, Rect } from '@univer/base-render';
+import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect } from '@univer/base-render';
 import { Nullable, Observer } from '@univer/core';
 import { SelectionManager } from './SelectionManager';
 
@@ -29,7 +29,7 @@ interface Option {
     direction: DragLineDirection;
     end: number; // 当前列/行尾距离屏幕距离
     start: number; //当前列/行首距离屏幕距离
-    dragUp: (distance: Nullable<number>) => void;
+    dragUp: (distance: Nullable<number>, e: IPointerEvent | IMouseEvent) => void;
 }
 
 export class DragLineController {
@@ -53,10 +53,14 @@ export class DragLineController {
 
     private _start: number;
 
-    private _dragUp: (distance: Nullable<number>) => void;
+    private _dragUp: (distance: Nullable<number>, e: IPointerEvent | IMouseEvent) => void;
 
     constructor(manager: SelectionManager) {
         this._manager = manager;
+    }
+
+    getDragLine() {
+        return this._dragLine;
     }
 
     create(option: Option) {
@@ -139,6 +143,7 @@ export class DragLineController {
 
     dragMoving(e: IPointerEvent | IMouseEvent) {
         if (this._direction) {
+            this._dragLine.cursor = CURSOR_TYPE.ROW_RESIZE;
             if (e.clientY < this._state.distance && this._state.distance - e.clientY >= this._end - this._start - 5) {
                 //留一丝空隙
                 return;
@@ -147,6 +152,7 @@ export class DragLineController {
                 top: e.clientY - this._state.distance,
             });
         } else {
+            this._dragLine.cursor = CURSOR_TYPE.COLUMN_RESIZE;
             if (e.clientX < this._state.distance && this._state.distance - e.clientX >= this._end - this._start - 5) {
                 //留一丝空隙
                 return;
@@ -170,7 +176,7 @@ export class DragLineController {
                 distance = null;
             }
         }
-        this._dragUp(distance);
+        this._dragUp(distance, e);
         this._dragLine.dispose();
     }
 }

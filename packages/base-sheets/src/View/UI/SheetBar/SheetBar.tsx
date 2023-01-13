@@ -1,13 +1,15 @@
-import { BaseComponentRender, BaseComponentSheet, BaseSheetBarProps, BaseUlProps, Component, createRef, RefObject } from '@univer/base-component';
+import { BaseComponentRender, BaseComponentSheet, BaseMenuItem, BaseSheetBarProps, Component, createRef, RefObject } from '@univer/base-component';
 import { Nullable, Observer, PLUGIN_NAMES, Workbook } from '@univer/core';
-import { Ul } from '@univer/style-univer';
+import { Menu } from '@univer/style-univer';
 import { SlideTabBar } from '../../../Basics/SlideTabBar/SlideTabBar';
+import { SheetPlugin } from '../../../SheetPlugin';
 import styles from './index.module.less';
+import { SheetBarMenu } from './SheetBarMenu';
 
 type SheetState = {
     sheetList: BaseSheetBarProps[];
     menuList: BaseSheetBarProps[];
-    sheetUl: BaseUlProps[];
+    sheetUl: BaseMenuItem[];
     addSheet: Nullable<() => void>;
     selectSheet: Nullable<() => void>;
     contextMenu: Nullable<(e: Event) => void>;
@@ -52,85 +54,53 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         };
     }
 
-    jointJsx(list: BaseSheetBarProps[] | BaseUlProps[]) {
-        list.forEach((item: any) => {
-            if (item.icon && typeof item.icon === 'string' && /Icon$/.test(item.icon)) {
-                const Icon = this._render.renderFunction(item.icon);
-                item.icon = <Icon />;
+    resetLabel(list: any) {
+        const plugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
+
+        for (let i = 0; i < list.length; i++) {
+            const item = list[i];
+
+            // 优先寻找自定义组件
+            if (item.customLabel) {
+                const Label = plugin?.getRegisterComponent(item.customLabel.name);
+                if (Label) {
+                    const props = item.customLabel.props ?? {};
+                    item.label = <Label {...props} />;
+                }
             }
-            if (item.selectType && item.selectType === 'jsx') {
-                const JSX: any = this._render.renderFunction(item.label);
-                // ColorPicker
-                item.label = (
-                    <JSX
-                        style={{ visibility: 'visible', marginTop: '-60px', marginLeft: '-50px' }}
-                        onClick={(color: string) => {
-                            item.onClick(color);
-                        }}
-                    />
-                );
+
+            if (item.children) {
+                item.children = this.resetLabel(item.children);
             }
-            if (item.children && item.children.length > 0) {
-                this.jointJsx(item.children);
-            }
-        });
+        }
+        return list;
     }
 
     // setstate
     setValue = (value: any, fn?: () => void) => {
-        const { sheetList, menuList, sheetUl } = value;
+        let { sheetList, menuList, sheetUl } = value;
         if (sheetList) {
-            this.jointJsx(sheetList);
+            sheetList = this.resetLabel(sheetList);
         }
         if (menuList) {
-            this.jointJsx(menuList);
+            menuList = this.resetLabel(menuList);
         }
         if (sheetUl) {
-            this.jointJsx(sheetUl);
+            sheetUl = this.resetLabel(sheetUl);
         }
         this.setState((prevState) => ({ ...value }), fn);
     };
 
     // 点击按钮左右滑动
     scrollLeft = (e: MouseEvent) => {
-        // let scroll = this.sheetContentRef.current;
-        // if (parseFloat(scroll.style.left) + 50 >= 0) {
-        //     scroll.style.left = '0px';
-        //     return;
-        // }
-        // scroll.style.left = `${parseFloat(scroll.style.left) + 50}px`;
         this.slideTabBar.getScrollbar().scrollX(this.slideTabBar.getScrollbar().getScrollX() - 50);
     };
 
     scrollRight = (e: MouseEvent) => {
-        // let scroll = this.sheetContentRef.current;
-        // let width = scroll.scrollWidth;
-        // let container = this.sheetContainerRef.current;
-        // if (width <= container.offsetWidth) {
-        //     return;
-        // }
-        // const scrollLeft = parseFloat(scroll.style.left);
-        // if (width - Math.abs(scrollLeft) <= container.offsetWidth) {
-        //     return;
-        // }
-        // if (width - Math.abs(scrollLeft) - container.offsetWidth <= 50) {
-        //     scroll.style.left = `${scrollLeft - (width - Math.abs(scrollLeft) - container.offsetWidth)}px`;
-        // } else {
-        //     scroll.style.left = `${scrollLeft - 50}px`;
-        // }
         this.slideTabBar.getScrollbar().scrollX(this.slideTabBar.getScrollbar().getScrollX() + 50);
     };
 
-    overGrid = () => {
-        // // 超过范围向左移动
-        // const scroll = this.sheetContentRef.current;
-        // const width = scroll.scrollWidth;
-        // const container = this.sheetBarContentRef.current;
-        // if (width <= container.offsetWidth / 2) {
-        //     return;
-        // }
-        // scroll.style.left = `${container.offsetWidth / 2 - width}px`;
-    };
+    overGrid = () => {};
 
     // 右击显示菜单
     contextMenu = (e: MouseEvent) => {
@@ -139,10 +109,10 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     };
 
     // 显示下拉
-    showSelect = (e: MouseEvent, ref: RefObject<Ul>) => {
+    showSelect = (e: MouseEvent, ref: RefObject<Menu>) => {
         e.stopImmediatePropagation();
         const current = ref.current;
-        if (current) current.showSelect();
+        if (current) current.showMenu(true);
         // 点击外部隐藏子组件
         window.addEventListener('click', this.hideSelect);
     };
@@ -151,8 +121,8 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     hideSelect = (e: MouseEvent) => {
         const current = this.ref.current;
         const ulCurrent = this.ulRef.current;
-        if (current) current.hideSelect();
-        if (ulCurrent) ulCurrent.hideSelect();
+        if (current) current.showMenu(false);
+        if (ulCurrent) ulCurrent.showMenu(false);
         window.removeEventListener('click', this.hideSelect);
     };
 
@@ -169,7 +139,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 const currentRect = currentTarget.getBoundingClientRect();
                 const left = `${currentRect.left}px`;
                 const bottom = `${currentRect.height}px`;
-                const ul = this.ulRef.current.ulRef.current;
+                const ul = this.ulRef.current.base;
                 ul.style.left = left;
                 ul.style.bottom = bottom;
                 ul.style.top = 'auto';
@@ -184,14 +154,6 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         if (item) {
             item.editor();
         }
-        // const sheetContentDiv = this.sheetContentRef.current.querySelectorAll('div');
-        // Array.from(sheetContentDiv).forEach((node: any) => {
-        //     if (node.dataset.id === id) {
-        //         const span = node.querySelector('span');
-        //         const dblclick = new MouseEvent('dblclick');
-        //         span?.dispatchEvent(dblclick);
-        //     }
-        // });
     };
 
     changeEditable = (e: MouseEvent) => {
@@ -262,10 +224,10 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         if (!addSheet || !selectSheet || !contextMenu) return;
 
         const Button = this._render.renderFunction('Button');
-        const Ul = this._render.renderFunction('Ul');
         const AddIcon = this._render.renderFunction('AddIcon');
         const MenuIcon = this._render.renderFunction('MenuIcon');
         const NextIcon = this._render.renderFunction('NextIcon');
+        const Menu = this._render.renderFunction('Menu');
 
         return (
             <div className={styles.sheetBar} ref={this.slideTabRoot}>
@@ -274,9 +236,9 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                     <Button className={styles.sheetBarOptionsButton} onClick={addSheet} type="text">
                         <AddIcon style={{ fontSize: '20px' }} />
                     </Button>
-                    <Button className={styles.sheetBarOptionsButton} onClick={(e: MouseEvent) => this.showSelect(e, this.ref)} type="text">
+                    <Button className={styles.sheetBarOptionsButton} onClick={(e: MouseEvent) => this.ref.current.showMenu(true)} type="text">
                         <MenuIcon style={{ fontSize: '20px' }} />
-                        <Ul onClick={selectSheet} children={menuList} ref={this.ref} style={{ bottom: '2.2rem', left: '0' }}></Ul>
+                        <SheetBarMenu onClick={selectSheet} menu={menuList} ref={this.ref}></SheetBarMenu>
                     </Button>
                 </div>
 
@@ -297,7 +259,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                                     <span style={{ padding: '2px 5px 2px 5px' }}>{item.label}</span>
                                 </div>
                                 <div className={`${styles.slideTabIcon}`} data-slide-skip="true" style={{ lineHeight: 1 }} data-id={item.sheetId} onClick={contextMenu}>
-                                    {item.icon}
+                                    <NextIcon />
                                 </div>
                             </div>
                             <div className={`${styles.slideTabFooter}`}>
@@ -308,7 +270,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 </div>
 
                 {/* mouse right button context menu */}
-                <Ul children={sheetUl} ref={this.ulRef}></Ul>
+                <Menu className={styles.sheetUl} menu={sheetUl} ref={this.ulRef} />
 
                 {/* prev next scroll button */}
                 <div className={`${styles.sheetBarOptions} ${styles.sheetBarScrollButton}`}>

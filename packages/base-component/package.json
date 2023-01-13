@@ -51,7 +51,9 @@
     },
     "dependencies": {
         "@univer/base-render": "workspace:^0.0.1",
+        "@univer/base-sheets": "workspace:^0.0.1",
         "@univer/core": "workspace:^0.0.1",
+        "@univer/style-univer": "workspace:^0.0.1",
         "css-vars-ponyfill": "^2.4.6",
         "nanoid": "^4.0.0",
         "preact": "^10.5.14",

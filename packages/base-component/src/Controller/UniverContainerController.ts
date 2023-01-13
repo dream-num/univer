@@ -1,13 +1,19 @@
-import { SheetPlugin } from '@univer/base-sheets';
-import { LocaleType, Workbook } from '@univer/core';
+import { RenderEngine } from '@univer/base-render';
+import { CanvasView } from '@univer/base-sheets';
+import { LocaleType, PLUGIN_NAMES } from '@univer/core';
 import { BaseComponentPlugin } from '../BaseComponentPlugin';
 import { UniverConfig } from '../Basics';
+import { UniverSheetConfig } from '../Basics/Interfaces/UniverSheetConfig';
 import { UI } from '../UI';
+import { UniverContainer } from '../UI/UniverContainer';
+import { ToolBarController } from './ToolbarController';
 
 export class UniverContainerController {
     private _plugin: BaseComponentPlugin;
 
-    private _sheetPlugin: SheetPlugin;
+    private _univerContainer: UniverContainer;
+
+    private _toolbarController: ToolBarController;
 
     private _config: UniverConfig;
 
@@ -20,9 +26,33 @@ export class UniverContainerController {
             config: this._config,
             changeSkin: this.changeSkin,
             changeLocale: this.changeLocale,
+            getComponent: this.getComponent,
+            mountCanvas: this.mountCanvas,
         };
         UI.create(config);
+
+        this._toolbarController = new ToolBarController(this._plugin);
     }
+
+    getComponent = (ref: UniverContainer) => {
+        this._univerContainer = ref;
+        this._plugin.getObserver('onAfterUniverContainerDidMountObservable')!.notifyObservers();
+    };
+
+    mountCanvas = (container: HTMLElement) => {
+        const engine = this._plugin.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
+        engine.setContainer(container);
+        new CanvasView(engine, this._plugin.getSheetPlugin());
+
+        window.addEventListener('resize', () => {
+            engine.resize();
+        });
+
+        // should be clear
+        setTimeout(() => {
+            engine.resize();
+        }, 0);
+    };
 
     /**
      * Change skin
@@ -30,7 +60,7 @@ export class UniverContainerController {
      */
     changeSkin = () => {
         // publish
-        this._plugin.getContext().getObserverManager().getObserver<Workbook>('onAfterChangeUISkinObservable')?.notifyObservers(this._plugin.getContext().getWorkBook());
+        this._plugin.getObserver('onAfterChangeUISkinObservable')!.notifyObservers();
     };
 
     /**
@@ -47,6 +77,12 @@ export class UniverContainerController {
             .change(locale as LocaleType);
 
         // publish
-        this._plugin.getContext().getContextObserver('onAfterChangeUILocaleObservable')?.notifyObservers();
+        this._plugin.getObserver('onAfterChangeUILocaleObservable')!.notifyObservers();
     };
+
+    addSheet(config: UniverSheetConfig) {}
+
+    getContentRef() {
+        return this._univerContainer.getContentRef();
+    }
 }

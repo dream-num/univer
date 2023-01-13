@@ -1,4 +1,5 @@
 import { ContextBase } from '@univer/core';
+import { ToolBarConfig } from './ToolbarConfig/BaseToolBarConfig';
 
 /**
  * ShowContainerConfig
@@ -41,32 +42,6 @@ export interface IShowContainerConfig {
 }
 
 /**
- * ToolBarConfig
- */
-export interface IShowToolBarConfig {
-    undoRedo?: boolean; // Undo redo
-    paintFormat?: boolean; // Format brush
-    currencyFormat?: boolean; // currency format
-    percentageFormat?: boolean; // Percentage format
-    numberDecrease?: boolean; // 'Decrease the number of decimal places'
-    numberIncrease?: boolean; // 'Increase the number of decimal places
-    font?: boolean; // 'font'
-    fontSize?: boolean; // 'Font size'
-    bold?: boolean; // 'Bold (Ctrl+B)'
-    italic?: boolean; // 'Italic (Ctrl+I)'
-    strikethrough?: boolean; // 'Strikethrough (Alt+Shift+5)'
-    underline?: boolean; // 'Underline (Alt+Shift+6)'
-    textColor?: boolean; // 'Text color'
-    fillColor?: boolean; // 'Cell color'
-    border?: boolean; // 'border'
-    mergeCell?: boolean; // 'Merge cells'
-    horizontalAlignMode?: boolean; // 'Horizontal alignment'
-    verticalAlignMode?: boolean; // 'Vertical alignment'
-    textWrapMode?: boolean; // 'Wrap mode'
-    textRotateMode?: boolean; // 'Text Rotation Mode'
-}
-
-/**
  * RightMenuConfig
  */
 export interface IHideRightMenuConfig {
@@ -91,7 +66,7 @@ export interface IHideRightMenuConfig {
 
 export interface ILayout {
     sheetContainerConfig?: IShowContainerConfig;
-    toolBarConfig?: IShowToolBarConfig;
+    toolBarConfig?: ToolBarConfig;
     rightMenuConfig?: IHideRightMenuConfig;
 }
 
@@ -99,5 +74,6 @@ export interface UniverConfig {
     container?: HTMLElement | string;
     layout?: ILayout;
     skin?: string;
+    locale?: string;
     context?: ContextBase;
 }

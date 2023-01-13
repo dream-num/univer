@@ -18,7 +18,8 @@ export class CanvasView {
     private _initialize() {
         const engine = this._engine;
         const context = this._plugin.getContext();
-        const workbook = context.getWorkBook();
+        // const workbook = context.getWorkBook();
+        const workbook = this._plugin.getWorkbook();
         let worksheet = workbook.getActiveSheet();
         if (!worksheet) {
             worksheet = workbook.getSheets()[0];

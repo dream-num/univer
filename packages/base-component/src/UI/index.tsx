@@ -30,6 +30,8 @@ export class UI {
             univerContainer.id = 'univer';
         }
 
+        props.container = univerContainer;
+
         render(<UniverContainer {...props} />, univerContainer);
     }
 }

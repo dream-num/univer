@@ -1,0 +1,98 @@
+.toolbar-warp {
+  max-height: fit-content;
+  width: 100%;
+  overflow: unset;
+  box-sizing: border-box;
+  font-size: var(--font-size);
+  background-color: var(--bg);
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color-base);
+}
+.toolbar-warp .single-button.more-hide {
+  display: none;
+}
+.toolbar-warp .single-button.more-show {
+  display: block;
+}
+.toolbar {
+  max-width: 100%;
+  color: var(--text-color);
+  padding: 0 15px;
+  height: 40px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.toolbar > div {
+  height: 26px;
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 3px;
+  cursor: pointer;
+}
+.toolbar > div.select-button:hover {
+  background-color: #efefef;
+}
+.toolbar .cols-menu {
+  overflow-y: auto;
+}
+.toolbar .select-label-string .drop-content > div {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 90px;
+}
+.toolbar .select-double-string .drop-content > div {
+  width: 24px;
+}
+.toolbar .select-color-picker-parent .select-item-content {
+  width: 100%;
+}
+.toolbar .select-color-picker-parent ul {
+  padding: 0;
+}
+.toolbar .select-color-picker-parent .select-color-picker {
+  padding: 0;
+}
+.toolbar .select-color-picker-parent .select-color-picker .select-item {
+  padding: 0;
+}
+.toolbar .select-line-bold-parent .select-item-content {
+  width: 100%;
+}
+.toolbar button {
+  padding: 0;
+  height: 26px;
+}
+.toolbar span[role='img'].univericon-nextIcon {
+  font-size: 12px;
+}
+.more-button {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0px;
+  line-height: 1;
+}
+.more-button.more-show {
+  display: block;
+}
+.more-tool {
+  padding: 0 10px;
+  background-color: var(--bg);
+  box-shadow: var(--box-shadow-base);
+  position: absolute;
+  right: 2em;
+  top: 40px;
+  z-index: 100;
+}
+.more-tool.more-show {
+  display: flex;
+}
+.more-tool button {
+  padding: 0px;
+  line-height: 1;
+}

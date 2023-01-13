@@ -1,5 +1,5 @@
 import { BasePlugin } from '@univer/core';
-import { ComponentChildren, ComponentClass, ForwardFn } from './Framework';
+import { ComponentClass, ForwardFn } from './Framework';
 import { Description } from './Components';
 
 // TODO Button const enum
@@ -10,7 +10,7 @@ export interface BaseComponentSheet extends BasePlugin {
     getComponentFactory(): BaseComponentFactory;
 }
 export interface BaseComponentProps {
-    getSelfRef?: (ref: ComponentChildren) => void; //获取自身组件
+    getComponent?: (ref: any) => void; //获取自身组件
     id?: string; // 组件id
 }
 

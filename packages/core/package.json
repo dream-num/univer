@@ -9,7 +9,9 @@
     "publishConfig": {
         "main": "./lib/univer-core.js",
         "module": "./lib/univer-core.mjs",
-        "types": "./lib/index.d.ts"
+        "types": "./lib/index.d.ts",
+        "registry": "https://registry.npmjs.org/",
+        "access": "public"
     },
     "exports": {
         ".": "./src/index.ts",

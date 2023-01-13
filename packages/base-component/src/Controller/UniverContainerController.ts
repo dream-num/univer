@@ -1,5 +1,5 @@
 import { RenderEngine } from '@univer/base-render';
-import { CanvasView } from '@univer/base-sheets';
+// import { CanvasView } from '@univer/base-sheets';
 import { LocaleType, PLUGIN_NAMES } from '@univer/core';
 import { BaseComponentPlugin } from '../BaseComponentPlugin';
 import { UniverConfig } from '../Basics';
@@ -39,20 +39,20 @@ export class UniverContainerController {
         this._plugin.getObserver('onAfterUniverContainerDidMountObservable')!.notifyObservers();
     };
 
-    mountCanvas = (container: HTMLElement) => {
-        const engine = this._plugin.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
-        engine.setContainer(container);
-        new CanvasView(engine, this._plugin.getSheetPlugin());
+    // mountCanvas = (container: HTMLElement) => {
+    //     const engine = this._plugin.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
+    //     engine.setContainer(container);
+    //     // new CanvasView(engine, this._plugin.getSheetPlugin());
 
-        window.addEventListener('resize', () => {
-            engine.resize();
-        });
+    //     window.addEventListener('resize', () => {
+    //         engine.resize();
+    //     });
 
-        // should be clear
-        setTimeout(() => {
-            engine.resize();
-        }, 0);
-    };
+    //     // should be clear
+    //     setTimeout(() => {
+    //         engine.resize();
+    //     }, 0);
+    // };
 
     /**
      * Change skin

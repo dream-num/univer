@@ -1,10 +1,8 @@
 import { Command } from '../../Command';
-import { ISetRowHeightActionData } from '../Action';
-import { ACTION_NAMES } from '../../Const';
+import { ISetRowHeightActionData, SetRowHeightAction } from '../Action';
 import { BooleanNumber } from '../../Enum';
 import { IRowData } from '../../Interfaces';
-import { Nullable } from '../../Shared';
-import { ObjectArray, ObjectArrayType } from '../../Shared/ObjectArray';
+import { Nullable, ObjectArray, ObjectArrayType } from '../../Shared';
 import { Worksheet } from './Worksheet';
 
 /**
@@ -85,7 +83,7 @@ export class RowManager {
         const _commandManager = this._workSheet.getCommandManager();
         const setRowHeight: ISetRowHeightActionData = {
             sheetId: this._workSheet.getSheetId(),
-            actionName: ACTION_NAMES.SET_ROW_HEIGHT_ACTION,
+            actionName: SetRowHeightAction.NAME,
             rowIndex,
             rowHeight,
         };

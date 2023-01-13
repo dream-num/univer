@@ -1,7 +1,12 @@
 import { SheetContext } from '../../Basics';
 import { Command, CommandManager } from '../../Command';
-import { ISetSelectionActivateActionData } from '../Action';
-import { ACTION_NAMES, DEFAULT_SELECTION } from '../../Const';
+
+import {
+    ISetSelectionActivateActionData,
+    SetSelectionActivateAction,
+} from '../Action';
+
+import { DEFAULT_SELECTION } from '../../Const';
 import { Direction } from '../../Enum';
 import { IRangeData, IRangeType, ISelectionData } from '../../Interfaces';
 import { Nullable, Tools } from '../../Shared';
@@ -165,7 +170,7 @@ export class Selection {
         const { _context, _workSheet, _commandManager } = this;
         const setSelection: ISetSelectionActivateActionData = {
             sheetId: _workSheet.getSheetId(),
-            actionName: ACTION_NAMES.SET_SELECTION_ACTION,
+            actionName: SetSelectionActivateAction.NAME,
             activeRangeList,
             activeRange,
             currentCell,
@@ -285,7 +290,7 @@ export class Selection {
         const { _context, _workSheet, _commandManager } = this;
         const setSelection: ISetSelectionActivateActionData = {
             sheetId: _workSheet.getSheetId(),
-            actionName: ACTION_NAMES.SET_SELECTION_ACTION,
+            actionName: SetSelectionActivateAction.NAME,
             activeRangeList,
             activeRange: range,
             currentCell: range,

@@ -1,8 +1,12 @@
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import {
+    SheetActionBase,
+    ISheetActionData,
+    ActionObservers,
+    ActionType,
+    CommandUnit,
+} from '../../Command';
 import { InsertRow, RemoveRow } from '../Apply';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveRowActionData } from './RemoveRowAction';
-import { CommandUnit } from '../../Command';
 
 /**
  * @internal

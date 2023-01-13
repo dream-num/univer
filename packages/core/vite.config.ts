@@ -14,7 +14,7 @@ export default defineConfig({
             fileName: 'univer-core',
         },
         outDir: './lib',
-        sourcemap: true
+        // sourcemap: true
     },
     define: {
         pkgJson: { name, version },

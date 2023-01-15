@@ -15,7 +15,7 @@ npm i @univer/sheets-plugin-find
 ### Usage
 
 ```js
-impport {Find} from '@univer/sheets-plugin-find'
+import {Find} from '@univer/sheets-plugin-find'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Find());

@@ -22,7 +22,7 @@ npm i @univer/style-universheet
 ### 使用
 
 ```js
-impport baseUI from '@univer/style-universheet'
+import baseUI from '@univer/style-universheet'
 universheet.install(baseUI)
 universheet.create({
     plugins:['style-univer']

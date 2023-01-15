@@ -15,7 +15,7 @@ npm i @univer/sheets-plugin-alternating-colors
 ### 使用
 
 ```js
-impport {AlternatingColors} from '@univer/sheets-plugin-alternating-colors'
+import {AlternatingColors} from '@univer/sheets-plugin-alternating-colors'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new AlternatingColors());

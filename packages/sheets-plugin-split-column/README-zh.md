@@ -15,7 +15,7 @@ npm i @univer/sheets-plugin-split-column
 ### 使用
 
 ```js
-impport {SplitColumn} from '@univer/sheets-plugin-split-column'
+import {SplitColumn} from '@univer/sheets-plugin-split-column'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new SplitColumn());

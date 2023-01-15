@@ -15,7 +15,7 @@ npm i @univer/sheets-plugin-insert-link
 ### 使用
 
 ```js
-impport {InsertLink} from '@univer/sheets-plugin-insert-link'
+import {InsertLink} from '@univer/sheets-plugin-insert-link'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new InsertLink());

@@ -15,7 +15,7 @@ npm i @univer/sheets-plugin-protection
 ### Usage
 
 ```js
-impport {Protection} from '@univer/sheets-plugin-protection'
+import {Protection} from '@univer/sheets-plugin-protection'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Protection());

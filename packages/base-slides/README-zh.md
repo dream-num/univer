@@ -15,7 +15,7 @@ npm i @univer/base-slides
 ### 使用
 
 ```js
-impport {Slides} from '@univer/base-slides'
+import {Slides} from '@univer/base-slides'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Slides());

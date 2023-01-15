@@ -15,7 +15,7 @@ npm i @univer/sheets-plugin-pivot-table
 ### 使用
 
 ```js
-impport {PivotTable} from '@univer/sheets-plugin-pivot-table'
+import {PivotTable} from '@univer/sheets-plugin-pivot-table'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new PivotTable());

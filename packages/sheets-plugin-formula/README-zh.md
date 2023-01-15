@@ -15,7 +15,7 @@ npm i @univer/sheets-plugin-formula
 ### 使用
 
 ```js
-impport {Formula} from '@univer/sheets-plugin-formula'
+import {Formula} from '@univer/sheets-plugin-formula'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Formula());

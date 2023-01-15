@@ -22,7 +22,7 @@ npm i @univer/base-component
 ### 使用
 
 ```js
-impport baseUI from '@univer/base-component'
+import baseUI from '@univer/base-component'
 universheet.install(baseUI)
 universheet.create({
     plugins:['base-component']

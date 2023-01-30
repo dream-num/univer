@@ -1,5 +1,5 @@
 {
-    "name": "@univer/sheets-plugin-clipboard",
+    "name": "@univerjs/sheets-plugin-clipboard",
     "version": "0.0.1",
     "description": "UniverSheet normal plugin UI manager",
     "keywords": [],
@@ -41,12 +41,12 @@
         "vite-plugin-external": "1.2.3"
     },
     "dependencies": {
-        "@univer/base-component": "workspace:^0.0.1",
-        "@univer/base-render": "workspace:^0.0.1",
-        "@univer/base-sheets": "workspace:^0.0.1",
-        "@univer/common-plugin-data": "workspace:^0.0.1",
-        "@univer/core": "workspace:^0.0.1",
-        "@univer/style-univer": "workspace:^0.0.1",
+        "@univerjs/base-component": "workspace:^0.0.1",
+        "@univerjs/base-render": "workspace:^0.0.1",
+        "@univerjs/base-sheets": "workspace:^0.0.1",
+        "@univerjs/common-plugin-data": "workspace:^0.0.1",
+        "@univerjs/core": "workspace:^0.0.1",
+        "@univerjs/style-univer": "workspace:^0.0.1",
         "nanoid": "^4.0.0",
         "preact": "^10.5.14"
     }

@@ -24,7 +24,7 @@ cover: ''
 ## 案例
 
 ```jsx
-import { RadioGroup, Radio } from '@univer/style-univer';
+import { RadioGroup, Radio } from '@univerjs/style-univer';
 
 const Demo = () => {
     return (
@@ -50,7 +50,7 @@ const Demo = () => {
 ## 案例
 
 ```jsx
-import { Radio } from '@univer/style-univer';
+import { Radio } from '@univerjs/style-univer';
 
 const Demo = () => {
     return <Radio></Radio>;

@@ -12,8 +12,8 @@ import {
     SceneViewer,
     ScrollBar,
     Viewport,
-} from '@univer/base-render';
-import { ContextBase, DocContext, EventState, IPageElement, PageElementType } from '@univer/core';
+} from '@univerjs/base-render';
+import { ContextBase, DocContext, EventState, IPageElement, PageElementType } from '@univerjs/core';
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 
 export enum DOCS_VIEW_KEY {

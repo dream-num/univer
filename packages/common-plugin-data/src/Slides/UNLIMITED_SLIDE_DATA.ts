@@ -1,4 +1,4 @@
-import { ISlideData, PageElementType, PageType, ShapeType } from '@univer/core';
+import { ISlideData, PageElementType, PageType, ShapeType } from '@univerjs/core';
 import { DEFAULT_SECOND_PAGE } from './DefaultPages/Page2';
 import { DEFAULT_THIRD_PAGE } from './DefaultPages/Page3';
 import { DEFAULT_FORTH_PAGE } from './DefaultPages/Page4';

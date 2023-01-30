@@ -1,4 +1,4 @@
-import { ICellInfo, ISelection, Nullable, makeCellToSelection } from '@univer/core';
+import { ICellInfo, ISelection, Nullable, makeCellToSelection } from '@univerjs/core';
 import { SELECTION_TYPE } from '../Controller/Selection/SelectionController';
 import { SheetPlugin } from '../SheetPlugin';
 

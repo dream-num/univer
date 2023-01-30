@@ -39,7 +39,7 @@ interface ModalProps extends ModalBaseProps {
 ## 案例
 
 ```jsx
-import { CellRangeModal } from '@univer/style-univer';
+import { CellRangeModal } from '@univerjs/style-univer';
 
 <CellRangeModal placeholderProps="请使用字符串" valueProps="A10:B10"></CellRangeModal>;
 ```

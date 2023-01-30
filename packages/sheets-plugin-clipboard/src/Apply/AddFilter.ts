@@ -1,4 +1,4 @@
-import { Nullable } from '@univer/core';
+import { Nullable } from '@univerjs/core';
 import { Filter, IFilter } from '../Domain';
 import { ClipboardPlugin } from '../ClipboardPlugin';
 

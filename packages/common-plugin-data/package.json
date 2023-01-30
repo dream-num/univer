@@ -1,5 +1,5 @@
 {
-    "name": "@univer/common-plugin-data",
+    "name": "@univerjs/common-plugin-data",
     "version": "0.0.1",
     "description": "",
     "author": "",
@@ -32,7 +32,7 @@
     },
     "license": "MIT",
     "dependencies": {
-        "@univer/core": "workspace:^0.0.1"
+        "@univerjs/core": "workspace:^0.0.1"
     },
     "devDependencies": {
         "@types/jest": "^27.5.2",

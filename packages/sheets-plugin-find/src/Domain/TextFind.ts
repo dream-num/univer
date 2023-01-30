@@ -1,4 +1,4 @@
-// import { Range, Worksheet, RangeList, FormatType, IRangeData } from '@univer/core';
+// import { Range, Worksheet, RangeList, FormatType, IRangeData } from '@univerjs/core';
 // import { getRegExpStr } from '../Util/util';
 // import { FindType } from '../IData';
 

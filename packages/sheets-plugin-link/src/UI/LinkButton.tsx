@@ -1,6 +1,6 @@
-import { BaseComponentRender, BaseComponentSheet, Component, IToolBarItemProps, ModalProps } from '@univer/base-component';
-import { Nullable, Observer, Workbook } from '@univer/core';
-import { Icon } from '@univer/style-univer';
+import { BaseComponentRender, BaseComponentSheet, Component, IToolBarItemProps, ModalProps } from '@univerjs/base-component';
+import { Nullable, Observer, Workbook } from '@univerjs/core';
+import { Icon } from '@univerjs/style-univer';
 import { IProps } from '../IData/ILink';
 import styles from './index.module.less';
 import { LinkContent } from './LinkContent';

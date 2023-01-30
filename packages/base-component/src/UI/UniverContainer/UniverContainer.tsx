@@ -1,9 +1,9 @@
-import { Tools } from '@univer/core';
-import { Container, Content, Footer, Header, Layout, Sider } from '@univer/style-univer';
+import { Tools } from '@univerjs/core';
+import { Container, Content, Footer, Header, Layout, Sider } from '@univerjs/style-univer';
 import cssVars from 'css-vars-ponyfill';
-import defaultSkin from '@univer/style-univer/assets/css/skin/default.module.less';
-import darkSkin from '@univer/style-univer/assets/css/skin/dark.module.less';
-import greenSkin from '@univer/style-univer/assets/css/skin/green.module.less';
+import defaultSkin from '@univerjs/style-univer/assets/css/skin/default.module.less';
+import darkSkin from '@univerjs/style-univer/assets/css/skin/dark.module.less';
+import greenSkin from '@univerjs/style-univer/assets/css/skin/green.module.less';
 import { BaseComponentProps } from '../../BaseComponent';
 import { IShowContainerConfig, UniverConfig } from '../../Basics';
 import { AppContext } from '../../Common';

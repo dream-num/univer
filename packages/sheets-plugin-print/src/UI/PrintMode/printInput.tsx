@@ -1,4 +1,4 @@
-import { Component, createRef } from '@univer/base-component';
+import { Component, createRef } from '@univerjs/base-component';
 import styles from './index.module.less';
 
 interface IProps {

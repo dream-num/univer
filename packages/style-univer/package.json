@@ -1,5 +1,5 @@
 {
-    "name": "@univer/style-univer",
+    "name": "@univerjs/style-univer",
     "version": "0.0.1",
     "description": "Universheet normal plugin UI manager",
     "keywords": [],
@@ -48,8 +48,8 @@
         "vite-plugin-external": "1.2.3"
     },
     "dependencies": {
-        "@univer/base-component": "workspace:^0.0.1",
-        "@univer/core": "workspace:^0.0.1",
+        "@univerjs/base-component": "workspace:^0.0.1",
+        "@univerjs/core": "workspace:^0.0.1",
         "css-vars-ponyfill": "^2.4.6",
         "nanoid": "^4.0.0",
         "preact": "^10.5.14",

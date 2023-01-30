@@ -1,4 +1,4 @@
-import { Picture } from '@univer/base-render';
+import { Picture } from '@univerjs/base-render';
 import { OverGridImageBorderType, OverGridImageProperty } from '../OverGridImagePlugin';
 
 export class OverImageShape extends Picture {

@@ -1,2 +1,2 @@
 export * from '../index';
-declare module '@univer/common-plugin-data' { }
+declare module '@univerjs/common-plugin-data' { }

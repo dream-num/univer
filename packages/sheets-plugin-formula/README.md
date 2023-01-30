@@ -9,13 +9,13 @@ UniverSheet Plugin Formula
 ### Installation
 
 ```bash
-npm i @univer/sheets-plugin-formula
+npm i @univerjs/sheets-plugin-formula
 ```
 
 ### Usage
 
 ```js
-impport {Formula} from '@univer/sheets-plugin-formula'
+impport {Formula} from '@univerjs/sheets-plugin-formula'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Formula());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/sheets-plugin-formula dev
+pnpm run --filter  @univerjs/sheets-plugin-formula dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-formula dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/sheets-plugin-formula build
+pnpm run --filter  @univerjs/sheets-plugin-formula build
 ```

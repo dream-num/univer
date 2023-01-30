@@ -1,4 +1,4 @@
-import { IRangeData, referenceToGrid } from '@univer/core';
+import { IRangeData, referenceToGrid } from '@univerjs/core';
 import { ErrorType } from '../Basics/ErrorType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { BaseReferenceObject } from './BaseReferenceObject';

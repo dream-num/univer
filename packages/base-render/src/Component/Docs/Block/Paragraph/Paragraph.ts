@@ -9,7 +9,7 @@ import {
     ParagraphElementType,
     PositionedObjectLayoutType,
     ContextBase,
-} from '@univer/core';
+} from '@univerjs/core';
 import { dealWidthTextRun } from './TextRun';
 import { dealWidthBullet } from './Bullet';
 import { dealWidthInlineDrawing } from './InlineDrawing';

@@ -10,7 +10,7 @@ import {
     ParagraphElementType,
     PositionedObjectLayoutType,
     WrapTextType,
-} from '@univer/core';
+} from '@univerjs/core';
 
 export const docsDemoData: IDocumentData = {
     documentId: 'd',

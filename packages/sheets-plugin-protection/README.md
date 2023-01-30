@@ -9,13 +9,13 @@ UniverSheet Plugin Protection
 ### Installation
 
 ```bash
-npm i @univer/sheets-plugin-protection
+npm i @univerjs/sheets-plugin-protection
 ```
 
 ### Usage
 
 ```js
-impport {Protection} from '@univer/sheets-plugin-protection'
+impport {Protection} from '@univerjs/sheets-plugin-protection'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Protection());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/sheets-plugin-protection dev
+pnpm run --filter  @univerjs/sheets-plugin-protection dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-protection dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/sheets-plugin-protection build
+pnpm run --filter  @univerjs/sheets-plugin-protection build
 ```

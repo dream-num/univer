@@ -1,6 +1,6 @@
-import { $$, getRefElement } from '@univer/base-component';
-import { SheetPlugin } from '@univer/base-sheets';
-import { KeyCode, PLUGIN_NAMES, SheetContext } from '@univer/core';
+import { $$, getRefElement } from '@univerjs/base-component';
+import { SheetPlugin } from '@univerjs/base-sheets';
+import { KeyCode, PLUGIN_NAMES, SheetContext } from '@univerjs/core';
 import { FORMULA_PLUGIN_NAME } from '../Basic';
 import { FormulaPlugin } from '../FormulaPlugin';
 import { HelpFunction, SearchFunction } from '../View/UI/FormulaPrompt';

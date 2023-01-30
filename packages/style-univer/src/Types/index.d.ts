@@ -1,6 +1,5 @@
 export * from '../index';
-declare module '@univer/style-univer' { }
-
+declare module '@univerjs/style-univer' {}
 
 // use css module
 declare module '*.less' {

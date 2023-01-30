@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet, BaseMenuItem, Component, ComponentChildren, joinClassNames } from '@univer/base-component';
+import { BaseComponentRender, BaseComponentSheet, BaseMenuItem, Component, ComponentChildren, joinClassNames } from '@univerjs/base-component';
 import styles from './index.module.less';
 
 export interface BaseItemProps extends BaseMenuItem {

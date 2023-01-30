@@ -1,6 +1,6 @@
-import { handleJsonToDom, handleStyleToString } from '@univer/base-component';
-import { SheetContext, PLUGIN_NAMES, Tools } from '@univer/core';
-import { SheetPlugin, SelectionModel, RightMenuProps, SelectionControl } from '@univer/base-sheets';
+import { handleJsonToDom, handleStyleToString } from '@univerjs/base-component';
+import { SheetContext, PLUGIN_NAMES, Tools } from '@univerjs/core';
+import { SheetPlugin, SelectionModel, RightMenuProps, SelectionControl } from '@univerjs/base-sheets';
 import { Clipboard } from './Clipboard';
 import { CLIPBOARD_PLUGIN } from '../Const';
 

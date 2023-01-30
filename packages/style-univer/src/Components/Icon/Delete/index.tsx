@@ -1,4 +1,4 @@
-import { BaseIconProps, IconComponent, JSXComponent } from '@univer/base-component';
+import { BaseIconProps, IconComponent, JSXComponent } from '@univerjs/base-component';
 import { Icon } from '../AddIcon';
 
 const DeleteIcon = (props: BaseIconProps) => (

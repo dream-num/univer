@@ -1,5 +1,5 @@
-import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect } from '@univer/base-render';
-import { Nullable, Observer } from '@univer/core';
+import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect } from '@univerjs/base-render';
+import { Nullable, Observer } from '@univerjs/core';
 import { SelectionManager } from './SelectionManager';
 
 enum DRAG_LINE_KEY {

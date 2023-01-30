@@ -1,4 +1,4 @@
-import { EventState } from '@univer/core';
+import { EventState } from '@univerjs/core';
 import { Vector2 } from '../Basics/Vector2';
 import { IMouseEvent, IPointerEvent } from '../Basics/IEvents';
 import { COLORS, EVENT_TYPE, RENDER_CLASS_TYPE } from '../Basics/Const';

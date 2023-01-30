@@ -1,6 +1,6 @@
 // import { IShapeProps, Shape, IObjectFullState, Group, Scene } from '.';
 
-import { IKeyValue } from '@univer/core';
+import { IKeyValue } from '@univerjs/core';
 import { IShapeProps, Shape } from './Shape';
 
 export interface IRectProps extends IShapeProps {

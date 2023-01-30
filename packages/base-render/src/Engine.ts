@@ -1,4 +1,4 @@
-import { Observable } from '@univer/core';
+import { Observable } from '@univerjs/core';
 import { DeviceType, IEvent, IKeyboardEvent, IPointerEvent, PointerInput } from './Basics/IEvents';
 
 import { getSizeForDom, getPointerPrefix, IsSafari, requestNewFrame } from './Basics/Tools';

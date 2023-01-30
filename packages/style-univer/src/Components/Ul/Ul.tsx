@@ -1,4 +1,4 @@
-import { BaseUlProps, cloneElement, createRef, JSXComponent, UlComponent, VNode, Component, debounce } from '@univer/base-component';
+import { BaseUlProps, cloneElement, createRef, JSXComponent, UlComponent, VNode, Component, debounce } from '@univerjs/base-component';
 import * as Icon from '../Icon';
 import styles from './index.module.less';
 

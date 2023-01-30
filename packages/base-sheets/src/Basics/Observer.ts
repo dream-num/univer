@@ -1,4 +1,4 @@
-import { Observable, Plugin } from '@univer/core';
+import { Observable, Plugin } from '@univerjs/core';
 import { FormulaBar } from '../View/UI/FormulaBar/FormulaBar';
 import { SelectionControl } from '../Controller/Selection/SelectionController';
 import { SheetContainer } from '../View/UI/SheetContainer';

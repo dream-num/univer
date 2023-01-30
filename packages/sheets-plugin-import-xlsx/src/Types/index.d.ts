@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
 export * from '../index';
-declare module '@univer/sheets-plugin-import-xlsx' {}
+declare module '@univerjs/sheets-plugin-import-xlsx' {}
 
 // use css module
 declare module '*.less' {

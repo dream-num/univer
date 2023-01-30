@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet, Component } from '@univer/base-component';
+import { BaseComponentRender, BaseComponentSheet, Component } from '@univerjs/base-component';
 import styles from './index.module.less';
 
 interface IProps {

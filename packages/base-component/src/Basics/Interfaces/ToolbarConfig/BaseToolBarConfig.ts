@@ -1,5 +1,5 @@
-import { BaseSelectChildrenProps, BaseSelectProps } from '@univer/base-sheets';
-import { BaseTextButtonProps } from '@univer/base-sheets/src/View/UI/Common/TextButton/TextButton';
+import { BaseSelectChildrenProps, BaseSelectProps } from '@univerjs/base-sheets';
+import { BaseTextButtonProps } from '@univerjs/base-sheets/src/View/UI/Common/TextButton/TextButton';
 
 export interface ToolBarConfig extends SheetToolBarConfig, DocToolBarConfig, SlideToolBarConfig {}
 

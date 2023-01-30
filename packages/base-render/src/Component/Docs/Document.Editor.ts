@@ -1,4 +1,4 @@
-import { Nullable, Observable, Observer } from '@univer/core';
+import { Nullable, Observable, Observer } from '@univerjs/core';
 import { IDocumentSkeletonCached, IDocumentSkeletonSpan } from '../../Basics/IDocumentSkeletonCached';
 import { CURSOR_TYPE } from '../../Basics/Const';
 import { IMouseEvent, IPointerEvent } from '../../Basics/IEvents';

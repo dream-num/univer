@@ -2,32 +2,32 @@ const execa = require('execa');
 // const { targets: allTargets } = require('./util');
 
 const buildTargets = [
-    '@univer/core', // success
-    '@univer/base-render', // success
-    '@univer/base-sheets', // success
+    '@univerjs/core', // success
+    '@univerjs/base-render', // success
+    '@univerjs/base-sheets', // success
 
-    // '@univer/sheets-plugin-format',
-    // '@univer/sheets-plugin-formula',
+    // '@univerjs/sheets-plugin-format',
+    // '@univerjs/sheets-plugin-formula',
 
-    '@univer/sheets-plugin-alternating-colors', // success
-    '@univer/sheets-plugin-conditional-format', // success
-    '@univer/sheets-plugin-data-validation', // success
-    '@univer/sheets-plugin-filter', // success
-    '@univer/sheets-plugin-find', // success
-    '@univer/sheets-plugin-freeze', // success
-    '@univer/sheets-plugin-image', // success
-    '@univer/sheets-plugin-insert-link', // success
-    '@univer/sheets-plugin-pivot-table', // success
-    '@univer/sheets-plugin-print', // success
-    '@univer/sheets-plugin-protection', // success
-    '@univer/sheets-plugin-screenshot', // success
-    '@univer/sheets-plugin-sort', // success
-    '@univer/sheets-plugin-split-column', // success
+    '@univerjs/sheets-plugin-alternating-colors', // success
+    '@univerjs/sheets-plugin-conditional-format', // success
+    '@univerjs/sheets-plugin-data-validation', // success
+    '@univerjs/sheets-plugin-filter', // success
+    '@univerjs/sheets-plugin-find', // success
+    '@univerjs/sheets-plugin-freeze', // success
+    '@univerjs/sheets-plugin-image', // success
+    '@univerjs/sheets-plugin-insert-link', // success
+    '@univerjs/sheets-plugin-pivot-table', // success
+    '@univerjs/sheets-plugin-print', // success
+    '@univerjs/sheets-plugin-protection', // success
+    '@univerjs/sheets-plugin-screenshot', // success
+    '@univerjs/sheets-plugin-sort', // success
+    '@univerjs/sheets-plugin-split-column', // success
 
-    // '@univer/style-google',
-    '@univer/style-univer', // success
-    // '@univer/style-office365',
-    // '@univer/style-mobile',
+    // '@univerjs/style-google',
+    '@univerjs/style-univer', // success
+    // '@univerjs/style-office365',
+    // '@univerjs/style-mobile',
 ];
 
 // TODO: run => build d.ts => build esm/umd

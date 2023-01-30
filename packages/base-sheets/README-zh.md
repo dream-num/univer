@@ -9,13 +9,13 @@ UniverSheet Spreadsheet 插件
 ### 安装
 
 ```bash
-npm i @univer/base-sheets
+npm i @univerjs/base-sheets
 ```
 
 ### 使用
 
 ```js
-impport {Spreadsheet} from '@univer/base-sheets'
+impport {Spreadsheet} from '@univerjs/base-sheets'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Spreadsheet());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/base-sheets dev
+pnpm run --filter  @univerjs/base-sheets dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/base-sheets dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/base-sheets build
+pnpm run --filter  @univerjs/base-sheets build
 ```

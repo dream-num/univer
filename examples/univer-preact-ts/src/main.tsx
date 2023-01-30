@@ -1,5 +1,5 @@
-import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DEMO3, DEFAULT_WORKBOOK_DATA_DOWN } from '@univer/common-plugin-data';
-import { IWorkbookConfig, IWorksheetConfig, SheetTypes, Tools } from '@univer/core';
+import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DEMO3, DEFAULT_WORKBOOK_DATA_DOWN } from '@univerjs/common-plugin-data';
+import { IWorkbookConfig, IWorksheetConfig, SheetTypes, Tools } from '@univerjs/core';
 import { univerSheetCustom } from '.';
 
 const sheetConfig = {

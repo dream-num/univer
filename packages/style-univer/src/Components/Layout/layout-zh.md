@@ -26,7 +26,7 @@ cover: ''
 UniverSheet 的整体布局，区分了外左边栏、外右边栏、头部、尾部、内左边栏、右左边栏、中间内容区，简单的表示如下
 
 ```jsx
-import { Container, Layout, Header, Footer, Content, Sider } from '@univer/style-univer';
+import { Container, Layout, Header, Footer, Content, Sider } from '@univerjs/style-univer';
 
 const MainPage = () => {
     return (

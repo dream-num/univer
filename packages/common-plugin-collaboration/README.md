@@ -9,13 +9,13 @@ UniverSheet Plugin Collaboration
 ### Installation
 
 ```bash
-npm i @univer/common-plugin-collaboration
+npm i @univerjs/common-plugin-collaboration
 ```
 
 ### Usage
 
 ```js
-impport {Collaboration} from '@univer/common-plugin-collaboration'
+impport {Collaboration} from '@univerjs/common-plugin-collaboration'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Collaboration());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/common-plugin-collaboration dev
+pnpm run --filter  @univerjs/common-plugin-collaboration dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/common-plugin-collaboration dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/common-plugin-collaboration build
+pnpm run --filter  @univerjs/common-plugin-collaboration build
 ```

@@ -9,13 +9,13 @@ UniverSheet Plugin Spreadsheet
 ### Installation
 
 ```bash
-npm i @univer/base-sheets
+npm i @univerjs/base-sheets
 ```
 
 ### Usage
 
 ```js
-impport {Spreadsheet} from '@univer/base-sheets'
+impport {Spreadsheet} from '@univerjs/base-sheets'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Spreadsheet());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/base-sheets dev
+pnpm run --filter  @univerjs/base-sheets dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/base-sheets dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/base-sheets build
+pnpm run --filter  @univerjs/base-sheets build
 ```

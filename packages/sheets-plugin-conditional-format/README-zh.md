@@ -9,13 +9,13 @@ UniverSheet ConditionalFormat 插件
 ### 安装
 
 ```bash
-npm i @univer/sheets-plugin-conditional-format
+npm i @univerjs/sheets-plugin-conditional-format
 ```
 
 ### 使用
 
 ```js
-impport {ConditionalFormat} from '@univer/sheets-plugin-conditional-format'
+impport {ConditionalFormat} from '@univerjs/sheets-plugin-conditional-format'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new ConditionalFormat());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/sheets-plugin-conditional-format dev
+pnpm run --filter  @univerjs/sheets-plugin-conditional-format dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-conditional-format dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/sheets-plugin-conditional-format build
+pnpm run --filter  @univerjs/sheets-plugin-conditional-format build
 ```

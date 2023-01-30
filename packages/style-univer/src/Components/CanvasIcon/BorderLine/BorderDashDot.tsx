@@ -1,4 +1,4 @@
-import { Component, createRef, IconComponent, JSXComponent, RefObject } from '@univer/base-component';
+import { Component, createRef, IconComponent, JSXComponent, RefObject } from '@univerjs/base-component';
 import { CanvasIcon } from '../CanvasIcon';
 
 interface IProps {

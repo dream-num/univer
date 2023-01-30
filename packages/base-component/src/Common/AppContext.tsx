@@ -1,7 +1,7 @@
 /**
  * Use createContext to provide global language and skin settings
  */
-import { ContextBase, Locale } from '@univer/core';
+import { ContextBase, Locale } from '@univerjs/core';
 import { createContext } from 'preact';
 
 export type AppContextValues = {

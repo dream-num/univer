@@ -11,7 +11,7 @@ import {
     ISize,
     ITextStyle,
     ITransformState,
-} from '@univer/core';
+} from '@univerjs/core';
 import { TextSelection } from '../Component/Docs/Common/TextSelection';
 import { Documents } from '../Component/Docs/Document';
 import {

@@ -35,7 +35,7 @@ cover: ''
 ## 案例
 
 ```jsx
-import { Ul } from '@univer/style-univer';
+import { Ul } from '@univerjs/style-univer';
 
 <Ul children={this.state.children} onClick={this.handleClick} ref={this.ref}></Ul>;
 ```

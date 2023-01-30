@@ -9,13 +9,13 @@ UniverSheet Slides 插件
 ### 安装
 
 ```bash
-npm i @univer/base-slides
+npm i @univerjs/base-slides
 ```
 
 ### 使用
 
 ```js
-impport {Slides} from '@univer/base-slides'
+impport {Slides} from '@univerjs/base-slides'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Slides());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/base-slides dev
+pnpm run --filter  @univerjs/base-slides dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/base-slides dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/base-slides build
+pnpm run --filter  @univerjs/base-slides build
 ```

@@ -1,4 +1,4 @@
-import { SheetContext } from '@univer/core';
+import { SheetContext } from '@univerjs/core';
 
 export type IConfig = {
     context: SheetContext;

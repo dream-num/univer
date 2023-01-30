@@ -1,4 +1,4 @@
-import { BaseMenuProps, JSXComponent, Component, MenuComponent, createRef, BaseMenuItem, joinClassNames, BaseMenuState, BaseMenuStyle } from '@univer/base-component';
+import { BaseMenuProps, JSXComponent, Component, MenuComponent, createRef, BaseMenuItem, joinClassNames, BaseMenuState, BaseMenuStyle } from '@univerjs/base-component';
 import styles from './index.module.less';
 
 export class Menu extends Component<BaseMenuProps, BaseMenuState> {

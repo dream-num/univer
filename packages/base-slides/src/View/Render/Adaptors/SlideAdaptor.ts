@@ -14,8 +14,8 @@ import {
     ScrollBar,
     Slide,
     Viewport,
-} from '@univer/base-render';
-import { ContextBase, SlideModel, EventState, getColorStyle, IColorStyle, IPageElement, ISlidePage, PageElementType, SlideContext } from '@univer/core';
+} from '@univerjs/base-render';
+import { ContextBase, SlideModel, EventState, getColorStyle, IColorStyle, IPageElement, ISlidePage, PageElementType, SlideContext } from '@univerjs/core';
 
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 import { ObjectProvider } from '../ObjectProvider';

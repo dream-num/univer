@@ -1,4 +1,4 @@
-import { sortRules } from '@univer/core';
+import { sortRules } from '@univerjs/core';
 import { BaseCellEditExtensionFactory } from './CellEditExtensionFactory';
 import { REGISTRY_CELL_EDIT_FACTORY } from './RegistryFactory';
 

@@ -9,13 +9,13 @@ UniverSheet Plugin Docs
 ### Installation
 
 ```bash
-npm i @univer/base-docs
+npm i @univerjs/base-docs
 ```
 
 ### Usage
 
 ```js
-impport {Docs} from '@univer/base-docs'
+impport {Docs} from '@univerjs/base-docs'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Docs());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/base-docs dev
+pnpm run --filter  @univerjs/base-docs dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/base-docs dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/base-docs build
+pnpm run --filter  @univerjs/base-docs build
 ```

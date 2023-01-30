@@ -25,7 +25,7 @@ cover: ''
 ## 案例
 
 ```jsx
-import { Container } from '@univer/style-univer';
+import { Container } from '@univerjs/style-univer';
 
 const ToolBar = () => {
     const containerText = 'container';

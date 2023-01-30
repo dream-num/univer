@@ -1,6 +1,6 @@
-import { BaseCellInputExtension, BaseCellInputExtensionFactory, ICell } from '@univer/base-sheets';
-import { IFormulaData } from '@univer/base-formula-engine';
-import { IRangeData, Nullable } from '@univer/core';
+import { BaseCellInputExtension, BaseCellInputExtensionFactory, ICell } from '@univerjs/base-sheets';
+import { IFormulaData } from '@univerjs/base-formula-engine';
+import { IRangeData, Nullable } from '@univerjs/core';
 import { FormulaPlugin } from '../../FormulaPlugin';
 
 export class FormulaCellInputExtension extends BaseCellInputExtension {

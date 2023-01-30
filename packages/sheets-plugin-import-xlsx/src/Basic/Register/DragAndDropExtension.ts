@@ -1,4 +1,4 @@
-import { BaseDragAndDropExtension, BaseDragAndDropExtensionFactory, handelTableToJson, handlePlainToJson, IDragAndDropData } from '@univer/base-component';
+import { BaseDragAndDropExtension, BaseDragAndDropExtensionFactory, handelTableToJson, handlePlainToJson, IDragAndDropData } from '@univerjs/base-component';
 import { ImportXlsxPlugin } from '../../ImportXlsxPlugin';
 
 export class DragAndDropExtension extends BaseDragAndDropExtension<ImportXlsxPlugin> {

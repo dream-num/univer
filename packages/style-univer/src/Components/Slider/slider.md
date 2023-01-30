@@ -30,7 +30,7 @@ Property Introduction:
 ## Case
 
 ```jsx
-import { Slider } from '@univer/style-univer';
+import { Slider } from '@univerjs/style-univer';
 
 <Slider onChange={this.onChange} value={zoom} min={this.min} max={this.max} onClick={this.handleClick} />;
 ```

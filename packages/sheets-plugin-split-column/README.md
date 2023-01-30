@@ -9,13 +9,13 @@ UniverSheet Plugin SplitColumn
 ### Installation
 
 ```bash
-npm i @univer/sheets-plugin-split-column
+npm i @univerjs/sheets-plugin-split-column
 ```
 
 ### Usage
 
 ```js
-impport {SplitColumn} from '@univer/sheets-plugin-split-column'
+impport {SplitColumn} from '@univerjs/sheets-plugin-split-column'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new SplitColumn());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/sheets-plugin-split-column dev
+pnpm run --filter  @univerjs/sheets-plugin-split-column dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-split-column dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/sheets-plugin-split-column build
+pnpm run --filter  @univerjs/sheets-plugin-split-column build
 ```

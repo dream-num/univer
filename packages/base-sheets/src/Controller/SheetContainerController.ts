@@ -1,5 +1,5 @@
-import { CommandManager, ContextBase, ISheetActionData, LocaleType, PLUGIN_NAMES, SheetActionBase, Workbook } from '@univer/core';
-import { BaseComponentSheet, BaseComponentRender, BaseComponentProps, DragManager, getRefElement } from '@univer/base-component';
+import { CommandManager, ContextBase, ISheetActionData, LocaleType, PLUGIN_NAMES, SheetActionBase, Workbook } from '@univerjs/core';
+import { BaseComponentSheet, BaseComponentRender, BaseComponentProps, DragManager, getRefElement } from '@univerjs/base-component';
 
 import { CellRangeModal } from '../View/UI/Common/CellRange/CellRangeModal';
 import { SheetPlugin } from '../SheetPlugin';

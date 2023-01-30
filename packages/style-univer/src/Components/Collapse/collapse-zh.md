@@ -28,7 +28,7 @@ interface PanelProps {
 ## 案例
 
 ```jsx
-import { Collapse, Panel } from '@univer/style-univer';
+import { Collapse, Panel } from '@univerjs/style-univer';
 
 <Collapse>
     <Panel header="title"></Panel>

@@ -1,4 +1,4 @@
-import { BorderStyleTypes, getColorStyle, IBorderData, IBorderStyleData, Nullable, IScale } from '@univer/core';
+import { BorderStyleTypes, getColorStyle, IBorderData, IBorderStyleData, Nullable, IScale } from '@univerjs/core';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../Extension';
 import { docExtension } from '../DocExtension';
 import { IDocumentSkeletonSpan } from '../../../Basics/IDocumentSkeletonCached';

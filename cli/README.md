@@ -5,7 +5,7 @@
 Install dependency
 
 ```sh
-npm i -g @univer/cli
+npm i -g @univerjs/cli
 ```
 
 ### Create Plugin

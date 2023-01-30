@@ -37,7 +37,7 @@ pnpm run --filter  [package name] [command]
 For example, start the `dev` development mode of the `packages/sheets-plugin-sort` project
 
 ```bash
-pnpm run --filter @univer/sheets-plugin-sort dev
+pnpm run --filter @univerjs/sheets-plugin-sort dev
 
 ```
 
@@ -62,7 +62,7 @@ npm run cli
 3. Execute the following command to start the plug-in development mode
 
 ```bash
-pnpm run --filter  @univer/sheets-plugin-filter dev
+pnpm run --filter  @univerjs/sheets-plugin-filter dev
 ```
 
 4. There will be an additional `filter` plugin button in the toolbar on the interface

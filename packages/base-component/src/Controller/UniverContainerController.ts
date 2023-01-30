@@ -1,6 +1,6 @@
-import { RenderEngine } from '@univer/base-render';
-// import { CanvasView } from '@univer/base-sheets';
-import { LocaleType, PLUGIN_NAMES } from '@univer/core';
+import { RenderEngine } from '@univerjs/base-render';
+// import { CanvasView } from '@univerjs/base-sheets';
+import { LocaleType, PLUGIN_NAMES } from '@univerjs/core';
 import { BaseComponentPlugin } from '../BaseComponentPlugin';
 import { UniverConfig } from '../Basics';
 import { UniverSheetConfig } from '../Basics/Interfaces/UniverSheetConfig';

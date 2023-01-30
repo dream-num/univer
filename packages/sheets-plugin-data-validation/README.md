@@ -9,13 +9,13 @@ UniverSheet Plugin DataValidation
 ### Installation
 
 ```bash
-npm i @univer/sheets-plugin-data-validation
+npm i @univerjs/sheets-plugin-data-validation
 ```
 
 ### Usage
 
 ```js
-impport {DataValidation} from '@univer/sheets-plugin-data-validation'
+impport {DataValidation} from '@univerjs/sheets-plugin-data-validation'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new DataValidation());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/sheets-plugin-data-validation dev
+pnpm run --filter  @univerjs/sheets-plugin-data-validation dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-data-validation dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/sheets-plugin-data-validation build
+pnpm run --filter  @univerjs/sheets-plugin-data-validation build
 ```

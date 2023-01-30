@@ -1,5 +1,5 @@
-import { SheetPlugin } from '@univer/base-sheets';
-import { Plugin, UniverSheet, UniverDoc, UniverSlide, PLUGIN_NAMES } from '@univer/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
+import { Plugin, UniverSheet, UniverDoc, UniverSlide, PLUGIN_NAMES } from '@univerjs/core';
 import { UniverConfig } from './Basics/Interfaces/UniverConfig';
 import { UniverSheetConfig } from './Basics/Interfaces/UniverSheetConfig';
 import { BaseComponentPluginObserve, installObserver } from './Basics/Observer';

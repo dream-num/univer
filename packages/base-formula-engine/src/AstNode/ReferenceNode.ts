@@ -1,4 +1,4 @@
-import { ABCToNumber } from '@univer/core';
+import { ABCToNumber } from '@univerjs/core';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
 import { NodeType, NODE_ORDER_MAP } from './NodeType';

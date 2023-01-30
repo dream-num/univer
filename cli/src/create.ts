@@ -158,10 +158,10 @@ function createProject(projectPath: string) {
 }
 
 function devTips(projectName: string) {
-    // pnpm run --filter  @univer/sheets-plugin-<%= projectValue %> dev
+    // pnpm run --filter  @univerjs/sheets-plugin-<%= projectValue %> dev
     console.log(chalk.green(`\nSuccess!\n`));
-    console.log(chalk.white(`Install Dependencies: \n`, chalk.green(`pnpm i --filter  @univer/${projectName}\n`)));
-    console.log(chalk.white(`Develop: \n`, chalk.green(`pnpm run --filter  @univer/${projectName} dev\n`)));
+    console.log(chalk.white(`Install Dependencies: \n`, chalk.green(`pnpm i --filter  @univerjs/${projectName}\n`)));
+    console.log(chalk.white(`Develop: \n`, chalk.green(`pnpm run --filter  @univerjs/${projectName} dev\n`)));
 }
 
 function covertToPascalCase(str: string) {

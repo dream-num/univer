@@ -1,5 +1,5 @@
-import { BaseCountBarProps, Component, CountBarComponent, createRef, JSXComponent } from '@univer/base-component';
-import { PLUGIN_NAMES } from '@univer/core';
+import { BaseCountBarProps, Component, CountBarComponent, createRef, JSXComponent } from '@univerjs/base-component';
+import { PLUGIN_NAMES } from '@univerjs/core';
 import styles from './index.module.less';
 
 // type CountProps = {};

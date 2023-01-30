@@ -8,8 +8,8 @@ import {
     ForwardFnComponent,
     FunctionComponent,
     PropsFrom,
-} from '@univer/base-component';
-import { Plugin } from '@univer/core';
+} from '@univerjs/base-component';
+import { Plugin } from '@univerjs/core';
 // import { UniverSingleButton } from './Components';
 import { UniverButton } from './Components/Button/Button';
 import { UniverBorderDashDot } from './Components/CanvasIcon/BorderLine/BorderDashDot';

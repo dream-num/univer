@@ -1,5 +1,5 @@
-import { getRefElement, isElement, ISlotProps, RefObject, render } from '@univer/base-component';
-import { Engine, RenderEngine } from '@univer/base-render';
+import { getRefElement, isElement, ISlotProps, RefObject, render } from '@univerjs/base-component';
+import { Engine, RenderEngine } from '@univerjs/base-render';
 import {
     AsyncFunction,
     SheetContext,
@@ -12,7 +12,7 @@ import {
     SheetActionBase,
     ACTION_NAMES,
     ISetNamedRangeActionData,
-} from '@univer/core';
+} from '@univerjs/core';
 
 import { install, SheetPluginObserve, uninstall } from './Basics/Observer';
 import { RightMenuProps } from './Model/RightMenuModel';

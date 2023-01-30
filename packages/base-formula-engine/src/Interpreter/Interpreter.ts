@@ -1,4 +1,4 @@
-import { CellValueType, ICellData, IRangeData, ObjectMatrix } from '@univer/core';
+import { CellValueType, ICellData, IRangeData, ObjectMatrix } from '@univerjs/core';
 import { FunctionNode } from '../AstNode';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { NodeType } from '../AstNode/NodeType';

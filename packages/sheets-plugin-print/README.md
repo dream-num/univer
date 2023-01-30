@@ -9,13 +9,13 @@ UniverSheet Plugin Print
 ### Installation
 
 ```bash
-npm i @univer/sheets-plugin-print
+npm i @univerjs/sheets-plugin-print
 ```
 
 ### Usage
 
 ```js
-impport {Print} from '@univer/sheets-plugin-print'
+impport {Print} from '@univerjs/sheets-plugin-print'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Print());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/sheets-plugin-print dev
+pnpm run --filter  @univerjs/sheets-plugin-print dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-print dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/sheets-plugin-print build
+pnpm run --filter  @univerjs/sheets-plugin-print build
 ```

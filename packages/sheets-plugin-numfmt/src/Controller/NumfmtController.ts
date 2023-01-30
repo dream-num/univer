@@ -8,10 +8,10 @@ import {
     ACTION_NAMES as CORE_ACTION_NAME,
     ActionOperation,
     ISetRangeDataActionData,
-} from '@univer/core';
-import { BaseComponentRender } from '@univer/base-component';
-import { IToolBarItemProps, SheetPlugin } from '@univer/base-sheets';
-import { numfmt } from '@univer/base-numfmt-engine';
+} from '@univerjs/core';
+import { BaseComponentRender } from '@univerjs/base-component';
+import { IToolBarItemProps, SheetPlugin } from '@univerjs/base-sheets';
+import { numfmt } from '@univerjs/base-numfmt-engine';
 import { ACTION_NAMES } from '../Basic/Enum';
 import { DEFAULT_DATA, NUMFMT_PLUGIN_NAME, NumftmConfig } from '../Basic/Const';
 import { NumfmtModel } from '../Model/NumfmtModel';

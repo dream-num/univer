@@ -1,4 +1,4 @@
-import { EVENT_TYPE, getColor, Rect, Scene } from '@univer/base-render';
+import { EVENT_TYPE, getColor, Rect, Scene } from '@univerjs/base-render';
 import { SheetPlugin } from '../../../SheetPlugin';
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 

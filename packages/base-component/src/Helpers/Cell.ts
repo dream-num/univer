@@ -15,9 +15,9 @@ import {
     Tools,
     VerticalAlign,
     WrapStrategy,
-} from '@univer/core';
+} from '@univerjs/core';
 import { nanoid } from 'nanoid';
-import { pxToPt } from '@univer/base-render';
+import { pxToPt } from '@univerjs/base-render';
 import { textTrim } from '../Utils';
 
 // TODO: move to Utils

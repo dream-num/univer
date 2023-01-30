@@ -24,7 +24,7 @@ cover: ''
 ## 案例
 
 ```jsx
-import { SiderModal } from '@univer/style-univer';
+import { SiderModal } from '@univerjs/style-univer';
 
 const Demo = () => {
     return (

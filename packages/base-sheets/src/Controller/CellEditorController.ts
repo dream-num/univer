@@ -1,6 +1,6 @@
-import { getRefElement, handleDomToJson, handleJsonToDom, handleStyleToString, handleStringToStyle, $$, setLastCaretPosition, KeyboardManager } from '@univer/base-component';
-import { Direction, IDocumentData, IRangeData, IStyleData, Nullable, ICellData, Tools, isKeyPrintable, PLUGIN_NAMES } from '@univer/core';
-import { IMouseEvent, IPointerEvent } from '@univer/base-render';
+import { getRefElement, handleDomToJson, handleJsonToDom, handleStyleToString, handleStringToStyle, $$, setLastCaretPosition, KeyboardManager } from '@univerjs/base-component';
+import { Direction, IDocumentData, IRangeData, IStyleData, Nullable, ICellData, Tools, isKeyPrintable, PLUGIN_NAMES } from '@univerjs/core';
+import { IMouseEvent, IPointerEvent } from '@univerjs/base-render';
 import { SheetPlugin } from '../SheetPlugin';
 import { SheetContainer } from '../View/UI/SheetContainer';
 import { CANVAS_VIEW_KEY } from '../View/Render/BaseView';

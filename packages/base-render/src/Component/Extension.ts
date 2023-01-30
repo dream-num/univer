@@ -1,4 +1,4 @@
-import { IDocumentRenderConfig, Registry, IScale } from '@univer/core';
+import { IDocumentRenderConfig, Registry, IScale } from '@univerjs/core';
 import { getScale } from '../Basics/Tools';
 import { RenderComponent } from './Component';
 import { Vector2 } from '../Basics/Vector2';

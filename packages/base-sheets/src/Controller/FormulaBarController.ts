@@ -1,5 +1,5 @@
-import { PLUGIN_NAMES } from '@univer/core';
-import { INamedRange } from '@univer/core/src/Interfaces/INamedRange';
+import { PLUGIN_NAMES } from '@univerjs/core';
+import { INamedRange } from '@univerjs/core/src/Interfaces/INamedRange';
 import { CellInputExtensionManager } from '../Basics/Register/CellInputRegister';
 import { SheetPlugin } from '../SheetPlugin';
 import { FormulaBar } from '../View/UI/FormulaBar';

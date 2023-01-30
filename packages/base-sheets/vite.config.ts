@@ -48,10 +48,10 @@ export default defineConfig({
         preact(),
         createExternal({
             externals: {
-                '@univer/core': '@univer/core',
-                '@univer/base-render': '@univer/base-render',
-                '@univer/base-component': '@univer/base-component',
-                '@univer/style-univer': '@univer/style-univer',
+                '@univerjs/core': '@univerjs/core',
+                '@univerjs/base-render': '@univerjs/base-render',
+                '@univerjs/base-component': '@univerjs/base-component',
+                '@univerjs/style-univer': '@univerjs/style-univer',
                 'css-vars-ponyfill': 'css-vars-ponyfill',
                 nanoid: 'nanoid',
                 preact: 'preact',

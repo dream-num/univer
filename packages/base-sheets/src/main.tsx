@@ -1,9 +1,9 @@
-import { UniverSheet } from '@univer/core';
-import { RenderEngine } from '@univer/base-render';
-import { UniverComponentSheet } from '@univer/style-univer';
-import { NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
-import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DOWN } from '@univer/common-plugin-data';
-import { DEFAULT_FORMULA_DATA, DEFAULT_FORMULA_DATA_DOWN, FormulaPlugin } from '@univer/sheets-plugin-formula';
+import { UniverSheet } from '@univerjs/core';
+import { RenderEngine } from '@univerjs/base-render';
+import { UniverComponentSheet } from '@univerjs/style-univer';
+import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
+import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DOWN } from '@univerjs/common-plugin-data';
+import { DEFAULT_FORMULA_DATA_DOWN, FormulaPlugin } from '@univerjs/sheets-plugin-formula';
 import { SheetPlugin } from './SheetPlugin';
 
 const uiDefaultConfigUp = {

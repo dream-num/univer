@@ -1,5 +1,5 @@
-import { BaseComponentRender, BaseComponentSheet, Component, createRef } from '@univer/base-component';
-import { PLUGIN_NAMES } from '@univer/core';
+import { BaseComponentRender, BaseComponentSheet, Component, createRef } from '@univerjs/base-component';
+import { PLUGIN_NAMES } from '@univerjs/core';
 
 interface childrenProps {
     placeholder?: string;

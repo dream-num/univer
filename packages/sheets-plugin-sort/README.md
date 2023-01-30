@@ -9,13 +9,13 @@ UniverSheet Plugin Sort
 ### Installation
 
 ```bash
-npm i @univer/sheets-plugin-sort
+npm i @univerjs/sheets-plugin-sort
 ```
 
 ### Usage
 
 ```js
-impport {Sort} from '@univer/sheets-plugin-sort'
+impport {Sort} from '@univerjs/sheets-plugin-sort'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Sort());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/sheets-plugin-sort dev
+pnpm run --filter  @univerjs/sheets-plugin-sort dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-sort dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/sheets-plugin-sort build
+pnpm run --filter  @univerjs/sheets-plugin-sort build
 ```

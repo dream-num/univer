@@ -1,6 +1,6 @@
-import { BaseComponentRender, BaseComponentSheet, BaseRightMenuProps, Component, createRef } from '@univer/base-component';
-import { IMouseEvent } from '@univer/base-render';
-import { PLUGIN_NAMES } from '@univer/core';
+import { BaseComponentRender, BaseComponentSheet, BaseRightMenuProps, Component, createRef } from '@univerjs/base-component';
+import { IMouseEvent } from '@univerjs/base-render';
+import { PLUGIN_NAMES } from '@univerjs/core';
 import Style from './index.module.less';
 import { SheetPlugin } from '../../../SheetPlugin';
 import { RightMenuProps } from '../../../Model';

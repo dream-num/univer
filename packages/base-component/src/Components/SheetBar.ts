@@ -1,4 +1,4 @@
-import { BooleanNumber } from '@univer/core';
+import { BooleanNumber } from '@univerjs/core';
 import { BaseComponent, BaseComponentProps, JSXComponent } from '../BaseComponent';
 import { BaseSelectProps } from './Select';
 

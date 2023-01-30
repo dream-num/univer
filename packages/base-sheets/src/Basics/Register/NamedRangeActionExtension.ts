@@ -7,7 +7,7 @@ import {
     ISheetActionData,
     Tools,
     IInsertRowActionData,
-} from '@univer/core';
+} from '@univerjs/core';
 import { SheetPlugin } from '../../SheetPlugin';
 
 /**

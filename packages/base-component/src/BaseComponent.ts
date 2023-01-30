@@ -1,4 +1,4 @@
-import { BasePlugin } from '@univer/core';
+import { BasePlugin } from '@univerjs/core';
 import { ComponentClass, ForwardFn } from './Framework';
 import { Description } from './Components';
 

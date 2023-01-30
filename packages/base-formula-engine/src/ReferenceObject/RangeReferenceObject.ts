@@ -1,4 +1,4 @@
-import { IRangeData } from '@univer/core';
+import { IRangeData } from '@univerjs/core';
 import { BaseReferenceObject } from './BaseReferenceObject';
 
 export class RangeReferenceObject extends BaseReferenceObject {

@@ -1,4 +1,4 @@
-import { ContextBase, IBullet, ILists, INestingLevel, ITextStyle, Nullable } from '@univer/core';
+import { ContextBase, IBullet, ILists, INestingLevel, ITextStyle, Nullable } from '@univerjs/core';
 import { FontCache } from '../../../../Basics/FontCache';
 import { getFontStyleString } from '../../../../Basics/Tools';
 import { IDocumentSkeletonBullet } from '../../../../Basics/IDocumentSkeletonCached';

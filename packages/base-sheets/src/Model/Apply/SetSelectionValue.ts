@@ -1,4 +1,4 @@
-import { PLUGIN_NAMES, Worksheet } from '@univer/core';
+import { PLUGIN_NAMES, Worksheet } from '@univerjs/core';
 import { SheetPlugin } from '../..';
 import { ISelectionModelValue } from '../Action/SetSelectionValueAction';
 

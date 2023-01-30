@@ -1,6 +1,6 @@
-import { BaseComponentRender, BaseComponentSheet, Component, IToolBarItemProps, ModalProps } from '@univer/base-component';
-import { Nullable, Observer, Workbook } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
+import { BaseComponentRender, BaseComponentSheet, Component, IToolBarItemProps, ModalProps } from '@univerjs/base-component';
+import { Nullable, Observer, Workbook } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
 import { IProps } from '../IData/ISplitColumn';
 import styles from './index.module.less';
 import { SplitColumnContent } from './SplitColumnContent';

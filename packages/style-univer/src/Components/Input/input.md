@@ -31,7 +31,7 @@ Property Introduction:
 ## Case
 
 ```jsx
-import { Input } from '@univer/style-univer';
+import { Input } from '@univerjs/style-univer';
 
 <Input onChange={() => {}} type="text" placeholder="good" value="1"></Input>;
 ```

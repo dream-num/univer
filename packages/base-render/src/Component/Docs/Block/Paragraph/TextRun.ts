@@ -1,4 +1,4 @@
-import { BooleanNumber, GridType, HorizontalAlign, ITextRun, NamedStyleType, SpacingRule } from '@univer/core';
+import { BooleanNumber, GridType, HorizontalAlign, ITextRun, NamedStyleType, SpacingRule } from '@univerjs/core';
 import { composeCharForLanguage } from './Language.Ruler';
 import { calculateParagraphLayout } from './Layout.Ruler';
 

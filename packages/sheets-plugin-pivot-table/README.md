@@ -9,13 +9,13 @@ UniverSheet Plugin PivotTable
 ### Installation
 
 ```bash
-npm i @univer/sheets-plugin-pivot-table
+npm i @univerjs/sheets-plugin-pivot-table
 ```
 
 ### Usage
 
 ```js
-impport {PivotTable} from '@univer/sheets-plugin-pivot-table'
+impport {PivotTable} from '@univerjs/sheets-plugin-pivot-table'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new PivotTable());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/sheets-plugin-pivot-table dev
+pnpm run --filter  @univerjs/sheets-plugin-pivot-table dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-pivot-table dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/sheets-plugin-pivot-table build
+pnpm run --filter  @univerjs/sheets-plugin-pivot-table build
 ```

@@ -1,4 +1,4 @@
-import { sortRules } from '@univer/core';
+import { sortRules } from '@univerjs/core';
 import { BaseObject } from './BaseObject';
 import { Scene } from './Scene';
 import { Group } from './Group';

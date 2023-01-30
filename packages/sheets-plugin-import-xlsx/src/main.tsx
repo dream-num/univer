@@ -1,8 +1,8 @@
-import { UniverSheet } from '@univer/core';
-import { RenderEngine } from '@univer/base-render';
-import { SheetPlugin } from '@univer/base-sheets';
-import { UniverComponentSheet } from '@univer/style-univer';
-import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
+import { UniverSheet } from '@univerjs/core';
+import { RenderEngine } from '@univerjs/base-render';
+import { SheetPlugin } from '@univerjs/base-sheets';
+import { UniverComponentSheet } from '@univerjs/style-univer';
+import { DEFAULT_WORKBOOK_DATA } from '@univerjs/common-plugin-data';
 
 import { ImportXlsxPlugin } from './ImportXlsxPlugin';
 

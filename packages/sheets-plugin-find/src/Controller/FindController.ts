@@ -1,6 +1,6 @@
-import { BaseComponentRender } from '@univer/base-component';
-import { IToolBarItemProps, SheetPlugin } from '@univer/base-sheets';
-import { PLUGIN_NAMES } from '@univer/core';
+import { BaseComponentRender } from '@univerjs/base-component';
+import { IToolBarItemProps, SheetPlugin } from '@univerjs/base-sheets';
+import { PLUGIN_NAMES } from '@univerjs/core';
 import { FIND_PLUGIN_NAME } from '../Const/PLUGIN_NAME';
 import { FindPlugin } from '../FindPlugin';
 

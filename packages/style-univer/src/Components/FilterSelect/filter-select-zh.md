@@ -21,7 +21,7 @@ cover: ''
 ## 案例
 
 ```jsx
-import { FilterSelect } from '@univer/style-univer';
+import { FilterSelect } from '@univerjs/style-univer';
 
 <FilterSelect></FilterSelect>;
 ```

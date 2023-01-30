@@ -23,8 +23,8 @@ The properties of the Color Picker-Round Button are described as follows:
 ## Case
 
 ```jsx
-import { ColorPickerCircleButton } from '@univer/style-univer';
-import { Component } from '@univer/base-component';
+import { ColorPickerCircleButton } from '@univerjs/style-univer';
+import { Component } from '@univerjs/base-component';
 
 type IPanelProps = {};
 

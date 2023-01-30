@@ -1,6 +1,6 @@
-import { BaseComponentPlugin } from '@univer/base-component';
-import { Engine, RenderEngine } from '@univer/base-render';
-import { SheetContext, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { BaseComponentPlugin } from '@univerjs/base-component';
+import { Engine, RenderEngine } from '@univerjs/base-render';
+import { SheetContext, Plugin, PLUGIN_NAMES } from '@univerjs/core';
 
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
 import { RightMenuProps } from './Model/RightMenuModel';

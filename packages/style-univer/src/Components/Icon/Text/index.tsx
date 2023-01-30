@@ -1,4 +1,4 @@
-import { BaseIconProps, FunctionComponent, IconComponent } from '@univer/base-component';
+import { BaseIconProps, FunctionComponent, IconComponent } from '@univerjs/base-component';
 import { Icon } from '../AddIcon';
 
 const LeftAlignIcon = (props: BaseIconProps) => (

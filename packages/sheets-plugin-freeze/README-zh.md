@@ -9,13 +9,13 @@ UniverSheet Frozen 插件
 ### 安装
 
 ```bash
-npm i @univer/sheets-plugin-freeze
+npm i @univerjs/sheets-plugin-freeze
 ```
 
 ### 使用
 
 ```js
-impport {Frozen} from '@univer/sheets-plugin-freeze'
+impport {Frozen} from '@univerjs/sheets-plugin-freeze'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Frozen());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/sheets-plugin-freeze dev
+pnpm run --filter  @univerjs/sheets-plugin-freeze dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-freeze dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/sheets-plugin-freeze build
+pnpm run --filter  @univerjs/sheets-plugin-freeze build
 ```

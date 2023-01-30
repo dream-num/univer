@@ -2,7 +2,7 @@ import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
 import { BaseValueObject } from '../ValueObject/BaseValueObject';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { AsyncObject } from '../OtherObject/AsyncObject';
-import { BooleanNumber, ICellData, IRangeData, Nullable, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univer/core';
+import { BooleanNumber, ICellData, IRangeData, Nullable, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univerjs/core';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { ReferenceNode } from '../AstNode/ReferenceNode';
 import { UnionNode } from '../AstNode/UnionNode';

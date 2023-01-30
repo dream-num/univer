@@ -12,7 +12,7 @@ import {
     Nullable,
     ObjectMatrix,
     Tools,
-} from '@univer/core';
+} from '@univerjs/core';
 import { FormulaPlugin } from '../../FormulaPlugin';
 import { ACTION_NAMES as PLUGIN_ACTION_NAMES } from '../Enum';
 

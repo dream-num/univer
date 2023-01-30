@@ -1,4 +1,4 @@
-import { Observable } from '@univer/core';
+import { Observable } from '@univerjs/core';
 import { NumfmtPlugin } from '../NumfmtPlugin';
 import { NumfmtModal } from '../View/UI/NumfmtModal';
 

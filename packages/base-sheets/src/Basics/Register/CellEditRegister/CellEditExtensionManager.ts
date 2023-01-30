@@ -1,4 +1,4 @@
-import { Nullable } from '@univer/core';
+import { Nullable } from '@univerjs/core';
 import { ICell } from '../../Interfaces';
 import { BaseCellEditExtension, BaseCellEditExtensionFactory } from './CellEditExtensionFactory';
 import { CellEditExtensionRegister } from './CellEditExtensionRegister';

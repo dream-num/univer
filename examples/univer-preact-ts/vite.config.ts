@@ -44,8 +44,8 @@ export default defineConfig({
         // }),
         createExternal({
             externals: {
-                // '@univer/core': '@univer/core',
-                // '@univer/style-univer': '@univer/style-univer',
+                // '@univerjs/core': '@univerjs/core',
+                // '@univerjs/style-univer': '@univerjs/style-univer',
                 // preact: 'preact',
                 // react: 'react',
             },

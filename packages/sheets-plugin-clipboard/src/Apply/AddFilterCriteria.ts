@@ -1,4 +1,4 @@
-import { Nullable } from '@univer/core';
+import { Nullable } from '@univerjs/core';
 import { FilterCriteriaColumn, IFilterCriteriaColumn } from '../Domain';
 import { ClipboardPlugin } from '../ClipboardPlugin';
 

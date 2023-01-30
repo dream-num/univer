@@ -9,13 +9,13 @@ UniverSheet Plugin FormulaEngine
 ### Installation
 
 ```bash
-npm i @univer/base-formula-engine
+npm i @univerjs/base-formula-engine
 ```
 
 ### Usage
 
 ```js
-impport {FormulaEngine} from '@univer/base-formula-engine'
+impport {FormulaEngine} from '@univerjs/base-formula-engine'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new FormulaEngine());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/base-formula-engine dev
+pnpm run --filter  @univerjs/base-formula-engine dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/base-formula-engine dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/base-formula-engine build
+pnpm run --filter  @univerjs/base-formula-engine build
 ```

@@ -16,13 +16,13 @@ UniverSheet 官方 UI 组件库
 ### 安装
 
 ```bash
-npm i @univer/base-component
+npm i @univerjs/base-component
 ```
 
 ### 使用
 
 ```js
-impport baseUI from '@univer/base-component'
+impport baseUI from '@univerjs/base-component'
 universheet.install(baseUI)
 universheet.create({
     plugins:['base-component']
@@ -49,7 +49,7 @@ npm i
 npm run dev
 
 # 或者项目根目录 ./
-npm run dev -w @univer/base-component
+npm run dev -w @univerjs/base-component
 ```
 
 ### 打包
@@ -59,7 +59,7 @@ npm run dev -w @univer/base-component
 npm run build
 
 # 或者根目录 ./
-npm run build -w @univer/base-component
+npm run build -w @univerjs/base-component
 ```
 
 ## 组件库文档
@@ -80,7 +80,7 @@ npm i
 npm run start
 
 # 或者根目录
-npm run start -w @univer/base-component
+npm run start -w @univerjs/base-component
 ```
 
 此命令启动本地开发服务器并打开浏览器窗口。 大多数更改都会实时刷新，而无需重新启动服务器。
@@ -92,7 +92,7 @@ npm run start -w @univer/base-component
 npm run build:doc
 
 # 或者根目录
-npm run build:doc -w @univer/base-component
+npm run build:doc -w @univerjs/base-component
 ```
 
 此命令将静态内容生成到 `build` 目录中，并且可以使用任何静态内容托管服务来提供。

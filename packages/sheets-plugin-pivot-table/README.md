@@ -8,7 +8,7 @@ UniverSheet Plugin PivotTable
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/sheets-plugin-pivot-table
 ```
 

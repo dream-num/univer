@@ -8,7 +8,7 @@ UniverSheet Plugin Screenshot
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/sheets-plugin-screenshot
 ```
 

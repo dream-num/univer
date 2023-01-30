@@ -8,7 +8,7 @@ UniverSheet Plugin Slides
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/base-slides
 ```
 

@@ -8,7 +8,7 @@ UniverSheet Plugin Formula
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/sheets-plugin-formula
 ```
 

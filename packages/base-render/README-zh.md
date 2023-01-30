@@ -8,7 +8,7 @@ UniverSheet Spreadsheet 插件
 
 ### 安装
 
-```bash
+```shell
 npm i @univerjs/base-render
 ```
 

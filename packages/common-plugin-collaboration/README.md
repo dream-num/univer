@@ -8,7 +8,7 @@ UniverSheet Plugin Collaboration
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/common-plugin-collaboration
 ```
 

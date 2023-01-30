@@ -15,7 +15,7 @@ Universheet official UI component library
 
 ### Install
 
-```bash
+```shell
 npm i @univerjs/style-univer
 ```
 

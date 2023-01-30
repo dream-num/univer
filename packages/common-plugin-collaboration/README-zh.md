@@ -8,7 +8,7 @@ UniverSheet Collaboration 插件
 
 ### 安装
 
-```bash
+```shell
 npm i @univerjs/common-plugin-collaboration
 ```
 

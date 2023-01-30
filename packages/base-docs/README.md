@@ -8,7 +8,7 @@ UniverSheet Plugin Docs
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/base-docs
 ```
 

@@ -15,7 +15,7 @@ Universheet 官方 UI 组件库
 
 ### 安装
 
-```bash
+```shell
 npm i @univerjs/style-univer
 ```
 

@@ -8,7 +8,7 @@ UniverSheet Plugin Spreadsheet
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/base-sheets
 ```
 

@@ -8,7 +8,7 @@ UniverSheet Sort 插件
 
 ### 安装
 
-```bash
+```shell
 npm i @univerjs/sheets-plugin-sort
 ```
 

@@ -8,7 +8,7 @@ UniverSheet Plugin Print
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/sheets-plugin-print
 ```
 

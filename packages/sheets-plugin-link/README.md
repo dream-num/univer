@@ -8,7 +8,7 @@ UniverSheet Plugin InsertLink
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/sheets-plugin-insert-link
 ```
 

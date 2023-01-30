@@ -1237,6 +1237,10 @@ npm run build
 
 ### 发布 npm
 
+```shell
+pnpm publish --filter @univerjs/core
+```
+
 ## 插件使用
 
 ### 安装插件

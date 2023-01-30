@@ -8,7 +8,7 @@ UniverSheet Plugin AlternatingColors
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/sheets-plugin-alternating-colors
 ```
 

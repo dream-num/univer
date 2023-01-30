@@ -8,7 +8,7 @@ UniverSheet Plugin Find
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/sheets-plugin-find
 ```
 

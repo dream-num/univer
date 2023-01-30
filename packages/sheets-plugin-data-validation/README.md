@@ -8,7 +8,7 @@ UniverSheet Plugin DataValidation
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/sheets-plugin-data-validation
 ```
 

@@ -8,7 +8,7 @@ UniverSheet Plugin Sort
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/sheets-plugin-sort
 ```
 

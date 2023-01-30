@@ -8,7 +8,7 @@ UniverSheet Plugin SplitColumn
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/sheets-plugin-split-column
 ```
 

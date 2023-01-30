@@ -8,7 +8,7 @@ UniverSheet Plugin <%= projectUpperValue %>
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/<%= projectName %>
 ```
 

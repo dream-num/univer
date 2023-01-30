@@ -8,7 +8,7 @@ UniverSheet Plugin Comment
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/sheets-plugin-comment
 ```
 

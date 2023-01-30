@@ -8,7 +8,7 @@ UniverSheet Plugin ConditionalFormat
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/sheets-plugin-conditional-format
 ```
 

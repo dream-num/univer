@@ -8,7 +8,7 @@ UniverSheet Plugin Frozen
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/sheets-plugin-freeze
 ```
 

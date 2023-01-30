@@ -8,7 +8,7 @@ UniverSheet Plugin ImportXlsx
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/sheets-plugin-import-xlsx
 ```
 

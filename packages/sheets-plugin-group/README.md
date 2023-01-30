@@ -8,7 +8,7 @@ UniverSheet Plugin Group
 
 ### Installation
 
-```bash
+```shell
 npm i @univerjs/sheets-plugin-group
 ```
 

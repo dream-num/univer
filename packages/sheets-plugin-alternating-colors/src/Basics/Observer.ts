@@ -1,4 +1,4 @@
-import { Plugin, Observable } from '@univer/core';
+import { Plugin, Observable } from '@univerjs/core';
 
 export type AlternatingColorsPluginObserve = {
     onAfterChangeFontFamilyObservable: Observable<string>;

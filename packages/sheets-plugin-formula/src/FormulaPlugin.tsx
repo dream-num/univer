@@ -1,6 +1,6 @@
-import { SheetContext, IOCContainer, UniverSheet, Plugin } from '@univer/core';
-import { CellEditExtensionManager, CellInputExtensionManager } from '@univer/base-sheets';
-import { FormulaEnginePlugin } from '@univer/base-formula-engine';
+import { SheetContext, IOCContainer, UniverSheet, Plugin } from '@univerjs/core';
+import { CellEditExtensionManager, CellInputExtensionManager } from '@univerjs/base-sheets';
+import { FormulaEnginePlugin } from '@univerjs/base-formula-engine';
 import { zh, en } from './Locale';
 
 import { IFormulaConfig } from './Basic/Interfaces/IFormula';
@@ -62,6 +62,34 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
         });
 
         this.registerExtension();
+
+        // this._arrayFormLineControl.addArrayFormLineToSheet(
+        //     {
+        //         startRow: 1,
+        //         endRow: 3,
+        //         startColumn: 1,
+        //         endColumn: 3,
+        //     },
+        //     'sheet-0004'
+        // );
+        // this._arrayFormLineControl.addArrayFormLineToSheet(
+        //     {
+        //         startRow: 4,
+        //         endRow: 5,
+        //         startColumn: 4,
+        //         endColumn: 5,
+        //     },
+        //     'sheet-0004'
+        // );
+        // this._arrayFormLineControl.addArrayFormLineToSheet(
+        //     {
+        //         startRow: 5,
+        //         endRow: 6,
+        //         startColumn: 5,
+        //         endColumn: 6,
+        //     },
+        //     'sheet-0003'
+        // );
     }
 
     onMapping(IOC: IOCContainer): void {}

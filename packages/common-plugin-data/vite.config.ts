@@ -31,7 +31,7 @@ export default defineConfig({
     plugins: [
         createExternal({
             externals: {
-                '@univer/core': '@univer/core'
+                '@univerjs/core': '@univerjs/core'
             },
         }),
     ],

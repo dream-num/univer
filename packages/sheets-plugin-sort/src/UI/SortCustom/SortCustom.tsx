@@ -8,8 +8,8 @@ import {
     BaseSelectProps,
     Component,
     FunctionComponent,
-} from '@univer/base-component';
-import { SheetContext } from '@univer/core';
+} from '@univerjs/base-component';
+import { SheetContext } from '@univerjs/core';
 
 import styles from './index.module.less';
 

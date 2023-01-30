@@ -1,4 +1,4 @@
-import { CommandManager } from '@univer/core';
+import { CommandManager } from '@univerjs/core';
 import { ACTION_NAMES } from '../Enum/ACTION_NAMES';
 import { DescSortAction, AscSortAction } from '.';
 

@@ -1,4 +1,4 @@
-# style-universheet
+# style-univer
 
 简体中文 | [English](./README.md)
 
@@ -8,14 +8,14 @@ UniverSheet Spreadsheet 插件
 
 ### 安装
 
-```bash
-npm i @univer/base-render
+```shell
+npm i @univerjs/base-render
 ```
 
 ### 使用
 
 ```js
-import {Spreadsheet} from '@univer/base-render'
+import { Spreadsheet } from '@univerjs/base-render';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Spreadsheet());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/base-render dev
+pnpm run --filter  @univerjs/base-render dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/base-render dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/base-render build
+pnpm run --filter  @univerjs/base-render build
 ```

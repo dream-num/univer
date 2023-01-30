@@ -1,4 +1,4 @@
-import { getColor, Rect, Documents, DocumentSkeleton, CustomObject, IPageRenderConfig, Transform, ptToPx } from '@univer/base-render';
+import { getColor, Rect, Documents, DocumentSkeleton, CustomObject, IPageRenderConfig, Transform, ptToPx } from '@univerjs/base-render';
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 import { DOCS_VIEW_KEY } from './DocsView';
 

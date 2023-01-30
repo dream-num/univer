@@ -1,4 +1,4 @@
-# style-universheet
+# style-univer
 
 简体中文 | [English](./README.md)
 
@@ -8,14 +8,14 @@ UniverSheet FormulaEngine 插件
 
 ### 安装
 
-```bash
-npm i @univer/base-formula-engine
+```shell
+npm i @univerjs/base-formula-engine
 ```
 
 ### 使用
 
 ```js
-import {FormulaEngine} from '@univer/base-formula-engine'
+import { FormulaEngine } from '@univerjs/base-formula-engine';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new FormulaEngine());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/base-formula-engine dev
+pnpm run --filter  @univerjs/base-formula-engine dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/base-formula-engine dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/base-formula-engine build
+pnpm run --filter  @univerjs/base-formula-engine build
 ```

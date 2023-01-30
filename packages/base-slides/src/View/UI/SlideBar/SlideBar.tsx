@@ -1,5 +1,5 @@
-import { BaseComponentRender, BaseComponentSheet, Component, createRef } from '@univer/base-component';
-import { PLUGIN_NAMES, ISlidePage } from '@univer/core';
+import { BaseComponentRender, BaseComponentSheet, Component, createRef } from '@univerjs/base-component';
+import { PLUGIN_NAMES, ISlidePage } from '@univerjs/core';
 import styles from './index.module.less';
 
 interface SlideBarState {

@@ -1,5 +1,5 @@
-import { Workbook } from '@univer/core';
-import { Rect, Scene } from '@univer/base-render';
+import { Workbook } from '@univerjs/core';
+import { Rect, Scene } from '@univerjs/base-render';
 import { SheetView } from '../View/Render/Views';
 import { AntLine, AntLineModel, IAntLineRange } from '../Model/AntLineModel';
 import { SheetPlugin } from '../SheetPlugin';
@@ -99,6 +99,7 @@ export class AntLineControl {
             height: totalHeight,
             width: totalWidth,
             strokeDashArray: [5],
+            evented: false,
         });
     }
 

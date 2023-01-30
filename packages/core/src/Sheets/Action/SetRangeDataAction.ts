@@ -28,6 +28,8 @@ export class SetRangeDataAction extends SheetActionBase<
     ISetRangeDataActionData,
     ObjectMatrixPrimitiveType<ICellData>
 > {
+    static NAME = 'SetRangeDataAction';
+
     constructor(
         actionData: ISetRangeDataActionData,
         commandUnit: CommandUnit,

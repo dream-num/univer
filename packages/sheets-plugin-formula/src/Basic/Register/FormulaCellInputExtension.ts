@@ -1,6 +1,6 @@
-import { BaseCellInputExtension, BaseCellInputExtensionFactory, ICell } from '@univer/base-sheets';
-import { IFormulaData } from '@univer/base-formula-engine';
-import { IRangeData, Nullable } from '@univer/core';
+import { BaseCellInputExtension, BaseCellInputExtensionFactory, ICell } from '@univerjs/base-sheets';
+import { IFormulaData } from '@univerjs/base-formula-engine';
+import { IRangeData, Nullable } from '@univerjs/core';
 import { FormulaPlugin } from '../../FormulaPlugin';
 
 export class FormulaCellInputExtension extends BaseCellInputExtension {
@@ -65,7 +65,7 @@ export class FormulaCellInputExtensionFactory extends BaseCellInputExtensionFact
         const { row, column } = cell;
         let formula;
         const formulaData = this._plugin.getFormulaController().getDataModel().getFormulaData();
-        const arrayFormulaData = this._plugin.getFormulaController().getArrayFormulaData();
+        const arrayFormulaData = this._plugin.getFormulaController().getDataModel().getArrayFormulaData();
 
         if (!arrayFormulaData) return null;
 

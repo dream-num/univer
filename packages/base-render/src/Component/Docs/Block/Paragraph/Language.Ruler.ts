@@ -1,4 +1,4 @@
-import { Nullable } from '@univer/core';
+import { Nullable } from '@univerjs/core';
 import { createSkeletonLetterSpan, createSkeletonWordSpan } from '../../Common/Span';
 import { hasArabic, hasCJK, hasSpaceAndTab, hasTibetan } from '../../../../Basics/Tools';
 import { IDocumentSkeletonSpan } from '../../../../Basics/IDocumentSkeletonCached';

@@ -12,7 +12,7 @@ import {
     PositionedObjectLayoutType,
     SectionType,
     WrapTextType,
-} from '@univer/core';
+} from '@univerjs/core';
 
 export const DOCS_DEMO_DATA: IDocumentData = {
     id: 'd',

@@ -11,7 +11,7 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     SpacingRule,
-} from '@univer/core';
+} from '@univerjs/core';
 import {
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,

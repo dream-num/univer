@@ -1,4 +1,4 @@
-import { Worksheet } from '@univer/core';
+import { Worksheet } from '@univerjs/core';
 
 export function SetFrozenCancel(worksheet: Worksheet): number[] {
     // get config

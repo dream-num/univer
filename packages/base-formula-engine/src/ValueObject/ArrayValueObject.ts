@@ -1,4 +1,4 @@
-import { CellValueType, Nullable, ObjectArray, ObjectMatrix } from '@univer/core';
+import { CellValueType, Nullable, ObjectArray, ObjectMatrix } from '@univerjs/core';
 import { fromObjectToString } from '../Basics/Calculate';
 import { CalculateValueType, IArrayValueObject } from '../Basics/Common';
 import { ErrorType, ERROR_TYPE_SET } from '../Basics/ErrorType';

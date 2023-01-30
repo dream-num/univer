@@ -1,4 +1,4 @@
-import { CommandManager } from '@univer/core';
+import { CommandManager } from '@univerjs/core';
 import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
 import { AddAllowedAction } from './AddAllowedAction';
 import { AddUnlockAction } from './AddUnlockAction';

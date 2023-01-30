@@ -1,4 +1,4 @@
-import { ContextBase } from '@univer/core';
+import { ContextBase } from '@univerjs/core';
 import { en, zh } from '../Locale';
 import { IFontLocale } from '../Basics/Interfaces';
 

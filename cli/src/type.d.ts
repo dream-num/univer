@@ -1,2 +1,2 @@
 export * from './index';
-declare module '@univer/cli' {}
+declare module '@univerjs/cli' {}

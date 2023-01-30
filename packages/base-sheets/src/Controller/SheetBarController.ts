@@ -1,13 +1,26 @@
-import { BaseUlProps } from '@univer/base-component';
-import { ACTION_NAMES, CommandManager, NameGen, Nullable, PLUGIN_NAMES, SheetActionBase } from '@univer/core';
+import { BaseMenuItem, BaseUlProps } from '@univerjs/base-component';
+import { ACTION_NAMES, CommandManager, NameGen, Nullable, PLUGIN_NAMES, SheetActionBase } from '@univerjs/core';
+import { ColorPicker } from '@univerjs/style-univer';
 import { SheetBarModel } from '../Model/SheetBarModel';
 import { SheetBar } from '../View/UI/SheetBar';
 import { SheetPlugin } from '../SheetPlugin';
+import styles from '../View/UI/SheetBar/index.module.less';
+
+interface CustomComponent {
+    name: string;
+    props?: Record<string, any>;
+}
 
 interface SheetUlProps extends BaseUlProps {
     index: string;
     color?: Nullable<string>;
     sheetId: string;
+}
+
+interface SheetUl extends BaseMenuItem {
+    locale?: string;
+    customLabel?: CustomComponent;
+    children?: SheetUl[];
 }
 
 class SheetBarUIController {
@@ -21,7 +34,7 @@ class SheetBarUIController {
 
     private _sheetList: SheetUlProps[];
 
-    private _sheetUl: BaseUlProps[];
+    private _sheetUl: SheetUl[];
 
     private _menuList: SheetUlProps[];
 
@@ -31,74 +44,137 @@ class SheetBarUIController {
      */
     constructor(barControl: SheetBarControl) {
         this._barControl = barControl;
+        const pluginName = barControl.getPlugin().getPluginName();
+
         this._sheetUl = [
             {
                 locale: 'sheetConfig.delete',
-                onClick: (...arg) => {
-                    arg[1].ref.hideSelect();
+                onClick: () => {
                     barControl.deleteSheet();
                 },
             },
             {
                 locale: 'sheetConfig.copy',
-                onClick: (...arg) => {
-                    arg[1].ref.hideSelect();
+                onClick: () => {
                     barControl.copySheet();
                 },
             },
             {
                 locale: 'sheetConfig.rename',
-                onClick: (...arg) => {
-                    arg[1].ref.hideSelect();
+                onClick: () => {
                     barControl.reNameSheet();
                 },
             },
             {
                 locale: 'sheetConfig.changeColor',
-                icon: 'RightIcon',
+                border: true,
+                className: styles.selectColorPickerParent,
                 children: [
                     {
-                        selectType: 'jsx',
-                        label: 'ColorPicker',
-                        onClick: (color: string) => {
-                            barControl.setSheetColor(color);
+                        customLabel: {
+                            name: pluginName + ColorPicker.name,
+                            props: {
+                                onClick: (color: string) => {
+                                    barControl.setSheetColor(color);
+                                },
+                                lang: {
+                                    collapseLocale: 'colorPicker.collapse',
+                                    customColorLocale: 'colorPicker.customColor',
+                                    confirmColorLocale: 'colorPicker.confirmColor',
+                                    cancelColorLocale: 'colorPicker.cancelColor',
+                                    changeLocale: 'colorPicker.change',
+                                },
+                            },
                         },
+                        className: styles.selectColorPicker,
                     },
                 ],
             },
             {
                 locale: 'sheetConfig.hide',
-                border: true,
-                onClick: (...arg) => {
-                    arg[1].ref.hideSelect();
+                onClick: () => {
                     barControl.hideSheet();
                 },
             },
             {
                 locale: 'sheetConfig.unhide',
-                onClick: (...arg) => {
-                    arg[1].ref.hideSelect();
+                onClick: () => {
                     barControl.unHideSheet();
                 },
+                border: true,
             },
             {
                 locale: 'sheetConfig.moveLeft',
-                border: true,
-                onClick: (...arg) => {
-                    arg[1].ref.hideSelect();
+                onClick: () => {
                     barControl.moveSheet('left');
                 },
             },
             {
                 locale: 'sheetConfig.moveRight',
-                onClick: (...arg) => {
-                    arg[1].ref.hideSelect();
+                onClick: () => {
                     barControl.moveSheet('right');
                 },
             },
         ];
         this._initializeData();
         this._initializeObserver();
+    }
+
+    resetLabel(label: string[] | string) {
+        const locale = this._barControl.getPlugin().getContext().getLocale();
+
+        let str = '';
+
+        if (label instanceof Array) {
+            label.forEach((item) => {
+                if (item.includes('.')) {
+                    str += locale.get(item);
+                } else {
+                    str += item;
+                }
+            });
+        } else {
+            if (label.includes('.')) {
+                str = locale.get(label);
+            } else {
+                str += label;
+            }
+        }
+
+        return str;
+    }
+
+    findLocale(obj: any) {
+        for (let k in obj) {
+            if (k === 'locale') {
+                obj.label = this.resetLabel(obj[k]);
+            } else if (k.endsWith('Locale')) {
+                const index = k.indexOf('Locale');
+                obj[k.slice(0, index)] = this.resetLabel(obj[k]);
+            } else if (!obj[k].$$typeof) {
+                if (Object.prototype.toString.call(obj[k]) === '[object Object]') {
+                    this.findLocale(obj[k]);
+                } else if (Object.prototype.toString.call(obj[k]) === '[object Array]') {
+                    obj[k] = this.resetSheetUl(obj[k]);
+                }
+            }
+        }
+
+        return obj;
+    }
+
+    resetSheetUl(sheetUl: SheetUl[]) {
+        for (let i = 0; i < sheetUl.length; i++) {
+            let item = sheetUl[i];
+
+            item = this.findLocale(item);
+
+            if (item.children) {
+                item.children = this.resetSheetUl(item.children);
+            }
+        }
+
+        return sheetUl;
     }
 
     /**
@@ -135,7 +211,7 @@ class SheetBarUIController {
         // manager.requiredObserver<SheetBar>('onSheetBarDidMountObservable', PLUGIN_NAMES.SPREADSHEET);
         manager.requiredObserver<SheetBar>('onSheetBarDidMountObservable', PLUGIN_NAMES.SPREADSHEET).add((component) => {
             this._sheetBar = component;
-            this.resetSheetUl();
+            this._sheetUl = this.resetSheetUl(this._sheetUl);
             this._sheetBar.setValue({
                 sheetList: this._sheetList,
                 sheetUl: this._sheetUl,
@@ -164,87 +240,12 @@ class SheetBarUIController {
             });
         });
         context.getContextObserver('onAfterChangeUILocaleObservable').add(() => {
-            this.resetSheetUl();
+            this._sheetUl = this.resetSheetUl(this._sheetUl);
             this._sheetBar.setValue({
                 sheetUl: this._sheetUl,
             });
         });
-        // context.getContextObserver('onAfterInsertSheetObservable').add(() => {
-        //     // update data
-        //     this._initializeData();
-        //     this._sheetBar.setValue({
-        //         sheetList: this._sheetList,
-        //         menuList: this._menuList,
-        //     });
-        // });
-        // context.getContextObserver('onSheetTabColorChangeObservable').add(() => {
-        //     // update data
-        //     this._initializeData();
-        //     this._sheetBar.setValue({
-        //         sheetList: this._sheetList,
-        //         menuList: this._menuList,
-        //     });
-        // });
-        // context.getContextObserver('onAfterRemoveSheetObservable').add((event) => {
-        //     const activeSheet = plugin.getContext().getWorkBook().getActiveSheet();
-        //     if (activeSheet) {
-        //         // update data;
-        //         this._initializeData();
-        //         // set ui bar sheetList;
-        //         this._sheetBar.setValue({
-        //             sheetList: this._sheetList,
-        //             menuList: this._menuList,
-        //         });
-        //         // update canvas
-        //         plugin.getCanvasView().updateToSheet(activeSheet);
-        //         plugin.getMainComponent().makeDirty(true);
-        //     }
-        // });
-        // context.getContextObserver('onAfterChangeSheetNameObservable').add(() => {
-        //     // update data;
-        //     this._initializeData();
-        //     // set ui bar sheetList;
-        //     this._sheetBar.setValue({
-        //         sheetList: this._sheetList,
-        //         menuList: this._menuList,
-        //     });
-        // });
-        // context.getContextObserver('onAfterChangeActiveSheetObservable').add(() => {
-        //     // update data;
-        //     this._initializeData();
-        //     // set ui bar sheetList;
-        //     this._sheetBar.setValue({
-        //         sheetList: this._sheetList,
-        //         menuList: this._menuList,
-        //     });
-        // });
-        // context.getContextObserver('onShowSheetObservable').add(() => {
-        //     // update data;
-        //     this._initializeData();
-        //     // set ui bar sheetList;
-        //     this._sheetBar.setValue({
-        //         sheetList: this._sheetList,
-        //         menuList: this._menuList,
-        //     });
-        // });
-        // context.getContextObserver('onSheetOrderObservable').add(() => {
-        //     // update data;
-        //     this._initializeData();
-        //     // set ui bar sheetList;
-        //     this._sheetBar.setValue({
-        //         sheetList: this._sheetList,
-        //         menuList: this._menuList,
-        //     });
-        // });
-        // context.getContextObserver('onHideSheetObservable').add(() => {
-        //     // update data;
-        //     this._initializeData();
-        //     // set ui bar sheetList;
-        //     this._sheetBar.setValue({
-        //         sheetList: this._sheetList,
-        //         menuList: this._menuList,
-        //     });
-        // });
+
         CommandManager.getActionObservers().add((actionEvent) => {
             const action = actionEvent.action as SheetActionBase<any>;
             const workbook = action.getWorkBook();
@@ -284,7 +285,6 @@ class SheetBarUIController {
             hidden: sheet.isSheetHidden(),
             selected: sheet.getStatus() === 1,
             onClick: (e: MouseEvent) => {
-                console.log('000000000');
                 const target = e.currentTarget as HTMLDivElement;
                 this._dataId = target.dataset.id as string;
                 sheet.showSheet();
@@ -296,7 +296,6 @@ class SheetBarUIController {
             .map((sheet, index) => ({
                 sheetId: sheet.getSheetId(),
                 label: sheet.getName(),
-                icon: 'NextIcon',
                 index: String(index),
                 selected: sheet.getStatus() === 1,
                 color: sheet.getTabColor() as string,
@@ -316,81 +315,15 @@ class SheetBarUIController {
     }
 
     /**
-     * reset sheet ui
-     */
-    resetSheetUl() {
-        const locale = this._barControl.getPlugin().context.getLocale();
-        this._sheetUl.forEach((item: BaseUlProps) => {
-            item.label = locale.get(item.locale as string);
-        });
-    }
-
-    /**
      * 选中sheet
      * @param args
      */
-    selectSheet(...args: any[]) {
-        // const index = args[1].index;
-        // this._menuList.forEach((item) => {
-        //     item.selected = false;
-        // });
-        // this._menuList[index].selected = true;
-        // this._menuList[index].hidden = false;
-        // this._sheetList.forEach((item) => {
-        //     item.selected = false;
-        //     if (item.index === this._menuList[index].index) {
-        //         item.hideLi = false;
-        //         item.selected = true;
-        //     }
-        // });
-        // this._sheetBar.setValue({ sheetList: this._sheetList, menuList: this._menuList });
-    }
+    selectSheet() {}
 
     /**
      * 删除sheet
      */
-    deleteSheet() {
-        // const index = this._sheetList.findIndex((item) => item.index === this._dataId);
-        //
-        // let length = 0;
-        // this._menuList.forEach((item) => {
-        //     if (!item.hidden) {
-        //         length++;
-        //     }
-        // });
-        // if (length === 1) {
-        //     alert('至少需要一个sheet');
-        //     return;
-        // }
-        //
-        // let selectIndex: number = 0;
-        // let flag = false;
-        // for (let i = index; i < this._menuList.length; i++) {
-        //     if (!this._menuList[i].hidden) {
-        //         selectIndex = i;
-        //         flag = true;
-        //         break;
-        //     }
-        // }
-        // if (!flag) {
-        //     for (let i = index - 1; i > -1; i--) {
-        //         if (!this._menuList[i].hidden) {
-        //             selectIndex = i;
-        //             break;
-        //         }
-        //     }
-        // }
-        //
-        // this._sheetList[selectIndex].selected = true;
-        // this._sheetList.splice(index, 1);
-        //
-        // this._sheetBar.setValue(
-        //     {
-        //         sheetList: this._sheetList,
-        //     },
-        //     () => this.sortMenu(selectIndex)
-        // );
-    }
+    deleteSheet() {}
 
     /**
      * 排序menu list
@@ -398,36 +331,12 @@ class SheetBarUIController {
      * @param hidden
      * @param hideIndex
      */
-    sortMenu(index: number, hidden?: boolean, hideIndex?: number) {
-        // const menu: SheetUlProps[] = [];
-        // this._sheetList.forEach((item) => {
-        //     this._menuList.forEach((ele) => {
-        //         if (item.index === ele.index) {
-        //             ele.selected = false;
-        //             ele.label = item.label;
-        //             menu.push(ele);
-        //         }
-        //     });
-        // });
-        // if (hidden && hideIndex) {
-        //     menu[hideIndex].hidden = true;
-        // }
-        // menu[index].selected = true;
-        // this._sheetBar.setValue({
-        //     menuList: this._menuList,
-        // });
-    }
+    sortMenu(index: number, hidden?: boolean, hideIndex?: number) {}
 
     /**
      * 复制sheet
      */
-    copySheet() {
-        // const index = this._sheetList.findIndex((item) => item.index === this._dataId);
-        // this.addSheet(`${index + 1}`, {
-        //     label: `${this._sheetList[index].label}副本`,
-        //     index: `${this._sheetIndex}`,
-        // });
-    }
+    copySheet() {}
 
     /**
      * 增加sheet
@@ -435,39 +344,6 @@ class SheetBarUIController {
      * @param config
      */
     addSheet(position?: string, config?: SheetUlProps): void {
-        // this._menuList.forEach((item) => {
-        //     item.selected = false;
-        // });
-        // if (position) {
-        //     if (config) {
-        //         this._sheetList.splice(+position, 0, { ...config, icon: 'NextIcon' });
-        //         this._menuList.splice(+position, 0, { ...config, selected: true });
-        //     } else {
-        //         this._sheetList.splice(+position, 0, {
-        //             label: `sheet${this._sheetIndex}`,
-        //             icon: 'NextIcon',
-        //             index: `${this._sheetIndex}`,
-        //         });
-        //         this._menuList.splice(+position, 0, {
-        //             label: `sheet${this._sheetIndex}`,
-        //             selected: true,
-        //             index: `${this._sheetIndex}`,
-        //         });
-        //     }
-        // } else {
-        //     this._sheetList.push({
-        //         label: `sheet${this._sheetIndex}`,
-        //         icon: 'NextIcon',
-        //         index: `${this._sheetIndex}`,
-        //     });
-        //     this._menuList.push({
-        //         label: `sheet${this._sheetIndex}`,
-        //         selected: true,
-        //         index: `${this._sheetIndex}`,
-        //     });
-        // }
-        //
-        // this._sheetIndex++;
         this._sheetBar.setValue({ sheetList: this._sheetList, menuList: this._menuList }, () => {
             this._sheetBar.overGrid();
         });
@@ -483,44 +359,7 @@ class SheetBarUIController {
     /**
      * 隐藏sheet
      */
-    hideSheet() {
-        // const index = this._sheetList.findIndex((item) => item.index === this._dataId);
-        // let length = 0;
-        // this._menuList.forEach((item) => {
-        //     if (!item.hidden) {
-        //         length++;
-        //     }
-        // });
-        // if (length === 1) {
-        //     alert('至少需要一个sheet');
-        //     return;
-        // }
-        // let selectIndex: number = 0;
-        // let flag = false;
-        // for (let i = index + 1; i < this._menuList.length; i++) {
-        //     if (!this._menuList[i].hidden) {
-        //         selectIndex = i;
-        //         flag = true;
-        //         break;
-        //     }
-        // }
-        // if (!flag) {
-        //     for (let i = index - 1; i > -1; i--) {
-        //         if (!this._menuList[i].hidden) {
-        //             selectIndex = i;
-        //             break;
-        //         }
-        //     }
-        // }
-        // this._sheetList[index].hideLi = true;
-        // this._sheetList[selectIndex].selected = true;
-        // this._sheetBar.setValue(
-        //     {
-        //         sheetList: this._sheetList,
-        //     },
-        //     () => this.sortMenu(selectIndex, true, index)
-        // );
-    }
+    hideSheet() {}
 
     /**
      * 取消隐藏sheet
@@ -533,41 +372,13 @@ class SheetBarUIController {
      * 向左向右移动sheet
      * @param direct
      */
-    moveSheet(direct: string) {
-        // const index = this._sheetList.findIndex((item) => item.index === this._dataId);
-        // if (direct === 'left') {
-        //     if (!index) return;
-        //     const item = this._sheetList.splice(index - 1, 1)[0];
-        //     this._sheetList.splice(index, 0, item);
-        // } else {
-        //     if (index === this._sheetList.length - 1) return;
-        //     const item = this._sheetList.splice(index, 1)[0];
-        //     this._sheetList.splice(index + 1, 0, item);
-        // }
-        // this._sheetBar.setValue(
-        //     {
-        //         sheetList: this._sheetList,
-        //     },
-        //     () => this.sortMenu(index)
-        // );
-    }
+    moveSheet(direct: string) {}
 
     /**
      * 重命名sheet
      * @param e
      */
-    changeSheetName(e: Event) {
-        // const target = e.target as HTMLDivElement;
-        // const index = this._sheetList.findIndex((item) => item.index === this._dataId);
-        // this._sheetList[index].label = target.innerText;
-        //
-        // this._sheetBar.setValue(
-        //     {
-        //         sheetList: this._sheetList,
-        //     },
-        //     () => this.sortMenu(index)
-        // );
-    }
+    changeSheetName(e: Event) {}
 
     /**
      * 右击显示菜单
@@ -665,6 +476,13 @@ class SheetBarAPIControl {
         const context = plugin.getContext();
         const workbook = context.getWorkBook();
         workbook.insertSheet();
+
+        const size = workbook.getSheetSize();
+        const sheets = workbook.getSheets();
+        const lastSheet = sheets[size - 1];
+        if (lastSheet) {
+            lastSheet.activate();
+        }
     }
 
     /**

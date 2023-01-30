@@ -1,16 +1,15 @@
-import { FormulaEnginePlugin, IInterpreterDatasetConfig, SheetDataType, UnitDataType, SheetNameMapType, ArrayFormulaDataType } from '@univer/base-formula-engine';
-import { SheetPlugin } from '@univer/base-sheets';
-import { PLUGIN_NAMES, SheetContext } from '@univer/core';
+import { FormulaEnginePlugin, IInterpreterDatasetConfig, SheetDataType, UnitDataType, SheetNameMapType, ArrayFormulaDataType } from '@univerjs/base-formula-engine';
+import { SheetPlugin } from '@univerjs/base-sheets';
+import { PLUGIN_NAMES, SheetContext } from '@univerjs/core';
 import { FORMULA_PLUGIN_NAME, CONFIG } from '../Basic';
 import { IFormulaConfig } from '../Basic/Interfaces/IFormula';
 import { FormulaPlugin } from '../FormulaPlugin';
 import { FormulaDataModel } from '../Model/FormulaDataModel';
 import { FormulaLabel } from '../View/UI/FormulaLabel';
+import { ArrayFormulaLineControl } from './ArrayFormulaLineController';
 
 export class FormulaController {
     private _formulaDataModel: FormulaDataModel;
-
-    private _arrayFormulaData: ArrayFormulaDataType;
 
     private _formulaEngine: FormulaEnginePlugin;
 
@@ -20,12 +19,18 @@ export class FormulaController {
 
     private _sheetPlugin: SheetPlugin;
 
+    private _activeSheetId: string;
+
+    private _arrayFormulaLineControls: ArrayFormulaLineControl[] = [];
+
     constructor(private _plugin: FormulaPlugin, config?: IFormulaConfig) {
         this._formulaDataModel = new FormulaDataModel(config);
 
         this._context = this._plugin.getContext();
 
         this._sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+
+        this._activeSheetId = this._sheetPlugin.getWorkbook().getActiveSheet().getSheetId();
 
         this._initRegisterComponent();
 
@@ -69,6 +74,24 @@ export class FormulaController {
                     onClick: () => this._plugin.getSearchFormulaController().showFormulaModal('SearchFormula', true),
                 },
             ],
+        });
+
+        this._initialize();
+    }
+
+    private _initialize() {
+        this._sheetPlugin
+            .getContext()
+            .getContextObserver('onAfterChangeActiveSheetObservable')
+            .add(() => {
+                this._activeSheetId = this._sheetPlugin.getWorkbook().getActiveSheet().getSheetId();
+                this.clearArrayFormulaLineControl();
+                this.renderArrayFormulaLineControl();
+            });
+
+        this._sheetPlugin.getObserver('onChangeSelectionObserver')?.add(() => {
+            this.clearArrayFormulaLineControl();
+            this.renderArrayFormulaLineControl();
         });
     }
 
@@ -144,11 +167,39 @@ export class FormulaController {
         };
     }
 
-    getArrayFormulaData(): ArrayFormulaDataType {
-        return this._arrayFormulaData;
+    addArrayFormulaData(value: ArrayFormulaDataType) {
+        this._formulaDataModel.setArrayFormulaData(value);
+
+        this.clearArrayFormulaLineControl();
+        this.renderArrayFormulaLineControl();
     }
 
-    setArrayFormulaData(value: ArrayFormulaDataType) {
-        this._arrayFormulaData = value;
+    clearArrayFormulaLineControl() {
+        const arrayFormulaLineControls = this._arrayFormulaLineControls;
+        if (arrayFormulaLineControls.length > 0) {
+            for (let control of arrayFormulaLineControls) {
+                control.dispose();
+            }
+        }
+
+        this._arrayFormulaLineControls = [];
+    }
+
+    renderArrayFormulaLineControl() {
+        const arrayFormulaData = this._formulaDataModel.getArrayFormulaData();
+        const arrayFormula = arrayFormulaData[this._activeSheetId];
+        if (!arrayFormula) return;
+
+        const currentCellData = this._sheetPlugin.getSelectionManager().getCurrentCellData();
+
+        arrayFormula.forValue((r, c, v) => {
+            const { startRow, startColumn, endRow, endColumn } = v;
+            if (currentCellData) {
+                const { startRow: row, startColumn: column } = currentCellData;
+                if (row >= startRow && row < endRow && column >= startColumn && column < endColumn) {
+                    this._arrayFormulaLineControls.push(new ArrayFormulaLineControl(this._plugin, this._activeSheetId, v));
+                }
+            }
+        });
     }
 }

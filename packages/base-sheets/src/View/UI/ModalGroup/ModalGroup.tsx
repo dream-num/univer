@@ -1,5 +1,5 @@
-import { Component } from '@univer/base-component';
-import { PLUGIN_NAMES } from '@univer/core';
+import { Component } from '@univerjs/base-component';
+import { PLUGIN_NAMES } from '@univerjs/core';
 import { ModalGroupProps } from '../../../Controller/ModalGroupController';
 import { SheetPlugin } from '../../../SheetPlugin';
 

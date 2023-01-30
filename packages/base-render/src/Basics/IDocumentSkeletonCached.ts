@@ -9,7 +9,7 @@ import {
     IIndentStart,
     PageOrientType,
     IElement,
-} from '@univer/core';
+} from '@univerjs/core';
 
 export interface IDocumentSkeletonCached extends ISkeletonResourceReference {
     pages: IDocumentSkeletonPage[];

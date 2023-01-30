@@ -39,7 +39,7 @@ export default defineConfig({
         preact(),
         createExternal({
             externals: {
-                '@univer/core': '@univer/core',
+                '@univerjs/core': '@univerjs/core',
             },
         }),
     ],

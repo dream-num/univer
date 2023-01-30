@@ -18,7 +18,7 @@ import {
     WrapTextType,
     BulletAlignment,
     GlyphType,
-} from '@univer/core';
+} from '@univerjs/core';
 
 const richTextTestFloat: IDocumentData = {
     id: 'd',

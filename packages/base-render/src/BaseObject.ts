@@ -1,4 +1,4 @@
-import { EventState, IKeyValue, Observable, Observer, Nullable } from '@univer/core';
+import { EventState, IKeyValue, Observable, Observer, Nullable } from '@univerjs/core';
 import { IBoundRect, Vector2 } from './Basics/Vector2';
 
 import { Transform } from './Basics/Transform';

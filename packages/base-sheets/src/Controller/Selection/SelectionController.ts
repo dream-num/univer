@@ -1,5 +1,5 @@
-import { Rect, Group, Spreadsheet } from '@univer/base-render';
-import { Nullable, ISelection, ICellInfo } from '@univer/core';
+import { Rect, Group, Spreadsheet } from '@univerjs/base-render';
+import { Nullable, ISelection, ICellInfo } from '@univerjs/core';
 import { SelectionModel } from '../../Model/SelectionModel';
 import { SelectionControlDragAndDrop } from './SelectionControlDragDrop';
 import { SelectionControlFill } from './SelectionControlFill';

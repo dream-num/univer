@@ -17,7 +17,7 @@ For multi-package projects managed by lerna, there are plugins and cores in the 
 
 Node.js >= 14.19
 
-```bash
+```shell
 git clone http://github.com/dream-num/univer
 cd univer
 npm i -g pnpm # MacOS : sudo npm i -g pnpm
@@ -30,14 +30,14 @@ npm run dev
 
 Execute a command in a subpackage
 
-```bash
+```shell
 pnpm run --filter  [package name] [command]
 ```
 
 For example, start the `dev` development mode of the `packages/sheets-plugin-sort` project
 
-```bash
-pnpm run --filter @univer/sheets-plugin-sort dev
+```shell
+pnpm run --filter @univerjs/sheets-plugin-sort dev
 
 ```
 
@@ -45,7 +45,7 @@ pnpm run --filter @univer/sheets-plugin-sort dev
 
 If you encounter any npm installation problems, please try one-click reinstallation of dependencies first
 
-```bash
+```shell
 npm run clean
 ```
 
@@ -53,7 +53,7 @@ npm run clean
 
 1. Quickly generate plug-in template directory
 
-```bash
+```shell
 npm run cli
 ```
 
@@ -61,8 +61,8 @@ npm run cli
 
 3. Execute the following command to start the plug-in development mode
 
-```bash
-pnpm run --filter  @univer/sheets-plugin-filter dev
+```shell
+pnpm run --filter  @univerjs/sheets-plugin-filter dev
 ```
 
 4. There will be an additional `filter` plugin button in the toolbar on the interface
@@ -84,6 +84,6 @@ function(){
 
 ## Update a dependency package
 
-```bash
+```shell
 pnpm update
 ```

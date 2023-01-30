@@ -1,4 +1,4 @@
-import { IRangeData, ObjectMatrix } from '@univer/core';
+import { IRangeData, ObjectMatrix } from '@univerjs/core';
 import { getCellByIndex } from '../../../Basics/Tools';
 import { ComponentExtension } from '../../Extension';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';

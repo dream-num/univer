@@ -1,4 +1,4 @@
-import { EventState, Observable, Observer, sortRules, sortRulesByDesc, Nullable } from '@univer/core';
+import { EventState, Observable, Observer, sortRules, sortRulesByDesc, Nullable } from '@univerjs/core';
 import { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './Basics/IEvents';
 
 import { requestNewFrame, precisionTo } from './Basics/Tools';
@@ -414,6 +414,17 @@ export class Scene {
         const layers = this.getLayers();
         for (let layer of layers) {
             layer.removeObject(object);
+        }
+        return this;
+    }
+
+    removeObjects(objects?: BaseObject[] | string[]) {
+        if (objects == null) {
+            return;
+        }
+        const layers = this.getLayers();
+        for (let layer of layers) {
+            layer.removeObjects(objects);
         }
         return this;
     }

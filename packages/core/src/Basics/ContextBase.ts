@@ -69,4 +69,8 @@ export abstract class ContextBase {
     getCommandManager(): CommandManager {
         return this._commandManager;
     }
+
+    getUniver(): Univer {
+        return this._univer;
+    }
 }

@@ -1,4 +1,4 @@
-import { SheetContext, IOCContainer, Observable, Plugin } from '@univer/core';
+import { SheetContext, IOCContainer, Observable, Plugin } from '@univerjs/core';
 
 export type BulletPluginObserve = {
     onAfterChangeFontFamilyObservable: Observable<any>;

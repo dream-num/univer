@@ -1,5 +1,5 @@
-import { $$, selectTextContent, selectTextContentCross, textTrim } from '@univer/base-component';
-import { Color } from '@univer/core';
+import { $$, selectTextContent, selectTextContentCross, textTrim } from '@univerjs/base-component';
+import { Color } from '@univerjs/core';
 import styles from './index.module.less';
 
 interface IStyleSetting {

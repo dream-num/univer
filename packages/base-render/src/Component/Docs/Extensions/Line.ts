@@ -1,4 +1,4 @@
-import { BooleanNumber, getColorStyle, TextDecoration, IScale } from '@univer/core';
+import { BooleanNumber, getColorStyle, TextDecoration, IScale } from '@univerjs/core';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../Extension';
 import { docExtension } from '../DocExtension';
 import { IDocumentSkeletonSpan } from '../../../Basics/IDocumentSkeletonCached';

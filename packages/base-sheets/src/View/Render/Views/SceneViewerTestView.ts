@@ -13,19 +13,19 @@ import {
     SpreadsheetRowTitle,
     SpreadsheetSkeleton,
     Viewport,
-} from '@univer/base-render';
-import { EventState, Worksheet } from '@univer/core';
+} from '@univerjs/base-render';
+import { EventState, Worksheet } from '@univerjs/core';
 import { SheetPlugin } from '../../../SheetPlugin';
 import { BaseView } from '../BaseView';
 
-export enum SHEET_VIEW_KEY {
+enum SHEET_VIEW_KEY {
     MAIN = '__SpreadsheetRender__Test',
     ROW = '__SpreadsheetRowTitle__Test',
     COLUMN = '__SpreadsheetColumnTitle__Test',
     LEFT_TOP = '__SpreadsheetLeftTopPlaceholder__Test',
 }
 
-export enum CANVAS_VIEW_KEY {
+enum CANVAS_VIEW_KEY {
     MAIN_SCENE = 'mainScene_Test',
     VIEW_MAIN = 'viewMain_Test',
     VIEW_TOP = 'viewTop_Test',

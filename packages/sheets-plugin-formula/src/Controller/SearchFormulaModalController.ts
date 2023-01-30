@@ -1,6 +1,6 @@
-import { ComponentChildren } from '@univer/base-component';
-import { SheetPlugin, CellRangeModal } from '@univer/base-sheets';
-import { PLUGIN_NAMES } from '@univer/core';
+import { ComponentChildren } from '@univerjs/base-component';
+import { SheetPlugin, CellRangeModal } from '@univerjs/base-sheets';
+import { PLUGIN_NAMES } from '@univerjs/core';
 import { FORMULA_PLUGIN_NAME, FunctionList, FunList, SelectCategoryType } from '../Basic';
 import { FormulaPlugin } from '../FormulaPlugin';
 import { SearchFormulaContent } from '../View/UI/SearchFormulaModal/SearchFormulaContent';

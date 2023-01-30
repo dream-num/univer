@@ -11,7 +11,7 @@ import {
     ISize,
     ITextStyle,
     ITransformState,
-} from '@univer/core';
+} from '@univerjs/core';
 import { TextSelection } from '../Component/Docs/Common/TextSelection';
 import { Documents } from '../Component/Docs/Document';
 import {
@@ -116,7 +116,8 @@ export interface IEditorInputConfig {
     event: Event | CompositionEvent | KeyboardEvent;
     content?: string;
     document: Documents;
-    selection?: TextSelection;
+    activeSelection?: TextSelection;
+    selectionList?: TextSelection[];
 }
 
 // export interface IPageConfig {

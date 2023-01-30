@@ -1,4 +1,4 @@
-# style-universheet
+# style-univer
 
 English| [简体中文](./README-zh.md)
 
@@ -8,14 +8,14 @@ UniverSheet Plugin Find
 
 ### Installation
 
-```bash
-npm i @univer/sheets-plugin-find
+```shell
+npm i @univerjs/sheets-plugin-find
 ```
 
 ### Usage
 
 ```js
-import {Find} from '@univer/sheets-plugin-find'
+import { Find } from '@univerjs/sheets-plugin-find';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Find());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/sheets-plugin-find dev
+pnpm run --filter  @univerjs/sheets-plugin-find dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-find dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/sheets-plugin-find build
+pnpm run --filter  @univerjs/sheets-plugin-find build
 ```

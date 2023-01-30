@@ -1,5 +1,5 @@
-import { SheetContext, Plugin, UniverSheet, PLUGIN_NAMES } from '@univer/core';
-import { BaseComponentPlugin } from '@univer/base-component';
+import { SheetContext, Plugin, UniverSheet, PLUGIN_NAMES } from '@univerjs/core';
+import { BaseComponentPlugin } from '@univerjs/base-component';
 import { en, zh } from './Locale';
 import { CLIPBOARD_PLUGIN } from './Const';
 import { Copy, Paste, UniverCopy, UniverPaste } from './Domain';

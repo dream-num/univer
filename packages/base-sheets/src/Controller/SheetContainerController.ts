@@ -1,5 +1,5 @@
-import { CommandManager, ContextBase, ISheetActionData, LocaleType, PLUGIN_NAMES, SheetActionBase, Workbook } from '@univer/core';
-import { BaseComponentSheet, BaseComponentRender, BaseComponentProps, DragManager, getRefElement } from '@univer/base-component';
+import { CommandManager, ContextBase, ISheetActionData, LocaleType, PLUGIN_NAMES, SheetActionBase, Workbook } from '@univerjs/core';
+import { BaseComponentSheet, BaseComponentRender, BaseComponentProps, DragManager, getRefElement } from '@univerjs/base-component';
 
 import { CellRangeModal } from '../View/UI/Common/CellRange/CellRangeModal';
 import { SheetPlugin } from '../SheetPlugin';
@@ -86,10 +86,6 @@ export class SheetContainerController {
         this._initialize();
 
         this._defaultLayout = this._config.layout?.sheetContainerConfig || DefaultSheetContainerConfig;
-        // this._defaultLayout =
-        //     this._config.layout === 'auto'
-        //         ? Tools.deepClone(DefaultSheetContainerConfig) // The defaultLayout must be cloned, otherwise the layout object will be referenced in multiple instances
-        //         : Tools.deepMerge(DefaultSheetContainerConfig, this._config.layout?.sheetContainerConfig);
     }
 
     private _initialize() {

@@ -1,4 +1,4 @@
-# style-universheet
+# style-univer
 
 English| [简体中文](./README-zh.md)
 
@@ -8,14 +8,14 @@ UniverSheet Plugin Spreadsheet
 
 ### Installation
 
-```bash
-npm i @univer/base-render
+```shell
+npm i @univerjs/base-render
 ```
 
 ### Usage
 
 ```js
-import {Spreadsheet} from '@univer/base-render'
+import { Spreadsheet } from '@univerjs/base-render';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Spreadsheet());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/base-render dev
+pnpm run --filter  @univerjs/base-render dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/base-render dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/base-render build
+pnpm run --filter  @univerjs/base-render build
 ```

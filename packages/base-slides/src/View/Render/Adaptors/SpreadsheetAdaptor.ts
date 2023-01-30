@@ -12,8 +12,8 @@ import {
     SpreadsheetRowTitle,
     SpreadsheetSkeleton,
     Viewport,
-} from '@univer/base-render';
-import { ContextBase, EventState, ICellData, IPageElement, ObjectMatrix, PageElementType, SheetContext, Styles, Worksheet } from '@univer/core';
+} from '@univerjs/base-render';
+import { ContextBase, EventState, ICellData, IPageElement, ObjectMatrix, PageElementType, SheetContext, Styles, Worksheet } from '@univerjs/core';
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 
 enum SHEET_VIEW_KEY {

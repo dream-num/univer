@@ -1,7 +1,7 @@
-import { UniverSlide } from '@univer/core';
-import { RenderEngine } from '@univer/base-render';
-import { SlidePlugin } from '@univer/base-slides';
-import { UniverComponentSheet } from '@univer/style-universheet';
+import { UniverSlide } from '@univerjs/core';
+import { RenderEngine } from '@univerjs/base-render';
+import { SlidePlugin } from '@univerjs/base-slides';
+import { UniverComponentSheet } from '@univerjs/style-univer';
 import { <%= projectUpperValue %>Plugin } from './<%= projectUpperValue %>Plugin';
 
 

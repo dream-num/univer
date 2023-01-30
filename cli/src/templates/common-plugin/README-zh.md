@@ -1,4 +1,4 @@
-# style-universheet
+# style-univer
 
 简体中文 | [English](./README.md)
 
@@ -8,14 +8,14 @@ UniverSheet <%= projectUpperValue %>插件
 
 ### 安装
 
-```bash
-npm i @univer/<%= projectName %>
+```shell
+npm i @univerjs/<%= projectName %>
 ```
 
 ### 使用
 
 ```js
-import {<%= projectUpperValue %>} from '@univer/<%= projectName %>'
+import {<%= projectUpperValue %>} from '@univerjs/<%= projectName %>'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new <%= projectUpperValue %>());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/<%= projectName %> dev
+pnpm run --filter  @univerjs/<%= projectName %> dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/<%= projectName %> dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/<%= projectName %> build
+pnpm run --filter  @univerjs/<%= projectName %> build
 ```

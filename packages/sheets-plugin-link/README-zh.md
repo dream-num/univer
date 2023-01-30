@@ -1,4 +1,4 @@
-# style-universheet
+# style-univer
 
 简体中文 | [English](./README.md)
 
@@ -8,14 +8,14 @@ UniverSheet InsertLink 插件
 
 ### 安装
 
-```bash
-npm i @univer/sheets-plugin-insert-link
+```shell
+npm i @univerjs/sheets-plugin-insert-link
 ```
 
 ### 使用
 
 ```js
-import {InsertLink} from '@univer/sheets-plugin-insert-link'
+import { InsertLink } from '@univerjs/sheets-plugin-insert-link';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new InsertLink());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/sheets-plugin-insert-link dev
+pnpm run --filter  @univerjs/sheets-plugin-insert-link dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-insert-link dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/sheets-plugin-insert-link build
+pnpm run --filter  @univerjs/sheets-plugin-insert-link build
 ```

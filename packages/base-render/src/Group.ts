@@ -1,4 +1,4 @@
-import { Nullable, sortRules } from '@univer/core';
+import { Nullable, sortRules } from '@univerjs/core';
 import { Scene } from './Scene';
 import { isString } from './Basics/Tools';
 import { IBoundRect, Vector2 } from './Basics/Vector2';

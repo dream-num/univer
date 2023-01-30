@@ -1,4 +1,4 @@
-# style-universheet
+# style-univer
 
 简体中文 | [English](./README.md)
 
@@ -8,14 +8,14 @@ UniverSheet Find 插件
 
 ### 安装
 
-```bash
-npm i @univer/sheets-plugin-find
+```shell
+npm i @univerjs/sheets-plugin-find
 ```
 
 ### 使用
 
 ```js
-import {Find} from '@univer/sheets-plugin-find'
+import { Find } from '@univerjs/sheets-plugin-find';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Find());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/sheets-plugin-find dev
+pnpm run --filter  @univerjs/sheets-plugin-find dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-find dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/sheets-plugin-find build
+pnpm run --filter  @univerjs/sheets-plugin-find build
 ```

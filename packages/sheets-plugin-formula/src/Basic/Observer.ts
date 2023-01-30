@@ -1,4 +1,4 @@
-import { Observable } from '@univer/core';
+import { Observable } from '@univerjs/core';
 import { FormulaPlugin } from '../FormulaPlugin';
 import { HelpFunction, SearchFunction } from '../View/UI/FormulaPrompt';
 import { SearchFormulaModal } from '../View/UI/SearchFormulaModal/SearchFormulaModal1';

@@ -1,10 +1,10 @@
-import { SheetContext, Plugin, PLUGIN_NAMES, UniverSheet } from '@univer/core';
+import { SheetContext, Plugin, PLUGIN_NAMES, UniverSheet } from '@univerjs/core';
 import { GroupButton } from './View/UI/GroupButton';
 import { zh, en } from './Locale';
 
-import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
-import { IOCContainer } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
+import { IToolBarItemProps, ISlotElement } from '@univerjs/base-component';
+import { IOCContainer } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
 import { GROUP_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
 
 export interface IGroupPluginConfig {}

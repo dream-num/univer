@@ -1,4 +1,4 @@
-import { SheetActionBase, ActionObservers, ActionType, ISheetActionData, ICellInfo, ISelection, Nullable, Workbook } from '@univer/core';
+import { SheetActionBase, ActionObservers, ActionType, ISheetActionData, ICellInfo, ISelection, Nullable, Workbook } from '@univerjs/core';
 import { ACTION_NAMES } from '../../Basics';
 import { SetSelectionValue } from '../Apply/SetSelectionValue';
 

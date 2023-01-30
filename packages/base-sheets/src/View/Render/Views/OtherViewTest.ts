@@ -1,4 +1,4 @@
-import { getColor, Path, Picture, Rect, Circle, RichText, Scene } from '@univer/base-render';
+import { getColor, Path, Picture, Rect, Circle, RichText, Scene } from '@univerjs/base-render';
 import {
     BaselineOffset,
     BlockType,
@@ -11,7 +11,7 @@ import {
     ParagraphElementType,
     PositionedObjectLayoutType,
     WrapTextType,
-} from '@univer/core';
+} from '@univerjs/core';
 import { SheetPlugin } from '../../../SheetPlugin';
 import { BaseView } from '../BaseView';
 

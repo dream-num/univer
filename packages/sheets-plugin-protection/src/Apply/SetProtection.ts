@@ -1,4 +1,4 @@
-import { Worksheet } from '@univer/core';
+import { Worksheet } from '@univerjs/core';
 
 export function SetProtection(workSheet: Worksheet, enable: boolean, password: string): [boolean, string] {
     const protection = workSheet.getProtection();

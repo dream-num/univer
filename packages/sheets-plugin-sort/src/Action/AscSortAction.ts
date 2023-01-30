@@ -1,4 +1,4 @@
-import { SheetActionBase, ActionObservers, ISheetActionData, IRangeData, Workbook } from '@univer/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, IRangeData, Workbook } from '@univerjs/core';
 import { ACTION_NAMES } from '../Enum';
 import { IDescSortData } from './DescSortAction';
 

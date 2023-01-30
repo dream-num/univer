@@ -1,4 +1,4 @@
-import { BooleanNumber, CommandManager } from '@univer/core';
+import { BooleanNumber, CommandManager } from '@univerjs/core';
 import { DocPlugin, IDocPluginConfig } from '../DocPlugin';
 import { InputController } from './InputController';
 

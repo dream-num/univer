@@ -72,7 +72,7 @@ export const DEFAULT_WORKBOOK: IWorkbookConfig = {
  */
 export const DEFAULT_WORKSHEET: IWorksheetConfig = {
     type: SheetTypes.GRID,
-    name: '',
+    name: 'Sheet1',
     id: 'sheet-01',
     tabColor: '',
     hidden: BooleanNumber.FALSE,

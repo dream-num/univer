@@ -1,5 +1,5 @@
-import { Component, createRef, xssDeal } from '@univer/base-component';
-// import { CellInputHandler } from '@univer/sheets-plugin-formula/src/Controller/CellInputHandler';
+import { Component, createRef, xssDeal } from '@univerjs/base-component';
+// import { CellInputHandler } from '@univerjs/sheets-plugin-formula/src/Controller/CellInputHandler';
 import { CellTextStyle } from './CellTextStyle';
 import styles from './index.module.less';
 // interface IProps {

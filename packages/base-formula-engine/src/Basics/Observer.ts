@@ -1,4 +1,4 @@
-import { BooleanNumber, IKeyValue, Observable, Plugin } from '@univer/core';
+import { BooleanNumber, IKeyValue, Observable, Plugin } from '@univerjs/core';
 import { LexerNode } from '../Analysis/LexerNode';
 
 interface ISelectionControlFillConfig {}

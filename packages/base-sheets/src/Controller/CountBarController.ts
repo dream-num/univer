@@ -1,4 +1,4 @@
-import { RangeList, Tools } from '@univer/core';
+import { RangeList, Tools } from '@univerjs/core';
 import { SheetPlugin } from '../SheetPlugin';
 import { CountBar } from '../View/UI/CountBar';
 

@@ -1,4 +1,4 @@
-import { SheetActionBase, ActionObservers, ISheetActionData, IRangeData, Workbook } from '@univer/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, IRangeData, Workbook } from '@univerjs/core';
 import { IAscSortData } from './index';
 
 export interface IDescSortData extends ISheetActionData {

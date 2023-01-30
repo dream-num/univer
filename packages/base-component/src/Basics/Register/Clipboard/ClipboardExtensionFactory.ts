@@ -1,4 +1,4 @@
-import { Plugin } from '@univer/core';
+import { Plugin } from '@univerjs/core';
 import { IClipboardData } from '../../Interfaces/IClipboardData';
 
 /**

@@ -1,4 +1,4 @@
-import { Nullable, Observable, Observer } from '@univer/core';
+import { Nullable, Observable, Observer } from '@univerjs/core';
 import { IDocumentSkeletonCached, IDocumentSkeletonSpan } from '../../Basics/IDocumentSkeletonCached';
 import { CURSOR_TYPE } from '../../Basics/Const';
 import { IMouseEvent, IPointerEvent } from '../../Basics/IEvents';
@@ -231,6 +231,9 @@ export class DocsEditor {
         const newTextSelection: TextSelection[] = [];
         let hasIntersection = false;
         this._textSelectionList.forEach((textSelection) => {
+            if (textSelection === activeTextSelection) {
+                return true;
+            }
             if (!activeTextSelection.isIntersection(textSelection)) {
                 newTextSelection.push(textSelection);
             } else {
@@ -280,15 +283,6 @@ export class DocsEditor {
         this._textSelectionList = [lastTextSelection];
     }
 
-    private _getActiveTextSelection() {
-        const list = this._textSelectionList;
-        for (let textSelection of list) {
-            if (textSelection.isActive()) {
-                return textSelection;
-            }
-        }
-    }
-
     private _isEmptyTextSelection() {
         return this._textSelectionList.length === 0;
     }
@@ -313,7 +307,7 @@ export class DocsEditor {
     }
 
     private _syncDomToSelection() {
-        const activeTextSelection = this._getActiveTextSelection();
+        const activeTextSelection = this.getActiveTextSelection();
         const anchor = activeTextSelection?.getAnchor();
         if (!anchor || (anchor && !anchor.visible)) {
             return;
@@ -349,13 +343,13 @@ export class DocsEditor {
 
         const endPosition = this._getNodePosition(endNode);
 
-        // console.log('endNode', endNode, { moveOffsetX, moveOffsetY, _viewportScrollY: this._viewportScrollY, scrollX });
+        console.log('endNode', endNode, endPosition, { moveOffsetX, moveOffsetY, _viewportScrollY: this._viewportScrollY, scrollX });
 
         if (!endPosition) {
             return;
         }
 
-        const activeTextSelection = this._getActiveTextSelection();
+        const activeTextSelection = this.getActiveTextSelection();
 
         if (!activeTextSelection) {
             return;
@@ -383,7 +377,7 @@ export class DocsEditor {
                 return;
             }
 
-            const textSelection = this._getActiveTextSelection();
+            const textSelection = this.getActiveTextSelection();
 
             textSelection?.activeStatic();
 
@@ -398,7 +392,7 @@ export class DocsEditor {
 
             const bounds = viewport.getBounding();
 
-            const textSelection = this._getActiveTextSelection();
+            const textSelection = this.getActiveTextSelection();
 
             const anchor = textSelection?.getAnchor();
 
@@ -434,7 +428,8 @@ export class DocsEditor {
             if (this._isIMEInputApply) {
                 return;
             }
-            const selection = this._getActiveTextSelection();
+            const activeSelection = this.getActiveTextSelection();
+            const selectionList = this.getTextSelectionList();
             if (this._documents == null) {
                 return;
             }
@@ -443,7 +438,8 @@ export class DocsEditor {
                 event: e,
                 content: '',
                 document: this._documents,
-                selection,
+                activeSelection,
+                selectionList,
             });
         });
 
@@ -456,7 +452,8 @@ export class DocsEditor {
 
             this._input.innerHTML = '';
 
-            const selection = this._getActiveTextSelection();
+            const activeSelection = this.getActiveTextSelection();
+            const selectionList = this.getTextSelectionList();
 
             if (this._documents == null) {
                 return;
@@ -466,7 +463,8 @@ export class DocsEditor {
                 event: e,
                 content,
                 document: this._documents,
-                selection,
+                activeSelection,
+                selectionList,
             });
         });
 
@@ -477,7 +475,8 @@ export class DocsEditor {
 
             this._input.innerHTML = '';
 
-            const selection = this._getActiveTextSelection();
+            const activeSelection = this.getActiveTextSelection();
+            const selectionList = this.getTextSelectionList();
 
             if (this._documents == null) {
                 return;
@@ -487,7 +486,8 @@ export class DocsEditor {
                 event: e,
                 content,
                 document: this._documents,
-                selection,
+                activeSelection,
+                selectionList,
             });
         });
 
@@ -497,7 +497,8 @@ export class DocsEditor {
 
             this._input.innerHTML = '';
 
-            const selection = this._getActiveTextSelection();
+            const activeSelection = this.getActiveTextSelection();
+            const selectionList = this.getTextSelectionList();
 
             if (this._documents == null) {
                 return;
@@ -507,7 +508,8 @@ export class DocsEditor {
                 event: e,
                 content,
                 document: this._documents,
-                selection,
+                activeSelection,
+                selectionList,
             });
         });
 
@@ -516,7 +518,8 @@ export class DocsEditor {
 
             this._input.innerHTML = '';
 
-            const selection = this._getActiveTextSelection();
+            const activeSelection = this.getActiveTextSelection();
+            const selectionList = this.getTextSelectionList();
 
             if (this._documents == null) {
                 return;
@@ -526,7 +529,8 @@ export class DocsEditor {
                 event: e,
                 content,
                 document: this._documents,
-                selection,
+                activeSelection,
+                selectionList,
             });
         });
     }
@@ -555,7 +559,7 @@ export class DocsEditor {
 
             const position = this._getNodePosition(startNode);
 
-            console.log(startNode, evtOffsetX, evtOffsetY);
+            console.log('startNode', startNode, position, evtOffsetX, evtOffsetY);
 
             if (!position) {
                 this._deleteAllTextSelection();
@@ -620,9 +624,22 @@ export class DocsEditor {
         if (!this._documents) {
             return;
         }
-        const activeSelection = this._getActiveTextSelection();
+        const activeSelection = this.getActiveTextSelection();
 
         activeSelection?.refresh(this._documents);
+    }
+
+    getActiveTextSelection() {
+        const list = this._textSelectionList;
+        for (let textSelection of list) {
+            if (textSelection.isActive()) {
+                return textSelection;
+            }
+        }
+    }
+
+    getTextSelectionList() {
+        return this._textSelectionList;
     }
 
     add(textSelection: TextSelection) {
@@ -630,7 +647,7 @@ export class DocsEditor {
     }
 
     remain() {
-        const activeSelection = this._getActiveTextSelection();
+        const activeSelection = this.getActiveTextSelection();
         if (activeSelection == null) {
             return;
         }

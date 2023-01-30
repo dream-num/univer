@@ -1,4 +1,4 @@
-import { Nullable, Observer, ISelection, makeCellToSelection, IRangeData, IRangeCellData } from '@univer/core';
+import { Nullable, Observer, ISelection, makeCellToSelection, IRangeData, IRangeCellData } from '@univerjs/core';
 
 import { SelectionControl } from './SelectionControl';
 import { ScrollTimer } from '../../../ScrollTimer';

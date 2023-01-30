@@ -1,6 +1,6 @@
-import { BaseComponentRender, BaseComponentSheet, BaseSelectProps, Component, ModalProps } from '@univer/base-component';
-import { Nullable, Observer, Workbook } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
+import { BaseComponentRender, BaseComponentSheet, BaseSelectProps, Component, ModalProps } from '@univerjs/base-component';
+import { Nullable, Observer, Workbook } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
 
 import { IProps } from '../IData/IConditionalFormat';
 import { ConditionContent } from './ConditionContent';

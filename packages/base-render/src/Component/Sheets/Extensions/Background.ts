@@ -1,5 +1,5 @@
 // import { fixLineWidthByScale, getColor, IScale } from '@Basics';
-import { IScale } from '@univer/core';
+import { IScale } from '@univerjs/core';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';
 

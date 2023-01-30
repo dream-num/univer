@@ -47,6 +47,6 @@ export enum ACTION_NAMES {
     ADD_NAMED_RANGE_ACTION = 'AddNamedRangeAction',
     SET_SHEET_ORDER_ACTION = 'SetSheetOrderAction',
     SET_ZOOM_RATIO_ACTION = 'SetZoomRatioAction',
-    SET_FROZEN_COLUMNS_ACTION = '',
-    SET_FROZEN_ROWS_ACTION = '',
+    SET_FROZEN_COLUMNS_ACTION = 'SetFrozenColumnsAction',
+    SET_FROZEN_ROWS_ACTION = 'SetFrozenRowsAction',
 }

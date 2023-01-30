@@ -75,7 +75,7 @@ cover: ''
 ## 案例
 
 ```jsx
-import { ToolBar } from '@univer/style-universheet';
+import { ToolBar } from '@univerjs/style-univer';
 
 const SheetContainer = () => {
     return (

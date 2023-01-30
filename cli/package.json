@@ -1,5 +1,5 @@
 {
-    "name": "@univer/cli",
+    "name": "@univerjs/cli",
     "version": "1.0.26",
     "description": "Quickly build univer plugins, custom package univer cores and plugins",
     "main": "./src/index.ts",

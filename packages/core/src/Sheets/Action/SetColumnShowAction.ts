@@ -17,6 +17,8 @@ export interface ISetColumnShowActionData extends ISheetActionData {
  * @internal
  */
 export class SetColumnShowAction extends SheetActionBase<ISetColumnShowActionData> {
+    static NAME = 'SetColumnShowAction';
+
     constructor(
         actionData: ISetColumnShowActionData,
         commandUnit: CommandUnit,

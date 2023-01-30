@@ -1,6 +1,6 @@
-import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
-import { SheetContext, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
+import { IToolBarItemProps, ISlotElement } from '@univerjs/base-component';
+import { SheetContext, UniverSheet, Plugin, PLUGIN_NAMES } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
 import { en, zh } from './Locale';
 import { DataValidationButton } from './UI/DataValidationButton';
 

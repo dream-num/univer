@@ -2,7 +2,7 @@
 
 
 export * from '../index';
-declare module '@univer/sheets-plugin-link' { }
+declare module '@univerjs/sheets-plugin-link' { }
 
 
 // use css module

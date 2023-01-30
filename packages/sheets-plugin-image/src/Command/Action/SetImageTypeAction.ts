@@ -1,4 +1,4 @@
-import { SheetActionBase, ActionObservers, ISheetActionData, Workbook } from '@univer/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, Workbook } from '@univerjs/core';
 import { SetImageType } from '../../Apply';
 import { OverGridImagePlugin } from '../../OverGridImagePlugin';
 import { ACTION_NAMES } from '../../Const';

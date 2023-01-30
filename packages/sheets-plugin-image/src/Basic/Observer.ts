@@ -1,4 +1,4 @@
-import { Observable } from '@univer/core';
+import { Observable } from '@univerjs/core';
 import { OverGridImagePlugin, OverGridImageProperty } from '../OverGridImagePlugin';
 
 export type ImagePluginObserve = {

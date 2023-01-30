@@ -1,4 +1,4 @@
-import { PageElementType, PageType, ShapeType } from '@univer/core';
+import { PageElementType, PageType, ShapeType } from '@univerjs/core';
 import { generateUnlimitedSlideData } from '../UNLIMITED_SLIDE_DATA';
 
 export const DEFAULT_SEVEN_PAGE = {

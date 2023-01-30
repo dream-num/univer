@@ -1,4 +1,4 @@
-# style-universheet
+# style-univer
 
 English| [简体中文](./README-zh.md)
 
@@ -8,14 +8,14 @@ UniverSheet Plugin Comment
 
 ### Installation
 
-```bash
-npm i @univer/sheets-plugin-comment
+```shell
+npm i @univerjs/sheets-plugin-comment
 ```
 
 ### Usage
 
 ```js
-import {Comment} from '@univer/sheets-plugin-comment'
+import { Comment } from '@univerjs/sheets-plugin-comment';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Comment());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/sheets-plugin-comment dev
+pnpm run --filter  @univerjs/sheets-plugin-comment dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-comment dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/sheets-plugin-comment build
+pnpm run --filter  @univerjs/sheets-plugin-comment build
 ```

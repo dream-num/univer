@@ -1,13 +1,13 @@
-import { DocContext, Plugin, PLUGIN_NAMES, UniverSheet, Tools, AsyncFunction } from '@univer/core';
+import { DocContext, Plugin, PLUGIN_NAMES, UniverSheet, Tools, AsyncFunction } from '@univerjs/core';
 import { zh, en } from './Locale';
-import { IOCContainer } from '@univer/core';
-import { Component, getRefElement, isElement, ISlotProps, RefObject, render } from '@univer/base-component';
+import { IOCContainer } from '@univerjs/core';
+import { Component, getRefElement, isElement, ISlotProps, RefObject, render } from '@univerjs/base-component';
 import { DocPluginObserve, install } from './Basic/Observer';
 import { ToolBarController } from './Controller/ToolBarController';
 import { DocumentController } from './Controller/DocumentController';
 import { BaseDocContainerConfig, defaultLayout, DocContainer, IDocPluginConfigBase, ILayout } from './View/UI/DocContainer';
 import { InfoBarController } from './Controller/InfoBarController';
-import { Engine, RenderEngine } from '@univer/base-render';
+import { Engine, RenderEngine } from '@univerjs/base-render';
 import { CanvasView } from './View/Render/CanvasView';
 import { CANVAS_VIEW_KEY } from './View/Render';
 import { DocsView } from './View/Render/Views';

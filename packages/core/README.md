@@ -1,19 +1,14 @@
-# @univer/core
+# @univerjs/core
 
-## dev
+## Introduction
 
-```bash
-pnpm run --filter  @univer/sheets-plugin-alternating-colors dev
+Univer core
+
+## Usage
+### Installation
+```shell
+npm i @univerjs/core
 ```
 
-## test
-
-```bash
-pnpm run --filter  @univer/sheets-plugin-alternating-colors test
-```
-
-## test cover
-
-```bash
-pnpm run --filter  @univer/sheets-plugin-alternating-colors test:cover
-```
+### API
+Check [Univer](https://github.com/dream-num/univer/)

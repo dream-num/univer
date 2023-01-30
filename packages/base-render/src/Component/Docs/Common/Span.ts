@@ -1,4 +1,4 @@
-import { BooleanNumber, BulletAlignment, GridType } from '@univer/core';
+import { BooleanNumber, BulletAlignment, GridType } from '@univerjs/core';
 import { validationGrid } from './Tools';
 import { IDocumentSkeletonBullet, IDocumentSkeletonSpan, SpanType } from '../../../Basics/IDocumentSkeletonCached';
 import { FontCache } from '../../../Basics/FontCache';

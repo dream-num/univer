@@ -1,4 +1,4 @@
-# style-universheet
+# style-univer
 
 English| [简体中文](./README-zh.md)
 
@@ -15,18 +15,18 @@ UniverSheet official UI component library
 
 ### Install
 
-```bash
-npm i @univer/style-universheet
+```shell
+npm i @univerjs/style-univer
 ```
 
 ### Import
 
 ```js
-import baseUI from'@univer/style-universheet'
-universheet.install(baseUI)
+import baseUI from '@univerjs/style-univer';
+universheet.install(baseUI);
 universheet.create({
-     plugins:['style-universheet']
-})
+    plugins: ['style-univer'],
+});
 ```
 
 ## Local development
@@ -45,21 +45,21 @@ npm i
 ### Development
 
 ```
-# Current directory ./packages/style-universheet/
+# Current directory ./packages/style-univer/
 npm run dev
 
 # Or project root directory ./
-npm run dev -w @univer/style-universheet
+npm run dev -w @univerjs/style-univer
 ```
 
 ### Package
 
 ```
-# Current directory ./packages/style-universheet/
+# Current directory ./packages/style-univer/
 npm run build
 
 # Or root directory ./
-npm run build -w @univer/style-universheet
+npm run build -w @univerjs/style-univer
 ```
 
 ## Doc Website
@@ -76,11 +76,11 @@ npm i
 ### Development
 
 ```console
-# style-universheet folder
+# style-univer folder
 npm run start
 
 # or root folder
-npm run start -w @univer/style-universheet
+npm run start -w @univerjs/style-univer
 ```
 
 This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
@@ -88,11 +88,11 @@ This command starts a local development server and opens up a browser window. Mo
 ### Build
 
 ```console
-# style-universheet folder
+# style-univer folder
 npm run build:doc
 
 # or root folder
-npm run build:doc -w @univer/style-universheet
+npm run build:doc -w @univerjs/style-univer
 ```
 
 This command generates static content into the `build` directory and can be served using any static contents hosting service.

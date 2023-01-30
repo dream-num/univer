@@ -20,6 +20,8 @@ export class AddNamedRangeAction extends SheetActionBase<
     IDeleteNamedRangeActionData,
     void
 > {
+    static NAME = 'AddNamedRangeAction';
+
     constructor(
         actionData: IAddNamedRangeActionData,
         commandUnit: CommandUnit,

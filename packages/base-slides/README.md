@@ -1,4 +1,4 @@
-# style-universheet
+# style-univer
 
 English| [简体中文](./README-zh.md)
 
@@ -8,14 +8,14 @@ UniverSheet Plugin Slides
 
 ### Installation
 
-```bash
-npm i @univer/base-slides
+```shell
+npm i @univerjs/base-slides
 ```
 
 ### Usage
 
 ```js
-import {Slides} from '@univer/base-slides'
+import { Slides } from '@univerjs/base-slides';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Slides());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/base-slides dev
+pnpm run --filter  @univerjs/base-slides dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/base-slides dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/base-slides build
+pnpm run --filter  @univerjs/base-slides build
 ```

@@ -1,4 +1,4 @@
-import { Nullable } from '@univer/core';
+import { Nullable } from '@univerjs/core';
 import { LambdaPrivacyVarType } from '../Basics/Common';
 
 interface LexerNodeJson {

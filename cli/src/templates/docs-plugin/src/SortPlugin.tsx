@@ -1,4 +1,4 @@
-import { Plugin, DocContext, UniverDoc } from '@univer/core';
+import { Plugin, DocContext, UniverDoc } from '@univerjs/core';
 import { zh, en } from './Locale';
 import { <%= projectConstantValue %>_PLUGIN_NAME} from './Basic/Const/PLUGIN_NAME'
 import { <%= projectUpperValue %>Controller } from './Controller/<%= projectUpperValue %>Controller';

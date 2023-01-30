@@ -1,4 +1,4 @@
-import { Observable, ObserverManager, Plugin } from '@univer/core';
+import { Observable, ObserverManager, Plugin } from '@univerjs/core';
 
 export type DragObserver = {
     onKeyDownObservable: Observable<DragEvent>;

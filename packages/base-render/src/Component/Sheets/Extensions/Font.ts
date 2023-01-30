@@ -1,4 +1,4 @@
-import { HorizontalAlign, IColorStyle, ObjectMatrix, WrapStrategy, IScale } from '@univer/core';
+import { HorizontalAlign, IColorStyle, ObjectMatrix, WrapStrategy, IScale } from '@univerjs/core';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';
 import { SpreadsheetExtensionRegistry } from '../../Extension';

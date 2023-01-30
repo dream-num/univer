@@ -1,6 +1,6 @@
-import { BaseComponentSheet, BaseIconProps, BaseSingleButtonProps, Component, FunctionComponent, IToolBarItemProps } from '@univer/base-component';
-import { PLUGIN_NAMES, Nullable, Observer, Workbook } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
+import { BaseComponentSheet, BaseIconProps, BaseSingleButtonProps, Component, FunctionComponent, IToolBarItemProps } from '@univerjs/base-component';
+import { PLUGIN_NAMES, Nullable, Observer, Workbook } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
 
 import { PROTECTION_PLUGIN_NAME } from '../Basic/Const';
 import { IProps } from '../IData/IProtection';

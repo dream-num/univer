@@ -22,6 +22,8 @@ export class SetBorderAction extends SheetActionBase<
     BorderStyleData,
     BorderStyleData
 > {
+    static NAME = 'SetBorderAction';
+
     constructor(
         actionData: BorderStyleData,
         commandUnit: CommandUnit,

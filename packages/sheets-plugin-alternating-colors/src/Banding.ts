@@ -1,4 +1,4 @@
-import { Command, CommandManager, SheetContext, Plugin, Worksheet } from '@univer/core';
+import { Command, CommandManager, SheetContext, Plugin, Worksheet } from '@univerjs/core';
 
 import { IAddBandingActionData, IDeleteBandingActionData, ISetBandingActionData } from './Command';
 import { ACTION_NAMES } from './Command/ACTION_NAMES';

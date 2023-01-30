@@ -1,13 +1,22 @@
 import { nanoid } from 'nanoid';
+
 import {
-    ACTION_NAMES,
     DEFAULT_RANGE_ARRAY,
     DEFAULT_WORKBOOK,
     DEFAULT_WORKSHEET,
 } from '../../Const';
+
 import { BooleanNumber } from '../../Enum';
 import { SheetContext } from '../../Basics';
-import { Command, CommandManager, ISetSheetOrderActionData } from '../../Command';
+
+import {
+    CommandManager,
+    InsertSheetAction,
+    Command,
+    ISetSheetOrderActionData,
+    RemoveSheetAction,
+    SetSheetOrderAction,
+} from '../../Command';
 
 import {
     IColumnStartEndData,
@@ -20,13 +29,12 @@ import {
     IWorksheetConfig,
 } from '../../Interfaces';
 
-import { NameGen, Nullable, Tools } from '../../Shared';
-import { Tuples } from '../../Shared/Tuples';
-import { Range } from './Range';
+import { NameGen, Nullable, Tools, Tuples } from '../../Shared';
 import { RangeList } from './RangeList';
 import { Selection } from './Selection';
 import { Styles } from './Styles';
 import { Worksheet } from './Worksheet';
+import { Range } from './Range';
 import { IInsertSheetActionData, IRemoveSheetActionData } from '../Action';
 import { NamedRange } from './NamedRange';
 
@@ -67,7 +75,10 @@ export class Workbook {
         this._context = context;
 
         const { styles } = this._config;
-        this._unitId = this._config.id ?? nanoid(6);
+        if (this._config.id === '') {
+            this._config.id = nanoid(6);
+        }
+        this._unitId = this._config.id;
         this._styles = new Styles(styles);
         this._worksheets = new Map<string, Worksheet>();
         this._commandManager = context.getCommandManager();
@@ -293,7 +304,7 @@ export class Workbook {
                         WorkBookUnit: _context.getWorkBook(),
                     },
                     {
-                        actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
+                        actionName: InsertSheetAction.NAME,
                         sheetId: worksheetConfig.id,
                         index,
                         sheet: worksheetConfig as IWorksheetConfig,
@@ -324,7 +335,7 @@ export class Workbook {
                             WorkBookUnit: _context.getWorkBook(),
                         },
                         {
-                            actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
+                            actionName: InsertSheetAction.NAME,
                             sheetId: worksheetConfig.id,
                             index,
                             sheet: worksheetConfig as IWorksheetConfig,
@@ -356,7 +367,7 @@ export class Workbook {
                             WorkBookUnit: _context.getWorkBook(),
                         },
                         {
-                            actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
+                            actionName: InsertSheetAction.NAME,
                             sheetId: worksheetConfig.id,
                             index,
                             sheet: worksheetConfig as IWorksheetConfig,
@@ -389,7 +400,7 @@ export class Workbook {
                             WorkBookUnit: _context.getWorkBook(),
                         },
                         {
-                            actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
+                            actionName: InsertSheetAction.NAME,
                             sheetId: worksheetConfig.id,
                             index,
                             sheet: worksheetConfig as IWorksheetConfig,
@@ -417,7 +428,7 @@ export class Workbook {
                             WorkBookUnit: _context.getWorkBook(),
                         },
                         {
-                            actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
+                            actionName: InsertSheetAction.NAME,
                             sheetId: worksheetConfig.id,
                             index,
                             sheet: worksheetConfig as IWorksheetConfig,
@@ -452,7 +463,7 @@ export class Workbook {
                             WorkBookUnit: _context.getWorkBook(),
                         },
                         {
-                            actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
+                            actionName: InsertSheetAction.NAME,
                             sheetId: worksheetConfig.id,
                             index,
                             sheet: worksheetConfig as IWorksheetConfig,
@@ -465,7 +476,6 @@ export class Workbook {
                 });
                 return worksheetConfig.id;
             }
-
             if (Tools.isNumber(argument[0])) {
                 // insert clone worksheet instance to index
                 if (Tools.isAssignableFrom(argument[1], Worksheet)) {
@@ -483,7 +493,7 @@ export class Workbook {
                                 WorkBookUnit: _context.getWorkBook(),
                             },
                             {
-                                actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
+                                actionName: InsertSheetAction.NAME,
                                 sheetId: worksheetConfig.id,
                                 index,
                                 sheet: worksheetConfig as IWorksheetConfig,
@@ -509,7 +519,7 @@ export class Workbook {
                                 WorkBookUnit: _context.getWorkBook(),
                             },
                             {
-                                actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
+                                actionName: InsertSheetAction.NAME,
                                 sheetId: worksheetConfig.id,
                                 index,
                                 sheet: worksheetConfig as IWorksheetConfig,
@@ -691,7 +701,7 @@ export class Workbook {
         const { _context, _commandManager } = this;
         const observer = _context.getContextObserver('onSheetOrderObservable');
         const config: ISetSheetOrderActionData = {
-            actionName: ACTION_NAMES.SET_SHEET_ORDER_ACTION,
+            actionName: SetSheetOrderAction.NAME,
             sheetId,
             order,
         };
@@ -746,7 +756,7 @@ export class Workbook {
                         WorkBookUnit: this,
                     },
                     {
-                        actionName: ACTION_NAMES.REMOVE_SHEET_ACTION,
+                        actionName: RemoveSheetAction.NAME,
                         sheetId,
                     } as IRemoveSheetActionData
                 )
@@ -899,7 +909,6 @@ export class Workbook {
         if (typeof range !== 'string' && 'startRow' in range) {
             return { sheetId: '', rangeData: range };
         }
-
         return DEFAULT_RANGE_ARRAY;
     }
 

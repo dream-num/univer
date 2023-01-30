@@ -1,6 +1,6 @@
-import { Documents, IDocumentSkeletonSpan, SpanType } from '@univer/base-render';
-import { TextSelection } from '@univer/base-render/src/Component/Docs/Common/TextSelection';
-import { KeyboardKeyType, Logger, Nullable } from '@univer/core';
+import { Documents, IDocumentSkeletonSpan, SpanType } from '@univerjs/base-render';
+import { TextSelection } from '@univerjs/base-render/src/Component/Docs/Common/TextSelection';
+import { KeyboardKeyType, Logger, Nullable } from '@univerjs/core';
 import { DocPlugin } from '../DocPlugin';
 
 export class InputController {
@@ -24,64 +24,99 @@ export class InputController {
         const docsModel = this._plugin.context.getDocument();
 
         onKeydownObservable.add((config) => {
-            const { event, document, selection } = config;
+            const { event, document, activeSelection, selectionList } = config;
             let e = event as KeyboardEvent;
 
-            const cursor = selection?.getCursor() || 0;
+            const activeRange = activeSelection?.getRange();
+
+            const segmentId = activeSelection?.segmentId;
 
             const skeleton = document.getSkeleton();
 
-            if (!skeleton) {
+            if (!skeleton || !activeRange) {
                 return;
             }
 
+            const { cursorStart, cursorEnd, isCollapse, isEndBack, isStartBack } = activeRange;
+
             if (e.key === KeyboardKeyType.backspace) {
-                const selectionRemain = document.remainActiveSelection();
+                if (isCollapse) {
+                    let cursor = cursorStart;
 
-                const content = document.findNodeByCharIndex(cursor - 1)?.content || '';
+                    if (isStartBack === false) {
+                        cursor += 1;
+                    }
 
-                docsModel.deleteText(content, cursor);
+                    const selectionRemain = document.remainActiveSelection();
 
-                skeleton.calculate();
+                    // const content = document.findNodeByCharIndex(cursor - 1)?.content || '';
 
-                const span = document.findNodeByCharIndex(cursor - 2);
+                    docsModel.deleteText(activeRange, segmentId);
 
-                this._adjustSelection(document, selectionRemain, span);
+                    skeleton.calculate();
 
-                this._resetIME();
+                    const span = document.findNodeByCharIndex(cursor - 2);
+
+                    this._adjustSelection(document, selectionRemain, span);
+
+                    this._resetIME();
+                }
             }
         });
 
         onInputObservable.add((config) => {
-            const { event, content = '', document, selection } = config;
+            const { event, content = '', document, activeSelection, selectionList } = config;
 
-            const cursor = selection?.getCursor() || 0;
-
-            console.log('cursor', cursor, selection);
+            const activeRange = activeSelection?.getRange();
 
             const skeleton = document.getSkeleton();
 
-            if (!skeleton) {
+            const segmentId = activeSelection?.segmentId;
+
+            if (!skeleton || !activeRange) {
                 return;
             }
 
-            const selectionRemain = document.remainActiveSelection();
+            const { cursorStart, cursorEnd, isCollapse, isEndBack, isStartBack } = activeRange;
 
-            docsModel.insertText(content, cursor);
+            if (isCollapse) {
+                let cursor = cursorStart;
 
-            skeleton.calculate();
+                if (isStartBack === false) {
+                    cursor += 1;
+                }
 
-            const span = document.findNodeByCharIndex(cursor + content.length - 1);
+                const selectionRemain = document.remainActiveSelection();
 
-            this._adjustSelection(document, selectionRemain, span);
+                docsModel.insertText(content, activeRange, segmentId);
+
+                skeleton.calculate();
+
+                const span = document.findNodeByCharIndex(cursor + content.length - 1);
+
+                this._adjustSelection(document, selectionRemain, span);
+            }
         });
 
         onCompositionstartObservable.add((config) => {
-            const { selection } = config;
+            const { activeSelection, selectionList } = config;
 
-            const cursor = selection?.getCursor() || 0;
+            const activeRange = activeSelection?.getRange();
 
-            this._previousIMEStart = cursor;
+            if (!activeRange) {
+                return;
+            }
+
+            const { cursorStart, cursorEnd, isCollapse, isEndBack, isStartBack } = activeRange;
+
+            if (isCollapse) {
+                let cursor = cursorStart;
+
+                if (isStartBack === false) {
+                    cursor += 1;
+                }
+                this._previousIMEStart = cursor;
+            }
 
             // console.log('_previousIMEStart', this._previousIMEStart);
         });

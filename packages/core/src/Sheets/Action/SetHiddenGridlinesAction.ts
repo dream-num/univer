@@ -14,6 +14,8 @@ export interface ISetHiddenGridlinesActionData extends ISheetActionData {
  * @internal
  */
 export class SetHiddenGridlinesAction extends SheetActionBase<ISetHiddenGridlinesActionData> {
+    static NAME = 'SetHiddenGridlinesAction';
+
     constructor(
         actionData: ISetHiddenGridlinesActionData,
         commandUnit: CommandUnit,

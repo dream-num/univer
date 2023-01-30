@@ -1,4 +1,4 @@
-import { SheetContext, Sequence, Serializer } from '@univer/core';
+import { SheetContext, Sequence, Serializer } from '@univerjs/core';
 import { FilterCriteria, IFilterCriteria } from './FilterCriteria';
 
 export interface IFilterCriteriaColumn extends Sequence {

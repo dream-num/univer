@@ -13,7 +13,7 @@ import {
     IColorStyle,
     IBorderData,
     Nullable,
-} from '@univer/core';
+} from '@univerjs/core';
 import { Canvas } from '../Canvas';
 import { BaseObject } from '../BaseObject';
 import { IBoundRect } from '../Basics/Vector2';

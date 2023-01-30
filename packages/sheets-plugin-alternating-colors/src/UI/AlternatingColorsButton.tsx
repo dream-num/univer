@@ -1,7 +1,7 @@
-import { Component, IToolBarItemProps } from '@univer/base-component';
+import { Component, IToolBarItemProps } from '@univerjs/base-component';
 
-import { SheetContext, Nullable, Observer, PLUGIN_NAMES, Workbook } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
+import { SheetContext, Nullable, Observer, PLUGIN_NAMES, Workbook } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
 
 import { ALTERNATING_COLORS_PLUGIN_NAME } from '../Const';
 import { IProps } from '../IData/IAlternatingColors';

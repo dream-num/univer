@@ -1,4 +1,4 @@
-import { IDrawing } from '@univer/core';
+import { IDrawing } from '@univerjs/core';
 import { IDocumentSkeletonPage } from '../../../../Basics/IDocumentSkeletonCached';
 import { IFontLocale, IParagraphConfig, ISectionBreakConfig } from '../../../../Basics/Interfaces';
 

@@ -1,4 +1,4 @@
-import { IBlockElement, IFooterData, IHeaderData, Nullable, PageOrientType } from '@univer/core';
+import { IBlockElement, IFooterData, IHeaderData, Nullable, PageOrientType } from '@univerjs/core';
 import { createSkeletonSection } from './Section';
 import { BreakType, IDocumentSkeletonFooter, IDocumentSkeletonHeader, IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../Basics/IDocumentSkeletonCached';
 import { ISectionBreakConfig } from '../../../Basics/Interfaces';

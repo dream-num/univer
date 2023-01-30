@@ -1,4 +1,4 @@
-import { sortRules } from '@univer/core';
+import { sortRules } from '@univerjs/core';
 import { BaseAstNodeFactory } from '../AstNode/BaseAstNode';
 import { FORMULA_AST_NODE_REGISTRY, FORMULA_FUNCTION_REGISTRY } from '../Basics/Registry';
 import { BaseFunction } from '../Functions/BaseFunction';

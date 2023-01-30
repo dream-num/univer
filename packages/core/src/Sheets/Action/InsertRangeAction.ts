@@ -26,6 +26,8 @@ export class InsertRangeAction extends SheetActionBase<
     IInsertRangeActionData,
     IDeleteRangeActionData
 > {
+    static NAME = 'InsertRangeAction';
+
     constructor(
         actionData: IInsertRangeActionData,
         commandUnit: CommandUnit,

@@ -1,4 +1,4 @@
-# style-universheet
+# style-univer
 
 简体中文 | [English](./README.md)
 
@@ -8,14 +8,14 @@ UniverSheet Sort 插件
 
 ### 安装
 
-```bash
-npm i @univer/sheets-plugin-sort
+```shell
+npm i @univerjs/sheets-plugin-sort
 ```
 
 ### 使用
 
 ```js
-import {Sort} from '@univer/sheets-plugin-sort'
+import { Sort } from '@univerjs/sheets-plugin-sort';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Sort());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/sheets-plugin-sort dev
+pnpm run --filter  @univerjs/sheets-plugin-sort dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-sort dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/sheets-plugin-sort build
+pnpm run --filter  @univerjs/sheets-plugin-sort build
 ```

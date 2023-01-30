@@ -1,5 +1,5 @@
-import { BaseComponentRender, BaseComponentSheet, BaseMenuItem, Component, ComponentChildren } from '@univer/base-component';
-import { Dropdown } from '@univer/style-universheet';
+import { BaseComponentRender, BaseComponentSheet, BaseMenuItem, Component, ComponentChildren } from '@univerjs/base-component';
+import { Dropdown } from '@univerjs/style-univer';
 import { BaseItemProps, Item } from '../Item/Item';
 import styles from './index.module.less';
 

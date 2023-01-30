@@ -1,5 +1,5 @@
-import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect, ScrollTimer } from '@univer/base-render';
-import { Direction, ISelection, makeCellToSelection, Nullable, Observer } from '@univer/core';
+import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect, ScrollTimer } from '@univerjs/base-render';
+import { Direction, ISelection, makeCellToSelection, Nullable, Observer } from '@univerjs/core';
 import { SelectionModel } from '../../Model';
 import { DEFAULT_SELECTION_CONFIG, SelectionControl, SELECTION_TYPE } from './SelectionController';
 

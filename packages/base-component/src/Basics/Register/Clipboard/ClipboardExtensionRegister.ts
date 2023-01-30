@@ -1,4 +1,4 @@
-import { sortRules } from '@univer/core';
+import { sortRules } from '@univerjs/core';
 import { BaseClipboardExtensionFactory } from './ClipboardExtensionFactory';
 
 export class ClipboardExtensionRegister {

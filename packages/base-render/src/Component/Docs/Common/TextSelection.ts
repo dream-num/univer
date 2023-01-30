@@ -1,4 +1,4 @@
-import { IPosition, Nullable } from '@univer/core';
+import { IPosition, ITextSelectionRange, Nullable } from '@univerjs/core';
 import { nanoid } from 'nanoid';
 import { COLORS } from '../../../Basics/Const';
 import {
@@ -53,13 +53,6 @@ interface ICurrentNodePositionState {
 const TEXT_RANGE_KEY_PREFIX = '__TestSelectionRange__';
 
 const TEXT_ANCHOR_KEY_PREFIX = '__TestSelectionAnchor__';
-
-interface ISelectionCursor {
-    cursorStart: number;
-    cursorEnd: number;
-    isCollapse: boolean;
-}
-
 export interface INodePosition {
     page: number;
     section: number;
@@ -79,7 +72,7 @@ export class TextSelection {
 
     private _anchorShape: Nullable<Rect>;
 
-    private _cursor: number = 0;
+    private _rangeList: ITextSelectionRange[];
 
     private _currentStartState: ICurrentNodePositionState = {
         page: NodePositionStateType.NORMAL,
@@ -99,7 +92,7 @@ export class TextSelection {
         span: NodePositionStateType.NORMAL,
     };
 
-    constructor(private _scene: Scene, public startNodePosition?: Nullable<INodePosition>, public endNodePosition?: Nullable<INodePosition>) {}
+    constructor(private _scene: Scene, public startNodePosition?: Nullable<INodePosition>, public endNodePosition?: Nullable<INodePosition>, public segmentId?: string) {}
 
     private _resetCurrentNodePositionState() {
         this._currentStartState = {
@@ -230,8 +223,8 @@ export class TextSelection {
     }
 
     private _getSelectionRuler(typeIndex: number, startPosition: INodePosition, endPosition: INodePosition, nextLength: number, current: number) {
-        let start_nest = 0;
-        let end_nest = nextLength;
+        let start_next = 0;
+        let end_next = nextLength;
 
         const type = NodePositionType[typeIndex] as unknown;
 
@@ -239,8 +232,8 @@ export class TextSelection {
 
         if (nextType === null || type === null) {
             return {
-                start_nest,
-                end_nest,
+                start_next,
+                end_next,
             };
         }
 
@@ -255,16 +248,16 @@ export class TextSelection {
         const preEndNestType = this._checkPreviousNodePositionState(typeIndex, false);
 
         if (preStartNestType === NodePositionStateType.START) {
-            start_nest = startPosition[nextType] as number;
+            start_next = startPosition[nextType] as number;
         }
 
         if (preEndNestType === NodePositionStateType.END) {
-            end_nest = endPosition[nextType] as number;
+            end_next = endPosition[nextType] as number;
         }
 
         return {
-            start_nest,
-            end_nest,
+            start_next,
+            end_next,
         };
     }
 
@@ -315,6 +308,10 @@ export class TextSelection {
             if (startNodeValue !== endNodeValue) {
                 return false;
             }
+        }
+
+        if (start.isBack !== end.isBack) {
+            return false;
         }
 
         return true;
@@ -384,7 +381,7 @@ export class TextSelection {
     private _getRangePointData(startOrigin: INodePosition, endOrigin: INodePosition, documents: Documents) {
         const pointGroup: IPoint[][] = [];
 
-        const cursorList: ISelectionCursor[] = [];
+        const cursorList: ITextSelectionRange[] = [];
 
         if (startOrigin == null || endOrigin == null) {
             return {
@@ -395,11 +392,7 @@ export class TextSelection {
 
         const { start, end } = this._compareNodePosition(startOrigin, endOrigin);
 
-        const isStartBack = start.isBack;
-
-        const isEndBack = end.isBack;
-
-        this._selectionIterator(start!, end!, documents, (start_sp, end_sp, divide, line) => {
+        this._selectionIterator(start!, end!, documents, (start_sp, end_sp, isFirst, isLast, divide, line) => {
             const { lineHeight } = line;
 
             const { spanGroup, st } = divide;
@@ -425,9 +418,19 @@ export class TextSelection {
 
             let cursorEnd = end_sp + st;
 
+            const isStartBack = start.span === start_sp && isFirst ? start.isBack : true;
+
+            const isEndBack = end.span === end_sp && isLast ? end.isBack : false;
+
+            // let isStartBackFin = isStartBack;
+
+            // let isEndBackFin = isEndBack;
+
             const isCollapse = start === end;
 
             if (start_sp === 0 && end_sp === spanGroup.length - 1) {
+                cursorEnd -= hasList ? 1 : 0;
+
                 position = {
                     startX: startX + firstSpanLeft + (isCurrentList ? firstSpanWidth : 0),
                     startY,
@@ -435,37 +438,38 @@ export class TextSelection {
                     endY: startY + lineHeight,
                 };
             } else {
-                const isStartBackFin = (isStartBack || (start_sp === 0 && !isCollapse)) && !isCurrentList;
+                const isStartBackFin = isStartBack && !isCurrentList;
 
-                const isEndBackFin = isEndBack && end_sp !== spanGroup.length - 1;
+                // isEndBackFin = isEndBack;
 
-                cursorStart += isStartBackFin ? 0 : 1;
+                // cursorStart += isStartBackFin ? 0 : 1;
 
-                cursorStart -= hasList ? 1 : 0;
+                cursorStart -= hasList && !isCurrentList ? 1 : 0;
 
-                cursorEnd += isEndBackFin ? 0 : 1;
+                // cursorEnd += isEndBackFin ? 0 : 1;
 
-                cursorEnd -= hasList ? 1 : 0;
+                cursorEnd -= hasList && !isCurrentList ? 1 : 0;
 
-                console.log('span', {
-                    hasList,
-                    isStartBackFin,
-                    isEndBackFin,
-                    firstSpan,
-                    lastSpan,
-                    start_sp,
-                    end_sp,
-                    isStartBack,
-                    isEndBack,
-                    cursorStart,
-                    cursorEnd,
-                    isCurrentList,
-                });
+                // console.log('span', {
+                //     start,
+                //     end,
+                //     hasList,
+                //     isStartBackFin,
+                //     firstSpan,
+                //     lastSpan,
+                //     start_sp,
+                //     end_sp,
+                //     isStartBack,
+                //     isEndBack,
+                //     cursorStart,
+                //     cursorEnd,
+                //     isCurrentList,
+                // });
 
                 position = {
                     startX: startX + firstSpanLeft + (isStartBackFin ? 0 : firstSpanWidth),
                     startY,
-                    endX: startX + lastSpanLeft + (isEndBackFin ? 0 : lastSpanWidth),
+                    endX: startX + lastSpanLeft + (isEndBack ? 0 : lastSpanWidth),
                     endY: startY + lineHeight,
                 };
 
@@ -477,6 +481,8 @@ export class TextSelection {
 
             pointGroup.push(this._pushToPoints(position));
             cursorList.push({
+                isStartBack,
+                isEndBack,
                 cursorStart,
                 cursorEnd,
                 isCollapse,
@@ -496,6 +502,8 @@ export class TextSelection {
         func: (
             startSpanIndex: number,
             endSpanIndex: number,
+            isFirst: boolean,
+            isLast: boolean,
             divide: IDocumentSkeletonDivide,
             line: IDocumentSkeletonLine,
             column: IDocumentSkeletonColumn,
@@ -514,43 +522,43 @@ export class TextSelection {
 
         const pages = skeletonData.pages;
 
-        const { page } = startPosition;
+        const { page: pageIndex } = startPosition;
 
-        const { page: endPage } = endPosition;
+        const { page: endPageIndex } = endPosition;
 
         this._resetCurrentNodePositionState();
 
-        for (let p = 0; p <= page - 1; p++) {
+        for (let p = 0; p <= pageIndex - 1; p++) {
             const page = pages[p];
             this._Liquid.translatePage(page, documents.pageLayoutType, documents.pageMarginLeft, documents.pageMarginTop);
         }
 
-        for (let p = page; p <= endPage; p++) {
+        for (let p = pageIndex; p <= endPageIndex; p++) {
             const page = pages[p];
             const sections = page.sections;
 
-            const { start_nest: start_s, end_nest: end_s } = this._getSelectionRuler(NodePositionMap.page, startPosition, endPosition, sections.length - 1, p);
-
+            const { start_next: start_s, end_next: end_s } = this._getSelectionRuler(NodePositionMap.page, startPosition, endPosition, sections.length - 1, p);
+            this._Liquid.translateSave();
             this._Liquid.translatePagePadding(page);
 
             for (let s = start_s; s <= end_s; s++) {
                 const section = sections[s];
                 const columns = section.columns;
-                const { start_nest: start_c, end_nest: end_c } = this._getSelectionRuler(NodePositionMap.section, startPosition, endPosition, columns.length - 1, s);
+                const { start_next: start_c, end_next: end_c } = this._getSelectionRuler(NodePositionMap.section, startPosition, endPosition, columns.length - 1, s);
 
                 this._Liquid.translateSection(section);
 
                 for (let c = start_c; c <= end_c; c++) {
                     const column = columns[c];
                     const lines = column.lines;
-                    const { start_nest: start_l, end_nest: end_l } = this._getSelectionRuler(NodePositionMap.column, startPosition, endPosition, lines.length - 1, c);
+                    const { start_next: start_l, end_next: end_l } = this._getSelectionRuler(NodePositionMap.column, startPosition, endPosition, lines.length - 1, c);
 
                     this._Liquid.translateColumn(column);
 
                     for (let l = start_l; l <= end_l; l++) {
                         const line = lines[l];
                         const { divides, type, lineHeight = 0 } = line;
-                        const { start_nest: start_d, end_nest: end_d } = this._getSelectionRuler(NodePositionMap.line, startPosition, endPosition, divides.length - 1, l);
+                        const { start_next: start_d, end_next: end_d } = this._getSelectionRuler(NodePositionMap.line, startPosition, endPosition, divides.length - 1, l);
                         this._Liquid.translateSave();
                         this._Liquid.translateLine(line);
 
@@ -564,9 +572,21 @@ export class TextSelection {
 
                             const spanGroup = divide.spanGroup;
 
-                            const { start_nest: start_sp, end_nest: end_sp } = this._getSelectionRuler(NodePositionMap.divide, startPosition, endPosition, spanGroup.length - 1, d);
+                            const { start_next: start_sp, end_next: end_sp } = this._getSelectionRuler(NodePositionMap.divide, startPosition, endPosition, spanGroup.length - 1, d);
 
-                            func && func(start_sp, end_sp, divide, line, column, section, page);
+                            let isFirst = false;
+
+                            let isLast = false;
+
+                            if (p === pageIndex && s === start_s && c === start_c && l === start_l && d === start_d) {
+                                isFirst = true;
+                            }
+
+                            if (p === endPageIndex && s === end_s && c === end_c && l === end_l && d === end_d) {
+                                isLast = true;
+                            }
+
+                            func && func(start_sp, end_sp, isFirst, isLast, divide, line, column, section, page);
 
                             this._Liquid.translateRestore();
                         }
@@ -575,23 +595,46 @@ export class TextSelection {
                     }
                 }
             }
+
+            this._Liquid.translateRestore();
+            this._Liquid.translatePage(page, documents.pageLayoutType, documents.pageMarginLeft, documents.pageMarginTop);
         }
     }
 
-    private _setCursor(cursorList: ISelectionCursor[]) {
-        if (cursorList.length === 0) {
+    private _setRangeList(rangeList: ITextSelectionRange[]) {
+        if (rangeList.length === 0) {
             return;
         }
 
-        const firstCursor = cursorList[0];
+        // const firstCursor = cursorList[0];
 
-        this._cursor = firstCursor.cursorStart;
-
-        console.log('_setCursor', firstCursor.cursorStart, firstCursor);
+        this._rangeList = rangeList;
     }
 
-    getCursor() {
-        return this._cursor;
+    private _getCursorPosition(index: number, isBack: boolean) {
+        return index - (isBack === true ? 1 : 0);
+    }
+
+    getRange() {
+        const cursorList = this._rangeList;
+
+        const firstCursor = cursorList[0];
+
+        const lastCursor = cursorList[cursorList.length - 1];
+
+        let isCollapse = cursorList.length === 1 && firstCursor.isCollapse;
+
+        return {
+            cursorStart: firstCursor.cursorStart,
+            cursorEnd: lastCursor.cursorEnd,
+            isStartBack: firstCursor.isStartBack,
+            isEndBack: lastCursor.isEndBack,
+            isCollapse,
+        };
+    }
+
+    getRangeList() {
+        return this._rangeList;
     }
 
     getAnchor() {
@@ -662,7 +705,23 @@ export class TextSelection {
     }
 
     isIntersection(textSelection: TextSelection) {
-        return false;
+        const activeRange = this.getRange();
+
+        const compareRange = textSelection.getRange();
+
+        const activeStart = this._getCursorPosition(activeRange.cursorStart, activeRange.isStartBack);
+
+        const activeEnd = this._getCursorPosition(activeRange.cursorEnd, activeRange.isEndBack);
+
+        const compareStart = this._getCursorPosition(compareRange.cursorStart, compareRange.isStartBack);
+
+        const compareEnd = this._getCursorPosition(compareRange.cursorEnd, compareRange.isEndBack);
+
+        if (activeStart > compareEnd || activeEnd < compareStart) {
+            return false;
+        }
+
+        return true;
     }
 
     refresh(documents: Documents) {
@@ -680,14 +739,14 @@ export class TextSelection {
         if (this.isCollapsed()) {
             const data = this._getRangePointData(start!, start!, documents);
             const { pointGroup, cursorList } = data;
-            this._setCursor(cursorList);
+            this._setRangeList(cursorList);
             pointGroup.length > 0 && this._createAndUpdateAnchor(pointGroup, documents.left, documents.top);
             return;
         }
 
         const data = this._getRangePointData(start!, end!, documents);
         const { pointGroup, cursorList } = data;
-        this._setCursor(cursorList);
+        this._setRangeList(cursorList);
         pointGroup.length > 0 && this._createAndUpdateRange(pointGroup, documents.left, documents.top);
     }
 

@@ -1,4 +1,4 @@
-import { IColor, IRangeData, Nullable } from '@univer/core';
+import { IColor, IRangeData, Nullable } from '@univerjs/core';
 
 export type IFilterType = {
     range: IRangeData;

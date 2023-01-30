@@ -1,6 +1,6 @@
-import { BaseCellEditExtension, BaseCellEditExtensionFactory, ICell, SheetPlugin } from '@univer/base-sheets';
-import { IFormulaData } from '@univer/base-formula-engine';
-import { IRangeData, Nullable, PLUGIN_NAMES } from '@univer/core';
+import { BaseCellEditExtension, BaseCellEditExtensionFactory, ICell, SheetPlugin } from '@univerjs/base-sheets';
+import { IFormulaData } from '@univerjs/base-formula-engine';
+import { IRangeData, Nullable, PLUGIN_NAMES } from '@univerjs/core';
 import { FormulaPlugin } from '../../FormulaPlugin';
 
 export class FormulaCellEditExtension extends BaseCellEditExtension {
@@ -65,7 +65,7 @@ export class FormulaCellEditExtensionFactory extends BaseCellEditExtensionFactor
     checkArrayFormValue(cell: ICell, unitId: string): Nullable<string> {
         const { row, column } = cell;
         let formula;
-        const arrayFormulaData = this._plugin.getFormulaController().getArrayFormulaData();
+        const arrayFormulaData = this._plugin.getFormulaController().getDataModel().getArrayFormulaData();
 
         if (!arrayFormulaData) return null;
 

@@ -1,5 +1,5 @@
-import { Component, IToolBarItemProps, VNode } from '@univer/base-component';
-import { SheetContext } from '@univer/core';
+import { Component, IToolBarItemProps, VNode } from '@univerjs/base-component';
+import { SheetContext } from '@univerjs/core';
 import { FileSelected } from '../../Library/FileSelected';
 
 export interface ImageUploadButtonUIProps {

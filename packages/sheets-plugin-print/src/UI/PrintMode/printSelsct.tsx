@@ -1,4 +1,4 @@
-import { BaseComponentSheet, BaseIconProps, BaseUlProps, Component, createRef, FunctionComponent } from '@univer/base-component';
+import { BaseComponentSheet, BaseIconProps, BaseUlProps, Component, createRef, FunctionComponent } from '@univerjs/base-component';
 import { IConfig } from '../../IData';
 import styles from './index.module.less';
 

@@ -1,21 +1,21 @@
-# style-universheet
+# style-univer
 
 简体中文 | [English](./README.md)
 
 ## 介绍
 
-UniverSheet ImportXlsx插件
+UniverSheet ImportXlsx 插件
 
 ### 安装
 
-```bash
-npm i @univer/sheets-plugin-import-xlsx
+```shell
+npm i @univerjs/sheets-plugin-import-xlsx
 ```
 
 ### 使用
 
 ```js
-import {ImportXlsx} from '@univer/sheets-plugin-import-xlsx'
+import { ImportXlsx } from '@univerjs/sheets-plugin-import-xlsx';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new ImportXlsx());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/sheets-plugin-import-xlsx dev
+pnpm run --filter  @univerjs/sheets-plugin-import-xlsx dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-import-xlsx dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/sheets-plugin-import-xlsx build
+pnpm run --filter  @univerjs/sheets-plugin-import-xlsx build
 ```

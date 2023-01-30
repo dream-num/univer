@@ -1,4 +1,4 @@
-import { FormatType } from '@univer/core';
+import { FormatType } from '@univerjs/core';
 
 export type IConfig = {};
 

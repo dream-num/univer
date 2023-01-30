@@ -13,6 +13,8 @@ export class RemoveSheetAction extends SheetActionBase<
     IRemoveSheetActionData,
     IInsertSheetActionData
 > {
+    static NAME = 'RemoveSheetAction';
+
     constructor(
         actionData: IRemoveSheetActionData,
         commandUnit: CommandUnit,

@@ -1,4 +1,4 @@
-import { Component } from '@univer/base-component';
+import { Component } from '@univerjs/base-component';
 import { FORMULA_PLUGIN_NAME } from '../../../Basic';
 import { lang } from '../../../Controller/locale';
 import { FormulaPlugin } from '../../../FormulaPlugin';

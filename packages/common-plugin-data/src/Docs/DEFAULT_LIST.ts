@@ -1,4 +1,4 @@
-import { BulletAlignment, GlyphType } from '@univer/core';
+import { BulletAlignment, GlyphType } from '@univerjs/core';
 
 export const DEFAULT_LIST_TEST = {
     unorderedTest: {

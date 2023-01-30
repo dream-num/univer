@@ -1,4 +1,4 @@
-import { numberToABC, IScale } from '@univer/core';
+import { numberToABC, IScale } from '@univerjs/core';
 import { fixLineWidthByScale, getColor } from '../../../Basics/Tools';
 import { MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../Basics/Const';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';

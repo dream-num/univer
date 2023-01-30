@@ -1,6 +1,6 @@
-import { SheetContext, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
-import { SheetPlugin } from '@univer/base-sheets';
+import { SheetContext, UniverSheet, Plugin, PLUGIN_NAMES } from '@univerjs/core';
+import { IToolBarItemProps, ISlotElement } from '@univerjs/base-component';
+import { SheetPlugin } from '@univerjs/base-sheets';
 import { SplitColumnButton } from './UI/SplitColumnButton';
 import { zh, en } from './Locale';
 

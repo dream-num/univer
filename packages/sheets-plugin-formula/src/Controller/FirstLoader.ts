@@ -1,4 +1,4 @@
-import { ActionOperation, ACTION_NAMES, ISetRangeDataActionData, Command, ObjectMatrix, ICellData } from '@univer/core';
+import { ActionOperation, ACTION_NAMES, ISetRangeDataActionData, Command, ObjectMatrix, ICellData } from '@univerjs/core';
 import { FormulaController } from './FormulaController';
 
 export function firstLoader(formulaController: FormulaController) {

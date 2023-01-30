@@ -1,2 +1,2 @@
 export * from '../index';
-declare module '@univer/base-numfmt-engine' { }
+declare module '@univerjs/base-numfmt-engine' { }

@@ -29,6 +29,8 @@ export class SetWorkSheetActivateAction extends SheetActionBase<
     ISetWorkSheetActivateActionData,
     ISheetStatus
 > {
+    static NAME = 'SetWorkSheetActivateAction';
+
     constructor(
         actionData: ISetWorkSheetActivateActionData,
         commandUnit: CommandUnit,

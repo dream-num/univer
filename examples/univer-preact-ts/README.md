@@ -1,4 +1,4 @@
-# style-universheet
+# style-univer
 
 English| [简体中文](./README-zh.md)
 
@@ -8,7 +8,7 @@ UniverSheet Plugin Spreadsheet
 
 ### Installation
 
-```bash
+```shell
 npm i univer-preact-ts
 ```
 

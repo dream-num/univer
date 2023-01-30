@@ -1,6 +1,6 @@
-import { BaseComponentRender, BaseComponentSheet } from '@univer/base-component';
-import { Tools, BorderType, BorderStyleTypes, HorizontalAlign, VerticalAlign, WrapStrategy, DEFAULT_STYLES } from '@univer/core';
-import { ColorPicker } from '@univer/style-universheet';
+import { BaseComponentRender, BaseComponentSheet } from '@univerjs/base-component';
+import { Tools, BorderType, BorderStyleTypes, HorizontalAlign, VerticalAlign, WrapStrategy, DEFAULT_STYLES } from '@univerjs/core';
+import { ColorPicker } from '@univerjs/style-univer';
 import { SlidePlugin } from '../SlidePlugin';
 import { defaultLayout, ILayout } from '../View/UI/SlideContainer';
 

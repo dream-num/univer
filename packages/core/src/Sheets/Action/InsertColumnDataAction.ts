@@ -24,6 +24,8 @@ export class InsertColumnDataAction extends SheetActionBase<
     IInsertColumnDataActionData,
     IRemoveColumnDataAction
 > {
+    static NAME = 'InsertColumnDataAction';
+
     constructor(
         actionData: IInsertColumnDataActionData,
         commandUnit: CommandUnit,

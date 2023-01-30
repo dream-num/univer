@@ -15,7 +15,7 @@ npm i @univer/sheets-plugin-import-xlsx
 ### Usage
 
 ```js
-impport {ImportXlsx} from '@univer/sheets-plugin-import-xlsx'
+import {ImportXlsx} from '@univer/sheets-plugin-import-xlsx'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new ImportXlsx());

@@ -15,7 +15,7 @@ npm i @univer/sheets-plugin-sort
 ### 使用
 
 ```js
-impport {Sort} from '@univer/sheets-plugin-sort'
+import {Sort} from '@univer/sheets-plugin-sort'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Sort());

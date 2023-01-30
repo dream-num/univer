@@ -15,7 +15,7 @@ npm i @univer/sheets-plugin-data-validation
 ### Usage
 
 ```js
-impport {DataValidation} from '@univer/sheets-plugin-data-validation'
+import {DataValidation} from '@univer/sheets-plugin-data-validation'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new DataValidation());

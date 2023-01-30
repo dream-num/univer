@@ -15,7 +15,7 @@ npm i @univer/base-sheets
 ### Usage
 
 ```js
-impport {Spreadsheet} from '@univer/base-sheets'
+import {Spreadsheet} from '@univer/base-sheets'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Spreadsheet());

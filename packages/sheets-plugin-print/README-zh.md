@@ -15,7 +15,7 @@ npm i @univer/sheets-plugin-print
 ### 使用
 
 ```js
-impport {Print} from '@univer/sheets-plugin-print'
+import {Print} from '@univer/sheets-plugin-print'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Print());

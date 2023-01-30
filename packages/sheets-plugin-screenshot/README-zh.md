@@ -15,7 +15,7 @@ npm i @univer/sheets-plugin-screenshot
 ### 使用
 
 ```js
-impport {Screenshot} from '@univer/sheets-plugin-screenshot'
+import {Screenshot} from '@univer/sheets-plugin-screenshot'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Screenshot());

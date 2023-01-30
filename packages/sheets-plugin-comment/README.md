@@ -15,7 +15,7 @@ npm i @univer/sheets-plugin-comment
 ### Usage
 
 ```js
-impport {Comment} from '@univer/sheets-plugin-comment'
+import {Comment} from '@univer/sheets-plugin-comment'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Comment());

@@ -15,7 +15,7 @@ npm i @univer/sheets-plugin-freeze
 ### 使用
 
 ```js
-impport {Frozen} from '@univer/sheets-plugin-freeze'
+import {Frozen} from '@univer/sheets-plugin-freeze'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Frozen());

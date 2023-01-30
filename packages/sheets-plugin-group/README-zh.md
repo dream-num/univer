@@ -15,7 +15,7 @@ npm i @univer/sheets-plugin-group
 ### 使用
 
 ```js
-impport {Group} from '@univer/sheets-plugin-group'
+import {Group} from '@univer/sheets-plugin-group'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Group());

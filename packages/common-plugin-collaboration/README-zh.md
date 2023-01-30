@@ -15,7 +15,7 @@ npm i @univer/common-plugin-collaboration
 ### 使用
 
 ```js
-impport {Collaboration} from '@univer/common-plugin-collaboration'
+import {Collaboration} from '@univer/common-plugin-collaboration'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Collaboration());

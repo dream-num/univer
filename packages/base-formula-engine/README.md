@@ -15,7 +15,7 @@ npm i @univer/base-formula-engine
 ### Usage
 
 ```js
-impport {FormulaEngine} from '@univer/base-formula-engine'
+import {FormulaEngine} from '@univer/base-formula-engine'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new FormulaEngine());

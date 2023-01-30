@@ -15,7 +15,7 @@ npm i @univer/sheets-plugin-conditional-format
 ### 使用
 
 ```js
-impport {ConditionalFormat} from '@univer/sheets-plugin-conditional-format'
+import {ConditionalFormat} from '@univer/sheets-plugin-conditional-format'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new ConditionalFormat());

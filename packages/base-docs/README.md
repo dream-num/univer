@@ -15,7 +15,7 @@ npm i @univer/base-docs
 ### Usage
 
 ```js
-impport {Docs} from '@univer/base-docs'
+import {Docs} from '@univer/base-docs'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Docs());

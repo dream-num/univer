@@ -15,7 +15,7 @@ npm i @univer/<%= projectName %>
 ### 使用
 
 ```js
-impport {<%= projectUpperValue %>} from '@univer/<%= projectName %>'
+import {<%= projectUpperValue %>} from '@univer/<%= projectName %>'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new <%= projectUpperValue %>());

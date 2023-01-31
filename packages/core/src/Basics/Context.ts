@@ -7,7 +7,6 @@ import { ContextBase } from './ContextBase';
 export class Context extends ContextBase {
     constructor(univerData: Partial<IUniverData> = {}) {
         super();
-        this._locale.initialize(univerData.locale);
     }
 
     protected _setObserver(): void {}

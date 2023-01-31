@@ -1,12 +1,12 @@
 export class ComponentManager {
-    private _componentList: Map<string, any>;
+    private _componentList: Map<string, any> = new Map();
 
     register(name: string, component: any) {
         this._componentList.set(name, component);
     }
 
     get(name: string) {
-        this._componentList.get(name);
+        return this._componentList.get(name);
     }
 
     delete(name: string) {

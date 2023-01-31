@@ -1,5 +1,8 @@
-export const DefaultToolbarConfig = {
-    undoRedo: true, // Undo redo
+import { BaseToolBarConfig, SheetToolBarConfig } from '../../Interfaces/ToolbarConfig/BaseToolBarConfig';
+
+export const DefaultToolbarConfig: BaseToolBarConfig = {
+    undo: true,
+    redo: true, // Undo redo
     paintFormat: true, // Format brush
     currencyFormat: true, // currency format
     percentageFormat: true, // Percentage format
@@ -15,9 +18,13 @@ export const DefaultToolbarConfig = {
     textColor: true, // 'Text color'
     fillColor: true, // 'Cell color'
     border: true, // 'border'
-    mergeCell: true, // 'Merge cells'
     horizontalAlignMode: true, // 'Horizontal alignment'
     verticalAlignMode: true, // 'Vertical alignment'
     textWrapMode: true, // 'Wrap mode'
     textRotateMode: true, // 'Text Rotation Mode'
+};
+
+export const DefaultSheetToolbarConfig: SheetToolBarConfig = {
+    ...DefaultToolbarConfig,
+    mergeCell: true,
 };

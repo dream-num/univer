@@ -49,9 +49,9 @@ const univerConfig = {
 const univer = new Univer();
 univer.install(new UniverComponentSheet());
 const sheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
+sheet.installPlugin(new RenderEngine());
 const component = new BaseComponentPlugin(univerConfig);
 univer.install(component);
-sheet.installPlugin(new RenderEngine());
 sheet.installPlugin(
     new SheetPlugin(component, {
         selections: {

@@ -1,9 +1,10 @@
-import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, createRef, debounce } from '@univerjs/base-component';
 import { PLUGIN_NAMES } from '@univerjs/core';
-import { IToolBarItemProps } from '../../../Model/ToolBarModel';
-import { SheetPlugin } from '../../../SheetPlugin';
-import { Select } from '../Common/Select/Select';
-import { TextButton } from '../Common/TextButton/TextButton';
+import { Select, TextButton } from '@univerjs/style-univer';
+import { BaseComponentProps, BaseComponentRender, BaseComponentSheet } from '../../BaseComponent';
+import { BaseComponentPlugin } from '../../BaseComponentPlugin';
+import { IToolBarItemProps } from '../../Basics/Interfaces/ToolbarConfig/BaseToolBarConfig';
+import { Component, createRef } from '../../Framework';
+import { debounce } from '../../Utils';
 import styles from './index.module.less';
 
 interface IProps extends BaseComponentProps {
@@ -150,14 +151,14 @@ export class ToolBar extends Component<IProps, IState> {
     };
 
     resetLabel = (toolList: any[]) => {
-        const plugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
+        const componentManager = this._context.getPluginManager().getPluginByName<BaseComponentPlugin>(PLUGIN_NAMES.BASE_COMPONENT)?.getComponentManager();
 
         for (let i = 0; i < toolList.length; i++) {
             const item = toolList[i];
 
             // 优先寻找自定义组件
             if (item.customLabel) {
-                const Label = plugin?.getRegisterComponent(item.customLabel.name);
+                const Label = componentManager?.get(item.customLabel.name);
                 if (Label) {
                     const props = item.customLabel.props ?? {};
                     item.label = <Label {...props} />;
@@ -165,7 +166,7 @@ export class ToolBar extends Component<IProps, IState> {
             }
 
             if (item.customSuffix) {
-                const Suffix = plugin?.getRegisterComponent(item.customSuffix.name);
+                const Suffix = componentManager?.get(item.customSuffix.name);
                 if (Suffix) {
                     const props = item.customSuffix.props ?? {};
                     item.suffix = <Suffix {...props} />;
@@ -179,14 +180,28 @@ export class ToolBar extends Component<IProps, IState> {
         return toolList;
     };
 
-    setToolBar = (toolList: any[], moreText: Record<string, string>) => {
+    // setToolBar = (toolList: any[], moreText: Record<string, string>) => {
+    //     toolList = this.resetLabel(toolList);
+
+    //     this.setState(
+    //         {
+    //             toolList,
+    //             defaultToolList: toolList,
+    //             moreText,
+    //         },
+    //         () => {
+    //             this.setToolbarListWidth();
+    //         }
+    //     );
+    // };
+
+    setToolBar = (toolList: any[]) => {
         toolList = this.resetLabel(toolList);
 
         this.setState(
             {
                 toolList,
                 defaultToolList: toolList,
-                moreText,
             },
             () => {
                 this.setToolbarListWidth();
@@ -195,7 +210,7 @@ export class ToolBar extends Component<IProps, IState> {
     };
 
     resetUl = () => {
-        const wrapper = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.getSheetContainerControl().getContentRef().current!;
+        const wrapper = this._context.getPluginManager().getPluginByName<BaseComponentPlugin>(PLUGIN_NAMES.BASE_COMPONENT)?.getUniverContainerController().getContentRef().current!;
         const height = `${(wrapper as HTMLDivElement).offsetHeight}px`;
         const ul = this.toolbarRef.current.querySelectorAll('ul');
         for (let i = 0; i < ul.length; i++) {
@@ -204,7 +219,7 @@ export class ToolBar extends Component<IProps, IState> {
     };
 
     componentDidMount() {
-        this._context.getObserverManager().getObserver<ToolBar>('onToolBarDidMountObservable')?.notifyObservers(this);
+        this.props.getComponent?.(this);
         window.addEventListener('resize', this.debounceSetToolbarListWidth);
     }
 

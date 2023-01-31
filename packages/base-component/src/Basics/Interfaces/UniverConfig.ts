@@ -1,4 +1,5 @@
-import { ContextBase } from '@univerjs/core';
+import { Context } from '@univerjs/core/src/Basics/Context';
+import { LocaleType } from '../../Enum';
 import { ToolBarConfig } from './ToolbarConfig/BaseToolBarConfig';
 
 /**
@@ -74,6 +75,6 @@ export interface UniverConfig {
     container?: HTMLElement | string;
     layout?: ILayout;
     skin?: string;
-    locale?: string;
-    context?: ContextBase;
+    locale?: LocaleType;
+    context?: Context;
 }

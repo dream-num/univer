@@ -1,39 +1,16 @@
-import { getRefElement, isElement, ISlotProps, RefObject, render } from '@univerjs/base-component';
+import { BaseComponentPlugin } from '@univerjs/base-component';
 import { Engine, RenderEngine } from '@univerjs/base-render';
-import {
-    AsyncFunction,
-    SheetContext,
-    IWorkbookConfig,
-    Plugin,
-    PLUGIN_NAMES,
-    Tools,
-    CommandManager,
-    IActionObserverProps,
-    SheetActionBase,
-    ACTION_NAMES,
-    ISetNamedRangeActionData,
-} from '@univerjs/core';
+import { SheetContext, Plugin, PLUGIN_NAMES } from '@univerjs/core';
 
-import { install, SheetPluginObserve, uninstall } from './Basics/Observer';
+import { SheetPluginObserve, uninstall } from './Basics/Observer';
 import { RightMenuProps } from './Model/RightMenuModel';
 import { en, zh } from './Locale';
 import { CANVAS_VIEW_KEY } from './View/Render/BaseView';
 import { CanvasView } from './View/Render/CanvasView';
-import { SheetContainer } from './View/UI/SheetContainer';
-import {
-    RightMenuController,
-    InfoBarController,
-    SheetBarControl,
-    CellEditorController,
-    AntLineControl,
-    CountBarController,
-    SheetContainerController,
-    ToolBarController,
-    BaseSheetContainerConfig,
-} from './Controller';
+import { RightMenuController, InfoBarController, SheetBarControl, CellEditorController, SheetContainerController, ToolBarController } from './Controller';
 import { IToolBarItemProps } from './Model/ToolBarModel';
 import { ModalGroupController } from './Controller/ModalGroupController';
-import { ISheetPluginConfig, DEFAULT_SPREADSHEET_PLUGIN_DATA } from './Basics';
+import { ISheetPluginConfig } from './Basics';
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeActionExtension';
 
@@ -44,27 +21,9 @@ import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeAc
 export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     private _config: ISheetPluginConfig;
 
-    private _toolBarRef: RefObject<HTMLElement>;
-
-    private _splitLeftRef: RefObject<HTMLDivElement>;
-
-    private _contentRef: RefObject<HTMLDivElement>;
-
-    private _addButtonFunc: Function;
-
-    private _addSiderFunc: AsyncFunction<ISlotProps>;
-
-    private _addMainFunc: Function;
-
-    private _showSiderByNameFunc: Function;
-
-    private _showMainByNameFunc: Function;
-
     private _canvasEngine: Engine;
 
     private _canvasView: CanvasView;
-
-    private _viewSheetMap: Map<string, string>;
 
     private _rightMenuControl: RightMenuController;
 
@@ -78,10 +37,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     private _cellEditorController: CellEditorController;
 
-    private _antLineController: AntLineControl;
-
-    private _countBarController: CountBarController;
-
     private _sheetContainerController: SheetContainerController;
 
     private _modalGroupController: ModalGroupController;
@@ -90,31 +45,13 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     private _namedRangeActionExtensionFactory: NamedRangeActionExtensionFactory;
 
-    constructor(config: Partial<ISheetPluginConfig> = {}) {
+    private _component: BaseComponentPlugin;
+
+    constructor(component: BaseComponentPlugin, config: any) {
         super(PLUGIN_NAMES.SPREADSHEET);
+        this._component = component;
 
-        this._config = Tools.deepMerge({}, DEFAULT_SPREADSHEET_PLUGIN_DATA, config);
-    }
-
-    register(engineInstance: Engine) {
-        // The preact ref component cannot determine whether ref.current or ref.current.base is DOM
-        let container: HTMLElement = getRefElement(this._sheetContainerController.getContentRef());
-
-        this._canvasEngine = engineInstance;
-
-        engineInstance.setContainer(container);
-        window.addEventListener('resize', () => {
-            engineInstance.resize();
-        });
-
-        // should be clear
-        setTimeout(() => {
-            engineInstance.resize();
-        }, 0);
-
-        // window.onresize = () => {
-        //     engineInstance.resize();
-        // };
+        this._config = config;
     }
 
     initialize(context: SheetContext): void {
@@ -128,130 +65,35 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
             zh,
         });
 
-        const configure: IWorkbookConfig = context.getWorkBook().getConfig();
+        const engine = this.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
 
-        const sheetContainer = this._initContainer(this._config.container);
+        let container = this._component.getUniverContainerController().getContentRef().current!;
 
-        const config: BaseSheetContainerConfig = {
-            skin: configure.skin || 'default',
-            layout: this._config.layout,
-            container: sheetContainer,
-            onDidMount: () => {},
-            context,
-        };
+        this._canvasEngine = engine;
 
-        this._componentList = new Map();
-
-        const sheetContainerConfig = this._config.layout?.sheetContainerConfig;
-        const rightMenuConfig = this._config.layout?.rightMenuConfig;
-        const toolBarConfig = this._config.layout?.toolBarConfig;
-
-        this._modalGroupController = new ModalGroupController(this);
-        this._sheetContainerController = new SheetContainerController(this, config);
-
-        // TODO rightMenu config
-        if (sheetContainerConfig?.rightMenu) {
-            this._rightMenuControl = new RightMenuController(this, rightMenuConfig);
-        }
-
-        if (sheetContainerConfig?.toolBar) {
-            this._toolBarControl = new ToolBarController(this, toolBarConfig);
-        }
-        if (sheetContainerConfig?.infoBar) {
-            this._infoBarControl = new InfoBarController(this);
-        }
-        if (sheetContainerConfig?.sheetBar) {
-            this._sheetBarControl = new SheetBarControl(this);
-        }
-        this._cellEditorController = new CellEditorController(this);
-        this._antLineController = new AntLineControl(this);
-
-        if (sheetContainerConfig?.countBar) {
-            this._countBarController = new CountBarController(this);
-        }
-        if (sheetContainerConfig?.formulaBar) {
-            this._formulaBarController = new FormulaBarController(this);
-        }
-
-        this.getObserver('onSheetContainerDidMountObservable')?.add(() => {
-            this._initializeRender(context);
+        engine.setContainer(container);
+        window.addEventListener('resize', () => {
+            engine.resize();
         });
 
-        // render sheet container
-        render(
-            <SheetContainer changeLocale={this._sheetContainerController.changeLocale} changeSkin={this._sheetContainerController.changeSkin} config={config} />,
-            sheetContainer
-        );
+        // should be clear
+        setTimeout(() => {
+            engine.resize();
+        }, 0);
 
-        // const formulaEngine = this.getPluginByName<FormulaPlugin>('formula')?.getFormulaEngine();
-        // =(sum(max(B1:C10,10)*5-100,((1+1)*2+5)/2,10)+count(B1:C10,10*5-100))*5-100
-        // =(sum(max(B1:C10,10)*5-100,((1+1)*2+5)/2,10, lambda(x,y, x*y*x)(sum(1,(1+2)*3),2))+lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+count(B1:C10,10*5-100))*5-100
-        // =((1+2)-A1:B2 + 5)/2 + sum(indirect("A5"):B10 + A1:offset("C5", 1, 1), 100)
-        // =1+(3*4=4)*5+1
-        // =(-(1+2)--@A1:B2 + 5)/2 + -sum(indirect("A5"):B10# + B6# + A1:offset("C5", 1, 1)  ,  100) + {1,2,3;4,5,6;7,8,10} + lambda(x,y,z, x*y*z)(sum(1,(1+2)*3),2,lambda(x,y, @offset(A1:B0,x#*y#))(1,2):C20) & "美国人才" + sum((1+2%)*30%, 1+2)%
-        // formulaEngine?.calculate(`=lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+1-max(100,200)`);
+        if (this._canvasView == null) {
+            this._canvasView = new CanvasView(engine, this);
+        }
 
         this.registerExtension();
-    }
-
-    /**
-     * Convert id to DOM
-     * @param container
-     * @returns
-     */
-    private _initContainer(container: HTMLElement | string) {
-        let sheetContainer = null;
-        if (typeof container === 'string') {
-            const containerDOM = document.getElementById(container);
-            if (containerDOM == null) {
-                sheetContainer = document.createElement('div');
-                sheetContainer.id = container;
-            } else {
-                sheetContainer = containerDOM;
-            }
-        } else if (isElement(container)) {
-            sheetContainer = container;
-        } else {
-            sheetContainer = document.createElement('div');
-            sheetContainer.id = 'universheet';
-        }
-
-        return sheetContainer;
-    }
-
-    onMounted(ctx: SheetContext): void {
-        install(this);
-
-        this.initialize(ctx);
-
-        CommandManager.getActionObservers().add((actionObs: IActionObserverProps): void => {
-            const currentUnitId = this.getContext().getWorkBook().getUnitId();
-            const action = actionObs.action as SheetActionBase<ISetNamedRangeActionData, ISetNamedRangeActionData>;
-            const actionData = action.getDoActionData();
-            const actionUnitId = action.getWorkBook().getUnitId();
-
-            if (currentUnitId !== actionUnitId) return;
-
-            if (actionData.actionName === ACTION_NAMES.SET_NAMED_RANGE_ACTION) {
-                const namedRange = actionData.namedRange;
-            }
-        });
     }
 
     get config() {
         return this._config;
     }
 
-    private _initializeRender(context: SheetContext) {
-        const engine = this.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
-
-        this.register(engine);
-
-        if (this._canvasView == null) {
-            this._canvasView = new CanvasView(engine, this);
-        }
-
-        this.context.getContextObserver('onSheetRenderDidMountObservable')?.notifyObservers();
+    onMounted(ctx: SheetContext): void {
+        this.initialize(ctx);
     }
 
     onDestroy(): void {
@@ -266,10 +108,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
         this._namedRangeActionExtensionFactory = new NamedRangeActionExtensionFactory(this);
         actionRegister.add(this._namedRangeActionExtensionFactory);
-    }
-
-    addButton(item: IToolBarItemProps): void {
-        this._addButtonFunc(item);
     }
 
     getCanvasEngine() {

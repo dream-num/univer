@@ -5,10 +5,11 @@ import defaultSkin from '@univerjs/style-univer/assets/css/skin/default.module.l
 import darkSkin from '@univerjs/style-univer/assets/css/skin/dark.module.less';
 import greenSkin from '@univerjs/style-univer/assets/css/skin/green.module.less';
 import { BaseComponentProps } from '../../BaseComponent';
-import { IShowContainerConfig, UniverConfig } from '../../Basics';
+import { UniverConfig } from '../../Basics';
 import { AppContext } from '../../Common';
 import { Component, createRef } from '../../Framework';
 import style from './index.module.less';
+import { ToolBar } from '../ToolBar';
 
 export interface BaseSheetContainerProps extends BaseComponentProps {
     config: UniverConfig;
@@ -16,11 +17,11 @@ export interface BaseSheetContainerProps extends BaseComponentProps {
     changeSkin: () => void;
     changeLocale: (locale: string) => void;
     mountCanvas?: (container: HTMLElement) => void;
+    methods?: any;
 }
 
 // Types for state
 interface IState {
-    layout: IShowContainerConfig;
     currentLocale: string;
     currentSkin: string;
 }
@@ -42,11 +43,10 @@ export class UniverContainer extends Component<BaseSheetContainerProps, IState> 
     contentRef = createRef<HTMLDivElement>();
 
     constructor(props: BaseSheetContainerProps) {
-        super(props, { coreContext: props.config.context });
+        super(props, { context: props.config.context });
         const defaultSkin = props.config.skin ?? 'default';
         // init state
         this.state = {
-            layout: {},
             currentLocale: props.config.locale ?? 'zh',
             currentSkin: defaultSkin,
         };
@@ -79,6 +79,7 @@ export class UniverContainer extends Component<BaseSheetContainerProps, IState> 
      * @param e
      */
     handleSplitBarMouseMove = (e: MouseEvent) => {
+        const layout = this.props.config.layout?.sheetContainerConfig!;
         e = e || window.event; // Compatible with IE browser
         let diffLeft = e.clientX - this.leftContentLeft;
         let diffTop = e.clientY - this.leftContentTop;
@@ -86,7 +87,7 @@ export class UniverContainer extends Component<BaseSheetContainerProps, IState> 
         diffLeft = diffLeft >= this.rightBorderX ? this.rightBorderX : diffLeft;
         diffTop = diffTop >= this.rightBorderY ? this.rightBorderY : diffTop;
         // set new width
-        if (this.state.layout.contentSplit === 'vertical') {
+        if (layout.contentSplit === 'vertical') {
             this.splitLeftRef.current!.style.height = `${diffTop}px`;
         } else {
             this.splitLeftRef.current!.style.width = `${diffLeft}px`;
@@ -226,36 +227,38 @@ export class UniverContainer extends Component<BaseSheetContainerProps, IState> 
      * @returns {void}
      */
     render() {
-        const { context } = this.props.config;
-        const { layout, currentLocale, currentSkin } = this.state;
+        const { methods } = this.props;
+        const { context, layout } = this.props.config;
+        const { currentLocale, currentSkin } = this.state;
+        const config = layout?.sheetContainerConfig!;
         // Set Provider for entire Container
         return (
             <AppContext.Provider
                 value={{
-                    coreContext: context,
+                    context,
                 }}
             >
                 <Container className={style.layoutContainer}>
                     <Layout>
-                        <Sider style={{ display: layout.outerLeft ? 'block' : 'none' }}></Sider>
+                        <Sider style={{ display: config.outerLeft ? 'block' : 'none' }}></Sider>
                         <Layout className={style.mainContent} style={{ position: 'relative' }}>
-                            <Header style={{ display: layout.header ? 'block' : 'none' }}>
-                                {/* {layout.infoBar && <InfoBar></InfoBar>}
-                                {layout.toolBar && <ToolBar toolList={[]}></ToolBar>}
-                                {layout.formulaBar && <FormulaBar></FormulaBar>} */}
+                            <Header style={{ display: config.header ? 'block' : 'none' }}>
+                                {config.toolBar && <ToolBar {...methods.toolbar}></ToolBar>}
+                                {/* {config.infoBar && <InfoBar></InfoBar>}
+                                {config.formulaBar && <FormulaBar></FormulaBar>} */}
                             </Header>
                             <Layout>
                                 <Sider
                                     style={{
-                                        display: layout.innerLeft ? 'block' : 'none',
+                                        display: config.innerLeft ? 'block' : 'none',
                                     }}
                                 >
                                     {/* innerLeft */}
                                 </Sider>
-                                <Content className={layout.contentSplit === 'vertical' ? style.contentContainerVertical : style.contentContainerHorizontal}>
+                                <Content className={config.contentSplit === 'vertical' ? style.contentContainerVertical : style.contentContainerHorizontal}>
                                     {/* extend main content */}
                                     {/* <ModalGroup></ModalGroup> */}
-                                    {!!layout.contentSplit && (
+                                    {!!config.contentSplit && (
                                         <Container ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>
                                             <div className={style.hoverCursor} onMouseDown={this.handleSplitBarMouseDown}></div>
                                         </Container>
@@ -279,7 +282,7 @@ export class UniverContainer extends Component<BaseSheetContainerProps, IState> 
                                 </Content>
                                 <Sider
                                     style={{
-                                        display: layout.innerRight ? 'block' : 'none',
+                                        display: config.innerRight ? 'block' : 'none',
                                     }}
                                 >
                                     {/* innerRight */}
@@ -288,16 +291,16 @@ export class UniverContainer extends Component<BaseSheetContainerProps, IState> 
                             </Layout>
                             <Footer
                                 style={{
-                                    display: layout.footer ? 'block' : 'none',
+                                    display: config.footer ? 'block' : 'none',
                                 }}
                             >
-                                {/* {layout.sheetBar && <SheetBar></SheetBar>} */}
-                                {/* {layout.countBar && <CountBar></CountBar>} */}
+                                {/* {config.sheetBar && <SheetBar></SheetBar>} */}
+                                {/* {config.countBar && <CountBar></CountBar>} */}
                             </Footer>
                         </Layout>
                         <Sider
                             style={{
-                                display: layout.outerRight ? 'block' : 'none',
+                                display: config.outerRight ? 'block' : 'none',
                             }}
                             className={style.outerRightContainer}
                         ></Sider>

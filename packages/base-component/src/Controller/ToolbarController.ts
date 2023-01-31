@@ -1,20 +1,21 @@
 import { BaseComponentPlugin } from '../BaseComponentPlugin';
-import { DefaultToolbarConfig } from '../Basics/Const/ToolBar/DefaultToolbarConfig';
 import { IToolBarItemProps, SheetToolBarConfig, ToolBarConfig } from '../Basics/Interfaces/ToolbarConfig/BaseToolBarConfig';
+import { ToolBar } from '../UI/ToolBar';
+import { resetDataLabel } from '../Utils';
 
 export class ToolBarController {
     private _plugin: BaseComponentPlugin;
 
-    private _currentConfig: ToolBarConfig;
+    private _toolbar: ToolBar;
 
-    private _configList: Map<string, ToolBarConfig>;
+    private _currentConfig: ToolBarConfig = {};
+
+    private _configList: Map<string, ToolBarConfig> = new Map();
 
     private _toolList: IToolBarItemProps[];
 
     constructor(plugin: BaseComponentPlugin) {
         this._plugin = plugin;
-
-        this._currentConfig = DefaultToolbarConfig;
 
         this._toolList = [
             {
@@ -24,18 +25,21 @@ export class ToolBarController {
                 customLabel: {
                     name: 'ForwardIcon',
                 },
-                show: this._currentConfig.undoRedo,
+                show: this._currentConfig.undo,
                 onClick: () => {},
             },
         ];
     }
 
+    // 获取Toolbar组件
+    getComponent = (ref: ToolBar) => {
+        this._toolbar = ref;
+    };
+
     // 增加toolbar配置
-    addToolbarConfig(id: string, config?: SheetToolBarConfig) {
-        if (!config) {
-            config = DefaultToolbarConfig;
-        }
+    addToolbarConfig(id: string, config: SheetToolBarConfig) {
         this._configList.set(id, config);
+        this.setCurrentToolbarConfig(id);
     }
 
     // 删除toolbar配置
@@ -48,5 +52,26 @@ export class ToolBarController {
         const config = this._configList.get(id);
         if (!config) return;
         this._currentConfig = config;
+        this.modifyToolList(config);
+    }
+
+    // 根据配置修改toolList
+    modifyToolList(config: ToolBarConfig) {
+        for (let i = 0; i < this._toolList.length; i++) {
+            this._toolList[i].show = false;
+            for (let k in config) {
+                if (this._toolList[i].name === k) {
+                    this._toolList[i].show = true;
+                }
+            }
+        }
+        this.setToolbar();
+    }
+
+    // 刷新toolbar
+    setToolbar() {
+        const locale = this._plugin.getLocale();
+        const toolList = resetDataLabel(this._toolList, locale);
+        this._toolbar.setToolBar(toolList);
     }
 }

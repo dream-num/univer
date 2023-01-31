@@ -3,14 +3,17 @@ import { BaseTextButtonProps } from '@univerjs/base-sheets/src/View/UI/Common/Te
 
 export interface ToolBarConfig extends SheetToolBarConfig, DocToolBarConfig, SlideToolBarConfig {}
 
+// 基础工具栏配置
 export interface BaseToolBarConfig {
-    undoRedo?: boolean; // Undo redo
+    undo?: boolean; // Undo redo
+    redo?: boolean; // Undo redo
     paintFormat?: boolean; // Format brush
     currencyFormat?: boolean; // currency format
     percentageFormat?: boolean; // Percentage format
     numberDecrease?: boolean; // 'Decrease the number of decimal places'
     numberIncrease?: boolean; // 'Increase the number of decimal places
     font?: boolean; // 'font'
+    moreFormats?: boolean;
     fontSize?: boolean; // 'Font size'
     bold?: boolean; // 'Bold (Ctrl+B)'
     italic?: boolean; // 'Italic (Ctrl+I)'
@@ -25,6 +28,7 @@ export interface BaseToolBarConfig {
     textRotateMode?: boolean; // 'Text Rotation Mode'
 }
 
+// sheet工具栏配置
 export interface SheetToolBarConfig extends BaseToolBarConfig {
     mergeCell?: boolean; // 'Merge cells'
 }

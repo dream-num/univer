@@ -2,7 +2,7 @@ import { BasePlugin } from '@univerjs/core';
 import { ComponentClass, ForwardFn } from './Framework';
 import { Description } from './Components';
 
-// TODO Button const enum
+// TODO Button const enum; BaseComponentSheet => BaseComponentXXX
 
 // UniverSheet base component
 export interface BaseComponentSheet extends BasePlugin {
@@ -28,13 +28,13 @@ export interface BaseComponentRender {
 
 // Components interface
 const ButtonTypes: string[] = ['default', 'primary'];
-export type ButtonType = typeof ButtonTypes[number];
+export type ButtonType = (typeof ButtonTypes)[number];
 const ButtonShapes: string[] = ['circle', 'round'];
-export type ButtonShape = typeof ButtonShapes[number];
+export type ButtonShape = (typeof ButtonShapes)[number];
 const SizeTypes: string[] = ['small', 'middle', 'large'];
-export type SizeType = typeof SizeTypes[number];
+export type SizeType = (typeof SizeTypes)[number];
 const ButtonHTMLTypes: string[] = ['submit', 'rest', 'button'];
-export type ButtonHTMLType = typeof ButtonHTMLTypes[number];
+export type ButtonHTMLType = (typeof ButtonHTMLTypes)[number];
 
 export interface BaseButtonProps extends BaseComponentProps {
     type?: ButtonType;

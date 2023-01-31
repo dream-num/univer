@@ -1,3 +1,4 @@
+import { ToolBarObserver } from '@univerjs/core';
 import { BaseComponentPlugin } from '../BaseComponentPlugin';
 import { IToolBarItemProps, SheetToolBarConfig, ToolBarConfig } from '../Basics/Interfaces/ToolbarConfig/BaseToolBarConfig';
 import { ToolBar } from '../UI/ToolBar';
@@ -26,7 +27,13 @@ export class ToolBarController {
                     name: 'ForwardIcon',
                 },
                 show: this._currentConfig.undo,
-                onClick: () => {},
+                onClick: () => {
+                    console.log('undo click');
+                    const msg = {
+                        name: 'undo',
+                    };
+                    this._plugin.getContext().getObserverManager().requiredObserver<ToolBarObserver>('onToolBarChangeObservable', 'core').notifyObservers(msg);
+                },
             },
         ];
     }

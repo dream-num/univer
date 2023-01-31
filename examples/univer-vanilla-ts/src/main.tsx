@@ -47,13 +47,18 @@ const univerConfig = {
 };
 
 const univer = new Univer();
-univer.install(new UniverComponentSheet());
+
+// base-render
+univer.install(new RenderEngine());
+
+// universheet
 const sheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
-sheet.installPlugin(new RenderEngine());
-const component = new BaseComponentPlugin(univerConfig);
-univer.install(component);
+// sheet.installPlugin(new RenderEngine());
+univer.addUniverSheet(sheet);
+
+// base-sheet
 sheet.installPlugin(
-    new SheetPlugin(component, {
+    new SheetPlugin({
         selections: {
             'sheet-0001': [
                 {
@@ -72,6 +77,10 @@ sheet.installPlugin(
         },
     })
 );
+
+// ui
+univer.install(new UniverComponentSheet());
+univer.install(new BaseComponentPlugin(univerConfig));
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO1);
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO2);

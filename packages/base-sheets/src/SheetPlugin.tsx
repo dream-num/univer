@@ -1,6 +1,5 @@
-import { BaseComponentPlugin } from '@univerjs/base-component';
-import { Engine, RenderEngine } from '@univerjs/base-render';
-import { SheetContext, Plugin, PLUGIN_NAMES } from '@univerjs/core';
+import { Engine } from '@univerjs/base-render';
+import { SheetContext, Plugin, PLUGIN_NAMES, ToolBarObserver } from '@univerjs/core';
 
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
 import { RightMenuProps } from './Model/RightMenuModel';
@@ -45,11 +44,11 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     private _namedRangeActionExtensionFactory: NamedRangeActionExtensionFactory;
 
-    private _component: BaseComponentPlugin;
+    // private _component: BaseComponentPlugin;
 
-    constructor(component: BaseComponentPlugin, config: any) {
+    constructor(config: any) {
         super(PLUGIN_NAMES.SPREADSHEET);
-        this._component = component;
+        // this._component = component;
 
         this._config = config;
     }
@@ -65,25 +64,25 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
             zh,
         });
 
-        const engine = this.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
+        // const engine = this.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
 
-        let container = this._component.getUniverContainerController().getContentRef().current!;
+        // let container = this._component.getUniverContainerController().getContentRef().current!;
 
-        this._canvasEngine = engine;
+        // this._canvasEngine = engine;
 
-        engine.setContainer(container);
-        window.addEventListener('resize', () => {
-            engine.resize();
-        });
+        // engine.setContainer(container);
+        // window.addEventListener('resize', () => {
+        //     engine.resize();
+        // });
 
-        // should be clear
-        setTimeout(() => {
-            engine.resize();
-        }, 0);
+        // // should be clear
+        // setTimeout(() => {
+        //     engine.resize();
+        // }, 0);
 
-        if (this._canvasView == null) {
-            this._canvasView = new CanvasView(engine, this);
-        }
+        // if (this._canvasView == null) {
+        //     this._canvasView = new CanvasView(engine, this);
+        // }
 
         this.registerExtension();
     }
@@ -108,6 +107,18 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
         this._namedRangeActionExtensionFactory = new NamedRangeActionExtensionFactory(this);
         actionRegister.add(this._namedRangeActionExtensionFactory);
+    }
+
+    listenEventManager() {
+        // TODO: move to toolbarcontroller
+        this.getContext()
+            .getUniver()
+            .getContext()
+            .getObserverManager()
+            .requiredObserver<ToolBarObserver<boolean>>('onToolBarChangeObservable', 'core')
+            .add((msg) => {
+                console.log('get click event mas:', msg);
+            });
     }
 
     getCanvasEngine() {

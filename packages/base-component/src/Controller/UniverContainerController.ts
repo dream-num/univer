@@ -25,6 +25,8 @@ export class UniverContainerController {
 
         this._initRegisterComponent();
 
+        this._initialize();
+
         this._toolbarController = new ToolBarController(this._plugin);
 
         // 初始化UI
@@ -105,6 +107,8 @@ export class UniverContainerController {
             this._plugin.getComponentManager().register(k, registerIcon[k]);
         }
     }
+
+    private _initialize() {}
 
     // 获取container组件
     getComponent = (ref: UniverContainer) => {

@@ -475,10 +475,12 @@ export class ToolBarController {
         this._toolBarModel.config = toolbarConfig;
         this._toolBarModel.toolList = this._toolList;
 
-        this.init();
+        this._initialize();
     }
 
-    init() {
+    _initialize() {
+        console.log('base-sheet toolbarController');
+
         this._plugin.getObserver('onAfterChangeFontFamilyObservable')?.add((value: string) => {
             if (!this._plugin.getCellEditorController().isEditMode) {
                 this.setFontFamily(value);

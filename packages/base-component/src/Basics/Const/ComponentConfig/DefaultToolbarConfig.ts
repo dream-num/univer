@@ -1,4 +1,4 @@
-import { BaseToolBarConfig, SheetToolBarConfig } from '../../Interfaces/ToolbarConfig/BaseToolBarConfig';
+import { BaseToolBarConfig, SheetToolBarConfig } from '../../Interfaces/ComponentConfig/ToolBarConfig';
 
 export const DefaultToolbarConfig: BaseToolBarConfig = {
     undo: true,

@@ -1,8 +1,37 @@
 import { UIObserver } from '@univerjs/core';
+import { BaseSelectChildrenProps, BaseSelectProps } from '@univerjs/style-univer/src/Components/Select';
+import { BaseTextButtonProps } from '@univerjs/style-univer/src/Components/TextButton/TextButton';
 import { BaseComponentPlugin } from '../BaseComponentPlugin';
-import { IToolBarItemProps, SheetToolBarConfig, ToolBarConfig } from '../Basics/Interfaces/ToolbarConfig/BaseToolBarConfig';
+import { SheetToolBarConfig, ToolBarConfig } from '../Basics/Interfaces/ComponentConfig/ToolBarConfig';
 import { ToolBar } from '../UI/ToolBar';
 import { resetDataLabel } from '../Utils';
+
+// 继承基础下拉属性,添加国际化
+export interface BaseToolBarSelectChildrenProps extends BaseSelectChildrenProps {
+    locale?: string;
+    suffixLocale?: string;
+    children?: BaseToolBarSelectChildrenProps[];
+}
+
+export interface BaseToolBarSelectProps extends BaseSelectProps {
+    locale?: string;
+    suffixLocale?: string;
+    children?: BaseToolBarSelectChildrenProps[];
+}
+
+enum ToolbarType {
+    SELECT,
+    BUTTON,
+}
+
+export interface IToolBarItemProps extends BaseToolBarSelectProps, BaseTextButtonProps {
+    show?: boolean; //是否显示按钮
+    toolbarType?: ToolbarType;
+    locale?: string; //label国际化
+    tooltipLocale?: string; //tooltip国际化 TODO: need right label
+    tooltip?: string; //tooltip文字
+    border?: boolean;
+}
 
 export class ToolBarController {
     private _plugin: BaseComponentPlugin;
@@ -42,6 +71,7 @@ export class ToolBarController {
     // 获取Toolbar组件
     getComponent = (ref: ToolBar) => {
         this._toolbar = ref;
+        this.setToolbar();
     };
 
     // 增加toolbar配置

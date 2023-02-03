@@ -20,7 +20,7 @@ import type { ModalProps } from './Modal';
 import { Modal } from './Modal';
 import { Radio, RadioGroup } from './Radio';
 import { ResizeDialog } from './ResizeDialog';
-import { Select } from './SelectComponent';
+import { Select } from './Select';
 import { Dropdown } from './Dropdown';
 import { Separator } from './Separator';
 import { SiderModal } from './SiderModal';
@@ -52,7 +52,6 @@ export {
     InfoBar,
     Select,
     Ul,
-    FormulaBar,
     CountBar,
     Modal,
     Slider,
@@ -69,7 +68,6 @@ export {
     BorderLine,
     SiderModal,
     ResizeDialog,
-    RichText,
     Dropdown,
     TextButton,
 };

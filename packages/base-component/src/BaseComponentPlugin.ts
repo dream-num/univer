@@ -1,10 +1,10 @@
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { Plugin, UniverSheet, UniverDoc, UniverSlide, PLUGIN_NAMES, Tools } from '@univerjs/core';
 import { Context } from '@univerjs/core/src/Basics/Context';
-import { DefaultUniverConfig } from './Basics/Const/DefaultUniverConfig';
-import { DefaultUniverSheetConfig } from './Basics/Const/DefaultUniverSheetConfig';
-import { UniverConfig } from './Basics/Interfaces/UniverConfig';
-import { UniverSheetConfig } from './Basics/Interfaces/UniverSheetConfig';
+import { UniverConfig } from './Basics';
+import { DefaultUniverConfig } from './Basics/Const/ComponentConfig/DefaultUniverConfig';
+import { DefaultUniverSheetConfig } from './Basics/Const/ComponentConfig/DefaultUniverSheetConfig';
+import { UniverSheetConfig } from './Basics/Interfaces/ComponentConfig/UniverSheetConfig';
 import { BaseComponentPluginObserve, installObserver } from './Basics/Observer';
 import { Locale } from './Basics/Shared/Locale';
 import { EventManager } from './Common';

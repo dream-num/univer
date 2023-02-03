@@ -1,8 +1,3 @@
-import { BaseSelectChildrenProps, BaseSelectProps } from '@univerjs/base-sheets';
-import { BaseTextButtonProps } from '@univerjs/base-sheets/src/View/UI/Common/TextButton/TextButton';
-
-export interface ToolBarConfig extends SheetToolBarConfig, DocToolBarConfig, SlideToolBarConfig {}
-
 // 基础工具栏配置
 export interface BaseToolBarConfig {
     undo?: boolean; // Undo redo
@@ -37,29 +32,4 @@ export interface DocToolBarConfig extends BaseToolBarConfig {}
 
 export interface SlideToolBarConfig extends BaseToolBarConfig {}
 
-// 继承基础下拉属性,添加国际化
-export interface BaseToolBarSelectChildrenProps extends BaseSelectChildrenProps {
-    locale?: string;
-    suffixLocale?: string;
-    children?: BaseToolBarSelectChildrenProps[];
-}
-
-export interface BaseToolBarSelectProps extends BaseSelectProps {
-    locale?: string;
-    suffixLocale?: string;
-    children?: BaseToolBarSelectChildrenProps[];
-}
-
-enum ToolbarType {
-    SELECT,
-    BUTTON,
-}
-
-export interface IToolBarItemProps extends BaseToolBarSelectProps, BaseTextButtonProps {
-    show?: boolean; //是否显示按钮
-    toolbarType?: ToolbarType;
-    locale?: string; //label国际化
-    tooltipLocale?: string; //tooltip国际化 TODO: need right label
-    tooltip?: string; //tooltip文字
-    border?: boolean;
-}
+export interface ToolBarConfig extends SheetToolBarConfig, DocToolBarConfig, SlideToolBarConfig {}

@@ -1,12 +1,15 @@
+import { InfoBarController, RightMenuController } from '.';
 import { BaseComponentRender, BaseComponentSheet } from '../BaseComponent';
 import { BaseComponentPlugin } from '../BaseComponentPlugin';
 import { UniverConfig } from '../Basics';
-import { UniverSheetConfig } from '../Basics/Interfaces/UniverSheetConfig';
+import { UniverSheetConfig } from '../Basics/Interfaces/ComponentConfig/UniverSheetConfig';
 import { LocaleType } from '../Enum';
 import { UI } from '../UI';
 import { UniverContainer } from '../UI/UniverContainer';
 import { CellEditorController } from './CellEditorController';
 import { ToolBarController } from './ToolbarController';
+import { CountBarController } from './CountBarController';
+import { SheetBarControl } from './SheetBarController';
 
 export class UniverContainerController {
     private _plugin: BaseComponentPlugin;
@@ -18,6 +21,14 @@ export class UniverContainerController {
     private _toolbarController: ToolBarController;
 
     private _cellEditorController: CellEditorController;
+    
+    private _infoBarController: InfoBarController;
+
+    private _rightMenuController: RightMenuController;
+
+    private _countBarController: CountBarController;
+
+    private _sheetBarController: SheetBarControl;
 
     private _config: UniverConfig;
 
@@ -32,6 +43,10 @@ export class UniverContainerController {
 
         this._toolbarController = new ToolBarController(this._plugin);
         this._cellEditorController = new CellEditorController(this._plugin);
+        this._infoBarController = new InfoBarController(this._plugin);
+        this._rightMenuController = new RightMenuController(this._plugin);
+        this._countBarController = new CountBarController(this._plugin);
+        this._sheetBarController = new SheetBarControl(this._plugin);
 
         // 初始化UI
         const config = {
@@ -46,6 +61,22 @@ export class UniverContainerController {
                 },
                 cellEditor: {
                     getComponent: this._cellEditorController.getComponent,
+                },
+                infoBar: {
+                    getComponent: this._infoBarController.getComponent,
+                    renameSheet: this._infoBarController.renameSheet,
+                },
+                rightMenu: {
+                    getComponent: this._rightMenuController.getComponent,
+                },
+                countBar: {
+                    getComponent: this._countBarController.getComponent,
+                },
+                sheetBar: {
+                    getComponent: this._sheetBarController.getComponent,
+                    addSheet: this._sheetBarController.addSheet,
+                    selectSheet: this._sheetBarController.selectSheet,
+                    changeSheetName: this._sheetBarController.changeSheetName,
                 },
             },
         };

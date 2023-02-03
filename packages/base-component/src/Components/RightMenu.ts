@@ -1,4 +1,4 @@
-import { BaseComponent, JSXComponent } from '../BaseComponent';
+import { BaseComponent, BaseComponentProps, JSXComponent } from '../BaseComponent';
 import { ComponentChildren } from '../Framework';
 
 export interface List {
@@ -9,7 +9,7 @@ export interface List {
     children?: List[];
 }
 
-export interface BaseRightMenuProps {
+export interface BaseRightMenuProps extends BaseComponentProps {
     onClick?: () => void;
     style?: {};
 }

@@ -7,7 +7,7 @@ export interface BaseMenuItem {
     label?: ComponentChildren;
     value?: any;
     children?: BaseMenuItem[];
-    hide?: boolean;
+    show?: boolean;
     disabled?: boolean;
     onClick?: (...arg: any) => void;
     border?: boolean;

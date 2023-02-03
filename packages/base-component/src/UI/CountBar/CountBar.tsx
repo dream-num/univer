@@ -1,4 +1,4 @@
-import { BaseCountBarProps } from '../../Components';
+import { BaseCountBarProps } from '../../Interfaces';
 import { Component, createRef } from '../../Framework';
 import styles from './index.module.less';
 

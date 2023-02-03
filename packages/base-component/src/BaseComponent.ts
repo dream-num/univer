@@ -1,6 +1,6 @@
 import { BasePlugin } from '@univerjs/core';
 import { ComponentClass, ForwardFn } from './Framework';
-import { Description } from './Components';
+import { Description } from './Interfaces';
 
 // TODO Button const enum; BaseComponentSheet => BaseComponentXXX
 

@@ -2,7 +2,7 @@ import { IMouseEvent } from '@univerjs/base-render';
 import { PLUGIN_NAMES } from '@univerjs/core';
 import { BaseComponentPlugin } from '../..';
 import { BaseComponentRender, BaseComponentSheet } from '../../BaseComponent';
-import { BaseRightMenuProps } from '../../Components';
+import { BaseRightMenuProps } from '../../Interfaces';
 import { RightMenuProps } from '../../Controller';
 import { Component, createRef } from '../../Framework';
 import Style from './index.module.less';

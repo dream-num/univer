@@ -24,5 +24,5 @@
         "strictPropertyInitialization": false,
         "types": ["jest", "node", "@types/jest"]
     },
-    "include": ["src/**/*", "tests/**/*.(spec|test).(ts|tsx|js)"]
+    "include": ["src/**/*", "tests/**/*.(spec|test).(ts|tsx|js)", "../base-component/src/StyleUniver.ts"]
 }

@@ -11,28 +11,28 @@ import {
 } from '@univerjs/base-component';
 import { Plugin } from '@univerjs/core';
 // import { UniverSingleButton } from './Components';
-import { UniverButton } from './Components/Button/Button';
-import { UniverBorderDashDot } from './Components/CanvasIcon/BorderLine/BorderDashDot';
-import { UniverBorderDashDotDot } from './Components/CanvasIcon/BorderLine/BorderDashDotDot';
-import { UniverBorderDashed } from './Components/CanvasIcon/BorderLine/BorderDashed';
-import { UniverBorderDotted } from './Components/CanvasIcon/BorderLine/BorderDotted';
-import { UniverBorderHair } from './Components/CanvasIcon/BorderLine/BorderHair';
-import { UniverBorderMedium } from './Components/CanvasIcon/BorderLine/BorderMedium';
-import { UniverBorderMediumDashDot } from './Components/CanvasIcon/BorderLine/BorderMediumDashDot';
-import { UniverBorderMediumDashDotDot } from './Components/CanvasIcon/BorderLine/BorderMediumDashDotDot';
-import { UniverBorderMediumDashed } from './Components/CanvasIcon/BorderLine/BorderMediumDashed';
-import { UniverBorderThick } from './Components/CanvasIcon/BorderLine/BorderThick';
-import { UniverBorderThin } from './Components/CanvasIcon/BorderLine/BorderThin';
-import { UniverCellRangeModal } from './Components/CellRangeModal';
-import { UniverCheckbox } from './Components/Checkbox/Checkbox';
-import { UniverCheckboxGroup } from './Components/Checkbox/Group';
-import { UniverCollapse, UniverPanel } from './Components/Collapse/Collapse';
-import { UniverColorPicker } from './Components/ColorPicker';
-import { UniverColorPickerCircleButton } from './Components/ColorPickerCircleButton';
-import { UniverContainer } from './Components/Container';
+import { UniverButton } from '@univerjs/style-univer/src/Components/Button/Button';
+import { UniverBorderDashDot } from '@univerjs/style-univer/src/Components/CanvasIcon/BorderLine/BorderDashDot';
+import { UniverBorderDashDotDot } from '@univerjs/style-univer/src/Components/CanvasIcon/BorderLine/BorderDashDotDot';
+import { UniverBorderDashed } from '@univerjs/style-univer/src/Components/CanvasIcon/BorderLine/BorderDashed';
+import { UniverBorderDotted } from '@univerjs/style-univer/src/Components/CanvasIcon/BorderLine/BorderDotted';
+import { UniverBorderHair } from '@univerjs/style-univer/src/Components/CanvasIcon/BorderLine/BorderHair';
+import { UniverBorderMedium } from '@univerjs/style-univer/src/Components/CanvasIcon/BorderLine/BorderMedium';
+import { UniverBorderMediumDashDot } from '@univerjs/style-univer/src/Components/CanvasIcon/BorderLine/BorderMediumDashDot';
+import { UniverBorderMediumDashDotDot } from '@univerjs/style-univer/src/Components/CanvasIcon/BorderLine/BorderMediumDashDotDot';
+import { UniverBorderMediumDashed } from '@univerjs/style-univer/src/Components/CanvasIcon/BorderLine/BorderMediumDashed';
+import { UniverBorderThick } from '@univerjs/style-univer/src/Components/CanvasIcon/BorderLine/BorderThick';
+import { UniverBorderThin } from '@univerjs/style-univer/src/Components/CanvasIcon/BorderLine/BorderThin';
+import { UniverCellRangeModal } from '@univerjs/style-univer/src/Components/CellRangeModal';
+import { UniverCheckbox } from '@univerjs/style-univer/src/Components/Checkbox/Checkbox';
+import { UniverCheckboxGroup } from '@univerjs/style-univer/src/Components/Checkbox/Group';
+import { UniverCollapse, UniverPanel } from '@univerjs/style-univer/src/Components/Collapse/Collapse';
+import { UniverColorPicker } from '@univerjs/style-univer/src/Components/ColorPicker';
+import { UniverColorPickerCircleButton } from '@univerjs/style-univer/src/Components/ColorPickerCircleButton';
+import { UniverContainer } from '@univerjs/style-univer/src/Components/Container';
 // import { UniverDemo } from './Components/Demo';
-import { UniverFormatModal } from './Components/FormatModal';
-import { UniverMenu } from './Components/Menu/Menu';
+import { UniverFormatModal } from '@univerjs/style-univer/src/Components/FormatModal';
+import { UniverMenu } from '@univerjs/style-univer/src/Components/Menu/Menu';
 import {
     UniverBottomBorderIcon,
     UniverFillColorIcon,
@@ -46,7 +46,7 @@ import {
     UniverStripingBorderIcon,
     UniverTopBorderIcon,
     UniverVerticalBorderIcon,
-} from './Components/Icon/Cell';
+} from '@univerjs/style-univer/src/Components/Icon/Cell';
 import {
     UniverCheckIcon,
     UniverCleanIcon,
@@ -57,9 +57,9 @@ import {
     UniverOrderIcon,
     UniverPivotableIcon,
     UniverSumIcon,
-} from './Components/Icon/Data';
-import { UniverDeleteIcon } from './Components/Icon/Delete';
-import { UniverBoldIcon, UniverDeleteLineIcon, UniverItalicIcon, UniverTextColorIcon, UniverUnderLineIcon } from './Components/Icon/Font';
+} from '@univerjs/style-univer/src/Components/Icon/Data';
+import { UniverDeleteIcon } from '@univerjs/style-univer/src/Components/Icon/Delete';
+import { UniverBoldIcon, UniverDeleteLineIcon, UniverItalicIcon, UniverTextColorIcon, UniverUnderLineIcon } from '@univerjs/style-univer/src/Components/Icon/Font';
 import {
     UniverBackIcon,
     UniverCloseIcon,
@@ -72,11 +72,19 @@ import {
     UniverMenuIcon,
     UniverNextIcon,
     UniverRightIcon,
-} from './Components/Icon/Format';
-import { UniverChartIcon, UniverLinkIcon, UniverPhotoIcon } from './Components/Icon/Insert';
-import { UniverLoadingIcon } from './Components/Icon/Loading';
-import { UniverLogoIcon } from './Components/Icon/Logo';
-import { UniverAddIcon, UniverAddNumIcon, UniverFxIcon, UniverMoneyIcon, UniverPercentIcon, UniverReduceIcon, UniverReduceNumIcon } from './Components/Icon/Math';
+} from '@univerjs/style-univer/src/Components/Icon/Format';
+import { UniverChartIcon, UniverLinkIcon, UniverPhotoIcon } from '@univerjs/style-univer/src/Components/Icon/Insert';
+import { UniverLoadingIcon } from '@univerjs/style-univer/src/Components/Icon/Loading';
+import { UniverLogoIcon } from '@univerjs/style-univer/src/Components/Icon/Logo';
+import {
+    UniverAddIcon,
+    UniverAddNumIcon,
+    UniverFxIcon,
+    UniverMoneyIcon,
+    UniverPercentIcon,
+    UniverReduceIcon,
+    UniverReduceNumIcon,
+} from '@univerjs/style-univer/src/Components/Icon/Math';
 import {
     UniverCommentIcon,
     UniverConditionalFormatIcon,
@@ -90,7 +98,7 @@ import {
     UniverReplaceIcon,
     UniverSearchIcon,
     UniverTableIcon,
-} from './Components/Icon/Sheet';
+} from '@univerjs/style-univer/src/Components/Icon/Sheet';
 import {
     UniverLeftAlignIcon,
     UniverCenterAlignIcon,
@@ -107,19 +115,19 @@ import {
     UniverBrIcon,
     UniverOverflowIcon,
     UniverCutIcon,
-} from './Components/Icon/Text';
-import { UniverScreenshotIcon, UniverImageIcon, UniverPrintAreaIcon, UniverPrintIcon, UniverPrintTitleIcon } from './Components/Icon/View';
-import { UniverInput } from './Components/Input';
-import { UniverContent, UniverFooter, UniverHeader, UniverLayout, UniverSider } from './Components/Layout';
-import { UniverModal } from './Components/Modal';
-import { UniverRadio, UniverRadioGroup } from './Components/Radio';
-import { UniverSelect } from './Components/SelectComponent';
-import { UniverSiderModal } from './Components/SiderModal';
-import { UniverSlider } from './Components/Slider';
-import { UniverTab, UniverTabPane } from './Components/Tabs';
-import { UniverTooltip } from './Components/Tooltip';
-import { UniverUl } from './Components/Ul';
-import { UniverDropdown } from './Components/Dropdown';
+} from '@univerjs/style-univer/src/Components/Icon/Text';
+import { UniverScreenshotIcon, UniverImageIcon, UniverPrintAreaIcon, UniverPrintIcon, UniverPrintTitleIcon } from '@univerjs/style-univer/src/Components/Icon/View';
+import { UniverInput } from '@univerjs/style-univer/src/Components/Input';
+import { UniverContent, UniverFooter, UniverHeader, UniverLayout, UniverSider } from '@univerjs/style-univer/src/Components/Layout';
+import { UniverModal } from '@univerjs/style-univer/src/Components/Modal';
+import { UniverRadio, UniverRadioGroup } from '@univerjs/style-univer/src/Components/Radio';
+import { UniverSelect } from '@univerjs/style-univer/src/Components/SelectComponent';
+import { UniverSiderModal } from '@univerjs/style-univer/src/Components/SiderModal';
+import { UniverSlider } from '@univerjs/style-univer/src/Components/Slider';
+import { UniverTab, UniverTabPane } from '@univerjs/style-univer/src/Components/Tabs';
+import { UniverTooltip } from '@univerjs/style-univer/src/Components/Tooltip';
+import { UniverUl } from '@univerjs/style-univer/src/Components/Ul';
+import { UniverDropdown } from '@univerjs/style-univer/src/Components/Dropdown';
 
 /**
  *

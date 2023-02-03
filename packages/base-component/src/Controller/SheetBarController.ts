@@ -1,6 +1,6 @@
 import { Nullable } from '@univerjs/core';
 import { BaseComponentPlugin } from '..';
-import { BaseMenuItem, BaseUlProps } from '../Components';
+import { BaseMenuItem, BaseUlProps } from '../Interfaces';
 import { SheetBar } from '../UI/SheetBar';
 
 interface CustomComponent {

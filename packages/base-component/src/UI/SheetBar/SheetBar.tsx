@@ -3,7 +3,7 @@ import { Menu } from '@univerjs/style-univer';
 import { BaseComponentPlugin } from '../..';
 import { BaseComponentRender, BaseComponentSheet } from '../../BaseComponent';
 import { SlideTabBar } from '../../Basics/SlideTabBar/SlideTabBar';
-import { BaseMenuItem, BaseSheetBarProps } from '../../Components';
+import { BaseMenuItem, BaseSheetBarProps } from '../../Interfaces';
 import { Component, createRef, RefObject } from '../../Framework';
 import styles from './index.module.less';
 import { SheetBarMenu } from './SheetBarMenu';

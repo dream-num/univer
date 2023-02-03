@@ -1,5 +1,5 @@
 import { Plugin } from '@univerjs/core';
-import { ICell } from '../../Interfaces';
+import { ICell } from '../../Interfaces/Cell';
 
 /**
  * Modify cell value

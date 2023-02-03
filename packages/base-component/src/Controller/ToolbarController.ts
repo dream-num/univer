@@ -1,4 +1,4 @@
-import { ToolBarObserver } from '@univerjs/core';
+import { UIObserver } from '@univerjs/core';
 import { BaseComponentPlugin } from '../BaseComponentPlugin';
 import { IToolBarItemProps, SheetToolBarConfig, ToolBarConfig } from '../Basics/Interfaces/ToolbarConfig/BaseToolBarConfig';
 import { ToolBar } from '../UI/ToolBar';
@@ -17,7 +17,6 @@ export class ToolBarController {
 
     constructor(plugin: BaseComponentPlugin) {
         this._plugin = plugin;
-
         this._toolList = [
             {
                 toolbarType: 1,
@@ -32,7 +31,9 @@ export class ToolBarController {
                     const msg = {
                         name: 'undo',
                     };
-                    this._plugin.getContext().getObserverManager().requiredObserver<ToolBarObserver>('onToolBarChangeObservable', 'core').notifyObservers(msg);
+                    // sheets-plugin-ui Univer => GlobalContext
+                    // 插件不必要用
+                    this._plugin.getContext().getObserverManager().requiredObserver<UIObserver>('onUIChangeObservable', 'core').notifyObservers(msg);
                 },
             },
         ];

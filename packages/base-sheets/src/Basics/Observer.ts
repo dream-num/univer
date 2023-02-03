@@ -6,7 +6,7 @@ import { ToolBar } from '../View/UI/ToolBar/ToolBar';
 import { LineColor } from '../View/UI/Common/Line/LineColor';
 import { LineBold } from '../View/UI/Common/Line/LineBold';
 import { ModalGroup } from '../View/UI/ModalGroup/ModalGroup';
-import { RichText } from '../View/UI/RichText/RichText';
+// import { RichText } from '../View/UI/RichText/RichText';
 import { CellRangeModal } from '../View/UI/Common/CellRange/CellRangeModal';
 import { ColorSelect } from '../View/UI/Common/ColorSelect/ColorSelect';
 
@@ -15,14 +15,14 @@ interface ISelectionControlFillConfig {}
 interface ISelectionControlDragAndDropConfig {}
 
 export type SheetPluginObserve = {
-    onAfterChangeFontFamilyObservable: Observable<string>;
-    onAfterChangeFontSizeObservable: Observable<number>;
-    onAfterChangeFontWeightObservable: Observable<boolean>;
-    onAfterChangeFontItalicObservable: Observable<boolean>;
-    onAfterChangeFontStrikethroughObservable: Observable<boolean>;
-    onAfterChangeFontUnderlineObservable: Observable<boolean>;
-    onAfterChangeFontBackgroundObservable: Observable<string>;
-    onAfterChangeFontColorObservable: Observable<string>;
+    // onAfterChangeFontFamilyObservable: Observable<string>;
+    // onAfterChangeFontSizeObservable: Observable<number>;
+    // onAfterChangeFontWeightObservable: Observable<boolean>;
+    // onAfterChangeFontItalicObservable: Observable<boolean>;
+    // onAfterChangeFontStrikethroughObservable: Observable<boolean>;
+    // onAfterChangeFontUnderlineObservable: Observable<boolean>;
+    // onAfterChangeFontBackgroundObservable: Observable<string>;
+    // onAfterChangeFontColorObservable: Observable<string>;
 
     onDragAndDropStartObserver: Observable<ISelectionControlDragAndDropConfig>;
 
@@ -44,7 +44,7 @@ export type SheetPluginObserve = {
 
     onModalGroupDidMountObservable: Observable<ModalGroup>;
 
-    onRichTextDidMountObservable: Observable<RichText>;
+    // onRichTextDidMountObservable: Observable<RichText>;
     onRichTextKeyDownObservable: Observable<KeyboardEvent>;
     onRichTextKeyUpObservable: Observable<KeyboardEvent>;
 
@@ -68,14 +68,14 @@ export type SheetPluginObserve = {
 };
 
 export function uninstall(plugin: Plugin) {
-    plugin.deleteObserve('onAfterChangeFontFamilyObservable');
-    plugin.deleteObserve('onAfterChangeFontSizeObservable');
-    plugin.deleteObserve('onAfterChangeFontWeightObservable');
-    plugin.deleteObserve('onAfterChangeFontItalicObservable');
-    plugin.deleteObserve('onAfterChangeFontStrikethroughObservable');
-    plugin.deleteObserve('onAfterChangeFontUnderlineObservable');
-    plugin.deleteObserve('onAfterChangeFontBackgroundObservable');
-    plugin.deleteObserve('onAfterChangeFontColorObservable');
+    // plugin.deleteObserve('onAfterChangeFontFamilyObservable');
+    // plugin.deleteObserve('onAfterChangeFontSizeObservable');
+    // plugin.deleteObserve('onAfterChangeFontWeightObservable');
+    // plugin.deleteObserve('onAfterChangeFontItalicObservable');
+    // plugin.deleteObserve('onAfterChangeFontStrikethroughObservable');
+    // plugin.deleteObserve('onAfterChangeFontUnderlineObservable');
+    // plugin.deleteObserve('onAfterChangeFontBackgroundObservable');
+    // plugin.deleteObserve('onAfterChangeFontColorObservable');
 
     plugin.deleteObserve('onDragAndDropStartObserver');
     plugin.deleteObserve('onDragAndDroppingObserver');
@@ -87,7 +87,7 @@ export function uninstall(plugin: Plugin) {
 
     plugin.deleteObserve('onToolBarDidMountObservable');
     plugin.deleteObserve('onModalGroupDidMountObservable');
-    plugin.deleteObserve('onRichTextDidMountObservable');
+    // plugin.deleteObserve('onRichTextDidMountObservable');
     plugin.deleteObserve('onRichTextKeyDownObservable');
     plugin.deleteObserve('onRichTextKeyUpObservable');
     plugin.deleteObserve('onFormulaBarDidMountObservable');
@@ -106,14 +106,14 @@ export function uninstall(plugin: Plugin) {
 }
 
 export function install(plugin: Plugin) {
-    plugin.pushToObserve('onAfterChangeFontFamilyObservable');
-    plugin.pushToObserve('onAfterChangeFontSizeObservable');
-    plugin.pushToObserve('onAfterChangeFontWeightObservable');
-    plugin.pushToObserve('onAfterChangeFontItalicObservable');
-    plugin.pushToObserve('onAfterChangeFontStrikethroughObservable');
-    plugin.pushToObserve('onAfterChangeFontUnderlineObservable');
-    plugin.pushToObserve('onAfterChangeFontBackgroundObservable');
-    plugin.pushToObserve('onAfterChangeFontColorObservable');
+    // plugin.pushToObserve('onAfterChangeFontFamilyObservable');
+    // plugin.pushToObserve('onAfterChangeFontSizeObservable');
+    // plugin.pushToObserve('onAfterChangeFontWeightObservable');
+    // plugin.pushToObserve('onAfterChangeFontItalicObservable');
+    // plugin.pushToObserve('onAfterChangeFontStrikethroughObservable');
+    // plugin.pushToObserve('onAfterChangeFontUnderlineObservable');
+    // plugin.pushToObserve('onAfterChangeFontBackgroundObservable');
+    // plugin.pushToObserve('onAfterChangeFontColorObservable');
 
     plugin.pushToObserve('onDragAndDropStartObserver');
     plugin.pushToObserve('onDragAndDroppingObserver');
@@ -128,7 +128,7 @@ export function install(plugin: Plugin) {
     plugin.pushToObserve('onToolBarDidMountObservable');
     plugin.pushToObserve('onCellRangeModalDidMountObservable');
     plugin.pushToObserve('onModalGroupDidMountObservable');
-    plugin.pushToObserve('onRichTextDidMountObservable');
+    // plugin.pushToObserve('onRichTextDidMountObservable');
     plugin.pushToObserve('onRichTextKeyDownObservable');
     plugin.pushToObserve('onRichTextKeyUpObservable');
     plugin.pushToObserve('onFormulaBarDidMountObservable');

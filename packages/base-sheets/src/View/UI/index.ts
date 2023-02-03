@@ -1,3 +1,3 @@
 export * from './RightMenu';
-export * from './RichText';
+export * from '@univerjs/base-component/src/UI/RichText';
 export * from './Common';

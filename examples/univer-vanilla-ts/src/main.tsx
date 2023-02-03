@@ -46,18 +46,19 @@ const univerConfig = {
     container: 'universheet',
 };
 
+// univer
 const univer = new Univer();
 
 // base-render
 univer.install(new RenderEngine());
 
-// universheet
-const sheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
+// universheet instance
+const universheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 // sheet.installPlugin(new RenderEngine());
-univer.addUniverSheet(sheet);
+univer.addUniverSheet(universheet);
 
 // base-sheet
-sheet.installPlugin(
+universheet.installPlugin(
     new SheetPlugin({
         selections: {
             'sheet-0001': [
@@ -78,9 +79,11 @@ sheet.installPlugin(
     })
 );
 
-// ui
+// ui TODO: 不要安装
 univer.install(new UniverComponentSheet());
 univer.install(new BaseComponentPlugin(univerConfig));
+
+// sheets-plugin-ui univer.install(new SheetsUI)
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO1);
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO2);

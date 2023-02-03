@@ -5,6 +5,7 @@ import { UniverSheetConfig } from '../Basics/Interfaces/UniverSheetConfig';
 import { LocaleType } from '../Enum';
 import { UI } from '../UI';
 import { UniverContainer } from '../UI/UniverContainer';
+import { CellEditorController } from './CellEditorController';
 import { ToolBarController } from './ToolbarController';
 
 export class UniverContainerController {
@@ -15,6 +16,8 @@ export class UniverContainerController {
     private _univerContainer: UniverContainer;
 
     private _toolbarController: ToolBarController;
+
+    private _cellEditorController: CellEditorController;
 
     private _config: UniverConfig;
 
@@ -28,6 +31,7 @@ export class UniverContainerController {
         this._initialize();
 
         this._toolbarController = new ToolBarController(this._plugin);
+        this._cellEditorController = new CellEditorController(this._plugin);
 
         // 初始化UI
         const config = {
@@ -40,6 +44,9 @@ export class UniverContainerController {
                 toolbar: {
                     getComponent: this._toolbarController.getComponent,
                 },
+                cellEditor: {
+                    getComponent: this._cellEditorController.getComponent,
+                },
             },
         };
         UI.create(config);
@@ -47,6 +54,7 @@ export class UniverContainerController {
 
     // 注册常用icon和组件
     private _initRegisterComponent() {
+        // TODO： import 组件
         const component = this._plugin.context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this._render = component.getComponentRender();
 

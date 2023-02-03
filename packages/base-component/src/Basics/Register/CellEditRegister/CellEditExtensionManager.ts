@@ -1,5 +1,5 @@
 import { Nullable } from '@univerjs/core';
-import { ICell } from '../../Interfaces';
+import { ICell } from '../../Interfaces/Cell';
 import { BaseCellEditExtension, BaseCellEditExtensionFactory } from './CellEditExtensionFactory';
 import { CellEditExtensionRegister } from './CellEditExtensionRegister';
 

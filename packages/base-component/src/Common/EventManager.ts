@@ -1,5 +1,6 @@
 import { Observable, ObserverManager, Plugin } from '@univerjs/core';
 
+// 在sheets plugin ui import 使用初始化
 export class EventManager {
     private _observerManager: ObserverManager;
 
@@ -10,6 +11,7 @@ export class EventManager {
 
     private _installObserver() {
         // Event
-        this._observerManager.addObserver('onToolBarChangeObservable', 'core', new Observable());
+        this._observerManager.addObserver('onUIChangeObservable', 'core', new Observable());
+        this._observerManager.addObserver('onRichTextDidMountObservable', 'core', new Observable());
     }
 }

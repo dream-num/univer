@@ -1,5 +1,5 @@
 import { Engine } from '@univerjs/base-render';
-import { SheetContext, Plugin, PLUGIN_NAMES, ToolBarObserver } from '@univerjs/core';
+import { SheetContext, Plugin, PLUGIN_NAMES, UIObserver } from '@univerjs/core';
 
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
 import { RightMenuProps } from './Model/RightMenuModel';
@@ -115,7 +115,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
             .getUniver()
             .getContext()
             .getObserverManager()
-            .requiredObserver<ToolBarObserver<boolean>>('onToolBarChangeObservable', 'core')
+            .requiredObserver<UIObserver<boolean>>('onUIChangeObservable', 'core')
             .add((msg) => {
                 console.log('get click event mas:', msg);
             });

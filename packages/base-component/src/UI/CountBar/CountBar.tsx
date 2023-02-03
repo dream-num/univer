@@ -1,11 +1,10 @@
-import { BaseCountBarProps, Component, CountBarComponent, createRef, JSXComponent } from '@univerjs/base-component';
-import { PLUGIN_NAMES } from '@univerjs/core';
+import { BaseCountBarProps } from '../../Components';
+import { Component, createRef } from '../../Framework';
 import styles from './index.module.less';
 
 type CountState = {
     zoom: number;
     content: string;
-    onChange?: (value: string) => void;
 };
 
 export class CountBar extends Component<BaseCountBarProps, CountState> {
@@ -42,11 +41,8 @@ export class CountBar extends Component<BaseCountBarProps, CountState> {
 
     onChange = (e: Event) => {
         let target = e.target as HTMLInputElement;
-        if (this.state.onChange) {
-            this.state.onChange(target.value);
-        }
+        this.props.changeRatio?.(target.value);
         this.setValue({ zoom: target.value });
-        console.log(target.value);
         this.ref.current.changeInputValue(0, target.value);
     };
 
@@ -59,9 +55,7 @@ export class CountBar extends Component<BaseCountBarProps, CountState> {
         let value = (number + 1) * 10;
         if (value >= this.max) value = this.max;
         this.setValue({ zoom: value });
-        if (this.state.onChange) {
-            this.state.onChange(String(value));
-        }
+        this.props.changeRatio?.(String(value));
     };
 
     reduceZoom = () => {
@@ -69,14 +63,12 @@ export class CountBar extends Component<BaseCountBarProps, CountState> {
         let value = (number - 1) * 10;
         if (value <= this.min) value = this.min;
         this.setValue({ zoom: value });
-        if (this.state.onChange) {
-            this.state.onChange(String(value));
-        }
+        this.props.changeRatio?.(String(value));
         this.ref.current.changeInputValue(0, value);
     };
 
     componentDidMount() {
-        this._context.getObserverManager().getObserver<CountBar>('onCountBarDidMountObservable', PLUGIN_NAMES.SPREADSHEET)?.notifyObservers(this);
+        this.props.getComponent?.(this);
     }
 
     render(props: BaseCountBarProps, state: CountState) {
@@ -114,11 +106,5 @@ export class CountBar extends Component<BaseCountBarProps, CountState> {
                 <span className={styles.countStatistic}>{content}</span>
             </div>
         );
-    }
-}
-
-export class UniverCountBar implements CountBarComponent {
-    render(): JSXComponent<BaseCountBarProps> {
-        return CountBar;
     }
 }

@@ -9,6 +9,10 @@ export interface BaseSheetBarProps extends BaseComponentProps, Omit<BaseSelectPr
     sheetId?: string;
     style?: JSX.CSSProperties;
     hidden?: BooleanNumber;
+    addSheet?: () => void;
+    selectSheet?: () => void;
+    changeSheetName?: (e: Event) => void;
+    dragEnd?: (elements: HTMLElement[]) => void;
 }
 
 export interface SheetBarComponent extends BaseComponent<BaseSheetBarProps> {

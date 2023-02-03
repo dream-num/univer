@@ -5,11 +5,15 @@ import defaultSkin from '@univerjs/style-univer/assets/css/skin/default.module.l
 import darkSkin from '@univerjs/style-univer/assets/css/skin/dark.module.less';
 import greenSkin from '@univerjs/style-univer/assets/css/skin/green.module.less';
 import { BaseComponentProps } from '../../BaseComponent';
-import { UniverConfig } from '../../Basics';
 import { AppContext } from '../../Common';
 import { Component, createRef } from '../../Framework';
 import style from './index.module.less';
 import { ToolBar } from '../ToolBar';
+import { InfoBar } from '../InfoBar';
+import { UniverConfig } from '../../Basics/Interfaces/ComponentConfig/UniverConfig';
+import { RightMenu } from '../RightMenu';
+import { CountBar } from '../CountBar';
+import { SheetBar } from '../SheetBar';
 
 export interface BaseSheetContainerProps extends BaseComponentProps {
     config: UniverConfig;
@@ -79,7 +83,7 @@ export class UniverContainer extends Component<BaseSheetContainerProps, IState> 
      * @param e
      */
     handleSplitBarMouseMove = (e: MouseEvent) => {
-        const layout = this.props.config.layout?.sheetContainerConfig!;
+        const layout = this.props.config.layout!;
         e = e || window.event; // Compatible with IE browser
         let diffLeft = e.clientX - this.leftContentLeft;
         let diffTop = e.clientY - this.leftContentTop;
@@ -230,7 +234,7 @@ export class UniverContainer extends Component<BaseSheetContainerProps, IState> 
         const { methods } = this.props;
         const { context, layout } = this.props.config;
         const { currentLocale, currentSkin } = this.state;
-        const config = layout?.sheetContainerConfig!;
+        const config = layout!;
         // Set Provider for entire Container
         return (
             <AppContext.Provider
@@ -243,6 +247,7 @@ export class UniverContainer extends Component<BaseSheetContainerProps, IState> 
                         <Sider style={{ display: config.outerLeft ? 'block' : 'none' }}></Sider>
                         <Layout className={style.mainContent} style={{ position: 'relative' }}>
                             <Header style={{ display: config.header ? 'block' : 'none' }}>
+                                {config.infoBar && <InfoBar {...methods.infoBar}></InfoBar>}
                                 {config.toolBar && <ToolBar {...methods.toolbar}></ToolBar>}
                                 {/* {config.infoBar && <InfoBar></InfoBar>}
                                 {config.formulaBar && <FormulaBar></FormulaBar>} */}
@@ -264,7 +269,7 @@ export class UniverContainer extends Component<BaseSheetContainerProps, IState> 
                                         </Container>
                                     )}
                                     <Container ref={this.contentRef} className={style.contentInnerRightContainer}>
-                                        {/* <RightMenu /> */}
+                                        {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>}
                                         <div style={{ position: 'fixed', right: '200px', top: '10px', fontSize: '14px' }}>
                                             <span style={{ display: 'inline-block', width: 50, margin: '5px 0 0 5px' }}>皮肤</span>
                                             <select value={currentSkin} onChange={this.handleChangeSkin.bind(this)} style={{ width: 55 }}>
@@ -294,8 +299,8 @@ export class UniverContainer extends Component<BaseSheetContainerProps, IState> 
                                     display: config.footer ? 'block' : 'none',
                                 }}
                             >
-                                {/* {config.sheetBar && <SheetBar></SheetBar>} */}
-                                {/* {config.countBar && <CountBar></CountBar>} */}
+                                {config.sheetBar && <SheetBar {...methods.sheetBar}></SheetBar>}
+                                {config.countBar && <CountBar {...methods.countBar}></CountBar>}
                             </Footer>
                         </Layout>
                         <Sider

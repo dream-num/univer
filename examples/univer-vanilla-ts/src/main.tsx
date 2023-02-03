@@ -81,6 +81,7 @@ sheet.installPlugin(
 // ui
 univer.install(new UniverComponentSheet());
 univer.install(new BaseComponentPlugin(univerConfig));
+
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO1);
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO2);

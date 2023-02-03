@@ -271,7 +271,7 @@ function findLocale(obj: any, locale: Locale) {
         } else if (k.endsWith('Locale')) {
             const index = k.indexOf('Locale');
             obj[k.slice(0, index)] = resetLabel(obj[k], locale);
-        } else if (!obj[k].$$typeof) {
+        } else if (obj[k] && !obj[k].$$typeof) {
             if (Object.prototype.toString.call(obj[k]) === '[object Object]') {
                 findLocale(obj[k], locale);
             } else if (Object.prototype.toString.call(obj[k]) === '[object Array]') {

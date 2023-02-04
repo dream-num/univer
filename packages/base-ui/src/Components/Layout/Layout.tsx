@@ -1,6 +1,5 @@
-import { Component, createRef, Ref, forwardRef } from '../../Framework';
-import { JSXComponent } from '../../BaseComponent';
-import { BaseLayoutProps, LayoutComponent, HeaderComponent, FooterComponent, ContentComponent, SiderComponent } from '../../Interfaces';
+import { Component, createRef, forwardRef, Ref } from '../../Framework';
+import { BaseLayoutProps } from '../../Interfaces';
 import { getFirstChildren } from '../../Utils';
 import styles from './index.module.less';
 
@@ -16,7 +15,7 @@ type IState = {
     isAside: boolean;
 };
 
-class Layout extends Component<BaseLayoutProps, IState> {
+export class Layout extends Component<BaseLayoutProps, IState> {
     ref = createRef<HTMLTableSectionElement>();
 
     state = {
@@ -95,30 +94,4 @@ const Sider = (props: BaseLayoutProps) => {
     );
 };
 
-export { Layout, Header, Footer, Content, Sider };
-
-export class UniverLayout implements LayoutComponent {
-    render(): JSXComponent<BaseLayoutProps> {
-        return Layout;
-    }
-}
-export class UniverHeader implements HeaderComponent {
-    render(): JSXComponent<BaseLayoutProps> {
-        return Header;
-    }
-}
-export class UniverFooter implements FooterComponent {
-    render(): JSXComponent<BaseLayoutProps> {
-        return Footer;
-    }
-}
-export class UniverContent implements ContentComponent {
-    render(): JSXComponent<BaseLayoutProps> {
-        return Content;
-    }
-}
-export class UniverSider implements SiderComponent {
-    render(): JSXComponent<BaseLayoutProps> {
-        return Sider;
-    }
-}
+export { Header, Footer, Content, Sider };

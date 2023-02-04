@@ -1,5 +1,5 @@
-// 基础工具栏配置
-export interface BaseToolBarConfig {
+// sheet工具栏配置
+export interface SheetToolBarConfig {
     undo?: boolean; // Undo redo
     redo?: boolean; // Undo redo
     paintFormat?: boolean; // Format brush
@@ -21,15 +21,5 @@ export interface BaseToolBarConfig {
     verticalAlignMode?: boolean; // 'Vertical alignment'
     textWrapMode?: boolean; // 'Wrap mode'
     textRotateMode?: boolean; // 'Text Rotation Mode'
-}
-
-// sheet工具栏配置
-export interface SheetToolBarConfig extends BaseToolBarConfig {
     mergeCell?: boolean; // 'Merge cells'
 }
-
-export interface DocToolBarConfig extends BaseToolBarConfig {}
-
-export interface SlideToolBarConfig extends BaseToolBarConfig {}
-
-export interface ToolBarConfig extends SheetToolBarConfig, DocToolBarConfig, SlideToolBarConfig {}

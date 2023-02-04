@@ -1,6 +1,4 @@
-import { JSXComponent } from '../../BaseComponent';
 import { ComponentChildren, forwardRef, Ref } from '../../Framework';
-import { ContainerComponent, BaseContainerProps } from '../../Interfaces';
 
 type IProps = {
     children?: ComponentChildren;
@@ -18,9 +16,3 @@ export const Container = forwardRef((props: IProps, ref: Ref<HTMLDivElement>) =>
         </div>
     );
 });
-
-export class UniverContainer implements ContainerComponent {
-    render(): JSXComponent<BaseContainerProps> {
-        return Container;
-    }
-}

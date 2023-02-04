@@ -1,6 +1,6 @@
-import { BaseSelectChildrenProps } from '@univerjs/style-univer/src/Components/Select';
-import { BaseComponentPlugin, BaseMenuItem, resetDataLabel, RightMenuConfig } from '..';
-import { RightMenu } from '../UI/RightMenu';
+import { BaseMenuItem, BaseSelectChildrenProps } from '@univerjs/base-ui';
+import { SheetUIPlugin } from '..';
+import { RightMenu } from '../View';
 
 export interface CustomLabelOptions extends BaseSelectChildrenProps {
     locale?: string;
@@ -30,13 +30,9 @@ export interface RightMenuProps extends BaseMenuItem {
 }
 
 export class RightMenuController {
-    private _plugin: BaseComponentPlugin;
-
-    private _configList: Map<string, RightMenuConfig> = new Map();
+    private _plugin: SheetUIPlugin;
 
     private _rightMenu: RightMenu;
-
-    private _currentConfig: RightMenuConfig = {};
 
     private _menuList: RightMenuProps[];
 

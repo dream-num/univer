@@ -9,18 +9,14 @@ import { Collapse, Panel } from './Collapse';
 import { ColorPicker } from './ColorPicker';
 import { ColorPickerCircleButton } from './ColorPickerCircleButton';
 import { Container } from './Container';
-import { CountBar } from './CountBar';
 import { FormatModal } from './FormatModal';
 import * as Icon from './Icon/index';
-import { InfoBar } from './InfoBar';
 import { Input } from './Input';
 import { Content, Footer, Header, Layout, Sider } from './Layout';
 import { Menu } from './Menu';
-import type { ModalProps } from './Modal';
 import { Modal } from './Modal';
 import { Radio, RadioGroup } from './Radio';
 import { ResizeDialog } from './ResizeDialog';
-import { Select } from './Select';
 import { Dropdown } from './Dropdown';
 import { Separator } from './Separator';
 import { SiderModal } from './SiderModal';
@@ -31,6 +27,9 @@ import { Tab, TabPane } from './Tabs';
 import { Tooltip } from './Tooltip';
 import { Ul } from './Ul';
 import { TextButton } from './TextButton/TextButton';
+
+export * from './Select';
+export * from './TextButton';
 
 export {
     Avatar,
@@ -49,16 +48,12 @@ export {
     Input,
     Separator,
     ColorPicker,
-    InfoBar,
-    Select,
     Ul,
-    CountBar,
     Modal,
     Slider,
     Radio,
     RadioGroup,
     FormatModal,
-    ModalProps,
     Checkbox,
     CheckboxGroup,
     CellRangeModal,

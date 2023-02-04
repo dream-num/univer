@@ -121,6 +121,10 @@ export class Locale {
         this.options.currentLocale = locale;
     }
 
+    getCurrentLocale() {
+        return this.options.currentLocale;
+    }
+
     /**
      * get value from Locale object and key
      * @param locale - A specified language pack

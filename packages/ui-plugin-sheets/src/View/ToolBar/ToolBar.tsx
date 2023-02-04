@@ -1,10 +1,8 @@
+import { BaseComponentProps, Button, Component, Container, createRef, debounce, Select, TextButton, Tooltip } from '@univerjs/base-ui';
 import { PLUGIN_NAMES } from '@univerjs/core';
-import { Select, TextButton } from '@univerjs/style-univer';
-import { BaseComponentProps, BaseComponentRender, BaseComponentSheet } from '../../BaseComponent';
-import { BaseComponentPlugin } from '../../BaseComponentPlugin';
-import { IToolBarItemProps } from '../../Controller/ToolbarController';
-import { Component, createRef } from '../../Framework';
-import { debounce } from '../../Utils';
+import { SheetUIPlugin } from '../..';
+import { SHEET_UI_PLUGIN_NAME } from '../../Basics';
+import { IToolBarItemProps } from '../../Controller';
 import styles from './index.module.less';
 
 interface IProps extends BaseComponentProps {
@@ -30,13 +28,9 @@ export class ToolBar extends Component<IProps, IState> {
 
     SelectRef = createRef();
 
-    private _render: BaseComponentRender;
-
     clientWidth = 0;
 
     initialize() {
-        const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this._render = component.getComponentRender();
         this.state = {
             // Button contains main button and drop down arrow, translation file contains main and right
             showMore: false,
@@ -151,7 +145,7 @@ export class ToolBar extends Component<IProps, IState> {
     };
 
     resetLabel = (toolList: any[]) => {
-        const componentManager = this._context.getPluginManager().getPluginByName<BaseComponentPlugin>(PLUGIN_NAMES.BASE_COMPONENT)?.getComponentManager();
+        const componentManager = this._context.getPluginManager().getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager();
 
         for (let i = 0; i < toolList.length; i++) {
             const item = toolList[i];
@@ -210,7 +204,7 @@ export class ToolBar extends Component<IProps, IState> {
     };
 
     resetUl = () => {
-        const wrapper = this._context.getPluginManager().getPluginByName<BaseComponentPlugin>(PLUGIN_NAMES.BASE_COMPONENT)?.getUniverContainerController().getContentRef().current!;
+        const wrapper = this._context.getPluginManager().getPluginByName<SheetUIPlugin>(PLUGIN_NAMES.BASE_COMPONENT)?.getSheetContainerController().getContentRef().current!;
         const height = `${(wrapper as HTMLDivElement).offsetHeight}px`;
         const ul = this.toolbarRef.current.querySelectorAll('ul');
         for (let i = 0; i < ul.length; i++) {
@@ -229,8 +223,6 @@ export class ToolBar extends Component<IProps, IState> {
 
     // 渲染dom
     getToolBarList(list: IToolBarItemProps[]) {
-        const Tooltip = this._render.renderFunction('Tooltip');
-
         return list.map((item) => {
             if (item.toolbarType) {
                 if (item.show) {
@@ -266,10 +258,6 @@ export class ToolBar extends Component<IProps, IState> {
 
     render() {
         const { defaultToolList, moreToolList, moreText, showMore } = this.state;
-
-        const Button = this._render.renderFunction('Button');
-        const Container = this._render.renderFunction('Container');
-        const Tooltip = this._render.renderFunction('Tooltip');
 
         return (
             <Container style={{ position: 'relative' }}>

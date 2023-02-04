@@ -8,7 +8,7 @@ import {
     BaseRadioIProps,
     Component,
     FunctionComponent,
-} from '@univerjs/base-component';
+} from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { IConfig } from '../../IData';
 import styles from './index.module.less';

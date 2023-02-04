@@ -8,7 +8,7 @@ import {
     BaseSelectProps,
     Component,
     FunctionComponent,
-} from '@univerjs/base-component';
+} from '@univerjs/base-ui';
 import { SheetContext } from '@univerjs/core';
 
 import styles from './index.module.less';

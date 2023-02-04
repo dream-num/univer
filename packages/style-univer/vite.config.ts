@@ -16,7 +16,7 @@ export default defineConfig({
             fileName: 'univer-style-univer',
         },
         outDir: './lib',
-        sourcemap: true
+        sourcemap: true,
     },
     define: {
         pkgJson: { name, version },
@@ -41,9 +41,9 @@ export default defineConfig({
         createExternal({
             externals: {
                 '@univerjs/core': '@univerjs/core',
-                '@univerjs/base-component': '@univerjs/base-component',
+                '@univerjs/base-ui': '@univerjs/base-ui',
                 'css-vars-ponyfill': 'css-vars-ponyfill',
-                'nanoid': 'nanoid',
+                nanoid: 'nanoid',
                 'react-colorful': 'react-colorful',
                 preact: 'preact',
                 react: 'react',

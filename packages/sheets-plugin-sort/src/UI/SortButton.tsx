@@ -1,14 +1,4 @@
-import {
-    BaseComponentSheet,
-    BaseIconProps,
-    BaseSelectProps,
-    Component,
-    createRef,
-    FunctionComponent,
-    ISelectButton,
-    IToolBarItemProps,
-    ISlotElement,
-} from '@univerjs/base-component';
+import { BaseComponentSheet, BaseIconProps, BaseSelectProps, Component, createRef, FunctionComponent, ISelectButton, IToolBarItemProps, ISlotElement } from '@univerjs/base-ui';
 
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { IProps } from '../IData/ISort';

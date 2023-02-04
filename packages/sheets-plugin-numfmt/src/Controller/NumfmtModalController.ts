@@ -1,4 +1,4 @@
-import { ComponentChildren } from '@univerjs/base-component';
+import { ComponentChildren } from '@univerjs/base-ui';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { PLUGIN_NAMES } from '@univerjs/core';
 import { NUMBERFORMAT, NUMFMT_PLUGIN_NAME, CURRENCYDETAIL, DATEFMTLISG } from '../Basic/Const';

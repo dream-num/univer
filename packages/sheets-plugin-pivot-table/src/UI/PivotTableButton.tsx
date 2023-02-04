@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet, Component, IToolBarItemProps } from '@univerjs/base-component';
+import { BaseComponentRender, BaseComponentSheet, Component, IToolBarItemProps } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { PIVOT_TABLE_PLUGIN_NAME } from '../Const/PLUGIN_NAME';

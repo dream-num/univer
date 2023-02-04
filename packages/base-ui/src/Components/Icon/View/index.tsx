@@ -1,5 +1,5 @@
-import { BaseIconProps, IconComponent } from '@univerjs/base-ui';
-import { FunctionComponent } from 'preact';
+import { FunctionComponent } from '../../../Framework';
+import { BaseIconProps, IconComponent } from '../../../Interfaces';
 import { Icon } from '../AddIcon';
 
 const PrintIcon = (props: BaseIconProps) => (

@@ -1,6 +1,12 @@
-import { BaseSelectProps, createRef, ISelectButton, JSXComponent, SelectComponent } from '@univerjs/base-ui';
-import { PureComponent } from 'preact/compat';
-import { Button, ColorPicker, Input, Tooltip, Ul } from '../../index';
+import { createRef, PureComponent } from '../../Framework';
+import { JSXComponent } from '../../BaseComponent';
+import { BaseSelectProps, SelectComponent } from '../../Interfaces';
+import { Button } from '../Button';
+import { ColorPicker } from '../ColorPicker';
+import { Input } from '../Input';
+import { Tooltip } from '../Tooltip';
+import { Ul } from '../Ul';
+import { ISelectButton } from './enum';
 import styles from './index.module.less';
 
 type BaseSelectState = {

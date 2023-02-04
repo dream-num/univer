@@ -1,4 +1,6 @@
-import { BaseContainerProps, ComponentChildren, ContainerComponent, forwardRef, JSXComponent, Ref } from '@univerjs/base-ui';
+import { JSXComponent } from '../../BaseComponent';
+import { ComponentChildren, forwardRef, Ref } from '../../Framework';
+import { ContainerComponent, BaseContainerProps } from '../../Interfaces';
 
 type IProps = {
     children?: ComponentChildren;

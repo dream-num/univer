@@ -1,17 +1,7 @@
-import {
-    BaseLayoutProps,
-    Component,
-    ContentComponent,
-    createRef,
-    FooterComponent,
-    forwardRef,
-    getFirstChildren,
-    HeaderComponent,
-    JSXComponent,
-    LayoutComponent,
-    Ref,
-    SiderComponent,
-} from '@univerjs/base-ui';
+import { Component, createRef, Ref, forwardRef } from '../../Framework';
+import { JSXComponent } from '../../BaseComponent';
+import { BaseLayoutProps, LayoutComponent, HeaderComponent, FooterComponent, ContentComponent, SiderComponent } from '../../Interfaces';
+import { getFirstChildren } from '../../Utils';
 import styles from './index.module.less';
 
 // Types for props

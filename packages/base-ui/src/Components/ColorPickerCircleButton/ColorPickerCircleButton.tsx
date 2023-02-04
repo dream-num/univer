@@ -1,4 +1,6 @@
-import { BaseColorPickerCircleButtonProps, ColorPickerCircleButtonComponent, Component, createRef, JSXComponent } from '@univerjs/base-ui';
+import { JSXComponent } from '../../BaseComponent';
+import { createRef } from '../../Framework';
+import { BaseColorPickerCircleButtonProps, ColorPickerCircleButtonComponent } from '../../Interfaces';
 import { ColorPicker } from '../index';
 import Styles from './index.module.less';
 

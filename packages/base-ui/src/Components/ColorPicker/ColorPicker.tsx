@@ -1,4 +1,4 @@
-import { BaseColorPickerProps, ColorPickerComponent, Component, createRef, JSXComponent } from '@univerjs/base-ui';
+import { BaseColorPickerProps, ColorPickerComponent, Component, createRef, JSXComponent } from '../..';
 import { Button, Tooltip } from '../index';
 import { ColorPickerPanel } from './ColorPickerPanel';
 import styles from './index.module.less';

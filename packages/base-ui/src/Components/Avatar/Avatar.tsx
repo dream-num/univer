@@ -1,4 +1,6 @@
-import { AvatarComponent, BaseAvatarProps, joinClassNames, JSXComponent } from '@univerjs/base-ui';
+import { JSXComponent } from '../../BaseComponent';
+import { BaseAvatarProps, AvatarComponent } from '../../Interfaces';
+import { joinClassNames } from '../../Utils';
 import styles from './Style/index.module.less';
 
 // type Shape = 'circle' | 'square';

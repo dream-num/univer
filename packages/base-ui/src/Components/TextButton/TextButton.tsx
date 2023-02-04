@@ -1,4 +1,5 @@
-import { BaseComponentRender, BaseComponentSheet, Component, ComponentChildren } from '@univerjs/base-ui';
+import { ComponentChildren, Component } from '../../Framework';
+import { BaseComponentRender, BaseComponentSheet } from '../../BaseComponent';
 import styles from './index.module.less';
 
 export interface BaseTextButtonProps {

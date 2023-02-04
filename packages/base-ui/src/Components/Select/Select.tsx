@@ -1,4 +1,6 @@
-import { BaseComponentRender, BaseComponentSheet, BaseMenuItem, Component, ComponentChildren } from '@univerjs/base-ui';
+import { ComponentChildren, Component } from '../../Framework';
+import { BaseComponentRender, BaseComponentSheet } from '../../BaseComponent';
+import { BaseMenuItem } from '../../Interfaces';
 import { Dropdown } from '../Dropdown';
 import { BaseItemProps, Item } from '../Item/Item';
 import styles from './index.module.less';

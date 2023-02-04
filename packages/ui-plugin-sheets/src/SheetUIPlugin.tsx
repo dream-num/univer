@@ -1,6 +1,6 @@
 import { Plugin, UniverSheet, UniverDoc, UniverSlide } from '@univerjs/core';
 import { zh, en } from './Locale';
-import { SHEET_UI_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
+import { SHEET_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { SheetUIController } from './Controller/SheetUIController';
 
 export interface ISheetsPluginConfig {}

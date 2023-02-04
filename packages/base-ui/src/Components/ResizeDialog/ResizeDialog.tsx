@@ -1,5 +1,6 @@
-import { BaseResizeDialogProps, JSXComponent, ResizeDialogComponent } from '@univerjs/base-ui';
-import { useEffect, useRef } from 'preact/hooks';
+import { useEffect, useRef } from '../../Framework';
+import { JSXComponent } from '../../BaseComponent';
+import { BaseResizeDialogProps, ResizeDialogComponent } from '../../Interfaces';
 import styles from './index.module.less';
 
 export const ResizeDialog = (props: BaseResizeDialogProps) => {

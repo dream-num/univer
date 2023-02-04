@@ -1,4 +1,4 @@
-import { Component, createRef, RefObject } from '@univerjs/base-ui';
+import { Component, createRef, RefObject } from '../../Framework';
 import Style from './index.module.less';
 
 type IProps = {

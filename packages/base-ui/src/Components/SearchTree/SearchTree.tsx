@@ -1,4 +1,6 @@
-import { BaseSearchTreeProps, Component, createRef, JSXComponent, SearchTreeComponent } from '@univerjs/base-ui';
+import { Component, createRef } from '../../Framework';
+import { JSXComponent } from '../../BaseComponent';
+import { BaseSearchTreeProps, SearchTreeComponent } from '../../Interfaces';
 import * as Icon from '../Icon';
 import styles from './index.module.less';
 

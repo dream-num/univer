@@ -1,4 +1,5 @@
-import { BaseIconProps, FunctionComponent, IconComponent } from '@univerjs/base-ui';
+import { FunctionComponent } from '../../../Framework';
+import { BaseIconProps, IconComponent } from '../../../Interfaces';
 import { Icon } from '../AddIcon';
 
 const BackIcon = (props: BaseIconProps) => (
@@ -34,7 +35,7 @@ const FormatIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const NextIcon = (props: BaseIconProps) => (
+export const NextIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} className={props.className} name="nextIcon" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5311" width="1em" height="1em" fill="currentColor">
             <path d="M512 682.666667L170.666667 341.333333h682.666666z" p-id="5312"></path>

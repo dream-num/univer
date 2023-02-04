@@ -1,4 +1,7 @@
-import { BaseSiderModalProps, Component, JSXComponent, SiderModalComponent } from '@univerjs/base-ui';
+
+import { Component } from '../../Framework';
+import { JSXComponent } from '../../BaseComponent';
+import { BaseSiderModalProps, SiderModalComponent } from '../../Interfaces';
 import { Icon } from '../index';
 import Style from './index.module.less';
 

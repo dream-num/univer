@@ -1,7 +1,7 @@
 import { SheetContext } from '../../Basics';
 import { Command, CommandManager } from '../../Command';
-import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { Worksheet } from './Worksheet';
+import { ACTION_NAMES } from '../../Const';
 
 export class Freeze {
     private _commandManager: CommandManager;

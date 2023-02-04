@@ -1,5 +1,6 @@
-import { Component, debounce } from '@univerjs/base-ui';
 import { HexColorInput, RgbaStringColorPicker } from 'react-colorful';
+import { Component } from '../../../Framework';
+import { debounce } from '../../../Utils';
 
 import { RgbaColorInput } from '../RgbaColorInput';
 import styles from './index.module.less';

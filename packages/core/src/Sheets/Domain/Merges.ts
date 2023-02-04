@@ -9,13 +9,15 @@ import {
     SheetActionBase,
     ISheetActionData,
 } from '../../Command';
-import { InsertColumnAction, RemoveColumnAction } from '../Action';
+import {
+    InsertColumnAction,
+    RemoveColumnAction,
+    RemoveMergeAction,
+} from '../Action';
 import { ACTION_NAMES } from '../../Const';
 import { IRangeData } from '../../Interfaces';
 import { Worksheet } from './Worksheet';
-import { Nullable, Tools } from '../../Shared';
-import { Rectangle } from '../../Shared/Rectangle';
-import { Tuples } from '../../Shared/Tuples';
+import { Nullable, Tools, Rectangle, Tuples } from '../../Shared';
 
 /**
  * Manage merged cells
@@ -555,7 +557,7 @@ export class Merges {
         const context = this._worksheet.getContext();
 
         const removeMerge: IRemoveMergeActionData = {
-            actionName: ACTION_NAMES.REMOVE_MERGE_ACTION,
+            actionName: RemoveMergeAction.NAME,
             sheetId: this._worksheet.getSheetId(),
             rectangles: originMerge,
         };

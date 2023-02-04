@@ -1,6 +1,7 @@
-import { BaseColorButtonProps, ColorButtonComponent, JSXComponent } from '@univerjs/base-ui';
+import { JSXComponent } from '../../BaseComponent';
+import { BaseColorButtonProps, ColorButtonComponent } from '../../Interfaces';
+import { ColorPicker } from '../ColorPicker';
 import * as Icon from '../Icon';
-import { ColorPicker } from '../index';
 import styles from './index.module.less';
 
 // type Iprops = {

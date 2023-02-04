@@ -4,8 +4,8 @@ import {
     ActionObservers,
     ActionType,
     CommandUnit,
+    DeleteNamedRangeAction,
 } from '../../Command';
-import { ACTION_NAMES } from '../../Const';
 import { INamedRange } from '../../Interfaces/INamedRange';
 import { AddNamedRange } from '../Apply/AddNamedRange';
 import { DeleteNamedRange } from '../Apply/DeleteNamedRange';
@@ -34,7 +34,8 @@ export class AddNamedRangeAction extends SheetActionBase<
         };
         this.do();
         this._oldActionData = {
-            actionName: ACTION_NAMES.DELETE_NAMED_RANGE_ACTION,
+            //actionName: ACTION_NAMES.DELETE_NAMED_RANGE_ACTION,
+            actionName: DeleteNamedRangeAction.NAME,
             sheetId: actionData.sheetId,
             namedRangeId: actionData.namedRange.namedRangeId,
         };
@@ -68,7 +69,8 @@ export class AddNamedRangeAction extends SheetActionBase<
 
         // update current data
         this._doActionData = {
-            actionName: ACTION_NAMES.ADD_NAMED_RANGE_ACTION,
+            // actionName: ACTION_NAMES.ADD_NAMED_RANGE_ACTION,
+            actionName: AddNamedRangeAction.NAME,
             sheetId,
             namedRange: DeleteNamedRange(namedRanges, namedRangeId),
         };

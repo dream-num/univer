@@ -1,17 +1,6 @@
-import {
-    BaseLayoutProps,
-    Component,
-    ContentComponent,
-    createRef,
-    FooterComponent,
-    forwardRef,
-    getFirstChildren,
-    HeaderComponent,
-    JSXComponent,
-    LayoutComponent,
-    Ref,
-    SiderComponent,
-} from '@univerjs/base-ui';
+import { Component, createRef, forwardRef, Ref } from '../../Framework';
+import { BaseLayoutProps } from '../../Interfaces';
+import { getFirstChildren } from '../../Utils';
 import styles from './index.module.less';
 
 // Types for props
@@ -106,29 +95,3 @@ const Sider = (props: BaseLayoutProps) => {
 };
 
 export { Layout, Header, Footer, Content, Sider };
-
-export class UniverLayout implements LayoutComponent {
-    render(): JSXComponent<BaseLayoutProps> {
-        return Layout;
-    }
-}
-export class UniverHeader implements HeaderComponent {
-    render(): JSXComponent<BaseLayoutProps> {
-        return Header;
-    }
-}
-export class UniverFooter implements FooterComponent {
-    render(): JSXComponent<BaseLayoutProps> {
-        return Footer;
-    }
-}
-export class UniverContent implements ContentComponent {
-    render(): JSXComponent<BaseLayoutProps> {
-        return Content;
-    }
-}
-export class UniverSider implements SiderComponent {
-    render(): JSXComponent<BaseLayoutProps> {
-        return Sider;
-    }
-}

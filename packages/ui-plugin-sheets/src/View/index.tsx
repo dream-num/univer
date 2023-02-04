@@ -1,6 +1,5 @@
-import { render } from '../Framework';
-import { isElement } from '../Utils';
-import { BaseSheetContainerProps, UniverContainer } from './UniverContainer';
+import { isElement, render } from '@univerjs/base-ui';
+import { BaseSheetContainerProps, SheetContainer } from './SheetContainer';
 
 export class UI {
     constructor(props: BaseSheetContainerProps) {
@@ -12,26 +11,28 @@ export class UI {
     }
 
     private _initialize(props: BaseSheetContainerProps) {
-        let univerContainer: HTMLElement;
+        let sheetContainer: HTMLElement;
         const container = props.config.container;
 
         if (typeof container === 'string') {
             const containerDOM = document.getElementById(container);
             if (containerDOM == null) {
-                univerContainer = document.createElement('div');
-                univerContainer.id = container;
+                sheetContainer = document.createElement('div');
+                sheetContainer.id = container;
             } else {
-                univerContainer = containerDOM;
+                sheetContainer = containerDOM;
             }
         } else if (isElement(container)) {
-            univerContainer = container!;
+            sheetContainer = container!;
         } else {
-            univerContainer = document.createElement('div');
-            univerContainer.id = 'univer';
+            sheetContainer = document.createElement('div');
+            sheetContainer.id = 'univer';
         }
 
-        props.container = univerContainer;
+        props.container = sheetContainer;
 
-        render(<UniverContainer {...props} />, univerContainer);
+        render(<SheetContainer {...props} />, sheetContainer);
     }
 }
+
+export * from './SheetContainer';

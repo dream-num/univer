@@ -1,5 +1,7 @@
-import { BaseCollapseProps, BasePanelProps, CollapseComponent, joinClassNames as classnames, JSXComponent, PanelComponent } from '@univerjs/base-ui';
-import { useState } from 'preact/hooks';
+import { JSXComponent } from '../../BaseComponent';
+import { useState } from '../../Framework';
+import { BasePanelProps, BaseCollapseProps, CollapseComponent, PanelComponent } from '../../Interfaces';
+import { joinClassNames } from '../../Utils';
 import { Icon } from '../index';
 import Style from './index.module.less';
 
@@ -14,14 +16,14 @@ import Style from './index.module.less';
 
 const Panel = (props: BasePanelProps) => {
     const { header, children } = props;
-    let [panelBodyClassName, setPanelBodyClassName] = useState(classnames(Style.panelBody));
+    let [panelBodyClassName, setPanelBodyClassName] = useState(joinClassNames(Style.panelBody));
 
     const handelClick = () => {
         let classname: string | undefined = panelBodyClassName;
         if ((classname as string).includes('active')) {
-            setPanelBodyClassName(classnames(Style.panelBody));
+            setPanelBodyClassName(joinClassNames(Style.panelBody));
         } else {
-            setPanelBodyClassName(classnames(Style.panelBody, Style.active));
+            setPanelBodyClassName(joinClassNames(Style.panelBody, Style.active));
         }
     };
 

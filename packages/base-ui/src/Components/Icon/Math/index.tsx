@@ -1,4 +1,5 @@
-import { BaseIconProps, FunctionComponent, IconComponent } from '@univerjs/base-ui';
+import { FunctionComponent } from '../../../Framework';
+import { BaseIconProps, IconComponent } from '../../../Interfaces';
 import { Icon } from '../AddIcon';
 
 const AddNumIcon = (props: BaseIconProps) => (

@@ -1,4 +1,6 @@
-import { BaseFilterSelectProps, Component, createRef, FilterSelectComponent, JSXComponent, List } from '@univerjs/base-ui';
+import { JSXComponent } from '../../BaseComponent';
+import { Component, createRef } from '../../Framework';
+import { BaseFilterSelectProps, FilterSelectComponent } from '../../Interfaces';
 import { ColorPicker, Icon, Ul } from '../index';
 import styles from './index.module.less';
 

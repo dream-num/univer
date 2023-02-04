@@ -2979,7 +2979,7 @@ test('Test deleteColumns/deleteColumn', () => {
     worksheet.getCommandManager().redo();
 });
 
-test('Test getContext', () => {
+test('Test getGlobalContext', () => {
     const container = IOCContainerStartUpReady();
     const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');

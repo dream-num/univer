@@ -26,7 +26,7 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
             return this;
         }
 
-        // const ctx = this._cacheCanvas.getContext();
+        // const ctx = this._cacheCanvas.getGlobalContext();
         // this._cacheCanvas.clear();
 
         mainCtx.save();

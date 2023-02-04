@@ -1,5 +1,9 @@
-import { BaseDropdownProps, JSXComponent, createRef, Component, DropdownComponent } from '@univerjs/base-ui';
-import { Icon, Menu, Tooltip } from '../../index';
+import { Icon } from '..';
+import { JSXComponent } from '../../BaseComponent';
+import { Component, createRef } from '../../Framework';
+import { BaseDropdownProps, DropdownComponent } from '../../Interfaces';
+import { Menu } from '../Menu';
+import { Tooltip } from '../Tooltip';
 import styles from './index.module.less';
 
 interface IState {

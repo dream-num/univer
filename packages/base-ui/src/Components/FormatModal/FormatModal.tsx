@@ -1,5 +1,7 @@
-import { BaseFormatModalProps, Component, FormatModalComponent, JSXComponent } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
+import { Component } from '../../Framework';
+import { JSXComponent } from '../../BaseComponent';
+import { BaseFormatModalProps, FormatModalComponent } from '../../Interfaces';
 import { Modal, Ul } from '../index';
 import styles from './index.module.less';
 

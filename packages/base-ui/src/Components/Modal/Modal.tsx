@@ -1,5 +1,6 @@
-import { BaseModalProps, Component, JSXComponent, ModalComponent, ModalProps } from '@univerjs/base-ui';
-
+import { Component } from '../../Framework';
+import { JSXComponent } from '../../BaseComponent';
+import { BaseModalProps, ModalComponent } from '../../Interfaces';
 import { Button } from '../Button';
 import { Drag } from '../Drag';
 import * as Icon from '../Icon';
@@ -110,5 +111,4 @@ export class UniverModal implements ModalComponent {
     }
 }
 
-export type { ModalProps };
 export { Modal };

@@ -1,4 +1,4 @@
-import { BaseContainerProps, ComponentChildren, ContainerComponent, forwardRef, JSXComponent, Ref } from '@univerjs/base-ui';
+import { ComponentChildren, forwardRef, Ref } from '../../Framework';
 
 type IProps = {
     children?: ComponentChildren;
@@ -16,9 +16,3 @@ export const Container = forwardRef((props: IProps, ref: Ref<HTMLDivElement>) =>
         </div>
     );
 });
-
-export class UniverContainer implements ContainerComponent {
-    render(): JSXComponent<BaseContainerProps> {
-        return Container;
-    }
-}

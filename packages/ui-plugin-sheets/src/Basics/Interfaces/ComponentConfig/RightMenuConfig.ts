@@ -17,9 +17,3 @@ export interface SheetRightMenuConfig {
     ClearContent?: boolean;
     Matrix?: boolean;
 }
-
-export interface DocRightMenuConfig {}
-
-export interface SlideRightMenuConfig {}
-
-export interface RightMenuConfig extends SheetRightMenuConfig, DocRightMenuConfig, SlideRightMenuConfig {}

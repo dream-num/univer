@@ -1,5 +1,5 @@
-import { BaseIconProps, joinClassNames } from '@univerjs/base-ui';
-
+import { BaseIconProps } from '../../Interfaces';
+import { joinClassNames } from '../../Utils';
 import styles from './Style/index.module.less';
 
 // export interface BaseIconProps {

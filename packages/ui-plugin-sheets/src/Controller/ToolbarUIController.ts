@@ -1,10 +1,8 @@
-import { UIObserver } from '@univerjs/core';
-import { BaseSelectChildrenProps, BaseSelectProps } from '@univerjs/style-univer/src/Components/Select';
-import { BaseTextButtonProps } from '@univerjs/style-univer/src/Components/TextButton/TextButton';
-import { BaseComponentPlugin } from '../BaseComponentPlugin';
-import { SheetToolBarConfig, ToolBarConfig } from '../Basics/Interfaces/ComponentConfig/ToolBarConfig';
-import { ToolBar } from '../UI/ToolBar';
-import { resetDataLabel } from '../Utils';
+import { BaseSelectChildrenProps, BaseSelectProps, BaseTextButtonProps, resetDataLabel } from '@univerjs/base-ui';
+import { Tools, UIObserver } from '@univerjs/core';
+import { SheetUIPlugin } from '..';
+import { DefaultToolbarConfig, SheetToolBarConfig, ToolBarConfig } from '../Basics';
+import { ToolBar } from '../View';
 
 // 继承基础下拉属性,添加国际化
 export interface BaseToolBarSelectChildrenProps extends BaseSelectChildrenProps {
@@ -33,19 +31,20 @@ export interface IToolBarItemProps extends BaseToolBarSelectProps, BaseTextButto
     border?: boolean;
 }
 
-export class ToolBarController {
-    private _plugin: BaseComponentPlugin;
+export class ToolBarUIController {
+    private _plugin: SheetUIPlugin;
 
     private _toolbar: ToolBar;
 
-    private _currentConfig: ToolBarConfig = {};
-
-    private _configList: Map<string, ToolBarConfig> = new Map();
-
     private _toolList: IToolBarItemProps[];
 
-    constructor(plugin: BaseComponentPlugin) {
+    private _config: SheetToolBarConfig;
+
+    constructor(plugin: SheetUIPlugin, config?: SheetToolBarConfig) {
         this._plugin = plugin;
+
+        this._config = Tools.deepMerge({}, DefaultToolbarConfig, config);
+
         this._toolList = [
             {
                 toolbarType: 1,
@@ -54,7 +53,7 @@ export class ToolBarController {
                 customLabel: {
                     name: 'ForwardIcon',
                 },
-                show: this._currentConfig.undo,
+                show: this._config.undo,
                 onClick: () => {
                     console.log('undo click');
                     const msg = {
@@ -75,40 +74,24 @@ export class ToolBarController {
     };
 
     // 增加toolbar配置
-    addToolbarConfig(id: string, config: SheetToolBarConfig) {
-        this._configList.set(id, config);
-        this.setCurrentToolbarConfig(id);
+    addToolbarConfig(config: IToolBarItemProps) {
+        const index = this._toolList.findIndex((item) => item.name === config.name);
+        if (index > -1) {
+            this._toolList.push(config);
+        }
     }
 
     // 删除toolbar配置
-    deleteToolbarConfig(id: string) {
-        this._configList.delete(id);
-    }
-
-    // 设置当前toolbar配置
-    setCurrentToolbarConfig(id: string) {
-        const config = this._configList.get(id);
-        if (!config) return;
-        this._currentConfig = config;
-        this.modifyToolList(config);
-    }
-
-    // 根据配置修改toolList
-    modifyToolList(config: ToolBarConfig) {
-        for (let i = 0; i < this._toolList.length; i++) {
-            this._toolList[i].show = false;
-            for (let k in config) {
-                if (this._toolList[i].name === k) {
-                    this._toolList[i].show = true;
-                }
-            }
+    deleteToolbarConfig(name: string) {
+        const index = this._toolList.findIndex((item) => item.name === name);
+        if (index > -1) {
+            this._toolList.splice(index, 1);
         }
-        this.setToolbar();
     }
 
     // 刷新toolbar
     setToolbar() {
-        const locale = this._plugin.getLocale();
+        const locale = this._plugin.getContext().getLocale();
         const toolList = resetDataLabel(this._toolList, locale);
         this._toolbar.setToolBar(toolList);
     }

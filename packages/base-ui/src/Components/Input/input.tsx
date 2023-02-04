@@ -1,4 +1,7 @@
-import { BaseInputProps, Component, createRef, InputComponent, joinClassNames, JSXComponent } from '@univerjs/base-ui';
+import { Component, createRef } from '../../Framework';
+import { JSXComponent } from '../../BaseComponent';
+import { BaseInputProps, InputComponent } from '../../Interfaces';
+import { joinClassNames } from '../../Utils';
 import styles from './Style/index.module.less';
 
 // interface InputProps {

@@ -8,7 +8,7 @@ import { IOCContainerStartUpReady } from '../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
-test('Test getContext', () => {
+test('Test getGlobalContext', () => {
     const container = IOCContainerStartUpReady();
     const manager: PluginManager = container.getSingleton('PluginManager');
     class Test extends Plugin {

@@ -46,7 +46,7 @@ export class ClipboardPlugin extends Plugin<any, SheetContext> {
             .getRegisterManager()
             .getClipboardExtensionManager()
             .getRegister();
-        // const clipboardRegister = this.getContext().getPluginManager().getRequirePluginByName<RegisterPlugin>(REGISTER_PLUGIN_NAME).getClipboardExtensionManager().getRegister();
+        // const clipboardRegister = this.getGlobalContext().getPluginManager().getRequirePluginByName<RegisterPlugin>(REGISTER_PLUGIN_NAME).getClipboardExtensionManager().getRegister();
 
         this._clipboardExtensionFactory = new ClipboardExtensionFactory(this);
         clipboardRegister.add(this._clipboardExtensionFactory);

@@ -1,5 +1,5 @@
 import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, debounce } from '@univerjs/base-ui';
-import { BaseSelectChildrenProps, Select } from '../Common/Select/Select';
+import { BaseSelectChildrenProps, Select } from '@univerjs/base-sheets';
 import styles from './index.module.less';
 
 type FormulaState = {
@@ -56,7 +56,8 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
     }
 
     componentDidMount() {
-        this._context.getObserverManager().getObserver<FormulaBar>('onFormulaBarDidMountObservable')?.notifyObservers(this);
+        this.props.getComponent?.(this);
+        // this._context.getObserverManager().getObserver<FormulaBar>('onFormulaBarDidMountObservable')?.notifyObservers(this);
     }
 
     render(props: BaseFormulaBarProps, state: FormulaState) {

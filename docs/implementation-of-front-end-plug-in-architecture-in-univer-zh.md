@@ -156,7 +156,7 @@ export abstract class Plugin {
         return this._name;
     }
 
-    getContext(): SheetContext {
+    getGlobalContext(): SheetContext {
         return this._context;
     }
 
@@ -200,7 +200,7 @@ export abstract class Plugin<O = any> {
         return this._name;
     }
 
-    getContext(): SheetContext {
+    getGlobalContext(): SheetContext {
         return this._context;
     }
 

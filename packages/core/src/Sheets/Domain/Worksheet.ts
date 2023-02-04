@@ -2255,7 +2255,7 @@ export class Worksheet {
 
 //     setLStyle(row: number, column: number, style: IBorderStyleData): void {
 //         const workSheet = this._workSheet;
-//         const context = workSheet.getContext();
+//         const context = workSheet.getGlobalContext();
 //         const workBook = context.getWorkBook();
 //         const styles = workBook.getStyles();
 //         const cellMatrix = workSheet.getCellMatrix();
@@ -2281,7 +2281,7 @@ export class Worksheet {
 
 //     setTStyle(row: number, column: number, style: IBorderStyleData): void {
 //         const workSheet = this._workSheet;
-//         const context = workSheet.getContext();
+//         const context = workSheet.getGlobalContext();
 //         const workBook = context.getWorkBook();
 //         const styles = workBook.getStyles();
 //         const cellMatrix = workSheet.getCellMatrix();
@@ -2307,7 +2307,7 @@ export class Worksheet {
 
 //     setRStyle(row: number, column: number, style: IBorderStyleData): void {
 //         const workSheet = this._workSheet;
-//         const context = workSheet.getContext();
+//         const context = workSheet.getGlobalContext();
 //         const workBook = context.getWorkBook();
 //         const styles = workBook.getStyles();
 //         const cellMatrix = workSheet.getCellMatrix();
@@ -2333,7 +2333,7 @@ export class Worksheet {
 
 //     setBStyle(row: number, column: number, style: IBorderStyleData): void {
 //         const workSheet = this._workSheet;
-//         const context = workSheet.getContext();
+//         const context = workSheet.getGlobalContext();
 //         const workBook = context.getWorkBook();
 //         const styles = workBook.getStyles();
 //         const cellMatrix = workSheet.getCellMatrix();

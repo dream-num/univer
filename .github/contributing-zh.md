@@ -649,7 +649,7 @@ const s = `${style.AlternatingColorsSideSetting}`;
 我们允许为同一组快捷键注册多个监听。
 
 ```ts
-const onKeyDownObservable = this._plugin.getContext().getObserverManager().getObserver<KeyboardEvent>('onKeyDownObservable', 'core');
+const onKeyDownObservable = this._plugin.getGlobalContext().getObserverManager().getObserver<KeyboardEvent>('onKeyDownObservable', 'core');
 
 onKeyDownObservable?.add((evt: KeyboardEvent) => {
     // handle Ctrl + A

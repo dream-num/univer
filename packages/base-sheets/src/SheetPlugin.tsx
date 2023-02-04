@@ -113,7 +113,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         // TODO: move to toolbarcontroller
         this.getContext()
             .getUniver()
-            .getContext()
+            .getGlobalContext()
             .getObserverManager()
             .requiredObserver<UIObserver<boolean>>('onUIChangeObservable', 'core')
             .add((msg) => {

@@ -1,5 +1,5 @@
 // import { CellInputHandler } from '@univerjs/sheets-plugin-formula/src/Controller/CellInputHandler';
-import { Component, createRef } from '../../Framework';
+import { Component, createRef } from '@univerjs/base-ui'
 import { xssDeal } from '../../Utils';
 import { CellTextStyle } from './CellTextStyle';
 import styles from './index.module.less';
@@ -151,9 +151,10 @@ export class RichText extends Component<BaseRichTextProps, IRichTextState> {
     componentWillMount() {}
 
     componentDidMount() {
+        this.props.getComponent?.(this);
         this.cellTextStyle = new CellTextStyle(this.ref.current!);
 
-        this._context.getObserverManager().getObserver<RichText>('onRichTextDidMountObservable', 'core')?.notifyObservers(this);
+        // this._context.getObserverManager().getObserver<RichText>('onRichTextDidMountObservable', 'core')?.notifyObservers(this);
     }
 
     /**

@@ -6,10 +6,11 @@ import { UniverSheetConfig } from '../Basics/Interfaces/ComponentConfig/UniverSh
 import { LocaleType } from '../Enum';
 import { UI } from '../UI';
 import { UniverContainer } from '../UI/UniverContainer';
-import { CellEditorController } from './CellEditorController';
+import { CellEditorUIController } from './CellEditorUIController';
 import { ToolBarController } from './ToolbarController';
 import { CountBarController } from './CountBarController';
 import { SheetBarControl } from './SheetBarController';
+import { FormulaBarUIController } from './FormulaBarUIController';
 
 export class UniverContainerController {
     private _plugin: BaseComponentPlugin;
@@ -20,8 +21,10 @@ export class UniverContainerController {
 
     private _toolbarController: ToolBarController;
 
-    private _cellEditorController: CellEditorController;
-    
+    private _cellEditorUIController: CellEditorUIController;
+
+    private _formulaBarUIController: FormulaBarUIController;
+
     private _infoBarController: InfoBarController;
 
     private _rightMenuController: RightMenuController;
@@ -42,7 +45,8 @@ export class UniverContainerController {
         this._initialize();
 
         this._toolbarController = new ToolBarController(this._plugin);
-        this._cellEditorController = new CellEditorController(this._plugin);
+        this._cellEditorUIController = new CellEditorUIController(this._plugin);
+        this._formulaBarUIController = new FormulaBarUIController(this._plugin);
         this._infoBarController = new InfoBarController(this._plugin);
         this._rightMenuController = new RightMenuController(this._plugin);
         this._countBarController = new CountBarController(this._plugin);
@@ -60,7 +64,10 @@ export class UniverContainerController {
                     getComponent: this._toolbarController.getComponent,
                 },
                 cellEditor: {
-                    getComponent: this._cellEditorController.getComponent,
+                    getComponent: this._cellEditorUIController.getComponent,
+                },
+                formulaBar: {
+                    getComponent: this._cellEditorUIController.getComponent,
                 },
                 infoBar: {
                     getComponent: this._infoBarController.getComponent,

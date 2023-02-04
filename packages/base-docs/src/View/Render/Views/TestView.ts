@@ -27,7 +27,7 @@ export class PageView extends BaseView {
         });
 
         // const object = scene.fuzzyMathObjects('__TestSelection__')[0];
-        // const ctx = scene.getEngine()?.getCanvas().getContext();
+        // const ctx = scene.getEngine()?.getCanvas().getGlobalContext();
         // object.onTransformChangeObservable.add((state) => {
         //     if (!ctx) {
         //         return;

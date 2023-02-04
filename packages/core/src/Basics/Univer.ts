@@ -62,7 +62,7 @@ export class Univer {
         return this._univerSlides;
     }
 
-    getContext() {
+    getGlobalContext() {
         return this._context;
     }
 

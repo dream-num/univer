@@ -62,7 +62,7 @@ export class FilterButton extends Component<IProps, IState> {
      * destory
      */
     componentWillUnmount() {
-        // this.getContext().getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+        // this.getGlobalContext().getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     /**

@@ -1,5 +1,4 @@
 import { SetRangeData } from '../Apply';
-import { ACTION_NAMES } from '../../Const';
 import { ObjectMatrixPrimitiveType } from '../../Shared';
 import {
     SheetActionBase,
@@ -72,7 +71,8 @@ export class SetRangeDataAction extends SheetActionBase<
         // update pre data
         const { sheetId, options } = this._doActionData;
         this._oldActionData = {
-            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+            // actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+            actionName: SetRangeDataAction.NAME,
             sheetId,
             cellValue: this.do(),
             options,
@@ -86,7 +86,8 @@ export class SetRangeDataAction extends SheetActionBase<
         if (worksheet) {
             // update current data
             this._doActionData = {
-                actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+                // actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+                actionName: SetRangeDataAction.NAME,
                 sheetId,
                 cellValue: SetRangeData(
                     worksheet.getCellMatrix(),

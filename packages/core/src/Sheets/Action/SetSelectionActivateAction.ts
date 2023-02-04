@@ -1,4 +1,3 @@
-import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { IRangeData } from '../../Interfaces';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
@@ -81,7 +80,8 @@ export class SetSelectionActivateAction extends SheetActionBase<
         const { sheetId } = this._doActionData;
         const { activeRangeList, activeRange, currentCell } = this.do();
         this._oldActionData = {
-            actionName: ACTION_NAMES.SET_SELECTION_ACTION,
+            // actionName: ACTION_NAMES.SET_SELECTION_ACTION,
+            actionName: SetSelectionActivateAction.NAME,
             sheetId,
             activeRangeList,
             activeRange,
@@ -102,7 +102,8 @@ export class SetSelectionActivateAction extends SheetActionBase<
         );
         // update current data
         this._doActionData = {
-            actionName: ACTION_NAMES.SET_SELECTION_ACTION,
+            // actionName: ACTION_NAMES.SET_SELECTION_ACTION,
+            actionName: SetSelectionActivateAction.NAME,
             sheetId,
             activeRangeList: doData.activeRangeList,
             activeRange: doData.activeRange,

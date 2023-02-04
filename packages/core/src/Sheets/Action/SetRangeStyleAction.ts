@@ -1,5 +1,4 @@
 import { SetRangeStyle } from '../Apply';
-import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { IRangeData, IStyleData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
@@ -53,7 +52,8 @@ export class SetRangeStyleAction extends SheetActionBase<ISetRangeStyleActionDat
         // update pre data
         const { sheetId, rangeData } = this._doActionData;
         this._oldActionData = {
-            actionName: ACTION_NAMES.SET_RANGE_STYLE_ACTION,
+            // actionName: ACTION_NAMES.SET_RANGE_STYLE_ACTION,
+            actionName: SetRangeStyleAction.NAME,
             sheetId,
             value: this.do(),
             rangeData,
@@ -67,7 +67,8 @@ export class SetRangeStyleAction extends SheetActionBase<ISetRangeStyleActionDat
 
         // update current data
         this._doActionData = {
-            actionName: ACTION_NAMES.SET_RANGE_STYLE_ACTION,
+            // actionName: ACTION_NAMES.SET_RANGE_STYLE_ACTION,
+            actionName: SetRangeStyleAction.NAME,
             sheetId,
             value: SetRangeStyle(cellMatrix, value, rangeData, styles),
             rangeData,

@@ -1,5 +1,4 @@
 import { SetWorkSheetActivate } from '../Apply';
-import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { BooleanNumber } from '../../Enum';
@@ -69,7 +68,8 @@ export class SetWorkSheetActivateAction extends SheetActionBase<
         // update pre data
         const { oldSheetId, status } = this.do();
         this._oldActionData = {
-            actionName: ACTION_NAMES.SET_WORKSHEET_ACTIVATE_ACTION,
+            // actionName: ACTION_NAMES.SET_WORKSHEET_ACTIVATE_ACTION,
+            actionName: SetWorkSheetActivateAction.NAME,
             sheetId: oldSheetId,
             status,
         };
@@ -86,7 +86,7 @@ export class SetWorkSheetActivateAction extends SheetActionBase<
             );
             // update current data
             this._doActionData = {
-                actionName: ACTION_NAMES.SET_WORKSHEET_ACTIVATE_ACTION,
+                actionName: SetWorkSheetActivateAction.NAME,
                 sheetId: oldSheetId,
                 status,
             };

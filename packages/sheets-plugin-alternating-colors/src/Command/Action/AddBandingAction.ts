@@ -1,4 +1,4 @@
-import { SheetActionBase, ActionObservers, ISheetActionData, Workbook } from '@univer/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, CommandUnit } from '@univer/core';
 import { AlternatingColorsPlugin } from '../../AlternatingColorsPlugin';
 import { AddBanding } from '../../Apply/AddBanding';
 import { DeleteBanding } from '../../Apply/DeleteBanding';
@@ -12,8 +12,10 @@ export interface IAddBandingActionData extends ISheetActionData {
 }
 
 export class AddBandingAction extends SheetActionBase<IAddBandingActionData, IDeleteBandingActionData, void> {
-    constructor(actionData: IAddBandingActionData, workbook: Workbook, observers: ActionObservers) {
-        super(actionData, workbook, observers);
+    static Name = 'AddBandingAction';
+
+    constructor(actionData: IAddBandingActionData, commandUnit: CommandUnit, observers: ActionObservers) {
+        super(actionData, commandUnit, observers);
 
         this._doActionData = {
             ...actionData,
@@ -31,10 +33,10 @@ export class AddBandingAction extends SheetActionBase<IAddBandingActionData, IDe
         const worksheet = this.getWorkSheet();
         const context = worksheet.getContext();
         const manager = context.getPluginManager();
-        const plugin = <AlternatingColorsPlugin>manager.getPluginByName(ALTERNATING_COLORS_PLUGIN_NAME);
+        const plugin = manager.getPluginByName(ALTERNATING_COLORS_PLUGIN_NAME) as AlternatingColorsPlugin;
 
         const { bandedRange } = this._doActionData;
-        this._observers.onActionDoObserver.notifyObservers(this);
+        // this._observers.onActionDoObserver.notifyObservers(this);
         AddBanding(plugin, bandedRange);
     }
 
@@ -48,8 +50,8 @@ export class AddBandingAction extends SheetActionBase<IAddBandingActionData, IDe
         const worksheet = this.getWorkSheet();
         const context = worksheet.getContext();
         const manager = context.getPluginManager();
-        const plugin = <AlternatingColorsPlugin>manager.getPluginByName(ALTERNATING_COLORS_PLUGIN_NAME);
-        this._observers.onActionUndoObserver.notifyObservers(this);
+        const plugin = manager.getPluginByName(ALTERNATING_COLORS_PLUGIN_NAME) as AlternatingColorsPlugin;
+        // this._observers.onActionUndoObserver.notifyObservers(this);
 
         // update current data
         this._doActionData = {

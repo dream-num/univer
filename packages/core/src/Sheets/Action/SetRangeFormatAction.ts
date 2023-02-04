@@ -1,5 +1,4 @@
 import { SetRangeFormat } from '../Apply';
-import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
@@ -64,7 +63,8 @@ export class SetRangeFormatAction extends SheetActionBase<
         // update pre data
         const { sheetId, rangeData } = this._doActionData;
         this._oldActionData = {
-            actionName: ACTION_NAMES.SET_RANGE_FORMAT_ACTION,
+            // actionName: ACTION_NAMES.SET_RANGE_FORMAT_ACTION,
+            actionName: SetRangeFormatAction.NAME,
             sheetId,
             cellFormat: this.do(),
             rangeData,
@@ -78,7 +78,8 @@ export class SetRangeFormatAction extends SheetActionBase<
         if (worksheet) {
             // update current data
             this._doActionData = {
-                actionName: ACTION_NAMES.SET_RANGE_FORMAT_ACTION,
+                // actionName: ACTION_NAMES.SET_RANGE_FORMAT_ACTION,
+                actionName: SetRangeFormatAction.NAME,
                 sheetId,
                 cellFormat: SetRangeFormat(
                     worksheet.getCellMatrix(),

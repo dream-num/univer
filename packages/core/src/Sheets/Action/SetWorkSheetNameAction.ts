@@ -1,5 +1,4 @@
 import { SetWorkSheetName } from '../Apply';
-import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { CommandUnit } from '../../Command';
@@ -57,7 +56,7 @@ export class SetWorkSheetNameAction extends SheetActionBase<
         const { sheetId } = this._doActionData;
         this._oldActionData = {
             sheetId,
-            actionName: ACTION_NAMES.SET_WORKSHEET_NAME_ACTION,
+            actionName: SetWorkSheetNameAction.NAME,
             sheetName: this.do(),
         };
     }
@@ -68,7 +67,7 @@ export class SetWorkSheetNameAction extends SheetActionBase<
 
         // update current data
         this._doActionData = {
-            actionName: ACTION_NAMES.SET_WORKSHEET_NAME_ACTION,
+            actionName: SetWorkSheetNameAction.NAME,
             sheetId,
             sheetName: SetWorkSheetName(worksheet, sheetName),
         };

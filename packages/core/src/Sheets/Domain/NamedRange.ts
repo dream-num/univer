@@ -5,11 +5,11 @@ import {
     IAddNamedRangeActionData,
     IDeleteNamedRangeActionData,
     ISetNamedRangeActionData,
+    AddNamedRangeAction,
 } from '../../Command';
 import { ACTION_NAMES } from '../../Const';
 import { Workbook } from './index';
-
-import { INamedRange } from '../../Interfaces/INamedRange';
+import { INamedRange } from '../../Interfaces';
 
 /**
  * Create, access and modify named ranges in a spreadsheet. Named ranges are ranges that have associated string aliases.
@@ -51,7 +51,7 @@ export class NamedRange {
         // };
         // Organize action data
         const actionData: IAddNamedRangeActionData = {
-            actionName: ACTION_NAMES.ADD_NAMED_RANGE_ACTION,
+            actionName: AddNamedRangeAction.NAME,
             namedRange,
             sheetId: namedRange.range.sheetId,
         };

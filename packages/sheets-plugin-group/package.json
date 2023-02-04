@@ -54,7 +54,6 @@
         "@univerjs/base-sheets": "workspace:^0.0.1",
         "@univerjs/common-plugin-data": "workspace:^0.0.1",
         "@univerjs/core": "workspace:^0.0.1",
-        "@univerjs/style-univer": "workspace:^0.0.1",
         "preact": "^10.5.14"
     }
 }

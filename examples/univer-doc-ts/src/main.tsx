@@ -2,7 +2,7 @@ import { UniverDoc } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 import { UniverComponentSheet } from '@univerjs/style-univer';
 import { DocPlugin } from '@univerjs/base-docs';
-import { BaseComponentPlugin } from '@univerjs/base-component';
+import { BaseComponentPlugin } from '@univerjs/base-ui';
 import { DEFAULT_DOCUMENT_DATA_EN } from '@univerjs/common-plugin-data';
 
 const docPluginConfig = {

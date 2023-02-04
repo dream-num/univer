@@ -1,4 +1,4 @@
-import { Component, VNode } from '@univerjs/base-component';
+import { Component, VNode } from '@univerjs/base-ui';
 import { PLUGIN_NAMES } from '@univerjs/core';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { BorderType } from '../../Enum/BorderType';

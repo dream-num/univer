@@ -1,4 +1,4 @@
-import { BaseDragProps, Component, createRef, DragComponent, JSXComponent } from '@univerjs/base-component';
+import { BaseDragProps, Component, createRef, DragComponent, JSXComponent } from '@univerjs/base-ui';
 import styles from './index.module.less';
 
 // interface IProps {

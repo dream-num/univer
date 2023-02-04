@@ -1,4 +1,4 @@
-import { Component, debounce } from '@univerjs/base-component';
+import { Component, debounce } from '@univerjs/base-ui';
 import { HexColorInput, RgbaStringColorPicker } from 'react-colorful';
 
 import { RgbaColorInput } from '../RgbaColorInput';

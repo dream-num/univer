@@ -1,4 +1,4 @@
-import { BaseCountBarProps, Component, CountBarComponent, createRef, JSXComponent } from '@univerjs/base-component';
+import { BaseCountBarProps, Component, CountBarComponent, createRef, JSXComponent } from '@univerjs/base-ui';
 import * as Icon from '../Icon';
 import { Button, Slider } from '../index';
 import styles from './index.module.less';

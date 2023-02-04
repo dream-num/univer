@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet, Component } from '@univerjs/base-component';
+import { BaseComponentRender, BaseComponentSheet, Component } from '@univerjs/base-ui';
 import { CustomLabelOptions } from '../../../Model';
 
 interface IProps {

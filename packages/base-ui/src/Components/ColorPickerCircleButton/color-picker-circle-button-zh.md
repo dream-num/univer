@@ -25,7 +25,7 @@ cover: ''
 
 ```jsx
 import { ColorPickerCircleButton } from '@univerjs/style-univer';
-import { Component } from '@univerjs/base-component';
+import { Component } from '@univerjs/base-ui';
 
 type IPanelProps = {};
 

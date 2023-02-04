@@ -1,4 +1,4 @@
-import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, debounce } from '@univerjs/base-component';
+import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, debounce } from '@univerjs/base-ui';
 import { BaseSelectChildrenProps, Select } from '../Common/Select/Select';
 import styles from './index.module.less';
 

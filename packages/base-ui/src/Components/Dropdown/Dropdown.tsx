@@ -1,4 +1,4 @@
-import { BaseDropdownProps, JSXComponent, createRef, Component, DropdownComponent } from '@univerjs/base-component';
+import { BaseDropdownProps, JSXComponent, createRef, Component, DropdownComponent } from '@univerjs/base-ui';
 import { Icon, Menu, Tooltip } from '../../index';
 import styles from './index.module.less';
 

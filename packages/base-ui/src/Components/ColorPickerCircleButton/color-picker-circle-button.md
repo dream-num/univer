@@ -13,18 +13,18 @@ Color picker, triggering color selection by a circular button
 
 The properties of the Color Picker-Round Button are described as follows:
 
-| Property | Description                                                | Type                                      | Default Value |
-| -------- | ---------------------------------------------------------- | ----------------------------------------- | ------------- |
-| color    | Initialize color                                           | `string`                                  | -             |
-| style    | custom css style object                                    | `JSX.CSSProperties`                       | -             |
+| Property | Description                                                | Type                       | Default Value |
+| -------- | ---------------------------------------------------------- | -------------------------- | ------------- |
+| color    | Initialize color                                           | `string`                   | -             |
+| style    | custom css style object                                    | `JSX.CSSProperties`        | -             |
 | onClick  | Callback function after user selects color                 | `(color: string) => void;` | -             |
-| onCancel | The callback function after the user cancels the selection | `() => void`                              | -             |
+| onCancel | The callback function after the user cancels the selection | `() => void`               | -             |
 
 ## Case
 
 ```jsx
 import { ColorPickerCircleButton } from '@univerjs/style-univer';
-import { Component } from '@univerjs/base-component';
+import { Component } from '@univerjs/base-ui';
 
 type IPanelProps = {};
 

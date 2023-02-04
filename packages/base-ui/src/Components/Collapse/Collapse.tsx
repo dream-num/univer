@@ -1,4 +1,4 @@
-import { BaseCollapseProps, BasePanelProps, CollapseComponent, joinClassNames as classnames, JSXComponent, PanelComponent } from '@univerjs/base-component';
+import { BaseCollapseProps, BasePanelProps, CollapseComponent, joinClassNames as classnames, JSXComponent, PanelComponent } from '@univerjs/base-ui';
 import { useState } from 'preact/hooks';
 import { Icon } from '../index';
 import Style from './index.module.less';

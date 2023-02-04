@@ -1,4 +1,4 @@
-import { BaseSingleButtonProps, Component, JSXComponent, SingleButtonComponent } from '@univerjs/base-component';
+import { BaseSingleButtonProps, Component, JSXComponent, SingleButtonComponent } from '@univerjs/base-ui';
 import { Button, Tooltip } from '@univerjs/style-univer';
 
 import styles from './index.module.less';

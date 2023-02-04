@@ -1,4 +1,4 @@
-import { BaseTooltipProps, Component, createRef, joinClassNames as classnames, JSXComponent, TooltipComponent } from '@univerjs/base-component';
+import { BaseTooltipProps, Component, createRef, joinClassNames as classnames, JSXComponent, TooltipComponent } from '@univerjs/base-ui';
 import style from './index.module.less';
 
 // interface TooltipProps {

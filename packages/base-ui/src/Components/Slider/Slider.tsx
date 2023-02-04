@@ -1,4 +1,4 @@
-import { BaseSliderRangeProps, BaseSliderSingleProps, Component, createRef, JSXComponent, randomId, SliderComponent } from '@univerjs/base-component';
+import { BaseSliderRangeProps, BaseSliderSingleProps, Component, createRef, JSXComponent, randomId, SliderComponent } from '@univerjs/base-ui';
 import styles from './index.module.less';
 
 interface SliderState {

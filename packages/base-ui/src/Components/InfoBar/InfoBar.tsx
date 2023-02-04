@@ -1,4 +1,4 @@
-import { BaseInfoBarProps, InfoBarComponent, JSXComponent } from '@univerjs/base-component';
+import { BaseInfoBarProps, InfoBarComponent, JSXComponent } from '@univerjs/base-ui';
 import { Button, Container, Input, Tooltip } from '../../index';
 import * as Icon from '../Icon';
 import './index.less';

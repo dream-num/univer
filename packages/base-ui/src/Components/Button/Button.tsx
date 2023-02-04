@@ -1,4 +1,4 @@
-import { BaseButtonProps, ButtonComponent, joinClassNames, JSXComponent } from '@univerjs/base-component';
+import { BaseButtonProps, ButtonComponent, joinClassNames, JSXComponent } from '@univerjs/base-ui';
 import { LoadingIcon } from '../Icon';
 import styles from './Style/index.module.less';
 

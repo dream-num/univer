@@ -1,5 +1,5 @@
 import { SlideContext, Plugin, PLUGIN_NAMES, UniverSheet, Tools, AsyncFunction } from '@univerjs/core';
-import { getRefElement, isElement, ISlotProps, RefObject, render } from '@univerjs/base-component';
+import { getRefElement, isElement, ISlotProps, RefObject, render } from '@univerjs/base-ui';
 import { Engine, RenderEngine } from '@univerjs/base-render';
 import { zh, en } from './Locale';
 import { install, SlidePluginObserve } from './Basic/Observer';

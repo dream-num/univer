@@ -43,7 +43,7 @@
         "vite-plugin-external": "1.2.3"
     },
     "dependencies": {
-        "@univerjs/base-component": "workspace:^0.0.1",
+        "@univerjs/base-ui": "workspace:^0.0.1",
         "@univerjs/base-docs": "workspace:^0.0.1",
         "@univerjs/base-render": "workspace:^0.0.1",
         "@univerjs/base-sheets": "workspace:^0.0.1",
@@ -55,7 +55,6 @@
         "@univerjs/sheets-plugin-formula": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-import-xlsx": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-numfmt": "workspace:^0.0.1",
-        "@univerjs/style-univer": "workspace:^0.0.1",
         "preact": "^10.5.14"
     }
 }

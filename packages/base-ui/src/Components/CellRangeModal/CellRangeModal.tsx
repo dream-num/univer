@@ -1,4 +1,4 @@
-import { BaseCellRangeModalProps, CellRangeModalComponent, Component, createRef, JSXComponent } from '@univerjs/base-component';
+import { BaseCellRangeModalProps, CellRangeModalComponent, Component, createRef, JSXComponent } from '@univerjs/base-ui';
 import { SheetContext, Nullable, Observer, Workbook, Worksheet } from '@univerjs/core';
 import { Icon, Input, Modal, ModalProps } from '../index';
 import styles from './index.module.less';

@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet, Component, createRef, debounce } from '@univerjs/base-component';
+import { BaseComponentRender, BaseComponentSheet, Component, createRef, debounce } from '@univerjs/base-ui';
 import { Select } from '@univerjs/base-sheets';
 import { FunctionList } from '../../../Basic';
 import { FunListILabel, ILabel } from '../../../Controller/SearchFormulaModalController';

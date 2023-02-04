@@ -1,4 +1,4 @@
-import { closest, Component, createRef } from '@univerjs/base-component';
+import { closest, Component, createRef } from '@univerjs/base-ui';
 import { IKeyValue, IRangeStringData, Nullable, Observer, PluginManager, PLUGIN_NAMES, Tools, Workbook } from '@univerjs/core';
 import { SheetPlugin } from '@univerjs/base-sheets';
 

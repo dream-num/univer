@@ -1,4 +1,4 @@
-import { Component } from '@univerjs/base-component';
+import { Component } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 
 import styles from './index.module.less';

@@ -1,4 +1,4 @@
-# base-component
+# base-ui
 
 English| [简体中文](./README-zh.md)
 
@@ -16,16 +16,16 @@ UniverSheet official UI component library
 ### Install
 
 ```shell
-npm i @univerjs/base-component
+npm i @univerjs/base-ui
 ```
 
 ### Import
 
 ```js
-import baseUI from '@univerjs/base-component';
+import baseUI from '@univerjs/base-ui';
 universheet.install(baseUI);
 universheet.create({
-    plugins: ['base-component'],
+    plugins: ['base-ui'],
 });
 ```
 
@@ -45,21 +45,21 @@ npm i
 ### Development
 
 ```
-# Current directory ./packages/base-component/
+# Current directory ./packages/base-ui/
 npm run dev
 
 # Or project root directory ./
-npm run dev -w @univerjs/base-component
+npm run dev -w @univerjs/base-ui
 ```
 
 ### Package
 
 ```
-# Current directory ./packages/base-component/
+# Current directory ./packages/base-ui/
 npm run build
 
 # Or root directory ./
-npm run build -w @univerjs/base-component
+npm run build -w @univerjs/base-ui
 ```
 
 ## Doc Website
@@ -76,11 +76,11 @@ npm i
 ### Development
 
 ```console
-# base-component folder
+# base-ui folder
 npm run start
 
 # or root folder
-npm run start -w @univerjs/base-component
+npm run start -w @univerjs/base-ui
 ```
 
 This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
@@ -88,11 +88,11 @@ This command starts a local development server and opens up a browser window. Mo
 ### Build
 
 ```console
-# base-component folder
+# base-ui folder
 npm run build:doc
 
 # or root folder
-npm run build:doc -w @univerjs/base-component
+npm run build:doc -w @univerjs/base-ui
 ```
 
 This command generates static content into the `build` directory and can be served using any static contents hosting service.

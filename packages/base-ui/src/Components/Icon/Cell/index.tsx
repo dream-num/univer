@@ -1,4 +1,4 @@
-import { BaseIconProps, IconComponent, JSXComponent } from '@univerjs/base-component';
+import { BaseIconProps, IconComponent, JSXComponent } from '@univerjs/base-ui';
 import { Icon } from '../AddIcon';
 
 const FillColorIcon = (props: BaseIconProps) => (

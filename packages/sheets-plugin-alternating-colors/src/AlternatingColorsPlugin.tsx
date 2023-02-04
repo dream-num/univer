@@ -1,4 +1,4 @@
-import { ISlotElement, ISlotProps } from '@univerjs/base-component';
+import { ISlotElement, ISlotProps } from '@univerjs/base-ui';
 import { SheetContext, IOCContainer, UniverSheet, Nullable, Plugin, PLUGIN_NAMES, Command } from '@univerjs/core';
 import { IToolBarItemProps, SheetPlugin } from '@univerjs/base-sheets';
 import { Banding } from './Banding';

@@ -1,4 +1,4 @@
-import { ComponentChildren } from '@univerjs/base-component';
+import { ComponentChildren } from '@univerjs/base-ui';
 
 type BaseGridProps = {
     children?: ComponentChildren;

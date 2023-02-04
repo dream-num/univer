@@ -13,7 +13,7 @@ import {
     cloneElement,
     BaseComponentProps,
     Description,
-} from '@univerjs/base-component';
+} from '@univerjs/base-ui';
 import { AsyncFunction, SlideContext, IKeyType, LocaleType, PLUGIN_NAMES, Tools, Workbook } from '@univerjs/core';
 import cssVars from 'css-vars-ponyfill';
 import { Container, Content, Footer, Header, Layout, Sider } from '@univerjs/style-univer';

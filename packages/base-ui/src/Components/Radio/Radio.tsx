@@ -1,4 +1,4 @@
-import { BaseRadioGroupProps, BaseRadioIProps, cloneElement, Component, JSXComponent, RadioComponent, VNode } from '@univerjs/base-component';
+import { BaseRadioGroupProps, BaseRadioIProps, cloneElement, Component, JSXComponent, RadioComponent, VNode } from '@univerjs/base-ui';
 import styles from './index.module.less';
 // interface IProps {
 //     value: string;

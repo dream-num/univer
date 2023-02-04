@@ -1,6 +1,6 @@
 import { IDocumentData, ISlideData, IWorkbookConfig, UniverDoc, UniverSheet, UniverSlide } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
-import { BaseComponentPlugin } from '@univerjs/base-component';
+import { BaseComponentPlugin } from '@univerjs/base-ui';
 import { UniverComponentSheet } from '@univerjs/style-univer';
 import { ISheetPluginConfig, SheetPlugin } from '@univerjs/base-sheets';
 import { IDocPluginConfig, DocPlugin } from '@univerjs/base-docs';
@@ -113,7 +113,7 @@ export { univerSheetCustom, univerDocCustom, univerSlideCustom };
 
 export * as UniverCore from '@univerjs/core';
 export * as BaseRender from '@univerjs/base-render';
-export * as BaseComponent from '@univerjs/base-component';
+export * as BaseComponent from '@univerjs/base-ui';
 export * as StyleUniver from '@univerjs/style-univer';
 export * as BaseSheets from '@univerjs/base-sheets';
 export * as BaseDocs from '@univerjs/base-docs';

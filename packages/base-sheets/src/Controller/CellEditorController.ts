@@ -1,4 +1,4 @@
-import { handleJsonToDom } from '@univerjs/base-component';
+import { handleJsonToDom } from '@univerjs/base-ui';
 import { Direction, IDocumentData, IRangeData, IStyleData, Nullable, ICellData } from '@univerjs/core';
 import { SheetPlugin } from '../SheetPlugin';
 

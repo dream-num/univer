@@ -19,7 +19,7 @@ import {
     DEFAULT_WORKBOOK_DATA_DOWN,
 } from '@univerjs/common-plugin-data';
 import { ClipboardPlugin } from '@univerjs/sheets-plugin-clipboard';
-import { BaseComponentPlugin } from '@univerjs/base-component';
+import { BaseComponentPlugin } from '@univerjs/base-ui';
 import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
 
 const uiDefaultConfigDemo = {

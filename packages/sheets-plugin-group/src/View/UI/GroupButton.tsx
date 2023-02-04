@@ -1,5 +1,5 @@
 import { Nullable, Observer } from '@univerjs/core';
-import { ISelectButton, IToolBarItemProps, Component, BaseSelectProps } from '@univerjs/base-component';
+import { ISelectButton, IToolBarItemProps, Component, BaseSelectProps } from '@univerjs/base-ui';
 
 interface IProps {}
 // Types for state

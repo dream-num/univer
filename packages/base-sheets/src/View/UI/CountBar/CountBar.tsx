@@ -1,4 +1,4 @@
-import { BaseCountBarProps, Component, CountBarComponent, createRef, JSXComponent } from '@univerjs/base-component';
+import { BaseCountBarProps, Component, CountBarComponent, createRef, JSXComponent } from '@univerjs/base-ui';
 import { PLUGIN_NAMES } from '@univerjs/core';
 import styles from './index.module.less';
 

@@ -1,4 +1,4 @@
-import { $$, getRefElement } from '@univerjs/base-component';
+import { $$, getRefElement } from '@univerjs/base-ui';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { KeyCode, PLUGIN_NAMES, SheetContext } from '@univerjs/core';
 import { FORMULA_PLUGIN_NAME } from '../Basic';

@@ -1,4 +1,4 @@
-import { BaseComponentRender } from '@univerjs/base-component';
+import { BaseComponentRender } from '@univerjs/base-ui';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { ACTION_NAMES, CommandManager, HEART_BEAT_MESSAGE, IOSocket, IOSocketListenType, ISheetActionData, PLUGIN_NAMES, SheetActionBase, SheetContext } from '@univerjs/core';
 import { CollaborationPlugin } from '../CollaborationPlugin';

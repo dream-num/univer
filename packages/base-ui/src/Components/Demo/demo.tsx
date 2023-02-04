@@ -1,4 +1,4 @@
-// import { BaseDemoProps, Component, DemoComponent, JSXComponent } from '@univerjs/base-component';
+// import { BaseDemoProps, Component, DemoComponent, JSXComponent } from '@univerjs/base-ui';
 
 // // type BaseDemoProps = {
 

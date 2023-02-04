@@ -1,4 +1,4 @@
-import { Component, BaseComponentSheet, BaseComponentRender, createRef, AppContext } from '@univerjs/base-component';
+import { Component, BaseComponentSheet, BaseComponentRender, createRef, AppContext } from '@univerjs/base-ui';
 import { PLUGIN_NAMES, Tools } from '@univerjs/core';
 import { Container, Content, Footer, Header, Layout, Sider } from '@univerjs/style-univer';
 import defaultSkin from '@univerjs/style-univer/assets/css/skin/default.module.less';

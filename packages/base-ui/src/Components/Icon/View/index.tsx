@@ -1,4 +1,4 @@
-import { BaseIconProps, IconComponent } from '@univerjs/base-component';
+import { BaseIconProps, IconComponent } from '@univerjs/base-ui';
 import { FunctionComponent } from 'preact';
 import { Icon } from '../AddIcon';
 

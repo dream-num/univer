@@ -1,4 +1,4 @@
-import { ISlotElement, ISlotProps, IToolBarItemProps } from '@univerjs/base-component';
+import { ISlotElement, ISlotProps, IToolBarItemProps } from '@univerjs/base-ui';
 import { Command, Plugin, PLUGIN_NAMES, Nullable, Worksheet, IOCContainer, UniverSheet } from '@univerjs/core';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { IPictureProps } from '@univerjs/base-render';

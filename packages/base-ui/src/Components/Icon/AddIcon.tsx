@@ -1,4 +1,4 @@
-import { BaseIconProps, joinClassNames } from '@univerjs/base-component';
+import { BaseIconProps, joinClassNames } from '@univerjs/base-ui';
 
 import styles from './Style/index.module.less';
 

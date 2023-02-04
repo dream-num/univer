@@ -1,4 +1,4 @@
-import { Component, IToolBarItemProps, VNode } from '@univerjs/base-component';
+import { Component, IToolBarItemProps, VNode } from '@univerjs/base-ui';
 import { SheetContext } from '@univerjs/core';
 import { FileSelected } from '../../Library/FileSelected';
 

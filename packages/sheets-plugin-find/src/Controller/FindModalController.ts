@@ -1,4 +1,4 @@
-import { BaseComponentRender, ComponentChildren } from '@univerjs/base-component';
+import { BaseComponentRender, ComponentChildren } from '@univerjs/base-ui';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { PLUGIN_NAMES } from '@univerjs/core';
 import { FIND_PLUGIN_NAME } from '../Const/PLUGIN_NAME';

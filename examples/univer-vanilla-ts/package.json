@@ -49,6 +49,7 @@
         "@univerjs/base-render": "workspace:^0.0.1",
         "@univerjs/base-sheets": "workspace:^0.0.1",
         "@univerjs/base-slides": "workspace:^0.0.1",
+        "@univerjs/ui-plugin-sheets": "workspace:^0.0.1",
         "@univerjs/common-plugin-data": "workspace:^0.0.1",
         "@univerjs/core": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-clipboard": "workspace:^0.0.1",

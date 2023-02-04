@@ -142,7 +142,8 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                         <Layout className={style.mainContent} style={{ position: 'relative' }}>
                             <Header style={{ display: config.header ? 'block' : 'none' }}>
                                 {/* {config.infoBar && <InfoBar {...methods.infoBar}></InfoBar>}
-                                {config.toolBar && <ToolBar {...methods.toolbar}></ToolBar>} */}
+                                {config.toolBar && <ToolBar {...methods.toolbar}></ToolBar>}
+                                {config.formulaBar && <FormulaBar {...methods.formulaBar}></FormulaBar>} */}
                                 {/* {config.infoBar && <InfoBar></InfoBar>}
                                 {config.formulaBar && <FormulaBar></FormulaBar>} */}
                             </Header>
@@ -163,7 +164,8 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                         </Container>
                                     )}
                                     <Container ref={this.contentRef} className={style.contentInnerRightContainer}>
-                                        {/* {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>} */}
+                                        {/* {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>}
+                                        {config.cellEditor && <RichText {...methods.cellEditor}></RichText>} */}
                                         <div style={{ position: 'fixed', right: '200px', top: '10px', fontSize: '14px' }}>
                                             <span style={{ display: 'inline-block', width: 50, margin: '5px 0 0 5px' }}>语言</span>
                                             <select value={currentLocale} onChange={this.setLocale.bind(this)} style={{ width: 55 }}>

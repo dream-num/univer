@@ -1,11 +1,14 @@
 import { Plugin, UniverSheet, Tools } from '@univerjs/core';
 import { zh, en } from './Locale';
-import { SheetUIController } from './Controller/SheetUIController';
 import { DefaultSheetUiConfig, installObserver, ISheetsPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';
 import { Context } from '@univerjs/core/src/Basics/Context';
+import { SheetContainerUIController } from './Controller';
+import { ComponentManager } from '@univerjs/base-ui';
 
 export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
-    private _sheetsController: SheetUIController;
+    private _sheetsController: SheetContainerUIController;
+
+    private _componentManager: ComponentManager;
 
     private _config: ISheetsPluginConfig;
 
@@ -34,16 +37,25 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
             en,
         });
 
-        this._sheetsController = new SheetUIController(this);
+        this._componentManager = new ComponentManager();
+        this._sheetsController = new SheetContainerUIController(this);
     }
 
     getConfig() {
         return this._config;
     }
 
-    onMounted(): void {
-        this.initialize();
+    onMounted(ctx: Context): void {
+        this.initialize(ctx);
     }
 
     onDestroy(): void {}
+
+    getSheetContainerController() {
+        return this._sheetsController;
+    }
+
+    getComponentManager() {
+        return this._componentManager;
+    }
 }

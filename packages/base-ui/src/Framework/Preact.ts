@@ -1,20 +1,6 @@
 import { BasePlugin, Nullable } from '@univerjs/core';
 import { Context } from '@univerjs/core/src/Basics/Context';
-import {
-    cloneElement,
-    Component as PreactComponent,
-    ComponentChildren,
-    ComponentClass,
-    createRef,
-    JSX,
-    RefObject,
-    render,
-    VNode,
-    PreactContext,
-    Ref,
-    FunctionComponent,
-    toChildArray,
-} from 'preact';
+import { cloneElement, Component as PreactComponent, ComponentChildren, ComponentClass, createRef, JSX, RefObject, render, VNode, PreactContext, Ref, toChildArray } from 'preact';
 import { ForwardFn, forwardRef, PureComponent as PreactPureComponent } from 'preact/compat';
 import { useRef, useState, useEffect } from 'preact/hooks';
 import { BaseComponentRender, BaseComponentSheet } from '../BaseComponent';
@@ -71,6 +57,6 @@ abstract class PureComponent<P = {}, S = {}> extends PreactPureComponent<P, S> {
     }
 }
 
-export { render, Component, forwardRef, createRef, FunctionComponent, PureComponent, cloneElement, useRef, useState, useEffect, toChildArray };
+export { render, Component, forwardRef, createRef, PureComponent, cloneElement, useRef, useState, useEffect, toChildArray };
 
 export type { ComponentChildren, ComponentClass, ForwardFn, JSX, RefObject, VNode, PreactContext, Ref };

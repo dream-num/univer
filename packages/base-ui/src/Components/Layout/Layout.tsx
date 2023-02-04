@@ -15,7 +15,7 @@ type IState = {
     isAside: boolean;
 };
 
-class Layout extends Component<BaseLayoutProps, IState> {
+export class Layout extends Component<BaseLayoutProps, IState> {
     ref = createRef<HTMLTableSectionElement>();
 
     state = {
@@ -94,4 +94,4 @@ const Sider = (props: BaseLayoutProps) => {
     );
 };
 
-export { Layout, Header, Footer, Content, Sider };
+export { Header, Footer, Content, Sider };

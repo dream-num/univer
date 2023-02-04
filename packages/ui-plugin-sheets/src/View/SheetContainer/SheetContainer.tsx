@@ -4,7 +4,7 @@ import { InfoBar } from '../InfoBar';
 import { RightMenu } from '../RightMenu';
 import { CountBar } from '../CountBar';
 import { SheetBar } from '../SheetBar';
-import { AppContext, BaseComponentProps, Component, createRef } from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps, Component, Container, Content, createRef, Footer, Header, Layout, Sider } from '@univerjs/base-ui';
 import { ISheetsPluginConfig } from '../../Basics';
 
 export interface BaseSheetContainerProps extends BaseComponentProps {

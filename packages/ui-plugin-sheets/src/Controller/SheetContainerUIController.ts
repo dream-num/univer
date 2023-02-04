@@ -2,13 +2,14 @@ import { LocaleType } from '@univerjs/core';
 import { ISheetsPluginConfig } from '../Basics';
 import { SheetUIPlugin } from '../SheetUIPlugin';
 import { SheetContainer, UI } from '../View';
+import { ToolBarUIController } from './ToolbarUIController';
 
-export class SheetUIController {
+export class SheetContainerUIController {
     protected _plugin: SheetUIPlugin;
 
     private _sheetContainer: SheetContainer;
 
-    // private _toolbarController: ToolBarController;
+    private _toolbarController: ToolBarUIController;
 
     // private _cellEditorController: CellEditorController;
 
@@ -29,7 +30,7 @@ export class SheetUIController {
 
         this._initialize();
 
-        // this._toolbarController = new ToolBarController(this._plugin);
+        this._toolbarController = new ToolBarUIController(this._plugin, this._config.layout?.toolBarConfig);
         // this._cellEditorController = new CellEditorController(this._plugin);
         // this._infoBarController = new InfoBarController(this._plugin);
         // this._rightMenuController = new RightMenuController(this._plugin);
@@ -42,9 +43,10 @@ export class SheetUIController {
             changeSkin: this.changeSkin,
             changeLocale: this.changeLocale,
             getComponent: this.getComponent,
+            // 其余组件的props
             methods: {
                 toolbar: {
-                    // getComponent: this._toolbarController.getComponent,
+                    getComponent: this._toolbarController.getComponent,
                 },
                 cellEditor: {
                     // getComponent: this._cellEditorController.getComponent,

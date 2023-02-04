@@ -246,7 +246,7 @@ class SheetBarUIController {
             });
         });
 
-        CommandManager.getActionObservers().add((actionEvent) => {
+        CommandManager.getActionObservers().add((actionEvent: any) => {
             const action = actionEvent.action as SheetActionBase<any>;
             const workbook = action.getWorkBook();
             const actionUnitId = workbook.getUnitId();

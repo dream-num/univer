@@ -43,7 +43,7 @@ It accepts all props which native buttons support.
 ## Case
 
 ```jsx
-import { Button } from '@univer/style-univer';
+import { Button } from '@univerjs/style-univer';
 
 const ToolBar = () => {
     const buttonText = 'Confirm';

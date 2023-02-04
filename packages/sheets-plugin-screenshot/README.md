@@ -8,14 +8,14 @@ UniverSheet Plugin Screenshot
 
 ### Installation
 
-```bash
-npm i @univer/sheets-plugin-screenshot
+```shell
+npm i @univerjs/sheets-plugin-screenshot
 ```
 
 ### Usage
 
 ```js
-impport {Screenshot} from '@univer/sheets-plugin-screenshot'
+import { Screenshot } from '@univerjs/sheets-plugin-screenshot';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Screenshot());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/sheets-plugin-screenshot dev
+pnpm run --filter  @univerjs/sheets-plugin-screenshot dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-screenshot dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/sheets-plugin-screenshot build
+pnpm run --filter  @univerjs/sheets-plugin-screenshot build
 ```

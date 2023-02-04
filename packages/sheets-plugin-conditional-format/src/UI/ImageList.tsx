@@ -1,5 +1,5 @@
-import { Component } from '@univer/base-component';
-import { Nullable, Observer, Workbook } from '@univer/core';
+import { Component } from '@univerjs/base-component';
+import { Nullable, Observer, Workbook } from '@univerjs/core';
 import CFcolorGradation from '../Assets/CFcolorGradation.png';
 import CFdataBar from '../Assets/CFdataBar.png';
 import styles from './index.module.less';

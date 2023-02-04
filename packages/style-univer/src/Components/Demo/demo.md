@@ -24,7 +24,7 @@ The properties of the device are described as follows:
 ## Case
 
 ```jsx
-import { Demo } from '@univer/style-univer';
+import { Demo } from '@univerjs/style-univer';
 
 const ToolBar = () => {
     const containerText = 'demo';

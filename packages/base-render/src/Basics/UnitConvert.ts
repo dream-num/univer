@@ -1,4 +1,4 @@
-import { IDocumentData, Tools } from '@univer/core';
+import { IDocumentData, Tools } from '@univerjs/core';
 import { ptToPx, pxToPt } from './Tools';
 
 const whiteListKeyForPt = new Set(['', '']);

@@ -1,5 +1,5 @@
-import { BaseComponentRender, BaseComponentSheet, Component, createRef, debounce } from '@univer/base-component';
-import { Select } from '@univer/base-sheets';
+import { BaseComponentRender, BaseComponentSheet, Component, createRef, debounce } from '@univerjs/base-component';
+import { Select } from '@univerjs/base-sheets';
 import { FunctionList } from '../../../Basic';
 import { FunListILabel, ILabel } from '../../../Controller/SearchFormulaModalController';
 import styles from './index.module.less';

@@ -52,7 +52,7 @@ value?: string;
 ## 案例
 
 ```jsx
-import { Checkbox, CheckboxGroup } from '@univer/style-univer';
+import { Checkbox, CheckboxGroup } from '@univerjs/style-univer';
 
 let options = {
     checked?: boolean;

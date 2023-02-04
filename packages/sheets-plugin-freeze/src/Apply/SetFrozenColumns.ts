@@ -1,4 +1,4 @@
-import { Worksheet } from '@univer/core';
+import { Worksheet } from '@univerjs/core';
 
 export function SetFrozenColumns(worksheet: Worksheet, numColumns: number): number {
     // get config

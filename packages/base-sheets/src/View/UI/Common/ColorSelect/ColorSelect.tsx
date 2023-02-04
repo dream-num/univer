@@ -1,5 +1,5 @@
-import { Component, ComponentChildren } from '@univer/base-component';
-import { PLUGIN_NAMES } from '@univer/core';
+import { Component, ComponentChildren } from '@univerjs/base-component';
+import { PLUGIN_NAMES } from '@univerjs/core';
 import { SheetPlugin } from '../../../../SheetPlugin';
 import styles from './index.module.less';
 

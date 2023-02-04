@@ -1,5 +1,5 @@
-import { SheetContext } from '@univer/core';
-import { FormulaDataType } from '@univer/base-formula-engine';
+import { SheetContext } from '@univerjs/core';
+import { FormulaDataType } from '@univerjs/base-formula-engine';
 
 export type IConfig = {
     context: SheetContext;

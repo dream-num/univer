@@ -1,4 +1,4 @@
-import { Command, SheetContext, IRangeData, GroupModel, Nullable, Sequence, Serializer } from '@univer/core';
+import { Command, SheetContext, IRangeData, GroupModel, Nullable, Sequence, Serializer } from '@univerjs/core';
 import { ACTION_NAMES } from '../Const';
 import { FilterCriteria } from './FilterCriteria';
 import { FilterCriteriaColumn, IFilterCriteriaColumn } from './FilterCriteriaColumn';

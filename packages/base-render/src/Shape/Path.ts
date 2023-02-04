@@ -1,6 +1,6 @@
 // import { IShapeProps, Shape, IObjectFullState, Group, Scene } from '.';
 
-import { IKeyValue, Nullable } from '@univer/core';
+import { IKeyValue, Nullable } from '@univerjs/core';
 import { IObjectFullState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../Basics/Interfaces';
 import { IShapeProps, Shape } from './Shape';
 

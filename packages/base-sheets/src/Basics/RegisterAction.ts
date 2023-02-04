@@ -1,4 +1,4 @@
-import { CommandManager } from '@univer/core';
+import { CommandManager } from '@univerjs/core';
 import { SetSelectionValueAction } from '../Model/Action/SetSelectionValueAction';
 import { ACTION_NAMES } from './Enum';
 

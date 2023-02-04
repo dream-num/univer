@@ -1,2 +1,2 @@
 export * from '../index';
-declare module '@univer/base-formula-engine' {}
+declare module '@univerjs/base-formula-engine' {}

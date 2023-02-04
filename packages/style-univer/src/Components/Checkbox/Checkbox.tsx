@@ -1,4 +1,4 @@
-import { BaseCheckboxProps, CheckboxComponent, Component, joinClassNames, JSXComponent } from '@univer/base-component';
+import { BaseCheckboxProps, CheckboxComponent, Component, joinClassNames, JSXComponent } from '@univerjs/base-component';
 import styles from './index.module.less';
 // export type CheckboxBaseProps = {
 //     value?: string;

@@ -1,5 +1,5 @@
-import { Component } from '@univer/base-component';
-import { CellRange } from '@univer/base-sheets';
+import { Component } from '@univerjs/base-component';
+import { CellRange } from '@univerjs/base-sheets';
 import { FORMULA_PLUGIN_NAME, P } from '../../../Basic';
 import { FunParams } from '../../../Controller/SearchFormulaModalController';
 import { FormulaPlugin } from '../../../FormulaPlugin';

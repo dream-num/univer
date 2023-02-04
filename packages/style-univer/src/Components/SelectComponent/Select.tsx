@@ -1,4 +1,4 @@
-import { BaseSelectProps, createRef, ISelectButton, JSXComponent, SelectComponent } from '@univer/base-component';
+import { BaseSelectProps, createRef, ISelectButton, JSXComponent, SelectComponent } from '@univerjs/base-component';
 import { PureComponent } from 'preact/compat';
 import { Button, ColorPicker, Input, Tooltip, Ul } from '../../index';
 import styles from './index.module.less';

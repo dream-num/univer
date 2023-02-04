@@ -1,19 +1,6 @@
-import { BaseMenuItem, BaseUlProps } from '@univer/base-component';
-import {
-    CommandManager,
-    InsertSheetAction,
-    NameGen,
-    Nullable,
-    PLUGIN_NAMES,
-    RemoveSheetAction,
-    SetSheetOrderAction,
-    SetTabColorAction,
-    SetWorkSheetActivateAction,
-    SetWorkSheetNameAction,
-    SetWorkSheetStatusAction,
-    SheetActionBase,
-} from '@univer/core';
-import { ColorPicker } from '@univer/style-univer';
+import { BaseMenuItem, BaseUlProps } from '@univerjs/base-component';
+import { ACTION_NAMES, CommandManager, NameGen, Nullable, PLUGIN_NAMES, SheetActionBase } from '@univerjs/core';
+import { ColorPicker } from '@univerjs/style-univer';
 import { SheetBarModel } from '../Model/SheetBarModel';
 import { SheetBar } from '../View/UI/SheetBar';
 import { SheetPlugin } from '../SheetPlugin';
@@ -267,13 +254,13 @@ class SheetBarUIController {
 
             const { data } = actionEvent;
             switch (data.actionName) {
-                case SetSheetOrderAction.NAME:
-                case InsertSheetAction.NAME:
-                case SetTabColorAction.NAME:
-                case RemoveSheetAction.NAME:
-                case SetWorkSheetNameAction.NAME:
-                case SetWorkSheetActivateAction.NAME:
-                case SetWorkSheetStatusAction.NAME: {
+                case ACTION_NAMES.SET_SHEET_ORDER_ACTION:
+                case ACTION_NAMES.INSERT_SHEET_ACTION:
+                case ACTION_NAMES.SET_TAB_COLOR_ACTION:
+                case ACTION_NAMES.REMOVE_SHEET_ACTION:
+                case ACTION_NAMES.SET_WORKSHEET_NAME_ACTION:
+                case ACTION_NAMES.SET_WORKSHEET_ACTIVATE_ACTION:
+                case ACTION_NAMES.SET_WORKSHEET_STATUS_ACTION: {
                     // update data;
                     this._initializeData();
                     // set ui bar sheetList;

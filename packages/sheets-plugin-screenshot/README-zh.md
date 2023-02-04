@@ -8,14 +8,14 @@ UniverSheet Screenshot 插件
 
 ### 安装
 
-```bash
-npm i @univer/sheets-plugin-screenshot
+```shell
+npm i @univerjs/sheets-plugin-screenshot
 ```
 
 ### 使用
 
 ```js
-impport {Screenshot} from '@univer/sheets-plugin-screenshot'
+import { Screenshot } from '@univerjs/sheets-plugin-screenshot';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Screenshot());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/sheets-plugin-screenshot dev
+pnpm run --filter  @univerjs/sheets-plugin-screenshot dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-screenshot dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/sheets-plugin-screenshot build
+pnpm run --filter  @univerjs/sheets-plugin-screenshot build
 ```

@@ -1,7 +1,7 @@
 
 
 export * from '../index';
-declare module '@univer/sheets-plugin-print' { }
+declare module '@univerjs/sheets-plugin-print' { }
 
 // use css module
 declare module '*.less' {

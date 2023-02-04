@@ -1,4 +1,4 @@
-import { ContextBase } from '@univer/core';
+import { ContextBase } from '@univerjs/core';
 import { BlockPlugin } from './BlockPlugin';
 import { BulletPlugin } from './BulletPlugin';
 import { IDocumentSkeletonPage, ISkeletonResourceReference } from '../Basics/IDocumentSkeletonCached';

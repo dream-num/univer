@@ -1,4 +1,4 @@
-import { ISlideData } from '@univer/core';
+import { ISlideData } from '@univerjs/core';
 import { DEFAULT_FIRST_PAGE } from './DefaultPages/Page1';
 import { DEFAULT_SECOND_PAGE } from './DefaultPages/Page2';
 import { DEFAULT_THIRD_PAGE } from './DefaultPages/Page3';

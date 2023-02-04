@@ -1,6 +1,6 @@
-import { BaseComponentRender, BaseComponentSheet, Component } from '@univer/base-component';
-import { PLUGIN_NAMES } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
+import { BaseComponentRender, BaseComponentSheet, Component } from '@univerjs/base-component';
+import { PLUGIN_NAMES } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
 import { FORMULA_PLUGIN_NAME } from '../../../Basic';
 import { SearchFormulaModalData } from '../../../Controller/SearchFormulaModalController';
 import { FormulaPlugin } from '../../../FormulaPlugin';

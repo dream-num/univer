@@ -8,9 +8,9 @@ import {
     ISelectButton,
     IToolBarItemProps,
     ISlotElement,
-} from '@univer/base-component';
+} from '@univerjs/base-component';
 
-import { Nullable, Observer, Workbook } from '@univer/core';
+import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { IProps } from '../IData/ISort';
 import { SortCustom } from './SortCustom';
 

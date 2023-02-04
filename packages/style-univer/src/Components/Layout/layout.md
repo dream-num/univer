@@ -25,7 +25,7 @@ Use flex layout internally, please pay attention to compatibility.
 The overall layout of UniverSheet distinguishes the outer left column, outer right column, head, footer, inner left column, right left column, and middle content area. The simple expression is as follows
 
 ```jsx
-import { Container, Layout, Header, Footer, Content, Sider } from '@univer/style-univer';
+import { Container, Layout, Header, Footer, Content, Sider } from '@univerjs/style-univer';
 
 const MainPage = () => {
     return (

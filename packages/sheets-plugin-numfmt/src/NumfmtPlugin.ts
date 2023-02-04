@@ -1,4 +1,4 @@
-import { SheetContext, IRangeData, ObjectMatrixPrimitiveType, Plugin } from '@univer/core';
+import { SheetContext, IRangeData, ObjectMatrixPrimitiveType, Plugin } from '@univerjs/core';
 import { NumfmtPluginObserve, install } from './Basic/Observer';
 import { NUMFMT_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
 import { NumfmtController } from './Controller/NumfmtController';

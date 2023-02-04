@@ -8,14 +8,14 @@ UniverSheet Comment 插件
 
 ### 安装
 
-```bash
-npm i @univer/sheets-plugin-comment
+```shell
+npm i @univerjs/sheets-plugin-comment
 ```
 
 ### 使用
 
 ```js
-impport {Comment} from '@univer/sheets-plugin-comment'
+import { Comment } from '@univerjs/sheets-plugin-comment';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Comment());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/sheets-plugin-comment dev
+pnpm run --filter  @univerjs/sheets-plugin-comment dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-comment dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/sheets-plugin-comment build
+pnpm run --filter  @univerjs/sheets-plugin-comment build
 ```

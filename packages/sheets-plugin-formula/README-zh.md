@@ -8,14 +8,14 @@ UniverSheet Formula 插件
 
 ### 安装
 
-```bash
-npm i @univer/sheets-plugin-formula
+```shell
+npm i @univerjs/sheets-plugin-formula
 ```
 
 ### 使用
 
 ```js
-impport {Formula} from '@univer/sheets-plugin-formula'
+import { Formula } from '@univerjs/sheets-plugin-formula';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Formula());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/sheets-plugin-formula dev
+pnpm run --filter  @univerjs/sheets-plugin-formula dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-formula dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/sheets-plugin-formula build
+pnpm run --filter  @univerjs/sheets-plugin-formula build
 ```

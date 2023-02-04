@@ -1,4 +1,4 @@
-import { IconComponent, JSXComponent } from '@univer/base-component';
+import { IconComponent, JSXComponent } from '@univerjs/base-component';
 import { Component, createRef, RefObject } from 'preact';
 import { CanvasIcon } from '../CanvasIcon';
 

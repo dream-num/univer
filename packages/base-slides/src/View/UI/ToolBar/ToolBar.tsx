@@ -1,6 +1,6 @@
-import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, createRef } from '@univer/base-component';
+import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, createRef } from '@univerjs/base-component';
 
-import { PLUGIN_NAMES } from '@univer/core';
+import { PLUGIN_NAMES } from '@univerjs/core';
 import { SlidePlugin } from '../../../SlidePlugin';
 import { IToolBarItemProps } from '../../../Model/ToolBarModel';
 import { TextButton } from '../Common/TextButton/TextButton';

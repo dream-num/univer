@@ -1,6 +1,6 @@
-import { IRangeData, PLUGIN_NAMES, Workbook } from '@univer/core';
-import { Rect, Scene } from '@univer/base-render';
-import { SheetPlugin, SheetView } from '@univer/base-sheets';
+import { IRangeData, PLUGIN_NAMES, Workbook } from '@univerjs/core';
+import { Rect, Scene } from '@univerjs/base-render';
+import { SheetPlugin, SheetView } from '@univerjs/base-sheets';
 
 import { FormulaPlugin } from '../FormulaPlugin';
 

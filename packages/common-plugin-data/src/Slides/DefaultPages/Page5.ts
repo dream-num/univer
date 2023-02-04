@@ -1,4 +1,4 @@
-import { PageElementType, PageType, ShapeType } from '@univer/core';
+import { PageElementType, PageType, ShapeType } from '@univerjs/core';
 
 export const DEFAULT_FIFTH_PAGE = {
     id: 'technology_1',

@@ -1,4 +1,4 @@
-import { FontStyleType, ICellInfo, ISelection, IStyleBase, Nullable, ObjectMatrix, Tools, IRangeData, BaselineOffset, IScale } from '@univer/core';
+import { FontStyleType, ICellInfo, ISelection, IStyleBase, Nullable, ObjectMatrix, Tools, IRangeData, BaselineOffset, IScale } from '@univerjs/core';
 import { DEFAULT_FONTFACE_PLANE } from './Const';
 import { IBoundRectNoAngle } from './Vector2';
 import { IFontLocale } from './Interfaces';

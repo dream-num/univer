@@ -1,4 +1,4 @@
-import { BaseModalProps, Component, JSXComponent, ModalComponent, ModalProps } from '@univer/base-component';
+import { BaseModalProps, Component, JSXComponent, ModalComponent, ModalProps } from '@univerjs/base-component';
 
 import { Button } from '../Button';
 import { Drag } from '../Drag';

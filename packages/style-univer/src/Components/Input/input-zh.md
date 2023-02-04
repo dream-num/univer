@@ -32,7 +32,7 @@ cover: ''
 ## 案例
 
 ```jsx
-import { Input } from '@univer/style-univer';
+import { Input } from '@univerjs/style-univer';
 
 <Input onChange={() => {}} type="text" placeholder="哈哈" value="1"></Input>;
 ```

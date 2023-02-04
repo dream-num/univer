@@ -1,4 +1,4 @@
-import { BlockType, ContextBase, IBlockElement } from '@univer/core';
+import { BlockType, ContextBase, IBlockElement } from '@univerjs/core';
 import { dealWidthParagraph } from './Paragraph';
 import { dealWithBlockError } from './BlockError';
 import { IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../Basics/IDocumentSkeletonCached';

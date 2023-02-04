@@ -1,5 +1,5 @@
-import { getColor, Rect, Scene, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, SpreadsheetSkeleton } from '@univer/base-render';
-import { Worksheet } from '@univer/core';
+import { getColor, Rect, Scene, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, SpreadsheetSkeleton } from '@univerjs/base-render';
+import { Worksheet } from '@univerjs/core';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from '../BaseView';
 import { SelectionManager } from '../../../Controller/Selection/SelectionManager';
 import { SheetPlugin } from '../../../SheetPlugin';

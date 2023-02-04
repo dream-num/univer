@@ -1,5 +1,5 @@
-import { BaseComponentRender, BaseComponentSheet, Component } from '@univer/base-component';
-import { Nullable, Observer, Workbook } from '@univer/core';
+import { BaseComponentRender, BaseComponentSheet, Component } from '@univerjs/base-component';
+import { Nullable, Observer, Workbook } from '@univerjs/core';
 
 interface IState {
     locale: string;

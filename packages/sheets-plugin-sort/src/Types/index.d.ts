@@ -1,7 +1,7 @@
 
 
 export * from '../index';
-declare module '@univer/sheets-plugin-sort' { }
+declare module '@univerjs/sheets-plugin-sort' { }
 
 // use css module
 declare module '*.less' {

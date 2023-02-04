@@ -1,3 +1,4 @@
+import { Locale } from '../Basics/Shared/Locale';
 import { Component, RefObject } from '../Framework';
 
 /**
@@ -236,4 +237,62 @@ export function setLastCaretPosition(dom: HTMLElement) {
     const range = window.getSelection();
     range && range.selectAllChildren(dom);
     range && range.collapseToEnd();
+}
+
+/**
+ * 翻译数据中的国际化
+ */
+function resetLabel(label: string[] | string, locale: Locale) {
+    let str = '';
+
+    if (label instanceof Array) {
+        label.forEach((item) => {
+            if (item.includes('.')) {
+                str += locale.get(item);
+            } else {
+                str += item;
+            }
+        });
+    } else {
+        if (label.includes('.')) {
+            str = locale.get(label);
+        } else {
+            str += label;
+        }
+    }
+
+    return str;
+}
+
+function findLocale(obj: any, locale: Locale) {
+    for (let k in obj) {
+        if (k === 'locale') {
+            obj.label = resetLabel(obj[k], locale);
+        } else if (k.endsWith('Locale')) {
+            const index = k.indexOf('Locale');
+            obj[k.slice(0, index)] = resetLabel(obj[k], locale);
+        } else if (obj[k] && !obj[k].$$typeof) {
+            if (Object.prototype.toString.call(obj[k]) === '[object Object]') {
+                findLocale(obj[k], locale);
+            } else if (Object.prototype.toString.call(obj[k]) === '[object Array]') {
+                resetDataLabel(obj[k], locale);
+            }
+        }
+    }
+
+    return obj;
+}
+
+export function resetDataLabel(data: any[], locale: Locale) {
+    for (let i = 0; i < data.length; i++) {
+        let item = data[i];
+
+        item = findLocale(item, locale);
+
+        if (item.children) {
+            item.children = resetDataLabel(item.children, locale);
+        }
+    }
+
+    return data;
 }

@@ -46,7 +46,7 @@ cover: ''
 ## 案例
 
 ```jsx
-import { Button } from '@univer/style-univer';
+import { Button } from '@univerjs/style-univer';
 
 const ToolBar = () => {
     const buttonText = '确认';

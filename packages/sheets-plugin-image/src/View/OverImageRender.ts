@@ -1,5 +1,5 @@
-import { RenderEngine, EVENT_TYPE, Scene } from '@univer/base-render';
-import { PLUGIN_NAMES } from '@univer/core';
+import { RenderEngine, EVENT_TYPE, Scene } from '@univerjs/base-render';
+import { PLUGIN_NAMES } from '@univerjs/core';
 import { OverGridImagePlugin, OverGridImageProperty } from '../OverGridImagePlugin';
 import { OverImageShape } from './OverImageShape';
 

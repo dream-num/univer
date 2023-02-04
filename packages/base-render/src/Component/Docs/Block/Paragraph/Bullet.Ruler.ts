@@ -1,4 +1,4 @@
-import { ContextBase, GlyphType, numberToListABC } from '@univer/core';
+import { ContextBase, GlyphType, numberToListABC } from '@univerjs/core';
 import { dealWidthCustomBulletOrderedSymbol } from '../../../../Custom/UseCustom';
 
 export function getBulletOrderedSymbol(startIndex: number, startNumber: number, glyphType: GlyphType | string, context?: ContextBase) {

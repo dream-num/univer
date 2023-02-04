@@ -1,4 +1,4 @@
-import { ConditionType, InterpolationPointType, Range, IRangeData, IStyleData, Nullable, RelativeDate } from '@univer/core';
+import { ConditionType, InterpolationPointType, Range, IRangeData, IStyleData, Nullable, RelativeDate } from '@univerjs/core';
 import { ConditionalFormatRule } from './ConditionalFormatRule';
 import { BooleanCondition, BooleanRule, ConditionValue, GradientRule, InterpolationPoint } from './IData/IConditionalFormatRule';
 

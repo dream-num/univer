@@ -1,4 +1,4 @@
-import { IRangeData, IUnitRange } from '@univer/core';
+import { IRangeData, IUnitRange } from '@univerjs/core';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { IFormulaData } from '../Basics/Common';
 

@@ -1,4 +1,4 @@
-import { IRangeData } from '@univer/core';
+import { IRangeData } from '@univerjs/core';
 import { BandingTheme } from './BandingTheme';
 /**
  * Properties referring a single dimension (either row or column).

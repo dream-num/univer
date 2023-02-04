@@ -1,4 +1,4 @@
-import { Color, Nullable } from '@univer/core';
+import { Color, Nullable } from '@univerjs/core';
 import { useRef } from 'preact/hooks';
 import { Input } from '../../Input';
 

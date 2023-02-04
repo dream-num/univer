@@ -1,4 +1,4 @@
-import { BaseTabPaneProps, BaseTabProps, joinClassNames, JSXComponent, randomId, TabComponent, TabPaneComponent } from '@univer/base-component';
+import { BaseTabPaneProps, BaseTabProps, joinClassNames, JSXComponent, randomId, TabComponent, TabPaneComponent } from '@univerjs/base-component';
 import { JSX, toChildArray } from 'preact';
 import { PureComponent } from 'preact/compat';
 import styles from './index.module.less';

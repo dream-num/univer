@@ -15,18 +15,18 @@ Universheet official UI component library
 
 ### Install
 
-```bash
-npm i @univer/style-univer
+```shell
+npm i @univerjs/style-univer
 ```
 
 ### Import
 
 ```js
-impport baseUI from'@univer/style-univer'
-universheet.install(baseUI)
+import baseUI from '@univerjs/style-univer';
+universheet.install(baseUI);
 universheet.create({
-     plugins:['style-univer']
-})
+    plugins: ['style-univer'],
+});
 ```
 
 ## Local development
@@ -49,7 +49,7 @@ npm i
 npm run dev
 
 # Or project root directory ./
-npm run dev -w @univer/style-univer
+npm run dev -w @univerjs/style-univer
 ```
 
 ### Package
@@ -59,7 +59,7 @@ npm run dev -w @univer/style-univer
 npm run build
 
 # Or root directory ./
-npm run build -w @univer/style-univer
+npm run build -w @univerjs/style-univer
 ```
 
 ## Doc Website
@@ -80,7 +80,7 @@ npm i
 npm run start
 
 # or root folder
-npm run start -w @univer/style-univer
+npm run start -w @univerjs/style-univer
 ```
 
 This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
@@ -92,7 +92,7 @@ This command starts a local development server and opens up a browser window. Mo
 npm run build:doc
 
 # or root folder
-npm run build:doc -w @univer/style-univer
+npm run build:doc -w @univerjs/style-univer
 ```
 
 This command generates static content into the `build` directory and can be served using any static contents hosting service.

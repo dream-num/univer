@@ -1,5 +1,5 @@
-import { SheetActionBase, ActionObservers, ActionType, ISheetActionData, ICellInfo, ISelection, Nullable, CommandUnit } from '@univer/core';
-import { ACTION_NAMES } from '@Basics';
+import { SheetActionBase, ActionObservers, ActionType, ISheetActionData, ICellInfo, ISelection, Nullable, Workbook } from '@univerjs/core';
+import { ACTION_NAMES } from '../../Basics';
 import { SetSelectionValue } from '../Apply/SetSelectionValue';
 
 export interface ISelectionModelValue {
@@ -12,10 +12,8 @@ export interface ISetSelectionValueActionData extends ISheetActionData {
 }
 
 export class SetSelectionValueAction extends SheetActionBase<ISetSelectionValueActionData, ISetSelectionValueActionData, ISelectionModelValue[]> {
-    static NAME = 'SetSelectionValueAction';
-
-    constructor(actionData: ISetSelectionValueActionData, commandUnit: CommandUnit, observers: ActionObservers) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetSelectionValueActionData, workbook: Workbook, observers: ActionObservers) {
+        super(actionData, workbook, observers);
 
         this._doActionData = {
             ...actionData,

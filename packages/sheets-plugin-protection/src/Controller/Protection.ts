@@ -1,4 +1,4 @@
-import { Nullable, Rectangle } from '@univer/core';
+import { Nullable, Rectangle } from '@univerjs/core';
 import { Allowed } from './Allowed';
 import { AllowedList } from './AllowedList';
 import { UnlockList } from './UnlockList';
@@ -164,7 +164,7 @@ export class Protection {
     }
 }
 
-// import { Range } from '@univer/core';
+// import { Range } from '@univerjs/core';
 
 // interface IConfig {
 //     canSelect: boolean;

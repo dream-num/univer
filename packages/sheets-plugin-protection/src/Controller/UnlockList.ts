@@ -1,4 +1,4 @@
-import { Nullable, Range, Rectangle } from '@univer/core';
+import { Nullable, Range, Rectangle } from '@univerjs/core';
 
 export class UnlockList {
     protected _rangeList: Range[];

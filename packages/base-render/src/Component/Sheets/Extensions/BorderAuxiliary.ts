@@ -1,4 +1,4 @@
-import { BooleanNumber, IRangeData, IScale, ObjectMatrix } from '@univer/core';
+import { BooleanNumber, IRangeData, IScale, ObjectMatrix } from '@univerjs/core';
 import { fixLineWidthByScale, getColor } from '../../../Basics/Tools';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';

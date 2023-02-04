@@ -26,7 +26,7 @@ icon 图标以 svg 形式展示,统一导出
 ## 案例
 
 ```jsx
-import { Icon } from '@univer/style-univer';
+import { Icon } from '@univerjs/style-univer';
 
 <Icon.Text.TopVerticalIcon />
 <Icon.Format.NextIcon rotate={90} />

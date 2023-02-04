@@ -11,7 +11,7 @@ import {
     LayoutComponent,
     Ref,
     SiderComponent,
-} from '@univer/base-component';
+} from '@univerjs/base-component';
 import styles from './index.module.less';
 
 // Types for props

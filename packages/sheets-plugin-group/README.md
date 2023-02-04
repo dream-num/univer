@@ -8,14 +8,14 @@ UniverSheet Plugin Group
 
 ### Installation
 
-```bash
-npm i @univer/sheets-plugin-group
+```shell
+npm i @univerjs/sheets-plugin-group
 ```
 
 ### Usage
 
 ```js
-impport {Group} from '@univer/sheets-plugin-group'
+import { Group } from '@univerjs/sheets-plugin-group';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Group());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/sheets-plugin-group dev
+pnpm run --filter  @univerjs/sheets-plugin-group dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-group dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/sheets-plugin-group build
+pnpm run --filter  @univerjs/sheets-plugin-group build
 ```

@@ -1,4 +1,4 @@
-import { PageElementType, PageType, ShapeType } from '@univer/core';
+import { PageElementType, PageType, ShapeType } from '@univerjs/core';
 
 export const DEFAULT_FIRST_PAGE = {
     id: 'cover_1',

@@ -1,5 +1,5 @@
 {
-    "name": "@univer/base-formula-engine",
+    "name": "@univerjs/base-formula-engine",
     "version": "0.0.1",
     "description": "UniverSheet normal base-formula-engine",
     "keywords": [],
@@ -50,8 +50,8 @@
         "vite": "^2.4.4"
     },
     "dependencies": {
-        "@univer/core": "workspace:^0.0.1",
-        "@univer/style-univer": "workspace:^0.0.1",
+        "@univerjs/core": "workspace:^0.0.1",
+        "@univerjs/style-univer": "workspace:^0.0.1",
         "nanoid": "4.0.0",
         "preact": "^10.5.14"
     }

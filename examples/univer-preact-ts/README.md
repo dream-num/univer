@@ -8,14 +8,14 @@ UniverSheet Plugin Spreadsheet
 
 ### Installation
 
-```bash
+```shell
 npm i univer-preact-ts
 ```
 
 ### Usage
 
 ```js
-impport {Spreadsheet} from 'univer-preact-ts'
+import {Spreadsheet} from 'univer-preact-ts'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Spreadsheet());

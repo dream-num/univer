@@ -2,7 +2,7 @@
 
 
 export * from '../index';
-declare module '@univer/sheets-plugin-split-column' { }
+declare module '@univerjs/sheets-plugin-split-column' { }
 
 // use css module
 declare module '*.less' {

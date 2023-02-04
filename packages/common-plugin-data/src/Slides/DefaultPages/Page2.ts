@@ -1,4 +1,4 @@
-import { PageElementType, PageType, ShapeType } from '@univer/core';
+import { PageElementType, PageType, ShapeType } from '@univerjs/core';
 
 export const DEFAULT_SECOND_PAGE = {
     id: 'catalog_1',

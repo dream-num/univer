@@ -1,4 +1,4 @@
-import { CommandManager } from '@univer/core';
+import { CommandManager } from '@univerjs/core';
 import { ACTION_NAMES } from '../Basic/Enum';
 import { SetNumfmtRangeDataAction } from './Action/SetNumfmtRangeDataAction';
 

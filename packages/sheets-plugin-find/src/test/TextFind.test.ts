@@ -18,7 +18,7 @@ import {
     UndoManager,
     Workbook,
     Worksheet,
-} from '@univer/core';
+} from '@univerjs/core';
 import { TextFinder } from '../Domain';
 
 export function IOCContainerStartUpReady(workbookConfig?: Partial<IWorkbookConfig>): IOCContainer {

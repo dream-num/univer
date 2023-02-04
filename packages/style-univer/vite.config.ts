@@ -40,8 +40,8 @@ export default defineConfig({
         preact(),
         createExternal({
             externals: {
-                '@univer/core': '@univer/core',
-                '@univer/base-component': '@univer/base-component',
+                '@univerjs/core': '@univerjs/core',
+                '@univerjs/base-component': '@univerjs/base-component',
                 'css-vars-ponyfill': 'css-vars-ponyfill',
                 'nanoid': 'nanoid',
                 'react-colorful': 'react-colorful',

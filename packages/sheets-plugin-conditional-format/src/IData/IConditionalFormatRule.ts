@@ -1,4 +1,4 @@
-import { ConditionType, IColor, IColorStyle, InterpolationPointType, IRangeData, IStyleData, RelativeDate } from '@univer/core';
+import { ConditionType, IColor, IColorStyle, InterpolationPointType, IRangeData, IStyleData, RelativeDate } from '@univerjs/core';
 
 /**
  * The value of the condition.

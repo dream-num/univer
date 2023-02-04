@@ -1,7 +1,7 @@
-import { ISlotElement, ISlotProps, IToolBarItemProps } from '@univer/base-component';
-import { Command, Plugin, PLUGIN_NAMES, Nullable, Worksheet, IOCContainer, UniverSheet } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
-import { IPictureProps } from '@univer/base-render';
+import { ISlotElement, ISlotProps, IToolBarItemProps } from '@univerjs/base-component';
+import { Command, Plugin, PLUGIN_NAMES, Nullable, Worksheet, IOCContainer, UniverSheet } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
+import { IPictureProps } from '@univerjs/base-render';
 import { ACTION_NAMES } from './Const';
 import { ImagePluginObserve, install, uninstall } from './Basic/Observer';
 import { OVER_GRID_IMAGE_PLUGIN_NAME } from './Const/PLUGIN_NAME';

@@ -1,5 +1,5 @@
-import { Engine, EVENT_TYPE, IWheelEvent, Layer, Rect, Scene, SceneViewer, ScrollBar, Slide, Viewport } from '@univer/base-render';
-import { EventState, getColorStyle, IColorStyle, IPageElement, ISlidePage, Nullable, Registry, sortRules } from '@univer/core';
+import { Engine, EVENT_TYPE, IWheelEvent, Layer, Rect, Scene, SceneViewer, ScrollBar, Slide, Viewport } from '@univerjs/base-render';
+import { EventState, getColorStyle, IColorStyle, IPageElement, ISlidePage, Nullable, Registry, sortRules } from '@univerjs/core';
 import { SlidePlugin } from '../../SlidePlugin';
 import { SlideBar } from '../UI/SlideBar/SlideBar';
 import { ObjectProvider } from './ObjectProvider';

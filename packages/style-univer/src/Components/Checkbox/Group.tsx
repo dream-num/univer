@@ -1,4 +1,4 @@
-import { BaseCheckboxGroupProps, CheckboxGroupComponent, JSXComponent } from '@univer/base-component';
+import { BaseCheckboxGroupProps, CheckboxGroupComponent, JSXComponent } from '@univerjs/base-component';
 import { useRef } from 'preact/hooks';
 import { Checkbox } from './Checkbox';
 import styles from './index.module.less';

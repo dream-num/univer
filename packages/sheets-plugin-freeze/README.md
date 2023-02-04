@@ -8,14 +8,14 @@ UniverSheet Plugin Frozen
 
 ### Installation
 
-```bash
-npm i @univer/sheets-plugin-freeze
+```shell
+npm i @univerjs/sheets-plugin-freeze
 ```
 
 ### Usage
 
 ```js
-impport {Frozen} from '@univer/sheets-plugin-freeze'
+import { Frozen } from '@univerjs/sheets-plugin-freeze';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Frozen());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/sheets-plugin-freeze dev
+pnpm run --filter  @univerjs/sheets-plugin-freeze dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-freeze dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/sheets-plugin-freeze build
+pnpm run --filter  @univerjs/sheets-plugin-freeze build
 ```

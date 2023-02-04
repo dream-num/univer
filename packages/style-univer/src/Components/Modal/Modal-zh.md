@@ -28,7 +28,7 @@ cover: ''
 ## 案例
 
 ```jsx
-import { Modal } from '@univer/style-univer';
+import { Modal } from '@univerjs/style-univer';
 
 const Demo = () => {
     return (

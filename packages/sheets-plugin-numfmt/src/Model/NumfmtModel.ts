@@ -1,4 +1,4 @@
-import { ObjectMatrixPrimitiveType } from '@univer/core';
+import { ObjectMatrixPrimitiveType } from '@univerjs/core';
 
 export class NumfmtModel {
     protected _sheetsNumfmtConfig: Map<string, ObjectMatrixPrimitiveType<string>>;

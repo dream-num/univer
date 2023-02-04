@@ -1,4 +1,4 @@
-import { UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { UniverSheet, Plugin, PLUGIN_NAMES } from '@univerjs/core';
 import { Engine } from './Engine';
 
 export class RenderEngine extends Plugin {

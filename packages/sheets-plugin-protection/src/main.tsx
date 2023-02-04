@@ -1,8 +1,8 @@
-import { UniverSheet } from '@univer/core';
-import { RenderEngine } from '@univer/base-render';
-import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
-import { SheetPlugin } from '@univer/base-sheets';
-import { UniverComponentSheet } from '@univer/style-univer';
+import { UniverSheet } from '@univerjs/core';
+import { RenderEngine } from '@univerjs/base-render';
+import { DEFAULT_WORKBOOK_DATA } from '@univerjs/common-plugin-data';
+import { SheetPlugin } from '@univerjs/base-sheets';
+import { UniverComponentSheet } from '@univerjs/style-univer';
 
 const uiDefaultConfigUp = {
     container: 'universheet-demo',

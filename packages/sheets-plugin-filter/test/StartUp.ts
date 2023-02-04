@@ -15,7 +15,7 @@ import {
     Worksheet,
     ObserverManager,
     IWorksheetConfig,
-} from "@univer/core";
+} from "@univerjs/core";
 
 export function StartUpReady(): IOCContainer {
     const configure = {

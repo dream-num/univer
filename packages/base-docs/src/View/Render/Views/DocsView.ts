@@ -1,5 +1,5 @@
-import { getColor, Rect, Documents, DocumentSkeleton } from '@univer/base-render';
-import { IDocumentData } from '@univer/core';
+import { getColor, Rect, Documents, DocumentSkeleton } from '@univerjs/base-render';
+import { IDocumentData } from '@univerjs/core';
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 import { CANVAS_VIEW_KEY } from '../BaseView';
 

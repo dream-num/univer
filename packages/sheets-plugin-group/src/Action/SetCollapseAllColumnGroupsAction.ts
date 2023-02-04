@@ -1,4 +1,4 @@
-import { ISheetActionData, SheetActionBase, Workbook, ActionObservers, ActionType } from '@univer/core';
+import { ISheetActionData, SheetActionBase, Workbook, ActionObservers, ActionType } from '@univerjs/core';
 import { SetCollapseAllColumnGroups } from '../Apply/SetCollapseAllColumnGroups';
 import { GroupOpenType } from '../Controller/StructGroup';
 

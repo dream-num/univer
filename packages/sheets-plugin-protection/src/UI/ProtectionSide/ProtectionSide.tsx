@@ -1,5 +1,5 @@
-import { BaseComponentSheet, BaseSiderModalProps, Component, createRef, FunctionComponent } from '@univer/base-component';
-import { SheetContext, IRangeData, Nullable, Observer, Workbook } from '@univer/core';
+import { BaseComponentSheet, BaseSiderModalProps, Component, createRef, FunctionComponent } from '@univerjs/base-component';
+import { SheetContext, IRangeData, Nullable, Observer, Workbook } from '@univerjs/core';
 import { PROTECTION_PLUGIN_NAME } from '../../Basic/Const';
 import { Protection } from '../../Controller/Protection';
 

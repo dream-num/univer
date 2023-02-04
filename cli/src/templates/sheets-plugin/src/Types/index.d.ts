@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
 export * from '../index';
-declare module '@univer/<%= projectName %>' {}
+declare module '@univerjs/<%= projectName %>' {}
 
 // use css module
 declare module '*.less' {

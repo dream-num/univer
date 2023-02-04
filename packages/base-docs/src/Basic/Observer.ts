@@ -1,5 +1,5 @@
-import { IKeyboardEvent } from '@univer/base-render';
-import { Observable, Plugin } from '@univer/core';
+import { IKeyboardEvent } from '@univerjs/base-render';
+import { Observable, Plugin } from '@univerjs/core';
 import { DocContainer } from '../View/UI/DocContainer';
 import { ToolBar } from '../View/UI/ToolBar/ToolBar';
 

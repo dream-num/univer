@@ -28,7 +28,7 @@ cover: ''
 ## 案例
 
 ```jsx
-import { ColorPicker } from '@univer/style-univer';
+import { ColorPicker } from '@univerjs/style-univer';
 
 const Demo = () => {
     const buttonText = '确认';

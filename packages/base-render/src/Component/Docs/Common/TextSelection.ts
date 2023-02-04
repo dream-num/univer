@@ -1,4 +1,4 @@
-import { IPosition, ITextSelectionRange, Nullable } from '@univer/core';
+import { IPosition, ITextSelectionRange, Nullable } from '@univerjs/core';
 import { nanoid } from 'nanoid';
 import { COLORS } from '../../../Basics/Const';
 import {

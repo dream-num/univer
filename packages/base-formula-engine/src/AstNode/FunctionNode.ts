@@ -1,4 +1,4 @@
-import { Nullable } from '@univer/core';
+import { Nullable } from '@univerjs/core';
 import { LexerNode } from '../Analysis/LexerNode';
 import { AstNodePromiseType, FunctionVariantType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';

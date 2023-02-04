@@ -1,4 +1,4 @@
-import { sortRules } from '@univer/core';
+import { sortRules } from '@univerjs/core';
 import { BaseDragAndDropExtensionFactory } from './DragAndDropExtensionFactory';
 
 export class DragAndDropExtensionRegister {

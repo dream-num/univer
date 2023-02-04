@@ -1,4 +1,4 @@
-import { BaseMenuProps, JSXComponent, Component, MenuComponent, createRef, BaseMenuItem, joinClassNames, BaseMenuState, BaseMenuStyle } from '@univer/base-component';
+import { BaseMenuProps, JSXComponent, Component, MenuComponent, createRef, BaseMenuItem, joinClassNames, BaseMenuState, BaseMenuStyle } from '@univerjs/base-component';
 import styles from './index.module.less';
 
 export class Menu extends Component<BaseMenuProps, BaseMenuState> {
@@ -104,7 +104,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
         return (
             <ul className={joinClassNames(styles.colsMenu, className)} style={{ ...style, ...posStyle, display: show ? 'block' : 'none' }} ref={this._MenuRef}>
                 {menu?.map((item: BaseMenuItem, index: number) => {
-                    if (item.hide) return;
+                    if (item.show === false) return;
                     return (
                         <>
                             <li

@@ -1,4 +1,4 @@
-import { Observer, Nullable } from '@univer/core';
+import { Observer, Nullable } from '@univerjs/core';
 import { IKeyboardEvent, IMouseEvent, IPointerEvent, IEvent, DeviceType, PointerInput, IWheelEvent } from './Basics/IEvents';
 
 import { Vector2 } from './Basics/Vector2';

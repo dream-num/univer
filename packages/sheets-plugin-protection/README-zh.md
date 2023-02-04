@@ -8,14 +8,14 @@ UniverSheet Protection 插件
 
 ### 安装
 
-```bash
-npm i @univer/sheets-plugin-protection
+```shell
+npm i @univerjs/sheets-plugin-protection
 ```
 
 ### 使用
 
 ```js
-impport {Protection} from '@univer/sheets-plugin-protection'
+import { Protection } from '@univerjs/sheets-plugin-protection';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Protection());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/sheets-plugin-protection dev
+pnpm run --filter  @univerjs/sheets-plugin-protection dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-protection dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/sheets-plugin-protection build
+pnpm run --filter  @univerjs/sheets-plugin-protection build
 ```

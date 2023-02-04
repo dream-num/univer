@@ -30,7 +30,7 @@ Property Introduction:
 ## 案例
 
 ```jsx
-import { Avatar } from '@univer/style-univer';
+import { Avatar } from '@univerjs/style-univer';
 
 <Avatar size="small" />;
 ```

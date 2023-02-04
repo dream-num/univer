@@ -1,4 +1,4 @@
-import { Observable } from '@univer/core';
+import { Observable } from '@univerjs/core';
 import { FindPlugin } from '../FindPlugin';
 import { FindModal } from '../View/UI/FindModal';
 import { SearchContent } from '../View/UI/SearchContent';

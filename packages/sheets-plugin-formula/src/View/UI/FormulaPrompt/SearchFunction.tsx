@@ -1,5 +1,5 @@
-import { Component } from '@univer/base-component';
-import { Nullable, Observer, Workbook } from '@univer/core';
+import { Component } from '@univerjs/base-component';
+import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { FORMULA_PLUGIN_NAME } from '../../../Basic';
 import { lang } from '../../../Controller/locale';
 import { FormulaPlugin } from '../../../FormulaPlugin';

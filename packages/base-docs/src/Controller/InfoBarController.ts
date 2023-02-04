@@ -1,4 +1,4 @@
-import { PLUGIN_NAMES } from '@univer/core';
+import { PLUGIN_NAMES } from '@univerjs/core';
 import { InfoBarModel } from '../Model/InfoBarModel';
 import { DocPlugin } from '../DocPlugin';
 import { InfoBar } from '../View/UI/InfoBar';

@@ -1,5 +1,5 @@
 export * from '../index';
-declare module '@univer/core' { }
+declare module '@univerjs/core' {}
 
 declare global {
     interface Navigator {

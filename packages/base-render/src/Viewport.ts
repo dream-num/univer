@@ -1,4 +1,4 @@
-import { EventState, Observable, Nullable } from '@univer/core';
+import { EventState, Observable, Nullable } from '@univerjs/core';
 import { toPx } from './Basics/Tools';
 
 import { PointerInput, IWheelEvent } from './Basics/IEvents';

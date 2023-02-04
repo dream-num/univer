@@ -1,4 +1,4 @@
-import { Range, Worksheet, Workbook, SheetContext, Command, CommandManager, Inject } from '@univer/core';
+import { Range, Worksheet, Workbook, SheetContext, Command, CommandManager, Inject } from '@univerjs/core';
 import { IAscSortData } from '../Action';
 import { ACTION_NAMES, SortOrderType, SortOrder } from '../Enum';
 

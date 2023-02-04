@@ -27,7 +27,7 @@ interface IProps {
 ## 案例
 
 ```jsx
-import { Drag } from '@univer/style-univer';
+import { Drag } from '@univerjs/style-univer';
 
 <Drag isDrag={true}>
     <div>container</div>

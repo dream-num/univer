@@ -1,9 +1,9 @@
-import { UniverDoc } from '@univer/core';
-import { RenderEngine } from '@univer/base-render';
-import { UniverComponentSheet } from '@univer/style-univer';
-import { DocPlugin } from '@univer/base-docs';
-import { BaseComponentPlugin } from '@univer/base-component';
-import { DEFAULT_DOCUMENT_DATA_EN } from '@univer/common-plugin-data';
+import { UniverDoc } from '@univerjs/core';
+import { RenderEngine } from '@univerjs/base-render';
+import { UniverComponentSheet } from '@univerjs/style-univer';
+import { DocPlugin } from '@univerjs/base-docs';
+import { BaseComponentPlugin } from '@univerjs/base-component';
+import { DEFAULT_DOCUMENT_DATA_EN } from '@univerjs/common-plugin-data';
 
 const docPluginConfig = {
     container: 'univerdoc',

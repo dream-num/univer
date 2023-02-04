@@ -1,6 +1,6 @@
-import { SlideContext, Plugin, PLUGIN_NAMES, UniverSheet, Tools, AsyncFunction } from '@univer/core';
-import { getRefElement, isElement, ISlotProps, RefObject, render } from '@univer/base-component';
-import { Engine, RenderEngine } from '@univer/base-render';
+import { SlideContext, Plugin, PLUGIN_NAMES, UniverSheet, Tools, AsyncFunction } from '@univerjs/core';
+import { getRefElement, isElement, ISlotProps, RefObject, render } from '@univerjs/base-component';
+import { Engine, RenderEngine } from '@univerjs/base-render';
 import { zh, en } from './Locale';
 import { install, SlidePluginObserve } from './Basic/Observer';
 import { ToolBarController } from './Controller/ToolBarController';

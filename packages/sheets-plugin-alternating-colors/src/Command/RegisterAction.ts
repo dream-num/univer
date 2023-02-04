@@ -1,4 +1,4 @@
-import { CommandManager } from '@univer/core';
+import { CommandManager } from '@univerjs/core';
 import { AddBandingAction } from './Action/AddBandingAction';
 import { DeleteBandingAction } from './Action/DeleteBandingAction';
 import { SetBandingAction } from './Action/SetBandingAction';

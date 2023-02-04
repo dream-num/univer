@@ -1,5 +1,5 @@
-import { BaseComponentRender, BaseComponentSheet, Component } from '@univer/base-component';
-import { Nullable, PLUGIN_NAMES } from '@univer/core';
+import { BaseComponentRender, BaseComponentSheet, Component } from '@univerjs/base-component';
+import { Nullable, PLUGIN_NAMES } from '@univerjs/core';
 import { BaseInfoBarProps } from '../../../Controller/InfoBarController';
 import './index.less';
 

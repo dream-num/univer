@@ -1,3 +1,5 @@
+// import { FormulaBar } from '@univer/base-sheets/src/View/UI/FormulaBar/FormulaBar';
+// import { RichText } from '@univer/base-sheets/src/View/UI/RichText/RichText';
 import { Avatar } from './Avatar';
 import { Button } from './Button';
 import { BorderLine } from './CanvasIcon';
@@ -9,7 +11,6 @@ import { ColorPickerCircleButton } from './ColorPickerCircleButton';
 import { Container } from './Container';
 import { CountBar } from './CountBar';
 import { FormatModal } from './FormatModal';
-import { FormulaBar } from '../../../base-sheets/src/View/UI/FormulaBar';
 import * as Icon from './Icon/index';
 import { InfoBar } from './InfoBar';
 import { Input } from './Input';
@@ -19,8 +20,7 @@ import type { ModalProps } from './Modal';
 import { Modal } from './Modal';
 import { Radio, RadioGroup } from './Radio';
 import { ResizeDialog } from './ResizeDialog';
-import { RichText } from '../../../base-sheets/src/View/UI/RichText/RichText';
-import { Select } from './SelectComponent';
+import { Select } from './Select';
 import { Dropdown } from './Dropdown';
 import { Separator } from './Separator';
 import { SiderModal } from './SiderModal';
@@ -30,6 +30,7 @@ import { Slider } from './Slider';
 import { Tab, TabPane } from './Tabs';
 import { Tooltip } from './Tooltip';
 import { Ul } from './Ul';
+import { TextButton } from './TextButton/TextButton';
 
 export {
     Avatar,
@@ -51,7 +52,6 @@ export {
     InfoBar,
     Select,
     Ul,
-    FormulaBar,
     CountBar,
     Modal,
     Slider,
@@ -68,6 +68,6 @@ export {
     BorderLine,
     SiderModal,
     ResizeDialog,
-    RichText,
     Dropdown,
+    TextButton,
 };

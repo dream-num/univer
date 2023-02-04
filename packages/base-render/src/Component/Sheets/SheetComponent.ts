@@ -1,4 +1,4 @@
-import { searchArray } from '@univer/core';
+import { searchArray } from '@univerjs/core';
 import { IBoundRect } from '../../Basics/Vector2';
 import { RenderComponent } from '../Component';
 import { SpreadsheetSkeleton } from './SheetSkeleton';

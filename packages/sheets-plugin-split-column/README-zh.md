@@ -8,14 +8,14 @@ UniverSheet SplitColumn 插件
 
 ### 安装
 
-```bash
-npm i @univer/sheets-plugin-split-column
+```shell
+npm i @univerjs/sheets-plugin-split-column
 ```
 
 ### 使用
 
 ```js
-impport {SplitColumn} from '@univer/sheets-plugin-split-column'
+import { SplitColumn } from '@univerjs/sheets-plugin-split-column';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new SplitColumn());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/sheets-plugin-split-column dev
+pnpm run --filter  @univerjs/sheets-plugin-split-column dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-split-column dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/sheets-plugin-split-column build
+pnpm run --filter  @univerjs/sheets-plugin-split-column build
 ```

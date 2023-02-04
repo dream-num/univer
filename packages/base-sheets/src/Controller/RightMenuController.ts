@@ -1,5 +1,5 @@
-import { IMouseEvent, IPointerEvent } from '@univer/base-render';
-import { PLUGIN_NAMES, Tools } from '@univer/core';
+import { IMouseEvent, IPointerEvent } from '@univerjs/base-render';
+import { PLUGIN_NAMES, Tools } from '@univerjs/core';
 import { RightMenuModel, RightMenuProps } from '../Model/RightMenuModel';
 import { SheetPlugin } from '../SheetPlugin';
 import { RightMenu } from '../View/UI/RightMenu';

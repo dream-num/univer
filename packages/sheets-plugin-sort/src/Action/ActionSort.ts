@@ -1,4 +1,4 @@
-import { Tools } from '@univer/core';
+import { Tools } from '@univerjs/core';
 
 export class ActionSort {
     constructor() {}

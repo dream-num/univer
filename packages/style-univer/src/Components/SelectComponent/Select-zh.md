@@ -40,7 +40,7 @@ cover: ''
 ## 案例
 
 ```jsx
-import { Select } from '@univer/style-univer';
+import { Select } from '@univerjs/style-univer';
 
 <Select
     tooltip={item.tooltip}

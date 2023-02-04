@@ -1,5 +1,5 @@
-import { Range, HorizontalAlign, VerticalAlign, WrapStrategy, DEFAULT_STYLES, BorderType } from '@univer/core';
-import { ColorPicker } from '@univer/style-univer';
+import { Range, HorizontalAlign, VerticalAlign, WrapStrategy, DEFAULT_STYLES, BorderType } from '@univerjs/core';
+import { ColorPicker } from '@univerjs/style-univer';
 import { SheetPlugin } from '../SheetPlugin';
 
 import { SelectionControl } from './Selection/SelectionController';
@@ -475,10 +475,12 @@ export class ToolBarController {
         this._toolBarModel.config = toolbarConfig;
         this._toolBarModel.toolList = this._toolList;
 
-        this.init();
+        this._initialize();
     }
 
-    init() {
+    _initialize() {
+        console.log('base-sheet toolbarController');
+
         this._plugin.getObserver('onAfterChangeFontFamilyObservable')?.add((value: string) => {
             if (!this._plugin.getCellEditorController().isEditMode) {
                 this.setFontFamily(value);

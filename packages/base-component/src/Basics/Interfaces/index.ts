@@ -2,5 +2,5 @@
 export * from './IClipboardData';
 export * from './IDragAndDropData';
 export * from './PasteType';
-export * from './UniverConfig';
+export * from './ComponentConfig';
 // @endindex

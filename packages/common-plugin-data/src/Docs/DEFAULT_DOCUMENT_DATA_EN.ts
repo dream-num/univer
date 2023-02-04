@@ -9,7 +9,7 @@ import {
     PositionedObjectLayoutType,
     SectionType,
     WrapTextType,
-} from '@univer/core';
+} from '@univerjs/core';
 import { DEFAULT_LIST_TEST } from './DEFAULT_LIST';
 
 export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {

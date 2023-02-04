@@ -1,7 +1,7 @@
 
 
 export * from '../index';
-declare module '@univer/sheets-plugin-find' { }
+declare module '@univerjs/sheets-plugin-find' { }
 
 
 // use css module

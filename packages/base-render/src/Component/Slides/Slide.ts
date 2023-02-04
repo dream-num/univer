@@ -1,4 +1,4 @@
-import { Nullable, Observable } from '@univer/core';
+import { Nullable, Observable } from '@univerjs/core';
 import { getColor } from '../../Basics/Tools';
 import { COLORS, CURSOR_TYPE } from '../../Basics/Const';
 import { Scene } from '../../Scene';

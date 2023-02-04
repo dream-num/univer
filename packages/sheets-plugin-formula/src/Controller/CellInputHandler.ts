@@ -1,5 +1,5 @@
-import { $$, getNodeindex, xssDeal } from '@univer/base-component';
-import { Nullable, Tools } from '@univer/core';
+import { $$, getNodeindex, xssDeal } from '@univerjs/base-component';
+import { Nullable, Tools } from '@univerjs/core';
 import { lang } from './locale';
 
 /**

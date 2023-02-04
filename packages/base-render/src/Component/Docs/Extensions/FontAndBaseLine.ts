@@ -1,4 +1,4 @@
-import { BaselineOffset, getColorStyle, IScale } from '@univer/core';
+import { BaselineOffset, getColorStyle, IScale } from '@univerjs/core';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../Extension';
 import { docExtension } from '../DocExtension';
 import { IDocumentSkeletonSpan } from '../../../Basics/IDocumentSkeletonCached';

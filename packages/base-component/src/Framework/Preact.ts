@@ -1,4 +1,5 @@
-import { BasePlugin, SheetContext, Nullable } from '@univer/core';
+import { BasePlugin, Nullable } from '@univerjs/core';
+import { Context } from '@univerjs/core/src/Basics/Context';
 import { cloneElement, Component as PreactComponent, ComponentChildren, ComponentClass, createRef, JSX, RefObject, render, VNode, PreactContext, Ref } from 'preact';
 import { ForwardFn, forwardRef, PureComponent as PreactPureComponent } from 'preact/compat';
 import { BaseComponentRender, BaseComponentSheet } from '../BaseComponent';
@@ -10,17 +11,17 @@ import { AppContext, AppContextValues } from '../Common';
 abstract class Component<P = {}, S = {}> extends PreactComponent<P, S> {
     static contextType: PreactContext<Partial<AppContextValues>> = AppContext;
 
-    protected _context: SheetContext;
+    protected _context: Context;
 
     constructor(props?: P, context?: any) {
         super(props, context);
-        this._context = context.coreContext;
+        this._context = context.context;
         this.initialize(props);
     }
 
     protected initialize(props?: P): void {}
 
-    getContext(): SheetContext {
+    getContext(): Context {
         return this._context;
     }
 
@@ -36,17 +37,17 @@ abstract class Component<P = {}, S = {}> extends PreactComponent<P, S> {
 abstract class PureComponent<P = {}, S = {}> extends PreactPureComponent<P, S> {
     static contextType: PreactContext<Partial<AppContextValues>> = AppContext;
 
-    protected _context: SheetContext;
+    protected _context: Context;
 
     constructor(props?: P, context?: any) {
         super(props, context);
-        this._context = context.coreContext;
+        this._context = context.context;
         this.initialize(props);
     }
 
     protected initialize(props?: P): void {}
 
-    getContext(): SheetContext {
+    getContext(): Context {
         return this._context;
     }
 

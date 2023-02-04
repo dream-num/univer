@@ -1,5 +1,5 @@
-import { Picture } from '@univer/base-render';
-import { IPageElement, PageElementType } from '@univer/core';
+import { Picture } from '@univerjs/base-render';
+import { IPageElement, PageElementType } from '@univerjs/core';
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 
 export class ImageAdaptor extends ObjectAdaptor {

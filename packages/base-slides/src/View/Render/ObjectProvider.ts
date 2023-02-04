@@ -1,5 +1,5 @@
-import { BaseObject, Scene } from '@univer/base-render';
-import { ContextBase, IPageElement, sortRules } from '@univer/core';
+import { BaseObject, Scene } from '@univerjs/base-render';
+import { ContextBase, IPageElement, sortRules } from '@univerjs/core';
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from './Adaptor';
 import './Adaptors';
 

@@ -55,7 +55,7 @@ export class InfoBarController {
     }
 
     private _initialize() {
-        const context = this._plugin.context;
+        const context = this._plugin.getContext();
         const manager = context.getObserverManager();
 
         manager.requiredObserver<InfoBar>('onInfoBarDidMountObservable', PLUGIN_NAMES.SPREADSHEET).add((component) => {
@@ -69,7 +69,7 @@ export class InfoBarController {
     }
 
     resetInfoList(list: BaseInfoBarProps) {
-        const locale = this._plugin.context.getLocale();
+        const locale = this._plugin.getContext().getLocale();
         for (let k in list) {
             if (list[k].locale) {
                 list[k].label = locale.get(list[k].locale);

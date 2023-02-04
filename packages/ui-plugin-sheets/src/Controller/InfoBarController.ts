@@ -1,5 +1,6 @@
-import { BaseComponentPlugin } from '..';
+import { Plugin } from '@univerjs/core';
 import { InfoBar } from '../UI/InfoBar';
+import { InfoBarModel } from '../Model/InfoBarModel';
 
 type IProps = {
     locale?: string;
@@ -15,13 +16,15 @@ export interface BaseInfoBarProps {
 }
 
 export class InfoBarController {
-    private _infoBar: InfoBar;
-
-    private _plugin: BaseComponentPlugin;
-
     private _infoList: BaseInfoBarProps;
 
-    constructor(plugin: BaseComponentPlugin) {
+    private _plugin: Plugin;
+
+    private _infoBar: InfoBar;
+
+    private _infoBarModel: InfoBarModel;
+
+    constructor(plugin: Plugin) {
         this._plugin = plugin;
 
         this._infoList = {
@@ -50,6 +53,12 @@ export class InfoBarController {
         this.resetInfoList(this._infoList);
     };
 
+    setSheetName(e: FocusEvent) {
+        const target = e.target as HTMLInputElement;
+        const name = target.value;
+        this._infoBarModel.setName(name);
+    }
+
     resetInfoList(list: BaseInfoBarProps) {
         const locale = this._plugin.getLocale();
         for (let k in list) {
@@ -60,5 +69,7 @@ export class InfoBarController {
         this._infoBar.setInfoList(list);
     }
 
-    renameSheet() {}
+    renameSheet() {
+
+    }
 }

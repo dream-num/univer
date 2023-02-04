@@ -1,7 +1,7 @@
 import { DocContext, Plugin, PLUGIN_NAMES, UniverSheet, Tools, AsyncFunction } from '@univerjs/core';
 import { zh, en } from './Locale';
 import { IOCContainer } from '@univerjs/core';
-import { Component, getRefElement, isElement, ISlotProps, RefObject, render } from '@univerjs/base-component';
+import { Component, getRefElement, isElement, ISlotProps, RefObject, render } from '@univerjs/base-ui';
 import { DocPluginObserve, install } from './Basic/Observer';
 import { ToolBarController } from './Controller/ToolBarController';
 import { DocumentController } from './Controller/DocumentController';

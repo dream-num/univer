@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet, Component } from '@univerjs/base-component';
+import { BaseComponentRender, BaseComponentSheet, Component } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { IProps } from '../IData';
 import styles from './index.module.less';

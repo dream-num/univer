@@ -1,4 +1,4 @@
-import { Component } from '@univerjs/base-component';
+import { Component } from '@univerjs/base-ui';
 import { PLUGIN_NAMES } from '@univerjs/core';
 import { SideProps } from '../../../Controller/SideGroupController';
 import { SheetPlugin } from '../../../SheetPlugin';

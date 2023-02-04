@@ -1,4 +1,4 @@
-import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component } from '@univerjs/base-component';
+import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component } from '@univerjs/base-ui';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { PLUGIN_NAMES } from '@univerjs/core';
 import { NUMFMT_PLUGIN_NAME } from '../../Basic/Const';

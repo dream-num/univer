@@ -1,4 +1,4 @@
-import { ComponentChildren } from '@univerjs/base-component';
+import { ComponentChildren } from '@univerjs/base-ui';
 import { SheetPlugin, CellRangeModal } from '@univerjs/base-sheets';
 import { PLUGIN_NAMES } from '@univerjs/core';
 import { FORMULA_PLUGIN_NAME, FunctionList, FunList, SelectCategoryType } from '../Basic';

@@ -1,4 +1,4 @@
-import { IToolBarItemProps, ISlotElement } from '@univerjs/base-component';
+import { IToolBarItemProps, ISlotElement } from '@univerjs/base-ui';
 import { SheetContext, IOCContainer, UniverSheet, Nullable, Plugin, PLUGIN_NAMES } from '@univerjs/core';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { COMMENT_COLORS_PLUGIN_NAME } from './Const/PLUGIN_NAME';

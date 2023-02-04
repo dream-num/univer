@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet, BaseMenuItem, BaseSheetBarProps, Component, createRef, RefObject } from '@univerjs/base-component';
+import { BaseComponentRender, BaseComponentSheet, BaseMenuItem, BaseSheetBarProps, Component, createRef, RefObject } from '@univerjs/base-ui';
 import { Nullable, Observer, PLUGIN_NAMES, Workbook } from '@univerjs/core';
 import { Menu } from '@univerjs/style-univer';
 import { SlideTabBar } from '../../../Basics/SlideTabBar/SlideTabBar';

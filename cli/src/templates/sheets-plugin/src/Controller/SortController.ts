@@ -1,5 +1,5 @@
 import { PLUGIN_NAMES } from '@univerjs/core';
-import { BaseComponentRender } from '@univerjs/base-component';
+import { BaseComponentRender } from '@univerjs/base-ui';
 import { IToolBarItemProps, SelectTypes, SheetPlugin } from '@univerjs/base-sheets';
 
 import { <%= projectConstantValue %>_PLUGIN_NAME } from '../Basic/Const';

@@ -1,4 +1,4 @@
-import { Component } from '@univerjs/base-component';
+import { Component } from '@univerjs/base-ui';
 import { PLUGIN_NAMES } from '@univerjs/core';
 import { ModalGroupProps } from '../../../Controller/ModalGroupController';
 import { SheetPlugin } from '../../../SheetPlugin';

@@ -1,4 +1,4 @@
-import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, createRef } from '@univerjs/base-component';
+import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, createRef } from '@univerjs/base-ui';
 
 import { PLUGIN_NAMES } from '@univerjs/core';
 import { SlidePlugin } from '../../../SlidePlugin';

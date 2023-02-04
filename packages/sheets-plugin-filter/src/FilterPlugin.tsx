@@ -1,4 +1,4 @@
-import { ISlotElement } from '@univerjs/base-component';
+import { ISlotElement } from '@univerjs/base-ui';
 import { Command, SheetContext, IRangeData, UniverSheet, Plugin, PLUGIN_NAMES } from '@univerjs/core';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { en, zh } from './Locale';

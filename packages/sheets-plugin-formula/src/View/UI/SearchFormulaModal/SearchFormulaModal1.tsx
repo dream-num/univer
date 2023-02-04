@@ -1,4 +1,4 @@
-import { BaseButtonProps, BaseComponentSheet, BaseModalProps, BaseSelectProps, Component, createRef, FunctionComponent } from '@univerjs/base-component';
+import { BaseButtonProps, BaseComponentSheet, BaseModalProps, BaseSelectProps, Component, createRef, FunctionComponent } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import * as func from '../../Basic/Const/FunctionList'; // 全部公式数组
 import { IConfig } from '../../Basic/Interfaces/IFormula';

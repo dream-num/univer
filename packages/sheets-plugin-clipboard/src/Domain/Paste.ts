@@ -1,7 +1,7 @@
 import { SelectionControl } from '@univerjs/base-sheets/src/Controller/Selection/SelectionController';
 import { SheetContext, PLUGIN_NAMES } from '@univerjs/core';
 import { RightMenuProps, SelectionModel, SheetPlugin } from '@univerjs/base-sheets';
-import { handleTableMergeData } from '@univerjs/base-component';
+import { handleTableMergeData } from '@univerjs/base-ui';
 
 export interface PasteType {
     type: string;

@@ -1,5 +1,5 @@
 import { IKeyValue, migrate, PLUGIN_NAMES, Tools } from '@univerjs/core';
-import { BaseComponentRender } from '@univerjs/base-component';
+import { BaseComponentRender } from '@univerjs/base-ui';
 import { IToolBarItemProps, SelectTypes, SheetPlugin } from '@univerjs/base-sheets';
 
 import * as LuckyExcel from 'luckyexcel';

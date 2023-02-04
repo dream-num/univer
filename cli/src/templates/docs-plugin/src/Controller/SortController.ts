@@ -1,4 +1,4 @@
-import { BaseComponentRender } from '@univerjs/base-component';
+import { BaseComponentRender } from '@univerjs/base-ui';
 import { DocPlugin } from '@univerjs/base-docs';
 import { <%= projectConstantValue %>_PLUGIN_NAME } from '../Basic/Const';
 import { <%= projectUpperValue %>Plugin } from '../<%= projectUpperValue %>Plugin';

@@ -9,7 +9,7 @@ import {
     ActionOperation,
     ISetRangeDataActionData,
 } from '@univerjs/core';
-import { BaseComponentRender } from '@univerjs/base-component';
+import { BaseComponentRender } from '@univerjs/base-ui';
 import { IToolBarItemProps, SheetPlugin } from '@univerjs/base-sheets';
 import { numfmt } from '@univerjs/base-numfmt-engine';
 import { ACTION_NAMES } from '../Basic/Enum';

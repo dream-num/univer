@@ -1,4 +1,4 @@
-import { $$, getNodeindex, xssDeal } from '@univerjs/base-component';
+import { $$, getNodeindex, xssDeal } from '@univerjs/base-ui';
 import { Nullable, Tools } from '@univerjs/core';
 import { lang } from './locale';
 

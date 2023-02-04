@@ -1,4 +1,4 @@
-import { Component } from '@univerjs/base-component';
+import { Component } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { FORMULA_PLUGIN_NAME } from '../../../Basic';
 import { lang } from '../../../Controller/locale';

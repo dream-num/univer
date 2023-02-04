@@ -1,4 +1,4 @@
-import { BaseMenuItem } from '@univerjs/base-component';
+import { BaseMenuItem } from '@univerjs/base-ui';
 import { BaseSelectChildrenProps } from '../View/UI/Common/Select/Select';
 
 export interface CustomLabelOptions extends BaseSelectChildrenProps {

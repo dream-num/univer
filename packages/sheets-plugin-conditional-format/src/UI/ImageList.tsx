@@ -1,4 +1,4 @@
-import { Component } from '@univerjs/base-component';
+import { Component } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import CFcolorGradation from '../Assets/CFcolorGradation.png';
 import CFdataBar from '../Assets/CFdataBar.png';

@@ -1,4 +1,4 @@
-import { BaseComponentSheet, BaseIconProps, BaseSingleButtonProps, Component, FunctionComponent, IToolBarItemProps } from '@univerjs/base-component';
+import { BaseComponentSheet, BaseIconProps, BaseSingleButtonProps, Component, FunctionComponent, IToolBarItemProps } from '@univerjs/base-ui';
 import { PLUGIN_NAMES, Nullable, Observer, Workbook } from '@univerjs/core';
 import { SheetPlugin } from '@univerjs/base-sheets';
 

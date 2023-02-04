@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet, Component } from '@univerjs/base-component';
+import { BaseComponentRender, BaseComponentSheet, Component } from '@univerjs/base-ui';
 import { Nullable, PLUGIN_NAMES } from '@univerjs/core';
 import { BaseInfoBarProps } from '../../../Controller/InfoBarController';
 import './index.less';

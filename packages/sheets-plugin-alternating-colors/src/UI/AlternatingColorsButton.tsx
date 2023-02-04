@@ -1,4 +1,4 @@
-import { Component, IToolBarItemProps } from '@univerjs/base-component';
+import { Component, IToolBarItemProps } from '@univerjs/base-ui';
 
 import { SheetContext, Nullable, Observer, PLUGIN_NAMES, Workbook } from '@univerjs/core';
 import { SheetPlugin } from '@univerjs/base-sheets';

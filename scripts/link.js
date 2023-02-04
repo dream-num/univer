@@ -4,7 +4,7 @@ const execa = require('execa');
 const linkTargets = [
     '@univerjs/core', // success
     '@univerjs/base-render', // success
-    '@univerjs/base-component', // success
+    '@univerjs/base-ui', // success
     '@univerjs/base-sheets', // success
 
     '@univerjs/common-plugin-data',

@@ -51,7 +51,6 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:^0.0.1",
-        "@univerjs/style-univer": "workspace:^0.0.1",
         "nanoid": "4.0.0",
         "preact": "^10.5.14"
     }

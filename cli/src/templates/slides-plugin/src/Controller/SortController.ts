@@ -1,4 +1,4 @@
-import { BaseComponentRender } from '@univerjs/base-component';
+import { BaseComponentRender } from '@univerjs/base-ui';
 import { SlidePlugin } from '@univerjs/base-slides';
 import { <%= projectConstantValue %>_PLUGIN_NAME } from '../Basic/Const';
 import { <%= projectUpperValue %>Plugin } from '../<%= projectUpperValue %>Plugin';

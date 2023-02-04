@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet } from '@univerjs/base-component';
+import { BaseComponentRender, BaseComponentSheet } from '@univerjs/base-ui';
 import { Tools, BorderType, BorderStyleTypes, HorizontalAlign, VerticalAlign, WrapStrategy, DEFAULT_STYLES } from '@univerjs/core';
 import { ColorPicker } from '@univerjs/style-univer';
 import { DocPlugin } from '../DocPlugin';

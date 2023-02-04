@@ -1,4 +1,4 @@
-import { Component, BaseComponentSheet, BaseComponentRender } from '@univerjs/base-component';
+import { Component, BaseComponentSheet, BaseComponentRender } from '@univerjs/base-ui';
 
 interface IProps {
     label: string;

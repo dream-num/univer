@@ -1,4 +1,4 @@
-import { Component } from '@univerjs/base-component';
+import { Component } from '@univerjs/base-ui';
 import { CellRange } from '@univerjs/base-sheets';
 import { FORMULA_PLUGIN_NAME, P } from '../../../Basic';
 import { FunParams } from '../../../Controller/SearchFormulaModalController';

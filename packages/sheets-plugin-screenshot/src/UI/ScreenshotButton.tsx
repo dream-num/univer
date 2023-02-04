@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet, Component, createRef, IToolBarItemProps, ModalProps } from '@univerjs/base-component';
+import { BaseComponentRender, BaseComponentSheet, Component, createRef, IToolBarItemProps, ModalProps } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { IProps } from '../IData/IScreenshot';
 import styles from './index.module.less';

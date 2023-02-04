@@ -1,4 +1,4 @@
-import { getRefElement, isElement, ISlotProps, RefObject, render } from '@univer/base-component';
+import { getRefElement, isElement, ISlotProps, RefObject, render } from '@univer/base-ui';
 import { Engine, RenderEngine } from '@univer/base-render';
 import {
     AsyncFunction,

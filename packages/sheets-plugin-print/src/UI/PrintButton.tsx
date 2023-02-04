@@ -1,4 +1,4 @@
-import { BaseComponentSheet, BaseIconProps, BaseSelectProps, Component, IToolBarItemProps } from '@univerjs/base-component';
+import { BaseComponentSheet, BaseIconProps, BaseSelectProps, Component, IToolBarItemProps } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { FunctionComponent } from 'preact';
 import { IProps } from '../IData/IPrint';

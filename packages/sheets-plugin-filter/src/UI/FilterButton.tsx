@@ -1,4 +1,4 @@
-import { BaseSelectProps, Component, IToolBarItemProps } from '@univerjs/base-component';
+import { BaseSelectProps, Component, IToolBarItemProps } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { IProps } from '../IData';
 import { FilterPlugin } from '../FilterPlugin';

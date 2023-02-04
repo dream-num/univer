@@ -644,7 +644,7 @@ const s = `${style.AlternatingColorsSideSetting}`;
 
 ## 注册快捷键
 
-`base-component`插件中向核心提供了`onKeyDownObservable`，可以用来快捷注册键盘快捷键。
+`base-ui`插件中向核心提供了`onKeyDownObservable`，可以用来快捷注册键盘快捷键。
 
 我们允许为同一组快捷键注册多个监听。
 
@@ -1027,7 +1027,7 @@ ActionOperation 有一个 removeExtension 可以移除 action 拦截。一般情
 ### 开发组件
 
 1. 在`Container.tsx`中正常编写组件核心逻辑
-2. 在`base-component/src/BaseComponent`中增加一个组件专用接口，比如`ContainerComponent`
+2. 在`base-ui/src/BaseComponent`中增加一个组件专用接口，比如`ContainerComponent`
 3. 在`Container.tsx`中增加`UniverContainer`类导出组件
 
     ```ts

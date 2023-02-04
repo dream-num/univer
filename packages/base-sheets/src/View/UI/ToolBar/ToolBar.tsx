@@ -1,4 +1,4 @@
-import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, createRef, debounce } from '@univerjs/base-component';
+import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, createRef, debounce } from '@univerjs/base-ui';
 import { PLUGIN_NAMES } from '@univerjs/core';
 import { IToolBarItemProps } from '../../../Model/ToolBarModel';
 import { SheetPlugin } from '../../../SheetPlugin';

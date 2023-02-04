@@ -5,7 +5,6 @@
     "private": true,
     "scripts": {
         "test": "node scripts/test",
-        "test:ui": "pnpm run --filter @univerjs/style-univer test",
         "test:e2e": "pnpm run --filter @univerjs/base-sheets test:play",
         "dev": "node scripts/dev",
         "dev:sheet": "pnpm run --filter univer-sheet-ts dev",

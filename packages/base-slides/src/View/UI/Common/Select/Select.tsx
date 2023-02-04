@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet, BaseMenuItem, BaseMenuProps, Component, ComponentChildren } from '@univerjs/base-component';
+import { BaseComponentRender, BaseComponentSheet, BaseMenuItem, BaseMenuProps, Component, ComponentChildren } from '@univerjs/base-ui';
 import { ColorPicker, Dropdown } from '@univerjs/style-univer';
 import { BaseItemProps, Item } from '../Item/Item';
 import styles from './index.module.less';

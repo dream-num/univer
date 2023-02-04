@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet, BaseRightMenuProps, Component, createRef } from '@univerjs/base-component';
+import { BaseComponentRender, BaseComponentSheet, BaseRightMenuProps, Component, createRef } from '@univerjs/base-ui';
 import { IMouseEvent } from '@univerjs/base-render';
 import { PLUGIN_NAMES } from '@univerjs/core';
 import Style from './index.module.less';

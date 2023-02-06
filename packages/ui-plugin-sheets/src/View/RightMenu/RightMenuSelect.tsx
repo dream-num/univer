@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet, Component } from '@univerjs/base-ui';
+import { Component, Input } from '@univerjs/base-ui';
 import { CustomLabelOptions } from '../../Controller';
 
 interface IProps {
@@ -7,16 +7,8 @@ interface IProps {
 }
 
 export class RightMenuSelect extends Component<IProps> {
-    private _render: BaseComponentRender;
-
-    initialize() {
-        const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this._render = component.getComponentRender();
-    }
-
     render() {
         const { label, options } = this.props;
-        const Input = this._render.renderFunction('Input');
 
         return (
             <div>

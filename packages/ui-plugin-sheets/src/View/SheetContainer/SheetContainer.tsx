@@ -13,7 +13,6 @@ import { ISheetsPluginConfig } from '../../Basics';
 export interface BaseSheetContainerProps extends BaseComponentProps {
     config: ISheetsPluginConfig;
     container?: HTMLElement;
-    changeSkin: () => void;
     changeLocale: (locale: string) => void;
     methods?: any;
 }

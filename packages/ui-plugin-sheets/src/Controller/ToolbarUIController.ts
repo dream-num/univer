@@ -1,7 +1,7 @@
 import { BaseSelectChildrenProps, BaseSelectProps, BaseTextButtonProps, resetDataLabel } from '@univerjs/base-ui';
 import { Tools, UIObserver } from '@univerjs/core';
 import { SheetUIPlugin } from '..';
-import { DefaultToolbarConfig, SheetToolBarConfig, ToolBarConfig } from '../Basics';
+import { DefaultToolbarConfig, SheetToolBarConfig } from '../Basics';
 import { ToolBar } from '../View';
 
 // 继承基础下拉属性,添加国际化

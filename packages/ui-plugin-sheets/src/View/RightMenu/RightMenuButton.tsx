@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet, Component } from '@univerjs/base-ui';
+import { Button, Component } from '@univerjs/base-ui';
 
 interface IProps {
     label: string;
@@ -10,16 +10,8 @@ interface IPropsChildren {
 }
 
 export class RightMenuButton extends Component<IProps> {
-    private _render: BaseComponentRender;
-
-    initialize() {
-        const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this._render = component.getComponentRender();
-    }
-
     render() {
         const { label, children } = this.props;
-        const Button = this._render.renderFunction('Button');
 
         return (
             <div>

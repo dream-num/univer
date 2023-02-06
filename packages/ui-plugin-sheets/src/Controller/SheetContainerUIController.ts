@@ -1,7 +1,8 @@
-import { LocaleType } from '@univerjs/core';
+import { LocaleType, UIObserver } from '@univerjs/core';
 import { ISheetsPluginConfig } from '../Basics';
 import { SheetUIPlugin } from '../SheetUIPlugin';
 import { SheetContainer, UI } from '../View';
+import { RightMenuUIController } from './RightMenuUIController';
 import { ToolBarUIController } from './ToolbarUIController';
 
 export class SheetContainerUIController {
@@ -17,7 +18,7 @@ export class SheetContainerUIController {
 
     // private _infoBarController: InfoBarController;
 
-    // private _rightMenuController: RightMenuController;
+    private _rightMenuController: RightMenuUIController;
 
     // private _countBarController: CountBarController;
 
@@ -36,14 +37,13 @@ export class SheetContainerUIController {
         // this._cellEditorUIController = new CellEditorUIController(this._plugin);
         // this._formulaBarUIController = new FormulaBarUIController(this._plugin);
         // this._infoBarController = new InfoBarController(this._plugin);
-        // this._rightMenuController = new RightMenuController(this._plugin);
+        this._rightMenuController = new RightMenuUIController(this._plugin, this._config.layout?.rightMenuConfig);
         // this._countBarController = new CountBarController(this._plugin);
         // this._sheetBarController = new SheetBarControl(this._plugin);
 
         // 初始化UI
         const config = {
             config: this._config,
-            changeSkin: this.changeSkin,
             changeLocale: this.changeLocale,
             getComponent: this.getComponent,
             // 其余组件的props
@@ -86,15 +86,6 @@ export class SheetContainerUIController {
     };
 
     /**
-     * Change skin
-     * @param {String} lang new skin
-     */
-    changeSkin = () => {
-        // publish
-        this._plugin.getObserver('onAfterChangeUISkinObservable')!.notifyObservers();
-    };
-
-    /**
      * Change language
      * @param {String} lang new language
      *
@@ -108,7 +99,7 @@ export class SheetContainerUIController {
             .change(locale as LocaleType);
 
         // publish
-        this._plugin.getObserver('onAfterChangeUILocaleObservable')!.notifyObservers();
+        this._plugin.getContext().getObserverManager().requiredObserver('onAfterChangeUILocaleObservable', 'core')!.notifyObservers();
     };
 
     getContentRef() {

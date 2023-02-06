@@ -58,12 +58,12 @@ export class RightMenuUIController {
 
     private _initialize() {
         setTimeout(() => {
-            this._plugin
-                .getSheetContainerController()
-                .getContentRef()
-                .current?.addEventListener('click', (e) => {
-                    this._rightMenu.handleContextMenu(e as any);
-                });
+            // this._plugin
+            //     .getSheetContainerController()
+            //     .getContentRef()
+            //     .current?.addEventListener('click', (e) => {
+            //         this._rightMenu.handleContextMenu(e as any);
+            //     });
         }, 1000);
     }
 

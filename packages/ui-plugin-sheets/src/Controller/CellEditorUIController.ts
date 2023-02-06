@@ -1,4 +1,5 @@
-import { getRefElement, CellEditExtensionManager,KeyboardManager, $$ } from '@univerjs/base-ui';
+import { getRefElement, CellEditExtensionManager, KeyboardManager, $$, setLastCaretPosition, handleStringToStyle } from '@univerjs/base-ui';
+import { isKeyPrintable, Tools } from '@univerjs/core';
 import { SheetUIPlugin } from '../SheetUIPlugin';
 import { RichText } from '../View/RichText';
 
@@ -24,27 +25,31 @@ export class CellEditorUIController {
     private _initialize() {
         // this._initRegisterComponent();
         // If other plugins are loaded asynchronously, they may be initialized after the rendering layer is loaded, and they will not receive obs listeners.
-        this._plugin.context
-            .getObserverManager()
-            .getObserver('onSheetRenderDidMountObservable', 'core')
-            ?.add((e) => {
-                const main = this._plugin.getMainComponent();
 
-                main.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
-                    // Prevent left + right double click
-                    if (evt.button !== 2) {
-                        this.enterEditMode();
-                    }
-                });
-                main.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-                    this.exitEditMode();
-                    evt.preventDefault();
-                });
-            });
+        // this._plugin.context
+        //     .getObserverManager()
+        //     .getObserver('onSheetRenderDidMountObservable', 'core')
+        //     ?.add((e) => {
+        //         const main = this._plugin.getMainComponent();
+
+        //         main.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
+        //             // Prevent left + right double click
+        //             if (evt.button !== 2) {
+        //                 this.enterEditMode();
+        //             }
+        //         });
+        //         main.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+        //             this.exitEditMode();
+        //             evt.preventDefault();
+        //         });
+        //     });
 
         this._cellEditExtensionManager = new CellEditExtensionManager();
 
         this._keyboardManager = new KeyboardManager(this._plugin);
+
+        console.log('cell edit--');
+
         // this.richTextEditEle
     }
 
@@ -53,7 +58,7 @@ export class CellEditorUIController {
         this.richTextEditEle = $$('div', this.richTextEle);
 
         // // focus
-        // this.richTextEditEle.focus();
+        this.richTextEditEle.focus();
 
         // this.focusEditEle();
         this.hideEditContainer();
@@ -228,7 +233,7 @@ export class CellEditorUIController {
         this.richTextEle.style.minHeight = `${endY - startY}px`;
 
         this.richTextEle.style.borderWidth = '2px';
-        const univerContainerContentRef = this._plugin.getSheetContainerUIController().getContentRef()
+        const univerContainerContentRef = this._plugin.getSheetContainerUIController().getContentRef();
         const sheetContentRect = getRefElement(univerContainerContentRef).getBoundingClientRect();
 
         this.richTextEle.style.maxWidth = `${sheetContentRect.width - startX + scrollX}px`;
@@ -311,7 +316,6 @@ export class CellEditorUIController {
     // 获取Toolbar组件
     getComponent = (ref: RichText) => {
         this.richText = ref;
-        this._initRichText()
-
+        this._initRichText();
     };
 }

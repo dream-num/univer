@@ -1,6 +1,5 @@
 import style from './index.module.less';
 import { ToolBar } from '../ToolBar';
-import { ToolBar } from '../ToolBar';
 import { InfoBar } from '../InfoBar';
 import { RightMenu } from '../RightMenu';
 import { CountBar } from '../CountBar';
@@ -8,10 +7,10 @@ import { SheetBar } from '../SheetBar';
 import { FormulaBar } from '../FormulaBar';
 import { RichText } from '../RichText';
 import { AppContext, BaseComponentProps, Component, Container, Content, createRef, Footer, Header, Layout, Sider } from '@univerjs/base-ui';
-import { ISheetsPluginConfig } from '../../Basics';
+import { ISheetUIPluginConfig } from '../../Basics';
 
 export interface BaseSheetContainerProps extends BaseComponentProps {
-    config: ISheetsPluginConfig;
+    config: ISheetUIPluginConfig;
     container?: HTMLElement;
     changeLocale: (locale: string) => void;
     methods?: any;
@@ -165,6 +164,8 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                     <Container ref={this.contentRef} className={style.contentInnerRightContainer}>
                                         {/* {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>}
                                         {config.cellEditor && <RichText {...methods.cellEditor}></RichText>} */}
+
+                                        {<RichText {...methods.cellEditor}></RichText>}
                                         <div style={{ position: 'fixed', right: '200px', top: '10px', fontSize: '14px' }}>
                                             <span style={{ display: 'inline-block', width: 50, margin: '5px 0 0 5px' }}>语言</span>
                                             <select value={currentLocale} onChange={this.setLocale.bind(this)} style={{ width: 55 }}>

@@ -9,7 +9,7 @@ export interface ILayout {
     rightMenuConfig?: SheetRightMenuConfig;
 }
 
-export interface ISheetsPluginConfig {
+export interface ISheetUIPluginConfig {
     container?: HTMLElement | string;
     layout?: ILayout;
     context?: Context;

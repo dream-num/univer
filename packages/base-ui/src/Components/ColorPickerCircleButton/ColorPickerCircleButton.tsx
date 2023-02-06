@@ -1,5 +1,5 @@
 import { JSXComponent } from '../../BaseComponent';
-import { createRef } from '../../Framework';
+import { Component, createRef } from '../../Framework';
 import { BaseColorPickerCircleButtonProps, ColorPickerCircleButtonComponent } from '../../Interfaces';
 import { ColorPicker } from '../index';
 import Styles from './index.module.less';

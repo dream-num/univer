@@ -1,7 +1,7 @@
 import { IDocumentData, ISlideData, IWorkbookConfig, UniverDoc, UniverSheet, UniverSlide } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 import { BaseComponentPlugin } from '@univerjs/base-ui';
-import { UniverComponentSheet } from '@univerjs/style-univer';
+
 import { ISheetPluginConfig, SheetPlugin } from '@univerjs/base-sheets';
 import { IDocPluginConfig, DocPlugin } from '@univerjs/base-docs';
 import { ISlidePluginConfig, SlidePlugin } from '@univerjs/base-slides';

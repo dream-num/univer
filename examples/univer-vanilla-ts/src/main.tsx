@@ -1,6 +1,5 @@
 import { UniverSheet, UniverDoc, UniverSlide, Univer } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
-import { UniverComponentSheet } from '@univerjs/style-univer';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 import {

@@ -1,6 +1,5 @@
 import { Component, BaseComponentSheet, BaseComponentRender, createRef, AppContext } from '@univerjs/base-ui';
 import { PLUGIN_NAMES, Tools } from '@univerjs/core';
-import { Container, Content, Footer, Header, Layout, Sider } from '@univerjs/style-univer';
 import defaultSkin from '@univerjs/style-univer/assets/css/skin/default.module.less';
 import darkSkin from '@univerjs/style-univer/assets/css/skin/dark.module.less';
 import greenSkin from '@univerjs/style-univer/assets/css/skin/green.module.less';
@@ -14,7 +13,6 @@ import { ToolBar } from '../ToolBar';
 import { CountBar } from '../CountBar/CountBar';
 import { ModalGroup } from '../ModalGroup/ModalGroup';
 import { SheetPlugin } from '../../../SheetPlugin';
-import { FormulaBar } from '../FormulaBar';
 import { SideGroup } from '../SideGroup/SideGroup';
 import { BaseSheetContainerConfig, IShowContainerConfig } from '../../../Controller';
 import { SheetBar } from '../SheetBar';

@@ -1,9 +1,8 @@
-import { Tools } from '@univerjs/core';
-import { Container, Content, Footer, Header, Layout, Sider } from '@univerjs/style-univer';
+import {  Tools } from '@univerjs/core';
 import cssVars from 'css-vars-ponyfill';
-import defaultSkin from '@univerjs/style-univer/assets/css/skin/default.module.less';
-import darkSkin from '@univerjs/style-univer/assets/css/skin/dark.module.less';
-import greenSkin from '@univerjs/style-univer/assets/css/skin/green.module.less';
+import defaultSkin from '../../Basics/CSS/Skin/default.module.less';
+import darkSkin from '../../Basics/CSS/Skin/dark.module.less';
+import greenSkin from '../../Basics/CSS/Skin/green.module.less';
 import { BaseComponentProps } from '../../BaseComponent';
 import { AppContext } from '../../Common';
 import { Component, createRef } from '../../Framework';
@@ -14,6 +13,7 @@ import { UniverConfig } from '../../Basics/Interfaces/ComponentConfig/UniverConf
 import { RightMenu } from '../RightMenu';
 import { CountBar } from '../CountBar';
 import { SheetBar } from '../SheetBar';
+import { Layout, Sider, Header, Content, Footer, Container } from '../../Components';
 
 export interface BaseSheetContainerProps extends BaseComponentProps {
     config: UniverConfig;

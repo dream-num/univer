@@ -1,7 +1,7 @@
 import { PLUGIN_NAMES } from '@univerjs/core';
-import { Select, TextButton } from '@univerjs/style-univer';
 import { BaseComponentProps, BaseComponentRender, BaseComponentSheet } from '../../BaseComponent';
 import { BaseComponentPlugin } from '../../BaseComponentPlugin';
+import { Select, TextButton } from '../../Components';
 import { IToolBarItemProps } from '../../Controller/ToolbarController';
 import { Component, createRef } from '../../Framework';
 import { debounce } from '../../Utils';

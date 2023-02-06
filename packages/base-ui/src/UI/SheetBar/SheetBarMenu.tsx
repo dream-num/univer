@@ -1,5 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet } from '../../BaseComponent';
-import { Component } from '../../Framework';
+import { BaseComponentRender, BaseComponentSheet, Component } from '@univerjs/base-ui';
 import { joinClassNames } from '../../Utils';
 import styles from './index.module.less';
 

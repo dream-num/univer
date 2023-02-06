@@ -1,6 +1,6 @@
 import { UniverSheet } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
-import { UniverComponentSheet } from '@univerjs/style-univer';
+
 import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
 import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DOWN } from '@univerjs/common-plugin-data';
 import { DEFAULT_FORMULA_DATA_DOWN, FormulaPlugin } from '@univerjs/sheets-plugin-formula';

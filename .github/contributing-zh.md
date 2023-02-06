@@ -1256,7 +1256,7 @@ npm i @univerjs/core @univerjs/base-render @univerjs/base-sheets @univerjs/style
 ```js
 import { UniverSheet } from '@univerjs/core';
 import '@univerjs/core/lib/style.css';
-import { UniverComponentSheet } from '@univerjs/style-univer';
+
 import { RenderEngine } from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
 
@@ -1295,7 +1295,7 @@ npm i @univerjs/core @univerjs/base-render @univerjs/base-sheets @univerjs/style
 ```js
 import { UniverSheet } from '@univerjs/core';
 import '@univerjs/core/lib/style.css';
-import { UniverComponentSheet } from '@univerjs/style-univer';
+
 import { RenderEngine } from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
 

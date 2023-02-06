@@ -1,5 +1,5 @@
-import { BaseComponentRender, BaseComponentSheet } from '../../BaseComponent';
-import { Component } from '../../Framework';
+import { BaseComponentRender, Component } from "@univerjs/base-ui";
+
 
 interface IProps {
     prefix: string[];

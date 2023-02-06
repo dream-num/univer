@@ -1,6 +1,5 @@
 import { BaseMenuItem, BaseUlProps } from '@univerjs/base-ui';
 import { ACTION_NAMES, CommandManager, NameGen, Nullable, PLUGIN_NAMES, SheetActionBase } from '@univerjs/core';
-import { ColorPicker } from '@univerjs/style-univer';
 import { SheetBarModel } from '../Model/SheetBarModel';
 import { SheetBar } from '../View/UI/SheetBar';
 import { SheetPlugin } from '../SheetPlugin';

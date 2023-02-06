@@ -49,8 +49,8 @@ export class BaseComponentPlugin extends Plugin<BaseComponentPluginObserve> {
             en,
         });
         // 初始自定义组件管理器
-        this._componentManager = new ComponentManager();
-        this._univerContainerController = new UniverContainerController(this);
+        // this._componentManager = new ComponentManager();
+        // this._univerContainerController = new UniverContainerController(this);
         this._registerManager = new RegisterManager(this);
         this.setEventManager();
 

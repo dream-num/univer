@@ -3,7 +3,7 @@ import { RenderEngine } from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { DocPlugin } from '@univerjs/base-docs';
 import { SlidePlugin } from '@univerjs/base-slides';
-import { UniverComponentSheet } from '@univerjs/style-univer';
+
 import { DEFAULT_WORKBOOK_DATA } from '@univerjs/common-plugin-data';
 
 import { CollaborationPlugin } from './CollaborationPlugin';

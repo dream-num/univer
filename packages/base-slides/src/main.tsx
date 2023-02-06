@@ -1,6 +1,6 @@
 import { UniverSlide } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
-import { UniverComponentSheet } from '@univerjs/style-univer';
+
 import { SlidePlugin } from './SlidePlugin';
 import { DEFAULT_SLIDE_DATA } from '@univerjs/common-plugin-data';
 

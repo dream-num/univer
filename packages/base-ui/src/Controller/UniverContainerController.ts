@@ -6,7 +6,6 @@ import { UniverSheetConfig } from '../Basics/Interfaces/ComponentConfig/UniverSh
 import { LocaleType } from '../Enum';
 import { UI } from '../UI';
 import { UniverContainer } from '../UI/UniverContainer';
-import { CellEditorController } from './CellEditorController';
 import { ToolBarController } from './ToolbarController';
 import { CountBarController } from './CountBarController';
 import { SheetBarControl } from './SheetBarController';
@@ -42,7 +41,6 @@ export class UniverContainerController {
         this._initialize();
 
         this._toolbarController = new ToolBarController(this._plugin);
-        this._cellEditorController = new CellEditorController(this._plugin);
         this._infoBarController = new InfoBarController(this._plugin);
         this._rightMenuController = new RightMenuController(this._plugin);
         this._countBarController = new CountBarController(this._plugin);

@@ -1,4 +1,4 @@
-@import '../../assets/css/skin/base.module.less';
+@import '../../Basics/CSS/Skin/base.module.less';
 
 .slider {
     --dif: calc(var(--max) - var(--min));
@@ -14,11 +14,11 @@
 
 .slider::before,
 .slider::after {
-    grid-column: 1/span 2;
+    grid-column: 1 / span 2;
     grid-row: 3;
     height: 2px;
     background: var(--primary-color);
-    content: "";
+    content: '';
 }
 
 // .slider::before {
@@ -31,8 +31,8 @@
 //     width: calc((var(--a) - var(--b))/var(--dif)*100%);
 // }
 
-[id=multi-lbl] {
-    grid-column: 1/span 2;
+[id='multi-lbl'] {
+    grid-column: 1 / span 2;
 }
 
 .sr-only {
@@ -41,8 +41,8 @@
     clip-path: inset(50%);
 }
 
-input[type=range] {
-    grid-column: 1/span 2;
+input[type='range'] {
+    grid-column: 1 / span 2;
     grid-row: 3;
     z-index: 1;
     top: 0;
@@ -54,45 +54,45 @@ input[type=range] {
     pointer-events: none;
 }
 
-input[type=range]::-webkit-slider-runnable-track,
-input[type=range]::-webkit-slider-thumb,
-input[type=range] {
+input[type='range']::-webkit-slider-runnable-track,
+input[type='range']::-webkit-slider-thumb,
+input[type='range'] {
     -webkit-appearance: none;
 }
 
-input[type=range]::-webkit-slider-runnable-track {
+input[type='range']::-webkit-slider-runnable-track {
     width: 100%;
     height: 100%;
     background: none;
 }
 
-input[type=range]::-moz-range-track {
+input[type='range']::-moz-range-track {
     width: 100%;
     height: 100%;
     background: none;
 }
 
-input[type=range]::-webkit-slider-thumb {
+input[type='range']::-webkit-slider-thumb {
     border: 1px solid var(--primary-color);
     /* get rid of Firefox thumb border */
     width: 8px;
     height: 8px;
     border-radius: 50%;
     /* get rid of Firefox corner rounding */
-    background: #Fff;
+    background: #fff;
     pointer-events: auto;
     transform: translateY(-50% + 8px);
     cursor: pointer;
 }
 
-input[type=range]::-moz-range-thumb {
+input[type='range']::-moz-range-thumb {
     /* get rid of Firefox thumb border */
     border: 1px solid var(--primary-color);
     width: 8px;
     height: 8px;
     border-radius: 50%;
     /* get rid of Firefox corner rounding */
-    background: #Fff;
+    background: #fff;
     pointer-events: auto;
     transform: translateY(-50% + 8px);
     cursor: pointer;

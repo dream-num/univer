@@ -12,7 +12,9 @@ export class SheetContainerUIController {
 
     private _toolbarController: ToolBarUIController;
 
-    // private _cellEditorController: CellEditorController;
+    // private _cellEditorUIController: CellEditorUIController;
+
+    // private _formulaBarUIController: FormulaBarUIController;
 
     // private _infoBarController: InfoBarController;
 
@@ -32,7 +34,8 @@ export class SheetContainerUIController {
         this._initialize();
 
         this._toolbarController = new ToolBarUIController(this._plugin, this._config.layout?.toolBarConfig);
-        // this._cellEditorController = new CellEditorController(this._plugin);
+        // this._cellEditorUIController = new CellEditorUIController(this._plugin);
+        // this._formulaBarUIController = new FormulaBarUIController(this._plugin);
         // this._infoBarController = new InfoBarController(this._plugin);
         this._rightMenuController = new RightMenuUIController(this._plugin, this._config.layout?.rightMenuConfig);
         // this._countBarController = new CountBarController(this._plugin);
@@ -49,7 +52,10 @@ export class SheetContainerUIController {
                     getComponent: this._toolbarController.getComponent,
                 },
                 cellEditor: {
-                    // getComponent: this._cellEditorController.getComponent,
+                    // getComponent: this._cellEditorUIController.getComponent,
+                },
+                formulaBar: {
+                    // getComponent: this._formulaBarUIController.getComponent,
                 },
                 infoBar: {
                     // getComponent: this._infoBarController.getComponent,

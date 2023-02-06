@@ -44,10 +44,6 @@ export type SheetPluginObserve = {
 
     onModalGroupDidMountObservable: Observable<ModalGroup>;
 
-    // onRichTextDidMountObservable: Observable<RichText>;
-    onRichTextKeyDownObservable: Observable<KeyboardEvent>;
-    onRichTextKeyUpObservable: Observable<KeyboardEvent>;
-
     onFormulaBarDidMountObservable: Observable<FormulaBar>;
 
     onLineColorDidMountObservable: Observable<LineColor>;
@@ -87,9 +83,7 @@ export function uninstall(plugin: Plugin) {
 
     plugin.deleteObserve('onToolBarDidMountObservable');
     plugin.deleteObserve('onModalGroupDidMountObservable');
-    // plugin.deleteObserve('onRichTextDidMountObservable');
-    plugin.deleteObserve('onRichTextKeyDownObservable');
-    plugin.deleteObserve('onRichTextKeyUpObservable');
+
     plugin.deleteObserve('onFormulaBarDidMountObservable');
 
     plugin.deleteObserve('onChangeCurrentSheetObserver');
@@ -128,9 +122,7 @@ export function install(plugin: Plugin) {
     plugin.pushToObserve('onToolBarDidMountObservable');
     plugin.pushToObserve('onCellRangeModalDidMountObservable');
     plugin.pushToObserve('onModalGroupDidMountObservable');
-    // plugin.pushToObserve('onRichTextDidMountObservable');
-    plugin.pushToObserve('onRichTextKeyDownObservable');
-    plugin.pushToObserve('onRichTextKeyUpObservable');
+
     plugin.pushToObserve('onFormulaBarDidMountObservable');
 
     plugin.pushToObserve('onLineColorDidMountObservable');

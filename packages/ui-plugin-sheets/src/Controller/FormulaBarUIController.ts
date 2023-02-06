@@ -1,20 +1,19 @@
-import { PLUGIN_NAMES } from '@univerjs/core';
-import { INamedRange } from '@univerjs/core/src/Interfaces/INamedRange';
+import { PLUGIN_NAMES, INamedRange } from '@univerjs/core';
 import { CellInputExtensionManager } from '../Basics/Register/CellInputRegister';
-import { SheetPlugin } from '../SheetPlugin';
+import { SheetUIPlugin } from '../SheetUIPlugin';
 import { FormulaBar } from '../View/UI/FormulaBar';
 import { SelectionControl } from './Selection';
 
 export class FormulaBarUIController {
     private _formulaBar: FormulaBar;
 
-    private _plugin: SheetPlugin;
+    private _plugin: SheetUIPlugin;
 
     private _cellInputExtensionManager: CellInputExtensionManager;
 
     private _namedRanges: INamedRange[];
 
-    constructor(plugin: SheetPlugin) {
+    constructor(plugin: SheetUIPlugin) {
         this._plugin = plugin;
 
         this._initialize();

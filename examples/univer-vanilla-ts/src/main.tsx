@@ -2,6 +2,7 @@ import { UniverSheet, UniverDoc, UniverSlide, Univer } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 import { UniverComponentSheet } from '@univerjs/style-univer';
 import { SheetPlugin } from '@univerjs/base-sheets';
+import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 import {
     DEFAULT_FORMULA_DATA,
     DEFAULT_FORMULA_DATA_DEMO,
@@ -79,10 +80,11 @@ universheet.installPlugin(
     })
 );
 
-// ui TODO: 不要安装
-univer.install(new UniverComponentSheet());
-univer.install(new BaseComponentPlugin(univerConfig));
+// // ui TODO: 不要安装
+// univer.install(new UniverComponentSheet());
+// univer.install(new BaseComponentPlugin(univerConfig));
 
+univer.install(new SheetUIPlugin())
 // sheets-plugin-ui univer.install(new SheetsUI)
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO1);

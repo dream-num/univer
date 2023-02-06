@@ -1,5 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet } from '../../BaseComponent';
-import { Component } from '../../Framework';
+import { Component, Input } from '@univerjs/base-ui';
 
 interface IProps {
     prefix: string[];
@@ -8,13 +7,6 @@ interface IProps {
 }
 
 export class RightMenuInput extends Component<IProps> {
-    private _render: BaseComponentRender;
-
-    initialize() {
-        const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this._render = component.getComponentRender();
-    }
-
     handleClick(e: Event) {
         e.stopPropagation();
     }
@@ -26,7 +18,6 @@ export class RightMenuInput extends Component<IProps> {
 
     render() {
         const { prefix, suffix } = this.props;
-        const Input = this._render.renderFunction('Input');
 
         return (
             <div>

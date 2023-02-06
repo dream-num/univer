@@ -1,10 +1,8 @@
 import { IMouseEvent } from '@univerjs/base-render';
-import { PLUGIN_NAMES } from '@univerjs/core';
-import { BaseComponentPlugin } from '../..';
-import { BaseComponentRender, BaseComponentSheet } from '../../BaseComponent';
-import { BaseRightMenuProps } from '../../Components';
+import { BaseRightMenuProps, Component, createRef, Menu } from '@univerjs/base-ui';
+import { SheetUIPlugin } from '../..';
+import { SHEET_UI_PLUGIN_NAME } from '../../Basics';
 import { RightMenuProps } from '../../Controller';
-import { Component, createRef } from '../../Framework';
 import Style from './index.module.less';
 
 interface IState {
@@ -17,12 +15,7 @@ interface IState {
 export class RightMenu extends Component<BaseRightMenuProps, IState> {
     ulRef = createRef();
 
-    private _render: BaseComponentRender;
-
     initialize() {
-        const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this._render = component.getComponentRender();
-
         this.state = {
             visible: false,
             srcElement: null,
@@ -35,7 +28,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
 
     // 转换成渲染需要的数据
     resetMenuList(children: RightMenuProps[]) {
-        const componentManager = this._context.getPluginManager().getPluginByName<BaseComponentPlugin>(PLUGIN_NAMES.BASE_COMPONENT)?.getComponentManager();
+        const componentManager = this._context.getPluginManager().getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager();
 
         for (let i = 0; i < children.length; i++) {
             const item = children[i];
@@ -148,7 +141,6 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
 
         const wrapStyles = { ...this.props.style };
         const { visible } = this.state;
-        const Menu = this._render.renderFunction('Menu');
 
         return (
             visible && (

@@ -1,5 +1,7 @@
-import { BaseMenuItem, BaseSelectChildrenProps } from '@univerjs/base-ui';
+import { BaseMenuItem, BaseSelectChildrenProps, resetDataLabel } from '@univerjs/base-ui';
+import { Tools } from '@univerjs/core';
 import { SheetUIPlugin } from '..';
+import { DefaultRightMenuConfig, SheetRightMenuConfig } from '../Basics';
 import { RightMenu } from '../View';
 
 export interface CustomLabelOptions extends BaseSelectChildrenProps {
@@ -29,21 +31,25 @@ export interface RightMenuProps extends BaseMenuItem {
     border?: boolean;
 }
 
-export class RightMenuController {
+export class RightMenuUIController {
     private _plugin: SheetUIPlugin;
 
     private _rightMenu: RightMenu;
 
     private _menuList: RightMenuProps[];
 
-    constructor(plugin: BaseComponentPlugin) {
+    private _config: SheetRightMenuConfig;
+
+    constructor(plugin: SheetUIPlugin, config?: SheetRightMenuConfig) {
         this._plugin = plugin;
+
+        this._config = Tools.deepMerge({}, DefaultRightMenuConfig, config);
 
         this._menuList = [
             {
                 locale: ['rightClick.insert', 'rightClick.row'],
                 onClick: () => {},
-                show: this._currentConfig.InsertRow,
+                show: this._config.InsertRow,
             },
         ];
 
@@ -53,10 +59,10 @@ export class RightMenuController {
     private _initialize() {
         setTimeout(() => {
             this._plugin
-                .getUniverContainerController()
+                .getSheetContainerController()
                 .getContentRef()
                 .current?.addEventListener('click', (e) => {
-                    this._rightMenu.handleContextMenu(e);
+                    this._rightMenu.handleContextMenu(e as any);
                 });
         }, 1000);
     }
@@ -69,7 +75,7 @@ export class RightMenuController {
 
     // 刷新
     setMenuList() {
-        const locale = this._plugin.getLocale();
+        const locale = this._plugin.getContext().getLocale();
         const menuList = resetDataLabel(this._menuList, locale);
         this._rightMenu?.setMenuList(menuList);
     }

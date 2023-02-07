@@ -13,8 +13,6 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
 
     private _config: ISheetUIPluginConfig;
 
-    private _canvasEngine: Engine;
-
     constructor(config?: ISheetUIPluginConfig) {
         super(SHEET_UI_PLUGIN_NAME);
         this._config = Tools.deepMerge({}, DefaultSheetUiConfig, config);
@@ -52,7 +50,6 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
     initRender() {
         const engine = this.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
         let container = getRefElement(this.getSheetContainerController().getContentRef());
-        this._canvasEngine = engine;
 
         // mount canvas to DOM container
         engine.setContainer(container);

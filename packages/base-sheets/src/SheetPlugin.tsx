@@ -64,6 +64,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
             zh,
         });
 
+        this.initController();
         this.initCanvasView();
 
         this.registerExtension();
@@ -73,8 +74,14 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         return this._config;
     }
 
+    initController() {
+        this._cellEditorController = new CellEditorController(this);
+    }
+
     initCanvasView() {
         const engine = this.getContext().getUniver().getGlobalContext().getPluginManager().getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
+
+        this._canvasEngine = engine;
 
         if (this._canvasView == null) {
             this._canvasView = new CanvasView(engine, this);

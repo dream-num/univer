@@ -1,14 +1,21 @@
-import { getRefElement, CellEditExtensionManager, KeyboardManager, $$, setLastCaretPosition, handleStringToStyle } from '@univerjs/base-ui';
-import { isKeyPrintable, Tools } from '@univerjs/core';
+import { IPointerEvent, IMouseEvent } from '@univerjs/base-render';
+import { CANVAS_VIEW_KEY, SheetPlugin } from '@univerjs/base-sheets';
+import { getRefElement, CellEditExtensionManager, KeyboardManager, $$, setLastCaretPosition, handleStringToStyle, handleDomToJson } from '@univerjs/base-ui';
+import { Direction, handleStyleToString, ICellData, isKeyPrintable, PLUGIN_NAMES, Tools } from '@univerjs/core';
 import { SheetUIPlugin } from '../SheetUIPlugin';
 import { RichText } from '../View/RichText';
 
 export class CellEditorUIController {
     private _plugin: SheetUIPlugin;
 
+    private _sheetPlugin: SheetPlugin;
+
     private _cellEditExtensionManager: CellEditExtensionManager;
 
     private _keyboardManager: KeyboardManager;
+
+    // Is it in editing state
+    isEditMode: boolean;
 
     richTextEle: HTMLElement;
 
@@ -18,6 +25,7 @@ export class CellEditorUIController {
 
     constructor(plugin: SheetUIPlugin) {
         this._plugin = plugin;
+        this._sheetPlugin = plugin.getContext().getUniver().getAllUniverSheetsInstance()[0].context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
 
         this._initialize();
     }
@@ -26,23 +34,18 @@ export class CellEditorUIController {
         // this._initRegisterComponent();
         // If other plugins are loaded asynchronously, they may be initialized after the rendering layer is loaded, and they will not receive obs listeners.
 
-        // this._plugin.context
-        //     .getObserverManager()
-        //     .getObserver('onSheetRenderDidMountObservable', 'core')
-        //     ?.add((e) => {
-        //         const main = this._plugin.getMainComponent();
+        const main = this._sheetPlugin.getMainComponent();
 
-        //         main.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
-        //             // Prevent left + right double click
-        //             if (evt.button !== 2) {
-        //                 this.enterEditMode();
-        //             }
-        //         });
-        //         main.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-        //             this.exitEditMode();
-        //             evt.preventDefault();
-        //         });
-        //     });
+        main.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            // Prevent left + right double click
+            if (evt.button !== 2) {
+                this.enterEditMode();
+            }
+        });
+        main.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this.exitEditMode();
+            evt.preventDefault();
+        });
 
         this._cellEditExtensionManager = new CellEditExtensionManager();
 
@@ -102,10 +105,10 @@ export class CellEditorUIController {
                             if (this.isEditMode) {
                                 this.exitEditMode();
 
-                                const currentCell = this._plugin.getSelectionManager().getCurrentCellModel();
+                                const currentCell = this._sheetPlugin.getSelectionManager().getCurrentCellModel();
                                 if (!currentCell?.isMerged) {
                                     // move to cell below
-                                    this._plugin.getSelectionManager().move(Direction.BOTTOM);
+                                    this._sheetPlugin.getSelectionManager().move(Direction.BOTTOM);
                                 }
                             } else {
                                 this.enterEditMode();
@@ -120,31 +123,31 @@ export class CellEditorUIController {
 
                         case 'ArrowUp':
                             if (!this.isEditMode) {
-                                this._plugin.getSelectionManager().move(Direction.TOP);
+                                this._sheetPlugin.getSelectionManager().move(Direction.TOP);
                             }
                             break;
 
                         case 'ArrowDown':
                             if (!this.isEditMode) {
-                                this._plugin.getSelectionManager().move(Direction.BOTTOM);
+                                this._sheetPlugin.getSelectionManager().move(Direction.BOTTOM);
                             }
                             break;
 
                         case 'ArrowLeft':
                             if (!this.isEditMode) {
-                                this._plugin.getSelectionManager().move(Direction.LEFT);
+                                this._sheetPlugin.getSelectionManager().move(Direction.LEFT);
                             }
                             break;
 
                         case 'ArrowRight':
                             if (!this.isEditMode) {
-                                this._plugin.getSelectionManager().move(Direction.RIGHT);
+                                this._sheetPlugin.getSelectionManager().move(Direction.RIGHT);
                             }
                             break;
 
                         case 'Tab':
                             if (!this.isEditMode) {
-                                this._plugin.getSelectionManager().move(Direction.RIGHT);
+                                this._sheetPlugin.getSelectionManager().move(Direction.RIGHT);
                             }
                             evt.preventDefault();
                             break;
@@ -199,7 +202,7 @@ export class CellEditorUIController {
 
         this.isEditMode = true;
 
-        const currentCell = this._plugin.getSelectionManager().getCurrentCellModel();
+        const currentCell = this._sheetPlugin.getSelectionManager().getCurrentCellModel();
 
         if (!currentCell) {
             return false;
@@ -223,8 +226,8 @@ export class CellEditorUIController {
             endY = currentCell.endY;
         }
 
-        const scrollX = this._plugin.getMainScene()?.getViewport(CANVAS_VIEW_KEY.VIEW_TOP)?.actualScrollX || 0;
-        const scrollY = this._plugin.getMainScene()?.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT)?.actualScrollY || 0;
+        const scrollX = this._sheetPlugin.getMainScene()?.getViewport(CANVAS_VIEW_KEY.VIEW_TOP)?.actualScrollX || 0;
+        const scrollY = this._sheetPlugin.getMainScene()?.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT)?.actualScrollY || 0;
 
         this.richTextEle.style.left = `${startX - scrollX}px`;
         this.richTextEle.style.top = `${startY - scrollY}px`;
@@ -233,7 +236,7 @@ export class CellEditorUIController {
         this.richTextEle.style.minHeight = `${endY - startY}px`;
 
         this.richTextEle.style.borderWidth = '2px';
-        const univerContainerContentRef = this._plugin.getSheetContainerUIController().getContentRef();
+        const univerContainerContentRef = this._plugin.getSheetContainerController().getContentRef();
         const sheetContentRect = getRefElement(univerContainerContentRef).getBoundingClientRect();
 
         this.richTextEle.style.maxWidth = `${sheetContentRect.width - startX + scrollX}px`;
@@ -242,7 +245,7 @@ export class CellEditorUIController {
         this.richTextEle.style.transform = '';
 
         // this._plugin.showMainByName('cellEditor', true).then(() => {
-        let cellValue = this.getSelectionValue();
+        let cellValue = this._sheetPlugin.getCellEditorController().getSelectionValue();
 
         // Intercept, the formula needs to modify the value of the edit state
         const cell = this._cellEditExtensionManager.handle({
@@ -260,7 +263,7 @@ export class CellEditorUIController {
         }
         this.richText.setValue(cellValue);
 
-        const style = this.getSelectionStyle();
+        const style = this._sheetPlugin.getCellEditorController().getSelectionStyle();
 
         this.richTextEditEle.style.cssText = '';
 
@@ -270,7 +273,7 @@ export class CellEditorUIController {
         }
 
         // });
-        this.setCurrentEditRangeData();
+        this._sheetPlugin.getCellEditorController().setCurrentEditRangeData();
     }
 
     exitEditMode() {
@@ -302,7 +305,7 @@ export class CellEditorUIController {
         if (Tools.isPlainObject(style)) {
             cell.s = style;
         }
-        this.setCurrentEditRangeValue(cell);
+        this._sheetPlugin.getCellEditorController().setCurrentEditRangeValue(cell);
         this.hideEditContainer();
     }
 

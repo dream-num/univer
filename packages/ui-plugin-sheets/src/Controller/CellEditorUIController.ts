@@ -17,15 +17,15 @@ export class CellEditorUIController {
     // Is it in editing state
     isEditMode: boolean;
 
-    richTextEle: HTMLElement;
+    _richTextEle: HTMLElement;
 
-    richTextEditEle: HTMLElement;
+    _richTextEditEle: HTMLElement;
 
-    richText: RichText;
+    _richText: RichText;
 
     constructor(plugin: SheetUIPlugin) {
         this._plugin = plugin;
-        this._sheetPlugin = plugin.getContext().getUniver().getAllUniverSheetsInstance()[0].context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+        this._sheetPlugin = plugin.getContext().getUniver().getCurrentUniverSheetInstance().context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
 
         this._initialize();
     }
@@ -51,43 +51,33 @@ export class CellEditorUIController {
 
         this._keyboardManager = new KeyboardManager(this._plugin);
 
-        console.log('cell edit--');
-
-        // this.richTextEditEle
+        // this._richTextEditEle
     }
 
     private _initRichText() {
-        this.richTextEle = getRefElement(this.richText.container);
-        this.richTextEditEle = $$('div', this.richTextEle);
+        this._richTextEle = getRefElement(this._richText.container);
+        this._richTextEditEle = $$('div', this._richTextEle);
 
         // // focus
-        this.richTextEditEle.focus();
+        this._richTextEditEle.focus();
 
         // this.focusEditEle();
         this.hideEditContainer();
 
         // init event
         // this._handleKeyboardAction();
-        this._keyboardManager.handleKeyboardAction(this.richTextEditEle);
+        this._keyboardManager.handleKeyboardAction(this._richTextEditEle);
         this._handleKeyboardObserver();
 
         // Get the display status of the formula prompt box
-        this.richText.hooks.set('onKeyDown', (event: KeyboardEvent) => {
+        this._richText.hooks.set('onKeyDown', (event: KeyboardEvent) => {
             this._plugin.getObserver('onRichTextKeyDownObservable')?.notifyObservers(event);
         });
         // Get the display status of the formula prompt box
-        this.richText.hooks.set('onKeyUp', (event: KeyboardEvent) => {
+        this._richText.hooks.set('onKeyUp', (event: KeyboardEvent) => {
             this._plugin.getObserver('onRichTextKeyUpObservable')?.notifyObservers(event);
         });
     }
-    // /**
-    //  * Register custom components
-    //  */
-    // private _initRegisterComponent() {
-    //     // this._plugin.registerComponent(PLUGIN_NAMES.SPREADSHEET + RichText.name, RichText, { activeKey: 'cellEdit' });
-    //     this._plugin.registerModal(`${PLUGIN_NAMES.SPREADSHEET + RichText.name}formula`, RichText);
-    //     this._plugin.registerModal(`${PLUGIN_NAMES.SPREADSHEET + RichText.name}cell`, RichText);
-    // }
 
     private _handleKeyboardObserver() {
         const onKeyDownObservable = this._plugin.getContext().getObserverManager().getObserver<KeyboardEvent>('onKeyDownObservable', 'core');
@@ -168,16 +158,25 @@ export class CellEditorUIController {
         }
     }
 
+    // Get the RichText component
+    getComponent = (ref: RichText) => {
+        this._richText = ref;
+        this._initRichText();
+    };
+    getCellEditor() {
+        return this._richText;
+    }
+
     hideEditContainer() {
         // It cannot be set to 0px, otherwise the paste event cannot be listened
-        this.richTextEle.style.maxHeight = '1px';
-        this.richTextEle.style.maxWidth = '1px';
+        this._richTextEle.style.maxHeight = '1px';
+        this._richTextEle.style.maxWidth = '1px';
 
-        this.richTextEle.style.minWidth = `1px`;
-        this.richTextEle.style.minHeight = `1px`;
+        this._richTextEle.style.minWidth = `1px`;
+        this._richTextEle.style.minHeight = `1px`;
 
-        this.richTextEle.style.borderWidth = '0px';
-        this.richTextEle.style.transform = 'scale(0)';
+        this._richTextEle.style.borderWidth = '0px';
+        this._richTextEle.style.transform = 'scale(0)';
     }
 
     /**
@@ -189,7 +188,7 @@ export class CellEditorUIController {
     enterEditMode(clear: boolean = false) {
         this.focusEditEle();
         // setTimeout(() => {
-        //     this.richTextEditEle.focus();
+        //     this._richTextEditEle.focus();
 
         // }, 1);
 
@@ -197,7 +196,7 @@ export class CellEditorUIController {
 
         // set focus to last position
         setTimeout(() => {
-            setLastCaretPosition(this.richTextEditEle);
+            setLastCaretPosition(this._richTextEditEle);
         }, 1);
 
         this.isEditMode = true;
@@ -229,20 +228,20 @@ export class CellEditorUIController {
         const scrollX = this._sheetPlugin.getMainScene()?.getViewport(CANVAS_VIEW_KEY.VIEW_TOP)?.actualScrollX || 0;
         const scrollY = this._sheetPlugin.getMainScene()?.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT)?.actualScrollY || 0;
 
-        this.richTextEle.style.left = `${startX - scrollX}px`;
-        this.richTextEle.style.top = `${startY - scrollY}px`;
+        this._richTextEle.style.left = `${startX - scrollX}px`;
+        this._richTextEle.style.top = `${startY - scrollY}px`;
 
-        this.richTextEle.style.minWidth = `${endX - startX}px`;
-        this.richTextEle.style.minHeight = `${endY - startY}px`;
+        this._richTextEle.style.minWidth = `${endX - startX}px`;
+        this._richTextEle.style.minHeight = `${endY - startY}px`;
 
-        this.richTextEle.style.borderWidth = '2px';
+        this._richTextEle.style.borderWidth = '2px';
         const univerContainerContentRef = this._plugin.getSheetContainerController().getContentRef();
         const sheetContentRect = getRefElement(univerContainerContentRef).getBoundingClientRect();
 
-        this.richTextEle.style.maxWidth = `${sheetContentRect.width - startX + scrollX}px`;
-        this.richTextEle.style.maxHeight = `${sheetContentRect.height - startY + scrollY}px`;
+        this._richTextEle.style.maxWidth = `${sheetContentRect.width - startX + scrollX}px`;
+        this._richTextEle.style.maxHeight = `${sheetContentRect.height - startY + scrollY}px`;
 
-        this.richTextEle.style.transform = '';
+        this._richTextEle.style.transform = '';
 
         // this._plugin.showMainByName('cellEditor', true).then(() => {
         let cellValue = this._sheetPlugin.getCellEditorController().getSelectionValue();
@@ -261,15 +260,15 @@ export class CellEditorUIController {
         if (clear) {
             cellValue = '';
         }
-        this.richText.setValue(cellValue);
+        this._richText.setValue(cellValue);
 
         const style = this._sheetPlugin.getCellEditorController().getSelectionStyle();
 
-        this.richTextEditEle.style.cssText = '';
+        this._richTextEditEle.style.cssText = '';
 
         // set cell style
         if (style) {
-            this.richTextEditEle.style.cssText = handleStyleToString(style, true);
+            this._richTextEditEle.style.cssText = handleStyleToString(style, true);
         }
 
         // });
@@ -283,8 +282,8 @@ export class CellEditorUIController {
 
         this.isEditMode = false;
         // this._plugin.showMainByName('cellEditor', false).then(() => {
-        const value = handleDomToJson(this.richTextEditEle);
-        const text = this.richTextEditEle.innerText;
+        const value = handleDomToJson(this._richTextEditEle);
+        const text = this._richTextEditEle.innerText;
 
         let cell: ICellData = {};
 
@@ -301,7 +300,7 @@ export class CellEditorUIController {
         }
 
         // get style
-        const style = handleStringToStyle(this.richTextEditEle);
+        const style = handleStringToStyle(this._richTextEditEle);
         if (Tools.isPlainObject(style)) {
             cell.s = style;
         }
@@ -312,13 +311,7 @@ export class CellEditorUIController {
     focusEditEle() {
         // If there is no settimeout, the first letter will be intercepted in Chinese state
         setTimeout(() => {
-            this.richTextEditEle.focus();
+            this._richTextEditEle.focus();
         }, 100);
     }
-
-    // 获取Toolbar组件
-    getComponent = (ref: RichText) => {
-        this.richText = ref;
-        this._initRichText();
-    };
 }

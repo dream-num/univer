@@ -62,6 +62,18 @@ export class Univer {
         return this._univerSlides;
     }
 
+    getCurrentUniverSheetInstance() {
+        return this._univerSheets[0];
+    }
+
+    getCurrentUniverDocInstance() {
+        return this._univerDocs[0];
+    }
+
+    getCurrentUniverSlideInstance() {
+        return this._univerSlides[0];
+    }
+
     getGlobalContext() {
         return this._context;
     }

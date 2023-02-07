@@ -136,10 +136,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                         <Header style={{ display: config.header ? 'block' : 'none' }}>
                             {config.infoBar && <InfoBar {...methods.infoBar}></InfoBar>}
                             {config.toolbar && <Toolbar {...methods.toolbar}></Toolbar>}
-                            {/* {config.infoBar && <InfoBar {...methods.infoBar}></InfoBar>}
-                                {config.formulaBar && <FormulaBar {...methods.formulaBar}></FormulaBar>} */}
-                            {/* {config.infoBar && <InfoBar></InfoBar>} */}
-                            {config.formulaBar && <FormulaBar></FormulaBar>}
+                            {config.formulaBar && <FormulaBar {...methods.formulaBar}></FormulaBar>}
                         </Header>
                         <Layout>
                             <Sider
@@ -158,21 +155,27 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                     </Container>
                                 )}
                                 <Container ref={this.contentRef} className={style.contentInnerRightContainer}>
-                                    {/* {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>} */}
-                                    {<RichText {...methods.cellEditor}></RichText>}
-                                    <div style={{ position: 'fixed', right: '200px', top: '10px', fontSize: '14px' }}>
-                                        <span style={{ display: 'inline-block', width: 50, margin: '5px 0 0 5px' }}>语言</span>
-                                        <select value={currentLocale} onChange={this.setLocale.bind(this)} style={{ width: 55 }}>
-                                            <option value="en">English</option>
-                                            <option value="zh">中文</option>
-                                        </select>
-                                    </div>
-                                </Container>
-                                <Container ref={this.contentRef} className={style.contentInnerRightContainer}>
                                     {/* {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>}
-                                        {config.cellEditor && <RichText {...methods.cellEditor}></RichText>} */}
-                                    <div style={{ position: 'fixed', right: '200px', top: '10px', fontSize: '14px' }}>
-                                        <span style={{ display: 'inline-block', width: 50, margin: '5px 0 0 5px' }}>语言</span>
+                                              {config.cellEditor && <RichText {...methods.cellEditor}></RichText>} */}
+
+                                    {<RichText {...methods.cellEditor}></RichText>}
+                                    <div
+                                        style={{
+                                            position: 'fixed',
+                                            right: '200px',
+                                            top: '10px',
+                                            fontSize: '14px',
+                                        }}
+                                    >
+                                        <span
+                                            style={{
+                                                display: 'inline-block',
+                                                width: 50,
+                                                margin: '5px 0 0 5px',
+                                            }}
+                                        >
+                                            语言
+                                        </span>
                                         <select value={currentLocale} onChange={this.setLocale.bind(this)} style={{ width: 55 }}>
                                             <option value="en">English</option>
                                             <option value="zh">中文</option>

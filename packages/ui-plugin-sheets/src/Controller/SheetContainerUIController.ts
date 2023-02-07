@@ -1,4 +1,6 @@
-import { LocaleType, UIObserver } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
+import { DragManager, EventManager, getRefElement } from '@univerjs/base-ui';
+import { LocaleType, PLUGIN_NAMES, UIObserver, UniverSheet } from '@univerjs/core';
 import { ISheetUIPluginConfig } from '../Basics';
 import { SheetUIPlugin } from '../SheetUIPlugin';
 import { SheetContainer, UI } from '../View';
@@ -29,6 +31,10 @@ export class SheetContainerUIController {
 
     private _config: ISheetUIPluginConfig;
 
+    private _dragManager: DragManager;
+
+    private _eventManager: EventManager;
+
     constructor(plugin: SheetUIPlugin) {
         this._plugin = plugin;
 
@@ -40,9 +46,9 @@ export class SheetContainerUIController {
 
         this._toolbarController = new ToolbarUIController(this._plugin, this._config.layout?.toolbarConfig);
         this._cellEditorUIController = new CellEditorUIController(this._plugin);
-        // this._formulaBarUIController = new FormulaBarUIController(this._plugin);
+        this._formulaBarUIController = new FormulaBarUIController(this._plugin);
         this._infoBarController = new InfoBarUIController(this._plugin);
-        // this._rightMenuController = new RightMenuUIController(this._plugin, this._config.layout?.rightMenuConfig);
+        this._rightMenuController = new RightMenuUIController(this._plugin, this._config.layout?.rightMenuConfig);
         // this._countBarController = new CountBarController(this._plugin);
         // this._sheetBarController = new SheetBarControl(this._plugin);
 
@@ -84,11 +90,23 @@ export class SheetContainerUIController {
         UI.create(config);
     }
 
-    private _initialize() {}
+    private _initialize() {
+        this._dragManager = new DragManager(this._plugin);
+        this._eventManager = new EventManager(this._plugin);
+
+        this.setEventManager();
+    }
+
+    private _initSheetContainer() {
+        // handle drag event
+        this._dragManager.handleDragAction(getRefElement(this._sheetContainer));
+    }
 
     // 获取SheetContainer组件
     getComponent = (ref: SheetContainer) => {
         this._sheetContainer = ref;
+
+        this._initSheetContainer();
     };
 
     /**
@@ -110,5 +128,16 @@ export class SheetContainerUIController {
 
     getContentRef() {
         return this._sheetContainer.getContentRef();
+    }
+
+    setEventManager() {
+        const universheets = this._plugin.getContext().getUniver().getAllUniverSheetsInstance();
+        universheets.forEach((universheet: UniverSheet) => {
+            universheet.getWorkBook().getContext().getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET).listenEventManager();
+        });
+    }
+
+    getEventManager() {
+        return this._eventManager;
     }
 }

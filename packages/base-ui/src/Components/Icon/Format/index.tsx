@@ -1,4 +1,3 @@
-import { FunctionComponent } from '../../../Framework';
 import { BaseIconProps, IconComponent } from '../../../Interfaces';
 import { Icon } from '../AddIcon';
 
@@ -117,58 +116,58 @@ export default {
     MenuIcon,
     HideIcon,
 };
-export class UniverBackIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return BackIcon;
-    }
-}
-export class UniverForwardIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return ForwardIcon;
-    }
-}
-export class UniverFormatIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return FormatIcon;
-    }
-}
-export class UniverNextIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return NextIcon;
-    }
-}
-export class UniverRightIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return RightIcon;
-    }
-}
-export class UniverCorrectIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return CorrectIcon;
-    }
-}
-export class UniverLtIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return LtIcon;
-    }
-}
-export class UniverCloseIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return CloseIcon;
-    }
-}
-export class UniverDropDownIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return CloseIcon;
-    }
-}
-export class UniverMenuIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return MenuIcon;
-    }
-}
-export class UniverHideIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return HideIcon;
-    }
-}
+// export class UniverBackIcon implements IconComponent {
+//     render(): FunctionComponent<BaseIconProps> {
+//         return BackIcon;
+//     }
+// }
+// export class UniverForwardIcon implements IconComponent {
+//     render(): FunctionComponent<BaseIconProps> {
+//         return ForwardIcon;
+//     }
+// }
+// export class UniverFormatIcon implements IconComponent {
+//     render(): FunctionComponent<BaseIconProps> {
+//         return FormatIcon;
+//     }
+// }
+// export class UniverNextIcon implements IconComponent {
+//     render(): FunctionComponent<BaseIconProps> {
+//         return NextIcon;
+//     }
+// }
+// export class UniverRightIcon implements IconComponent {
+//     render(): FunctionComponent<BaseIconProps> {
+//         return RightIcon;
+//     }
+// }
+// export class UniverCorrectIcon implements IconComponent {
+//     render(): FunctionComponent<BaseIconProps> {
+//         return CorrectIcon;
+//     }
+// }
+// export class UniverLtIcon implements IconComponent {
+//     render(): FunctionComponent<BaseIconProps> {
+//         return LtIcon;
+//     }
+// }
+// export class UniverCloseIcon implements IconComponent {
+//     render(): FunctionComponent<BaseIconProps> {
+//         return CloseIcon;
+//     }
+// }
+// export class UniverDropDownIcon implements IconComponent {
+//     render(): FunctionComponent<BaseIconProps> {
+//         return CloseIcon;
+//     }
+// }
+// export class UniverMenuIcon implements IconComponent {
+//     render(): FunctionComponent<BaseIconProps> {
+//         return MenuIcon;
+//     }
+// }
+// export class UniverHideIcon implements IconComponent {
+//     render(): FunctionComponent<BaseIconProps> {
+//         return HideIcon;
+//     }
+// }

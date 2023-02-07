@@ -141,9 +141,11 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                             <Header style={{ display: config.header ? 'block' : 'none' }}>
                                 {/* {config.infoBar && <InfoBar {...methods.infoBar}></InfoBar>}
                                 {config.toolBar && <ToolBar {...methods.toolbar}></ToolBar>}
-                                {config.formulaBar && <FormulaBar {...methods.formulaBar}></FormulaBar>} */}
+                                 */}
                                 {/* {config.infoBar && <InfoBar></InfoBar>}
-                                {config.formulaBar && <FormulaBar></FormulaBar>} */}
+                                 */}
+
+                                {config.formulaBar && <FormulaBar {...methods.formulaBar}></FormulaBar>}
                             </Header>
                             <Layout>
                                 <Sider

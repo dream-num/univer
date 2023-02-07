@@ -9,7 +9,7 @@ import { CanvasView } from './View/Render/CanvasView';
 import { RightMenuController, InfoBarController, SheetBarControl, CellEditorController, SheetContainerController, ToolBarController } from './Controller';
 import { IToolBarItemProps } from './Model/ToolBarModel';
 import { ModalGroupController } from './Controller/ModalGroupController';
-import { ISheetPluginConfig } from './Basics';
+import { install, ISheetPluginConfig } from './Basics';
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeActionExtension';
 
@@ -56,6 +56,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     initialize(context: SheetContext): void {
         this.context = context;
 
+        install(this);
+
         /**
          * load more Locale object
          */
@@ -75,7 +77,9 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     }
 
     initController() {
+        this._sheetContainerController = new SheetContainerController(this);
         this._cellEditorController = new CellEditorController(this);
+        this._formulaBarController = new FormulaBarController(this);
     }
 
     initCanvasView() {

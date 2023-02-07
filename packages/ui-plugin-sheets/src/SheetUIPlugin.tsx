@@ -3,13 +3,15 @@ import { zh, en } from './Locale';
 import { DefaultSheetUiConfig, installObserver, ISheetUIPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';
 import { Context } from '@univerjs/core/src/Basics/Context';
 import { SheetContainerUIController } from './Controller';
-import { ComponentManager, getRefElement } from '@univerjs/base-ui';
+import { ComponentManager, getRefElement, RegisterManager } from '@univerjs/base-ui';
 import { Engine, RenderEngine } from '@univerjs/base-render';
 
 export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
     private _sheetsController: SheetContainerUIController;
 
     private _componentManager: ComponentManager;
+
+    private _registerManager: RegisterManager;
 
     private _config: ISheetUIPluginConfig;
 
@@ -39,6 +41,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
         });
 
         this._componentManager = new ComponentManager();
+        this._registerManager = new RegisterManager(this);
         this._sheetsController = new SheetContainerUIController(this);
         this.initRender();
     }
@@ -78,5 +81,13 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
 
     getComponentManager() {
         return this._componentManager;
+    }
+
+    /**
+     * usage this._clipboardExtensionManager.handle(data);
+     * @returns
+     */
+    getRegisterManager(): RegisterManager {
+        return this._registerManager;
     }
 }

@@ -12,7 +12,6 @@ export class EventManager {
     private _installObserver() {
         // Event
         this._observerManager.addObserver('onUIChangeObservable', 'core', new Observable());
-        this._observerManager.addObserver('onRichTextDidMountObservable', 'core', new Observable());
         this._observerManager.addObserver('onAfterChangeUILocaleObservable', 'core', new Observable());
     }
 }

@@ -1,4 +1,4 @@
-import { Engine } from '@univerjs/base-render';
+import { Engine, RenderEngine } from '@univerjs/base-render';
 import { SheetContext, Plugin, PLUGIN_NAMES, UIObserver } from '@univerjs/core';
 
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
@@ -64,31 +64,28 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
             zh,
         });
 
-        // const engine = this.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
-
-        // let container = this._component.getUniverContainerController().getContentRef().current!;
-
-        // this._canvasEngine = engine;
-
-        // engine.setContainer(container);
-        // window.addEventListener('resize', () => {
-        //     engine.resize();
-        // });
-
-        // // should be clear
-        // setTimeout(() => {
-        //     engine.resize();
-        // }, 0);
-
-        // if (this._canvasView == null) {
-        //     this._canvasView = new CanvasView(engine, this);
-        // }
+        this.initController();
+        this.initCanvasView();
 
         this.registerExtension();
     }
 
     get config() {
         return this._config;
+    }
+
+    initController() {
+        this._cellEditorController = new CellEditorController(this);
+    }
+
+    initCanvasView() {
+        const engine = this.getContext().getUniver().getGlobalContext().getPluginManager().getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
+
+        this._canvasEngine = engine;
+
+        if (this._canvasView == null) {
+            this._canvasView = new CanvasView(engine, this);
+        }
     }
 
     onMounted(ctx: SheetContext): void {

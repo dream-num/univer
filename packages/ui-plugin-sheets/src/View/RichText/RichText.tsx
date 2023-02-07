@@ -1,6 +1,5 @@
 // import { CellInputHandler } from '@univerjs/sheets-plugin-formula/src/Controller/CellInputHandler';
-import { Component, createRef } from '@univerjs/base-ui'
-import { xssDeal } from '../../Utils';
+import { Component, createRef, xssDeal } from '@univerjs/base-ui';
 import { CellTextStyle } from './CellTextStyle';
 import styles from './index.module.less';
 // interface IProps {

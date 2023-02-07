@@ -83,7 +83,11 @@ universheet.installPlugin(
 // univer.install(new UniverComponentSheet());
 // univer.install(new BaseComponentPlugin(univerConfig));
 
-univer.install(new SheetUIPlugin())
+univer.install(
+    new SheetUIPlugin({
+        container: 'universheet',
+    })
+);
 // sheets-plugin-ui univer.install(new SheetsUI)
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO1);

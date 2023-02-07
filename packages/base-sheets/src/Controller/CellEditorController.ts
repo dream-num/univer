@@ -1,5 +1,4 @@
-import { handleJsonToDom } from '@univerjs/base-ui';
-import { Direction, IDocumentData, IRangeData, IStyleData, Nullable, ICellData } from '@univerjs/core';
+import { Direction, IDocumentData, IRangeData, IStyleData, Nullable, ICellData, handleJsonToDom } from '@univerjs/core';
 import { SheetPlugin } from '../SheetPlugin';
 
 /**
@@ -7,9 +6,6 @@ import { SheetPlugin } from '../SheetPlugin';
  */
 export class CellEditorController {
     private _plugin: SheetPlugin;
-
-    // Is it in editing state
-    isEditMode: boolean;
 
     // current edit cell
     currentEditRangeData: IRangeData;

@@ -1,7 +1,8 @@
 import { LocaleType, UIObserver } from '@univerjs/core';
-import { ISheetsPluginConfig } from '../Basics';
+import { ISheetUIPluginConfig } from '../Basics';
 import { SheetUIPlugin } from '../SheetUIPlugin';
 import { SheetContainer, UI } from '../View';
+import { CellEditorUIController } from './CellEditorUIController';
 import { RightMenuUIController } from './RightMenuUIController';
 import { SheetBarUIController } from './SheetBarUIContruller';
 import { ToolBarUIController } from './ToolbarUIController';
@@ -13,7 +14,7 @@ export class SheetContainerUIController {
 
     private _toolbarController: ToolBarUIController;
 
-    // private _cellEditorUIController: CellEditorUIController;
+    private _cellEditorUIController: CellEditorUIController;
 
     // private _formulaBarUIController: FormulaBarUIController;
 
@@ -25,7 +26,7 @@ export class SheetContainerUIController {
 
     private _sheetBarController: SheetBarUIController;
 
-    private _config: ISheetsPluginConfig;
+    private _config: ISheetUIPluginConfig;
 
     constructor(plugin: SheetUIPlugin) {
         this._plugin = plugin;
@@ -34,10 +35,8 @@ export class SheetContainerUIController {
 
         this._initialize();
 
-        console.log('sheet container init!');
-
         this._toolbarController = new ToolBarUIController(this._plugin, this._config.layout?.toolBarConfig);
-        // this._cellEditorUIController = new CellEditorUIController(this._plugin);
+        this._cellEditorUIController = new CellEditorUIController(this._plugin);
         // this._formulaBarUIController = new FormulaBarUIController(this._plugin);
         // this._infoBarController = new InfoBarController(this._plugin);
         this._rightMenuController = new RightMenuUIController(this._plugin, this._config.layout?.rightMenuConfig);
@@ -55,7 +54,7 @@ export class SheetContainerUIController {
                     getComponent: this._toolbarController.getComponent,
                 },
                 cellEditor: {
-                    // getComponent: this._cellEditorUIController.getComponent,
+                    getComponent: this._cellEditorUIController.getComponent,
                 },
                 formulaBar: {
                     // getComponent: this._formulaBarUIController.getComponent,

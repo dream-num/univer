@@ -1,6 +1,7 @@
 import { BaseMenuItem, BaseUlProps } from '@univerjs/base-ui';
-import { Nullable, Plugin } from '@univerjs/core';
+import { Nullable, Plugin, ACTION_NAMES, CommandManager, SheetActionBase } from '@univerjs/core';
 import { SheetBar } from "../View/SheetBar";
+import styles from '../View/UI/SheetBar/index.module.less';
 
 interface CustomComponent {
     name: string;
@@ -35,7 +36,7 @@ export class SheetBarUIController {
     protected _plugin: Plugin;
 
     protected _initializeObs() {
-        const plugin = this._barControl.getPlugin();
+        const plugin = this._plugin;
         const context = plugin.getContext();
         const manager = context.getObserverManager();
         const workbook = context.getWorkBook();
@@ -49,7 +50,7 @@ export class SheetBarUIController {
                 sheetUl: this._sheetUl,
                 menuList: this._menuList,
                 addSheet: () => {
-                    this._barControl.addSheet();
+                    // this._barControl.addSheet();
                 },
                 selectSheet: (event: Event, data: { item: SheetUlProps }) => {
                     this._dataId = data.item.sheetId;
@@ -61,13 +62,13 @@ export class SheetBarUIController {
                 contextMenu: (e: MouseEvent) => {
                     const target = e.currentTarget as HTMLDivElement;
                     this._dataId = target.dataset.id as string;
-                    this._barControl.contextMenu(e);
+                    //this._barControl.contextMenu(e);
                 },
                 changeSheetName: (e: Event) => {
-                    this._barControl.changeSheetName(e);
+                    //this._barControl.changeSheetName(e);
                 },
                 dragEnd: (elements: HTMLDivElement[]) => {
-                    this._barControl.dragEnd(elements);
+                    //this._barControl.dragEnd(elements);
                 },
             });
         });
@@ -151,19 +152,19 @@ export class SheetBarUIController {
             {
                 locale: 'sheetConfig.delete',
                 onClick: () => {
-                    barControl.deleteSheet();
+                    //barControl.deleteSheet();
                 },
             },
             {
                 locale: 'sheetConfig.copy',
                 onClick: () => {
-                    barControl.copySheet();
+                    //barControl.copySheet();
                 },
             },
             {
                 locale: 'sheetConfig.rename',
                 onClick: () => {
-                    barControl.reNameSheet();
+                    //barControl.reNameSheet();
                 },
             },
             {
@@ -173,10 +174,10 @@ export class SheetBarUIController {
                 children: [
                     {
                         customLabel: {
-                            name: pluginName + ColorPicker.name,
+                            name: this._plugin.getPluginName() + ColorPicker.name,
                             props: {
                                 onClick: (color: string) => {
-                                    barControl.setSheetColor(color);
+                                    // barControl.setSheetColor(color);
                                 },
                                 lang: {
                                     collapseLocale: 'colorPicker.collapse',
@@ -194,26 +195,26 @@ export class SheetBarUIController {
             {
                 locale: 'sheetConfig.hide',
                 onClick: () => {
-                    barControl.hideSheet();
+                    //barControl.hideSheet();
                 },
             },
             {
                 locale: 'sheetConfig.unhide',
                 onClick: () => {
-                    barControl.unHideSheet();
+                    //barControl.unHideSheet();
                 },
                 border: true,
             },
             {
                 locale: 'sheetConfig.moveLeft',
                 onClick: () => {
-                    barControl.moveSheet('left');
+                    //barControl.moveSheet('left');
                 },
             },
             {
                 locale: 'sheetConfig.moveRight',
                 onClick: () => {
-                    barControl.moveSheet('right');
+                    //barControl.moveSheet('right');
                 },
             },
         ];

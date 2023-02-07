@@ -3,6 +3,7 @@ import { ISheetsPluginConfig } from '../Basics';
 import { SheetUIPlugin } from '../SheetUIPlugin';
 import { SheetContainer, UI } from '../View';
 import { RightMenuUIController } from './RightMenuUIController';
+import { SheetBarUIController } from './SheetBarUIContruller';
 import { ToolBarUIController } from './ToolbarUIController';
 
 export class SheetContainerUIController {
@@ -22,7 +23,7 @@ export class SheetContainerUIController {
 
     // private _countBarController: CountBarController;
 
-    // private _sheetBarController: SheetBarControl;
+    private _sheetBarController: SheetBarUIController;
 
     private _config: ISheetsPluginConfig;
 
@@ -41,7 +42,7 @@ export class SheetContainerUIController {
         // this._infoBarController = new InfoBarController(this._plugin);
         this._rightMenuController = new RightMenuUIController(this._plugin, this._config.layout?.rightMenuConfig);
         // this._countBarController = new CountBarController(this._plugin);
-        // this._sheetBarController = new SheetBarControl(this._plugin);
+        this._sheetBarController = new SheetBarUIController(this._plugin);
 
         // 初始化UI
         const config = {

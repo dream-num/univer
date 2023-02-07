@@ -1,8 +1,7 @@
-import { FunctionComponent } from '../../../Framework';
-import { BaseIconProps, IconComponent } from '../../../Interfaces';
+import { BaseIconProps } from '../../../Interfaces';
 import { Icon } from '../AddIcon';
 
-const BackIcon = (props: BaseIconProps) => (
+export const BackIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} className={props.className} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5692" width="1em" height="1em" fill="currentColor">
             <path
@@ -13,7 +12,7 @@ const BackIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const ForwardIcon = (props: BaseIconProps) => (
+export const ForwardIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} className={props.className} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5565" width="1em" height="1em" fill="currentColor">
             <path
@@ -24,7 +23,7 @@ const ForwardIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const FormatIcon = (props: BaseIconProps) => (
+export const FormatIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5955" width="1em" height="1em" fill="currentColor">
             <path
@@ -43,7 +42,7 @@ export const NextIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const RightIcon = (props: BaseIconProps) => (
+export const RightIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} className={props.className} name="rightIcon" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5311" width="1em" height="1em" fill="currentColor">
             <path d="M682.666667 512l-341.333334 341.333333V170.666667z" p-id="5312"></path>
@@ -51,7 +50,7 @@ const RightIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const CorrectIcon = (props: BaseIconProps) => (
+export const CorrectIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} className={props.className} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5311" width="1em" height="1em" fill="currentColor">
             <path d="M268.032 523.434667l60.373333-60.330667 211.2 211.2-60.373333 60.330667z" p-id="5312"></path>
@@ -60,7 +59,7 @@ const CorrectIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const LtIcon = (props: BaseIconProps) => (
+export const LtIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} className={props.className} name="foward" style={props.style}>
         <svg width="1em" height="1em" fill="currentColor" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1732">
             <path d="M224.45 538.68l575.11-346.21-0.05-68.75-575.03 345.61-0.03 69.35z" p-id="1733"></path>
@@ -69,7 +68,7 @@ const LtIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const CloseIcon = (props: BaseIconProps) => (
+export const CloseIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} className={props.className} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5318" width="1em" height="1em" fill="currentColor">
             <path d="M330.965333 270.634667l422.4 422.4-60.330666 60.330666-422.4-422.4z" p-id="5319"></path>
@@ -78,7 +77,7 @@ const CloseIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const MenuIcon = (props: BaseIconProps) => (
+export const MenuIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} className={props.className} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5446" width="1em" height="1em" fill="currentColor">
             <path
@@ -89,7 +88,7 @@ const MenuIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const HideIcon = (props: BaseIconProps) => (
+export const HideIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} className={props.className} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6513" width="1em" height="1em" fill="currentColor">
             <path
@@ -117,58 +116,3 @@ export default {
     MenuIcon,
     HideIcon,
 };
-export class UniverBackIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return BackIcon;
-    }
-}
-export class UniverForwardIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return ForwardIcon;
-    }
-}
-export class UniverFormatIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return FormatIcon;
-    }
-}
-export class UniverNextIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return NextIcon;
-    }
-}
-export class UniverRightIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return RightIcon;
-    }
-}
-export class UniverCorrectIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return CorrectIcon;
-    }
-}
-export class UniverLtIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return LtIcon;
-    }
-}
-export class UniverCloseIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return CloseIcon;
-    }
-}
-export class UniverDropDownIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return CloseIcon;
-    }
-}
-export class UniverMenuIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return MenuIcon;
-    }
-}
-export class UniverHideIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return HideIcon;
-    }
-}

@@ -5,7 +5,7 @@ export interface IUniverData {
 }
 
 /**
- * ToolBar Observer generic interface, convenient for plug-ins to define their own types
+ * Toolbar Observer generic interface, convenient for plug-ins to define their own types
  */
 export interface UIObserver<T = string> {
     /**

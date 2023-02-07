@@ -13,7 +13,7 @@ export const DefaultUniverConfig: UniverConfig = {
         frozenHeaderLM: false,
         frozenContent: false,
         infoBar: true,
-        toolBar: true,
+        toolbar: true,
         rightMenu: true,
         countBar: true,
         sheetBar: true,

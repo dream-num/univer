@@ -1,6 +1,6 @@
 import { IKeyValue, migrate, PLUGIN_NAMES, Tools } from '@univerjs/core';
 import { BaseComponentRender } from '@univerjs/base-ui';
-import { IToolBarItemProps, SelectTypes, SheetPlugin } from '@univerjs/base-sheets';
+import { IToolbarItemProps, SelectTypes, SheetPlugin } from '@univerjs/base-sheets';
 
 import * as LuckyExcel from 'luckyexcel';
 import { IMPORT_XLSX_PLUGIN_NAME } from '../Basic/Const';
@@ -9,7 +9,7 @@ import { ImportXlsxPlugin } from '../ImportXlsxPlugin';
 export class ImportXlsxController {
     protected _sheetPlugin: SheetPlugin;
 
-    protected _toolButton: IToolBarItemProps;
+    protected _toolButton: IToolbarItemProps;
 
     protected _plugin: ImportXlsxPlugin;
 

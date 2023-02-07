@@ -5,9 +5,9 @@ import { SelectionControl } from './Selection/SelectionController';
 
 import { LineColor } from '../View/UI/Common/Line/LineColor';
 import { SelectionModel } from '../Model';
-import { IShowToolBarConfig, IToolBarItemProps, ToolBarModel } from '../Model/ToolBarModel';
-import { ToolBar } from '../View/UI/ToolBar';
-import styles from '../View/UI/ToolBar/index.module.less';
+import { IShowToolbarConfig, IToolbarItemProps, ToolbarModel } from '../Model/ToolbarModel';
+import { Toolbar } from '../View/UI/Toolbar';
+import styles from '../View/UI/Toolbar/index.module.less';
 import {
     BORDER_LINE_CHILDREN,
     BORDER_SIZE_CHILDREN,
@@ -18,7 +18,7 @@ import {
     TEXT_ROTATE_CHILDREN,
     TEXT_WRAP_CHILDREN,
     VERTICAL_ALIGN_CHILDREN,
-} from '../View/UI/ToolBar/Const';
+} from '../View/UI/Toolbar/Const';
 import { DefaultToolbarConfig } from '../Basics';
 import { LineBold } from '../View/UI/Common/Line/LineBold';
 import { ColorSelect } from '../View/UI/Common/ColorSelect/ColorSelect';
@@ -31,14 +31,14 @@ interface BorderInfo {
 /**
  *
  */
-export class ToolBarController {
-    private _toolBarModel: ToolBarModel;
+export class ToolbarController {
+    private _toolbarModel: ToolbarModel;
 
     private _plugin: SheetPlugin;
 
-    private _toolBarComponent: ToolBar;
+    private _toolbarComponent: Toolbar;
 
-    private _toolList: IToolBarItemProps[];
+    private _toolList: IToolbarItemProps[];
 
     private _moreText: Record<string, string>;
 
@@ -50,7 +50,7 @@ export class ToolBarController {
 
     private _borderInfo: BorderInfo; //存储边框信息
 
-    private _changeToolBarState(range: Range): void {
+    private _changeToolbarState(range: Range): void {
         const workbook = this._plugin.getContext().getWorkBook();
         const worksheet = workbook.getActiveSheet();
         if (worksheet) {
@@ -122,11 +122,11 @@ export class ToolBarController {
                 });
             }
 
-            this.resetToolBarList();
+            this.resetToolbarList();
         }
     }
 
-    constructor(plugin: SheetPlugin, config?: IShowToolBarConfig) {
+    constructor(plugin: SheetPlugin, config?: IShowToolbarConfig) {
         this._plugin = plugin;
 
         const pluginName = this._plugin.getPluginName();
@@ -470,9 +470,9 @@ export class ToolBarController {
 
         this._moreText = { more: 'toolbar.toolMore', tip: 'toolbar.toolMoreTip' };
 
-        this._toolBarModel = new ToolBarModel();
-        this._toolBarModel.config = toolbarConfig;
-        this._toolBarModel.toolList = this._toolList;
+        this._toolbarModel = new ToolbarModel();
+        this._toolbarModel.config = toolbarConfig;
+        this._toolbarModel.toolList = this._toolList;
 
         this._initialize();
     }
@@ -537,10 +537,10 @@ export class ToolBarController {
             }
         });
 
-        this._plugin.getObserver('onToolBarDidMountObservable')?.add((component) => {
+        this._plugin.getObserver('onToolbarDidMountObservable')?.add((component) => {
             //初始化视图
-            this._toolBarComponent = component;
-            this.resetToolBarList();
+            this._toolbarComponent = component;
+            this.resetToolbarList();
         });
         this._plugin.getObserver('onLineColorDidMountObservable')?.add((component) => {
             //初始化视图
@@ -559,7 +559,7 @@ export class ToolBarController {
             .getObserverManager()
             .getObserver('onAfterChangeUILocaleObservable', 'core')
             ?.add(() => {
-                this.resetToolBarList();
+                this.resetToolbarList();
             });
 
         // Monitor selection changes, update toolbar button status and values TODO: 根据不同的焦点对象，接受
@@ -593,7 +593,7 @@ export class ToolBarController {
             const manager = this._plugin.getSelectionManager();
             const range = manager?.getCurrentCell();
             if (range) {
-                this._changeToolBarState(range);
+                this._changeToolbarState(range);
             }
         });
     }
@@ -651,7 +651,7 @@ export class ToolBarController {
         return obj;
     }
 
-    resetToolListLabel(toolList: IToolBarItemProps[]) {
+    resetToolListLabel(toolList: IToolbarItemProps[]) {
         for (let i = 0; i < toolList.length; i++) {
             let item = toolList[i];
 
@@ -665,11 +665,11 @@ export class ToolBarController {
         return toolList;
     }
 
-    resetToolBarList() {
+    resetToolbarList() {
         const locale = this._plugin.context.getLocale();
 
         const toolList = this.resetToolListLabel(this._toolList);
-        this._toolBarComponent.setToolBar(toolList, {
+        this._toolbarComponent.setToolbar(toolList, {
             more: locale.get(this._moreText.more),
             tip: locale.get(this._moreText.tip),
         });
@@ -817,12 +817,12 @@ export class ToolBarController {
         this._borderInfo.type = index;
     }
 
-    addToolButton(config: IToolBarItemProps) {
+    addToolButton(config: IToolbarItemProps) {
         const index = this._toolList.findIndex((item) => item.name === config.name);
         if (index > -1) return;
         this._toolList.push(config);
-        if (this._toolBarComponent) {
-            this.resetToolBarList();
+        if (this._toolbarComponent) {
+            this.resetToolbarList();
         }
     }
 }

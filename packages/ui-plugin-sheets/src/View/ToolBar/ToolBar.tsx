@@ -1,25 +1,27 @@
-import { BaseComponentProps, Button, Component, Container, createRef, debounce, Select, TextButton, Tooltip } from '@univerjs/base-ui';
+import { AppContext, AppContextValues, BaseComponentProps, Button, Component, Container, createRef, debounce, PreactContext, Select, TextButton, Tooltip } from '@univerjs/base-ui';
 import { PLUGIN_NAMES } from '@univerjs/core';
 import { SheetUIPlugin } from '../..';
 import { SHEET_UI_PLUGIN_NAME } from '../../Basics';
-import { IToolBarItemProps } from '../../Controller';
+import { IToolbarItemProps } from '../../Controller';
 import styles from './index.module.less';
 
 interface IProps extends BaseComponentProps {
     style?: JSX.CSSProperties;
-    toolList: IToolBarItemProps[];
+    toolList: IToolbarItemProps[];
 }
 
 interface IState {
-    toolList: IToolBarItemProps[];
-    moreToolList: IToolBarItemProps[];
-    defaultToolList: IToolBarItemProps[];
+    toolList: IToolbarItemProps[];
+    moreToolList: IToolbarItemProps[];
+    defaultToolList: IToolbarItemProps[];
     showMore: boolean;
     toolbarListWidths: number[];
     moreText: Record<string, string>;
 }
 
-export class ToolBar extends Component<IProps, IState> {
+export class Toolbar extends Component<IProps, IState> {
+    static contextType: PreactContext<Partial<AppContextValues>> = AppContext;
+
     toolbarRef = createRef();
 
     moreBtnRef = createRef();
@@ -145,7 +147,7 @@ export class ToolBar extends Component<IProps, IState> {
     };
 
     resetLabel = (toolList: any[]) => {
-        const componentManager = this._context.getPluginManager().getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager();
+        const componentManager = this.getContext().getPluginManager().getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager();
 
         for (let i = 0; i < toolList.length; i++) {
             const item = toolList[i];
@@ -174,7 +176,7 @@ export class ToolBar extends Component<IProps, IState> {
         return toolList;
     };
 
-    // setToolBar = (toolList: any[], moreText: Record<string, string>) => {
+    // setToolbar = (toolList: any[], moreText: Record<string, string>) => {
     //     toolList = this.resetLabel(toolList);
 
     //     this.setState(
@@ -189,7 +191,7 @@ export class ToolBar extends Component<IProps, IState> {
     //     );
     // };
 
-    setToolBar = (toolList: any[]) => {
+    setToolbar = (toolList: any[]) => {
         toolList = this.resetLabel(toolList);
 
         this.setState(
@@ -204,7 +206,7 @@ export class ToolBar extends Component<IProps, IState> {
     };
 
     resetUl = () => {
-        const wrapper = this._context.getPluginManager().getPluginByName<SheetUIPlugin>(PLUGIN_NAMES.BASE_COMPONENT)?.getSheetContainerController().getContentRef().current!;
+        const wrapper = this.getContext().getPluginManager().getPluginByName<SheetUIPlugin>(PLUGIN_NAMES.BASE_COMPONENT)?.getSheetContainerController().getContentRef().current!;
         const height = `${(wrapper as HTMLDivElement).offsetHeight}px`;
         const ul = this.toolbarRef.current.querySelectorAll('ul');
         for (let i = 0; i < ul.length; i++) {
@@ -222,7 +224,7 @@ export class ToolBar extends Component<IProps, IState> {
     }
 
     // 渲染dom
-    getToolBarList(list: IToolBarItemProps[]) {
+    getToolbarList(list: IToolbarItemProps[]) {
         return list.map((item) => {
             if (item.toolbarType) {
                 if (item.show) {
@@ -262,7 +264,7 @@ export class ToolBar extends Component<IProps, IState> {
         return (
             <Container style={{ position: 'relative' }}>
                 <div className={`${styles.toolbarWarp} ${styles.toolbar}`} ref={this.toolbarRef}>
-                    {this.getToolBarList(defaultToolList)}
+                    {this.getToolbarList(defaultToolList)}
 
                     <div ref={this.moreBtnRef} className={styles.moreButton} style={{ visibility: moreToolList.length ? 'visible' : 'hidden' }}>
                         <Tooltip title={moreText.tip} placement={'bottom'}>
@@ -275,7 +277,7 @@ export class ToolBar extends Component<IProps, IState> {
 
                 {moreToolList.length ? (
                     <div style={{ visibility: showMore ? 'visible' : 'hidden' }} className={`${styles.moreTool} ${styles.toolbar}`} ref={this.moreToolRef}>
-                        {this.getToolBarList(moreToolList)}
+                        {this.getToolbarList(moreToolList)}
                     </div>
                 ) : (
                     ''

@@ -55,7 +55,7 @@ export const DefaultSheetContainerConfig = {
     frozenHeaderLM: false,
     frozenContent: false,
     infoBar: true,
-    toolBar: true,
+    toolbar: true,
     rightMenu: true,
     countBar: true,
     sheetBar: true,

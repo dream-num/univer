@@ -27,7 +27,7 @@ cover: ''
 ```jsx
 import { Container } from '@univerjs/style-univer';
 
-const ToolBar = () => {
+const Toolbar = () => {
     const containerText = 'container';
     return (
         <Container

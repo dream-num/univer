@@ -1,5 +1,5 @@
 // 基础工具栏配置
-export interface BaseToolBarConfig {
+export interface BaseToolbarConfig {
     undo?: boolean; // Undo redo
     redo?: boolean; // Undo redo
     paintFormat?: boolean; // Format brush
@@ -24,12 +24,12 @@ export interface BaseToolBarConfig {
 }
 
 // sheet工具栏配置
-export interface SheetToolBarConfig extends BaseToolBarConfig {
+export interface SheetToolbarConfig extends BaseToolbarConfig {
     mergeCell?: boolean; // 'Merge cells'
 }
 
-export interface DocToolBarConfig extends BaseToolBarConfig {}
+export interface DocToolbarConfig extends BaseToolbarConfig {}
 
-export interface SlideToolBarConfig extends BaseToolBarConfig {}
+export interface SlideToolbarConfig extends BaseToolbarConfig {}
 
-export interface ToolBarConfig extends SheetToolBarConfig, DocToolBarConfig, SlideToolBarConfig {}
+export interface ToolbarConfig extends SheetToolbarConfig, DocToolbarConfig, SlideToolbarConfig {}

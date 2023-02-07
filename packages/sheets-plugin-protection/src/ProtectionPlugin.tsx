@@ -1,4 +1,4 @@
-import { ISlotElement, ISlotProps, IToolBarItemProps } from '@univerjs/base-ui';
+import { ISlotElement, ISlotProps, IToolbarItemProps } from '@univerjs/base-ui';
 import { SheetContext, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univerjs/core';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { PROTECTION_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
@@ -39,7 +39,7 @@ export class ProtectionPlugin extends Plugin {
             context,
         };
 
-        const item: IToolBarItemProps = {
+        const item: IToolbarItemProps = {
             locale: PROTECTION_PLUGIN_NAME,
             type: ISlotElement.JSX,
             show: true,

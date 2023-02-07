@@ -2,7 +2,7 @@ import { IKeyboardEvent } from '@univerjs/base-render';
 import { Observable, Plugin } from '@univerjs/core';
 import { SlideContainer } from '../View/UI/SlideContainer';
 import { SlideBar } from '../View/UI/SlideBar/SlideBar';
-import { ToolBar } from '../View/UI/ToolBar/ToolBar';
+import { Toolbar } from '../View/UI/ToolBar/Toolbar';
 
 export type SlidePluginObserve = {
     onAfterChangeFontFamilyObservable: Observable<string>;
@@ -16,7 +16,7 @@ export type SlidePluginObserve = {
 
     onChangeCurrentSheetObserver: Observable<string>;
 
-    onToolBarDidMountObservable: Observable<ToolBar>;
+    onToolbarDidMountObservable: Observable<Toolbar>;
     onSlideBarDidMountObservable: Observable<SlideBar>;
 
     onSlideBarMousedownObservable: Observable<string>;
@@ -43,7 +43,7 @@ export function uninstall(plugin: Plugin) {
     plugin.deleteObserve('onAfterChangeFontBackgroundObservable');
     plugin.deleteObserve('onAfterChangeFontColorObservable');
 
-    plugin.deleteObserve('onToolBarDidMountObservable');
+    plugin.deleteObserve('onToolbarDidMountObservable');
     plugin.deleteObserve('onSlideBarDidMountObservable');
 
     plugin.deleteObserve('onSlideBarMousedownObservable');
@@ -79,7 +79,7 @@ export function install(plugin: Plugin) {
 
     plugin.pushToObserve('onChangeCurrentSheetObserver');
 
-    plugin.pushToObserve('onToolBarDidMountObservable');
+    plugin.pushToObserve('onToolbarDidMountObservable');
 
     plugin.pushToObserve('onSlideBarMousedownObservable');
 

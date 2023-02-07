@@ -1,8 +1,7 @@
-import { FunctionComponent } from '../../../Framework';
-import { BaseIconProps, IconComponent } from '../../../Interfaces';
+import { BaseIconProps } from '../../../Interfaces';
 import { Icon } from '../AddIcon';
 
-const PhotoIcon = (props: BaseIconProps) => (
+export const PhotoIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="8090" width="1em" height="1em" fill="currentColor">
             <path
@@ -13,7 +12,7 @@ const PhotoIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const LinkIcon = (props: BaseIconProps) => (
+export const LinkIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7962" width="1em" height="1em" fill="currentColor">
             <path
@@ -28,7 +27,7 @@ const LinkIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const ChartIcon = (props: BaseIconProps) => (
+export const ChartIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7833" width="1em" height="1em" fill="currentColor">
             <path d="M256 213.333333H213.333333v597.333334h597.333334v-42.666667H256z" p-id="7834"></path>
@@ -49,19 +48,3 @@ export default {
     LinkIcon,
     ChartIcon,
 };
-
-export class UniverPhotoIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return PhotoIcon;
-    }
-}
-export class UniverLinkIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return LinkIcon;
-    }
-}
-export class UniverChartIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return ChartIcon;
-    }
-}

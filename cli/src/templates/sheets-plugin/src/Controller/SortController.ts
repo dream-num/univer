@@ -1,6 +1,6 @@
 import { PLUGIN_NAMES } from '@univerjs/core';
 import { BaseComponentRender } from '@univerjs/base-ui';
-import { IToolBarItemProps, SelectTypes, SheetPlugin } from '@univerjs/base-sheets';
+import { IToolbarItemProps, SelectTypes, SheetPlugin } from '@univerjs/base-sheets';
 
 import { <%= projectConstantValue %>_PLUGIN_NAME } from '../Basic/Const';
 import { <%= projectUpperValue %>Plugin } from '../<%= projectUpperValue %>Plugin';
@@ -8,7 +8,7 @@ import { <%= projectUpperValue %>Plugin } from '../<%= projectUpperValue %>Plugi
 export class <%= projectUpperValue %>Controller {
     protected _sheetPlugin: SheetPlugin;
 
-    protected _toolButton: IToolBarItemProps;
+    protected _toolButton: IToolbarItemProps;
 
     protected _plugin: <%= projectUpperValue %>Plugin;
 

@@ -1,7 +1,7 @@
 import { IKeyboardEvent } from '@univerjs/base-render';
 import { Observable, Plugin } from '@univerjs/core';
 import { DocContainer } from '../View/UI/DocContainer';
-import { ToolBar } from '../View/UI/ToolBar/ToolBar';
+import { Toolbar } from '../View/UI/ToolBar/Toolbar';
 
 export type DocPluginObserve = {
     onAfterChangeFontFamilyObservable: Observable<string>;
@@ -15,7 +15,7 @@ export type DocPluginObserve = {
 
     onChangeCurrentSheetObserver: Observable<string>;
 
-    onToolBarDidMountObservable: Observable<ToolBar>;
+    onToolbarDidMountObservable: Observable<Toolbar>;
 
     onDocContainerDidMountObservable: Observable<DocContainer>;
 
@@ -40,7 +40,7 @@ export function uninstall(plugin: Plugin) {
     plugin.deleteObserve('onAfterChangeFontBackgroundObservable');
     plugin.deleteObserve('onAfterChangeFontColorObservable');
 
-    plugin.deleteObserve('onToolBarDidMountObservable');
+    plugin.deleteObserve('onToolbarDidMountObservable');
 
     plugin.deleteObserve('onChangeCurrentSheetObserver');
     plugin.deleteObserve('onDocContainerDidMountObservable');
@@ -73,7 +73,7 @@ export function install(plugin: Plugin) {
 
     plugin.pushToObserve('onChangeCurrentSheetObserver');
 
-    plugin.pushToObserve('onToolBarDidMountObservable');
+    plugin.pushToObserve('onToolbarDidMountObservable');
 
     plugin.pushToObserve('onSheetBarDidMountObservable');
     plugin.pushToObserve('onCountBarDidMountObservable');

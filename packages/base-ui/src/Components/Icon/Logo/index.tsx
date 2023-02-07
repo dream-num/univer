@@ -1,8 +1,7 @@
-import { FunctionComponent } from '../../../Framework';
-import { BaseIconProps, IconComponent } from '../../../Interfaces';
+import { BaseIconProps } from '../../../Interfaces';
 import { Icon } from '../AddIcon';
 
-const LogoIcon = (props: BaseIconProps) => (
+export const LogoIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="logo" style={props.style}>
         <svg class="icon" viewBox="0 0 4864 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="8477" fill="currentColor">
             <path
@@ -23,8 +22,3 @@ const LogoIcon = (props: BaseIconProps) => (
 );
 
 export default LogoIcon;
-export class UniverLogoIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return LogoIcon;
-    }
-}

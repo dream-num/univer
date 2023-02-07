@@ -1,6 +1,7 @@
 import { ComponentChildren, Component } from '../../Framework';
-import { BaseComponentRender, BaseComponentSheet } from '../../BaseComponent';
+import { BaseComponentRender } from '../../BaseComponent';
 import styles from './index.module.less';
+import { Button } from '../Button';
 
 export interface BaseTextButtonProps {
     active?: boolean;
@@ -16,8 +17,6 @@ export class TextButton extends Component<BaseTextButtonProps, IState> {
     private _render: BaseComponentRender;
 
     initialize() {
-        const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this._render = component.getComponentRender();
         this.state = {
             active: this.props.active,
         };
@@ -43,7 +42,6 @@ export class TextButton extends Component<BaseTextButtonProps, IState> {
     render() {
         const { label } = this.props;
         const { active } = this.state;
-        const Button = this._render.renderFunction('Button');
 
         return (
             <div className={styles.textButton}>

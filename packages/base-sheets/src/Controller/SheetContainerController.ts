@@ -3,7 +3,7 @@ import { BaseComponentSheet, BaseComponentRender, BaseComponentProps, DragManage
 
 import { CellRangeModal } from '../View/UI/Common/CellRange/CellRangeModal';
 import { SheetPlugin } from '../SheetPlugin';
-import { IShowToolBarConfig } from '../Model';
+import { IShowToolbarConfig } from '../Model';
 import { SheetContainer } from '../View/UI/SheetContainer';
 import { IHideRightMenuConfig } from './RightMenuController';
 import { DefaultSheetContainerConfig } from '../Basics';
@@ -39,7 +39,7 @@ export interface IShowContainerConfig {
     sheetBar?: boolean;
 
     // Whether to show the toolbar
-    toolBar?: boolean;
+    toolbar?: boolean;
 
     rightMenu?: boolean;
 
@@ -48,7 +48,7 @@ export interface IShowContainerConfig {
 
 export interface ILayout {
     sheetContainerConfig?: IShowContainerConfig;
-    toolBarConfig?: IShowToolBarConfig;
+    toolbarConfig?: IShowToolbarConfig;
     rightMenuConfig?: IHideRightMenuConfig;
 }
 

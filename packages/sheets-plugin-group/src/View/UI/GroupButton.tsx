@@ -1,10 +1,10 @@
 import { Nullable, Observer } from '@univerjs/core';
-import { ISelectButton, IToolBarItemProps, Component, BaseSelectProps } from '@univerjs/base-ui';
+import { ISelectButton, IToolbarItemProps, Component, BaseSelectProps } from '@univerjs/base-ui';
 
 interface IProps {}
 // Types for state
 interface IState {
-    group: IToolBarItemProps;
+    group: IToolbarItemProps;
 }
 
 export class GroupButton extends Component<IProps, IState> {
@@ -15,7 +15,7 @@ export class GroupButton extends Component<IProps, IState> {
         const OrderIcon = this.getComponentRender().renderFunction('OrderIcon');
         const NextIcon = this.getComponentRender().renderFunction('NextIcon');
 
-        const group: IToolBarItemProps = {
+        const group: IToolbarItemProps = {
             locale: 'group',
             type: 'select',
             label: <OrderASCIcon />,
@@ -78,7 +78,7 @@ export class GroupButton extends Component<IProps, IState> {
             item.tooltipRight = locale.get(`${item.locale}RightLabel`);
 
             // set current Locale string for select
-            item.children?.forEach((ele: IToolBarItemProps) => {
+            item.children?.forEach((ele: IToolbarItemProps) => {
                 if (ele.locale) {
                     ele.label = locale.get(`${ele.locale}`);
                 }

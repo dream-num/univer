@@ -2,26 +2,26 @@ import { PLUGIN_NAMES } from '@univerjs/core';
 import { BaseComponentProps, BaseComponentRender, BaseComponentSheet } from '../../BaseComponent';
 import { BaseComponentPlugin } from '../../BaseComponentPlugin';
 import { Select, TextButton } from '../../Components';
-import { IToolBarItemProps } from '../../Controller/ToolbarController';
+import { IToolbarItemProps } from '../../Controller/ToolbarController';
 import { Component, createRef } from '../../Framework';
 import { debounce } from '../../Utils';
 import styles from './index.module.less';
 
 interface IProps extends BaseComponentProps {
     style?: JSX.CSSProperties;
-    toolList: IToolBarItemProps[];
+    toolList: IToolbarItemProps[];
 }
 
 interface IState {
-    toolList: IToolBarItemProps[];
-    moreToolList: IToolBarItemProps[];
-    defaultToolList: IToolBarItemProps[];
+    toolList: IToolbarItemProps[];
+    moreToolList: IToolbarItemProps[];
+    defaultToolList: IToolbarItemProps[];
     showMore: boolean;
     toolbarListWidths: number[];
     moreText: Record<string, string>;
 }
 
-export class ToolBar extends Component<IProps, IState> {
+export class Toolbar extends Component<IProps, IState> {
     toolbarRef = createRef();
 
     moreBtnRef = createRef();
@@ -180,7 +180,7 @@ export class ToolBar extends Component<IProps, IState> {
         return toolList;
     };
 
-    // setToolBar = (toolList: any[], moreText: Record<string, string>) => {
+    // setToolbar = (toolList: any[], moreText: Record<string, string>) => {
     //     toolList = this.resetLabel(toolList);
 
     //     this.setState(
@@ -195,7 +195,7 @@ export class ToolBar extends Component<IProps, IState> {
     //     );
     // };
 
-    setToolBar = (toolList: any[]) => {
+    setToolbar = (toolList: any[]) => {
         toolList = this.resetLabel(toolList);
 
         this.setState(
@@ -228,7 +228,7 @@ export class ToolBar extends Component<IProps, IState> {
     }
 
     // 渲染dom
-    getToolBarList(list: IToolBarItemProps[]) {
+    getToolbarList(list: IToolbarItemProps[]) {
         const Tooltip = this._render.renderFunction('Tooltip');
 
         return list.map((item) => {
@@ -274,7 +274,7 @@ export class ToolBar extends Component<IProps, IState> {
         return (
             <Container style={{ position: 'relative' }}>
                 <div className={`${styles.toolbarWarp} ${styles.toolbar}`} ref={this.toolbarRef}>
-                    {this.getToolBarList(defaultToolList)}
+                    {this.getToolbarList(defaultToolList)}
 
                     <div ref={this.moreBtnRef} className={styles.moreButton} style={{ visibility: moreToolList.length ? 'visible' : 'hidden' }}>
                         <Tooltip title={moreText.tip} placement={'bottom'}>
@@ -287,7 +287,7 @@ export class ToolBar extends Component<IProps, IState> {
 
                 {moreToolList.length ? (
                     <div style={{ visibility: showMore ? 'visible' : 'hidden' }} className={`${styles.moreTool} ${styles.toolbar}`} ref={this.moreToolRef}>
-                        {this.getToolBarList(moreToolList)}
+                        {this.getToolbarList(moreToolList)}
                     </div>
                 ) : (
                     ''

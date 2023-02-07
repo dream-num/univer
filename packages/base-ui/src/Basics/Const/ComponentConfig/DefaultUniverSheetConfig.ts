@@ -3,6 +3,6 @@ import { DefaultSheetRightMenuConfig } from './DefaultRightMenuConfig';
 import { DefaultSheetToolbarConfig } from './DefaultToolbarConfig';
 
 export const DefaultUniverSheetConfig: UniverSheetConfig = {
-    toolBarConfig: DefaultSheetToolbarConfig,
+    toolbarConfig: DefaultSheetToolbarConfig,
     rightMenuConfig: DefaultSheetRightMenuConfig,
 };

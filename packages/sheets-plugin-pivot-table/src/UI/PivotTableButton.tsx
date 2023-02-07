@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet, Component, IToolBarItemProps } from '@univerjs/base-ui';
+import { BaseComponentRender, BaseComponentSheet, Component, IToolbarItemProps } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { PIVOT_TABLE_PLUGIN_NAME } from '../Const/PLUGIN_NAME';
@@ -7,7 +7,7 @@ import styles from './index.module.less';
 
 // Types for state
 interface IState {
-    pivotTable: IToolBarItemProps;
+    pivotTable: IToolbarItemProps;
     // modalData: Array<ModalProps>;
 }
 
@@ -22,7 +22,7 @@ export class PivotTableButton extends Component<IProps, IState> {
         this.Render = component.getComponentRender();
 
         const PivotableIcon = this.Render.renderFunction('PivotableIcon');
-        const pivotTableState: IToolBarItemProps = {
+        const pivotTableState: IToolbarItemProps = {
             locale: PIVOT_TABLE_PLUGIN_NAME,
             type: 'single',
             label: <PivotableIcon />,
@@ -68,7 +68,7 @@ export class PivotTableButton extends Component<IProps, IState> {
             item.tooltipRight = locale.get(`${item.locale}RightLabel`);
 
             // set current Locale string for select
-            item.children?.forEach((ele: IToolBarItemProps) => {
+            item.children?.forEach((ele: IToolbarItemProps) => {
                 if (ele.locale) {
                     ele.label = locale.get(`${ele.locale}`);
                 }

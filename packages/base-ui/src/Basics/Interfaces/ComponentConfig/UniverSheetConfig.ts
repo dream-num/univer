@@ -1,7 +1,7 @@
 import { SheetRightMenuConfig } from './RightMenuConfig';
-import { SheetToolBarConfig } from './ToolBarConfig';
+import { SheetToolbarConfig } from './ToolbarConfig';
 
 export interface UniverSheetConfig {
-    toolBarConfig?: SheetToolBarConfig;
+    toolbarConfig?: SheetToolbarConfig;
     rightMenuConfig?: SheetRightMenuConfig;
 }

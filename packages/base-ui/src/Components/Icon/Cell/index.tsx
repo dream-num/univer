@@ -1,8 +1,7 @@
-import { JSXComponent } from '../../../BaseComponent';
-import { BaseIconProps, IconComponent } from '../../../Interfaces';
+import { BaseIconProps } from '../../../Interfaces';
 import { Icon } from '../AddIcon';
 
-const FillColorIcon = (props: BaseIconProps) => (
+export const FillColorIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5567" width="1em" height="1em" fill="currentColor">
             <path
@@ -17,7 +16,7 @@ const FillColorIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const FullBorderIcon = (props: BaseIconProps) => (
+export const FullBorderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5695" width="1em" height="1em" fill="currentColor">
             <path
@@ -32,7 +31,7 @@ const FullBorderIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const TopBorderIcon = (props: BaseIconProps) => (
+export const TopBorderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5823" width="1em" height="1em" fill="currentColor">
             <path d="M213.333333 256h554.666667v42.666667H213.333333z" p-id="5824"></path>
@@ -45,7 +44,7 @@ const TopBorderIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const BottomBorderIcon = (props: BaseIconProps) => (
+export const BottomBorderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5952" width="1em" height="1em" fill="currentColor">
             <path d="M768 810.666667H213.333333v-42.666667h554.666667z" p-id="5953"></path>
@@ -74,7 +73,7 @@ const BottomBorderIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const LeftBorderIcon = (props: BaseIconProps) => (
+export const LeftBorderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6085" width="1em" height="1em" fill="currentColor">
             <path d="M213.333333 810.666667V256h42.666667v554.666667z" p-id="6086"></path>
@@ -99,7 +98,7 @@ const LeftBorderIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const RightBorderIcon = (props: BaseIconProps) => (
+export const RightBorderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6217" width="1em" height="1em" fill="currentColor">
             <path d="M768 256v554.666667h-42.666667V256z" p-id="6218"></path>
@@ -128,7 +127,7 @@ const RightBorderIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const NoneBorderIcon = (props: BaseIconProps) => (
+export const NoneBorderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6350" width="1em" height="1em" fill="currentColor">
             <path
@@ -147,7 +146,7 @@ const NoneBorderIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const OuterBorderIcon = (props: BaseIconProps) => (
+export const OuterBorderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6479" width="1em" height="1em" fill="currentColor">
             <path d="M213.333333 810.666667V256h42.666667v554.666667zM725.333333 810.666667V256h42.666667v554.666667z" p-id="6480"></path>
@@ -161,7 +160,7 @@ const OuterBorderIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const InnerBorderIcon = (props: BaseIconProps) => (
+export const InnerBorderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6609" width="1em" height="1em" fill="currentColor">
             <path d="M213.333333 512h554.666667v42.666667H213.333333z" p-id="6610"></path>
@@ -174,7 +173,7 @@ const InnerBorderIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const StripingBorderIcon = (props: BaseIconProps) => (
+export const StripingBorderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6866" width="1em" height="1em" fill="currentColor">
             <path d="M213.333333 512h554.666667v42.666667H213.333333z" p-id="6867"></path>
@@ -186,7 +185,7 @@ const StripingBorderIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const VerticalBorderIcon = (props: BaseIconProps) => (
+export const VerticalBorderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6994" width="1em" height="1em" fill="currentColor">
             <path
@@ -198,7 +197,7 @@ const VerticalBorderIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const MergeIcon = (props: BaseIconProps) => (
+export const MergeIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7122" width="1em" height="1em" fill="currentColor">
             <path d="M810.666667 213.333333v597.333334H213.333333V213.333333h597.333334z m-42.666667 42.666667H256v512h512V256z" p-id="7123"></path>
@@ -224,64 +223,3 @@ export default {
     VerticalBorderIcon,
     MergeIcon,
 };
-
-export class UniverFillColorIcon implements IconComponent {
-    render(): JSXComponent<BaseIconProps> {
-        return FillColorIcon;
-    }
-}
-export class UniverFullBorderIcon implements IconComponent {
-    render(): JSXComponent<BaseIconProps> {
-        return FullBorderIcon;
-    }
-}
-export class UniverTopBorderIcon implements IconComponent {
-    render(): JSXComponent<BaseIconProps> {
-        return TopBorderIcon;
-    }
-}
-export class UniverBottomBorderIcon implements IconComponent {
-    render(): JSXComponent<BaseIconProps> {
-        return BottomBorderIcon;
-    }
-}
-export class UniverLeftBorderIcon implements IconComponent {
-    render(): JSXComponent<BaseIconProps> {
-        return LeftBorderIcon;
-    }
-}
-export class UniverRightBorderIcon implements IconComponent {
-    render(): JSXComponent<BaseIconProps> {
-        return RightBorderIcon;
-    }
-}
-export class UniverNoneBorderIcon implements IconComponent {
-    render(): JSXComponent<BaseIconProps> {
-        return NoneBorderIcon;
-    }
-}
-export class UniverOuterBorderIcon implements IconComponent {
-    render(): JSXComponent<BaseIconProps> {
-        return OuterBorderIcon;
-    }
-}
-export class UniverInnerBorderIcon implements IconComponent {
-    render(): JSXComponent<BaseIconProps> {
-        return InnerBorderIcon;
-    }
-}
-export class UniverStripingBorderIcon implements IconComponent {
-    render(): JSXComponent<BaseIconProps> {
-        return StripingBorderIcon;
-    }
-}
-export class UniverVerticalBorderIcon implements IconComponent {
-    render(): JSXComponent<BaseIconProps> {
-        return VerticalBorderIcon;
-    }
-}
-export class UniverMergeIcon implements IconComponent {
-    render(): JSXComponent<BaseIconProps> {
-        return MergeIcon;
-    }
-}

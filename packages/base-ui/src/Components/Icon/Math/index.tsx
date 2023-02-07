@@ -1,8 +1,7 @@
-import { FunctionComponent } from '../../../Framework';
-import { BaseIconProps, IconComponent } from '../../../Interfaces';
+import { BaseIconProps } from '../../../Interfaces';
 import { Icon } from '../AddIcon';
 
-const AddNumIcon = (props: BaseIconProps) => (
+export const AddNumIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6466" width="1em" height="1em" fill="currentColor">
             <path d="M533.333333 789.333333m-42.666666 0a42.666667 42.666667 0 1 0 85.333333 0 42.666667 42.666667 0 1 0-85.333333 0Z" p-id="6467"></path>
@@ -23,7 +22,7 @@ const AddNumIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const ReduceNumIcon = (props: BaseIconProps) => (
+export const ReduceNumIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6336" width="1em" height="1em" fill="currentColor">
             <path d="M533.333333 448m-42.666666 0a42.666667 42.666667 0 1 0 85.333333 0 42.666667 42.666667 0 1 0-85.333333 0Z" p-id="6337"></path>
@@ -40,7 +39,7 @@ const ReduceNumIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const PercentIcon = (props: BaseIconProps) => (
+export const PercentIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6209" width="1em" height="1em" fill="currentColor">
             <path
@@ -51,7 +50,7 @@ const PercentIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const MoneyIcon = (props: BaseIconProps) => (
+export const MoneyIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6082" width="1em" height="1em" fill="currentColor">
             <path
@@ -62,7 +61,7 @@ const MoneyIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const FxIcon = (props: BaseIconProps) => (
+export const FxIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5446" width="1em" height="1em" fill="currentColor">
             <path
@@ -73,7 +72,7 @@ const FxIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const AddIcon = (props: BaseIconProps) => (
+export const AddIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5318" width="1em" height="1em" fill="currentColor">
             <path d="M213.333333 469.333333h597.333334v85.333334H213.333333z" p-id="5319"></path>
@@ -82,7 +81,7 @@ const AddIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const ReduceIcon = (props: BaseIconProps) => (
+export const ReduceIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5318" width="1em" height="1em" fill="currentColor">
             <path d="M213.333333 469.333333h597.333334v85.333334H213.333333z" p-id="5319"></path>
@@ -99,39 +98,3 @@ export default {
     AddIcon,
     ReduceIcon,
 };
-
-export class UniverAddNumIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return AddNumIcon;
-    }
-}
-export class UniverReduceNumIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return ReduceNumIcon;
-    }
-}
-export class UniverPercentIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return PercentIcon;
-    }
-}
-export class UniverMoneyIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return MoneyIcon;
-    }
-}
-export class UniverFxIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return FxIcon;
-    }
-}
-export class UniverAddIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return AddIcon;
-    }
-}
-export class UniverReduceIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return ReduceIcon;
-    }
-}

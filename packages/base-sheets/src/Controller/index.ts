@@ -8,5 +8,5 @@ export * from './Selection/index';
 export * from './SheetBarController';
 export * from './SheetContainerController';
 export * from './SpreadsheetController';
-export * from './ToolBarController';
+export * from './ToolbarController';
 // @endindex

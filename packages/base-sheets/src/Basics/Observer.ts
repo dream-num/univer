@@ -2,7 +2,7 @@ import { Observable, Plugin } from '@univerjs/core';
 import { FormulaBar } from '../View/UI/FormulaBar/FormulaBar';
 import { SelectionControl } from '../Controller/Selection/SelectionController';
 import { SheetContainer } from '../View/UI/SheetContainer';
-import { ToolBar } from '../View/UI/ToolBar/ToolBar';
+import { Toolbar } from '../View/UI/Toolbar/Toolbar';
 import { LineColor } from '../View/UI/Common/Line/LineColor';
 import { LineBold } from '../View/UI/Common/Line/LineBold';
 import { ModalGroup } from '../View/UI/ModalGroup/ModalGroup';
@@ -40,7 +40,7 @@ export type SheetPluginObserve = {
 
     onChangeCurrentSheetObserver: Observable<string>;
 
-    onToolBarDidMountObservable: Observable<ToolBar>;
+    onToolbarDidMountObservable: Observable<Toolbar>;
 
     onModalGroupDidMountObservable: Observable<ModalGroup>;
 
@@ -81,7 +81,7 @@ export function uninstall(plugin: Plugin) {
     plugin.deleteObserve('onFillEndObserver');
     plugin.deleteObserve('onChangeSelectionObserver');
 
-    plugin.deleteObserve('onToolBarDidMountObservable');
+    plugin.deleteObserve('onToolbarDidMountObservable');
     plugin.deleteObserve('onModalGroupDidMountObservable');
 
     plugin.deleteObserve('onFormulaBarDidMountObservable');
@@ -119,7 +119,7 @@ export function install(plugin: Plugin) {
 
     plugin.pushToObserve('onChangeCurrentSheetObserver');
 
-    plugin.pushToObserve('onToolBarDidMountObservable');
+    plugin.pushToObserve('onToolbarDidMountObservable');
     plugin.pushToObserve('onCellRangeModalDidMountObservable');
     plugin.pushToObserve('onModalGroupDidMountObservable');
 

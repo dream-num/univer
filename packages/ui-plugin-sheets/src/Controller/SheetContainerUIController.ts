@@ -3,21 +3,23 @@ import { ISheetUIPluginConfig } from '../Basics';
 import { SheetUIPlugin } from '../SheetUIPlugin';
 import { SheetContainer, UI } from '../View';
 import { CellEditorUIController } from './CellEditorUIController';
+import { FormulaBarUIController } from './FormulaBarUIController';
+import { InfoBarUIController } from './InfoBarUIController';
 import { RightMenuUIController } from './RightMenuUIController';
-import { ToolBarUIController } from './ToolbarUIController';
+import { ToolbarUIController } from './ToolbarUIController';
 
 export class SheetContainerUIController {
     protected _plugin: SheetUIPlugin;
 
     private _sheetContainer: SheetContainer;
 
-    private _toolbarController: ToolBarUIController;
+    private _toolbarController: ToolbarUIController;
 
     private _cellEditorUIController: CellEditorUIController;
 
-    // private _formulaBarUIController: FormulaBarUIController;
+    private _formulaBarUIController: FormulaBarUIController;
 
-    // private _infoBarController: InfoBarController;
+    private _infoBarController: InfoBarUIController;
 
     private _rightMenuController: RightMenuUIController;
 
@@ -34,16 +36,19 @@ export class SheetContainerUIController {
 
         this._initialize();
 
-        this._toolbarController = new ToolBarUIController(this._plugin, this._config.layout?.toolBarConfig);
+        console.log('sheet container init!');
+
+        this._toolbarController = new ToolbarUIController(this._plugin, this._config.layout?.toolbarConfig);
         this._cellEditorUIController = new CellEditorUIController(this._plugin);
         // this._formulaBarUIController = new FormulaBarUIController(this._plugin);
-        // this._infoBarController = new InfoBarController(this._plugin);
-        this._rightMenuController = new RightMenuUIController(this._plugin, this._config.layout?.rightMenuConfig);
+        this._infoBarController = new InfoBarUIController(this._plugin);
+        // this._rightMenuController = new RightMenuUIController(this._plugin, this._config.layout?.rightMenuConfig);
         // this._countBarController = new CountBarController(this._plugin);
         // this._sheetBarController = new SheetBarControl(this._plugin);
 
         // 初始化UI
         const config = {
+            context: this._plugin.getContext(),
             config: this._config,
             changeLocale: this.changeLocale,
             getComponent: this.getComponent,
@@ -56,10 +61,10 @@ export class SheetContainerUIController {
                     getComponent: this._cellEditorUIController.getComponent,
                 },
                 formulaBar: {
-                    // getComponent: this._formulaBarUIController.getComponent,
+                    getComponent: this._formulaBarUIController.getComponent,
                 },
                 infoBar: {
-                    // getComponent: this._infoBarController.getComponent,
+                    getComponent: this._infoBarController.getComponent,
                     // renameSheet: this._infoBarController.renameSheet,
                 },
                 rightMenu: {

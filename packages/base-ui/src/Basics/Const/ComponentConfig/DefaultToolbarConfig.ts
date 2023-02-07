@@ -1,6 +1,6 @@
-import { BaseToolBarConfig, SheetToolBarConfig } from '../../Interfaces/ComponentConfig/ToolBarConfig';
+import { BaseToolbarConfig, SheetToolbarConfig } from '../../Interfaces/ComponentConfig/ToolbarConfig';
 
-export const DefaultToolbarConfig: BaseToolBarConfig = {
+export const DefaultToolbarConfig: BaseToolbarConfig = {
     undo: true,
     redo: true, // Undo redo
     paintFormat: true, // Format brush
@@ -24,7 +24,7 @@ export const DefaultToolbarConfig: BaseToolBarConfig = {
     textRotateMode: true, // 'Text Rotation Mode'
 };
 
-export const DefaultSheetToolbarConfig: SheetToolBarConfig = {
+export const DefaultSheetToolbarConfig: SheetToolbarConfig = {
     ...DefaultToolbarConfig,
     mergeCell: true,
 };

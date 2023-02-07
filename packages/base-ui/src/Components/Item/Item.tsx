@@ -1,8 +1,9 @@
 import { ComponentChildren, Component } from '../../Framework';
-import { BaseComponentRender, BaseComponentSheet } from '../../BaseComponent';
+import { BaseComponentRender } from '../../BaseComponent';
 import { BaseMenuItem } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
 import styles from './index.module.less';
+import { Icon } from '..';
 
 export interface BaseItemProps extends BaseMenuItem {
     selected?: boolean;
@@ -13,19 +14,13 @@ export interface BaseItemProps extends BaseMenuItem {
 export class Item extends Component<BaseItemProps> {
     private _render: BaseComponentRender;
 
-    initialize() {
-        const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this._render = component.getComponentRender();
-    }
-
     render() {
-        const CorrectIcon = this._render.renderFunction('CorrectIcon');
         const { selected, label, suffix, disabled } = this.props;
         return (
             <div className={joinClassNames(styles.selectItem, disabled ? styles.selectDisabledItem : '')}>
                 {selected ? (
                     <span className={styles.selectItemSelected}>
-                        <CorrectIcon />
+                        <Icon.CorrectIcon />
                     </span>
                 ) : (
                     ''

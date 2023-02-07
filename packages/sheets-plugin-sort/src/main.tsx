@@ -11,8 +11,8 @@ const uiDefaultConfigUp = {
         outerRight: true,
         innerLeft: false,
         innerRight: false,
-        toolBar: true,
-        toolBarConfig: {
+        toolbar: true,
+        toolbarConfig: {
             undoRedo: true,
             font: true,
         },

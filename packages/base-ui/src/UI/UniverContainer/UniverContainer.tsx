@@ -1,4 +1,4 @@
-import {  Tools } from '@univerjs/core';
+import { Tools } from '@univerjs/core';
 import cssVars from 'css-vars-ponyfill';
 import defaultSkin from '../../Basics/CSS/Skin/default.module.less';
 import darkSkin from '../../Basics/CSS/Skin/dark.module.less';
@@ -7,7 +7,7 @@ import { BaseComponentProps } from '../../BaseComponent';
 import { AppContext } from '../../Common';
 import { Component, createRef } from '../../Framework';
 import style from './index.module.less';
-import { ToolBar } from '../ToolBar';
+import { Toolbar } from '../Toolbar';
 import { InfoBar } from '../InfoBar';
 import { UniverConfig } from '../../Basics/Interfaces/ComponentConfig/UniverConfig';
 import { RightMenu } from '../RightMenu';
@@ -248,7 +248,7 @@ export class UniverContainer extends Component<BaseSheetContainerProps, IState> 
                         <Layout className={style.mainContent} style={{ position: 'relative' }}>
                             <Header style={{ display: config.header ? 'block' : 'none' }}>
                                 {config.infoBar && <InfoBar {...methods.infoBar}></InfoBar>}
-                                {config.toolBar && <ToolBar {...methods.toolbar}></ToolBar>}
+                                {config.toolbar && <Toolbar {...methods.toolbar}></Toolbar>}
                                 {/* {config.infoBar && <InfoBar></InfoBar>}
                                 {config.formulaBar && <FormulaBar></FormulaBar>} */}
                             </Header>

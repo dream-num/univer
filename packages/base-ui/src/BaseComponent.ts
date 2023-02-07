@@ -1,4 +1,5 @@
 import { BasePlugin } from '@univerjs/core';
+import { Context } from '@univerjs/core/src/Basics/Context';
 import { ComponentClass, ForwardFn } from './Framework';
 import { Description } from './Interfaces';
 
@@ -12,6 +13,7 @@ export interface BaseComponentSheet extends BasePlugin {
 export interface BaseComponentProps {
     getComponent?: (ref: any) => void; //获取自身组件
     id?: string; // 组件id
+    context?: Context;
 }
 
 export interface BaseComponent<T = any> {

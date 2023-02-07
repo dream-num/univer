@@ -48,7 +48,7 @@ cover: ''
 ```jsx
 import { Button } from '@univerjs/style-univer';
 
-const ToolBar = () => {
+const Toolbar = () => {
     const buttonText = '确认';
     return (
         <Button

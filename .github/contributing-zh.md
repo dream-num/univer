@@ -465,7 +465,7 @@ pnpm install
                 // 其他代码
                 initialize(context: SheetContext): void {
                     // 其他代码
-                    const item: IToolBarItemProps = {
+                    const item: IToolbarItemProps = {
                         locale: 'filter',
                         type: ISlotElement.JSX,
                         show: true,
@@ -534,7 +534,7 @@ pnpm install
 
     现有抛出元素的 API 有
 
-    -   getToolBarRef：工具栏组件
+    -   getToolbarRef：工具栏组件
     -   getContentRef：中间内容区组件
     -   getSplitLeftRef：中间左边内容区组件，在中间内容区被切分为两块内容区的时候存在
 
@@ -1196,7 +1196,7 @@ cover: ''
 ```jsx
 import { Button } from '@univerjs/style-univer';
 
-const ToolBar = () => {
+const Toolbar = () => {
     const buttonText = '确认';
     return (
         <Button

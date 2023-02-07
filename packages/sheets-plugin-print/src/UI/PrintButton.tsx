@@ -1,11 +1,11 @@
-import { BaseComponentSheet, BaseIconProps, BaseSelectProps, Component, IToolBarItemProps } from '@univerjs/base-ui';
+import { BaseComponentSheet, BaseIconProps, BaseSelectProps, Component, IToolbarItemProps } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { FunctionComponent } from 'preact';
 import { IProps } from '../IData/IPrint';
 import { PrintMode } from './PrintMode';
 // Types for state
 interface IState {
-    print: IToolBarItemProps;
+    print: IToolbarItemProps;
     isPrintShow: boolean;
 }
 
@@ -107,7 +107,7 @@ export class PrintButton extends Component<IProps, IState> {
             item.tooltipRight = locale.get(`${item.locale}RightLabel`);
 
             // set current Locale string for select
-            item.children?.forEach((ele: IToolBarItemProps) => {
+            item.children?.forEach((ele: IToolbarItemProps) => {
                 if (ele.locale) {
                     ele.label = locale.get(`${ele.locale}`);
                 }

@@ -28,10 +28,10 @@ import {
     AntLineControl,
     CountBarController,
     SheetContainerController,
-    ToolBarController,
+    ToolbarController,
     BaseSheetContainerConfig,
 } from './Controller';
-import { IToolBarItemProps } from './Model/ToolBarModel';
+import { IToolbarItemProps } from './Model/ToolbarModel';
 import { ModalGroupController } from './Controller/ModalGroupController';
 import { ISheetPluginConfig, DEFAULT_SPREADSHEET_PLUGIN_DATA } from './Basics';
 import { FormulaBarController } from './Controller/FormulaBarController';
@@ -44,7 +44,7 @@ import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeAc
 export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     private _config: ISheetPluginConfig;
 
-    private _toolBarRef: RefObject<HTMLElement>;
+    private _toolbarRef: RefObject<HTMLElement>;
 
     private _splitLeftRef: RefObject<HTMLDivElement>;
 
@@ -68,7 +68,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     private _rightMenuControl: RightMenuController;
 
-    private _toolBarControl: ToolBarController;
+    private _toolbarControl: ToolbarController;
 
     private _infoBarControl: InfoBarController;
 
@@ -144,7 +144,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
         const sheetContainerConfig = this._config.layout?.sheetContainerConfig;
         const rightMenuConfig = this._config.layout?.rightMenuConfig;
-        const toolBarConfig = this._config.layout?.toolBarConfig;
+        const toolbarConfig = this._config.layout?.toolbarConfig;
 
         this._modalGroupController = new ModalGroupController(this);
         this._sheetContainerController = new SheetContainerController(this, config);
@@ -154,8 +154,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
             this._rightMenuControl = new RightMenuController(this, rightMenuConfig);
         }
 
-        if (sheetContainerConfig?.toolBar) {
-            this._toolBarControl = new ToolBarController(this, toolBarConfig);
+        if (sheetContainerConfig?.toolbar) {
+            this._toolbarControl = new ToolbarController(this, toolbarConfig);
         }
         if (sheetContainerConfig?.infoBar) {
             this._infoBarControl = new InfoBarController(this);
@@ -268,7 +268,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         actionRegister.add(this._namedRangeActionExtensionFactory);
     }
 
-    addButton(item: IToolBarItemProps): void {
+    addButton(item: IToolbarItemProps): void {
         this._addButtonFunc(item);
     }
 
@@ -328,8 +328,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         return this._rightMenuControl;
     }
 
-    getToolBarControl() {
-        return this._toolBarControl;
+    getToolbarControl() {
+        return this._toolbarControl;
     }
 
     getInfoBarControl() {
@@ -360,8 +360,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         this._rightMenuControl && this._rightMenuControl.addItem(item);
     }
 
-    addToolButton(config: IToolBarItemProps) {
-        this._toolBarControl && this._toolBarControl.addToolButton(config);
+    addToolButton(config: IToolbarItemProps) {
+        this._toolbarControl && this._toolbarControl.addToolButton(config);
     }
 
     registerComponent(name: string, component: any, props?: any) {

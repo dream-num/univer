@@ -1,10 +1,10 @@
-import { BaseSelectProps, Component, IToolBarItemProps } from '@univerjs/base-ui';
+import { BaseSelectProps, Component, IToolbarItemProps } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { IProps } from '../IData';
 import { FilterPlugin } from '../FilterPlugin';
 
 interface IState {
-    filter: IToolBarItemProps;
+    filter: IToolbarItemProps;
     isFilter: boolean;
     filterPlugin: FilterPlugin | null;
 }
@@ -76,7 +76,7 @@ export class FilterButton extends Component<IProps, IState> {
             item.tooltip = locale.get(`${item.locale}Label`);
 
             // set current Locale string for select
-            item.children?.forEach((ele: IToolBarItemProps) => {
+            item.children?.forEach((ele: IToolbarItemProps) => {
                 if (ele.locale) {
                     ele.label = locale.get(`${ele.locale}`);
                 }

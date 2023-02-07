@@ -26,7 +26,7 @@ The properties of the device are described as follows:
 ```jsx
 import { Container } from '@univerjs/style-univer';
 
-const ToolBar = () => {
+const Toolbar = () => {
     const containerText = 'container';
     return (
         <Container

@@ -1,6 +1,6 @@
 import { Plugin } from '@univerjs/core';
-import { InfoBar } from '../UI/InfoBar';
 import { InfoBarModel } from '../Model/InfoBarModel';
+import { InfoBar } from '../View';
 
 type IProps = {
     locale?: string;
@@ -15,7 +15,7 @@ export interface BaseInfoBarProps {
     sheetName: string;
 }
 
-export class InfoBarController {
+export class InfoBarUIController {
     private _infoList: BaseInfoBarProps;
 
     private _plugin: Plugin;
@@ -60,7 +60,7 @@ export class InfoBarController {
     }
 
     resetInfoList(list: BaseInfoBarProps) {
-        const locale = this._plugin.getLocale();
+        const locale = this._plugin.getContext().getLocale();
         for (let k in list) {
             if (list[k].locale) {
                 list[k].label = locale.get(list[k].locale);
@@ -69,7 +69,5 @@ export class InfoBarController {
         this._infoBar.setInfoList(list);
     }
 
-    renameSheet() {
-
-    }
+    renameSheet() {}
 }

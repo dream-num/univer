@@ -6,8 +6,8 @@ import { RightMenuProps } from './Model/RightMenuModel';
 import { en, zh } from './Locale';
 import { CANVAS_VIEW_KEY } from './View/Render/BaseView';
 import { CanvasView } from './View/Render/CanvasView';
-import { RightMenuController, InfoBarController, SheetBarControl, CellEditorController, SheetContainerController, ToolBarController } from './Controller';
-import { IToolBarItemProps } from './Model/ToolBarModel';
+import { RightMenuController, InfoBarController, SheetBarControl, CellEditorController, SheetContainerController, ToolbarController } from './Controller';
+import { IToolbarItemProps } from './Model/ToolbarModel';
 import { ModalGroupController } from './Controller/ModalGroupController';
 import { ISheetPluginConfig } from './Basics';
 import { FormulaBarController } from './Controller/FormulaBarController';
@@ -26,7 +26,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     private _rightMenuControl: RightMenuController;
 
-    private _toolBarControl: ToolBarController;
+    private _toolbarControl: ToolbarController;
 
     private _infoBarControl: InfoBarController;
 
@@ -174,8 +174,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         return this._rightMenuControl;
     }
 
-    getToolBarControl() {
-        return this._toolBarControl;
+    getToolbarControl() {
+        return this._toolbarControl;
     }
 
     getInfoBarControl() {
@@ -206,8 +206,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         this._rightMenuControl && this._rightMenuControl.addItem(item);
     }
 
-    addToolButton(config: IToolBarItemProps) {
-        this._toolBarControl && this._toolBarControl.addToolButton(config);
+    addToolButton(config: IToolbarItemProps) {
+        this._toolbarControl && this._toolbarControl.addToolButton(config);
     }
 
     registerComponent(name: string, component: any, props?: any) {

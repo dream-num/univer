@@ -9,7 +9,7 @@ import cssVars from 'css-vars-ponyfill';
 import { RightMenu } from '../RightMenu';
 import { InfoBar } from '../InfoBar';
 import style from './index.module.less';
-import { ToolBar } from '../ToolBar';
+import { Toolbar } from '../Toolbar';
 import { CountBar } from '../CountBar/CountBar';
 import { ModalGroup } from '../ModalGroup/ModalGroup';
 import { SheetPlugin } from '../../../SheetPlugin';
@@ -280,7 +280,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                         <Layout className={style.mainContent} style={{ position: 'relative' }}>
                             <Header style={{ display: layout.header ? 'block' : 'none' }}>
                                 {layout.infoBar && <InfoBar></InfoBar>}
-                                {layout.toolBar && <ToolBar toolList={[]}></ToolBar>}
+                                {layout.toolbar && <Toolbar toolList={[]}></Toolbar>}
                                 {layout.formulaBar && <FormulaBar></FormulaBar>}
                             </Header>
                             <Layout>

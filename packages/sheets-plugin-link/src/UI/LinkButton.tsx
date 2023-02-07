@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet, Component, IToolBarItemProps, ModalProps } from '@univerjs/base-ui';
+import { BaseComponentRender, BaseComponentSheet, Component, IToolbarItemProps, ModalProps } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { Icon } from '@univerjs/style-univer';
 import { IProps } from '../IData/ILink';
@@ -7,11 +7,11 @@ import { LinkContent } from './LinkContent';
 
 // Types for state
 interface IState {
-    insertLink: IToolBarItemProps;
+    insertLink: IToolbarItemProps;
     modalData: ModalProps[];
 }
 
-const insertLink: IToolBarItemProps = {
+const insertLink: IToolbarItemProps = {
     locale: 'toolbar.insertLink',
     type: 'single',
     label: <Icon.Insert.LinkIcon />,

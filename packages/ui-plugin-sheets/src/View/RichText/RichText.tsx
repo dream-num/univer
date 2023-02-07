@@ -1,5 +1,5 @@
 // import { CellInputHandler } from '@univerjs/sheets-plugin-formula/src/Controller/CellInputHandler';
-import { Component, createRef, xssDeal } from '@univerjs/base-ui';
+import { BaseComponentProps, Component, createRef, xssDeal } from '@univerjs/base-ui';
 import { CellTextStyle } from './CellTextStyle';
 import styles from './index.module.less';
 // interface IProps {
@@ -11,7 +11,7 @@ import styles from './index.module.less';
 
 export interface IRichTextState {}
 
-export interface BaseRichTextProps {
+export interface BaseRichTextProps extends BaseComponentProps {
     style?: {};
     className?: string;
     onClick?: (e: MouseEvent) => void;

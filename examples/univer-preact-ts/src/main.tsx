@@ -8,7 +8,7 @@ const sheetConfig = {
         sheetContainerConfig: {
             infoBar: false,
             formulaBar: false,
-            toolBar: false,
+            toolbar: false,
             sheetBar: false,
             countBar: false,
             rightMenu: false,
@@ -73,7 +73,7 @@ const sheetConfigDown = {
         sheetContainerConfig: {
             infoBar: false,
             formulaBar: false,
-            toolBar: false,
+            toolbar: false,
             sheetBar: true,
             countBar: false,
             rightMenu: false,
@@ -130,7 +130,7 @@ univerSheetCustom({
 //         layout: {
 //             innerRight: false,
 //             outerLeft: false,
-//             toolBarConfig: {
+//             toolbarConfig: {
 //                 paintFormat: false,
 //                 currencyFormat: false,
 //                 percentageFormat: false,

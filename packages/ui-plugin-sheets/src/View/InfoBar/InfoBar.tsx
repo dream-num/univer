@@ -1,7 +1,6 @@
+import { BaseComponentProps, Component, Container, Input, Tooltip } from '@univerjs/base-ui';
 import { Nullable } from '@univerjs/core';
-import { BaseComponentProps, BaseComponentRender, BaseComponentSheet } from '../../BaseComponent';
-import { BaseInfoBarProps } from '../../Controller/InfoBarController';
-import { Component } from '../../Framework';
+import { BaseInfoBarProps } from '../../Controller/InfoBarUIController';
 import styles from './index.module.less';
 
 interface IState {
@@ -13,12 +12,7 @@ interface IProps extends BaseComponentProps {
 }
 
 export class InfoBar extends Component<IProps, IState> {
-    private _render: BaseComponentRender;
-
     initialize() {
-        const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this._render = component.getComponentRender();
-
         this.state = {
             infoList: null,
         };
@@ -37,12 +31,6 @@ export class InfoBar extends Component<IProps, IState> {
     render() {
         const { renameSheet } = this.props;
         if (!this.state.infoList) return;
-        const Button = this._render.renderFunction('Button');
-        const Container = this._render.renderFunction('Container');
-        const Input = this._render.renderFunction('Input');
-        const Tooltip = this._render.renderFunction('Tooltip');
-        const DropDownIcon = this._render.renderFunction('DropDownIcon');
-        const LogoIcon = this._render.renderFunction('LogoIcon');
 
         const { back, sheetName, update, save, rename } = this.state.infoList;
 

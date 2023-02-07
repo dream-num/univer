@@ -1,8 +1,7 @@
-import { FunctionComponent } from '../../../Framework';
-import { BaseIconProps, IconComponent } from '../../../Interfaces';
+import { BaseIconProps } from '../../../Interfaces';
 import { Icon } from '../AddIcon';
 
-const LeftAlignIcon = (props: BaseIconProps) => (
+export const LeftAlignIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7250" width="1em" height="1em" fill="currentColor">
             <path
@@ -13,7 +12,7 @@ const LeftAlignIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const CenterAlignIcon = (props: BaseIconProps) => (
+export const CenterAlignIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7377" width="1em" height="1em" fill="currentColor">
             <path
@@ -24,7 +23,7 @@ const CenterAlignIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const RightAlignIcon = (props: BaseIconProps) => (
+export const RightAlignIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7504" width="1em" height="1em" fill="currentColor">
             <path
@@ -35,7 +34,7 @@ const RightAlignIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const TopVerticalIcon = (props: BaseIconProps) => (
+export const TopVerticalIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7631" width="1em" height="1em" fill="currentColor">
             <path
@@ -46,7 +45,7 @@ const TopVerticalIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const CenterVerticalIcon = (props: BaseIconProps) => (
+export const CenterVerticalIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7758" width="1em" height="1em" fill="currentColor">
             <path
@@ -57,7 +56,7 @@ const CenterVerticalIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const BottomVerticalIcon = (props: BaseIconProps) => (
+export const BottomVerticalIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7885" width="1em" height="1em" fill="currentColor">
             <path
@@ -68,7 +67,7 @@ const BottomVerticalIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const TextRotateIcon = (props: BaseIconProps) => (
+export const TextRotateIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="8217" width="1em" height="1em" fill="currentColor">
             <path
@@ -78,7 +77,7 @@ const TextRotateIcon = (props: BaseIconProps) => (
         </svg>
     </Icon>
 );
-const TextRotateAngleUpIcon = (props: BaseIconProps) => (
+export const TextRotateAngleUpIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4524" width="1em" height="1em" fill="currentColor">
             <path
@@ -89,7 +88,7 @@ const TextRotateAngleUpIcon = (props: BaseIconProps) => (
         </svg>
     </Icon>
 );
-const TextRotateAngleDownIcon = (props: BaseIconProps) => (
+export const TextRotateAngleDownIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4659" width="1em" height="1em" fill="currentColor">
             <path
@@ -100,7 +99,7 @@ const TextRotateAngleDownIcon = (props: BaseIconProps) => (
         </svg>
     </Icon>
 );
-const TextRotateVerticalIcon = (props: BaseIconProps) => (
+export const TextRotateVerticalIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4794" width="1em" height="1em" fill="currentColor">
             <path
@@ -111,7 +110,7 @@ const TextRotateVerticalIcon = (props: BaseIconProps) => (
         </svg>
     </Icon>
 );
-const TextRotateRotationUpIcon = (props: BaseIconProps) => (
+export const TextRotateRotationUpIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4929" width="1em" height="1em" fill="currentColor">
             <path
@@ -122,7 +121,7 @@ const TextRotateRotationUpIcon = (props: BaseIconProps) => (
         </svg>
     </Icon>
 );
-const TextRotateRotationDownIcon = (props: BaseIconProps) => (
+export const TextRotateRotationDownIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5199" width="1em" height="1em" fill="currentColor">
             <path
@@ -134,7 +133,7 @@ const TextRotateRotationDownIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const BrIcon = (props: BaseIconProps) => (
+export const BrIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="8736" width="1em" height="1em" fill="currentColor">
             <path
@@ -150,7 +149,7 @@ const BrIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const OverflowIcon = (props: BaseIconProps) => (
+export const OverflowIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="8608" width="1em" height="1em" fill="currentColor">
             <path
@@ -162,7 +161,7 @@ const OverflowIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const CutIcon = (props: BaseIconProps) => (
+export const CutIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="8865" width="1em" height="1em" fill="currentColor">
             <path d="M767.829333 213.333333h42.496v597.333334h-42.496z" p-id="8866"></path>
@@ -170,82 +169,6 @@ const CutIcon = (props: BaseIconProps) => (
         </svg>
     </Icon>
 );
-
-export class UniverLeftAlignIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return LeftAlignIcon;
-    }
-}
-export class UniverCenterAlignIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return CenterAlignIcon;
-    }
-}
-export class UniverRightAlignIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return RightAlignIcon;
-    }
-}
-export class UniverTopVerticalIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return TopVerticalIcon;
-    }
-}
-export class UniverCenterVerticalIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return CenterVerticalIcon;
-    }
-}
-export class UniverBottomVerticalIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return BottomVerticalIcon;
-    }
-}
-export class UniverTextRotateIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return TextRotateIcon;
-    }
-}
-export class UniverTextRotateAngleUpIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return TextRotateAngleUpIcon;
-    }
-}
-export class UniverTextRotateAngleDownIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return TextRotateAngleDownIcon;
-    }
-}
-export class UniverTextRotateVerticalIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return TextRotateVerticalIcon;
-    }
-}
-export class UniverTextRotateRotationUpIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return TextRotateRotationUpIcon;
-    }
-}
-export class UniverTextRotateRotationDownIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return TextRotateRotationDownIcon;
-    }
-}
-export class UniverBrIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return BrIcon;
-    }
-}
-export class UniverOverflowIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return OverflowIcon;
-    }
-}
-export class UniverCutIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return CutIcon;
-    }
-}
 
 export default {
     LeftAlignIcon,

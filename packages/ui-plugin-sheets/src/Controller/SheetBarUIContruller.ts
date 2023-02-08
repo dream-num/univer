@@ -37,40 +37,13 @@ export class SheetBarUIController {
 
     protected _initializeObs() {
         const plugin = this._plugin;
-        const context = plugin.getContext();
         const manager = context.getObserverManager();
+        const context = plugin.getContext();
         const workbook = context.getWorkBook();
         const unitId = workbook.getUnitId();
         // manager.requiredObserver<SheetBar>('onSheetBarDidMountObservable', PLUGIN_NAMES.SPREADSHEET);
         manager.requiredObserver<SheetBar>('onSheetBarDidMountObservable', PLUGIN_NAMES.SPREADSHEET).add((component) => {
-            this._sheetBar = component;
-            this._sheetUl = this.resetSheetUl(this._sheetUl);
-            this._sheetBar.setValue({
-                sheetList: this._sheetList,
-                sheetUl: this._sheetUl,
-                menuList: this._menuList,
-                addSheet: () => {
-                    // this._barControl.addSheet();
-                },
-                selectSheet: (event: Event, data: { item: SheetUlProps }) => {
-                    this._dataId = data.item.sheetId;
-                    const sheet = plugin.getContext().getWorkBook().getSheetBySheetId(this._dataId);
-                    if (sheet) {
-                        sheet.activate();
-                    }
-                },
-                contextMenu: (e: MouseEvent) => {
-                    const target = e.currentTarget as HTMLDivElement;
-                    this._dataId = target.dataset.id as string;
-                    //this._barControl.contextMenu(e);
-                },
-                changeSheetName: (e: Event) => {
-                    //this._barControl.changeSheetName(e);
-                },
-                dragEnd: (elements: HTMLDivElement[]) => {
-                    //this._barControl.dragEnd(elements);
-                },
-            });
+            
         });
         context.getContextObserver('onAfterChangeUILocaleObservable').add(() => {
             this._sheetUl = this.resetSheetUl(this._sheetUl);
@@ -78,7 +51,6 @@ export class SheetBarUIController {
                 sheetUl: this._sheetUl,
             });
         });
-
         CommandManager.getActionObservers().add((actionEvent: any) => {
             const action = actionEvent.action as SheetActionBase<any>;
             const workbook = action.getWorkBook();
@@ -221,6 +193,37 @@ export class SheetBarUIController {
         this._initializeObs();
         this._initializeData();
     }
+
+    getComponent = (ref: SheetBar) => {
+        this._sheetBar = ref;
+        this._sheetUl = this.resetSheetUl(this._sheetUl);
+        this._sheetBar.setValue({
+            sheetList: this._sheetList,
+            sheetUl: this._sheetUl,
+            menuList: this._menuList,
+            addSheet: () => {
+                // this._barControl.addSheet();
+            },
+            selectSheet: (event: Event, data: { item: SheetUlProps }) => {
+                this._dataId = data.item.sheetId;
+                const sheet = this._plugin.getContext().getWorkBook().getSheetBySheetId(this._dataId);
+                if (sheet) {
+                    sheet.activate();
+                }
+            },
+            contextMenu: (e: MouseEvent) => {
+                const target = e.currentTarget as HTMLDivElement;
+                this._dataId = target.dataset.id as string;
+                //this._barControl.contextMenu(e);
+            },
+            changeSheetName: (e: Event) => {
+                //this._barControl.changeSheetName(e);
+            },
+            dragEnd: (elements: HTMLDivElement[]) => {
+                //this._barControl.dragEnd(elements);
+            },
+        });
+    };
 
     resetLabel(label: string[] | string) {
         const locale = this._plugin.getContext().getLocale();

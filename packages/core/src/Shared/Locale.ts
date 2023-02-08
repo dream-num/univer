@@ -63,7 +63,6 @@ export class Locale {
                     : LocaleType.EN,
             locales: { zh, en },
         };
-        console.dir(this.options);
     }
 
     /**
@@ -81,7 +80,7 @@ export class Locale {
         if (key) {
             // const { locales, currentLocale } = this.options;
             const { locales, currentLocale } = this.options;
-            return (Locale.getValue(locales[currentLocale], key) as string) || '';
+            return (Locale.getValue(locales[currentLocale], key) as string) || key;
         }
         return String();
     }

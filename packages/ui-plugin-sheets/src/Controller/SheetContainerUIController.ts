@@ -125,7 +125,7 @@ export class SheetContainerUIController {
                     // renameSheet: this._infoBarController.renameSheet,
                 },
                 rightMenu: {
-                    // getComponent: this._rightMenuController.getComponent,
+                    getComponent: this._rightMenuController.getComponent,
                 },
                 countBar: {
                     // getComponent: this._countBarController.getComponent,

@@ -1,5 +1,4 @@
 import { ComponentChildren, Component } from '../../Framework';
-import { BaseComponentRender } from '../../BaseComponent';
 import { BaseMenuItem } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
 import styles from './index.module.less';
@@ -12,7 +11,11 @@ export interface BaseItemProps extends BaseMenuItem {
 }
 
 export class Item extends Component<BaseItemProps> {
-    private _render: BaseComponentRender;
+    getLabelLocale(label: ComponentChildren) {
+        if (typeof label === 'string') {
+            return this.getLocale(label);
+        }
+    }
 
     render() {
         const { selected, label, suffix, disabled } = this.props;
@@ -25,7 +28,7 @@ export class Item extends Component<BaseItemProps> {
                 ) : (
                     ''
                 )}
-                <span className={styles.selectItemContent}>{label}</span>
+                <span className={styles.selectItemContent}>{this.getLabelLocale(label)}</span>
                 {suffix ? <span className={styles.selectItemSuffix}>{suffix}</span> : ''}
             </div>
         );

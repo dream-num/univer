@@ -130,14 +130,6 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
     render() {
         const obj = Object.assign(this.state.styles || {}, this.props.style);
 
-        this.props.lang = this.props.lang ?? {
-            collapse: '',
-            customColor: '',
-            confirmColor: '',
-            cancelColor: '',
-            change: '',
-        };
-
         return (
             <div className={`${styles.colorPickerOuter} ${this.props.className}`} ref={this.ulRef} style={{ ...obj }}>
                 <div
@@ -169,7 +161,7 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                             ))}
                         </div>
                         <div>
-                            <Button onClick={this.onSwitch}>{this.state.setting ? this.props.lang.collapse : this.props.lang.customColor}</Button>
+                            <Button onClick={this.onSwitch}>{this.state.setting ? this.getLocale('colorPicker.collapse') : this.getLocale('colorPicker.customColor')}</Button>
                         </div>
                     </div>
 
@@ -185,7 +177,7 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                                         // this.hideSelect();
                                     }}
                                 >
-                                    {this.props.lang.confirmColor}
+                                    {this.getLocale('colorPicker.confirmColor')}
                                 </Button>
                                 <Button
                                     danger
@@ -193,7 +185,7 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                                         this.onCancel();
                                     }}
                                 >
-                                    {this.props.lang.cancelColor}
+                                    {this.getLocale('colorPicker.cancelColor')}
                                 </Button>
                                 <Button
                                     onClick={(e: MouseEvent) => {
@@ -203,7 +195,7 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                                         });
                                     }}
                                 >
-                                    {this.props.lang.change}
+                                    {this.getLocale('colorPicker.change')}
                                 </Button>
                             </div>
                         </div>

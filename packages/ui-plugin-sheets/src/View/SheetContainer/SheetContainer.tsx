@@ -100,7 +100,6 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
         // Set Provider for entire Container
         return (
             <Container className={style.layoutContainer}>
-                {this.getLocale('toolbar.undo')}
                 <Layout>
                     <Sider style={{ display: config.outerLeft ? 'block' : 'none' }}></Sider>
                     <Layout className={style.mainContent} style={{ position: 'relative' }}>
@@ -126,9 +125,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
                                     </Container>
                                 )}
                                 <Container ref={this.contentRef} className={style.contentInnerRightContainer}>
-                                    {/* {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>}
-                                              {config.cellEditor && <RichText {...methods.cellEditor}></RichText>} */}
-
+                                    {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>}
                                     {<RichText {...methods.cellEditor}></RichText>}
                                 </Container>
                             </Content>

@@ -1,5 +1,5 @@
 // sheet工具栏配置
-export interface SheetToolBarConfig {
+export interface SheetToolbarConfig {
     undo?: boolean; // Undo redo
     redo?: boolean; // Undo redo
     paintFormat?: boolean; // Format brush

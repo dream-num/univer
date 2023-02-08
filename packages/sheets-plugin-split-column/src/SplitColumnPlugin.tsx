@@ -1,5 +1,5 @@
 import { SheetContext, UniverSheet, Plugin, PLUGIN_NAMES } from '@univerjs/core';
-import { IToolBarItemProps, ISlotElement } from '@univerjs/base-ui';
+import { IToolbarItemProps, ISlotElement } from '@univerjs/base-ui';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { SplitColumnButton } from './UI/SplitColumnButton';
 import { zh, en } from './Locale';
@@ -34,7 +34,7 @@ export class SplitColumnPlugin extends Plugin {
         });
         const config: IConfig = {};
 
-        const item: IToolBarItemProps = {
+        const item: IToolbarItemProps = {
             locale: SPLIT_COLUMN_PLUGIN_NAME,
             type: ISlotElement.JSX,
             show: true,

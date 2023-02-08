@@ -1,13 +1,15 @@
-import { PLUGIN_NAMES, INamedRange } from '@univerjs/core';
-import { CellInputExtensionManager } from '../Basics/Register/CellInputRegister';
-import { SheetUIPlugin } from '../SheetUIPlugin';
-import { FormulaBar } from '../View/UI/FormulaBar';
-import { SelectionControl } from './Selection';
+import { SheetPlugin, SelectionControl } from "@univerjs/base-sheets";
+import { CellInputExtensionManager } from "@univerjs/base-ui";
+import { INamedRange, PLUGIN_NAMES } from "@univerjs/core";
+import { SheetUIPlugin } from "..";
+import { FormulaBar } from "../View/FormulaBar";
 
 export class FormulaBarUIController {
     private _formulaBar: FormulaBar;
 
     private _plugin: SheetUIPlugin;
+
+    private _sheetPlugin: SheetPlugin;
 
     private _cellInputExtensionManager: CellInputExtensionManager;
 
@@ -15,29 +17,14 @@ export class FormulaBarUIController {
 
     constructor(plugin: SheetUIPlugin) {
         this._plugin = plugin;
+        this._sheetPlugin = plugin.getContext().getUniver().getCurrentUniverSheetInstance().context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
 
         this._initialize();
     }
 
     private _initialize() {
-        const context = this._plugin.context;
-        const manager = context.getObserverManager();
 
-        manager.requiredObserver<FormulaBar>('onFormulaBarDidMountObservable', PLUGIN_NAMES.SPREADSHEET).add((component) => {
-            this._formulaBar = component;
-
-            // update named ranges data
-            this._namedRanges = this._plugin.getContext().getWorkBook().getConfig().namedRanges;
-
-            const list = this._namedRanges.map((namedRange) => ({
-                value: namedRange.name,
-                label: namedRange.name,
-            }));
-
-            this._formulaBar.setNamedRanges(list);
-        });
-
-        this._plugin.getObserver('onChangeSelectionObserver')?.add((selectionControl: SelectionControl) => {
+        this._sheetPlugin.getObserver('onChangeSelectionObserver')?.add((selectionControl: SelectionControl) => {
             const currentCell = selectionControl.model.currentCell;
 
             if (currentCell) {
@@ -62,7 +49,7 @@ export class FormulaBarUIController {
                     };
                 }
 
-                const cellData = this._plugin.getWorkbook().getActiveSheet().getRange(currentRangeData).getObjectValue({ isIncludeStyle: true });
+                const cellData = this._sheetPlugin.getWorkbook().getActiveSheet().getRange(currentRangeData).getObjectValue({ isIncludeStyle: true });
 
                 if (cellData) {
                     let cellValue = String(cellData.m || cellData.v || '');
@@ -90,6 +77,25 @@ export class FormulaBarUIController {
 
         // set NamedRange data
     }
+
+    private _initFormulaBar() {
+        // update named ranges data
+        this._namedRanges = this._sheetPlugin.getContext().getWorkBook().getConfig().namedRanges;
+
+        const list = this._namedRanges.map((namedRange) => ({
+            value: namedRange.name,
+            label: namedRange.name,
+        }));
+
+        this._formulaBar.setNamedRanges(list);
+    }
+
+    // 获取Toolbar组件
+    getComponent = (ref: FormulaBar) => {
+        this._formulaBar = ref;
+
+        this._initFormulaBar();
+    };
 
     getFormulaBar() {
         return this._formulaBar;

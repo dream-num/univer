@@ -1,4 +1,4 @@
-import { IToolBarItemProps, ISlotElement } from '@univerjs/base-ui';
+import { IToolbarItemProps, ISlotElement } from '@univerjs/base-ui';
 import { SheetContext, IOCContainer, UniverSheet, Nullable, Plugin, PLUGIN_NAMES } from '@univerjs/core';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { COMMENT_COLORS_PLUGIN_NAME } from './Const/PLUGIN_NAME';
@@ -35,7 +35,7 @@ export class CommentPlugin extends Plugin {
         });
         const config: IConfig = {};
 
-        const item: IToolBarItemProps = {
+        const item: IToolbarItemProps = {
             locale: COMMENT_COLORS_PLUGIN_NAME,
             type: ISlotElement.JSX,
             show: true,

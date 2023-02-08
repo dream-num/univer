@@ -1,4 +1,3 @@
-import { SheetPlugin } from '@univerjs/base-sheets';
 import { Plugin, UniverSheet, UniverDoc, UniverSlide, PLUGIN_NAMES, Tools } from '@univerjs/core';
 import { Context } from '@univerjs/core/src/Basics/Context';
 import { UniverConfig } from './Basics';
@@ -7,18 +6,12 @@ import { DefaultUniverSheetConfig } from './Basics/Const/ComponentConfig/Default
 import { UniverSheetConfig } from './Basics/Interfaces/ComponentConfig/UniverSheetConfig';
 import { BaseComponentPluginObserve, installObserver } from './Basics/Observer';
 import { Locale } from './Basics/Shared/Locale';
-import { EventManager } from './Common';
 import { ComponentManager } from './Common/ComponentManager';
-import { RegisterManager } from './Common/RegisterManager';
 import { UniverContainerController } from './Controller/UniverContainerController';
 import { en, zh } from './Locale';
 
 export class BaseComponentPlugin extends Plugin<BaseComponentPluginObserve> {
-    private _registerManager: RegisterManager;
-
     private _componentManager: ComponentManager;
-
-    private _eventManager: EventManager;
 
     private _config: UniverConfig;
 
@@ -51,8 +44,6 @@ export class BaseComponentPlugin extends Plugin<BaseComponentPluginObserve> {
         // 初始自定义组件管理器
         // this._componentManager = new ComponentManager();
         // this._univerContainerController = new UniverContainerController(this);
-        this._registerManager = new RegisterManager(this);
-        this.setEventManager();
 
         this.addSheet();
     }
@@ -76,31 +67,10 @@ export class BaseComponentPlugin extends Plugin<BaseComponentPluginObserve> {
     }
 
     /**
-     * usage this._clipboardExtensionManager.handle(data);
-     * @returns
-     */
-    getRegisterManager(): RegisterManager {
-        return this._registerManager;
-    }
-
-    /**
      * 自定义组件管理
      */
     getComponentManager() {
         return this._componentManager;
-    }
-
-    setEventManager() {
-        this._eventManager = new EventManager(this);
-
-        const universheets = this.getContext().getUniver().getAllUniverSheetsInstance();
-        universheets.forEach((universheet: UniverSheet) => {
-            universheet.getWorkBook().getContext().getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET).listenEventManager();
-        });
-    }
-
-    getEventManager() {
-        return this._eventManager;
     }
 
     addSheet(config: UniverSheetConfig = {}) {

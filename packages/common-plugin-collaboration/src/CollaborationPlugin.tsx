@@ -13,7 +13,6 @@ export class CollaborationPlugin extends Plugin {
     constructor(config?: ICollaborationPluginConfig) {
         super(COLLABORATION_PLUGIN_NAME);
         this.config = config || { url: '' };
-        console.log('colla---config---', config);
     }
 
     static create(config?: ICollaborationPluginConfig) {

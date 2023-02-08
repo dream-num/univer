@@ -1,14 +1,14 @@
-import { BaseComponentRender, BaseComponentSheet, Component, createRef, IToolBarItemProps, ModalProps } from '@univerjs/base-ui';
+import { BaseComponentRender, BaseComponentSheet, Component, createRef, IToolbarItemProps, ModalProps } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { IProps } from '../IData/IScreenshot';
 import styles from './index.module.less';
 
 // Types for state
 interface IState {
-    screenshot: IToolBarItemProps;
+    screenshot: IToolbarItemProps;
     modalData: ModalProps[];
 }
-// const screenshot: IToolBarItemProps = {
+// const screenshot: IToolbarItemProps = {
 //     name: 'screenshot.screenshotLabel',
 //     type: 'single',
 //     icon: <Icon.View.ScreenshotIcon />,

@@ -1,4 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet, BaseSelectProps, Component, ISelectButton, IToolBarItemProps } from '@univerjs/base-ui';
+import { BaseComponentRender, BaseComponentSheet, BaseSelectProps, Component, ISelectButton, IToolbarItemProps } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { IConfig } from '../../IData';
@@ -9,7 +9,7 @@ interface IProps {
 
 // Types for state
 interface IState {
-    frozen: IToolBarItemProps;
+    frozen: IToolbarItemProps;
 }
 
 export class FreezeButton extends Component<IProps, IState> {
@@ -100,7 +100,7 @@ export class FreezeButton extends Component<IProps, IState> {
             item.tooltipRight = locale.get(`frozen.${item.locale}RightLabel`);
 
             // set current Locale string for select
-            item.children?.forEach((ele: IToolBarItemProps) => {
+            item.children?.forEach((ele: IToolbarItemProps) => {
                 if (ele.locale) {
                     ele.label = locale.get(`${ele.locale}`);
                 }

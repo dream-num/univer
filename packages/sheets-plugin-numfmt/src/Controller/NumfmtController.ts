@@ -10,7 +10,7 @@ import {
     ISetRangeDataActionData,
 } from '@univerjs/core';
 import { BaseComponentRender } from '@univerjs/base-ui';
-import { IToolBarItemProps, SheetPlugin } from '@univerjs/base-sheets';
+import { IToolbarItemProps, SheetPlugin } from '@univerjs/base-sheets';
 import { numfmt } from '@univerjs/base-numfmt-engine';
 import { ACTION_NAMES } from '../Basic/Enum';
 import { DEFAULT_DATA, NUMFMT_PLUGIN_NAME, NumftmConfig } from '../Basic/Const';
@@ -24,7 +24,7 @@ export class NumfmtController {
 
     protected _model: NumfmtModel;
 
-    protected _numfmtList: IToolBarItemProps;
+    protected _numfmtList: IToolbarItemProps;
 
     protected _plugin: NumfmtPlugin;
 

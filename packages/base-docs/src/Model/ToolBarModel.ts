@@ -1,7 +1,7 @@
 import { BaseSelectChildrenProps, BaseSelectProps } from '../View/UI/Common/Select/Select';
 import { BaseTextButtonProps } from '../View/UI/Common/TextButton/TextButton';
 
-export interface IShowToolBarConfig {
+export interface IShowToolbarConfig {
     undoRedo?: boolean; // Undo redo
     paintFormat?: boolean; // Format brush
     currencyFormat?: boolean; // currency format
@@ -47,19 +47,19 @@ enum ToolbarType {
 }
 
 // 继承基础下拉属性,添加国际化
-export interface BaseToolBarSelectChildrenProps extends BaseSelectChildrenProps {
+export interface BaseToolbarSelectChildrenProps extends BaseSelectChildrenProps {
     locale?: string;
     suffixLocale?: string;
-    children?: BaseToolBarSelectChildrenProps[];
+    children?: BaseToolbarSelectChildrenProps[];
 }
 
-interface BaseToolBarSelectProps extends BaseSelectProps {
+interface BaseToolbarSelectProps extends BaseSelectProps {
     locale?: string;
     suffixLocale?: string;
-    children?: BaseToolBarSelectChildrenProps[];
+    children?: BaseToolbarSelectChildrenProps[];
 }
 
-export interface IToolBarItemProps extends BaseToolBarSelectProps, BaseTextButtonProps {
+export interface IToolbarItemProps extends BaseToolbarSelectProps, BaseTextButtonProps {
     show?: boolean; //是否显示按钮
     toolbarType?: ToolbarType;
     locale?: string; //label国际化
@@ -68,24 +68,24 @@ export interface IToolBarItemProps extends BaseToolBarSelectProps, BaseTextButto
     border?: boolean;
 }
 
-export class ToolBarModel {
-    private _config: IShowToolBarConfig[];
+export class ToolbarModel {
+    private _config: IShowToolbarConfig[];
 
-    private _toolList: IToolBarItemProps[];
+    private _toolList: IToolbarItemProps[];
 
-    get config(): IShowToolBarConfig[] {
+    get config(): IShowToolbarConfig[] {
         return this._config;
     }
 
-    get toolList(): IToolBarItemProps[] {
+    get toolList(): IToolbarItemProps[] {
         return this._toolList;
     }
 
-    set config(value: IShowToolBarConfig[]) {
+    set config(value: IShowToolbarConfig[]) {
         this._config = value;
     }
 
-    set toolList(value: IToolBarItemProps[]) {
+    set toolList(value: IToolbarItemProps[]) {
         this._toolList = value;
     }
 }

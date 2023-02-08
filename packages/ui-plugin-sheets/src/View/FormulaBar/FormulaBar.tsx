@@ -1,4 +1,4 @@
-import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, debounce } from '@univerjs/base-ui';
+import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, debounce, Icon } from '@univerjs/base-ui';
 import { BaseSelectChildrenProps, Select } from '@univerjs/base-sheets';
 import styles from './index.module.less';
 
@@ -16,11 +16,6 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
     // formulaContent = createRef<HTMLDivElement>();
 
     initialize(props?: BaseFormulaBarProps) {
-        const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this._render = component.getComponentRender();
-
-        const NextIcon = this._render.renderFunction('NextIcon');
-
         this.state = {
             namedRanges: [
                 {
@@ -61,25 +56,23 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
     }
 
     render(props: BaseFormulaBarProps, state: FormulaState) {
-        const { namedRanges } = state;
 
-        const CloseIcon = this._render.renderFunction('CloseIcon');
-        const CorrectIcon = this._render.renderFunction('CorrectIcon');
-        const FxIcon = this._render.renderFunction('FxIcon');
+        // TODO: formula bar top left menu: 1. cell edit formula ,use formula list 2. cell selection ,use named range, 3. cell edit no formula, disable select
+        const { namedRanges } = state;
 
         return (
             <div className={styles.formulaBox}>
-                <Select children={namedRanges} type={0}></Select>
+                {/* <Select children={namedRanges} type={0}></Select> */}
                 <div className={styles.formulaBar}>
                     <div className={styles.formulaIcon}>
                         <span className={state.spanClass}>
-                            <CloseIcon />
+                            <Icon.Format.CloseIcon />
                         </span>
                         <span className={state.spanClass}>
-                            <CorrectIcon />
+                            <Icon.Format.CorrectIcon />
                         </span>
                         <span className={styles.formulaBlack}>
-                            <FxIcon />
+                            <Icon.Math.FxIcon />
                         </span>
                     </div>
                     <div className={styles.formulaInput}>

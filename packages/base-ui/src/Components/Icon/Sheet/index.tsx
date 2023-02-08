@@ -1,8 +1,7 @@
-import { FunctionComponent } from '../../../Framework';
-import { BaseIconProps, IconComponent } from '../../../Interfaces';
+import { BaseIconProps } from '../../../Interfaces';
 import { Icon } from '../AddIcon';
 
-const CommentIcon = (props: BaseIconProps) => (
+export const CommentIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7705" width="1em" height="1em" fill="currentColor">
             <path d="M352 490.666667a32 32 0 1 0 64 0 32 32 0 0 0-64 0z m128 0a32 32 0 1 0 64 0 32 32 0 0 0-64 0z m128 0a32 32 0 1 0 64 0 32 32 0 0 0-64 0z" p-id="7706"></path>
@@ -14,13 +13,7 @@ const CommentIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-export class UniverCommentIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return CommentIcon;
-    }
-}
-
-const FreezeIcon = (props: BaseIconProps) => (
+export const FreezeIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5448" width="1em" height="1em">
             <path d="M256.426667 256.426667h255.317333v553.130666H256.426667z" fill="#B5B8BD" p-id="5449"></path>
@@ -39,13 +32,8 @@ const FreezeIcon = (props: BaseIconProps) => (
         </svg>
     </Icon>
 );
-export class UniverFreezeIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return FreezeIcon;
-    }
-}
 
-const conditionalFormatIcon = (props: BaseIconProps) => (
+export const conditionalFormatIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6039" width="1em" height="1em" fill="currentColor">
             <path
@@ -55,13 +43,8 @@ const conditionalFormatIcon = (props: BaseIconProps) => (
         </svg>
     </Icon>
 );
-export class UniverConditionalFormatIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return conditionalFormatIcon;
-    }
-}
 
-const DivideIcon = (props: BaseIconProps) => (
+export const DivideIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5501" width="1em" height="1em" fill="currentColor">
             <path
@@ -72,13 +55,7 @@ const DivideIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-export class UniverDivideIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return DivideIcon;
-    }
-}
-
-const ReplaceIcon = (props: BaseIconProps) => (
+export const ReplaceIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4859" width="1em" height="1em" fill="currentColor">
             <path
@@ -88,13 +65,8 @@ const ReplaceIcon = (props: BaseIconProps) => (
         </svg>
     </Icon>
 );
-export class UniverReplaceIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return ReplaceIcon;
-    }
-}
 
-const SearchIcon = (props: BaseIconProps) => (
+export const SearchIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4732" width="1em" height="1em" fill="currentColor">
             <path
@@ -104,13 +76,8 @@ const SearchIcon = (props: BaseIconProps) => (
         </svg>
     </Icon>
 );
-export class UniverSearchIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return SearchIcon;
-    }
-}
 
-const LockIcon = (props: BaseIconProps) => (
+export const LockIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4605" width="1em" height="1em" fill="currentColor">
             <path
@@ -121,13 +88,7 @@ const LockIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-export class UniverLockIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return LockIcon;
-    }
-}
-
-const LocationIcon = (props: BaseIconProps) => (
+export const LocationIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5579" width="1em" height="1em" fill="currentColor">
             <path
@@ -137,13 +98,8 @@ const LocationIcon = (props: BaseIconProps) => (
         </svg>
     </Icon>
 );
-export class UniverLocationIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return LocationIcon;
-    }
-}
 
-const PageIcon = (props: BaseIconProps) => (
+export const PageIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5318" width="1em" height="1em">
             <path d="M810.666667 213.333333v597.333334H213.333333V213.333333h597.333334z m-42.666667 42.666667H256v512h512V256z" p-id="5319"></path>
@@ -153,13 +109,7 @@ const PageIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-export class UniverPageIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return PageIcon;
-    }
-}
-
-const RegularIcon = (props: BaseIconProps) => (
+export const RegularIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5447" width="1em" height="1em" fill="currentColor">
             <path d="M256 256h554.666667v42.666667H256z" p-id="5448"></path>
@@ -172,13 +122,7 @@ const RegularIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-export class UniverRegularIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return RegularIcon;
-    }
-}
-
-const LayoutIcon = (props: BaseIconProps) => (
+export const LayoutIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5576" width="1em" height="1em" fill="currentColor">
             <path
@@ -189,13 +133,7 @@ const LayoutIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-export class UniverLayoutIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return LayoutIcon;
-    }
-}
-
-const TableIcon = (props: BaseIconProps) => (
+export const TableIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6094" width="1em" height="1em" fill="currentColor">
             <path
@@ -205,24 +143,6 @@ const TableIcon = (props: BaseIconProps) => (
         </svg>
     </Icon>
 );
-
-export class UniverTableIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return TableIcon;
-    }
-}
-
-// export interface SheetCompomentUI extends BaseIconProps {
-//     CommentIcon: FunctionComponent;
-// }
-
-// export class UniverIcon implements IconComponent<SheetCompomentUI> {
-//     render(): JSXComponent<SheetCompomentUI> {
-//         return {
-//             CommentIcon,
-//         };
-//     }
-// }
 
 export default {
     CommentIcon,

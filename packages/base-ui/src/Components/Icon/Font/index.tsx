@@ -1,8 +1,7 @@
-import { JSXComponent } from '../../../BaseComponent';
-import { BaseIconProps, IconComponent } from '../../../Interfaces';
+import { BaseIconProps } from '../../../Interfaces';
 import { Icon } from '../AddIcon';
 
-const BoldIcon = (props: BaseIconProps) => (
+export const BoldIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5565" width="1em" height="1em" fill="currentColor">
             <path
@@ -13,7 +12,7 @@ const BoldIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const ItalicIcon = (props: BaseIconProps) => (
+export const ItalicIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5692" width="1em" height="1em" fill="currentColor">
             <path d="M469.333333 256h170.666667v42.666667h-170.666667z" p-id="5693"></path>
@@ -23,7 +22,7 @@ const ItalicIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const DeleteLineIcon = (props: BaseIconProps) => (
+export const DeleteLineIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5311" width="1em" height="1em" fill="currentColor">
             <path d="M298.666667 256h426.666666v42.666667H298.666667z" p-id="5312"></path>
@@ -36,7 +35,7 @@ const DeleteLineIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const UnderLineIcon = (props: BaseIconProps) => (
+export const UnderLineIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5318" width="1em" height="1em" fill="currentColor">
             <path
@@ -59,7 +58,7 @@ const UnderLineIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const TextColorIcon = (props: BaseIconProps) => (
+export const TextColorIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5440" width="1em" height="1em" fill="currentColor">
             <path
@@ -77,29 +76,3 @@ export default {
     UnderLineIcon,
     TextColorIcon,
 };
-
-export class UniverBoldIcon implements IconComponent {
-    render(): JSXComponent<BaseIconProps> {
-        return BoldIcon;
-    }
-}
-export class UniverItalicIcon implements IconComponent {
-    render(): JSXComponent<BaseIconProps> {
-        return ItalicIcon;
-    }
-}
-export class UniverDeleteLineIcon implements IconComponent {
-    render(): JSXComponent<BaseIconProps> {
-        return DeleteLineIcon;
-    }
-}
-export class UniverUnderLineIcon implements IconComponent {
-    render(): JSXComponent<BaseIconProps> {
-        return UnderLineIcon;
-    }
-}
-export class UniverTextColorIcon implements IconComponent {
-    render(): JSXComponent<BaseIconProps> {
-        return TextColorIcon;
-    }
-}

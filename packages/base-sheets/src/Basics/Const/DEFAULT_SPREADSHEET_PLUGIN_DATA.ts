@@ -25,7 +25,7 @@ export const DefaultSheetContainerConfig = {
 
     formulaBar: true,
 
-    toolBar: true,
+    toolbar: true,
 
     countBar: true,
 
@@ -84,7 +84,7 @@ export const DEFAULT_SPREADSHEET_PLUGIN_DATA: ISheetPluginConfig = {
     container: 'universheet',
     layout: {
         sheetContainerConfig: DefaultSheetContainerConfig,
-        toolBarConfig: DefaultToolbarConfig,
+        toolbarConfig: DefaultToolbarConfig,
         rightMenuConfig: DefaultRightMenuConfig,
     },
     selections: {

@@ -1,8 +1,7 @@
-import { FunctionComponent } from '../../../Framework';
-import { BaseIconProps, IconComponent } from '../../../Interfaces';
+import { BaseIconProps } from '../../../Interfaces';
 import { Icon } from '../AddIcon';
 
-const PrintIcon = (props: BaseIconProps) => (
+export const PrintIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4476" width="1em" height="1em" fill="currentColor">
             <path
@@ -18,7 +17,7 @@ const PrintIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const ScreenshotIcon = (props: BaseIconProps) => (
+export const ScreenshotIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5374" width="1em" height="1em" fill="currentColor">
             <path
@@ -29,7 +28,7 @@ const ScreenshotIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const PrintAreaIcon = (props: BaseIconProps) => (
+export const PrintAreaIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5706" width="1em" height="1em" fill="currentColor">
             <path
@@ -40,7 +39,7 @@ const PrintAreaIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const PrintTitleIcon = (props: BaseIconProps) => (
+export const PrintTitleIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5833" width="1em" height="1em" fill="currentColor">
             <path
@@ -52,7 +51,7 @@ const PrintTitleIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const ImageIcon = (props: BaseIconProps) => (
+export const ImageIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5815" width="1em" height="1em" fill="currentColor">
             <path
@@ -63,33 +62,6 @@ const ImageIcon = (props: BaseIconProps) => (
         </svg>
     </Icon>
 );
-
-export class UniverPrintIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return PrintIcon;
-    }
-}
-export class UniverScreenshotIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return ScreenshotIcon;
-    }
-}
-export class UniverPrintAreaIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return PrintAreaIcon;
-    }
-}
-export class UniverPrintTitleIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return PrintTitleIcon;
-    }
-}
-
-export class UniverImageIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return ImageIcon;
-    }
-}
 
 export default {
     PrintIcon,

@@ -1,16 +1,15 @@
 import { SheetRightMenuConfig } from './RightMenuConfig';
 import { SheetContainerConfig } from './SheetContainerConfig';
-import { SheetToolBarConfig } from './ToolBarConfig';
+import { SheetToolbarConfig } from './ToolbarConfig';
 import { Context } from '@univerjs/core/src/Basics/Context';
 
 export interface ILayout {
     sheetContainerConfig?: SheetContainerConfig;
-    toolBarConfig?: SheetToolBarConfig;
+    toolbarConfig?: SheetToolbarConfig;
     rightMenuConfig?: SheetRightMenuConfig;
 }
 
 export interface ISheetUIPluginConfig {
     container?: HTMLElement | string;
     layout?: ILayout;
-    context?: Context;
 }

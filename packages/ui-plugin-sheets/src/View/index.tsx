@@ -1,4 +1,4 @@
-import { isElement, render } from '@univerjs/base-ui';
+import { AppContext, isElement, render } from '@univerjs/base-ui';
 import { BaseSheetContainerProps, SheetContainer } from './SheetContainer';
 
 export class UI {
@@ -31,10 +31,21 @@ export class UI {
 
         props.container = sheetContainer;
 
-        render(<SheetContainer {...props} />, sheetContainer);
+        render(
+            <AppContext.Provider
+                value={{
+                    context: props.context,
+                }}
+            >
+                <SheetContainer {...props} />
+            </AppContext.Provider>,
+            sheetContainer
+        );
     }
 }
 
 export * from './SheetContainer';
-export * from './ToolBar';
+export * from './Toolbar';
 export * from './RightMenu';
+export * from './InfoBar';
+export * from './Common';

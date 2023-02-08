@@ -1,10 +1,10 @@
-import { BaseComponentSheet, BaseIconProps, BaseSelectProps, Component, createRef, FunctionComponent, ISelectButton, IToolBarItemProps, ISlotElement } from '@univerjs/base-ui';
+import { BaseComponentSheet, BaseIconProps, BaseSelectProps, Component, createRef, FunctionComponent, ISelectButton, IToolbarItemProps, ISlotElement } from '@univerjs/base-ui';
 
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { IProps } from '../IData/ISort';
 import { SortCustom } from './SortCustom';
 
-interface config extends IToolBarItemProps {
+interface config extends IToolbarItemProps {
     config?: { [index: string]: any };
 }
 // Types for state
@@ -114,7 +114,7 @@ export class SortButton extends Component<IProps, IState> {
             item.tooltipRight = locale.get(`${item.locale}RightLabel`);
 
             // set current Locale string for select
-            item.children?.forEach((ele: IToolBarItemProps) => {
+            item.children?.forEach((ele: IToolbarItemProps) => {
                 if (ele.locale) {
                     ele.label = locale.get(`${ele.locale}`);
                 }

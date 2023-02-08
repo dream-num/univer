@@ -13,11 +13,11 @@ import {
     TEXT_ROTATE_CHILDREN,
     TEXT_WRAP_CHILDREN,
     VERTICAL_ALIGN_CHILDREN,
-} from '../View/UI/ToolBar/Const';
-import styles from '../View/UI/ToolBar/index.module.less';
+} from '../View/UI/Toolbar/Const';
+import styles from '../View/UI/Toolbar/index.module.less';
 import { LineColor } from '../View/UI/Common/Line/LineColor';
-import { ToolBar } from '../View/UI/ToolBar';
-import { IToolBarItemProps, ToolBarModel } from '../Model/ToolBarModel';
+import { Toolbar } from '../View/UI/Toolbar';
+import { IToolbarItemProps, ToolbarModel } from '../Model/ToolbarModel';
 
 interface BorderInfo {
     color: string;
@@ -27,14 +27,14 @@ interface BorderInfo {
 /**
  *
  */
-export class ToolBarController {
-    private _toolBarModel: ToolBarModel;
+export class ToolbarController {
+    private _toolbarModel: ToolbarModel;
 
     private _plugin: DocPlugin;
 
-    private _toolBarComponent: ToolBar;
+    private _toolbarComponent: Toolbar;
 
-    private _toolList: IToolBarItemProps[];
+    private _toolList: IToolbarItemProps[];
 
     private _lineColor: LineColor;
 
@@ -51,8 +51,8 @@ export class ToolBarController {
 
         const config =
             this._plugin.config.layout === 'auto'
-                ? Tools.deepClone(defaultLayout.toolBarConfig)
-                : Tools.deepMerge(defaultLayout.toolBarConfig, (this._plugin.config.layout as ILayout).toolBarConfig);
+                ? Tools.deepClone(defaultLayout.toolbarConfig)
+                : Tools.deepMerge(defaultLayout.toolbarConfig, (this._plugin.config.layout as ILayout).toolbarConfig);
 
         this._borderInfo = {
             color: '#000',
@@ -175,9 +175,9 @@ export class ToolBarController {
             },
         ];
 
-        this._toolBarModel = new ToolBarModel();
-        this._toolBarModel.config = config;
-        this._toolBarModel.toolList = this._toolList;
+        this._toolbarModel = new ToolbarModel();
+        this._toolbarModel.config = config;
+        this._toolbarModel.toolList = this._toolList;
 
         this.init();
     }
@@ -208,10 +208,10 @@ export class ToolBarController {
             this.setBackground(value);
         });
 
-        this._plugin.getObserver('onToolBarDidMountObservable')?.add((component) => {
+        this._plugin.getObserver('onToolbarDidMountObservable')?.add((component) => {
             //初始化视图
-            this._toolBarComponent = component;
-            this.resetToolBarList();
+            this._toolbarComponent = component;
+            this.resetToolbarList();
         });
 
         this._plugin.context
@@ -287,9 +287,9 @@ export class ToolBarController {
         return toolList;
     }
 
-    resetToolBarList() {
+    resetToolbarList() {
         const toolList = this.resetLocale(this._toolList);
-        this._toolBarComponent.setToolBar(toolList);
+        this._toolbarComponent.setToolbar(toolList);
     }
 
     setRedo() {

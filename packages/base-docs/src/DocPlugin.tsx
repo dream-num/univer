@@ -3,7 +3,7 @@ import { zh, en } from './Locale';
 import { IOCContainer } from '@univerjs/core';
 import { Component, getRefElement, isElement, ISlotProps, RefObject, render } from '@univerjs/base-ui';
 import { DocPluginObserve, install } from './Basic/Observer';
-import { ToolBarController } from './Controller/ToolBarController';
+import { ToolbarController } from './Controller/ToolbarController';
 import { DocumentController } from './Controller/DocumentController';
 import { BaseDocContainerConfig, defaultLayout, DocContainer, IDocPluginConfigBase, ILayout } from './View/UI/DocContainer';
 import { InfoBarController } from './Controller/InfoBarController';
@@ -23,7 +23,7 @@ const DEFAULT_DOCUMENT_PLUGIN_DATA = {
 
 export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
     private _config: IDocPluginConfig;
-    private _toolBarRef: RefObject<HTMLElement>;
+    private _toolbarRef: RefObject<HTMLElement>;
     private _infoBarControl: InfoBarController;
 
     private _splitLeftRef: RefObject<HTMLDivElement>;
@@ -44,7 +44,7 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
 
     private _canvasEngine: Engine;
 
-    private _toolBarControl: ToolBarController;
+    private _toolbarControl: ToolbarController;
 
     private _documentController: DocumentController;
 
@@ -83,14 +83,14 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
 
         const layout = this._config.layout as ILayout;
 
-        if (layout.toolBar) {
-            this._toolBarControl = new ToolBarController(this);
+        if (layout.toolbar) {
+            this._toolbarControl = new ToolbarController(this);
         }
         if (layout.infoBar) {
             this._infoBarControl = new InfoBarController(this);
         }
 
-        this._toolBarControl = new ToolBarController(this);
+        this._toolbarControl = new ToolbarController(this);
         this._infoBarControl = new InfoBarController(this);
         this._documentController = new DocumentController(this, this.config);
 
@@ -208,8 +208,8 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
     getContentRef(): RefObject<HTMLDivElement> {
         return this._contentRef;
     }
-    getToolBarControl() {
-        return this._toolBarControl;
+    getToolbarControl() {
+        return this._toolbarControl;
     }
 
     getInfoBarControl() {

@@ -1,8 +1,7 @@
-import { FunctionComponent } from '../../../Framework';
-import { BaseIconProps, IconComponent } from '../../../Interfaces';
+import { BaseIconProps } from '../../../Interfaces';
 import { Icon } from '../AddIcon';
 
-const PivotableIcon = (props: BaseIconProps) => (
+export const PivotableIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7578" width="1em" height="1em" fill="currentColor">
             <path
@@ -13,7 +12,7 @@ const PivotableIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const SumIcon = (props: BaseIconProps) => (
+export const SumIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7451" width="1em" height="1em" fill="currentColor">
             <path
@@ -24,7 +23,7 @@ const SumIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const OrderIcon = (props: BaseIconProps) => (
+export const OrderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6675" width="1em" height="1em" fill="currentColor">
             <path
@@ -35,7 +34,7 @@ const OrderIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const OrderDESCIcon = (props: BaseIconProps) => (
+export const OrderDESCIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6548" width="1em" height="1em" fill="currentColor">
             <path
@@ -46,7 +45,7 @@ const OrderDESCIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const OrderASCIcon = (props: BaseIconProps) => (
+export const OrderASCIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6294" width="1em" height="1em" fill="currentColor">
             <path
@@ -57,7 +56,7 @@ const OrderASCIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const FilterIcon = (props: BaseIconProps) => (
+export const FilterIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6802" width="1em" height="1em" fill="currentColor">
             <path
@@ -68,7 +67,7 @@ const FilterIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const FilterRankIcon = (props: BaseIconProps) => (
+export const FilterRankIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6929" width="1em" height="1em" fill="currentColor">
             <path
@@ -83,7 +82,7 @@ const FilterRankIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const CleanIcon = (props: BaseIconProps) => (
+export const CleanIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7193" width="1em" height="1em" fill="currentColor">
             <path
@@ -94,7 +93,7 @@ const CleanIcon = (props: BaseIconProps) => (
     </Icon>
 );
 
-const CheckIcon = (props: BaseIconProps) => (
+export const CheckIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5912" width="1em" height="1em" fill="currentColor">
             <path
@@ -116,49 +115,3 @@ export default {
     CleanIcon,
     CheckIcon,
 };
-
-export class UniverPivotableIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return PivotableIcon;
-    }
-}
-export class UniverSumIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return SumIcon;
-    }
-}
-export class UniverOrderIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return OrderIcon;
-    }
-}
-export class UniverOrderDESCIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return OrderDESCIcon;
-    }
-}
-export class UniverOrderASCIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return OrderASCIcon;
-    }
-}
-export class UniverFilterIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return FilterIcon;
-    }
-}
-export class UniverFilterRankIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return FilterRankIcon;
-    }
-}
-export class UniverCleanIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return CleanIcon;
-    }
-}
-export class UniverCheckIcon implements IconComponent {
-    render(): FunctionComponent<BaseIconProps> {
-        return CheckIcon;
-    }
-}

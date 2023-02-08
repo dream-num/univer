@@ -1,8 +1,7 @@
-import { JSXComponent } from '../../../BaseComponent';
-import { BaseIconProps, IconComponent } from '../../../Interfaces';
+import { BaseIconProps } from '../../../Interfaces';
 import { Icon } from '../AddIcon';
 
-const DeleteIcon = (props: BaseIconProps) => (
+export const DeleteIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="logo" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1214" width="1em" height="1em">
             <path
@@ -16,11 +15,3 @@ const DeleteIcon = (props: BaseIconProps) => (
         </svg>
     </Icon>
 );
-
-export default DeleteIcon;
-
-export class UniverDeleteIcon implements IconComponent {
-    render(): JSXComponent<BaseIconProps> {
-        return DeleteIcon;
-    }
-}

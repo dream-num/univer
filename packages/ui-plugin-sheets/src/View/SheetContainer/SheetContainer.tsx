@@ -1,5 +1,5 @@
 import style from './index.module.less';
-import { ToolBar } from '../ToolBar';
+import { Toolbar } from '../Toolbar';
 import { InfoBar } from '../InfoBar';
 import { RightMenu } from '../RightMenu';
 import { CountBar } from '../CountBar';
@@ -38,10 +38,10 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
     contentRef = createRef<HTMLDivElement>();
 
     constructor(props: BaseSheetContainerProps) {
-        super(props, { context: props.config.context });
+        super(props);
         // init state
         this.state = {
-            currentLocale: this._context.getLocale().getCurrentLocale() ?? 'zh',
+            currentLocale: 'zh',
         };
     }
 
@@ -124,84 +124,91 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
      */
     render() {
         const { methods } = this.props;
-        const { context, layout } = this.props.config;
+        const { layout } = this.props.config;
         const { currentLocale } = this.state;
         const config = layout?.sheetContainerConfig!;
         // Set Provider for entire Container
         return (
-            <AppContext.Provider
-                value={{
-                    context,
-                }}
-            >
-                <Container className={style.layoutContainer}>
-                    <Layout>
-                        <Sider style={{ display: config.outerLeft ? 'block' : 'none' }}></Sider>
-                        <Layout className={style.mainContent} style={{ position: 'relative' }}>
-                            <Header style={{ display: config.header ? 'block' : 'none' }}>
-                                {/* {config.infoBar && <InfoBar {...methods.infoBar}></InfoBar>}
-                                {config.toolBar && <ToolBar {...methods.toolbar}></ToolBar>}
-                                {config.formulaBar && <FormulaBar {...methods.formulaBar}></FormulaBar>} */}
-                                {/* {config.infoBar && <InfoBar></InfoBar>}
-                                {config.formulaBar && <FormulaBar></FormulaBar>} */}
-                            </Header>
-                            <Layout>
-                                <Sider
-                                    style={{
-                                        display: config.innerLeft ? 'block' : 'none',
-                                    }}
-                                >
-                                    {/* innerLeft */}
-                                </Sider>
-                                <Content className={config.contentSplit === 'vertical' ? style.contentContainerVertical : style.contentContainerHorizontal}>
-                                    {/* extend main content */}
-                                    {/* <ModalGroup></ModalGroup> */}
-                                    {!!config.contentSplit && (
-                                        <Container ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>
-                                            <div className={style.hoverCursor} onMouseDown={this.handleSplitBarMouseDown}></div>
-                                        </Container>
-                                    )}
-                                    <Container ref={this.contentRef} className={style.contentInnerRightContainer}>
-                                        {/* {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>}
-                                        {config.cellEditor && <RichText {...methods.cellEditor}></RichText>} */}
-
-                                        {<RichText {...methods.cellEditor}></RichText>}
-                                        <div style={{ position: 'fixed', right: '200px', top: '10px', fontSize: '14px' }}>
-                                            <span style={{ display: 'inline-block', width: 50, margin: '5px 0 0 5px' }}>语言</span>
-                                            <select value={currentLocale} onChange={this.setLocale.bind(this)} style={{ width: 55 }}>
-                                                <option value="en">English</option>
-                                                <option value="zh">中文</option>
-                                            </select>
-                                        </div>
-                                    </Container>
-                                </Content>
-                                <Sider
-                                    style={{
-                                        display: config.innerRight ? 'block' : 'none',
-                                    }}
-                                >
-                                    {/* innerRight */}
-                                    {/* <SideGroup></SideGroup> */}
-                                </Sider>
-                            </Layout>
-                            <Footer
+            <Container className={style.layoutContainer}>
+                <Layout>
+                    <Sider style={{ display: config.outerLeft ? 'block' : 'none' }}></Sider>
+                    <Layout className={style.mainContent} style={{ position: 'relative' }}>
+                        <Header style={{ display: config.header ? 'block' : 'none' }}>
+                            {config.infoBar && <InfoBar {...methods.infoBar}></InfoBar>}
+                            {config.toolbar && <Toolbar {...methods.toolbar}></Toolbar>}
+                            {config.formulaBar && <FormulaBar {...methods.formulaBar}></FormulaBar>}
+                        </Header>
+                        <Layout>
+                            <Sider
                                 style={{
-                                    display: config.footer ? 'block' : 'none',
+                                    display: config.innerLeft ? 'block' : 'none',
                                 }}
                             >
-                                {/* {config.sheetBar && <SheetBar {...methods.sheetBar}></SheetBar>} */}
-                                {/* {config.countBar && <CountBar {...methods.countBar}></CountBar>} */}
-                            </Footer>
+                                {/* innerLeft */}
+                            </Sider>
+                            <Content className={config.contentSplit === 'vertical' ? style.contentContainerVertical : style.contentContainerHorizontal}>
+                                {/* extend main content */}
+                                {/* <ModalGroup></ModalGroup> */}
+                                {!!config.contentSplit && (
+                                    <Container ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>
+                                        <div className={style.hoverCursor} onMouseDown={this.handleSplitBarMouseDown}></div>
+                                    </Container>
+                                )}
+                                <Container ref={this.contentRef} className={style.contentInnerRightContainer}>
+                                    {/* {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>}
+                                              {config.cellEditor && <RichText {...methods.cellEditor}></RichText>} */}
+
+                                    {<RichText {...methods.cellEditor}></RichText>}
+                                    <div
+                                        style={{
+                                            position: 'fixed',
+                                            right: '200px',
+                                            top: '10px',
+                                            fontSize: '14px',
+                                        }}
+                                    >
+                                        <span
+                                            style={{
+                                                display: 'inline-block',
+                                                width: 50,
+                                                margin: '5px 0 0 5px',
+                                            }}
+                                        >
+                                            语言
+                                        </span>
+                                        <select value={currentLocale} onChange={this.setLocale.bind(this)} style={{ width: 55 }}>
+                                            <option value="en">English</option>
+                                            <option value="zh">中文</option>
+                                        </select>
+                                    </div>
+                                </Container>
+                            </Content>
+                            <Sider
+                                style={{
+                                    display: config.innerRight ? 'block' : 'none',
+                                }}
+                            >
+                                {/* innerRight */}
+                                {/* <SideGroup></SideGroup> */}
+                            </Sider>
                         </Layout>
-                        <Sider
+                        <Footer
                             style={{
-                                display: config.outerRight ? 'block' : 'none',
+                                display: config.footer ? 'block' : 'none',
                             }}
-                            className={style.outerRightContainer}
-                        ></Sider>
+                        >
+                            {/* {config.sheetBar && <SheetBar {...methods.sheetBar}></SheetBar>} */}
+                            {/* {config.countBar && <CountBar {...methods.countBar}></CountBar>} */}
+                        </Footer>
                     </Layout>
-                </Container>
-            </AppContext.Provider>
+                    <Sider
+                        style={{
+                            display: config.outerRight ? 'block' : 'none',
+                        }}
+                        className={style.outerRightContainer}
+                    ></Sider>
+                </Layout>
+            </Container>
         );
     }
 }

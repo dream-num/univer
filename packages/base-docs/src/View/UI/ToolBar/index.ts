@@ -1,2 +1,2 @@
-export * from './ToolBar';
+export * from './Toolbar';
 export * from './SingleButton';

@@ -31,7 +31,7 @@ export interface ILayout {
     sheetBar?: boolean;
 
     // Whether to show the toolbar
-    toolBar?: boolean;
+    toolbar?: boolean;
 
     rightMenu?: boolean;
 

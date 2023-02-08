@@ -45,7 +45,7 @@ It accepts all props which native buttons support.
 ```jsx
 import { Button } from '@univerjs/style-univer';
 
-const ToolBar = () => {
+const Toolbar = () => {
     const buttonText = 'Confirm';
     return (
         <Button

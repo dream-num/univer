@@ -2,6 +2,7 @@ import { Component, createRef } from '../../Framework';
 import { JSXComponent } from '../../BaseComponent';
 import { BaseTooltipProps, TooltipComponent } from '../../Interfaces';
 import style from './index.module.less';
+import { joinClassNames } from '../../Utils';
 
 // interface TooltipProps {
 //     title: string;
@@ -30,7 +31,7 @@ export class Tooltip extends Component<BaseTooltipProps, TooltipState> {
     initialize(props: BaseTooltipProps) {
         this.state = {
             placement: props.placement || 'top',
-            placementClassName: classnames(style.tooltipTitle, placementClassNames[props.placement || 'top']),
+            placementClassName: joinClassNames(style.tooltipTitle, placementClassNames[props.placement || 'top']),
             top: '',
             left: '',
         };

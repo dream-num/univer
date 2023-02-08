@@ -1,4 +1,4 @@
-import { BaseComponentSheet, BaseIconProps, BaseSingleButtonProps, Component, FunctionComponent, IToolBarItemProps } from '@univerjs/base-ui';
+import { BaseComponentSheet, BaseIconProps, BaseSingleButtonProps, Component, FunctionComponent, IToolbarItemProps } from '@univerjs/base-ui';
 import { PLUGIN_NAMES, Nullable, Observer, Workbook } from '@univerjs/core';
 import { SheetPlugin } from '@univerjs/base-sheets';
 
@@ -7,7 +7,7 @@ import { IProps } from '../IData/IProtection';
 
 // Types for state
 interface IState {
-    protection: IToolBarItemProps;
+    protection: IToolbarItemProps;
 }
 
 export class ProtectionButton extends Component<IProps, IState> {
@@ -25,7 +25,7 @@ export class ProtectionButton extends Component<IProps, IState> {
         this.SingleButton = render.renderFunction('SingleButton');
         this.LockIcon = render.renderFunction('LockIcon');
 
-        const protection: IToolBarItemProps = {
+        const protection: IToolbarItemProps = {
             locale: 'protection',
             type: 'single',
             label: <this.LockIcon />,

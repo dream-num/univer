@@ -1,5 +1,5 @@
-import LoadingIcon from './Loading';
-import LogoIcon from './Logo';
+import { LoadingIcon } from './Loading';
+import { LogoIcon } from './Logo';
 /**
  * 增加小数位数
  * 减少小数位数
@@ -65,11 +65,11 @@ import View from './View';
 /**
  * 关闭
  */
-import DeleteIcon from './Delete';
+import { DeleteIcon } from './Delete';
 import Other from './Other';
 
 export { LoadingIcon, LogoIcon, DeleteIcon, Math, Font, Cell, Text, Insert, Format, Data, Sheet, View, Other };
-
-export const IconMap = {
-    RightIcon: <Format.RightIcon />,
-};
+export * from './Format';
+export * from './Font';
+export * from './Cell';
+export * from './Text';

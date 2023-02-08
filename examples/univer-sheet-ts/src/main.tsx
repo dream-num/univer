@@ -42,7 +42,7 @@ const uiDefaultConfigDemo = {
     },
 };
 
-const univerConfig = {
+const sheetUIConfig = {
     container: 'universheet',
 };
 
@@ -89,6 +89,7 @@ univer.install(
     })
 );
 // sheets-plugin-ui univer.install(new SheetsUI)
+// sheets-plugin-ui univer.install(new SheetsUI
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO1);
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO2);

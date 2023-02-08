@@ -12,7 +12,7 @@ const uiDefaultConfigUp = {
         sheetContainerConfig: {
             infoBar: true,
             formulaBar: true,
-            toolBar: true,
+            toolbar: true,
             sheetBar: true,
             countBar: true,
             rightMenu: true,
@@ -79,7 +79,7 @@ const uiDefaultConfigDown = {
         sheetContainerConfig: {
             infoBar: false,
             formulaBar: false,
-            toolBar: true,
+            toolbar: true,
             sheetBar: true,
             countBar: true,
             rightMenu: true,

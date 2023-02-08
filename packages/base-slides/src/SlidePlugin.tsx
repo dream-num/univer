@@ -3,7 +3,7 @@ import { getRefElement, isElement, ISlotProps, RefObject, render } from '@univer
 import { Engine, RenderEngine } from '@univerjs/base-render';
 import { zh, en } from './Locale';
 import { install, SlidePluginObserve } from './Basic/Observer';
-import { ToolBarController } from './Controller/ToolBarController';
+import { ToolbarController } from './Controller/ToolbarController';
 import { SlideController } from './Controller/SlideController';
 import { InfoBarController } from './Controller/InfoBarController';
 import { BaseSlideContainerConfig, defaultLayout, ILayout, ISlidePluginConfigBase, SlideContainer } from './View/UI/SlideContainer';
@@ -42,7 +42,7 @@ export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
 
     private _canvasView: CanvasView;
 
-    private _toolBarControl: ToolBarController;
+    private _toolbarControl: ToolbarController;
 
     private _slideBarControl: SlideBarController;
 
@@ -83,8 +83,8 @@ export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
 
         const layout = this._config.layout as ILayout;
 
-        if (layout.toolBar) {
-            this._toolBarControl = new ToolBarController(this);
+        if (layout.toolbar) {
+            this._toolbarControl = new ToolbarController(this);
         }
         if (layout.infoBar) {
             this._infoBarControl = new InfoBarController(this);
@@ -183,8 +183,8 @@ export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
         return this._contentRef;
     }
 
-    getToolBarControl() {
-        return this._toolBarControl;
+    getToolbarControl() {
+        return this._toolbarControl;
     }
 
     getInfoBarControl() {

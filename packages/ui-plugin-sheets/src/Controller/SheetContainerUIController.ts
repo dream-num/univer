@@ -81,10 +81,10 @@ export class SheetContainerUIController {
                     // getComponent: this._countBarController.getComponent,
                 },
                 sheetBar: {
-                    // getComponent: this._sheetBarController.getComponent,
-                    // addSheet: this._sheetBarController.addSheet,
-                    // selectSheet: this._sheetBarController.selectSheet,
-                    // changeSheetName: this._sheetBarController.changeSheetName,
+                    getComponent: this._sheetBarController.getComponent,
+                    addSheet: this._sheetBarController.addSheet,
+                    selectSheet: this._sheetBarController.selectSheet,
+                    changeSheetName: this._sheetBarController.changeSheetName,
                 },
             },
         };

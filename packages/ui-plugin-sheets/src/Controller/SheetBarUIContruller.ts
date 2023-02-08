@@ -1,7 +1,7 @@
-import { BaseMenuItem, BaseUlProps } from '@univerjs/base-ui';
+import { BaseMenuItem, BaseUlProps, ColorPicker } from '@univerjs/base-ui';
 import { Nullable, Plugin, ACTION_NAMES, CommandManager, SheetActionBase } from '@univerjs/core';
 import { SheetBar } from "../View/SheetBar";
-import styles from '../View/UI/SheetBar/index.module.less';
+import styles from '../View/SheetBar/index.module.less';
 
 interface CustomComponent {
     name: string;
@@ -35,52 +35,37 @@ export class SheetBarUIController {
 
     protected _plugin: Plugin;
 
-    protected _initializeObs() {
-        const plugin = this._plugin;
-        const manager = context.getObserverManager();
-        const context = plugin.getContext();
-        const workbook = context.getWorkBook();
-        const unitId = workbook.getUnitId();
-        // manager.requiredObserver<SheetBar>('onSheetBarDidMountObservable', PLUGIN_NAMES.SPREADSHEET);
-        manager.requiredObserver<SheetBar>('onSheetBarDidMountObservable', PLUGIN_NAMES.SPREADSHEET).add((component) => {
-            
-        });
-        context.getContextObserver('onAfterChangeUILocaleObservable').add(() => {
-            this._sheetUl = this.resetSheetUl(this._sheetUl);
-            this._sheetBar.setValue({
-                sheetUl: this._sheetUl,
-            });
-        });
-        CommandManager.getActionObservers().add((actionEvent: any) => {
-            const action = actionEvent.action as SheetActionBase<any>;
-            const workbook = action.getWorkBook();
-            const actionUnitId = workbook.getUnitId();
-            if (unitId !== actionUnitId) return;
-
-            const { data } = actionEvent;
-            switch (data.actionName) {
-                case ACTION_NAMES.SET_SHEET_ORDER_ACTION:
-                case ACTION_NAMES.INSERT_SHEET_ACTION:
-                case ACTION_NAMES.SET_TAB_COLOR_ACTION:
-                case ACTION_NAMES.REMOVE_SHEET_ACTION:
-                case ACTION_NAMES.SET_WORKSHEET_NAME_ACTION:
-                case ACTION_NAMES.SET_WORKSHEET_ACTIVATE_ACTION:
-                case ACTION_NAMES.SET_WORKSHEET_STATUS_ACTION: {
-                    // update data;
-                    this._initializeData();
-                    // set ui bar sheetList;
-                    this._sheetBar.setValue({
-                        sheetList: this._sheetList,
-                        menuList: this._menuList,
-                    });
-                    break;
+    protected _refreshSheetBarUI(): void {
+        this._sheetBar.setValue({
+            sheetList: this._sheetList,
+            sheetUl: this._sheetUl,
+            menuList: this._menuList,
+            addSheet: () => {
+                // this._barControl.addSheet();
+            },
+            selectSheet: (event: Event, data: { item: SheetUlProps }) => {
+                this._dataId = data.item.sheetId;
+                const sheet = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(this._dataId);
+                if (sheet) {
+                    sheet.activate();
                 }
-            }
+            },
+            contextMenu: (e: MouseEvent) => {
+                const target = e.currentTarget as HTMLDivElement;
+                this._dataId = target.dataset.id as string;
+                //this._barControl.contextMenu(e);
+            },
+            changeSheetName: (e: Event) => {
+                //this._barControl.changeSheetName(e);
+            },
+            dragEnd: (elements: HTMLDivElement[]) => {
+                //this._barControl.dragEnd(elements);
+            },
         });
     }
 
-    protected _initializeData() {
-        const workbook = this._plugin.getWorkbook();
+    protected _refreshSheetData(): void {
+        const workbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
         const sheets = workbook.getSheets();
         this._menuList = sheets.map((sheet, index) => ({
             label: sheet.getName(),
@@ -95,27 +80,31 @@ export class SheetBarUIController {
                 sheet.activate();
             },
         }));
-        this._sheetList = sheets
-            .filter((sheet) => !sheet.isSheetHidden())
-            .map((sheet, index) => ({
-                sheetId: sheet.getSheetId(),
-                label: sheet.getName(),
-                index: String(index),
-                selected: sheet.getStatus() === 1,
-                color: sheet.getTabColor() as string,
-                onDown: (e: MouseEvent) => {
-                    const target = e.currentTarget as HTMLDivElement;
-                    this._dataId = target.dataset.id as string;
-                },
-                onClick: (e: MouseEvent) => {
-                    const target = e.currentTarget as HTMLDivElement;
-                    this._dataId = target.dataset.id as string;
+        this._sheetList = sheets.filter((sheet) => !sheet.isSheetHidden()).map((sheet, index) => ({
+            sheetId: sheet.getSheetId(),
+            label: sheet.getName(),
+            index: String(index),
+            selected: sheet.getStatus() === 1,
+            color: sheet.getTabColor() as string,
+            onDown: (e: MouseEvent) => {
+                const target = e.currentTarget as HTMLDivElement;
+                this._dataId = target.dataset.id as string;
+            },
+            onClick: (e: MouseEvent) => {
+                const target = e.currentTarget as HTMLDivElement;
+                this._dataId = target.dataset.id as string;
 
-                    sheet.activate();
-                },
-            }));
+                sheet.activate();
+            },
+        }));
         this._sheetIndex = sheets.findIndex((sheet) => sheet.getStatus() === 1);
         this._dataId = sheets[this._sheetIndex].getSheetId();
+    }
+
+    protected _refreshComponent(): void {
+        this._sheetUl = this.resetSheetUl(this._sheetUl);
+        this._refreshSheetData();
+        this._refreshSheetBarUI();
     }
 
     constructor(plugin: Plugin) {
@@ -190,39 +179,36 @@ export class SheetBarUIController {
                 },
             },
         ];
-        this._initializeObs();
-        this._initializeData();
+        CommandManager.getActionObservers().add((event) => {
+            const action = event.action as SheetActionBase<any>;
+            const data = event.data;
+            const workbook = action.getWorkBook();
+            const unitId = workbook.getUnitId();
+            const currentWorkbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
+            const currentUnitId = currentWorkbook.getUnitId();
+            if (unitId === currentUnitId) {
+                switch (data.actionName) {
+                    case ACTION_NAMES.SET_SHEET_ORDER_ACTION:
+                    case ACTION_NAMES.INSERT_SHEET_ACTION:
+                    case ACTION_NAMES.SET_TAB_COLOR_ACTION:
+                    case ACTION_NAMES.REMOVE_SHEET_ACTION:
+                    case ACTION_NAMES.SET_WORKSHEET_NAME_ACTION:
+                    case ACTION_NAMES.SET_WORKSHEET_ACTIVATE_ACTION:
+                    case ACTION_NAMES.SET_WORKSHEET_STATUS_ACTION: {
+                        // update data;
+                        this._refreshSheetData();
+                        // set ui bar sheetList;
+                        this._refreshSheetBarUI();
+                        break;
+                    }
+                }
+            }
+        });
     }
 
     getComponent = (ref: SheetBar) => {
         this._sheetBar = ref;
-        this._sheetUl = this.resetSheetUl(this._sheetUl);
-        this._sheetBar.setValue({
-            sheetList: this._sheetList,
-            sheetUl: this._sheetUl,
-            menuList: this._menuList,
-            addSheet: () => {
-                // this._barControl.addSheet();
-            },
-            selectSheet: (event: Event, data: { item: SheetUlProps }) => {
-                this._dataId = data.item.sheetId;
-                const sheet = this._plugin.getContext().getWorkBook().getSheetBySheetId(this._dataId);
-                if (sheet) {
-                    sheet.activate();
-                }
-            },
-            contextMenu: (e: MouseEvent) => {
-                const target = e.currentTarget as HTMLDivElement;
-                this._dataId = target.dataset.id as string;
-                //this._barControl.contextMenu(e);
-            },
-            changeSheetName: (e: Event) => {
-                //this._barControl.changeSheetName(e);
-            },
-            dragEnd: (elements: HTMLDivElement[]) => {
-                //this._barControl.dragEnd(elements);
-            },
-        });
+        this._refreshComponent();
     };
 
     resetLabel(label: string[] | string) {

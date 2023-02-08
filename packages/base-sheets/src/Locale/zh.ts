@@ -6,7 +6,7 @@ export default {
         two: '二',
         three: '三',
     },
-
+    // toolbar.undo
     toolbar: {
         undo: '撤销',
         redo: '重做',

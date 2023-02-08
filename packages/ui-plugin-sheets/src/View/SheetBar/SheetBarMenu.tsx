@@ -1,5 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet, Component } from '@univerjs/base-ui';
-import { joinClassNames } from '../../Utils';
+import { Component, Icon, joinClassNames } from '@univerjs/base-ui';
 import styles from './index.module.less';
 
 interface SheetBarMenuItem {
@@ -22,12 +21,7 @@ interface IState {
 }
 
 export class SheetBarMenu extends Component<SheetBarMenuProps, IState> {
-    private _render: BaseComponentRender;
-
     initialize() {
-        const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this._render = component.getComponentRender();
-
         this.state = {
             show: false,
         };
@@ -49,9 +43,7 @@ export class SheetBarMenu extends Component<SheetBarMenuProps, IState> {
 
     showMenu(show: boolean) {
         this.setState(
-            {
-                show,
-            },
+            {show},
             () => {
                 if (show) {
                     window.addEventListener('click', this.hideMenu, true);
@@ -63,16 +55,14 @@ export class SheetBarMenu extends Component<SheetBarMenuProps, IState> {
     render() {
         const { menu, style } = this.props;
         const { show } = this.state;
-        const CheckIcon = this._render.renderFunction('CheckIcon');
-        const HideIcon = this._render.renderFunction('HideIcon');
-
+       
         return (
             <ul className={styles.sheetBarMenu} style={{ ...style, display: show ? 'block' : ' none' }}>
                 {menu.map((item) => (
                     <li onClick={(e) => this.handleClick(e, item)} className={joinClassNames(styles.sheetBarMenuItem, item.hide ? styles.sheetBarMenuItemHide : '')}>
                         <span className={styles.sheetBarMenuIcon}>
-                            {item.hide ? <HideIcon /> : ''}
-                            {item.selected ? <CheckIcon /> : ''}
+                            {item.hide ? <Icon.HideIcon /> : ''}
+                            {item.selected ? <Icon.Data.CheckIcon /> : ''}
                         </span>
                         {item.label}
                     </li>

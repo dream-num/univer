@@ -1,12 +1,8 @@
-import { Nullable, Observer, PLUGIN_NAMES, Workbook } from '@univerjs/core';
-import { Menu } from '@univerjs/style-univer';
-import { BaseComponentPlugin } from '../..';
-import { BaseComponentRender, BaseComponentSheet } from '../../BaseComponent';
-import { SlideTabBar } from '../../Basics/SlideTabBar/SlideTabBar';
-import { BaseMenuItem, BaseSheetBarProps } from '../../Components';
-import { Component, createRef, RefObject } from '../../Framework';
-import styles from './index.module.less';
+import { AppContext, AppContextValues, BaseComponentPlugin, BaseComponentRender, BaseComponentSheet, BaseMenuItem, BaseSheetBarProps, Button, Component, createRef, Icon, Menu, PreactContext, RefObject } from '@univerjs/base-ui';
 import { SheetBarMenu } from './SheetBarMenu';
+import { Nullable, Observer, PLUGIN_NAMES, Workbook } from '@univerjs/core';
+import styles from './index.module.less';
+import { SlideTabBar } from '../../Basics/SlideTabBar/SlideTabBar';
 
 type SheetState = {
     sheetList: BaseSheetBarProps[];
@@ -29,16 +25,11 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
 
     slideTabBar: SlideTabBar;
 
-    private _render: BaseComponentRender;
-
     private _localeObserver: Nullable<Observer<Workbook>>;
 
     private _renderKey: number = 1;
 
     initialize(props: BaseSheetBarProps) {
-        const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this._render = component.getComponentRender();
-
         this.state = {
             sheetList: [],
             sheetUl: [],
@@ -47,7 +38,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     }
 
     resetLabel(list: any) {
-        const componentManager = this._context.getPluginManager().getPluginByName<BaseComponentPlugin>(PLUGIN_NAMES.BASE_COMPONENT)?.getComponentManager();
+        const componentManager = this.getContext().getPluginManager().getPluginByName<BaseComponentPlugin>(PLUGIN_NAMES.BASE_COMPONENT)?.getComponentManager();
 
         for (let i = 0; i < list.length; i++) {
             const item = list[i];
@@ -203,21 +194,16 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
 
         if (!sheetList.length) return;
 
-        const Button = this._render.renderFunction('Button');
-        const AddIcon = this._render.renderFunction('AddIcon');
-        const MenuIcon = this._render.renderFunction('MenuIcon');
-        const NextIcon = this._render.renderFunction('NextIcon');
-        const Menu = this._render.renderFunction('Menu');
-
+        debugger;
         return (
             <div className={styles.sheetBar} ref={this.slideTabRoot}>
                 {/* user options button */}
                 <div className={styles.sheetBarOptions}>
                     <Button className={styles.sheetBarOptionsButton} onClick={addSheet} type="text">
-                        <AddIcon style={{ fontSize: '20px' }} />
+                        <Icon.Math.AddIcon style={{ fontSize: '20px' }} />
                     </Button>
                     <Button className={styles.sheetBarOptionsButton} onClick={(e: MouseEvent) => this.ref.current.showMenu(true)} type="text">
-                        <MenuIcon style={{ fontSize: '20px' }} />
+                        <Icon.MenuIcon style={{ fontSize: '20px' }} />
                         <SheetBarMenu onClick={selectSheet} menu={menuList} ref={this.ref}></SheetBarMenu>
                     </Button>
                 </div>
@@ -239,7 +225,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                                     <span style={{ padding: '2px 5px 2px 5px' }}>{item.label}</span>
                                 </div>
                                 <div className={`${styles.slideTabIcon}`} data-slide-skip="true" style={{ lineHeight: 1 }} data-id={item.sheetId} onClick={this.contextMenu}>
-                                    <NextIcon />
+                                    <Icon.NextIcon />
                                 </div>
                             </div>
                             <div className={`${styles.slideTabFooter}`}>
@@ -255,10 +241,10 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 {/* prev next scroll button */}
                 <div className={`${styles.sheetBarOptions} ${styles.sheetBarScrollButton}`}>
                     <Button type="text" className={styles.sheetBarOptionsButton} onClick={this.scrollLeft}>
-                        <NextIcon rotate={90} style={{ padding: '5px' }} />
+                        <Icon.NextIcon rotate={90} style={{ padding: '5px' }} />
                     </Button>
                     <Button type="text" className={styles.sheetBarOptionsButton} onClick={this.scrollRight}>
-                        <NextIcon rotate={-90} style={{ padding: '5px' }} />
+                        <Icon.NextIcon rotate={-90} style={{ padding: '5px' }} />
                     </Button>
                 </div>
             </div>

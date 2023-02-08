@@ -14,5 +14,6 @@ export class EventManager {
         this._observerManager.addObserver('onUIChangeObservable', 'core', new Observable());
         this._observerManager.addObserver('onAfterChangeUILocaleObservable', 'core', new Observable());
         this._observerManager.addObserver('onViewComponentFocusChange', 'core', new Observable());
+        this._observerManager.addObserver('onViewComponentFocusChange', 'core', new Observable());
     }
 }

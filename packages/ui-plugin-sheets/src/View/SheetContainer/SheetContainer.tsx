@@ -197,7 +197,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                 display: config.footer ? 'block' : 'none',
                             }}
                         >
-                            {/* {config.sheetBar && <SheetBar {...methods.sheetBar}></SheetBar>} */}
+                            {config.sheetBar && <SheetBar {...methods.sheetBar}></SheetBar>}
                             {/* {config.countBar && <CountBar {...methods.countBar}></CountBar>} */}
                         </Footer>
                     </Layout>

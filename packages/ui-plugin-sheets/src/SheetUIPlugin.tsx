@@ -2,12 +2,12 @@ import { Plugin, UniverSheet, Tools, PLUGIN_NAMES } from '@univerjs/core';
 import { zh, en } from './Locale';
 import { DefaultSheetUiConfig, installObserver, ISheetUIPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';
 import { Context } from '@univerjs/core/src/Basics/Context';
-import { SheetContainerUIController } from './Controller';
 import { ComponentManager, getRefElement, RegisterManager } from '@univerjs/base-ui';
 import { Engine, RenderEngine } from '@univerjs/base-render';
+import { AppUIController } from './Controller/AppUIController';
 
 export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
-    private _sheetsController: SheetContainerUIController;
+    private _appUIController: AppUIController;
 
     private _componentManager: ComponentManager;
 
@@ -30,7 +30,6 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
 
     initialize(ctx: Context): void {
         installObserver(this);
-        this._config.context = ctx;
         const context = this.getContext();
         /**
          * load more Locale object
@@ -42,7 +41,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
 
         this._componentManager = new ComponentManager();
         this._registerManager = new RegisterManager(this);
-        this._sheetsController = new SheetContainerUIController(this);
+        this._appUIController = new AppUIController(this);
         this.initRender();
     }
 
@@ -52,7 +51,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
 
     initRender() {
         const engine = this.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
-        let container = getRefElement(this.getSheetContainerController().getContentRef());
+        let container = getRefElement(this._appUIController.getSheetContainerController().getContentRef());
 
         // mount canvas to DOM container
         engine.setContainer(container);
@@ -75,8 +74,8 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
 
     onDestroy(): void {}
 
-    getSheetContainerController() {
-        return this._sheetsController;
+    getAppUIController() {
+        return this._appUIController;
     }
 
     getComponentManager() {

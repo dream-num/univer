@@ -1,64 +1,6 @@
-import { CommandManager, ContextBase, ISheetActionData, SheetActionBase } from '@univerjs/core';
-import { BaseComponentProps } from '@univerjs/base-ui';
-
+import { CommandManager, ISheetActionData, SheetActionBase } from '@univerjs/core';
 import { SheetPlugin } from '../SheetPlugin';
-import { IShowToolbarConfig } from '../Model';
-import { IHideRightMenuConfig } from './RightMenuController';
 // All skins' less file
-
-export interface IShowContainerConfig {
-    outerLeft?: boolean;
-
-    outerRight?: boolean;
-
-    header?: boolean;
-
-    footer?: boolean;
-
-    innerLeft?: boolean;
-
-    innerRight?: boolean;
-
-    frozenHeaderLT?: boolean;
-
-    frozenHeaderRT?: boolean;
-
-    frozenHeaderLM?: boolean;
-
-    frozenContent?: boolean;
-
-    infoBar?: boolean;
-
-    formulaBar?: boolean;
-
-    countBar?: boolean;
-
-    sheetBar?: boolean;
-
-    // Whether to show the toolbar
-    toolbar?: boolean;
-
-    rightMenu?: boolean;
-
-    contentSplit?: boolean | string;
-}
-
-export interface ILayout {
-    sheetContainerConfig?: IShowContainerConfig;
-    toolbarConfig?: IShowToolbarConfig;
-    rightMenuConfig?: IHideRightMenuConfig;
-}
-
-export interface ISheetPluginConfigBase {
-    layout: ILayout;
-}
-
-export interface BaseSheetContainerConfig extends BaseComponentProps, ISheetPluginConfigBase {
-    container: HTMLElement;
-    skin: string;
-    onDidMount: () => void;
-    context: ContextBase;
-}
 
 export class SheetContainerController {
     private _plugin: SheetPlugin;

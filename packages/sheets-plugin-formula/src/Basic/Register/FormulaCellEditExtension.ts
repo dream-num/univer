@@ -1,6 +1,7 @@
-import { BaseCellEditExtension, BaseCellEditExtensionFactory, ICell, SheetPlugin } from '@univerjs/base-sheets';
 import { IFormulaData } from '@univerjs/base-formula-engine';
-import { IRangeData, Nullable, PLUGIN_NAMES } from '@univerjs/core';
+import { BaseCellEditExtension, BaseCellEditExtensionFactory, ICell } from '@univerjs/base-ui';
+import { IRangeData, Nullable } from '@univerjs/core';
+import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
 import { FormulaPlugin } from '../../FormulaPlugin';
 
 export class FormulaCellEditExtension extends BaseCellEditExtension {
@@ -79,8 +80,10 @@ export class FormulaCellEditExtensionFactory extends BaseCellEditExtensionFactor
                     this._plugin
                         .getContext()
                         .getPluginManager()
-                        .getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)
-                        .getFormulaBarController()
+                        .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
+                        .getAppUIController()
+                        .getSheetContainerController()
+                        .getFormulaBarUIController()
                         .getFormulaBar()
                         .setFormulaContent('');
                     return false;

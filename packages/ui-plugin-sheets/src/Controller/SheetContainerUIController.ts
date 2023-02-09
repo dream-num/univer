@@ -43,8 +43,6 @@ export class SheetContainerUIController {
 
         this._initialize();
 
-        console.log('sheet container init!');
-
         this._toolbarController = new ToolbarUIController(this._plugin, this._config.layout?.toolbarConfig);
         this._cellEditorUIController = new CellEditorUIController(this._plugin);
         this._formulaBarUIController = new FormulaBarUIController(this._plugin);
@@ -178,5 +176,12 @@ export class SheetContainerUIController {
 
     getEventManager() {
         return this._eventManager;
+    }
+
+    getCellEditorUIController() {
+        return this._cellEditorUIController
+    }
+    getFormulaBarUIController() {
+        return this._formulaBarUIController
     }
 }

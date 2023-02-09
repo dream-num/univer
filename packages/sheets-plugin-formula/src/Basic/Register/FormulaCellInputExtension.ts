@@ -1,5 +1,5 @@
-import { BaseCellInputExtension, BaseCellInputExtensionFactory, ICell } from '@univerjs/base-sheets';
 import { IFormulaData } from '@univerjs/base-formula-engine';
+import { BaseCellInputExtension, BaseCellInputExtensionFactory, ICell } from '@univerjs/base-ui';
 import { IRangeData, Nullable } from '@univerjs/core';
 import { FormulaPlugin } from '../../FormulaPlugin';
 

@@ -62,6 +62,10 @@ export class Univer {
         return this._univerSlides;
     }
 
+    /**
+     * get active universheet
+     * @returns
+     */
     getCurrentUniverSheetInstance() {
         return this._univerSheets[0];
     }

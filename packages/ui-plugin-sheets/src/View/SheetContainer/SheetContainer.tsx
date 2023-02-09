@@ -198,7 +198,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                             }}
                         >
                             {config.sheetBar && <SheetBar {...methods.sheetBar}></SheetBar>}
-                            {/* {config.countBar && <CountBar {...methods.countBar}></CountBar>} */}
+                            {config.countBar && <CountBar {...methods.countBar}></CountBar>}
                         </Footer>
                     </Layout>
                     <Sider

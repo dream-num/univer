@@ -1,10 +1,11 @@
-import { BaseCountBarProps } from '../../Components';
-import { Component, createRef } from '../../Framework';
+import { BaseCountBarProps, Button, Component, CountBarComponent, createRef, Icon, JSXComponent, Slider } from '@univerjs/base-ui';
+import { PLUGIN_NAMES } from '@univerjs/core';
 import styles from './index.module.less';
 
 type CountState = {
     zoom: number;
     content: string;
+    onChange?: (value: string) => void;
 };
 
 export class CountBar extends Component<BaseCountBarProps, CountState> {
@@ -41,8 +42,11 @@ export class CountBar extends Component<BaseCountBarProps, CountState> {
 
     onChange = (e: Event) => {
         let target = e.target as HTMLInputElement;
-        this.props.changeRatio?.(target.value);
+        if (this.state.onChange) {
+            this.state.onChange(target.value);
+        }
         this.setValue({ zoom: target.value });
+        console.log(target.value);
         this.ref.current.changeInputValue(0, target.value);
     };
 
@@ -55,7 +59,9 @@ export class CountBar extends Component<BaseCountBarProps, CountState> {
         let value = (number + 1) * 10;
         if (value >= this.max) value = this.max;
         this.setValue({ zoom: value });
-        this.props.changeRatio?.(String(value));
+        if (this.state.onChange) {
+            this.state.onChange(String(value));
+        }
     };
 
     reduceZoom = () => {
@@ -63,21 +69,18 @@ export class CountBar extends Component<BaseCountBarProps, CountState> {
         let value = (number - 1) * 10;
         if (value <= this.min) value = this.min;
         this.setValue({ zoom: value });
-        this.props.changeRatio?.(String(value));
+        if (this.state.onChange) {
+            this.state.onChange(String(value));
+        }
         this.ref.current.changeInputValue(0, value);
     };
 
     componentDidMount() {
-        this.props.getComponent?.(this);
+        this.getContext().getObserverManager().getObserver<CountBar>('onCountBarDidMountObservable', PLUGIN_NAMES.SPREADSHEET)?.notifyObservers(this);
     }
 
     render(props: BaseCountBarProps, state: CountState) {
         const { zoom, content } = state;
-        const ReduceIcon = this.getComponentRender().renderFunction('ReduceIcon');
-        const RegularIcon = this.getComponentRender().renderFunction('RegularIcon');
-        const Slider = this.getComponentRender().renderFunction('Slider');
-        const Button = this.getComponentRender().renderFunction('Button');
-        const AddIcon = this.getComponentRender().renderFunction('AddIcon');
         // const PageIcon = this.getComponentRender().renderFunction('PageIcon');
         // const LayoutIcon = this.getComponentRender().renderFunction('LayoutIcon');
         return (
@@ -86,13 +89,13 @@ export class CountBar extends Component<BaseCountBarProps, CountState> {
                     {zoom}
                 </Button>
                 <Button type="text" onClick={this.addZoom}>
-                    <AddIcon />
+                    <Icon.Math.AddIcon />
                 </Button>
                 <div className={styles.countSlider}>
                     <Slider ref={this.ref} onChange={this.onChange} value={zoom} min={this.min} max={this.max} onClick={this.handleClick} />
                 </div>
                 <Button type="text" onClick={this.reduceZoom}>
-                    <ReduceIcon />
+                    <Icon.Math.ReduceIcon />
                 </Button>
                 {/* <Button type="text">
                     <PageIcon />
@@ -101,10 +104,16 @@ export class CountBar extends Component<BaseCountBarProps, CountState> {
                     <LayoutIcon />
                 </Button> */}
                 <Button type="text">
-                    <RegularIcon />
+                    <Icon.Sheet.RegularIcon />
                 </Button>
                 <span className={styles.countStatistic}>{content}</span>
             </div>
         );
+    }
+}
+
+export class UniverCountBar implements CountBarComponent {
+    render(): JSXComponent<BaseCountBarProps> {
+        return CountBar;
     }
 }

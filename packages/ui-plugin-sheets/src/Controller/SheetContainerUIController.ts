@@ -5,6 +5,7 @@ import { ISheetUIPluginConfig } from '../Basics';
 import { SheetUIPlugin } from '../SheetUIPlugin';
 import { SheetContainer, UI } from '../View';
 import { CellEditorUIController } from './CellEditorUIController';
+import { CountBarUIController } from './CountBarUIController';
 import { FormulaBarUIController } from './FormulaBarUIController';
 import { InfoBarUIController } from './InfoBarUIController';
 import { RightMenuUIController } from './RightMenuUIController';
@@ -26,7 +27,7 @@ export class SheetContainerUIController {
 
     private _rightMenuController: RightMenuUIController;
 
-    // private _countBarController: CountBarController;
+    private _countBarController: CountBarUIController;
 
     private _sheetBarController: SheetBarUIController;
 
@@ -50,7 +51,7 @@ export class SheetContainerUIController {
         this._formulaBarUIController = new FormulaBarUIController(this._plugin);
         this._infoBarController = new InfoBarUIController(this._plugin);
         this._rightMenuController = new RightMenuUIController(this._plugin, this._config.layout?.rightMenuConfig);
-        // this._countBarController = new CountBarController(this._plugin);
+        this._countBarController = new CountBarUIController(this._plugin);
         this._sheetBarController = new SheetBarUIController(this._plugin);
 
         // 初始化UI
@@ -78,7 +79,7 @@ export class SheetContainerUIController {
                     // getComponent: this._rightMenuController.getComponent,
                 },
                 countBar: {
-                    // getComponent: this._countBarController.getComponent,
+                    getComponent: this._countBarController.getComponent,
                 },
                 sheetBar: {
                     getComponent: this._sheetBarController.getComponent,

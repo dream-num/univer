@@ -246,7 +246,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
                             }}
                         >
                             {config.sheetBar && <SheetBar {...methods.sheetBar}></SheetBar>}
-                            {/* {config.countBar && <CountBar {...methods.countBar}></CountBar>} */}
+                            {config.countBar && <CountBar {...methods.countBar}></CountBar>}
                         </Footer>
                     </Layout>
                     <Sider

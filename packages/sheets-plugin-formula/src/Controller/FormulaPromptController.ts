@@ -27,7 +27,7 @@ export class FormulaPromptController {
         this._sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
 
         this._initialize();
-        this._initRegisterComponent();
+        // this._initRegisterComponent();
     }
 
     private _initRegisterComponent() {

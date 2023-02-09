@@ -55,6 +55,7 @@
         "@univerjs/base-render": "workspace:^0.0.1",
         "@univerjs/core": "workspace:^0.0.1",
         "@univerjs/base-sheets": "workspace:^0.0.1",
+        "css-vars-ponyfill": "^2.4.6",
         "preact": "^10.5.14"
     }
 }

@@ -8,6 +8,9 @@ import { FormulaBar } from '../FormulaBar';
 import { RichText } from '../RichText';
 import { BaseComponentProps, Component, Container, Content, createRef, Footer, Header, Layout, Sider } from '@univerjs/base-ui';
 import { ISheetUIPluginConfig } from '../../Basics';
+import defaultSkin from '@univerjs/base-ui/Basics/CSS/Skin/default.module.less';
+import { Tools } from '@univerjs/core';
+import cssVars from 'css-vars-ponyfill';
 
 export interface BaseSheetContainerProps extends BaseComponentProps {
     config: ISheetUIPluginConfig;
@@ -30,6 +33,11 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
     splitLeftRef = createRef<HTMLDivElement>();
 
     contentRef = createRef<HTMLDivElement>();
+
+    constructor(props: BaseSheetContainerProps) {
+        super();
+        this.changeSkin(props.config.container as string, 'default');
+    }
 
     componentDidMount() {
         this.props.getComponent?.(this);
@@ -86,6 +94,100 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
 
     getSplitLeftRef() {
         return this.splitLeftRef;
+    }
+
+    /**
+     * Modify Dom Skin
+     */
+    changeSkin(container: HTMLElement | string, skin: string) {
+        // Collect all  skins
+        let root = document.documentElement;
+
+        const id = typeof container === 'string' ? container : container.id;
+
+        // get all skins
+        const skins = {
+            default: defaultSkin,
+        };
+
+        // current skin set by user
+        let currentSkin = skins[skin];
+
+        // transform "primaryColor" to "--primary-color"
+        currentSkin = Object.fromEntries(Object.keys(currentSkin).map((item) => [`--${item.replace(/([A-Z0-9])/g, '-$1').toLowerCase()}`, currentSkin[item]]));
+
+        // ie11 does not support css variables, use css-vars-ponyfill to handle
+        if (Tools.isIEBrowser()) {
+            cssVars({
+                // Options...
+
+                // The container is invalid as rootElement, so the default setting is root.
+                // Disadvantages: In ie11, only one set of skins can be used for multiple workbooks, and it is the skin set by the last workbook
+                rootElement: root, // default
+
+                variables: currentSkin,
+            });
+        } else {
+            // set css variable
+            let sheet = getSkinStyleSheet(id);
+
+            /**
+             *  covert object to style, remove " and replace , to ;
+             *
+             *  Example:
+             *
+             *  before: {--primary-color:"#0188fb",--primary-color-hover:"#5391ff"}
+             *  after:  {--primary-color:#0188fb;--primary-color-hover:#5391ff;}
+             */
+
+            sheet.insertRule(
+                `#${id} ${JSON.stringify(currentSkin)
+                    .replace(/"/g, '')
+                    .replace(/,(?=--)/g, ';')}`
+            );
+        }
+
+        /**
+         * get skin style sheet
+         * @param id
+         * @returns
+         */
+
+        function getSkinStyleSheet(id: string) {
+            const title = 'universheet-skin-style';
+            // avoid duplicates
+            for (let i = 0; i < document.styleSheets.length; i++) {
+                if (document.styleSheets[i].title === title) {
+                    deleteStyleRuleIndexBySelector(document.styleSheets[i], id);
+
+                    return document.styleSheets[i];
+                }
+            }
+            const head = document.head || document.getElementsByTagName('head')[0];
+            const styleEle = document.createElement('style');
+            styleEle.title = title;
+            head.appendChild(styleEle);
+
+            return document.styleSheets[document.styleSheets.length - 1];
+        }
+
+        /**
+         * delete style rule in universheet-skin-style
+         * @param skinStyleSheet
+         * @param id
+         */
+        function deleteStyleRuleIndexBySelector(skinStyleSheet: CSSStyleSheet, id: string) {
+            let index = 0;
+            for (let i = 0; i < skinStyleSheet.cssRules.length; i++) {
+                const rule = skinStyleSheet.cssRules[i];
+
+                if (rule instanceof CSSStyleRule && rule.selectorText === `#${id}`) {
+                    index = i;
+                    skinStyleSheet.deleteRule(index);
+                    break;
+                }
+            }
+        }
     }
 
     /**

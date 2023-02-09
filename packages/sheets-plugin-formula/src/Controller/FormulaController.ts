@@ -32,7 +32,7 @@ export class FormulaController {
 
         this._activeSheetId = this._sheetPlugin.getWorkbook().getActiveSheet().getSheetId();
 
-        this._initRegisterComponent();
+        // this._initRegisterComponent();
 
         this._sheetPlugin.addToolButton({
             name: FORMULA_PLUGIN_NAME,

@@ -235,7 +235,7 @@ export class CellEditorUIController {
         this._richTextEle.style.minHeight = `${endY - startY}px`;
 
         this._richTextEle.style.borderWidth = '2px';
-        const univerContainerContentRef = this._plugin.getSheetContainerController().getContentRef();
+        const univerContainerContentRef = this._plugin.getAppUIController().getSheetContainerController().getContentRef();
         const sheetContentRect = getRefElement(univerContainerContentRef).getBoundingClientRect();
 
         this._richTextEle.style.maxWidth = `${sheetContentRect.width - startX + scrollX}px`;

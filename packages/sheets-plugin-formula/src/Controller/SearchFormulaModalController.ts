@@ -157,7 +157,7 @@ export class SearchFormulaController {
             },
         };
 
-        this._initRegisterComponent();
+        // this._initRegisterComponent();
 
         this._initialize();
     }
@@ -177,7 +177,7 @@ export class SearchFormulaController {
         const sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
         sheetPlugin.getObserver('onChangeSelectionObserver')?.add((selection) => {
             const info = selection.getCurrentCellInfo();
-            this._searchItem.changeRange(info?.startColumn.toString() ?? '');
+            // this._searchItem.changeRange(info?.startColumn.toString() ?? '');
         });
     }
 

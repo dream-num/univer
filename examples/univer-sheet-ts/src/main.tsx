@@ -78,6 +78,8 @@ universheet.installPlugin(
         },
     })
 );
+FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO1).installTo(universheet);
+// universheet.installPlugin(new FormulaPlugin(DEFAULT_FORMULA_DATA_DEMO));
 
 // // ui TODO: 不要安装
 // univer.install(new UniverComponentSheet());

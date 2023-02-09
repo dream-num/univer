@@ -1,6 +1,6 @@
 import { SheetContext, IOCContainer, UniverSheet, Plugin } from '@univerjs/core';
-import { CellEditExtensionManager, CellInputExtensionManager } from '@univerjs/base-sheets';
 import { FormulaEnginePlugin } from '@univerjs/base-formula-engine';
+import { CellEditExtensionManager, CellInputExtensionManager } from '@univerjs/base-ui';
 import { zh, en } from './Locale';
 
 import { IFormulaConfig } from './Basic/Interfaces/IFormula';

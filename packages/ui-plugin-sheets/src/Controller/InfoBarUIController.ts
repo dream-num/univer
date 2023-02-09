@@ -1,35 +1,39 @@
 import { Plugin } from '@univerjs/core';
 import { InfoBarModel } from '../Model/InfoBarModel';
-import { InfoBar } from '../View';
+import { InfoBar } from '../View/InfoBar';
 
 type IProps = {
     locale?: string;
     label?: string;
+    onBlur?: (e: FocusEvent) => void;
 };
 
 export interface BaseInfoBarProps {
     back: IProps;
-    update: IProps;
-    save: IProps;
     rename: IProps;
-    sheetName: string;
+    save: IProps;
+    sheet: IProps;
+    update: IProps;
 }
 
 export class InfoBarUIController {
-    private _infoList: BaseInfoBarProps;
-
-    private _plugin: Plugin;
+    private _infoBarModel: InfoBarModel;
 
     private _infoBar: InfoBar;
 
-    private _infoBarModel: InfoBarModel;
+    private _plugin: Plugin;
 
-    constructor(plugin: Plugin) {
-        this._plugin = plugin;
+    private _infoList: BaseInfoBarProps;
 
+    private _refreshComponent(): void {
+        const name = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getConfig().name;
+        this._infoBarModel = new InfoBarModel(name);
         this._infoList = {
             back: {
                 locale: 'info.return',
+            },
+            rename: {
+                locale: 'info.tips',
             },
             update: {
                 locale: 'info.detailUpdate',
@@ -37,27 +41,24 @@ export class InfoBarUIController {
             save: {
                 locale: 'info.detailSave',
             },
-            rename: {
-                locale: 'info.tips',
+            sheet: {
+                label: name,
+                onBlur: (e) => {
+                    this.setSheetName(e);
+                },
             },
-            sheetName: 'UniverSheet',
         };
-        this._initialize();
     }
 
-    private _initialize() {}
+    constructor(plugin: Plugin) {
+        this._plugin = plugin;
+    }
 
-    // 获取Toolbar组件
     getComponent = (ref: InfoBar) => {
         this._infoBar = ref;
+        this._refreshComponent();
         this.resetInfoList(this._infoList);
     };
-
-    setSheetName(e: FocusEvent) {
-        const target = e.target as HTMLInputElement;
-        const name = target.value;
-        this._infoBarModel.setName(name);
-    }
 
     resetInfoList(list: BaseInfoBarProps) {
         const locale = this._plugin.getContext().getLocale();
@@ -69,5 +70,9 @@ export class InfoBarUIController {
         this._infoBar.setInfoList(list);
     }
 
-    renameSheet() {}
+    setSheetName(e: FocusEvent) {
+        const target = e.target as HTMLInputElement;
+        const name = target.value;
+        this._infoBarModel.setName(name);
+    }
 }

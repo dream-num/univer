@@ -32,7 +32,7 @@ export class InfoBar extends Component<IProps, IState> {
         const { renameSheet } = this.props;
         if (!this.state.infoList) return;
 
-        const { back, sheetName, update, save, rename } = this.state.infoList;
+        const { back, sheet, update, save, rename } = this.state.infoList;
 
         return (
             <Container className={styles.infoDetail}>
@@ -46,7 +46,7 @@ export class InfoBar extends Component<IProps, IState> {
                 {/* <LogoIcon style={{ width: '152px', height: '32px' }} /> */}
                 <div className={styles.sheetName}>
                     <Tooltip title={rename.label} placement={'bottom'}>
-                        <Input bordered={false} value={sheetName} onBlur={renameSheet} />
+                        <Input bordered={false} value={sheet.label} onBlur={renameSheet} />
                     </Tooltip>
                 </div>
                 <div className={styles.infoDetailUpdate}>{update.label}</div>

@@ -6,25 +6,19 @@ import { CountBar } from '../CountBar';
 import { SheetBar } from '../SheetBar';
 import { FormulaBar } from '../FormulaBar';
 import { RichText } from '../RichText';
-import { AppContext, BaseComponentProps, Component, Container, Content, createRef, Footer, Header, Layout, Sider } from '@univerjs/base-ui';
+import { BaseComponentProps, Component, Container, Content, createRef, Footer, Header, Layout, Sider } from '@univerjs/base-ui';
 import { ISheetUIPluginConfig } from '../../Basics';
 
 export interface BaseSheetContainerProps extends BaseComponentProps {
     config: ISheetUIPluginConfig;
-    container?: HTMLElement;
     changeLocale: (locale: string) => void;
     methods?: any;
-}
-
-// Types for state
-interface IState {
-    currentLocale: string;
 }
 
 /**
  * One universheet instance DOM container
  */
-export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
+export class SheetContainer extends Component<BaseSheetContainerProps> {
     leftContentLeft: number;
 
     leftContentTop: number;
@@ -36,14 +30,6 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
     splitLeftRef = createRef<HTMLDivElement>();
 
     contentRef = createRef<HTMLDivElement>();
-
-    constructor(props: BaseSheetContainerProps) {
-        super(props);
-        // init state
-        this.state = {
-            currentLocale: 'zh',
-        };
-    }
 
     componentDidMount() {
         this.props.getComponent?.(this);
@@ -102,21 +88,6 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
         return this.splitLeftRef;
     }
 
-    setLocale(e: Event) {
-        const { changeLocale } = this.props;
-        const target = e.target as HTMLSelectElement;
-        const locale = target.value;
-        // You must use setState to trigger the re-rendering of the child component
-        this.setState(
-            {
-                currentLocale: locale,
-            },
-            () => {
-                changeLocale(locale);
-            }
-        );
-    }
-
     /**
      * Render the component's HTML
      *
@@ -125,7 +96,6 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
     render() {
         const { methods } = this.props;
         const { layout } = this.props.config;
-        const { currentLocale } = this.state;
         const config = layout?.sheetContainerConfig!;
         // Set Provider for entire Container
         return (
@@ -155,32 +125,8 @@ export class SheetContainer extends Component<BaseSheetContainerProps, IState> {
                                     </Container>
                                 )}
                                 <Container ref={this.contentRef} className={style.contentInnerRightContainer}>
-                                    {/* {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>}
-                                              {config.cellEditor && <RichText {...methods.cellEditor}></RichText>} */}
-
+                                    {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>}
                                     {<RichText {...methods.cellEditor}></RichText>}
-                                    <div
-                                        style={{
-                                            position: 'fixed',
-                                            right: '200px',
-                                            top: '10px',
-                                            fontSize: '14px',
-                                        }}
-                                    >
-                                        <span
-                                            style={{
-                                                display: 'inline-block',
-                                                width: 50,
-                                                margin: '5px 0 0 5px',
-                                            }}
-                                        >
-                                            语言
-                                        </span>
-                                        <select value={currentLocale} onChange={this.setLocale.bind(this)} style={{ width: 55 }}>
-                                            <option value="en">English</option>
-                                            <option value="zh">中文</option>
-                                        </select>
-                                    </div>
                                 </Container>
                             </Content>
                             <Sider

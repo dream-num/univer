@@ -1,4 +1,19 @@
-import { AppContext, AppContextValues, BaseComponentPlugin, BaseComponentRender, BaseComponentSheet, BaseMenuItem, BaseSheetBarProps, Button, Component, createRef, Icon, Menu, PreactContext, RefObject } from '@univerjs/base-ui';
+import {
+    AppContext,
+    AppContextValues,
+    BaseComponentPlugin,
+    BaseComponentRender,
+    BaseComponentSheet,
+    BaseMenuItem,
+    BaseSheetBarProps,
+    Button,
+    Component,
+    createRef,
+    Icon,
+    Menu,
+    PreactContext,
+    RefObject,
+} from '@univerjs/base-ui';
 import { SheetBarMenu } from './SheetBarMenu';
 import { Nullable, Observer, PLUGIN_NAMES, Workbook } from '@univerjs/core';
 import styles from './index.module.less';
@@ -194,7 +209,6 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
 
         if (!sheetList.length) return;
 
-        debugger;
         return (
             <div className={styles.sheetBar} ref={this.slideTabRoot}>
                 {/* user options button */}

@@ -1,5 +1,7 @@
+import { IMouseEvent, IPointerEvent } from '@univerjs/base-render';
+import { SheetPlugin } from '@univerjs/base-sheets';
 import { BaseMenuItem, BaseSelectChildrenProps, resetDataLabel } from '@univerjs/base-ui';
-import { Tools } from '@univerjs/core';
+import { PLUGIN_NAMES, Tools } from '@univerjs/core';
 import { SheetUIPlugin } from '..';
 import { DefaultRightMenuConfig, SheetRightMenuConfig } from '../Basics';
 import { RightMenu } from '../View';
@@ -14,14 +16,12 @@ interface CustomLabelProps {
     prefixLocale?: string[] | string;
     suffixLocale?: string[] | string;
     options?: CustomLabelOptions[];
-    locale?: string;
     label?: string;
     children?: CustomLabelProps[];
     onKeyUp?: (e: Event) => void;
 }
 
 export interface RightMenuProps extends BaseMenuItem {
-    locale?: string[];
     customLabel?: {
         name: string;
         props?: CustomLabelProps;
@@ -29,10 +29,13 @@ export interface RightMenuProps extends BaseMenuItem {
     children?: RightMenuProps[];
     suffix?: string;
     border?: boolean;
+    locale?: string
 }
 
 export class RightMenuUIController {
     private _plugin: SheetUIPlugin;
+
+    private _sheetPlugin: SheetPlugin
 
     private _rightMenu: RightMenu;
 
@@ -43,12 +46,15 @@ export class RightMenuUIController {
     constructor(plugin: SheetUIPlugin, config?: SheetRightMenuConfig) {
         this._plugin = plugin;
 
+        this._sheetPlugin = plugin.getContext().getUniver().getCurrentUniverSheetInstance().context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+
         this._config = Tools.deepMerge({}, DefaultRightMenuConfig, config);
+
 
         this._menuList = [
             {
-                locale: ['rightClick.insert', 'rightClick.row'],
-                onClick: () => {},
+                locale: 'rightClick.insertRow',
+                onClick: () => { },
                 show: this._config.InsertRow,
             },
         ];
@@ -57,14 +63,11 @@ export class RightMenuUIController {
     }
 
     private _initialize() {
-        setTimeout(() => {
-            // this._plugin
-            //     .getSheetContainerController()
-            //     .getContentRef()
-            //     .current?.addEventListener('click', (e) => {
-            //         this._rightMenu.handleContextMenu(e as any);
-            //     });
-        }, 1000);
+        this._sheetPlugin.getMainComponent().onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            if (evt.button === 2) {
+                this._rightMenu.handleContextMenu(evt);
+            }
+        });
     }
 
     // 获取RightMenu组件

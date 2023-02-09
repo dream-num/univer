@@ -1,46 +1,39 @@
-import { AppContext, isElement, render } from '@univerjs/base-ui';
-import { BaseSheetContainerProps, SheetContainer } from './SheetContainer';
+import { isElement, render } from '@univerjs/base-ui';
+import { App, BaseUIProps } from './App';
+
+interface BaseSheetUIConfig extends BaseUIProps {
+    container?: HTMLElement | string;
+}
 
 export class UI {
-    constructor(props: BaseSheetContainerProps) {
+    constructor(props: BaseSheetUIConfig) {
         this._initialize(props);
     }
 
-    static create(props: BaseSheetContainerProps) {
+    static create(props: BaseSheetUIConfig) {
         return new UI(props);
     }
 
-    private _initialize(props: BaseSheetContainerProps) {
-        let sheetContainer: HTMLElement;
-        const container = props.config.container;
+    private _initialize(props: BaseSheetUIConfig) {
+        let renderContainer: HTMLElement;
+        const container = props.container;
 
         if (typeof container === 'string') {
             const containerDOM = document.getElementById(container);
             if (containerDOM == null) {
-                sheetContainer = document.createElement('div');
-                sheetContainer.id = container;
+                renderContainer = document.createElement('div');
+                renderContainer.id = container;
             } else {
-                sheetContainer = containerDOM;
+                renderContainer = containerDOM;
             }
         } else if (isElement(container)) {
-            sheetContainer = container!;
+            renderContainer = container!;
         } else {
-            sheetContainer = document.createElement('div');
-            sheetContainer.id = 'univer';
+            renderContainer = document.createElement('div');
+            renderContainer.id = 'univer';
         }
 
-        props.container = sheetContainer;
-
-        render(
-            <AppContext.Provider
-                value={{
-                    context: props.context,
-                }}
-            >
-                <SheetContainer {...props} />
-            </AppContext.Provider>,
-            sheetContainer
-        );
+        render(<App {...props} />, renderContainer);
     }
 }
 

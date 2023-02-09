@@ -1,4 +1,4 @@
-import { BaseComponentProps, BaseComponentRender, Component } from '@univerjs/base-ui';
+import { BaseComponentProps, BaseComponentRender, Component, Icon } from '@univerjs/base-ui';
 
 interface IState {
     img: string;
@@ -9,8 +9,6 @@ interface IProps extends BaseComponentProps {
 }
 
 export class LineBold extends Component<IProps, IState> {
-    private _render: BaseComponentRender;
-
     initialize() {
         this.state = {
             img: '',
@@ -28,14 +26,13 @@ export class LineBold extends Component<IProps, IState> {
     }
 
     getImg(img: string) {
-        const span = document.querySelector('.base-sheets-line-bold') as HTMLDivElement;
-        const props = { width: span.offsetWidth };
-        const Img = this._render.renderFunction(img as any);
-        return <Img {...(props as any)} />;
+        // const span = document.querySelector('.base-sheets-line-bold') as HTMLDivElement;
+        // const props = { width: span.offsetWidth };
+        // const Img = this._render.renderFunction(img as any);
+        // return <Img {...(props as any)} />;
     }
 
     render() {
-        const RightIcon = this._render.renderFunction('RightIcon');
         const { img } = this.state;
         const { label } = this.props;
         return (
@@ -44,7 +41,7 @@ export class LineBold extends Component<IProps, IState> {
                     {label}
                     <div style={{ width: '100%', height: 0, position: 'absolute', left: 0, bottom: '10px' }}>{img.length ? this.getImg(img) : ''}</div>
                 </span>
-                <RightIcon />
+                <Icon.RightIcon />
             </div>
         );
     }

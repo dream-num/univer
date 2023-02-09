@@ -28,7 +28,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
 
     // 转换成渲染需要的数据
     resetMenuList(children: RightMenuProps[]) {
-        const componentManager = this._context.getPluginManager().getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager();
+        const componentManager = this.getContext().getPluginManager().getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager();
 
         for (let i = 0; i < children.length; i++) {
             const item = children[i];
@@ -39,7 +39,10 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
                 if (Label) {
                     item.label = <Label {...props} />;
                 }
+            } else {
+                item.label = this.getLocale(item.locale);
             }
+
             if (item.children) {
                 item.children = this.resetMenuList(item.children);
             }
@@ -152,7 +155,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
                         e.preventDefault();
                     }}
                 >
-                    <Menu ref={this.ulRef} menu={this.state.children} onClick={this.handleClick}></Menu>
+                    <Menu ref={this.ulRef} menu={this.resetMenuList(this.state.children)} onClick={this.handleClick}></Menu>
                 </div>
             )
         );

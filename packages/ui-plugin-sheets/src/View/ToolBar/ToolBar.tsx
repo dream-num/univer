@@ -1,5 +1,4 @@
 import { AppContext, AppContextValues, BaseComponentProps, Button, Component, Container, createRef, debounce, PreactContext, Select, TextButton, Tooltip } from '@univerjs/base-ui';
-import { PLUGIN_NAMES } from '@univerjs/core';
 import { SheetUIPlugin } from '../..';
 import { SHEET_UI_PLUGIN_NAME } from '../../Basics';
 import { IToolbarItemProps } from '../../Controller';
@@ -176,21 +175,6 @@ export class Toolbar extends Component<IProps, IState> {
         return toolList;
     };
 
-    // setToolbar = (toolList: any[], moreText: Record<string, string>) => {
-    //     toolList = this.resetLabel(toolList);
-
-    //     this.setState(
-    //         {
-    //             toolList,
-    //             defaultToolList: toolList,
-    //             moreText,
-    //         },
-    //         () => {
-    //             this.setToolbarListWidth();
-    //         }
-    //     );
-    // };
-
     setToolbar = (toolList: any[]) => {
         toolList = this.resetLabel(toolList);
 
@@ -206,7 +190,12 @@ export class Toolbar extends Component<IProps, IState> {
     };
 
     resetUl = () => {
-        const wrapper = this.getContext().getPluginManager().getPluginByName<SheetUIPlugin>(PLUGIN_NAMES.BASE_COMPONENT)?.getSheetContainerController().getContentRef().current!;
+        const wrapper = this.getContext()
+            .getPluginManager()
+            .getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
+            ?.getAppUIController()
+            .getSheetContainerController()
+            .getContentRef().current!;
         const height = `${(wrapper as HTMLDivElement).offsetHeight}px`;
         const ul = this.toolbarRef.current.querySelectorAll('ul');
         for (let i = 0; i < ul.length; i++) {
@@ -229,7 +218,7 @@ export class Toolbar extends Component<IProps, IState> {
             if (item.toolbarType) {
                 if (item.show) {
                     return (
-                        <Tooltip title={item.tooltip} placement={'bottom'}>
+                        <Tooltip title={this.getLocale(item.tooltip)} placement={'bottom'}>
                             <TextButton active={item.active} label={item.label} onClick={item.onClick}></TextButton>
                         </Tooltip>
                     );
@@ -238,7 +227,7 @@ export class Toolbar extends Component<IProps, IState> {
                 if (item.show) {
                     return (
                         <Select
-                            tooltip={item.tooltip}
+                            tooltip={this.getLocale(item.tooltip)}
                             type={item.type}
                             display={item.display}
                             children={item.children}
@@ -267,9 +256,9 @@ export class Toolbar extends Component<IProps, IState> {
                     {this.getToolbarList(defaultToolList)}
 
                     <div ref={this.moreBtnRef} className={styles.moreButton} style={{ visibility: moreToolList.length ? 'visible' : 'hidden' }}>
-                        <Tooltip title={moreText.tip} placement={'bottom'}>
+                        <Tooltip title={this.getLocale('toolbar.toolMoreTip')} placement={'bottom'}>
                             <Button type="text" onClick={this.showMore}>
-                                <div style={{ fontSize: '14px' }}>{moreText.more}</div>
+                                <div style={{ fontSize: '14px' }}>{this.getLocale('toolbar.toolMore')}</div>
                             </Button>
                         </Tooltip>
                     </div>

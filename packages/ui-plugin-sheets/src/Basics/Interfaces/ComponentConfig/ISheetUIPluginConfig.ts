@@ -1,7 +1,7 @@
 import { SheetRightMenuConfig } from './RightMenuConfig';
 import { SheetContainerConfig } from './SheetContainerConfig';
 import { SheetToolbarConfig } from './ToolbarConfig';
-import { Context } from '@univerjs/core/src/Basics/Context';
+import { LocaleType } from '@univerjs/core';
 
 export interface ILayout {
     sheetContainerConfig?: SheetContainerConfig;
@@ -12,4 +12,5 @@ export interface ILayout {
 export interface ISheetUIPluginConfig {
     container?: HTMLElement | string;
     layout?: ILayout;
+    locale?: LocaleType;
 }

@@ -14,6 +14,16 @@ export class EventManager {
         this._observerManager.addObserver('onUIChangeObservable', 'core', new Observable());
         this._observerManager.addObserver('onAfterChangeUILocaleObservable', 'core', new Observable());
         this._observerManager.addObserver('onViewComponentFocusChange', 'core', new Observable());
-        this._observerManager.addObserver('onViewComponentFocusChange', 'core', new Observable());
+
+        // SheetBar
+        this._observerManager.addObserver('onAddSheet', 'core', new Observable());
+        this._observerManager.addObserver('onDeleteSheet', 'core', new Observable());
+        this._observerManager.addObserver('onHideSheet', 'core', new Observable());
+        this._observerManager.addObserver('onUnHideSheet', 'core', new Observable());
+        this._observerManager.addObserver('onToLeftSheet', 'core', new Observable());
+        this._observerManager.addObserver('onToRightSheet', 'core', new Observable());
+        this._observerManager.addObserver('onCopySheet', 'core', new Observable());
+        this._observerManager.addObserver('onRemoveSheet', 'core', new Observable());
+        this._observerManager.addObserver('onSheetColor', 'core', new Observable());
     }
 }

@@ -1,5 +1,5 @@
 import { BaseMenuItem, BaseUlProps, ColorPicker } from '@univerjs/base-ui';
-import { Nullable, Plugin, ACTION_NAMES, CommandManager, SheetActionBase } from '@univerjs/core';
+import { Nullable, Plugin, ACTION_NAMES, CommandManager, SheetActionBase, UIObserver } from '@univerjs/core';
 import { SheetBar } from "../View/SheetBar";
 import styles from '../View/SheetBar/index.module.less';
 
@@ -25,15 +25,15 @@ export class SheetBarUIController {
 
     protected _sheetList: SheetUlProps[];
 
+    protected _sheetUl: SheetUl[];
+
     protected _sheetIndex: number;
+
+    protected _plugin: Plugin;
 
     protected _dataId: string;
 
-    protected _sheetUl: SheetUl[];
-
     protected _menuList: SheetUlProps[];
-
-    protected _plugin: Plugin;
 
     protected _refreshSheetBarUI(): void {
         this._sheetBar.setValue({
@@ -108,24 +108,25 @@ export class SheetBarUIController {
     }
 
     constructor(plugin: Plugin) {
+        let that = this;
         this._plugin = plugin;
         this._sheetUl = [
             {
                 locale: 'sheetConfig.delete',
                 onClick: () => {
-                    //barControl.deleteSheet();
+                    that.setUIObserve('onDeleteSheet', { name: 'deleteSheet' });
                 },
             },
             {
                 locale: 'sheetConfig.copy',
                 onClick: () => {
-                    //barControl.copySheet();
+                    that.setUIObserve('onCopySheet', { name: 'copySheet' });
                 },
             },
             {
                 locale: 'sheetConfig.rename',
                 onClick: () => {
-                    //barControl.reNameSheet();
+                    that.setUIObserve('onRemoveSheet', { name: 'removeSheet' });
                 },
             },
             {
@@ -138,14 +139,14 @@ export class SheetBarUIController {
                             name: this._plugin.getPluginName() + ColorPicker.name,
                             props: {
                                 onClick: (color: string) => {
-                                    // barControl.setSheetColor(color);
+                                    that.setUIObserve('onSheetColor', { name: 'sheetColor', value: color });
                                 },
                                 lang: {
                                     collapseLocale: 'colorPicker.collapse',
-                                    customColorLocale: 'colorPicker.customColor',
-                                    confirmColorLocale: 'colorPicker.confirmColor',
-                                    cancelColorLocale: 'colorPicker.cancelColor',
                                     changeLocale: 'colorPicker.change',
+                                    customColorLocale: 'colorPicker.customColor',
+                                    cancelColorLocale: 'colorPicker.cancelColor',
+                                    confirmColorLocale: 'colorPicker.confirmColor',
                                 },
                             },
                         },
@@ -156,26 +157,27 @@ export class SheetBarUIController {
             {
                 locale: 'sheetConfig.hide',
                 onClick: () => {
-                    //barControl.hideSheet();
+                    that.setUIObserve('onHideSheet', { name: 'hideSheet' });
                 },
             },
             {
                 locale: 'sheetConfig.unhide',
                 onClick: () => {
-                    //barControl.unHideSheet();
+                    that.setUIObserve('onUnHideSheet', { name: 'hideSheet' });
+
                 },
                 border: true,
             },
             {
                 locale: 'sheetConfig.moveLeft',
                 onClick: () => {
-                    //barControl.moveSheet('left');
+                    that.setUIObserve('onToLeftSheet', { name: 'toLeftSheet' });
                 },
             },
             {
                 locale: 'sheetConfig.moveRight',
                 onClick: () => {
-                    //barControl.moveSheet('right');
+                    that.setUIObserve('onToRightSheet', { name: 'toRightSheet' });
                 },
             },
         ];
@@ -254,6 +256,10 @@ export class SheetBarUIController {
         return obj;
     }
 
+    setUIObserve<T>(type: string, msg: UIObserver<T>) {
+        this._plugin.getContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core').notifyObservers(msg);
+    }
+
     getSheetBar(): SheetBar {
         return this._sheetBar;
     }
@@ -299,8 +305,12 @@ export class SheetBarUIController {
     }
 
     addSheet(position?: string, config?: SheetUlProps): void {
-        this._sheetBar.setValue({ sheetList: this._sheetList, menuList: this._menuList }, () => {
-            this._sheetBar.overGrid();
+        this.setUIObserve('onAddSheet', {
+            name: 'addSheet',
+            value: {
+                position,
+                config
+            }
         });
     }
 

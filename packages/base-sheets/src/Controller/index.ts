@@ -5,7 +5,7 @@ export * from './CountBarController';
 export * from './InfoBarController';
 export * from './RightMenuController';
 export * from './Selection/index';
-export * from './SheetBarController';
+export * from './SheetBarController1';
 export * from './SheetContainerController';
 export * from './SpreadsheetController';
 export * from './ToolbarController';

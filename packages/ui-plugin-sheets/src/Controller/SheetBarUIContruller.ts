@@ -114,7 +114,7 @@ export class SheetBarUIController {
             {
                 locale: 'sheetConfig.delete',
                 onClick: () => {
-                    that.setUIObserve('onDeleteSheet', { name: 'deleteSheet' });
+                    that.setUIObserve('onDeleteSheet', { name: 'deleteSheet', value: this._dataId });
                 },
             },
             {
@@ -157,13 +157,13 @@ export class SheetBarUIController {
             {
                 locale: 'sheetConfig.hide',
                 onClick: () => {
-                    that.setUIObserve('onHideSheet', { name: 'hideSheet' });
+                    that.setUIObserve('onHideSheet', { name: 'hideSheet', value: this._dataId });
                 },
             },
             {
                 locale: 'sheetConfig.unhide',
                 onClick: () => {
-                    that.setUIObserve('onUnHideSheet', { name: 'hideSheet' });
+                    that.setUIObserve('onUnHideSheet', { name: 'hideSheet', value: this._dataId });
 
                 },
                 border: true,

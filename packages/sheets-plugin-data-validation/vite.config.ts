@@ -10,8 +10,8 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetPluginDataValidation',
-            formats: ['es', 'umd'],
+            name: 'UniverSheetsPluginDataValidation',
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-sheets--plugin-data-validation',
         },
         outDir: './lib',

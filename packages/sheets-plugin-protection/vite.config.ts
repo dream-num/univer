@@ -10,8 +10,8 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetPluginProtection',
-            formats: ['es', 'umd'],
+            name: 'UniverSheetsPluginProtection',
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-sheets-plugin-protection',
         },
         outDir: './lib',

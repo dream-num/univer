@@ -11,7 +11,7 @@ export default defineConfig({
         lib: {
             entry: resolve('src/index.ts'),
             name: 'UniverSheetsPluginFormula',
-            formats: ['es', 'umd'],
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-sheets-plugin-formula',
         },
         outDir: './lib',

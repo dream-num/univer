@@ -10,8 +10,8 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetPluginSort',
-            formats: ['es', 'umd'],
+            name: 'UniverSheetsPluginSort',
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-sheets-plugin-sort',
         },
         outDir: './lib',

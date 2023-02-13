@@ -10,8 +10,8 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetPluginScreenshot',
-            formats: ['es', 'umd'],
+            name: 'UniverSheetsPluginScreenshot',
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-sheets-plugin-screenshot',
         },
         outDir: './lib',

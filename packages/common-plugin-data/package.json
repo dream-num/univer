@@ -19,7 +19,6 @@
         "lib": "lib"
     },
     "files": [
-        "package.json",
         "lib"
     ],
     "scripts": {

@@ -1,4 +1,3 @@
-// import { nanoid } from 'nanoid';
 import { SheetContext } from '../../Basics';
 
 import {
@@ -2021,9 +2020,9 @@ export class Range {
 
         const zx = Math.abs(
             currentStartColumn +
-                currentEndColumn -
-                incomingStartColumn -
-                incomingEndColumn
+            currentEndColumn -
+            incomingStartColumn -
+            incomingEndColumn
         );
         const x =
             Math.abs(currentStartColumn - currentEndColumn) +
@@ -3895,36 +3894,6 @@ export class Range {
         _commandManager.invoke(command);
     }
 
-    // /**
-    //  * Set key for cell
-    //  */
-    // setCellId(): string;
-    // setCellId(id: string): string;
-    // setCellId(...argument: any): string {
-    //     let id = argument[0];
-
-    //     // TODO rowCount > 10000 use 8, rountCount > 10 0000 ,12位 100 0000 ,16位，1000 0000, 20位
-    //     if (typeof id !== 'string') {
-    //         id = nanoid(6);
-    //     }
-
-    //     const { _context, _worksheet, _commandManager, _rangeData } = this;
-
-    //     const cellValue = new ObjectMatrix<ICellData>();
-    //     cellValue.setValue(0, 0, Object.assign(this.getValue() || {}, { id }));
-
-    //     const setValue: ISetRangeDataActionData = {
-    //         sheetId: _worksheet.getSheetId(),
-    //         actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-    //         cellValue: cellValue.getData(),
-    //         rangeData: _rangeData,
-    //     };
-    //     const command = new Command(_context.getWorkBook(), setValue);
-    //     _commandManager.invoke(command);
-
-    //     return id;
-    // }
-
     /**
      * Determine whether a range is legal
      */
@@ -3960,7 +3929,7 @@ export class Range {
     // applyRowBanding(...argument: any): Nullable<Banding> {
 
     //     // default argument
-    //     const bandedRangeId = 'banded-range-' + Tools.generateRandomId();
+    //     const bandedRangeId = 'banded-range-' + Tools.generateRandomId(6);
     //     const rangeData = this.getRangeData()
     //     let rowProperties:IBanding = {
     //         bandingTheme:argument[0] || BandingTheme.LIGHT_GRAY,
@@ -4026,7 +3995,7 @@ export class Range {
     // ): Nullable<Banding>;
     // applyRowBanding(...argument: any): Nullable<Banding> {
     //     // default argument
-    //     const bandedRangeId = 'banded-range-' + Tools.generateRandomId();
+    //     const bandedRangeId = 'banded-range-' + Tools.generateRandomId(6);
     //     const rangeData = this.getRangeData();
     //     let rowProperties: IBanding = {
     //         bandingTheme: argument[0] || BandingTheme.LIGHT_GRAY,

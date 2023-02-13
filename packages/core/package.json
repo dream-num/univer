@@ -17,12 +17,12 @@
         ".": "./src/index.ts",
         "./*": "./src/*"
     },
-    "files": [
-        "lib"
-    ],
     "directories": {
         "lib": "lib"
     },
+    "files": [
+        "lib"
+    ],
     "scripts": {
         "test": "cross-env NODE_ENV=--experimental-vm-modules jest --config=jest.config.js",
         "dev": "vite",

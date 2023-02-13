@@ -1,5 +1,4 @@
 import { BlockType, ICellData, IDocumentData, IElementsOrder, IRangeData, IStyleData, ITextDecoration, Tools } from '@univerjs/core';
-import { nanoid } from 'nanoid';
 import { pxToPt } from '@univerjs/base-render';
 import { textTrim } from '../Utils';
 
@@ -46,7 +45,7 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
 
         spanTexts.forEach((item) => {
             ed = +item.length;
-            let eId = nanoid(6);
+            let eId = Tools.generateRandomId(6);
 
             elements[eId] = {
                 eId,
@@ -94,9 +93,9 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
         });
     }
 
-    const blockId = nanoid(6);
+    const blockId = Tools.generateRandomId(6);
     let p = {
-        id: nanoid(6),
+        id: Tools.generateRandomId(6),
         body: {
             blockElements: {
                 [blockId]: {

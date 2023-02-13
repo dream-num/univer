@@ -17,9 +17,10 @@
         ".": "./src/index.ts",
         "./*": "./src/*"
     },
-    "directories": {
-        "lib": "lib"
-    },
+    
+    "files": [
+        "lib"
+    ],
     "scripts": {
         "test": "jest",
         "dev": "vite",

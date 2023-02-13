@@ -1,4 +1,4 @@
-import { Nullable } from '@univerjs/core';
+import { Nullable, Tools } from '@univerjs/core';
 import { LexerNode } from '../Analysis/LexerNode';
 import { ErrorType } from '../Basics/ErrorType';
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
@@ -7,7 +7,6 @@ import { DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_
 import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
 import { ErrorNode } from './ErrorNode';
 import { NodeType, NODE_ORDER_MAP } from './NodeType';
-import { nanoid } from 'nanoid';
 import { AstNodePromiseType, LambdaPrivacyVarType } from '../Basics/Common';
 
 export const LAMBDA_TOKEN: string = 'LAMBDA';
@@ -80,7 +79,8 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
             return ErrorNode.create(ErrorType.VALUE);
         }
 
-        const lambdaId = nanoid(8);
+        // const lambdaId = nanoid(8);
+        const lambdaId = Tools.generateRandomId(8)
 
         const lambdaRuntime = parserDataLoader.getLambdaRuntime();
         const currentLambdaPrivacyVar = new Map<string, Nullable<BaseAstNode>>();

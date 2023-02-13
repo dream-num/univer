@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid';
 import { SheetContext } from '../../Basics';
 import {
     IInsertColumnDataActionData,
@@ -130,7 +129,7 @@ export class Worksheet {
             // this._config = Tools.deepMerge({}, DEFAULT_WORKSHEET, argument[1]);
 
             const { columnData, rowData, cellData } = this._config;
-            this._sheetId = this._config.id ?? nanoid(6);
+            this._sheetId = this._config.id ?? Tools.generateRandomId(6);
             this._initialized = false;
             // this._selection = new Selection(this);
             // this._borderStyles = new BorderStyles(this);
@@ -513,7 +512,7 @@ export class Worksheet {
         const copy = Tools.deepClone(_config);
         copy.name = name;
         copy.status = BooleanNumber.FALSE;
-        copy.id = nanoid();
+        copy.id = Tools.generateRandomId();
         return new Worksheet(_context, copy);
     }
 

@@ -58,7 +58,6 @@ export default defineConfig({
                 // '@univerjs/base-ui': '@univerjs/base-ui',
                 // '@univerjs/style-univer': '@univerjs/style-univer',
                 // 'css-vars-ponyfill': 'css-vars-ponyfill',
-                // nanoid: 'nanoid',
                 // preact: 'preact',
                 // react: 'react',
             },

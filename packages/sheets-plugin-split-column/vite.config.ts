@@ -10,8 +10,8 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetPluginSplitColumn',
-            formats: ['es', 'umd'],
+            name: 'UniverSheetsPluginSplitColumn',
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-sheets--plugin-split-column',
         },
         outDir: './lib',

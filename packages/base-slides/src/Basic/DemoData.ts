@@ -13,7 +13,7 @@ import {
 } from '@univerjs/core';
 
 export const docsDemoData: IDocumentData = {
-    documentId: 'd',
+    id: 'd',
     drawings: {
         shapeTest1: {
             objectId: 'shapeTest1',

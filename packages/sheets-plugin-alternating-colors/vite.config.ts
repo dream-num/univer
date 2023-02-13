@@ -10,8 +10,8 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetPluginAlternatingColors',
-            formats: ['es', 'umd'],
+            name: 'UniverSheetsPluginAlternatingColors',
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-sheets--plugin-alternating-colors',
         },
         outDir: './lib',

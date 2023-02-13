@@ -641,21 +641,21 @@ export class SelectionManager {
     private _rowEventInitial() {
         const row = this._rowComponent;
         row.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._rowTitleControl.highlightRowTitle(evt);
+            // this._rowTitleControl.highlightRowTitle(evt);
         });
     }
 
     private _columnEventInitial() {
         const column = this._columnComponent;
         column.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._columnTitleControl.highlightColumnTitle(evt);
+            // this._columnTitleControl.highlightColumnTitle(evt);
         });
     }
 
     private _leftTopEventInitial() {
         const leftTop = this._leftTopComponent;
         leftTop.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            console.log('leftTop_moveObserver', evt);
+            // console.log('leftTop_moveObserver', evt);
         });
     }
 
@@ -678,25 +678,25 @@ export class SelectionManager {
 
                 const cellInfo = cell
                     ? {
-                          row: cell.row,
-                          column: cell.column,
-                          isMerged: false,
-                          isMergedMainCell: false,
-                          startY: 0,
-                          endY: 0,
-                          startX: 0,
-                          endX: 0,
-                          mergeInfo: {
-                              startColumn,
-                              startRow,
-                              endColumn,
-                              endRow,
-                              startY: 0,
-                              endY: 0,
-                              startX: 0,
-                              endX: 0,
-                          },
-                      }
+                        row: cell.row,
+                        column: cell.column,
+                        isMerged: false,
+                        isMergedMainCell: false,
+                        startY: 0,
+                        endY: 0,
+                        startX: 0,
+                        endX: 0,
+                        mergeInfo: {
+                            startColumn,
+                            startRow,
+                            endColumn,
+                            endRow,
+                            startY: 0,
+                            endY: 0,
+                            startX: 0,
+                            endX: 0,
+                        },
+                    }
                     : null;
 
                 // Only update data, not render

@@ -1,7 +1,7 @@
 import { Component, Input } from '@univerjs/base-ui';
 
 interface IProps {
-    prefix: string[];
+    prefix: string;
     suffix: string;
     onKeyUp?: (e: Event) => void;
 }
@@ -18,12 +18,11 @@ export class RightMenuInput extends Component<IProps> {
 
     render() {
         const { prefix, suffix } = this.props;
-
         return (
             <div>
-                {prefix}
+                {this.getLocale(prefix)}
                 <Input onKeyUp={this.handleKeyUp.bind(this)} type="number" placeholder="1" onClick={this.handleClick}></Input>
-                {suffix}
+                {this.getLocale(suffix)}
             </div>
         );
     }

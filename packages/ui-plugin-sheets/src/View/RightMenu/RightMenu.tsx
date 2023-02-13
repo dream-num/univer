@@ -10,6 +10,7 @@ interface IState {
     srcElement: any;
     eventType: string | null;
     children: RightMenuProps[];
+    replace: RightMenuProps[];
 }
 
 export class RightMenu extends Component<BaseRightMenuProps, IState> {
@@ -21,13 +22,14 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
             srcElement: null,
             eventType: null,
             children: [],
+            replace: [],
         };
     }
 
     root = createRef();
 
     // 转换成渲染需要的数据
-    resetMenuList(children: RightMenuProps[]) {
+    resetMenuList(children: RightMenuProps[], replace: RightMenuProps[]) {
         const componentManager = this.getContext().getPluginManager().getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager();
 
         for (let i = 0; i < children.length; i++) {
@@ -39,12 +41,12 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
                 if (Label) {
                     item.label = <Label {...props} />;
                 }
-            } else {
-                item.label = this.getLocale(item.locale);
+            } else if (typeof item.label === 'string') {
+                item.label = this.getLocale(replace[i].label as string);
             }
 
             if (item.children) {
-                item.children = this.resetMenuList(item.children);
+                item.children = this.resetMenuList(item.children, replace[i].children!);
             }
         }
 
@@ -53,7 +55,8 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
 
     setMenuList(children: RightMenuProps[]) {
         this.setState({
-            children: this.resetMenuList(children),
+            children,
+            replace: JSON.parse(JSON.stringify(children)),
         });
     }
 
@@ -155,7 +158,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
                         e.preventDefault();
                     }}
                 >
-                    <Menu ref={this.ulRef} menu={this.resetMenuList(this.state.children)} onClick={this.handleClick}></Menu>
+                    <Menu ref={this.ulRef} menu={this.resetMenuList(this.state.children, this.state.replace)} onClick={this.handleClick}></Menu>
                 </div>
             )
         );

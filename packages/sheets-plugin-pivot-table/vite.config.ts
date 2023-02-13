@@ -10,8 +10,8 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetPluginPivotTable',
-            formats: ['es', 'umd'],
+            name: 'UniverSheetsPluginPivotTable',
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-sheets-plugin-pivot-table',
         },
         outDir: './lib',

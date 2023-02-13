@@ -10,8 +10,8 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetPluginConditionalFormat',
-            formats: ['es', 'umd'],
+            name: 'UniverSheetsPluginConditionalFormat',
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-sheets--plugin-conditional-format',
         },
         outDir: './lib',

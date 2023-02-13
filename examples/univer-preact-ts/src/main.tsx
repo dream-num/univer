@@ -162,7 +162,7 @@ univerSheetCustom({
 //         columnCount = 5;
 //     }
 //     const defaultWorkbookData = Tools.deepClone(DEFAULT_WORKBOOK_DATA);
-//     defaultWorkbookData.id = Tools.generateRandomId();
+//     defaultWorkbookData.id = Tools.generateRandomId(6);
 //     defaultWorkbookData.styles = null;
 //     defaultWorkbookData.namedRanges = null;
 //     defaultWorkbookData.sheets = {

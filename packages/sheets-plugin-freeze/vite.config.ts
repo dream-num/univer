@@ -10,8 +10,8 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetPluginFrozen',
-            formats: ['es', 'umd'],
+            name: 'UniverSheetsPluginFrozen',
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-sheets-plugin-freeze',
         },
         outDir: './lib',

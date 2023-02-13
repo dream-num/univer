@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid';
 import { Environment } from '../Basics';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from './ObjectMatrix';
 import { Class, IKeyValue } from './Types';
@@ -182,11 +183,8 @@ export class Tools {
         return 'Unknown browser';
     }
 
-    static generateRandomId(): string {
-        function S4() {
-            return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-        }
-        return `${S4() + S4()}-${S4()}-${S4()}-${S4()}-${S4()}${S4()}${S4()}`;
+    static generateRandomId(n: number = 21): string {
+        return nanoid(n);
     }
 
     static getClassName(instance: object): string {

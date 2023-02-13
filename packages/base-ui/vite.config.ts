@@ -11,12 +11,12 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'StyleUniverSheet',
+            name: 'UniverBaseUI',
             formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-base-ui',
         },
         outDir: './lib',
-        sourcemap: true,
+        //sourcemap: true,
     },
     define: {
         pkgJson: { name, version },
@@ -42,7 +42,6 @@ export default defineConfig({
             externals: {
                 '@univerjs/core': '@univerjs/core',
                 '@univerjs/base-render': '@univerjs/base-render',
-                'css-vars-ponyfill': 'css-vars-ponyfill',
                 'react-colorful': 'react-colorful',
                 preact: 'preact',
             },

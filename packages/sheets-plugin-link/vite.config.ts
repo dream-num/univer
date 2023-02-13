@@ -10,8 +10,8 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetPluginInsertLink',
-            formats: ['es', 'umd'],
+            name: 'UniverSheetsPluginInsertLink',
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'universheet-plugin-insert-link',
         },
         outDir: './lib',

@@ -10,9 +10,9 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetPluginFilter',
-            formats: ['es', 'umd'],
-            fileName: 'univer-sheets--plugin-filter',
+            name: 'UniverSheetsPluginFilter',
+            formats: ['es', 'umd', 'cjs'],
+            fileName: 'univer-sheets-plugin-filter',
         },
         outDir: './lib',
     },

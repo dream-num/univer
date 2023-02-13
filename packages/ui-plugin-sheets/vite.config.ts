@@ -1,20 +1,20 @@
 import { defineConfig } from 'vite';
 import path from 'path';
 import preact from '@preact/preset-vite';
-import legacy from '@vitejs/plugin-legacy';
 import { name, version } from './package.json';
+import createExternal from 'vite-plugin-external';
 
 const resolve = (url: string) => path.resolve(__dirname, url);
 
 export default defineConfig({
     build: {
-        // lib: {
-        //     entry: resolve('src/index.ts'),
-        //     name: 'BaseStyleUniver',
-        //     formats: ['es', 'umd'],
-        //     fileName: 'index',
-        // },
-        // outDir: './lib',
+        lib: {
+            entry: resolve('src/index.ts'),
+            name: 'UniverUIPluginSheets',
+            formats: ['es', 'umd', 'cjs'],
+            fileName: 'univer-ui-plugin-sheets',
+        },
+        outDir: './lib',
     },
     define: {
         pkgJson: { name, version },
@@ -36,9 +36,13 @@ export default defineConfig({
     },
     plugins: [
         preact(),
-        legacy({
-            targets: ['ie >= 11'],
-            additionalLegacyPolyfills: ['regenerator-runtime/runtime'],
+        createExternal({
+            externals: {
+                '@univerjs/core': '@univerjs/core',
+                '@univerjs/base-ui': '@univerjs/base-ui',
+                '@univerjs/base-render': '@univerjs/base-render',
+                '@univerjs/base-sheets': '@univerjs/base-sheets',
+            },
         }),
     ],
 });

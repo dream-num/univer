@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid';
 import {
     IWorkbookConfig,
     IWorksheetConfig,
@@ -7,6 +6,7 @@ import {
     ITextStyle,
     IStyleData,
 } from '../../Interfaces';
+import { Tools } from '../Tools';
 import { IKeyValue } from '../Types';
 import { border } from './Border';
 
@@ -25,7 +25,7 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
             // if (sheet.hasOwnProperty('index')) {
             //     newSheet.id = sheet.index as string;
             // } else {
-            newSheet.id = nanoid(6);
+            newSheet.id = Tools.generateRandomId(6);
             // }
 
             // 缩放比例
@@ -227,7 +227,7 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                                 };
                             }
 
-                            const eId = nanoid(6);
+                            const eId = Tools.generateRandomId(6);
                             elements[eId] = {
                                 eId,
                                 st: 0,
@@ -246,7 +246,7 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                         });
 
                         newCell.p = {
-                            documentId: nanoid(6),
+                            id: Tools.generateRandomId(6),
                             body: {
                                 blockElements: {
                                     p1: {
@@ -273,8 +273,8 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                         // 显示值
                         if (cell.hasOwnProperty('m')) {
                             newCell.m = cell.m;
-                        }else{
-                            newCell.m = String(cell.v || '')
+                        } else {
+                            newCell.m = String(cell.v || '');
                         }
 
                         const cellStyle: IStyleData = {};

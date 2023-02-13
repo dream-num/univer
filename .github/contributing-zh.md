@@ -1237,8 +1237,16 @@ npm run build
 
 ### 发布 npm
 
+以发布 `@univerjs/core` 为例
 ```shell
 pnpm publish --filter @univerjs/core
+```
+
+or
+
+```shell
+cd packages/core
+npm publish --access=public
 ```
 
 ## 插件使用

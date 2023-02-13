@@ -10,8 +10,8 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetPluginFind',
-            formats: ['es', 'umd'],
+            name: 'UniverSheetsPluginFind',
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-sheets-plugin-find',
         },
         outDir: './lib',

@@ -34,7 +34,7 @@ export class NamedRange {
 
         // this._name = name;
         // this._range = range;
-        // this._namedRangeId = 'named-range-' + Tools.generateRandomId();
+        // this._namedRangeId = 'named-range-' + Tools.generateRandomId(6);
         // this._addNamedRange();
     }
 

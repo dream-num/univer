@@ -9,12 +9,12 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'Univer',
+            name: 'UniverCore',
             formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-core',
         },
         outDir: './lib',
-        // sourcemap: true
+        //sourcemap: true
     },
     define: {
         pkgJson: { name, version },

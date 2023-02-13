@@ -10,7 +10,7 @@ export default defineConfig({
         // lib: {
         //     entry: resolve('src/index.ts'),
         //     name: 'BaseStyleUniverSheet',
-        //     formats: ['es', 'umd'],
+        //     formats: ['es', 'umd', 'cjs'],
         //     fileName: 'index',
         // },
         // outDir: './lib',

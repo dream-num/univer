@@ -1,5 +1,3 @@
-import { nanoid } from 'nanoid';
-
 import {
     DEFAULT_RANGE_ARRAY,
     DEFAULT_WORKBOOK,
@@ -76,7 +74,7 @@ export class Workbook {
 
         const { styles } = this._config;
         if (this._config.id === '') {
-            this._config.id = nanoid(6);
+            this._config.id = Tools.generateRandomId(6);
         }
         this._unitId = this._config.id;
         this._styles = new Styles(styles);
@@ -291,7 +289,7 @@ export class Workbook {
             const worksheetConfig = {
                 name: NameGen.getSheetName(),
                 status: 0,
-                id: nanoid(6),
+                id: Tools.generateRandomId(6),
             };
             const index = this.getSheetSize();
             before.notifyObservers({
@@ -324,7 +322,7 @@ export class Workbook {
                 const sheet = argument[0];
                 const index = this.getSheetSize();
                 const worksheetConfig = sheet.getConfig();
-                worksheetConfig.id = nanoid(6);
+                worksheetConfig.id = Tools.generateRandomId(6);
                 before.notifyObservers({
                     index,
                     sheetId: worksheetConfig.id,
@@ -355,7 +353,7 @@ export class Workbook {
                 const worksheetConfig = {
                     name: NameGen.getSheetName(),
                     status: 0,
-                    id: nanoid(6),
+                    id: Tools.generateRandomId(6),
                 };
                 before.notifyObservers({
                     index,
@@ -388,7 +386,7 @@ export class Workbook {
                 const worksheetConfig = {
                     status: 0,
                     name,
-                    id: nanoid(6),
+                    id: Tools.generateRandomId(6),
                 };
                 before.notifyObservers({
                     index,
@@ -451,7 +449,7 @@ export class Workbook {
                 const worksheetConfig = {
                     status: 0,
                     name,
-                    id: nanoid(6),
+                    id: Tools.generateRandomId(6),
                 };
                 before.notifyObservers({
                     index,
@@ -482,7 +480,7 @@ export class Workbook {
                     const index = argument[0];
                     const sheet = argument[1];
                     const worksheetConfig = sheet.getConfig();
-                    worksheetConfig.id = nanoid(6);
+                    worksheetConfig.id = Tools.generateRandomId(6);
                     before.notifyObservers({
                         index,
                         sheetId: worksheetConfig.id,
@@ -691,7 +689,7 @@ export class Workbook {
      *
      * @returns void
      */
-    flush(): void {}
+    flush(): void { }
 
     setSheetOrder(sheetId: string, order: number): void {
         // const { _sheetOrder } = this;

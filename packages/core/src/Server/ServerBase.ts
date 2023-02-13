@@ -46,7 +46,7 @@ export abstract class ServerBase {
     packMessage(changed: ISheetActionData[]): IOServerMessage {
         return {
             changed,
-            version: Tools.generateRandomId(),
+            version: Tools.generateRandomId(6),
         };
     }
 

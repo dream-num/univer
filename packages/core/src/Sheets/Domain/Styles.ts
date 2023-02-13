@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid';
 import { ICellData, IStyleData } from '../../Interfaces';
 import { IKeyType, Nullable, Tools } from '../../Shared';
 
@@ -41,7 +40,7 @@ export class Styles {
     }
 
     add(data: IStyleData): string {
-        const id = nanoid(6);
+        const id = Tools.generateRandomId(6);
         this._styles[id] = data;
         return id;
     }

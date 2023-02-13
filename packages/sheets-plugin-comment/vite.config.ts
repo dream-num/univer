@@ -10,8 +10,8 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetPluginComment',
-            formats: ['es', 'umd'],
+            name: 'UniverSheetsPluginComment',
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-sheets--plugin-comment',
         },
         outDir: './lib',

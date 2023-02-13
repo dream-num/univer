@@ -10,8 +10,8 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetPluginClipboard',
-            formats: ['es', 'umd'],
+            name: 'UniverSheetsPluginClipboard',
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-sheets--plugin-clipboard',
         },
         outDir: './lib',

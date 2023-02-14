@@ -137,6 +137,7 @@ export class SheetContainerUIController {
                     getComponent: this._sheetBarController.getComponent,
                     addSheet: this._sheetBarController.addSheet,
                     selectSheet: this._sheetBarController.selectSheet,
+                    dragEnd: this._sheetBarController.dragEnd,
                     changeSheetName: this._sheetBarController.changeSheetName,
                 },
                 slot: {

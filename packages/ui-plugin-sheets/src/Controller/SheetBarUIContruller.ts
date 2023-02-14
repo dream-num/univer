@@ -23,15 +23,15 @@ interface SheetUlProps extends BaseUlProps {
 export class SheetBarUIController {
     protected _sheetBar: SheetBar;
 
-    protected _sheetList: SheetUlProps[];
+    protected _plugin: Plugin;
 
     protected _sheetUl: SheetUl[];
 
+    protected _dataId: string;
+
     protected _sheetIndex: number;
 
-    protected _plugin: Plugin;
-
-    protected _dataId: string;
+    protected _sheetList: SheetUlProps[];
 
     protected _menuList: SheetUlProps[];
 
@@ -40,9 +40,6 @@ export class SheetBarUIController {
             sheetList: this._sheetList,
             sheetUl: this._sheetUl,
             menuList: this._menuList,
-            addSheet: () => {
-                // this._barControl.addSheet();
-            },
             selectSheet: (event: Event, data: { item: SheetUlProps }) => {
                 this._dataId = data.item.sheetId;
                 const sheet = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(this._dataId);
@@ -55,8 +52,8 @@ export class SheetBarUIController {
                 this._dataId = target.dataset.id as string;
                 //this._barControl.contextMenu(e);
             },
-            changeSheetName: (e: Event) => {
-                //this._barControl.changeSheetName(e);
+            changeSheetName: (event: Event) => {
+
             },
             dragEnd: (elements: HTMLDivElement[]) => {
                 //this._barControl.dragEnd(elements);
@@ -114,19 +111,19 @@ export class SheetBarUIController {
             {
                 locale: 'sheetConfig.delete',
                 onClick: () => {
-                    that.setUIObserve('onDeleteSheet', { name: 'deleteSheet', value: this._dataId });
+                    that.setUIObserve('onUIChangeObservable', { name: 'deleteSheet', value: this._dataId });
                 },
             },
             {
                 locale: 'sheetConfig.copy',
                 onClick: () => {
-                    that.setUIObserve('onCopySheet', { name: 'copySheet' });
+                    that.setUIObserve('onUIChangeObservable', { name: 'copySheet' });
                 },
             },
             {
                 locale: 'sheetConfig.rename',
                 onClick: () => {
-                    that.setUIObserve('onRemoveSheet', { name: 'removeSheet' });
+                    this._sheetBar.reNameSheet(this._dataId);
                 },
             },
             {
@@ -139,7 +136,7 @@ export class SheetBarUIController {
                             name: this._plugin.getPluginName() + ColorPicker.name,
                             props: {
                                 onClick: (color: string) => {
-                                    that.setUIObserve('onSheetColor', { name: 'sheetColor', value: color });
+                                    that.setUIObserve('onUIChangeObservable', { name: 'changeSheetColor', value: color });
                                 },
                                 lang: {
                                     collapseLocale: 'colorPicker.collapse',
@@ -157,29 +154,16 @@ export class SheetBarUIController {
             {
                 locale: 'sheetConfig.hide',
                 onClick: () => {
-                    that.setUIObserve('onHideSheet', { name: 'hideSheet', value: this._dataId });
+                    that.setUIObserve('onUIChangeObservable', { name: 'hideSheet', value: this._dataId });
                 },
             },
             {
                 locale: 'sheetConfig.unhide',
                 onClick: () => {
-                    that.setUIObserve('onUnHideSheet', { name: 'hideSheet', value: this._dataId });
-
+                    that.setUIObserve('onUIChangeObservable', { name: 'unHideSheet', value: this._dataId });
                 },
                 border: true,
-            },
-            {
-                locale: 'sheetConfig.moveLeft',
-                onClick: () => {
-                    that.setUIObserve('onToLeftSheet', { name: 'toLeftSheet' });
-                },
-            },
-            {
-                locale: 'sheetConfig.moveRight',
-                onClick: () => {
-                    that.setUIObserve('onToRightSheet', { name: 'toRightSheet' });
-                },
-            },
+            }
         ];
         CommandManager.getActionObservers().add((event) => {
             const action = event.action as SheetActionBase<any>;
@@ -304,18 +288,14 @@ export class SheetBarUIController {
 
     }
 
-    addSheet(position?: string, config?: SheetUlProps): void {
-        this.setUIObserve('onAddSheet', {
+    addSheet = (position?: string, config?: SheetUlProps): void => {
+        this.setUIObserve('onUIChangeObservable', {
             name: 'addSheet',
             value: {
                 position,
                 config
             }
         });
-    }
-
-    reNameSheet() {
-        this._sheetBar.reNameSheet(this._dataId);
     }
 
     hideSheet() {
@@ -330,8 +310,13 @@ export class SheetBarUIController {
 
     }
 
-    changeSheetName(e: Event) {
-
+    changeSheetName = (event: Event) => {
+        this.setUIObserve('onUIChangeObservable', {
+            name: 'renameSheet', value: {
+                sheetId: this._dataId,
+                sheetName: (event.target as HTMLElement).innerText
+            }
+        });
     }
 
     contextMenu(e: MouseEvent) {
@@ -339,16 +324,19 @@ export class SheetBarUIController {
     }
 
     dragEnd(element: HTMLDivElement[]) {
+        debugger
         let list: SheetUlProps[] = [];
+        let sheetId = this._dataId;
         Array.from(element).forEach((node: any) => {
             const item = this._sheetList.find((ele) => ele.sheetId === node.dataset.id);
             if (item) {
                 list.push(item);
             }
         });
-        this._sheetList = list;
-        this._sheetBar.setValue({
-            sheetList: list,
+        list.forEach((ele, index) => {
+            if (ele.sheetId === sheetId) {
+                this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().setSheetOrder(ele.sheetId, index);
+            }
         });
     }
 }

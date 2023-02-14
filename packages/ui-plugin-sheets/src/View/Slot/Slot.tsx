@@ -1,16 +1,15 @@
-import { BaseComponentProps } from '../../BaseComponent';
-import { Component } from '../../Framework';
+import { BaseComponentProps, Component } from '@univerjs/base-ui';
 
 interface IState {
-    slotGroup: any[];
+    slotGroup: Map<string, any>;
 }
 
 export class Slot extends Component<BaseComponentProps, IState> {
-    refs: any[] = [];
+    refMap = new Map();
 
     initialize() {
         this.state = {
-            slotGroup: [],
+            slotGroup: new Map(),
         };
     }
 
@@ -18,26 +17,26 @@ export class Slot extends Component<BaseComponentProps, IState> {
         this.props.getComponent?.(this);
     }
 
-    setSlotGroup(group: any[]) {
-        const slotGroup = group.map((item, index) => {
-            const Modal = plugin?.getRegisterComponent(item);
-            if (Modal) {
-                return <Modal ref={(ele: any) => (this.refs[index] = ele)} />;
-            }
-            return null;
-        });
-
+    setSlotGroup(group: Map<string, any>) {
         this.setState({
-            modalGroup,
+            slotGroup: group,
         });
     }
 
-    getModalGroup() {
-        return this.refs;
+    getSlotGroup() {
+        return this.refMap;
+    }
+
+    getRender(slotGroup: Map<string, any>) {
+        const group = [];
+        for (let k in slotGroup) {
+            group.push(<Slot ref={(ele: any) => this.refMap.set(k, ele)}></Slot>);
+        }
+        return group;
     }
 
     render() {
-        const { modalGroup } = this.state;
-        return <>{modalGroup.map((item) => item)}</>;
+        const { slotGroup } = this.state;
+        return <>{this.getRender(slotGroup)}</>;
     }
 }

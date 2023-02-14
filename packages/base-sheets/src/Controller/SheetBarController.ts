@@ -317,12 +317,12 @@ class SheetBarUIController {
      * 选中sheet
      * @param args
      */
-    selectSheet() {}
+    selectSheet() { }
 
     /**
      * 删除sheet
      */
-    deleteSheet() {}
+    deleteSheet() { }
 
     /**
      * 排序menu list
@@ -330,12 +330,12 @@ class SheetBarUIController {
      * @param hidden
      * @param hideIndex
      */
-    sortMenu(index: number, hidden?: boolean, hideIndex?: number) {}
+    sortMenu(index: number, hidden?: boolean, hideIndex?: number) { }
 
     /**
      * 复制sheet
      */
-    copySheet() {}
+    copySheet() { }
 
     /**
      * 增加sheet
@@ -358,7 +358,7 @@ class SheetBarUIController {
     /**
      * 隐藏sheet
      */
-    hideSheet() {}
+    hideSheet() { }
 
     /**
      * 取消隐藏sheet
@@ -371,13 +371,13 @@ class SheetBarUIController {
      * 向左向右移动sheet
      * @param direct
      */
-    moveSheet(direct: string) {}
+    moveSheet(direct: string) { }
 
     /**
      * 重命名sheet
      * @param e
      */
-    changeSheetName(e: Event) {}
+    changeSheetName(e: Event) { }
 
     /**
      * 右击显示菜单

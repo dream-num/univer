@@ -1,7 +1,7 @@
 import { FormulaEnginePlugin, IInterpreterDatasetConfig, SheetDataType, UnitDataType, SheetNameMapType, ArrayFormulaDataType } from '@univerjs/base-formula-engine';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { PLUGIN_NAMES, SheetContext } from '@univerjs/core';
-import { FORMULA_PLUGIN_NAME, CONFIG } from '../Basic';
+import { FORMULA_PLUGIN_NAME } from '../Basic';
 import { IFormulaConfig } from '../Basic/Interfaces/IFormula';
 import { FormulaPlugin } from '../FormulaPlugin';
 import { FormulaDataModel } from '../Model/FormulaDataModel';
@@ -34,47 +34,47 @@ export class FormulaController {
 
         // this._initRegisterComponent();
 
-        this._sheetPlugin.addToolButton({
-            name: FORMULA_PLUGIN_NAME,
-            locale: FORMULA_PLUGIN_NAME,
-            hideSelectedIcon: true,
-            customLabel: {
-                name: FORMULA_PLUGIN_NAME + FormulaLabel.name,
-                props: {
-                    locale: 'formula.formula.sum',
-                },
-            },
-            type: 5,
-            show: CONFIG.show,
-            tooltipLocale: 'formula.formulaLabel',
-            children: [
-                {
-                    locale: 'formula.formula.sum',
-                    suffix: 'SUM',
-                },
-                {
-                    locale: 'formula.formula.average',
-                    suffix: 'AVERAGE',
-                },
-                {
-                    locale: 'formula.formula.max',
-                    suffix: 'MAX',
-                },
-                {
-                    locale: 'formula.formula.min',
-                    suffix: 'MIN',
-                    border: true,
-                },
-                {
-                    locale: 'formula.formula.if',
-                    suffix: 'IF',
-                },
-                {
-                    locale: 'formula.formula.more',
-                    onClick: () => this._plugin.getSearchFormulaController().showFormulaModal('SearchFormula', true),
-                },
-            ],
-        });
+        // this._sheetPlugin.addToolButton({
+        //     name: FORMULA_PLUGIN_NAME,
+        //     locale: FORMULA_PLUGIN_NAME,
+        //     hideSelectedIcon: true,
+        //     customLabel: {
+        //         name: FORMULA_PLUGIN_NAME + FormulaLabel.name,
+        //         props: {
+        //             locale: 'formula.formula.sum',
+        //         },
+        //     },
+        //     type: 5,
+        //     show: CONFIG.show,
+        //     tooltipLocale: 'formula.formulaLabel',
+        //     children: [
+        //         {
+        //             locale: 'formula.formula.sum',
+        //             suffix: 'SUM',
+        //         },
+        //         {
+        //             locale: 'formula.formula.average',
+        //             suffix: 'AVERAGE',
+        //         },
+        //         {
+        //             locale: 'formula.formula.max',
+        //             suffix: 'MAX',
+        //         },
+        //         {
+        //             locale: 'formula.formula.min',
+        //             suffix: 'MIN',
+        //             border: true,
+        //         },
+        //         {
+        //             locale: 'formula.formula.if',
+        //             suffix: 'IF',
+        //         },
+        //         {
+        //             locale: 'formula.formula.more',
+        //             onClick: () => this._plugin.getSearchFormulaController().showFormulaModal('SearchFormula', true),
+        //         },
+        //     ],
+        // });
 
         this._initialize();
     }

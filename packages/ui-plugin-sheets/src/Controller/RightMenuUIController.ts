@@ -3,7 +3,7 @@ import { SheetPlugin } from '@univerjs/base-sheets';
 import { BaseMenuItem, BaseSelectChildrenProps, resetDataLabel } from '@univerjs/base-ui';
 import { PLUGIN_NAMES, Tools, UIObserver } from '@univerjs/core';
 import { SheetUIPlugin } from '..';
-import { DefaultRightMenuConfig, SheetRightMenuConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
+import { DefaultRightMenuConfig, SheetRightMenuConfig } from '../Basics';
 import { RightMenu, RightMenuInput, RightMenuItem } from '../View';
 import styles from '../View/RightMenu/index.module.less'
 

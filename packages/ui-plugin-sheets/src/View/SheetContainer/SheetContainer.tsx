@@ -221,7 +221,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
                             </Sider>
                             <Content className={config.contentSplit === 'vertical' ? style.contentContainerVertical : style.contentContainerHorizontal}>
                                 {/* extend main content */}
-                                <Slot></Slot>
+                                <Slot {...methods.slot}></Slot>
                                 {!!config.contentSplit && (
                                     <Container ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>
                                         <div className={style.hoverCursor} onMouseDown={this.handleSplitBarMouseDown}></div>

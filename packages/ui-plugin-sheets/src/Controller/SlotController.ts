@@ -3,7 +3,7 @@ import { Slot } from "../View";
 
 export type SlotGroupProps = Map<string, any>;
 
-export class ModalGroupController {
+export class SlotController {
     private _slotGroup: SlotGroupProps = new Map();
 
     private _slot: Slot;

@@ -10,6 +10,7 @@ import { FormulaBarUIController } from './FormulaBarUIController';
 import { InfoBarUIController } from './InfoBarUIController';
 import { RightMenuUIController } from './RightMenuUIController';
 import { SheetBarUIController } from './SheetBarUIContruller';
+import { SlotController } from './SlotController';
 import { ToolbarUIController } from './ToolbarUIController';
 
 export class SheetContainerUIController {
@@ -18,6 +19,8 @@ export class SheetContainerUIController {
     private _sheetContainer: SheetContainer;
 
     private _toolbarController: ToolbarUIController;
+
+    private _slotController: SlotController;
 
     private _cellEditorUIController: CellEditorUIController;
 
@@ -44,6 +47,7 @@ export class SheetContainerUIController {
 
         this._initialize();
 
+        this._slotController = new SlotController(this._plugin)
         this._toolbarController = new ToolbarUIController(this._plugin, this._config.layout?.toolbarConfig);
         this._cellEditorUIController = new CellEditorUIController(this._plugin);
         this._formulaBarUIController = new FormulaBarUIController(this._plugin);
@@ -135,6 +139,9 @@ export class SheetContainerUIController {
                     selectSheet: this._sheetBarController.selectSheet,
                     changeSheetName: this._sheetBarController.changeSheetName,
                 },
+                slot: {
+                    getComponent: this._slotController.getComponent,
+                }
             },
         };
         return config;

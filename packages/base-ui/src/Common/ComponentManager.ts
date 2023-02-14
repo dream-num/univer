@@ -1,4 +1,17 @@
 import {
+    BorderDashDot,
+    BorderDashDotDot,
+    BorderDashed,
+    BorderDotted,
+    BorderHair,
+    BorderMedium,
+    BorderMediumDashDot,
+    BorderMediumDashDotDot,
+    BorderMediumDashed,
+    BorderThick,
+    BorderThin,
+} from '../Components/CanvasIcon';
+import {
     BackIcon,
     BoldIcon,
     BottomBorderIcon,
@@ -74,6 +87,17 @@ export class ComponentManager {
             TextRotateVerticalIcon,
             TextRotateRotationUpIcon,
             TextRotateRotationDownIcon,
+            BorderThin,
+            BorderHair,
+            BorderDotted,
+            BorderDashed,
+            BorderDashDot,
+            BorderDashDotDot,
+            BorderMedium,
+            BorderMediumDashed,
+            BorderMediumDashDot,
+            BorderMediumDashDotDot,
+            BorderThick,
         };
 
         for (let k in iconList) {

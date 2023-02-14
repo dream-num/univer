@@ -3,9 +3,9 @@ import { SheetPlugin } from '../SheetPlugin';
 
 import { SelectionControl } from './Selection/SelectionController';
 
-import { SelectionModel, ToolbarModel } from '../Model';
+import { SelectionModel } from '../Model';
 
-interface BorderInfo {
+export interface BorderInfo {
     type: BorderType;
     color: string;
     style: number;
@@ -15,8 +15,6 @@ interface BorderInfo {
  *
  */
 export class ToolbarController {
-    private _toolbarModel: ToolbarModel;
-
     private _plugin: SheetPlugin;
 
     private _changeToolbarState(range: Range): void {
@@ -102,6 +100,32 @@ export class ToolbarController {
                     case 'fontSize':
                         this.setFontSize(msg.value!);
                         break;
+                    case 'textRotation':
+                        this.setTextRotation(msg.value!);
+                        break;
+                    case 'wrapStrategy':
+                        this.setWrapStrategy(msg.value!);
+                        break;
+                    case 'verticalAlignment':
+                        this.setVerticalAlignment(msg.value!);
+                        break;
+                    case 'horizontalAlignment':
+                        this.setHorizontalAlignment(msg.value!);
+                        break;
+                }
+            });
+
+        this._plugin
+            .getContext()
+            .getUniver()
+            .getGlobalContext()
+            .getObserverManager()
+            .requiredObserver<UIObserver<BorderInfo>>('onUIChangeObservable', 'core')
+            .add((msg) => {
+                switch (msg.name) {
+                    case 'borderInfo':
+                        this.setBorder(msg.value!);
+                        break;
                 }
             });
 
@@ -115,6 +139,15 @@ export class ToolbarController {
                 switch (msg.name) {
                     case 'fontFamily':
                         this.setFontFamily(msg.value!);
+                        break;
+                    case 'fontColor':
+                        this.setFontColor(msg.value!);
+                        break;
+                    case 'background':
+                        this.setBackground(msg.value!);
+                        break;
+                    case 'merge':
+                        this.setMerge(msg.value!);
                         break;
                 }
             });
@@ -130,53 +163,37 @@ export class ToolbarController {
                     case 'fontWeight':
                         this.setFontWeight(msg.value!);
                         break;
-                    // case ''
+                    case 'fontStyle':
+                        this.setFontStyle(msg.value!);
+                        break;
+                    case 'strikeThrough':
+                        this.setStrikeThrough(msg.value!);
+                        break;
+                    case 'underLine':
+                        this.setUnderline(msg.value!);
+                        break;
                 }
             });
     }
 
     _initialize() {
         // this._plugin.getObserver('onAfterChangeFontFamilyObservable')?.add((value: string) => {
-        //     if (!this._plugin.getCellEditorController().isEditMode) {
-        //         this.setFontFamily(value);
-        //     } else {
         //         this._plugin.getCellEditorController().richText.cellTextStyle.updateFormat('ff', value);
-        //     }
         // });
         // this._plugin.getObserver('onAfterChangeFontItalicObservable')?.add((value: boolean) => {
-        //     if (!this._plugin.getCellEditorController().isEditMode) {
-        //         this.setFontStyle(value);
-        //     } else {
         //         this._plugin.getCellEditorController().richText.cellTextStyle.updateFormat('it', value ? '1' : '0');
-        //     }
         // });
         // this._plugin.getObserver('onAfterChangeFontStrikethroughObservable')?.add((value: boolean) => {
-        //     if (!this._plugin.getCellEditorController().isEditMode) {
-        //         this.setStrikeThrough(value);
-        //     } else {
         //         this._plugin.getCellEditorController().richText.cellTextStyle.updateFormat('cl', value ? '1' : '0');
-        //     }
         // });
         // this._plugin.getObserver('onAfterChangeFontUnderlineObservable')?.add((value: boolean) => {
-        //     if (!this._plugin.getCellEditorController().isEditMode) {
-        //         this.setUnderline(value);
-        //     } else {
         //         this._plugin.getCellEditorController().richText.cellTextStyle.updateFormat('un', value ? '1' : '0');
-        //     }
         // });
         // this._plugin.getObserver('onAfterChangeFontColorObservable')?.add((value: string) => {
-        //     if (!this._plugin.getCellEditorController().isEditMode) {
-        //         this.setFontColor(value);
-        //     } else {
         //         this._plugin.getCellEditorController().richText.cellTextStyle.updateFormat('fc', value);
-        //     }
         // });
         // this._plugin.getObserver('onAfterChangeFontBackgroundObservable')?.add((value: string) => {
-        //     if (!this._plugin.getCellEditorController().isEditMode) {
-        //         this.setBackground(value);
-        //     } else {
         //         this._plugin.getCellEditorController().richText.cellTextStyle.updateFormat('bg', value);
-        //     }
         // });
         // // Monitor selection changes, update toolbar button status and values TODO: 根据不同的焦点对象，接受
         // this._plugin.getObserver('onChangeSelectionObserver')?.add((selectionControl: SelectionControl) => {

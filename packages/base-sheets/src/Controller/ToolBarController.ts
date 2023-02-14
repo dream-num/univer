@@ -110,13 +110,27 @@ export class ToolbarController {
             .getUniver()
             .getGlobalContext()
             .getObserverManager()
+            .requiredObserver<UIObserver<string>>('onUIChangeObservable', 'core')
+            .add((msg) => {
+                switch (msg.name) {
+                    case 'fontFamily':
+                        this.setFontFamily(msg.value!);
+                        break;
+                }
+            });
+
+        this._plugin
+            .getContext()
+            .getUniver()
+            .getGlobalContext()
+            .getObserverManager()
             .requiredObserver<UIObserver<boolean>>('onUIChangeObservable', 'core')
             .add((msg) => {
-                console.dir(msg);
                 switch (msg.name) {
                     case 'fontWeight':
                         this.setFontWeight(msg.value!);
                         break;
+                    // case ''
                 }
             });
     }

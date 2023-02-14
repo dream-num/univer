@@ -11,6 +11,7 @@ import { ISheetUIPluginConfig } from '../../Basics';
 import defaultSkin from '@univerjs/base-ui/Basics/CSS/Skin/default.module.less';
 import { Tools } from '@univerjs/core';
 import cssVars from 'css-vars-ponyfill';
+import { Slot } from '../Slot/Slot';
 
 export interface BaseSheetContainerProps extends BaseComponentProps {
     config: ISheetUIPluginConfig;
@@ -220,7 +221,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
                             </Sider>
                             <Content className={config.contentSplit === 'vertical' ? style.contentContainerVertical : style.contentContainerHorizontal}>
                                 {/* extend main content */}
-                                {/* <ModalGroup></ModalGroup> */}
+                                <Slot></Slot>
                                 {!!config.contentSplit && (
                                     <Container ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>
                                         <div className={style.hoverCursor} onMouseDown={this.handleSplitBarMouseDown}></div>

@@ -1,5 +1,6 @@
+import { BorderInfo } from '@univerjs/base-sheets';
 import { BaseSelectChildrenProps, BaseSelectProps, BaseTextButtonProps, ColorPicker } from '@univerjs/base-ui';
-import { DEFAULT_STYLES, HorizontalAlign, Tools, UIObserver, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { BorderType, DEFAULT_STYLES, HorizontalAlign, IKeyValue, Tools, UIObserver, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { SheetUIPlugin } from '..';
 import { DefaultToolbarConfig, SheetToolbarConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
@@ -29,10 +30,6 @@ export interface IToolbarItemProps extends BaseToolbarSelectProps, BaseTextButto
     border?: boolean;
 }
 
-interface BorderInfo {
-    color: string;
-    type: number;
-}
 
 export class ToolbarUIController {
     private _plugin: SheetUIPlugin;
@@ -47,9 +44,14 @@ export class ToolbarUIController {
 
     private _lineBold: LineBold;
 
-    private _colorSelect: ColorSelect[] = [];
+    private _colorSelect1: ColorSelect;
+    private _colorSelect2: ColorSelect;
 
-    private _borderInfo: BorderInfo; //存储边框信息
+    private _borderInfo: BorderInfo = {
+        type: BorderType.TOP,
+        color: '#000',
+        style: 1
+    } //存储边框信息
 
     constructor(plugin: SheetUIPlugin, config?: SheetToolbarConfig) {
         this._plugin = plugin;
@@ -155,7 +157,7 @@ export class ToolbarUIController {
                 name: 'italic',
                 show: this._config.italic,
                 onClick: (isItalic: boolean) => {
-                    // this._plugin.getObserver('onAfterChangeFontItalicObservable')?.notifyObservers(isItalic);
+                    this.setFontStyle(isItalic)
                 },
             },
             {
@@ -167,7 +169,7 @@ export class ToolbarUIController {
                 name: 'strikethrough',
                 show: this._config.strikethrough,
                 onClick: (isStrikethrough: boolean) => {
-                    // this._plugin.getObserver('onAfterChangeFontStrikethroughObservable')?.notifyObservers(isStrikethrough);
+                    this.setStrikeThrough(isStrikethrough)
                 },
             },
             {
@@ -178,8 +180,8 @@ export class ToolbarUIController {
                 },
                 name: 'underline',
                 show: this._config.underline,
-                onClick: (isItalic: boolean) => {
-                    // this._plugin.getObserver('onAfterChangeFontUnderlineObservable')?.notifyObservers(isItalic);
+                onClick: (isUnderLine: boolean) => {
+                    this.setUnderline(isUnderLine)
                 },
             },
             {
@@ -188,10 +190,12 @@ export class ToolbarUIController {
                 customLabel: {
                     name: SHEET_UI_PLUGIN_NAME + ColorSelect.name,
                     props: {
+                        getComponent: (ref: ColorSelect) => {
+                            this._colorSelect1 = ref
+                        },
                         customLabel: {
                             name: 'TextColorIcon',
                         },
-                        id: 'textColor',
                     },
                 },
                 hideSelectedIcon: true,
@@ -201,10 +205,10 @@ export class ToolbarUIController {
                         customLabel: {
                             name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
                             props: {
+
                                 onClick: (color: string, e: MouseEvent) => {
-                                    const colorSelect = this._colorSelect.find((item) => item.getId() === 'textColor');
-                                    colorSelect?.setColor(color);
-                                    // this._plugin.getObserver('onAfterChangeFontColorObservable')?.notifyObservers(color);
+                                    this._colorSelect1.setColor(color);
+                                    this.setFontColor(color)
                                 },
                             },
                         },
@@ -220,10 +224,12 @@ export class ToolbarUIController {
                 customLabel: {
                     name: SHEET_UI_PLUGIN_NAME + ColorSelect.name,
                     props: {
+                        getComponent: (ref: ColorSelect) => {
+                            this._colorSelect2 = ref
+                        },
                         customLabel: {
                             name: 'FillColorIcon',
                         },
-                        id: 'fillColor',
                     },
                 },
                 hideSelectedIcon: true,
@@ -234,9 +240,8 @@ export class ToolbarUIController {
                             name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
                             props: {
                                 onClick: (color: string, e: MouseEvent) => {
-                                    const colorSelect = this._colorSelect.find((item) => item.getId() === 'fillColor');
-                                    colorSelect?.setColor(color);
-                                    // this._plugin.getObserver('onAfterChangeFontBackgroundObservable')?.notifyObservers(color);
+                                    this._colorSelect2.setColor(color);
+                                    this.setBackground(color)
                                 }
                             },
                         },
@@ -252,10 +257,9 @@ export class ToolbarUIController {
                 show: this._config.border,
                 tooltip: 'toolbar.border.main',
                 className: styles.selectDoubleString,
-                onClick: (value) => {
-                    if (value) {
-                        // this.setBorder(value);
-                    }
+                onClick: (value: string) => {
+                    this._borderInfo.type = value as BorderType
+                    this.setBorder()
                 },
                 name: 'border',
                 children: [
@@ -276,13 +280,14 @@ export class ToolbarUIController {
                                     name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
                                     props: {
                                         onClick: (color: string, e: MouseEvent) => {
-                                            // this.handleLineColor(color, e)
+                                            this._lineColor.setColor(color)
+                                            this._borderInfo.color = color
                                         },
                                     },
                                 },
                                 className: styles.selectColorPicker,
-                                onClick: () => {
-                                    // this.handleLineColor
+                                onClick: (...arg) => {
+                                    arg[0].stopPropagation();
                                 },
                             },
                         ],
@@ -295,8 +300,10 @@ export class ToolbarUIController {
                                 getComponent: (ref: LineBold) => this._lineBold = ref
                             },
                         },
-                        onClick: () => {
-                            // this.handleLineBold(arg[1], arg[2], arg[0])
+                        onClick: (...arg) => {
+                            arg[0].stopPropagation()
+                            this._lineBold.setImg(BORDER_SIZE_CHILDREN[arg[2]].customLabel?.name)
+                            this._borderInfo.style = arg[1]
                         },
                         className: styles.selectLineBoldParent,
                         unSelectable: true,
@@ -312,7 +319,7 @@ export class ToolbarUIController {
                 },
                 show: this._config.mergeCell,
                 onClick: (value: string) => {
-                    // this.setMerge(value);
+                    this.setMerge(value);
                 },
                 name: 'mergeCell',
                 children: MERGE_CHILDREN,
@@ -325,7 +332,7 @@ export class ToolbarUIController {
                 name: 'horizontalAlignMode',
                 show: this._config.horizontalAlignMode,
                 onClick: (value: HorizontalAlign) => {
-                    // this.setHorizontalAlignment(value);
+                    this.setHorizontalAlignment(value);
                 },
                 children: HORIZONTAL_ALIGN_CHILDREN,
             },
@@ -337,7 +344,7 @@ export class ToolbarUIController {
                 name: 'verticalAlignMode',
                 show: this._config.verticalAlignMode,
                 onClick: (value: VerticalAlign) => {
-                    // this.setVerticalAlignment(value);
+                    this.setVerticalAlignment(value);
                 },
                 children: VERTICAL_ALIGN_CHILDREN,
             },
@@ -349,7 +356,7 @@ export class ToolbarUIController {
                 name: 'textWrapMode',
                 show: this._config.textWrapMode,
                 onClick: (value: WrapStrategy) => {
-                    // this.setWrapStrategy(value);
+                    this.setWrapStrategy(value);
                 },
                 children: TEXT_WRAP_CHILDREN,
             },
@@ -361,7 +368,7 @@ export class ToolbarUIController {
                 display: 1,
                 show: this._config.textRotateMode,
                 onClick: (value: number | string) => {
-                    // this.setTextRotation(value);
+                    this.setTextRotation(value);
                 },
                 children: TEXT_ROTATE_CHILDREN,
             },
@@ -375,9 +382,6 @@ export class ToolbarUIController {
         this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker)
         this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + LineColor.name, LineColor)
         this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + LineBold.name, LineBold)
-
-
-
     }
 
     // 获取Toolbar组件
@@ -404,8 +408,6 @@ export class ToolbarUIController {
 
     // 刷新toolbar
     setToolbar() {
-        // const locale = this._plugin.getContext().getLocale();
-        // const toolList = resetDataLabel(this._toolList, locale);
         this._toolbar.setToolbar(this._toolList);
     }
 
@@ -449,5 +451,94 @@ export class ToolbarUIController {
             value: isBold,
         };
         this.setUIObserve<boolean>(msg);
+    }
+
+    setFontStyle(isItalic: boolean) {
+        const msg = {
+            name: 'fontStyle',
+            value: isItalic,
+        };
+        this.setUIObserve<boolean>(msg);
+    }
+
+    setStrikeThrough(isStrikethrough: boolean) {
+        const msg = {
+            name: 'strikeThrough',
+            value: isStrikethrough,
+        };
+        this.setUIObserve<boolean>(msg);
+    }
+
+    setUnderline(isUnderLine: boolean) {
+        const msg = {
+            name: 'underLine',
+            value: isUnderLine,
+        };
+        this.setUIObserve<boolean>(msg);
+    }
+
+    setFontColor(color: string) {
+        const msg = {
+            name: 'fontColor',
+            value: color,
+        };
+        this.setUIObserve(msg);
+    }
+
+    setBackground(color: string) {
+        const msg = {
+            name: 'background',
+            value: color,
+        };
+        this.setUIObserve(msg);
+    }
+
+
+    setMerge(value: string) {
+        const msg = {
+            name: 'merge',
+            value,
+        };
+        this.setUIObserve(msg);
+    }
+
+    setTextRotation(value: string | number) {
+        const msg = {
+            name: 'textRotation',
+            value,
+        };
+        this.setUIObserve(msg);
+    }
+
+    setWrapStrategy(value: WrapStrategy) {
+        const msg = {
+            name: 'wrapStrategy',
+            value,
+        };
+        this.setUIObserve<number>(msg);
+    }
+
+    setVerticalAlignment(value: VerticalAlign) {
+        const msg = {
+            name: 'verticalAlignment',
+            value,
+        };
+        this.setUIObserve<number>(msg);
+    }
+
+    setHorizontalAlignment(value: HorizontalAlign) {
+        const msg = {
+            name: 'horizontalAlignment',
+            value,
+        };
+        this.setUIObserve<number>(msg);
+    }
+
+    setBorder() {
+        const msg = {
+            name: 'borderInfo',
+            value: this._borderInfo,
+        };
+        this.setUIObserve<IKeyValue>(msg);
     }
 }

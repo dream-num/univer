@@ -1,6 +1,6 @@
-import { BaseComponent, JSXComponent } from '../BaseComponent';
+import { BaseComponent, BaseComponentProps, JSXComponent } from '../BaseComponent';
 
-export interface BaseColorPickerProps {
+export interface BaseColorPickerProps extends BaseComponentProps {
     /**
      * init color
      */

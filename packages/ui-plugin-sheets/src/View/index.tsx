@@ -42,3 +42,4 @@ export * from './Toolbar';
 export * from './RightMenu';
 export * from './InfoBar';
 export * from './Common';
+export * from './Slot/Slot';

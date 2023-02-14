@@ -143,7 +143,7 @@ export class ToolbarUIController {
                 name: 'bold',
                 show: this._config.bold,
                 onClick: (isBold: boolean) => {
-                    // this._plugin.getObserver('onAfterChangeFontWeightObservable')?.notifyObservers(isBold);
+                    this.setFontWeight(isBold);
                 },
             },
             {
@@ -441,5 +441,13 @@ export class ToolbarUIController {
             value: fontSize,
         };
         this.setUIObserve<number>(msg);
+    }
+
+    setFontWeight(isBold: boolean) {
+        const msg = {
+            name: 'fontWeight',
+            value: isBold,
+        };
+        this.setUIObserve<boolean>(msg);
     }
 }

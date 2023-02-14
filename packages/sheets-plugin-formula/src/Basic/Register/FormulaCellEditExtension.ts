@@ -1,7 +1,6 @@
 import { IFormulaData } from '@univerjs/base-formula-engine';
 import { BaseCellEditExtension, BaseCellEditExtensionFactory, ICell } from '@univerjs/base-ui';
 import { IRangeData, Nullable } from '@univerjs/core';
-import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
 import { FormulaPlugin } from '../../FormulaPlugin';
 
 export class FormulaCellEditExtension extends BaseCellEditExtension {

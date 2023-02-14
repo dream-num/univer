@@ -1,14 +1,11 @@
 import { Engine, RenderEngine } from '@univerjs/base-render';
-import { SheetContext, Plugin, PLUGIN_NAMES, UIObserver } from '@univerjs/core';
+import { SheetContext, Plugin, PLUGIN_NAMES } from '@univerjs/core';
 
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
-import { RightMenuProps } from './Model/RightMenuModel';
 import { en, zh } from './Locale';
 import { CANVAS_VIEW_KEY } from './View/Render/BaseView';
 import { CanvasView } from './View/Render/CanvasView';
 import { RightMenuController, InfoBarController, SheetBarControl, CellEditorController, SheetContainerController, ToolbarController } from './Controller';
-import { IToolbarItemProps } from './Model/ToolbarModel';
-import { ModalGroupController } from './Controller/ModalGroupController';
 import { install, ISheetPluginConfig } from './Basics';
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeActionExtension';
@@ -37,10 +34,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     private _cellEditorController: CellEditorController;
 
     private _sheetContainerController: SheetContainerController;
-
-    private _modalGroupController: ModalGroupController;
-
-    private _componentList: Map<string, any>;
 
     private _namedRangeActionExtensionFactory: NamedRangeActionExtensionFactory;
 
@@ -81,6 +74,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         this._cellEditorController = new CellEditorController(this);
         this._formulaBarController = new FormulaBarController(this);
         this._sheetBarControl = new SheetBarControl(this);
+        this._toolbarControl = new ToolbarController(this);
     }
 
     initCanvasView() {
@@ -114,14 +108,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     listenEventManager() {
         // TODO: move to toolbarcontroller
         this._sheetBarControl.listenEventManager();
-        this.getContext()
-            .getUniver()
-            .getGlobalContext()
-            .getObserverManager()
-            .requiredObserver<UIObserver<boolean>>('onUIChangeObservable', 'core')
-            .add((msg) => {
-                console.log('get click event mas:', msg);
-            });
+        this._toolbarControl.listenEventManager();
     }
 
     getCanvasEngine() {
@@ -200,31 +187,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         return this._formulaBarController;
     }
 
-    getModalGroupControl() {
-        return this._modalGroupController;
-    }
-
     getSheetContainerControl() {
         return this._sheetContainerController;
-    }
-
-    addRightMenu(item: RightMenuProps[] | RightMenuProps) {
-        this._rightMenuControl && this._rightMenuControl.addItem(item);
-    }
-
-    addToolButton(config: IToolbarItemProps) {
-        this._toolbarControl && this._toolbarControl.addToolButton(config);
-    }
-
-    registerComponent(name: string, component: any, props?: any) {
-        this._componentList.set(name, component);
-    }
-
-    getRegisterComponent(name: string) {
-        return this._componentList.get(name);
-    }
-
-    registerModal(name: string, component: any) {
-        this._modalGroupController.addModal(name, component);
     }
 }

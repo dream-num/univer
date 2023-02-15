@@ -34,9 +34,7 @@ export class SearchFunction extends Component<IProps, IState> {
         };
     }
 
-    componentDidMount() {
-        this.props.getComponent?.(this);
-    }
+    componentDidMount() {}
 
     componentWillUpdate(nextProps: any) {}
 
@@ -67,7 +65,7 @@ export class SearchFunction extends Component<IProps, IState> {
                 {formula.map((item: any, i: number) => (
                     <li className={selectIndex === i ? styles.searchFunctionActive : ''}>
                         <div className={styles.formulaName}>{item.n}</div>
-                        <div className={styles.formulaDetail}>{item.a}</div>
+                        <div className={styles.formulaDetail}>{this.getLocale(item.d)}</div>
                     </li>
                 ))}
             </ul>

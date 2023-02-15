@@ -2,7 +2,7 @@ import { $$ } from '@univerjs/base-ui';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { KeyCode, PLUGIN_NAMES, SheetContext } from '@univerjs/core';
 import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
-import { FORMULA_PLUGIN_NAME } from '../Basic';
+import { FORMULA_PLUGIN_NAME, FunList } from '../Basic';
 import { FormulaPlugin } from '../FormulaPlugin';
 import { HelpFunction, SearchFunction } from '../View/UI/FormulaPrompt';
 import { CellInputHandler } from './CellInputHandler';
@@ -31,12 +31,11 @@ export class FormulaPromptController {
 
         this._sheetUIPlugin = this._plugin.getContext().getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
 
-        this._initialize();
         this._initRegisterComponent();
+        this._initialize();
     }
 
     private _initRegisterComponent() {
-        console.info('searchFunction====11');
         this._sheetUIPlugin
             .getAppUIController()
             .getSheetContainerController()
@@ -47,15 +46,21 @@ export class FormulaPromptController {
                     .getSheetContainerController()
                     .getMainSlotController()
                     .getSlot(FORMULA_PLUGIN_NAME + SearchFunction.name);
-
-                console.info('searchFunction====', searchFunction);
+                this._searchFunction = searchFunction;
             });
 
         this._sheetUIPlugin
             .getAppUIController()
             .getSheetContainerController()
             .getMainSlotController()
-            .addSlot(FORMULA_PLUGIN_NAME + HelpFunction.name, HelpFunction);
+            .addSlot(FORMULA_PLUGIN_NAME + HelpFunction.name, HelpFunction, () => {
+                const helpFunction = this._sheetUIPlugin
+                    .getAppUIController()
+                    .getSheetContainerController()
+                    .getMainSlotController()
+                    .getSlot(FORMULA_PLUGIN_NAME + HelpFunction.name);
+                this._helpFunction = helpFunction;
+            });
     }
 
     private _initialize() {
@@ -135,7 +140,9 @@ export class FormulaPromptController {
                     //     helpFormulaActive: false,
                     // });
                 } else if (helpFormula[0]) {
-                    this._helpFunction.updateState(true, helpFormula[1] as number, (helpFormula[0] as string).toUpperCase(), position);
+                    const functionName = (helpFormula[0] as string).toUpperCase();
+                    const functionInfo = FunList.find((item: any) => item.n === functionName) || {};
+                    this._helpFunction.updateState(true, helpFormula[1] as number, functionInfo, position);
                     this._searchFunction.updateState(false);
 
                     // this.setState({
@@ -173,16 +180,6 @@ export class FormulaPromptController {
                     }
                 }
             }
-        });
-
-        this._plugin.getObserver('onSearchFunctionDidMountObservable')!.add((component) => {
-            this._searchFunction = component;
-            console.log('get search function', component);
-        });
-        this._plugin.getObserver('onHelpFunctionDidMountObservable')!.add((component) => {
-            this._helpFunction = component;
-
-            console.log('get help function', component);
         });
     }
 }

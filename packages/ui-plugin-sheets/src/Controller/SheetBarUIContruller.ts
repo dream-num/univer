@@ -1,5 +1,7 @@
 import { BaseMenuItem, BaseUlProps, ColorPicker } from '@univerjs/base-ui';
 import { Nullable, Plugin, ACTION_NAMES, CommandManager, SheetActionBase, UIObserver } from '@univerjs/core';
+import { SheetUIPlugin } from '..';
+import { SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { SheetBar } from "../View/SheetBar";
 import styles from '../View/SheetBar/index.module.less';
 
@@ -138,13 +140,6 @@ export class SheetBarUIController {
                                 onClick: (color: string) => {
                                     that.setUIObserve('onUIChangeObservable', { name: 'changeSheetColor', value: color });
                                 },
-                                lang: {
-                                    collapseLocale: 'colorPicker.collapse',
-                                    changeLocale: 'colorPicker.change',
-                                    customColorLocale: 'colorPicker.customColor',
-                                    cancelColorLocale: 'colorPicker.cancelColor',
-                                    confirmColorLocale: 'colorPicker.confirmColor',
-                                },
                             },
                         },
                         className: styles.selectColorPicker,
@@ -165,6 +160,7 @@ export class SheetBarUIController {
                 border: true,
             }
         ];
+        this._plugin.getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager().register(this._plugin.getPluginName() + ColorPicker.name, ColorPicker)
         CommandManager.getActionObservers().add((event) => {
             const action = event.action as SheetActionBase<any>;
             const data = event.data;

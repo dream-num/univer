@@ -137,9 +137,11 @@ export class SheetBarUIController {
                             name: this._plugin.getPluginName() + ColorPicker.name,
                             props: {
                                 onClick: (color: string) => {
-                                    that.setUIObserve('onUIChangeObservable', { name: 'changeSheetColor', value: color });
-                                    console.dir(color)
-                                    this.setUIObserve('onSheetColor', { name: 'sheetColor', value: color });
+                                    this.setUIObserve('onUIChangeObservable', {
+                                        name: 'changeSheetColor', value: {
+                                            color, sheetId: this._dataId
+                                        }
+                                    });
                                 },
                             },
                         },

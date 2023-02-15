@@ -4,8 +4,14 @@ interface IState {
     slotGroup: Map<string, any>;
 }
 
-export class Slot extends Component<BaseComponentProps, IState> {
+interface IProps extends BaseComponentProps {
+    ref?: Slot;
+}
+
+export class Slot extends Component<IProps, IState> {
     refMap = new Map();
+
+    refs: any[] = [];
 
     initialize() {
         this.state = {
@@ -41,6 +47,6 @@ export class Slot extends Component<BaseComponentProps, IState> {
 
     render() {
         const { slotGroup } = this.state;
-        return <>{this.getRender(slotGroup)}</>;
+        return <div>{this.getRender(slotGroup)}</div>;
     }
 }

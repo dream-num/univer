@@ -1,7 +1,6 @@
 import { BaseMenuItem, BaseUlProps, ColorPicker } from '@univerjs/base-ui';
 import { Nullable, Plugin, ACTION_NAMES, CommandManager, SheetActionBase, UIObserver } from '@univerjs/core';
-import { SheetUIPlugin } from '..';
-import { SHEET_UI_PLUGIN_NAME } from '../Basics';
+import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '..';
 import { SheetBar } from "../View/SheetBar";
 import styles from '../View/SheetBar/index.module.less';
 
@@ -138,7 +137,11 @@ export class SheetBarUIController {
                             name: this._plugin.getPluginName() + ColorPicker.name,
                             props: {
                                 onClick: (color: string) => {
-                                    that.setUIObserve('onUIChangeObservable', { name: 'changeSheetColor', value: color });
+                                    this.setUIObserve('onUIChangeObservable', {
+                                        name: 'changeSheetColor', value: {
+                                            color, sheetId: this._dataId
+                                        }
+                                    });
                                 },
                             },
                         },
@@ -155,6 +158,7 @@ export class SheetBarUIController {
             {
                 locale: 'sheetConfig.unhide',
                 onClick: () => {
+                    this._sheetBar.ref.current.showMenu(true)
                     that.setUIObserve('onUIChangeObservable', { name: 'unHideSheet', value: this._dataId });
                 },
                 border: true,
@@ -186,6 +190,7 @@ export class SheetBarUIController {
                 }
             }
         });
+        this._plugin.getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager().register(this._plugin.getPluginName() + ColorPicker.name, ColorPicker)
     }
 
     getComponent = (ref: SheetBar) => {
@@ -319,8 +324,7 @@ export class SheetBarUIController {
         this._sheetBar.contextMenu(e);
     }
 
-    dragEnd(element: HTMLDivElement[]) {
-        debugger
+    dragEnd = (element: HTMLDivElement[]): void => {
         let list: SheetUlProps[] = [];
         let sheetId = this._dataId;
         Array.from(element).forEach((node: any) => {

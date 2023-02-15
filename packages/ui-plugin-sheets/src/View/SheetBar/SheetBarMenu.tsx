@@ -28,13 +28,14 @@ export class SheetBarMenu extends Component<SheetBarMenuProps, IState> {
     }
 
     handleClick(e: MouseEvent, item: SheetBarMenuItem) {
+        e.stopPropagation();
         const { onClick } = this.props;
         if (item.onClick) {
             item.onClick(e);
         }
         onClick?.(e);
         this.showMenu(false);
-        window.removeEventListener('click', this.hideMenu);
+        window.removeEventListener('click', this.hideMenu, true);
     }
 
     hideMenu = () => {
@@ -42,20 +43,15 @@ export class SheetBarMenu extends Component<SheetBarMenuProps, IState> {
     };
 
     showMenu(show: boolean) {
-        this.setState(
-            {show},
-            () => {
-                if (show) {
-                    window.addEventListener('click', this.hideMenu, true);
-                }
-            }
-        );
+        this.setState({ show }, () => {
+            if (true) window.addEventListener('click', this.hideMenu, true);
+        });
     }
 
     render() {
         const { menu, style } = this.props;
         const { show } = this.state;
-       
+
         return (
             <ul className={styles.sheetBarMenu} style={{ ...style, display: show ? 'block' : ' none' }}>
                 {menu.map((item) => (

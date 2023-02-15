@@ -118,9 +118,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
 
     // 隐藏下拉
     hideSelect = (e: MouseEvent) => {
-        const current = this.ref.current;
         const ulCurrent = this.ulRef.current;
-        if (current) current.showMenu(false);
         if (ulCurrent) ulCurrent.showMenu(false);
         window.removeEventListener('click', this.hideSelect);
     };

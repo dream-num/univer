@@ -55,12 +55,12 @@ export class RightMenuUIController {
         this._menuList = [
             {
                 label: 'rightClick.insertRow',
-                onClick: this.insertRow,
+                onClick: () => this.insertRow(),
                 show: this._config.InsertRow,
             },
             {
                 label: 'rightClick.insertColumn',
-                onClick: this.insertColumn,
+                onClick: () => this.insertColumn(),
                 show: this._config.InsertColumn,
             },
             {
@@ -105,12 +105,12 @@ export class RightMenuUIController {
             },
             {
                 label: 'rightClick.deleteSelectedRow',
-                onClick: this.deleteRow,
+                onClick: () => this.deleteRow(),
                 show: this._config.DeleteRow,
             },
             {
                 label: 'rightClick.deleteSelectedColumn',
-                onClick: this.deleteColumn,
+                onClick: () => this.deleteColumn(),
                 show: this._config.DeleteColumn,
             },
             {
@@ -165,18 +165,18 @@ export class RightMenuUIController {
                     {
                         label: 'rightClick.moveLeft',
                         className: styles.rightMenuCenter,
-                        onClick: this.deleteCellLeft,
+                        onClick: () => this.deleteCellLeft(),
                     },
                     {
                         label: 'rightClick.moveUp',
                         className: styles.rightMenuCenter,
-                        onClick: this.deleteCellTop,
+                        onClick: () => this.deleteCellTop(),
                     },
                 ],
             },
             {
                 label: 'rightClick.clearContent',
-                onClick: this.clearContent,
+                onClick: () => this.clearContent(),
                 border: true,
                 show: this._config.ClearContent,
             },
@@ -375,9 +375,23 @@ export class RightMenuUIController {
     }
 
     deleteCellLeft() {
+        const msg = {
+            name: 'moveLeft',
+        };
+        this.setUIObserve(msg);
     }
 
-    deleteCellTop() { }
+    deleteCellTop() {
+        const msg = {
+            name: 'moveTop',
+        };
+        this.setUIObserve(msg);
+    }
 
-    clearContent() { }
+    clearContent() {
+        const msg = {
+            name: 'clearContent',
+        };
+        this.setUIObserve(msg);
+    }
 }

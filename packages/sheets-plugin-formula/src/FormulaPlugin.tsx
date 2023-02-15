@@ -1,6 +1,7 @@
 import { SheetContext, IOCContainer, UniverSheet, Plugin } from '@univerjs/core';
 import { FormulaEnginePlugin } from '@univerjs/base-formula-engine';
 import { CellEditExtensionManager, CellInputExtensionManager } from '@univerjs/base-ui';
+import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
 import { zh, en } from './Locale';
 
 import { IFormulaConfig } from './Basic/Interfaces/IFormula';
@@ -41,14 +42,16 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
             universheetInstance.installPlugin(formulaEngine);
         }
 
-        this._formulaController = new FormulaController(this, this._config);
+        let sheetPlugin = context.getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
+        sheetPlugin?.UIDidMount(() => {
+            this._formulaController = new FormulaController(this, this._config);
+            this._searchFormulaController = new SearchFormulaController(this);
+            this._formulaPromptController = new FormulaPromptController(this);
 
-        this._searchFormulaController = new SearchFormulaController(this);
-        this._formulaPromptController = new FormulaPromptController(this);
+            this._formulaController.setFormulaEngine(formulaEngine as FormulaEnginePlugin);
 
-        this._formulaController.setFormulaEngine(formulaEngine);
-
-        firstLoader(this._formulaController);
+            firstLoader(this._formulaController);
+        });
     }
 
     initialize(context: SheetContext): void {

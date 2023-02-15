@@ -150,6 +150,7 @@ export class SheetContainerUIController {
     // 获取SheetContainer组件
     getComponent = (ref: SheetContainer) => {
         this._sheetContainer = ref;
+        this._plugin.getObserver('onUIDidMount')?.notifyObservers(this._sheetContainer)
 
         this._initSheetContainer();
     };
@@ -189,7 +190,20 @@ export class SheetContainerUIController {
     getCellEditorUIController() {
         return this._cellEditorUIController
     }
+
     getFormulaBarUIController() {
         return this._formulaBarUIController
+    }
+
+    getMainSlotController() {
+        return this._slotController
+    }
+
+    UIDidMount(cb: Function) {
+        if (this._sheetContainer) return cb(this._sheetContainer)
+
+        this._plugin.getObserver('onUIDidMount')?.add(() => {
+            return cb(this._sheetContainer)
+        })
     }
 }

@@ -1,6 +1,7 @@
 import { FormulaEnginePlugin, IInterpreterDatasetConfig, SheetDataType, UnitDataType, SheetNameMapType, ArrayFormulaDataType } from '@univerjs/base-formula-engine';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { PLUGIN_NAMES, SheetContext } from '@univerjs/core';
+import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
 import { FORMULA_PLUGIN_NAME } from '../Basic';
 import { IFormulaConfig } from '../Basic/Interfaces/IFormula';
 import { FormulaPlugin } from '../FormulaPlugin';
@@ -28,11 +29,11 @@ export class FormulaController {
 
         this._context = this._plugin.getContext();
 
-        this._sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+        this._sheetPlugin = this._plugin.getContext().getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
 
         this._activeSheetId = this._sheetPlugin.getWorkbook().getActiveSheet().getSheetId();
 
-        // this._initRegisterComponent();
+        this._initRegisterComponent();
 
         // this._sheetPlugin.addToolButton({
         //     name: FORMULA_PLUGIN_NAME,
@@ -96,7 +97,17 @@ export class FormulaController {
     }
 
     private _initRegisterComponent() {
-        this._sheetPlugin.registerComponent(FORMULA_PLUGIN_NAME + FormulaLabel.name, FormulaLabel);
+        // this._sheetPlugin.registerComponent(FORMULA_PLUGIN_NAME + FormulaLabel.name, FormulaLabel);
+        this._plugin
+            .getContext()
+            .getUniver()
+            .getGlobalContext()
+            .getPluginManager()
+            .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
+            .getAppUIController()
+            .getSheetContainerController()
+            .getMainSlotController()
+            .addSlot(FORMULA_PLUGIN_NAME + FormulaLabel.name, FormulaLabel);
     }
 
     getDataModel() {

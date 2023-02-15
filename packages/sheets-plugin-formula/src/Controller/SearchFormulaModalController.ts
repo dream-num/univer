@@ -270,8 +270,8 @@ export class SearchFormulaController {
     showCellRangeModal(show: boolean) {
         this._cellRangeModalData.show = show;
         const sheetPlugin = this._plugin.getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
-        const cellRangeModal = sheetPlugin?.getModalGroupControl().getModal(CellRangeModal.name);
-        cellRangeModal.setModal(this._cellRangeModalData);
+        // const cellRangeModal = sheetPlugin?.getModalGroupControl().getModal(CellRangeModal.name);
+        // cellRangeModal.setModal(this._cellRangeModalData);
         this.showFormulaModal('SearchItem', false);
     }
 

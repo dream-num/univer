@@ -105,7 +105,6 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
 
         if (parserDataLoader?.hasExecutor(tokenTrim)) {
             const functionNode = this.create(tokenTrim, parserDataLoader);
-            console.log('functionNode', functionNode);
             if (atPrefixNode) {
                 functionNode.setParent(atPrefixNode);
                 // return atPrefixNode;

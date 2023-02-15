@@ -1,6 +1,7 @@
-import { $$, getRefElement } from '@univerjs/base-ui';
+import { $$ } from '@univerjs/base-ui';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { KeyCode, PLUGIN_NAMES, SheetContext } from '@univerjs/core';
+import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
 import { FORMULA_PLUGIN_NAME } from '../Basic';
 import { FormulaPlugin } from '../FormulaPlugin';
 import { HelpFunction, SearchFunction } from '../View/UI/FormulaPrompt';
@@ -10,6 +11,8 @@ export class FormulaPromptController {
     private _context: SheetContext;
 
     private _sheetPlugin: SheetPlugin;
+
+    private _sheetUIPlugin: SheetUIPlugin;
 
     private _searchFunction: SearchFunction;
 
@@ -24,27 +27,49 @@ export class FormulaPromptController {
     constructor(private _plugin: FormulaPlugin) {
         this._context = this._plugin.getContext();
 
-        this._sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+        this._sheetPlugin = this._plugin.getContext().getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
+
+        this._sheetUIPlugin = this._plugin.getContext().getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
 
         this._initialize();
-        // this._initRegisterComponent();
+        this._initRegisterComponent();
     }
 
     private _initRegisterComponent() {
-        this._sheetPlugin.registerModal(FORMULA_PLUGIN_NAME + SearchFunction.name, SearchFunction);
-        this._sheetPlugin.registerModal(FORMULA_PLUGIN_NAME + HelpFunction.name, HelpFunction);
+        console.info('searchFunction====11');
+        this._sheetUIPlugin
+            .getAppUIController()
+            .getSheetContainerController()
+            .getMainSlotController()
+            .addSlot(FORMULA_PLUGIN_NAME + SearchFunction.name, SearchFunction, () => {
+                const searchFunction = this._sheetUIPlugin
+                    .getAppUIController()
+                    .getSheetContainerController()
+                    .getMainSlotController()
+                    .getSlot(FORMULA_PLUGIN_NAME + SearchFunction.name);
+
+                console.info('searchFunction====', searchFunction);
+            });
+
+        this._sheetUIPlugin
+            .getAppUIController()
+            .getSheetContainerController()
+            .getMainSlotController()
+            .addSlot(FORMULA_PLUGIN_NAME + HelpFunction.name, HelpFunction);
     }
 
     private _initialize() {
-        this._sheetPlugin.getObserver('onRichTextDidMountObservable')?.add((cellEditor) => {
-            this.richTextEle = getRefElement(cellEditor.container);
+        this._sheetUIPlugin.UIDidMount(() => {
+            const richTextEle = this._sheetUIPlugin.getAppUIController().getSheetContainerController().getCellEditorUIController()._richTextEle;
+
+            this.richTextEle = richTextEle;
             this.richTextEditEle = $$('div', this.richTextEle);
 
             // Register cell input formula support
             this.cellInputHandler = new CellInputHandler(this.richTextEditEle);
         });
 
-        this._sheetPlugin.getObserver('onRichTextKeyDownObservable')?.add((event: KeyboardEvent) => {
+        this._sheetUIPlugin.getObserver('onRichTextKeyDownObservable')?.add((event: KeyboardEvent) => {
             let ctrlKey = event.ctrlKey;
             let altKey = event.altKey;
             let shiftKey = event.shiftKey;
@@ -68,7 +93,7 @@ export class FormulaPromptController {
                 this.cellInputHandler.functionInputHandler(this.richTextEditEle, kcode);
             }
         });
-        this._sheetPlugin.getObserver('onRichTextKeyUpObservable')?.add((event: KeyboardEvent) => {
+        this._sheetUIPlugin.getObserver('onRichTextKeyUpObservable')?.add((event: KeyboardEvent) => {
             let kcode = event.keyCode;
 
             // stop edit
@@ -135,7 +160,7 @@ export class FormulaPromptController {
                     event.preventDefault();
                     event.stopPropagation();
                     const searchFunctionState = this._searchFunction.getState();
-                    // 搜索公式框打开时选择公式，关闭时执行公式
+                    // Select the formula when the search formula box is open, and execute the formula when it is closed
                     if (searchFunctionState.searchActive) {
                         const func = searchFunctionState.formula[searchFunctionState.selectIndex] as any;
                         this.cellInputHandler.searchFunctionEnter(func.n);

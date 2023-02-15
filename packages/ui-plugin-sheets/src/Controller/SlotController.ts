@@ -14,14 +14,14 @@ export class SlotController {
         this._plugin = plugin;
     }
 
-    getComponent(ref: Slot) {
+    getComponent = (ref: Slot)=> {
         this._slot = ref
     }
 
-    addSlot(name: string, component: any) {
+    addSlot(name: string, component: any, cb?: () => void) {
         if (this._slotGroup.get(name)) return
         this._slotGroup.set(name, component)
-        this.setSlot()
+        this.setSlot(cb)
     }
 
     getSlot(name: string) {
@@ -34,7 +34,7 @@ export class SlotController {
         this.setSlot()
     }
 
-    setSlot() {
-        this._slot.setSlotGroup(this._slotGroup);
+    setSlot(cb?: () => void) {
+        this._slot?.setSlotGroup(this._slotGroup, cb);
     }
 }

@@ -1,6 +1,7 @@
 import { IFormulaData } from '@univerjs/base-formula-engine';
 import { BaseCellEditExtension, BaseCellEditExtensionFactory, ICell } from '@univerjs/base-ui';
 import { IRangeData, Nullable } from '@univerjs/core';
+import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
 import { FormulaPlugin } from '../../FormulaPlugin';
 
 export class FormulaCellEditExtension extends BaseCellEditExtension {
@@ -76,15 +77,7 @@ export class FormulaCellEditExtensionFactory extends BaseCellEditExtensionFactor
                 const { startRow, startColumn, endRow, endColumn } = value;
                 if (row >= startRow && row < endRow && column >= startColumn && column < endColumn) {
                     formula = '';
-                    this._plugin
-                        .getContext()
-                        .getPluginManager()
-                        .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
-                        .getAppUIController()
-                        .getSheetContainerController()
-                        .getFormulaBarUIController()
-                        .getFormulaBar()
-                        .setFormulaContent('');
+                    this._plugin.getContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME).setFormulaContent('');
                     return false;
                 }
             });

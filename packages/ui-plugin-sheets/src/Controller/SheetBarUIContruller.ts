@@ -320,8 +320,7 @@ export class SheetBarUIController {
         this._sheetBar.contextMenu(e);
     }
 
-    dragEnd(element: HTMLDivElement[]) {
-        debugger
+    dragEnd = (element: HTMLDivElement[]): void => {
         let list: SheetUlProps[] = [];
         let sheetId = this._dataId;
         Array.from(element).forEach((node: any) => {

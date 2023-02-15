@@ -11,11 +11,11 @@ export interface BaseItemProps extends BaseMenuItem {
 }
 
 export class Item extends Component<BaseItemProps> {
-    getLabelLocale(label: ComponentChildren) {
-        if (typeof label === 'string') {
-            return this.getLocale(label);
-        }
-    }
+    // getLabelLocale(label: ComponentChildren) {
+    //     if (typeof label === 'string') {
+    //         return this.getLocale(label);
+    //     }
+    // }
 
     render() {
         const { selected, label, suffix, disabled } = this.props;
@@ -28,7 +28,8 @@ export class Item extends Component<BaseItemProps> {
                 ) : (
                     ''
                 )}
-                <span className={styles.selectItemContent}>{this.getLabelLocale(label)}</span>
+                {/* <span className={styles.selectItemContent}>{this.getLabelLocale(label)}</span> */}
+                <span className={styles.selectItemContent}>{label}</span>
                 {suffix ? <span className={styles.selectItemSuffix}>{suffix}</span> : ''}
             </div>
         );

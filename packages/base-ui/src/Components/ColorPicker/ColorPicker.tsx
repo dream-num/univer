@@ -127,6 +127,10 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
         });
     };
 
+    componentDidMount() {
+        this.props.getComponent?.(this);
+    }
+
     render() {
         const obj = Object.assign(this.state.styles || {}, this.props.style);
 

@@ -20,7 +20,6 @@ interface IState {
 
 export class ColorSelect extends Component<IProps, IState> {
     componentDidMount(): void {
-        this.props.getComponent?.(this);
         const componentManager = this.getContext().getPluginManager().getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager();
         let label = this.props.label;
         if (this.props.customLabel) {
@@ -31,16 +30,13 @@ export class ColorSelect extends Component<IProps, IState> {
             label,
             color: '#000',
         });
+        this.props.getComponent?.(this);
     }
 
     setColor(color: string) {
         this.setState({
             color,
         });
-    }
-
-    getId() {
-        return this.props.id;
     }
 
     render() {

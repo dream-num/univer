@@ -1,3 +1,5 @@
+import { BorderStyleTypes } from "@univerjs/core";
+
 export const FONT_SIZE_CHILDREN = [
     {
         label: '9',
@@ -224,73 +226,73 @@ export const BORDER_LINE_CHILDREN = [
 export const BORDER_SIZE_CHILDREN = [
     {
         label: 'borderLine.borderNone',
-        value: '',
+        value: BorderStyleTypes.NONE,
     },
     {
         customLabel: {
             name: 'BorderThin',
         },
-        value: 'BorderThin',
+        value: BorderStyleTypes.THIN,
     },
     {
         customLabel: {
             name: 'BorderHair',
         },
-        value: 'BorderHair',
+        value: BorderStyleTypes.HAIR,
     },
     {
         customLabel: {
             name: 'BorderDotted',
         },
-        value: 'BorderDotted',
+        value: BorderStyleTypes.DOTTED,
     },
     {
         customLabel: {
             name: 'BorderDashed',
         },
-        value: 'BorderDashed',
+        value: BorderStyleTypes.DASHED,
     },
     {
         customLabel: {
             name: 'BorderDashDot',
         },
-        value: 'BorderDashDot',
+        value: BorderStyleTypes.DOTTED,
     },
     {
         customLabel: {
             name: 'BorderDashDotDot',
         },
-        value: 'BorderDashDotDot',
+        value: BorderStyleTypes.DASH_DOT_DOT,
     },
     {
         customLabel: {
             name: 'BorderMedium',
         },
-        value: 'BorderMedium',
+        value: BorderStyleTypes.MEDIUM,
     },
     {
         customLabel: {
             name: 'BorderMediumDashed',
         },
-        value: 'BorderMediumDashed',
+        value: BorderStyleTypes.MEDIUM_DASHED,
     },
     {
         customLabel: {
             name: 'BorderMediumDashDot',
         },
-        value: 'BorderMediumDashDot',
+        value: BorderStyleTypes.MEDIUM_DASH_DOT,
     },
     {
         customLabel: {
             name: 'BorderMediumDashDotDot',
         },
-        value: 'BorderMediumDashDotDot',
+        value: BorderStyleTypes.MEDIUM_DASH_DOT_DOT,
     },
     {
         customLabel: {
             name: 'BorderThick',
         },
-        value: 'BorderThick',
+        value: BorderStyleTypes.THICK,
     },
 ];
 

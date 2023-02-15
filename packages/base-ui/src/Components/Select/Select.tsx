@@ -32,6 +32,7 @@ export interface BaseSelectChildrenProps extends BaseItemProps {
     unSelectable?: boolean; //选中后不生效事件
     customLabel?: CustomComponent;
     customSuffix?: CustomComponent;
+    name?: string;
 }
 
 export interface BaseSelectProps {

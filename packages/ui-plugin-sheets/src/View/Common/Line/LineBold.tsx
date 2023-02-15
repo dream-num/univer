@@ -1,4 +1,6 @@
 import { BaseComponentProps, BaseComponentRender, Component, Icon } from '@univerjs/base-ui';
+import { SheetUIPlugin } from '../../..';
+import { SHEET_UI_PLUGIN_NAME } from '../../../Basics';
 
 interface IState {
     img: string;
@@ -19,17 +21,19 @@ export class LineBold extends Component<IProps, IState> {
         this.props.getComponent?.(this);
     }
 
-    setLineType(img: string) {
+    setImg(img: string = '') {
         this.setState({
             img,
         });
     }
 
     getImg(img: string) {
-        // const span = document.querySelector('.base-sheets-line-bold') as HTMLDivElement;
-        // const props = { width: span.offsetWidth };
-        // const Img = this._render.renderFunction(img as any);
-        // return <Img {...(props as any)} />;
+        if (!img) return null;
+        const span = document.querySelector('.base-sheets-line-bold') as HTMLDivElement;
+        const props = { width: span.offsetWidth };
+        const componentManager = this.getContext().getPluginManager().getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager();
+        const Img = componentManager?.get(img);
+        return <Img {...(props as any)} />;
     }
 
     render() {
@@ -38,7 +42,7 @@ export class LineBold extends Component<IProps, IState> {
         return (
             <div style={{ paddingBottom: '3px', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className={'base-sheets-line-bold'} style={{ position: 'relative' }}>
-                    {label}
+                    {this.getLocale(label)}
                     <div style={{ width: '100%', height: 0, position: 'absolute', left: 0, bottom: '10px' }}>{img.length ? this.getImg(img) : ''}</div>
                 </span>
                 <Icon.RightIcon />

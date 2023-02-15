@@ -9,11 +9,11 @@ import { AppUIController } from './Controller/AppUIController';
 export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
     private _appUIController: AppUIController;
 
-    private _componentManager: ComponentManager;
-
     private _registerManager: RegisterManager;
 
     private _config: ISheetUIPluginConfig;
+
+    private _componentManager: ComponentManager;
 
     constructor(config?: ISheetUIPluginConfig) {
         super(SHEET_UI_PLUGIN_NAME);

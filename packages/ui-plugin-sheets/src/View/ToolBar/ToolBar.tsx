@@ -15,7 +15,9 @@ interface IState {
     defaultToolList: IToolbarItemProps[];
     showMore: boolean;
     toolbarListWidths: number[];
-    moreText: Record<string, string>;
+    replace: IToolbarItemProps[];
+    defaultReplaceList: IToolbarItemProps[];
+    moreReplaceList: IToolbarItemProps[];
 }
 
 export class Toolbar extends Component<IProps, IState> {
@@ -39,7 +41,9 @@ export class Toolbar extends Component<IProps, IState> {
             defaultToolList: [],
             moreToolList: [],
             toolbarListWidths: [],
-            moreText: {},
+            replace: [],
+            defaultReplaceList: [],
+            moreReplaceList: [],
         };
     }
 
@@ -97,6 +101,8 @@ export class Toolbar extends Component<IProps, IState> {
                     {
                         defaultToolList: this.state.toolList.slice(0, index),
                         moreToolList: index ? this.state.toolList.slice(index) : [],
+                        defaultReplaceList: this.state.replace.slice(0, index),
+                        moreReplaceList: index ? this.state.replace.slice(index) : [],
                     },
                     () => {
                         this.resetUl();
@@ -134,6 +140,8 @@ export class Toolbar extends Component<IProps, IState> {
                         {
                             defaultToolList: this.state.defaultToolList.concat(this.state.moreToolList.slice(0, last ? moreIndex + 1 : moreIndex)),
                             moreToolList: last ? [] : this.state.moreToolList.slice(moreIndex),
+                            defaultReplaceList: this.state.replace.concat(this.state.moreReplaceList.slice(0, last ? moreIndex + 1 : moreIndex)),
+                            moreReplaceList: last ? [] : this.state.moreReplaceList.slice(moreIndex),
                         },
                         () => {
                             this.resetUl();
@@ -145,7 +153,7 @@ export class Toolbar extends Component<IProps, IState> {
         }
     };
 
-    resetLabel = (toolList: any[]) => {
+    resetLabel = (toolList: any[], replace: IToolbarItemProps[]) => {
         const componentManager = this.getContext().getPluginManager().getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager();
 
         for (let i = 0; i < toolList.length; i++) {
@@ -158,6 +166,8 @@ export class Toolbar extends Component<IProps, IState> {
                     const props = item.customLabel.props ?? {};
                     item.label = <Label {...props} />;
                 }
+            } else {
+                item.label = this.getLocale(replace[i].label as string);
             }
 
             if (item.customSuffix) {
@@ -169,19 +179,21 @@ export class Toolbar extends Component<IProps, IState> {
             }
 
             if (item.children) {
-                item.children = this.resetLabel(item.children);
+                item.children = this.resetLabel(item.children, replace[i].children ?? []);
             }
         }
         return toolList;
     };
 
     setToolbar = (toolList: any[]) => {
-        toolList = this.resetLabel(toolList);
+        // toolList = this.resetLabel(toolList);
 
         this.setState(
             {
                 toolList,
                 defaultToolList: toolList,
+                replace: JSON.parse(JSON.stringify(toolList)),
+                defaultReplaceList: JSON.parse(JSON.stringify(toolList)),
             },
             () => {
                 this.setToolbarListWidth();
@@ -213,7 +225,8 @@ export class Toolbar extends Component<IProps, IState> {
     }
 
     // 渲染dom
-    getToolbarList(list: IToolbarItemProps[]) {
+    getToolbarList(list: IToolbarItemProps[], replace: IToolbarItemProps[]) {
+        list = this.resetLabel(list, replace);
         return list.map((item) => {
             if (item.toolbarType) {
                 if (item.show) {
@@ -248,12 +261,12 @@ export class Toolbar extends Component<IProps, IState> {
     }
 
     render() {
-        const { defaultToolList, moreToolList, moreText, showMore } = this.state;
+        const { defaultToolList, moreToolList, showMore, defaultReplaceList, moreReplaceList } = this.state;
 
         return (
             <Container style={{ position: 'relative' }}>
                 <div className={`${styles.toolbarWarp} ${styles.toolbar}`} ref={this.toolbarRef}>
-                    {this.getToolbarList(defaultToolList)}
+                    {this.getToolbarList(defaultToolList, defaultReplaceList)}
 
                     <div ref={this.moreBtnRef} className={styles.moreButton} style={{ visibility: moreToolList.length ? 'visible' : 'hidden' }}>
                         <Tooltip title={this.getLocale('toolbar.toolMoreTip')} placement={'bottom'}>
@@ -266,7 +279,7 @@ export class Toolbar extends Component<IProps, IState> {
 
                 {moreToolList.length ? (
                     <div style={{ visibility: showMore ? 'visible' : 'hidden' }} className={`${styles.moreTool} ${styles.toolbar}`} ref={this.moreToolRef}>
-                        {this.getToolbarList(moreToolList)}
+                        {this.getToolbarList(moreToolList, moreReplaceList)}
                     </div>
                 ) : (
                     ''

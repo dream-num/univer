@@ -18,6 +18,7 @@ import { SheetBarMenu } from './SheetBarMenu';
 import { Nullable, Observer, PLUGIN_NAMES, Workbook } from '@univerjs/core';
 import styles from './index.module.less';
 import { SlideTabBar } from '../../Basics/SlideTabBar/SlideTabBar';
+import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '../..';
 
 type SheetState = {
     sheetList: BaseSheetBarProps[];
@@ -53,7 +54,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     }
 
     resetLabel(list: any) {
-        const componentManager = this.getContext().getPluginManager().getPluginByName<BaseComponentPlugin>(PLUGIN_NAMES.BASE_COMPONENT)?.getComponentManager();
+        const componentManager = this.getContext().getPluginManager().getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager();
 
         for (let i = 0; i < list.length; i++) {
             const item = list[i];

@@ -78,18 +78,15 @@ universheet.installPlugin(
         },
     })
 );
-// FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO1).installTo(universheet);
 // universheet.installPlugin(new FormulaPlugin(DEFAULT_FORMULA_DATA_DEMO));
 
-// // ui TODO: 不要安装
-// univer.install(new UniverComponentSheet());
-// univer.install(new BaseComponentPlugin(univerConfig));
-
+// ui-plugin-sheets
 univer.install(
     new SheetUIPlugin({
         container: 'universheet',
     })
 );
+FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO1).installTo(universheet);
 // sheets-plugin-ui univer.install(new SheetsUI)
 // sheets-plugin-ui univer.install(new SheetsUI
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);

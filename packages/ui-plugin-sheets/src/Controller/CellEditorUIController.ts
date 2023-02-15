@@ -314,4 +314,12 @@ export class CellEditorUIController {
             this._richTextEditEle.focus();
         }, 100);
     }
+
+    getRichTextEle() {
+        return this._richTextEle
+    }
+
+    getRichTextEditEle() {
+        return this._richTextEditEle
+    }
 }

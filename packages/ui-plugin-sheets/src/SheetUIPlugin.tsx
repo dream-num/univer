@@ -89,4 +89,21 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
     getRegisterManager(): RegisterManager {
         return this._registerManager;
     }
+
+    /**
+     * Formula Bar API
+     * @param str
+     */
+    setFormulaContent(str: string) {
+        this._appUIController.getSheetContainerController().getFormulaBarUIController().getFormulaBar().setFormulaContent(str);
+    }
+
+    /**
+     * This API is used in plugins for initialization that depends on UI rendering
+     * @param cb
+     * @returns
+     */
+    UIDidMount(cb: Function) {
+        this._appUIController.getSheetContainerController().UIDidMount(cb);
+    }
 }

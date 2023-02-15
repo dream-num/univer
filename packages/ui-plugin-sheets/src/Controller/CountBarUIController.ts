@@ -10,8 +10,7 @@ export class CountBarUIController {
         let rectList = rangeList.getRangeList();
         let recList: string[] = [];
         let plugin = this._plugin;
-        let context = plugin.getContext();
-        let workbook = context.getWorkBook();
+        let workbook = plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
         let worksheet = workbook.getActiveSheet();
         let cellMatrix = worksheet.getCellMatrix();
         let avg = 0;
@@ -46,12 +45,7 @@ export class CountBarUIController {
     }
 
     protected _refreshCountBarUI(): void {
-        const workbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
-        this._countBar.setState({
-            onChange: (v: any) => {
-                workbook.getActiveSheet().setZoomRatio(Tools.numberFixed(v / 100, 2));
-            },
-        });
+
     }
 
     protected _refreshComponent(): void {
@@ -92,7 +86,9 @@ export class CountBarUIController {
     }
 
     // changeRatio
-    changeRatio(ratio: string) { }
+    onChange = (ratio: string) => {
+        console.log(ratio);
+    }
 
     // 刷新组件
     setCountBar(content: string) {

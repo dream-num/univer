@@ -138,7 +138,8 @@ export class SheetBarUIController {
                             props: {
                                 onClick: (color: string) => {
                                     this.setUIObserve('onUIChangeObservable', {
-                                        name: 'changeSheetColor', value: {
+                                        name: 'changeSheetColor',
+                                        value: {
                                             color, sheetId: this._dataId
                                         }
                                     });

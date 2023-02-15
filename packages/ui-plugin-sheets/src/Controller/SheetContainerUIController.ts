@@ -132,6 +132,7 @@ export class SheetContainerUIController {
                 },
                 countBar: {
                     getComponent: this._countBarController.getComponent,
+                    onChange: this._countBarController.onChange,
                 },
                 sheetBar: {
                     getComponent: this._sheetBarController.getComponent,

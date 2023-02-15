@@ -4,8 +4,14 @@ interface IState {
     slotGroup: Map<string, any>;
 }
 
-export class Slot extends Component<BaseComponentProps, IState> {
+interface IProps extends BaseComponentProps {
+    ref?: Slot;
+}
+
+export class Slot extends Component<IProps, IState> {
     refMap = new Map();
+
+    refs: any[] = [];
 
     initialize() {
         this.state = {
@@ -32,19 +38,21 @@ export class Slot extends Component<BaseComponentProps, IState> {
 
     getRender(slotGroup: Map<string, any>) {
         const group: JSX.Element[] = [];
-        slotGroup.forEach((k) => {
+        slotGroup.forEach((v, k) => {
             const Slot = slotGroup.get(k);
-            group.push(<Slot ref={(ele: any) => this.refMap.set(k, ele)}></Slot>);
+            group.push(
+                <Slot
+                    ref={(ele: any) => {
+                        this.refMap.set(k, ele);
+                    }}
+                ></Slot>
+            );
         });
-        // for (let k in slotGroup) {
-        //     const A = slotGroup.get(k);
-        //     group.push(<A ref={(ele: any) => this.refMap.set(k, ele)}></A>);
-        // }
         return group;
     }
 
     render() {
         const { slotGroup } = this.state;
-        return <>{this.getRender(slotGroup)}</>;
+        return <div>{this.getRender(slotGroup)}</div>;
     }
 }

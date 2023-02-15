@@ -2,10 +2,10 @@ import { $$ } from '@univerjs/base-ui';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { KeyCode, PLUGIN_NAMES, SheetContext } from '@univerjs/core';
 import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
-import { FORMULA_PLUGIN_NAME } from '../Basic';
 import { FormulaPlugin } from '../FormulaPlugin';
 import { HelpFunction, SearchFunction } from '../View/UI/FormulaPrompt';
 import { CellInputHandler } from './CellInputHandler';
+import { FORMULA_PLUGIN_NAME } from '../Basic';
 
 export class FormulaPromptController {
     private _context: SheetContext;
@@ -47,7 +47,6 @@ export class FormulaPromptController {
                     .getSheetContainerController()
                     .getMainSlotController()
                     .getSlot(FORMULA_PLUGIN_NAME + SearchFunction.name);
-
                 console.info('searchFunction====', searchFunction);
             });
 

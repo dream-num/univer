@@ -155,6 +155,7 @@ export class SheetBarUIController {
             {
                 locale: 'sheetConfig.unhide',
                 onClick: () => {
+                    this._sheetBar.ref.current.showMenu(true)
                     that.setUIObserve('onUIChangeObservable', { name: 'unHideSheet', value: this._dataId });
                 },
                 border: true,

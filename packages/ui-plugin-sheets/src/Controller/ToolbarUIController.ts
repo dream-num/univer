@@ -45,6 +45,7 @@ export class ToolbarUIController {
     private _lineBold: LineBold;
 
     private _colorSelect1: ColorSelect;
+
     private _colorSelect2: ColorSelect;
 
     private _borderInfo: BorderInfo = {
@@ -79,36 +80,6 @@ export class ToolbarUIController {
                 show: this._config.redo,
                 onClick: () => this.setRedo(),
             },
-            // {
-            //     toolbarType: 1,
-            //     tooltipLocale: 'paintFormat',
-            //     label: 'FormatIcon',
-            //     show: toolbarConfig.paintFormat,
-            // },
-            // {
-            //     toolbarType: 1,
-            //     tooltipLocale: 'currencyFormat',
-            //     label: 'MoneyIcon',
-            //     show: toolbarConfig.currencyFormat,
-            // },
-            // {
-            //     toolbarType: 1,
-            //     tooltipLocale: 'percentageFormat',
-            //     label: 'PercentIcon',
-            //     show: toolbarConfig.percentageFormat,
-            // },
-            // {
-            //     toolbarType: 1,
-            //     tooltipLocale: 'numberDecrease',
-            //     label: 'ReduceNumIcon',
-            //     show: toolbarConfig.numberDecrease,
-            // },
-            // {
-            //     toolbarType: 1,
-            //     tooltipLocale: 'numberIncrease',
-            //     label: 'AddNumIcon',
-            //     show: toolbarConfig.numberIncrease,
-            // },
             {
                 type: 0,
                 tooltip: 'toolbar.font',

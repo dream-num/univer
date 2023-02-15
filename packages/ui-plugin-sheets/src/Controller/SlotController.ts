@@ -1,4 +1,3 @@
-import { SheetUIPlugin } from "..";
 import { Slot } from "../View";
 
 export type SlotGroupProps = Map<string, any>;
@@ -8,13 +7,7 @@ export class SlotController {
 
     private _slot: Slot;
 
-    private _plugin: SheetUIPlugin;
-
-    constructor(plugin: SheetUIPlugin) {
-        this._plugin = plugin;
-    }
-
-    getComponent = (ref: Slot)=> {
+    getComponent = (ref: Slot) => {
         this._slot = ref
     }
 

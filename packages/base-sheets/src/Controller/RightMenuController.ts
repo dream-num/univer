@@ -1,3 +1,4 @@
+import { UIObserver } from '@univerjs/core';
 import { SheetPlugin } from '../SheetPlugin';
 import { SelectionControl } from './Selection/SelectionController';
 import { SelectionModel } from '../Model/SelectionModel';
@@ -7,6 +8,40 @@ export class RightMenuController {
 
     constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
+    }
+
+    listenEventManager() {
+        this._plugin
+            .getContext()
+            .getUniver()
+            .getGlobalContext()
+            .getObserverManager()
+            .requiredObserver<UIObserver<string>>('onUIChangeObservable', 'core')
+            .add((msg) => {
+                switch (msg.name) {
+                    case 'insertRow':
+                        this.insertRow();
+                        break;
+                    case 'insertColumn':
+                        this.insertColumn();
+                        break;
+                    case 'deleteRow':
+                        this.deleteRow();
+                        break;
+                    case 'deleteColumn':
+                        this.deleteColumn();
+                        break;
+                    case 'moveTop':
+                        this.deleteCellTop();
+                        break;
+                    case 'moveLeft':
+                        this.deleteCellLeft();
+                        break;
+                    case 'clearContent':
+                        this.clearContent();
+                        break;
+                }
+            });
     }
 
     private _getSelections() {
@@ -28,7 +63,6 @@ export class RightMenuController {
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
             sheet?.insertRowBefore(selections[0].startRow, selections[0].endRow - selections[0].startRow + 1);
-            // this._render(sheet);
         }
     };
 
@@ -56,7 +90,7 @@ export class RightMenuController {
         }
     };
 
-    clear = () => {
+    clearContent = () => {
         const selections = this._getSelections();
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();

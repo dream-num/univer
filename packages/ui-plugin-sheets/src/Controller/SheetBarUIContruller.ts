@@ -1,7 +1,6 @@
 import { BaseMenuItem, BaseUlProps, ColorPicker } from '@univerjs/base-ui';
 import { Nullable, Plugin, ACTION_NAMES, CommandManager, SheetActionBase, UIObserver } from '@univerjs/core';
-import { SheetUIPlugin } from '..';
-import { SHEET_UI_PLUGIN_NAME } from '../Basics';
+import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '..';
 import { SheetBar } from "../View/SheetBar";
 import styles from '../View/SheetBar/index.module.less';
 
@@ -139,6 +138,8 @@ export class SheetBarUIController {
                             props: {
                                 onClick: (color: string) => {
                                     that.setUIObserve('onUIChangeObservable', { name: 'changeSheetColor', value: color });
+                                    console.dir(color)
+                                    this.setUIObserve('onSheetColor', { name: 'sheetColor', value: color });
                                 },
                             },
                         },
@@ -187,6 +188,7 @@ export class SheetBarUIController {
                 }
             }
         });
+        this._plugin.getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager().register(this._plugin.getPluginName() + ColorPicker.name, ColorPicker)
     }
 
     getComponent = (ref: SheetBar) => {

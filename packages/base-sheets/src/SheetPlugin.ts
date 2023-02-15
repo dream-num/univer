@@ -75,6 +75,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         this._formulaBarController = new FormulaBarController(this);
         this._sheetBarControl = new SheetBarControl(this);
         this._toolbarControl = new ToolbarController(this);
+        this._rightMenuControl = new RightMenuController(this);
     }
 
     initCanvasView() {
@@ -109,6 +110,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         // TODO: move to toolbarcontroller
         this._sheetBarControl.listenEventManager();
         this._toolbarControl.listenEventManager();
+        this._rightMenuControl.listenEventManager();
     }
 
     getCanvasEngine() {

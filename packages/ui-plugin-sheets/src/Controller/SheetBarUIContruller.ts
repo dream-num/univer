@@ -155,7 +155,9 @@ export class SheetBarUIController {
             {
                 locale: 'sheetConfig.unhide',
                 onClick: () => {
-                    that.setUIObserve('onUIChangeObservable', { name: 'unHideSheet', value: this._dataId });
+                    // that.setUIObserve('onUIChangeObservable', { name: 'unHideSheet', value: this._dataId });
+                    console.log(this._sheetBar.ref.current);
+                    this._sheetBar.ref.current.showMenu(true)
                 },
                 border: true,
             }
@@ -319,8 +321,7 @@ export class SheetBarUIController {
         this._sheetBar.contextMenu(e);
     }
 
-    dragEnd(element: HTMLDivElement[]) {
-        debugger
+    dragEnd = (element: HTMLDivElement[]): void => {
         let list: SheetUlProps[] = [];
         let sheetId = this._dataId;
         Array.from(element).forEach((node: any) => {

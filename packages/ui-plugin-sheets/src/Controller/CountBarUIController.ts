@@ -86,8 +86,9 @@ export class CountBarUIController {
     }
 
     // changeRatio
-    onChange = (ratio: string) => {
-        console.log(ratio);
+    onChange = (v: string) => {
+        console.log(v);
+        this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().setZoomRatio(Tools.numberFixed(v / 100, 2));
     }
 
     // 刷新组件

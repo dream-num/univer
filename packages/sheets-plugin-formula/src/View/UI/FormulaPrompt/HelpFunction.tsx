@@ -1,4 +1,4 @@
-import { Component } from '@univerjs/base-ui';
+import { Component, createRef } from '@univerjs/base-ui';
 import { FormulaParamType, FormulaType } from '../../../Basic';
 import styles from './index.module.less';
 
@@ -18,6 +18,8 @@ interface IState {
 }
 
 export class HelpFunction extends Component<IProps, IState> {
+    contentRef = createRef<HTMLDivElement>();
+
     initialize() {
         this.state = {
             activeIndex: 0,
@@ -34,17 +36,24 @@ export class HelpFunction extends Component<IProps, IState> {
 
     componentDidMount() {}
 
-    updateState(helpFormulaActive: boolean, activeIndex: number = 0, functionInfo: FormulaType = {}, position = { left: 0, top: 0 }) {
-        this.setState({
-            helpFormulaActive,
-            functionInfo,
-            activeIndex,
-            position,
-        });
+    updateState(helpFormulaActive: boolean, activeIndex: number = 0, functionInfo: FormulaType = {}, position = { left: 0, top: 0 }, cb?: () => void) {
+        this.setState(
+            {
+                helpFormulaActive,
+                functionInfo,
+                activeIndex,
+                position,
+            },
+            cb
+        );
     }
 
     getState() {
         return this.state;
+    }
+
+    getContentRef() {
+        return this.contentRef;
     }
 
     render(props: IProps, state: IState) {
@@ -54,6 +63,7 @@ export class HelpFunction extends Component<IProps, IState> {
             <div
                 className={styles.helpFunction}
                 style={{ display: helpFormulaActive ? 'block' : 'none', position: 'absolute', left: `${position.left}px`, top: `${position.top}px` }}
+                ref={this.contentRef}
             >
                 <div class={styles.helpFunctionTitle}>
                     <Help title={functionInfo.n} value={functionInfo.p} type="name" active={activeIndex} />

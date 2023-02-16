@@ -20,6 +20,8 @@ export class FormulaController {
 
     private _sheetPlugin: SheetPlugin;
 
+    private _sheetUIPlugin: SheetUIPlugin;
+
     private _activeSheetId: string;
 
     private _arrayFormulaLineControls: ArrayFormulaLineControl[] = [];
@@ -31,9 +33,11 @@ export class FormulaController {
 
         this._sheetPlugin = this._plugin.getContext().getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
 
+        this._sheetUIPlugin = this._plugin.getContext().getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
+
         this._activeSheetId = this._sheetPlugin.getWorkbook().getActiveSheet().getSheetId();
 
-        this._initRegisterComponent();
+        // this._initRegisterComponent();
 
         // this._sheetPlugin.addToolButton({
         //     name: FORMULA_PLUGIN_NAME,

@@ -40,13 +40,7 @@ export class Slot extends Component<IProps, IState> {
         const group: JSX.Element[] = [];
         slotGroup.forEach((v, k) => {
             const Slot = slotGroup.get(k);
-            group.push(
-                <Slot
-                    ref={(ele: any) => {
-                        this.refMap.set(k, ele);
-                    }}
-                ></Slot>
-            );
+            Slot && group.push(<Slot ref={(ele: any) => this.refMap.set(k, ele)}></Slot>);
         });
         return group;
     }

@@ -1,4 +1,4 @@
-import { BaseComponentProps, Component } from '@univerjs/base-ui';
+import { BaseComponentProps, Component, createRef } from '@univerjs/base-ui';
 import styles from './index.module.less';
 
 interface IProps extends BaseComponentProps {}
@@ -18,6 +18,8 @@ interface IState {
 }
 
 export class SearchFunction extends Component<IProps, IState> {
+    contentRef = createRef<HTMLUListElement>();
+
     initialize() {
         this.state = {
             lang: '',
@@ -34,13 +36,15 @@ export class SearchFunction extends Component<IProps, IState> {
         };
     }
 
-    componentDidMount() {
-        this.props.getComponent?.(this);
-    }
+    componentDidMount() {}
 
     componentWillUpdate(nextProps: any) {}
 
     onKeyDown(event: Event) {}
+
+    getContentRef() {
+        return this.contentRef;
+    }
 
     /**
      *
@@ -48,8 +52,8 @@ export class SearchFunction extends Component<IProps, IState> {
      * @param formula
      * @param selectIndex
      */
-    updateState(searchActive: boolean, formula: [] = [], selectIndex: number = 0, position = { left: 0, top: 0 }) {
-        this.setState({ searchActive, formula, selectIndex, position });
+    updateState(searchActive: boolean, formula: [] = [], selectIndex: number = 0, position = { left: 0, top: 0 }, cb?: () => void) {
+        this.setState({ searchActive, formula, selectIndex, position }, cb);
     }
 
     getState() {
@@ -63,11 +67,12 @@ export class SearchFunction extends Component<IProps, IState> {
                 className={styles.searchFunction}
                 onKeyDown={this.onKeyDown.bind(this)}
                 style={{ display: searchActive ? 'block' : 'none', position: 'absolute', left: `${position.left}px`, top: `${position.top}px` }}
+                ref={this.contentRef}
             >
                 {formula.map((item: any, i: number) => (
                     <li className={selectIndex === i ? styles.searchFunctionActive : ''}>
                         <div className={styles.formulaName}>{item.n}</div>
-                        <div className={styles.formulaDetail}>{item.a}</div>
+                        <div className={styles.formulaDetail}>{this.getLocale(item.d)}</div>
                     </li>
                 ))}
             </ul>

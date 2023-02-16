@@ -5,11 +5,17 @@
     font-size: 14px;
     z-index: 1003;
     width: 300px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    > li {
+        padding: 5px 10px;
+    }
     .formula-detail {
         display: none;
     }
     .search-function-active {
-        background-color: aqua;
+        background-color: var(--bg-hover);
 
         .formula-detail {
             display: block;
@@ -45,6 +51,6 @@
         }
     }
     .help-function-active {
-        background-color: aqua;
+        background-color: #fff9b2;
     }
 }

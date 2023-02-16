@@ -1,11 +1,11 @@
-import { $$ } from '@univerjs/base-ui';
+import { $$, getRefElement } from '@univerjs/base-ui';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { KeyCode, PLUGIN_NAMES, SheetContext } from '@univerjs/core';
 import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
+import { FORMULA_PLUGIN_NAME, FunList } from '../Basic';
 import { FormulaPlugin } from '../FormulaPlugin';
 import { HelpFunction, SearchFunction } from '../View/UI/FormulaPrompt';
 import { CellInputHandler } from './CellInputHandler';
-import { FORMULA_PLUGIN_NAME } from '../Basic';
 
 export class FormulaPromptController {
     private _context: SheetContext;
@@ -31,12 +31,11 @@ export class FormulaPromptController {
 
         this._sheetUIPlugin = this._plugin.getContext().getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
 
-        this._initialize();
         this._initRegisterComponent();
+        this._initialize();
     }
 
     private _initRegisterComponent() {
-        console.info('searchFunction====11');
         this._sheetUIPlugin
             .getAppUIController()
             .getSheetContainerController()
@@ -47,14 +46,21 @@ export class FormulaPromptController {
                     .getSheetContainerController()
                     .getMainSlotController()
                     .getSlot(FORMULA_PLUGIN_NAME + SearchFunction.name);
-                console.info('searchFunction====', searchFunction);
+                this._searchFunction = searchFunction;
             });
 
         this._sheetUIPlugin
             .getAppUIController()
             .getSheetContainerController()
             .getMainSlotController()
-            .addSlot(FORMULA_PLUGIN_NAME + HelpFunction.name, HelpFunction);
+            .addSlot(FORMULA_PLUGIN_NAME + HelpFunction.name, HelpFunction, () => {
+                const helpFunction = this._sheetUIPlugin
+                    .getAppUIController()
+                    .getSheetContainerController()
+                    .getMainSlotController()
+                    .getSlot(FORMULA_PLUGIN_NAME + HelpFunction.name);
+                this._helpFunction = helpFunction;
+            });
     }
 
     private _initialize() {
@@ -118,39 +124,64 @@ export class FormulaPromptController {
                 const formula = this.cellInputHandler.getFormula();
                 let helpFormula = this.cellInputHandler.getHelpFormula();
 
-                const left = parseInt(this.richTextEle.style.left);
-                const top = parseInt(this.richTextEle.style.top) + parseInt(this.richTextEle.style.minHeight);
+                let height = parseInt(this.richTextEle.style.minHeight);
+                let width = parseInt(this.richTextEle.style.minWidth);
+                let left = parseInt(this.richTextEle.style.left);
+                let top = parseInt(this.richTextEle.style.top) + height;
+
+                // Get the viewport width/height of the Main SheetContainer
+                const sheetContainer = getRefElement(this._sheetUIPlugin.getAppUIController().getSheetContainerController().getContentRef());
+                const screenW = sheetContainer.offsetWidth;
+                const screenH = sheetContainer.offsetHeight;
+
+                // Parse out a reasonable display position, and the list cannot be hidden
                 const position = {
                     left,
                     top,
                 };
 
-                if (formula[0]) {
-                    this._searchFunction.updateState(true, formula, 0, position);
-                    this._helpFunction.updateState(false);
-                    // this.setState({
-                    //     formula,
-                    //     searchActive: true,
-                    //     helpFormulaActive: false,
-                    // });
-                } else if (helpFormula[0]) {
-                    this._helpFunction.updateState(true, helpFormula[1] as number, (helpFormula[0] as string).toUpperCase(), position);
-                    this._searchFunction.updateState(false);
+                const getPosition = (component: SearchFunction | HelpFunction) => {
+                    // Get the width/height of the list
+                    const searchFunctionEle = getRefElement(component.getContentRef());
+                    const rootW = searchFunctionEle.offsetWidth;
+                    // const rootW = this._searchFunction?.base?.offsetWidth;
+                    const rootH = searchFunctionEle.offsetHeight;
 
-                    // this.setState({
-                    //     formulaName: (helpFormula[0] as string).toUpperCase(),
-                    //     paramIndex: helpFormula[1] as number,
-                    //     helpFormulaActive: true,
-                    //     searchActive: false,
-                    // });
+                    // right is true, indicating that the width from the lower left corner of the cell to the right border of the browser can hold the SearchFunction. Otherwise, the component is placed on the left.
+                    // bottom is true, indicating that the height from the lower left corner of the cell to the lower border of the browser can place the SearchFunction. Otherwise, the component is put on top.
+                    const right = screenW - left > rootW;
+                    const bottom = screenH - top > rootH;
+
+                    if (!right) {
+                        left -= rootW - width;
+                    }
+                    if (!bottom) {
+                        top -= rootH + height;
+                    }
+
+                    return {
+                        left,
+                        top,
+                    };
+                };
+
+                if (formula[0]) {
+                    this._searchFunction.updateState(true, formula, 0, position, () => {
+                        const position = getPosition(this._searchFunction);
+                        this._searchFunction.updateState(true, formula, 0, position);
+                    });
+                    this._helpFunction.updateState(false);
+                } else if (helpFormula[0]) {
+                    const functionName = (helpFormula[0] as string).toUpperCase();
+                    const functionInfo = FunList.find((item: any) => item.n === functionName) || {};
+                    this._helpFunction.updateState(true, helpFormula[1] as number, functionInfo, position, () => {
+                        const position = getPosition(this._helpFunction);
+                        this._helpFunction.updateState(true, helpFormula[1] as number, functionInfo, position);
+                    });
+                    this._searchFunction.updateState(false);
                 } else {
                     this._searchFunction.updateState(false, formula);
                     this._helpFunction.updateState(false);
-                    // this.setState({
-                    //     formula,
-                    //     searchActive: false,
-                    //     helpFormulaActive: false,
-                    // });
                 }
             }
             const value = this.cellInputHandler.getInputValue();
@@ -163,25 +194,9 @@ export class FormulaPromptController {
                     if (searchFunctionState.searchActive) {
                         const func = searchFunctionState.formula[searchFunctionState.selectIndex] as any;
                         this.cellInputHandler.searchFunctionEnter(func.n);
-                        // this.setState({
-                        //     formulaName: this.state.formula[this.state.funIndex].n,
-                        //     paramIndex: 0,
-                        //     helpFormulaActive: true,
-                        //     searchActive: false,
-                        // });
                     }
                 }
             }
-        });
-
-        this._plugin.getObserver('onSearchFunctionDidMountObservable')!.add((component) => {
-            this._searchFunction = component;
-            console.log('get search function', component);
-        });
-        this._plugin.getObserver('onHelpFunctionDidMountObservable')!.add((component) => {
-            this._helpFunction = component;
-
-            console.log('get help function', component);
         });
     }
 }

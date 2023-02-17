@@ -5,7 +5,7 @@ export class CountBarController {
     private _plugin: SheetPlugin;
 
     protected _getCoreObserver<T>(type: string) {
-        return this._plugin.getContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core');
+        return this._plugin.getGlobalContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core');
     }
 
     constructor(plugin: SheetPlugin) {

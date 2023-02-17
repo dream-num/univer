@@ -16,8 +16,8 @@ export class AppUIController {
         const UIConfig = this._sheetContainerController.getUIConfig();
 
         UI.create({
-            context: this._plugin.getContext(),
-            locale: this._plugin.getContext().getLocale().getCurrentLocale(),
+            context: this._plugin.getGlobalContext(),
+            locale: this._plugin.getGlobalContext().getLocale().getCurrentLocale(),
             changeLocale: this.changeLocale,
             UIConfig,
             container: this._plugin.getConfig().container,
@@ -33,12 +33,12 @@ export class AppUIController {
      */
     changeLocale = (locale: string) => {
         this._plugin
-            .getContext()
+            .getGlobalContext()
             .getLocale()
             .change(locale as LocaleType);
 
         // publish
-        this._plugin.getContext().getObserverManager().requiredObserver('onAfterChangeUILocaleObservable', 'core')!.notifyObservers();
+        this._plugin.getGlobalContext().getObserverManager().requiredObserver('onAfterChangeUILocaleObservable', 'core')!.notifyObservers();
     };
 
     getSheetContainerController() {

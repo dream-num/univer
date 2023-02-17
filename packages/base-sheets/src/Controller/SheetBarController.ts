@@ -1,13 +1,14 @@
-import { NameGen, Plugin, UIObserver } from '@univerjs/core';
+import { NameGen, UIObserver } from '@univerjs/core';
+import { SheetPlugin } from '../SheetPlugin';
 
 export class SheetBarControl {
-    protected _plugin: Plugin;
+    protected _plugin: SheetPlugin;
 
     protected _getCoreObserver<T>(type: string) {
-        return this._plugin.getContext().getUniver().getGlobalContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core');
+        return this._plugin.getGlobalContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core');
     }
 
-    constructor(plugin: Plugin) {
+    constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
     }
 
@@ -15,14 +16,14 @@ export class SheetBarControl {
         this._getCoreObserver('onUIChangeObservable').add(({ name, value }) => {
             switch (name) {
                 case 'deleteSheet': {
-                    const workbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
+                    const workbook = this._plugin.getContext().getWorkBook();
                     if (workbook) {
                         workbook.removeSheetBySheetId(value as string);
                     }
                     break;
                 }
                 case 'copySheet': {
-                    const workbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
+                    const workbook = this._plugin.getContext().getWorkBook();
                     const activeSheet = workbook.getActiveSheet();
                     const copySheet = activeSheet.copy(NameGen.getSheetName());
                     if (workbook) {
@@ -40,8 +41,7 @@ export class SheetBarControl {
                     break;
                 }
                 case 'addSheet': {
-                    const context = this._plugin.getContext();
-                    const workbook = context.getUniver().getCurrentUniverSheetInstance().getWorkBook();
+                    const workbook = this._plugin.getContext().getWorkBook();
                     workbook.insertSheet();
 
                     const size = workbook.getSheetSize();
@@ -53,7 +53,7 @@ export class SheetBarControl {
                     break;
                 }
                 case 'unHideSheet': {
-                    const workbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
+                    const workbook = this._plugin.getContext().getWorkBook();
                     const worksheet = workbook.getSheetBySheetId(value as string);
                     if (worksheet) {
                         worksheet.showSheet();
@@ -61,7 +61,7 @@ export class SheetBarControl {
                     break;
                 }
                 case 'hideSheet': {
-                    const workbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
+                    const workbook = this._plugin.getContext().getWorkBook();
                     const worksheet = workbook.getSheetBySheetId(value as string);
                     if (worksheet) {
                         worksheet.hideSheet();
@@ -70,7 +70,7 @@ export class SheetBarControl {
                 }
                 case 'changeSheetColor': {
                     const { color, sheetId } = value as { color: string; sheetId: string };
-                    const workbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
+                    const workbook = this._plugin.getContext().getWorkBook();
                     const worksheet = workbook.getSheetBySheetId(sheetId);
                     if (worksheet) {
                         worksheet.setTabColor(color);

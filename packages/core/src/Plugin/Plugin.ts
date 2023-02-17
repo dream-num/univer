@@ -1,6 +1,8 @@
 import { ContextBase } from '../Basics/ContextBase';
+import { Context } from '../Basics/Context';
 import { Observable } from '../Observer';
 import { Nullable, PropsFrom } from '../Shared';
+import { Univer } from '../Basics';
 
 /**
  * Basic function of plugin
@@ -8,6 +10,7 @@ import { Nullable, PropsFrom } from '../Shared';
 export interface BasePlugin {
     context: ContextBase;
     getContext(): ContextBase;
+    getGlobalContext(): Context;
     getPluginName(): string;
     onCreate(context: ContextBase): void;
     onMounted(context: ContextBase): void;
@@ -29,8 +32,7 @@ export interface BasePlugin {
  * Plug-in base class, all plug-ins must inherit from this base class. provides the basic method
  */
 export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase>
-    implements BasePlugin
-{
+    implements BasePlugin {
     context: O;
 
     private _name: string;
@@ -46,13 +48,13 @@ export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase>
         this.context = context;
     }
 
-    load<T>(data: T): void {}
+    load<T>(data: T): void { }
 
     save(): object {
         return Object();
     }
 
-    onMounted(context: O): void {}
+    onMounted(context: O): void { }
 
     onDestroy(): void {
         this.deleteObserve(...this._observeNames);
@@ -64,6 +66,14 @@ export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase>
 
     getContext(): O {
         return this.context;
+    }
+
+    getGlobalContext(): Context {
+        return this.context.getUniver().getGlobalContext();
+    }
+
+    getUniver(): Univer {
+        return this.context.getUniver();
     }
 
     getObserver<K extends keyof Obs & string>(

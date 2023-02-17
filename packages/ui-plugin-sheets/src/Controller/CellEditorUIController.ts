@@ -25,7 +25,7 @@ export class CellEditorUIController {
 
     constructor(plugin: SheetUIPlugin) {
         this._plugin = plugin;
-        this._sheetPlugin = plugin.getContext().getUniver().getCurrentUniverSheetInstance().context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+        this._sheetPlugin = plugin.getUniver().getCurrentUniverSheetInstance().context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
 
         this._initialize();
     }
@@ -80,8 +80,8 @@ export class CellEditorUIController {
     }
 
     private _handleKeyboardObserver() {
-        const onKeyDownObservable = this._plugin.getContext().getObserverManager().getObserver<KeyboardEvent>('onKeyDownObservable', 'core');
-        const onKeyCompositionStartObservable = this._plugin.getContext().getObserverManager().getObserver<CompositionEvent>('onKeyCompositionStartObservable', 'core');
+        const onKeyDownObservable = this._plugin.getGlobalContext().getObserverManager().getObserver<KeyboardEvent>('onKeyDownObservable', 'core');
+        const onKeyCompositionStartObservable = this._plugin.getGlobalContext().getObserverManager().getObserver<CompositionEvent>('onKeyCompositionStartObservable', 'core');
 
         if (onKeyDownObservable && !onKeyDownObservable.hasObservers()) {
             onKeyDownObservable.add((evt: KeyboardEvent) => {

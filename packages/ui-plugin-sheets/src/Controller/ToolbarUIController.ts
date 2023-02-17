@@ -1,6 +1,6 @@
 import { BorderInfo, SelectionControl, SheetPlugin } from '@univerjs/base-sheets';
 import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren } from '@univerjs/base-ui';
-import { BorderType, DEFAULT_STYLES, FontItalic, FontStyleType, FontWeight, HorizontalAlign, IKeyValue, PLUGIN_NAMES, Range, Tools, UIObserver, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { BorderType, DEFAULT_STYLES, FontItalic, FontStyleType, FontWeight, HorizontalAlign, IBorderData, IKeyValue, PLUGIN_NAMES, Range, Tools, UIObserver, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { SheetUIPlugin } from '..';
 import { DefaultToolbarConfig, SheetToolbarConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
@@ -246,6 +246,7 @@ export class ToolbarUIController {
                         customLabel: {
                             name: SHEET_UI_PLUGIN_NAME + LineColor.name,
                             props: {
+                                color: '#000',
                                 label: 'borderLine.borderColor',
                                 getComponent: (ref: LineColor) => this._lineColor = ref
                             },
@@ -274,6 +275,7 @@ export class ToolbarUIController {
                         customLabel: {
                             name: SHEET_UI_PLUGIN_NAME + LineBold.name,
                             props: {
+                                img: 0,
                                 label: 'borderLine.borderSize',
                                 getComponent: (ref: LineBold) => this._lineBold = ref
                             },
@@ -381,12 +383,13 @@ export class ToolbarUIController {
             const fontWeight = range.getFontWeight();
             const fontName = range.getFontFamily();
             const fontItalic = range.getFontStyle();
-            const fontColor = range.getFontColor();
-            const background = range.getBackground();
+            // const fontColor = range.getFontColor();
+            // const background = range.getBackground();
             const underline = range.getUnderline();
-            const horizontalAlign = range.getHorizontalAlignment();
-            const verticalAlign = range.getVerticalAlignment();
+            const horizontalAlign = range.getHorizontalAlignment() ?? HorizontalAlign.LEFT;
+            const verticalAlign = range.getVerticalAlignment() ?? VerticalAlign.BOTTOM;
             const rotation = range.getTextRotation();
+            const warp = range.getWrapStrategy() ?? WrapStrategy.CLIP;
 
             const bold = this._toolList.find((item) => item.name === 'bold')
             const italic = this._toolList.find((item) => item.name === 'italic')
@@ -395,12 +398,14 @@ export class ToolbarUIController {
             const fontNameItem = this._toolList.find((item) => item.name === 'font');
             const fontBoldItem = this._toolList.find((item) => item.name === 'bold');
             const fontItalicItem = this._toolList.find((item) => item.name === 'italic');
-            const textColor = this._toolList.find((item) => item.name === 'textColor')
-            const fillColor = this._toolList.find((item) => item.name === 'fillColor')
+            // const textColor = this._toolList.find((item) => item.name === 'textColor')
+            // const fillColor = this._toolList.find((item) => item.name === 'fillColor')
             const strikethroughItem = this._toolList.find((item) => item.name === 'strikethrough');
             const underlineItem = this._toolList.find((item) => item.name === 'underline');
             const horizontalAlignModeItem = this._toolList.find((item) => item.name === 'horizontalAlignMode');
             const verticalAlignModeItem = this._toolList.find((item) => item.name === 'verticalAlignMode');
+            const textWrapMode = this._toolList.find((item) => item.name === 'textWrapMode');
+            // const border = this._toolList.find((item) => item.name === 'border')
 
             if (bold) {
                 bold.active = isBold === FontWeight.BOLD
@@ -427,18 +432,18 @@ export class ToolbarUIController {
             if (fontItalicItem) {
                 fontItalicItem.active = !!fontItalic;
             }
-            if (textColor) {
-                const label = textColor.customLabel
-                if (label && label.props) {
-                    label.props.color = fontColor
-                }
-            }
-            if (fillColor) {
-                const label = fillColor.customLabel
-                if (label && label.props) {
-                    label.props.color = background
-                }
-            }
+            // if (textColor) {
+            //     const label = textColor.customLabel
+            //     if (label && label.props) {
+            //         label.props.color = fontColor
+            //     }
+            // }
+            // if (fillColor) {
+            //     const label = fillColor.customLabel
+            //     if (label && label.props) {
+            //         label.props.color = background
+            //     }
+            // }
             if (underlineItem) {
                 underlineItem.active = !!(underline && underline.s);
             }
@@ -449,7 +454,11 @@ export class ToolbarUIController {
             }
             if (textRotateModeItem) {
                 textRotateModeItem.children?.forEach((item) => {
-                    item.selected = rotation === item.value;
+                    if (rotation.v) {
+                        item.selected = item.value === 'v'
+                    } else {
+                        item.selected = rotation.a === item.value;
+                    }
                 });
             }
             if (verticalAlignModeItem) {
@@ -457,6 +466,12 @@ export class ToolbarUIController {
                     item.selected = verticalAlign === item.value;
                 });
             }
+            if (textWrapMode) {
+                textWrapMode.children?.forEach((item) => {
+                    item.selected = warp === item.value;
+                });
+            }
+
             this.setToolbar();
         }
     }

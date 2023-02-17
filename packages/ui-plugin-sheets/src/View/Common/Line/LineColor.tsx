@@ -12,12 +12,18 @@ interface IProps extends BaseComponentProps {
 export class LineColor extends Component<IProps, IState> {
     initialize() {
         this.state = {
-            color: 'rgb(217,217,217)',
+            color: this.props.color,
         };
     }
 
     componentDidMount() {
         this.props.getComponent?.(this);
+    }
+
+    componentWillReceiveProps(props: IProps): void {
+        this.setState({
+            color: props.color,
+        });
     }
 
     setColor(color: string) {

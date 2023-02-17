@@ -22,6 +22,7 @@ export class CountBarController {
                 case 'changeZoom': {
                     const workbook = this._plugin.getContext().getWorkBook();
                     if (workbook) {
+                        console.log(value);
                         workbook.getActiveSheet().setZoomRatio(value!);
                     }
                     break;

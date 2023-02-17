@@ -1,6 +1,6 @@
-import { BorderInfo } from '@univerjs/base-sheets';
-import { BaseSelectChildrenProps, BaseSelectProps, BaseTextButtonProps, ColorPicker } from '@univerjs/base-ui';
-import { BorderType, DEFAULT_STYLES, HorizontalAlign, IKeyValue, Tools, UIObserver, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { BorderInfo, SelectionControl, SheetPlugin } from '@univerjs/base-sheets';
+import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren } from '@univerjs/base-ui';
+import { BorderType, DEFAULT_STYLES, FontItalic, FontStyleType, FontWeight, HorizontalAlign, IKeyValue, PLUGIN_NAMES, Range, Tools, UIObserver, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { SheetUIPlugin } from '..';
 import { DefaultToolbarConfig, SheetToolbarConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
@@ -23,16 +23,20 @@ enum ToolbarType {
     BUTTON,
 }
 
-export interface IToolbarItemProps extends BaseToolbarSelectProps, BaseTextButtonProps {
+export interface IToolbarItemProps extends BaseToolbarSelectProps {
+    active?: boolean;
     show?: boolean; //是否显示按钮
     toolbarType?: ToolbarType;
     tooltip?: string; //tooltip文字
     border?: boolean;
+    suffix?: ComponentChildren;
 }
 
 
 export class ToolbarUIController {
     private _plugin: SheetUIPlugin;
+
+    private _sheetPlugin: SheetPlugin;
 
     private _toolbar: Toolbar;
 
@@ -56,6 +60,8 @@ export class ToolbarUIController {
 
     constructor(plugin: SheetUIPlugin, config?: SheetToolbarConfig) {
         this._plugin = plugin;
+
+        this._sheetPlugin = plugin.getContext().getUniver().getCurrentUniverSheetInstance().context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
 
         this._config = Tools.deepMerge({}, DefaultToolbarConfig, config);
 
@@ -164,6 +170,7 @@ export class ToolbarUIController {
                         getComponent: (ref: ColorSelect) => {
                             this._colorSelect1 = ref
                         },
+                        color: '#000',
                         customLabel: {
                             name: 'TextColorIcon',
                         },
@@ -176,7 +183,6 @@ export class ToolbarUIController {
                         customLabel: {
                             name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
                             props: {
-
                                 onClick: (color: string, e: MouseEvent) => {
                                     this._colorSelect1.setColor(color);
                                     this.setFontColor(color)
@@ -198,6 +204,7 @@ export class ToolbarUIController {
                         getComponent: (ref: ColorSelect) => {
                             this._colorSelect2 = ref
                         },
+                        color: '#fff',
                         customLabel: {
                             name: 'FillColorIcon',
                         },
@@ -353,6 +360,105 @@ export class ToolbarUIController {
         this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker)
         this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + LineColor.name, LineColor)
         this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + LineBold.name, LineBold)
+
+        this._sheetPlugin.getObserver('onChangeSelectionObserver')?.add((selectionControl: SelectionControl) => {
+            const manager = this._sheetPlugin.getSelectionManager();
+            const range = manager?.getCurrentCell();
+            if (range) {
+                this._changeToolbarState(range);
+            }
+        });
+    }
+
+    private _changeToolbarState(range: Range): void {
+        const workbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
+        const worksheet = workbook.getActiveSheet();
+        if (worksheet) {
+            const isBold = range.getFontWeight();
+            const IsItalic = range.getFontStyle()
+            const strikeThrough = range.getStrikeThrough();
+            const fontSize = range.getFontSize();
+            const fontWeight = range.getFontWeight();
+            const fontName = range.getFontFamily();
+            const fontItalic = range.getFontStyle();
+            const fontColor = range.getFontColor();
+            const background = range.getBackground();
+            const underline = range.getUnderline();
+            const horizontalAlign = range.getHorizontalAlignment();
+            const verticalAlign = range.getVerticalAlignment();
+            const rotation = range.getTextRotation();
+
+            const bold = this._toolList.find((item) => item.name === 'bold')
+            const italic = this._toolList.find((item) => item.name === 'italic')
+            const textRotateModeItem = this._toolList.find((item) => item.name === 'textRotateMode');
+            const fontSizeItem = this._toolList.find((item) => item.name === 'fontSize');
+            const fontNameItem = this._toolList.find((item) => item.name === 'font');
+            const fontBoldItem = this._toolList.find((item) => item.name === 'bold');
+            const fontItalicItem = this._toolList.find((item) => item.name === 'italic');
+            const textColor = this._toolList.find((item) => item.name === 'textColor')
+            const fillColor = this._toolList.find((item) => item.name === 'fillColor')
+            const strikethroughItem = this._toolList.find((item) => item.name === 'strikethrough');
+            const underlineItem = this._toolList.find((item) => item.name === 'underline');
+            const horizontalAlignModeItem = this._toolList.find((item) => item.name === 'horizontalAlignMode');
+            const verticalAlignModeItem = this._toolList.find((item) => item.name === 'verticalAlignMode');
+
+            if (bold) {
+                bold.active = isBold === FontWeight.BOLD
+            }
+
+            if (italic) {
+                italic.active = IsItalic === FontItalic.ITALIC
+            }
+
+            if (strikethroughItem) {
+                strikethroughItem.active = !!(strikeThrough && strikeThrough.s);
+            }
+            if (fontNameItem) {
+                fontNameItem.children?.forEach((item) => {
+                    item.selected = fontName === item.value;
+                });
+            }
+            if (fontSizeItem) {
+                fontSizeItem.label = fontSize.toString()
+            }
+            if (fontBoldItem) {
+                fontBoldItem.active = !!fontWeight;
+            }
+            if (fontItalicItem) {
+                fontItalicItem.active = !!fontItalic;
+            }
+            if (textColor) {
+                const label = textColor.customLabel
+                if (label && label.props) {
+                    label.props.color = fontColor
+                }
+            }
+            if (fillColor) {
+                const label = fillColor.customLabel
+                if (label && label.props) {
+                    label.props.color = background
+                }
+            }
+            if (underlineItem) {
+                underlineItem.active = !!(underline && underline.s);
+            }
+            if (horizontalAlignModeItem) {
+                horizontalAlignModeItem.children?.forEach((item) => {
+                    item.selected = horizontalAlign === item.value;
+                });
+            }
+            if (textRotateModeItem) {
+                textRotateModeItem.children?.forEach((item) => {
+                    item.selected = rotation === item.value;
+                });
+            }
+            if (verticalAlignModeItem) {
+                verticalAlignModeItem.children?.forEach((item) => {
+                    item.selected = verticalAlign === item.value;
+                });
+            }
+            this.setToolbar();
+        }
     }
 
     // 获取Toolbar组件

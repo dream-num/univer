@@ -66,83 +66,83 @@ export const FONT_SIZE_CHILDREN = [
 
 export const FONT_FAMILY_CHILDREN = [
     {
-        label: 'fontFamily.TimesNewRoman',
+        labelLocale: 'fontFamily.TimesNewRoman',
         style: { 'font-family': 'Times New Roman' },
         value: 'Times New Roman',
         selected: true,
     },
     {
-        label: 'fontFamily.Arial',
+        labelLocale: 'fontFamily.Arial',
         style: { 'font-family': 'Arial' },
         value: 'Arial',
     },
     {
-        label: 'fontFamily.Tahoma',
+        labelLocale: 'fontFamily.Tahoma',
         style: { 'font-family': 'Tahoma' },
         value: 'Tahoma',
     },
     {
-        label: 'fontFamily.Verdana',
+        labelLocale: 'fontFamily.Verdana',
         style: { 'font-family': 'Verdana' },
         value: 'Verdana',
     },
     {
-        label: 'fontFamily.MicrosoftAccorblack',
+        labelLocale: 'fontFamily.MicrosoftAccorblack',
         style: { 'font-family': '微软雅黑' },
         value: '微软雅黑',
     },
     {
-        label: 'fontFamily.SimSun',
+        labelLocale: 'fontFamily.SimSun',
         style: { 'font-family': '宋体' },
         value: '宋体',
     },
     {
-        label: 'fontFamily.SimHei',
+        labelLocale: 'fontFamily.SimHei',
         style: { 'font-family': '黑体' },
         value: '黑体',
     },
     {
-        label: 'fontFamily.Kaiti',
+        labelLocale: 'fontFamily.Kaiti',
         style: { 'font-family': '楷体' },
         value: '楷体',
     },
     {
-        label: 'fontFamily.FangSong',
+        labelLocale: 'fontFamily.FangSong',
         style: { 'font-family': '仿宋' },
         value: '仿宋',
     },
     {
-        label: 'fontFamily.NSimSun',
+        labelLocale: 'fontFamily.NSimSun',
         style: { 'font-family': '新宋体' },
         value: '新宋体',
     },
     {
-        label: 'fontFamily.STXinwei',
+        labelLocale: 'fontFamily.STXinwei',
         style: { 'font-family': '华文新魏' },
         value: '华文新魏',
     },
     {
-        label: 'fontFamily.STXingkai',
+        labelLocale: 'fontFamily.STXingkai',
         style: { 'font-family': '华文行楷' },
         value: '华文行楷',
     },
     {
-        label: 'fontFamily.STLiti',
+        labelLocale: 'fontFamily.STLiti',
         style: { 'font-family': '华文隶书' },
         value: '华文隶书',
     },
     {
-        label: 'fontFamily.HanaleiFill',
+        labelLocale: 'fontFamily.HanaleiFill',
         style: { 'font-family': 'HanaleiFill' },
         value: 'HanaleiFill',
     },
     {
-        label: 'fontFamily.Anton',
+        labelLocale: 'fontFamily.Anton',
         style: { 'font-family': 'Anton' },
         value: 'Anton',
     },
     {
-        label: 'fontFamily.Pacifico',
+        labelLocale: 'fontFamily.Pacifico',
         style: { 'font-family': 'Pacifico' },
         value: 'Pacifico',
     },
@@ -150,28 +150,28 @@ export const FONT_FAMILY_CHILDREN = [
 
 export const BORDER_LINE_CHILDREN = [
     {
-        label: 'borderLine.borderTop',
+        labelLocale: 'borderLine.borderTop',
         customSuffix: {
             name: 'TopBorderIcon',
         },
         value: 'top',
     },
     {
-        label: 'borderLine.borderBottom',
+        labelLocale: 'borderLine.borderBottom',
         customSuffix: {
             name: 'BottomBorderIcon',
         },
         value: 'bottom',
     },
     {
-        label: 'borderLine.borderLeft',
+        labelLocale: 'borderLine.borderLeft',
         customSuffix: {
             name: 'LeftBorderIcon',
         },
         value: 'left',
     },
     {
-        label: 'borderLine.borderRight',
+        labelLocale: 'borderLine.borderRight',
         customSuffix: {
             name: 'RightBorderIcon',
         },
@@ -179,14 +179,14 @@ export const BORDER_LINE_CHILDREN = [
         border: true,
     },
     {
-        label: 'borderLine.borderNone',
+        labelLocale: 'borderLine.borderNone',
         customSuffix: {
             name: 'NoneBorderIcon',
         },
         value: 'none',
     },
     {
-        label: 'borderLine.borderAll',
+        labelLocale: 'borderLine.borderAll',
         customSuffix: {
             name: 'FullBorderIcon',
         },
@@ -194,28 +194,28 @@ export const BORDER_LINE_CHILDREN = [
         selected: true,
     },
     {
-        label: 'borderLine.borderOutside',
+        labelLocale: 'borderLine.borderOutside',
         customSuffix: {
             name: 'OuterBorderIcon',
         },
         value: 'outside',
     },
     {
-        label: 'borderLine.borderInside',
+        labelLocale: 'borderLine.borderInside',
         customSuffix: {
             name: 'InnerBorderIcon',
         },
         value: 'inside',
     },
     {
-        label: 'borderLine.borderHorizontal',
+        labelLocale: 'borderLine.borderHorizontal',
         customSuffix: {
             name: 'StripingBorderIcon',
         },
         value: 'horizontal',
     },
     {
-        label: 'borderLine.borderVertical',
+        labelLocale: 'borderLine.borderVertical',
         customSuffix: {
             name: 'VerticalBorderIcon',
         },
@@ -225,7 +225,7 @@ export const BORDER_LINE_CHILDREN = [
 
 export const BORDER_SIZE_CHILDREN = [
     {
-        label: 'borderLine.borderNone',
+        labelLocale: 'borderLine.borderNone',
         value: BorderStyleTypes.NONE,
     },
     {
@@ -298,33 +298,33 @@ export const BORDER_SIZE_CHILDREN = [
 
 export const MERGE_CHILDREN = [
     {
-        label: 'merge.all',
+        labelLocale: 'merge.all',
         value: 'all',
     },
     {
-        label: 'merge.vertical',
+        labelLocale: 'merge.vertical',
         value: 'vertical',
     },
     {
-        label: 'merge.horizontal',
+        labelLocale: 'merge.horizontal',
         value: 'horizontal',
     },
     {
-        label: 'merge.cancel',
+        labelLocale: 'merge.cancel',
         value: 'cancel',
     },
 ];
 
 export const HORIZONTAL_ALIGN_CHILDREN = [
     {
-        label: 'align.left',
+        labelLocale: 'align.left',
         customSuffix: {
             name: 'LeftAlignIcon',
         },
         value: 1,
     },
     {
-        label: 'align.center',
+        labelLocale: 'align.center',
         selected: true,
         customSuffix: {
             name: 'CenterAlignIcon',
@@ -332,7 +332,7 @@ export const HORIZONTAL_ALIGN_CHILDREN = [
         value: 2,
     },
     {
-        label: 'align.right',
+        labelLocale: 'align.right',
         customSuffix: {
             name: 'RightAlignIcon',
         },
@@ -342,21 +342,21 @@ export const HORIZONTAL_ALIGN_CHILDREN = [
 
 export const VERTICAL_ALIGN_CHILDREN = [
     {
-        label: 'align.top',
+        labelLocale: 'align.top',
         customSuffix: {
             name: 'TopVerticalIcon',
         },
         value: 1,
     },
     {
-        label: 'align.middle',
+        labelLocale: 'align.middle',
         customSuffix: {
             name: 'CenterVerticalIcon',
         },
         value: 2,
     },
     {
-        label: 'align.bottom',
+        labelLocale: 'align.bottom',
         customSuffix: {
             name: 'BottomVerticalIcon',
         },
@@ -366,21 +366,21 @@ export const VERTICAL_ALIGN_CHILDREN = [
 
 export const TEXT_WRAP_CHILDREN = [
     {
-        label: 'textWrap.overflow',
+        labelLocale: 'textWrap.overflow',
         customSuffix: {
             name: 'OverflowIcon',
         },
         value: 1,
     },
     {
-        label: 'textWrap.wrap',
+        labelLocale: 'textWrap.wrap',
         customSuffix: {
             name: 'BrIcon',
         },
         value: 3,
     },
     {
-        label: 'textWrap.clip',
+        labelLocale: 'textWrap.clip',
         customSuffix: {
             name: 'CutIcon',
         },
@@ -390,42 +390,42 @@ export const TEXT_WRAP_CHILDREN = [
 
 export const TEXT_ROTATE_CHILDREN = [
     {
-        label: 'textRotate.none',
+        labelLocale: 'textRotate.none',
         customSuffix: {
             name: 'TextRotateIcon',
         },
         value: 0,
     },
     {
-        label: 'textRotate.angleUp',
+        labelLocale: 'textRotate.angleUp',
         customSuffix: {
             name: 'TextRotateAngleUpIcon',
         },
         value: -45,
     },
     {
-        label: 'textRotate.angleDown',
+        labelLocale: 'textRotate.angleDown',
         customSuffix: {
             name: 'TextRotateAngleDownIcon',
         },
         value: 45,
     },
     {
-        label: 'textRotate.vertical',
+        labelLocale: 'textRotate.vertical',
         customSuffix: {
             name: 'TextRotateVerticalIcon',
         },
         value: 'v',
     },
     {
-        label: 'textRotate.rotationUp',
+        labelLocale: 'textRotate.rotationUp',
         customSuffix: {
             name: 'TextRotateRotationUpIcon',
         },
         value: -90,
     },
     {
-        label: 'textRotate.rotationDown',
+        labelLocale: 'textRotate.rotationDown',
         customSuffix: {
             name: 'TextRotateRotationDownIcon',
         },

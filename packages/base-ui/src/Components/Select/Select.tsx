@@ -1,7 +1,6 @@
 import { Icon } from '..';
 import { ComponentChildren, Component } from '../../Framework';
 import { BaseMenuItem } from '../../Interfaces';
-import { Button } from '../Button';
 import { Dropdown } from '../Dropdown';
 import { Input } from '../Input';
 import { BaseItemProps, Item } from '../Item/Item';
@@ -275,11 +274,9 @@ export class Select extends Component<BaseSelectProps, IState> {
 
         return (
             <div className={`${styles.selectSingle} ${className}`}>
-                <Button type="text">
-                    <Dropdown tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
-                        <div>{content}</div>
-                    </Dropdown>
-                </Button>
+                <Dropdown tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
+                    <div>{content}</div>
+                </Dropdown>
             </div>
         );
     };
@@ -291,11 +288,9 @@ export class Select extends Component<BaseSelectProps, IState> {
 
         return (
             <div className={`${styles.selectInput} ${className}`}>
-                <Button type="text">
-                    <Dropdown tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
-                        <Input onKeyUp={this.onKeyUp} type="number" value={content as string} />
-                    </Dropdown>
-                </Button>
+                <Dropdown tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
+                    <Input onKeyUp={this.onKeyUp} type="number" value={content as string} />
+                </Dropdown>
             </div>
         );
     };
@@ -306,11 +301,9 @@ export class Select extends Component<BaseSelectProps, IState> {
 
         return (
             <div className={`${styles.selectDouble} ${className}`}>
-                <Button type="text">
-                    <Dropdown tooltip={tooltip} menu={{ menu, onClick: this.onClick }} icon={<Icon.NextIcon />}>
-                        <div className={styles.selectLabel}>{content}</div>
-                    </Dropdown>
-                </Button>
+                <Dropdown tooltip={tooltip} menu={{ menu, onClick: this.onClick }} icon={<Icon.NextIcon />}>
+                    <div className={styles.selectLabel}>{content}</div>
+                </Dropdown>
             </div>
         );
     };
@@ -321,11 +314,9 @@ export class Select extends Component<BaseSelectProps, IState> {
 
         return (
             <div className={`${styles.selectDouble} ${className}`}>
-                <Button type="text">
-                    <Dropdown tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
-                        <div className={styles.selectLabel}>{label}</div>
-                    </Dropdown>
-                </Button>
+                <Dropdown tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
+                    <div className={styles.selectLabel}>{label}</div>
+                </Dropdown>
             </div>
         );
     };
@@ -336,11 +327,9 @@ export class Select extends Component<BaseSelectProps, IState> {
 
         return (
             <div className={`${styles.selectDouble} ${className}`}>
-                <Button type="text">
-                    <Dropdown tooltip={tooltip} onClick={this.onClick} menu={{ menu, onClick: this.onClick }} icon={<Icon.NextIcon />}>
-                        <div className={styles.selectLabel}>{label}</div>
-                    </Dropdown>
-                </Button>
+                <Dropdown tooltip={tooltip} onClick={this.onClick} menu={{ menu, onClick: this.onClick }} icon={<Icon.NextIcon />}>
+                    <div className={styles.selectLabel}>{label}</div>
+                </Dropdown>
             </div>
         );
     };

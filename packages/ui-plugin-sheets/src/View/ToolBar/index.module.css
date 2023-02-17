@@ -62,12 +62,30 @@
 .toolbar .select-line-bold-parent .select-item-content {
   width: 100%;
 }
+.toolbar .select-single {
+  height: 26px;
+  line-height: 26px;
+}
+.toolbar .select-input {
+  height: 26px;
+  line-height: 26px;
+}
+.toolbar .select-double {
+  height: 26px;
+  line-height: 26px;
+}
 .toolbar button {
   padding: 0;
   height: 26px;
 }
 .toolbar span[role='img'].univericon-nextIcon {
   font-size: 12px;
+}
+.toolbar .text-button span[role="img"] {
+  font-size: 24px;
+}
+.toolbar .text-button button {
+  padding: 0 5px;
 }
 .more-button {
   position: absolute;

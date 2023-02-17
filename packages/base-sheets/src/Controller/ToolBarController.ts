@@ -1,4 +1,4 @@
-import { Range, HorizontalAlign, VerticalAlign, WrapStrategy, BorderType, UIObserver } from '@univerjs/core';
+import { HorizontalAlign, VerticalAlign, WrapStrategy, BorderType, UIObserver } from '@univerjs/core';
 import { SheetPlugin } from '../SheetPlugin';
 
 import { SelectionControl } from './Selection/SelectionController';
@@ -16,71 +16,6 @@ export interface BorderInfo {
  */
 export class ToolbarController {
     private _plugin: SheetPlugin;
-
-    private _changeToolbarState(range: Range): void {
-        const workbook = this._plugin.getContext().getWorkBook();
-        const worksheet = workbook.getActiveSheet();
-        if (worksheet) {
-            const cellMatrix = worksheet.getCellMatrix();
-            const strikeThrough = range.getStrikeThrough();
-            const fontSize = range.getFontSize();
-            const fontWeight = range.getFontWeight();
-            const fontName = range.getFontFamily();
-            const fontItalic = range.getFontStyle();
-            const underline = range.getUnderline();
-            const horizontalAlign = range.getHorizontalAlignment();
-            const verticalAlign = range.getVerticalAlignment();
-            const rotation = range.getTextRotation();
-
-            // const textRotateModeItem = this._toolList.find((item) => item.name === 'textRotateMode');
-            // const fontSizeItem = this._toolList.find((item) => item.name === 'fontSize');
-            // const fontNameItem = this._toolList.find((item) => item.name === 'font');
-            // const fontBoldItem = this._toolList.find((item) => item.name === 'bold');
-            // const fontItalicItem = this._toolList.find((item) => item.name === 'italic');
-            // const strikethroughItem = this._toolList.find((item) => item.name === 'strikethrough');
-            // const underlineItem = this._toolList.find((item) => item.name === 'underline');
-            // const horizontalAlignModeItem = this._toolList.find((item) => item.name === 'horizontalAlignMode');
-            // const verticalAlignModeItem = this._toolList.find((item) => item.name === 'verticalAlignMode');
-
-            // if (strikethroughItem) {
-            //     strikethroughItem.active = !!(strikeThrough && strikeThrough.s);
-            // }
-            // if (fontNameItem) {
-            //     fontNameItem.children?.forEach((item) => {
-            //         item.selected = fontName === item.value;
-            //     });
-            // }
-            // if (fontSizeItem) {
-            //     fontSizeItem.children?.forEach((item) => {
-            //         item.selected = fontSize === item.value;
-            //     });
-            // }
-            // if (fontBoldItem) {
-            //     fontBoldItem.active = !!fontWeight;
-            // }
-            // if (fontItalicItem) {
-            //     fontItalicItem.active = !!fontItalic;
-            // }
-            // if (underlineItem) {
-            //     underlineItem.active = !!(underline && underline.s);
-            // }
-            // if (horizontalAlignModeItem) {
-            //     horizontalAlignModeItem.children?.forEach((item) => {
-            //         item.selected = horizontalAlign === item.value;
-            //     });
-            // }
-            // if (textRotateModeItem) {
-            //     textRotateModeItem.children?.forEach((item) => {
-            //         item.selected = rotation === item.value;
-            //     });
-            // }
-            // if (verticalAlignModeItem) {
-            //     verticalAlignModeItem.children?.forEach((item) => {
-            //         item.selected = verticalAlign === item.value;
-            //     });
-            // }
-        }
-    }
 
     constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
@@ -194,40 +129,6 @@ export class ToolbarController {
         // });
         // this._plugin.getObserver('onAfterChangeFontBackgroundObservable')?.add((value: string) => {
         //         this._plugin.getCellEditorController().richText.cellTextStyle.updateFormat('bg', value);
-        // });
-        // // Monitor selection changes, update toolbar button status and values TODO: 根据不同的焦点对象，接受
-        // this._plugin.getObserver('onChangeSelectionObserver')?.add((selectionControl: SelectionControl) => {
-        //     // const currentCell = selectionControl.model.currentCell;
-        //     //
-        //     // if (currentCell) {
-        //     //     let currentRangeData;
-        //     //
-        //     //     if (currentCell.isMerged) {
-        //     //         const mergeInfo = currentCell.mergeInfo;
-        //     //
-        //     //         currentRangeData = {
-        //     //             startRow: mergeInfo.startRow,
-        //     //             endRow: mergeInfo.endRow,
-        //     //             startColumn: mergeInfo.startColumn,
-        //     //             endColumn: mergeInfo.endColumn,
-        //     //         };
-        //     //     } else {
-        //     //         const { row, column } = currentCell;
-        //     //         currentRangeData = {
-        //     //             startRow: row,
-        //     //             endRow: row,
-        //     //             startColumn: column,
-        //     //             endColumn: column,
-        //     //         };
-        //     //     }
-        //     //
-        //     //     const cellData = this._plugin.getWorkbook().getActiveSheet().getRange(currentRangeData).getObjectValue({ isIncludeStyle: true });
-        //     // }
-        //     const manager = this._plugin.getSelectionManager();
-        //     const range = manager?.getCurrentCell();
-        //     if (range) {
-        //         this._changeToolbarState(range);
-        //     }
         // });
     }
 

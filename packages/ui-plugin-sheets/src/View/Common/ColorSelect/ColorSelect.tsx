@@ -11,6 +11,7 @@ interface IProps extends BaseComponentProps {
     };
     label?: ComponentChildren;
     id: string;
+    color: string;
 }
 
 interface IState {
@@ -28,9 +29,15 @@ export class ColorSelect extends Component<IProps, IState> {
         }
         this.setState({
             label,
-            color: '#000',
+            color: this.props.color,
         });
         this.props.getComponent?.(this);
+    }
+
+    componentWillReceiveProps(props: IProps) {
+        this.setState({
+            color: props.color,
+        });
     }
 
     setColor(color: string) {

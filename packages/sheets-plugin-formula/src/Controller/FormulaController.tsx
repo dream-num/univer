@@ -111,7 +111,9 @@ export class FormulaController {
             .getAppUIController()
             .getSheetContainerController()
             .getMainSlotController()
-            .addSlot(FORMULA_PLUGIN_NAME + FormulaLabel.name, FormulaLabel);
+            .addSlot(FORMULA_PLUGIN_NAME + FormulaLabel.name, {
+                component: FormulaLabel,
+            });
     }
 
     getDataModel() {

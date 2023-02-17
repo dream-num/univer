@@ -21,6 +21,14 @@
         .btn-text();
     }
 
+    &-active {
+        color: var(--text-color);
+        background: var(--bg-hover);
+        border-color: var(--border-color-base);
+        text-shadow: none;
+        box-shadow: none;
+    }
+
     &-round {
         .btn-round();
     }
@@ -53,7 +61,6 @@
         pointer-events: none;
     }
 
-    &:focus>span,
     &:active>span {
         position: relative;
     }

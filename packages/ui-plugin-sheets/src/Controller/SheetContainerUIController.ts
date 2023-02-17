@@ -171,7 +171,7 @@ export class SheetContainerUIController {
             .change(locale as LocaleType);
 
         // publish
-        this._plugin.getContext().getObserverManager().requiredObserver('onAfterChangeUILocaleObservable', 'core')!.notifyObservers();
+        this._plugin.getGlobalContext().getObserverManager().requiredObserver('onAfterChangeUILocaleObservable', 'core')!.notifyObservers();
     };
 
     getContentRef() {
@@ -179,7 +179,7 @@ export class SheetContainerUIController {
     }
 
     setEventManager() {
-        const universheets = this._plugin.getContext().getUniver().getAllUniverSheetsInstance();
+        const universheets = this._plugin.getUniver().getAllUniverSheetsInstance();
         universheets.forEach((universheet: UniverSheet) => {
             universheet.getWorkBook().getContext().getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET).listenEventManager();
         });

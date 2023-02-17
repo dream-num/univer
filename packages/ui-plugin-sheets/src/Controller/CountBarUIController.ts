@@ -10,7 +10,7 @@ export class CountBarUIController {
         let rectList = rangeList.getRangeList();
         let recList: string[] = [];
         let plugin = this._plugin;
-        let workbook = plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
+        let workbook = plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook();
         let worksheet = workbook.getActiveSheet();
         let cellMatrix = worksheet.getCellMatrix();
         let avg = 0;
@@ -59,7 +59,7 @@ export class CountBarUIController {
             const data = event.data;
             const workbook = action.getWorkBook();
             const unitId = workbook.getUnitId();
-            const currentWorkbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
+            const currentWorkbook = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook();
             const currentUnitId = currentWorkbook.getUnitId();
             if (unitId === currentUnitId) {
                 switch (data.actionName) {
@@ -70,7 +70,7 @@ export class CountBarUIController {
                 }
             }
         });
-        const manager = plugin.getContext()
+        const manager = plugin
             .getUniver()
             .getCurrentUniverSheetInstance()
             .context
@@ -88,7 +88,7 @@ export class CountBarUIController {
     // changeRatio
     onChange = (v: string) => {
         console.log(v);
-        this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().setZoomRatio(Tools.numberFixed(v / 100, 2));
+        this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().setZoomRatio(Tools.numberFixed(v / 100, 2));
     }
 
     // 刷新组件

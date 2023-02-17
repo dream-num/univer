@@ -43,7 +43,7 @@ export class SheetBarUIController {
             menuList: this._menuList,
             selectSheet: (event: Event, data: { item: SheetUlProps }) => {
                 this._dataId = data.item.sheetId;
-                const sheet = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(this._dataId);
+                const sheet = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(this._dataId);
                 if (sheet) {
                     sheet.activate();
                 }
@@ -63,7 +63,7 @@ export class SheetBarUIController {
     }
 
     protected _refreshSheetData(): void {
-        const workbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
+        const workbook = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook();
         const sheets = workbook.getSheets();
         this._menuList = sheets.map((sheet, index) => ({
             label: sheet.getName(),
@@ -171,7 +171,7 @@ export class SheetBarUIController {
             const data = event.data;
             const workbook = action.getWorkBook();
             const unitId = workbook.getUnitId();
-            const currentWorkbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
+            const currentWorkbook = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook();
             const currentUnitId = currentWorkbook.getUnitId();
             if (unitId === currentUnitId) {
                 switch (data.actionName) {
@@ -336,7 +336,7 @@ export class SheetBarUIController {
         });
         list.forEach((ele, index) => {
             if (ele.sheetId === sheetId) {
-                this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().setSheetOrder(ele.sheetId, index);
+                this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook().setSheetOrder(ele.sheetId, index);
             }
         });
     }

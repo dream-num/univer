@@ -26,7 +26,7 @@ export class InfoBarUIController {
     private _infoList: BaseInfoBarProps;
 
     private _refreshComponent(): void {
-        const name = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getConfig().name;
+        const name = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook().getConfig().name;
         this._infoBarModel = new InfoBarModel(name);
         this._infoList = {
             back: {

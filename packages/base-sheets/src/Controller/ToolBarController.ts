@@ -154,7 +154,6 @@ export class ToolbarController {
     }
 
     setUndo() {
-        console.log('undo');
         this._plugin.getContext().getCommandManager().undo();
     }
 

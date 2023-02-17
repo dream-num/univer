@@ -117,7 +117,26 @@ export class Worksheet {
     constructor(...argument: any) {
         if (Tools.hasLength(argument, 1)) {
             const context = argument[0];
-            const config = Tools.commonExtend({}, DEFAULT_WORKSHEET);
+            const config = {
+                ...DEFAULT_WORKSHEET,
+                mergeData: [],
+                hideRow: [],
+                hideColumn: [],
+                cellData: {},
+                rowData: {},
+                columnData: {},
+                rowTitle: {
+                    width: 46,
+                    hidden: BooleanNumber.FALSE,
+                },
+                columnTitle: {
+                    height: 20,
+                    hidden: BooleanNumber.FALSE,
+                },
+                selections: ['A1'],
+                rightToLeft: BooleanNumber.FALSE,
+                pluginMeta: {},
+            };
             // const config = Tools.deepMerge({}, DEFAULT_WORKSHEET);
             argument = [context, config];
         }
@@ -125,7 +144,27 @@ export class Worksheet {
             this._context = argument[0];
             // this._config = argument[1];
 
-            this._config = Tools.commonExtend1(DEFAULT_WORKSHEET, argument[1]);
+            this._config = {
+                ...DEFAULT_WORKSHEET,
+                mergeData: [],
+                hideRow: [],
+                hideColumn: [],
+                cellData: {},
+                rowData: {},
+                columnData: {},
+                rowTitle: {
+                    width: 46,
+                    hidden: BooleanNumber.FALSE,
+                },
+                columnTitle: {
+                    height: 20,
+                    hidden: BooleanNumber.FALSE,
+                },
+                selections: ['A1'],
+                rightToLeft: BooleanNumber.FALSE,
+                pluginMeta: {},
+                ...argument[1],
+            };
             // this._config = Tools.deepMerge({}, DEFAULT_WORKSHEET, argument[1]);
 
             const { columnData, rowData, cellData } = this._config;

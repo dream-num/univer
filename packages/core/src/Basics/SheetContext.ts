@@ -14,7 +14,6 @@ export class SheetContext extends ContextBase {
 
     constructor(univerSheetData: Partial<IWorkbookConfig> = {}) {
         super();
-        this._locale.initialize(univerSheetData.locale);
         this._setObserver();
         this._workbook = new Workbook(univerSheetData, this);
     }

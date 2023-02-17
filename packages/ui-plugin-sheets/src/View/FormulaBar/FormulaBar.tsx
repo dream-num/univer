@@ -1,5 +1,4 @@
-import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, debounce, Icon } from '@univerjs/base-ui';
-import { BaseSelectChildrenProps, Select } from '@univerjs/base-sheets';
+import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, BaseSelectChildrenProps, Component, debounce, Icon } from '@univerjs/base-ui';
 import styles from './index.module.less';
 
 type FormulaState = {

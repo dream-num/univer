@@ -23,7 +23,7 @@ export class Skeleton {
             return;
         }
 
-        const locale = this._context.getLocale();
+        const locale = this._context.getUniver().getGlobalContext().getLocale();
         const renderFont = locale.getObject('renderFont');
         if (!renderFont) {
             locale.load({

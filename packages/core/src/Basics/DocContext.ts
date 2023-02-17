@@ -10,7 +10,6 @@ export class DocContext extends ContextBase {
 
     constructor(univerDocData: Partial<IDocumentData> = {}) {
         super();
-        this._locale.initialize(univerDocData.locale);
         this._document = new DocumentModel(univerDocData, this);
     }
 

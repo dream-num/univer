@@ -1,7 +1,7 @@
 import { ContextBase } from '../Basics/ContextBase';
 import { Context } from '../Basics/Context';
 import { Observable } from '../Observer';
-import { Nullable, PropsFrom } from '../Shared';
+import { Locale, Nullable, PropsFrom } from '../Shared';
 import { Univer } from '../Basics';
 
 /**
@@ -11,6 +11,7 @@ export interface BasePlugin {
     context: ContextBase;
     getContext(): ContextBase;
     getGlobalContext(): Context;
+    getLocale(): Locale;
     getPluginName(): string;
     onCreate(context: ContextBase): void;
     onMounted(context: ContextBase): void;
@@ -70,6 +71,10 @@ export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase>
 
     getGlobalContext(): Context {
         return this.context.getUniver().getGlobalContext();
+    }
+
+    getLocale(): Locale {
+        return this.getGlobalContext().getLocale();
     }
 
     getUniver(): Univer {

@@ -200,7 +200,7 @@ export class SheetBarUIController {
     };
 
     resetLabel(label: string[] | string) {
-        const locale = this._plugin.getContext().getLocale();
+        const locale = this._plugin.getGlobalContext().getLocale();
 
         let str = '';
 

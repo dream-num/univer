@@ -103,7 +103,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         // TODO: move to toolbarcontroller
         this._countBarController.listenEventManager();
         this._sheetBarControl.listenEventManager();
-        this._sheetBarControl.listenEventManager();
         this._toolbarControl.listenEventManager();
         this._rightMenuControl.listenEventManager();
     }

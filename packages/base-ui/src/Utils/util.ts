@@ -1,4 +1,3 @@
-import { Locale } from '../Basics/Shared/Locale';
 import { Component, RefObject } from '../Framework';
 
 /**
@@ -13,11 +12,11 @@ export function isElement(element: any) {
 export const isDOM =
     typeof HTMLElement === 'object'
         ? function (obj: any) {
-              return obj instanceof HTMLElement;
-          }
+            return obj instanceof HTMLElement;
+        }
         : function (obj: any) {
-              return obj && typeof obj === 'object' && obj.nodeType === 1 && typeof obj.nodeName === 'string';
-          };
+            return obj && typeof obj === 'object' && obj.nodeType === 1 && typeof obj.nodeName === 'string';
+        };
 
 /**
  * DOM selector
@@ -242,57 +241,67 @@ export function setLastCaretPosition(dom: HTMLElement) {
 /**
  * 翻译数据中的国际化
  */
-function resetLabel(label: string[] | string, locale: Locale) {
-    let str = '';
+// function resetLabel(label: string[] | string, locale: Locale) {
+//     let str = '';
 
-    if (label instanceof Array) {
-        label.forEach((item) => {
-            if (item.includes('.')) {
-                str += locale.get(item);
-            } else {
-                str += item;
-            }
-        });
-    } else {
-        if (label.includes('.')) {
-            str = locale.get(label);
-        } else {
-            str += label;
-        }
-    }
+//     if (label instanceof Array) {
+//         label.forEach((item) => {
+//             if (item.includes('.')) {
+//                 str += locale.get(item);
+//             } else {
+//                 str += item;
+//             }
+//         });
+//     } else {
+//         if (label.includes('.')) {
+//             str = locale.get(label);
+//         } else {
+//             str += label;
+//         }
+//     }
 
-    return str;
-}
+//     return str;
+// }
 
-function findLocale(obj: any, locale: Locale) {
+export function findLocale<T>(obj: T, fn: Function) {
     for (let k in obj) {
-        if (k === 'locale') {
-            obj.label = resetLabel(obj[k], locale);
-        } else if (k.endsWith('Locale')) {
+        if (k.endsWith('Locale') && typeof obj[k] === 'string') {
             const index = k.indexOf('Locale');
-            obj[k.slice(0, index)] = resetLabel(obj[k], locale);
-        } else if (obj[k] && !obj[k].$$typeof) {
-            if (Object.prototype.toString.call(obj[k]) === '[object Object]') {
-                findLocale(obj[k], locale);
-            } else if (Object.prototype.toString.call(obj[k]) === '[object Array]') {
-                resetDataLabel(obj[k], locale);
-            }
+            obj[k.slice(0, index)] = fn(obj[k]);
         }
     }
-
     return obj;
 }
 
-export function resetDataLabel(data: any[], locale: Locale) {
-    for (let i = 0; i < data.length; i++) {
-        let item = data[i];
+// function findLocale(obj: any, locale: Locale) {
+//     for (let k in obj) {
+//         if (k === 'locale') {
+//             obj.label = resetLabel(obj[k], locale);
+//         } else if (k.endsWith('Locale')) {
+//             const index = k.indexOf('Locale');
+//             obj[k.slice(0, index)] = resetLabel(obj[k], locale);
+//         } else if (obj[k] && !obj[k].$$typeof) {
+//             if (Object.prototype.toString.call(obj[k]) === '[object Object]') {
+//                 findLocale(obj[k], locale);
+//             } else if (Object.prototype.toString.call(obj[k]) === '[object Array]') {
+//                 resetDataLabel(obj[k], locale);
+//             }
+//         }
+//     }
 
-        item = findLocale(item, locale);
+//     return obj;
+// }
 
-        if (item.children) {
-            item.children = resetDataLabel(item.children, locale);
-        }
-    }
+// export function resetDataLabel(data: any[], locale: Locale) {
+//     for (let i = 0; i < data.length; i++) {
+//         let item = data[i];
 
-    return data;
-}
+//         item = findLocale(item, locale);
+
+//         if (item.children) {
+//             item.children = resetDataLabel(item.children, locale);
+//         }
+//     }
+
+//     return data;
+// }

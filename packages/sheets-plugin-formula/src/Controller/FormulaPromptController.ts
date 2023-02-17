@@ -40,26 +40,27 @@ export class FormulaPromptController {
             .getAppUIController()
             .getSheetContainerController()
             .getMainSlotController()
-            .addSlot(FORMULA_PLUGIN_NAME + SearchFunction.name, SearchFunction, () => {
-                const searchFunction = this._sheetUIPlugin
-                    .getAppUIController()
-                    .getSheetContainerController()
-                    .getMainSlotController()
-                    .getSlot(FORMULA_PLUGIN_NAME + SearchFunction.name);
-                this._searchFunction = searchFunction;
-            });
+            .addSlot(
+                FORMULA_PLUGIN_NAME + SearchFunction.name,
+                {
+                    component: SearchFunction,
+                },
+                () => {
+                    const searchFunction = this._sheetUIPlugin
+                        .getAppUIController()
+                        .getSheetContainerController()
+                        .getMainSlotController()
+                        .getSlot(FORMULA_PLUGIN_NAME + SearchFunction.name);
+                    console.info('searchFunction====', searchFunction);
+                }
+            );
 
         this._sheetUIPlugin
             .getAppUIController()
             .getSheetContainerController()
             .getMainSlotController()
-            .addSlot(FORMULA_PLUGIN_NAME + HelpFunction.name, HelpFunction, () => {
-                const helpFunction = this._sheetUIPlugin
-                    .getAppUIController()
-                    .getSheetContainerController()
-                    .getMainSlotController()
-                    .getSlot(FORMULA_PLUGIN_NAME + HelpFunction.name);
-                this._helpFunction = helpFunction;
+            .addSlot(FORMULA_PLUGIN_NAME + HelpFunction.name, {
+                component: HelpFunction,
             });
     }
 

@@ -220,18 +220,19 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
                                 {/* innerLeft */}
                             </Sider>
                             <Content className={config.contentSplit === 'vertical' ? style.contentContainerVertical : style.contentContainerHorizontal}>
-                                {/* extend main content */}
                                 <Slot {...methods.slot}></Slot>
                                 {!!config.contentSplit && (
                                     <Container ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>
                                         <div className={style.hoverCursor} onMouseDown={this.handleSplitBarMouseDown}></div>
                                     </Container>
                                 )}
-                                <Container ref={this.contentRef} className={style.contentInnerRightContainer}>
+                                <Container onContextMenu={(e) => e.preventDefault()} ref={this.contentRef} className={style.contentInnerRightContainer}>
                                     {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>}
                                     {<RichText {...methods.cellEditor}></RichText>}
                                 </Container>
+                                {/* extend main content */}
                             </Content>
+
                             <Sider
                                 style={{
                                     display: config.innerRight ? 'block' : 'none',

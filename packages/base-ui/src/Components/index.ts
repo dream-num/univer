@@ -26,10 +26,8 @@ import { Slider } from './Slider';
 import { Tab, TabPane } from './Tabs';
 import { Tooltip } from './Tooltip';
 import { Ul } from './Ul';
-import { TextButton } from './TextButton/TextButton';
 
 export * from './Select';
-export * from './TextButton';
 
 export {
     Avatar,
@@ -64,5 +62,4 @@ export {
     SiderModal,
     ResizeDialog,
     Dropdown,
-    TextButton,
 };

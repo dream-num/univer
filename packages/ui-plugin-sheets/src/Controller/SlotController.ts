@@ -1,6 +1,12 @@
+import { IKeyValue } from "@univerjs/core";
 import { Slot } from "../View";
 
-export type SlotGroupProps = Map<string, any>;
+export type SlotComponentProps = {
+    component: Function,
+    props?: IKeyValue
+}
+
+export type SlotGroupProps = Map<string, SlotComponentProps>
 
 export class SlotController {
     private _slotGroup: SlotGroupProps = new Map();
@@ -11,9 +17,12 @@ export class SlotController {
         this._slot = ref
     }
 
-    addSlot(name: string, component: any, cb?: () => void) {
+    addSlot<O, T = null>(name: string, slot: SlotComponentProps, cb?: () => void) {
         if (this._slotGroup.get(name)) return
-        this._slotGroup.set(name, component)
+        this._slotGroup.set(name, {
+            component: slot.component,
+            props: slot.props ?? {}
+        })
         this.setSlot(cb)
     }
 

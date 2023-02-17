@@ -4,7 +4,7 @@ import { SheetContext, Plugin, PLUGIN_NAMES } from '@univerjs/core';
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
 import { CANVAS_VIEW_KEY } from './View/Render/BaseView';
 import { CanvasView } from './View/Render/CanvasView';
-import { RightMenuController, InfoBarController, SheetBarControl, CellEditorController, SheetContainerController, ToolbarController } from './Controller';
+import { RightMenuController, InfoBarController, SheetBarControl, CellEditorController, SheetContainerController, ToolbarController, CountBarController } from './Controller';
 import { install, ISheetPluginConfig } from './Basics';
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeActionExtension';
@@ -31,6 +31,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     private _sheetBarControl: SheetBarControl;
 
     private _cellEditorController: CellEditorController;
+
+    private _countBarController: CountBarController;
 
     private _sheetContainerController: SheetContainerController;
 
@@ -66,6 +68,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         this._sheetBarControl = new SheetBarControl(this);
         this._toolbarControl = new ToolbarController(this);
         this._rightMenuControl = new RightMenuController(this);
+        this._countBarController = new CountBarController(this);
     }
 
     initCanvasView() {
@@ -98,6 +101,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     listenEventManager() {
         // TODO: move to toolbarcontroller
+        this._countBarController.listenEventManager();
+        this._sheetBarControl.listenEventManager();
         this._sheetBarControl.listenEventManager();
         this._toolbarControl.listenEventManager();
         this._rightMenuControl.listenEventManager();
@@ -181,5 +186,9 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     getSheetContainerControl() {
         return this._sheetContainerController;
+    }
+
+    getCountBarController() {
+        return this._countBarController;
     }
 }

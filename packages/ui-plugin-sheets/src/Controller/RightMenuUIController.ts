@@ -1,6 +1,6 @@
 import { IMouseEvent, IPointerEvent } from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
-import { BaseMenuItem, BaseSelectChildrenProps, resetDataLabel } from '@univerjs/base-ui';
+import { BaseMenuItem, BaseSelectChildrenProps } from '@univerjs/base-ui';
 import { PLUGIN_NAMES, Tools, UIObserver } from '@univerjs/core';
 import { SheetUIPlugin } from '..';
 import { DefaultRightMenuConfig, SheetRightMenuConfig } from '../Basics';
@@ -300,6 +300,7 @@ export class RightMenuUIController {
 
         this._sheetPlugin.getMainComponent().onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
             if (evt.button === 2) {
+                evt.preventDefault()
                 this._rightMenu.handleContextMenu(evt);
             }
         });
@@ -313,9 +314,7 @@ export class RightMenuUIController {
 
     // 刷新
     setMenuList() {
-        const locale = this._plugin.getContext().getLocale();
-        const menuList = resetDataLabel(this._menuList, locale);
-        this._rightMenu?.setMenuList(menuList);
+        this._rightMenu?.setMenuList(this._menuList);
     }
 
     setUIObserve<T>(msg: UIObserver<T>) {

@@ -1,4 +1,5 @@
-import { BaseButtonProps, ButtonComponent, JSXComponent } from '../../BaseComponent';
+import { BaseButtonProps } from '../../BaseComponent';
+import { Component } from '../../Framework';
 import { joinClassNames } from '../../Utils';
 import { LoadingIcon } from '../Icon';
 import styles from './Style/index.module.less';
@@ -28,62 +29,86 @@ import styles from './Style/index.module.less';
 //     isActive?: true;
 // }
 
-const Button = (props: BaseButtonProps) => {
-    const { type, shape, size, htmlType = 'button', danger = false, disabled, block = false, loading = false, active = false, onClick, children, className = '', style } = props;
+interface IState {
+    isActive: boolean;
+}
 
-    const handleClick = (e: MouseEvent) => {
+class Button extends Component<BaseButtonProps, IState> {
+    constructor(props: BaseButtonProps) {
+        super();
+        this.state = {
+            isActive: props.active ?? false,
+        };
+    }
+
+    getSizeCls() {
+        const { size } = this.props;
+        let sizeCls = '';
+        switch (size) {
+            case 'large':
+                sizeCls = 'lg';
+                break;
+            case 'small':
+                sizeCls = 'sm';
+                break;
+            default:
+                break;
+        }
+        return sizeCls;
+    }
+
+    getClass() {
+        const { isActive } = this.state;
+        const { type, shape, danger, block, loading, size, className } = this.props;
+        return joinClassNames(
+            styles.btn,
+            {
+                [`${styles.btn}-${type}`]: type,
+                [`${styles.btn}-${shape}`]: shape,
+                [`${styles.btn}-${this.getSizeCls()}`]: size,
+                [`${styles.btn}-danger`]: !!danger,
+                [`${styles.btn}-block`]: block,
+                [`${styles.btn}-loading`]: loading,
+                [`${styles.btn}-active`]: isActive,
+            },
+            className
+        );
+    }
+
+    handleClick = (e: MouseEvent) => {
+        const { disabled, onClick } = this.props;
+
         if (disabled) {
             e.preventDefault();
             return;
         }
-        if (onClick) {
-            onClick(e);
-        }
+
+        this.setState(
+            {
+                isActive: !this.state.isActive,
+            },
+            () => {
+                if (onClick) {
+                    onClick.call(null, this.state.isActive);
+                }
+            }
+        );
     };
-    let sizeCls = '';
-    switch (size) {
-        case 'large':
-            sizeCls = 'lg';
-            break;
-        case 'small':
-            sizeCls = 'sm';
-            break;
-        default:
-            break;
+
+    componentWillReceiveProps(props: BaseButtonProps) {
+        this.setState({
+            isActive: props.active,
+        });
     }
 
-    const classes = joinClassNames(
-        styles.btn,
-        {
-            [`${styles.btn}-${type}`]: type,
-            [`${styles.btn}-${shape}`]: shape,
-            [`${styles.btn}-${sizeCls}`]: size,
-            [`${styles.btn}-danger`]: !!danger,
-            [`${styles.btn}-block`]: block,
-            [`${styles.btn}-loading`]: loading,
-        },
-        className
-    );
-
-    let customStyle = style;
-    // set active status
-    if (active) {
-        customStyle = Object.assign((style as object) || {}, { background: '#eee' });
-    }
-
-    const buttonNode = (
-        <button type={htmlType} onClick={handleClick} className={classes} disabled={disabled} style={{ ...customStyle }}>
-            {loading ? <LoadingIcon /> : ''}
-            {children}
-        </button>
-    );
-
-    return buttonNode;
-};
-
-export class UniverButton implements ButtonComponent {
-    render(): JSXComponent<BaseButtonProps> {
-        return Button;
+    render() {
+        const { htmlType, disabled, style, loading, children } = this.props;
+        return (
+            <button type={htmlType} onClick={this.handleClick} className={this.getClass()} disabled={disabled} style={style}>
+                {loading ? <LoadingIcon /> : ''}
+                {children}
+            </button>
+        );
     }
 }
 

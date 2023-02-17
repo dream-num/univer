@@ -1,6 +1,5 @@
 import { Component, createRef } from '../../Framework';
-import { JSXComponent } from '../../BaseComponent';
-import { BaseMenuProps, BaseMenuState, BaseMenuItem, BaseMenuStyle, MenuComponent } from '../../Interfaces';
+import { BaseMenuProps, BaseMenuState, BaseMenuItem, BaseMenuStyle } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
 import styles from './index.module.less';
 
@@ -142,11 +141,5 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
                 })}
             </ul>
         );
-    }
-}
-
-export class UniverMenu implements MenuComponent {
-    render(): JSXComponent<BaseMenuProps> {
-        return Menu;
     }
 }

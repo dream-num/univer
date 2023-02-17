@@ -30,11 +30,10 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
 
     initialize(ctx: Context): void {
         installObserver(this);
-        const context = this.getContext();
         /**
          * load more Locale object
          */
-        context.getLocale().load({
+        this.getLocale().load({
             zh,
             en,
         });

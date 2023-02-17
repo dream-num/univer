@@ -59,7 +59,7 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
         /**
          * load more Locale object
          */
-        this.getContext().getLocale().load({
+        this.getLocale().load({
             en,
             zh,
         });

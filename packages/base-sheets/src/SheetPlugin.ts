@@ -2,7 +2,6 @@ import { Engine, RenderEngine } from '@univerjs/base-render';
 import { SheetContext, Plugin, PLUGIN_NAMES } from '@univerjs/core';
 
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
-import { en, zh } from './Locale';
 import { CANVAS_VIEW_KEY } from './View/Render/BaseView';
 import { CanvasView } from './View/Render/CanvasView';
 import { RightMenuController, InfoBarController, SheetBarControl, CellEditorController, SheetContainerController, ToolbarController, CountBarController } from './Controller';
@@ -52,15 +51,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         this.context = context;
 
         install(this);
-
-        /**
-         * load more Locale object
-         */
-        context.getLocale().load({
-            en,
-            zh,
-        });
-
         this.initController();
         this.initCanvasView();
 

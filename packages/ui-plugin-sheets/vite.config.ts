@@ -43,6 +43,7 @@ export default defineConfig({
                 '@univerjs/base-render': '@univerjs/base-render',
                 '@univerjs/base-sheets': '@univerjs/base-sheets',
                 'css-vars-ponyfill': 'css-vars-ponyfill',
+                'preact': 'preact',
             },
         }),
     ],

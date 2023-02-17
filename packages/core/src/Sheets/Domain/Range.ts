@@ -35,6 +35,7 @@ import {
 } from '../../Enum';
 
 import {
+    IBorderData,
     IBorderStyleData,
     ICellData,
     ICellDataMatrix,
@@ -475,6 +476,18 @@ export class Range {
     }
 
     /**
+     * Returns the border info of the cells in the range.
+     */
+
+    getBorder(): IBorderData {
+        return this.getBorders()[0][0];
+    }
+
+    getBorders(): IBorderData[][] {
+        return this._getStyles('bd');
+    }
+
+    /**
      * Returns the font style ('italic' or 'normal') of the cell in the top-left corner of the range.
      */
     getFontStyle(): FontItalic {
@@ -747,14 +760,16 @@ export class Range {
     /**
      * Returns the text rotation settings for the top left cell of the range.
      */
-    getTextRotation(): number {
+    // getTextRotation(): number {
+    getTextRotation() {
         return this.getTextRotations()[0][0];
     }
 
     /**
      * Returns the text rotation settings for the cells in the range.
      */
-    getTextRotations(): number[][] {
+    // getTextRotations(): number[][] {
+    getTextRotations() {
         return this._getStyles('tr');
     }
 
@@ -2020,9 +2035,9 @@ export class Range {
 
         const zx = Math.abs(
             currentStartColumn +
-            currentEndColumn -
-            incomingStartColumn -
-            incomingEndColumn
+                currentEndColumn -
+                incomingStartColumn -
+                incomingEndColumn
         );
         const x =
             Math.abs(currentStartColumn - currentEndColumn) +

@@ -32,6 +32,23 @@ export class ToolbarController {
             .requiredObserver<UIObserver<number>>('onUIChangeObservable', 'core')
             .add((msg) => {
                 switch (msg.name) {
+                    case 'undo':
+                        this.setUndo();
+                        break;
+                    case 'redo':
+                        this.setRedo();
+                        break;
+                }
+            });
+
+        this._plugin
+            .getContext()
+            .getUniver()
+            .getGlobalContext()
+            .getObserverManager()
+            .requiredObserver<UIObserver<number>>('onUIChangeObservable', 'core')
+            .add((msg) => {
+                switch (msg.name) {
                     case 'fontSize':
                         this.setFontSize(msg.value!);
                         break;
@@ -137,6 +154,7 @@ export class ToolbarController {
     }
 
     setUndo() {
+        console.log('undo');
         this._plugin.getContext().getCommandManager().undo();
     }
 

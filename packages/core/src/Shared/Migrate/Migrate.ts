@@ -3,9 +3,9 @@ import {
     IWorkbookConfig,
     IWorksheetConfig,
     ICellData,
-    IElementsOrder,
     ITextStyle,
     IStyleData,
+    IElement,
 } from '../../Interfaces';
 import { IKeyValue } from '../Types';
 import { border } from './Border';
@@ -173,8 +173,7 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                         newSheet.cellData[cellItem.r][cellItem.c];
 
                     if (cell?.ct?.t === 'inlineStr') {
-                        const elements = {};
-                        const elementOrder: IElementsOrder[] = [];
+                        const elements: IElement[] = [];
 
                         cell.ct.s.forEach((element: any) => {
                             const textStyle: ITextStyle = {};
@@ -228,7 +227,7 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                             }
 
                             const eId = nanoid(6);
-                            elements[eId] = {
+                            elements.push({
                                 eId,
                                 st: 0,
                                 ed: element.v.length - 1,
@@ -237,30 +236,23 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                                     ct: element.v,
                                     ts: textStyle,
                                 },
-                            };
-
-                            elementOrder.push({
-                                elementId: eId,
-                                paragraphElementType: 0,
                             });
                         });
 
                         newCell.p = {
-                            documentId: nanoid(6),
+                            id: nanoid(6),
                             body: {
-                                blockElements: {
-                                    p1: {
+                                blockElements: [
+                                    {
                                         blockId: 'p1',
                                         st: 0,
                                         ed: cell.ct.s.length - 1,
                                         blockType: 0,
                                         paragraph: {
                                             elements,
-                                            elementOrder,
                                         },
                                     },
-                                },
-                                blockElementOrder: ['p1'],
+                                ],
                             },
                             documentStyle: {},
                         };
@@ -273,8 +265,8 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                         // 显示值
                         if (cell.hasOwnProperty('m')) {
                             newCell.m = cell.m;
-                        }else{
-                            newCell.m = String(cell.v || '')
+                        } else {
+                            newCell.m = String(cell.v || '');
                         }
 
                         const cellStyle: IStyleData = {};

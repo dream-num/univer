@@ -192,39 +192,37 @@ export function mergeRichTextStyle(
     p: IDocumentData,
     newStyle: Nullable<IStyleData>
 ) {
-    p.body?.blockElementOrder.forEach((blockId) => {
-        if (p.body?.blockElements[blockId].blockType === 0) {
-            const paragraph = p.body?.blockElements[blockId].paragraph;
-            paragraph?.elementOrder.forEach(
-                ({ elementId, paragraphElementType }) => {
-                    if (!paragraph.elements[elementId].tr) {
-                        paragraph.elements[elementId].tr = {};
-                    }
-
-                    const textRun = paragraph.elements[elementId].tr as ITextRun;
-
-                    if (!textRun.ts) {
-                        textRun.ts = {};
-                    }
-
-                    const oldStyle = textRun.ts;
-
-                    const merge = mergeStyle(
-                        oldStyle as Nullable<IStyleData>,
-                        newStyle,
-                        true
-                    );
-
-                    // then remove null
-                    merge && Tools.removeNull(merge);
-
-                    if (Tools.isEmptyObject(merge)) {
-                        delete textRun.ts;
-                    } else {
-                        textRun.ts = merge as ITextStyle;
-                    }
+    p.body?.blockElements.forEach((blockElement) => {
+        if (blockElement.blockType === 0) {
+            const paragraph = blockElement.paragraph;
+            paragraph?.elements.forEach((element) => {
+                if (!element.tr) {
+                    element.tr = {};
                 }
-            );
+
+                const textRun = element.tr as ITextRun;
+
+                if (!textRun.ts) {
+                    textRun.ts = {};
+                }
+
+                const oldStyle = textRun.ts;
+
+                const merge = mergeStyle(
+                    oldStyle as Nullable<IStyleData>,
+                    newStyle,
+                    true
+                );
+
+                // then remove null
+                merge && Tools.removeNull(merge);
+
+                if (Tools.isEmptyObject(merge)) {
+                    delete textRun.ts;
+                } else {
+                    textRun.ts = merge as ITextStyle;
+                }
+            });
         }
     });
 }

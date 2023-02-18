@@ -123,9 +123,9 @@ export class DocumentSkeleton extends Skeleton {
         if (!body) {
             return [];
         }
-        const { blockElements, blockElementOrder } = body;
+        const { blockElements } = body;
 
-        if (!blockElements || blockElementOrder.length === 0) {
+        if (blockElements.length === 0) {
             return [];
         }
 
@@ -135,8 +135,7 @@ export class DocumentSkeleton extends Skeleton {
             sectionBreak: undefined,
         };
         // sectionBreak会在一个段落的底部，定义之前所有段落的页样式。
-        blockElementOrder.forEach((bId: string) => {
-            const dcd = blockElements[bId];
+        blockElements.forEach((dcd: IBlockElement) => {
             const { sectionBreak: sSectionBreak } = dcd;
             if (sSectionBreak) {
                 documentContentMap.sectionBreak = sSectionBreak;

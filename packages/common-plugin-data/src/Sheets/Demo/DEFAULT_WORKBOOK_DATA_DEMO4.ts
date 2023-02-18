@@ -3,15 +3,15 @@ import { BlockType, BooleanNumber, BorderStyleTypes, IDocumentData, IWorkbookCon
 const richTextDemo1: IDocumentData = {
     id: 'd',
     body: {
-        blockElements: {
-            oneParagraph: {
+        blockElements: [
+            {
                 blockId: 'oneParagraph',
                 st: 0,
                 ed: 15,
                 blockType: BlockType.PARAGRAPH,
                 paragraph: {
-                    elements: {
-                        oneElement: {
+                    elements: [
+                        {
                             eId: 'oneElement',
                             st: 0,
                             ed: 15,
@@ -26,7 +26,7 @@ const richTextDemo1: IDocumentData = {
                                 },
                             },
                         },
-                        twoElement: {
+                        {
                             eId: 'twoElement',
                             st: 0,
                             ed: 15,
@@ -41,21 +41,10 @@ const richTextDemo1: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'oneElement',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
-                        {
-                            elementId: 'twoElement',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-        },
-        blockElementOrder: ['oneParagraph'],
+        ],
     },
     documentStyle: {
         pageSize: {

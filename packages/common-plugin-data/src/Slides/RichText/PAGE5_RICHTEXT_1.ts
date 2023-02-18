@@ -5,15 +5,15 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
     id: 'd',
     lists: DEFAULT_LIST_TEST,
     body: {
-        blockElements: {
-            p1: {
+        blockElements: [
+            {
                 blockId: 'p1',
                 st: 0,
                 ed: 66,
                 blockType: BlockType.PARAGRAPH,
                 paragraph: {
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 0,
                             ed: 66,
@@ -29,16 +29,10 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p2: {
+            {
                 blockId: 'p2',
                 st: 67,
                 ed: 251,
@@ -48,8 +42,8 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                         spaceAbove: 20,
                         indentFirstLine: 20,
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 67,
                             ed: 251,
@@ -64,16 +58,10 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p3: {
+            {
                 blockId: 'p3',
                 st: 252,
                 ed: 401,
@@ -83,8 +71,8 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                         spaceAbove: 20,
                         indentFirstLine: 20,
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 252,
                             ed: 401,
@@ -99,16 +87,10 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p4: {
+            {
                 blockId: 'p4',
                 st: 402,
                 ed: 429,
@@ -127,8 +109,8 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                     paragraphStyle: {
                         lineSpacing: 1.5,
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 402,
                             ed: 429,
@@ -143,16 +125,10 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p13: {
+            {
                 blockId: 'p13',
                 st: 2020 + 28,
                 ed: 2250 + 28,
@@ -168,8 +144,8 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                             fs: 20,
                         },
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 2020 + 28,
                             ed: 2042 + 28,
@@ -182,16 +158,10 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p14: {
+            {
                 blockId: 'p14',
                 st: 2251 + 28,
                 ed: 2393 + 28,
@@ -207,8 +177,8 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                             fs: 20,
                         },
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 2251 + 28,
                             ed: 2265 + 28,
@@ -222,16 +192,10 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p5: {
+            {
                 blockId: 'p5',
                 st: 430,
                 ed: 479,
@@ -250,8 +214,8 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                     paragraphStyle: {
                         lineSpacing: 1.5,
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 430,
                             ed: 479,
@@ -266,16 +230,10 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p15: {
+            {
                 blockId: 'p15',
                 st: 2394 + 28,
                 ed: 2582 + 28,
@@ -291,8 +249,8 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                             fs: 20,
                         },
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 2394 + 28,
                             ed: 2422 + 28,
@@ -308,16 +266,10 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p6: {
+            {
                 blockId: 'p6',
                 st: 480,
                 ed: 510,
@@ -336,8 +288,8 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                     paragraphStyle: {
                         lineSpacing: 1.5,
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 480,
                             ed: 510,
@@ -352,17 +304,10 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-        },
-        blockElementOrder: ['p1', 'p3', 'p4', 'p13', 'p14', 'p5', 'p15', 'p6'],
+        ],
     },
     documentStyle: {
         pageSize: {

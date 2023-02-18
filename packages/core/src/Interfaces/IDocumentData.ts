@@ -69,8 +69,7 @@ export interface ISizeData {
  * Properties of document body
  */
 export interface IDocumentBody {
-    blockElements: { [bId: string]: IBlockElement }; // block elements
-    blockElementOrder: string[]; // block element order
+    blockElements: IBlockElement[]; // block elements
 }
 
 /**
@@ -307,8 +306,7 @@ export interface ISectionColumnProperties {
 }
 
 export interface IParagraph {
-    elements: { [eId: string]: IElement }; // elements
-    elementOrder: IElementsOrder[]; // element order
+    elements: IElement[]; // elements
     paragraphStyle?: IParagraphStyle; // paragraphStyle
     bullet?: IBullet; // bullet
     // dIds?: string[]; // drawingIds objectId

@@ -129,8 +129,8 @@ const richTextTestFloat: IDocumentData = {
         },
     },
     body: {
-        blockElements: {
-            oneParagraph: {
+        blockElements: [
+            {
                 blockId: 'oneParagraph',
                 st: 0,
                 ed: 15,
@@ -143,8 +143,8 @@ const richTextTestFloat: IDocumentData = {
                             fs: 20,
                         },
                     },
-                    elements: {
-                        oneElement: {
+                    elements: [
+                        {
                             eId: 'oneElement',
                             st: 0,
                             ed: 15,
@@ -162,7 +162,13 @@ const richTextTestFloat: IDocumentData = {
                                 },
                             },
                         },
-                        smallSub: {
+                        {
+                            eId: 'shapeTest1',
+                            et: ParagraphElementType.DRAWING,
+                            st: 0,
+                            ed: 0,
+                        },
+                        {
                             eId: 'smallSub',
                             st: 0,
                             ed: 15,
@@ -181,7 +187,7 @@ const richTextTestFloat: IDocumentData = {
                                 },
                             },
                         },
-                        twoElement: {
+                        {
                             eId: 'twoElement',
                             st: 0,
                             ed: 15,
@@ -199,28 +205,10 @@ const richTextTestFloat: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'oneElement',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
-                        {
-                            elementId: 'shapeTest1',
-                            paragraphElementType: ParagraphElementType.DRAWING,
-                        },
-                        {
-                            elementId: 'smallSub',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
-                        {
-                            elementId: 'twoElement',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            twoParagraph: {
+            {
                 blockId: 'twoParagraph',
                 st: 0,
                 ed: 15,
@@ -233,8 +221,8 @@ const richTextTestFloat: IDocumentData = {
                             fs: 20,
                         },
                     },
-                    elements: {
-                        oneElement: {
+                    elements: [
+                        {
                             eId: 'oneElement',
                             st: 0,
                             ed: 15,
@@ -243,7 +231,7 @@ const richTextTestFloat: IDocumentData = {
                                 ct: '细化埋点上报链路和指标方案梳理',
                             },
                         },
-                        twoElement: {
+                        {
                             eId: 'twoElement',
                             st: 0,
                             ed: 15,
@@ -252,20 +240,10 @@ const richTextTestFloat: IDocumentData = {
                                 ct: '目前通过每日定时任务发送报告',
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'oneElement',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
-                        {
-                            elementId: 'twoElement',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            threeParagraph: {
+            {
                 blockId: 'threeParagraph',
                 st: 0,
                 ed: 15,
@@ -278,8 +256,8 @@ const richTextTestFloat: IDocumentData = {
                             fs: 20,
                         },
                     },
-                    elements: {
-                        oneElement: {
+                    elements: [
+                        {
                             eId: 'oneElement',
                             st: 0,
                             ed: 15,
@@ -288,7 +266,7 @@ const richTextTestFloat: IDocumentData = {
                                 ct: '自2018年首届进博会举办以来，进博会已经成为全球新品的首发地、前沿技术的首选地、创新服务的首推地。',
                             },
                         },
-                        twoElement: {
+                        {
                             eId: 'twoElement',
                             st: 0,
                             ed: 15,
@@ -297,20 +275,10 @@ const richTextTestFloat: IDocumentData = {
                                 ct: '中国这十年”对外开放成就展湖北展区主要以图文、图表、数据、视频、企业展品、实物模型、光电科技等体现湖北十年开放成就、重大开放平台及产业。湖北省共计17家企业、机构的展品将在这一展区展示',
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'oneElement',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
-                        {
-                            elementId: 'twoElement',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            fourParagraph: {
+            {
                 blockId: 'fourParagraph',
                 st: 0,
                 ed: 15,
@@ -323,8 +291,8 @@ const richTextTestFloat: IDocumentData = {
                             fs: 20,
                         },
                     },
-                    elements: {
-                        oneElement: {
+                    elements: [
+                        {
                             eId: 'oneElement',
                             st: 0,
                             ed: 15,
@@ -333,7 +301,7 @@ const richTextTestFloat: IDocumentData = {
                                 ct: '国家主席习近平以视频方式出席在上海举行的第五届中国国际进口博览会开幕式并发表题为《共创开放繁荣的美好未来》的致辞',
                             },
                         },
-                        twoElement: {
+                        {
                             eId: 'twoElement',
                             st: 0,
                             ed: 15,
@@ -342,20 +310,10 @@ const richTextTestFloat: IDocumentData = {
                                 ct: '中国将推动各国各方共享深化国际合作机遇，全面深入参与世界贸易组织改革谈判',
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'oneElement',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
-                        {
-                            elementId: 'twoElement',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            fiveParagraph: {
+            {
                 blockId: 'fiveParagraph',
                 st: 0,
                 ed: 15,
@@ -368,8 +326,8 @@ const richTextTestFloat: IDocumentData = {
                             fs: 20,
                         },
                     },
-                    elements: {
-                        oneElement: {
+                    elements: [
+                        {
                             eId: 'oneElement',
                             st: 0,
                             ed: 15,
@@ -378,7 +336,7 @@ const richTextTestFloat: IDocumentData = {
                                 ct: '中国男排两名现役国手彭世坤和张秉龙分别效力的三得利太阳鸟和东京大熊本轮遭遇。',
                             },
                         },
-                        twoElement: {
+                        {
                             eId: 'twoElement',
                             st: 0,
                             ed: 15,
@@ -387,21 +345,10 @@ const richTextTestFloat: IDocumentData = {
                                 ct: '双方经过激战，主场作战的卫冕冠军三得利技高一筹3-2逆转击败对手，力夺第3场胜利',
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'oneElement',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
-                        {
-                            elementId: 'twoElement',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-        },
-        blockElementOrder: ['oneParagraph', 'twoParagraph', 'threeParagraph', 'fourParagraph', 'fiveParagraph'],
+        ],
     },
     documentStyle: {
         pageSize: {
@@ -418,15 +365,15 @@ const richTextTestFloat: IDocumentData = {
 const richTextTest: IDocumentData = {
     id: 'd',
     body: {
-        blockElements: {
-            oneParagraph: {
+        blockElements: [
+            {
                 blockId: 'oneParagraph',
                 st: 0,
                 ed: 15,
                 blockType: BlockType.PARAGRAPH,
                 paragraph: {
-                    elements: {
-                        oneElement: {
+                    elements: [
+                        {
                             eId: 'oneElement',
                             st: 0,
                             ed: 15,
@@ -444,7 +391,7 @@ const richTextTest: IDocumentData = {
                                 },
                             },
                         },
-                        smallSub: {
+                        {
                             eId: 'twoElement',
                             st: 0,
                             ed: 15,
@@ -463,7 +410,7 @@ const richTextTest: IDocumentData = {
                                 },
                             },
                         },
-                        twoElement: {
+                        {
                             eId: 'twoElement',
                             st: 0,
                             ed: 15,
@@ -481,25 +428,10 @@ const richTextTest: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'oneElement',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
-                        {
-                            elementId: 'smallSub',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
-                        {
-                            elementId: 'twoElement',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-        },
-        blockElementOrder: ['oneParagraph'],
+        ],
     },
     documentStyle: {
         pageSize: {

@@ -36,3 +36,7 @@ export interface ITextSelectionRange {
     isEndBack: boolean;
     isCollapse: boolean;
 }
+
+export interface ITextSelectionRangeParam extends ITextSelectionRange {
+    segmentId?: string; //The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body.
+}

@@ -137,15 +137,15 @@ export class RichText extends BaseObject {
         const documentData: IDocumentData = {
             id: 'd',
             body: {
-                blockElements: {
-                    oneParagraph: {
+                blockElements: [
+                    {
                         blockId: 'oneParagraph',
                         st: 0,
                         ed: contentLength,
                         blockType: BlockType.PARAGRAPH,
                         paragraph: {
-                            elements: {
-                                oneElement: {
+                            elements: [
+                                {
                                     eId: 'oneElement',
                                     st: 0,
                                     ed: contentLength,
@@ -166,12 +166,10 @@ export class RichText extends BaseObject {
                                         },
                                     },
                                 },
-                            },
-                            elementOrder: [{ elementId: 'oneElement', paragraphElementType: ParagraphElementType.TEXT_RUN }],
+                            ],
                         },
                     },
-                },
-                blockElementOrder: ['oneParagraph'],
+                ],
             },
             documentStyle: {
                 pageSize: {

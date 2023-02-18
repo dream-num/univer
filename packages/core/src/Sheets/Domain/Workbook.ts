@@ -740,14 +740,12 @@ export class Workbook {
             const before = this.getContext().getContextObserver(
                 'onBeforeRemoveSheetObservable'
             );
-            const after = this.getContext().getContextObserver(
+            const aftert = this.getContext().getContextObserver(
                 'onAfterRemoveSheetObservable'
             );
-
             before.notifyObservers({
                 index,
             });
-
             _commandManager.invoke(
                 new Command(
                     {
@@ -759,15 +757,7 @@ export class Workbook {
                     } as IRemoveSheetActionData
                 )
             );
-
-            const needSwitch = sheet.getStatus() === BooleanNumber.TRUE;
-            if (needSwitch) {
-                const nextSheet = this.nextSheet(index);
-                if (nextSheet) {
-                    nextSheet.activate();
-                }
-            }
-            after.notifyObservers({ index, sheetId });
+            aftert.notifyObservers({ index, sheetId });
         }
     }
 

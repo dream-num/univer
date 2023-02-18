@@ -144,7 +144,7 @@ export class Worksheet {
             this._context = argument[0];
             // this._config = argument[1];
 
-            this._config = {
+            this._config = Object.assign(argument[1], {
                 ...DEFAULT_WORKSHEET,
                 mergeData: [],
                 hideRow: [],
@@ -164,7 +164,7 @@ export class Worksheet {
                 rightToLeft: BooleanNumber.FALSE,
                 pluginMeta: {},
                 ...argument[1],
-            };
+            });
             // this._config = Tools.deepMerge({}, DEFAULT_WORKSHEET, argument[1]);
 
             const { columnData, rowData, cellData } = this._config;

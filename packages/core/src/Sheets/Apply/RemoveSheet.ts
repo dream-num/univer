@@ -15,15 +15,10 @@ export function RemoveSheet(
     if (sheets[sheetId] == null) {
         throw new Error(`Remove Sheet fail ${sheetId} is not exist`);
     }
+
     const removeSheet = sheets[sheetId];
     const removeIndex = config.sheetOrder.findIndex((id) => id === sheetId);
     delete sheets[sheetId];
-
-    if (removeIndex !== config.sheetOrder.length - 1) {
-        sheets[config.sheetOrder[removeIndex + 1]].status = 1;
-    } else {
-        sheets[config.sheetOrder[removeIndex - 1]].status = 1;
-    }
 
     config.sheetOrder.splice(removeIndex, 1);
     iSheets.delete(sheetId);
@@ -45,21 +40,15 @@ export function RemoveSheetApply(unit: CommandUnit, data: IRemoveSheetActionData
     if (sheets[sheetId] == null) {
         throw new Error(`Remove Sheet fail ${sheetId} is not exist`);
     }
-    const removeSheet = sheets[sheetId];
-    const removeIndex = config.sheetOrder.findIndex((id) => id === sheetId);
+    const findSheet = sheets[sheetId];
+    const findIndex = config.sheetOrder.findIndex((id) => id === sheetId);
     delete sheets[sheetId];
 
-    if (removeIndex !== config.sheetOrder.length - 1) {
-        sheets[config.sheetOrder[removeIndex + 1]].status = 1;
-    } else {
-        sheets[config.sheetOrder[removeIndex - 1]].status = 1;
-    }
-
-    config.sheetOrder.splice(removeIndex, 1);
+    config.sheetOrder.splice(findIndex, 1);
     iSheets.delete(sheetId);
 
     return {
-        index: removeIndex,
-        sheet: removeSheet as IWorksheetConfig,
+        index: findIndex,
+        sheet: findSheet as IWorksheetConfig,
     };
 }

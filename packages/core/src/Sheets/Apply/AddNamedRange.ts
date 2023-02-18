@@ -1,5 +1,5 @@
 import { INamedRange } from '../../Interfaces';
-import { CommandUnit } from '../../Command';
+import { CommandUnit, IAddNamedRangeActionData } from '../../Command';
 
 export function AddNamedRange(
     namedRanges: INamedRange[],
@@ -8,7 +8,10 @@ export function AddNamedRange(
     namedRanges.push(namedRange);
 }
 
-export function AddNamedRangeApply(unit: CommandUnit, namedRange: INamedRange) {
+export function AddNamedRangeApply(
+    unit: CommandUnit,
+    data: IAddNamedRangeActionData
+) {
     const namedRanges = unit.WorkBookUnit?.getConfig().namedRanges;
-    namedRanges?.push(namedRange);
+    namedRanges?.push(data.namedRange);
 }

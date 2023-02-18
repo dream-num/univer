@@ -50,9 +50,9 @@ export class ToolbarController {
         this._initRegisterComponent();
 
         const config =
-            this._plugin.config.layout === 'auto'
+            this._plugin.getConfig().layout === 'auto'
                 ? Tools.deepClone(defaultLayout.toolbarConfig)
-                : Tools.deepMerge(defaultLayout.toolbarConfig, (this._plugin.config.layout as ILayout).toolbarConfig);
+                : Tools.deepMerge(defaultLayout.toolbarConfig, (this._plugin.getConfig().layout as ILayout).toolbarConfig);
 
         this._borderInfo = {
             color: '#000',

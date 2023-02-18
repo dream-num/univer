@@ -177,7 +177,7 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
         // };
     }
 
-    get config() {
+    getConfig() {
         return this._config;
     }
 

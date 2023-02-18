@@ -58,26 +58,7 @@ const universheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 univer.addUniverSheet(universheet);
 
 // base-sheet
-universheet.installPlugin(
-    new SheetPlugin({
-        selections: {
-            'sheet-0001': [
-                {
-                    selection: {
-                        startRow: 2,
-                        endRow: 2,
-                        startColumn: 3,
-                        endColumn: 3,
-                    },
-                    cell: {
-                        row: 2,
-                        column: 3,
-                    },
-                },
-            ],
-        },
-    })
-);
+universheet.installPlugin(new SheetPlugin());
 // universheet.installPlugin(new FormulaPlugin(DEFAULT_FORMULA_DATA_DEMO));
 
 // ui-plugin-sheets

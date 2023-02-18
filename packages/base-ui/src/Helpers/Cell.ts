@@ -1,5 +1,5 @@
-import { BlockType, ICellData, IDocumentData, IElement, IRangeData, IStyleData, ITextDecoration, Tools } from '@univer/core';
-import { pxToPt } from '@univer/base-render';
+import { BlockType, ICellData, IDocumentData, IElement, IRangeData, IStyleData, ITextDecoration, Tools } from '@univerjs/core';
+import { pxToPt } from '@univerjs/base-render';
 import { textTrim } from '../Utils';
 
 // TODO: move to Utils

@@ -1,4 +1,4 @@
-import { ColumnSeparatorType, IBullet, IDrawing, IDrawings, IParagraph, Nullable, ParagraphElementType, PositionedObjectLayoutType, ContextBase, IElement } from '@univer/core';
+import { ColumnSeparatorType, IBullet, IDrawing, IDrawings, IParagraph, Nullable, ParagraphElementType, PositionedObjectLayoutType, ContextBase, IElement } from '@univerjs/core';
 import { dealWidthTextRun } from './TextRun';
 import { dealWidthBullet } from './Bullet';
 import { dealWidthInlineDrawing } from './InlineDrawing';
@@ -107,7 +107,6 @@ export function dealWidthParagraph(
         const { eId: elementId, et: paragraphElementType } = element;
         let currentPages: IDocumentSkeletonPage[] = [];
         if (paragraphElementType === ParagraphElementType.TEXT_RUN) {
-            const element = elements[elementId];
             const { tr: textRun, st, ed } = element;
             if (!textRun) {
                 return false;

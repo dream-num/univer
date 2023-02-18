@@ -1237,21 +1237,22 @@ npm run build
 
 ### 发布 npm
 
-以发布 `@univerjs/core` 为例
+1. 选择需要修改版本的包
 ```shell
-pnpm publish --filter @univerjs/core
+pnpm changeset add
 ```
 
-使用 Verdaccio 本地测试发包使用
+2. 更新版本号被依赖的版本号
 ```shell
-pnpm publish --filter @univerjs/core --registry http://localhost:4873/
+pnpm changeset version
 ```
 
-or
-
+3. 发布npm
 ```shell
-cd packages/core
-npm publish --access=public
+pnpm publish -r
+
+# 本地测试的话加上本地npm仓库地址
+pnpm publish -r --registry http://localhost:4873/
 ```
 
 ## 插件使用

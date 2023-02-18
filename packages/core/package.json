@@ -2,7 +2,16 @@
     "name": "@univerjs/core",
     "version": "0.0.1",
     "description": "Univer core",
-    "keywords": ["univer","core","sheets","docs","slides","excel","word","ppt"],
+    "keywords": [
+        "univer",
+        "core",
+        "sheets",
+        "docs",
+        "slides",
+        "excel",
+        "word",
+        "ppt"
+    ],
     "author": "DreamNum <msoffice2@126.com>",
     "main": "./src/index.ts",
     "module": "./src/index.ts",
@@ -11,6 +20,13 @@
         "main": "./lib/univer-core.js",
         "module": "./lib/univer-core.mjs",
         "types": "./lib/index.d.ts",
+        "exports": {
+            ".": {
+                "require": "./lib/univer-core.js",
+                "default": "./lib/univer-core.mjs"
+            },
+            "./*": "./lib/*"
+        },
         "access": "public"
     },
     "exports": {

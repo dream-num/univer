@@ -1242,6 +1242,11 @@ npm run build
 pnpm publish --filter @univerjs/core
 ```
 
+使用 Verdaccio 本地测试发包使用
+```shell
+pnpm publish --filter @univerjs/core --registry http://localhost:4873/
+```
+
 or
 
 ```shell

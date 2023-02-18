@@ -7,7 +7,7 @@ const linkTargets = [
     '@univerjs/base-ui', // success
     '@univerjs/base-sheets', // success
 
-    '@univerjs/common-plugin-data',
+    // '@univerjs/common-plugin-data',
     // '@univerjs/sheets-plugin-format',
     // '@univerjs/sheets-plugin-formula',
 
@@ -27,7 +27,7 @@ const linkTargets = [
     // '@univerjs/sheets-plugin-split-column', // success
 
     // '@univerjs/style-google',
-    '@univerjs/style-univer', // success
+    '@univerjs/ui-plugin-sheets', // success
     // '@univerjs/style-office365',
     // '@univerjs/style-mobile',
 ];

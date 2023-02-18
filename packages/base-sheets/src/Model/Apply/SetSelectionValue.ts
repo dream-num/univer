@@ -13,11 +13,9 @@ import { ISelectionModelValue } from '../Action/SetSelectionValueAction';
  * @internal
  */
 export function SetSelectionValue(worksheet: Worksheet, selections: ISelectionModelValue[]): ISelectionModelValue[] {
-    const selectionManager = worksheet.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.getSelectionManager();
+    const selectionManager = worksheet.getContext().getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET).getSelectionManager();
 
-    if (!selectionManager) return [];
-
-    const result = selectionManager?.getCurrentModelsValue();
+    const result = selectionManager.getCurrentModelsValue();
 
     selectionManager.setModels(selections);
 

@@ -2,7 +2,7 @@
     "name": "@univerjs/base-render",
     "version": "0.0.1",
     "description": "UniverSheet normal base-render",
-    "keywords": ["render","canvas"],
+    "keywords": ["univer","render","canvas"],
     "author": "DreamNum <msoffice2@126.com>",
     "license": "MIT",
     "main": "./src/index.ts",
@@ -11,7 +11,8 @@
     "publishConfig": {
         "main": "./lib/univer-base-render.cjs.js",
         "module": "./lib/univer-base-render.es.js",
-        "types": "./lib/index.d.ts"
+        "types": "./lib/index.d.ts",
+        "access": "public"
     },
     "exports": {
         ".": "./src/index.ts",

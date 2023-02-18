@@ -10,7 +10,7 @@ export class ActionOperation<T extends IActionData> {
                 ActionOperationType.OBSERVER_ACTION
             );
         }
-        return false;
+        return true;
     }
 
     static hasUndo<U extends IActionData>(action: U): boolean {
@@ -20,7 +20,7 @@ export class ActionOperation<T extends IActionData> {
                 ActionOperationType.UNDO_ACTION
             );
         }
-        return false;
+        return true;
     }
 
     static hasCollaboration<U extends IActionData>(action: U): boolean {
@@ -30,7 +30,7 @@ export class ActionOperation<T extends IActionData> {
                 ActionOperationType.SERVER_ACTION
             );
         }
-        return false;
+        return true;
     }
 
     static hasExtension<U extends IActionData>(action: U): boolean {
@@ -40,7 +40,7 @@ export class ActionOperation<T extends IActionData> {
                 ActionOperationType.EXTENSION_ACTION
             );
         }
-        return false;
+        return true;
     }
 
     static make<U extends IActionData>(action: U) {

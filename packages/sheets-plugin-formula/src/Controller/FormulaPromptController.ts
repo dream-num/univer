@@ -51,7 +51,7 @@ export class FormulaPromptController {
                         .getSheetContainerController()
                         .getMainSlotController()
                         .getSlot(FORMULA_PLUGIN_NAME + SearchFunction.name);
-                    console.info('searchFunction====', searchFunction);
+                    this._searchFunction = searchFunction;
                 }
             );
 
@@ -59,9 +59,20 @@ export class FormulaPromptController {
             .getAppUIController()
             .getSheetContainerController()
             .getMainSlotController()
-            .addSlot(FORMULA_PLUGIN_NAME + HelpFunction.name, {
-                component: HelpFunction,
-            });
+            .addSlot(
+                FORMULA_PLUGIN_NAME + HelpFunction.name,
+                {
+                    component: HelpFunction,
+                },
+                () => {
+                    const helpFunction = this._sheetUIPlugin
+                        .getAppUIController()
+                        .getSheetContainerController()
+                        .getMainSlotController()
+                        .getSlot(FORMULA_PLUGIN_NAME + HelpFunction.name);
+                    this._helpFunction = helpFunction;
+                }
+            );
     }
 
     private _initialize() {

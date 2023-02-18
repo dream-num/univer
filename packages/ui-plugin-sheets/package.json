@@ -2,7 +2,7 @@
     "name": "@univerjs/ui-plugin-sheets",
     "version": "0.0.1",
     "description": "UniverSheet normal ui-plugin-sheets",
-    "keywords": [],
+    "keywords": ["univer","ui","sheets"],
     "author": "DreamNum <msoffice2@126.com>",
     "license": "MIT",
     "main": "./src/index.ts",
@@ -11,7 +11,8 @@
     "publishConfig": {
         "main": "./lib/univer-ui-plugin-sheets.cjs.js",
         "module": "./lib/univer-ui-plugin-sheets.es.js",
-        "types": "./lib/index.d.ts"
+        "types": "./lib/index.d.ts",
+        "access": "public"
     },
     "exports": {
         ".": "./src/index.ts",

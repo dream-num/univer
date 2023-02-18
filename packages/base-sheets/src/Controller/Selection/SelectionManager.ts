@@ -1,5 +1,19 @@
 import { IMouseEvent, IPointerEvent, Rect, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, ScrollTimer } from '@univerjs/base-render';
-import { Nullable, Observer, Worksheet, ISelection, makeCellToSelection, IRangeData, RangeList, Range, IRangeCellData, ICellInfo, Command, Direction } from '@univerjs/core';
+import {
+    Nullable,
+    Observer,
+    Worksheet,
+    ISelection,
+    makeCellToSelection,
+    IRangeData,
+    RangeList,
+    Range,
+    IRangeCellData,
+    ICellInfo,
+    Command,
+    Direction,
+    ActionOperation,
+} from '@univerjs/core';
 import { ACTION_NAMES, ISelectionsConfig } from '../../Basics';
 import { ISelectionModelValue, ISetSelectionValueActionData, SetSelectionValueAction } from '../../Model/Action/SetSelectionValueAction';
 import { SelectionModel } from '../../Model/SelectionModel';
@@ -147,7 +161,7 @@ export class SelectionManager {
      * Renders all controls of the currently active sheet
      * @returns
      */
-    renderCurrentControls(models?: SelectionModel[]) {
+    renderCurrentControls(command: boolean = true, models?: SelectionModel[]) {
         const worksheetId = this.getWorksheetId();
         if (worksheetId) {
             if (this._selectionControls) {
@@ -192,7 +206,7 @@ export class SelectionManager {
                 this._selectionControls.push(control);
             });
 
-            this.setSelectionModel();
+            command && this.setSelectionModel();
         }
     }
 
@@ -274,17 +288,19 @@ export class SelectionManager {
         const workbook = this._worksheet.getContext().getWorkBook();
         const commandManager = workbook.getCommandManager();
 
-        const value: ISetSelectionValueActionData = {
+        let action: ISetSelectionValueActionData = {
             sheetId: this._worksheet.getSheetId(),
             actionName: SetSelectionValueAction.NAME,
             selections: models,
         };
 
+        action = ActionOperation.make<ISetSelectionValueActionData>(action).removeUndo().getAction();
+
         const command = new Command(
             {
                 WorkBookUnit: workbook,
             },
-            value
+            action
         );
         commandManager.invoke(command);
     }
@@ -311,17 +327,19 @@ export class SelectionManager {
         const workbook = this._worksheet.getContext().getWorkBook();
         const commandManager = workbook.getCommandManager();
 
-        const value: ISetSelectionValueActionData = {
+        let action: ISetSelectionValueActionData = {
             sheetId: this._worksheet.getSheetId(),
             actionName: ACTION_NAMES.SET_SELECTION_VALUE_ACTION,
             selections: selectionModelsValue,
         };
 
+        action = ActionOperation.make<ISetSelectionValueActionData>(action).removeUndo().getAction();
+
         const command = new Command(
             {
                 WorkBookUnit: workbook,
             },
-            value
+            action
         );
         commandManager.invoke(command);
     }

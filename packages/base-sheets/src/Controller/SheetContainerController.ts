@@ -33,6 +33,7 @@ export class SheetContainerController {
                     if (canvasView) {
                         canvasView.updateToSheet(worksheet);
                         plugin.getMainComponent().makeDirty(true);
+                        plugin.getSelectionManager().renderCurrentControls(false);
                     }
                 } catch (error) {
                     console.info(error);

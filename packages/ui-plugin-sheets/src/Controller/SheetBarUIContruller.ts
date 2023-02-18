@@ -186,7 +186,6 @@ export class SheetBarUIController {
                     case SetTabColorAction.NAME:
                     case SetWorkSheetHideAction.NAME:
                     case SetWorkSheetStatusAction.NAME: {
-                        debugger
                         // update data;
                         this._refreshSheetData();
                         // set ui bar sheetList;

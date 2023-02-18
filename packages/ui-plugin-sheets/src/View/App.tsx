@@ -42,8 +42,8 @@ export class App extends Component<BaseUIProps, IState> {
                 <div
                     style={{
                         position: 'fixed',
-                        right: '200px',
-                        top: '10px',
+                        right: '250px',
+                        top: '14px',
                         fontSize: '14px',
                         zIndex: 100,
                     }}
@@ -51,13 +51,13 @@ export class App extends Component<BaseUIProps, IState> {
                     <span
                         style={{
                             display: 'inline-block',
-                            width: 50,
+                            width: 70,
                             margin: '5px 0 0 5px',
                         }}
                     >
-                        语言
+                        Language
                     </span>
-                    <select value={locale} onChange={this.setLocale.bind(this)} style={{ width: 55 }}>
+                    <select value={locale} onChange={this.setLocale.bind(this)} style={{ width: 70 }}>
                         <option value="en">English</option>
                         <option value="zh">中文</option>
                     </select>

@@ -2,7 +2,11 @@
     "name": "@univerjs/base-sheets",
     "version": "0.0.1",
     "description": "UniverSheet normal base-sheets",
-    "keywords": ["univer","sheets","spreadsheet"],
+    "keywords": [
+        "univer",
+        "sheets",
+        "spreadsheet"
+    ],
     "author": "DreamNum <msoffice2@126.com>",
     "license": "MIT",
     "main": "./src/index.ts",
@@ -12,6 +16,13 @@
         "main": "./lib/univer-base-sheets.cjs.js",
         "module": "./lib/univer-base-sheets.es.js",
         "types": "./lib/index.d.ts",
+        "exports": {
+            ".": {
+                "require": "./lib/univer-base-sheets.cjs.js",
+                "default": "./lib/univer-base-sheets.es.js"
+            },
+            "./*": "./lib/*"
+        },
         "access": "public"
     },
     "exports": {

@@ -9,7 +9,15 @@
     "publishConfig": {
         "main": "./lib/univer-common-plugin-data.cjs.js",
         "module": "./lib/univer-common-plugin-data.es.js",
-        "types": "./lib/index.d.ts"
+        "types": "./lib/index.d.ts",
+        "exports": {
+            ".": {
+                "require": "./lib/univer-common-plugin-data.cjs.js",
+                "default": "./lib/univer-common-plugin-data.es.js"
+            },
+            "./*": "./lib/*"
+        },
+        "access": "public"
     },
     "exports": {
         ".": "./src/index.ts",

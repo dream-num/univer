@@ -7,7 +7,7 @@ const linkTargets = [
     '@univerjs/base-ui', // success
     '@univerjs/base-sheets', // success
 
-    // '@univerjs/common-plugin-data',
+    '@univerjs/common-plugin-data',
     // '@univerjs/sheets-plugin-format',
     // '@univerjs/sheets-plugin-formula',
 

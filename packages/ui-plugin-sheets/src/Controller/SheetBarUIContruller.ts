@@ -177,9 +177,8 @@ export class SheetBarUIController {
                 switch (data.actionName) {
                     case ACTION_NAMES.SET_SHEET_ORDER_ACTION:
                     case ACTION_NAMES.INSERT_SHEET_ACTION:
-                    case ACTION_NAMES.SET_TAB_COLOR_ACTION:
-                    case ACTION_NAMES.REMOVE_SHEET_ACTION:
                     case ACTION_NAMES.SET_WORKSHEET_NAME_ACTION:
+                    case ACTION_NAMES.SET_TAB_COLOR_ACTION:
                     case ACTION_NAMES.SET_WORKSHEET_ACTIVATE_ACTION:
                     case ACTION_NAMES.SET_WORKSHEET_STATUS_ACTION: {
                         // update data;

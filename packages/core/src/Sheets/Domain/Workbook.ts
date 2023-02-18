@@ -241,24 +241,32 @@ export class Workbook {
         return this._namedRange;
     }
 
-    nextSheet(start: number): Nullable<Worksheet> {
-        if (start >= 0) {
+    activateSheetByIndex(index: number): Nullable<Worksheet> {
+        if (index >= 0) {
             const { sheetOrder } = this._config;
-            for (let i = start; i < sheetOrder.length; i++) {
+            for (let i = index; i < sheetOrder.length; i++) {
                 const worksheet = this._worksheets.get(sheetOrder[i]);
                 if (worksheet && !worksheet.isSheetHidden()) {
+                    worksheet.activate();
                     return worksheet;
                 }
             }
-            if (start < sheetOrder.length) {
-                for (let i = start - 1; i >= 0; i--) {
+            if (index < sheetOrder.length) {
+                for (let i = index - 1; i >= 0; i--) {
                     const worksheet = this._worksheets.get(sheetOrder[i]);
                     if (worksheet && !worksheet.isSheetHidden()) {
+                        worksheet.activate();
                         return worksheet;
                     }
                 }
             }
-            return this._worksheets.get(sheetOrder[sheetOrder.length - 1]);
+            const worksheet = this._worksheets.get(
+                sheetOrder[sheetOrder.length - 1]
+            );
+            if (worksheet) {
+                worksheet.activate();
+            }
+            return worksheet;
         }
     }
 
@@ -757,7 +765,11 @@ export class Workbook {
                     } as IRemoveSheetActionData
                 )
             );
-            aftert.notifyObservers({ index, sheetId });
+            aftert.notifyObservers({
+                index,
+                sheetId,
+            });
+            this.activateSheetByIndex(index);
         }
     }
 

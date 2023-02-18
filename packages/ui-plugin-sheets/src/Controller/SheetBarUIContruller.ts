@@ -1,5 +1,5 @@
 import { BaseMenuItem, BaseUlProps, ColorPicker } from '@univerjs/base-ui';
-import { Nullable, Plugin, CommandManager, SheetActionBase, UIObserver, SetSheetOrderAction, InsertSheetAction, SetWorkSheetNameAction, SetTabColorAction, SetWorkSheetHideAction, SetWorkSheetActivateAction, SetWorkSheetStatusAction } from '@univerjs/core';
+import { Nullable, Plugin, CommandManager, SheetActionBase, UIObserver, SetSheetOrderAction, InsertSheetAction, SetWorkSheetNameAction, SetTabColorAction, SetWorkSheetHideAction, SetWorkSheetActivateAction, SetWorkSheetStatusAction, RemoveSheetAction } from '@univerjs/core';
 import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '..';
 import { SheetBar } from "../View/SheetBar";
 import styles from '../View/SheetBar/index.module.less';
@@ -96,7 +96,9 @@ export class SheetBarUIController {
             },
         }));
         this._sheetIndex = sheets.findIndex((sheet) => sheet.getStatus() === 1);
-        this._dataId = sheets[this._sheetIndex].getSheetId();
+        if (this._sheetIndex > -1) {
+            this._dataId = sheets[this._sheetIndex].getSheetId();
+        }
     }
 
     protected _refreshComponent(): void {
@@ -178,10 +180,13 @@ export class SheetBarUIController {
                     case SetWorkSheetActivateAction.NAME:
                     case SetSheetOrderAction.NAME:
                     case InsertSheetAction.NAME:
+                    case RemoveSheetAction.NAME:
                     case SetWorkSheetNameAction.NAME:
+                    case InsertSheetAction.NAME:
                     case SetTabColorAction.NAME:
                     case SetWorkSheetHideAction.NAME:
                     case SetWorkSheetStatusAction.NAME: {
+                        debugger
                         // update data;
                         this._refreshSheetData();
                         // set ui bar sheetList;

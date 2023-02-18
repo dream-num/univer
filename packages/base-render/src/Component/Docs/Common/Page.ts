@@ -169,10 +169,9 @@ function _createSkeletonHeader(
         drawings,
     };
 
-    const { blockElements, blockElementOrder } = headerOrFooterBody;
+    const { blockElements } = headerOrFooterBody;
     const blockElementArray: IBlockElement[] = [];
-    blockElementOrder.forEach((bId: string) => {
-        const dcd = blockElements[bId];
+    blockElements.forEach((dcd: IBlockElement) => {
         blockElementArray.push(dcd);
     });
 

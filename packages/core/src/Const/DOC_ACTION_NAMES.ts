@@ -20,4 +20,6 @@ export enum DOC_ACTION_NAMES {
     INSERT_SECTION_ACTION_NAME = 'InsertSectionAction',
     UPDATE_BULLET_ACTION_NAME = 'UpdateBulletAction',
     UPDATE_PARAGRAPH_BULLET_ACTION_NAME = 'UpdateParagraphBulletAction',
+
+    TEXT_INDEX_ADJUST_ACTION_NAME = 'TextIndexAdjustAction',
 }

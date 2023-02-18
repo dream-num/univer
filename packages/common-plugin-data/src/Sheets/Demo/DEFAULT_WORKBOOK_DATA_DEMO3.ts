@@ -3,15 +3,15 @@ import { BlockType, BooleanNumber, BorderStyleTypes, IDocumentData, IWorkbookCon
 const richTextDemo: IDocumentData = {
     id: 'd',
     body: {
-        blockElements: {
-            oneParagraph: {
+        blockElements: [
+            {
                 blockId: 'oneParagraph',
                 st: 0,
                 ed: 15,
                 blockType: BlockType.PARAGRAPH,
                 paragraph: {
-                    elements: {
-                        oneElement: {
+                    elements: [
+                        {
                             eId: 'oneElement',
                             st: 0,
                             ed: 15,
@@ -25,7 +25,13 @@ const richTextDemo: IDocumentData = {
                                 },
                             },
                         },
-                        twoElement: {
+                        {
+                            eId: 'breakElement',
+                            et: ParagraphElementType.PAGE_BREAK,
+                            st: 0,
+                            ed: 0,
+                        },
+                        {
                             eId: 'twoElement',
                             st: 0,
                             ed: 15,
@@ -39,7 +45,13 @@ const richTextDemo: IDocumentData = {
                                 },
                             },
                         },
-                        threeElement: {
+                        {
+                            eId: 'breakElement1',
+                            et: ParagraphElementType.PAGE_BREAK,
+                            st: 0,
+                            ed: 0,
+                        },
+                        {
                             eId: 'threeElement',
                             st: 0,
                             ed: 15,
@@ -53,7 +65,13 @@ const richTextDemo: IDocumentData = {
                                 },
                             },
                         },
-                        fourElement: {
+                        {
+                            eId: 'breakElement2',
+                            et: ParagraphElementType.PAGE_BREAK,
+                            st: 0,
+                            ed: 0,
+                        },
+                        {
                             eId: 'fourElement',
                             st: 0,
                             ed: 15,
@@ -67,7 +85,13 @@ const richTextDemo: IDocumentData = {
                                 },
                             },
                         },
-                        fiveElement: {
+                        {
+                            eId: 'breakElement3',
+                            et: ParagraphElementType.PAGE_BREAK,
+                            st: 0,
+                            ed: 0,
+                        },
+                        {
                             eId: 'fiveElement',
                             st: 0,
                             ed: 15,
@@ -81,44 +105,6 @@ const richTextDemo: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'oneElement',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
-                        {
-                            elementId: 'breakElement',
-                            paragraphElementType: ParagraphElementType.PAGE_BREAK,
-                        },
-                        {
-                            elementId: 'twoElement',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
-                        {
-                            elementId: 'breakElement1',
-                            paragraphElementType: ParagraphElementType.PAGE_BREAK,
-                        },
-                        {
-                            elementId: 'threeElement',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
-                        {
-                            elementId: 'breakElement2',
-                            paragraphElementType: ParagraphElementType.PAGE_BREAK,
-                        },
-                        {
-                            elementId: 'fourElement',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
-                        {
-                            elementId: 'breakElement2',
-                            paragraphElementType: ParagraphElementType.PAGE_BREAK,
-                        },
-                        {
-                            elementId: 'fiveElement',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                     paragraphStyle: {
                         spaceAbove: 10,
@@ -126,8 +112,7 @@ const richTextDemo: IDocumentData = {
                     },
                 },
             },
-        },
-        blockElementOrder: ['oneParagraph'],
+        ],
     },
     documentStyle: {
         pageSize: {

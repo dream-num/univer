@@ -1,5 +1,5 @@
-import { BlockType, ICellData, IDocumentData, IElementsOrder, IRangeData, IStyleData, ITextDecoration, Tools } from '@univerjs/core';
-import { pxToPt } from '@univerjs/base-render';
+import { BlockType, ICellData, IDocumentData, IElement, IRangeData, IStyleData, ITextDecoration, Tools } from '@univer/core';
+import { pxToPt } from '@univer/base-render';
 import { textTrim } from '../Utils';
 
 // TODO: move to Utils
@@ -25,8 +25,7 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
     if (nodeList.length === 1 && nodeList[0].nodeName === '#text') {
         return nodeList[0].textContent as string;
     }
-    const elements = {};
-    const elementOrder: IElementsOrder[] = [];
+    const elements: IElement[] = [];
     let ed = 0;
 
     for (let i = 0; i < nodeList.length; i++) {
@@ -47,7 +46,7 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
             ed = +item.length;
             let eId = Tools.generateRandomId(6);
 
-            elements[eId] = {
+            elements.push({
                 eId,
                 st: 0,
                 ed: item.length - 1,
@@ -56,13 +55,7 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
                     ct: item,
                     ts: textStyle,
                 },
-            };
-
-            elementOrder.push({
-                elementId: eId,
-                paragraphElementType: 0,
             });
-
             // // 如果有 \n 说明有换行，另起一段
             // if (item.includes('\n')) {
             //     const pStart = cot.length > 0 ? cot[cot.length].ed : 0;
@@ -97,18 +90,17 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
     let p = {
         id: Tools.generateRandomId(6),
         body: {
-            blockElements: {
-                [blockId]: {
+            blockElements: [
+                {
                     blockId,
                     st: 0,
                     ed,
                     blockType: 0,
                     paragraph: {
                         elements,
-                        elementOrder,
                     },
                 },
-                b: {
+                {
                     blockId: 'b',
                     st: 0,
                     ed: 0,
@@ -119,8 +111,7 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
                         sectionType: 0,
                     },
                 },
-            },
-            blockElementOrder: [blockId, 'b'],
+            ],
         },
         documentStyle: {},
     };

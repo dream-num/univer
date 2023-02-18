@@ -775,9 +775,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         document.documentStyle.renderConfig = renderConfig;
 
         const blockElements = document.body.blockElements;
-        const blockKeys = Object.keys(document.body.blockElements);
-        for (let key of blockKeys) {
-            const blockElement = blockElements[key];
+        for (let blockElement of blockElements) {
             // if (blockElement.blockType === BlockType.SECTION_BREAK) {
             //     if (!blockElement.sectionBreak) {
             //         blockElement.sectionBreak = {};
@@ -829,8 +827,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         const documentData: IDocumentData = {
             id: 'd',
             body: {
-                blockElements: {
-                    oneParagraph: {
+                blockElements: [
+                    {
                         blockId: 'oneParagraph',
                         st: 0,
                         ed: contentLength,
@@ -839,8 +837,8 @@ export class SpreadsheetSkeleton extends Skeleton {
                             paragraphStyle: {
                                 horizontalAlign,
                             },
-                            elements: {
-                                oneElement: {
+                            elements: [
+                                {
                                     eId: 'oneElement',
                                     st: 0,
                                     ed: contentLength,
@@ -850,8 +848,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                                         ts: textStyle,
                                     },
                                 },
-                            },
-                            elementOrder: [{ elementId: 'oneElement', paragraphElementType: ParagraphElementType.TEXT_RUN }],
+                            ],
                         },
                     },
                     // oneSectionBreak: {
@@ -867,8 +864,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                     //         // contentDirection: textDirection!,
                     //     },
                     // },
-                },
-                blockElementOrder: ['oneParagraph'],
+                ],
             },
             documentStyle: {
                 pageSize: {

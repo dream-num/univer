@@ -2,9 +2,9 @@ import {
     IWorkbookConfig,
     IWorksheetConfig,
     ICellData,
-    IElementsOrder,
     ITextStyle,
     IStyleData,
+    IElement,
 } from '../../Interfaces';
 import { Tools } from '../Tools';
 import { IKeyValue } from '../Types';
@@ -173,8 +173,7 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                         newSheet.cellData[cellItem.r][cellItem.c];
 
                     if (cell?.ct?.t === 'inlineStr') {
-                        const elements = {};
-                        const elementOrder: IElementsOrder[] = [];
+                        const elements: IElement[] = [];
 
                         cell.ct.s.forEach((element: any) => {
                             const textStyle: ITextStyle = {};
@@ -228,7 +227,7 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                             }
 
                             const eId = Tools.generateRandomId(6);
-                            elements[eId] = {
+                            elements.push({
                                 eId,
                                 st: 0,
                                 ed: element.v.length - 1,
@@ -237,30 +236,23 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                                     ct: element.v,
                                     ts: textStyle,
                                 },
-                            };
-
-                            elementOrder.push({
-                                elementId: eId,
-                                paragraphElementType: 0,
                             });
                         });
 
                         newCell.p = {
                             id: Tools.generateRandomId(6),
                             body: {
-                                blockElements: {
-                                    p1: {
+                                blockElements: [
+                                    {
                                         blockId: 'p1',
                                         st: 0,
                                         ed: cell.ct.s.length - 1,
                                         blockType: 0,
                                         paragraph: {
                                             elements,
-                                            elementOrder,
                                         },
                                     },
-                                },
-                                blockElementOrder: ['p1'],
+                                ],
                             },
                             documentStyle: {},
                         };

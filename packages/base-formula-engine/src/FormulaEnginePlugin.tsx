@@ -1,6 +1,6 @@
-import { SheetContext, IGridRange, IUnitRange, Plugin, PLUGIN_NAMES } from '@univer/core';
+import { SheetContext, IGridRange, IUnitRange, Plugin, PLUGIN_NAMES } from '@univerjs/core';
 
-import { IOCContainer } from '@univer/core';
+import { IOCContainer } from '@univerjs/core';
 import { LexerTreeMaker } from './Analysis/Lexer';
 import { FormulaEnginePluginObserver } from './Basics/Observer';
 import { AstTreeMaker } from './Analysis/Parser';

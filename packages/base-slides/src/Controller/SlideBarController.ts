@@ -1,4 +1,4 @@
-import { ISlidePage, PLUGIN_NAMES } from '@univer/core';
+import { ISlidePage, PLUGIN_NAMES } from '@univerjs/core';
 import { SlidePlugin } from '../SlidePlugin';
 import { SlideBar } from '../View/UI/SlideBar/SlideBar';
 

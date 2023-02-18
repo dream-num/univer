@@ -1,0 +1,99 @@
+@import '../../Basics/CSS/Skin/base.module.less';
+
+.slider {
+    --dif: calc(var(--max) - var(--min));
+    display: grid;
+    grid-template: repeat(2, -webkit-max-content) 1em/1fr 1fr;
+    grid-template: repeat(2, max-content) 1em/1fr 1fr;
+    position: relative;
+    margin: 1em auto;
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(0deg, #ccc 1em, transparent 0);
+}
+
+.slider::before,
+.slider::after {
+    grid-column: 1 / span 2;
+    grid-row: 3;
+    height: 2px;
+    background: var(--primary-color);
+    content: '';
+}
+
+// .slider::before {
+//     margin-left: calc((var(--a) - var(--min))/var(--dif)*100%);
+//     width: calc((var(--b) - var(--a))/var(--dif)*100%);
+// }
+
+// .slider::after {
+//     margin-left: calc((var(--b) - var(--min))/var(--dif)*100%);
+//     width: calc((var(--a) - var(--b))/var(--dif)*100%);
+// }
+
+[id='multi-lbl'] {
+    grid-column: 1 / span 2;
+}
+
+.sr-only {
+    position: absolute;
+    -webkit-clip-path: inset(50%);
+    clip-path: inset(50%);
+}
+
+input[type='range'] {
+    grid-column: 1 / span 2;
+    grid-row: 3;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    margin: 0;
+    background: none;
+    /* get rid of white Chrome background */
+    color: red;
+    pointer-events: none;
+}
+
+input[type='range']::-webkit-slider-runnable-track,
+input[type='range']::-webkit-slider-thumb,
+input[type='range'] {
+    -webkit-appearance: none;
+}
+
+input[type='range']::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 100%;
+    background: none;
+}
+
+input[type='range']::-moz-range-track {
+    width: 100%;
+    height: 100%;
+    background: none;
+}
+
+input[type='range']::-webkit-slider-thumb {
+    border: 1px solid var(--primary-color);
+    /* get rid of Firefox thumb border */
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    /* get rid of Firefox corner rounding */
+    background: #fff;
+    pointer-events: auto;
+    transform: translateY(-50% + 8px);
+    cursor: pointer;
+}
+
+input[type='range']::-moz-range-thumb {
+    /* get rid of Firefox thumb border */
+    border: 1px solid var(--primary-color);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    /* get rid of Firefox corner rounding */
+    background: #fff;
+    pointer-events: auto;
+    transform: translateY(-50% + 8px);
+    cursor: pointer;
+}

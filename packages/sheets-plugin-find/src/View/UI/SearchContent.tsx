@@ -1,5 +1,5 @@
-import { BaseComponentRender, BaseComponentSheet, Component } from '@univer/base-component';
-import { Nullable } from '@univer/core';
+import { BaseComponentRender, BaseComponentSheet, Component } from '@univerjs/base-ui';
+import { Nullable } from '@univerjs/core';
 import { FIND_PLUGIN_NAME } from '../../Const/PLUGIN_NAME';
 import { FindPlugin } from '../../FindPlugin';
 import styles from './index.module.less';

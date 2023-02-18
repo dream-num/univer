@@ -1,4 +1,4 @@
-import { getColor, RegularPolygon, Documents, DocumentSkeleton, CustomObject, IPageRenderConfig, Transform, ptToPx, COLORS, Rect } from '@univer/base-render';
+import { getColor, RegularPolygon, Documents, DocumentSkeleton, CustomObject, IPageRenderConfig, Transform, ptToPx, COLORS, Rect } from '@univerjs/base-render';
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 
 const PAGE_VIEW_BACKGROUND = 'page_view_background';
@@ -27,7 +27,7 @@ export class PageView extends BaseView {
         });
 
         // const object = scene.fuzzyMathObjects('__TestSelection__')[0];
-        // const ctx = scene.getEngine()?.getCanvas().getContext();
+        // const ctx = scene.getEngine()?.getCanvas().getGlobalContext();
         // object.onTransformChangeObservable.add((state) => {
         //     if (!ctx) {
         //         return;

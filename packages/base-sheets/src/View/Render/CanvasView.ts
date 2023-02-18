@@ -1,5 +1,5 @@
-import { Engine, EVENT_TYPE, IScrollObserverParam, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univer/base-render';
-import { EventState, Worksheet } from '@univer/core';
+import { Engine, EVENT_TYPE, IScrollObserverParam, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univerjs/base-render';
+import { EventState, Worksheet } from '@univerjs/core';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from './BaseView';
 import { SheetView } from './Views/SheetView';
 import './Views';
@@ -18,7 +18,8 @@ export class CanvasView {
     private _initialize() {
         const engine = this._engine;
         const context = this._plugin.getContext();
-        const workbook = context.getWorkBook();
+        // const workbook = context.getWorkBook();
+        const workbook = this._plugin.getWorkbook();
         let worksheet = workbook.getActiveSheet();
         if (!worksheet) {
             worksheet = workbook.getSheets()[0];

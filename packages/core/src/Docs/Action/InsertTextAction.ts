@@ -16,6 +16,8 @@ export class InsertTextAction extends DocActionBase<
     IInsertTextActionData,
     IDeleteTextActionData
 > {
+    static NAME = 'InsertTextAction';
+
     constructor(
         actionData: IInsertTextActionData,
         commandUnit: CommandUnit,

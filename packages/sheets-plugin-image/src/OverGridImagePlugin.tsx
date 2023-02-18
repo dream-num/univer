@@ -1,7 +1,7 @@
-import { ISlotElement, ISlotProps, IToolBarItemProps } from '@univer/base-component';
-import { Command, Plugin, PLUGIN_NAMES, Nullable, Worksheet, IOCContainer, UniverSheet } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
-import { IPictureProps } from '@univer/base-render';
+import { ISlotElement, ISlotProps, IToolbarItemProps } from '@univerjs/base-ui';
+import { Command, Plugin, PLUGIN_NAMES, Nullable, Worksheet, IOCContainer, UniverSheet } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
+import { IPictureProps } from '@univerjs/base-render';
 import { ACTION_NAMES } from './Const';
 import { ImagePluginObserve, install, uninstall } from './Basic/Observer';
 import { OVER_GRID_IMAGE_PLUGIN_NAME } from './Const/PLUGIN_NAME';
@@ -118,7 +118,7 @@ export class OverGridImagePlugin extends Plugin<ImagePluginObserve> {
             type: ISlotElement.JSX,
             label: <ImagePanelUI normal={NormalType.MoveAndSize} fixed={false} borderStyle={BorderType.Solid} borderWidth={1} borderRadius={1} borderColor={'#000000'} />,
         };
-        const button: IToolBarItemProps = {
+        const button: IToolbarItemProps = {
             locale: OVER_GRID_IMAGE_PLUGIN_NAME,
             type: ISlotElement.JSX,
             show: true,

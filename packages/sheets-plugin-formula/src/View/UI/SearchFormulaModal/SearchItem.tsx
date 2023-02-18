@@ -1,5 +1,4 @@
-import { Component } from '@univer/base-component';
-import { CellRange } from '@univer/base-sheets';
+import { Component } from '@univerjs/base-ui';
 import { FORMULA_PLUGIN_NAME, P } from '../../../Basic';
 import { FunParams } from '../../../Controller/SearchFormulaModalController';
 import { FormulaPlugin } from '../../../FormulaPlugin';
@@ -27,7 +26,7 @@ export class SearchItem extends Component<IProps, IState> {
     }
 
     componentDidMount() {
-        const plugin = this._context.getPluginManager().getPluginByName<FormulaPlugin>(FORMULA_PLUGIN_NAME)!;
+        const plugin = this.getContext().getPluginManager().getPluginByName<FormulaPlugin>(FORMULA_PLUGIN_NAME)!;
         plugin.getObserver('onSearchItemDidMountObservable')!.notifyObservers(this);
 
         const { funParams } = this.props;

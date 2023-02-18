@@ -1,4 +1,4 @@
-import { IScale } from '@univer/core';
+import { IScale } from '@univerjs/core';
 import { fixLineWidthByScale, getColor } from '../../../Basics/Tools';
 import { MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../Basics/Const';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';

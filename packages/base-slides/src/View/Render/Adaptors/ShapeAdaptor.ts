@@ -1,5 +1,5 @@
-import { Rect, Shape } from '@univer/base-render';
-import { getColorStyle, IPageElement, PageElementType, ShapeType } from '@univer/core';
+import { Rect, Shape } from '@univerjs/base-render';
+import { getColorStyle, IPageElement, PageElementType, ShapeType } from '@univerjs/core';
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 
 export class ShapeAdaptor extends ObjectAdaptor {

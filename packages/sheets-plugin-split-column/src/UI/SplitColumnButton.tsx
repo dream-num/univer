@@ -1,13 +1,13 @@
-import { BaseComponentRender, BaseComponentSheet, Component, IToolBarItemProps, ModalProps } from '@univer/base-component';
-import { Nullable, Observer, Workbook } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
+import { BaseComponentRender, BaseComponentSheet, Component, IToolbarItemProps, ModalProps } from '@univerjs/base-ui';
+import { Nullable, Observer, Workbook } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
 import { IProps } from '../IData/ISplitColumn';
 import styles from './index.module.less';
 import { SplitColumnContent } from './SplitColumnContent';
 
 // Types for state
 interface IState {
-    splitColumn: IToolBarItemProps;
+    splitColumn: IToolbarItemProps;
     modalData: ModalProps[];
     notice: Notice[];
 }
@@ -28,7 +28,7 @@ export class SplitColumnButton extends Component<IProps, IState> {
         this.Render = component.getComponentRender();
         const DivideIcon = this.Render.renderFunction('DivideIcon');
 
-        const splitColumn: IToolBarItemProps = {
+        const splitColumn: IToolbarItemProps = {
             locale: 'splitColumn.splitColumnLabel',
             type: 'single',
             label: <DivideIcon />,

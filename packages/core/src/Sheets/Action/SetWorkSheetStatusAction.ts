@@ -16,6 +16,8 @@ export interface ISetWorkSheetStatusActionData extends ISheetActionData {
  * @internal
  */
 export class SetWorkSheetStatusAction extends SheetActionBase<ISetWorkSheetStatusActionData> {
+    static NAME = 'SetWorkSheetStatusAction';
+
     constructor(
         actionData: ISetWorkSheetStatusActionData,
         commandUnit: CommandUnit,

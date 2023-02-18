@@ -1,4 +1,4 @@
-import { SheetActionBase, ActionObservers, ISheetActionData, Workbook } from '@univer/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, Workbook } from '@univerjs/core';
 import { AlternatingColorsPlugin } from '../../AlternatingColorsPlugin';
 import { AddBanding } from '../../Apply/AddBanding';
 import { DeleteBanding } from '../../Apply/DeleteBanding';

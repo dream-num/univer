@@ -1,6 +1,6 @@
-import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
-import { SheetContext, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
+import { IToolbarItemProps, ISlotElement } from '@univerjs/base-ui';
+import { SheetContext, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
 import { SCREENSHOT_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 import { IConfig } from './IData/IScreenshot';
 import { en, zh } from './Locale';
@@ -33,7 +33,7 @@ export class ScreenshotPlugin extends Plugin {
         });
         const config: IConfig = { context };
 
-        const item: IToolBarItemProps = {
+        const item: IToolbarItemProps = {
             locale: SCREENSHOT_PLUGIN_NAME,
             type: ISlotElement.JSX,
             show: true,

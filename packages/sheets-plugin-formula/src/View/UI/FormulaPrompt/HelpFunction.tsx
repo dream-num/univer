@@ -1,24 +1,6 @@
-import { Component } from '@univer/base-component';
-import { FORMULA_PLUGIN_NAME } from '../../../Basic';
-import { lang } from '../../../Controller/locale';
-import { FormulaPlugin } from '../../../FormulaPlugin';
+import { Component, createRef } from '@univerjs/base-ui';
+import { FormulaParamType, FormulaType } from '../../../Basic';
 import styles from './index.module.less';
-
-type Formula = {
-    n: string;
-    t: number;
-    d: string;
-    a: string;
-    m: number[];
-    p: Array<{
-        name: string;
-        detail: string;
-        example: string;
-        require: string;
-        repeat: string;
-        type: string;
-    }>;
-};
 
 interface IProps {
     funName: any;
@@ -27,10 +9,7 @@ interface IProps {
 
 interface IState {
     activeIndex: number;
-    lang: string;
-    locale: [];
-    formula: [];
-    functionInfo: any;
+    functionInfo: FormulaType;
     helpFormulaActive: boolean;
     position: {
         left: number;
@@ -39,13 +18,12 @@ interface IState {
 }
 
 export class HelpFunction extends Component<IProps, IState> {
+    contentRef = createRef<HTMLDivElement>();
+
     initialize() {
         this.state = {
             activeIndex: 0,
-            lang: '',
-            locale: [],
-            formula: [],
-            functionInfo: null,
+            functionInfo: {},
             helpFormulaActive: false,
             position: {
                 left: 0,
@@ -54,36 +32,28 @@ export class HelpFunction extends Component<IProps, IState> {
         };
     }
 
-    componentWillMount() {
-        this.setLocale();
-    }
+    componentWillMount() {}
 
-    componentDidMount() {
-        const plugin = this._context.getPluginManager().getPluginByName<FormulaPlugin>(FORMULA_PLUGIN_NAME)!;
-        plugin.getObserver('onHelpFunctionDidMountObservable')!.notifyObservers(this);
-    }
+    componentDidMount() {}
 
-    updateState(helpFormulaActive: boolean, activeIndex: number = 0, functionName: string = '', position = { left: 0, top: 0 }) {
-        const functionInfo = this.state.formula.find((item: any) => item.n === functionName) || {};
-        this.setState({
-            helpFormulaActive,
-            functionInfo,
-            activeIndex,
-            position,
-        });
+    updateState(helpFormulaActive: boolean, activeIndex: number = 0, functionInfo: FormulaType = {}, position = { left: 0, top: 0 }, cb?: () => void) {
+        this.setState(
+            {
+                helpFormulaActive,
+                functionInfo,
+                activeIndex,
+                position,
+            },
+            cb
+        );
     }
 
     getState() {
         return this.state;
     }
 
-    setLocale() {
-        const locale = this._context.getLocale().options.currentLocale as string;
-        this.setState({
-            lang: locale,
-            formula: lang[`${locale}`],
-            functionInfo: lang[`${locale}`][0],
-        });
+    getContentRef() {
+        return this.contentRef;
     }
 
     render(props: IProps, state: IState) {
@@ -93,19 +63,25 @@ export class HelpFunction extends Component<IProps, IState> {
             <div
                 className={styles.helpFunction}
                 style={{ display: helpFormulaActive ? 'block' : 'none', position: 'absolute', left: `${position.left}px`, top: `${position.top}px` }}
+                ref={this.contentRef}
             >
                 <div class={styles.helpFunctionTitle}>
                     <Help title={functionInfo.n} value={functionInfo.p} type="name" active={activeIndex} />
                 </div>
                 <div className={styles.helpFunctionContent}>
-                    <div>示例</div>
+                    <div>{this.getLocale('formula.formulaMore.helpExample')}</div>
                     <Help title={functionInfo.n} value={functionInfo.p} type="example" active={activeIndex} />
-                    <Params title="摘要" value={functionInfo.d} />
+                    <Params title={this.getLocale('formula.formulaMore.helpAbstract')} value={this.getLocale(functionInfo.d)} />
                     <>
                         {functionInfo &&
                             functionInfo.p &&
-                            functionInfo.p.map((item: any, i: number) => (
-                                <Params className={activeIndex === i ? styles.helpFunctionActive : ''} title={item.name} value={item.detail} active={activeIndex} />
+                            functionInfo.p.map((item: FormulaParamType, i: number) => (
+                                <Params
+                                    className={activeIndex === i ? styles.helpFunctionActive : ''}
+                                    title={this.getLocale(item.name)}
+                                    value={this.getLocale(item.detail)}
+                                    active={activeIndex}
+                                />
                             ))}
                     </>
                 </div>
@@ -113,19 +89,46 @@ export class HelpFunction extends Component<IProps, IState> {
         );
     }
 }
-const Params = (props: any) => (
+
+interface IParamsProps {
+    className?: string;
+    title?: string;
+    value?: string;
+    active?: number;
+}
+
+interface IParamsState {}
+
+const Params = (props: IParamsProps) => (
     <div className={`${styles.helpFunctionContentParams} ${props.className}`}>
         <div className={styles.helpFunctionContentTitle}>{props.title}</div>
         <div className={styles.helpFunctionContentDetail}>{props.value}</div>
     </div>
 );
-const Help = (props: any) => (
-    <div>
-        <span>
-            {props.title}
-            {'('}
-        </span>
-        {props.value && props.value.map((item: any, i: number) => <span className={props.active === i ? styles.helpFunctionActive : ''}>{item[`${props.type}`]},</span>)}
-        <span>{')'}</span>
-    </div>
-);
+
+interface IHelpProps {
+    title?: string;
+    value?: FormulaParamType[];
+    type: string;
+    active: number;
+}
+
+interface IHelpState {}
+
+class Help extends Component<IHelpProps, IHelpState> {
+    render(props: IHelpProps, state: IHelpState) {
+        return (
+            <div>
+                <span>
+                    {props.title}
+                    {'('}
+                </span>
+                {props.value &&
+                    props.value.map((item: FormulaParamType, i: number) => (
+                        <span className={props.active === i ? styles.helpFunctionActive : ''}>{this.getLocale(item[`${props.type}`])},</span>
+                    ))}
+                <span>{')'}</span>
+            </div>
+        );
+    }
+}

@@ -1,4 +1,4 @@
-import { ColumnSeparatorType, ISectionColumnProperties } from '@univer/core';
+import { ColumnSeparatorType, ISectionColumnProperties } from '@univerjs/core';
 import { IDocumentSkeletonColumn } from '../../../Basics/IDocumentSkeletonCached';
 
 export function createSkeletonColumn(

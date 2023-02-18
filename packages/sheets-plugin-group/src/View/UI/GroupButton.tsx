@@ -1,23 +1,21 @@
-import { Nullable, Observer  } from '@univer/core';
-import { ISelectButton, IToolBarItemProps, Component, BaseSelectProps } from '@univer/base-component';
+import { Nullable, Observer } from '@univerjs/core';
+import { ISelectButton, IToolbarItemProps, Component, BaseSelectProps } from '@univerjs/base-ui';
 
 interface IProps {}
 // Types for state
 interface IState {
-    group: IToolBarItemProps;
+    group: IToolbarItemProps;
 }
 
 export class GroupButton extends Component<IProps, IState> {
-    
     private _localeObserver: Nullable<Observer<void>>;
     initialize(props: IProps) {
-
         const OrderASCIcon = this.getComponentRender().renderFunction('OrderASCIcon');
         const OrderDESCIcon = this.getComponentRender().renderFunction('OrderDESCIcon');
         const OrderIcon = this.getComponentRender().renderFunction('OrderIcon');
         const NextIcon = this.getComponentRender().renderFunction('NextIcon');
 
-        const group: IToolBarItemProps = {
+        const group: IToolbarItemProps = {
             locale: 'group',
             type: 'select',
             label: <OrderASCIcon />,
@@ -55,9 +53,12 @@ export class GroupButton extends Component<IProps, IState> {
 
         // subscribe Locale change event
 
-        this._localeObserver = this._context.getObserverManager().getObserver('onAfterChangeUILocaleObservable','core')?.add(() => {
-            this.setLocale();
-        });
+        this._localeObserver = this._context
+            .getObserverManager()
+            .getObserver('onAfterChangeUILocaleObservable', 'core')
+            ?.add(() => {
+                this.setLocale();
+            });
     }
     /**
      * destory
@@ -77,7 +78,7 @@ export class GroupButton extends Component<IProps, IState> {
             item.tooltipRight = locale.get(`${item.locale}RightLabel`);
 
             // set current Locale string for select
-            item.children?.forEach((ele: IToolBarItemProps) => {
+            item.children?.forEach((ele: IToolbarItemProps) => {
                 if (ele.locale) {
                     ele.label = locale.get(`${ele.locale}`);
                 }
@@ -99,6 +100,17 @@ export class GroupButton extends Component<IProps, IState> {
         const { group } = state;
         const Select = this.getComponentRender().renderFunction('Select');
         // Set Provider for entire Container
-        return <Select tooltip={group.tooltip} tooltipRight={group.tooltipRight} border={group.border} needChange={group.needChange} key={group.locale} children={group.children as BaseSelectProps[]} label={group.label} icon={group.icon} />;
+        return (
+            <Select
+                tooltip={group.tooltip}
+                tooltipRight={group.tooltipRight}
+                border={group.border}
+                needChange={group.needChange}
+                key={group.locale}
+                children={group.children as BaseSelectProps[]}
+                label={group.label}
+                icon={group.icon}
+            />
+        );
     }
 }

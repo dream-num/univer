@@ -1,6 +1,7 @@
-import { BaseCellEditExtension, BaseCellEditExtensionFactory, ICell, SheetPlugin } from '@univer/base-sheets';
-import { IFormulaData } from '@univer/base-formula-engine';
-import { IRangeData, Nullable, PLUGIN_NAMES } from '@univer/core';
+import { IFormulaData } from '@univerjs/base-formula-engine';
+import { BaseCellEditExtension, BaseCellEditExtensionFactory, ICell } from '@univerjs/base-ui';
+import { IRangeData, Nullable } from '@univerjs/core';
+import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
 import { FormulaPlugin } from '../../FormulaPlugin';
 
 export class FormulaCellEditExtension extends BaseCellEditExtension {
@@ -65,7 +66,7 @@ export class FormulaCellEditExtensionFactory extends BaseCellEditExtensionFactor
     checkArrayFormValue(cell: ICell, unitId: string): Nullable<string> {
         const { row, column } = cell;
         let formula;
-        const arrayFormulaData = this._plugin.getFormulaController().getArrayFormulaData();
+        const arrayFormulaData = this._plugin.getFormulaController().getDataModel().getArrayFormulaData();
 
         if (!arrayFormulaData) return null;
 
@@ -76,13 +77,7 @@ export class FormulaCellEditExtensionFactory extends BaseCellEditExtensionFactor
                 const { startRow, startColumn, endRow, endColumn } = value;
                 if (row >= startRow && row < endRow && column >= startColumn && column < endColumn) {
                     formula = '';
-                    this._plugin
-                        .getContext()
-                        .getPluginManager()
-                        .getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)
-                        .getFormulaBarController()
-                        .getFormulaBar()
-                        .setFormulaContent('');
+                    this._plugin.getContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME).setFormulaContent('');
                     return false;
                 }
             });

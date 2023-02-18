@@ -1,7 +1,7 @@
 
 
 export * from '../index';
-declare module '@univer/sheets-plugin-data-validation' { }
+declare module '@univerjs/sheets-plugin-data-validation' { }
 
 
 

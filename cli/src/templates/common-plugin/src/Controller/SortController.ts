@@ -1,4 +1,4 @@
-import { BaseComponentRender } from '@univer/base-component';
+import { BaseComponentRender } from '@univerjs/base-ui';
 import { <%= projectUpperValue %>Plugin } from '../<%= projectUpperValue %>Plugin';
 
 export class <%= projectUpperValue %>Controller {

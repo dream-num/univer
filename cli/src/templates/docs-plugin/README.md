@@ -8,14 +8,14 @@ UniverSheet Plugin <%= projectUpperValue %>
 
 ### Installation
 
-```bash
-npm i @univer/<%= projectName %>
+```shell
+npm i @univerjs/<%= projectName %>
 ```
 
 ### Usage
 
 ```js
-impport {<%= projectUpperValue %>} from '@univer/<%= projectName %>'
+import {<%= projectUpperValue %>} from '@univerjs/<%= projectName %>'
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new <%= projectUpperValue %>());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/<%= projectName %> dev
+pnpm run --filter  @univerjs/<%= projectName %> dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/<%= projectName %> dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/<%= projectName %> build
+pnpm run --filter  @univerjs/<%= projectName %> build
 ```

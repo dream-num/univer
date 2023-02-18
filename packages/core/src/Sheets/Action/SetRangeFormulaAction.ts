@@ -1,5 +1,4 @@
 import { SetRangeFormula } from '../Apply';
-import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
@@ -22,6 +21,8 @@ export class SetRangeFormulaAction extends SheetActionBase<
     ISetRangeFormulaActionData,
     ObjectMatrixPrimitiveType<string>
 > {
+    static NAME = 'SetRangeFormulaAction';
+
     constructor(
         actionData: ISetRangeFormulaActionData,
         commandUnit: CommandUnit,
@@ -62,7 +63,8 @@ export class SetRangeFormulaAction extends SheetActionBase<
         // update pre data
         const { sheetId, rangeData } = this._doActionData;
         this._oldActionData = {
-            actionName: ACTION_NAMES.SET_RANGE_FORMULA_ACTION,
+            // actionName: ACTION_NAMES.SET_RANGE_FORMULA_ACTION,
+            actionName: SetRangeFormulaAction.NAME,
             sheetId,
             cellFormula: this.do(),
             rangeData,
@@ -75,7 +77,8 @@ export class SetRangeFormulaAction extends SheetActionBase<
         if (worksheet) {
             // update current data
             this._doActionData = {
-                actionName: ACTION_NAMES.SET_RANGE_FORMULA_ACTION,
+                // actionName: ACTION_NAMES.SET_RANGE_FORMULA_ACTION,
+                actionName: SetRangeFormulaAction.NAME,
                 sheetId,
                 cellFormula: SetRangeFormula(
                     worksheet.getCellMatrix(),

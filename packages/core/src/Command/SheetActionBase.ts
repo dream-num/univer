@@ -22,6 +22,8 @@ export abstract class SheetActionBase<
     O extends ISheetActionData = D,
     R = void
 > extends ActionBase<D, O, R> {
+    protected _commandUnit: CommandUnit;
+
     protected _workbook: Workbook;
 
     protected constructor(
@@ -33,6 +35,7 @@ export abstract class SheetActionBase<
         if (commandUnit.WorkBookUnit == null) {
             throw new Error('action workbook domain can not be null!');
         }
+        this._commandUnit = commandUnit;
         this._workbook = commandUnit.WorkBookUnit;
     }
 

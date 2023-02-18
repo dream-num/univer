@@ -16,6 +16,8 @@ export class DeleteTextAction extends DocActionBase<
     IDeleteTextActionData,
     IInsertTextActionData
 > {
+    static Name = 'DeleteTextAction';
+
     constructor(
         actionData: IDeleteTextActionData,
         commandUnit: CommandUnit,

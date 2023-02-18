@@ -1,5 +1,5 @@
-import { Scene } from '@univer/base-render';
-import { Registry, Worksheet } from '@univer/core';
+import { Scene } from '@univerjs/base-render';
+import { Registry, Worksheet } from '@univerjs/core';
 import { DocPlugin } from '../../DocPlugin';
 
 export class BaseView {

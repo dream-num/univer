@@ -1,29 +1,29 @@
-import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, createRef } from '@univer/base-component';
+import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, createRef } from '@univerjs/base-ui';
 
-import { PLUGIN_NAMES } from '@univer/core';
+import { PLUGIN_NAMES } from '@univerjs/core';
 import { DocPlugin } from '../../../DocPlugin';
-import { IToolBarItemProps } from '../../../Model/ToolBarModel';
+import { IToolbarItemProps } from '../../../Model/ToolbarModel';
 import { Select } from '../Common/Select/Select';
 import { TextButton } from '../Common/TextButton/TextButton';
 import styles from './index.module.less';
 
 interface IProps extends BaseComponentProps {
     style?: JSX.CSSProperties;
-    toolList: IToolBarItemProps[];
+    toolList: IToolbarItemProps[];
     // forwardRefs?: RefObject<HTMLElement>;
 }
 
 interface IState {
-    toolList: IToolBarItemProps[];
-    moreToolList: IToolBarItemProps[];
-    defaultToolList: IToolBarItemProps[];
+    toolList: IToolbarItemProps[];
+    moreToolList: IToolbarItemProps[];
+    defaultToolList: IToolbarItemProps[];
     more: boolean;
     index: number;
     toolbarListWidths: number[];
     moreText: string;
 }
 
-export class ToolBar extends Component<IProps, IState> {
+export class Toolbar extends Component<IProps, IState> {
     toolbarWarp = createRef();
 
     toolbarRef = createRef();
@@ -103,7 +103,7 @@ export class ToolBar extends Component<IProps, IState> {
         return toolList;
     };
 
-    setToolBar = (toolList: any[]) => {
+    setToolbar = (toolList: any[]) => {
         toolList = this.resetLabel(toolList);
 
         this.setState({
@@ -112,7 +112,7 @@ export class ToolBar extends Component<IProps, IState> {
     };
 
     componentDidMount() {
-        this._context.getObserverManager().getObserver<ToolBar>('onToolBarDidMountObservable')?.notifyObservers(this);
+        this._context.getObserverManager().getObserver<Toolbar>('onToolbarDidMountObservable')?.notifyObservers(this);
     }
 
     render(props: IProps, state: IState) {

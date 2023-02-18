@@ -15,7 +15,7 @@ export default defineConfig({
             fileName: 'univer-base-sheets',
         },
         outDir: './lib',
-        sourcemap: true,
+        //sourcemap: true,
     },
     define: {
         pkgJson: { name, version },
@@ -48,14 +48,8 @@ export default defineConfig({
         preact(),
         createExternal({
             externals: {
-                '@univer/core': '@univer/core',
-                '@univer/base-render': '@univer/base-render',
-                '@univer/base-component': '@univer/base-component',
-                '@univer/style-univer': '@univer/style-univer',
-                'css-vars-ponyfill': 'css-vars-ponyfill',
-                nanoid: 'nanoid',
-                preact: 'preact',
-                react: 'react',
+                '@univerjs/core': '@univerjs/core',
+                '@univerjs/base-render': '@univerjs/base-render',
             },
         }),
     ],

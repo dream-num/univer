@@ -1,8 +1,8 @@
 /**
  * @jest-environment jsdom
  */
-import { UniverSheet } from '@univer/core';
-import { StyleUniverSheet } from '@univer/style-univer';
+import { UniverSheet } from '@univerjs/core';
+import { StyleUniverSheet } from '@univerjs/style-univer';
 import { AlternatingColorsPlugin } from '../src';
 // TODO 补充单元测试
 test('Test Banding', () => {
@@ -57,8 +57,8 @@ test('Test Banding', () => {
             outerRight: true,
             innerLeft: false,
             innerRight: false,
-            toolBar: true,
-            toolBarConfig: {
+            toolbar: true,
+            toolbarConfig: {
                 undoRedo: true,
                 font: true,
             },

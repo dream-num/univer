@@ -1,4 +1,4 @@
-import { Plugin, UniverSheet, UniverDoc, UniverSlide } from '@univer/core';
+import { Plugin, UniverSheet, UniverDoc, UniverSlide } from '@univerjs/core';
 import { zh, en } from './Locale';
 import { COLLABORATION_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
 import { CollaborationController } from './Controller/CollaborationController';
@@ -13,7 +13,6 @@ export class CollaborationPlugin extends Plugin {
     constructor(config?: ICollaborationPluginConfig) {
         super(COLLABORATION_PLUGIN_NAME);
         this.config = config || { url: '' };
-        console.log('colla---config---', config);
     }
 
     static create(config?: ICollaborationPluginConfig) {

@@ -2,7 +2,7 @@ import { CommandManager, UndoManager } from '../Command';
 import { ObservableHooks, ObserverManager } from '../Observer';
 import { HooksManager } from '../Observer/HooksManager';
 import { PluginManager } from '../Plugin';
-import { Locale, Nullable } from '../Shared';
+import { Nullable } from '../Shared';
 import { Environment } from './Environment';
 import { Univer } from './Univer';
 
@@ -18,8 +18,6 @@ export abstract class ContextBase {
 
     protected _undoManager: UndoManager;
 
-    protected _locale: Locale;
-
     protected _pluginManager: PluginManager;
 
     protected _observerManager: ObserverManager;
@@ -33,7 +31,6 @@ export abstract class ContextBase {
         this._commandManager = new CommandManager(this);
         this._environment = new Environment();
         this._hooksManager = new HooksManager();
-        this._locale = new Locale();
         this._pluginManager = new PluginManager(this);
         this._observerManager = new ObserverManager();
     }
@@ -44,10 +41,6 @@ export abstract class ContextBase {
 
     getHook<T>(path: string): Nullable<ObservableHooks<T>> {
         return this._hooksManager.getHooks<T>(path);
-    }
-
-    getLocale(): Locale {
-        return this._locale;
     }
 
     getHooksManager(): HooksManager {

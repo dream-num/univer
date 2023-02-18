@@ -1,7 +1,7 @@
 
 
 export * from '../index';
-declare module '@univer/sheets-plugin-comment' { }
+declare module '@univerjs/sheets-plugin-comment' { }
 
 // use css module
 declare module '*.less' {

@@ -5,9 +5,8 @@ import {
     ActionType,
     CommandUnit,
 } from '../../Command';
-import { ACTION_NAMES } from '../../Const';
-import { INamedRange } from '../../Interfaces/INamedRange';
-import { SetNamedRange } from '../Apply/SetNamedRange';
+import { SetNamedRange } from '../Apply';
+import { INamedRange } from '../../Interfaces';
 
 export interface ISetNamedRangeActionData extends ISheetActionData {
     namedRange: INamedRange;
@@ -18,6 +17,8 @@ export class SetNamedRangeAction extends SheetActionBase<
     ISetNamedRangeActionData,
     INamedRange
 > {
+    static NAME = 'SetNamedRangeAction';
+
     constructor(
         actionData: ISetNamedRangeActionData,
         commandUnit: CommandUnit,
@@ -29,9 +30,10 @@ export class SetNamedRangeAction extends SheetActionBase<
             ...actionData,
         };
         this._oldActionData = {
-            actionName: ACTION_NAMES.SET_NAMED_RANGE_ACTION,
-            sheetId: actionData.sheetId,
+            // actionName: ACTION_NAMES.SET_NAMED_RANGE_ACTION,
+            actionName: SetNamedRangeAction.NAME,
             namedRange: this.do(),
+            sheetId: actionData.sheetId,
         };
         this.validate();
     }
@@ -51,7 +53,8 @@ export class SetNamedRangeAction extends SheetActionBase<
         // update pre data
         const { sheetId, namedRange } = this._doActionData;
         this._oldActionData = {
-            actionName: ACTION_NAMES.SET_NAMED_RANGE_ACTION,
+            // actionName: ACTION_NAMES.SET_NAMED_RANGE_ACTION,
+            actionName: SetNamedRangeAction.NAME,
             sheetId,
             namedRange: this.do(),
         };
@@ -68,7 +71,8 @@ export class SetNamedRangeAction extends SheetActionBase<
 
         // update current data
         this._doActionData = {
-            actionName: ACTION_NAMES.SET_NAMED_RANGE_ACTION,
+            // actionName: ACTION_NAMES.SET_NAMED_RANGE_ACTION,
+            actionName: SetNamedRangeAction.NAME,
             sheetId,
             namedRange: SetNamedRange(namedRanges, namedRange),
         };

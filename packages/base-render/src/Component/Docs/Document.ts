@@ -1,4 +1,4 @@
-import { BooleanNumber, HorizontalAlign, Nullable, Observable, Observer, VerticalAlign, WrapStrategy } from '@univer/core';
+import { BooleanNumber, HorizontalAlign, Nullable, Observable, Observer, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DocComponent } from './DocComponent';
 import { IDocumentSkeletonCached, IDocumentSkeletonPage, IDocumentSkeletonSpan, LineType, PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';

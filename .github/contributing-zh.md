@@ -88,7 +88,7 @@ pnpm run --filter  [package name] [command]
 比如启动 `packages/sheets-plugin-sort` 工程的`dev`开发模式
 
 ```sh
-pnpm run --filter @univer/sheets-plugin-sort dev
+pnpm run --filter @univerjs/sheets-plugin-sort dev
 
 ```
 
@@ -361,21 +361,21 @@ pnpm install
     比如 `data-validation` 插件安装依赖
 
     ```sh
-    pnpm i --filter  @univer/sheets-plugin-data-validation
+    pnpm i --filter  @univerjs/sheets-plugin-data-validation
     ```
 
     启动开发模式
 
     ```sh
-    pnpm run --filter  @univer/sheets-plugin-data-validation dev
+    pnpm run --filter  @univerjs/sheets-plugin-data-validation dev
     ```
 
     这里用到了 pnpm 的 `--filter` 的功能来筛选出指定的插件来运行命令，更多学习内容请移步[官网 pnpm 过滤](https://pnpm.io/zh/filtering)
 
-4. 如果需要测试其他的插件和当前插件一起运行，需要在当前插件里安装您所需要的插件，比如以下命令是在`@univer/base-sheets` 插件中安装 `@univer/sheets-plugin-alternating-colors` 插件：
+4. 如果需要测试其他的插件和当前插件一起运行，需要在当前插件里安装您所需要的插件，比如以下命令是在`@univerjs/base-sheets` 插件中安装 `@univerjs/sheets-plugin-alternating-colors` 插件：
 
     ```sh
-    pnpm add @univer/sheets-plugin-alternating-colors --filter @univer/base-sheets
+    pnpm add @univerjs/sheets-plugin-alternating-colors --filter @univerjs/base-sheets
     ```
 
     如果您还有协同开发的朋友，他本地的开发需要执行`pnpm install`来链接到安装的插件
@@ -445,7 +445,7 @@ pnpm install
 
 ### 挂载设置面板
 
-依据插件模板生成的新插件，默认会将插件里的 DOM 元素挂载到界面上的工具栏，内部是在插件里引入了`@univer/base-sheets`，然后通过其 API `addButton` 来动态挂载 DOM 元素，所以工具栏会多出一个`data-validation`插件按钮，即表明插件加载成功
+依据插件模板生成的新插件，默认会将插件里的 DOM 元素挂载到界面上的工具栏，内部是在插件里引入了`@univerjs/base-sheets`，然后通过其 API `addButton` 来动态挂载 DOM 元素，所以工具栏会多出一个`data-validation`插件按钮，即表明插件加载成功
 
 -   filterPlugin 类中的 initialize 初始化时，使用 SheetPlugin 插件提供的 API 来挂载 JSX 组件
 
@@ -465,7 +465,7 @@ pnpm install
                 // 其他代码
                 initialize(context: SheetContext): void {
                     // 其他代码
-                    const item: IToolBarItemProps = {
+                    const item: IToolbarItemProps = {
                         locale: 'filter',
                         type: ISlotElement.JSX,
                         show: true,
@@ -534,7 +534,7 @@ pnpm install
 
     现有抛出元素的 API 有
 
-    -   getToolBarRef：工具栏组件
+    -   getToolbarRef：工具栏组件
     -   getContentRef：中间内容区组件
     -   getSplitLeftRef：中间左边内容区组件，在中间内容区被切分为两块内容区的时候存在
 
@@ -557,7 +557,7 @@ pnpm install
 
 ### 获取 context
 
-在插件初始化的时候，会自动从核心（@univer/core）注入 context，context 包含 Univer 核心的所有上下文，我们根据 context 进行业务逻辑处理。
+在插件初始化的时候，会自动从核心（@univerjs/core）注入 context，context 包含 Univer 核心的所有上下文，我们根据 context 进行业务逻辑处理。
 
 比如，获取 workbook
 
@@ -644,12 +644,12 @@ const s = `${style.AlternatingColorsSideSetting}`;
 
 ## 注册快捷键
 
-`base-component`插件中向核心提供了`onKeyDownObservable`，可以用来快捷注册键盘快捷键。
+`base-ui`插件中向核心提供了`onKeyDownObservable`，可以用来快捷注册键盘快捷键。
 
 我们允许为同一组快捷键注册多个监听。
 
 ```ts
-const onKeyDownObservable = this._plugin.getContext().getObserverManager().getObserver<KeyboardEvent>('onKeyDownObservable', 'core');
+const onKeyDownObservable = this._plugin.getGlobalContext().getObserverManager().getObserver<KeyboardEvent>('onKeyDownObservable', 'core');
 
 onKeyDownObservable?.add((evt: KeyboardEvent) => {
     // handle Ctrl + A
@@ -692,7 +692,7 @@ npx playwright install
 npm run test:ui
 ```
 
-UI 测试主要是测试`@univer/style-univer`的组件
+UI 测试主要是测试`@univerjs/style-univer`的组件
 
 -   未与核心耦合、未使用核心`SheetContext`/`locale`的无状态组件，编写单元测试，测试文件的目录和组件在一个层级，参照`./packages/style-univer/src/components/Container>`组件
 
@@ -1027,7 +1027,7 @@ ActionOperation 有一个 removeExtension 可以移除 action 拦截。一般情
 ### 开发组件
 
 1. 在`Container.tsx`中正常编写组件核心逻辑
-2. 在`base-component/src/BaseComponent`中增加一个组件专用接口，比如`ContainerComponent`
+2. 在`base-ui/src/BaseComponent`中增加一个组件专用接口，比如`ContainerComponent`
 3. 在`Container.tsx`中增加`UniverContainer`类导出组件
 
     ```ts
@@ -1096,7 +1096,7 @@ jest 单元测试
 | 快照测试 | Jest          |
 | E2E 测试 | Playwright    |
 
-每一个组件都应该至少包含一个完整的 jest 单元测试，我们使用 preact 官房推荐的`@testing-library/preact`库来做 DOM 测试，
+每一个组件都应该至少包含一个完整的 jest 单元测试，我们使用 preact 官方推荐的`@testing-library/preact`库来做 DOM 测试，
 
 > [preact 组件测试](https://preactjs.com/guide/v10/preact-testing-library/)
 
@@ -1194,9 +1194,9 @@ cover: ''
 ## 案例
 
 ```jsx
-import { Button } from '@univer/style-univer';
+import { Button } from '@univerjs/style-univer';
 
-const ToolBar = () => {
+const Toolbar = () => {
     const buttonText = '确认';
     return (
         <Button
@@ -1216,8 +1216,8 @@ const ToolBar = () => {
 
 ### 安装依赖
 
--   安装生产依赖到某一个插件里，比如在`plugin-sort`里安装`preact`: `pnpm add preact --filter @univer/sheets-plugin-sort`
--   安装开发依赖到某一个插件里，加一个 `-D` 比如在`plugin-sort`里安装`jest`: `pnpm add -D jest --filter @univer/sheets-plugin-sort`
+-   安装生产依赖到某一个插件里，比如在`plugin-sort`里安装`preact`: `pnpm add preact --filter @univerjs/sheets-plugin-sort`
+-   安装开发依赖到某一个插件里，加一个 `-D` 比如在`plugin-sort`里安装`jest`: `pnpm add -D jest --filter @univerjs/sheets-plugin-sort`
 -   安装开发依赖到所有插件里，比如在所有插件里安装`jest`: `pnpm add -D jest`，这类插件一般称为公共依赖，公共依赖包一般安装在项目一级根目录的`package.json`中
 -   更新公共依赖包：`pnpm update`
 
@@ -1237,24 +1237,42 @@ npm run build
 
 ### 发布 npm
 
+1. 选择需要修改版本的包
+```shell
+pnpm changeset add
+```
+
+2. 更新版本号被依赖的版本号
+```shell
+pnpm changeset version
+```
+
+3. 发布npm
+```shell
+pnpm publish -r
+
+# 本地测试的话加上本地npm仓库地址
+pnpm publish -r --registry http://localhost:4873/
+```
+
 ## 插件使用
 
 ### 安装插件
 
-先用 npm 安装核心包`@univer/core`、渲染引擎 `@univer/base-render`、表格组件插件`@univer/base-sheets`、基础 UI 插件`@univer/style-univer`和筛选插件`@univer/sheets-plugin-filter`
+先用 npm 安装核心包`@univerjs/core`、渲染引擎 `@univerjs/base-render`、表格组件插件`@univerjs/base-sheets`、基础 UI 插件`@univerjs/style-univer`和筛选插件`@univerjs/sheets-plugin-filter`
 
 ```sh
-npm i @univer/core @univer/base-render @univer/base-sheets @univer/style-univer @univer/sheets-plugin-filter
+npm i @univerjs/core @univerjs/base-render @univerjs/base-sheets @univerjs/style-univer @univerjs/sheets-plugin-filter
 ```
 
 然后再引入插件使用
 
 ```js
-import { UniverSheet } from '@univer/core';
-import '@univer/core/lib/style.css';
-import { UniverComponentSheet } from '@univer/style-univer';
-import { RenderEngine } from '@univer/base-render';
-import { SheetPlugin } from '@univer/base-sheets';
+import { UniverSheet } from '@univerjs/core';
+import '@univerjs/core/lib/style.css';
+
+import { RenderEngine } from '@univerjs/base-render';
+import { SheetPlugin } from '@univerjs/base-sheets';
 
 // 初始化universheet
 const univerSheet = UniverSheet.newInstance({
@@ -1283,17 +1301,17 @@ univerSheet.installPlugin(new FilterPlugin());
 先用 npm 安装插件
 
 ```sh
-npm i @univer/core @univer/base-render @univer/base-sheets @univer/style-univer @univer/sheets-plugin-filter
+npm i @univerjs/core @univerjs/base-render @univerjs/base-sheets @univerjs/style-univer @univerjs/sheets-plugin-filter
 ```
 
 然后再动态引入插件使用
 
 ```js
-import { UniverSheet } from '@univer/core';
-import '@univer/core/lib/style.css';
-import { UniverComponentSheet } from '@univer/style-univer';
-import { RenderEngine } from '@univer/base-render';
-import { SheetPlugin } from '@univer/base-sheets';
+import { UniverSheet } from '@univerjs/core';
+import '@univerjs/core/lib/style.css';
+
+import { RenderEngine } from '@univerjs/base-render';
+import { SheetPlugin } from '@univerjs/base-sheets';
 
 // 初始化universheet
 const univerSheet = UniverSheet.newInstance({
@@ -1314,7 +1332,7 @@ univerSheetUp.installPlugin(
 );
 
 // 动态加载筛选插件
-import('@univer/sheets-plugin-filter').then(({ FilterPlugin }) => {
+import('@univerjs/sheets-plugin-filter').then(({ FilterPlugin }) => {
     univerSheetUp.installPlugin(new FilterPlugin());
 });
 ```

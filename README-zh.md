@@ -4,7 +4,9 @@
 
 ## 介绍
 
-🚀Univer，原 [Luckysheet 2.0](https://github.com/dream-num/Luckysheet) 升级，一个基于 javascript 的前端开源框架，可以把文档，电子表格，幻灯片嵌入到你的系统内。
+Univer 是一个开源的协作解决方案，旨在将协作能力赋能所有系统。 接入我们之后，用户可以同步在自己的系统中查看和编辑 Microsoft Office 文件，避免上传和下载 PPT、Word、Excel。
+
+我们在本仓库中提供了 Univer 前端代码，一套基于 Canvas 的框架，用于构建文档、电子表格和幻灯片。
 
 > ⚠️ 该项目仍在开发中，仅用于测试和学习，不得用于生产
 

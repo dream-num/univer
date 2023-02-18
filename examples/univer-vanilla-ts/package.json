@@ -44,18 +44,18 @@
         "vite-plugin-external": "1.2.3"
     },
     "dependencies": {
-        "@univer/base-component": "workspace:^0.0.1",
-        "@univer/base-docs": "workspace:^0.0.1",
-        "@univer/base-render": "workspace:^0.0.1",
-        "@univer/base-sheets": "workspace:^0.0.1",
-        "@univer/base-slides": "workspace:^0.0.1",
-        "@univer/common-plugin-data": "workspace:^0.0.1",
-        "@univer/core": "workspace:^0.0.1",
-        "@univer/sheets-plugin-clipboard": "workspace:^0.0.1",
-        "@univer/sheets-plugin-formula": "workspace:^0.0.1",
-        "@univer/sheets-plugin-import-xlsx": "workspace:^0.0.1",
-        "@univer/sheets-plugin-numfmt": "workspace:^0.0.1",
-        "@univer/style-univer": "workspace:^0.0.1",
+        "@univerjs/base-ui": "workspace:^0.0.1",
+        "@univerjs/base-docs": "workspace:^0.0.1",
+        "@univerjs/base-render": "workspace:^0.0.1",
+        "@univerjs/base-sheets": "workspace:^0.0.1",
+        "@univerjs/base-slides": "workspace:^0.0.1",
+        "@univerjs/ui-plugin-sheets": "workspace:^0.0.1",
+        "@univerjs/common-plugin-data": "workspace:^0.0.1",
+        "@univerjs/core": "workspace:^0.0.1",
+        "@univerjs/sheets-plugin-clipboard": "workspace:^0.0.1",
+        "@univerjs/sheets-plugin-formula": "workspace:^0.0.1",
+        "@univerjs/sheets-plugin-import-xlsx": "workspace:^0.0.1",
+        "@univerjs/sheets-plugin-numfmt": "workspace:^0.0.1",
         "preact": "^10.5.14"
     }
 }

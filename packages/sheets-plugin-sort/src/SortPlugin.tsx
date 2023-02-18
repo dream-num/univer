@@ -1,6 +1,6 @@
-import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
-import { SheetContext, IOCContainer, IRangeType, Plugin, PLUGIN_NAMES, UniverSheet } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
+import { IToolbarItemProps, ISlotElement } from '@univerjs/base-ui';
+import { SheetContext, IOCContainer, IRangeType, Plugin, PLUGIN_NAMES, UniverSheet } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
 import { SORT_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 import { Sort } from './Domain';
 import { IConfig } from './IData/ISort';
@@ -36,7 +36,7 @@ export class SortPlugin extends Plugin {
         });
         const config: IConfig = { context };
 
-        const item: IToolBarItemProps = {
+        const item: IToolbarItemProps = {
             locale: SORT_PLUGIN_NAME,
             type: ISlotElement.JSX,
             show: true,

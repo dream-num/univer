@@ -1,5 +1,5 @@
 {
-    "name": "@univer/common-plugin-data",
+    "name": "@univerjs/common-plugin-data",
     "version": "0.0.1",
     "description": "",
     "author": "",
@@ -9,7 +9,15 @@
     "publishConfig": {
         "main": "./lib/univer-common-plugin-data.cjs.js",
         "module": "./lib/univer-common-plugin-data.es.js",
-        "types": "./lib/index.d.ts"
+        "types": "./lib/index.d.ts",
+        "exports": {
+            ".": {
+                "require": "./lib/univer-common-plugin-data.cjs.js",
+                "default": "./lib/univer-common-plugin-data.es.js"
+            },
+            "./*": "./lib/*"
+        },
+        "access": "public"
     },
     "exports": {
         ".": "./src/index.ts",
@@ -19,7 +27,6 @@
         "lib": "lib"
     },
     "files": [
-        "package.json",
         "lib"
     ],
     "scripts": {
@@ -32,7 +39,7 @@
     },
     "license": "MIT",
     "dependencies": {
-        "@univer/core": "workspace:^0.0.1"
+        "@univerjs/core": "workspace:^0.0.1"
     },
     "devDependencies": {
         "@types/jest": "^27.5.2",

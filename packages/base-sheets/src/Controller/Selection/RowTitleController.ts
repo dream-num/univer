@@ -1,5 +1,5 @@
-import { IMouseEvent, IPointerEvent, Rect } from '@univer/base-render';
-import { Nullable } from '@univer/core';
+import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect } from '@univerjs/base-render';
+import { Nullable } from '@univerjs/core';
 import { DragLineDirection } from './DragLineController';
 import { SelectionManager } from './SelectionManager';
 
@@ -16,27 +16,60 @@ export class RowTitleController {
 
     private _currentHeight: number = 0;
 
-    private _highlightItem: Rect;
+    private _highlightItem: Group;
+
+    private _content: Rect;
+
+    private _Item: Rect;
 
     constructor(manager: SelectionManager) {
         this._manager = manager;
         this._leftTopHeight = this._manager.getSheetView().getSpreadsheetLeftTopPlaceholder().getState().height;
 
+        const width = this._manager.getSheetView().getSpreadsheetSkeleton().rowTitleWidth;
         // 创建高亮item
-        this._highlightItem = new Rect('HighLightRowTitle', {
-            width: this._manager.getSheetView().getSpreadsheetSkeleton().rowTitleWidth,
+        this._content = new Rect('RowTitleContent', {
+            width,
             height: 0,
             top: 0,
             fill: 'rgb(220,220,220,0.5)',
         });
-
+        this._Item = new Rect('RowTitleItem', {
+            width,
+            height: 5,
+            top: 0,
+            fill: 'rgb(220,220,220,0.5)',
+        });
+        this._highlightItem = new Group('RowTitleGroup', this._content, this._Item);
         this._highlightItem.hide();
-
-        this._highlightItem.evented = false;
 
         const scene = this._manager.getScene();
 
         scene.addObject(this._highlightItem, 3);
+
+        this._initialize();
+    }
+
+    // 拖拽图标
+    private _initialize() {
+        this._highlightItem.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this._highlightItem.show();
+        });
+        this._highlightItem.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this._highlightItem.show();
+        });
+        this._highlightItem.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this._highlightItem.hide();
+        });
+        this._Item.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this._Item.cursor = CURSOR_TYPE.ROW_RESIZE;
+        });
+        this._Item.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this._Item.resetCursor();
+        });
+        this._Item.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this.pointerDown(evt);
+        });
     }
 
     pointerDown(e: IPointerEvent | IMouseEvent) {
@@ -130,15 +163,19 @@ export class RowTitleController {
             top = this._leftTopHeight + rowHeightAccumulation[this._index - 1];
         }
 
+        this._content.transformByState({
+            height: this._currentHeight - 5,
+        });
+
+        this._Item.transformByState({
+            top: this._currentHeight - 5,
+        });
+
         this._highlightItem.transformByState({
             height: this._currentHeight,
             top,
         });
 
         this._highlightItem.show();
-    }
-
-    unHighlightRowTitle() {
-        this._highlightItem.hide();
     }
 }

@@ -1,11 +1,10 @@
 import { DeleteRange, InsertRange } from '../Apply';
-import { ACTION_NAMES } from '../../Const';
 import { Dimension } from '../../Enum/Dimension';
 import { ICellData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { IInsertRangeActionData } from './InsertRangeAction';
+import { IInsertRangeActionData, InsertRangeAction } from './InsertRangeAction';
 import { CommandUnit } from '../../Command';
 
 /**
@@ -26,6 +25,8 @@ export class DeleteRangeAction extends SheetActionBase<
     IInsertRangeActionData,
     ObjectMatrixPrimitiveType<ICellData>
 > {
+    static NAME = 'DeleteRangeAction';
+
     constructor(
         actionData: IDeleteRangeActionData,
         commandUnit: CommandUnit,
@@ -70,7 +71,8 @@ export class DeleteRangeAction extends SheetActionBase<
         const { sheetId, rangeData, shiftDimension } = this._doActionData;
         this._oldActionData = {
             sheetId,
-            actionName: ACTION_NAMES.INSERT_RANGE_ACTION,
+            // actionName: ACTION_NAMES.INSERT_RANGE_ACTION,
+            actionName: InsertRangeAction.NAME,
             shiftDimension,
             rangeData,
             cellValue: this.do(),

@@ -12,9 +12,9 @@ const uiDefaultConfigDown = {
 
         innerRight: false,
 
-        toolBar: true,
+        toolbar: true,
 
-        toolBarConfig: {
+        toolbarConfig: {
             undoRedo: true,
             font: true,
         },

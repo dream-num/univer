@@ -1,7 +1,7 @@
-import { nanoid } from 'nanoid';
 import { SlideContext } from '../../Basics/SlideContext';
 import { DEFAULT_SLIDE } from '../../Const';
 import { ISlideData, ISlidePage, PageType } from '../../Interfaces';
+import { Tools } from '../../Shared';
 
 export class SlideModel {
     private _snapshot: ISlideData;
@@ -13,7 +13,7 @@ export class SlideModel {
     constructor(snapshot: Partial<ISlideData>, context: SlideContext) {
         this._context = context;
         this._snapshot = { ...DEFAULT_SLIDE, ...snapshot };
-        this._unitId = this._snapshot.id ?? nanoid(6);
+        this._unitId = this._snapshot.id ?? Tools.generateRandomId(6);
     }
 
     getSnapshot() {

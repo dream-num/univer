@@ -161,6 +161,6 @@ function capitalizeFirstLetter(string: string) {
 }
 
 function devTips(projectName: string) {
-    // pnpm run --filter  @univer/sheets-plugin-<%= projectValue %> dev
-    console.log(chalk.green(` SUCCESS!\n\n`), chalk.white(`Check directory packages/${projectName}, run the following command to develop: \n\n`), chalk.green(`pnpm run --filter  @univer/${projectName} dev`));
+    // pnpm run --filter  @univerjs/sheets-plugin-<%= projectValue %> dev
+    console.log(chalk.green(` SUCCESS!\n\n`), chalk.white(`Check directory packages/${projectName}, run the following command to develop: \n\n`), chalk.green(`pnpm run --filter  @univerjs/${projectName} dev`));
 }

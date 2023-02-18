@@ -1,4 +1,4 @@
-import { SheetActionBase, ISheetActionData, Workbook, ActionObservers, ActionType } from '@univer/core';
+import { SheetActionBase, ISheetActionData, Workbook, ActionObservers, ActionType } from '@univerjs/core';
 import { SetFrozenCancel } from '../Apply/SetFrozenCancel';
 import { SetFrozenColumns } from '../Apply/SetFrozenColumns';
 import { SetFrozenRows } from '../Apply/SetFrozenRows';

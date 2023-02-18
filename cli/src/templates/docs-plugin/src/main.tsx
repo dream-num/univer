@@ -1,7 +1,7 @@
-import { UniverDoc } from '@univer/core';
-import { RenderEngine } from '@univer/base-render';
-import { DocPlugin } from '@univer/base-docs';
-import { UniverComponentSheet } from '@univer/style-univer';
+import { UniverDoc } from '@univerjs/core';
+import { RenderEngine } from '@univerjs/base-render';
+import { DocPlugin } from '@univerjs/base-docs';
+
 
 import { <%= projectUpperValue %>Plugin } from './<%= projectUpperValue %>Plugin';
 

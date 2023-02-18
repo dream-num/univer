@@ -1,4 +1,4 @@
-import { BaseClipboardExtension, BaseClipboardExtensionFactory, IClipboardData } from '@univer/base-component';
+import { BaseClipboardExtension, BaseClipboardExtensionFactory, IClipboardData } from '@univerjs/base-ui';
 import { ClipboardPlugin } from '../../ClipboardPlugin';
 
 /**

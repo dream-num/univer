@@ -1,4 +1,4 @@
-import { IPaddingData, Nullable } from '@univer/core';
+import { IPaddingData, Nullable } from '@univerjs/core';
 import { RENDER_CLASS_TYPE } from './Basics/Const';
 import { Viewport } from './Viewport';
 import { Scene } from './Scene';

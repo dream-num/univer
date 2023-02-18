@@ -1,4 +1,4 @@
-import { Plugin, UniverSheet } from '@univer/core';
+import { Plugin, UniverSheet } from '@univerjs/core';
 import { zh, en } from './Locale';
 import { <%= projectConstantValue %>_PLUGIN_NAME} from './Basic/Const/PLUGIN_NAME'
 import { <%= projectUpperValue %>Controller } from './Controller/<%= projectUpperValue %>Controller';

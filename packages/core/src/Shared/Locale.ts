@@ -78,8 +78,9 @@ export class Locale {
      */
     get(key: string | undefined): string {
         if (key) {
+            // const { locales, currentLocale } = this.options;
             const { locales, currentLocale } = this.options;
-            return (Locale.getValue(locales[currentLocale], key) as string) || '';
+            return (Locale.getValue(locales[currentLocale], key) as string) || key;
         }
         return String();
     }
@@ -119,6 +120,10 @@ export class Locale {
      */
     change(locale: LocaleType): void {
         this.options.currentLocale = locale;
+    }
+
+    getCurrentLocale() {
+        return this.options.currentLocale;
     }
 
     /**

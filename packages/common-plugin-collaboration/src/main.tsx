@@ -1,10 +1,10 @@
-import { UniverSheet, UniverDoc, UniverSlide } from '@univer/core';
-import { RenderEngine } from '@univer/base-render';
-import { SheetPlugin } from '@univer/base-sheets';
-import { DocPlugin } from '@univer/base-docs';
-import { SlidePlugin } from '@univer/base-slides';
-import { UniverComponentSheet } from '@univer/style-univer';
-import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
+import { UniverSheet, UniverDoc, UniverSlide } from '@univerjs/core';
+import { RenderEngine } from '@univerjs/base-render';
+import { SheetPlugin } from '@univerjs/base-sheets';
+import { DocPlugin } from '@univerjs/base-docs';
+import { SlidePlugin } from '@univerjs/base-slides';
+
+import { DEFAULT_WORKBOOK_DATA } from '@univerjs/common-plugin-data';
 
 import { CollaborationPlugin } from './CollaborationPlugin';
 

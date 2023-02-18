@@ -1,14 +1,14 @@
-import { Component, IToolBarItemProps } from '@univer/base-component';
+import { Component, IToolbarItemProps } from '@univerjs/base-ui';
 
-import { SheetContext, Nullable, Observer, PLUGIN_NAMES, Workbook } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
+import { SheetContext, Nullable, Observer, PLUGIN_NAMES, Workbook } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
 
 import { ALTERNATING_COLORS_PLUGIN_NAME } from '../Const';
 import { IProps } from '../IData/IAlternatingColors';
 
 // Types for state
 interface IState {
-    alternatingColors: IToolBarItemProps;
+    alternatingColors: IToolbarItemProps;
 }
 
 export class AlternatingColorsButton extends Component<IProps, IState> {
@@ -19,7 +19,7 @@ export class AlternatingColorsButton extends Component<IProps, IState> {
 
         // this.SingleButton = renderComponent.renderFunction<SingleButtonComponent>('SingleButton');
 
-        const alternatingColors: IToolBarItemProps = {
+        const alternatingColors: IToolbarItemProps = {
             locale: ALTERNATING_COLORS_PLUGIN_NAME,
             type: 'single',
             label: <OrderIcon />,
@@ -69,7 +69,7 @@ export class AlternatingColorsButton extends Component<IProps, IState> {
             item.tooltipRight = locale.get(`${item.locale}RightLabel`);
 
             // set current Locale string for select
-            item.children?.forEach((ele: IToolBarItemProps) => {
+            item.children?.forEach((ele: IToolbarItemProps) => {
                 if (ele.locale) {
                     ele.label = locale.get(`${ele.locale}`);
                 }

@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid';
 import { SheetContext } from '../../Basics';
 import {
     IInsertColumnDataActionData,
@@ -20,9 +19,34 @@ import {
     ISetWorkSheetActivateActionData,
     ISetWorkSheetHideActionData,
     ISetWorkSheetStatusActionData,
+    SetWorkSheetActivateAction,
+    SetWorkSheetNameAction,
+    SetWorkSheetStatusAction,
+    SetZoomRatioAction,
+    InsertRowDataAction,
+    InsertRowAction,
+    InsertColumnDataAction,
+    InsertColumnAction,
+    ClearRangeAction,
+    SetTabColorAction,
+    SetBorderAction,
 } from '../../Command';
-import { IInsertColumnActionData, IRemoveColumnAction } from '../Action';
-import { ACTION_NAMES, DEFAULT_WORKSHEET } from '../../Const';
+import {
+    IInsertColumnActionData,
+    IRemoveColumnAction,
+    RemoveColumnAction,
+    RemoveColumnDataAction,
+    RemoveRowAction,
+    RemoveRowDataAction,
+    SetColumnHideAction,
+    SetColumnShowAction,
+    SetHiddenGridlinesAction,
+    SetRightToLeftAction,
+    SetRowHideAction,
+    SetRowShowAction,
+    SetWorkSheetHideAction,
+} from '../Action';
+import { DEFAULT_WORKSHEET } from '../../Const';
 import { Direction, BooleanNumber, SheetTypes } from '../../Enum';
 import {
     IBorderStyleData,
@@ -35,9 +59,7 @@ import {
     IStyleData,
     IWorksheetConfig,
 } from '../../Interfaces';
-import { Nullable, ObjectMatrix, Tools } from '../../Shared';
-import { ObjectArray } from '../../Shared/ObjectArray';
-import { Tuples } from '../../Shared/Tuples';
+import { Nullable, ObjectMatrix, Tools, ObjectArray, Tuples } from '../../Shared';
 import { ColumnManager } from './ColumnManager';
 import { Merges } from './Merges';
 import { Range } from './Range';
@@ -95,7 +117,26 @@ export class Worksheet {
     constructor(...argument: any) {
         if (Tools.hasLength(argument, 1)) {
             const context = argument[0];
-            const config = Tools.commonExtend({}, DEFAULT_WORKSHEET);
+            const config = {
+                ...DEFAULT_WORKSHEET,
+                mergeData: [],
+                hideRow: [],
+                hideColumn: [],
+                cellData: {},
+                rowData: {},
+                columnData: {},
+                rowTitle: {
+                    width: 46,
+                    hidden: BooleanNumber.FALSE,
+                },
+                columnTitle: {
+                    height: 20,
+                    hidden: BooleanNumber.FALSE,
+                },
+                selections: ['A1'],
+                rightToLeft: BooleanNumber.FALSE,
+                pluginMeta: {},
+            };
             // const config = Tools.deepMerge({}, DEFAULT_WORKSHEET);
             argument = [context, config];
         }
@@ -103,11 +144,31 @@ export class Worksheet {
             this._context = argument[0];
             // this._config = argument[1];
 
-            this._config = Tools.commonExtend1(DEFAULT_WORKSHEET, argument[1]);
+            this._config = Object.assign(argument[1], {
+                ...DEFAULT_WORKSHEET,
+                mergeData: [],
+                hideRow: [],
+                hideColumn: [],
+                cellData: {},
+                rowData: {},
+                columnData: {},
+                rowTitle: {
+                    width: 46,
+                    hidden: BooleanNumber.FALSE,
+                },
+                columnTitle: {
+                    height: 20,
+                    hidden: BooleanNumber.FALSE,
+                },
+                selections: ['A1'],
+                rightToLeft: BooleanNumber.FALSE,
+                pluginMeta: {},
+                ...argument[1],
+            });
             // this._config = Tools.deepMerge({}, DEFAULT_WORKSHEET, argument[1]);
 
             const { columnData, rowData, cellData } = this._config;
-            this._sheetId = this._config.id ?? nanoid(6);
+            this._sheetId = this._config.id ?? Tools.generateRandomId(6);
             this._initialized = false;
             // this._selection = new Selection(this);
             // this._borderStyles = new BorderStyles(this);
@@ -151,7 +212,7 @@ export class Worksheet {
         );
         const setActive: ISetWorkSheetActivateActionData = {
             sheetId: this._sheetId,
-            actionName: ACTION_NAMES.SET_WORKSHEET_ACTIVATE_ACTION,
+            actionName: SetWorkSheetActivateAction.NAME,
             status: BooleanNumber.TRUE,
         };
         const command = new Command(
@@ -224,7 +285,7 @@ export class Worksheet {
             'onAfterChangeSheetNameObservable'
         );
         const configure = {
-            actionName: ACTION_NAMES.SET_WORKSHEET_NAME_ACTION,
+            actionName: SetWorkSheetNameAction.NAME,
             sheetName: name,
             sheetId: _sheetId,
         };
@@ -411,7 +472,7 @@ export class Worksheet {
     setStatus(status: BooleanNumber): Worksheet {
         const { _context, _commandManager, _sheetId } = this;
         const configure: ISetWorkSheetStatusActionData = {
-            actionName: ACTION_NAMES.SET_WORKSHEET_STATUS_ACTION,
+            actionName: SetWorkSheetStatusAction.NAME,
             sheetId: _sheetId,
             sheetStatus: status,
         };
@@ -440,9 +501,9 @@ export class Worksheet {
     setZoomRatio(zoomRatio: number): void {
         const { _context, _sheetId, _commandManager } = this;
         const zoomRation = {
-            actionName: ACTION_NAMES.SET_ZOOM_RATIO_ACTION,
-            sheetId: _sheetId,
+            actionName: SetZoomRatioAction.NAME,
             zoom: zoomRatio,
+            sheetId: _sheetId,
         };
         const command = new Command(
             {
@@ -490,7 +551,7 @@ export class Worksheet {
         const copy = Tools.deepClone(_config);
         copy.name = name;
         copy.status = BooleanNumber.FALSE;
-        copy.id = nanoid();
+        copy.id = Tools.generateRandomId();
         return new Worksheet(_context, copy);
     }
 
@@ -529,13 +590,13 @@ export class Worksheet {
 
         const { _context, _commandManager, _sheetId } = this;
         const insertRowData: IInsertRowDataActionData = {
-            actionName: ACTION_NAMES.INSERT_ROW_DATA_ACTION,
+            actionName: InsertRowDataAction.NAME,
             sheetId: _sheetId,
             rowIndex,
             rowData: new ObjectMatrix<ICellData>(new ObjectArray(numRows)).toJSON(),
         };
         const insertRow: IInsertRowActionData = {
-            actionName: ACTION_NAMES.INSERT_ROW_ACTION,
+            actionName: InsertRowAction.NAME,
             sheetId: _sheetId,
             rowIndex,
             rowCount: numRows,
@@ -578,13 +639,13 @@ export class Worksheet {
 
         const { _context, _commandManager, _sheetId } = this;
         const insertRowData = {
-            actionName: ACTION_NAMES.INSERT_ROW_DATA_ACTION,
+            actionName: InsertRowDataAction.NAME,
             sheetId: _sheetId,
             rowIndex,
             rowData: new ObjectMatrix<ICellData>(new ObjectArray(numRows)).toJSON(),
         };
         const insertRow = {
-            actionName: ACTION_NAMES.INSERT_ROW_ACTION,
+            actionName: InsertRowAction.NAME,
             sheetId: _sheetId,
             rowIndex,
             rowCount: numRows,
@@ -632,13 +693,13 @@ export class Worksheet {
 
         const { _context, _commandManager, _sheetId } = this;
         const insertRowData = {
-            actionName: ACTION_NAMES.INSERT_ROW_DATA_ACTION,
+            actionName: InsertRowDataAction.NAME,
             sheetId: _sheetId,
             rowIndex,
             rowData: new ObjectMatrix<ICellData>(new ObjectArray(numRows)).toJSON(),
         };
         const insertRow = {
-            actionName: ACTION_NAMES.INSERT_ROW_ACTION,
+            actionName: InsertRowAction.NAME,
             sheetId: _sheetId,
             rowIndex,
             rowCount: numRows,
@@ -687,13 +748,13 @@ export class Worksheet {
             }
         });
         const insertColumnData = {
-            actionName: ACTION_NAMES.INSERT_COLUMN_DATA_ACTION,
+            actionName: InsertColumnDataAction.NAME,
             sheetId: _sheetId,
             columnIndex,
             columnData: columnData.toJSON(),
         };
         const insertColumn = {
-            actionName: ACTION_NAMES.INSERT_COLUMN_ACTION,
+            actionName: InsertColumnAction.NAME,
             sheetId: _sheetId,
             columnIndex,
             columnCount: numColumns,
@@ -747,13 +808,13 @@ export class Worksheet {
             }
         });
         const insertColumnData: IInsertColumnDataActionData = {
-            actionName: ACTION_NAMES.INSERT_COLUMN_DATA_ACTION,
+            actionName: InsertColumnDataAction.NAME,
             sheetId: _sheetId,
             columnIndex,
             columnData: columnData.toJSON(),
         };
         const insertColumn: IInsertColumnActionData = {
-            actionName: ACTION_NAMES.INSERT_COLUMN_ACTION,
+            actionName: InsertColumnAction.NAME,
             sheetId: _sheetId,
             columnIndex,
             columnCount: numColumns,
@@ -803,13 +864,13 @@ export class Worksheet {
             }
         });
         const insertColumnData: IInsertColumnDataActionData = {
-            actionName: ACTION_NAMES.INSERT_COLUMN_DATA_ACTION,
+            actionName: InsertColumnDataAction.NAME,
             sheetId: _sheetId,
             columnIndex,
             columnData: columnData.toJSON(),
         };
         const insertColumn: IInsertColumnActionData = {
-            actionName: ACTION_NAMES.INSERT_COLUMN_ACTION,
+            actionName: InsertColumnAction.NAME,
             sheetId: _sheetId,
             columnIndex,
             columnCount: numColumns,
@@ -860,7 +921,7 @@ export class Worksheet {
 
         const setValue: IClearRangeActionData = {
             sheetId: this._sheetId,
-            actionName: ACTION_NAMES.CLEAR_RANGE_ACTION,
+            actionName: ClearRangeAction.NAME,
             options,
             rangeData: _range,
         };
@@ -886,7 +947,7 @@ export class Worksheet {
         );
         const setTabColor: ISetTabColorActionData = {
             sheetId: this._sheetId,
-            actionName: ACTION_NAMES.SET_TAB_COLOR_ACTION,
+            actionName: SetTabColorAction.NAME,
             color,
         };
         const command = new Command(
@@ -910,9 +971,9 @@ export class Worksheet {
         if (!this._config.hidden) {
             const observer = _context.getContextObserver('onHideSheetObservable');
             const setHiddenAction: ISetWorkSheetHideActionData = {
-                sheetId: this._sheetId,
-                actionName: ACTION_NAMES.HIDE_SHEET_ACTION,
                 hidden: BooleanNumber.TRUE,
+                sheetId: this._sheetId,
+                actionName: SetWorkSheetHideAction.NAME,
             };
             const command = new Command(
                 {
@@ -946,9 +1007,9 @@ export class Worksheet {
         }
         const { _context, _commandManager } = this;
         const setHidden: ISetWorkSheetHideActionData = {
-            sheetId: this._sheetId,
-            actionName: ACTION_NAMES.HIDE_SHEET_ACTION,
             hidden: BooleanNumber.FALSE,
+            sheetId: this._sheetId,
+            actionName: SetWorkSheetHideAction.NAME,
         };
         const command = new Command(
             {
@@ -1116,19 +1177,17 @@ export class Worksheet {
     deleteColumn(columnPosition: number): Worksheet {
         const { _context, _commandManager, _sheetId } = this;
         const deleteColumnData: IRemoveColumnDataAction = {
-            actionName: ACTION_NAMES.REMOVE_COLUMN_DATA_ACTION,
+            actionName: RemoveColumnDataAction.NAME,
             sheetId: _sheetId,
             columnCount: 1,
             columnIndex: columnPosition,
         };
-
         const deleteColumn: IRemoveColumnAction = {
-            actionName: ACTION_NAMES.REMOVE_COLUMN_ACTION,
+            actionName: RemoveColumnAction.NAME,
             sheetId: _sheetId,
             columnCount: 1,
             columnIndex: columnPosition,
         };
-
         const command = new Command(
             {
                 WorkBookUnit: _context.getWorkBook(),
@@ -1150,19 +1209,17 @@ export class Worksheet {
     deleteColumns(columnPosition: number, howMany: number): Worksheet {
         const { _context, _commandManager, _sheetId } = this;
         const deleteColumnData: IRemoveColumnDataAction = {
-            actionName: ACTION_NAMES.REMOVE_COLUMN_DATA_ACTION,
+            actionName: RemoveColumnDataAction.NAME,
             sheetId: _sheetId,
             columnCount: howMany,
             columnIndex: columnPosition,
         };
-
         const deleteColumn: IRemoveColumnAction = {
-            actionName: ACTION_NAMES.REMOVE_COLUMN_ACTION,
+            actionName: RemoveColumnAction.NAME,
             sheetId: _sheetId,
             columnCount: howMany,
             columnIndex: columnPosition,
         };
-
         const command = new Command(
             {
                 WorkBookUnit: _context.getWorkBook(),
@@ -1183,14 +1240,13 @@ export class Worksheet {
     deleteRow(rowPosition: number): Worksheet {
         const { _context, _commandManager, _sheetId } = this;
         const dataRowDelete: IRemoveRowDataActionData = {
-            actionName: ACTION_NAMES.REMOVE_ROW_DATA_ACTION,
+            actionName: RemoveRowDataAction.NAME,
             sheetId: _sheetId,
             rowCount: 1,
             rowIndex: rowPosition,
         };
-
         const rowDelete: IRemoveRowActionData = {
-            actionName: ACTION_NAMES.REMOVE_ROW_ACTION,
+            actionName: RemoveRowAction.NAME,
             sheetId: _sheetId,
             rowCount: 1,
             rowIndex: rowPosition,
@@ -1216,21 +1272,18 @@ export class Worksheet {
      */
     deleteRows(rowPosition: number, howMany: number): Worksheet {
         const { _context, _commandManager, _sheetId } = this;
-
         const dataRowDelete: IRemoveRowDataActionData = {
-            actionName: ACTION_NAMES.REMOVE_ROW_DATA_ACTION,
+            actionName: RemoveRowDataAction.NAME,
             sheetId: _sheetId,
             rowCount: howMany,
             rowIndex: rowPosition,
         };
-
         const rowDelete: IRemoveRowActionData = {
-            actionName: ACTION_NAMES.REMOVE_ROW_ACTION,
+            actionName: RemoveRowAction.NAME,
             sheetId: _sheetId,
             rowCount: howMany,
             rowIndex: rowPosition,
         };
-
         const command = new Command(
             {
                 WorkBookUnit: _context.getWorkBook(),
@@ -1378,7 +1431,7 @@ export class Worksheet {
         if (directions.includes(Direction.TOP)) {
             const setBottomData: BorderStyleData = {
                 sheetId: _sheetId,
-                actionName: ACTION_NAMES.SET_BORDER_ACTION,
+                actionName: SetBorderAction.NAME,
                 styles: mbr.toJSON(),
             };
             actions.push(setBottomData);
@@ -1386,7 +1439,7 @@ export class Worksheet {
         if (directions.includes(Direction.BOTTOM)) {
             const setTopData: BorderStyleData = {
                 sheetId: _sheetId,
-                actionName: ACTION_NAMES.SET_BORDER_ACTION,
+                actionName: SetBorderAction.NAME,
                 styles: mtr.toJSON(),
             };
             actions.push(setTopData);
@@ -1394,7 +1447,7 @@ export class Worksheet {
         if (directions.includes(Direction.LEFT)) {
             const setRightData: BorderStyleData = {
                 sheetId: _sheetId,
-                actionName: ACTION_NAMES.SET_BORDER_ACTION,
+                actionName: SetBorderAction.NAME,
                 styles: mrr.toJSON(),
             };
             actions.push(setRightData);
@@ -1402,14 +1455,14 @@ export class Worksheet {
         if (directions.includes(Direction.RIGHT)) {
             const setLeftData: BorderStyleData = {
                 sheetId: _sheetId,
-                actionName: ACTION_NAMES.SET_BORDER_ACTION,
+                actionName: SetBorderAction.NAME,
                 styles: mlr.toJSON(),
             };
             actions.push(setLeftData);
         }
         const setCCData: BorderStyleData = {
             sheetId: _sheetId,
-            actionName: ACTION_NAMES.SET_BORDER_ACTION,
+            actionName: SetBorderAction.NAME,
             styles: mcr.toJSON(),
         };
         actions.push(setCCData);
@@ -1617,7 +1670,7 @@ export class Worksheet {
         const count = range.endRow - range.startRow + 1;
         const { _context, _commandManager, _sheetId } = this;
         const hideRow: ISetRowHideActionData = {
-            actionName: ACTION_NAMES.SET_HIDE_ROW_ACTION,
+            actionName: SetRowHideAction.NAME,
             sheetId: _sheetId,
             rowCount: count,
             rowIndex: index,
@@ -1653,7 +1706,7 @@ export class Worksheet {
         }
         const { _context, _commandManager, _sheetId } = this;
         const hideRow: ISetRowHideActionData = {
-            actionName: ACTION_NAMES.SET_HIDE_ROW_ACTION,
+            actionName: SetRowHideAction.NAME,
             sheetId: _sheetId,
             rowCount: count,
             rowIndex: index,
@@ -1679,7 +1732,7 @@ export class Worksheet {
         const count = range.endColumn - range.startColumn + 1;
         const { _context, _commandManager, _sheetId } = this;
         const hideColumn: ISetColumnHideActionData = {
-            actionName: ACTION_NAMES.SET_HIDE_COLUMN_ACTION,
+            actionName: SetColumnHideAction.NAME,
             sheetId: _sheetId,
             columnCount: count,
             columnIndex: index,
@@ -1715,7 +1768,7 @@ export class Worksheet {
         }
         const { _context, _commandManager, _sheetId } = this;
         const hideColumn: ISetColumnHideActionData = {
-            actionName: ACTION_NAMES.SET_HIDE_COLUMN_ACTION,
+            actionName: SetColumnHideAction.NAME,
             sheetId: _sheetId,
             columnCount: count,
             columnIndex: index,
@@ -1741,10 +1794,10 @@ export class Worksheet {
         const count = range.endRow - range.startRow + 1;
         const { _context, _commandManager, _sheetId } = this;
         const unhideRow: ISetRowShowActionData = {
-            actionName: ACTION_NAMES.SET_SHOW_ROW_ACTION,
-            sheetId: _sheetId,
+            actionName: SetRowShowAction.NAME,
             rowCount: count,
             rowIndex: index,
+            sheetId: _sheetId,
         };
         const command = new Command(
             {
@@ -1767,7 +1820,7 @@ export class Worksheet {
         const count = range.endColumn - range.startColumn + 1;
         const { _context, _commandManager, _sheetId } = this;
         const unhideColumn: ISetColumnShowActionData = {
-            actionName: ACTION_NAMES.SET_SHOW_COLUMN_ACTION,
+            actionName: SetColumnShowAction.NAME,
             sheetId: _sheetId,
             columnCount: count,
             columnIndex: index,
@@ -1803,7 +1856,7 @@ export class Worksheet {
         }
         const { _context, _commandManager, _sheetId } = this;
         const showColumn: ISetColumnShowActionData = {
-            actionName: ACTION_NAMES.SET_SHOW_COLUMN_ACTION,
+            actionName: SetColumnShowAction.NAME,
             sheetId: _sheetId,
             columnCount: count,
             columnIndex: index,
@@ -1839,7 +1892,7 @@ export class Worksheet {
         }
         const { _context, _commandManager, _sheetId } = this;
         const showRow: ISetRowShowActionData = {
-            actionName: ACTION_NAMES.SET_SHOW_ROW_ACTION,
+            actionName: SetRowShowAction.NAME,
             sheetId: _sheetId,
             rowCount: count,
             rowIndex: index,
@@ -1967,7 +2020,7 @@ export class Worksheet {
     setHiddenGridlines(hideGridlines: boolean): Worksheet {
         const { _context, _commandManager, _sheetId } = this;
         const configure = {
-            actionName: ACTION_NAMES.SET_HIDDEN_GRIDLINES_ACTION,
+            actionName: SetHiddenGridlinesAction.NAME,
             hideGridlines,
             sheetId: _sheetId,
         };
@@ -2019,7 +2072,7 @@ export class Worksheet {
     setRightToLeft(rightToLeft: BooleanNumber): Worksheet {
         const { _context, _commandManager, _sheetId } = this;
         const configure = {
-            actionName: ACTION_NAMES.SET_RIGHT_TO_LEFT_ACTION,
+            actionName: SetRightToLeftAction.NAME,
             rightToLeft,
             sheetId: _sheetId,
         };
@@ -2240,7 +2293,7 @@ export class Worksheet {
 
 //     setLStyle(row: number, column: number, style: IBorderStyleData): void {
 //         const workSheet = this._workSheet;
-//         const context = workSheet.getContext();
+//         const context = workSheet.getGlobalContext();
 //         const workBook = context.getWorkBook();
 //         const styles = workBook.getStyles();
 //         const cellMatrix = workSheet.getCellMatrix();
@@ -2266,7 +2319,7 @@ export class Worksheet {
 
 //     setTStyle(row: number, column: number, style: IBorderStyleData): void {
 //         const workSheet = this._workSheet;
-//         const context = workSheet.getContext();
+//         const context = workSheet.getGlobalContext();
 //         const workBook = context.getWorkBook();
 //         const styles = workBook.getStyles();
 //         const cellMatrix = workSheet.getCellMatrix();
@@ -2292,7 +2345,7 @@ export class Worksheet {
 
 //     setRStyle(row: number, column: number, style: IBorderStyleData): void {
 //         const workSheet = this._workSheet;
-//         const context = workSheet.getContext();
+//         const context = workSheet.getGlobalContext();
 //         const workBook = context.getWorkBook();
 //         const styles = workBook.getStyles();
 //         const cellMatrix = workSheet.getCellMatrix();
@@ -2318,7 +2371,7 @@ export class Worksheet {
 
 //     setBStyle(row: number, column: number, style: IBorderStyleData): void {
 //         const workSheet = this._workSheet;
-//         const context = workSheet.getContext();
+//         const context = workSheet.getGlobalContext();
 //         const workBook = context.getWorkBook();
 //         const styles = workBook.getStyles();
 //         const cellMatrix = workSheet.getCellMatrix();

@@ -8,14 +8,14 @@ UniverSheet Plugin AlternatingColors
 
 ### Installation
 
-```bash
-npm i @univer/sheets-plugin-alternating-colors
+```shell
+npm i @univerjs/sheets-plugin-alternating-colors
 ```
 
 ### Usage
 
 ```js
-impport {AlternatingColors} from '@univer/sheets-plugin-alternating-colors'
+import { AlternatingColors } from '@univerjs/sheets-plugin-alternating-colors';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new AlternatingColors());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/sheets-plugin-alternating-colors dev
+pnpm run --filter  @univerjs/sheets-plugin-alternating-colors dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-alternating-colors dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/sheets-plugin-alternating-colors build
+pnpm run --filter  @univerjs/sheets-plugin-alternating-colors build
 ```

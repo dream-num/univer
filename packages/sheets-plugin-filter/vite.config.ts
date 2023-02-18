@@ -10,9 +10,9 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetPluginFilter',
-            formats: ['es', 'umd'],
-            fileName: 'univer-sheets--plugin-filter',
+            name: 'UniverSheetsPluginFilter',
+            formats: ['es', 'umd', 'cjs'],
+            fileName: 'univer-sheets-plugin-filter',
         },
         outDir: './lib',
     },
@@ -38,8 +38,8 @@ export default defineConfig({
         preact(),
         createExternal({
             externals: {
-                '@univer/core': '@univer/core',
-                '@univer/style-univer': '@univer/style-univer',
+                '@univerjs/core': '@univerjs/core',
+                '@univerjs/style-univer': '@univerjs/style-univer',
                 preact: 'preact',
                 react: 'react',
             },

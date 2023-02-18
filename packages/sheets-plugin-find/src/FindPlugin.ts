@@ -1,4 +1,4 @@
-import { SheetContext, UniverSheet, Plugin, Worksheet } from '@univer/core';
+import { SheetContext, UniverSheet, Plugin, Worksheet } from '@univerjs/core';
 // import { TextFinder } from './Domain/TextFind';
 import { FindType } from './IData/IFind';
 import { FIND_PLUGIN_NAME } from './Const/PLUGIN_NAME';

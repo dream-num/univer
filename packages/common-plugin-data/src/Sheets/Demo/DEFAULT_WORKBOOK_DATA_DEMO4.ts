@@ -1,4 +1,4 @@
-import { BlockType, BooleanNumber, BorderStyleTypes, IDocumentData, IWorkbookConfig, LocaleType, ParagraphElementType, SheetTypes } from '@univer/core';
+import { BlockType, BooleanNumber, BorderStyleTypes, IDocumentData, IWorkbookConfig, LocaleType, ParagraphElementType, SheetTypes } from '@univerjs/core';
 
 const richTextDemo1: IDocumentData = {
     id: 'd',

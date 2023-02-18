@@ -53,12 +53,11 @@ export default defineConfig({
         // }),
         createExternal({
             externals: {
-                // '@univer/core': '@univer/core',
-                // '@univer/base-render': '@univer/base-render',
-                // '@univer/base-component': '@univer/base-component',
-                // '@univer/style-univer': '@univer/style-univer',
+                // '@univerjs/core': '@univerjs/core',
+                // '@univerjs/base-render': '@univerjs/base-render',
+                // '@univerjs/base-ui': '@univerjs/base-ui',
+                // '@univerjs/style-univer': '@univerjs/style-univer',
                 // 'css-vars-ponyfill': 'css-vars-ponyfill',
-                // nanoid: 'nanoid',
                 // preact: 'preact',
                 // react: 'react',
             },

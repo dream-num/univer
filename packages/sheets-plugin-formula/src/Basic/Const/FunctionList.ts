@@ -1,22 +1,37 @@
-interface P {
+export interface FormulaParamType {
+    /**
+     * formula param name locale key
+     */
     name?: string;
+    /**
+     * formula param detail description locale key
+     */
     detail?: string;
     example?: string;
     require?: string;
     repeat?: string;
     type?: string;
 }
-interface FunctionList {
+
+export interface FormulaType {
+    /**
+     * formula name
+     */
     n?: string;
     t?: number;
+    /**
+     * detail description locale key
+     */
     d?: string;
-    dLocale?: string;
     a?: string;
     m?: number[];
-    p?: P[];
+    /**
+     * formula params locale key
+     */
+    p?: FormulaParamType[];
 }
 
-const SelectCategoryType = [
+export const SelectCategoryType = [
     {
         locale: 'formula.formulaMore.Math',
     },
@@ -67,25 +82,25 @@ const SelectCategoryType = [
     },
 ];
 
-const FunList = [
+export const FunList: FormulaType[] = [
     {
         n: 'SUMIF',
         t: 0,
-        dLocale: 'formula.functionList.SUMIF.d',
+        d: 'formula.functionList.SUMIF.d',
         p: [
             {
-                nameLocale: 'formula.functionList.SUMIF.p.range.name',
-                detailLocale: 'formula.functionList.SUMIF.p.range.detail',
+                name: 'formula.functionList.SUMIF.p.range.name',
+                detail: 'formula.functionList.SUMIF.p.range.detail',
                 example: 'A1:A10',
             },
             {
-                nameLocale: 'formula.functionList.SUMIF.p.rangeAll.name',
-                detailLocale: 'formula.functionList.SUMIF.p.rangeAll.detail',
+                name: 'formula.functionList.SUMIF.p.rangeAll.name',
+                detail: 'formula.functionList.SUMIF.p.rangeAll.detail',
                 example: '">20"',
             },
             {
-                nameLocale: 'formula.functionList.SUMIF.p.range1.name',
-                detailLocale: 'formula.functionList.SUMIF.p.range1.detail',
+                name: 'formula.functionList.SUMIF.p.range1.name',
+                detail: 'formula.functionList.SUMIF.p.range1.detail',
                 example: 'B1:B10',
             },
         ],
@@ -93,40 +108,40 @@ const FunList = [
     {
         n: 'SUMIF1',
         t: 1,
-        dLocale: 'formula.functionList.SUMIF.d',
+        d: 'formula.functionList.SUMIF.d',
     },
     {
         n: 'SUMIF2',
         t: 2,
-        dLocale: 'formula.functionList.SUMIF.d',
+        d: 'formula.functionList.SUMIF.d',
     },
     {
         n: 'SUMIF3',
         t: 3,
-        dLocale: 'formula.functionList.SUMIF.d',
+        d: 'formula.functionList.SUMIF.d',
     },
     {
         n: 'SUMIF4',
         t: 4,
-        dLocale: 'formula.functionList.SUMIF.d',
+        d: 'formula.functionList.SUMIF.d',
     },
     {
         n: 'SUMIF5',
         t: 5,
-        dLocale: 'formula.functionList.SUMIF.d',
+        d: 'formula.functionList.SUMIF.d',
     },
     {
         n: 'SUMIF6',
         t: 6,
-        dLocale: 'formula.functionList.SUMIF.d',
+        d: 'formula.functionList.SUMIF.d',
     },
     {
         n: 'SUMIF7',
         t: 7,
-        dLocale: 'formula.functionList.SUMIF.d',
+        d: 'formula.functionList.SUMIF.d',
     },
 ];
 
-export { SelectCategoryType, FunList };
+// export { SelectCategoryType, FunList };
 
-export type { FunctionList, P };
+// export type { FunctionList, P };

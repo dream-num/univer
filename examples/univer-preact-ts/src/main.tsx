@@ -1,5 +1,5 @@
-import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DEMO3, DEFAULT_WORKBOOK_DATA_DOWN } from '@univer/common-plugin-data';
-import { IWorkbookConfig, IWorksheetConfig, SheetTypes, Tools } from '@univer/core';
+import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DEMO3, DEFAULT_WORKBOOK_DATA_DOWN } from '@univerjs/common-plugin-data';
+import { IWorkbookConfig, IWorksheetConfig, SheetTypes, Tools } from '@univerjs/core';
 import { univerSheetCustom } from '.';
 
 const sheetConfig = {
@@ -8,7 +8,7 @@ const sheetConfig = {
         sheetContainerConfig: {
             infoBar: false,
             formulaBar: false,
-            toolBar: false,
+            toolbar: false,
             sheetBar: false,
             countBar: false,
             rightMenu: false,
@@ -73,7 +73,7 @@ const sheetConfigDown = {
         sheetContainerConfig: {
             infoBar: false,
             formulaBar: false,
-            toolBar: false,
+            toolbar: false,
             sheetBar: true,
             countBar: false,
             rightMenu: false,
@@ -130,7 +130,7 @@ univerSheetCustom({
 //         layout: {
 //             innerRight: false,
 //             outerLeft: false,
-//             toolBarConfig: {
+//             toolbarConfig: {
 //                 paintFormat: false,
 //                 currencyFormat: false,
 //                 percentageFormat: false,
@@ -162,7 +162,7 @@ univerSheetCustom({
 //         columnCount = 5;
 //     }
 //     const defaultWorkbookData = Tools.deepClone(DEFAULT_WORKBOOK_DATA);
-//     defaultWorkbookData.id = Tools.generateRandomId();
+//     defaultWorkbookData.id = Tools.generateRandomId(6);
 //     defaultWorkbookData.styles = null;
 //     defaultWorkbookData.namedRanges = null;
 //     defaultWorkbookData.sheets = {

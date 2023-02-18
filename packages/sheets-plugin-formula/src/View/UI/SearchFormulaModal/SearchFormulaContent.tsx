@@ -1,5 +1,4 @@
-import { BaseComponentRender, BaseComponentSheet, Component, createRef, debounce } from '@univer/base-component';
-import { Select } from '@univer/base-sheets';
+import { BaseComponentRender, BaseComponentSheet, Component, createRef, debounce, Select } from '@univerjs/base-ui';
 import { FunctionList } from '../../../Basic';
 import { FunListILabel, ILabel } from '../../../Controller/SearchFormulaModalController';
 import styles from './index.module.less';
@@ -21,7 +20,7 @@ export class SearchFormulaContent extends Component<IProps, IState> {
     functionListRef = createRef();
 
     initialize() {
-        const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = this.getContext().getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this._render = component.getComponentRender();
 
         const functionList = this.props.funList.children?.filter((item) => item.t === 0);

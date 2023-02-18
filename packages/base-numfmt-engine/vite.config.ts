@@ -11,7 +11,7 @@ export default defineConfig({
         lib: {
             entry: resolve('src/index.ts'),
             name: 'UniverSheetsPluginFormula',
-            formats: ['es', 'umd'],
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-sheets-plugin-formula',
         },
         outDir: './lib',
@@ -38,8 +38,8 @@ export default defineConfig({
         preact(),
         createExternal({
             externals: {
-                '@univer/core': '@univer/core',
-                '@univer/style-univer': '@univer/style-univer',
+                '@univerjs/core': '@univerjs/core',
+                '@univerjs/style-univer': '@univerjs/style-univer',
                 preact: 'preact',
                 react: 'react',
             },

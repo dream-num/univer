@@ -1,7 +1,21 @@
-import { IMouseEvent, IPointerEvent, Rect, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, ScrollTimer } from '@univer/base-render';
-import { Nullable, Observer, Worksheet, ISelection, makeCellToSelection, IRangeData, RangeList, Range, IRangeCellData, ICellInfo, Command, Direction } from '@univer/core';
+import { IMouseEvent, IPointerEvent, Rect, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, ScrollTimer } from '@univerjs/base-render';
+import {
+    Nullable,
+    Observer,
+    Worksheet,
+    ISelection,
+    makeCellToSelection,
+    IRangeData,
+    RangeList,
+    Range,
+    IRangeCellData,
+    ICellInfo,
+    Command,
+    Direction,
+    ActionOperation,
+} from '@univerjs/core';
 import { ACTION_NAMES, ISelectionsConfig } from '../../Basics';
-import { ISelectionModelValue, ISetSelectionValueActionData } from '../../Model/Action/SetSelectionValueAction';
+import { ISelectionModelValue, ISetSelectionValueActionData, SetSelectionValueAction } from '../../Model/Action/SetSelectionValueAction';
 import { SelectionModel } from '../../Model/SelectionModel';
 import { SheetPlugin } from '../../SheetPlugin';
 import { SheetView } from '../../View/Render/Views/SheetView';
@@ -147,7 +161,7 @@ export class SelectionManager {
      * Renders all controls of the currently active sheet
      * @returns
      */
-    renderCurrentControls(models?: SelectionModel[]) {
+    renderCurrentControls(command: boolean = true, models?: SelectionModel[]) {
         const worksheetId = this.getWorksheetId();
         if (worksheetId) {
             if (this._selectionControls) {
@@ -192,7 +206,7 @@ export class SelectionManager {
                 this._selectionControls.push(control);
             });
 
-            this.setSelectionModel();
+            command && this.setSelectionModel();
         }
     }
 
@@ -274,17 +288,19 @@ export class SelectionManager {
         const workbook = this._worksheet.getContext().getWorkBook();
         const commandManager = workbook.getCommandManager();
 
-        const value: ISetSelectionValueActionData = {
+        let action: ISetSelectionValueActionData = {
             sheetId: this._worksheet.getSheetId(),
-            actionName: ACTION_NAMES.SET_SELECTION_VALUE_ACTION,
+            actionName: SetSelectionValueAction.NAME,
             selections: models,
         };
+
+        action = ActionOperation.make<ISetSelectionValueActionData>(action).removeUndo().getAction();
 
         const command = new Command(
             {
                 WorkBookUnit: workbook,
             },
-            value
+            action
         );
         commandManager.invoke(command);
     }
@@ -311,17 +327,19 @@ export class SelectionManager {
         const workbook = this._worksheet.getContext().getWorkBook();
         const commandManager = workbook.getCommandManager();
 
-        const value: ISetSelectionValueActionData = {
+        let action: ISetSelectionValueActionData = {
             sheetId: this._worksheet.getSheetId(),
             actionName: ACTION_NAMES.SET_SELECTION_VALUE_ACTION,
             selections: selectionModelsValue,
         };
 
+        action = ActionOperation.make<ISetSelectionValueActionData>(action).removeUndo().getAction();
+
         const command = new Command(
             {
                 WorkBookUnit: workbook,
             },
-            value
+            action
         );
         commandManager.invoke(command);
     }
@@ -640,40 +658,22 @@ export class SelectionManager {
 
     private _rowEventInitial() {
         const row = this._rowComponent;
-        row.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._rowTitleControl.pointerDown(evt);
-        });
         row.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._rowTitleControl.highlightRowTitle(evt);
-        });
-        row.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._rowTitleControl.highlightRowTitle(evt);
-        });
-        row.onPointerLeaveObserver.add(() => {
-            this._rowTitleControl.unHighlightRowTitle();
+            // this._rowTitleControl.highlightRowTitle(evt);
         });
     }
 
     private _columnEventInitial() {
         const column = this._columnComponent;
-        column.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._columnTitleControl.pointerDown(evt);
-        });
         column.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._columnTitleControl.highlightColumnTitle(evt);
-        });
-        column.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._columnTitleControl.highlightColumnTitle(evt);
-        });
-        column.onPointerLeaveObserver.add(() => {
-            this._columnTitleControl.unHighlightColumnTitle();
+            // this._columnTitleControl.highlightColumnTitle(evt);
         });
     }
 
     private _leftTopEventInitial() {
         const leftTop = this._leftTopComponent;
         leftTop.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            console.log('leftTop_moveObserver', evt);
+            // console.log('leftTop_moveObserver', evt);
         });
     }
 
@@ -696,25 +696,25 @@ export class SelectionManager {
 
                 const cellInfo = cell
                     ? {
-                          row: cell.row,
-                          column: cell.column,
-                          isMerged: false,
-                          isMergedMainCell: false,
-                          startY: 0,
-                          endY: 0,
-                          startX: 0,
-                          endX: 0,
-                          mergeInfo: {
-                              startColumn,
-                              startRow,
-                              endColumn,
-                              endRow,
-                              startY: 0,
-                              endY: 0,
-                              startX: 0,
-                              endX: 0,
-                          },
-                      }
+                        row: cell.row,
+                        column: cell.column,
+                        isMerged: false,
+                        isMergedMainCell: false,
+                        startY: 0,
+                        endY: 0,
+                        startX: 0,
+                        endX: 0,
+                        mergeInfo: {
+                            startColumn,
+                            startRow,
+                            endColumn,
+                            endRow,
+                            startY: 0,
+                            endY: 0,
+                            startX: 0,
+                            endX: 0,
+                        },
+                    }
                     : null;
 
                 // Only update data, not render

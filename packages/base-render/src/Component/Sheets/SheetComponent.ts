@@ -1,4 +1,4 @@
-import { searchArray } from '@univer/core';
+import { searchArray } from '@univerjs/core';
 import { IBoundRect } from '../../Basics/Vector2';
 import { RenderComponent } from '../Component';
 import { SpreadsheetSkeleton } from './SheetSkeleton';
@@ -26,7 +26,7 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
             return this;
         }
 
-        // const ctx = this._cacheCanvas.getContext();
+        // const ctx = this._cacheCanvas.getGlobalContext();
         // this._cacheCanvas.clear();
 
         mainCtx.save();

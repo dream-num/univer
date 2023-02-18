@@ -1,9 +1,9 @@
-import { UniverSheet } from '@univer/core';
-import { RenderEngine } from '@univer/base-render';
-import { UniverComponentSheet } from '@univer/style-univer';
-// import { NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
-import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
-// import { DEFAULT_FORMULA_DATA, FormulaPlugin } from '@univer/sheets-plugin-formula';
+import { UniverSheet } from '@univerjs/core';
+import { RenderEngine } from '@univerjs/base-render';
+
+import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
+import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DOWN } from '@univerjs/common-plugin-data';
+import { DEFAULT_FORMULA_DATA_DOWN, FormulaPlugin } from '@univerjs/sheets-plugin-formula';
 import { SheetPlugin } from './SheetPlugin';
 
 const uiDefaultConfigUp = {
@@ -12,7 +12,7 @@ const uiDefaultConfigUp = {
         sheetContainerConfig: {
             infoBar: true,
             formulaBar: true,
-            toolBar: true,
+            toolbar: true,
             sheetBar: true,
             countBar: true,
             rightMenu: true,
@@ -77,9 +77,9 @@ const uiDefaultConfigDown = {
     container: 'universheet-demo-down',
     layout: {
         sheetContainerConfig: {
-            infoBar: true,
-            formulaBar: true,
-            toolBar: true,
+            infoBar: false,
+            formulaBar: false,
+            toolbar: true,
             sheetBar: true,
             countBar: true,
             rightMenu: true,
@@ -103,13 +103,13 @@ const uiDefaultConfigDown = {
     },
 };
 
-// const univerSheetDown = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DOWN);
-// univerSheetDown.installPlugin(new RenderEngine());
-// univerSheetDown.installPlugin(new UniverComponentSheet());
+const univerSheetDown = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DOWN);
+univerSheetDown.installPlugin(new RenderEngine());
+univerSheetDown.installPlugin(new UniverComponentSheet());
 
-// univerSheetDown.installPlugin(new SheetPlugin(uiDefaultConfigDown));
-// univerSheetDown.installPlugin(new NumfmtPlugin());
-// FormulaPlugin.create(DEFAULT_FORMULA_DATA_DOWN).installTo(univerSheetDown);
+univerSheetDown.installPlugin(new SheetPlugin(uiDefaultConfigDown));
+univerSheetDown.installPlugin(new NumfmtPlugin());
+FormulaPlugin.create(DEFAULT_FORMULA_DATA_DOWN).installTo(univerSheetDown);
 
 // const uiDefaultConfigDemo = {
 //     container: 'universheet-demo-demo',

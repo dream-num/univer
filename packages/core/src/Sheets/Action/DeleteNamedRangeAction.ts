@@ -4,11 +4,10 @@ import {
     ActionObservers,
     ActionType,
     CommandUnit,
+    AddNamedRangeAction,
 } from '../../Command';
-import { ACTION_NAMES } from '../../Const';
-import { INamedRange } from '../../Interfaces/INamedRange';
-import { AddNamedRange } from '../Apply/AddNamedRange';
-import { DeleteNamedRange } from '../Apply/DeleteNamedRange';
+import { DeleteNamedRange, AddNamedRange } from '../Apply';
+import { INamedRange } from '../../Interfaces';
 import { IAddNamedRangeActionData } from './AddNamedRangeAction';
 
 export interface IDeleteNamedRangeActionData extends ISheetActionData {
@@ -20,6 +19,8 @@ export class DeleteNamedRangeAction extends SheetActionBase<
     IAddNamedRangeActionData,
     INamedRange
 > {
+    static NAME = 'DeleteNamedRangeAction';
+
     constructor(
         actionData: IDeleteNamedRangeActionData,
         commandUnit: CommandUnit,
@@ -31,7 +32,8 @@ export class DeleteNamedRangeAction extends SheetActionBase<
             ...actionData,
         };
         this._oldActionData = {
-            actionName: ACTION_NAMES.ADD_NAMED_RANGE_ACTION,
+            // actionName: ACTION_NAMES.ADD_NAMED_RANGE_ACTION,
+            actionName: AddNamedRangeAction.NAME,
             sheetId: actionData.sheetId,
             namedRange: this.do(),
         };
@@ -55,7 +57,8 @@ export class DeleteNamedRangeAction extends SheetActionBase<
 
         this._oldActionData = {
             sheetId,
-            actionName: ACTION_NAMES.ADD_BANDING_ACTION,
+            // actionName: ACTION_NAMES.ADD_BANDING_ACTION,
+            actionName: AddNamedRangeAction.NAME,
             namedRange: this.do(),
         };
     }

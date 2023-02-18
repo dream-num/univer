@@ -1,4 +1,4 @@
-import { ITransformState } from '@univer/core';
+import { ITransformState } from '@univerjs/core';
 import { degToRad, precisionTo, radToDeg } from './Tools';
 import { IRect } from './Interfaces';
 import { Vector2 } from './Vector2';

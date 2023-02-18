@@ -1,4 +1,4 @@
-import { BooleanCriteria, Color, SheetContext, RelativeDate, Sequence, Serializer, Tools } from '@univer/core';
+import { BooleanCriteria, Color, SheetContext, RelativeDate, Sequence, Serializer, Tools } from '@univerjs/core';
 import { ConditionValue } from '../../../sheets-plugin-conditional-format';
 import { FilterCriteriaBuilder } from './FilterCriteriaBuilder';
 

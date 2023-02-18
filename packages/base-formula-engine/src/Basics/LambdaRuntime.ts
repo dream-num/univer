@@ -1,4 +1,4 @@
-import { Nullable } from '@univer/core';
+import { Nullable } from '@univerjs/core';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 
 export class LambdaRuntime {

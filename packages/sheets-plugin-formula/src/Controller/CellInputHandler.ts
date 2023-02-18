@@ -1,6 +1,6 @@
-import { $$, getNodeindex, xssDeal } from '@univer/base-component';
-import { Nullable, Tools } from '@univer/core';
-import { lang } from './locale';
+import { $$, getNodeindex, xssDeal } from '@univerjs/base-ui';
+import { Nullable, Tools } from '@univerjs/core';
+import { FunList } from '../Basic';
 
 /**
  * Random color for formula cell input
@@ -524,9 +524,8 @@ export class CellInputHandler {
             if (i === funcstack.length - 1) {
                 // function_str += str;
                 if (_this.iscelldata(str.trim())) {
-                    function_str += `<span class="universheet-formula-functionrange-cell" rangeindex="${_this.functionHTMLIndex}" dir="auto" style="color:${
-                        LUCKY_COLOR[_this.functionHTMLIndex]
-                    };">${str}</span>`;
+                    function_str += `<span class="universheet-formula-functionrange-cell" rangeindex="${_this.functionHTMLIndex}" dir="auto" style="color:${LUCKY_COLOR[_this.functionHTMLIndex]
+                        };">${str}</span>`;
                     _this.functionHTMLIndex++;
                 } else if (matchConfig.dquote > 0) {
                     function_str += `${str}</span>`;
@@ -697,10 +696,10 @@ export class CellInputHandler {
 
     searchFunction($editer: HTMLElement) {
         let _this = this;
-        const locale = 'zh';
+        // const locale = 'zh';
         this.formula = [];
 
-        let functionlist = lang[`${locale}`];
+        // let functionlist = lang[`${locale}`];
 
         let $cell = _this.getrangeseleciton();
 
@@ -725,9 +724,11 @@ export class CellInputHandler {
         };
         let result_i = 0;
 
-        for (let i = 0; i < functionlist.length; i++) {
-            let item = functionlist[i];
+        for (let i = 0; i < FunList.length; i++) {
+            let item = FunList[i];
             let n = item.n;
+
+            if (!n) continue;
 
             if (n === searchtxt) {
                 result.f.unshift(item);
@@ -754,11 +755,11 @@ export class CellInputHandler {
 
     helpFunctionExe($editer: HTMLElement, currSelection: HTMLSpanElement) {
         let _this = this;
-        const locale = 'zh';
-        let functionlist = lang[`${locale}`];
         if (document.querySelectorAll('#universheet-formula-help-c').length === 0) {
-            for (let i = 0; i < functionlist.length; i++) {
-                _this.functionlistPosition[functionlist[i].n] = i;
+            for (let i = 0; i < FunList.length; i++) {
+                const n = FunList[i].n;
+                if (!n) continue;
+                _this.functionlistPosition[n] = i;
             }
         }
         if (!currSelection) {

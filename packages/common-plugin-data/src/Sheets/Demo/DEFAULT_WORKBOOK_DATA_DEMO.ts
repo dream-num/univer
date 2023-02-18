@@ -1,4 +1,4 @@
-import { BlockType, BooleanNumber, BorderStyleTypes, IDocumentData, IWorkbookConfig, LocaleType, ParagraphElementType, SheetTypes } from '@univer/core';
+import { BlockType, BooleanNumber, BorderStyleTypes, IDocumentData, IWorkbookConfig, LocaleType, ParagraphElementType, SheetTypes } from '@univerjs/core';
 import { PAGE5_RICHTEXT_1 } from '../../Slides/RichText/PAGE5_RICHTEXT_1';
 
 const richTextDemo: IDocumentData = {
@@ -1628,8 +1628,8 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             tabColor: 'blue',
             hidden: BooleanNumber.FALSE,
             freezeColumn: 1,
-            rowCount: 10,
-            columnCount: 11,
+            rowCount: 13,
+            columnCount: 14,
             freezeRow: 1,
             zoomRatio: 1,
             scrollTop: 200,

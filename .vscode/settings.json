@@ -39,6 +39,7 @@
         "ilvl",
         "Kaiti",
         "KANBAN",
+        "kcode",
         "keyof",
         "Lerp",
         "Liti",
@@ -57,6 +58,7 @@
         "Tahoma",
         "univer",
         "univerdoc",
+        "univerjs",
         "universheet",
         "universlide",
         "Unmerge",
@@ -70,5 +72,8 @@
     "typescript.preferences.importModuleSpecifier": "relative",
     "[xml]": {
         "editor.defaultFormatter": "redhat.vscode-xml"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
     }
 }

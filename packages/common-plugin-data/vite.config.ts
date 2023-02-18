@@ -14,7 +14,7 @@ export default defineConfig({
             fileName: 'univer-common-plugin-data',
         },
         outDir: './lib',
-        sourcemap: true
+        //sourcemap: true
     },
     define: {
         pkgJson: { name, version },
@@ -31,7 +31,7 @@ export default defineConfig({
     plugins: [
         createExternal({
             externals: {
-                '@univer/core': '@univer/core'
+                '@univerjs/core': '@univerjs/core'
             },
         }),
     ],

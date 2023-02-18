@@ -1,8 +1,8 @@
-import { UniverSlide } from '@univer/core';
-import { RenderEngine } from '@univer/base-render';
-import { UniverComponentSheet } from '@univer/style-univer';
+import { UniverSlide } from '@univerjs/core';
+import { RenderEngine } from '@univerjs/base-render';
+
 import { SlidePlugin } from './SlidePlugin';
-import { DEFAULT_SLIDE_DATA } from '@univer/common-plugin-data';
+import { DEFAULT_SLIDE_DATA } from '@univerjs/common-plugin-data';
 
 const slidePluginConfig = {
     container: 'universlide',

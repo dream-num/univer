@@ -1,6 +1,6 @@
-import { ComponentChildren } from '@univer/base-component';
-import { SheetPlugin, CellRangeModal } from '@univer/base-sheets';
-import { PLUGIN_NAMES } from '@univer/core';
+import { ComponentChildren } from '@univerjs/base-ui';
+import { SheetPlugin, CellRangeModal } from '@univerjs/base-sheets';
+import { PLUGIN_NAMES } from '@univerjs/core';
 import { FORMULA_PLUGIN_NAME, FunctionList, FunList, SelectCategoryType } from '../Basic';
 import { FormulaPlugin } from '../FormulaPlugin';
 import { SearchFormulaContent } from '../View/UI/SearchFormulaModal/SearchFormulaContent';
@@ -157,7 +157,7 @@ export class SearchFormulaController {
             },
         };
 
-        this._initRegisterComponent();
+        // this._initRegisterComponent();
 
         this._initialize();
     }
@@ -177,7 +177,7 @@ export class SearchFormulaController {
         const sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
         sheetPlugin.getObserver('onChangeSelectionObserver')?.add((selection) => {
             const info = selection.getCurrentCellInfo();
-            this._searchItem.changeRange(info?.startColumn.toString() ?? '');
+            // this._searchItem.changeRange(info?.startColumn.toString() ?? '');
         });
     }
 
@@ -270,8 +270,8 @@ export class SearchFormulaController {
     showCellRangeModal(show: boolean) {
         this._cellRangeModalData.show = show;
         const sheetPlugin = this._plugin.getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
-        const cellRangeModal = sheetPlugin?.getModalGroupControl().getModal(CellRangeModal.name);
-        cellRangeModal.setModal(this._cellRangeModalData);
+        // const cellRangeModal = sheetPlugin?.getModalGroupControl().getModal(CellRangeModal.name);
+        // cellRangeModal.setModal(this._cellRangeModalData);
         this.showFormulaModal('SearchItem', false);
     }
 

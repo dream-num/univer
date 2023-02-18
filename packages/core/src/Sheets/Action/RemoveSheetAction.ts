@@ -1,9 +1,9 @@
-import { InsertSheet, RemoveSheet } from '../Apply';
+import { InsertSheetApply, RemoveSheetApply } from '../Apply';
 import { IWorksheetConfig } from '../../Interfaces';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { IInsertSheetActionData } from './InsertSheetAction';
 import { CommandUnit } from '../../Command';
+import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { IInsertSheetActionData } from './InsertSheetAction';
+import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 
 export interface IRemoveSheetActionData extends ISheetActionData {
     sheetId: string;
@@ -13,6 +13,8 @@ export class RemoveSheetAction extends SheetActionBase<
     IRemoveSheetActionData,
     IInsertSheetActionData
 > {
+    static NAME = 'RemoveSheetAction';
+
     constructor(
         actionData: IRemoveSheetActionData,
         commandUnit: CommandUnit,
@@ -33,8 +35,7 @@ export class RemoveSheetAction extends SheetActionBase<
     }
 
     redo(): { index: number; sheet: IWorksheetConfig } {
-        const workbook = this.getWorkBook();
-        const result = RemoveSheet(workbook, this._doActionData.sheetId);
+        const result = RemoveSheetApply(this._commandUnit, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -45,12 +46,12 @@ export class RemoveSheetAction extends SheetActionBase<
 
     undo(): void {
         const workbook = this.getWorkBook();
+        InsertSheetApply(this._commandUnit, this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
             action: this,
         });
-        InsertSheet(workbook, this._oldActionData.index, this._oldActionData.sheet);
     }
 
     validate(): boolean {

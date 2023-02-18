@@ -10,8 +10,8 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve('src/index.ts'),
-            name: 'UniverSheetPluginAlternatingColors',
-            formats: ['es', 'umd'],
+            name: 'UniverSheetsPluginAlternatingColors',
+            formats: ['es', 'umd', 'cjs'],
             fileName: 'univer-sheets--plugin-alternating-colors',
         },
         outDir: './lib',
@@ -38,8 +38,8 @@ export default defineConfig({
         preact(),
         createExternal({
             externals: {
-                '@univer/core': '@univer/core',
-                '@univer/style-univer': '@univer/style-univer',
+                '@univerjs/core': '@univerjs/core',
+                '@univerjs/style-univer': '@univerjs/style-univer',
                 preact: 'preact',
                 react: 'react',
             },

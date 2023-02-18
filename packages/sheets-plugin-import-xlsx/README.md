@@ -8,14 +8,14 @@ UniverSheet Plugin ImportXlsx
 
 ### Installation
 
-```bash
-npm i @univer/sheets-plugin-import-xlsx
+```shell
+npm i @univerjs/sheets-plugin-import-xlsx
 ```
 
 ### Usage
 
 ```js
-impport {ImportXlsx} from '@univer/sheets-plugin-import-xlsx'
+import { ImportXlsx } from '@univerjs/sheets-plugin-import-xlsx';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new ImportXlsx());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # Or project root directory ./
-pnpm run --filter  @univer/sheets-plugin-import-xlsx dev
+pnpm run --filter  @univerjs/sheets-plugin-import-xlsx dev
 ```
 
 ### Package
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-import-xlsx dev
 npm run build
 
 # Or root directory ./
-pnpm run --filter  @univer/sheets-plugin-import-xlsx build
+pnpm run --filter  @univerjs/sheets-plugin-import-xlsx build
 ```

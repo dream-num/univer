@@ -1,4 +1,4 @@
-import { Nullable } from '@univer/core';
+import { Nullable } from '@univerjs/core';
 
 /**
  * Alias type for number that are floats

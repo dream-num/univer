@@ -1,6 +1,6 @@
-import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
-import { SheetContext, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
+import { IToolbarItemProps, ISlotElement } from '@univerjs/base-ui';
+import { SheetContext, UniverSheet, Plugin, PLUGIN_NAMES } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
 import { en, zh } from './Locale';
 import { DataValidationButton } from './UI/DataValidationButton';
 
@@ -36,7 +36,7 @@ export class DataValidationPlugin extends Plugin {
         });
         const config: IConfig = {};
 
-        const item: IToolBarItemProps = {
+        const item: IToolbarItemProps = {
             locale: DATA_VALIDATION_PLUGIN_NAME,
             type: ISlotElement.JSX,
             show: true,

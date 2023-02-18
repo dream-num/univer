@@ -1,4 +1,4 @@
-import { CellValueType, HorizontalAlign, ICellInfo, IRangeData, Nullable, ObjectMatrix, searchArray, WrapStrategy, sortRules } from '@univer/core';
+import { CellValueType, HorizontalAlign, ICellInfo, IRangeData, Nullable, ObjectMatrix, searchArray, WrapStrategy, sortRules } from '@univerjs/core';
 import { Background } from './Extensions/Background';
 import { Border } from './Extensions/Border';
 import { Font } from './Extensions/Font';

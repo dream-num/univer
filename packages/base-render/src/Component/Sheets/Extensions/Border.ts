@@ -1,4 +1,4 @@
-import { BorderStyleTypes, IRangeData, ObjectMatrix, IScale } from '@univer/core';
+import { BorderStyleTypes, IRangeData, ObjectMatrix, IScale } from '@univerjs/core';
 import { BorderCacheItem } from '../Interfaces';
 import { fixLineWidthByScale } from '../../../Basics/Tools';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';

@@ -1,4 +1,4 @@
-import { Tools } from '@univer/core';
+import { Tools } from '@univerjs/core';
 import { AlternatingColorsPlugin } from '../AlternatingColorsPlugin';
 import { DEFAULT_PROPERTIES_BANDED_RANGE, IBandedRange } from '../IBandedRange';
 

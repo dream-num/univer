@@ -1,0 +1,67 @@
+@import 'mixin.less';
+
+.btn {
+    line-height: @line-height-base;
+    .btn();
+    .btn-default();
+
+    >span {
+        display: inline-block;
+    }
+
+    &-primary {
+        .btn-primary();
+    }
+
+    &-danger {
+        .btn-danger();
+    }
+
+    &-text {
+        .btn-text();
+    }
+
+    &-active {
+        color: var(--text-color);
+        background: var(--bg-hover);
+        border-color: var(--border-color-base);
+        text-shadow: none;
+        box-shadow: none;
+    }
+
+    &-round {
+        .btn-round();
+    }
+
+    &-circle {
+        .btn-circle();
+    }
+
+    &-block {
+        width: 100%;
+    }
+
+    &-loading {
+        position: relative;
+    }
+
+    &::before {
+        position: absolute;
+        top: -@border-width-base;
+        right: -@border-width-base;
+        bottom: -@border-width-base;
+        left: -@border-width-base;
+        z-index: 1;
+        display: none;
+        background: var(--bg);
+        border-radius: inherit;
+        opacity: 0.35;
+        transition: opacity 0.2s;
+        content: '';
+        pointer-events: none;
+    }
+
+    &:active>span {
+        position: relative;
+    }
+}

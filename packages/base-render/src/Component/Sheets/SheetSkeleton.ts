@@ -29,7 +29,7 @@ import {
     Nullable,
     getColorStyle,
     IDocumentRenderConfig,
-} from '@univer/core';
+} from '@univerjs/core';
 import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../Basics/Const';
 import { IStylesCache, BorderCache } from './Interfaces';
 import { getFontStyleString, getCellPositionByIndex, isRectIntersect } from '../../Basics/Tools';

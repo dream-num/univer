@@ -1,5 +1,4 @@
-import { IPosition, ITextSelectionRange, Nullable } from '@univer/core';
-import { nanoid } from 'nanoid';
+import { IPosition, ITextSelectionRange, Nullable, Tools } from '@univerjs/core';
 import { COLORS } from '../../../Basics/Const';
 import {
     IDocumentSkeletonColumn,
@@ -92,7 +91,7 @@ export class TextSelection {
         span: NodePositionStateType.NORMAL,
     };
 
-    constructor(private _scene: Scene, public startNodePosition?: Nullable<INodePosition>, public endNodePosition?: Nullable<INodePosition>, public segmentId?: string) {}
+    constructor(private _scene: Scene, public startNodePosition?: Nullable<INodePosition>, public endNodePosition?: Nullable<INodePosition>, public segmentId?: string) { }
 
     private _resetCurrentNodePositionState() {
         this._currentStartState = {
@@ -325,7 +324,7 @@ export class TextSelection {
             return;
         }
 
-        const polygon = new RegularPolygon(TEXT_RANGE_KEY_PREFIX + nanoid(6), {
+        const polygon = new RegularPolygon(TEXT_RANGE_KEY_PREFIX + Tools.generateRandomId(6), {
             pointsGroup,
             fill: getColor(COLORS.black, 0.2),
             left,
@@ -364,7 +363,7 @@ export class TextSelection {
             return;
         }
 
-        const anchor = new Rect(TEXT_ANCHOR_KEY_PREFIX + nanoid(6), {
+        const anchor = new Rect(TEXT_ANCHOR_KEY_PREFIX + Tools.generateRandomId(6), {
             left: left + docsLeft,
             top: top + docsTop,
             height,

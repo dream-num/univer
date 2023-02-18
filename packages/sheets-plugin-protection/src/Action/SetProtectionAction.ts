@@ -1,4 +1,4 @@
-import { SheetActionBase, ActionObservers, ISheetActionData, Workbook } from '@univer/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, Workbook } from '@univerjs/core';
 import { SetProtection } from '../Apply';
 import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
 

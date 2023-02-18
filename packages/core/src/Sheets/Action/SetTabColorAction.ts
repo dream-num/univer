@@ -1,5 +1,4 @@
 import { SetTabColor } from '../Apply';
-import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { Nullable } from '../../Shared/Types';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
@@ -20,6 +19,8 @@ export class SetTabColorAction extends SheetActionBase<
     ISetTabColorActionData,
     Nullable<string>
 > {
+    static NAME = 'SetTabColorAction';
+
     constructor(
         actionData: ISetTabColorActionData,
         commandUnit: CommandUnit,
@@ -57,7 +58,8 @@ export class SetTabColorAction extends SheetActionBase<
         const { sheetId } = this._doActionData;
         this._oldActionData = {
             sheetId,
-            actionName: ACTION_NAMES.SET_TAB_COLOR_ACTION,
+            // actionName: ACTION_NAMES.SET_TAB_COLOR_ACTION,
+            actionName: SetTabColorAction.NAME,
             color: this.do(),
         };
     }
@@ -68,7 +70,8 @@ export class SetTabColorAction extends SheetActionBase<
 
         // update current data
         this._doActionData = {
-            actionName: ACTION_NAMES.SET_TAB_COLOR_ACTION,
+            // actionName: ACTION_NAMES.SET_TAB_COLOR_ACTION,
+            actionName: SetTabColorAction.NAME,
             sheetId,
             color: SetTabColor(worksheet, color),
         };

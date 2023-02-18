@@ -1,4 +1,4 @@
-import { CellValueType, ICellData, IWorkbookConfig, ObjectMatrix } from '@univer/core';
+import { CellValueType, ICellData, IWorkbookConfig, ObjectMatrix } from '@univerjs/core';
 
 type SheetDataType = { [sheetName: string]: ObjectMatrix<ICellData> };
 

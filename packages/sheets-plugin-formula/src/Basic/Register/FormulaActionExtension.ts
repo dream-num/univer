@@ -12,7 +12,7 @@ import {
     Nullable,
     ObjectMatrix,
     Tools,
-} from '@univer/core';
+} from '@univerjs/core';
 import { FormulaPlugin } from '../../FormulaPlugin';
 import { ACTION_NAMES as PLUGIN_ACTION_NAMES } from '../Enum';
 
@@ -161,7 +161,7 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
 
     checkArrayFormValue(row: number, column: number): Nullable<IRangeData> {
         let formula;
-        const arrayFormulaData = this._plugin.getFormulaController().getArrayFormulaData();
+        const arrayFormulaData = this._plugin.getFormulaController().getDataModel().getArrayFormulaData();
 
         if (!arrayFormulaData) return null;
 

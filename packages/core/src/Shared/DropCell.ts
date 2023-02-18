@@ -551,7 +551,7 @@ export class DropCell {
                             arrIndex.push(b - b1 + 1);
 
                             if (text in obj) {
-                                obj[text].push({ data: arrData, index: arrIndex });
+                                // obj[text].push({ data: arrData, index: arrIndex });
                             } else {
                                 obj[text] = [];
                                 obj[text].push({ data: arrData, index: arrIndex });

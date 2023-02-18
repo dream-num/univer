@@ -1,6 +1,6 @@
-import { ComponentChildren } from '@univer/base-component';
-import { SheetPlugin } from '@univer/base-sheets';
-import { PLUGIN_NAMES } from '@univer/core';
+import { ComponentChildren } from '@univerjs/base-ui';
+import { SheetPlugin } from '@univerjs/base-sheets';
+import { PLUGIN_NAMES } from '@univerjs/core';
 import { NUMBERFORMAT, NUMFMT_PLUGIN_NAME, CURRENCYDETAIL, DATEFMTLISG } from '../Basic/Const';
 import { NumfmtPlugin } from '../NumfmtPlugin';
 import { FormatContent } from '../View/UI/FormatContent';

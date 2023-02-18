@@ -8,14 +8,14 @@ UniverSheet Collaboration 插件
 
 ### 安装
 
-```bash
-npm i @univer/common-plugin-collaboration
+```shell
+npm i @univerjs/common-plugin-collaboration
 ```
 
 ### 使用
 
 ```js
-impport {Collaboration} from '@univer/common-plugin-collaboration'
+import { Collaboration } from '@univerjs/common-plugin-collaboration';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Collaboration());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/common-plugin-collaboration dev
+pnpm run --filter  @univerjs/common-plugin-collaboration dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/common-plugin-collaboration dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/common-plugin-collaboration build
+pnpm run --filter  @univerjs/common-plugin-collaboration build
 ```

@@ -1,6 +1,6 @@
-import { BaseComponentRender, BaseComponentSheet, Component, ModalProps } from '@univer/base-component';
-import { PLUGIN_NAMES } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
+import { BaseComponentRender, BaseComponentSheet, Component, ModalProps } from '@univerjs/base-ui';
+import { PLUGIN_NAMES } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
 import { IProps } from '../../IData/IFind';
 import { FindPlugin } from '../../FindPlugin';
 import { FIND_PLUGIN_NAME } from '../../Const/PLUGIN_NAME';

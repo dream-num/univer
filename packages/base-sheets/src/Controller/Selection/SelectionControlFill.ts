@@ -1,4 +1,4 @@
-import { CURSOR_TYPE, IMouseEvent, IPointerEvent } from '@univer/base-render';
+import { CURSOR_TYPE, IMouseEvent, IPointerEvent } from '@univerjs/base-render';
 import { SelectionControl } from './SelectionController';
 
 export class SelectionControlFill {

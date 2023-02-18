@@ -1,6 +1,6 @@
-import { BaseComponentRender } from '@univer/base-component';
-import { SheetPlugin } from '@univer/base-sheets';
-import { ACTION_NAMES, CommandManager, HEART_BEAT_MESSAGE, IOSocket, IOSocketListenType, ISheetActionData, PLUGIN_NAMES, SheetActionBase, SheetContext } from '@univer/core';
+import { BaseComponentRender } from '@univerjs/base-ui';
+import { SheetPlugin } from '@univerjs/base-sheets';
+import { ACTION_NAMES, CommandManager, HEART_BEAT_MESSAGE, IOSocket, IOSocketListenType, ISheetActionData, PLUGIN_NAMES, SheetActionBase, SheetContext } from '@univerjs/core';
 import { CollaborationPlugin } from '../CollaborationPlugin';
 
 export class CollaborationController {

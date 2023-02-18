@@ -1,4 +1,4 @@
-import { BlockType, PageElementType, ParagraphElementType } from '@univer/core';
+import { BlockType, PageElementType, ParagraphElementType } from '@univerjs/core';
 import { DEFAULT_LIST_TEST } from '../../Docs/DEFAULT_LIST';
 
 export const PAGE3_RICHTEXT_1 = {

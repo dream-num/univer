@@ -1,8 +1,12 @@
 {
-    "name": "@univer/base-sheets",
+    "name": "@univerjs/base-sheets",
     "version": "0.0.1",
     "description": "UniverSheet normal base-sheets",
-    "keywords": [],
+    "keywords": [
+        "univer",
+        "sheets",
+        "spreadsheet"
+    ],
     "author": "DreamNum <msoffice2@126.com>",
     "license": "MIT",
     "main": "./src/index.ts",
@@ -11,7 +15,15 @@
     "publishConfig": {
         "main": "./lib/univer-base-sheets.cjs.js",
         "module": "./lib/univer-base-sheets.es.js",
-        "types": "./lib/index.d.ts"
+        "types": "./lib/index.d.ts",
+        "exports": {
+            ".": {
+                "require": "./lib/univer-base-sheets.cjs.js",
+                "default": "./lib/univer-base-sheets.es.js"
+            },
+            "./*": "./lib/*"
+        },
+        "access": "public"
     },
     "exports": {
         ".": "./src/index.ts",
@@ -20,6 +32,9 @@
     "directories": {
         "lib": "lib"
     },
+    "files": [
+        "lib"
+    ],
     "scripts": {
         "test": "jest",
         "test:play": "npx playwright test",
@@ -48,13 +63,7 @@
         "vite-plugin-external": "1.2.3"
     },
     "dependencies": {
-        "@univer/base-component": "workspace:^0.0.1",
-        "@univer/base-render": "workspace:^0.0.1",
-        "@univer/common-plugin-data": "workspace:^0.0.1",
-        "@univer/core": "workspace:^0.0.1",
-        "@univer/style-univer": "workspace:^0.0.1",
-        "css-vars-ponyfill": "^2.4.6",
-        "nanoid": "4.0.0",
-        "preact": "^10.5.14"
+        "@univerjs/base-render": "workspace:^0.0.1",
+        "@univerjs/core": "workspace:^0.0.1"
     }
 }

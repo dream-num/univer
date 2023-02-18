@@ -1,16 +1,16 @@
-import { IDocumentData, ISlideData, IWorkbookConfig, UniverDoc, UniverSheet, UniverSlide } from '@univer/core';
-import { RenderEngine } from '@univer/base-render';
-import { BaseComponentPlugin } from '@univer/base-component';
-import { UniverComponentSheet } from '@univer/style-univer';
-import { ISheetPluginConfig, SheetPlugin } from '@univer/base-sheets';
-import { IDocPluginConfig, DocPlugin } from '@univer/base-docs';
-import { ISlidePluginConfig, SlidePlugin } from '@univer/base-slides';
-import { DEFAULT_WORKBOOK_DATA } from '@univer/common-plugin-data';
-import { CollaborationPlugin, ICollaborationPluginConfig } from '@univer/common-plugin-collaboration';
-import { DEFAULT_FORMULA_DATA, FormulaPlugin, IFormulaConfig } from '@univer/sheets-plugin-formula';
-import { INumfmtPluginConfig, NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
-import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
-import { ImportXlsxPlugin } from '@univer/sheets-plugin-import-xlsx';
+import { IDocumentData, ISlideData, IWorkbookConfig, UniverDoc, UniverSheet, UniverSlide } from '@univerjs/core';
+import { RenderEngine } from '@univerjs/base-render';
+import { BaseComponentPlugin } from '@univerjs/base-ui';
+
+import { ISheetPluginConfig, SheetPlugin } from '@univerjs/base-sheets';
+import { IDocPluginConfig, DocPlugin } from '@univerjs/base-docs';
+import { ISlidePluginConfig, SlidePlugin } from '@univerjs/base-slides';
+import { DEFAULT_WORKBOOK_DATA } from '@univerjs/common-plugin-data';
+import { CollaborationPlugin, ICollaborationPluginConfig } from '@univerjs/common-plugin-collaboration';
+import { DEFAULT_FORMULA_DATA, FormulaPlugin, IFormulaConfig } from '@univerjs/sheets-plugin-formula';
+import { INumfmtPluginConfig, NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
+import { ClipboardPlugin } from '@univerjs/sheets-plugin-clipboard';
+import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
 
 interface ISheetPropsCustom {
     coreConfig?: Partial<IWorkbookConfig>;
@@ -111,16 +111,16 @@ const univerSlideCustom = function (config?: ISlidePropsCustom) {
 
 export { univerSheetCustom, univerDocCustom, univerSlideCustom };
 
-export * as UniverCore from '@univer/core';
-export * as BaseRender from '@univer/base-render';
-export * as BaseComponent from '@univer/base-component';
-export * as StyleUniver from '@univer/style-univer';
-export * as BaseSheets from '@univer/base-sheets';
-export * as BaseDocs from '@univer/base-docs';
-export * as BaseSlides from '@univer/base-slides';
-export * as CommonPluginData from '@univer/common-plugin-data';
-export * as CommonPluginCollaboration from '@univer/common-plugin-collaboration';
-export * as SheetsPluginFormula from '@univer/sheets-plugin-formula';
-export * as SheetsPluginNumfmt from '@univer/sheets-plugin-numfmt';
-export * as SheetsPluginClipboard from '@univer/sheets-plugin-clipboard';
-export * as SheetsPluginImportXlsx from '@univer/sheets-plugin-import-xlsx';
+export * as UniverCore from '@univerjs/core';
+export * as BaseRender from '@univerjs/base-render';
+export * as BaseComponent from '@univerjs/base-ui';
+export * as StyleUniver from '@univerjs/style-univer';
+export * as BaseSheets from '@univerjs/base-sheets';
+export * as BaseDocs from '@univerjs/base-docs';
+export * as BaseSlides from '@univerjs/base-slides';
+export * as CommonPluginData from '@univerjs/common-plugin-data';
+export * as CommonPluginCollaboration from '@univerjs/common-plugin-collaboration';
+export * as SheetsPluginFormula from '@univerjs/sheets-plugin-formula';
+export * as SheetsPluginNumfmt from '@univerjs/sheets-plugin-numfmt';
+export * as SheetsPluginClipboard from '@univerjs/sheets-plugin-clipboard';
+export * as SheetsPluginImportXlsx from '@univerjs/sheets-plugin-import-xlsx';

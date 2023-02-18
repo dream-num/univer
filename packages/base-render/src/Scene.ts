@@ -1,4 +1,4 @@
-import { EventState, Observable, Observer, sortRules, sortRulesByDesc, Nullable } from '@univer/core';
+import { EventState, Observable, Observer, sortRules, sortRulesByDesc, Nullable } from '@univerjs/core';
 import { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './Basics/IEvents';
 
 import { requestNewFrame, precisionTo } from './Basics/Tools';

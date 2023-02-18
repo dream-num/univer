@@ -1,6 +1,6 @@
-import { Documents, IDocumentSkeletonSpan, SpanType } from '@univer/base-render';
-import { TextSelection } from '@univer/base-render/src/Component/Docs/Common/TextSelection';
-import { KeyboardKeyType, Logger, Nullable } from '@univer/core';
+import { Documents, IDocumentSkeletonSpan, SpanType } from '@univerjs/base-render';
+import { TextSelection } from '@univerjs/base-render/src/Component/Docs/Common/TextSelection';
+import { KeyboardKeyType, Logger, Nullable } from '@univerjs/core';
 import { DocPlugin } from '../DocPlugin';
 
 export class InputController {

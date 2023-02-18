@@ -1,0 +1,57 @@
+@import '../../Basics/CSS/Skin/base.module.less';
+
+.modal-mask {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 500;
+}
+
+.modal-wrapper {
+    width: 50%;
+    overflow: auto;
+    position: fixed;
+    z-index: 500;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 1);
+}
+
+.modal-darg-wrapper {
+    width: 50%;
+    overflow: auto;
+    background-color: rgba(255, 255, 255, 1);
+}
+
+.modal-header {
+    padding: 1rem 1.5em;
+    border-bottom: 1px solid @gray-4;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .modal-close * {
+        cursor: pointer;
+    }
+}
+
+.modal-body {
+    padding: 1rem 1.5em;
+    max-height: 70vh;
+    overflow: auto;
+}
+
+.modal-footer {
+    padding: 1rem 1.5em;
+    border-top: 1px solid @gray-4;
+    text-align: right;
+
+    button {
+        margin-right: 0.5em;
+        font-size: 1rem !important;
+    }
+}

@@ -1,13 +1,13 @@
-import { BaseComponentRender, BaseComponentSheet, Component, IToolBarItemProps, ModalProps } from '@univer/base-component';
-import { Nullable, Observer, Workbook } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
+import { BaseComponentRender, BaseComponentSheet, Component, IToolbarItemProps, ModalProps } from '@univerjs/base-ui';
+import { Nullable, Observer, Workbook } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
 import { IProps } from '../IData/IDataValidation';
 import { DataValidationContent } from './DataValidationContent';
 import styles from './index.module.less';
 
 // Types for state
 interface IState {
-    dataValidation: IToolBarItemProps;
+    dataValidation: IToolbarItemProps;
     modalData: ModalProps[];
     tip: LabelProps[];
 }
@@ -29,7 +29,7 @@ export class DataValidationButton extends Component<IProps, IState> {
 
         const CheckIcon = this.Render.renderFunction('CheckIcon');
 
-        const dataValidationState: IToolBarItemProps = {
+        const dataValidationState: IToolbarItemProps = {
             locale: 'dataValidation',
             type: 'single',
             label: <CheckIcon />,

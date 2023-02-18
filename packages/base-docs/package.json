@@ -1,5 +1,5 @@
 {
-    "name": "@univer/base-docs",
+    "name": "@univerjs/base-docs",
     "version": "0.0.1",
     "description": "UniverSheet normal base-docs",
     "keywords": [],
@@ -20,6 +20,9 @@
     "directories": {
         "lib": "lib"
     },
+    "files": [
+        "lib"
+    ],
     "scripts": {
         "test": "jest",
         "dev": "vite",
@@ -49,12 +52,11 @@
         "vite": "^2.4.4"
     },
     "dependencies": {
-        "@univer/base-component": "workspace:^0.0.1",
-        "@univer/base-render": "workspace:^0.0.1",
-        "@univer/base-sheets": "workspace:^0.0.1",
-        "@univer/core": "workspace:^0.0.1",
-        "@univer/common-plugin-data": "workspace:^0.0.1",
-        "@univer/style-univer": "workspace:^0.0.1",
+        "@univerjs/base-ui": "workspace:^0.0.1",
+        "@univerjs/base-render": "workspace:^0.0.1",
+        "@univerjs/base-sheets": "workspace:^0.0.1",
+        "@univerjs/core": "workspace:^0.0.1",
+        "@univerjs/common-plugin-data": "workspace:^0.0.1",
         "css-vars-ponyfill": "^2.4.6",
         "preact": "^10.5.14"
     }

@@ -1,4 +1,4 @@
-import { BooleanNumber, CommandManager } from '@univer/core';
+import { BooleanNumber, CommandManager } from '@univerjs/core';
 import { SlidePlugin } from '../SlidePlugin';
 
 export class SlideController {

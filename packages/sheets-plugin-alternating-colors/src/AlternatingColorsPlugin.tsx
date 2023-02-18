@@ -1,6 +1,6 @@
-import { ISlotElement, ISlotProps } from '@univer/base-component';
-import { SheetContext, IOCContainer, UniverSheet, Nullable, Plugin, PLUGIN_NAMES, Command } from '@univer/core';
-import { IToolBarItemProps, SheetPlugin } from '@univer/base-sheets';
+import { ISlotElement, ISlotProps } from '@univerjs/base-ui';
+import { SheetContext, IOCContainer, UniverSheet, Nullable, Plugin, PLUGIN_NAMES, Command } from '@univerjs/core';
+import { IToolbarItemProps, SheetPlugin } from '@univerjs/base-sheets';
 import { Banding } from './Banding';
 import { IAddBandingActionData } from './Command';
 import { ACTION_NAMES } from './Command/ACTION_NAMES';
@@ -47,7 +47,7 @@ export class AlternatingColorsPlugin extends Plugin<AlternatingColorsPluginObser
             // context,
         };
 
-        const item: IToolBarItemProps = {
+        const item: IToolbarItemProps = {
             locale: ALTERNATING_COLORS_PLUGIN_NAME,
             type: ISlotElement.JSX,
             show: true,

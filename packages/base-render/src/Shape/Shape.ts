@@ -1,4 +1,4 @@
-import { IKeyValue, IScale, Nullable } from '@univer/core';
+import { IKeyValue, IScale, Nullable } from '@univerjs/core';
 import { Canvas, getDevicePixelRatio } from '../Canvas';
 import { BaseObject, BASE_OBJECT_ARRAY } from '../BaseObject';
 import { IBoundRect, Vector2 } from '../Basics/Vector2';

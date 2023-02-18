@@ -1,11 +1,10 @@
-import { nanoid } from 'nanoid';
 import { DocContext } from '../../Basics';
 import { Command } from '../../Command';
 import { BlockType, IDocumentData, ITextSelectionRange } from '../../Interfaces';
 import { DEFAULT_DOC } from '../../Const';
 import { DOC_ACTION_NAMES } from '../../Const/DOC_ACTION_NAMES';
 import { getDocsUpdateBody } from '../Apply/Common';
-import { Nullable } from '../../Shared';
+import { Nullable, Tools } from '../../Shared';
 
 export class DocumentModel {
     private _snapshot: IDocumentData;
@@ -17,7 +16,7 @@ export class DocumentModel {
     constructor(snapshot: Partial<IDocumentData>, context: DocContext) {
         this._context = context;
         this._snapshot = { ...DEFAULT_DOC, ...snapshot };
-        this._unitId = this._snapshot.id ?? nanoid(6);
+        this._unitId = this._snapshot.id ?? Tools.generateRandomId(6);
     }
 
     getSnapshot() {

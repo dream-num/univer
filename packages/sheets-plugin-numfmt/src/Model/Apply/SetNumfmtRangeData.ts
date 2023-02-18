@@ -1,4 +1,4 @@
-import { ObjectMatrix, ObjectMatrixPrimitiveType, Workbook } from '@univer/core';
+import { ObjectMatrix, ObjectMatrixPrimitiveType, Workbook } from '@univerjs/core';
 import { NumfmtPlugin } from '../../NumfmtPlugin';
 import { NUMFMT_PLUGIN_NAME } from '../../Basic/Const';
 

@@ -8,14 +8,14 @@ UniverSheet DataValidation 插件
 
 ### 安装
 
-```bash
-npm i @univer/sheets-plugin-data-validation
+```shell
+npm i @univerjs/sheets-plugin-data-validation
 ```
 
 ### 使用
 
 ```js
-impport {DataValidation} from '@univer/sheets-plugin-data-validation'
+import { DataValidation } from '@univerjs/sheets-plugin-data-validation';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new DataValidation());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/sheets-plugin-data-validation dev
+pnpm run --filter  @univerjs/sheets-plugin-data-validation dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-data-validation dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/sheets-plugin-data-validation build
+pnpm run --filter  @univerjs/sheets-plugin-data-validation build
 ```

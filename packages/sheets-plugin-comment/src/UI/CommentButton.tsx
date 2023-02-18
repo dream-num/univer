@@ -1,12 +1,12 @@
-import { BaseComponentRender, BaseComponentSheet, BaseSelectProps, Component, IToolBarItemProps } from '@univer/base-component';
-import { Nullable, Observer, Workbook } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
+import { BaseComponentRender, BaseComponentSheet, BaseSelectProps, Component, IToolbarItemProps } from '@univerjs/base-ui';
+import { Nullable, Observer, Workbook } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
 
 import { IProps } from '../IData/IComment';
 
 // Types for state
 interface IState {
-    comment: IToolBarItemProps;
+    comment: IToolbarItemProps;
 }
 
 export class CommentButton extends Component<IProps, IState> {
@@ -21,7 +21,7 @@ export class CommentButton extends Component<IProps, IState> {
         const CommentIcon = this._render.renderFunction('CommentIcon');
 
         // super(props);
-        const commentState: IToolBarItemProps = {
+        const commentState: IToolbarItemProps = {
             locale: 'comment.commentLabel',
             type: 'select',
             label: <CommentIcon />,
@@ -88,7 +88,7 @@ export class CommentButton extends Component<IProps, IState> {
             item.tooltip = locale.get(`${item.locale}`);
 
             // set current Locale string for select
-            item.children?.forEach((ele: IToolBarItemProps) => {
+            item.children?.forEach((ele: IToolbarItemProps) => {
                 if (ele.locale) {
                     ele.label = locale.get(`${ele.locale}`);
                 }

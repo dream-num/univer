@@ -1,26 +1,44 @@
 {
-    "name": "@univer/core",
+    "name": "@univerjs/core",
     "version": "0.0.1",
-    "description": "",
-    "author": "",
+    "description": "Univer core",
+    "keywords": [
+        "univer",
+        "core",
+        "sheets",
+        "docs",
+        "slides",
+        "excel",
+        "word",
+        "ppt"
+    ],
+    "author": "DreamNum <msoffice2@126.com>",
     "main": "./src/index.ts",
     "module": "./src/index.ts",
     "types": "./src/Types/index.d.ts",
     "publishConfig": {
         "main": "./lib/univer-core.js",
         "module": "./lib/univer-core.mjs",
-        "types": "./lib/index.d.ts"
+        "types": "./lib/index.d.ts",
+        "exports": {
+            ".": {
+                "require": "./lib/univer-core.js",
+                "default": "./lib/univer-core.mjs"
+            },
+            "./*": "./lib/*"
+        },
+        "access": "public"
     },
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*"
     },
-    "files": [
-        "lib"
-    ],
     "directories": {
         "lib": "lib"
     },
+    "files": [
+        "lib"
+    ],
     "scripts": {
         "test": "cross-env NODE_ENV=--experimental-vm-modules jest --config=jest.config.js",
         "dev": "vite",
@@ -32,6 +50,11 @@
         "serve": "node test/Server/server.js"
     },
     "license": "MIT",
+    "homepage": "https://github.com/dream-num/univer",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dream-num/univer.git"
+    },
     "dependencies": {
         "dayjs": "^1.11.5",
         "es6-proxy-polyfill": "^2.1.1",

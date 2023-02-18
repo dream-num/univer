@@ -1,12 +1,12 @@
-import { ISlotElement } from '@univer/base-component';
-import { Command, SheetContext, IRangeData, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
+import { ISlotElement } from '@univerjs/base-ui';
+import { Command, SheetContext, IRangeData, UniverSheet, Plugin, PLUGIN_NAMES } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
 import { en, zh } from './Locale';
 import { IConfig } from './IData';
 import { FilterButton } from './UI/FilterButton';
 import { ACTION_NAMES, FILTER_PLUGIN_NAME } from './Const';
 import { Filter, FilterList, IFilterPluginConfig } from './Domain';
-import { Univer } from '@univer/core/src/Basics/Univer';
+import { Univer } from '@univerjs/core/src/Basics/Univer';
 
 export class FilterPlugin extends Plugin {
     private _filterList: FilterList;

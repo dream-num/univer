@@ -1,2 +1,2 @@
 export * from '../index';
-declare module '@univer/base-render' {}
+declare module '@univerjs/base-render' {}

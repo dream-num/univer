@@ -1,5 +1,5 @@
-import { IRichTextProps, RichText, Scene } from '@univer/base-render';
-import { ContextBase, IPageElement, PageElementType } from '@univer/core';
+import { IRichTextProps, RichText, Scene } from '@univerjs/base-render';
+import { ContextBase, IPageElement, PageElementType } from '@univerjs/core';
 
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 

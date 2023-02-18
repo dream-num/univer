@@ -1,4 +1,4 @@
-import { Nullable, ISelection, ICellInfo } from '@univer/core';
+import { Nullable, ISelection, ICellInfo } from '@univerjs/core';
 import { SelectionModel } from './SelectionModel';
 import { Rect } from '../../../Shape/Rect';
 import { Group } from '../../../Group';

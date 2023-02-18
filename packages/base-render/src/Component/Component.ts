@@ -1,4 +1,4 @@
-import { sortRules } from '@univer/core';
+import { sortRules } from '@univerjs/core';
 import { IBoundRect } from '../Basics/Vector2';
 import { BaseObject } from '../BaseObject';
 import { ComponentExtension } from './Extension';

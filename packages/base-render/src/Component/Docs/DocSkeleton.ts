@@ -12,7 +12,7 @@ import {
     SectionType,
     VerticalAlign,
     WrapStrategy,
-} from '@univer/core';
+} from '@univerjs/core';
 import { getLastPage, updateBlockIndex } from './Common/Tools';
 
 import { createSkeletonPage } from './Common/Page';

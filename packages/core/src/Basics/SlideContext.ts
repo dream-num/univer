@@ -10,7 +10,6 @@ export class SlideContext extends ContextBase {
 
     constructor(univerSlideData: Partial<ISlideData> = {}) {
         super();
-        this._locale.initialize(univerSlideData.locale);
         this._slide = new SlideModel(univerSlideData, this);
     }
 

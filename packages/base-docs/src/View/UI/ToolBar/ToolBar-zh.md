@@ -1,7 +1,7 @@
 ---
 category: Components
 type: 定制
-title: ToolBar
+title: Toolbar
 subtitle: 工具栏
 cover: ''
 ---
@@ -17,11 +17,11 @@ cover: ''
 | 属性       | 说明                  | 类型                        | 默认值                     |
 | ---------- | --------------------- | --------------------------- | -------------------------- |
 | style      | 自定义 css 央样式对象 | `JSX.CSSProperties`         | -                          |
-| config     | 配置项                | `IShowToolBarConfig`        | `IShowToolBarConfig`       |
+| config     | 配置项                | `IShowToolbarConfig`        | `IShowToolbarConfig`       |
 | forwardRef | preact refs 引用      | `RefObject<HTMLDivElement>` | -                          |
 | func       | 回调挂载              | `object`                    | `{ addButton: Function; }` |
 
-`IShowToolBarConfig`包含以下配置，默认都为 `true`，可以指定想隐藏的工具栏按钮为`false`
+`IShowToolbarConfig`包含以下配置，默认都为 `true`，可以指定想隐藏的工具栏按钮为`false`
 
 ```json
 {
@@ -75,18 +75,18 @@ cover: ''
 ## 案例
 
 ```jsx
-import { ToolBar } from '@univer/style-univer';
+import { Toolbar } from '@univerjs/style-univer';
 
 const SheetContainer = () => {
     return (
-        <ToolBar
+        <Toolbar
             style={{
-                display: layout.toolBar ? 'block' : 'none',
+                display: layout.toolbar ? 'block' : 'none',
             }}
-            config={layout.toolBarConfig!}
+            config={layout.toolbarConfig!}
             func={{ addButton }}
-            ref={this.toolBarRef}
-        ></ToolBar>
+            ref={this.toolbarRef}
+        ></Toolbar>
     );
 };
 ```

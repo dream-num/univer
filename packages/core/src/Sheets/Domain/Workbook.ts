@@ -1,13 +1,20 @@
-import { nanoid } from 'nanoid';
 import {
-    ACTION_NAMES,
     DEFAULT_RANGE_ARRAY,
     DEFAULT_WORKBOOK,
     DEFAULT_WORKSHEET,
 } from '../../Const';
+
 import { BooleanNumber } from '../../Enum';
 import { SheetContext } from '../../Basics';
-import { Command, CommandManager, ISetSheetOrderActionData } from '../../Command';
+
+import {
+    CommandManager,
+    InsertSheetAction,
+    Command,
+    ISetSheetOrderActionData,
+    RemoveSheetAction,
+    SetSheetOrderAction,
+} from '../../Command';
 
 import {
     IColumnStartEndData,
@@ -20,13 +27,12 @@ import {
     IWorksheetConfig,
 } from '../../Interfaces';
 
-import { NameGen, Nullable, Tools } from '../../Shared';
-import { Tuples } from '../../Shared/Tuples';
-import { Range } from './Range';
+import { NameGen, Nullable, Tools, Tuples } from '../../Shared';
 import { RangeList } from './RangeList';
 import { Selection } from './Selection';
 import { Styles } from './Styles';
 import { Worksheet } from './Worksheet';
+import { Range } from './Range';
 import { IInsertSheetActionData, IRemoveSheetActionData } from '../Action';
 import { NamedRange } from './NamedRange';
 
@@ -67,7 +73,10 @@ export class Workbook {
         this._context = context;
 
         const { styles } = this._config;
-        this._unitId = this._config.id ?? nanoid(6);
+        if (this._config.id === '') {
+            this._config.id = Tools.generateRandomId(6);
+        }
+        this._unitId = this._config.id;
         this._styles = new Styles(styles);
         this._worksheets = new Map<string, Worksheet>();
         this._commandManager = context.getCommandManager();
@@ -232,24 +241,32 @@ export class Workbook {
         return this._namedRange;
     }
 
-    nextSheet(start: number): Nullable<Worksheet> {
-        if (start >= 0) {
+    activateSheetByIndex(index: number): Nullable<Worksheet> {
+        if (index >= 0) {
             const { sheetOrder } = this._config;
-            for (let i = start; i < sheetOrder.length; i++) {
+            for (let i = index; i < sheetOrder.length; i++) {
                 const worksheet = this._worksheets.get(sheetOrder[i]);
                 if (worksheet && !worksheet.isSheetHidden()) {
+                    worksheet.activate();
                     return worksheet;
                 }
             }
-            if (start < sheetOrder.length) {
-                for (let i = start - 1; i >= 0; i--) {
+            if (index < sheetOrder.length) {
+                for (let i = index - 1; i >= 0; i--) {
                     const worksheet = this._worksheets.get(sheetOrder[i]);
                     if (worksheet && !worksheet.isSheetHidden()) {
+                        worksheet.activate();
                         return worksheet;
                     }
                 }
             }
-            return this._worksheets.get(sheetOrder[sheetOrder.length - 1]);
+            const worksheet = this._worksheets.get(
+                sheetOrder[sheetOrder.length - 1]
+            );
+            if (worksheet) {
+                worksheet.activate();
+            }
+            return worksheet;
         }
     }
 
@@ -280,7 +297,7 @@ export class Workbook {
             const worksheetConfig = {
                 name: NameGen.getSheetName(),
                 status: 0,
-                id: nanoid(6),
+                id: Tools.generateRandomId(6),
             };
             const index = this.getSheetSize();
             before.notifyObservers({
@@ -293,7 +310,7 @@ export class Workbook {
                         WorkBookUnit: _context.getWorkBook(),
                     },
                     {
-                        actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
+                        actionName: InsertSheetAction.NAME,
                         sheetId: worksheetConfig.id,
                         index,
                         sheet: worksheetConfig as IWorksheetConfig,
@@ -313,7 +330,7 @@ export class Workbook {
                 const sheet = argument[0];
                 const index = this.getSheetSize();
                 const worksheetConfig = sheet.getConfig();
-                worksheetConfig.id = nanoid(6);
+                worksheetConfig.id = Tools.generateRandomId(6);
                 before.notifyObservers({
                     index,
                     sheetId: worksheetConfig.id,
@@ -324,7 +341,7 @@ export class Workbook {
                             WorkBookUnit: _context.getWorkBook(),
                         },
                         {
-                            actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
+                            actionName: InsertSheetAction.NAME,
                             sheetId: worksheetConfig.id,
                             index,
                             sheet: worksheetConfig as IWorksheetConfig,
@@ -344,7 +361,7 @@ export class Workbook {
                 const worksheetConfig = {
                     name: NameGen.getSheetName(),
                     status: 0,
-                    id: nanoid(6),
+                    id: Tools.generateRandomId(6),
                 };
                 before.notifyObservers({
                     index,
@@ -356,7 +373,7 @@ export class Workbook {
                             WorkBookUnit: _context.getWorkBook(),
                         },
                         {
-                            actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
+                            actionName: InsertSheetAction.NAME,
                             sheetId: worksheetConfig.id,
                             index,
                             sheet: worksheetConfig as IWorksheetConfig,
@@ -377,7 +394,7 @@ export class Workbook {
                 const worksheetConfig = {
                     status: 0,
                     name,
-                    id: nanoid(6),
+                    id: Tools.generateRandomId(6),
                 };
                 before.notifyObservers({
                     index,
@@ -389,7 +406,7 @@ export class Workbook {
                             WorkBookUnit: _context.getWorkBook(),
                         },
                         {
-                            actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
+                            actionName: InsertSheetAction.NAME,
                             sheetId: worksheetConfig.id,
                             index,
                             sheet: worksheetConfig as IWorksheetConfig,
@@ -417,7 +434,7 @@ export class Workbook {
                             WorkBookUnit: _context.getWorkBook(),
                         },
                         {
-                            actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
+                            actionName: InsertSheetAction.NAME,
                             sheetId: worksheetConfig.id,
                             index,
                             sheet: worksheetConfig as IWorksheetConfig,
@@ -440,7 +457,7 @@ export class Workbook {
                 const worksheetConfig = {
                     status: 0,
                     name,
-                    id: nanoid(6),
+                    id: Tools.generateRandomId(6),
                 };
                 before.notifyObservers({
                     index,
@@ -452,7 +469,7 @@ export class Workbook {
                             WorkBookUnit: _context.getWorkBook(),
                         },
                         {
-                            actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
+                            actionName: InsertSheetAction.NAME,
                             sheetId: worksheetConfig.id,
                             index,
                             sheet: worksheetConfig as IWorksheetConfig,
@@ -465,14 +482,13 @@ export class Workbook {
                 });
                 return worksheetConfig.id;
             }
-
             if (Tools.isNumber(argument[0])) {
                 // insert clone worksheet instance to index
                 if (Tools.isAssignableFrom(argument[1], Worksheet)) {
                     const index = argument[0];
                     const sheet = argument[1];
                     const worksheetConfig = sheet.getConfig();
-                    worksheetConfig.id = nanoid(6);
+                    worksheetConfig.id = Tools.generateRandomId(6);
                     before.notifyObservers({
                         index,
                         sheetId: worksheetConfig.id,
@@ -483,7 +499,7 @@ export class Workbook {
                                 WorkBookUnit: _context.getWorkBook(),
                             },
                             {
-                                actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
+                                actionName: InsertSheetAction.NAME,
                                 sheetId: worksheetConfig.id,
                                 index,
                                 sheet: worksheetConfig as IWorksheetConfig,
@@ -509,7 +525,7 @@ export class Workbook {
                                 WorkBookUnit: _context.getWorkBook(),
                             },
                             {
-                                actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
+                                actionName: InsertSheetAction.NAME,
                                 sheetId: worksheetConfig.id,
                                 index,
                                 sheet: worksheetConfig as IWorksheetConfig,
@@ -681,7 +697,7 @@ export class Workbook {
      *
      * @returns void
      */
-    flush(): void {}
+    flush(): void { }
 
     setSheetOrder(sheetId: string, order: number): void {
         // const { _sheetOrder } = this;
@@ -691,7 +707,7 @@ export class Workbook {
         const { _context, _commandManager } = this;
         const observer = _context.getContextObserver('onSheetOrderObservable');
         const config: ISetSheetOrderActionData = {
-            actionName: ACTION_NAMES.SET_SHEET_ORDER_ACTION,
+            actionName: SetSheetOrderAction.NAME,
             sheetId,
             order,
         };
@@ -732,34 +748,28 @@ export class Workbook {
             const before = this.getContext().getContextObserver(
                 'onBeforeRemoveSheetObservable'
             );
-            const after = this.getContext().getContextObserver(
+            const aftert = this.getContext().getContextObserver(
                 'onAfterRemoveSheetObservable'
             );
-
             before.notifyObservers({
                 index,
             });
-
             _commandManager.invoke(
                 new Command(
                     {
                         WorkBookUnit: this,
                     },
                     {
-                        actionName: ACTION_NAMES.REMOVE_SHEET_ACTION,
+                        actionName: RemoveSheetAction.NAME,
                         sheetId,
                     } as IRemoveSheetActionData
                 )
             );
-
-            const needSwitch = sheet.getStatus() === BooleanNumber.TRUE;
-            if (needSwitch) {
-                const nextSheet = this.nextSheet(index);
-                if (nextSheet) {
-                    nextSheet.activate();
-                }
-            }
-            after.notifyObservers({ index, sheetId });
+            aftert.notifyObservers({
+                index,
+                sheetId,
+            });
+            this.activateSheetByIndex(index);
         }
     }
 
@@ -899,7 +909,6 @@ export class Workbook {
         if (typeof range !== 'string' && 'startRow' in range) {
             return { sheetId: '', rangeData: range };
         }
-
         return DEFAULT_RANGE_ARRAY;
     }
 

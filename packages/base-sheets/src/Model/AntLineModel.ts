@@ -1,5 +1,5 @@
-import { Rect } from '@univer/base-render';
-import { IRangeData, Nullable } from '@univer/core';
+import { Rect } from '@univerjs/base-render';
+import { IRangeData, Nullable } from '@univerjs/core';
 
 export interface IAntLineRange extends IRangeData {
     id?: string;

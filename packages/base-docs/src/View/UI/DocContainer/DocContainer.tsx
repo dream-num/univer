@@ -13,17 +13,17 @@ import {
     cloneElement,
     BaseComponentProps,
     Description,
-} from '@univer/base-component';
-import { AsyncFunction, ContextBase, DocContext, IKeyType, LocaleType, PLUGIN_NAMES, Tools, Workbook } from '@univer/core';
+} from '@univerjs/base-ui';
+import { AsyncFunction, ContextBase, DocContext, IKeyType, LocaleType, PLUGIN_NAMES, Tools, Workbook } from '@univerjs/core';
 import cssVars from 'css-vars-ponyfill';
-import { Container, Content, Footer, Header, Layout, Sider } from '@univer/style-univer';
-import defaultSkin from '@univer/style-univer/assets/css/skin/default.module.less';
-import darkSkin from '@univer/style-univer/assets/css/skin/dark.module.less';
+import { Container, Content, Footer, Header, Layout, Sider } from '@univerjs/style-univer';
+import defaultSkin from '@univerjs/style-univer/assets/css/skin/default.module.less';
+import darkSkin from '@univerjs/style-univer/assets/css/skin/dark.module.less';
 // All skins' less file
-import greenSkin from '@univer/style-univer/assets/css/skin/green.module.less';
+import greenSkin from '@univerjs/style-univer/assets/css/skin/green.module.less';
 // app context for skin and Locale
 import style from './index.module.less';
-import { ToolBar } from '../ToolBar';
+import { Toolbar } from '../Toolbar';
 import { DocPlugin } from '../../../DocPlugin';
 import { InfoBar } from '../InfoBar';
 
@@ -31,7 +31,7 @@ export interface IDocPluginConfigBase {
     layout: ILayout;
 }
 
-interface IShowToolBarConfig {
+interface IShowToolbarConfig {
     undoRedo?: boolean; // Undo redo
     paintFormat?: boolean; // Format brush
     currencyFormat?: boolean; // currency format
@@ -95,10 +95,10 @@ export interface ILayout {
     infoBar?: boolean;
 
     // Whether to show the toolbar
-    toolBar?: boolean;
+    toolbar?: boolean;
 
-    // Custom configuration toolbar,can be used in conjunction with showToolBar, showToolBarConfig has a higher priority
-    toolBarConfig?: IShowToolBarConfig;
+    // Custom configuration toolbar,can be used in conjunction with showToolbar, showToolbarConfig has a higher priority
+    toolbarConfig?: IShowToolbarConfig;
 
     /**
      * 左右或者上下分割content区域
@@ -158,9 +158,9 @@ export const defaultLayout: ILayout = {
 
     infoBar: true,
 
-    toolBar: true,
+    toolbar: true,
 
-    toolBarConfig: {
+    toolbarConfig: {
         undoRedo: true, // Undo redo
         paintFormat: true, // Format brush
         currencyFormat: true, // currency format
@@ -643,7 +643,7 @@ export class DocContainer extends Component<BaseDocContainerProps, IState> {
                         <Layout className={style.mainContent} style={{ position: 'relative' }}>
                             <Header style={{ display: layout.header ? 'block' : 'none' }}>
                                 {layout.infoBar && <InfoBar></InfoBar>}
-                                {layout.toolBar && <ToolBar toolList={[]}></ToolBar>}
+                                {layout.toolbar && <Toolbar toolList={[]}></Toolbar>}
                             </Header>
                             <Layout>
                                 <Sider

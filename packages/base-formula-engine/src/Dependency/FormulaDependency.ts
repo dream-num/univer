@@ -1,4 +1,4 @@
-import { IGridRange, IRangeData, IUnitRange, ObjectMatrix } from '@univer/core';
+import { IGridRange, IRangeData, IUnitRange, ObjectMatrix } from '@univerjs/core';
 import { generateAstNode } from '../Analysis/Tools';
 import { FunctionNode, PrefixNode, ReferenceNode, SuffixNode, UnionNode } from '../AstNode';
 import { BaseAstNode } from '../AstNode/BaseAstNode';

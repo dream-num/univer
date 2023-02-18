@@ -1,5 +1,5 @@
-import { Scene } from '@univer/base-render';
-import { ContextBase, IPageElement, PageElementType, Registry } from '@univer/core';
+import { Scene } from '@univerjs/base-render';
+import { ContextBase, IPageElement, PageElementType, Registry } from '@univerjs/core';
 
 export class ObjectAdaptor {
     zIndex = 0;

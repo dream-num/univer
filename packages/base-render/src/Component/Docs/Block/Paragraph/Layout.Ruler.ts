@@ -1,4 +1,4 @@
-import { BooleanNumber, GridType, HorizontalAlign, INumberUnit, IParagraphStyle, NamedStyleType, SpacingRule } from '@univer/core';
+import { BooleanNumber, GridType, HorizontalAlign, INumberUnit, IParagraphStyle, NamedStyleType, SpacingRule } from '@univerjs/core';
 import {
     getCharSpaceApply,
     getCharSpaceConfig,

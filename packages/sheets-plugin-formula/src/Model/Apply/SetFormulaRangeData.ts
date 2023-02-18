@@ -1,5 +1,5 @@
-import { Tools, Workbook } from '@univer/core';
-import { FormulaDataType } from '@univer/base-formula-engine';
+import { Tools, Workbook } from '@univerjs/core';
+import { FormulaDataType } from '@univerjs/base-formula-engine';
 import { FORMULA_PLUGIN_NAME } from '../../Basic';
 import { FormulaPlugin } from '../../FormulaPlugin';
 

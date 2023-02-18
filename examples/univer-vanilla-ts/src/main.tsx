@@ -1,48 +1,40 @@
-import { UniverSheet, UniverDoc, UniverSlide } from '@univer/core';
-import { RenderEngine } from '@univer/base-render';
-import { UniverComponentSheet } from '@univer/style-univer';
-import { SheetPlugin } from '@univer/base-sheets';
-import { DocPlugin } from '@univer/base-docs';
-import { SlidePlugin } from '@univer/base-slides';
+import { UniverSheet, UniverDoc, UniverSlide, Univer } from '@univerjs/core';
+import { RenderEngine } from '@univerjs/base-render';
+import { SheetPlugin } from '@univerjs/base-sheets';
+import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 import {
     DEFAULT_FORMULA_DATA,
+    DEFAULT_FORMULA_DATA_DEMO,
+    DEFAULT_FORMULA_DATA_DEMO1,
     FormulaPlugin,
-} from '@univer/sheets-plugin-formula';
-import { NumfmtPlugin } from '@univer/sheets-plugin-numfmt';
+} from '@univerjs/sheets-plugin-formula';
+import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
 import {
     DEFAULT_WORKBOOK_DATA,
+    DEFAULT_WORKBOOK_DATA_DEMO,
+    DEFAULT_WORKBOOK_DATA_DEMO1,
+    DEFAULT_WORKBOOK_DATA_DEMO2,
+    DEFAULT_WORKBOOK_DATA_DEMO3,
+    DEFAULT_WORKBOOK_DATA_DEMO4,
     DEFAULT_WORKBOOK_DATA_DOWN,
-} from '@univer/common-plugin-data';
-import { ClipboardPlugin } from '@univer/sheets-plugin-clipboard';
-import { BaseComponentPlugin } from '@univer/base-component';
-import { ImportXlsxPlugin } from '@univer/sheets-plugin-import-xlsx';
+} from '@univerjs/common-plugin-data';
+import { ClipboardPlugin } from '@univerjs/sheets-plugin-clipboard';
+import { BaseComponentPlugin } from '@univerjs/base-ui';
+import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
 
-const uiDefaultConfigUp = {
-    container: 'universheet-up',
-    layout: {
-        innerRight: false,
-        outerLeft: false,
-        toolBarConfig: {
-            paintFormat: false,
-            currencyFormat: false,
-            percentageFormat: false,
-            numberDecrease: false,
-            numberIncrease: false,
-            moreFormats: false,
-        },
-    },
-
+const uiDefaultConfigDemo = {
+    container: 'universheet',
     selections: {
-        'sheet-01': [
+        'sheet-0001': [
             {
                 selection: {
-                    startRow: 0,
-                    endRow: 0,
+                    startRow: 2,
+                    endRow: 2,
                     startColumn: 3,
                     endColumn: 3,
                 },
                 cell: {
-                    row: 0,
+                    row: 2,
                     column: 3,
                 },
             },
@@ -50,58 +42,61 @@ const uiDefaultConfigUp = {
     },
 };
 
-// sheet up
-const univerSheetUp = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA);
-univerSheetUp.installPlugin(new RenderEngine());
+const univerConfig = {
+    container: 'universheet',
+};
 
-univerSheetUp.installPlugin(new UniverComponentSheet());
-univerSheetUp.installPlugin(new SheetPlugin(uiDefaultConfigUp));
-univerSheetUp.installPlugin(new BaseComponentPlugin());
-univerSheetUp.installPlugin(new NumfmtPlugin());
-FormulaPlugin.create(DEFAULT_FORMULA_DATA).installTo(univerSheetUp);
+// univer
+const univer = new Univer();
 
-univerSheetUp.installPlugin(new ClipboardPlugin());
-univerSheetUp.installPlugin(new ImportXlsxPlugin());
+// base-render
+univer.install(new RenderEngine());
 
-// sheet down
-const univerSheetDown = UniverSheet.newInstance();
-univerSheetDown.installPlugin(new RenderEngine());
-univerSheetDown.installPlugin(new UniverComponentSheet());
+// universheet instance
+const universheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
+// sheet.installPlugin(new RenderEngine());
+univer.addUniverSheet(universheet);
 
-univerSheetDown.installPlugin(
+// base-sheet
+universheet.installPlugin(
     new SheetPlugin({
-        container: 'universheet-down',
+        selections: {
+            'sheet-0001': [
+                {
+                    selection: {
+                        startRow: 2,
+                        endRow: 2,
+                        startColumn: 3,
+                        endColumn: 3,
+                    },
+                    cell: {
+                        row: 2,
+                        column: 3,
+                    },
+                },
+            ],
+        },
     })
 );
-univerSheetDown.installPlugin(new BaseComponentPlugin());
-univerSheetDown.installPlugin(new NumfmtPlugin());
-FormulaPlugin.create().installTo(univerSheetDown);
 
-univerSheetDown.installPlugin(new ClipboardPlugin());
+// // ui TODO: 不要安装
+// univer.install(new UniverComponentSheet());
+// univer.install(new BaseComponentPlugin(univerConfig));
 
-// doc
+univer.install(new SheetUIPlugin())
+// sheets-plugin-ui univer.install(new SheetsUI)
+// const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
+// const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO1);
+// const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO2);
+// const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO3);
+// const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
+// univerSheetDemo.installPlugin(new RenderEngine());
+// univerSheetDemo.installPlugin(new UniverComponentSheet());
+// univerSheetDemo.installPlugin(new SheetPlugin(uiDefaultConfigDemo));
+// univerSheetDemo.installPlugin(new BaseComponentPlugin());
+// univerSheetDemo.installPlugin(new NumfmtPlugin());
+// FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(univerSheetDemo);
+// FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO1).installTo(univerSheetDemo);
 
-const docPluginConfig = {
-    container: 'univerdoc',
-};
-const univerDoc = UniverDoc.newInstance();
-
-univerDoc.installPlugin(new RenderEngine());
-univerDoc.installPlugin(new UniverComponentSheet());
-
-univerDoc.installPlugin(new DocPlugin(docPluginConfig));
-univerDoc.installPlugin(new BaseComponentPlugin());
-
-// SlidePlugin
-
-const slidePluginConfig = {
-    container: 'universlide',
-};
-
-const univerSlide = UniverSlide.newInstance();
-
-univerSlide.installPlugin(new RenderEngine());
-univerSlide.installPlugin(new UniverComponentSheet());
-
-univerSlide.installPlugin(new SlidePlugin(slidePluginConfig));
-univerSlide.installPlugin(new BaseComponentPlugin());
+// univerSheetDemo.installPlugin(new ClipboardPlugin());
+// univerSheetDemo.installPlugin(new ImportXlsxPlugin());

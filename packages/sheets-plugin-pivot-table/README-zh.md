@@ -8,14 +8,14 @@ UniverSheet PivotTable 插件
 
 ### 安装
 
-```bash
-npm i @univer/sheets-plugin-pivot-table
+```shell
+npm i @univerjs/sheets-plugin-pivot-table
 ```
 
 ### 使用
 
 ```js
-impport {PivotTable} from '@univer/sheets-plugin-pivot-table'
+import { PivotTable } from '@univerjs/sheets-plugin-pivot-table';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new PivotTable());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/sheets-plugin-pivot-table dev
+pnpm run --filter  @univerjs/sheets-plugin-pivot-table dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-pivot-table dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/sheets-plugin-pivot-table build
+pnpm run --filter  @univerjs/sheets-plugin-pivot-table build
 ```

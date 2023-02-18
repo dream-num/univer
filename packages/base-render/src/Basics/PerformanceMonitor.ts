@@ -1,4 +1,4 @@
-import { Nullable } from '@univer/core';
+import { Nullable } from '@univerjs/core';
 
 /**
  * Performance monitor tracks rolling average frame-time and frame-time variance over a user defined sliding-window

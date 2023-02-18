@@ -41,7 +41,7 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
         if (!this._skeleton) {
             return;
         }
-        // const ctx = this._cacheCanvas.getContext();
+        // const ctx = this._cacheCanvas.getGlobalContext();
         // this._cacheCanvas.clear();
         const m = this.transform.getMatrix();
         mainCtx.save();

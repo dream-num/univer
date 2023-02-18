@@ -1,4 +1,4 @@
-import { Nullable } from '@univer/core';
+import { Nullable } from '@univerjs/core';
 import { LexerNode } from '../Analysis/LexerNode';
 import { AstNodePromiseType, FunctionVariantType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
@@ -105,7 +105,6 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
 
         if (parserDataLoader?.hasExecutor(tokenTrim)) {
             const functionNode = this.create(tokenTrim, parserDataLoader);
-            console.log('functionNode', functionNode);
             if (atPrefixNode) {
                 functionNode.setParent(atPrefixNode);
                 // return atPrefixNode;

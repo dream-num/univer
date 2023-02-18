@@ -1,4 +1,4 @@
-import { SheetActionBase, ActionObservers, ISheetActionData, Nullable, Workbook } from '@univer/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, Nullable, Workbook } from '@univerjs/core';
 import { IFilterCriteriaColumn } from '../Domain/FilterCriteriaColumn';
 import { ACTION_NAMES } from '../Const/ACTION_NAME';
 import { FILTER_PLUGIN_NAME } from '../Const';

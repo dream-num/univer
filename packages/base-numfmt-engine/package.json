@@ -1,5 +1,5 @@
 {
-    "name": "@univer/base-numfmt-engine",
+    "name": "@univerjs/base-numfmt-engine",
     "version": "0.0.1",
     "description": "UniverSheet normal plugin UI manager",
     "keywords": [],
@@ -20,6 +20,9 @@
     "directories": {
         "lib": "lib"
     },
+    "files": [
+        "lib"
+    ],
     "scripts": {
         "test": "jest",
         "dev": "vite",
@@ -45,6 +48,6 @@
         "vite-plugin-external": "1.2.3"
     },
     "dependencies": {
-        "@univer/core": "workspace:^0.0.1"
+        "@univerjs/core": "workspace:^0.0.1"
     }
 }

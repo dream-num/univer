@@ -1,0 +1,156 @@
+@import '../../../Basics/CSS/Skin/base.module.less';
+
+.button-size(@height; @padding-horizontal; @font-size; @border-radius) {
+    @padding-vertical: max((round(((@height - @font-size * @line-height-base) / 2) * 10) / 10) - @border-width-base,
+        0);
+    height: @height;
+    // padding: @padding-vertical @padding-horizontal;
+    border-radius: @border-radius;
+    font-size: @font-size;
+}
+
+.button-color(@color; @background; @border) {
+    color: @color;
+    background: @background;
+    border-color: @border;
+}
+
+.button-disabled(@color: var(--disabled-color); @background: var(--disabled-bg); @border: var(--border-color-base)) {
+    &[disabled] {
+
+        &,
+        &:hover,
+        &:active {
+            .button-color(@color; @background; @border);
+            text-shadow: none;
+            box-shadow: none;
+        }
+    }
+}
+
+.btn-primary(@color: var(--bg); @background: @primary-color) {
+    .button-color(@color; @background; @background);
+
+    &:hover {
+        .button-color(@color, fade(@background, 70%), fade(@background, 70%))
+    }
+
+    &:active {
+        .button-color(@color, fade(@background, 50%), fade(@background, 50%))
+    }
+
+    .button-disabled()
+}
+
+.btn-default(@color: var(--text-color); @background: var(--bg); @board: var(--border-color-base); ) {
+    .button-color(@color; @background; @board);
+
+    &:hover,
+    &:active {
+        .button-color(@primary-color, @background, @primary-color);
+    }
+
+    .button-disabled()
+}
+
+.btn-text() {
+    .button-color(var(--text-color), transparent, transparent);
+    box-shadow: none;
+
+    &:hover {
+        color: var(--text-color);
+        background: #eee;
+        border-color: transparent;
+    }
+
+    &:active {
+        color: var(--text-color);
+        background: #eee;
+        border-color: transparent;
+    }
+
+    .button-disabled(var(--disabled-color); transparent; transparent);
+}
+
+.btn() {
+    position: relative;
+    display: inline-block;
+    font-weight: @font-weight;
+    white-space: nowrap;
+    text-align: center;
+    background-image: none;
+    padding: 0 10px;
+    border: @border-width-base @border-style-base transparent;
+    cursor: pointer;
+    user-select: none;
+    .button-size(30px; 15px; @font-size-base; @border-width-base);
+
+    &,
+    &:active {
+        outline: 0;
+    }
+
+    &[disabled] {
+        cursor: not-allowed;
+
+        >* {
+            pointer-events: none;
+        }
+    }
+
+    &-lg {
+        .button-size(40px, 15px, @font-size-lg, @border-radius-base)
+    }
+
+    &-sm {
+        .button-size(24px, 7px, @font-size-sm, @border-radius-base)
+    }
+}
+
+.btn-danger() {
+    .btn-primary(var(--bg), @error-color);
+}
+
+.btn-danger-default() {
+    .button-color(@error-color, @bg, @error-color);
+
+    &:hover {
+        .button-color(fade(@error-color, 70%); @bg; fade(@error-color, 70%))
+    }
+
+    &:active {
+        .button-color(fade(@error-color, 50%); @bg; fade(@error-color, 50%))
+    }
+
+    .button-disabled()
+}
+
+.btn-round() {
+    .button-size(30px, (30px / 2), @font-size-base, 30px);
+
+    &.btn-lg {
+        .button-size(40px, (30px / 2), @font-size-lg, 40px);
+    }
+
+    &.btn-sm {
+        .button-size(24px, (30px / 2), @font-size-sm, 24px);
+    }
+}
+
+.btn-circle() {
+    min-width: 30px;
+    padding-right: 0;
+    padding-left: 0;
+    text-align: center;
+    border-radius: 50%;
+
+    &.btn-lg {
+        min-width: 40px;
+        border-radius: 50%;
+    }
+
+    &.btn-sm {
+        min-width: 24px;
+        border-radius: 50%;
+    }
+}

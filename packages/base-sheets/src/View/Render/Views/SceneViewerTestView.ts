@@ -13,8 +13,8 @@ import {
     SpreadsheetRowTitle,
     SpreadsheetSkeleton,
     Viewport,
-} from '@univer/base-render';
-import { EventState, Worksheet } from '@univer/core';
+} from '@univerjs/base-render';
+import { EventState, Worksheet } from '@univerjs/core';
 import { SheetPlugin } from '../../../SheetPlugin';
 import { BaseView } from '../BaseView';
 

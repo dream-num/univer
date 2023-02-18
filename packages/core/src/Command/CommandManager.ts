@@ -7,6 +7,7 @@ import { CommandObservers } from './CommandObservers';
 import { CommandInjectorObservers } from './CommandInjectorObservers';
 import { ContextBase } from '../Basics/ContextBase';
 import { Command } from './Command';
+import { ActionOperation } from './ActionOperation';
 
 /**
  * Manage command
@@ -90,9 +91,17 @@ export class CommandManager {
             const ActionClass = CommandManager.getAction(data.actionName);
             const observers = CommandManager.getActionObservers();
             const action = new ActionClass(data, _unit, observers);
-            _actionList.push(action);
+
+            if (ActionOperation.hasUndo(data)) {
+                _actionList.push(action);
+            }
         });
         command.invoke();
+
+        if (_actionList.length === 0) {
+            return;
+        }
+
         _undoManager.push(command);
         // server.pushMessageQueue(command.getDoData());
     }

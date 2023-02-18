@@ -15,11 +15,12 @@ export class Univer {
     private _context: Context;
 
     constructor() {
-        this._univerSlides = [];
+        this._univerSheets = [];
         this._univerDocs = [];
         this._univerSlides = [];
 
         this._context = new Context();
+        this._context.onUniver(this);
     }
 
     addUniverSheet(univerSheet: UniverSheet): void {
@@ -49,7 +50,35 @@ export class Univer {
         return null;
     }
 
-    getContext() {
+    getAllUniverSheetsInstance() {
+        return this._univerSheets;
+    }
+
+    getAllUniverDocsInstance() {
+        return this._univerDocs;
+    }
+
+    getAllUniverSlidesInstance() {
+        return this._univerSlides;
+    }
+
+    /**
+     * get active universheet
+     * @returns
+     */
+    getCurrentUniverSheetInstance() {
+        return this._univerSheets[0];
+    }
+
+    getCurrentUniverDocInstance() {
+        return this._univerDocs[0];
+    }
+
+    getCurrentUniverSlideInstance() {
+        return this._univerSlides[0];
+    }
+
+    getGlobalContext() {
         return this._context;
     }
 

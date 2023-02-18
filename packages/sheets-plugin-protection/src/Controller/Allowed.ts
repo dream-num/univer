@@ -1,4 +1,4 @@
-import { Range } from '@univer/core';
+import { Range } from '@univerjs/core';
 
 export class Allowed {
     protected _password: string;

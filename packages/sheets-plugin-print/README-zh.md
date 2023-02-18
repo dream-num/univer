@@ -8,14 +8,14 @@ UniverSheet Print 插件
 
 ### 安装
 
-```bash
-npm i @univer/sheets-plugin-print
+```shell
+npm i @univerjs/sheets-plugin-print
 ```
 
 ### 使用
 
 ```js
-impport {Print} from '@univer/sheets-plugin-print'
+import { Print } from '@univerjs/sheets-plugin-print';
 
 const univerSheet = new UniverSheet();
 univerSheet.installPlugin(new Print());
@@ -41,7 +41,7 @@ pnpm install
 npm run dev
 
 # 或者项目根目录 ./
-pnpm run --filter  @univer/sheets-plugin-print dev
+pnpm run --filter  @univerjs/sheets-plugin-print dev
 ```
 
 ### 打包
@@ -51,5 +51,5 @@ pnpm run --filter  @univer/sheets-plugin-print dev
 npm run build
 
 # 或者根目录 ./
-pnpm run --filter  @univer/sheets-plugin-print build
+pnpm run --filter  @univerjs/sheets-plugin-print build
 ```

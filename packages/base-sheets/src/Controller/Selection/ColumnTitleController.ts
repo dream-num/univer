@@ -1,5 +1,5 @@
-import { IMouseEvent, IPointerEvent, Rect } from '@univer/base-render';
-import { Nullable } from '@univer/core';
+import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect } from '@univerjs/base-render';
+import { Nullable } from '@univerjs/core';
 import { DragLineDirection } from './DragLineController';
 import { SelectionManager } from './SelectionManager';
 
@@ -16,26 +16,58 @@ export class ColumnTitleController {
 
     private _currentWidth: number = 0;
 
-    private _highlightItem: Rect;
+    private _highlightItem: Group;
+
+    private _content: Rect;
+
+    private _Item: Rect;
 
     constructor(manager: SelectionManager) {
         this._manager = manager;
         this._leftTopWidth = this._manager.getSheetView().getSpreadsheetLeftTopPlaceholder().getState().width;
         // 创建高亮item
-        this._highlightItem = new Rect('HighLightColumnTitle', {
+        this._content = new Rect('HighLightContent', {
             width: 0,
             height: this._manager.getSheetView().getSpreadsheetSkeleton().columnTitleHeight,
             left: 0,
             fill: 'rgb(220,220,220,0.5)',
         });
-
+        this._Item = new Rect('HighLightItem', {
+            width: 5,
+            height: this._manager.getSheetView().getSpreadsheetSkeleton().columnTitleHeight,
+            left: 0,
+            fill: 'rgb(220,220,220,0.5)',
+        });
+        this._highlightItem = new Group('HighLightColumnTitle', this._content, this._Item);
         this._highlightItem.hide();
-
-        this._highlightItem.evented = false;
 
         const scene = this._manager.getScene();
 
         scene.addObject(this._highlightItem, 3);
+
+        this._initialize();
+    }
+
+    // 拖拽图标
+    private _initialize() {
+        this._highlightItem.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this._highlightItem.show();
+        });
+        this._highlightItem.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this._highlightItem.show();
+        });
+        this._highlightItem.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this._highlightItem.hide();
+        });
+        this._Item.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this._Item.cursor = CURSOR_TYPE.COLUMN_RESIZE;
+        });
+        this._Item.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this._Item.resetCursor();
+        });
+        this._Item.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this.pointerDown(evt);
+        });
     }
 
     pointerDown(e: IPointerEvent | IMouseEvent) {
@@ -45,7 +77,7 @@ export class ColumnTitleController {
         this._startOffsetY = evtOffsetY;
         const scrollXY = main.getAncestorScrollXY(this._startOffsetX, this._startOffsetY);
         const contentRef = this._manager.getPlugin().getSheetContainerControl().getContentRef();
-        const clientX = e.clientX - scrollXY.x - this._leftTopWidth - contentRef.current!.getBoundingClientRect().left;
+        const clientX = e.clientX + scrollXY.x - this._leftTopWidth - contentRef.current!.getBoundingClientRect().left;
         const columnWidthAccumulation = main.getSkeleton()?.columnWidthAccumulation ?? [];
 
         for (let i = 0; i < columnWidthAccumulation?.length; i++) {
@@ -68,7 +100,10 @@ export class ColumnTitleController {
                 direction: DragLineDirection.VERTICAL,
                 end,
                 start,
-                dragUp: this.setColumnWidth.bind(this),
+                dragUp: (width, e) => {
+                    this.setColumnWidth(width);
+                    this.highlightColumnTitle(e);
+                },
             });
             this._manager.getDragLineControl().dragDown(e);
         }
@@ -111,7 +146,7 @@ export class ColumnTitleController {
         this._startOffsetY = evtOffsetY;
         const scrollXY = main.getAncestorScrollXY(this._startOffsetX, this._startOffsetY);
         const contentRef = this._manager.getPlugin().getSheetContainerControl().getContentRef();
-        const clientX = e.clientX - scrollXY.x - this._leftTopWidth - contentRef.current!.getBoundingClientRect().left;
+        const clientX = e.clientX + scrollXY.x - this._leftTopWidth - contentRef.current!.getBoundingClientRect().left;
         const columnWidthAccumulation = main.getSkeleton()?.columnWidthAccumulation ?? [];
 
         for (let i = 0; i < columnWidthAccumulation?.length; i++) {
@@ -129,15 +164,18 @@ export class ColumnTitleController {
             left = this._leftTopWidth + columnWidthAccumulation[this._index - 1];
         }
 
+        this._content.transformByState({
+            width: this._currentWidth - 5,
+        });
+
+        this._Item.transformByState({
+            left: this._currentWidth - 5,
+        });
+
         this._highlightItem.transformByState({
             width: this._currentWidth,
             left,
         });
-
         this._highlightItem.show();
-    }
-
-    unHighlightColumnTitle() {
-        this._highlightItem.hide();
     }
 }

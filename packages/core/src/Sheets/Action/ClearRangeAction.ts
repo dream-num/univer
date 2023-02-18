@@ -1,10 +1,9 @@
 import { SetRangeData, ClearRange } from '../Apply';
-import { ACTION_NAMES } from '../../Const';
 import { ICellData, IOptionsData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { ISetRangeDataActionData } from './SetRangeDataAction';
+import { ISetRangeDataActionData, SetRangeDataAction } from './SetRangeDataAction';
 import { CommandUnit } from '../../Command';
 
 /**
@@ -25,6 +24,8 @@ export class ClearRangeAction extends SheetActionBase<
     ISetRangeDataActionData,
     ObjectMatrixPrimitiveType<ICellData>
 > {
+    static NAME = 'ClearRangeAction';
+
     constructor(
         actionData: IClearRangeActionData,
         commandUnit: CommandUnit,
@@ -65,7 +66,8 @@ export class ClearRangeAction extends SheetActionBase<
         const { sheetId, rangeData } = this._doActionData;
 
         this._oldActionData = {
-            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+            // actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+            actionName: SetRangeDataAction.NAME,
             sheetId,
             cellValue: this.do(),
         };

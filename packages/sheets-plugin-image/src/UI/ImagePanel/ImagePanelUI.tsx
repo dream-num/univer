@@ -1,6 +1,6 @@
-import { Component, VNode } from '@univer/base-component';
-import { PLUGIN_NAMES } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
+import { Component, VNode } from '@univerjs/base-ui';
+import { PLUGIN_NAMES } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
 import { BorderType } from '../../Enum/BorderType';
 import { NormalType } from '../../Enum/NormalType';
 import { OVER_GRID_IMAGE_PLUGIN_NAME } from '../../Const/PLUGIN_NAME';

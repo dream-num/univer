@@ -1,4 +1,4 @@
-import { Nullable } from '@univer/core';
+import { Nullable } from '@univerjs/core';
 import { OverGridImagePlugin, OverGridImageProperty } from '../OverGridImagePlugin';
 
 export function RemoveImageProperty(plugin: OverGridImagePlugin, id: string): Nullable<OverGridImageProperty> {

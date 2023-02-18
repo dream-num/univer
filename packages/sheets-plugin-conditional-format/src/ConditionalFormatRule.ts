@@ -1,4 +1,4 @@
-import { IRangeData, Nullable } from '@univer/core';
+import { IRangeData, Nullable } from '@univerjs/core';
 import { ConditionalFormatRuleBuilder } from './ConditionalFormatRuleBuilder';
 import { BooleanRule, GradientRule } from './IData/IConditionalFormatRule';
 

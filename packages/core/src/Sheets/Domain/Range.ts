@@ -1,21 +1,23 @@
-// import { nanoid } from 'nanoid';
 import { SheetContext } from '../../Basics';
+
 import {
-    Command,
+    IInsertRangeActionData,
+    IClearRangeActionData,
+    IAddMergeActionData,
+    IRemoveMergeActionData,
+    IDeleteRangeActionData,
     CommandManager,
     ISheetActionData,
-    IAddMergeActionData,
-    IClearRangeActionData,
-    IDeleteRangeActionData,
-    IInsertRangeActionData,
-    IRemoveMergeActionData,
     ISetRangeDataActionData,
+    Command,
     ISetRangeFormulaActionData,
     ISetRangeStyleActionData,
     ISetRangeFormattedValueActionData,
+    SetRangeStyleAction,
 } from '../../Command';
-import { DEFAULT_RANGE, DEFAULT_STYLES } from '../../Const';
-import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
+
+import { DEFAULT_RANGE, DEFAULT_STYLES, ACTION_NAMES } from '../../Const';
+
 import {
     AutoFillSeries,
     BooleanNumber,
@@ -29,9 +31,11 @@ import {
     TextDirection,
     VerticalAlign,
     WrapStrategy,
+    CopyPasteType,
 } from '../../Enum';
-import { CopyPasteType } from '../../Enum/CopyPasteType';
+
 import {
+    IBorderData,
     IBorderStyleData,
     ICellData,
     ICellDataMatrix,
@@ -44,6 +48,7 @@ import {
     IStyleData,
     ITextDecoration,
 } from '../../Interfaces';
+
 import {
     Nullable,
     ObjectArrayPrimitiveType,
@@ -51,6 +56,7 @@ import {
     Tools,
     Tuples,
 } from '../../Shared';
+
 import { DropCell } from '../../Shared/DropCell';
 import { Worksheet } from './Worksheet';
 
@@ -376,11 +382,8 @@ export class Range {
         return this.getValues().map((row) =>
             row.map((cell: Nullable<ICellData>) => {
                 const styles = this._context.getWorkBook().getStyles();
-                const cellStyle = styles.getStyleByCell(cell)
-                return (
-                    cellStyle?.cl?.rgb ||
-                    DEFAULT_STYLES.cl?.rgb
-                );
+                const cellStyle = styles.getStyleByCell(cell);
+                return cellStyle?.cl?.rgb || DEFAULT_STYLES.cl?.rgb;
             })
         );
     }
@@ -470,6 +473,18 @@ export class Range {
      */
     getFontSizes(): number[][] {
         return this._getStyles('fs');
+    }
+
+    /**
+     * Returns the border info of the cells in the range.
+     */
+
+    getBorder(): IBorderData {
+        return this.getBorders()[0][0];
+    }
+
+    getBorders(): IBorderData[][] {
+        return this._getStyles('bd');
     }
 
     /**
@@ -745,14 +760,16 @@ export class Range {
     /**
      * Returns the text rotation settings for the top left cell of the range.
      */
-    getTextRotation(): number {
+    // getTextRotation(): number {
+    getTextRotation() {
         return this.getTextRotations()[0][0];
     }
 
     /**
      * Returns the text rotation settings for the cells in the range.
      */
-    getTextRotations(): number[][] {
+    // getTextRotations(): number[][] {
+    getTextRotations() {
         return this._getStyles('tr');
     }
 
@@ -880,7 +897,7 @@ export class Range {
 
         const setStyle: ISetRangeStyleActionData = {
             sheetId: _worksheet.getSheetId(),
-            actionName: ACTION_NAMES.SET_RANGE_STYLE_ACTION,
+            actionName: SetRangeStyleAction.NAME,
             value: stylesMatrix,
             rangeData: this._rangeData,
         };
@@ -3892,36 +3909,6 @@ export class Range {
         _commandManager.invoke(command);
     }
 
-    // /**
-    //  * Set key for cell
-    //  */
-    // setCellId(): string;
-    // setCellId(id: string): string;
-    // setCellId(...argument: any): string {
-    //     let id = argument[0];
-
-    //     // TODO rowCount > 10000 use 8, rountCount > 10 0000 ,12位 100 0000 ,16位，1000 0000, 20位
-    //     if (typeof id !== 'string') {
-    //         id = nanoid(6);
-    //     }
-
-    //     const { _context, _worksheet, _commandManager, _rangeData } = this;
-
-    //     const cellValue = new ObjectMatrix<ICellData>();
-    //     cellValue.setValue(0, 0, Object.assign(this.getValue() || {}, { id }));
-
-    //     const setValue: ISetRangeDataActionData = {
-    //         sheetId: _worksheet.getSheetId(),
-    //         actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-    //         cellValue: cellValue.getData(),
-    //         rangeData: _rangeData,
-    //     };
-    //     const command = new Command(_context.getWorkBook(), setValue);
-    //     _commandManager.invoke(command);
-
-    //     return id;
-    // }
-
     /**
      * Determine whether a range is legal
      */
@@ -3957,7 +3944,7 @@ export class Range {
     // applyRowBanding(...argument: any): Nullable<Banding> {
 
     //     // default argument
-    //     const bandedRangeId = 'banded-range-' + Tools.generateRandomId();
+    //     const bandedRangeId = 'banded-range-' + Tools.generateRandomId(6);
     //     const rangeData = this.getRangeData()
     //     let rowProperties:IBanding = {
     //         bandingTheme:argument[0] || BandingTheme.LIGHT_GRAY,
@@ -4023,7 +4010,7 @@ export class Range {
     // ): Nullable<Banding>;
     // applyRowBanding(...argument: any): Nullable<Banding> {
     //     // default argument
-    //     const bandedRangeId = 'banded-range-' + Tools.generateRandomId();
+    //     const bandedRangeId = 'banded-range-' + Tools.generateRandomId(6);
     //     const rangeData = this.getRangeData();
     //     let rowProperties: IBanding = {
     //         bandingTheme: argument[0] || BandingTheme.LIGHT_GRAY,

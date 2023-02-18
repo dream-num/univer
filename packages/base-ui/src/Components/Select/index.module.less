@@ -1,0 +1,112 @@
+.select-component {
+    position: relative;
+    margin: 0 3px;
+    height: 26px;
+
+    &:hover {
+        background-color: var(--gray-14);
+    }
+
+    .select-button {
+        padding: 0px 5px;
+
+        span[role='img'] {
+            font-size: 24px;
+        }
+    }
+
+    .select-single {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        &:hover {
+            background: var(--bg-hover);
+        }
+    }
+
+    .select-input {
+        display: flex;
+        align-items: center;
+
+        &:hover {
+            background: var(--bg-hover);
+        }
+
+        input {
+            width: 38px;
+            height: 20px;
+            background: transparent;
+            border: 1px solid transparent;
+
+            &::-webkit-outer-spin-button,
+            &::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+            }
+
+            &[type='number'] {
+                -moz-appearance: textfield;
+            }
+
+            &:hover {
+                border: 1px solid transparent;
+            }
+
+            &:focus {
+                background: #fff;
+                border: 1px solid var(--primary-color-hover);
+            }
+        }
+    }
+
+    .select-double {
+        &:hover {
+            background: var(--bg-hover);
+        }
+
+        .dropdown {
+            height: 24px;
+            padding-right: 0;
+        }
+
+        .drop-content {
+            position: relative;
+
+            .select-line {
+                position: absolute;
+                width: 15px;
+                height: 5px;
+                background-color: #000;
+                bottom: 0px;
+                left: 50%;
+                transform: translate(-50%, 0);
+            }
+        }
+
+        .drop-icon {
+            border-left: 1px solid transparent;
+        }
+
+        &:hover {
+            .drop-icon {
+                border-left: 1px solid var(--gray-6);
+            }
+        }
+    }
+
+    .select-label {
+        span[role='img'] {
+            font-size: 24px;
+        }
+    }
+
+    button {
+        .button();
+        border-color: transparent;
+        height: auto;
+    }
+}
+
+.button() {
+    padding: 0px;
+    box-sizing: border-box;
+}

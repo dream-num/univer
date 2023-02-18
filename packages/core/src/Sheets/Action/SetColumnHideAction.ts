@@ -21,6 +21,8 @@ export class SetColumnHideAction extends SheetActionBase<
     ISetColumnHideActionData,
     ISetColumnShowActionData
 > {
+    static NAME = 'SetColumnHideAction';
+
     constructor(
         actionData: ISetColumnHideActionData,
         commandUnit: CommandUnit,

@@ -1,0 +1,43 @@
+@import '../../Basics/CSS/Skin/base.module.less';
+
+.flexrow {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    background: #efefef;
+}
+
+.flexcol {
+    width: calc(50% - 5px);
+    margin-bottom: 10px;
+
+    /* just for visibility */
+    border: 1px solid red;
+    padding: 20px;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.col-1,
+.col-6 {
+    width: calc(40% - 5px);
+}
+
+.col-2,
+.col-5 {
+    width: calc(60% - 5px);
+}
+
+.col-5,
+.col-6 {
+    margin-bottom: 0;
+}
+
+@media (max-width: 992px) {
+    .flexcol {
+        width: 100%;
+    }
+    .col-5 {
+        margin-bottom: 10px;
+    }
+}

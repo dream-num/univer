@@ -1,6 +1,6 @@
-import { IToolBarItemProps, ISlotElement } from '@univer/base-component';
-import { SheetContext, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univer/core';
-import { SheetPlugin } from '@univer/base-sheets';
+import { IToolbarItemProps, ISlotElement } from '@univerjs/base-ui';
+import { SheetContext, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univerjs/core';
+import { SheetPlugin } from '@univerjs/base-sheets';
 import { en, zh } from './Locale';
 import { PrintButton } from './UI/PrintButton';
 
@@ -36,7 +36,7 @@ export class PrintPlugin extends Plugin {
             context,
         };
 
-        const item: IToolBarItemProps = {
+        const item: IToolbarItemProps = {
             locale: PRINT_PLUGIN_NAME,
             type: ISlotElement.JSX,
             show: true,

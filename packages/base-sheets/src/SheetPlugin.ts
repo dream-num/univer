@@ -1,11 +1,11 @@
 import { Engine, RenderEngine } from '@univerjs/base-render';
-import { SheetContext, Plugin, PLUGIN_NAMES } from '@univerjs/core';
+import { SheetContext, Plugin, PLUGIN_NAMES, DEFAULT_SELECTION } from '@univerjs/core';
 
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
 import { CANVAS_VIEW_KEY } from './View/Render/BaseView';
 import { CanvasView } from './View/Render/CanvasView';
 import { RightMenuController, InfoBarController, SheetBarControl, CellEditorController, SheetContainerController, ToolbarController, CountBarController } from './Controller';
-import { install, ISheetPluginConfig } from './Basics';
+import { DEFAULT_SPREADSHEET_PLUGIN_DATA, install, ISheetPluginConfig } from './Basics';
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeActionExtension';
 
@@ -40,25 +40,37 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     // private _component: BaseComponentPlugin;
 
-    constructor(config: any) {
+    constructor(config?: Partial<ISheetPluginConfig>) {
         super(PLUGIN_NAMES.SPREADSHEET);
-        // this._component = component;
-
-        this._config = config;
+        this._config = Object.assign(DEFAULT_SPREADSHEET_PLUGIN_DATA, config);
     }
 
     initialize(context: SheetContext): void {
         this.context = context;
 
         install(this);
+        this.initConfig();
         this.initController();
         this.initCanvasView();
-
         this.registerExtension();
     }
 
-    get config() {
+    getConfig() {
         return this._config;
+    }
+
+    initConfig() {
+        const config = this._config;
+        if (!config.selections) {
+            const worksheetId = this.getContext().getWorkBook().getActiveSheet().getSheetId();
+            config.selections = {
+                [worksheetId]: [
+                    {
+                        selection: DEFAULT_SELECTION,
+                    },
+                ],
+            };
+        }
     }
 
     initController() {

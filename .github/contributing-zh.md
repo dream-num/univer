@@ -24,6 +24,15 @@ pnpm 管理的多包项目，
 -   PR 贡献请提交到 dev 分支，提到其它分支的会被驳回
 -   commit 信息必须使用全英文，代码中注释和 issues 尽量使用英文，便于全球的开发者沟通交流
 
+## 使用
+
+### ESM
+
+#### 安装
+```shell
+npm i @univerjs/core @univerjs/base-render @univerjs/base-ui @univerjs/base-sheets @univerjs/ui-plugin-sheets
+```
+
 ## 基本命令
 
 开发

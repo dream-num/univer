@@ -70,15 +70,15 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
     },
     lists: DEFAULT_LIST_TEST,
     body: {
-        blockElements: {
-            p1: {
+        blockElements: [
+            {
                 blockId: 'p1',
                 st: 0,
                 ed: 66,
                 blockType: BlockType.PARAGRAPH,
                 paragraph: {
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 0,
                             ed: 66,
@@ -94,16 +94,10 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p2: {
+            {
                 blockId: 'p2',
                 st: 67,
                 ed: 251,
@@ -113,8 +107,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                         spaceAbove: 20,
                         indentFirstLine: 20,
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 67,
                             ed: 251,
@@ -129,16 +123,10 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p3: {
+            {
                 blockId: 'p3',
                 st: 252,
                 ed: 401,
@@ -148,8 +136,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                         spaceAbove: 20,
                         indentFirstLine: 20,
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 252,
                             ed: 401,
@@ -161,16 +149,10 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p4: {
+            {
                 blockId: 'p4',
                 st: 402,
                 ed: 429,
@@ -186,8 +168,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     paragraphStyle: {
                         lineSpacing: 1.5,
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 402,
                             ed: 429,
@@ -199,16 +181,10 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p5: {
+            {
                 blockId: 'p5',
                 st: 430,
                 ed: 479,
@@ -224,8 +200,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     paragraphStyle: {
                         lineSpacing: 1.5,
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 430,
                             ed: 479,
@@ -237,16 +213,10 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p6: {
+            {
                 blockId: 'p6',
                 st: 480,
                 ed: 510,
@@ -262,8 +232,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     paragraphStyle: {
                         lineSpacing: 1.5,
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 480,
                             ed: 510,
@@ -275,16 +245,10 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p7: {
+            {
                 blockId: 'p7',
                 st: 511,
                 ed: 705,
@@ -293,8 +257,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     paragraphStyle: {
                         indentFirstLine: 20,
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 511,
                             ed: 672,
@@ -306,7 +270,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                                 },
                             },
                         },
-                        e2: {
+                        {
                             eId: 'e2',
                             st: 673,
                             ed: 705,
@@ -322,20 +286,10 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
-                        {
-                            elementId: 'e2',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p8: {
+            {
                 blockId: 'p8',
                 st: 706,
                 ed: 762,
@@ -344,8 +298,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     paragraphStyle: {
                         spaceAbove: 20,
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 706,
                             ed: 762,
@@ -363,16 +317,10 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p9: {
+            {
                 blockId: 'p9',
                 st: 763,
                 ed: 1233,
@@ -382,8 +330,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                         spaceAbove: 20,
                         indentFirstLine: 20,
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 763,
                             ed: 1233,
@@ -395,20 +343,16 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
                         {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
-                        {
-                            elementId: 'shapeTest1',
-                            paragraphElementType: ParagraphElementType.DRAWING,
+                            eId: 'shapeTest1',
+                            st: 0,
+                            ed: 0,
+                            et: ParagraphElementType.DRAWING,
                         },
                     ],
                 },
             },
-            oneSectionBreak: {
+            {
                 blockId: 'oneSectionBreak',
                 st: 0,
                 ed: 0,
@@ -421,7 +365,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     // contentDirection: textDirection!,
                 },
             },
-            p10: {
+            {
                 blockId: 'p10',
                 st: 1206 + 28,
                 ed: 1548 + 28,
@@ -430,8 +374,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     paragraphStyle: {
                         indentFirstLine: 20,
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 1206 + 28,
                             ed: 1548 + 28,
@@ -443,16 +387,10 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p11: {
+            {
                 blockId: 'p11',
                 st: 1549 + 28,
                 ed: 1944 + 28,
@@ -461,8 +399,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     paragraphStyle: {
                         indentFirstLine: 20,
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 1549 + 28,
                             ed: 1944 + 28,
@@ -474,16 +412,10 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p12: {
+            {
                 blockId: 'p12',
                 st: 1945 + 28,
                 ed: 2019 + 28,
@@ -492,8 +424,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     paragraphStyle: {
                         indentFirstLine: 20,
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 1945 + 28,
                             ed: 2019 + 28,
@@ -505,16 +437,10 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p13: {
+            {
                 blockId: 'p13',
                 st: 2020 + 28,
                 ed: 2250 + 28,
@@ -530,8 +456,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                             fs: 20,
                         },
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 2020 + 28,
                             ed: 2042 + 28,
@@ -547,7 +473,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                                 },
                             },
                         },
-                        e2: {
+                        {
                             eId: 'e2',
                             st: 2043 + 28,
                             ed: 2250 + 28,
@@ -559,21 +485,10 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
-
-                        {
-                            elementId: 'e2',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p14: {
+            {
                 blockId: 'p14',
                 st: 2251 + 28,
                 ed: 2393 + 28,
@@ -589,8 +504,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                             fs: 20,
                         },
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 2251 + 28,
                             ed: 2265 + 28,
@@ -606,7 +521,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                                 },
                             },
                         },
-                        e2: {
+                        {
                             eId: 'e2',
                             st: 2266 + 28,
                             ed: 2393 + 28,
@@ -618,20 +533,10 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
-                        {
-                            elementId: 'e2',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            p15: {
+            {
                 blockId: 'p15',
                 st: 2394 + 28,
                 ed: 2582 + 28,
@@ -647,8 +552,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                             fs: 20,
                         },
                     },
-                    elements: {
-                        e1: {
+                    elements: [
+                        {
                             eId: 'e1',
                             st: 2394 + 28,
                             ed: 2422 + 28,
@@ -664,7 +569,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                                 },
                             },
                         },
-                        e2: {
+                        {
                             eId: 'e2',
                             st: 2423 + 28,
                             ed: 2582 + 28,
@@ -676,20 +581,10 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                                 },
                             },
                         },
-                    },
-                    elementOrder: [
-                        {
-                            elementId: 'e1',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
-                        {
-                            elementId: 'e2',
-                            paragraphElementType: ParagraphElementType.TEXT_RUN,
-                        },
                     ],
                 },
             },
-            twoSectionBreak: {
+            {
                 blockId: 'twoSectionBreak',
                 st: 0,
                 ed: 0,
@@ -707,8 +602,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     // contentDirection: textDirection!,
                 },
             },
-        },
-        blockElementOrder: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9', 'oneSectionBreak', 'p10', 'p11', 'p12', 'p13', 'p14', 'p15', 'twoSectionBreak'],
+        ],
     },
     documentStyle: {
         pageSize: {

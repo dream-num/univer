@@ -1,15 +1,4 @@
-import {
-    ColumnSeparatorType,
-    IBullet,
-    IDrawing,
-    IDrawings,
-    IElementsOrder,
-    IParagraph,
-    Nullable,
-    ParagraphElementType,
-    PositionedObjectLayoutType,
-    ContextBase,
-} from '@univerjs/core';
+import { ColumnSeparatorType, IBullet, IDrawing, IDrawings, IParagraph, Nullable, ParagraphElementType, PositionedObjectLayoutType, ContextBase, IElement } from '@univerjs/core';
 import { dealWidthTextRun } from './TextRun';
 import { dealWidthBullet } from './Bullet';
 import { dealWidthInlineDrawing } from './InlineDrawing';
@@ -50,7 +39,7 @@ export function dealWidthParagraph(
         fontLocale,
     } = sectionBreakConfig;
 
-    const { elements, elementOrder, paragraphStyle = {}, bullet } = paragraph;
+    const { elements, paragraphStyle = {}, bullet } = paragraph;
 
     // const paragraphAffectSkeDrawings = _changeDrawingToSkeletonFormat(drawingIds, drawings);
 
@@ -98,8 +87,8 @@ export function dealWidthParagraph(
     _updateListLevelAncestors(bullet, bulletSkeleton, skeListLevel); // 更新最新的level缓存列表
     paragraphConfig.bulletSkeleton = bulletSkeleton;
 
-    elementOrder.forEach((elementOrderItem: IElementsOrder, elementIndex: number) => {
-        const { elementId, paragraphElementType } = elementOrderItem;
+    elements.forEach((element: IElement, elementIndex: number) => {
+        const { eId: elementId, et: paragraphElementType } = element;
         let currentPages: IDocumentSkeletonPage[] = [];
         if (paragraphElementType === ParagraphElementType.DRAWING) {
             const drawingOrigin = drawings[elementId];
@@ -114,11 +103,10 @@ export function dealWidthParagraph(
     // let currentLine = createSkeletonLine({ ...paragraphConfig, bulletSkeleton, affectSkeDrawings: affectAllSkeDrawings });
     // 处理1列的情况
     // 如果下一节是连续的，则按照1列进行计算，计算结果返回后，用来预估列高度，然后在接来下的流程进行二次计算
-    elementOrder.forEach((elementOrderItem: IElementsOrder, elementIndex: number) => {
-        const { elementId, paragraphElementType } = elementOrderItem;
+    elements.forEach((element: IElement, elementIndex: number) => {
+        const { eId: elementId, et: paragraphElementType } = element;
         let currentPages: IDocumentSkeletonPage[] = [];
         if (paragraphElementType === ParagraphElementType.TEXT_RUN) {
-            const element = elements[elementId];
             const { tr: textRun, st, ed } = element;
             if (!textRun) {
                 return false;

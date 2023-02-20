@@ -64,6 +64,7 @@ import {
     InsertSectionAction,
     UpdateBulletAction,
     UpdateParagraphBulletAction,
+    TextIndexAdjustAction,
 } from '../Docs';
 
 /**
@@ -203,4 +204,9 @@ CommandManager.register(
 CommandManager.register(
     DOC_ACTION_NAMES.UPDATE_PARAGRAPH_BULLET_ACTION_NAME,
     UpdateParagraphBulletAction
+);
+
+CommandManager.register(
+    DOC_ACTION_NAMES.TEXT_INDEX_ADJUST_ACTION_NAME,
+    TextIndexAdjustAction
 );

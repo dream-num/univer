@@ -5,48 +5,27 @@ import {
     IParagraph,
     ParagraphElementType,
 } from '../../Interfaces/IDocumentData';
+import { ITextSelectionRangeParam } from '../../Interfaces/ISelectionData';
 import { DocumentModel } from '../Domain/DocumentModel';
-import {
-    deleteContent,
-    getTextStartByAnchor,
-    moveBlockCharIndex,
-    moveElementCharIndex,
-} from './Common';
+import { deleteContent, getDocsUpdateBody } from './Common';
 
 export function DeleteTextApply(
     document: DocumentModel,
-    config: { start: number; length: number; segmentId?: string }
+    range: ITextSelectionRangeParam
 ) {
     const doc = document.getSnapshot();
-    const { start, length, segmentId } = config;
 
-    const textStart = getTextStartByAnchor(start);
+    const { segmentId } = range;
 
-    let body = doc.body;
-
-    if (length === 0) {
-        return;
-    }
-
-    if (segmentId) {
-        const { headers, footers } = doc;
-        if (headers?.[segmentId]) {
-            body = headers[segmentId].body;
-        } else if (footers?.[segmentId]) {
-            body = footers[segmentId].body;
-        }
-    }
+    const body = getDocsUpdateBody(doc, segmentId);
 
     if (body == null) {
         throw new Error('no body has changed');
     }
 
-    const { blockElements, blockElementOrder } = body;
+    const { blockElements } = body;
 
-    let isApplied = false;
-
-    for (let blockId of blockElementOrder) {
-        const blockElement = blockElements[blockId];
+    for (let blockElement of blockElements) {
         if (blockElement == null) {
             continue;
         }
@@ -55,47 +34,30 @@ export function DeleteTextApply(
 
         switch (blockType) {
             case BlockType.PARAGRAPH:
-                isApplied = paragraphApply(
-                    start,
-                    textStart,
-                    length,
-                    blockElement,
-                    blockElement.paragraph,
-                    isApplied
-                );
+                if (blockElement.paragraph) {
+                    deleteText(blockElement, blockElement.paragraph, range);
+                }
         }
     }
 }
 
-function paragraphApply(
-    start: number,
-    textStart: number,
-    length: number,
+function deleteText(
     blockElement: IBlockElement,
-    paragraph?: IParagraph,
-    isApplied: boolean = false
+    paragraph: IParagraph,
+    range: ITextSelectionRangeParam
 ) {
-    if (isApplied) {
-        moveBlockCharIndex(blockElement, -length);
-    }
+    const { cursorStart, cursorEnd, isStartBack, isEndBack, isCollapse } = range;
 
     const { st, ed } = blockElement;
 
-    let isApply = false;
-
-    if (textStart > ed) {
-        return isApply;
+    if (cursorStart > ed || cursorEnd < st) {
+        return;
     }
 
-    if (paragraph == null) {
-        return isApply;
-    }
+    const { elements } = paragraph;
 
-    const { elements, elementOrder } = paragraph;
-
-    for (let elementInfo of elementOrder) {
-        const { elementId, paragraphElementType } = elementInfo;
-        const element = elements[elementId];
+    for (let element of elements) {
+        const { et: paragraphElementType } = element;
 
         if (paragraphElementType === ParagraphElementType.DRAWING) {
             continue;
@@ -103,14 +65,10 @@ function paragraphApply(
 
         const { st, ed, tr } = element;
 
-        if ((isApply || isApplied) && textStart > ed) {
-            moveElementCharIndex(element, -length);
-        }
-
         if (tr == null) {
             continue;
         }
-        if (textStart < st || textStart > ed || isApplied) {
+        if (textStart < st || textStart > ed) {
             continue;
         }
 
@@ -121,8 +79,6 @@ function paragraphApply(
                 relative = 0;
             }
 
-            isApply = true;
-
             if (tr.tab === BooleanNumber.TRUE) {
                 continue;
             }
@@ -130,18 +86,6 @@ function paragraphApply(
             const newContent = deleteContent(tr.ct || '', relative, length);
 
             tr.ct = newContent;
-
-            element.ed -= length;
         }
     }
-
-    if (isApply === true && isApplied === false) {
-        blockElement.ed -= length;
-    }
-
-    if (isApplied) {
-        return true;
-    }
-
-    return isApply;
 }

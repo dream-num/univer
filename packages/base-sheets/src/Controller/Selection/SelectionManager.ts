@@ -682,7 +682,7 @@ export class SelectionManager {
      * @param selections
      */
     private _initModels() {
-        const selections: ISelectionsConfig = this._plugin.config.selections;
+        const selections: ISelectionsConfig = this._plugin.getConfig().selections;
 
         Object.keys(selections).forEach((worksheetId) => {
             const selectionsList = selections[worksheetId];
@@ -743,7 +743,7 @@ export class SelectionManager {
      * @param selections
      */
     private _initControls() {
-        const selections: ISelectionsConfig = this._plugin.config.selections;
+        const selections: ISelectionsConfig = this._plugin.getConfig().selections;
         Object.keys(selections).forEach((worksheetId) => {
             const selectionsList = selections[worksheetId];
             const currentControls: SelectionControl[] = [];

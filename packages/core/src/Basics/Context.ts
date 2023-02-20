@@ -19,5 +19,5 @@ export class Context extends ContextBase {
         return this._locale;
     }
 
-    protected _setObserver(): void { }
+    protected _setObserver(): void {}
 }

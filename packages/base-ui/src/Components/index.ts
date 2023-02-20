@@ -1,5 +1,3 @@
-// import { FormulaBar } from '@univer/base-sheets/src/View/UI/FormulaBar/FormulaBar';
-// import { RichText } from '@univer/base-sheets/src/View/UI/RichText/RichText';
 import { Avatar } from './Avatar';
 import { Button } from './Button';
 import { BorderLine } from './CanvasIcon';

@@ -16,8 +16,8 @@ export const PAGE3_RICHTEXT_3 = {
             id: 'd',
             lists: DEFAULT_LIST_TEST,
             body: {
-                blockElements: {
-                    oneParagraph: {
+                blockElements: [
+                    {
                         blockId: 'oneParagraph',
                         st: 0,
                         ed: 59,
@@ -33,8 +33,8 @@ export const PAGE3_RICHTEXT_3 = {
                             paragraphStyle: {
                                 spaceBelow: 15,
                             },
-                            elements: {
-                                oneElement: {
+                            elements: [
+                                {
                                     eId: 'oneElement',
                                     st: 0,
                                     ed: 15,
@@ -46,16 +46,10 @@ export const PAGE3_RICHTEXT_3 = {
                                         },
                                     },
                                 },
-                            },
-                            elementOrder: [
-                                {
-                                    elementId: 'oneElement',
-                                    paragraphElementType: ParagraphElementType.TEXT_RUN,
-                                },
                             ],
                         },
                     },
-                    twoParagraph: {
+                    {
                         blockId: 'twoParagraph',
                         st: 0,
                         ed: 59,
@@ -68,8 +62,8 @@ export const PAGE3_RICHTEXT_3 = {
                                     fs: 20,
                                 },
                             },
-                            elements: {
-                                oneElement: {
+                            elements: [
+                                {
                                     eId: 'oneElement',
                                     st: 0,
                                     ed: 15,
@@ -81,17 +75,10 @@ export const PAGE3_RICHTEXT_3 = {
                                         },
                                     },
                                 },
-                            },
-                            elementOrder: [
-                                {
-                                    elementId: 'oneElement',
-                                    paragraphElementType: ParagraphElementType.TEXT_RUN,
-                                },
                             ],
                         },
                     },
-                },
-                blockElementOrder: ['oneParagraph', 'twoParagraph'],
+                ],
             },
             documentStyle: {
                 pageSize: {

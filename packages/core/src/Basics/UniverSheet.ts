@@ -9,6 +9,8 @@ import { VersionCode, VersionEnv } from './Version';
  * Externally provided UniverSheet root instance
  */
 export class UniverSheet {
+    private _context: SheetContext;
+
     univerSheetConfig: Partial<IWorkbookConfig>;
 
     constructor(univerSheetData: Partial<IWorkbookConfig> = {}) {
@@ -67,8 +69,6 @@ export class UniverSheet {
     static newColor(): ColorBuilder {
         return new ColorBuilder();
     }
-
-    private _context: SheetContext;
 
     /**
      * get SheetContext

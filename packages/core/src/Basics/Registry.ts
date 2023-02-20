@@ -7,6 +7,10 @@
 export class Registry {
     private _data: any[] = [];
 
+    static create() {
+        return new Registry();
+    }
+
     add(dataInstance: any) {
         if (this._data.indexOf(dataInstance) > -1) {
             return;
@@ -22,10 +26,6 @@ export class Registry {
     getData() {
         return this._data;
     }
-
-    static create() {
-        return new Registry();
-    }
 }
 
 /**
@@ -36,6 +36,10 @@ export class Registry {
  */
 export class RegistryAsMap {
     private _data: Map<string, any> = new Map();
+
+    static create() {
+        return new RegistryAsMap();
+    }
 
     add(id: string, dataInstance: any) {
         if (this._data.has(id)) {
@@ -50,9 +54,5 @@ export class RegistryAsMap {
 
     getData() {
         return this._data;
-    }
-
-    static create() {
-        return new RegistryAsMap();
     }
 }

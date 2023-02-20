@@ -7,10 +7,9 @@ import {
 } from '../../Interfaces/IDocumentData';
 import { DocumentModel } from '../Domain/DocumentModel';
 import {
+    getDocsUpdateBody,
     getTextStartByAnchor,
     insertTextToContent,
-    moveBlockCharIndex,
-    moveElementCharIndex,
 } from './Common';
 
 export function InsertTextApply(
@@ -22,31 +21,19 @@ export function InsertTextApply(
 
     const textStart = getTextStartByAnchor(start);
 
-    let body = doc.body;
+    const body = getDocsUpdateBody(doc, segmentId);
 
     if (length === 0) {
         return;
-    }
-
-    if (segmentId) {
-        const { headers, footers } = doc;
-        if (headers?.[segmentId]) {
-            body = headers[segmentId].body;
-        } else if (footers?.[segmentId]) {
-            body = footers[segmentId].body;
-        }
     }
 
     if (body == null) {
         throw new Error('no body has changed');
     }
 
-    const { blockElements, blockElementOrder } = body;
+    const { blockElements } = body;
 
-    let isApplied = false;
-
-    for (let blockId of blockElementOrder) {
-        const blockElement = blockElements[blockId];
+    for (let blockElement of blockElements) {
         if (blockElement == null) {
             continue;
         }
@@ -55,14 +42,12 @@ export function InsertTextApply(
 
         switch (blockType) {
             case BlockType.PARAGRAPH:
-                isApplied = paragraphApply(
+                paragraphApply(
                     text,
                     start,
                     textStart,
-                    length,
                     blockElement,
-                    blockElement.paragraph,
-                    isApplied
+                    blockElement.paragraph
                 );
         }
     }
@@ -72,32 +57,19 @@ function paragraphApply(
     text: string,
     start: number,
     textStart: number,
-    length: number,
     blockElement: IBlockElement,
-    paragraph?: IParagraph,
-    isApplied: boolean = false
+    paragraph?: IParagraph
 ) {
-    if (isApplied) {
-        moveBlockCharIndex(blockElement, length);
-    }
-
     const { st, ed } = blockElement;
 
-    let isApply = false;
-
-    if (textStart > ed) {
-        return isApply;
+    if (textStart > ed || paragraph == null) {
+        return;
     }
 
-    if (paragraph == null) {
-        return isApply;
-    }
+    const { elements } = paragraph;
 
-    const { elements, elementOrder } = paragraph;
-
-    for (let elementInfo of elementOrder) {
-        const { elementId, paragraphElementType } = elementInfo;
-        const element = elements[elementId];
+    for (let element of elements) {
+        const { et: paragraphElementType } = element;
 
         if (paragraphElementType === ParagraphElementType.DRAWING) {
             continue;
@@ -105,14 +77,10 @@ function paragraphApply(
 
         const { st, ed, tr } = element;
 
-        if ((isApply || isApplied) && textStart > ed) {
-            moveElementCharIndex(element, length);
-        }
-
         if (tr == null) {
             continue;
         }
-        if (textStart < st || textStart > ed || isApplied) {
+        if (textStart < st || textStart > ed) {
             continue;
         }
 
@@ -121,9 +89,8 @@ function paragraphApply(
             textStart,
             st,
             ed,
-            isApplied,
             element,
-            textStart < st || textStart > ed || isApplied
+            textStart < st || textStart > ed
         );
 
         if (paragraphElementType === ParagraphElementType.TEXT_RUN) {
@@ -133,8 +100,6 @@ function paragraphApply(
                 relative = 0;
             }
 
-            isApply = true;
-
             if (tr.tab === BooleanNumber.TRUE) {
                 continue;
             }
@@ -142,18 +107,6 @@ function paragraphApply(
             const newContent = insertTextToContent(tr.ct || '', relative, text);
 
             tr.ct = newContent;
-
-            element.ed += length;
         }
     }
-
-    if (isApply === true && isApplied === false) {
-        blockElement.ed += length;
-    }
-
-    if (isApplied) {
-        return true;
-    }
-
-    return isApply;
 }

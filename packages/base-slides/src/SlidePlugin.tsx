@@ -175,7 +175,7 @@ export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
         // };
     }
 
-    get config() {
+    getConfig() {
         return this._config;
     }
 

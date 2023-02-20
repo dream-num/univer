@@ -18,12 +18,6 @@ export class SheetContext extends ContextBase {
         this._workbook = new Workbook(univerSheetData, this);
     }
 
-    protected _setObserver(): void {
-        const manager = this.getObserverManager();
-
-        new WorkBookObserverImpl().install(manager);
-    }
-
     getWorkBook(): Workbook {
         return this._workbook;
     }
@@ -36,5 +30,11 @@ export class SheetContext extends ContextBase {
 
     refreshWorkbook(univerSheetData: Partial<IWorkbookConfig> = {}) {
         this._workbook = new Workbook(univerSheetData, this);
+    }
+
+    protected _setObserver(): void {
+        const manager = this.getObserverManager();
+
+        new WorkBookObserverImpl().install(manager);
     }
 }

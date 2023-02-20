@@ -8,8 +8,6 @@ import { ContextBase } from './ContextBase';
 export class Context extends ContextBase {
     protected _locale: Locale;
 
-    protected _setObserver(): void { }
-
     constructor(univerData: Partial<IUniverData> = {}) {
         super();
 
@@ -20,4 +18,6 @@ export class Context extends ContextBase {
     getLocale(): Locale {
         return this._locale;
     }
+
+    protected _setObserver(): void {}
 }

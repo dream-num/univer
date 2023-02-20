@@ -24,8 +24,6 @@ export abstract class ContextBase {
 
     protected _univer: Univer;
 
-    protected abstract _setObserver(): void;
-
     constructor() {
         this._undoManager = new UndoManager();
         this._commandManager = new CommandManager(this);
@@ -66,4 +64,6 @@ export abstract class ContextBase {
     getUniver(): Univer {
         return this._univer;
     }
+
+    protected abstract _setObserver(): void;
 }

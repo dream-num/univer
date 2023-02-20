@@ -13,9 +13,9 @@ export class DocContext extends ContextBase {
         this._document = new DocumentModel(univerDocData, this);
     }
 
-    protected _setObserver(): void {}
-
     getDocument(): DocumentModel {
         return this._document;
     }
+
+    protected _setObserver(): void {}
 }

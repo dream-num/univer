@@ -96,7 +96,11 @@ module.exports = {
         'prefer-regex-literals': 'off',
         '@typescript-eslint/default-param-last': 'off',
         'grouped-accessor-pairs': 'off',
-        '@typescript-eslint/member-ordering': ['error', { default: ['private-field', 'protected-field', 'public-field', 'private-method', 'protected-method', 'public-method'] }],
+        '@typescript-eslint/member-ordering': 'error',
+        // '@typescript-eslint/member-ordering': [
+        //     'error',
+        //     { default: ['private-field', 'protected-field', 'public-field', 'constructor', 'private-method', 'protected-method', 'public-method'] },
+        // ],
     },
     settings: {
         'import/parsers': {

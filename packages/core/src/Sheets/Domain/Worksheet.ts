@@ -977,17 +977,12 @@ export class Worksheet {
                 setHiddenAction
             );
             _commandManager.invoke(command);
-
-            const needSwitch = this.getStatus() === BooleanNumber.TRUE;
-            if (needSwitch) {
-                const index = _workbook.getSheetIndex(this);
-                const nextSheet = _workbook.nextSheet(index);
-                if (nextSheet) {
-                    nextSheet.activate();
-                }
-            }
-
             observer.notifyObservers({ sheet: this });
+
+            const index = _workbook.getSheetIndex(this);
+            if (index) {
+                _workbook.activateSheetByIndex(index);
+            }
         }
         return this;
     }

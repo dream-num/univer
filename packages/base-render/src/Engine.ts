@@ -13,6 +13,22 @@ import { Scene } from './Scene';
 import { RENDER_CLASS_TYPE } from './Basics/Const';
 
 export class Engine {
+    onInputChangedObservable = new Observable<IEvent>();
+
+    renderEvenInBackground = true;
+
+    /**
+     * Observable raised when the engine begins a new frame
+     */
+    onBeginFrameObservable = new Observable<Engine>();
+
+    /**
+     * Observable raised when the engine ends the current frame
+     */
+    onEndFrameObservable = new Observable<Engine>();
+
+    onTransformChangeObservable = new Observable<ITransformChangeState>();
+
     private _container: HTMLElement;
 
     private _canvas: Canvas = new Canvas();
@@ -26,10 +42,6 @@ export class Engine {
     private _renderingQueueLaunched = false;
 
     private _activeRenderLoops = new Array<() => void>();
-
-    onInputChangedObservable = new Observable<IEvent>();
-
-    renderEvenInBackground = true;
 
     private _renderFunction: any;
 
@@ -56,17 +68,11 @@ export class Engine {
 
     private _pointerWheelEvent: (evt: any) => void;
 
-    /**
-     * Observable raised when the engine begins a new frame
-     */
-    onBeginFrameObservable = new Observable<Engine>();
+    private __pointer: { [deviceSlot: number]: number } = {};
 
-    /**
-     * Observable raised when the engine ends the current frame
-     */
-    onEndFrameObservable = new Observable<Engine>();
+    private __mouseId = -1;
 
-    onTransformChangeObservable = new Observable<ITransformChangeState>();
+    private __isUsingFirefox = navigator.userAgent.indexOf('Firefox') !== -1;
 
     constructor(elemWidth: number = 100, elemHeight: number = 100) {
         this._canvasEle = this._canvas.getCanvasEle();
@@ -85,6 +91,21 @@ export class Engine {
 
     get classType() {
         return RENDER_CLASS_TYPE.ENGINE;
+    }
+
+    get activeScene() {
+        return this._activeScene;
+    }
+
+    get requestNewFrameHandler() {
+        return this._requestNewFrameHandler;
+    }
+
+    /**
+     * Gets the current frame id
+     */
+    get frameId(): number {
+        return this._frameId;
     }
 
     getCanvas() {
@@ -123,10 +144,6 @@ export class Engine {
 
     hasActiveScene(): boolean {
         return this._activeScene != null;
-    }
-
-    get activeScene() {
-        return this._activeScene;
     }
 
     setContainer(elem: HTMLElement) {
@@ -209,32 +226,6 @@ export class Engine {
         }
     }
 
-    get requestNewFrameHandler() {
-        return this._requestNewFrameHandler;
-    }
-
-    /** @hidden */
-    private _renderLoop(): void {
-        let shouldRender = true;
-        if (!this.renderEvenInBackground) {
-            shouldRender = false;
-        }
-
-        if (shouldRender) {
-            // Start new frame
-            this.beginFrame();
-            this._renderFrame();
-            // Present
-            this.endFrame();
-        }
-
-        if (this._activeRenderLoops.length > 0) {
-            this._requestNewFrameHandler = requestNewFrame(this._renderFunction);
-        } else {
-            this._renderingQueueLaunched = false;
-        }
-    }
-
     /**
      * Begin a new frame
      */
@@ -262,24 +253,11 @@ export class Engine {
     }
 
     /**
-     * Gets the current frame id
-     */
-    get frameId(): number {
-        return this._frameId;
-    }
-
-    /**
      * Gets the time spent between current and previous frame
      * @returns a number representing the delta time in ms
      */
     getDeltaTime(): number {
         return this._deltaTime;
-    }
-
-    private _measureFps(): void {
-        this._performanceMonitor.sampleFrame();
-        this._fps = this._performanceMonitor.averageFPS;
-        this._deltaTime = this._performanceMonitor.instantaneousFrameTime || 0;
     }
 
     _renderFrame() {
@@ -288,6 +266,34 @@ export class Engine {
 
             renderFunction();
         }
+    }
+
+    /** @hidden */
+    private _renderLoop(): void {
+        let shouldRender = true;
+        if (!this.renderEvenInBackground) {
+            shouldRender = false;
+        }
+
+        if (shouldRender) {
+            // Start new frame
+            this.beginFrame();
+            this._renderFrame();
+            // Present
+            this.endFrame();
+        }
+
+        if (this._activeRenderLoops.length > 0) {
+            this._requestNewFrameHandler = requestNewFrame(this._renderFunction);
+        } else {
+            this._renderingQueueLaunched = false;
+        }
+    }
+
+    private _measureFps(): void {
+        this._performanceMonitor.sampleFrame();
+        this._fps = this._performanceMonitor.averageFPS;
+        this._deltaTime = this._performanceMonitor.instantaneousFrameTime || 0;
     }
 
     private _handleKeyboardAction() {
@@ -314,12 +320,6 @@ export class Engine {
         this._canvasEle.addEventListener('keydown', keyboardDownEvent);
         this._canvasEle.addEventListener('keyup', keyboardUpEvent);
     }
-
-    private __pointer: { [deviceSlot: number]: number } = {};
-
-    private __mouseId = -1;
-
-    private __isUsingFirefox = navigator.userAgent.indexOf('Firefox') !== -1;
 
     private _handlePointerAction() {
         const eventPrefix = getPointerPrefix();

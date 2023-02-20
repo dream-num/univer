@@ -110,18 +110,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         this.updateDataMerge();
     }
 
-    getWorksheetConfig() {
-        return this._config;
-    }
-
-    getCellData() {
-        return this._cellData;
-    }
-
-    getsStyles() {
-        return this._styles;
-    }
-
     get rowHeightAccumulation() {
         return this._rowHeightAccumulation;
     }
@@ -164,6 +152,26 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     get showGridlines() {
         return this._showGridlines;
+    }
+
+    get dataMergeCacheAll() {
+        return this._dataMergeCacheAll;
+    }
+
+    static create(config: IWorksheetConfig, cellData: ObjectMatrix<ICellData>, styles: Styles, context: SheetContext) {
+        return new SpreadsheetSkeleton(config, cellData, styles, context);
+    }
+
+    getWorksheetConfig() {
+        return this._config;
+    }
+
+    getCellData() {
+        return this._cellData;
+    }
+
+    getsStyles() {
+        return this._styles;
     }
 
     setOverflowCache(value: ObjectMatrix<IRangeData>) {
@@ -293,8 +301,90 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._rowHeightAccumulation.length;
     }
 
-    get dataMergeCacheAll() {
-        return this._dataMergeCacheAll;
+    getOverflowPosition(contentSize: { width: number; height: number }, horizontalAlign: HorizontalAlign, row: number, column: number, columnCount: number) {
+        const { width: contentWidth, height: contentHeight } = contentSize;
+
+        let startColumn = column;
+        let endColumn = column;
+
+        // console.log('documentSkeleton', cell?.v, column, endColumn, row, column, columnCount, contentWidth);
+
+        if (horizontalAlign === HorizontalAlign.CENTER) {
+            startColumn = this._getOverflowBound(row, column, 0, contentWidth / 2);
+            endColumn = this._getOverflowBound(row, column, columnCount - 1, contentWidth / 2);
+        } else if (horizontalAlign === HorizontalAlign.RIGHT) {
+            startColumn = this._getOverflowBound(row, column, 0, contentWidth);
+        } else {
+            endColumn = this._getOverflowBound(row, column, columnCount - 1, contentWidth);
+        }
+
+        return {
+            startColumn,
+            endColumn,
+        };
+    }
+
+    /**
+     *
+     * @param rowHeightAccumulation Row layout information
+     * @param columnWidthAccumulation Column layout information
+     * @param bounds The range of the visible area of the canvas
+     * @returns The range cell index of the canvas visible area
+     */
+    protected _getBounding(rowHeightAccumulation: number[], columnWidthAccumulation: number[], bounds?: IBoundRect) {
+        const rhaLength = rowHeightAccumulation.length;
+        const cwaLength = columnWidthAccumulation.length;
+
+        if (!bounds) {
+            return {
+                startRow: 0,
+                endRow: rhaLength - 1,
+                startColumn: 0,
+                endColumn: cwaLength - 1,
+            };
+        }
+
+        let dataset_row_st = -1;
+        let dataset_row_ed = -1;
+        let dataset_col_st = -1;
+        let dataset_col_ed = -1;
+
+        dataset_row_st = searchArray(rowHeightAccumulation, bounds.tl.y - this.columnTitleHeight);
+        dataset_row_ed = searchArray(rowHeightAccumulation, bounds.bl.y - this.columnTitleHeight);
+
+        if (dataset_row_st === -1) {
+            dataset_row_st = 0;
+        }
+
+        if (dataset_row_ed === -1) {
+            dataset_row_ed = rhaLength - 1;
+        }
+
+        if (dataset_row_ed >= rhaLength) {
+            dataset_row_ed = rhaLength - 1;
+        }
+
+        dataset_col_st = searchArray(columnWidthAccumulation, bounds.tl.x - this.rowTitleWidth);
+        dataset_col_ed = searchArray(columnWidthAccumulation, bounds.tr.x - this.rowTitleWidth);
+
+        if (dataset_col_st === -1) {
+            dataset_col_st = 0;
+        }
+
+        if (dataset_col_ed === -1) {
+            dataset_col_ed = cwaLength - 1;
+        }
+
+        if (dataset_col_ed >= cwaLength) {
+            dataset_col_ed = cwaLength - 1;
+        }
+
+        return {
+            startRow: dataset_row_st - 1,
+            endRow: dataset_row_ed + 1,
+            startColumn: dataset_col_st - 1,
+            endColumn: dataset_col_ed + 1,
+        };
     }
 
     private _generateRowMatrixCache(rowCount: number, rowData: ObjectArrayType<Partial<IRowData>>, defaultRowHeight: number) {
@@ -369,69 +459,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    /**
-     *
-     * @param rowHeightAccumulation Row layout information
-     * @param columnWidthAccumulation Column layout information
-     * @param bounds The range of the visible area of the canvas
-     * @returns The range cell index of the canvas visible area
-     */
-    protected _getBounding(rowHeightAccumulation: number[], columnWidthAccumulation: number[], bounds?: IBoundRect) {
-        const rhaLength = rowHeightAccumulation.length;
-        const cwaLength = columnWidthAccumulation.length;
-
-        if (!bounds) {
-            return {
-                startRow: 0,
-                endRow: rhaLength - 1,
-                startColumn: 0,
-                endColumn: cwaLength - 1,
-            };
-        }
-
-        let dataset_row_st = -1;
-        let dataset_row_ed = -1;
-        let dataset_col_st = -1;
-        let dataset_col_ed = -1;
-
-        dataset_row_st = searchArray(rowHeightAccumulation, bounds.tl.y - this.columnTitleHeight);
-        dataset_row_ed = searchArray(rowHeightAccumulation, bounds.bl.y - this.columnTitleHeight);
-
-        if (dataset_row_st === -1) {
-            dataset_row_st = 0;
-        }
-
-        if (dataset_row_ed === -1) {
-            dataset_row_ed = rhaLength - 1;
-        }
-
-        if (dataset_row_ed >= rhaLength) {
-            dataset_row_ed = rhaLength - 1;
-        }
-
-        dataset_col_st = searchArray(columnWidthAccumulation, bounds.tl.x - this.rowTitleWidth);
-        dataset_col_ed = searchArray(columnWidthAccumulation, bounds.tr.x - this.rowTitleWidth);
-
-        if (dataset_col_st === -1) {
-            dataset_col_st = 0;
-        }
-
-        if (dataset_col_ed === -1) {
-            dataset_col_ed = cwaLength - 1;
-        }
-
-        if (dataset_col_ed >= cwaLength) {
-            dataset_col_ed = cwaLength - 1;
-        }
-
-        return {
-            startRow: dataset_row_st - 1,
-            endRow: dataset_row_ed + 1,
-            startColumn: dataset_col_st - 1,
-            endColumn: dataset_col_ed + 1,
-        };
-    }
-
     // private _calculateOverflowCache() {
     //     const { font: fontList } = this.stylesCache;
     //     // const mergeRangeCache = this._getMergeRangeCache();
@@ -483,29 +510,6 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     //     return overflowCache;
     // }
-
-    getOverflowPosition(contentSize: { width: number; height: number }, horizontalAlign: HorizontalAlign, row: number, column: number, columnCount: number) {
-        const { width: contentWidth, height: contentHeight } = contentSize;
-
-        let startColumn = column;
-        let endColumn = column;
-
-        // console.log('documentSkeleton', cell?.v, column, endColumn, row, column, columnCount, contentWidth);
-
-        if (horizontalAlign === HorizontalAlign.CENTER) {
-            startColumn = this._getOverflowBound(row, column, 0, contentWidth / 2);
-            endColumn = this._getOverflowBound(row, column, columnCount - 1, contentWidth / 2);
-        } else if (horizontalAlign === HorizontalAlign.RIGHT) {
-            startColumn = this._getOverflowBound(row, column, 0, contentWidth);
-        } else {
-            endColumn = this._getOverflowBound(row, column, columnCount - 1, contentWidth);
-        }
-
-        return {
-            startColumn,
-            endColumn,
-        };
-    }
 
     private _getOverflowBound(row: number, startColumn: number, endColumn: number, contentWidth: number) {
         let cumWidth = 0;
@@ -988,9 +992,5 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
         }
         return cacheDataMerge;
-    }
-
-    static create(config: IWorksheetConfig, cellData: ObjectMatrix<ICellData>, styles: Styles, context: SheetContext) {
-        return new SpreadsheetSkeleton(config, cellData, styles, context);
     }
 }

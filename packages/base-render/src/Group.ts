@@ -13,12 +13,12 @@ export class Group extends BaseObject {
         this.addObjects(...objects);
     }
 
-    set cursor(val: CURSOR_TYPE) {
-        this.setCursor(val);
-    }
-
     get classType() {
         return RENDER_CLASS_TYPE.GROUP;
+    }
+
+    set cursor(val: CURSOR_TYPE) {
+        this.setCursor(val);
     }
 
     addObjects(...objects: BaseObject[]) {
@@ -122,10 +122,6 @@ export class Group extends BaseObject {
         return this;
     }
 
-    private _transformBounds(bounds?: IBoundRect) {
-        return bounds;
-    }
-
     // 判断自己scope下的所有对象是否有被选中的
     isHit(coord: Vector2) {
         return true;
@@ -139,5 +135,9 @@ export class Group extends BaseObject {
             o.dispose();
         });
         super.dispose();
+    }
+
+    private _transformBounds(bounds?: IBoundRect) {
+        return bounds;
     }
 }

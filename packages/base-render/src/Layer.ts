@@ -11,16 +11,16 @@ export class Layer {
         this.addObjects(objects);
     }
 
-    static create(scene: Scene, objects: BaseObject[] = [], zIndex: number = 1000) {
-        return new this(scene, objects, zIndex);
-    }
-
     get scene() {
         return this._scene;
     }
 
     get zIndex() {
         return this._zIndex;
+    }
+
+    static create(scene: Scene, objects: BaseObject[] = [], zIndex: number = 1000) {
+        return new this(scene, objects, zIndex);
     }
 
     getObjectsByOrder() {

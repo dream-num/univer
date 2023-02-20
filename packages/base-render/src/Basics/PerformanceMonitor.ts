@@ -19,31 +19,6 @@ export class PerformanceMonitor {
     }
 
     /**
-     * Samples current frame
-     * @param timeMs A timestamp in milliseconds of the current frame to compare with other frames
-     */
-    sampleFrame(timeMs: number = this.Now()) {
-        if (!this._enabled) {
-            return;
-        }
-
-        if (this._lastFrameTimeMs != null) {
-            let dt = timeMs - this._lastFrameTimeMs;
-            this._rollingFrameTime.add(dt);
-        }
-
-        this._lastFrameTimeMs = timeMs;
-    }
-
-    Now(): number {
-        if (window.performance && window.performance.now) {
-            return window.performance.now();
-        }
-
-        return Date.now();
-    }
-
-    /**
      * Returns the average frame time in milliseconds over the sliding window (or the subset of frames sampled so far)
      */
     get averageFrameTime(): number {
@@ -92,6 +67,38 @@ export class PerformanceMonitor {
     }
 
     /**
+     * Returns true if sampling is enabled
+     */
+    get isEnabled(): boolean {
+        return this._enabled;
+    }
+
+    /**
+     * Samples current frame
+     * @param timeMs A timestamp in milliseconds of the current frame to compare with other frames
+     */
+    sampleFrame(timeMs: number = this.Now()) {
+        if (!this._enabled) {
+            return;
+        }
+
+        if (this._lastFrameTimeMs != null) {
+            let dt = timeMs - this._lastFrameTimeMs;
+            this._rollingFrameTime.add(dt);
+        }
+
+        this._lastFrameTimeMs = timeMs;
+    }
+
+    Now(): number {
+        if (window.performance && window.performance.now) {
+            return window.performance.now();
+        }
+
+        return Date.now();
+    }
+
+    /**
      * Enables contributions to the sliding window sample set
      */
     enable() {
@@ -106,13 +113,6 @@ export class PerformanceMonitor {
         this._enabled = false;
         // clear last sample to avoid interpolating over the disabled period when next enabled
         this._lastFrameTimeMs = null;
-    }
-
-    /**
-     * Returns true if sampling is enabled
-     */
-    get isEnabled(): boolean {
-        return this._enabled;
     }
 
     /**

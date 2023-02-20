@@ -57,27 +57,6 @@ export class InputManager {
         this._scene = scene;
     }
 
-    private _getCurrentObject(offsetX: number, offsetY: number) {
-        return this._scene?.pick(Vector2.FromArray([offsetX, offsetY]));
-    }
-
-    private _checkDirectSceneEventTrigger(isTrigger: boolean, currentObject: Nullable<Scene | BaseObject>) {
-        let notObject = false;
-        if (currentObject == null) {
-            notObject = true;
-        }
-
-        let isNotInSceneViewer = true;
-        if (currentObject && currentObject.classType === RENDER_CLASS_TYPE.BASE_OBJECT) {
-            const scene = (currentObject as BaseObject).getScene() as Scene;
-            if (scene) {
-                const parent = scene.getParent();
-                isNotInSceneViewer = parent.classType !== RENDER_CLASS_TYPE.SCENE_VIEWER;
-            }
-        }
-        return (!this._scene.evented && isTrigger && isNotInSceneViewer) || notObject;
-    }
-
     // 处理事件，比如mouseleave,mouseenter的触发。
     mouseLeaveEnterHandler(o: Nullable<BaseObject | Scene>, evt: IMouseEvent) {
         if (o === null || o === undefined) {
@@ -243,6 +222,27 @@ export class InputManager {
         engine.onInputChangedObservable.remove(this._onInputObserver);
 
         this._alreadyAttached = false;
+    }
+
+    private _getCurrentObject(offsetX: number, offsetY: number) {
+        return this._scene?.pick(Vector2.FromArray([offsetX, offsetY]));
+    }
+
+    private _checkDirectSceneEventTrigger(isTrigger: boolean, currentObject: Nullable<Scene | BaseObject>) {
+        let notObject = false;
+        if (currentObject == null) {
+            notObject = true;
+        }
+
+        let isNotInSceneViewer = true;
+        if (currentObject && currentObject.classType === RENDER_CLASS_TYPE.BASE_OBJECT) {
+            const scene = (currentObject as BaseObject).getScene() as Scene;
+            if (scene) {
+                const parent = scene.getParent();
+                isNotInSceneViewer = parent.classType !== RENDER_CLASS_TYPE.SCENE_VIEWER;
+            }
+        }
+        return (!this._scene.evented && isTrigger && isNotInSceneViewer) || notObject;
     }
 
     /**

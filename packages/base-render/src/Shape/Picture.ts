@@ -10,37 +10,9 @@ export interface IPictureProps extends IShapeProps {
 }
 
 export class Picture extends Shape<IPictureProps> {
-    static drawWith(ctx: CanvasRenderingContext2D, picture: Picture) {
-        if (picture._native.complete) {
-            const { width, height } = picture;
-            try {
-                ctx.drawImage(picture._native, 0, 0, width, height);
-            } catch (error) {
-                console.error(error);
-            }
-        }
-    }
-
-    static create(id: string, url: string, callback?: () => void): Picture {
-        return new Picture(id, { url, success: callback });
-    }
-
     protected _props: IPictureProps;
 
     protected _native: HTMLImageElement;
-
-    protected _draw(ctx: CanvasRenderingContext2D) {
-        Picture.drawWith(ctx, this);
-    }
-
-    protected _init(): void {
-        if (this._props.autoWidth) {
-            this.resize(this._native.width);
-        }
-        if (this._props.autoHeight) {
-            this.resize(undefined, this._native.height);
-        }
-    }
 
     constructor(id: string, config: IPictureProps) {
         super(id, config);
@@ -70,6 +42,34 @@ export class Picture extends Shape<IPictureProps> {
                     this.makeDirty(true);
                 }
             };
+        }
+    }
+
+    static drawWith(ctx: CanvasRenderingContext2D, picture: Picture) {
+        if (picture._native.complete) {
+            const { width, height } = picture;
+            try {
+                ctx.drawImage(picture._native, 0, 0, width, height);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    }
+
+    static create(id: string, url: string, callback?: () => void): Picture {
+        return new Picture(id, { url, success: callback });
+    }
+
+    protected _draw(ctx: CanvasRenderingContext2D) {
+        Picture.drawWith(ctx, this);
+    }
+
+    protected _init(): void {
+        if (this._props.autoWidth) {
+            this.resize(this._native.width);
+        }
+        if (this._props.autoHeight) {
+            this.resize(undefined, this._native.height);
         }
     }
 }

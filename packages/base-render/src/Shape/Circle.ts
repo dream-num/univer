@@ -13,10 +13,6 @@ export const CIRCLE_OBJECT_ARRAY = ['radius'];
 export class Circle extends Shape<ICircleProps> {
     private _radius: number;
 
-    get radius() {
-        return this._radius;
-    }
-
     constructor(key?: string, props?: ICircleProps) {
         super(key, props);
         this._radius = props?.radius || 10;
@@ -35,15 +31,8 @@ export class Circle extends Shape<ICircleProps> {
         });
     }
 
-    private _setFixBoundingBox() {
-        this.transformByState({
-            width: this._radius * 2,
-            height: this._radius * 2,
-        });
-    }
-
-    protected _draw(ctx: CanvasRenderingContext2D) {
-        Circle.drawWith(ctx, this);
+    get radius() {
+        return this._radius;
     }
 
     static drawWith(ctx: CanvasRenderingContext2D, props: ICircleProps | Circle) {
@@ -75,5 +64,16 @@ export class Circle extends Shape<ICircleProps> {
             ...super.toJson(),
             ...props,
         };
+    }
+
+    protected _draw(ctx: CanvasRenderingContext2D) {
+        Circle.drawWith(ctx, this);
+    }
+
+    private _setFixBoundingBox() {
+        this.transformByState({
+            width: this._radius * 2,
+            height: this._radius * 2,
+        });
     }
 }

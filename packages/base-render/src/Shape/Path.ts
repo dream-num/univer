@@ -37,10 +37,6 @@ export class Path extends Shape<IPathProps> {
 
     private _reCalculateCache: boolean = true;
 
-    get dataArray() {
-        return this._dataArray;
-    }
-
     constructor(key?: string, props?: IPathProps) {
         super(key, props);
         if (props?.data) {
@@ -109,8 +105,8 @@ export class Path extends Shape<IPathProps> {
         });
     }
 
-    protected _draw(ctx: CanvasRenderingContext2D) {
-        Path.drawWith(ctx, this);
+    get dataArray() {
+        return this._dataArray;
     }
 
     static drawWith(ctx: CanvasRenderingContext2D, props: IPathProps | Path) {
@@ -169,223 +165,6 @@ export class Path extends Shape<IPathProps> {
         }
 
         this._renderPaintInOrder(ctx, props);
-    }
-
-    private _setFixBoundingBox() {
-        const { left, top, width, height } = this._getSelfRect();
-
-        // this.left = (this.left as number) - left;
-        // this.top = (this.top as number) - top;
-        const fixScaleX = (this.width as number) / width;
-        const fixScaleY = (this.height as number) / height;
-
-        this.left = (this.left as number) - left * fixScaleX;
-        this.top = (this.top as number) - top * fixScaleY;
-        this.scaleX = fixScaleX;
-        this.scaleY = fixScaleY;
-        this.width = width;
-        this.height = height;
-
-        this._setTransForm();
-    }
-
-    toJson() {
-        const props: IKeyValue = {};
-        PATH_OBJECT_ARRAY.forEach((key) => {
-            if (this[key]) {
-                props[key] = this[key];
-            }
-        });
-        return {
-            ...super.toJson(),
-            ...props,
-        };
-    }
-
-    getState() {
-        const { left, top, width, height } = this.getRect();
-        return {
-            left,
-            top,
-            width,
-            height,
-            scaleX: this.scaleX,
-            scaleY: this.scaleY,
-            angle: this.angle,
-            skewX: this.skewX,
-            skewY: this.skewY,
-            flipX: this.flipX,
-            flipY: this.flipY,
-        };
-    }
-
-    getRect() {
-        const { left, top, width, height } = this._getSelfRect();
-        return {
-            left: left * this.scaleX + this.left,
-            top: top * this.scaleY + this.top,
-            width: width * this.scaleX,
-            height: height * this.scaleY,
-        };
-    }
-
-    private _getSelfRect() {
-        if (!this._reCalculateCache) {
-            return this._selfRectCache;
-        }
-        let points: number[] = [];
-        this.dataArray.forEach((data) => {
-            if (data.command === 'A') {
-                // Approximates by breaking curve into line segments
-                let start = data.points[4];
-                // 4 = theta
-                let dTheta = data.points[5];
-                // 5 = dTheta
-                let end = data.points[4] + dTheta;
-                let inc = Math.PI / 180.0;
-                // 1 degree resolution
-                if (Math.abs(start - end) < inc) {
-                    inc = Math.abs(start - end);
-                }
-                if (dTheta < 0) {
-                    // clockwise
-                    for (let t = start - inc; t > end; t -= inc) {
-                        const point = Path.getPointOnEllipticalArc(data.points[0], data.points[1], data.points[2], data.points[3], t, 0);
-                        points.push(point.x, point.y);
-                    }
-                } else {
-                    // counter-clockwise
-                    for (let t = start + inc; t < end; t += inc) {
-                        const point = Path.getPointOnEllipticalArc(data.points[0], data.points[1], data.points[2], data.points[3], t, 0);
-                        points.push(point.x, point.y);
-                    }
-                }
-            } else if (data.command === 'C') {
-                // Approximates by breaking curve into 100 line segments
-                for (let t = 0.0; t <= 1; t += 0.01) {
-                    const point = Path.getPointOnCubicBezier(
-                        t,
-                        data.start.x,
-                        data.start.y,
-                        data.points[0],
-                        data.points[1],
-                        data.points[2],
-                        data.points[3],
-                        data.points[4],
-                        data.points[5]
-                    );
-                    points.push(point.x, point.y);
-                }
-            } else {
-                // TODO: how can we calculate bezier curves better?
-                points = points.concat(data.points);
-            }
-        });
-        let minX = points[0];
-        let maxX = points[0];
-        let minY = points[1];
-        let maxY = points[1];
-        let x;
-        let y;
-        for (let i = 0; i < points.length / 2; i++) {
-            x = points[i * 2];
-            y = points[i * 2 + 1];
-
-            // skip bad values
-            if (!isNaN(x)) {
-                minX = Math.min(minX, x);
-                maxX = Math.max(maxX, x);
-            }
-            if (!isNaN(y)) {
-                minY = Math.min(minY, y);
-                maxY = Math.max(maxY, y);
-            }
-        }
-
-        const cache = {
-            left: minX,
-            top: minY,
-            width: maxX - minX,
-            height: maxY - minY,
-        };
-
-        this._selfRectCache = cache;
-
-        return cache;
-    }
-
-    /**
-     * Return length of the path.
-     * @method
-     * @returns {Number} length
-     * @example
-     * var length = path.getLength();
-     */
-    getLength() {
-        return this.pathLength;
-    }
-
-    /**
-     * Get point on path at specific length of the path
-     * @method
-     * @param {Number} length length
-     * @returns {Object} point {x,y} point
-     * @example
-     * var point = path.getPointAtLength(10);
-     */
-    getPointAtLength(length: number) {
-        let point;
-        let i = 0;
-        let ii = this.dataArray.length;
-
-        if (!ii) {
-            return null;
-        }
-
-        while (i < ii && length > this.dataArray[i].pathLength) {
-            length -= this.dataArray[i].pathLength;
-            ++i;
-        }
-
-        if (i === ii) {
-            point = this.dataArray[i - 1].points.slice(-2);
-            return {
-                x: point[0],
-                y: point[1],
-            };
-        }
-
-        if (length < 0.01) {
-            point = this.dataArray[i].points.slice(0, 2);
-            return {
-                x: point[0],
-                y: point[1],
-            };
-        }
-
-        let cp = this.dataArray[i];
-        let p = cp.points;
-        switch (cp.command) {
-            case 'L':
-                return Path.getPointOnLine(length, cp.start.x, cp.start.y, p[0], p[1]);
-            case 'C':
-                return Path.getPointOnCubicBezier(length / cp.pathLength, cp.start.x, cp.start.y, p[0], p[1], p[2], p[3], p[4], p[5]);
-            case 'Q':
-                return Path.getPointOnQuadraticBezier(length / cp.pathLength, cp.start.x, cp.start.y, p[0], p[1], p[2], p[3]);
-            case 'A': {
-                let cx = p[0];
-                let cy = p[1];
-                let rx = p[2];
-                let ry = p[3];
-                let theta = p[4];
-                let dTheta = p[5];
-                let psi = p[6];
-                theta += (dTheta * length) / cp.pathLength;
-                return Path.getPointOnEllipticalArc(cx, cy, rx, ry, theta, psi);
-            }
-        }
-
-        return null;
     }
 
     static getLineLength(x1: number, y1: number, x2: number, y2: number) {
@@ -931,5 +710,226 @@ export class Path extends Shape<IPathProps> {
             dTheta += 2 * Math.PI;
         }
         return [cx, cy, rx, ry, theta, dTheta, psi, fs];
+    }
+
+    toJson() {
+        const props: IKeyValue = {};
+        PATH_OBJECT_ARRAY.forEach((key) => {
+            if (this[key]) {
+                props[key] = this[key];
+            }
+        });
+        return {
+            ...super.toJson(),
+            ...props,
+        };
+    }
+
+    getState() {
+        const { left, top, width, height } = this.getRect();
+        return {
+            left,
+            top,
+            width,
+            height,
+            scaleX: this.scaleX,
+            scaleY: this.scaleY,
+            angle: this.angle,
+            skewX: this.skewX,
+            skewY: this.skewY,
+            flipX: this.flipX,
+            flipY: this.flipY,
+        };
+    }
+
+    getRect() {
+        const { left, top, width, height } = this._getSelfRect();
+        return {
+            left: left * this.scaleX + this.left,
+            top: top * this.scaleY + this.top,
+            width: width * this.scaleX,
+            height: height * this.scaleY,
+        };
+    }
+
+    /**
+     * Return length of the path.
+     * @method
+     * @returns {Number} length
+     * @example
+     * var length = path.getLength();
+     */
+    getLength() {
+        return this.pathLength;
+    }
+
+    /**
+     * Get point on path at specific length of the path
+     * @method
+     * @param {Number} length length
+     * @returns {Object} point {x,y} point
+     * @example
+     * var point = path.getPointAtLength(10);
+     */
+    getPointAtLength(length: number) {
+        let point;
+        let i = 0;
+        let ii = this.dataArray.length;
+
+        if (!ii) {
+            return null;
+        }
+
+        while (i < ii && length > this.dataArray[i].pathLength) {
+            length -= this.dataArray[i].pathLength;
+            ++i;
+        }
+
+        if (i === ii) {
+            point = this.dataArray[i - 1].points.slice(-2);
+            return {
+                x: point[0],
+                y: point[1],
+            };
+        }
+
+        if (length < 0.01) {
+            point = this.dataArray[i].points.slice(0, 2);
+            return {
+                x: point[0],
+                y: point[1],
+            };
+        }
+
+        let cp = this.dataArray[i];
+        let p = cp.points;
+        switch (cp.command) {
+            case 'L':
+                return Path.getPointOnLine(length, cp.start.x, cp.start.y, p[0], p[1]);
+            case 'C':
+                return Path.getPointOnCubicBezier(length / cp.pathLength, cp.start.x, cp.start.y, p[0], p[1], p[2], p[3], p[4], p[5]);
+            case 'Q':
+                return Path.getPointOnQuadraticBezier(length / cp.pathLength, cp.start.x, cp.start.y, p[0], p[1], p[2], p[3]);
+            case 'A': {
+                let cx = p[0];
+                let cy = p[1];
+                let rx = p[2];
+                let ry = p[3];
+                let theta = p[4];
+                let dTheta = p[5];
+                let psi = p[6];
+                theta += (dTheta * length) / cp.pathLength;
+                return Path.getPointOnEllipticalArc(cx, cy, rx, ry, theta, psi);
+            }
+        }
+
+        return null;
+    }
+
+    protected _draw(ctx: CanvasRenderingContext2D) {
+        Path.drawWith(ctx, this);
+    }
+
+    private _setFixBoundingBox() {
+        const { left, top, width, height } = this._getSelfRect();
+
+        // this.left = (this.left as number) - left;
+        // this.top = (this.top as number) - top;
+        const fixScaleX = (this.width as number) / width;
+        const fixScaleY = (this.height as number) / height;
+
+        this.left = (this.left as number) - left * fixScaleX;
+        this.top = (this.top as number) - top * fixScaleY;
+        this.scaleX = fixScaleX;
+        this.scaleY = fixScaleY;
+        this.width = width;
+        this.height = height;
+
+        this._setTransForm();
+    }
+
+    private _getSelfRect() {
+        if (!this._reCalculateCache) {
+            return this._selfRectCache;
+        }
+        let points: number[] = [];
+        this.dataArray.forEach((data) => {
+            if (data.command === 'A') {
+                // Approximates by breaking curve into line segments
+                let start = data.points[4];
+                // 4 = theta
+                let dTheta = data.points[5];
+                // 5 = dTheta
+                let end = data.points[4] + dTheta;
+                let inc = Math.PI / 180.0;
+                // 1 degree resolution
+                if (Math.abs(start - end) < inc) {
+                    inc = Math.abs(start - end);
+                }
+                if (dTheta < 0) {
+                    // clockwise
+                    for (let t = start - inc; t > end; t -= inc) {
+                        const point = Path.getPointOnEllipticalArc(data.points[0], data.points[1], data.points[2], data.points[3], t, 0);
+                        points.push(point.x, point.y);
+                    }
+                } else {
+                    // counter-clockwise
+                    for (let t = start + inc; t < end; t += inc) {
+                        const point = Path.getPointOnEllipticalArc(data.points[0], data.points[1], data.points[2], data.points[3], t, 0);
+                        points.push(point.x, point.y);
+                    }
+                }
+            } else if (data.command === 'C') {
+                // Approximates by breaking curve into 100 line segments
+                for (let t = 0.0; t <= 1; t += 0.01) {
+                    const point = Path.getPointOnCubicBezier(
+                        t,
+                        data.start.x,
+                        data.start.y,
+                        data.points[0],
+                        data.points[1],
+                        data.points[2],
+                        data.points[3],
+                        data.points[4],
+                        data.points[5]
+                    );
+                    points.push(point.x, point.y);
+                }
+            } else {
+                // TODO: how can we calculate bezier curves better?
+                points = points.concat(data.points);
+            }
+        });
+        let minX = points[0];
+        let maxX = points[0];
+        let minY = points[1];
+        let maxY = points[1];
+        let x;
+        let y;
+        for (let i = 0; i < points.length / 2; i++) {
+            x = points[i * 2];
+            y = points[i * 2 + 1];
+
+            // skip bad values
+            if (!isNaN(x)) {
+                minX = Math.min(minX, x);
+                maxX = Math.max(maxX, x);
+            }
+            if (!isNaN(y)) {
+                minY = Math.min(minY, y);
+                maxY = Math.max(maxY, y);
+            }
+        }
+
+        const cache = {
+            left: minX,
+            top: minY,
+            width: maxX - minX,
+            height: maxY - minY,
+        };
+
+        this._selfRectCache = cache;
+
+        return cache;
     }
 }

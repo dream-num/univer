@@ -19,6 +19,337 @@ export class Vector2 implements IPoint {
         public y: number = 0
     ) {}
 
+    // Statics
+
+    /**
+     * Gets a new Vector2(0, 0)
+     * @returns a new Vector2
+     */
+    static Zero(): Vector2 {
+        return new Vector2(0, 0);
+    }
+
+    /**
+     * Gets a new Vector2(1, 1)
+     * @returns a new Vector2
+     */
+    static One(): Vector2 {
+        return new Vector2(1, 1);
+    }
+
+    /**
+     * Gets a new Vector2 set from the given index element of the given array
+     * @param array defines the data source
+     * @param offset defines the offset in the data source
+     * @returns a new Vector2
+     */
+    static FromArray(array: DeepImmutable<ArrayLike<number>>, offset: number = 0): Vector2 {
+        return new Vector2(array[offset], array[offset + 1]);
+    }
+
+    /**
+     * Sets "result" from the given index element of the given array
+     * @param array defines the data source
+     * @param offset defines the offset in the data source
+     * @param result defines the target vector
+     */
+    static FromArrayToRef(array: ArrayLike<number>, offset: number, result: Vector2): void {
+        result.x = array[offset];
+        result.y = array[offset + 1];
+    }
+
+    /**
+     * Gets a new Vector2 located for "amount" (float) on the CatmullRom spline defined by the given four Vector2
+     * @param value1 defines 1st point of control
+     * @param value2 defines 2nd point of control
+     * @param value3 defines 3rd point of control
+     * @param value4 defines 4th point of control
+     * @param amount defines the interpolation factor
+     * @returns a new Vector2
+     */
+    static CatmullRom(value1: DeepImmutable<Vector2>, value2: DeepImmutable<Vector2>, value3: DeepImmutable<Vector2>, value4: DeepImmutable<Vector2>, amount: number): Vector2 {
+        let squared = amount * amount;
+        let cubed = amount * squared;
+
+        let x =
+            0.5 *
+            (2.0 * value2.x +
+                (-value1.x + value3.x) * amount +
+                (2.0 * value1.x - 5.0 * value2.x + 4.0 * value3.x - value4.x) * squared +
+                (-value1.x + 3.0 * value2.x - 3.0 * value3.x + value4.x) * cubed);
+
+        let y =
+            0.5 *
+            (2.0 * value2.y +
+                (-value1.y + value3.y) * amount +
+                (2.0 * value1.y - 5.0 * value2.y + 4.0 * value3.y - value4.y) * squared +
+                (-value1.y + 3.0 * value2.y - 3.0 * value3.y + value4.y) * cubed);
+
+        return new Vector2(x, y);
+    }
+
+    /**
+     * Returns a new Vector2 set with same the coordinates than "value" ones if the vector "value" is in the square defined by "min" and "max".
+     * If a coordinate of "value" is lower than "min" coordinates, the returned Vector2 is given this "min" coordinate.
+     * If a coordinate of "value" is greater than "max" coordinates, the returned Vector2 is given this "max" coordinate
+     * @param value defines the value to clamp
+     * @param min defines the lower limit
+     * @param max defines the upper limit
+     * @returns a new Vector2
+     */
+    static Clamp(value: DeepImmutable<Vector2>, min: DeepImmutable<Vector2>, max: DeepImmutable<Vector2>): Vector2 {
+        let x = value.x;
+        x = x > max.x ? max.x : x;
+        x = x < min.x ? min.x : x;
+
+        let y = value.y;
+        y = y > max.y ? max.y : y;
+        y = y < min.y ? min.y : y;
+
+        return new Vector2(x, y);
+    }
+
+    /**
+     * Returns a new Vector2 located for "amount" (float) on the Hermite spline defined by the vectors "value1", "value2", "tangent1", "tangent2"
+     * @param value1 defines the 1st control point
+     * @param tangent1 defines the outgoing tangent
+     * @param value2 defines the 2nd control point
+     * @param tangent2 defines the incoming tangent
+     * @param amount defines the interpolation factor
+     * @returns a new Vector2
+     */
+    static Hermite(value1: DeepImmutable<Vector2>, tangent1: DeepImmutable<Vector2>, value2: DeepImmutable<Vector2>, tangent2: DeepImmutable<Vector2>, amount: number): Vector2 {
+        let squared = amount * amount;
+        let cubed = amount * squared;
+        let part1 = 2.0 * cubed - 3.0 * squared + 1.0;
+        let part2 = -2.0 * cubed + 3.0 * squared;
+        let part3 = cubed - 2.0 * squared + amount;
+        let part4 = cubed - squared;
+
+        let x = value1.x * part1 + value2.x * part2 + tangent1.x * part3 + tangent2.x * part4;
+        let y = value1.y * part1 + value2.y * part2 + tangent1.y * part3 + tangent2.y * part4;
+
+        return new Vector2(x, y);
+    }
+
+    /**
+     * Returns a new Vector2 which is the 1st derivative of the Hermite spline defined by the vectors "value1", "value2", "tangent1", "tangent2".
+     * @param value1 defines the first control point
+     * @param tangent1 defines the first tangent
+     * @param value2 defines the second control point
+     * @param tangent2 defines the second tangent
+     * @param time define where the derivative must be done
+     * @returns 1st derivative
+     */
+    static Hermite1stDerivative(
+        value1: DeepImmutable<Vector2>,
+        tangent1: DeepImmutable<Vector2>,
+        value2: DeepImmutable<Vector2>,
+        tangent2: DeepImmutable<Vector2>,
+        time: number
+    ): Vector2 {
+        let result = Vector2.Zero();
+
+        this.Hermite1stDerivativeToRef(value1, tangent1, value2, tangent2, time, result);
+
+        return result;
+    }
+
+    /**
+     * Returns a new Vector2 which is the 1st derivative of the Hermite spline defined by the vectors "value1", "value2", "tangent1", "tangent2".
+     * @param value1 defines the first control point
+     * @param tangent1 defines the first tangent
+     * @param value2 defines the second control point
+     * @param tangent2 defines the second tangent
+     * @param time define where the derivative must be done
+     * @param result define where the derivative will be stored
+     */
+    static Hermite1stDerivativeToRef(
+        value1: DeepImmutable<Vector2>,
+        tangent1: DeepImmutable<Vector2>,
+        value2: DeepImmutable<Vector2>,
+        tangent2: DeepImmutable<Vector2>,
+        time: number,
+        result: Vector2
+    ) {
+        const t2 = time * time;
+
+        result.x = (t2 - time) * 6 * value1.x + (3 * t2 - 4 * time + 1) * tangent1.x + (-t2 + time) * 6 * value2.x + (3 * t2 - 2 * time) * tangent2.x;
+        result.y = (t2 - time) * 6 * value1.y + (3 * t2 - 4 * time + 1) * tangent1.y + (-t2 + time) * 6 * value2.y + (3 * t2 - 2 * time) * tangent2.y;
+    }
+
+    /**
+     * Returns a new Vector2 located for "amount" (float) on the linear interpolation between the vector "start" adn the vector "end".
+     * @param start defines the start vector
+     * @param end defines the end vector
+     * @param amount defines the interpolation factor
+     * @returns a new Vector2
+     */
+    static Lerp(start: DeepImmutable<Vector2>, end: DeepImmutable<Vector2>, amount: number): Vector2 {
+        let x = start.x + (end.x - start.x) * amount;
+        let y = start.y + (end.y - start.y) * amount;
+        return new Vector2(x, y);
+    }
+
+    /**
+     * Gets the dot product of the vector "left" and the vector "right"
+     * @param left defines first vector
+     * @param right defines second vector
+     * @returns the dot product (float)
+     */
+    static Dot(left: DeepImmutable<Vector2>, right: DeepImmutable<Vector2>): number {
+        return left.x * right.x + left.y * right.y;
+    }
+
+    /**
+     * Returns a new Vector2 equal to the normalized given vector
+     * @param vector defines the vector to normalize
+     * @returns a new Vector2
+     */
+    static Normalize(vector: DeepImmutable<Vector2>): Vector2 {
+        let newVector = Vector2.Zero();
+        this.NormalizeToRef(vector, newVector);
+        return newVector;
+    }
+
+    /**
+     * Normalize a given vector into a second one
+     * @param vector defines the vector to normalize
+     * @param result defines the vector where to store the result
+     */
+    static NormalizeToRef(vector: DeepImmutable<Vector2>, result: Vector2) {
+        let len = vector.length();
+
+        if (len === 0) {
+            return;
+        }
+
+        result.x = vector.x / len;
+        result.y = vector.y / len;
+    }
+
+    /**
+     * Gets a new Vector2 set with the minimal coordinate values from the "left" and "right" vectors
+     * @param left defines 1st vector
+     * @param right defines 2nd vector
+     * @returns a new Vector2
+     */
+    static Minimize(left: DeepImmutable<Vector2>, right: DeepImmutable<Vector2>): Vector2 {
+        let x = left.x < right.x ? left.x : right.x;
+        let y = left.y < right.y ? left.y : right.y;
+        return new Vector2(x, y);
+    }
+
+    /**
+     * Gets a new Vector2 set with the maximal coordinate values from the "left" and "right" vectors
+     * @param left defines 1st vector
+     * @param right defines 2nd vector
+     * @returns a new Vector2
+     */
+    static Maximize(left: DeepImmutable<Vector2>, right: DeepImmutable<Vector2>): Vector2 {
+        let x = left.x > right.x ? left.x : right.x;
+        let y = left.y > right.y ? left.y : right.y;
+        return new Vector2(x, y);
+    }
+
+    /**
+     * Transforms the given vector coordinates by the given transformation Transform and stores the result in the vector "result" coordinates
+     * @param vector defines the vector to transform
+     * @param transformation defines the Transform to apply
+     * @param result defines the target vector
+     */
+    static Transform(vector: DeepImmutable<Vector2>, transformation: DeepImmutable<Transform>, ignoreOffset: boolean = false) {
+        const t = transformation;
+        const p = vector;
+
+        if (ignoreOffset) {
+            return new Vector2(t[0] * p.x + t[2] * p.y, t[1] * p.x + t[3] * p.y);
+        }
+        return new Vector2(t[0] * p.x + t[2] * p.y + t[4], t[1] * p.x + t[3] * p.y + t[5]);
+    }
+
+    /**
+     * Determines if a given vector is included in a triangle
+     * @param p defines the vector to test
+     * @param p0 defines 1st triangle point
+     * @param p1 defines 2nd triangle point
+     * @param p2 defines 3rd triangle point
+     * @returns true if the point "p" is in the triangle defined by the vectors "p0", "p1", "p2"
+     */
+    static PointInTriangle(p: DeepImmutable<Vector2>, p0: DeepImmutable<Vector2>, p1: DeepImmutable<Vector2>, p2: DeepImmutable<Vector2>) {
+        let a = (1 / 2) * (-p1.y * p2.x + p0.y * (-p1.x + p2.x) + p0.x * (p1.y - p2.y) + p1.x * p2.y);
+        let sign = a < 0 ? -1 : 1;
+        let s = (p0.y * p2.x - p0.x * p2.y + (p2.y - p0.y) * p.x + (p0.x - p2.x) * p.y) * sign;
+        let t = (p0.x * p1.y - p0.y * p1.x + (p0.y - p1.y) * p.x + (p1.x - p0.x) * p.y) * sign;
+
+        return s > 0 && t > 0 && s + t < 2 * a * sign;
+    }
+
+    /**
+     * Gets the distance between the vectors "value1" and "value2"
+     * @param value1 defines first vector
+     * @param value2 defines second vector
+     * @returns the distance between vectors
+     */
+    static Distance(value1: DeepImmutable<Vector2>, value2: DeepImmutable<Vector2>): number {
+        return Math.sqrt(Vector2.DistanceSquared(value1, value2));
+    }
+
+    /**
+     * Returns the squared distance between the vectors "value1" and "value2"
+     * @param value1 defines first vector
+     * @param value2 defines second vector
+     * @returns the squared distance between vectors
+     */
+    static DistanceSquared(value1: DeepImmutable<Vector2>, value2: DeepImmutable<Vector2>): number {
+        let x = value1.x - value2.x;
+        let y = value1.y - value2.y;
+        return x * x + y * y;
+    }
+
+    /**
+     * Gets a new Vector2 located at the center of the vectors "value1" and "value2"
+     * @param value1 defines first vector
+     * @param value2 defines second vector
+     * @returns a new Vector2
+     */
+    static Center(value1: DeepImmutable<Vector2>, value2: DeepImmutable<Vector2>): Vector2 {
+        return Vector2.CenterToRef(value1, value2, Vector2.Zero());
+    }
+
+    /**
+     * Gets the center of the vectors "value1" and "value2" and stores the result in the vector "ref"
+     * @param value1 defines first vector
+     * @param value2 defines second vector
+     * @param ref defines third vector
+     * @returns ref
+     */
+    static CenterToRef(value1: DeepImmutable<Vector2>, value2: DeepImmutable<Vector2>, ref: DeepImmutable<Vector2>): Vector2 {
+        return ref.copyFromFloats((value1.x + value2.x) / 2, (value1.y + value2.y) / 2);
+    }
+
+    /**
+     * Gets the shortest distance (float) between the point "p" and the segment defined by the two points "segA" and "segB".
+     * @param p defines the middle point
+     * @param segA defines one point of the segment
+     * @param segB defines the other point of the segment
+     * @returns the shortest distance
+     */
+    static DistanceOfPointFromSegment(p: DeepImmutable<Vector2>, segA: DeepImmutable<Vector2>, segB: DeepImmutable<Vector2>): number {
+        let l2 = Vector2.DistanceSquared(segA, segB);
+        if (l2 === 0.0) {
+            return Vector2.Distance(p, segA);
+        }
+        let v = segB.subtract(segA);
+        let t = Math.max(0, Math.min(1, Vector2.Dot(p.subtract(segA), v) / l2));
+        let proj = segA.add(v.multiplyByFloats(t, t));
+        return Vector2.Distance(p, proj);
+    }
+
+    static create(x: number, y: number) {
+        return new Vector2(x, y);
+    }
+
     /**
      * Gets a string with the Vector2 coordinates
      * @returns a string with the Vector2 coordinates
@@ -441,337 +772,6 @@ export class Vector2 implements IPoint {
      */
     clone(): Vector2 {
         return new Vector2(this.x, this.y);
-    }
-
-    // Statics
-
-    /**
-     * Gets a new Vector2(0, 0)
-     * @returns a new Vector2
-     */
-    static Zero(): Vector2 {
-        return new Vector2(0, 0);
-    }
-
-    /**
-     * Gets a new Vector2(1, 1)
-     * @returns a new Vector2
-     */
-    static One(): Vector2 {
-        return new Vector2(1, 1);
-    }
-
-    /**
-     * Gets a new Vector2 set from the given index element of the given array
-     * @param array defines the data source
-     * @param offset defines the offset in the data source
-     * @returns a new Vector2
-     */
-    static FromArray(array: DeepImmutable<ArrayLike<number>>, offset: number = 0): Vector2 {
-        return new Vector2(array[offset], array[offset + 1]);
-    }
-
-    /**
-     * Sets "result" from the given index element of the given array
-     * @param array defines the data source
-     * @param offset defines the offset in the data source
-     * @param result defines the target vector
-     */
-    static FromArrayToRef(array: ArrayLike<number>, offset: number, result: Vector2): void {
-        result.x = array[offset];
-        result.y = array[offset + 1];
-    }
-
-    /**
-     * Gets a new Vector2 located for "amount" (float) on the CatmullRom spline defined by the given four Vector2
-     * @param value1 defines 1st point of control
-     * @param value2 defines 2nd point of control
-     * @param value3 defines 3rd point of control
-     * @param value4 defines 4th point of control
-     * @param amount defines the interpolation factor
-     * @returns a new Vector2
-     */
-    static CatmullRom(value1: DeepImmutable<Vector2>, value2: DeepImmutable<Vector2>, value3: DeepImmutable<Vector2>, value4: DeepImmutable<Vector2>, amount: number): Vector2 {
-        let squared = amount * amount;
-        let cubed = amount * squared;
-
-        let x =
-            0.5 *
-            (2.0 * value2.x +
-                (-value1.x + value3.x) * amount +
-                (2.0 * value1.x - 5.0 * value2.x + 4.0 * value3.x - value4.x) * squared +
-                (-value1.x + 3.0 * value2.x - 3.0 * value3.x + value4.x) * cubed);
-
-        let y =
-            0.5 *
-            (2.0 * value2.y +
-                (-value1.y + value3.y) * amount +
-                (2.0 * value1.y - 5.0 * value2.y + 4.0 * value3.y - value4.y) * squared +
-                (-value1.y + 3.0 * value2.y - 3.0 * value3.y + value4.y) * cubed);
-
-        return new Vector2(x, y);
-    }
-
-    /**
-     * Returns a new Vector2 set with same the coordinates than "value" ones if the vector "value" is in the square defined by "min" and "max".
-     * If a coordinate of "value" is lower than "min" coordinates, the returned Vector2 is given this "min" coordinate.
-     * If a coordinate of "value" is greater than "max" coordinates, the returned Vector2 is given this "max" coordinate
-     * @param value defines the value to clamp
-     * @param min defines the lower limit
-     * @param max defines the upper limit
-     * @returns a new Vector2
-     */
-    static Clamp(value: DeepImmutable<Vector2>, min: DeepImmutable<Vector2>, max: DeepImmutable<Vector2>): Vector2 {
-        let x = value.x;
-        x = x > max.x ? max.x : x;
-        x = x < min.x ? min.x : x;
-
-        let y = value.y;
-        y = y > max.y ? max.y : y;
-        y = y < min.y ? min.y : y;
-
-        return new Vector2(x, y);
-    }
-
-    /**
-     * Returns a new Vector2 located for "amount" (float) on the Hermite spline defined by the vectors "value1", "value2", "tangent1", "tangent2"
-     * @param value1 defines the 1st control point
-     * @param tangent1 defines the outgoing tangent
-     * @param value2 defines the 2nd control point
-     * @param tangent2 defines the incoming tangent
-     * @param amount defines the interpolation factor
-     * @returns a new Vector2
-     */
-    static Hermite(value1: DeepImmutable<Vector2>, tangent1: DeepImmutable<Vector2>, value2: DeepImmutable<Vector2>, tangent2: DeepImmutable<Vector2>, amount: number): Vector2 {
-        let squared = amount * amount;
-        let cubed = amount * squared;
-        let part1 = 2.0 * cubed - 3.0 * squared + 1.0;
-        let part2 = -2.0 * cubed + 3.0 * squared;
-        let part3 = cubed - 2.0 * squared + amount;
-        let part4 = cubed - squared;
-
-        let x = value1.x * part1 + value2.x * part2 + tangent1.x * part3 + tangent2.x * part4;
-        let y = value1.y * part1 + value2.y * part2 + tangent1.y * part3 + tangent2.y * part4;
-
-        return new Vector2(x, y);
-    }
-
-    /**
-     * Returns a new Vector2 which is the 1st derivative of the Hermite spline defined by the vectors "value1", "value2", "tangent1", "tangent2".
-     * @param value1 defines the first control point
-     * @param tangent1 defines the first tangent
-     * @param value2 defines the second control point
-     * @param tangent2 defines the second tangent
-     * @param time define where the derivative must be done
-     * @returns 1st derivative
-     */
-    static Hermite1stDerivative(
-        value1: DeepImmutable<Vector2>,
-        tangent1: DeepImmutable<Vector2>,
-        value2: DeepImmutable<Vector2>,
-        tangent2: DeepImmutable<Vector2>,
-        time: number
-    ): Vector2 {
-        let result = Vector2.Zero();
-
-        this.Hermite1stDerivativeToRef(value1, tangent1, value2, tangent2, time, result);
-
-        return result;
-    }
-
-    /**
-     * Returns a new Vector2 which is the 1st derivative of the Hermite spline defined by the vectors "value1", "value2", "tangent1", "tangent2".
-     * @param value1 defines the first control point
-     * @param tangent1 defines the first tangent
-     * @param value2 defines the second control point
-     * @param tangent2 defines the second tangent
-     * @param time define where the derivative must be done
-     * @param result define where the derivative will be stored
-     */
-    static Hermite1stDerivativeToRef(
-        value1: DeepImmutable<Vector2>,
-        tangent1: DeepImmutable<Vector2>,
-        value2: DeepImmutable<Vector2>,
-        tangent2: DeepImmutable<Vector2>,
-        time: number,
-        result: Vector2
-    ) {
-        const t2 = time * time;
-
-        result.x = (t2 - time) * 6 * value1.x + (3 * t2 - 4 * time + 1) * tangent1.x + (-t2 + time) * 6 * value2.x + (3 * t2 - 2 * time) * tangent2.x;
-        result.y = (t2 - time) * 6 * value1.y + (3 * t2 - 4 * time + 1) * tangent1.y + (-t2 + time) * 6 * value2.y + (3 * t2 - 2 * time) * tangent2.y;
-    }
-
-    /**
-     * Returns a new Vector2 located for "amount" (float) on the linear interpolation between the vector "start" adn the vector "end".
-     * @param start defines the start vector
-     * @param end defines the end vector
-     * @param amount defines the interpolation factor
-     * @returns a new Vector2
-     */
-    static Lerp(start: DeepImmutable<Vector2>, end: DeepImmutable<Vector2>, amount: number): Vector2 {
-        let x = start.x + (end.x - start.x) * amount;
-        let y = start.y + (end.y - start.y) * amount;
-        return new Vector2(x, y);
-    }
-
-    /**
-     * Gets the dot product of the vector "left" and the vector "right"
-     * @param left defines first vector
-     * @param right defines second vector
-     * @returns the dot product (float)
-     */
-    static Dot(left: DeepImmutable<Vector2>, right: DeepImmutable<Vector2>): number {
-        return left.x * right.x + left.y * right.y;
-    }
-
-    /**
-     * Returns a new Vector2 equal to the normalized given vector
-     * @param vector defines the vector to normalize
-     * @returns a new Vector2
-     */
-    static Normalize(vector: DeepImmutable<Vector2>): Vector2 {
-        let newVector = Vector2.Zero();
-        this.NormalizeToRef(vector, newVector);
-        return newVector;
-    }
-
-    /**
-     * Normalize a given vector into a second one
-     * @param vector defines the vector to normalize
-     * @param result defines the vector where to store the result
-     */
-    static NormalizeToRef(vector: DeepImmutable<Vector2>, result: Vector2) {
-        let len = vector.length();
-
-        if (len === 0) {
-            return;
-        }
-
-        result.x = vector.x / len;
-        result.y = vector.y / len;
-    }
-
-    /**
-     * Gets a new Vector2 set with the minimal coordinate values from the "left" and "right" vectors
-     * @param left defines 1st vector
-     * @param right defines 2nd vector
-     * @returns a new Vector2
-     */
-    static Minimize(left: DeepImmutable<Vector2>, right: DeepImmutable<Vector2>): Vector2 {
-        let x = left.x < right.x ? left.x : right.x;
-        let y = left.y < right.y ? left.y : right.y;
-        return new Vector2(x, y);
-    }
-
-    /**
-     * Gets a new Vector2 set with the maximal coordinate values from the "left" and "right" vectors
-     * @param left defines 1st vector
-     * @param right defines 2nd vector
-     * @returns a new Vector2
-     */
-    static Maximize(left: DeepImmutable<Vector2>, right: DeepImmutable<Vector2>): Vector2 {
-        let x = left.x > right.x ? left.x : right.x;
-        let y = left.y > right.y ? left.y : right.y;
-        return new Vector2(x, y);
-    }
-
-    /**
-     * Transforms the given vector coordinates by the given transformation Transform and stores the result in the vector "result" coordinates
-     * @param vector defines the vector to transform
-     * @param transformation defines the Transform to apply
-     * @param result defines the target vector
-     */
-    static Transform(vector: DeepImmutable<Vector2>, transformation: DeepImmutable<Transform>, ignoreOffset: boolean = false) {
-        const t = transformation;
-        const p = vector;
-
-        if (ignoreOffset) {
-            return new Vector2(t[0] * p.x + t[2] * p.y, t[1] * p.x + t[3] * p.y);
-        }
-        return new Vector2(t[0] * p.x + t[2] * p.y + t[4], t[1] * p.x + t[3] * p.y + t[5]);
-    }
-
-    /**
-     * Determines if a given vector is included in a triangle
-     * @param p defines the vector to test
-     * @param p0 defines 1st triangle point
-     * @param p1 defines 2nd triangle point
-     * @param p2 defines 3rd triangle point
-     * @returns true if the point "p" is in the triangle defined by the vectors "p0", "p1", "p2"
-     */
-    static PointInTriangle(p: DeepImmutable<Vector2>, p0: DeepImmutable<Vector2>, p1: DeepImmutable<Vector2>, p2: DeepImmutable<Vector2>) {
-        let a = (1 / 2) * (-p1.y * p2.x + p0.y * (-p1.x + p2.x) + p0.x * (p1.y - p2.y) + p1.x * p2.y);
-        let sign = a < 0 ? -1 : 1;
-        let s = (p0.y * p2.x - p0.x * p2.y + (p2.y - p0.y) * p.x + (p0.x - p2.x) * p.y) * sign;
-        let t = (p0.x * p1.y - p0.y * p1.x + (p0.y - p1.y) * p.x + (p1.x - p0.x) * p.y) * sign;
-
-        return s > 0 && t > 0 && s + t < 2 * a * sign;
-    }
-
-    /**
-     * Gets the distance between the vectors "value1" and "value2"
-     * @param value1 defines first vector
-     * @param value2 defines second vector
-     * @returns the distance between vectors
-     */
-    static Distance(value1: DeepImmutable<Vector2>, value2: DeepImmutable<Vector2>): number {
-        return Math.sqrt(Vector2.DistanceSquared(value1, value2));
-    }
-
-    /**
-     * Returns the squared distance between the vectors "value1" and "value2"
-     * @param value1 defines first vector
-     * @param value2 defines second vector
-     * @returns the squared distance between vectors
-     */
-    static DistanceSquared(value1: DeepImmutable<Vector2>, value2: DeepImmutable<Vector2>): number {
-        let x = value1.x - value2.x;
-        let y = value1.y - value2.y;
-        return x * x + y * y;
-    }
-
-    /**
-     * Gets a new Vector2 located at the center of the vectors "value1" and "value2"
-     * @param value1 defines first vector
-     * @param value2 defines second vector
-     * @returns a new Vector2
-     */
-    static Center(value1: DeepImmutable<Vector2>, value2: DeepImmutable<Vector2>): Vector2 {
-        return Vector2.CenterToRef(value1, value2, Vector2.Zero());
-    }
-
-    /**
-     * Gets the center of the vectors "value1" and "value2" and stores the result in the vector "ref"
-     * @param value1 defines first vector
-     * @param value2 defines second vector
-     * @param ref defines third vector
-     * @returns ref
-     */
-    static CenterToRef(value1: DeepImmutable<Vector2>, value2: DeepImmutable<Vector2>, ref: DeepImmutable<Vector2>): Vector2 {
-        return ref.copyFromFloats((value1.x + value2.x) / 2, (value1.y + value2.y) / 2);
-    }
-
-    /**
-     * Gets the shortest distance (float) between the point "p" and the segment defined by the two points "segA" and "segB".
-     * @param p defines the middle point
-     * @param segA defines one point of the segment
-     * @param segB defines the other point of the segment
-     * @returns the shortest distance
-     */
-    static DistanceOfPointFromSegment(p: DeepImmutable<Vector2>, segA: DeepImmutable<Vector2>, segB: DeepImmutable<Vector2>): number {
-        let l2 = Vector2.DistanceSquared(segA, segB);
-        if (l2 === 0.0) {
-            return Vector2.Distance(p, segA);
-        }
-        let v = segB.subtract(segA);
-        let t = Math.max(0, Math.min(1, Vector2.Dot(p.subtract(segA), v) / l2));
-        let proj = segA.add(v.multiplyByFloats(t, t));
-        return Vector2.Distance(p, proj);
-    }
-
-    static create(x: number, y: number) {
-        return new Vector2(x, y);
     }
 }
 

@@ -9,13 +9,25 @@ export class Skeleton {
 
     private _dirty = true;
 
+    constructor(context: ContextBase) {
+        this._context = context;
+        this._localeInitial();
+    }
+
     get dirty() {
         return this._dirty;
     }
 
-    constructor(context: ContextBase) {
-        this._context = context;
-        this._localeInitial();
+    getFontLocale() {
+        return this._fontLocale;
+    }
+
+    getContext() {
+        return this._context;
+    }
+
+    makeDirty(state: boolean) {
+        this._dirty = state;
     }
 
     private _localeInitial() {
@@ -32,17 +44,5 @@ export class Skeleton {
             });
         }
         this._fontLocale = renderFont as IFontLocale;
-    }
-
-    getFontLocale() {
-        return this._fontLocale;
-    }
-
-    getContext() {
-        return this._context;
-    }
-
-    makeDirty(state: boolean) {
-        this._dirty = state;
     }
 }

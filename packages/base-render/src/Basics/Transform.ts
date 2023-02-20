@@ -6,9 +6,9 @@ import { Vector2 } from './Vector2';
 export const INITIAL_MATRIX: number[] = [1, 0, 0, 1, 0, 0];
 
 export class Transform {
-    private _m: number[];
-
     dirty = false;
+
+    private _m: number[];
 
     constructor(m = INITIAL_MATRIX) {
         this._m = (m && m.slice()) || INITIAL_MATRIX;
@@ -322,6 +322,10 @@ export class Transform {
         return this;
     }
 
+    clone() {
+        return new Transform([...this._m]);
+    }
+
     /**
      * Returns a transform matrix starting from an object of the same kind of
      * the one returned from qrDecompose, useful also if you want to calculate some
@@ -348,10 +352,6 @@ export class Transform {
             scaleMatrix.multiply(new Transform([1, Math.tan(degToRad(options.skewY)), 0, 1, 0, 0]));
         }
         return scaleMatrix;
-    }
-
-    clone() {
-        return new Transform([...this._m]);
     }
 
     // static createTransformByState(state: positionState) {

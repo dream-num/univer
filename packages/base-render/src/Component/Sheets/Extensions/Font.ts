@@ -12,12 +12,12 @@ export class Font extends SheetExtension {
 
     zIndex = 40;
 
+    changeFontColor: ObjectMatrix<IColorStyle>;
+
     getDocuments() {
         const parent = this.parent as Spreadsheet;
         return parent.getDocuments();
     }
-
-    changeFontColor: ObjectMatrix<IColorStyle>;
 
     setChangeFontColor(r: number, c: number, color: IColorStyle) {
         this.changeFontColor.setValue(r, c, color);

@@ -12,10 +12,6 @@ export const RECT_OBJECT_ARRAY = ['radius'];
 export class Rect extends Shape<IRectProps> {
     private _radius: number;
 
-    get radius() {
-        return this._radius;
-    }
-
     constructor(key?: string, props?: IRectProps) {
         super(key, props);
         if (props?.radius) {
@@ -23,8 +19,8 @@ export class Rect extends Shape<IRectProps> {
         }
     }
 
-    protected _draw(ctx: CanvasRenderingContext2D) {
-        Rect.drawWith(ctx, this);
+    get radius() {
+        return this._radius;
     }
 
     static drawWith(ctx: CanvasRenderingContext2D, props: IRectProps | Rect) {
@@ -75,5 +71,9 @@ export class Rect extends Shape<IRectProps> {
             ...super.toJson(),
             ...props,
         };
+    }
+
+    protected _draw(ctx: CanvasRenderingContext2D) {
+        Rect.drawWith(ctx, this);
     }
 }

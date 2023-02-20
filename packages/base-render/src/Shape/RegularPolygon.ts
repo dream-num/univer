@@ -14,10 +14,6 @@ export const REGULAR_POLYGON_OBJECT_ARRAY = ['pointsGroup'];
 export class RegularPolygon extends Shape<IRegularPolygonProps> {
     private _pointsGroup: IPoint[][];
 
-    get pointsGroup() {
-        return this._pointsGroup;
-    }
-
     constructor(key?: string, props?: IRegularPolygonProps) {
         super(key, props);
         this._pointsGroup = props?.pointsGroup || [[]];
@@ -30,8 +26,8 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
         });
     }
 
-    protected _draw(ctx: CanvasRenderingContext2D) {
-        RegularPolygon.drawWith(ctx, this);
+    get pointsGroup() {
+        return this._pointsGroup;
     }
 
     static drawWith(ctx: CanvasRenderingContext2D, props: IRegularPolygonProps | RegularPolygon) {
@@ -131,6 +127,10 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
             width: width * this.scaleX,
             height: height * this.scaleY,
         };
+    }
+
+    protected _draw(ctx: CanvasRenderingContext2D) {
+        RegularPolygon.drawWith(ctx, this);
     }
 
     private _setFixBoundingBox() {

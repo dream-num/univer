@@ -48,6 +48,8 @@ interface ICanvasProps {
  * @param {Number} props.pixelRatio
  */
 export class Canvas {
+    isCache = false;
+
     private _pixelRatio = 1;
 
     private _canvasEle: HTMLCanvasElement;
@@ -57,8 +59,6 @@ export class Canvas {
     private _width = 0;
 
     private _height = 0;
-
-    isCache = false;
 
     constructor(props?: ICanvasProps) {
         props = props || {};

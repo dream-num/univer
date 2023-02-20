@@ -29,18 +29,6 @@ export interface IPageRenderConfig {
 }
 
 export class Documents extends DocComponent {
-    private _drawLiquid: Liquid;
-
-    private _findLiquid: Liquid;
-
-    private _hasEditor = false;
-
-    private _editor: DocsEditor;
-
-    private _skeletonObserver: Nullable<Observer<IDocumentSkeletonCached>>;
-
-    // private _textAngleRotateOffset: number = 0;
-
     pageWidth: number;
 
     pageHeight: number;
@@ -54,6 +42,18 @@ export class Documents extends DocComponent {
     isCalculateSkeleton = true;
 
     onPageRenderObservable = new Observable<IPageRenderConfig>();
+
+    private _drawLiquid: Liquid;
+
+    private _findLiquid: Liquid;
+
+    private _hasEditor = false;
+
+    private _editor: DocsEditor;
+
+    private _skeletonObserver: Nullable<Observer<IDocumentSkeletonCached>>;
+
+    // private _textAngleRotateOffset: number = 0;
 
     constructor(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
         super(oKey, documentSkeleton, config?.allowCache);
@@ -85,108 +85,12 @@ export class Documents extends DocComponent {
         this.makeDirty(true);
     }
 
-    protected _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
-        this.draw(ctx, bounds);
+    get hasEditor() {
+        return this._hasEditor;
     }
 
-    private _horizontalHandler(pageWidth: number, pagePaddingLeft: number, pagePaddingRight: number, horizontalAlign: HorizontalAlign) {
-        let offsetLeft = 0;
-        if (horizontalAlign === HorizontalAlign.CENTER) {
-            offsetLeft = (this.width - pageWidth) / 2;
-        } else if (horizontalAlign === HorizontalAlign.RIGHT) {
-            offsetLeft = this.width - pageWidth - pagePaddingRight;
-        } else {
-            offsetLeft = pagePaddingLeft;
-        }
-
-        return offsetLeft;
-    }
-
-    private _verticalHandler(pageHeight: number, pagePaddingTop: number, pagePaddingBottom: number, verticalAlign: VerticalAlign) {
-        let offsetTop = 0;
-        if (verticalAlign === VerticalAlign.MIDDLE) {
-            offsetTop = (this.height - pageHeight) / 2;
-        } else if (verticalAlign === VerticalAlign.BOTTOM) {
-            offsetTop = this.height - pageHeight - pagePaddingBottom;
-        } else {
-            offsetTop = pagePaddingTop;
-        }
-        return offsetTop;
-    }
-
-    private _startRotation(ctx: CanvasRenderingContext2D, textAngle: number) {
-        ctx.rotate(textAngle || 0);
-    }
-
-    private _resetRotation(ctx: CanvasRenderingContext2D, textAngle: number) {
-        ctx.rotate(-textAngle || 0);
-    }
-
-    private _initialDefaultExtension() {
-        DocumentsSpanAndLineExtensionRegistry.getData().forEach((extension) => {
-            this.register(extension);
-        });
-    }
-
-    private _addSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
-        if (!skeleton) {
-            return;
-        }
-
-        this._skeletonObserver = skeleton.onRecalculateChangeObservable.add((data) => {
-            const pages = data.pages;
-            let width = 0;
-            let height = 0;
-            for (let i = 0, len = pages.length; i < len; i++) {
-                const page = pages[i];
-                const { pageWidth, pageHeight } = page;
-                if (this.pageLayoutType === PageLayoutType.VERTICAL) {
-                    height += pageHeight;
-                    if (i !== len - 1) {
-                        height += this.pageMarginTop;
-                    }
-                    width = Math.max(width, pageWidth);
-                } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
-                    width += pageWidth;
-                    if (i !== len - 1) {
-                        width += this.pageMarginLeft;
-                    }
-                    height = Math.max(height, pageHeight);
-                }
-            }
-
-            this.resize(width, height);
-            this.calculatePagePosition();
-        });
-    }
-
-    private _disposeSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
-        if (!skeleton) {
-            return;
-        }
-        skeleton.onRecalculateChangeObservable.remove(this._skeletonObserver);
-    }
-
-    private _getPageBoundingBox(page: IDocumentSkeletonPage) {
-        const { pageWidth, pageHeight } = page;
-        let { x: startX, y: startY } = this._findLiquid;
-
-        let endX = -1;
-        let endY = -1;
-        if (this.pageLayoutType === PageLayoutType.VERTICAL) {
-            endX = pageWidth;
-            endY = startY + pageHeight;
-        } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
-            endX = startX + pageWidth;
-            endY = pageHeight;
-        }
-
-        return {
-            startX,
-            startY,
-            endX,
-            endY,
-        };
+    static create(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
+        return new Documents(oKey, documentSkeleton, config);
     }
 
     calculatePagePosition() {
@@ -279,10 +183,6 @@ export class Documents extends DocComponent {
         }
 
         return this._editor.sync();
-    }
-
-    get hasEditor() {
-        return this._hasEditor;
     }
 
     draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
@@ -731,11 +631,111 @@ export class Documents extends DocComponent {
         return false;
     }
 
-    private _translatePage(page: IDocumentSkeletonPage) {
-        this._findLiquid.translatePage(page, this.pageLayoutType, this.pageMarginLeft, this.pageMarginTop);
+    protected _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+        this.draw(ctx, bounds);
     }
 
-    static create(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
-        return new Documents(oKey, documentSkeleton, config);
+    private _horizontalHandler(pageWidth: number, pagePaddingLeft: number, pagePaddingRight: number, horizontalAlign: HorizontalAlign) {
+        let offsetLeft = 0;
+        if (horizontalAlign === HorizontalAlign.CENTER) {
+            offsetLeft = (this.width - pageWidth) / 2;
+        } else if (horizontalAlign === HorizontalAlign.RIGHT) {
+            offsetLeft = this.width - pageWidth - pagePaddingRight;
+        } else {
+            offsetLeft = pagePaddingLeft;
+        }
+
+        return offsetLeft;
+    }
+
+    private _verticalHandler(pageHeight: number, pagePaddingTop: number, pagePaddingBottom: number, verticalAlign: VerticalAlign) {
+        let offsetTop = 0;
+        if (verticalAlign === VerticalAlign.MIDDLE) {
+            offsetTop = (this.height - pageHeight) / 2;
+        } else if (verticalAlign === VerticalAlign.BOTTOM) {
+            offsetTop = this.height - pageHeight - pagePaddingBottom;
+        } else {
+            offsetTop = pagePaddingTop;
+        }
+        return offsetTop;
+    }
+
+    private _startRotation(ctx: CanvasRenderingContext2D, textAngle: number) {
+        ctx.rotate(textAngle || 0);
+    }
+
+    private _resetRotation(ctx: CanvasRenderingContext2D, textAngle: number) {
+        ctx.rotate(-textAngle || 0);
+    }
+
+    private _initialDefaultExtension() {
+        DocumentsSpanAndLineExtensionRegistry.getData().forEach((extension) => {
+            this.register(extension);
+        });
+    }
+
+    private _addSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
+        if (!skeleton) {
+            return;
+        }
+
+        this._skeletonObserver = skeleton.onRecalculateChangeObservable.add((data) => {
+            const pages = data.pages;
+            let width = 0;
+            let height = 0;
+            for (let i = 0, len = pages.length; i < len; i++) {
+                const page = pages[i];
+                const { pageWidth, pageHeight } = page;
+                if (this.pageLayoutType === PageLayoutType.VERTICAL) {
+                    height += pageHeight;
+                    if (i !== len - 1) {
+                        height += this.pageMarginTop;
+                    }
+                    width = Math.max(width, pageWidth);
+                } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
+                    width += pageWidth;
+                    if (i !== len - 1) {
+                        width += this.pageMarginLeft;
+                    }
+                    height = Math.max(height, pageHeight);
+                }
+            }
+
+            this.resize(width, height);
+            this.calculatePagePosition();
+        });
+    }
+
+    private _disposeSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
+        if (!skeleton) {
+            return;
+        }
+        skeleton.onRecalculateChangeObservable.remove(this._skeletonObserver);
+    }
+
+    private _getPageBoundingBox(page: IDocumentSkeletonPage) {
+        const { pageWidth, pageHeight } = page;
+        let { x: startX, y: startY } = this._findLiquid;
+
+        let endX = -1;
+        let endY = -1;
+        if (this.pageLayoutType === PageLayoutType.VERTICAL) {
+            endX = pageWidth;
+            endY = startY + pageHeight;
+        } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
+            endX = startX + pageWidth;
+            endY = pageHeight;
+        }
+
+        return {
+            startX,
+            startY,
+            endX,
+            endY,
+        };
+    }
+
+    private _translatePage(page: IDocumentSkeletonPage) {
+        this._findLiquid.translatePage(page, this.pageLayoutType, this.pageMarginLeft, this.pageMarginTop);
     }
 }

@@ -31,6 +31,12 @@ interface IGlyphHorizonData {
 }
 
 export class FontCache {
+    private static _getTextHeightCache: { [key: string]: { width: number; height: number } } = {};
+
+    private static _context: CanvasRenderingContext2D;
+
+    private static _fontDataMap: Map<string, IFontData> = new Map();
+
     // 文字缓存全局变量
     private static _globalFontMeasureCache: Map<string, Map<string, IMeasureTextCache>> = new Map();
 
@@ -124,21 +130,6 @@ export class FontCache {
         return getDefaultBaselineOffset(fontSize);
     }
 
-    private static _clearMeasureCache(limit: number, values: Map<string, IMeasureTextCache>) {
-        let valueIndex = 0;
-        for (let txtItem of values) {
-            const [txtKey] = txtItem;
-            if (valueIndex > limit) {
-                break;
-            }
-            values.delete(txtKey);
-            valueIndex++;
-        }
-        return true;
-    }
-
-    private static _getTextHeightCache: { [key: string]: { width: number; height: number } } = {};
-
     static getTextSizeByDom(text: string, fontStyle: string) {
         if (fontStyle in this._getTextHeightCache) {
             return this._getTextHeightCache[fontStyle];
@@ -161,9 +152,80 @@ export class FontCache {
         return result;
     }
 
-    private static _context: CanvasRenderingContext2D;
+    static getTextSize(content: string, fontStyle: IDocumentSkeletonFontStyle): IDocumentSkeletonBoundingBox {
+        const { fontString, fontSize, fontFamily } = fontStyle;
 
-    private static _fontDataMap: Map<string, IFontData> = new Map();
+        let bBox = this._getBoundingBoxByFont(fontFamily, fontSize);
+        if (!bBox) {
+            const measureText = this.getMeasureText(content, fontString);
+            bBox = this._calculateBoundingBoxByMeasureText(measureText, fontSize);
+        }
+        return bBox;
+    }
+
+    // 获取有值单元格文本大小
+    // let measureTextCache = {}, measureTextCacheTimeOut = null;
+    static getMeasureText(content: string, fontString: string): IMeasureTextCache {
+        if (!this._context) {
+            const canvas = document.createElement('canvas');
+            this._context = canvas.getContext('2d')!;
+        }
+
+        // const { fontString, fontSize, fontFamily } = fontStyle;
+
+        const ctx = this._context;
+
+        const mtc = this.getFontMeasureCache(fontString, content);
+        if (mtc != null) {
+            return mtc;
+        }
+
+        ctx.font = fontString;
+
+        const textMetrics = ctx.measureText(content);
+
+        const { width, fontBoundingBoxAscent, fontBoundingBoxDescent, actualBoundingBoxAscent, actualBoundingBoxDescent } = textMetrics;
+
+        const cache: IMeasureTextCache = {
+            width,
+            fontBoundingBoxAscent,
+            fontBoundingBoxDescent,
+            actualBoundingBoxAscent,
+            actualBoundingBoxDescent,
+        };
+
+        // 兼容不支持textMetrics的情况
+        if (fontBoundingBoxAscent == null || fontBoundingBoxDescent == null || Number.isNaN(fontBoundingBoxAscent) || Number.isNaN(fontBoundingBoxDescent)) {
+            let oneLineTextHeight = this.getTextSizeByDom(DEFAULT_MEASURE_TEXT, fontString)[1];
+
+            if (ctx.textBaseline === 'top') {
+                cache.fontBoundingBoxAscent = cache.actualBoundingBoxAscent = oneLineTextHeight;
+                cache.fontBoundingBoxDescent = cache.actualBoundingBoxDescent = 0;
+            } else if (ctx.textBaseline === 'middle') {
+                cache.fontBoundingBoxDescent = cache.actualBoundingBoxDescent = oneLineTextHeight / 2;
+                cache.fontBoundingBoxAscent = cache.actualBoundingBoxAscent = oneLineTextHeight / 2;
+            } else {
+                cache.fontBoundingBoxDescent = cache.actualBoundingBoxDescent = 0;
+                cache.fontBoundingBoxAscent = cache.actualBoundingBoxAscent = oneLineTextHeight;
+            }
+        }
+
+        this.setFontMeasureCache(fontString, content, cache);
+        return cache;
+    }
+
+    private static _clearMeasureCache(limit: number, values: Map<string, IMeasureTextCache>) {
+        let valueIndex = 0;
+        for (let txtItem of values) {
+            const [txtKey] = txtItem;
+            if (valueIndex > limit) {
+                break;
+            }
+            values.delete(txtKey);
+            valueIndex++;
+        }
+        return true;
+    }
 
     /**
      * Vertical Metrics https://glyphsapp.com/learn/vertical-metrics
@@ -233,67 +295,5 @@ export class FontCache {
             spr: 0.5,
             spo: fontSize,
         };
-    }
-
-    static getTextSize(content: string, fontStyle: IDocumentSkeletonFontStyle): IDocumentSkeletonBoundingBox {
-        const { fontString, fontSize, fontFamily } = fontStyle;
-
-        let bBox = this._getBoundingBoxByFont(fontFamily, fontSize);
-        if (!bBox) {
-            const measureText = this.getMeasureText(content, fontString);
-            bBox = this._calculateBoundingBoxByMeasureText(measureText, fontSize);
-        }
-        return bBox;
-    }
-
-    // 获取有值单元格文本大小
-    // let measureTextCache = {}, measureTextCacheTimeOut = null;
-    static getMeasureText(content: string, fontString: string): IMeasureTextCache {
-        if (!this._context) {
-            const canvas = document.createElement('canvas');
-            this._context = canvas.getContext('2d')!;
-        }
-
-        // const { fontString, fontSize, fontFamily } = fontStyle;
-
-        const ctx = this._context;
-
-        const mtc = this.getFontMeasureCache(fontString, content);
-        if (mtc != null) {
-            return mtc;
-        }
-
-        ctx.font = fontString;
-
-        const textMetrics = ctx.measureText(content);
-
-        const { width, fontBoundingBoxAscent, fontBoundingBoxDescent, actualBoundingBoxAscent, actualBoundingBoxDescent } = textMetrics;
-
-        const cache: IMeasureTextCache = {
-            width,
-            fontBoundingBoxAscent,
-            fontBoundingBoxDescent,
-            actualBoundingBoxAscent,
-            actualBoundingBoxDescent,
-        };
-
-        // 兼容不支持textMetrics的情况
-        if (fontBoundingBoxAscent == null || fontBoundingBoxDescent == null || Number.isNaN(fontBoundingBoxAscent) || Number.isNaN(fontBoundingBoxDescent)) {
-            let oneLineTextHeight = this.getTextSizeByDom(DEFAULT_MEASURE_TEXT, fontString)[1];
-
-            if (ctx.textBaseline === 'top') {
-                cache.fontBoundingBoxAscent = cache.actualBoundingBoxAscent = oneLineTextHeight;
-                cache.fontBoundingBoxDescent = cache.actualBoundingBoxDescent = 0;
-            } else if (ctx.textBaseline === 'middle') {
-                cache.fontBoundingBoxDescent = cache.actualBoundingBoxDescent = oneLineTextHeight / 2;
-                cache.fontBoundingBoxAscent = cache.actualBoundingBoxAscent = oneLineTextHeight / 2;
-            } else {
-                cache.fontBoundingBoxDescent = cache.actualBoundingBoxDescent = 0;
-                cache.fontBoundingBoxAscent = cache.actualBoundingBoxAscent = oneLineTextHeight;
-            }
-        }
-
-        this.setFontMeasureCache(fontString, content, cache);
-        return cache;
     }
 }

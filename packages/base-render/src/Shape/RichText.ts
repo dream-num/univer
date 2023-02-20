@@ -65,10 +65,6 @@ export class RichText extends BaseObject {
 
     private _cl?: IColorStyle;
 
-    get documentData() {
-        return this._documentData;
-    }
-
     constructor(context: ContextBase, key?: string, props?: IRichTextProps) {
         super(key);
         if (props?.richText) {
@@ -119,6 +115,10 @@ export class RichText extends BaseObject {
         });
     }
 
+    get documentData() {
+        return this._documentData;
+    }
+
     getDocsSkeletonPageSize() {
         const skeletonData = this._documentSkeleton?.getSkeletonData();
 
@@ -130,6 +130,86 @@ export class RichText extends BaseObject {
 
         const { width, height } = lastPage;
         return { width, height };
+    }
+
+    setProps(props?: IRichTextProps) {
+        if (!props) {
+            return;
+        }
+
+        const themeKeys = Object.keys(props);
+        if (themeKeys.length === 0) {
+            return;
+        }
+        themeKeys.forEach((key) => {
+            if (props[key] === undefined) {
+                return true;
+            }
+
+            if (RICHTEXT_OBJECT_ARRAY.indexOf(key) === -1) {
+                this[`_${key}`] = props[key];
+            }
+        });
+        this.makeDirty(true);
+        return this;
+    }
+
+    render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+        if (!this.visible) {
+            this.makeDirty(false);
+            return this;
+        }
+
+        // Temporarily ignore the on-demand display of elements within a group：this.isInGroup
+        if (this.isRender()) {
+            const { minX, maxX, minY, maxY } = transformBoundingCoord(this, bounds!);
+
+            if (this.width + this.strokeWidth < minX || maxX < 0 || this.height + this.strokeWidth < minY || maxY < 0) {
+                // console.warn('ignore object', this);
+                return this;
+            }
+        }
+
+        const m = this.transform.getMatrix();
+        mainCtx.save();
+        mainCtx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+        if (this._allowCache) {
+            if (this.isDirty()) {
+                const ctx = this._cacheCanvas.getContext();
+                this._cacheCanvas.clear();
+                ctx.save();
+                ctx.translate(this.strokeWidth / 2, this.strokeWidth / 2); // 边框会按照宽度画在边界上，分别占据内外二分之一
+                this._draw(ctx);
+                ctx.restore();
+            }
+            this._applyCache(mainCtx);
+        } else {
+            this._draw(mainCtx);
+        }
+        mainCtx.restore();
+        this.makeDirty(false);
+        return this;
+    }
+
+    getContext() {
+        return this._context;
+    }
+
+    toJson() {
+        const props: IKeyValue = {};
+        RICHTEXT_OBJECT_ARRAY.forEach((key) => {
+            if (this[key]) {
+                props[key] = this[key];
+            }
+        });
+        return {
+            ...super.toJson(),
+            ...props,
+        };
+    }
+
+    protected _draw(ctx: CanvasRenderingContext2D) {
+        this._documents.render(ctx);
     }
 
     private convertToDocumentData(text: string) {
@@ -201,69 +281,6 @@ export class RichText extends BaseObject {
         this.makeDirty(true);
     }
 
-    setProps(props?: IRichTextProps) {
-        if (!props) {
-            return;
-        }
-
-        const themeKeys = Object.keys(props);
-        if (themeKeys.length === 0) {
-            return;
-        }
-        themeKeys.forEach((key) => {
-            if (props[key] === undefined) {
-                return true;
-            }
-
-            if (RICHTEXT_OBJECT_ARRAY.indexOf(key) === -1) {
-                this[`_${key}`] = props[key];
-            }
-        });
-        this.makeDirty(true);
-        return this;
-    }
-
-    protected _draw(ctx: CanvasRenderingContext2D) {
-        this._documents.render(ctx);
-    }
-
-    render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
-        if (!this.visible) {
-            this.makeDirty(false);
-            return this;
-        }
-
-        // Temporarily ignore the on-demand display of elements within a group：this.isInGroup
-        if (this.isRender()) {
-            const { minX, maxX, minY, maxY } = transformBoundingCoord(this, bounds!);
-
-            if (this.width + this.strokeWidth < minX || maxX < 0 || this.height + this.strokeWidth < minY || maxY < 0) {
-                // console.warn('ignore object', this);
-                return this;
-            }
-        }
-
-        const m = this.transform.getMatrix();
-        mainCtx.save();
-        mainCtx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
-        if (this._allowCache) {
-            if (this.isDirty()) {
-                const ctx = this._cacheCanvas.getContext();
-                this._cacheCanvas.clear();
-                ctx.save();
-                ctx.translate(this.strokeWidth / 2, this.strokeWidth / 2); // 边框会按照宽度画在边界上，分别占据内外二分之一
-                this._draw(ctx);
-                ctx.restore();
-            }
-            this._applyCache(mainCtx);
-        } else {
-            this._draw(mainCtx);
-        }
-        mainCtx.restore();
-        this.makeDirty(false);
-        return this;
-    }
-
     private _applyCache(ctx?: CanvasRenderingContext2D) {
         if (!ctx || !this._cacheCanvas) {
             return;
@@ -282,22 +299,5 @@ export class RichText extends BaseObject {
             this.width + this.strokeWidth,
             this.height + this.strokeWidth
         );
-    }
-
-    getContext() {
-        return this._context;
-    }
-
-    toJson() {
-        const props: IKeyValue = {};
-        RICHTEXT_OBJECT_ARRAY.forEach((key) => {
-            if (this[key]) {
-                props[key] = this[key];
-            }
-        });
-        return {
-            ...super.toJson(),
-            ...props,
-        };
     }
 }

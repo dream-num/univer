@@ -26,6 +26,32 @@ import { SceneViewer } from './SceneViewer';
 import { Transformer, ITransformerConfig } from './Scene.Transformer';
 
 export class Scene {
+    // onPointerMove: (evt: IPointerEvent | IMouseEvent) => void;
+
+    // onPointerDown: (evt: IPointerEvent | IMouseEvent) => void;
+
+    // onPointerUp: (evt: IPointerEvent | IMouseEvent) => void;
+
+    // onDblclick: (evt: IPointerEvent | IMouseEvent) => void;
+
+    // onMouseWheel: (evt: IWheelEvent) => void;
+
+    onPointerDownObserver = new Observable<IPointerEvent | IMouseEvent>();
+
+    onPointerMoveObserver = new Observable<IPointerEvent | IMouseEvent>();
+
+    onPointerUpObserver = new Observable<IPointerEvent | IMouseEvent>();
+
+    onDblclickObserver = new Observable<IPointerEvent | IMouseEvent>();
+
+    onMouseWheelObserver = new Observable<IWheelEvent>();
+
+    onKeyDownObservable = new Observable<IKeyboardEvent>();
+
+    onKeyUpObservable = new Observable<IKeyboardEvent>();
+
+    onTransformChangeObservable = new Observable<ITransformChangeState>();
+
     // private _ObjectsForward = new Array<BaseObject>();
 
     // private _ObjectsBack = new Array<BaseObject>();
@@ -95,6 +121,84 @@ export class Scene {
         // }, 500);
     }
 
+    get classType() {
+        return RENDER_CLASS_TYPE.SCENE;
+    }
+
+    get transform() {
+        return this._transform;
+    }
+
+    get width() {
+        return this._width;
+    }
+
+    get height() {
+        return this._height;
+    }
+
+    get scaleX() {
+        return this._scaleX;
+    }
+
+    get scaleY() {
+        return this._scaleY;
+    }
+
+    get ancestorScaleX() {
+        const p = this.getParent();
+        let pScale = 1;
+        if (p.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+            pScale = (p as SceneViewer).ancestorScaleX;
+        }
+        return this._scaleX * pScale;
+    }
+
+    get ancestorScaleY() {
+        const p = this.getParent();
+        let pScale = 1;
+        if (p.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+            pScale = (p as SceneViewer).ancestorScaleY;
+        }
+        return this._scaleY * pScale;
+    }
+
+    get cursor() {
+        return this._cursor;
+    }
+
+    get sceneKey() {
+        return this._sceneKey;
+    }
+
+    get evented() {
+        return this._evented;
+    }
+
+    set transform(trans: Transform) {
+        this._transform = trans;
+    }
+
+    set cursor(val: CURSOR_TYPE) {
+        this.setCursor(val);
+    }
+
+    private set width(num: number) {
+        this._width = num;
+    }
+
+    private set height(num: number) {
+        this._height = num;
+    }
+
+    private set scaleX(scaleX: number) {
+        this._scaleX = scaleX;
+    }
+
+    private set scaleY(scaleY: number) {
+        this._scaleY = scaleY;
+    }
+
     attachControl(hasDown: boolean = true, hasUp: boolean = true, hasMove: boolean = true, hasWheel: boolean = true) {
         if (!(this._parent.classType === RENDER_CLASS_TYPE.ENGINE)) {
             // 只绑定直接与engine挂载的scene来统一管理事件
@@ -137,14 +241,6 @@ export class Scene {
         return false;
     }
 
-    get cursor() {
-        return this._cursor;
-    }
-
-    set cursor(val: CURSOR_TYPE) {
-        this.setCursor(val);
-    }
-
     resetCursor() {
         this.setCursor(CURSOR_TYPE.DEFAULT);
     }
@@ -157,68 +253,6 @@ export class Scene {
         }
         const canvasEl = engine.getCanvas().getCanvasEle();
         canvasEl.style.cursor = val;
-    }
-
-    get classType() {
-        return RENDER_CLASS_TYPE.SCENE;
-    }
-
-    get transform() {
-        return this._transform;
-    }
-
-    set transform(trans: Transform) {
-        this._transform = trans;
-    }
-
-    get width() {
-        return this._width;
-    }
-
-    get height() {
-        return this._height;
-    }
-
-    get scaleX() {
-        return this._scaleX;
-    }
-
-    get scaleY() {
-        return this._scaleY;
-    }
-
-    get ancestorScaleX() {
-        const p = this.getParent();
-        let pScale = 1;
-        if (p.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-            pScale = (p as SceneViewer).ancestorScaleX;
-        }
-        return this._scaleX * pScale;
-    }
-
-    get ancestorScaleY() {
-        const p = this.getParent();
-        let pScale = 1;
-        if (p.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-            pScale = (p as SceneViewer).ancestorScaleY;
-        }
-        return this._scaleY * pScale;
-    }
-
-    private set width(num: number) {
-        this._width = num;
-    }
-
-    private set height(num: number) {
-        this._height = num;
-    }
-
-    private set scaleX(scaleX: number) {
-        this._scaleX = scaleX;
-    }
-
-    private set scaleY(scaleY: number) {
-        this._scaleY = scaleY;
     }
 
     resize(width?: number, height?: number) {
@@ -344,12 +378,6 @@ export class Scene {
             }
         }
         return this._createDefaultLayer(zIndex);
-    }
-
-    private _createDefaultLayer(zIndex: number = 1) {
-        const defaultLayer = Layer.create(this, [], zIndex);
-        this.addLayer(defaultLayer);
-        return defaultLayer;
     }
 
     getLayerMaxZIndex(): number {
@@ -518,17 +546,6 @@ export class Scene {
 
     changeObjectOrder() {}
 
-    get sceneKey() {
-        return this._sceneKey;
-    }
-
-    async requestRender(parentCtx?: CanvasRenderingContext2D) {
-        return new Promise((resolve, reject) => {
-            this.render(parentCtx);
-            requestNewFrame(resolve);
-        });
-    }
-
     renderObjects(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         this.getAllObjectsByOrder().forEach((o) => {
             o.render(ctx, bounds);
@@ -544,25 +561,6 @@ export class Scene {
         this.getViewports()?.forEach((vp: Viewport) => vp.render(parentCtx));
     }
 
-    private _resetViewportSize() {
-        this.getViewports().forEach((vp: Viewport) => {
-            vp.resetSize();
-        });
-    }
-
-    private _setTransForm() {
-        const composeResult = Transform.create().composeMatrix({
-            scaleX: this.scaleX,
-            scaleY: this.scaleY,
-        });
-
-        this.transform = composeResult;
-        this.getViewports().forEach((vp: Viewport) => {
-            vp.resizeScrollBar();
-        });
-        this.makeDirty(true);
-    }
-
     enableEvent() {
         this._evented = true;
     }
@@ -571,8 +569,11 @@ export class Scene {
         this._evented = false;
     }
 
-    get evented() {
-        return this._evented;
+    async requestRender(parentCtx?: CanvasRenderingContext2D) {
+        return new Promise((resolve, reject) => {
+            this.render(parentCtx);
+            requestNewFrame(resolve);
+        });
     }
 
     openTransformer(config?: ITransformerConfig) {
@@ -749,44 +750,6 @@ export class Scene {
         return isPickedObject;
     }
 
-    private _getGroupCumLeftRight(object: BaseObject) {
-        let parent: any = object.parent;
-        let cumLeft = 0;
-        let cumTop = 0;
-        while (parent.classType === RENDER_CLASS_TYPE.GROUP) {
-            const { left, top } = parent;
-            cumLeft += left;
-            cumTop += top;
-
-            parent = parent.parent;
-        }
-        return { cumLeft, cumTop };
-    }
-
-    // onPointerMove: (evt: IPointerEvent | IMouseEvent) => void;
-
-    // onPointerDown: (evt: IPointerEvent | IMouseEvent) => void;
-
-    // onPointerUp: (evt: IPointerEvent | IMouseEvent) => void;
-
-    // onDblclick: (evt: IPointerEvent | IMouseEvent) => void;
-
-    // onMouseWheel: (evt: IWheelEvent) => void;
-
-    onPointerDownObserver = new Observable<IPointerEvent | IMouseEvent>();
-
-    onPointerMoveObserver = new Observable<IPointerEvent | IMouseEvent>();
-
-    onPointerUpObserver = new Observable<IPointerEvent | IMouseEvent>();
-
-    onDblclickObserver = new Observable<IPointerEvent | IMouseEvent>();
-
-    onMouseWheelObserver = new Observable<IWheelEvent>();
-
-    onKeyDownObservable = new Observable<IKeyboardEvent>();
-
-    onKeyUpObservable = new Observable<IKeyboardEvent>();
-
     on(eventType: EVENT_TYPE, func: (evt: unknown, state: EventState) => void) {
         const observable = this[`on${eventType}Observer`] as Observable<unknown>;
         const observer = observable.add(func.bind(this));
@@ -894,5 +857,42 @@ export class Scene {
         return true;
     }
 
-    onTransformChangeObservable = new Observable<ITransformChangeState>();
+    private _createDefaultLayer(zIndex: number = 1) {
+        const defaultLayer = Layer.create(this, [], zIndex);
+        this.addLayer(defaultLayer);
+        return defaultLayer;
+    }
+
+    private _resetViewportSize() {
+        this.getViewports().forEach((vp: Viewport) => {
+            vp.resetSize();
+        });
+    }
+
+    private _setTransForm() {
+        const composeResult = Transform.create().composeMatrix({
+            scaleX: this.scaleX,
+            scaleY: this.scaleY,
+        });
+
+        this.transform = composeResult;
+        this.getViewports().forEach((vp: Viewport) => {
+            vp.resizeScrollBar();
+        });
+        this.makeDirty(true);
+    }
+
+    private _getGroupCumLeftRight(object: BaseObject) {
+        let parent: any = object.parent;
+        let cumLeft = 0;
+        let cumTop = 0;
+        while (parent.classType === RENDER_CLASS_TYPE.GROUP) {
+            const { left, top } = parent;
+            cumLeft += left;
+            cumTop += top;
+
+            parent = parent.parent;
+        }
+        return { cumLeft, cumTop };
+    }
 }

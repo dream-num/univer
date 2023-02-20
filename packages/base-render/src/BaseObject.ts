@@ -14,6 +14,40 @@ import { IObjectFullState, ITransformChangeState, TRANSFORM_CHANGE_OBSERVABLE_TY
 export const BASE_OBJECT_ARRAY = ['top', 'left', 'width', 'height', 'angle', 'scaleX', 'scaleY', 'skewX', 'skewY', 'flipX', 'flipY', 'strokeWidth'];
 
 export abstract class BaseObject {
+    groupKey?: string;
+
+    isInGroup: boolean = false;
+
+    onTransformChangeObservable = new Observable<ITransformChangeState>();
+
+    onPointerDownObserver = new Observable<IPointerEvent | IMouseEvent>();
+
+    onPointerMoveObserver = new Observable<IPointerEvent | IMouseEvent>();
+
+    onPointerUpObserver = new Observable<IPointerEvent | IMouseEvent>();
+
+    onDblclickObserver = new Observable<IPointerEvent | IMouseEvent>();
+
+    onMouseWheelObserver = new Observable<IWheelEvent>();
+    // onKeyDownObservable = new Observable<IKeyboardEvent>();
+    // onKeyUpObservable = new Observable<IKeyboardEvent>();
+
+    onPointerOutObserver = new Observable<IPointerEvent | IMouseEvent>();
+
+    onPointerLeaveObserver = new Observable<IPointerEvent | IMouseEvent>();
+
+    onPointerOverObserver = new Observable<IPointerEvent | IMouseEvent>();
+
+    onPointerEnterObserver = new Observable<IPointerEvent | IMouseEvent>();
+
+    onIsAddedToParentObserver = new Observable<any>();
+
+    onDisposeObserver = new Observable<BaseObject>();
+
+    protected _oKey: string;
+
+    protected _dirty: boolean = true;
+
     private _top: number = 0;
 
     private _topOrigin: number | string = 0;
@@ -58,10 +92,6 @@ export abstract class BaseObject {
 
     private _transform = new Transform();
 
-    protected _oKey: string;
-
-    protected _dirty: boolean = true;
-
     private __debounceParentTimeout: number;
 
     private _cursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
@@ -70,16 +100,206 @@ export abstract class BaseObject {
 
     private _forceRender = false;
 
-    groupKey?: string;
-
-    isInGroup: boolean = false;
-
     constructor(key?: string) {
         if (key) {
             this._oKey = key;
         } else {
             this._oKey = generateRandomKey();
         }
+    }
+
+    get transform() {
+        return this._transform;
+    }
+
+    get topOrigin() {
+        return this._topOrigin;
+    }
+
+    get leftOrigin() {
+        return this._leftOrigin;
+    }
+
+    get widthOrigin() {
+        return this._widthOrigin;
+    }
+
+    get heightOrigin() {
+        return this._heightOrigin;
+    }
+
+    get classType() {
+        return RENDER_CLASS_TYPE.BASE_OBJECT;
+    }
+
+    get top(): number {
+        return this._top;
+    }
+
+    get left(): number {
+        return this._left;
+    }
+
+    get width(): number {
+        return this._width;
+    }
+
+    get height(): number {
+        return this._height;
+    }
+
+    get strokeWidth() {
+        return this._strokeWidth;
+    }
+
+    get angle() {
+        return this._angle;
+    }
+
+    get scaleX() {
+        return this._scaleX;
+    }
+
+    get scaleY() {
+        return this._scaleY;
+    }
+
+    get ancestorScaleX() {
+        let pScale: number = this.getParent()?.ancestorScaleX || 1;
+        return this.scaleX * pScale;
+    }
+
+    get ancestorScaleY() {
+        let pScale: number = this.getParent()?.ancestorScaleY || 1;
+        return this.scaleY * pScale;
+    }
+
+    get skewX() {
+        return this._skewX;
+    }
+
+    get skewY() {
+        return this._skewY;
+    }
+
+    get flipX() {
+        return this._flipX;
+    }
+
+    get flipY() {
+        return this._flipY;
+    }
+
+    get parent() {
+        return this._parent;
+    }
+
+    get oKey() {
+        return this._oKey;
+    }
+
+    get zIndex() {
+        return this._zIndex;
+    }
+
+    get evented() {
+        return this._evented;
+    }
+
+    get visible() {
+        return this._visible;
+    }
+
+    get debounceParentDirty() {
+        return this._debounceParentDirty;
+    }
+
+    get isTransformer() {
+        return this._isTransformer;
+    }
+
+    get cursor() {
+        return this._cursor;
+    }
+
+    set transform(trans: Transform) {
+        this._transform = trans;
+    }
+
+    set zIndex(index: number) {
+        this._zIndex = index;
+    }
+
+    set parent(o: any) {
+        this._parent = o;
+    }
+
+    set evented(state: boolean) {
+        this._evented = state;
+    }
+
+    set debounceParentDirty(state: boolean) {
+        this._debounceParentDirty = state;
+    }
+
+    set isTransformer(state: boolean) {
+        this._isTransformer = state;
+    }
+
+    set cursor(val: CURSOR_TYPE) {
+        this.setCursor(val);
+    }
+
+    protected set top(num: number | string) {
+        this._topOrigin = num;
+        this._top = toPx(num, this._parent?.height);
+    }
+
+    protected set left(num: number | string) {
+        this._leftOrigin = num;
+        this._left = toPx(num, this._parent?.width);
+    }
+
+    protected set width(num: number | string) {
+        this._widthOrigin = num;
+        this._width = toPx(num, this._parent?.width);
+    }
+
+    protected set height(num: number | string) {
+        this._heightOrigin = num;
+        this._height = toPx(num, this._parent?.height);
+    }
+
+    protected set strokeWidth(width: number) {
+        this._strokeWidth = width;
+    }
+
+    protected set angle(angle: number) {
+        this._angle = angle;
+    }
+
+    protected set scaleX(scaleX: number) {
+        this._scaleX = scaleX;
+    }
+
+    protected set scaleY(scaleY: number) {
+        this._scaleY = scaleY;
+    }
+
+    protected set skewX(skewX: number) {
+        this._skewX = skewX;
+    }
+
+    protected set flipY(flipY: boolean) {
+        this._flipY = flipY;
+    }
+
+    protected set flipX(flipX: boolean) {
+        this._flipX = flipX;
+    }
+
+    protected set skewY(skewY: number) {
+        this._skewY = skewY;
     }
 
     makeDirty(state: boolean = true) {
@@ -103,36 +323,6 @@ export abstract class BaseObject {
 
     isDirty(): boolean {
         return this._dirty;
-    }
-
-    onTransformChangeObservable = new Observable<ITransformChangeState>();
-
-    get transform() {
-        return this._transform;
-    }
-
-    set transform(trans: Transform) {
-        this._transform = trans;
-    }
-
-    get topOrigin() {
-        return this._topOrigin;
-    }
-
-    get leftOrigin() {
-        return this._leftOrigin;
-    }
-
-    get widthOrigin() {
-        return this._widthOrigin;
-    }
-
-    get heightOrigin() {
-        return this._heightOrigin;
-    }
-
-    get classType() {
-        return RENDER_CLASS_TYPE.BASE_OBJECT;
     }
 
     translate(x?: number | string, y?: number | string) {
@@ -274,190 +464,8 @@ export abstract class BaseObject {
         return bounds && !this.isInGroup;
     }
 
-    private _makeDirtyMix() {
-        if (this.debounceParentDirty) {
-            this.makeDirty(true);
-        } else {
-            this.makeDirtyNoDebounce(true);
-        }
-    }
-
-    protected _setTransForm() {
-        const composeResult = Transform.create().composeMatrix({
-            left: this.left + this.strokeWidth / 2,
-            top: this.top + this.strokeWidth / 2,
-            scaleX: this.scaleX,
-            scaleY: this.scaleY,
-            angle: this.angle,
-            skewX: this.skewX,
-            skewY: this.skewY,
-            flipX: this.flipX,
-            flipY: this.flipY,
-        });
-        this.transform = composeResult;
-        this._makeDirtyMix();
-    }
-
-    get top(): number {
-        return this._top;
-    }
-
-    protected set top(num: number | string) {
-        this._topOrigin = num;
-        this._top = toPx(num, this._parent?.height);
-    }
-
-    get left(): number {
-        return this._left;
-    }
-
-    protected set left(num: number | string) {
-        this._leftOrigin = num;
-        this._left = toPx(num, this._parent?.width);
-    }
-
-    get width(): number {
-        return this._width;
-    }
-
-    protected set width(num: number | string) {
-        this._widthOrigin = num;
-        this._width = toPx(num, this._parent?.width);
-    }
-
-    get height(): number {
-        return this._height;
-    }
-
-    protected set height(num: number | string) {
-        this._heightOrigin = num;
-        this._height = toPx(num, this._parent?.height);
-    }
-
-    get strokeWidth() {
-        return this._strokeWidth;
-    }
-
-    protected set strokeWidth(width: number) {
-        this._strokeWidth = width;
-    }
-
-    get angle() {
-        return this._angle;
-    }
-
-    protected set angle(angle: number) {
-        this._angle = angle;
-    }
-
-    get scaleX() {
-        return this._scaleX;
-    }
-
-    protected set scaleX(scaleX: number) {
-        this._scaleX = scaleX;
-    }
-
-    get scaleY() {
-        return this._scaleY;
-    }
-
-    protected set scaleY(scaleY: number) {
-        this._scaleY = scaleY;
-    }
-
-    get ancestorScaleX() {
-        let pScale: number = this.getParent()?.ancestorScaleX || 1;
-        return this.scaleX * pScale;
-    }
-
-    get ancestorScaleY() {
-        let pScale: number = this.getParent()?.ancestorScaleY || 1;
-        return this.scaleY * pScale;
-    }
-
-    get skewX() {
-        return this._skewX;
-    }
-
-    protected set skewX(skewX: number) {
-        this._skewX = skewX;
-    }
-
-    get skewY() {
-        return this._skewY;
-    }
-
-    protected set skewY(skewY: number) {
-        this._skewY = skewY;
-    }
-
-    get flipX() {
-        return this._flipX;
-    }
-
-    protected set flipX(flipX: boolean) {
-        this._flipX = flipX;
-    }
-
-    get flipY() {
-        return this._flipY;
-    }
-
-    protected set flipY(flipY: boolean) {
-        this._flipY = flipY;
-    }
-
-    get parent() {
-        return this._parent;
-    }
-
-    set parent(o: any) {
-        this._parent = o;
-    }
-
     getParent() {
         return this._parent;
-    }
-
-    get oKey() {
-        return this._oKey;
-    }
-
-    get zIndex() {
-        return this._zIndex;
-    }
-
-    set zIndex(index: number) {
-        this._zIndex = index;
-    }
-
-    get evented() {
-        return this._evented;
-    }
-
-    set evented(state: boolean) {
-        this._evented = state;
-    }
-
-    get visible() {
-        return this._visible;
-    }
-
-    get debounceParentDirty() {
-        return this._debounceParentDirty;
-    }
-
-    set debounceParentDirty(state: boolean) {
-        this._debounceParentDirty = state;
-    }
-
-    get isTransformer() {
-        return this._isTransformer;
-    }
-
-    set isTransformer(state: boolean) {
-        this._isTransformer = state;
     }
 
     getState() {
@@ -501,10 +509,6 @@ export abstract class BaseObject {
             return true;
         }
         return false;
-    }
-
-    protected _getInverseCoord(coord: Vector2) {
-        return this._transform.clone().invert().applyPoint(coord);
     }
 
     on(eventType: EVENT_TYPE, func: (evt: unknown, state: EventState) => void) {
@@ -630,30 +634,6 @@ export abstract class BaseObject {
         this.onDisposeObserver.notifyObservers(this);
     }
 
-    onPointerDownObserver = new Observable<IPointerEvent | IMouseEvent>();
-
-    onPointerMoveObserver = new Observable<IPointerEvent | IMouseEvent>();
-
-    onPointerUpObserver = new Observable<IPointerEvent | IMouseEvent>();
-
-    onDblclickObserver = new Observable<IPointerEvent | IMouseEvent>();
-
-    onMouseWheelObserver = new Observable<IWheelEvent>();
-    // onKeyDownObservable = new Observable<IKeyboardEvent>();
-    // onKeyUpObservable = new Observable<IKeyboardEvent>();
-
-    onPointerOutObserver = new Observable<IPointerEvent | IMouseEvent>();
-
-    onPointerLeaveObserver = new Observable<IPointerEvent | IMouseEvent>();
-
-    onPointerOverObserver = new Observable<IPointerEvent | IMouseEvent>();
-
-    onPointerEnterObserver = new Observable<IPointerEvent | IMouseEvent>();
-
-    onIsAddedToParentObserver = new Observable<any>();
-
-    onDisposeObserver = new Observable<BaseObject>();
-
     toJson() {
         const props: IKeyValue = {};
         BASE_OBJECT_ARRAY.forEach((key) => {
@@ -683,14 +663,6 @@ export abstract class BaseObject {
         }
     }
 
-    get cursor() {
-        return this._cursor;
-    }
-
-    set cursor(val: CURSOR_TYPE) {
-        this.setCursor(val);
-    }
-
     resetCursor() {
         this.setCursor(CURSOR_TYPE.DEFAULT);
     }
@@ -709,5 +681,33 @@ export abstract class BaseObject {
             parent = parent.getParent();
         }
         return null;
+    }
+
+    protected _getInverseCoord(coord: Vector2) {
+        return this._transform.clone().invert().applyPoint(coord);
+    }
+
+    protected _setTransForm() {
+        const composeResult = Transform.create().composeMatrix({
+            left: this.left + this.strokeWidth / 2,
+            top: this.top + this.strokeWidth / 2,
+            scaleX: this.scaleX,
+            scaleY: this.scaleY,
+            angle: this.angle,
+            skewX: this.skewX,
+            skewY: this.skewY,
+            flipX: this.flipX,
+            flipY: this.flipY,
+        });
+        this.transform = composeResult;
+        this._makeDirtyMix();
+    }
+
+    private _makeDirtyMix() {
+        if (this.debounceParentDirty) {
+            this.makeDirty(true);
+        } else {
+            this.makeDirtyNoDebounce(true);
+        }
     }
 }

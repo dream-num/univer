@@ -46,17 +46,21 @@ interface IDrawingUpdateConfig {
 }
 
 export class DocumentSkeleton extends Skeleton {
+    onRecalculateChangeObservable = new Observable<IDocumentSkeletonCached>();
+
     private _documentData: IDocumentData;
 
     private _skeletonData: IDocumentSkeletonCached;
 
     private _renderedBlockIdMap = new Map<string, boolean>();
 
-    onRecalculateChangeObservable = new Observable<IDocumentSkeletonCached>();
-
     constructor(documentData: IDocumentData, context: ContextBase) {
         super(context);
         this._documentData = documentData;
+    }
+
+    static create(documentData: IDocumentData, context: ContextBase) {
+        return new DocumentSkeleton(documentData, context);
     }
 
     updateDrawing(id: string, config: IDrawingUpdateConfig) {
@@ -378,9 +382,5 @@ export class DocumentSkeleton extends Skeleton {
             skeListLevel: new Map(),
             blockAnchor: new Map(),
         };
-    }
-
-    static create(documentData: IDocumentData, context: ContextBase) {
-        return new DocumentSkeleton(documentData, context);
     }
 }

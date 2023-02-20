@@ -91,7 +91,156 @@ export class TextSelection {
         span: NodePositionStateType.NORMAL,
     };
 
-    constructor(private _scene: Scene, public startNodePosition?: Nullable<INodePosition>, public endNodePosition?: Nullable<INodePosition>, public segmentId?: string) { }
+    constructor(private _scene: Scene, public startNodePosition?: Nullable<INodePosition>, public endNodePosition?: Nullable<INodePosition>, public segmentId?: string) {}
+
+    getRange() {
+        const cursorList = this._rangeList;
+
+        const firstCursor = cursorList[0];
+
+        const lastCursor = cursorList[cursorList.length - 1];
+
+        let isCollapse = cursorList.length === 1 && firstCursor.isCollapse;
+
+        return {
+            cursorStart: firstCursor.cursorStart,
+            cursorEnd: lastCursor.cursorEnd,
+            isStartBack: firstCursor.isStartBack,
+            isEndBack: lastCursor.isEndBack,
+            isCollapse,
+        };
+    }
+
+    getRangeList() {
+        return this._rangeList;
+    }
+
+    getAnchor() {
+        return this._anchorShape;
+    }
+
+    activeStatic() {
+        this._anchorShape?.setProps({
+            stroke: getColor(COLORS.black, 1),
+        });
+    }
+
+    deactivateStatic() {
+        this._anchorShape?.setProps({
+            stroke: getColor(COLORS.black, 0),
+        });
+    }
+
+    isActive() {
+        return this._current === true;
+    }
+
+    activate() {
+        this._current = true;
+    }
+
+    deactivate() {
+        this._current = false;
+    }
+
+    isEmpty() {
+        return this.startNodePosition == null && this.endNodePosition == null;
+    }
+
+    isCollapsed() {
+        if (this.startNodePosition != null && this.endNodePosition == null) {
+            return true;
+        }
+
+        if (this.isSamePosition()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    isRange() {
+        const start = this.startNodePosition;
+
+        const end = this.endNodePosition;
+
+        if (start == null || end == null) {
+            return false;
+        }
+
+        if (this.isSamePosition()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    dispose() {
+        this._rangeShape?.dispose();
+        this._rangeShape = null;
+        this._anchorShape?.dispose();
+        this._anchorShape = null;
+    }
+
+    isIntersection(textSelection: TextSelection) {
+        const activeRange = this.getRange();
+
+        const compareRange = textSelection.getRange();
+
+        const activeStart = this._getCursorPosition(activeRange.cursorStart, activeRange.isStartBack);
+
+        const activeEnd = this._getCursorPosition(activeRange.cursorEnd, activeRange.isEndBack);
+
+        const compareStart = this._getCursorPosition(compareRange.cursorStart, compareRange.isStartBack);
+
+        const compareEnd = this._getCursorPosition(compareRange.cursorEnd, compareRange.isEndBack);
+
+        if (activeStart > compareEnd || activeEnd < compareStart) {
+            return false;
+        }
+
+        return true;
+    }
+
+    refresh(documents: Documents) {
+        const start = this.startNodePosition;
+
+        const end = this.endNodePosition;
+
+        this._anchorShape?.hide();
+        this._rangeShape?.hide();
+
+        if (this.isEmpty()) {
+            return;
+        }
+
+        if (this.isCollapsed()) {
+            const data = this._getRangePointData(start!, start!, documents);
+            const { pointGroup, cursorList } = data;
+            this._setRangeList(cursorList);
+            pointGroup.length > 0 && this._createAndUpdateAnchor(pointGroup, documents.left, documents.top);
+            return;
+        }
+
+        const data = this._getRangePointData(start!, end!, documents);
+        const { pointGroup, cursorList } = data;
+        this._setRangeList(cursorList);
+        pointGroup.length > 0 && this._createAndUpdateRange(pointGroup, documents.left, documents.top);
+    }
+
+    getStart() {
+        if (this.startNodePosition == null) {
+            return this.endNodePosition;
+        }
+
+        if (this.endNodePosition == null) {
+            return this.startNodePosition;
+        }
+
+        const { start } = this._compareNodePosition(this.startNodePosition, this.endNodePosition);
+
+        return start;
+    }
 
     private _resetCurrentNodePositionState() {
         this._currentStartState = {
@@ -612,154 +761,5 @@ export class TextSelection {
 
     private _getCursorPosition(index: number, isBack: boolean) {
         return index - (isBack === true ? 1 : 0);
-    }
-
-    getRange() {
-        const cursorList = this._rangeList;
-
-        const firstCursor = cursorList[0];
-
-        const lastCursor = cursorList[cursorList.length - 1];
-
-        let isCollapse = cursorList.length === 1 && firstCursor.isCollapse;
-
-        return {
-            cursorStart: firstCursor.cursorStart,
-            cursorEnd: lastCursor.cursorEnd,
-            isStartBack: firstCursor.isStartBack,
-            isEndBack: lastCursor.isEndBack,
-            isCollapse,
-        };
-    }
-
-    getRangeList() {
-        return this._rangeList;
-    }
-
-    getAnchor() {
-        return this._anchorShape;
-    }
-
-    activeStatic() {
-        this._anchorShape?.setProps({
-            stroke: getColor(COLORS.black, 1),
-        });
-    }
-
-    deactivateStatic() {
-        this._anchorShape?.setProps({
-            stroke: getColor(COLORS.black, 0),
-        });
-    }
-
-    isActive() {
-        return this._current === true;
-    }
-
-    activate() {
-        this._current = true;
-    }
-
-    deactivate() {
-        this._current = false;
-    }
-
-    isEmpty() {
-        return this.startNodePosition == null && this.endNodePosition == null;
-    }
-
-    isCollapsed() {
-        if (this.startNodePosition != null && this.endNodePosition == null) {
-            return true;
-        }
-
-        if (this.isSamePosition()) {
-            return true;
-        }
-
-        return false;
-    }
-
-    isRange() {
-        const start = this.startNodePosition;
-
-        const end = this.endNodePosition;
-
-        if (start == null || end == null) {
-            return false;
-        }
-
-        if (this.isSamePosition()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    dispose() {
-        this._rangeShape?.dispose();
-        this._rangeShape = null;
-        this._anchorShape?.dispose();
-        this._anchorShape = null;
-    }
-
-    isIntersection(textSelection: TextSelection) {
-        const activeRange = this.getRange();
-
-        const compareRange = textSelection.getRange();
-
-        const activeStart = this._getCursorPosition(activeRange.cursorStart, activeRange.isStartBack);
-
-        const activeEnd = this._getCursorPosition(activeRange.cursorEnd, activeRange.isEndBack);
-
-        const compareStart = this._getCursorPosition(compareRange.cursorStart, compareRange.isStartBack);
-
-        const compareEnd = this._getCursorPosition(compareRange.cursorEnd, compareRange.isEndBack);
-
-        if (activeStart > compareEnd || activeEnd < compareStart) {
-            return false;
-        }
-
-        return true;
-    }
-
-    refresh(documents: Documents) {
-        const start = this.startNodePosition;
-
-        const end = this.endNodePosition;
-
-        this._anchorShape?.hide();
-        this._rangeShape?.hide();
-
-        if (this.isEmpty()) {
-            return;
-        }
-
-        if (this.isCollapsed()) {
-            const data = this._getRangePointData(start!, start!, documents);
-            const { pointGroup, cursorList } = data;
-            this._setRangeList(cursorList);
-            pointGroup.length > 0 && this._createAndUpdateAnchor(pointGroup, documents.left, documents.top);
-            return;
-        }
-
-        const data = this._getRangePointData(start!, end!, documents);
-        const { pointGroup, cursorList } = data;
-        this._setRangeList(cursorList);
-        pointGroup.length > 0 && this._createAndUpdateRange(pointGroup, documents.left, documents.top);
-    }
-
-    getStart() {
-        if (this.startNodePosition == null) {
-            return this.endNodePosition;
-        }
-
-        if (this.endNodePosition == null) {
-            return this.startNodePosition;
-        }
-
-        const { start } = this._compareNodePosition(this.startNodePosition, this.endNodePosition);
-
-        return start;
     }
 }

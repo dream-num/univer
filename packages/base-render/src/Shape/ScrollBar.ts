@@ -77,6 +77,14 @@ export class ScrollBar {
 
     private _mainScene?: Scene;
 
+    private _lastX: number;
+
+    private _lastY: number;
+
+    private _isHorizonMove = false;
+
+    private _isVerticalMove = false;
+
     constructor(view: Viewport, props?: IScrollBarProps) {
         if (!view) {
             console.warn('Missing viewport');
@@ -109,6 +117,32 @@ export class ScrollBar {
         return this._verticalThumbHeight;
     }
 
+    get ratioScrollX(): number {
+        if (this._horizontalThumbWidth === undefined || this._horizontalBarWidth === undefined) {
+            return 1;
+        }
+        return (this._horizontalThumbWidth - this._horizontalMinusMiniThumb) / this._horizontalBarWidth;
+    }
+
+    get ratioScrollY(): number {
+        if (this._verticalThumbHeight === undefined || this._verticalBarHeight === undefined) {
+            return 1;
+        }
+        return (this._verticalThumbHeight - this._verticalMinusMiniThumb) / this._verticalBarHeight;
+    }
+
+    get barSize() {
+        return this._barSize;
+    }
+
+    get barBorder() {
+        return this._barBorder;
+    }
+
+    static attachTo(view: Viewport, props?: IScrollBarProps) {
+        return new ScrollBar(view, props);
+    }
+
     setProps(props?: IScrollBarProps) {
         if (!props) {
             return;
@@ -124,6 +158,156 @@ export class ScrollBar {
                 this[`_${key}`] = props[key];
             }
         });
+    }
+
+    render(ctx: CanvasRenderingContext2D, left: number = 0, top: number = 0) {
+        let { scrollX, scrollY } = this._view;
+        ctx.save();
+        const transform = new Transform([1, 0, 0, 1, left, top]);
+        const m = transform.getMatrix();
+        ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+        this._horizonBarRect.render(ctx);
+        this._horizonThumbRect.translate(scrollX).render(ctx);
+        this._verticalBarRect.render(ctx);
+        this._verticalThumbRect.translate(undefined, scrollY).render(ctx);
+        this._placeholderBarRect.render(ctx);
+        ctx.restore();
+    }
+
+    resize(parentWidth: number = 0, parentHeight: number = 0, contentWidth: number = 0, contentHeight: number = 0) {
+        if (parentWidth === 0 && parentWidth === 0) {
+            return;
+        }
+        // ratioScrollY = 内容可视区高度/内容实际区高度= 滑动条的高度/滑道高度=滚动条的顶部距离/实际内容区域顶部距离；
+        if (this._enableHorizontal) {
+            this._horizontalMinusMiniThumb = 0;
+            this._horizontalBarWidth = parentWidth - this._barSize;
+            this._horizontalThumbWidth = ((this._horizontalBarWidth * (this._horizontalBarWidth - this._barBorder)) / contentWidth) * this._thumbLengthRatio;
+
+            // this._horizontalThumbWidth = this._horizontalThumbWidth < MINI_THUMB_SIZE ? MINI_THUMB_SIZE : this._horizontalThumbWidth;
+            if (this._horizontalThumbWidth < MINI_THUMB_SIZE) {
+                this._horizontalMinusMiniThumb = MINI_THUMB_SIZE - this._horizontalThumbWidth;
+                this._horizontalThumbWidth = MINI_THUMB_SIZE;
+            }
+
+            this._horizonBarRect?.transformByState({
+                left: 0,
+                top: parentHeight - this._barSize,
+                width: this._horizontalBarWidth,
+                height: this._barSize - this._barBorder,
+            });
+
+            if (this._horizontalThumbWidth >= parentWidth) {
+                this._horizonThumbRect?.setProps({
+                    visible: false,
+                });
+            } else {
+                if (!this._horizonThumbRect?.visible) {
+                    this._horizonThumbRect?.setProps({
+                        visible: true,
+                    });
+                }
+
+                this._horizonThumbRect?.transformByState({
+                    left: this._view.scrollX,
+                    top: parentHeight - this._barSize + this._thumbMargin,
+                    width: this._horizontalThumbWidth,
+                    height: this._barSize - this._thumbMargin * 2,
+                });
+            }
+        }
+
+        if (this._enableVertical) {
+            this._verticalMinusMiniThumb = 0;
+            this._verticalBarHeight = parentHeight - this._barSize;
+            this._verticalThumbHeight = ((this._verticalBarHeight * (this._verticalBarHeight - this._barBorder)) / contentHeight) * this._thumbLengthRatio;
+            // this._verticalThumbHeight = this._verticalThumbHeight < MINI_THUMB_SIZE ? MINI_THUMB_SIZE : this._verticalThumbHeight;
+            if (this._verticalThumbHeight < MINI_THUMB_SIZE) {
+                this._verticalMinusMiniThumb = MINI_THUMB_SIZE - this._verticalThumbHeight;
+                this._verticalThumbHeight = MINI_THUMB_SIZE;
+            }
+
+            this._verticalBarRect?.transformByState({
+                left: parentWidth - this._barSize,
+                top: 0,
+                width: this._barSize - this._barBorder,
+                height: this._verticalBarHeight,
+            });
+
+            if (this._verticalThumbHeight >= parentHeight) {
+                this._verticalThumbRect?.setProps({
+                    visible: false,
+                });
+            } else {
+                if (!this._verticalThumbRect?.visible) {
+                    this._verticalThumbRect?.setProps({
+                        visible: true,
+                    });
+                }
+
+                this._verticalThumbRect?.transformByState({
+                    left: parentWidth - this._barSize + this._thumbMargin,
+                    top: this._view.scrollY,
+                    width: this._barSize - this._thumbMargin * 2,
+                    height: this._verticalThumbHeight,
+                });
+            }
+        }
+
+        if (this._enableHorizontal && this._enableVertical) {
+            this._placeholderBarRect?.transformByState({
+                left: parentWidth - this._barSize,
+                top: parentHeight - this._barSize,
+                width: this._barSize - this._barBorder,
+                height: this._barSize - this._barBorder,
+            });
+        }
+    }
+
+    makeDirty(state: boolean) {
+        this._horizonBarRect?.makeDirty(state);
+        this._horizonThumbRect?.makeDirty(state);
+        this._verticalBarRect?.makeDirty(state);
+        this._verticalThumbRect?.makeDirty(state);
+        this._placeholderBarRect?.makeDirty(state);
+
+        this.makeViewDirty(state);
+    }
+
+    makeViewDirty(state: boolean) {
+        this._view.makeDirty(state);
+        const parent = this._view.scene.getParent();
+        if (parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+            (parent as SceneViewer).makeDirty(true);
+        }
+    }
+
+    pick(coord: Vector2) {
+        if (this._horizonThumbRect?.isHit(coord)) {
+            return this._horizonThumbRect;
+        }
+
+        if (this._verticalThumbRect?.isHit(coord)) {
+            return this._verticalThumbRect;
+        }
+
+        if (this._horizonBarRect?.isHit(coord)) {
+            return this._horizonBarRect;
+        }
+
+        if (this._verticalBarRect?.isHit(coord)) {
+            return this._verticalBarRect;
+        }
+
+        return null;
+    }
+
+    dispose() {
+        this._horizonBarRect.dispose();
+        this._horizonThumbRect.dispose();
+        this._verticalBarRect.dispose();
+        this._verticalThumbRect.dispose();
+        this._placeholderBarRect.dispose();
     }
 
     private _initialScrollRect() {
@@ -163,14 +347,6 @@ export class ScrollBar {
 
         this.__initialEvent();
     }
-
-    private _lastX: number;
-
-    private _lastY: number;
-
-    private _isHorizonMove = false;
-
-    private _isVerticalMove = false;
 
     private __initialEvent() {
         const mainScene = this._mainScene || this._view.scene;
@@ -289,181 +465,5 @@ export class ScrollBar {
                 this.makeViewDirty(true);
             });
         }
-    }
-
-    render(ctx: CanvasRenderingContext2D, left: number = 0, top: number = 0) {
-        let { scrollX, scrollY } = this._view;
-        ctx.save();
-        const transform = new Transform([1, 0, 0, 1, left, top]);
-        const m = transform.getMatrix();
-        ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
-        this._horizonBarRect.render(ctx);
-        this._horizonThumbRect.translate(scrollX).render(ctx);
-        this._verticalBarRect.render(ctx);
-        this._verticalThumbRect.translate(undefined, scrollY).render(ctx);
-        this._placeholderBarRect.render(ctx);
-        ctx.restore();
-    }
-
-    resize(parentWidth: number = 0, parentHeight: number = 0, contentWidth: number = 0, contentHeight: number = 0) {
-        if (parentWidth === 0 && parentWidth === 0) {
-            return;
-        }
-        // ratioScrollY = 内容可视区高度/内容实际区高度= 滑动条的高度/滑道高度=滚动条的顶部距离/实际内容区域顶部距离；
-        if (this._enableHorizontal) {
-            this._horizontalMinusMiniThumb = 0;
-            this._horizontalBarWidth = parentWidth - this._barSize;
-            this._horizontalThumbWidth = ((this._horizontalBarWidth * (this._horizontalBarWidth - this._barBorder)) / contentWidth) * this._thumbLengthRatio;
-
-            // this._horizontalThumbWidth = this._horizontalThumbWidth < MINI_THUMB_SIZE ? MINI_THUMB_SIZE : this._horizontalThumbWidth;
-            if (this._horizontalThumbWidth < MINI_THUMB_SIZE) {
-                this._horizontalMinusMiniThumb = MINI_THUMB_SIZE - this._horizontalThumbWidth;
-                this._horizontalThumbWidth = MINI_THUMB_SIZE;
-            }
-
-            this._horizonBarRect?.transformByState({
-                left: 0,
-                top: parentHeight - this._barSize,
-                width: this._horizontalBarWidth,
-                height: this._barSize - this._barBorder,
-            });
-
-            if (this._horizontalThumbWidth >= parentWidth) {
-                this._horizonThumbRect?.setProps({
-                    visible: false,
-                });
-            } else {
-                if (!this._horizonThumbRect?.visible) {
-                    this._horizonThumbRect?.setProps({
-                        visible: true,
-                    });
-                }
-
-                this._horizonThumbRect?.transformByState({
-                    left: this._view.scrollX,
-                    top: parentHeight - this._barSize + this._thumbMargin,
-                    width: this._horizontalThumbWidth,
-                    height: this._barSize - this._thumbMargin * 2,
-                });
-            }
-        }
-
-        if (this._enableVertical) {
-            this._verticalMinusMiniThumb = 0;
-            this._verticalBarHeight = parentHeight - this._barSize;
-            this._verticalThumbHeight = ((this._verticalBarHeight * (this._verticalBarHeight - this._barBorder)) / contentHeight) * this._thumbLengthRatio;
-            // this._verticalThumbHeight = this._verticalThumbHeight < MINI_THUMB_SIZE ? MINI_THUMB_SIZE : this._verticalThumbHeight;
-            if (this._verticalThumbHeight < MINI_THUMB_SIZE) {
-                this._verticalMinusMiniThumb = MINI_THUMB_SIZE - this._verticalThumbHeight;
-                this._verticalThumbHeight = MINI_THUMB_SIZE;
-            }
-
-            this._verticalBarRect?.transformByState({
-                left: parentWidth - this._barSize,
-                top: 0,
-                width: this._barSize - this._barBorder,
-                height: this._verticalBarHeight,
-            });
-
-            if (this._verticalThumbHeight >= parentHeight) {
-                this._verticalThumbRect?.setProps({
-                    visible: false,
-                });
-            } else {
-                if (!this._verticalThumbRect?.visible) {
-                    this._verticalThumbRect?.setProps({
-                        visible: true,
-                    });
-                }
-
-                this._verticalThumbRect?.transformByState({
-                    left: parentWidth - this._barSize + this._thumbMargin,
-                    top: this._view.scrollY,
-                    width: this._barSize - this._thumbMargin * 2,
-                    height: this._verticalThumbHeight,
-                });
-            }
-        }
-
-        if (this._enableHorizontal && this._enableVertical) {
-            this._placeholderBarRect?.transformByState({
-                left: parentWidth - this._barSize,
-                top: parentHeight - this._barSize,
-                width: this._barSize - this._barBorder,
-                height: this._barSize - this._barBorder,
-            });
-        }
-    }
-
-    get ratioScrollX(): number {
-        if (this._horizontalThumbWidth === undefined || this._horizontalBarWidth === undefined) {
-            return 1;
-        }
-        return (this._horizontalThumbWidth - this._horizontalMinusMiniThumb) / this._horizontalBarWidth;
-    }
-
-    get ratioScrollY(): number {
-        if (this._verticalThumbHeight === undefined || this._verticalBarHeight === undefined) {
-            return 1;
-        }
-        return (this._verticalThumbHeight - this._verticalMinusMiniThumb) / this._verticalBarHeight;
-    }
-
-    get barSize() {
-        return this._barSize;
-    }
-
-    get barBorder() {
-        return this._barBorder;
-    }
-
-    makeDirty(state: boolean) {
-        this._horizonBarRect?.makeDirty(state);
-        this._horizonThumbRect?.makeDirty(state);
-        this._verticalBarRect?.makeDirty(state);
-        this._verticalThumbRect?.makeDirty(state);
-        this._placeholderBarRect?.makeDirty(state);
-
-        this.makeViewDirty(state);
-    }
-
-    makeViewDirty(state: boolean) {
-        this._view.makeDirty(state);
-        const parent = this._view.scene.getParent();
-        if (parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-            (parent as SceneViewer).makeDirty(true);
-        }
-    }
-
-    pick(coord: Vector2) {
-        if (this._horizonThumbRect?.isHit(coord)) {
-            return this._horizonThumbRect;
-        }
-
-        if (this._verticalThumbRect?.isHit(coord)) {
-            return this._verticalThumbRect;
-        }
-
-        if (this._horizonBarRect?.isHit(coord)) {
-            return this._horizonBarRect;
-        }
-
-        if (this._verticalBarRect?.isHit(coord)) {
-            return this._verticalBarRect;
-        }
-
-        return null;
-    }
-
-    dispose() {
-        this._horizonBarRect.dispose();
-        this._horizonThumbRect.dispose();
-        this._verticalBarRect.dispose();
-        this._verticalThumbRect.dispose();
-        this._placeholderBarRect.dispose();
-    }
-
-    static attachTo(view: Viewport, props?: IScrollBarProps) {
-        return new ScrollBar(view, props);
     }
 }

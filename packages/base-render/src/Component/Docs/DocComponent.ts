@@ -11,14 +11,6 @@ import { RENDER_CLASS_TYPE } from '../../Basics/Const';
 export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE> {
     protected _cacheCanvas: Canvas;
 
-    getSkeleton() {
-        return this._skeleton;
-    }
-
-    setSkeleton(skeleton: DocumentSkeleton) {
-        this._skeleton = skeleton;
-    }
-
     constructor(oKey: string, private _skeleton?: DocumentSkeleton, private _allowCache: boolean = false) {
         super(oKey);
         if (this._allowCache) {
@@ -30,6 +22,14 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
             });
             this.resizeCacheCanvas();
         });
+    }
+
+    getSkeleton() {
+        return this._skeleton;
+    }
+
+    setSkeleton(skeleton: DocumentSkeleton) {
+        this._skeleton = skeleton;
     }
 
     render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
@@ -54,12 +54,6 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
         // console.log('mainCtx', mainCtx, this.width, this.height);
     }
 
-    protected _getBounding(bounds?: IBoundRect) {}
-
-    protected _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
-        /* abstract */
-    }
-
     getParentScale() {
         if (!this.parent) {
             return { scaleX: 1, scaleY: 1 };
@@ -75,5 +69,11 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
             scaleX,
             scaleY,
         };
+    }
+
+    protected _getBounding(bounds?: IBoundRect) {}
+
+    protected _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+        /* abstract */
     }
 }

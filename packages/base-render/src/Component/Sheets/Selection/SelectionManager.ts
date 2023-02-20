@@ -14,6 +14,8 @@ import { Scene } from '../../../Scene';
  * SelectionManager 维护model数据list，action也是修改这一层数据，obs监听到数据变动后，自动刷新（control仍然可以持有数据）
  */
 export class SelectionManager {
+    hasSelection: boolean = false;
+
     private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
@@ -32,10 +34,12 @@ export class SelectionManager {
 
     private _cancelUpObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
-    hasSelection: boolean = false;
-
     constructor(private _spreadsheet: Spreadsheet) {
         this._mainEventInitial();
+    }
+
+    static create(spreadsheet: Spreadsheet) {
+        return new SelectionManager(spreadsheet);
     }
 
     /**
@@ -410,9 +414,5 @@ export class SelectionManager {
 
             state.stopPropagation();
         });
-    }
-
-    static create(spreadsheet: Spreadsheet) {
-        return new SelectionManager(spreadsheet);
     }
 }

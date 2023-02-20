@@ -21,13 +21,6 @@ export class SpreadsheetColumnTitle extends SpreadsheetTitle {
         return this._columnTitleLayoutExtension;
     }
 
-    private _initialDefaultExtension() {
-        SheetColumnTitleExtensionRegistry.getData().forEach((extension) => {
-            this.register(extension);
-        });
-        this._columnTitleLayoutExtension = this.getExtensionByKey('DefaultColumnTitleLayoutExtension') as ColumnTitleLayout;
-    }
-
     draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         const spreadsheetSkeleton = this.getSkeleton();
         if (!spreadsheetSkeleton) {
@@ -60,5 +53,12 @@ export class SpreadsheetColumnTitle extends SpreadsheetTitle {
             return true;
         }
         return false;
+    }
+
+    private _initialDefaultExtension() {
+        SheetColumnTitleExtensionRegistry.getData().forEach((extension) => {
+            this.register(extension);
+        });
+        this._columnTitleLayoutExtension = this.getExtensionByKey('DefaultColumnTitleLayoutExtension') as ColumnTitleLayout;
     }
 }

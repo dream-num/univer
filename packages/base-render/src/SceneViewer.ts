@@ -113,6 +113,14 @@ export class SceneViewer extends BaseObject {
         return this._activeSubScene?.pick(tCoord);
     }
 
+    dispose() {
+        super.dispose();
+
+        this._subScenes.forEach((scene) => {
+            scene.dispose();
+        });
+    }
+
     private _initialProps(props?: IObjectFullState) {
         if (!props) {
             return;
@@ -139,13 +147,5 @@ export class SceneViewer extends BaseObject {
         }
 
         this.makeDirty(true);
-    }
-
-    dispose() {
-        super.dispose();
-
-        this._subScenes.forEach((scene) => {
-            scene.dispose();
-        });
     }
 }

@@ -21,6 +21,16 @@ interface INodeInfo {
 }
 
 export class DocsEditor {
+    onKeydownObservable = new Observable<IEditorInputConfig>();
+
+    onInputObservable = new Observable<IEditorInputConfig>();
+
+    onCompositionstartObservable = new Observable<IEditorInputConfig>();
+
+    onCompositionupdateObservable = new Observable<IEditorInputConfig>();
+
+    onCompositionendObservable = new Observable<IEditorInputConfig>();
+
     private _container: HTMLDivElement;
 
     private _inputParent: HTMLDivElement;
@@ -57,15 +67,7 @@ export class DocsEditor {
         }
     >();
 
-    onKeydownObservable = new Observable<IEditorInputConfig>();
-
-    onInputObservable = new Observable<IEditorInputConfig>();
-
-    onCompositionstartObservable = new Observable<IEditorInputConfig>();
-
-    onCompositionupdateObservable = new Observable<IEditorInputConfig>();
-
-    onCompositionendObservable = new Observable<IEditorInputConfig>();
+    private _isIMEInputApply = false;
 
     constructor(private _documents?: Documents) {
         this._initialDom();
@@ -75,6 +77,87 @@ export class DocsEditor {
         if (this._documents) {
             this.changeDocuments(this._documents);
         }
+    }
+
+    set activeViewport(viewport: Nullable<Viewport>) {
+        this._attachScrollEvent(viewport);
+        this._activeViewport = viewport;
+    }
+
+    static create(documents?: Documents) {
+        return new DocsEditor(documents);
+    }
+
+    getActiveTextSelection() {
+        const list = this._textSelectionList;
+        for (let textSelection of list) {
+            if (textSelection.isActive()) {
+                return textSelection;
+            }
+        }
+    }
+
+    getTextSelectionList() {
+        return this._textSelectionList;
+    }
+
+    add(textSelection: TextSelection) {
+        this._addTextSelection(textSelection);
+    }
+
+    remain() {
+        const activeSelection = this.getActiveTextSelection();
+        if (activeSelection == null) {
+            return;
+        }
+        const index = this._textSelectionList.indexOf(activeSelection);
+
+        return this._textSelectionList.splice(index, 1)[0];
+    }
+
+    sync() {
+        this._syncDomToSelection();
+    }
+
+    active(x: number, y: number) {
+        this._container.style.left = `${x}px`;
+        this._container.style.top = `${y}px`;
+
+        this._cursor.style.animation = 'univer_cursor_blinkStyle 1s steps(1) infinite';
+        this._cursor.style.display = 'revert';
+
+        setTimeout(() => {
+            this._input.focus();
+        }, 0);
+    }
+
+    deactivate() {
+        this._container.style.left = `0px`;
+        this._container.style.top = `0px`;
+
+        this._cursor.style.animation = '';
+        this._cursor.style.display = 'none';
+
+        this._input.blur();
+    }
+
+    changeDocuments(documents: Documents) {
+        if (this._documents) {
+            this._detachEvent(this._documents);
+        }
+
+        this._documents = documents;
+        this._skeletonObserver = documents.getSkeleton()?.onRecalculateChangeObservable.add((data: IDocumentSkeletonCached) => {
+            this._deleteAllTextSelection();
+        });
+        this._attachSelectionEvent(this._documents);
+    }
+
+    dispose() {
+        if (this._documents) {
+            this._detachEvent(this._documents);
+        }
+        this._container.remove();
     }
 
     private _initialDom() {
@@ -421,8 +504,6 @@ export class DocsEditor {
         });
     }
 
-    private _isIMEInputApply = false;
-
     private _attachInputEvent() {
         this._input.addEventListener('keydown', (e) => {
             if (this._isIMEInputApply) {
@@ -627,86 +708,5 @@ export class DocsEditor {
         const activeSelection = this.getActiveTextSelection();
 
         activeSelection?.refresh(this._documents);
-    }
-
-    getActiveTextSelection() {
-        const list = this._textSelectionList;
-        for (let textSelection of list) {
-            if (textSelection.isActive()) {
-                return textSelection;
-            }
-        }
-    }
-
-    getTextSelectionList() {
-        return this._textSelectionList;
-    }
-
-    add(textSelection: TextSelection) {
-        this._addTextSelection(textSelection);
-    }
-
-    remain() {
-        const activeSelection = this.getActiveTextSelection();
-        if (activeSelection == null) {
-            return;
-        }
-        const index = this._textSelectionList.indexOf(activeSelection);
-
-        return this._textSelectionList.splice(index, 1)[0];
-    }
-
-    sync() {
-        this._syncDomToSelection();
-    }
-
-    active(x: number, y: number) {
-        this._container.style.left = `${x}px`;
-        this._container.style.top = `${y}px`;
-
-        this._cursor.style.animation = 'univer_cursor_blinkStyle 1s steps(1) infinite';
-        this._cursor.style.display = 'revert';
-
-        setTimeout(() => {
-            this._input.focus();
-        }, 0);
-    }
-
-    deactivate() {
-        this._container.style.left = `0px`;
-        this._container.style.top = `0px`;
-
-        this._cursor.style.animation = '';
-        this._cursor.style.display = 'none';
-
-        this._input.blur();
-    }
-
-    changeDocuments(documents: Documents) {
-        if (this._documents) {
-            this._detachEvent(this._documents);
-        }
-
-        this._documents = documents;
-        this._skeletonObserver = documents.getSkeleton()?.onRecalculateChangeObservable.add((data: IDocumentSkeletonCached) => {
-            this._deleteAllTextSelection();
-        });
-        this._attachSelectionEvent(this._documents);
-    }
-
-    dispose() {
-        if (this._documents) {
-            this._detachEvent(this._documents);
-        }
-        this._container.remove();
-    }
-
-    set activeViewport(viewport: Nullable<Viewport>) {
-        this._attachScrollEvent(viewport);
-        this._activeViewport = viewport;
-    }
-
-    static create(documents?: Documents) {
-        return new DocsEditor(documents);
     }
 }

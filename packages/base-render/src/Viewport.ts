@@ -55,6 +55,22 @@ enum SCROLL_TYPE {
 }
 
 export class Viewport {
+    scrollX: number = 0;
+
+    scrollY: number = 0;
+
+    actualScrollX: number;
+
+    actualScrollY: number;
+
+    onMouseWheelObserver = new Observable<IWheelEvent>();
+
+    onScrollAfterObserver = new Observable<IScrollObserverParam>();
+
+    onScrollBeforeObserver = new Observable<IScrollObserverParam>();
+
+    onScrollStopObserver = new Observable<IScrollObserverParam>();
+
     private _viewPortKey: string;
 
     private _dirty: boolean = true;
@@ -97,19 +113,11 @@ export class Viewport {
 
     private _scrollStopNum: number;
 
-    scrollX: number = 0;
-
-    scrollY: number = 0;
-
     private _preScrollX: Nullable<number> = 0;
 
     private _preScrollY: Nullable<number> = 0;
 
     private _renderClipState = true;
-
-    actualScrollX: number;
-
-    actualScrollY: number;
 
     constructor(viewPortKey: string, scene: Scene, props?: IViewProps) {
         this._viewPortKey = viewPortKey;
@@ -153,16 +161,8 @@ export class Viewport {
         return this._width;
     }
 
-    set width(w: Nullable<number>) {
-        this._width = w;
-    }
-
     get height() {
         return this._height;
-    }
-
-    set height(h: Nullable<number>) {
-        this._height = h;
     }
 
     get viewPortKey() {
@@ -189,13 +189,29 @@ export class Viewport {
         return this._top;
     }
 
+    get left(): number {
+        return this._left;
+    }
+
+    get bottom(): number {
+        return this._bottom;
+    }
+
+    get right(): number {
+        return this._right;
+    }
+
+    set width(w: Nullable<number>) {
+        this._width = w;
+    }
+
+    set height(h: Nullable<number>) {
+        this._height = h;
+    }
+
     private set top(num: number | string) {
         this._topOrigin = num;
         this._top = toPx(num, this._scene?.getParent()?.height);
-    }
-
-    get left(): number {
-        return this._left;
     }
 
     private set left(num: number | string) {
@@ -203,17 +219,9 @@ export class Viewport {
         this._left = toPx(num, this.scene.getParent()?.width);
     }
 
-    get bottom(): number {
-        return this._bottom;
-    }
-
     private set bottom(num: number | string) {
         this._bottomOrigin = num;
         this._bottom = toPx(num, this.scene.getParent()?.height);
-    }
-
-    get right(): number {
-        return this._right;
     }
 
     private set right(num: number | string) {
@@ -252,46 +260,6 @@ export class Viewport {
         this._resizeCacheCanvasAndScrollBar();
     }
 
-    private _resizeCacheCanvasAndScrollBar(forceCalculate = false) {
-        const { width, height } = this._getViewPortSize(forceCalculate);
-
-        this.width = width;
-        this.height = height;
-
-        const contentWidth = this._scene.width * this._scene.scaleX;
-        const contentHeight = this._scene.height * this._scene.scaleY;
-
-        this._scrollBar?.resize(width, height, contentWidth, contentHeight);
-        this.makeDirty(true);
-    }
-
-    private _getViewPortSize(forceCalculate = false) {
-        const parent = this._scene?.getParent();
-        let width;
-        let height;
-
-        if (!forceCalculate && this._widthOrigin !== undefined) {
-            width = this._widthOrigin!;
-        } else {
-            const referenceWidth = parent.width;
-            let containerWidth = parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceWidth * (parent as SceneViewer).scaleX : referenceWidth;
-            width = containerWidth - (this._left + this._right);
-        }
-
-        if (!forceCalculate && this._heightOrigin !== undefined) {
-            height = this._heightOrigin!;
-        } else {
-            const referenceHeight = parent.height;
-            let containerHeight = parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceHeight * (parent as SceneViewer).scaleY : referenceHeight;
-            height = containerHeight - (this._top + this._bottom);
-        }
-
-        return {
-            width,
-            height,
-        };
-    }
-
     makeDirty(state: boolean = true) {
         this._dirty = state;
     }
@@ -306,129 +274,6 @@ export class Viewport {
 
     scrollBy(pos: IScrollBarPosition) {
         return this._scroll(SCROLL_TYPE.scrollBy, pos);
-    }
-
-    private _getApplyCanvasState() {
-        return this._allowCache && this._renderClipState;
-    }
-
-    private _scrollRendered() {
-        this._preScrollX = this.scrollX;
-        this._preScrollY = this.scrollY;
-    }
-
-    private _limitedScroll() {
-        if (!this._scrollBar) {
-            return;
-        }
-
-        const limitX = this._scrollBar?.limitX || Infinity;
-        const limitY = this._scrollBar?.limitY || Infinity;
-
-        let isLimitedX = true;
-        let isLimitedY = true;
-
-        if (this.scrollX < 0) {
-            this.scrollX = 0;
-        } else if (this.scrollX > limitX) {
-            this.scrollX = limitX;
-        } else {
-            isLimitedX = false;
-        }
-
-        if (this.scrollY < 0) {
-            this.scrollY = 0;
-        } else if (this.scrollY > limitY) {
-            this.scrollY = limitY;
-        } else {
-            isLimitedY = false;
-        }
-
-        return {
-            isLimitedX,
-            isLimitedY,
-        };
-    }
-
-    private _triggerScrollStop(
-        scroll: {
-            x: number;
-            y: number;
-        },
-        x?: number,
-        y?: number
-    ) {
-        window.clearTimeout(this._scrollStopNum);
-        this._scrollStopNum = window.setTimeout(() => {
-            this.onScrollStopObserver.notifyObservers({
-                viewport: this,
-                scrollX: this.scrollX,
-                scrollY: this.scrollY,
-                x,
-                y,
-                actualScrollX: scroll.x,
-                actualScrollY: scroll.y,
-                limitX: this._scrollBar?.limitX,
-                limitY: this._scrollBar?.limitY,
-            });
-        }, 0);
-    }
-
-    private _scroll(scrollType: SCROLL_TYPE, pos: IScrollBarPosition) {
-        const { x, y } = pos;
-        if (x !== undefined) {
-            if (scrollType === SCROLL_TYPE.scrollBy) {
-                this.scrollX += x;
-            } else {
-                this.scrollX = x;
-            }
-        }
-
-        if (y !== undefined) {
-            if (scrollType === SCROLL_TYPE.scrollBy) {
-                this.scrollY += y;
-            } else {
-                this.scrollY = y;
-            }
-        }
-
-        const limited = this._limitedScroll(); // 限制滚动范围
-
-        this.onScrollBeforeObserver.notifyObservers({
-            viewport: this,
-            scrollX: this.scrollX,
-            scrollY: this.scrollY,
-            x,
-            y,
-            limitX: this._scrollBar?.limitX,
-            limitY: this._scrollBar?.limitY,
-        });
-
-        if (this._scrollBar) {
-            this._scrollBar.makeDirty(true);
-        } else {
-            this.makeDirty(true);
-        }
-
-        const scroll = this.transformScroll();
-        this.actualScrollX = scroll.x;
-        this.actualScrollY = scroll.y;
-
-        this.onScrollAfterObserver.notifyObservers({
-            viewport: this,
-            scrollX: this.scrollX,
-            scrollY: this.scrollY,
-            x,
-            y,
-            actualScrollX: scroll.x,
-            actualScrollY: scroll.y,
-            limitX: this._scrollBar?.limitX,
-            limitY: this._scrollBar?.limitY,
-        });
-
-        this._triggerScrollStop(scroll, x, y);
-
-        return limited;
     }
 
     getBarScroll(actualX: number, actualY: number) {
@@ -575,42 +420,6 @@ export class Viewport {
         return this._calViewportRelativeBounding();
     }
 
-    private _calViewportRelativeBounding() {
-        let ratioScrollX = this._scrollBar?.ratioScrollX ?? 1;
-        let ratioScrollY = this._scrollBar?.ratioScrollY ?? 1;
-        let xFrom: number = this.left;
-        let xTo: number = (this.width || 0) + this.left;
-        let yFrom: number = this.top;
-        let yTo: number = (this.height || 0) + this.top;
-
-        let differenceX = 0;
-        let differenceY = 0;
-
-        if (this._preScrollX != null) {
-            differenceX = (this._preScrollX - this.scrollX) / ratioScrollX;
-        }
-
-        if (this._preScrollY != null) {
-            differenceY = (this._preScrollY - this.scrollY) / ratioScrollY;
-        }
-
-        const bounding: IBoundRect = {
-            tl: Vector2.FromArray([xFrom, yFrom]),
-            tr: Vector2.FromArray([xTo, yFrom]),
-            bl: Vector2.FromArray([xFrom, yTo]),
-            br: Vector2.FromArray([xTo, yTo]),
-            dx: differenceX,
-            dy: differenceY,
-        };
-
-        bounding.tl = this.getRelativeVector(bounding.tl);
-        bounding.tr = this.getRelativeVector(bounding.tr);
-        bounding.bl = this.getRelativeVector(bounding.bl);
-        bounding.br = this.getRelativeVector(bounding.br);
-
-        return bounding;
-    }
-
     getRelativeVector(coord: Vector2) {
         const sceneTrans = this.scene.transform.clone().invert();
         const scroll = this.transformScroll();
@@ -625,29 +434,6 @@ export class Viewport {
 
         const svCoord = sceneTrans.applyPoint(coord).subtract(Vector2.FromArray([scroll.x, scroll.y]));
         return svCoord;
-    }
-
-    private drawScrollbar(ctx: CanvasRenderingContext2D) {
-        if (!this._scrollBar) {
-            return;
-        }
-        const parent = this._scene.getParent();
-        if (parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-            this._scrollBar.render(ctx);
-        } else if (parent.classType === RENDER_CLASS_TYPE.ENGINE) {
-            this._scrollBar.render(ctx);
-        }
-    }
-
-    private _applyCache(ctx?: CanvasRenderingContext2D) {
-        if (!ctx) {
-            return;
-        }
-        const pixelRatio = this._cacheCanvas.getPixelRatio();
-        const width = this._cacheCanvas.getWidth() * pixelRatio;
-        const height = this._cacheCanvas.getHeight() * pixelRatio;
-        // console.log(this.viewPortKey, this._cacheCanvas, width, height, this.left, this.top, this.width, this.height, pixelRatio);
-        ctx.drawImage(this._cacheCanvas.getCanvasEle(), 0, 0, width, height, this.left, this.top, this.width || 0, this.height || 0);
     }
 
     onMouseWheel(evt: IWheelEvent, state: EventState) {
@@ -778,11 +564,225 @@ export class Viewport {
         this._scrollBar?.dispose();
     }
 
-    onMouseWheelObserver = new Observable<IWheelEvent>();
+    private _resizeCacheCanvasAndScrollBar(forceCalculate = false) {
+        const { width, height } = this._getViewPortSize(forceCalculate);
 
-    onScrollAfterObserver = new Observable<IScrollObserverParam>();
+        this.width = width;
+        this.height = height;
 
-    onScrollBeforeObserver = new Observable<IScrollObserverParam>();
+        const contentWidth = this._scene.width * this._scene.scaleX;
+        const contentHeight = this._scene.height * this._scene.scaleY;
 
-    onScrollStopObserver = new Observable<IScrollObserverParam>();
+        this._scrollBar?.resize(width, height, contentWidth, contentHeight);
+        this.makeDirty(true);
+    }
+
+    private _getViewPortSize(forceCalculate = false) {
+        const parent = this._scene?.getParent();
+        let width;
+        let height;
+
+        if (!forceCalculate && this._widthOrigin !== undefined) {
+            width = this._widthOrigin!;
+        } else {
+            const referenceWidth = parent.width;
+            let containerWidth = parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceWidth * (parent as SceneViewer).scaleX : referenceWidth;
+            width = containerWidth - (this._left + this._right);
+        }
+
+        if (!forceCalculate && this._heightOrigin !== undefined) {
+            height = this._heightOrigin!;
+        } else {
+            const referenceHeight = parent.height;
+            let containerHeight = parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceHeight * (parent as SceneViewer).scaleY : referenceHeight;
+            height = containerHeight - (this._top + this._bottom);
+        }
+
+        return {
+            width,
+            height,
+        };
+    }
+
+    private _getApplyCanvasState() {
+        return this._allowCache && this._renderClipState;
+    }
+
+    private _scrollRendered() {
+        this._preScrollX = this.scrollX;
+        this._preScrollY = this.scrollY;
+    }
+
+    private _limitedScroll() {
+        if (!this._scrollBar) {
+            return;
+        }
+
+        const limitX = this._scrollBar?.limitX || Infinity;
+        const limitY = this._scrollBar?.limitY || Infinity;
+
+        let isLimitedX = true;
+        let isLimitedY = true;
+
+        if (this.scrollX < 0) {
+            this.scrollX = 0;
+        } else if (this.scrollX > limitX) {
+            this.scrollX = limitX;
+        } else {
+            isLimitedX = false;
+        }
+
+        if (this.scrollY < 0) {
+            this.scrollY = 0;
+        } else if (this.scrollY > limitY) {
+            this.scrollY = limitY;
+        } else {
+            isLimitedY = false;
+        }
+
+        return {
+            isLimitedX,
+            isLimitedY,
+        };
+    }
+
+    private _triggerScrollStop(
+        scroll: {
+            x: number;
+            y: number;
+        },
+        x?: number,
+        y?: number
+    ) {
+        window.clearTimeout(this._scrollStopNum);
+        this._scrollStopNum = window.setTimeout(() => {
+            this.onScrollStopObserver.notifyObservers({
+                viewport: this,
+                scrollX: this.scrollX,
+                scrollY: this.scrollY,
+                x,
+                y,
+                actualScrollX: scroll.x,
+                actualScrollY: scroll.y,
+                limitX: this._scrollBar?.limitX,
+                limitY: this._scrollBar?.limitY,
+            });
+        }, 0);
+    }
+
+    private _scroll(scrollType: SCROLL_TYPE, pos: IScrollBarPosition) {
+        const { x, y } = pos;
+        if (x !== undefined) {
+            if (scrollType === SCROLL_TYPE.scrollBy) {
+                this.scrollX += x;
+            } else {
+                this.scrollX = x;
+            }
+        }
+
+        if (y !== undefined) {
+            if (scrollType === SCROLL_TYPE.scrollBy) {
+                this.scrollY += y;
+            } else {
+                this.scrollY = y;
+            }
+        }
+
+        const limited = this._limitedScroll(); // 限制滚动范围
+
+        this.onScrollBeforeObserver.notifyObservers({
+            viewport: this,
+            scrollX: this.scrollX,
+            scrollY: this.scrollY,
+            x,
+            y,
+            limitX: this._scrollBar?.limitX,
+            limitY: this._scrollBar?.limitY,
+        });
+
+        if (this._scrollBar) {
+            this._scrollBar.makeDirty(true);
+        } else {
+            this.makeDirty(true);
+        }
+
+        const scroll = this.transformScroll();
+        this.actualScrollX = scroll.x;
+        this.actualScrollY = scroll.y;
+
+        this.onScrollAfterObserver.notifyObservers({
+            viewport: this,
+            scrollX: this.scrollX,
+            scrollY: this.scrollY,
+            x,
+            y,
+            actualScrollX: scroll.x,
+            actualScrollY: scroll.y,
+            limitX: this._scrollBar?.limitX,
+            limitY: this._scrollBar?.limitY,
+        });
+
+        this._triggerScrollStop(scroll, x, y);
+
+        return limited;
+    }
+
+    private _calViewportRelativeBounding() {
+        let ratioScrollX = this._scrollBar?.ratioScrollX ?? 1;
+        let ratioScrollY = this._scrollBar?.ratioScrollY ?? 1;
+        let xFrom: number = this.left;
+        let xTo: number = (this.width || 0) + this.left;
+        let yFrom: number = this.top;
+        let yTo: number = (this.height || 0) + this.top;
+
+        let differenceX = 0;
+        let differenceY = 0;
+
+        if (this._preScrollX != null) {
+            differenceX = (this._preScrollX - this.scrollX) / ratioScrollX;
+        }
+
+        if (this._preScrollY != null) {
+            differenceY = (this._preScrollY - this.scrollY) / ratioScrollY;
+        }
+
+        const bounding: IBoundRect = {
+            tl: Vector2.FromArray([xFrom, yFrom]),
+            tr: Vector2.FromArray([xTo, yFrom]),
+            bl: Vector2.FromArray([xFrom, yTo]),
+            br: Vector2.FromArray([xTo, yTo]),
+            dx: differenceX,
+            dy: differenceY,
+        };
+
+        bounding.tl = this.getRelativeVector(bounding.tl);
+        bounding.tr = this.getRelativeVector(bounding.tr);
+        bounding.bl = this.getRelativeVector(bounding.bl);
+        bounding.br = this.getRelativeVector(bounding.br);
+
+        return bounding;
+    }
+
+    private drawScrollbar(ctx: CanvasRenderingContext2D) {
+        if (!this._scrollBar) {
+            return;
+        }
+        const parent = this._scene.getParent();
+        if (parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+            this._scrollBar.render(ctx);
+        } else if (parent.classType === RENDER_CLASS_TYPE.ENGINE) {
+            this._scrollBar.render(ctx);
+        }
+    }
+
+    private _applyCache(ctx?: CanvasRenderingContext2D) {
+        if (!ctx) {
+            return;
+        }
+        const pixelRatio = this._cacheCanvas.getPixelRatio();
+        const width = this._cacheCanvas.getWidth() * pixelRatio;
+        const height = this._cacheCanvas.getHeight() * pixelRatio;
+        // console.log(this.viewPortKey, this._cacheCanvas, width, height, this.left, this.top, this.width, this.height, pixelRatio);
+        ctx.drawImage(this._cacheCanvas.getCanvasEle(), 0, 0, width, height, this.left, this.top, this.width || 0, this.height || 0);
+    }
 }

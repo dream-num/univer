@@ -161,6 +161,16 @@ export class Transformer implements ITransformerConfig {
 
     shouldOverdrawWholeArea?: boolean;
 
+    onChangeStartObservable = new Observable<IChangeObserverConfig>();
+
+    onChangingObservable = new Observable<IChangeObserverConfig>();
+
+    onChangeEndObservable = new Observable<IChangeObserverConfig>();
+
+    onClearControlObservable = new Observable<null>();
+
+    onCreateControlObservable = new Observable<Group>();
+
     private _startOffsetX: number;
 
     private _startOffsetY: number;
@@ -179,18 +189,89 @@ export class Transformer implements ITransformerConfig {
 
     private _selectedObjectMap = new Map<string, BaseObject>();
 
-    onChangeStartObservable = new Observable<IChangeObserverConfig>();
-
-    onChangingObservable = new Observable<IChangeObserverConfig>();
-
-    onChangeEndObservable = new Observable<IChangeObserverConfig>();
-
-    onClearControlObservable = new Observable<null>();
-
-    onCreateControlObservable = new Observable<Group>();
-
     constructor(private _scene: Scene, config?: ITransformerConfig) {
         this._initialProps(config);
+    }
+
+    getScene() {
+        return this._scene;
+    }
+
+    attachTo(applyObject: BaseObject) {
+        if (!applyObject.isTransformer) {
+            return;
+        }
+
+        if (this.hoverEnabled) {
+            this.hoverEnterFunc && applyObject.onPointerEnterObserver.add(this.hoverEnterFunc);
+            this.hoverLeaveFunc && applyObject.onPointerLeaveObserver.add(this.hoverLeaveFunc);
+        }
+
+        applyObject.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
+            this._startOffsetX = evtOffsetX;
+            this._startOffsetY = evtOffsetY;
+
+            const scene = this._getTopScene();
+
+            if (!scene) {
+                return;
+            }
+
+            this._addCancelObserver(scene);
+
+            scene.disableEvent();
+
+            const scrollTimer = ScrollTimer.create(scene);
+            scrollTimer.startScroll(evtOffsetX, evtOffsetY);
+
+            const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
+
+            this._viewportScrollX = scrollX;
+            this._viewportScrollY = scrollY;
+
+            this._updateActiveObjectList(applyObject, evt);
+
+            this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+                const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+                this._moving(moveOffsetX, moveOffsetY, scrollTimer);
+                this._hiddenControl();
+                scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
+                    this._moving(moveOffsetX, moveOffsetY, scrollTimer);
+                });
+            });
+
+            this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+                scene.onPointerMoveObserver.remove(this._moveObserver);
+                scene.onPointerUpObserver.remove(this._upObserver);
+                scene.enableEvent();
+                this._updateControl();
+                scrollTimer.stopScroll();
+
+                this.onChangeEndObservable.notifyObservers({
+                    objects: this._selectedObjectMap,
+                    type: MoveObserverType.MOVE_END,
+                });
+            });
+
+            state.stopPropagation();
+        });
+
+        return applyObject;
+    }
+
+    dispose() {
+        this._moveObserver = null;
+        this._upObserver = null;
+        this._transformerControlMap.forEach((control) => {
+            control.dispose();
+        });
+        this._selectedObjectMap.forEach((control) => {
+            control.dispose();
+        });
+        this.onChangeStartObservable.clear();
+        this.onChangingObservable.clear();
+        this.onChangeEndObservable.clear();
     }
 
     private _initialProps(props?: ITransformerConfig) {
@@ -694,10 +775,6 @@ export class Transformer implements ITransformerConfig {
         return transformerControl;
     }
 
-    getScene() {
-        return this._scene;
-    }
-
     private _getTopScene() {
         const currentScene = this.getScene();
         return currentScene.getEngine()?.activeScene;
@@ -746,82 +823,5 @@ export class Transformer implements ITransformerConfig {
             this._clearControl();
             scene.onPointerDownObserver.remove(this._cancelFocusObserver);
         });
-    }
-
-    attachTo(applyObject: BaseObject) {
-        if (!applyObject.isTransformer) {
-            return;
-        }
-
-        if (this.hoverEnabled) {
-            this.hoverEnterFunc && applyObject.onPointerEnterObserver.add(this.hoverEnterFunc);
-            this.hoverLeaveFunc && applyObject.onPointerLeaveObserver.add(this.hoverLeaveFunc);
-        }
-
-        applyObject.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
-            this._startOffsetX = evtOffsetX;
-            this._startOffsetY = evtOffsetY;
-
-            const scene = this._getTopScene();
-
-            if (!scene) {
-                return;
-            }
-
-            this._addCancelObserver(scene);
-
-            scene.disableEvent();
-
-            const scrollTimer = ScrollTimer.create(scene);
-            scrollTimer.startScroll(evtOffsetX, evtOffsetY);
-
-            const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
-
-            this._viewportScrollX = scrollX;
-            this._viewportScrollY = scrollY;
-
-            this._updateActiveObjectList(applyObject, evt);
-
-            this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
-                const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
-                this._moving(moveOffsetX, moveOffsetY, scrollTimer);
-                this._hiddenControl();
-                scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
-                    this._moving(moveOffsetX, moveOffsetY, scrollTimer);
-                });
-            });
-
-            this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
-                scene.onPointerMoveObserver.remove(this._moveObserver);
-                scene.onPointerUpObserver.remove(this._upObserver);
-                scene.enableEvent();
-                this._updateControl();
-                scrollTimer.stopScroll();
-
-                this.onChangeEndObservable.notifyObservers({
-                    objects: this._selectedObjectMap,
-                    type: MoveObserverType.MOVE_END,
-                });
-            });
-
-            state.stopPropagation();
-        });
-
-        return applyObject;
-    }
-
-    dispose() {
-        this._moveObserver = null;
-        this._upObserver = null;
-        this._transformerControlMap.forEach((control) => {
-            control.dispose();
-        });
-        this._selectedObjectMap.forEach((control) => {
-            control.dispose();
-        });
-        this.onChangeStartObservable.clear();
-        this.onChangingObservable.clear();
-        this.onChangeEndObservable.clear();
     }
 }

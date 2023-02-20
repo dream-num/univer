@@ -30,6 +30,10 @@ export class ScrollTimer {
         }
     }
 
+    static create(scene: Scene, padding?: IPaddingData) {
+        return new ScrollTimer(scene, padding);
+    }
+
     startScroll(offsetX: number, offsetY: number) {
         this._offsetX = offsetX;
         this._offsetY = offsetY;
@@ -97,6 +101,16 @@ export class ScrollTimer {
         cancelRequestFrame(this._requestNewFrameNumber);
     }
 
+    getViewportByCoord(scene?: Scene) {
+        // return scene?.getActiveViewportByCoord(Vector2.FromArray([this._offsetX, this._offsetY]));
+
+        return scene?.getActiveViewportByRelativeCoord(Vector2.FromArray([this._offsetX, this._offsetY]));
+    }
+
+    getScene() {
+        return this._scene;
+    }
+
     private _runRenderLoop() {
         this._scroll(this._viewport);
         this._scrollFunction && this._scrollFunction(this._scrollX, this._scrollY);
@@ -111,19 +125,5 @@ export class ScrollTimer {
             }
             parent = parent?.getParent && parent?.getParent();
         }
-    }
-
-    getViewportByCoord(scene?: Scene) {
-        // return scene?.getActiveViewportByCoord(Vector2.FromArray([this._offsetX, this._offsetY]));
-
-        return scene?.getActiveViewportByRelativeCoord(Vector2.FromArray([this._offsetX, this._offsetY]));
-    }
-
-    getScene() {
-        return this._scene;
-    }
-
-    static create(scene: Scene, padding?: IPaddingData) {
-        return new ScrollTimer(scene, padding);
     }
 }

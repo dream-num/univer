@@ -6,6 +6,10 @@ import { ComponentExtension } from './Extension';
 export class RenderComponent<T, U> extends BaseObject {
     private _extensions = new Map<string, ComponentExtension<T, U>>();
 
+    get extensions() {
+        return this._extensions;
+    }
+
     register(...extensions: Array<ComponentExtension<T, U>>) {
         for (let extension of extensions) {
             extension.parent = this;
@@ -27,10 +31,6 @@ export class RenderComponent<T, U> extends BaseObject {
 
     getExtensionByKey(uKey: string) {
         return this._extensions.get(uKey);
-    }
-
-    get extensions() {
-        return this._extensions;
     }
 
     draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {

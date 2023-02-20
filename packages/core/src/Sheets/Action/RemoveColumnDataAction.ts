@@ -1,4 +1,4 @@
-import { InsertDataColumn, RemoveColumnData } from '../Apply';
+import { InsertDataColumnApply, RemoveColumnDataApply } from '../Apply';
 import { ICellData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
@@ -42,20 +42,12 @@ export class RemoveColumnDataAction extends SheetActionBase<
     }
 
     do(): ObjectMatrixPrimitiveType<ICellData> {
-        const worksheet = this.getWorkSheet();
-
-        const result = RemoveColumnData(
-            this._doActionData.columnIndex,
-            this._doActionData.columnCount,
-            worksheet.getCellMatrix().toJSON()
-        );
-
+        const result = RemoveColumnDataApply(this._commandUnit, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
             action: this,
         });
-
         return result;
     }
 
@@ -64,14 +56,7 @@ export class RemoveColumnDataAction extends SheetActionBase<
     }
 
     undo(): void {
-        const worksheet = this.getWorkSheet();
-
-        InsertDataColumn(
-            this._oldActionData.columnIndex,
-            this._oldActionData.columnData,
-            worksheet.getCellMatrix().toJSON()
-        );
-
+        InsertDataColumnApply(this._commandUnit, this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

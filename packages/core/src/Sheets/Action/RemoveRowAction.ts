@@ -1,8 +1,8 @@
-import { InsertRow, RemoveRow } from '../Apply';
+import { InsertRowApply, RemoveRowApply } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { CommandUnit } from '../../Command';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertRowActionData } from './InsertRowAction';
-import { CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -40,15 +40,7 @@ export class RemoveRowAction extends SheetActionBase<
     }
 
     do(): number {
-        const worksheet = this.getWorkSheet();
-        const rowManager = worksheet.getRowManager()!;
-
-        const result = RemoveRow(
-            this._doActionData.rowIndex,
-            this._doActionData.rowCount,
-            rowManager.getRowData().toJSON()
-        );
-
+        const result = RemoveRowApply(this._commandUnit, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -63,15 +55,7 @@ export class RemoveRowAction extends SheetActionBase<
     }
 
     undo(): void {
-        const worksheet = this.getWorkSheet();
-        const rowManager = worksheet.getRowManager()!;
-
-        InsertRow(
-            this._oldActionData.rowIndex,
-            this._oldActionData.rowCount,
-            rowManager.getRowData().toJSON()
-        );
-
+        InsertRowApply(this._commandUnit, this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

@@ -1,9 +1,9 @@
-import { InsertSheet, RemoveSheet } from '../Apply';
+import { InsertSheetApply, RemoveSheetApply } from '../Apply';
 import { IWorksheetConfig } from '../../Interfaces';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { CommandUnit } from '../../Command';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveSheetActionData } from './RemoveSheetAction';
-import { CommandUnit } from '../../Command';
 
 export interface IInsertSheetActionData extends ISheetActionData {
     index: number;
@@ -32,12 +32,7 @@ export class InsertSheetAction extends SheetActionBase<
     }
 
     do(): string {
-        const workbook = this.getWorkBook();
-        const result = InsertSheet(
-            workbook,
-            this._doActionData.index,
-            this._doActionData.sheet
-        );
+        const result = InsertSheetApply(this._commandUnit, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -51,8 +46,7 @@ export class InsertSheetAction extends SheetActionBase<
     }
 
     undo(): void {
-        const workbook = this.getWorkBook();
-        RemoveSheet(workbook, this._oldActionData.sheetId);
+        RemoveSheetApply(this._commandUnit, this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

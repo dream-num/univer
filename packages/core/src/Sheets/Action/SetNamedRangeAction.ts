@@ -5,7 +5,7 @@ import {
     ActionType,
     CommandUnit,
 } from '../../Command';
-import { SetNamedRange } from '../Apply';
+import { SetNamedRangeApply } from '../Apply';
 import { INamedRange } from '../../Interfaces';
 
 export interface ISetNamedRangeActionData extends ISheetActionData {
@@ -39,19 +39,18 @@ export class SetNamedRangeAction extends SheetActionBase<
     }
 
     do(): INamedRange {
-        const { namedRange } = this._doActionData;
-        const namedRanges = this._workbook.getConfig().namedRanges;
+        const result = SetNamedRangeApply(this._commandUnit, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
             action: this,
         });
-        return SetNamedRange(namedRanges, namedRange);
+        return result;
     }
 
     redo(): void {
         // update pre data
-        const { sheetId, namedRange } = this._doActionData;
+        const { sheetId } = this._doActionData;
         this._oldActionData = {
             // actionName: ACTION_NAMES.SET_NAMED_RANGE_ACTION,
             actionName: SetNamedRangeAction.NAME,
@@ -61,20 +60,18 @@ export class SetNamedRangeAction extends SheetActionBase<
     }
 
     undo(): void {
-        const { namedRange, sheetId } = this._oldActionData;
-        const namedRanges = this._workbook.getConfig().namedRanges;
+        const { sheetId } = this._oldActionData;
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
             action: this,
         });
-
         // update current data
         this._doActionData = {
             // actionName: ACTION_NAMES.SET_NAMED_RANGE_ACTION,
             actionName: SetNamedRangeAction.NAME,
             sheetId,
-            namedRange: SetNamedRange(namedRanges, namedRange),
+            namedRange: SetNamedRangeApply(this._commandUnit, this._oldActionData),
         };
     }
 

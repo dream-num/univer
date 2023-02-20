@@ -1,4 +1,3 @@
-import { DeleteRange, InsertRange } from '../Apply';
 import { Dimension } from '../../Enum/Dimension';
 import { ICellData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
@@ -6,6 +5,7 @@ import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertRangeActionData, InsertRangeAction } from './InsertRangeAction';
 import { CommandUnit } from '../../Command';
+import { DeleteRangeApply, InsertRangeApply } from '../Apply';
 
 /**
  * @internal
@@ -45,18 +45,7 @@ export class DeleteRangeAction extends SheetActionBase<
     }
 
     do(): ObjectMatrixPrimitiveType<ICellData> {
-        const worksheet = this.getWorkSheet();
-
-        const result = DeleteRange(
-            {
-                rowCount: worksheet.getConfig().rowCount,
-                columnCount: worksheet.getConfig().columnCount,
-            },
-            worksheet.getCellMatrix(),
-            this._doActionData.shiftDimension,
-            this._doActionData.rangeData
-        );
-
+        const result = DeleteRangeApply(this._commandUnit, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -81,19 +70,8 @@ export class DeleteRangeAction extends SheetActionBase<
 
     undo(): void {
         const worksheet = this.getWorkSheet();
-        const { shiftDimension, rangeData, cellValue } = this._oldActionData;
         if (worksheet) {
-            InsertRange(
-                {
-                    rowCount: worksheet.getConfig().rowCount,
-                    columnCount: worksheet.getConfig().columnCount,
-                },
-                worksheet.getCellMatrix(),
-                shiftDimension,
-                rangeData,
-                cellValue
-            );
-
+            InsertRangeApply(this._commandUnit, this._oldActionData);
             this._observers.notifyObservers({
                 type: ActionType.UNDO,
                 data: this._oldActionData,

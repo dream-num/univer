@@ -1,4 +1,4 @@
-import { SetRangeData } from '../Apply';
+import { SetRangeData, SetRangeDataApply } from '../Apply';
 import { ObjectMatrixPrimitiveType } from '../../Shared';
 import {
     SheetActionBase,
@@ -48,16 +48,7 @@ export class SetRangeDataAction extends SheetActionBase<
     }
 
     do(): ObjectMatrixPrimitiveType<ICellData> {
-        const worksheet = this.getWorkSheet();
-        const styles = this._workbook.getStyles();
-
-        const result = SetRangeData(
-            worksheet.getCellMatrix(),
-            this._doActionData.cellValue,
-            styles,
-            this._doActionData.options
-        );
-
+        const result = SetRangeDataApply(this._commandUnit, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,

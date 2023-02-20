@@ -1,4 +1,4 @@
-import { SetHiddenGridlines } from '../Apply';
+import { SetHiddenGridlinesApply } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { CommandUnit } from '../../Command';
@@ -34,19 +34,15 @@ export class SetHiddenGridlinesAction extends SheetActionBase<ISetHiddenGridline
     }
 
     do(): boolean {
-        const worksheet = this.getWorkSheet();
-
-        const result = SetHiddenGridlines(
-            worksheet,
-            this._doActionData.hideGridlines
+        const result = SetHiddenGridlinesApply(
+            this._commandUnit,
+            this._doActionData
         );
-
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
             action: this,
         });
-
         return result;
     }
 
@@ -55,11 +51,7 @@ export class SetHiddenGridlinesAction extends SheetActionBase<ISetHiddenGridline
     }
 
     undo(): void {
-        const { hideGridlines, sheetId } = this._oldActionData;
-        const worksheet = this.getWorkSheet();
-
-        SetHiddenGridlines(worksheet, this._oldActionData.hideGridlines);
-
+        SetHiddenGridlinesApply(this._commandUnit, this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

@@ -5,7 +5,7 @@ import {
     ActionType,
     CommandUnit,
 } from '../../Command';
-import { InsertRow, RemoveRow } from '../Apply';
+import { InsertRowApply, RemoveRowApply } from '../Apply';
 import { IRemoveRowActionData } from './RemoveRowAction';
 
 /**
@@ -44,15 +44,7 @@ export class InsertRowAction extends SheetActionBase<
     }
 
     do(): void {
-        const worksheet = this.getWorkSheet();
-        const rowManager = worksheet.getRowManager()!;
-
-        InsertRow(
-            this._doActionData.rowIndex,
-            this._doActionData.rowCount,
-            rowManager.getRowData().toJSON()
-        );
-
+        InsertRowApply(this._commandUnit, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -65,20 +57,12 @@ export class InsertRowAction extends SheetActionBase<
     }
 
     undo(): void {
-        const worksheet = this.getWorkSheet();
-        const rowManager = worksheet.getRowManager()!;
-
+        RemoveRowApply(this._commandUnit, this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
             action: this,
         });
-
-        RemoveRow(
-            this._oldActionData.rowIndex,
-            this._oldActionData.rowCount,
-            rowManager.getRowData().toJSON()
-        );
     }
 
     validate(): boolean {

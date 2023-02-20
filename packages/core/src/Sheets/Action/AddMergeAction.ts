@@ -1,10 +1,9 @@
-import { addMerge } from '../Apply/AddMerge';
-import { RemoveMerge } from '../Apply/RemoveMerge';
 import { IRangeData } from '../../Interfaces';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers } from '../../Command/ActionObservers';
-import { IRemoveMergeActionData } from './RemoveMergeAction';
 import { CommandUnit } from '../../Command';
+import { IRemoveMergeActionData } from './RemoveMergeAction';
+import { addMergeApply, RemoveMergeApply } from '../Apply';
 
 /**
  * @internal
@@ -43,8 +42,7 @@ export class AddMergeAction extends SheetActionBase<
     }
 
     do(): IRangeData[] {
-        const worksheet = this.getWorkSheet();
-        return addMerge(worksheet.getMerges(), this._doActionData.rectangles);
+        return addMergeApply(this._commandUnit, this._doActionData);
     }
 
     redo(): void {
@@ -52,8 +50,7 @@ export class AddMergeAction extends SheetActionBase<
     }
 
     undo(): void {
-        const worksheet = this.getWorkSheet();
-        RemoveMerge(worksheet.getMerges(), this._doActionData.rectangles);
+        RemoveMergeApply(this._commandUnit, this._doActionData);
     }
 
     validate(): boolean {

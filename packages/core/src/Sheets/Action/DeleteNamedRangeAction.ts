@@ -6,7 +6,7 @@ import {
     CommandUnit,
     AddNamedRangeAction,
 } from '../../Command';
-import { DeleteNamedRange, AddNamedRange } from '../Apply';
+import { AddNamedRangeApply, DeleteNamedRangeApply } from '../Apply';
 import { INamedRange } from '../../Interfaces';
 import { IAddNamedRangeActionData } from './AddNamedRangeAction';
 
@@ -41,20 +41,18 @@ export class DeleteNamedRangeAction extends SheetActionBase<
     }
 
     do(): INamedRange {
-        const { namedRangeId } = this._doActionData;
-        const namedRanges = this._workbook.getConfig().namedRanges;
+        const result = DeleteNamedRangeApply(this._commandUnit, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
             action: this,
         });
-        return DeleteNamedRange(namedRanges, namedRangeId);
+        return result;
     }
 
     redo(): void {
         // update pre data
         const { sheetId } = this._doActionData;
-
         this._oldActionData = {
             sheetId,
             // actionName: ACTION_NAMES.ADD_BANDING_ACTION,
@@ -64,14 +62,12 @@ export class DeleteNamedRangeAction extends SheetActionBase<
     }
 
     undo(): void {
-        const { namedRange } = this._oldActionData;
-        const namedRanges = this._workbook.getConfig().namedRanges;
+        AddNamedRangeApply(this._commandUnit, this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
             action: this,
         });
-        AddNamedRange(namedRanges, namedRange);
     }
 
     validate(): boolean {

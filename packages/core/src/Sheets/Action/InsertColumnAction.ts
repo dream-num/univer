@@ -1,4 +1,4 @@
-import { RemoveColumn, InsertColumn } from '../Apply';
+import { InsertColumnApply, RemoveColumnApply } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveColumnAction } from './removeColumnAction';
@@ -40,15 +40,7 @@ export class InsertColumnAction extends SheetActionBase<
     }
 
     do(): void {
-        const worksheet = this.getWorkSheet();
-        const columnManager = worksheet.getColumnManager();
-
-        InsertColumn(
-            this._doActionData.columnIndex,
-            this._doActionData.columnCount,
-            columnManager.getColumnData().toJSON()
-        );
-
+        InsertColumnApply(this._commandUnit, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -61,20 +53,12 @@ export class InsertColumnAction extends SheetActionBase<
     }
 
     undo(): void {
-        const worksheet = this.getWorkSheet();
-        const columnManager = worksheet.getColumnManager();
-
+        RemoveColumnApply(this._commandUnit, this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
             action: this,
         });
-
-        RemoveColumn(
-            this._oldActionData.columnIndex,
-            this._oldActionData.columnCount,
-            columnManager.getColumnData().toJSON()
-        );
     }
 
     validate(): boolean {

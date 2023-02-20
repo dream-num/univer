@@ -7,8 +7,8 @@ import {
     DeleteNamedRangeAction,
 } from '../../Command';
 import { INamedRange } from '../../Interfaces/INamedRange';
-import { AddNamedRange } from '../Apply/AddNamedRange';
-import { DeleteNamedRange } from '../Apply/DeleteNamedRange';
+import { AddNamedRangeApply } from '../Apply';
+import { DeleteNamedRangeApply } from '../Apply/DeleteNamedRange';
 import { IDeleteNamedRangeActionData } from './DeleteNamedRangeAction';
 
 export interface IAddNamedRangeActionData extends ISheetActionData {
@@ -43,14 +43,12 @@ export class AddNamedRangeAction extends SheetActionBase<
     }
 
     do(): void {
-        const { namedRange } = this._doActionData;
-        const namedRanges = this._workbook.getConfig().namedRanges;
+        AddNamedRangeApply(this._commandUnit, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
             action: this,
         });
-        AddNamedRange(namedRanges, namedRange);
     }
 
     redo(): void {
@@ -59,21 +57,23 @@ export class AddNamedRangeAction extends SheetActionBase<
     }
 
     undo(): void {
-        const { namedRangeId, sheetId } = this._oldActionData;
-        const namedRanges = this._workbook.getConfig().namedRanges;
-        this._observers.notifyObservers({
-            type: ActionType.UNDO,
-            data: this._oldActionData,
-            action: this,
-        });
-
+        const { sheetId } = this._oldActionData;
         // update current data
         this._doActionData = {
             // actionName: ACTION_NAMES.ADD_NAMED_RANGE_ACTION,
             actionName: AddNamedRangeAction.NAME,
             sheetId,
-            namedRange: DeleteNamedRange(namedRanges, namedRangeId),
+            namedRange: DeleteNamedRangeApply(
+                this._commandUnit,
+                this._oldActionData
+            ),
         };
+
+        this._observers.notifyObservers({
+            type: ActionType.UNDO,
+            data: this._oldActionData,
+            action: this,
+        });
     }
 
     validate(): boolean {

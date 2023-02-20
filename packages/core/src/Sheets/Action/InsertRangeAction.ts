@@ -1,4 +1,3 @@
-import { DeleteRange, InsertRange } from '../Apply';
 import { Dimension } from '../../Enum/Dimension';
 import { ICellData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
@@ -6,6 +5,7 @@ import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IDeleteRangeActionData } from './DeleteRangeAction';
 import { CommandUnit, SetRangeDataAction } from '../../Command';
+import { DeleteRangeApply, InsertRangeApply } from '../Apply';
 
 /**
  * @internal
@@ -46,17 +46,7 @@ export class InsertRangeAction extends SheetActionBase<
     do(): void {
         const worksheet = this.getWorkSheet();
         if (worksheet) {
-            InsertRange(
-                {
-                    rowCount: worksheet.getLastRow(),
-                    columnCount: worksheet.getLastColumn(),
-                },
-                worksheet.getCellMatrix(),
-                this._doActionData.shiftDimension,
-                this._doActionData.rangeData,
-                this._doActionData.cellValue
-            );
-
+            InsertRangeApply(this._commandUnit, this._doActionData);
             this._observers.notifyObservers({
                 type: ActionType.REDO,
                 data: this._doActionData,
@@ -73,26 +63,16 @@ export class InsertRangeAction extends SheetActionBase<
     undo(): void {
         const { rangeData, sheetId, shiftDimension } = this._oldActionData;
         const worksheet = this.getWorkSheet();
-
         if (worksheet) {
             // update current data
             this._doActionData = {
                 // actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                 actionName: SetRangeDataAction.NAME,
                 sheetId,
-                cellValue: DeleteRange(
-                    {
-                        rowCount: worksheet.getLastRow(),
-                        columnCount: worksheet.getLastColumn(),
-                    },
-                    worksheet.getCellMatrix(),
-                    shiftDimension,
-                    rangeData
-                ),
+                cellValue: DeleteRangeApply(this._commandUnit, this._oldActionData),
                 rangeData,
                 shiftDimension,
             };
-
             this._observers.notifyObservers({
                 type: ActionType.UNDO,
                 data: this._oldActionData,

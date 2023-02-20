@@ -1,4 +1,4 @@
-import { SetRangeData, ClearRange } from '../Apply';
+import { ClearRangeApply, SetRangeDataApply } from '../Apply';
 import { ICellData, IOptionsData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
@@ -44,27 +44,18 @@ export class ClearRangeAction extends SheetActionBase<
     }
 
     do(): ObjectMatrixPrimitiveType<ICellData> {
-        const worksheet = this.getWorkSheet();
-
-        const result = ClearRange(
-            worksheet.getCellMatrix(),
-            this._doActionData.options,
-            this._doActionData.rangeData
-        );
-
+        const result = ClearRangeApply(this._commandUnit, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
             action: this,
         });
-
         return result;
     }
 
     redo(): void {
         // update pre data
-        const { sheetId, rangeData } = this._doActionData;
-
+        const { sheetId } = this._doActionData;
         this._oldActionData = {
             // actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
             actionName: SetRangeDataAction.NAME,
@@ -75,13 +66,9 @@ export class ClearRangeAction extends SheetActionBase<
 
     undo(): void {
         const worksheet = this.getWorkSheet();
-        const { cellValue } = this._oldActionData;
-        const styles = this._workbook.getStyles();
-
         if (worksheet) {
-            SetRangeData(worksheet.getCellMatrix(), cellValue, styles);
+            SetRangeDataApply(this._commandUnit, this._oldActionData);
             // no need update current data
-
             this._observers.notifyObservers({
                 type: ActionType.UNDO,
                 data: this._oldActionData,

@@ -1,4 +1,4 @@
-import { SetColumnHide, SetColumnShow } from '../Apply';
+import { SetColumnHideApply, SetColumnShowApply } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { ISetColumnShowActionData } from './SetColumnShowAction';
@@ -40,14 +40,7 @@ export class SetColumnHideAction extends SheetActionBase<
     }
 
     do(): void {
-        const worksheet = this.getWorkSheet();
-
-        SetColumnHide(
-            this._doActionData.columnIndex,
-            this._doActionData.columnCount,
-            worksheet.getColumnManager()
-        );
-
+        SetColumnHideApply(this._commandUnit, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -60,14 +53,7 @@ export class SetColumnHideAction extends SheetActionBase<
     }
 
     undo(): void {
-        const worksheet = this.getWorkSheet();
-
-        SetColumnShow(
-            this._doActionData.columnIndex,
-            this._doActionData.columnCount,
-            worksheet.getColumnManager()
-        );
-
+        SetColumnShowApply(this._commandUnit, this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

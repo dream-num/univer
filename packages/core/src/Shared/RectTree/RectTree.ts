@@ -7,6 +7,26 @@ const defaultCompareNodeMinY = (a: RectTree.Node, b: RectTree.Node) =>
     a.minY - b.minY;
 
 export class RectTree {
+    private _maxEntries: number;
+
+    private _minEntries: number;
+
+    private _data: RectTree.Node;
+
+    private _compareMinX: Compare<RectTree.Node>;
+
+    private _compareMinY: Compare<RectTree.Node>;
+
+    constructor(max: number = 9) {
+        // 默认情况下，节点中的最大条目数为 9； 最小节点填充为 40% 以获得最佳性能
+        this._maxEntries = Math.max(4, max);
+        this._minEntries = Math.max(2, Math.ceil(this._maxEntries * 0.4));
+        this._data = null as unknown as RectTree.Node;
+        this._compareMinX = defaultCompareNodeMinX;
+        this._compareMinY = defaultCompareNodeMinY;
+        this.clear();
+    }
+
     static findItem<T>(item: T, items: T[], equalsFn: Nullable<EqualsFunction<T>>) {
         if (!equalsFn) {
             return items.indexOf(item);
@@ -39,15 +59,175 @@ export class RectTree {
         }
     }
 
-    private _maxEntries: number;
+    all(): RectTree.Node[] {
+        return RectTree.Node.expandNode(this._data, []);
+    }
 
-    private _minEntries: number;
+    load(data: RectTree.Node[]): RectTree {
+        if (!(data && data.length)) {
+            return this;
+        }
 
-    private _data: RectTree.Node;
+        if (data.length < this._minEntries) {
+            for (let i = 0; i < data.length; i++) {
+                this.insert(data[i]);
+            }
+            return this;
+        }
 
-    private _compareMinX: Compare<RectTree.Node>;
+        // 使用 OMT 算法从头开始使用给定数据递归构建树
+        let node = this._build(data.slice(), 0, data.length - 1, 0);
 
-    private _compareMinY: Compare<RectTree.Node>;
+        if (!this._data.childrenNodes.length) {
+            // 如果树为空，则按原样保存
+            this._data = node;
+        } else if (this._data.height === node.height) {
+            // 如果树具有相同的高度，则拆分根
+            this._splitRoot(this._data, node);
+        } else {
+            if (this._data.height < node.height) {
+                // 如果插入的树更大，则交换树
+                const tmpNode = this._data;
+                this._data = node;
+                node = tmpNode;
+            }
+            // 将小树插入大树中适当的层次
+            this._insert(node, this._data.height - node.height - 1);
+        }
+
+        return this;
+    }
+
+    clear(): RectTree {
+        this._data = RectTree.Node.makeParentNode([]);
+        return this;
+    }
+
+    remove(
+        item: RectTree.Node,
+        equals: Nullable<EqualsFunction<RectTree.Node>>
+    ): RectTree {
+        if (!item) {
+            return this;
+        }
+
+        let node = this._data;
+        const path: RectTree.Node[] = [];
+        const indexes: number[] = [];
+        const bbox = item;
+        let i = 0;
+        let goingUp: boolean = false;
+        let parent: RectTree.Node = null as unknown as RectTree.Node;
+
+        // 深度优先迭代树遍历
+        while (node || path.length) {
+            if (!node) {
+                // 往上
+                node = path.pop() as RectTree.Node;
+                parent = path[path.length - 1];
+                i = indexes.pop() as number;
+                goingUp = true;
+            }
+
+            if (node.leaf) {
+                // 检查当前节点
+                const index = RectTree.findItem(item, node.childrenNodes, equals);
+                if (index !== -1) {
+                    // 找到项目，移除项目并向上压缩树
+                    node.childrenNodes.splice(index, 1);
+                    path.push(node);
+                    this._condense(path);
+                    return this;
+                }
+            }
+
+            if (!goingUp && !node.leaf && node.contains(bbox)) {
+                // 往下
+                path.push(node);
+                indexes.push(i as number);
+                i = 0;
+                parent = node;
+                node = node.childrenNodes[0];
+            } else if (parent) {
+                // 向右走
+                i++;
+                node = parent.childrenNodes[i];
+                goingUp = false;
+            } else {
+                // 没有发现
+                node = null as unknown as RectTree.Node;
+            }
+        }
+
+        return this;
+    }
+
+    insert(item: RectTree.Node): RectTree {
+        if (item) {
+            this._insert(item, this._data.height - 1);
+        }
+        return this;
+    }
+
+    collides(bbox: RectTree.Node): boolean {
+        let node: RectTree.Node = this._data;
+
+        if (!bbox.intersects(node)) {
+            return false;
+        }
+
+        const nodesToSearch = [];
+
+        while (node) {
+            for (let i = 0; i < node.childrenNodes.length; i++) {
+                const child = node.childrenNodes[i];
+                const childBBox = child;
+                if (bbox.intersects(childBBox)) {
+                    if (node.leaf || bbox.contains(childBBox)) {
+                        return true;
+                    }
+                    nodesToSearch.push(child);
+                }
+            }
+            node = nodesToSearch.pop() as RectTree.Node;
+        }
+
+        return false;
+    }
+
+    first(bbox: RectTree.Node): RectTree.Node {
+        return this.search(bbox)[0];
+    }
+
+    search(bbox: RectTree.Node): RectTree.Node[] {
+        let node = this._data;
+        const result: RectTree.Node[] = [];
+
+        if (!bbox.intersects(node)) {
+            return result;
+        }
+
+        const nodesToSearch = [];
+
+        while (node) {
+            for (let i = 0; i < node.childrenNodes.length; i++) {
+                const child = node.childrenNodes[i];
+                const childBBox = child;
+                if (bbox.intersects(childBBox)) {
+                    if (node.leaf) {
+                        result.push(child);
+                    } else if (bbox.contains(childBBox)) {
+                        RectTree.Node.expandNode(child, result);
+                    } else {
+                        nodesToSearch.push(child);
+                    }
+                }
+            }
+            node = nodesToSearch.pop() as RectTree.Node;
+        }
+
+        return result;
+    }
 
     private _chooseSplitAxis(node: RectTree.Node, m: number, M: number) {
         // 按最佳轴对节点子节点进行排序以进行拆分
@@ -290,212 +470,12 @@ export class RectTree {
         }
         return node;
     }
-
-    constructor(max: number = 9) {
-        // 默认情况下，节点中的最大条目数为 9； 最小节点填充为 40% 以获得最佳性能
-        this._maxEntries = Math.max(4, max);
-        this._minEntries = Math.max(2, Math.ceil(this._maxEntries * 0.4));
-        this._data = null as unknown as RectTree.Node;
-        this._compareMinX = defaultCompareNodeMinX;
-        this._compareMinY = defaultCompareNodeMinY;
-        this.clear();
-    }
-
-    all(): RectTree.Node[] {
-        return RectTree.Node.expandNode(this._data, []);
-    }
-
-    load(data: RectTree.Node[]): RectTree {
-        if (!(data && data.length)) {
-            return this;
-        }
-
-        if (data.length < this._minEntries) {
-            for (let i = 0; i < data.length; i++) {
-                this.insert(data[i]);
-            }
-            return this;
-        }
-
-        // 使用 OMT 算法从头开始使用给定数据递归构建树
-        let node = this._build(data.slice(), 0, data.length - 1, 0);
-
-        if (!this._data.childrenNodes.length) {
-            // 如果树为空，则按原样保存
-            this._data = node;
-        } else if (this._data.height === node.height) {
-            // 如果树具有相同的高度，则拆分根
-            this._splitRoot(this._data, node);
-        } else {
-            if (this._data.height < node.height) {
-                // 如果插入的树更大，则交换树
-                const tmpNode = this._data;
-                this._data = node;
-                node = tmpNode;
-            }
-            // 将小树插入大树中适当的层次
-            this._insert(node, this._data.height - node.height - 1);
-        }
-
-        return this;
-    }
-
-    clear(): RectTree {
-        this._data = RectTree.Node.makeParentNode([]);
-        return this;
-    }
-
-    remove(
-        item: RectTree.Node,
-        equals: Nullable<EqualsFunction<RectTree.Node>>
-    ): RectTree {
-        if (!item) {
-            return this;
-        }
-
-        let node = this._data;
-        const path: RectTree.Node[] = [];
-        const indexes: number[] = [];
-        const bbox = item;
-        let i = 0;
-        let goingUp: boolean = false;
-        let parent: RectTree.Node = null as unknown as RectTree.Node;
-
-        // 深度优先迭代树遍历
-        while (node || path.length) {
-            if (!node) {
-                // 往上
-                node = path.pop() as RectTree.Node;
-                parent = path[path.length - 1];
-                i = indexes.pop() as number;
-                goingUp = true;
-            }
-
-            if (node.leaf) {
-                // 检查当前节点
-                const index = RectTree.findItem(item, node.childrenNodes, equals);
-                if (index !== -1) {
-                    // 找到项目，移除项目并向上压缩树
-                    node.childrenNodes.splice(index, 1);
-                    path.push(node);
-                    this._condense(path);
-                    return this;
-                }
-            }
-
-            if (!goingUp && !node.leaf && node.contains(bbox)) {
-                // 往下
-                path.push(node);
-                indexes.push(i as number);
-                i = 0;
-                parent = node;
-                node = node.childrenNodes[0];
-            } else if (parent) {
-                // 向右走
-                i++;
-                node = parent.childrenNodes[i];
-                goingUp = false;
-            } else {
-                // 没有发现
-                node = null as unknown as RectTree.Node;
-            }
-        }
-
-        return this;
-    }
-
-    insert(item: RectTree.Node): RectTree {
-        if (item) {
-            this._insert(item, this._data.height - 1);
-        }
-        return this;
-    }
-
-    collides(bbox: RectTree.Node): boolean {
-        let node: RectTree.Node = this._data;
-
-        if (!bbox.intersects(node)) {
-            return false;
-        }
-
-        const nodesToSearch = [];
-
-        while (node) {
-            for (let i = 0; i < node.childrenNodes.length; i++) {
-                const child = node.childrenNodes[i];
-                const childBBox = child;
-                if (bbox.intersects(childBBox)) {
-                    if (node.leaf || bbox.contains(childBBox)) {
-                        return true;
-                    }
-                    nodesToSearch.push(child);
-                }
-            }
-            node = nodesToSearch.pop() as RectTree.Node;
-        }
-
-        return false;
-    }
-
-    first(bbox: RectTree.Node): RectTree.Node {
-        return this.search(bbox)[0];
-    }
-
-    search(bbox: RectTree.Node): RectTree.Node[] {
-        let node = this._data;
-        const result: RectTree.Node[] = [];
-
-        if (!bbox.intersects(node)) {
-            return result;
-        }
-
-        const nodesToSearch = [];
-
-        while (node) {
-            for (let i = 0; i < node.childrenNodes.length; i++) {
-                const child = node.childrenNodes[i];
-                const childBBox = child;
-                if (bbox.intersects(childBBox)) {
-                    if (node.leaf) {
-                        result.push(child);
-                    } else if (bbox.contains(childBBox)) {
-                        RectTree.Node.expandNode(child, result);
-                    } else {
-                        nodesToSearch.push(child);
-                    }
-                }
-            }
-            node = nodesToSearch.pop() as RectTree.Node;
-        }
-
-        return result;
-    }
 }
 
 export type EqualsFunction<T> = (a: T, b: T) => boolean;
 
 export namespace RectTree {
     export class Node {
-        static makeParentNode(childrenNodes: RectTree.Node[]) {
-            return new RectTree.Node({ childrenNodes });
-        }
-
-        static expandNode(
-            node: RectTree.Node,
-            result: RectTree.Node[]
-        ): RectTree.Node[] {
-            const nodesToSearch: RectTree.Node[] = [];
-            while (node) {
-                if (node.leaf) {
-                    result.push(...node.childrenNodes);
-                } else {
-                    nodesToSearch.push(...node.childrenNodes);
-                }
-                node = nodesToSearch.pop() as RectTree.Node;
-            }
-            return result;
-        }
-
         minX: number;
 
         range: Range;
@@ -528,6 +508,26 @@ export namespace RectTree {
             this.leaf = leaf;
             this.height = height;
             this.childrenNodes = childrenNodes;
+        }
+
+        static makeParentNode(childrenNodes: RectTree.Node[]) {
+            return new RectTree.Node({ childrenNodes });
+        }
+
+        static expandNode(
+            node: RectTree.Node,
+            result: RectTree.Node[]
+        ): RectTree.Node[] {
+            const nodesToSearch: RectTree.Node[] = [];
+            while (node) {
+                if (node.leaf) {
+                    result.push(...node.childrenNodes);
+                } else {
+                    nodesToSearch.push(...node.childrenNodes);
+                }
+                node = nodesToSearch.pop() as RectTree.Node;
+            }
+            return result;
         }
 
         difference(other: RectTree.Node, collect: Nullable<RectTree.Node[]>) {

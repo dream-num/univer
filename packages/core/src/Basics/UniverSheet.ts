@@ -9,13 +9,20 @@ import { VersionCode, VersionEnv } from './Version';
  * Externally provided UniverSheet root instance
  */
 export class UniverSheet {
-    private _context: SheetContext;
-
     univerSheetConfig: Partial<IWorkbookConfig>;
+
+    private _context: SheetContext;
 
     constructor(univerSheetData: Partial<IWorkbookConfig> = {}) {
         this.univerSheetConfig = univerSheetData;
         this._context = new SheetContext(univerSheetData);
+    }
+
+    /**
+     * get SheetContext
+     */
+    get context() {
+        return this._context;
     }
 
     static newInstance(univerSheetData: Partial<IWorkbookConfig> = {}): UniverSheet {
@@ -71,10 +78,24 @@ export class UniverSheet {
     }
 
     /**
-     * get SheetContext
+     * Save data
+     *
+     * @example
+     * get all the core and plug-in data
+     *
+     * @param univerSheet
      */
-    get context() {
-        return this._context;
+    static toJson(univerSheet: UniverSheet) {
+        const workbookConfig = univerSheet.getWorkBook().save();
+        const pluginConfig = {};
+        univerSheet.context
+            .getPluginManager()
+            .getPlugins()
+            .forEach((plugin: BasePlugin) => {
+                pluginConfig[`${plugin.getPluginName()}Config`] = plugin.save();
+            });
+
+        return { workbookConfig, ...pluginConfig };
     }
 
     /**
@@ -109,27 +130,6 @@ export class UniverSheet {
      */
     getWorkBook(): Workbook {
         return this._context.getWorkBook();
-    }
-
-    /**
-     * Save data
-     *
-     * @example
-     * get all the core and plug-in data
-     *
-     * @param univerSheet
-     */
-    static toJson(univerSheet: UniverSheet) {
-        const workbookConfig = univerSheet.getWorkBook().save();
-        const pluginConfig = {};
-        univerSheet.context
-            .getPluginManager()
-            .getPlugins()
-            .forEach((plugin: BasePlugin) => {
-                pluginConfig[`${plugin.getPluginName()}Config`] = plugin.save();
-            });
-
-        return { workbookConfig, ...pluginConfig };
     }
 
     refreshWorkbook(univerSheetData: Partial<IWorkbookConfig> = {}) {

@@ -13,9 +13,9 @@ export class SlideContext extends ContextBase {
         this._slide = new SlideModel(univerSlideData, this);
     }
 
-    protected _setObserver(): void {}
-
     getSlide(): SlideModel {
         return this._slide;
     }
+
+    protected _setObserver(): void {}
 }

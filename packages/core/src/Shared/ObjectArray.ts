@@ -34,31 +34,6 @@ const define = <T>(value?: T): value is T => value !== undefined && value !== nu
  * @beta
  */
 export class ObjectArray<T> {
-    static objectKeys<T>(array: Nullable<ObjectArrayPrimitiveType<T>>) {
-        if (array) {
-            const keys = Object.keys(array);
-            const index = keys.indexOf('length');
-            if (index > -1) {
-                keys.splice(index, 1);
-            }
-            return keys;
-        }
-        return [];
-    }
-
-    static getMaxLength<T>(array: Nullable<ObjectArrayPrimitiveType<T>>) {
-        if (array) {
-            if (array.length) {
-                return array.length;
-            }
-            const keys: unknown[] = ObjectArray.objectKeys(array);
-            if (keys.length) {
-                return Math.max(...(keys as number[])) + 1;
-            }
-        }
-        return 0;
-    }
-
     private _array: ObjectArrayPrimitiveType<T>;
 
     private _length: number;
@@ -91,6 +66,31 @@ export class ObjectArray<T> {
             this._array = {};
             this._length = 0;
         }
+    }
+
+    static objectKeys<T>(array: Nullable<ObjectArrayPrimitiveType<T>>) {
+        if (array) {
+            const keys = Object.keys(array);
+            const index = keys.indexOf('length');
+            if (index > -1) {
+                keys.splice(index, 1);
+            }
+            return keys;
+        }
+        return [];
+    }
+
+    static getMaxLength<T>(array: Nullable<ObjectArrayPrimitiveType<T>>) {
+        if (array) {
+            if (array.length) {
+                return array.length;
+            }
+            const keys: unknown[] = ObjectArray.objectKeys(array);
+            if (keys.length) {
+                return Math.max(...(keys as number[])) + 1;
+            }
+        }
+        return 0;
     }
 
     obtain(index: number, defaultValue: T): T {

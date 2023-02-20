@@ -107,11 +107,6 @@ export class Worksheet {
 
     // protected _columnStatusGroup: StructGroup;
 
-    private _initialize(): void {
-        // this._selection = new Selection(this);
-        this._merges = new Merges(this, this._config.mergeData);
-    }
-
     constructor(context: SheetContext);
     constructor(context: SheetContext, config: Partial<IWorksheetConfig>);
     constructor(...argument: any) {
@@ -2242,6 +2237,11 @@ export class Worksheet {
         const data = this._cellData.spliceColumns(startRow, endRow - startRow + 1);
         this._cellData.insertColumns(destinationIndex, data);
         return this;
+    }
+
+    private _initialize(): void {
+        // this._selection = new Selection(this);
+        this._merges = new Merges(this, this._config.mergeData);
     }
 
     // /**

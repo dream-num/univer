@@ -10,9 +10,18 @@ import { VersionCode, VersionEnv } from './Version';
 export class UniverDoc {
     univerDocConfig: Partial<IDocumentData>;
 
+    private _context: DocContext;
+
     constructor(UniverDocData: Partial<IDocumentData> = {}) {
         this.univerDocConfig = UniverDocData;
         this._context = new DocContext(UniverDocData);
+    }
+
+    /**
+     * get DocContext
+     */
+    get context() {
+        return this._context;
     }
 
     static newInstance(UniverDocData: Partial<IDocumentData> = {}): UniverDoc {
@@ -39,15 +48,6 @@ export class UniverDoc {
      */
     static post<T = void>(config: Omit<IOHttpConfig, 'type'>): Promise<T> {
         return IOHttp({ ...config, type: 'POST' });
-    }
-
-    private _context: DocContext;
-
-    /**
-     * get DocContext
-     */
-    get context() {
-        return this._context;
     }
 
     /**

@@ -230,52 +230,6 @@ export class RangeList {
     }
 
     /**
-     * set style
-     *
-     * @param value style value
-     * @param type style type
-     * @returns  This range list, for chaining.
-     * @internal @preapproved
-     */
-    private _setStyle(
-        value: Nullable<number | string | ITextDecoration | BooleanNumber>,
-        type: string
-    ) {
-        let { _rangeList, _context, _commandManager, _worksheet } = this;
-
-        const setList = _rangeList.map((range) => {
-            let { startRow, startColumn, endRow, endColumn } = range;
-
-            // string converted to a two-dimensional array
-            const styleObj: IStyleData = { [type]: value };
-
-            const stylesMatrix = Tools.fillObjectMatrix(
-                endRow - startRow + 1,
-                endColumn - startColumn + 1,
-                styleObj
-            );
-
-            const setStyle: ISetRangeStyleActionData = {
-                sheetId: _worksheet.getSheetId(),
-                value: stylesMatrix,
-                rangeData: range,
-                actionName: SetRangeStyleAction.NAME,
-            };
-
-            return setStyle;
-        });
-
-        let command = new Command(
-            {
-                WorkBookUnit: _context.getWorkBook(),
-            },
-            ...setList
-        );
-        _commandManager.invoke(command);
-        return this;
-    }
-
-    /**
      * Sets the background color for each Range in the range list.
      *
      * @param color  The background color code in CSS notation such as '#ffffff' or 'white'; a null value resets the color.
@@ -787,6 +741,52 @@ export class RangeList {
             };
 
             return setValue;
+        });
+
+        let command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            ...setList
+        );
+        _commandManager.invoke(command);
+        return this;
+    }
+
+    /**
+     * set style
+     *
+     * @param value style value
+     * @param type style type
+     * @returns  This range list, for chaining.
+     * @internal @preapproved
+     */
+    private _setStyle(
+        value: Nullable<number | string | ITextDecoration | BooleanNumber>,
+        type: string
+    ) {
+        let { _rangeList, _context, _commandManager, _worksheet } = this;
+
+        const setList = _rangeList.map((range) => {
+            let { startRow, startColumn, endRow, endColumn } = range;
+
+            // string converted to a two-dimensional array
+            const styleObj: IStyleData = { [type]: value };
+
+            const stylesMatrix = Tools.fillObjectMatrix(
+                endRow - startRow + 1,
+                endColumn - startColumn + 1,
+                styleObj
+            );
+
+            const setStyle: ISetRangeStyleActionData = {
+                sheetId: _worksheet.getSheetId(),
+                value: stylesMatrix,
+                rangeData: range,
+                actionName: SetRangeStyleAction.NAME,
+            };
+
+            return setStyle;
         });
 
         let command = new Command(

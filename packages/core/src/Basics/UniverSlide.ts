@@ -11,9 +11,18 @@ import { ColorBuilder } from '../Sheets/Domain/ColorBuilder';
 export class UniverSlide {
     UniverSlideConfig: Partial<ISlideData>;
 
+    private _context: SlideContext;
+
     constructor(UniverSlideData: Partial<ISlideData> = {}) {
         this.UniverSlideConfig = UniverSlideData;
         this._context = new SlideContext(UniverSlideData);
+    }
+
+    /**
+     * get SlideContext
+     */
+    get context() {
+        return this._context;
     }
 
     static newInstance(UniverSlideData: Partial<ISlideData> = {}): UniverSlide {
@@ -44,15 +53,6 @@ export class UniverSlide {
 
     static newColor(): ColorBuilder {
         return new ColorBuilder();
-    }
-
-    private _context: SlideContext;
-
-    /**
-     * get SlideContext
-     */
-    get context() {
-        return this._context;
     }
 
     /**

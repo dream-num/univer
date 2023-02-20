@@ -86,6 +86,26 @@ export class IOCAttribute {
  * Register, get, inject instances
  */
 export class IOCContainer {
+    protected _circulate: CirculateData[];
+
+    protected _mappings: Map<any, any>;
+
+    protected _instance: Map<any, any>;
+
+    protected _configure: Map<any, any>;
+
+    protected _attribute: IOCAttribute;
+
+    constructor(attribute: AttributeConfig | IOCAttribute = {}) {
+        this._mappings = new Map<any, any>();
+        this._instance = new Map<any, any>();
+        this._configure = new Map<any, any>();
+        this._attribute = isAttribute(attribute)
+            ? attribute
+            : new IOCAttribute(attribute);
+        this._circulate = [];
+    }
+
     static postDestroy<T>(target: T): void {
         if (target) {
             const prototype = Object.getPrototypeOf(target);
@@ -124,166 +144,6 @@ export class IOCContainer {
                 }
             }
         }
-    }
-
-    protected _circulate: CirculateData[];
-
-    protected _mappings: Map<any, any>;
-
-    protected _instance: Map<any, any>;
-
-    protected _configure: Map<any, any>;
-
-    protected _attribute: IOCAttribute;
-
-    private _printCirculate(): string {
-        let message =
-            'The dependencies of some of the instance in the application context form a cycle：';
-        message += '\n';
-        this._circulate.reverse().forEach((element) => {
-            const { baseClass } = element;
-            const ImplClass: IOCMapClass<any> = this._mappings.get(baseClass);
-            const { name } = ImplClass;
-            message += '\n';
-            message += `Class: ${name} Field: ${baseClass}`;
-        });
-        return message;
-    }
-
-    private _clearCirculate(): void {
-        this._circulate = [];
-    }
-
-    private _addCirculate(baseClass: any, scope: IOCScope): void {
-        this._circulate.forEach((element) => {
-            if (element.baseClass === baseClass) {
-                if (element.scope === scope) {
-                    if (scope === IOCScope.prototype) {
-                        this._circulate.push({
-                            baseClass,
-                            scope,
-                        });
-                        throw new Error(this._printCirculate());
-                    }
-                }
-            }
-        });
-        this._circulate.push({
-            baseClass,
-            scope,
-        });
-    }
-
-    private _popCirculate(): void {
-        this._circulate.pop();
-    }
-
-    private _inject<T>(target: T, collect: any[]): void {
-        const prototype = Object.getPrototypeOf(target);
-        const table = AttributeMap.getTable(prototype);
-        for (const key of table) {
-            const container = Reflect.getMetadata('Container', prototype, key);
-            const injecting = Reflect.getMetadata('Inject', prototype, key);
-            const attribute = Reflect.getMetadata('Attribute', prototype, key);
-            const attributeValue = Reflect.getMetadata(
-                'AttributeValue',
-                prototype,
-                key
-            );
-            switch (typeof injecting) {
-                case 'string': {
-                    const value = target;
-                    value[key] = this._getInstance(
-                        injecting,
-                        collect,
-                        IOCScope.nothing,
-                        []
-                    );
-                    break;
-                }
-                case 'object': {
-                    const config = injecting as InjectConfig;
-                    const { mapping } = config;
-                    const { scope } = config;
-                    const { argument } = config;
-                    const value = target;
-                    value[key] = this._getInstance(
-                        mapping,
-                        collect,
-                        scope as IOCScope,
-                        argument as []
-                    );
-                }
-            }
-            if (container) {
-                const value = target;
-                value[key] = this;
-            }
-            if (attribute) {
-                const value = target;
-                value[key] = this._attribute;
-            }
-            if (attributeValue) {
-                const value = target;
-                value[key] = this._attribute.getValue();
-            }
-        }
-    }
-
-    private _getInstance<T>(
-        baseClass: any,
-        collect: any[],
-        scope: IOCScope,
-        argument: any[]
-    ) {
-        const ImplClass: IOCMapClass<T> = this._mappings.get(baseClass);
-        if (ImplClass) {
-            if (scope === IOCScope.nothing) {
-                const configure = this._configure.get(baseClass);
-                if (configure) {
-                    scope = configure.scope;
-                } else {
-                    scope = IOCScope.prototype;
-                }
-            }
-            switch (scope) {
-                case IOCScope.singleton: {
-                    const target = this._instance.get(baseClass);
-                    if (isDefine(target)) {
-                        return target;
-                    }
-                    const create: T = isDefine(argument)
-                        ? new ImplClass(...argument)
-                        : new ImplClass();
-                    this._instance.set(baseClass, create);
-                    this._addCirculate(baseClass, scope);
-                    this._inject(create, collect);
-                    this._popCirculate();
-                    collect.push([create, argument]);
-                    return create;
-                }
-                case IOCScope.prototype: {
-                    const target: T = isDefine(argument)
-                        ? new ImplClass(...argument)
-                        : new ImplClass();
-                    this._addCirculate(baseClass, scope);
-                    this._inject(target, collect);
-                    this._popCirculate();
-                    collect.push([target, argument]);
-                    return target;
-                }
-            }
-        }
-    }
-
-    constructor(attribute: AttributeConfig | IOCAttribute = {}) {
-        this._mappings = new Map<any, any>();
-        this._instance = new Map<any, any>();
-        this._configure = new Map<any, any>();
-        this._attribute = isAttribute(attribute)
-            ? attribute
-            : new IOCAttribute(attribute);
-        this._circulate = [];
     }
 
     inject(instance: object) {
@@ -392,6 +252,146 @@ export class IOCContainer {
 
     addSingletonClass<T>(implClass: IOCMapClass<T>): void {
         this.addSingletonMapping(implClass.name, implClass);
+    }
+
+    private _inject<T>(target: T, collect: any[]): void {
+        const prototype = Object.getPrototypeOf(target);
+        const table = AttributeMap.getTable(prototype);
+        for (const key of table) {
+            const container = Reflect.getMetadata('Container', prototype, key);
+            const injecting = Reflect.getMetadata('Inject', prototype, key);
+            const attribute = Reflect.getMetadata('Attribute', prototype, key);
+            const attributeValue = Reflect.getMetadata(
+                'AttributeValue',
+                prototype,
+                key
+            );
+            switch (typeof injecting) {
+                case 'string': {
+                    const value = target;
+                    value[key] = this._getInstance(
+                        injecting,
+                        collect,
+                        IOCScope.nothing,
+                        []
+                    );
+                    break;
+                }
+                case 'object': {
+                    const config = injecting as InjectConfig;
+                    const { mapping } = config;
+                    const { scope } = config;
+                    const { argument } = config;
+                    const value = target;
+                    value[key] = this._getInstance(
+                        mapping,
+                        collect,
+                        scope as IOCScope,
+                        argument as []
+                    );
+                }
+            }
+            if (container) {
+                const value = target;
+                value[key] = this;
+            }
+            if (attribute) {
+                const value = target;
+                value[key] = this._attribute;
+            }
+            if (attributeValue) {
+                const value = target;
+                value[key] = this._attribute.getValue();
+            }
+        }
+    }
+
+    private _getInstance<T>(
+        baseClass: any,
+        collect: any[],
+        scope: IOCScope,
+        argument: any[]
+    ) {
+        const ImplClass: IOCMapClass<T> = this._mappings.get(baseClass);
+        if (ImplClass) {
+            if (scope === IOCScope.nothing) {
+                const configure = this._configure.get(baseClass);
+                if (configure) {
+                    scope = configure.scope;
+                } else {
+                    scope = IOCScope.prototype;
+                }
+            }
+            switch (scope) {
+                case IOCScope.singleton: {
+                    const target = this._instance.get(baseClass);
+                    if (isDefine(target)) {
+                        return target;
+                    }
+                    const create: T = isDefine(argument)
+                        ? new ImplClass(...argument)
+                        : new ImplClass();
+                    this._instance.set(baseClass, create);
+                    this._addCirculate(baseClass, scope);
+                    this._inject(create, collect);
+                    this._popCirculate();
+                    collect.push([create, argument]);
+                    return create;
+                }
+                case IOCScope.prototype: {
+                    const target: T = isDefine(argument)
+                        ? new ImplClass(...argument)
+                        : new ImplClass();
+                    this._addCirculate(baseClass, scope);
+                    this._inject(target, collect);
+                    this._popCirculate();
+                    collect.push([target, argument]);
+                    return target;
+                }
+            }
+        }
+    }
+
+    private _printCirculate(): string {
+        let message =
+            'The dependencies of some of the instance in the application context form a cycle：';
+        message += '\n';
+        this._circulate.reverse().forEach((element) => {
+            const { baseClass } = element;
+            const ImplClass: IOCMapClass<any> = this._mappings.get(baseClass);
+            const { name } = ImplClass;
+            message += '\n';
+            message += `Class: ${name} Field: ${baseClass}`;
+        });
+        return message;
+    }
+
+    private _clearCirculate(): void {
+        this._circulate = [];
+    }
+
+    private _addCirculate(baseClass: any, scope: IOCScope): void {
+        this._circulate.forEach((element) => {
+            if (element.baseClass === baseClass) {
+                if (element.scope === scope) {
+                    if (scope === IOCScope.prototype) {
+                        this._circulate.push({
+                            baseClass,
+                            scope,
+                        });
+                        throw new Error(this._printCirculate());
+                    }
+                }
+            }
+        });
+        this._circulate.push({
+            baseClass,
+            scope,
+        });
+    }
+
+    private _popCirculate(): void {
+        this._circulate.pop();
     }
 }
 

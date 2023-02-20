@@ -88,145 +88,20 @@ export class Workbook {
     }
 
     /**
-     * Get Default Sheet
-     * @private
-     */
-    private _getDefaultWorkSheet(): void {
-        const { _context, _config, _worksheets } = this;
-        const { sheets, sheetOrder } = _config;
-
-        // One worksheet by default
-        if (Tools.isEmptyObject(sheets)) {
-            sheets[DEFAULT_WORKSHEET.id] = Object.assign(DEFAULT_WORKSHEET, {
-                status: BooleanNumber.TRUE,
-            });
-        }
-
-        let firstWorksheet = null;
-
-        for (let sheetId in sheets) {
-            let config = sheets[sheetId];
-            config.name = NameGen.getSheetName(config.name);
-            const worksheet = new Worksheet(_context, config);
-            _worksheets.set(sheetId, worksheet);
-            if (!sheetOrder.includes(sheetId)) {
-                sheetOrder.push(sheetId);
-            }
-            if (firstWorksheet == null) {
-                firstWorksheet = worksheet;
-            }
-        }
-
-        if (firstWorksheet) {
-            firstWorksheet.activate();
-        }
-    }
-
-    /**
-     * Get Default Active Sheet
-     * @private
-     */
-    private _setDefaultActiveSheet(): void {
-        if (this._worksheets.size > 0) {
-            this._worksheets.forEach((sheet) => {
-                sheet.setStatus(BooleanNumber.FALSE);
-            });
-            this._worksheets[0].setStatus(BooleanNumber.TRUE);
-        }
-    }
-
-    /**
-     * Get the range array based on the range string and sheet id
      *
-     * @privateRemarks
-     * zh: 根据范围字符串和sheet id取得范围数组
-     *
-     * @param txt - range string
+     * @param rangeData
      * @returns
-     *
-     * @internal
      */
-    private _getCellRange(txt: IRangeStringData): IGridRange {
-        let sheetTxt: string = '';
-        let rangeTxt: string | string[] = '';
-        if (txt.indexOf('!') > -1) {
-            const val = txt.split('!');
-            sheetTxt = val[0];
-            rangeTxt = val[1];
-            sheetTxt = sheetTxt.replace(/\\'/g, "'").replace(/''/g, "'");
-            if (
-                sheetTxt.substring(0, 1) === "'" &&
-                sheetTxt.substring(sheetTxt.length - 1, 1) === "'"
-            ) {
-                sheetTxt = sheetTxt.substring(1, sheetTxt.length - 1);
-            }
-        } else {
-            rangeTxt = txt;
-        }
-        if (rangeTxt.indexOf(':') === -1) {
-            const row = parseInt(rangeTxt.replace(/[^0-9]/g, ''), 10) - 1;
-            const col = Tools.ABCatNum(rangeTxt.replace(/[^A-Za-z]/g, ''));
+    static rangeDataToRangeStringData(rangeData: IRangeData) {
+        const { startRow, endRow, startColumn, endColumn } = rangeData;
 
-            if (!Number.isNaN(row) && !Number.isNaN(col)) {
-                const item = {
-                    sheetId: sheetTxt,
-                    rangeData: {
-                        startRow: row,
-                        endRow: row,
-                        startColumn: col,
-                        endColumn: col,
-                    },
-                };
-                return item;
-            }
-            return DEFAULT_RANGE_ARRAY;
-        }
-        rangeTxt = rangeTxt.split(':');
+        return `${Tools.chatAtABC(startColumn) + (startRow + 1)}:${Tools.chatAtABC(
+            endColumn
+        )}${endRow + 1}`;
+    }
 
-        const row: IRowStartEndData = [0, 0];
-        const col: IColumnStartEndData = [0, 0];
-        const maxRow =
-            this.getSheetBySheetName(sheetTxt)?.getMaxRows() ||
-            this.getActiveSheet()?.getMaxRows();
-        const maxCol =
-            this.getSheetBySheetName(sheetTxt)?.getMaxColumns() ||
-            this.getActiveSheet()?.getMaxColumns();
-        row[0] = parseInt(rangeTxt[0].replace(/[^0-9]/g, ''), 10) - 1;
-        row[1] = parseInt(rangeTxt[1].replace(/[^0-9]/g, ''), 10) - 1;
-
-        if (Number.isNaN(row[0])) {
-            row[0] = 0;
-        }
-
-        if (Number.isNaN(row[1])) {
-            row[1] = maxRow!;
-        }
-
-        if (row[0] > row[1]) {
-            return DEFAULT_RANGE_ARRAY;
-        }
-        col[0] = Tools.ABCatNum(rangeTxt[0].replace(/[^A-Za-z]/g, ''));
-        col[1] = Tools.ABCatNum(rangeTxt[1].replace(/[^A-Za-z]/g, ''));
-        if (Number.isNaN(col[0])) {
-            col[0] = 0;
-        }
-        if (Number.isNaN(col[1])) {
-            col[1] = maxCol!;
-        }
-        if (col[0] > col[1]) {
-            return DEFAULT_RANGE_ARRAY;
-        }
-
-        const item = {
-            sheetId: this.getSheetBySheetName(sheetTxt)?.getSheetId() || '',
-            rangeData: {
-                startRow: row[0],
-                endRow: row[1],
-                startColumn: col[0],
-                endColumn: col[1],
-            },
-        };
-        return item;
+    static isIRangeType(range: IRangeType | IRangeType[]): Boolean {
+        return typeof range === 'string' || 'startRow' in range || 'row' in range;
     }
 
     getUnitId() {
@@ -697,7 +572,7 @@ export class Workbook {
      *
      * @returns void
      */
-    flush(): void { }
+    flush(): void {}
 
     setSheetOrder(sheetId: string, order: number): void {
         // const { _sheetOrder } = this;
@@ -847,10 +722,6 @@ export class Workbook {
     //     return new FilterCriteriaBuilder();
     // }
 
-    static isIRangeType(range: IRangeType | IRangeType[]): Boolean {
-        return typeof range === 'string' || 'startRow' in range || 'row' in range;
-    }
-
     /**
      * transform any range type to range data
      *
@@ -912,19 +783,6 @@ export class Workbook {
         return DEFAULT_RANGE_ARRAY;
     }
 
-    /**
-     *
-     * @param rangeData
-     * @returns
-     */
-    static rangeDataToRangeStringData(rangeData: IRangeData) {
-        const { startRow, endRow, startColumn, endColumn } = rangeData;
-
-        return `${Tools.chatAtABC(startColumn) + (startRow + 1)}:${Tools.chatAtABC(
-            endColumn
-        )}${endRow + 1}`;
-    }
-
     load(config: IWorkbookConfig) {
         // TODO: new Command
         this._config = config;
@@ -933,5 +791,147 @@ export class Workbook {
     save(): IWorkbookConfig {
         // TODO
         return this._config;
+    }
+
+    /**
+     * Get Default Sheet
+     * @private
+     */
+    private _getDefaultWorkSheet(): void {
+        const { _context, _config, _worksheets } = this;
+        const { sheets, sheetOrder } = _config;
+
+        // One worksheet by default
+        if (Tools.isEmptyObject(sheets)) {
+            sheets[DEFAULT_WORKSHEET.id] = Object.assign(DEFAULT_WORKSHEET, {
+                status: BooleanNumber.TRUE,
+            });
+        }
+
+        let firstWorksheet = null;
+
+        for (let sheetId in sheets) {
+            let config = sheets[sheetId];
+            config.name = NameGen.getSheetName(config.name);
+            const worksheet = new Worksheet(_context, config);
+            _worksheets.set(sheetId, worksheet);
+            if (!sheetOrder.includes(sheetId)) {
+                sheetOrder.push(sheetId);
+            }
+            if (firstWorksheet == null) {
+                firstWorksheet = worksheet;
+            }
+        }
+
+        if (firstWorksheet) {
+            firstWorksheet.activate();
+        }
+    }
+
+    /**
+     * Get Default Active Sheet
+     * @private
+     */
+    private _setDefaultActiveSheet(): void {
+        if (this._worksheets.size > 0) {
+            this._worksheets.forEach((sheet) => {
+                sheet.setStatus(BooleanNumber.FALSE);
+            });
+            this._worksheets[0].setStatus(BooleanNumber.TRUE);
+        }
+    }
+
+    /**
+     * Get the range array based on the range string and sheet id
+     *
+     * @privateRemarks
+     * zh: 根据范围字符串和sheet id取得范围数组
+     *
+     * @param txt - range string
+     * @returns
+     *
+     * @internal
+     */
+    private _getCellRange(txt: IRangeStringData): IGridRange {
+        let sheetTxt: string = '';
+        let rangeTxt: string | string[] = '';
+        if (txt.indexOf('!') > -1) {
+            const val = txt.split('!');
+            sheetTxt = val[0];
+            rangeTxt = val[1];
+            sheetTxt = sheetTxt.replace(/\\'/g, "'").replace(/''/g, "'");
+            if (
+                sheetTxt.substring(0, 1) === "'" &&
+                sheetTxt.substring(sheetTxt.length - 1, 1) === "'"
+            ) {
+                sheetTxt = sheetTxt.substring(1, sheetTxt.length - 1);
+            }
+        } else {
+            rangeTxt = txt;
+        }
+        if (rangeTxt.indexOf(':') === -1) {
+            const row = parseInt(rangeTxt.replace(/[^0-9]/g, ''), 10) - 1;
+            const col = Tools.ABCatNum(rangeTxt.replace(/[^A-Za-z]/g, ''));
+
+            if (!Number.isNaN(row) && !Number.isNaN(col)) {
+                const item = {
+                    sheetId: sheetTxt,
+                    rangeData: {
+                        startRow: row,
+                        endRow: row,
+                        startColumn: col,
+                        endColumn: col,
+                    },
+                };
+                return item;
+            }
+            return DEFAULT_RANGE_ARRAY;
+        }
+        rangeTxt = rangeTxt.split(':');
+
+        const row: IRowStartEndData = [0, 0];
+        const col: IColumnStartEndData = [0, 0];
+        const maxRow =
+            this.getSheetBySheetName(sheetTxt)?.getMaxRows() ||
+            this.getActiveSheet()?.getMaxRows();
+        const maxCol =
+            this.getSheetBySheetName(sheetTxt)?.getMaxColumns() ||
+            this.getActiveSheet()?.getMaxColumns();
+        row[0] = parseInt(rangeTxt[0].replace(/[^0-9]/g, ''), 10) - 1;
+        row[1] = parseInt(rangeTxt[1].replace(/[^0-9]/g, ''), 10) - 1;
+
+        if (Number.isNaN(row[0])) {
+            row[0] = 0;
+        }
+
+        if (Number.isNaN(row[1])) {
+            row[1] = maxRow!;
+        }
+
+        if (row[0] > row[1]) {
+            return DEFAULT_RANGE_ARRAY;
+        }
+        col[0] = Tools.ABCatNum(rangeTxt[0].replace(/[^A-Za-z]/g, ''));
+        col[1] = Tools.ABCatNum(rangeTxt[1].replace(/[^A-Za-z]/g, ''));
+        if (Number.isNaN(col[0])) {
+            col[0] = 0;
+        }
+        if (Number.isNaN(col[1])) {
+            col[1] = maxCol!;
+        }
+        if (col[0] > col[1]) {
+            return DEFAULT_RANGE_ARRAY;
+        }
+
+        const item = {
+            sheetId: this.getSheetBySheetName(sheetTxt)?.getSheetId() || '',
+            rangeData: {
+                startRow: row[0],
+                endRow: row[1],
+                startColumn: col[0],
+                endColumn: col[1],
+            },
+        };
+        return item;
     }
 }

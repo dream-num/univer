@@ -4,7 +4,7 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true
     },
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    // "editor.defaultFormatter": "esbenp.prettier-vscode",
     "commentTranslate.targetLanguage": "zh-CN",
     "[html]": {
         "editor.defaultFormatter": "vscode.html-language-features"

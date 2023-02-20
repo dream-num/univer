@@ -14,5 +14,5 @@ export const THEME_COLORS = {
         [ThemeColorType.LIGHT2]: '#E7E6E6',
         [ThemeColorType.HYPERLINK]: '#0563C1',
         [ThemeColorType.FOLLOWED_HYPERLINK]: '#954F72',
-    }
-}
+    },
+};

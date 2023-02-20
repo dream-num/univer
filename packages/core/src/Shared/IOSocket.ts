@@ -84,6 +84,32 @@ export class IOSocket {
         this._config = setting;
     }
 
+    link(): void {
+        this._create();
+        this._bind();
+    }
+
+    send(body: IOSocketSendBody): void {
+        this._socket.send(body);
+    }
+
+    destroy(): void {
+        const listen = this._listens.get(IOSocketListenType.DESTROY);
+        if (listen) {
+            listen();
+        }
+        this._clear();
+        this._listens.clear();
+    }
+
+    on(type: IOSocketListenType, listen: Function): void {
+        this._listens.set(type, listen);
+    }
+
+    close(): void {
+        this._socket && this._socket.close();
+    }
+
     private _create(): void {
         const { _config } = this;
         this._socket = new WebSocket(_config.url);
@@ -192,31 +218,5 @@ export class IOSocket {
         this._clear();
         this._create();
         this._bind();
-    }
-
-    link(): void {
-        this._create();
-        this._bind();
-    }
-
-    send(body: IOSocketSendBody): void {
-        this._socket.send(body);
-    }
-
-    destroy(): void {
-        const listen = this._listens.get(IOSocketListenType.DESTROY);
-        if (listen) {
-            listen();
-        }
-        this._clear();
-        this._listens.clear();
-    }
-
-    on(type: IOSocketListenType, listen: Function): void {
-        this._listens.set(type, listen);
-    }
-
-    close(): void {
-        this._socket && this._socket.close();
     }
 }

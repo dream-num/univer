@@ -102,6 +102,30 @@ export class LRUMap<K, V> {
 
     newest: Entry<K, V> | undefined;
 
+    constructor(entries: Iterable<[K, V]>);
+    constructor(limit: number);
+    constructor(limit: number, entries: Iterable<[K, V]>);
+    constructor(...parameter: any) {
+        if (LRUHelper.hasLength(parameter, 1)) {
+            if (LRUHelper.isNumber(parameter[0])) {
+                const limit = parameter[0];
+                this._initialize(limit, undefined);
+                return;
+            }
+            if (LRUHelper.isIterable<[K, V]>(parameter[0])) {
+                const entries = parameter[0];
+                this._initialize(0, entries);
+                return;
+            }
+            return;
+        }
+        if (LRUHelper.hasLength(parameter, 2)) {
+            const limit = parameter[0];
+            const entries = parameter[1];
+            this._initialize(limit, entries);
+        }
+    }
+
     _initialize(limit: number, entries: Iterable<[K, V]> | undefined): void {
         this.oldest = undefined;
         this.newest = undefined;
@@ -141,30 +165,6 @@ export class LRUMap<K, V> {
             this.newest[NEWER] = entry; // E. <-- D
         }
         this.newest = entry;
-    }
-
-    constructor(entries: Iterable<[K, V]>);
-    constructor(limit: number);
-    constructor(limit: number, entries: Iterable<[K, V]>);
-    constructor(...parameter: any) {
-        if (LRUHelper.hasLength(parameter, 1)) {
-            if (LRUHelper.isNumber(parameter[0])) {
-                const limit = parameter[0];
-                this._initialize(limit, undefined);
-                return;
-            }
-            if (LRUHelper.isIterable<[K, V]>(parameter[0])) {
-                const entries = parameter[0];
-                this._initialize(0, entries);
-                return;
-            }
-            return;
-        }
-        if (LRUHelper.hasLength(parameter, 2)) {
-            const limit = parameter[0];
-            const entries = parameter[1];
-            this._initialize(limit, entries);
-        }
     }
 
     assign(entries: Iterable<[K, V]>): void {

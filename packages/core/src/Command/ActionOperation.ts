@@ -3,6 +3,10 @@ import { ActionOperationType, IActionData } from './ActionBase';
 export class ActionOperation<T extends IActionData> {
     protected _action: T;
 
+    protected constructor(action: T) {
+        this._action = action;
+    }
+
     static hasObserver<U extends IActionData>(action: U): boolean {
         if (action.operation) {
             return (
@@ -46,10 +50,6 @@ export class ActionOperation<T extends IActionData> {
     static make<U extends IActionData>(action: U) {
         action.operation = ActionOperationType.DEFAULT_ACTION;
         return new ActionOperation<U>(action);
-    }
-
-    protected constructor(action: T) {
-        this._action = action;
     }
 
     removeObserver() {

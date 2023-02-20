@@ -81,18 +81,6 @@ type IValueOptionsType = {
  * @beta
  */
 export class Range {
-    static foreach(
-        rangeData: IRangeData,
-        action: (row: number, column: number) => void
-    ): void {
-        const { startRow, startColumn, endRow, endColumn } = rangeData;
-        for (let i = startRow; i <= endRow; i++) {
-            for (let j = startColumn; j <= endColumn; j++) {
-                action(i, j);
-            }
-        }
-    }
-
     private _commandManager: CommandManager;
 
     private _context: SheetContext;
@@ -117,6 +105,18 @@ export class Range {
         // The user entered an invalid range
         if (Object.values(this._rangeData).includes(-1)) {
             console.error('Invalid range,default set index -1');
+        }
+    }
+
+    static foreach(
+        rangeData: IRangeData,
+        action: (row: number, column: number) => void
+    ): void {
+        const { startRow, startColumn, endRow, endColumn } = rangeData;
+        for (let i = startRow; i <= endRow; i++) {
+            for (let j = startColumn; j <= endColumn; j++) {
+                action(i, j);
+            }
         }
     }
 
@@ -442,23 +442,6 @@ export class Range {
      */
     getStrikeThrough(): ITextDecoration {
         return this.getStrikeThroughs()[0][0];
-    }
-
-    /**
-     *
-     * @param arg Shorthand for the style that gets
-     * @returns style value
-     */
-    private _getStyles(arg: string) {
-        return this.getValues().map((row) =>
-            row.map((cell: Nullable<ICellData>) => {
-                const styles = this._context.getWorkBook().getStyles();
-
-                // const style = getStyle(styles, cell);
-                const style = styles && styles.getStyleByCell(cell);
-                return (style && style[arg]) || DEFAULT_STYLES[arg];
-            })
-        );
     }
 
     /**
@@ -873,74 +856,6 @@ export class Range {
         }
 
         return false;
-    }
-
-    // isStartColumnBounded() {}
-    // isStartRowBounded() {}
-
-    private _setStyle(
-        value: Nullable<string | number | ITextDecoration>,
-        type: string
-    ) {
-        const { _context, _worksheet, _commandManager } = this;
-
-        const { startRow, endRow, startColumn, endColumn } = this._rangeData;
-
-        // string converted to a two-dimensional array
-        const styleObj = { [type]: value };
-
-        const stylesMatrix = Tools.fillObjectMatrix(
-            endRow - startRow + 1,
-            endColumn - startColumn + 1,
-            styleObj
-        );
-
-        const setStyle: ISetRangeStyleActionData = {
-            sheetId: _worksheet.getSheetId(),
-            actionName: SetRangeStyleAction.NAME,
-            value: stylesMatrix,
-            rangeData: this._rangeData,
-        };
-
-        const command = new Command(
-            {
-                WorkBookUnit: _context.getWorkBook(),
-            },
-            setStyle
-        );
-        _commandManager.invoke(command);
-        return this;
-    }
-
-    private _setStyles(
-        values: Array<Array<Nullable<string | number | ITextDecoration>>>,
-        type: string
-    ) {
-        const { _context, _worksheet, _commandManager } = this;
-
-        const { startRow, endRow, startColumn, endColumn } = this._rangeData;
-
-        const matrix = new ObjectMatrix<IStyleData>();
-        for (let r = 0; r < endRow - startRow + 1; r++) {
-            for (let c = 0; c < endColumn - startColumn + 1; c++) {
-                matrix.setValue(r, c, { [type]: values[r][c] });
-            }
-        }
-        const setStyle: ISetRangeStyleActionData = {
-            sheetId: _worksheet.getSheetId(),
-            actionName: ACTION_NAMES.SET_RANGE_STYLE_ACTION,
-            value: matrix.getData(),
-            rangeData: this._rangeData,
-        };
-
-        const command = new Command(
-            {
-                WorkBookUnit: _context.getWorkBook(),
-            },
-            setStyle
-        );
-        _commandManager.invoke(command);
-        return this;
     }
 
     /**
@@ -3750,6 +3665,55 @@ export class Range {
         return rangeMatrix;
     }
 
+    forEach(action: (row: number, column: number) => void): void {
+        Range.foreach(this._rangeData, action);
+    }
+
+    /**
+     * Randomizes the order of the rows in the given range.
+     * TODO：待研究特性
+     * 1. 公式内的范围也会变化
+     * 2. 并不是所有范围都支持随机处理
+     * @returns
+     */
+    randomize() {
+        const { _context, _worksheet, _commandManager, _rangeData } = this;
+        const { startRow, startColumn } = _rangeData;
+        const cellValue = new ObjectMatrix<ICellData>();
+
+        const value = Tools.randSort(this.getMatrix().toArray());
+
+        value.forEach((row, r) =>
+            row.forEach((cell, c) => {
+                cell = cell as ICellData;
+                cellValue.setValue(r + startRow, c + startColumn, cell || {});
+            })
+        );
+
+        const setValue: ISetRangeDataActionData = {
+            sheetId: _worksheet.getSheetId(),
+            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+            cellValue: cellValue.getData(),
+        };
+        const command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            setValue
+        );
+        _commandManager.invoke(command);
+    }
+
+    /**
+     * Determine whether a range is legal
+     */
+    isValid(): boolean {
+        if (Object.values(this._rangeData).includes(-1)) {
+            return false;
+        }
+        return true;
+    }
+
     /**
      * en:
      *
@@ -3870,53 +3834,89 @@ export class Range {
         return [value, range];
     }
 
-    forEach(action: (row: number, column: number) => void): void {
-        Range.foreach(this._rangeData, action);
-    }
-
     /**
-     * Randomizes the order of the rows in the given range.
-     * TODO：待研究特性
-     * 1. 公式内的范围也会变化
-     * 2. 并不是所有范围都支持随机处理
-     * @returns
+     *
+     * @param arg Shorthand for the style that gets
+     * @returns style value
      */
-    randomize() {
-        const { _context, _worksheet, _commandManager, _rangeData } = this;
-        const { startRow, startColumn } = _rangeData;
-        const cellValue = new ObjectMatrix<ICellData>();
+    private _getStyles(arg: string) {
+        return this.getValues().map((row) =>
+            row.map((cell: Nullable<ICellData>) => {
+                const styles = this._context.getWorkBook().getStyles();
 
-        const value = Tools.randSort(this.getMatrix().toArray());
-
-        value.forEach((row, r) =>
-            row.forEach((cell, c) => {
-                cell = cell as ICellData;
-                cellValue.setValue(r + startRow, c + startColumn, cell || {});
+                // const style = getStyle(styles, cell);
+                const style = styles && styles.getStyleByCell(cell);
+                return (style && style[arg]) || DEFAULT_STYLES[arg];
             })
         );
+    }
 
-        const setValue: ISetRangeDataActionData = {
+    // isStartColumnBounded() {}
+    // isStartRowBounded() {}
+
+    private _setStyle(
+        value: Nullable<string | number | ITextDecoration>,
+        type: string
+    ) {
+        const { _context, _worksheet, _commandManager } = this;
+
+        const { startRow, endRow, startColumn, endColumn } = this._rangeData;
+
+        // string converted to a two-dimensional array
+        const styleObj = { [type]: value };
+
+        const stylesMatrix = Tools.fillObjectMatrix(
+            endRow - startRow + 1,
+            endColumn - startColumn + 1,
+            styleObj
+        );
+
+        const setStyle: ISetRangeStyleActionData = {
             sheetId: _worksheet.getSheetId(),
-            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-            cellValue: cellValue.getData(),
+            actionName: SetRangeStyleAction.NAME,
+            value: stylesMatrix,
+            rangeData: this._rangeData,
         };
+
         const command = new Command(
             {
                 WorkBookUnit: _context.getWorkBook(),
             },
-            setValue
+            setStyle
         );
         _commandManager.invoke(command);
+        return this;
     }
 
-    /**
-     * Determine whether a range is legal
-     */
-    isValid(): boolean {
-        if (Object.values(this._rangeData).includes(-1)) {
-            return false;
+    private _setStyles(
+        values: Array<Array<Nullable<string | number | ITextDecoration>>>,
+        type: string
+    ) {
+        const { _context, _worksheet, _commandManager } = this;
+
+        const { startRow, endRow, startColumn, endColumn } = this._rangeData;
+
+        const matrix = new ObjectMatrix<IStyleData>();
+        for (let r = 0; r < endRow - startRow + 1; r++) {
+            for (let c = 0; c < endColumn - startColumn + 1; c++) {
+                matrix.setValue(r, c, { [type]: values[r][c] });
+            }
         }
-        return true;
+        const setStyle: ISetRangeStyleActionData = {
+            sheetId: _worksheet.getSheetId(),
+            actionName: ACTION_NAMES.SET_RANGE_STYLE_ACTION,
+            value: matrix.getData(),
+            rangeData: this._rangeData,
+        };
+
+        const command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            setStyle
+        );
+        _commandManager.invoke(command);
+        return this;
     }
 
     // /**

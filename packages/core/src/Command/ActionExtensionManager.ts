@@ -5,16 +5,16 @@ import { ActionExtensionRegister } from './ActionExtensionRegister';
 export class ActionExtensionManager {
     private _actionExtensionFactoryList: BaseActionExtensionFactory[];
 
-    // 挂载到实例上
+    // mounted on the instance
     private _register: ActionExtensionRegister;
-
-    getRegister(): ActionExtensionRegister {
-        return this._register;
-    }
 
     constructor() {
         this._register = new ActionExtensionRegister();
         this._register.initialize();
+    }
+
+    getRegister(): ActionExtensionRegister {
+        return this._register;
     }
 
     /**

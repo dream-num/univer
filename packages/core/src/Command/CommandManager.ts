@@ -25,10 +25,6 @@ export class CommandManager {
 
     private _actionExtensionManager: ActionExtensionManager;
 
-    getActionExtensionManager(): ActionExtensionManager {
-        return this._actionExtensionManager;
-    }
-
     constructor(context: ContextBase) {
         this._undoManager = context.getUndoManager();
         this._actionExtensionManager = new ActionExtensionManager();
@@ -59,6 +55,10 @@ export class CommandManager {
 
     static getCommandInjectorObservers(): CommandInjectorObservers {
         return this._commandInjectorObservers;
+    }
+
+    getActionExtensionManager(): ActionExtensionManager {
+        return this._actionExtensionManager;
     }
 
     undo(): void {

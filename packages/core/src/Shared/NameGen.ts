@@ -6,6 +6,16 @@ let identity: number = 0;
  * TODO... 添加到 context 上
  */
 export class NameGen {
+    static getSheetName(name?: string): string {
+        if (name === undefined) {
+            name = NameGen._generateName();
+        }
+        while (NameGen._checkedName(name)) {
+            name = NameGen._generateName();
+        }
+        return name;
+    }
+
     private static _generateName(): string {
         return `sheet${++identity}`;
     }
@@ -16,15 +26,5 @@ export class NameGen {
             include.push(name);
         }
         return checked;
-    }
-
-    static getSheetName(name?: string): string {
-        if (name === undefined) {
-            name = NameGen._generateName();
-        }
-        while (NameGen._checkedName(name)) {
-            name = NameGen._generateName();
-        }
-        return name;
     }
 }

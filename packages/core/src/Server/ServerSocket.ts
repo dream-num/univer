@@ -32,18 +32,29 @@ export class ServerSocket extends ServerBase {
     initialize() {
         this.messageQueue = new MessageQueue<IOServerMessage>();
         this.status = MessageQueueStatus.WAIT;
-        this.globalSendResolve = () => {};
+        this.globalSendResolve = () => { };
         if (this.config.socketEnable) {
             this.socket = new IOSocket({ url: this.config.socketUrl });
             this.socket.on(IOSocketListenType.MESSAGE, (event: MessageEvent) => {
                 this.checkupReceiveMessage(event.data);
             });
-            this.socket.on(IOSocketListenType.ERROR, () => {});
-            this.socket.on(IOSocketListenType.OPEN, () => {});
-            this.socket.on(IOSocketListenType.CLOSE, () => {});
-            this.socket.on(IOSocketListenType.RETRY, () => {});
-            this.socket.on(IOSocketListenType.DESTROY, () => {});
+            this.socket.on(IOSocketListenType.ERROR, () => { });
+            this.socket.on(IOSocketListenType.OPEN, () => { });
+            this.socket.on(IOSocketListenType.CLOSE, () => { });
+            this.socket.on(IOSocketListenType.RETRY, () => { });
+            this.socket.on(IOSocketListenType.DESTROY, () => { });
             this.socket.link();
+        }
+    }
+
+    /**
+     * zh: 消息添加到发送队列中
+     * @param data
+     */
+    pushMessageQueue(changed: ISheetActionData[]): void {
+        if (this.config.socketEnable) {
+            this.messageQueue.push(this.packMessage(changed));
+            this.sendMessageQueue();
         }
     }
 
@@ -86,17 +97,6 @@ export class ServerSocket extends ServerBase {
                 this.popTopMessage();
                 this.globalSendResolve();
             }
-        }
-    }
-
-    /**
-     * zh: 消息添加到发送队列中
-     * @param data
-     */
-    pushMessageQueue(changed: ISheetActionData[]): void {
-        if (this.config.socketEnable) {
-            this.messageQueue.push(this.packMessage(changed));
-            this.sendMessageQueue();
         }
     }
 

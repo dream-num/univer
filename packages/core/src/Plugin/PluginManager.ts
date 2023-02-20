@@ -12,16 +12,6 @@ export class PluginManager {
 
     protected _initialized: boolean;
 
-    protected _initialize() {
-        if (this._initialized) {
-            this._initialized = false;
-            this._plugins.forEach((plugin: BasePlugin) => {
-                plugin.onCreate(this._context);
-                plugin.onMounted(this._context);
-            });
-        }
-    }
-
     constructor(context: ContextBase, plugins: BasePlugin[] = []) {
         this._context = context;
         this._plugins = [];
@@ -73,5 +63,15 @@ export class PluginManager {
             }
         }
         return null;
+    }
+
+    protected _initialize() {
+        if (this._initialized) {
+            this._initialized = false;
+            this._plugins.forEach((plugin: BasePlugin) => {
+                plugin.onCreate(this._context);
+                plugin.onMounted(this._context);
+            });
+        }
     }
 }

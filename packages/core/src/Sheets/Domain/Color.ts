@@ -4,6 +4,12 @@ import { ColorBuilder } from './ColorBuilder';
 import { THEME_COLORS } from '../../Const/THEME_COLOR_MAP';
 
 export class Color {
+    protected _builder: ColorBuilder;
+
+    constructor(builder: ColorBuilder) {
+        this._builder = builder;
+    }
+
     static rgbColorToHexValue(color: RgbColor): string {
         return `#${(
             (1 << 24) +
@@ -42,12 +48,6 @@ export class Color {
             string = `rgba(${r},${g},${b})`;
         }
         return string;
-    }
-
-    protected _builder: ColorBuilder;
-
-    constructor(builder: ColorBuilder) {
-        this._builder = builder;
     }
 
     asRgbColor(): RgbColor {

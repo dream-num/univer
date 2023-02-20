@@ -63,14 +63,6 @@ export abstract class ActionBase<
         this._operation = ActionOperationType.OBSERVER_ACTION;
     }
 
-    abstract redo(): void;
-
-    abstract undo(): void;
-
-    abstract do(): R;
-
-    abstract validate(): boolean;
-
     getDoActionData() {
         return this._doActionData;
     }
@@ -90,4 +82,12 @@ export abstract class ActionBase<
     removeOperation(operation: ActionOperationType) {
         this._operation &= ~operation;
     }
+
+    abstract redo(): void;
+
+    abstract undo(): void;
+
+    abstract do(): R;
+
+    abstract validate(): boolean;
 }

@@ -4,6 +4,19 @@ import { Nullable } from '../Shared';
  */
 export class EventState {
     /**
+     * An WorkBookObserver can set this property to true to prevent subsequent observers of being notified
+     */
+    skipNextObservers: boolean | undefined;
+
+    /**
+     * This will be populated with the return value of the last function that was executed.
+     * If it is the first function in the callback chain it will be the event data.
+     */
+    lastReturnValue?: unknown;
+
+    isStopPropagation: boolean = false;
+
+    /**
      * Create a new EventState
      * @param skipNextObservers defines a flag which will instruct the observable to skip following observers when set to true
      * @param target defines the original target of the state
@@ -24,19 +37,6 @@ export class EventState {
         this.skipNextObservers = skipNextObservers;
         return this;
     }
-
-    /**
-     * An WorkBookObserver can set this property to true to prevent subsequent observers of being notified
-     */
-    skipNextObservers: boolean | undefined;
-
-    /**
-     * This will be populated with the return value of the last function that was executed.
-     * If it is the first function in the callback chain it will be the event data.
-     */
-    lastReturnValue?: unknown;
-
-    isStopPropagation: boolean = false;
 
     stopPropagation() {
         this.isStopPropagation = true;
@@ -69,7 +69,7 @@ export class Observer<T = void> {
          * Defines the callback to call when the observer is notified
          */
         public callback: (eventData: T, eventState: EventState) => void
-    ) {}
+    ) { }
 }
 
 /**
@@ -91,13 +91,6 @@ export class Observable<T> {
         | undefined;
 
     /**
-     * Gets the list of observers
-     */
-    get observers(): Array<Observer<T>> {
-        return this._observers;
-    }
-
-    /**
      * Creates a new observable
      * @param onObserverAdded defines a callback to call when a new observer is added
      */
@@ -107,6 +100,13 @@ export class Observable<T> {
         if (onObserverAdded) {
             this._onObserverAdded = onObserverAdded;
         }
+    }
+
+    /**
+     * Gets the list of observers
+     */
+    get observers(): Array<Observer<T>> {
+        return this._observers;
     }
 
     /**
@@ -189,31 +189,6 @@ export class Observable<T> {
                 this._deferUnregister(observer);
                 return true;
             }
-        }
-
-        return false;
-    }
-
-    private _deferUnregister(observer: Observer<T>): void {
-        observer.unregisterOnNextCall = false;
-        observer._willBeUnregistered = true;
-        setTimeout(() => {
-            this._remove(observer);
-        }, 0);
-    }
-
-    // This should only be called when not iterating over _observers to avoid callback skipping.
-    // Removes an observer from the _observer Array.
-    private _remove(observer: Nullable<Observer<T>>): boolean {
-        if (!observer) {
-            return false;
-        }
-
-        const index = this._observers.indexOf(observer);
-
-        if (index !== -1) {
-            this._observers.splice(index, 1);
-            return true;
         }
 
         return false;
@@ -380,5 +355,30 @@ export class Observable<T> {
         result._observers = this._observers.slice(0);
 
         return result;
+    }
+
+    private _deferUnregister(observer: Observer<T>): void {
+        observer.unregisterOnNextCall = false;
+        observer._willBeUnregistered = true;
+        setTimeout(() => {
+            this._remove(observer);
+        }, 0);
+    }
+
+    // This should only be called when not iterating over _observers to avoid callback skipping.
+    // Removes an observer from the _observer Array.
+    private _remove(observer: Nullable<Observer<T>>): boolean {
+        if (!observer) {
+            return false;
+        }
+
+        const index = this._observers.indexOf(observer);
+
+        if (index !== -1) {
+            this._observers.splice(index, 1);
+            return true;
+        }
+
+        return false;
     }
 }

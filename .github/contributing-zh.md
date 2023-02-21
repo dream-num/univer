@@ -266,7 +266,7 @@ pnpm install
     }
     ```
 
-5. 类中的修饰符参照`private` `protected` `public`的顺序组织，内部使用 eslint 规则进行提示约束 `'@typescript-eslint/member-ordering': ['error', { default: ['private-field', 'protected-field', 'public-field', 'private-method', 'protected-method', 'public-method'] }],`
+5. 类中的修饰符参照 `@typescript-eslint/member-ordering` 默认的规则进行组织，[详细排序规则](https://typescript-eslint.io/rules/member-ordering/#default-configuration)
 
 6. 当使用 `forEach` 来简化 `for` 循环时，有三点注意：
 

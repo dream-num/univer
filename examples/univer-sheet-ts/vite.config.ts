@@ -4,6 +4,7 @@ import preact from '@preact/preset-vite';
 import { name, version } from './package.json';
 import createExternal from 'vite-plugin-external';
 
+
 const resolve = (url: string) => path.resolve(__dirname, url);
 
 export default defineConfig({

@@ -35,7 +35,7 @@
         "@preact/preset-vite": "2.0.0",
         "@testing-library/preact": "^2.0.1",
         "@types/jest": "^27.0.1",
-        "@types/node": "^16.4.6",
+        "@types/node": "^18.14.0",
         "eslint": "^8.22.0",
         "eslint-config-airbnb-typescript": "^17.0.0",
         "eslint-config-prettier": "^8.3.0",
@@ -47,14 +47,14 @@
         "less": "^4.1.1",
         "prettier": "^2.3.2",
         "ts-jest": "29.0.1",
-        "ts-node": "^10.2.1",
+        "ts-node": "^10.9.1",
         "typescript": "^4.4.1-rc",
         "vite": "^2.4.4"
     },
     "dependencies": {
-        "@univerjs/base-ui": "workspace:^0.0.1",
         "@univerjs/base-render": "workspace:^0.0.1",
         "@univerjs/base-sheets": "workspace:^0.0.1",
+        "@univerjs/base-ui": "workspace:^0.0.1",
         "@univerjs/common-plugin-data": "workspace:^0.0.1",
         "@univerjs/core": "workspace:^0.0.1",
         "preact": "^10.5.14"

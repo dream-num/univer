@@ -9,6 +9,7 @@ yarn.lock
 pnpm-lock.yaml
 
 dist
+local
 lib
 docs/.vuepress/dist
 

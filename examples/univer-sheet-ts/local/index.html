@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>Esbuild example app</title>
+    <meta name="author" content="Christoffer Jahren" />
+
+    <link rel="stylesheet" href="./index.css" />
+    <script src="./index.js"></script>
+    <script>
+            new EventSource('/esbuild').addEventListener('change', () => {
+                console.info('reload--')
+                location.reload()
+            })
+    </script>
+  </head>
+  <body>
+    <div>1</div>
+  </body>
+</html>

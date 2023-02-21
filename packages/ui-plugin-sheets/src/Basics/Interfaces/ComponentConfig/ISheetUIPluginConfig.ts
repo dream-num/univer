@@ -1,7 +1,7 @@
 import { LocaleType } from '@univerjs/core';
 import { SheetRightMenuConfig } from './RightMenuConfig';
 import { SheetContainerConfig } from './SheetContainerConfig';
-import { SheetToolbarConfig } from './ToolbarConfig';
+import { SheetToolbarConfig } from './ToolBarConfig1';
 
 export interface ILayout {
     sheetContainerConfig?: SheetContainerConfig;

@@ -1,7 +1,7 @@
 import { IKeyboardEvent } from '@univerjs/base-render';
 import { Observable, Plugin } from '@univerjs/core';
 import { DocContainer } from '../View/UI/DocContainer';
-import { Toolbar } from '../View/UI/ToolBar/Toolbar';
+import { Toolbar } from '../View/UI/Toolbar/Toolbar';
 
 export type DocPluginObserve = {
     onAfterChangeFontFamilyObservable: Observable<string>;

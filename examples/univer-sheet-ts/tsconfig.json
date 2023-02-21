@@ -5,7 +5,7 @@
         "target": "ESNext",
 
         "lib": ["ESNext", "DOM", "WebWorker"],
-        "module": "ESNext",
+        "module": "commonjs",
         "moduleResolution": "Node", //This value is needed for Node.js.
 
         "declaration": true,

@@ -15,15 +15,19 @@
         "build:demo": "vite build -c vite.demo.config.ts",
         "watch": "vite build",
         "link": "pnpm link ./",
-        "serve": "vite preview"
+        "serve": "vite preview",
+        "start": "ts-node --transpile-only ./scripts/start.ts",
+        "build:esbuild": "ts-node --transpile-only ./scripts/build.ts"
     },
     "devDependencies": {
         "@preact/preset-vite": "2.0.0",
         "@testing-library/preact": "^2.0.1",
         "@types/jest": "^27.5.2",
-        "@types/node": "^16.4.6",
+        "@types/node": "^18.14.0",
         "enzyme": "^3.11.0",
         "enzyme-adapter-preact-pure": "^3.3.0",
+        "esbuild": "^0.17.10",
+        "esbuild-style-plugin": "^1.6.1",
         "eslint": "^8.22.0",
         "eslint-config-airbnb-typescript": "^17.0.0",
         "eslint-config-prettier": "^8.3.0",
@@ -38,22 +42,22 @@
         "less": "^4.1.1",
         "prettier": "^2.3.2",
         "ts-jest": "29.0.1",
-        "ts-node": "^10.2.1",
+        "ts-node": "^10.9.1",
         "typescript": "^4.4.1-rc",
         "vite": "^2.4.4",
         "vite-plugin-external": "1.2.3"
     },
     "dependencies": {
-        "@univerjs/base-ui": "workspace:^0.0.1",
-        "@univerjs/ui-plugin-sheets": "workspace:^0.0.1",
         "@univerjs/base-render": "workspace:^0.0.1",
         "@univerjs/base-sheets": "workspace:^0.0.1",
+        "@univerjs/base-ui": "workspace:^0.0.1",
         "@univerjs/common-plugin-data": "workspace:^0.0.1",
         "@univerjs/core": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-clipboard": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-formula": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-import-xlsx": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-numfmt": "workspace:^0.0.1",
+        "@univerjs/ui-plugin-sheets": "workspace:^0.0.1",
         "preact": "^10.5.14"
     }
 }

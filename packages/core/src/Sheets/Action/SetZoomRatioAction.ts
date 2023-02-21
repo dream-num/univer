@@ -4,6 +4,7 @@ import {
     ActionType,
     ISheetActionData,
     CommandUnit,
+    CommandManager,
 } from '../../Command';
 import { SetZoomRatio } from '../Apply/SetZoomRatio';
 
@@ -72,3 +73,5 @@ export class SetZoomRatioAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(SetZoomRatioAction.NAME, SetZoomRatioAction);

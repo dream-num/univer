@@ -1,8 +1,8 @@
-import { SheetPlugin, SelectionControl } from "@univerjs/base-sheets";
-import { CellInputExtensionManager } from "@univerjs/base-ui";
-import { INamedRange, PLUGIN_NAMES } from "@univerjs/core";
-import { SheetUIPlugin } from "..";
-import { FormulaBar } from "../View/FormulaBar";
+import { SheetPlugin, SelectionControl } from '@univerjs/base-sheets';
+import { CellInputExtensionManager } from '@univerjs/base-ui';
+import { INamedRange, PLUGIN_NAMES } from '@univerjs/core';
+import { SheetUIPlugin } from '..';
+import { FormulaBar } from '../View/FormulaBar';
 
 export class FormulaBarUIController {
     private _formulaBar: FormulaBar;
@@ -22,8 +22,18 @@ export class FormulaBarUIController {
         this._initialize();
     }
 
-    private _initialize() {
+    // 获取Toolbar组件
+    getComponent = (ref: FormulaBar) => {
+        this._formulaBar = ref;
 
+        this._initFormulaBar();
+    };
+
+    getFormulaBar() {
+        return this._formulaBar;
+    }
+
+    private _initialize() {
         this._sheetPlugin.getObserver('onChangeSelectionObserver')?.add((selectionControl: SelectionControl) => {
             const currentCell = selectionControl.model.currentCell;
 
@@ -88,16 +98,5 @@ export class FormulaBarUIController {
         }));
 
         this._formulaBar.setNamedRanges(list);
-    }
-
-    // 获取Toolbar组件
-    getComponent = (ref: FormulaBar) => {
-        this._formulaBar = ref;
-
-        this._initFormulaBar();
-    };
-
-    getFormulaBar() {
-        return this._formulaBar;
     }
 }

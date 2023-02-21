@@ -114,3 +114,9 @@
   padding: 0px;
   line-height: 1;
 }
+.tooltip-title {
+  display: none;
+}
+.bottom {
+  display: none;
+}

@@ -8,12 +8,12 @@ export class DragAndDropExtensionManager {
     // mounted on the instance
     private _register: DragAndDropExtensionRegister;
 
-    getRegister(): DragAndDropExtensionRegister {
-        return this._register;
-    }
-
     constructor() {
         this._register = new DragAndDropExtensionRegister();
+    }
+
+    getRegister(): DragAndDropExtensionRegister {
+        return this._register;
     }
 
     /**

@@ -8,13 +8,13 @@ import { BooleanNumber } from '../../Enum';
 import { SheetContext } from '../../Basics';
 
 import {
-    CommandManager,
     InsertSheetAction,
-    Command,
     ISetSheetOrderActionData,
     RemoveSheetAction,
     SetSheetOrderAction,
-} from '../../Command';
+    IInsertSheetActionData,
+    IRemoveSheetActionData,
+} from '../Action';
 
 import {
     IColumnStartEndData,
@@ -33,8 +33,9 @@ import { Selection } from './Selection';
 import { Styles } from './Styles';
 import { Worksheet } from './Worksheet';
 import { Range } from './Range';
-import { IInsertSheetActionData, IRemoveSheetActionData } from '../Action';
+
 import { NamedRange } from './NamedRange';
+import { Command, CommandManager } from '../../Command';
 
 /**
  * Access and create Univer Sheets files
@@ -572,7 +573,9 @@ export class Workbook {
      *
      * @returns void
      */
-    flush(): void {}
+    flush(): void {
+        //TDOO ..
+    }
 
     setSheetOrder(sheetId: string, order: number): void {
         // const { _sheetOrder } = this;

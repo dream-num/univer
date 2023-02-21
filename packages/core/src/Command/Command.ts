@@ -1,10 +1,14 @@
 import { Class, Nullable } from '../Shared';
-import { Workbook } from '../Sheets/Domain';
-import { ActionBase, IActionData } from './ActionBase';
-import { ActionType } from './ActionObservers';
+import { Workbook } from '../Sheets';
+import {
+    ActionBase,
+    IActionData,
+    ActionType,
+    CommandInjector,
+    CommandManager,
+} from './index';
+
 import { DocumentModel } from '../Docs/Domain/DocumentModel';
-import { CommandInjector } from './CommandInjectorObservers';
-import { CommandManager } from './CommandManager';
 
 export class CommandUnit {
     WorkBookUnit?: Workbook;

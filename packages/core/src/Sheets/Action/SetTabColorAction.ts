@@ -2,7 +2,7 @@ import { SetTabColor } from '../Apply';
 import { Nullable } from '../../Shared/Types';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -87,3 +87,5 @@ export class SetTabColorAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(SetTabColorAction.NAME, SetTabColorAction);

@@ -1,4 +1,4 @@
-import { BorderStyleTypes } from "@univerjs/core";
+import { BorderStyleTypes } from '@univerjs/core';
 
 export const FONT_SIZE_CHILDREN = [
     {

@@ -17,14 +17,9 @@ export class Dropdown extends Component<BaseDropdownProps, IState> {
 
     IconRef = createRef<HTMLDivElement>();
 
-    protected initialize() {
-        this.state = {
-            menuStyle: {},
-        };
-    }
-
     handleClick = (e: MouseEvent) => {
         this.props.onClick?.();
+        this.props.onMainClick?.();
         const { icon } = this.props;
         if (!icon) {
             this.MenuRef.current?.showMenu(true);
@@ -35,9 +30,13 @@ export class Dropdown extends Component<BaseDropdownProps, IState> {
         this.MenuRef.current?.showMenu(true);
     };
 
-    hideMenu = (e: MouseEvent) => {
+    hideMenu = () => {
+        this.MenuRef.current?.showMenu(false);
+    };
+
+    hideMenuClick = (e: MouseEvent) => {
         if (!this.DropRef.current || !this.DropRef.current?.contains(e.target as Node)) {
-            this.MenuRef.current?.showMenu(false);
+            this.hideMenu();
         }
     };
 
@@ -60,11 +59,11 @@ export class Dropdown extends Component<BaseDropdownProps, IState> {
         this.setState({
             menuStyle: style,
         });
-        window.addEventListener('click', this.hideMenu);
+        window.addEventListener('click', this.hideMenuClick, true);
     }
 
     componentWillUnmount() {
-        window.removeEventListener('click', this.hideMenu);
+        window.removeEventListener('click', this.hideMenuClick, true);
     }
 
     render() {
@@ -89,6 +88,12 @@ export class Dropdown extends Component<BaseDropdownProps, IState> {
                 <Menu onClick={menu.onClick} ref={this.MenuRef} menu={menu.menu} className={menu.className} style={{ ...menu.style, ...menuStyle }}></Menu>
             </div>
         );
+    }
+
+    protected initialize() {
+        this.state = {
+            menuStyle: {},
+        };
     }
 }
 

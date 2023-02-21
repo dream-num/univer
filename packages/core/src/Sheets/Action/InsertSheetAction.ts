@@ -1,7 +1,7 @@
 import { InsertSheetApply, RemoveSheetApply } from '../Apply';
 import { IWorksheetConfig } from '../../Interfaces';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveSheetActionData } from './RemoveSheetAction';
 
@@ -58,3 +58,5 @@ export class InsertSheetAction extends SheetActionBase<
         throw new Error('Method not implemented.');
     }
 }
+
+CommandManager.register(InsertSheetAction.NAME, InsertSheetAction);

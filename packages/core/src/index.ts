@@ -11,11 +11,13 @@
  * @packageDocumentation
  *
  */
+
 import './Sheets/Action';
-export * from './Basics';
+
 export * from './Command';
+export * from './Basics';
 export * from './Const';
-export * from './Sheets/Domain';
+export * from './Sheets';
 export * from './Docs/Domain';
 export * from './Slides/Domain';
 export * from './Enum';

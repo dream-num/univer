@@ -61,6 +61,22 @@ export class Locale {
         };
     }
 
+    /**
+     * get value from Locale object and key
+     * @param locale - A specified language pack
+     * @param key - Specify key
+     * @returns Get the translation corresponding to the Key
+     *
+     * @private
+     */
+    private static getValue(locale: object, key: string): Nullable<string | object> {
+        try {
+            return locale[key] ? locale[key] : key.split('.').reduce((a, b) => a[b], locale);
+        } catch (error) {
+            console.error('Key %s not found', key);
+        }
+    }
+
     initialize(locale: Nullable<LocaleType>) {
         this.options = {
             // use config first, or get language setting from browser
@@ -123,21 +139,5 @@ export class Locale {
      */
     change(locale: LocaleType): void {
         this.options.currentLocale = locale;
-    }
-
-    /**
-     * get value from Locale object and key
-     * @param locale - A specified language pack
-     * @param key - Specify key
-     * @returns Get the translation corresponding to the Key
-     *
-     * @private
-     */
-    private static getValue(locale: object, key: string): Nullable<string | object> {
-        try {
-            return locale[key] ? locale[key] : key.split('.').reduce((a, b) => a[b], locale);
-        } catch (error) {
-            console.error('Key %s not found', key);
-        }
     }
 }

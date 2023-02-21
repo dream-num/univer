@@ -1,28 +1,13 @@
 import { Worksheet } from './index';
 import { SheetContext } from '../../Basics';
-
-import {
-    ISetRangeStyleActionData,
-    IClearRangeActionData,
-    ISetRangeDataActionData,
-    Command,
-    CommandManager,
-    ISetRangeFormulaActionData,
-    ISetRangeFormattedValueActionData,
-    SetRangeDataAction,
-    ClearRangeAction,
-    SetRangeStyleAction,
-} from '../../Command';
-
+import { Command, CommandManager } from '../../Command';
 import { ACTION_NAMES } from '../../Const';
-
 import {
     BooleanNumber,
     HorizontalAlign,
     VerticalAlign,
     WrapStrategy,
 } from '../../Enum';
-
 import {
     ICellData,
     ICellV,
@@ -32,10 +17,18 @@ import {
     IStyleData,
     ITextDecoration,
 } from '../../Interfaces';
-
 import { Workbook } from './Workbook';
-
 import { Nullable, ObjectMatrix, Tools, Tuples } from '../../Shared';
+import {
+    ClearRangeAction,
+    IClearRangeActionData,
+    ISetRangeDataActionData,
+    ISetRangeFormattedValueActionData,
+    ISetRangeFormulaActionData,
+    ISetRangeStyleActionData,
+    SetRangeDataAction,
+    SetRangeStyleAction,
+} from '../Action';
 
 /**
  * A collection of one or more Range instances in the same sheet.

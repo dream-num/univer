@@ -2,7 +2,7 @@ import { SetRightToLeft } from '../Apply';
 import { BooleanNumber } from '../../Enum';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -67,3 +67,5 @@ export class SetRightToLeftAction extends SheetActionBase<ISetRightToLeftActionD
         return false;
     }
 }
+
+CommandManager.register(SetRightToLeftAction.NAME, SetRightToLeftAction);

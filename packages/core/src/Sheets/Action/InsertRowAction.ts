@@ -4,6 +4,7 @@ import {
     ActionObservers,
     ActionType,
     CommandUnit,
+    CommandManager,
 } from '../../Command';
 import { InsertRowApply, RemoveRowApply } from '../Apply';
 import { IRemoveRowActionData } from './RemoveRowAction';
@@ -69,3 +70,5 @@ export class InsertRowAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(InsertRowAction.NAME, InsertRowAction);

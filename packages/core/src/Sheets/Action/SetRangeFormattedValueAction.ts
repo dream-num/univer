@@ -3,7 +3,8 @@ import { ICellV, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandUnit, SetRangeDataAction } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
+import { SetRangeDataAction } from './SetRangeDataAction';
 
 /**
  *
@@ -100,3 +101,8 @@ export class SetRangeFormattedValueAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(
+    SetRangeFormattedValueAction.NAME,
+    SetRangeFormattedValueAction
+);

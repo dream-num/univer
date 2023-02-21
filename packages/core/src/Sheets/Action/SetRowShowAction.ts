@@ -1,7 +1,7 @@
 import { SetHideRow, SetShowRow } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -73,3 +73,5 @@ export class SetRowShowAction extends SheetActionBase<ISetRowShowActionData> {
         return false;
     }
 }
+
+CommandManager.register(SetRowShowAction.NAME, SetRowShowAction);

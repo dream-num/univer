@@ -1,17 +1,17 @@
+import { BaseComponentProps, Component, Container, Content, createRef, Footer, Header, Layout, Sider } from '@univerjs/base-ui';
+import defaultSkin from '@univerjs/base-ui/Basics/CSS/Skin/default.module.less';
+import { Tools } from '@univerjs/core';
+import cssVars from 'css-vars-ponyfill';
 import style from './index.module.less';
-import { Toolbar } from '../Toolbar';
 import { InfoBar } from '../InfoBar';
 import { RightMenu } from '../RightMenu';
 import { CountBar } from '../CountBar';
 import { SheetBar } from '../SheetBar';
 import { FormulaBar } from '../FormulaBar';
 import { RichText } from '../RichText';
-import { BaseComponentProps, Component, Container, Content, createRef, Footer, Header, Layout, Sider } from '@univerjs/base-ui';
 import { ISheetUIPluginConfig } from '../../Basics';
-import defaultSkin from '@univerjs/base-ui/Basics/CSS/Skin/default.module.less';
-import { Tools } from '@univerjs/core';
-import cssVars from 'css-vars-ponyfill';
 import { Slot } from '../Slot/Slot';
+import { Toolbar } from '../Toolbar';
 
 export interface BaseSheetContainerProps extends BaseComponentProps {
     config: ISheetUIPluginConfig;

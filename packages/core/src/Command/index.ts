@@ -1,15 +1,15 @@
-// @index(['./*.ts','./Action/index.ts'], f => `export * from '${f.path}'`)
-export * from './SheetActionBase';
+// @index(['./*.ts','./Action/index.ts'], f => `export * from '${f.path}'`);
+export * from './ActionBase';
 export * from './ActionObservers';
-export * from './Command';
+export * from './CommandInjectorObservers';
+export * from './CommandObservers';
 export * from './CommandManager';
+export * from './SheetActionBase';
+export * from './Command';
 export * from './UndoManager';
 export * from './ActionExtensionManager';
 export * from './ActionExtensionFactory';
-export * from '../Sheets/Action/index';
+export * from './RegistryFactory';
+export * from './ActionExtensionRegister';
 export * from './ActionOperation';
-
-/* eslint-disable import/first */
-import './RegisterAction';
-
 // @endindex

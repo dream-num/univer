@@ -1,7 +1,7 @@
 import { SetHiddenGridlinesApply } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -63,3 +63,5 @@ export class SetHiddenGridlinesAction extends SheetActionBase<ISetHiddenGridline
         return false;
     }
 }
+
+CommandManager.register(SetHiddenGridlinesAction.NAME, SetHiddenGridlinesAction);

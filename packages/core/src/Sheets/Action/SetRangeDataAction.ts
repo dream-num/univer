@@ -6,6 +6,7 @@ import {
     ActionObservers,
     ActionType,
     CommandUnit,
+    CommandManager,
 } from '../../Command';
 import { ICopyToOptionsData, ICellData } from '../../Interfaces';
 
@@ -100,3 +101,5 @@ export class SetRangeDataAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(SetRangeDataAction.NAME, SetRangeDataAction);

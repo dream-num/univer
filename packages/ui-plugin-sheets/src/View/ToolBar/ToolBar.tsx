@@ -30,6 +30,13 @@ export class Toolbar extends Component<IProps, IState> {
 
     clientWidth = 0;
 
+    /**
+     * Gets the distance of each button from the parent element
+     */
+    debounceSetToolbarListWidth = debounce(() => {
+        this.setToolbarListWidth();
+    }, 50);
+
     initialize() {
         this.state = {
             // Button contains main button and drop down arrow, translation file contains main and right
@@ -61,13 +68,6 @@ export class Toolbar extends Component<IProps, IState> {
         this.setState({ showMore: false });
         document.removeEventListener('click', this.hide, true);
     };
-
-    /**
-     * Gets the distance of each button from the parent element
-     */
-    debounceSetToolbarListWidth = debounce(() => {
-        this.setToolbarListWidth();
-    }, 50);
 
     setToolbarListWidth = () => {
         if (!this.clientWidth) {
@@ -217,7 +217,7 @@ export class Toolbar extends Component<IProps, IState> {
                 if (item.show) {
                     return (
                         <Tooltip title={this.getLocale(item.tooltip)} placement={'bottom'}>
-                            <Button className={styles.textButton} type="text" active={item.active} onClick={item.onClick}>
+                            <Button unActive={item.unActive} className={styles.textButton} type="text" active={item.active} onClick={item.onClick}>
                                 {item.label}
                             </Button>
                         </Tooltip>
@@ -235,7 +235,8 @@ export class Toolbar extends Component<IProps, IState> {
                             customSuffix={item.customSuffix}
                             label={item.label}
                             onClick={item.onClick}
-                            onKeyUp={item.onKeyUp}
+                            onPressEnter={item.onPressEnter}
+                            onMainClick={item.onMainClick}
                             defaultColor={item.defaultColor}
                             hideSelectedIcon={item.hideSelectedIcon}
                             className={item.className}

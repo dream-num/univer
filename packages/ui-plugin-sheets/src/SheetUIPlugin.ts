@@ -1,9 +1,9 @@
 import { Plugin, UniverSheet, Tools, PLUGIN_NAMES } from '@univerjs/core';
-import { zh, en } from './Locale';
-import { DefaultSheetUiConfig, installObserver, ISheetUIPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';
 import { Context } from '@univerjs/core/src/Basics/Context';
 import { ComponentManager, getRefElement, RegisterManager } from '@univerjs/base-ui';
-import { Engine, RenderEngine } from '@univerjs/base-render';
+import { RenderEngine } from '@univerjs/base-render';
+import { DefaultSheetUiConfig, installObserver, ISheetUIPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';
+import { zh, en } from './Locale';
 import { AppUIController } from './Controller/AppUIController';
 
 export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
@@ -65,13 +65,13 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
         }, 0);
     }
 
-    initUI() {}
+    initUI() { }
 
     onMounted(ctx: Context): void {
         this.initialize(ctx);
     }
 
-    onDestroy(): void {}
+    onDestroy(): void { }
 
     getAppUIController() {
         return this._appUIController;

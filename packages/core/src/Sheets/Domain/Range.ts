@@ -6,15 +6,14 @@ import {
     IAddMergeActionData,
     IRemoveMergeActionData,
     IDeleteRangeActionData,
-    CommandManager,
-    ISheetActionData,
     ISetRangeDataActionData,
-    Command,
     ISetRangeFormulaActionData,
     ISetRangeStyleActionData,
     ISetRangeFormattedValueActionData,
     SetRangeStyleAction,
-} from '../../Command';
+} from '../Action';
+
+import { CommandManager, ISheetActionData, Command } from '../../Command';
 
 import { DEFAULT_RANGE, DEFAULT_STYLES, ACTION_NAMES } from '../../Const';
 
@@ -1950,9 +1949,9 @@ export class Range {
 
         const zx = Math.abs(
             currentStartColumn +
-                currentEndColumn -
-                incomingStartColumn -
-                incomingEndColumn
+            currentEndColumn -
+            incomingStartColumn -
+            incomingEndColumn
         );
         const x =
             Math.abs(currentStartColumn - currentEndColumn) +

@@ -16,6 +16,8 @@ interface IState {
 export class RightMenu extends Component<BaseRightMenuProps, IState> {
     ulRef = createRef();
 
+    root = createRef();
+
     initialize() {
         this.state = {
             visible: false,
@@ -25,8 +27,6 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
             replace: [],
         };
     }
-
-    root = createRef();
 
     // 转换成渲染需要的数据
     resetMenuList(children: RightMenuProps[], replace: RightMenuProps[]) {

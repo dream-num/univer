@@ -28,8 +28,8 @@ export interface SheetToolbarConfig extends BaseToolbarConfig {
     mergeCell?: boolean; // 'Merge cells'
 }
 
-export interface DocToolbarConfig extends BaseToolbarConfig {}
+export interface DocToolbarConfig extends BaseToolbarConfig { }
 
-export interface SlideToolbarConfig extends BaseToolbarConfig {}
+export interface SlideToolbarConfig extends BaseToolbarConfig { }
 
-export interface ToolbarConfig extends SheetToolbarConfig, DocToolbarConfig, SlideToolbarConfig {}
+export interface ToolbarConfig extends SheetToolbarConfig, DocToolbarConfig, SlideToolbarConfig { }

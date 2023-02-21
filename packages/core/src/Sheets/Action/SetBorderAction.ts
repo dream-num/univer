@@ -3,7 +3,7 @@ import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase
 import { SetBorderApply } from '../Apply';
 import { IStyleData } from '../../Interfaces';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -67,3 +67,5 @@ export class SetBorderAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(SetBorderAction.NAME, SetBorderAction);

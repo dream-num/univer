@@ -1,4 +1,4 @@
-import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, BaseSelectChildrenProps, Component, debounce, Icon } from '@univerjs/base-ui';
+import { BaseComponentProps, BaseComponentRender, BaseSelectChildrenProps, Component, debounce, Icon } from '@univerjs/base-ui';
 import styles from './index.module.less';
 
 type FormulaState = {
@@ -55,7 +55,6 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
     }
 
     render(props: BaseFormulaBarProps, state: FormulaState) {
-
         // TODO: formula bar top left menu: 1. cell edit formula ,use formula list 2. cell selection ,use named range, 3. cell edit no formula, disable select
         const { namedRanges } = state;
 

@@ -3,7 +3,7 @@ import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { BooleanNumber } from '../../Enum';
 import { ActionOperationType } from '../../Command/ActionBase';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -103,3 +103,5 @@ export class SetWorkSheetActivateAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(SetWorkSheetActivateAction.NAME, SetWorkSheetActivateAction);

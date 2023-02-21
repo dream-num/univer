@@ -1,5 +1,5 @@
 import { Icon } from '..';
-import { ComponentChildren, Component } from '../../Framework';
+import { ComponentChildren, Component, createRef, RefObject } from '../../Framework';
 import { BaseMenuItem } from '../../Interfaces';
 import { Dropdown } from '../Dropdown';
 import { Input } from '../Input';
@@ -26,7 +26,7 @@ interface CustomComponent {
 }
 
 export interface BaseSelectChildrenProps extends BaseItemProps {
-    onKeyUp?: (...arg: any) => void;
+    onPressEnter?: (...arg: any) => void;
     children?: BaseSelectChildrenProps[];
     unSelectable?: boolean; //选中后不生效事件
     customLabel?: CustomComponent;
@@ -40,7 +40,8 @@ export interface BaseSelectProps {
     display?: DisplayTypes;
     label?: ComponentChildren;
     onClick?: (...arg: any) => void; //下拉Ul点击事件
-    onKeyUp?: (...arg: any) => void;
+    onPressEnter?: (...arg: any) => void;
+    onMainClick?: () => void; // 非功能按钮事件
     defaultColor?: string;
     hideSelectedIcon?: boolean;
     className?: string;
@@ -62,7 +63,7 @@ export class Select extends Component<BaseSelectProps, IState> {
 
     onClick: (...arg: any) => void;
 
-    onKeyUp: (...arg: any[]) => void;
+    onPressEnter: (...arg: any[]) => void;
 
     initialize() {
         const { children = [], hideSelectedIcon } = this.props;
@@ -175,9 +176,9 @@ export class Select extends Component<BaseSelectProps, IState> {
                 });
             };
 
-            this.onKeyUp = (e: KeyboardEvent) => {
+            this.onPressEnter = (e: KeyboardEvent) => {
                 const value = (e.currentTarget as HTMLInputElement).value;
-                this.props.onKeyUp?.(value);
+                this.props.onPressEnter?.(value);
                 getLabel(value);
             };
         } else if (type === 2) {
@@ -270,26 +271,32 @@ export class Select extends Component<BaseSelectProps, IState> {
     // 普通下拉
     getSingle = () => {
         const { content, menu } = this.state;
-        const { className = '', tooltip } = this.props;
+        const { className = '', tooltip, onMainClick } = this.props;
 
         return (
             <div className={`${styles.selectSingle} ${className}`}>
-                <Dropdown tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
+                <Dropdown onMainClick={onMainClick} tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
                     <div>{content}</div>
                 </Dropdown>
             </div>
         );
     };
 
+    handlePressEnter = (e: KeyboardEvent, ref: RefObject<Dropdown>) => {
+        this.onPressEnter(e);
+        ref.current?.hideMenu();
+    };
+
     //Input下拉
     getInput = () => {
         const { content, menu } = this.state;
-        const { className = '', tooltip } = this.props;
+        const { className = '', tooltip, onMainClick } = this.props;
+        const ref = createRef<Dropdown>();
 
         return (
             <div className={`${styles.selectInput} ${className}`}>
-                <Dropdown tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
-                    <Input onKeyUp={this.onKeyUp} type="number" value={content as string} />
+                <Dropdown onMainClick={onMainClick} ref={ref} tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
+                    <Input onPressEnter={(e) => this.handlePressEnter(e, ref)} onBlur={this.onPressEnter} type="number" value={content as string} />
                 </Dropdown>
             </div>
         );
@@ -297,11 +304,11 @@ export class Select extends Component<BaseSelectProps, IState> {
 
     getDouble = () => {
         const { content, menu } = this.state;
-        const { className = '', tooltip } = this.props;
+        const { className = '', tooltip, onClick } = this.props;
 
         return (
             <div className={`${styles.selectDouble} ${className}`}>
-                <Dropdown tooltip={tooltip} menu={{ menu, onClick: this.onClick }} icon={<Icon.NextIcon />}>
+                <Dropdown onClick={onClick} tooltip={tooltip} menu={{ menu, onClick: this.onClick }} icon={<Icon.NextIcon />}>
                     <div className={styles.selectLabel}>{content}</div>
                 </Dropdown>
             </div>
@@ -322,12 +329,12 @@ export class Select extends Component<BaseSelectProps, IState> {
     };
 
     getDoubleFix = () => {
-        const { label, className = '', tooltip } = this.props;
+        const { label, className = '', tooltip, onClick } = this.props;
         const { menu } = this.state;
 
         return (
             <div className={`${styles.selectDouble} ${className}`}>
-                <Dropdown tooltip={tooltip} onClick={this.onClick} menu={{ menu, onClick: this.onClick }} icon={<Icon.NextIcon />}>
+                <Dropdown tooltip={tooltip} onClick={onClick} menu={{ menu, onClick: this.onClick }} icon={<Icon.NextIcon />}>
                     <div className={styles.selectLabel}>{label}</div>
                 </Dropdown>
             </div>

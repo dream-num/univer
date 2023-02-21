@@ -3,7 +3,7 @@ import { IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -99,3 +99,5 @@ export class SetRangeNoteAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(SetRangeNoteAction.NAME, SetRangeNoteAction);

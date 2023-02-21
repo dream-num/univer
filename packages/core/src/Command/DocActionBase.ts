@@ -1,9 +1,7 @@
-import { ActionBase, IActionData } from './ActionBase';
+import { ActionBase, IActionData, CommandUnit, ActionObservers } from './index';
 import { DocumentModel } from '../Docs/Domain/DocumentModel';
-import { CommandUnit } from './Command';
-import { ActionObservers } from './ActionObservers';
 
-export interface IDocActionData extends IActionData {}
+export interface IDocActionData extends IActionData { }
 
 export abstract class DocActionBase<
     D extends IDocActionData,

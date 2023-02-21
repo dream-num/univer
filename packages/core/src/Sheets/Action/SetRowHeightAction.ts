@@ -1,7 +1,7 @@
 import { SetRowHeight } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -79,3 +79,5 @@ export class SetRowHeightAction extends SheetActionBase<ISetRowHeightActionData>
         return false;
     }
 }
+
+CommandManager.register(SetRowHeightAction.NAME, SetRowHeightAction);

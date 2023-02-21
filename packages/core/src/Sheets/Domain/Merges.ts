@@ -1,23 +1,23 @@
 import {
-    IAddMergeActionData,
     CommandManager,
-    InsertRowAction,
-    IRemoveMergeActionData,
     Command,
-    RemoveRowAction,
-    DeleteRangeAction,
     SheetActionBase,
     ISheetActionData,
 } from '../../Command';
 import {
+    DeleteRangeAction,
+    IAddMergeActionData,
     InsertColumnAction,
-    RemoveColumnAction,
+    InsertRowAction,
+    RemoveRowAction,
+    IRemoveMergeActionData,
     RemoveMergeAction,
+    RemoveColumnAction,
 } from '../Action';
 import { ACTION_NAMES } from '../../Const';
-import { IRangeData } from '../../Interfaces';
-import { Worksheet } from './Worksheet';
 import { Nullable, Tools, Rectangle, Tuples } from '../../Shared';
+import { Worksheet } from './Worksheet';
+import { IRangeData } from '../../Interfaces';
 
 /**
  * Manage merged cells
@@ -367,7 +367,7 @@ export class Merges {
                                     continue;
                                 } else if (
                                     merge.startColumn >=
-                                        data.rangeData.startColumn &&
+                                    data.rangeData.startColumn &&
                                     merge.endColumn <= data.rangeData.endColumn
                                 ) {
                                     const count =

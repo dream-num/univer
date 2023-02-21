@@ -5,7 +5,9 @@ import { ICell } from '../../Interfaces/Cell';
  * Modify cell value
  */
 export class BaseCellEditExtension {
-    constructor(protected _cell: ICell, protected _value: string) {}
+    constructor(protected _cell: ICell, protected _value: string) {
+        //
+    }
 
     getCell(): ICell {
         return this._cell;
@@ -14,19 +16,19 @@ export class BaseCellEditExtension {
     /**
      * Modify the value
      */
-    setValue(value: string) {}
+    // setValue(value: string) { }
 
     /**
      * Execute the core logic after the check is successful
      */
-    execute() {}
+    // execute() { }
 }
 
 /**
  * Determine whether to intercept and create BaseCellEditExtension
  */
 export class BaseCellEditExtensionFactory<T extends Plugin = Plugin> {
-    constructor(protected _plugin: T) {}
+    // constructor(protected _plugin: T) { }
 
     get zIndex() {
         return 0;

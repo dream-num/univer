@@ -1,6 +1,5 @@
 import { Component, createRef } from '../../Framework';
-import { JSXComponent } from '../../BaseComponent';
-import { BaseTooltipProps, TooltipComponent } from '../../Interfaces';
+import { BaseTooltipProps } from '../../Interfaces';
 import style from './index.module.less';
 import { joinClassNames } from '../../Utils';
 
@@ -18,6 +17,7 @@ interface TooltipState {
     placementClassName: string | undefined;
     top: number | string;
     left: number | string;
+    show: boolean;
 }
 
 const placementClassNames: { [index: string]: string } = {
@@ -28,16 +28,17 @@ const placementClassNames: { [index: string]: string } = {
 };
 
 export class Tooltip extends Component<BaseTooltipProps, TooltipState> {
+    tooltip = createRef<HTMLDivElement>();
+
     initialize(props: BaseTooltipProps) {
         this.state = {
             placement: props.placement || 'top',
             placementClassName: joinClassNames(style.tooltipTitle, placementClassNames[props.placement || 'top']),
             top: '',
             left: '',
+            show: false,
         };
     }
-
-    tooltip = createRef<HTMLDivElement>();
 
     handleMouseOver() {
         if (this.tooltip && this.tooltip.current) {
@@ -49,30 +50,40 @@ export class Tooltip extends Component<BaseTooltipProps, TooltipState> {
                 this.setState({
                     top: top + 10,
                     left: left / 2,
+                    show: true,
                 });
             } else if (this.state.placement === 'left') {
                 this.setState({
                     top: top / 2,
                     left: left + 5,
+                    show: true,
                 });
             } else if (this.state.placement === 'right') {
                 this.setState({
                     top: top / 2,
                     left: -left - 10,
+                    show: true,
                 });
             } else {
                 this.setState({
                     top: -top - 20,
                     left: left / 2,
+                    show: true,
                 });
             }
         }
     }
 
+    handleMouseLeave() {
+        this.setState({
+            show: false,
+        });
+    }
+
     render() {
         return (
             <div ref={this.tooltip} className={style.tooltipGroup} style={this.props.styles}>
-                <div className={style.tooltipBody} onMouseEnter={this.handleMouseOver.bind(this)}>
+                <div className={style.tooltipBody} onMouseEnter={this.handleMouseOver.bind(this)} onMouseLeave={this.handleMouseLeave.bind(this)}>
                     {this.props.children}
                 </div>
 
@@ -82,6 +93,7 @@ export class Tooltip extends Component<BaseTooltipProps, TooltipState> {
                         style={{
                             top: `${this.state.top}px`,
                             left: `${this.state.left}px`,
+                            display: `${this.state.show ? 'block' : 'none'}`,
                         }}
                     >
                         {this.props.title}
@@ -90,11 +102,5 @@ export class Tooltip extends Component<BaseTooltipProps, TooltipState> {
                 ) : null}
             </div>
         );
-    }
-}
-
-export class UniverTooltip implements TooltipComponent {
-    render(): JSXComponent<BaseTooltipProps> {
-        return Tooltip;
     }
 }

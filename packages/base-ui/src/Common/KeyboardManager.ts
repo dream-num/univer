@@ -19,18 +19,6 @@ export class KeyboardManager {
         this._installObserver();
     }
 
-    private _installObserver() {
-        // keyboard
-        this._observerManager.addObserver('onKeyDownObservable', 'core', new Observable());
-        this._observerManager.addObserver('onKeyUpObservable', 'core', new Observable());
-        this._observerManager.addObserver('onKeyCopyObservable', 'core', new Observable());
-        this._observerManager.addObserver('onKeyPasteObservable', 'core', new Observable());
-        this._observerManager.addObserver('onKeyCutObservable', 'core', new Observable());
-        this._observerManager.addObserver('onKeyCompositionStartObservable', 'core', new Observable());
-        this._observerManager.addObserver('onKeyCompositionUpdateObservable', 'core', new Observable());
-        this._observerManager.addObserver('onKeyCompositionEndObservable', 'core', new Observable());
-    }
-
     /**
      * init keyboard listener
      *
@@ -75,5 +63,17 @@ export class KeyboardManager {
         element.addEventListener('compositionstart', keyboardCompositionStartEvent);
         element.addEventListener('compositionupdate', keyboardCompositionUpdateEvent);
         element.addEventListener('compositionend', keyboardCompositionEndEvent);
+    }
+
+    private _installObserver() {
+        // keyboard
+        this._observerManager.addObserver('onKeyDownObservable', 'core', new Observable());
+        this._observerManager.addObserver('onKeyUpObservable', 'core', new Observable());
+        this._observerManager.addObserver('onKeyCopyObservable', 'core', new Observable());
+        this._observerManager.addObserver('onKeyPasteObservable', 'core', new Observable());
+        this._observerManager.addObserver('onKeyCutObservable', 'core', new Observable());
+        this._observerManager.addObserver('onKeyCompositionStartObservable', 'core', new Observable());
+        this._observerManager.addObserver('onKeyCompositionUpdateObservable', 'core', new Observable());
+        this._observerManager.addObserver('onKeyCompositionEndObservable', 'core', new Observable());
     }
 }

@@ -1,4 +1,4 @@
-import { BaseComponentProps, BaseComponentRender, Component, Icon } from '@univerjs/base-ui';
+import { BaseComponentProps, Component, Icon } from '@univerjs/base-ui';
 import { SheetUIPlugin } from '../../..';
 import { SHEET_UI_PLUGIN_NAME } from '../../../Basics';
 

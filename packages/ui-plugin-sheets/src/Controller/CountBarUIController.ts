@@ -4,7 +4,59 @@ import { CountBar } from '../View/CountBar';
 
 export class CountBarUIController {
     protected _countBar: CountBar;
+
     protected _plugin: Plugin;
+
+    constructor(plugin: Plugin) {
+        this._plugin = plugin;
+        CommandManager.getActionObservers().add((event) => {
+            const action = event.action as SheetActionBase<any>;
+            const data = event.data;
+            const workbook = action.getWorkBook();
+            const unitId = workbook.getUnitId();
+            const currentWorkbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
+            const currentUnitId = currentWorkbook.getUnitId();
+            if (unitId === currentUnitId) {
+                switch (data.actionName) {
+                    case SetZoomRatioAction.NAME: {
+                        this._refreshCountBarUI();
+                        break;
+                    }
+                }
+            }
+        });
+        const manager = plugin
+            .getContext()
+            .getUniver()
+            .getCurrentUniverSheetInstance()
+            .context.getPluginManager()
+            .getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)
+            .getSelectionManager();
+        plugin.getObserver('onChangeSelectionObserver')?.add(() => {
+            const rangeList = manager.getActiveRangeList();
+            if (rangeList && this._countBar) {
+                this._totalRangeList(rangeList);
+            }
+        });
+    }
+
+    // changeRatio
+    onChange = (v: string) => {
+        this._setUIObserve('onUIChangeObservable', { name: 'changeZoom', value: Tools.numberFixed(parseFloat(v) / 100, 2) });
+    };
+
+    // 刷新组件
+    setCountBar(content: string) {
+        this._countBar.setValue({
+            content,
+        });
+    }
+
+    // 获取CountBar组件
+    getComponent = (ref: CountBar) => {
+        this._countBar = ref;
+        this._refreshComponent();
+    };
 
     protected _totalRangeList(rangeList: RangeList): void {
         let rectList = rangeList.getRangeList();
@@ -44,9 +96,7 @@ export class CountBarUIController {
         });
     }
 
-    protected _refreshCountBarUI(): void {
-
-    }
+    protected _refreshCountBarUI(): void { }
 
     protected _refreshComponent(): void {
         this._refreshCountBarUI();
@@ -55,56 +105,4 @@ export class CountBarUIController {
     protected _setUIObserve<T>(type: string, msg: UIObserver<T>) {
         this._plugin.getContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core').notifyObservers(msg);
     }
-
-    constructor(plugin: Plugin) {
-        this._plugin = plugin;
-        CommandManager.getActionObservers().add((event) => {
-            const action = event.action as SheetActionBase<any>;
-            const data = event.data;
-            const workbook = action.getWorkBook();
-            const unitId = workbook.getUnitId();
-            const currentWorkbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
-            const currentUnitId = currentWorkbook.getUnitId();
-            if (unitId === currentUnitId) {
-                switch (data.actionName) {
-                    case SetZoomRatioAction.NAME: {
-                        this._refreshCountBarUI();
-                        break;
-                    }
-                }
-            }
-        });
-        const manager = plugin.getContext()
-            .getUniver()
-            .getCurrentUniverSheetInstance()
-            .context
-            .getPluginManager()
-            .getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)
-            .getSelectionManager();
-        plugin.getObserver('onChangeSelectionObserver')?.add(() => {
-            const rangeList = manager.getActiveRangeList();
-            if (rangeList && this._countBar) {
-                this._totalRangeList(rangeList);
-            }
-        });
-    }
-
-    // changeRatio
-    onChange = (v: string) => {
-        this._setUIObserve('onUIChangeObservable', { name: 'changeZoom', value: Tools.numberFixed(parseFloat(v) / 100, 2) });
-    }
-
-    // 刷新组件
-    setCountBar(content: string) {
-        this._countBar.setValue({
-            content,
-        });
-    }
-
-    // 获取CountBar组件
-    getComponent = (ref: CountBar) => {
-        this._countBar = ref;
-        this._refreshComponent();
-    };
-
 }

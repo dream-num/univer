@@ -1,7 +1,5 @@
 import { Workbook, Worksheet } from '../Sheets/Domain';
-import { ActionBase, IActionData } from './ActionBase';
-import { ActionObservers } from './ActionObservers';
-import { CommandUnit } from './Command';
+import { ActionBase, IActionData, ActionObservers, CommandUnit } from './index';
 
 /**
  * Format of action data param

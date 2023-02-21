@@ -1,7 +1,21 @@
 import { BaseMenuItem, BaseUlProps, ColorPicker } from '@univerjs/base-ui';
-import { Nullable, Plugin, CommandManager, SheetActionBase, UIObserver, SetSheetOrderAction, InsertSheetAction, SetWorkSheetNameAction, SetTabColorAction, SetWorkSheetHideAction, SetWorkSheetActivateAction, SetWorkSheetStatusAction, RemoveSheetAction } from '@univerjs/core';
+import {
+    Nullable,
+    Plugin,
+    CommandManager,
+    SheetActionBase,
+    UIObserver,
+    SetSheetOrderAction,
+    InsertSheetAction,
+    SetWorkSheetNameAction,
+    SetTabColorAction,
+    SetWorkSheetHideAction,
+    SetWorkSheetActivateAction,
+    SetWorkSheetStatusAction,
+    RemoveSheetAction,
+} from '@univerjs/core';
 import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '..';
-import { SheetBar } from "../View/SheetBar";
+import { SheetBar } from '../View/SheetBar';
 import styles from '../View/SheetBar/index.module.less';
 
 interface CustomComponent {
@@ -35,77 +49,6 @@ export class SheetBarUIController {
     protected _sheetList: SheetUlProps[];
 
     protected _menuList: SheetUlProps[];
-
-    protected _refreshSheetBarUI(): void {
-        this._sheetBar.setValue({
-            sheetList: this._sheetList,
-            sheetUl: this._sheetUl,
-            menuList: this._menuList,
-            selectSheet: (event: Event, data: { item: SheetUlProps }) => {
-                this._dataId = data.item.sheetId;
-                const sheet = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(this._dataId);
-                if (sheet) {
-                    sheet.activate();
-                }
-            },
-            contextMenu: (e: MouseEvent) => {
-                const target = e.currentTarget as HTMLDivElement;
-                this._dataId = target.dataset.id as string;
-                //this._barControl.contextMenu(e);
-            },
-            changeSheetName: (event: Event) => {
-
-            },
-            dragEnd: (elements: HTMLDivElement[]) => {
-                //this._barControl.dragEnd(elements);
-            },
-        });
-    }
-
-    protected _refreshSheetData(): void {
-        const workbook = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook();
-        const sheets = workbook.getSheets();
-        this._menuList = sheets.map((sheet, index) => ({
-            label: sheet.getName(),
-            index: String(index),
-            sheetId: sheet.getSheetId(),
-            hidden: sheet.isSheetHidden(),
-            selected: sheet.getStatus() === 1,
-            onClick: (e: MouseEvent) => {
-                const target = e.currentTarget as HTMLDivElement;
-                this._dataId = target.dataset.id as string;
-                sheet.showSheet();
-                sheet.activate();
-            },
-        }));
-        this._sheetList = sheets.filter((sheet) => !sheet.isSheetHidden()).map((sheet, index) => ({
-            sheetId: sheet.getSheetId(),
-            label: sheet.getName(),
-            index: String(index),
-            selected: sheet.getStatus() === 1,
-            color: sheet.getTabColor() as string,
-            onDown: (e: MouseEvent) => {
-                const target = e.currentTarget as HTMLDivElement;
-                this._dataId = target.dataset.id as string;
-            },
-            onClick: (e: MouseEvent) => {
-                const target = e.currentTarget as HTMLDivElement;
-                this._dataId = target.dataset.id as string;
-
-                sheet.activate();
-            },
-        }));
-        this._sheetIndex = sheets.findIndex((sheet) => sheet.getStatus() === 1);
-        if (this._sheetIndex > -1) {
-            this._dataId = sheets[this._sheetIndex].getSheetId();
-        }
-    }
-
-    protected _refreshComponent(): void {
-        this._sheetUl = this.resetSheetUl(this._sheetUl);
-        this._refreshSheetData();
-        this._refreshSheetBarUI();
-    }
 
     constructor(plugin: Plugin) {
         let that = this;
@@ -142,8 +85,9 @@ export class SheetBarUIController {
                                     this.setUIObserve('onUIChangeObservable', {
                                         name: 'changeSheetColor',
                                         value: {
-                                            color, sheetId: this._dataId
-                                        }
+                                            color,
+                                            sheetId: this._dataId,
+                                        },
                                     });
                                 },
                             },
@@ -161,13 +105,16 @@ export class SheetBarUIController {
             {
                 locale: 'sheetConfig.unhide',
                 onClick: () => {
-                    this._sheetBar.ref.current.showMenu(true)
+                    this._sheetBar.ref.current.showMenu(true);
                     that.setUIObserve('onUIChangeObservable', { name: 'unHideSheet', value: this._dataId });
                 },
                 border: true,
-            }
+            },
         ];
-        this._plugin.getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager().register(this._plugin.getPluginName() + ColorPicker.name, ColorPicker)
+        this._plugin
+            .getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
+            ?.getComponentManager()
+            .register(this._plugin.getPluginName() + ColorPicker.name, ColorPicker);
         CommandManager.getActionObservers().add((event) => {
             const action = event.action as SheetActionBase<any>;
             const data = event.data;
@@ -195,7 +142,10 @@ export class SheetBarUIController {
                 }
             }
         });
-        this._plugin.getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager().register(this._plugin.getPluginName() + ColorPicker.name, ColorPicker)
+        this._plugin
+            .getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
+            ?.getComponentManager()
+            .register(this._plugin.getPluginName() + ColorPicker.name, ColorPicker);
     }
 
     getComponent = (ref: SheetBar) => {
@@ -278,52 +228,41 @@ export class SheetBarUIController {
         return sheetUl;
     }
 
-    selectSheet() {
+    selectSheet() { }
 
-    }
+    deleteSheet() { }
 
-    deleteSheet() {
+    sortMenu(index: number, hidden?: boolean, hideIndex?: number) { }
 
-    }
-
-    sortMenu(index: number, hidden?: boolean, hideIndex?: number) {
-
-    }
-
-    copySheet() {
-
-    }
+    copySheet() { }
 
     addSheet = (position?: string, config?: SheetUlProps): void => {
         this.setUIObserve('onUIChangeObservable', {
             name: 'addSheet',
             value: {
                 position,
-                config
-            }
+                config,
+            },
         });
-    }
+    };
 
-    hideSheet() {
-
-    }
+    hideSheet() { }
 
     unHideSheet() {
         this._sheetBar.ref.current.showSelect();
     }
 
-    moveSheet(direct: string) {
-
-    }
+    moveSheet(direct: string) { }
 
     changeSheetName = (event: Event) => {
         this.setUIObserve('onUIChangeObservable', {
-            name: 'renameSheet', value: {
+            name: 'renameSheet',
+            value: {
                 sheetId: this._dataId,
-                sheetName: (event.target as HTMLElement).innerText
-            }
+                sheetName: (event.target as HTMLElement).innerText,
+            },
         });
-    }
+    };
 
     contextMenu(e: MouseEvent) {
         this._sheetBar.contextMenu(e);
@@ -343,5 +282,76 @@ export class SheetBarUIController {
                 this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook().setSheetOrder(ele.sheetId, index);
             }
         });
+    };
+
+    protected _refreshSheetBarUI(): void {
+        this._sheetBar.setValue({
+            sheetList: this._sheetList,
+            sheetUl: this._sheetUl,
+            menuList: this._menuList,
+            selectSheet: (event: Event, data: { item: SheetUlProps }) => {
+                this._dataId = data.item.sheetId;
+                const sheet = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(this._dataId);
+                if (sheet) {
+                    sheet.activate();
+                }
+            },
+            contextMenu: (e: MouseEvent) => {
+                const target = e.currentTarget as HTMLDivElement;
+                this._dataId = target.dataset.id as string;
+                //this._barControl.contextMenu(e);
+            },
+            changeSheetName: (event: Event) => { },
+            dragEnd: (elements: HTMLDivElement[]) => {
+                //this._barControl.dragEnd(elements);
+            },
+        });
+    }
+
+    protected _refreshSheetData(): void {
+        const workbook = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook();
+        const sheets = workbook.getSheets();
+        this._menuList = sheets.map((sheet, index) => ({
+            label: sheet.getName(),
+            index: String(index),
+            sheetId: sheet.getSheetId(),
+            hidden: sheet.isSheetHidden(),
+            selected: sheet.getStatus() === 1,
+            onClick: (e: MouseEvent) => {
+                const target = e.currentTarget as HTMLDivElement;
+                this._dataId = target.dataset.id as string;
+                sheet.showSheet();
+                sheet.activate();
+            },
+        }));
+        this._sheetList = sheets
+            .filter((sheet) => !sheet.isSheetHidden())
+            .map((sheet, index) => ({
+                sheetId: sheet.getSheetId(),
+                label: sheet.getName(),
+                index: String(index),
+                selected: sheet.getStatus() === 1,
+                color: sheet.getTabColor() as string,
+                onDown: (e: MouseEvent) => {
+                    const target = e.currentTarget as HTMLDivElement;
+                    this._dataId = target.dataset.id as string;
+                },
+                onClick: (e: MouseEvent) => {
+                    const target = e.currentTarget as HTMLDivElement;
+                    this._dataId = target.dataset.id as string;
+
+                    sheet.activate();
+                },
+            }));
+        this._sheetIndex = sheets.findIndex((sheet) => sheet.getStatus() === 1);
+        if (this._sheetIndex > -1) {
+            this._dataId = sheets[this._sheetIndex].getSheetId();
+        }
+    }
+
+    protected _refreshComponent(): void {
+        this._sheetUl = this.resetSheetUl(this._sheetUl);
+        this._refreshSheetData();
+        this._refreshSheetBarUI();
     }
 }

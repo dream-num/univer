@@ -2,7 +2,7 @@ import { SetWorkSheetHideService } from '../Apply';
 import { BooleanNumber } from '../../Enum';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -82,3 +82,5 @@ export class SetWorkSheetHideAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(SetWorkSheetHideAction.NAME, SetWorkSheetHideAction);

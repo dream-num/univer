@@ -6,7 +6,7 @@ export interface BaseInputProps extends BaseComponentProps {
     value?: string;
     placeholder?: string;
     onChange?: (e: Event) => void;
-    onKeyUp?: (e: KeyboardEvent) => void;
+    onPressEnter?: (e: KeyboardEvent) => void;
     bordered?: boolean;
     disabled?: boolean;
     // maxLength?: number;

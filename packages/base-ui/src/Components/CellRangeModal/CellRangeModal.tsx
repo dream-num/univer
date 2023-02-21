@@ -1,4 +1,4 @@
-import { SheetContext, Nullable, Observer, Workbook, Worksheet } from '@univerjs/core';
+import { SheetContext, Workbook, Worksheet } from '@univerjs/core';
 import { BaseCellRangeModalProps, CellRangeModalComponent, JSXComponent } from '../../BaseComponent';
 import { Component, createRef } from '../../Framework';
 import { Icon, Input, Modal, ModalProps } from '../index';
@@ -20,10 +20,6 @@ type placeholder = {
 };
 
 export class CellRangeModal extends Component<BaseCellRangeModalProps, CellModalState> {
-    private _localeObserver: Nullable<Observer<Workbook>>;
-
-    private _localeObserver1: Nullable<Observer<Worksheet>>;
-
     ref = createRef();
     // refProp = createRef();
 

@@ -5,7 +5,7 @@ import styles from './index.module.less';
 interface CountState {
     zoom: number;
     content: string;
-};
+}
 
 interface CountBarProps extends BaseCountBarProps {
     onChange?: (value: string) => void;

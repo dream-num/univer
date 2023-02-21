@@ -44,7 +44,7 @@ export class SheetBarMenu extends Component<SheetBarMenuProps, IState> {
 
     showMenu(show: boolean) {
         this.setState({ show }, () => {
-            if (true) window.addEventListener('click', this.hideMenu, true);
+            if (this.state.show) window.addEventListener('click', this.hideMenu, true);
         });
     }
 

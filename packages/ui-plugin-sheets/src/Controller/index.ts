@@ -1,4 +1,3 @@
-export * from './InfoBarUIController';
 export * from './RightMenuUIController';
 export * from './ToolbarUIController';
 export * from './SheetContainerUIController';

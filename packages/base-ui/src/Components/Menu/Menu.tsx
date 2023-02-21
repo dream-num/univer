@@ -8,13 +8,6 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
 
     private _refs: Menu[] = [];
 
-    protected initialize() {
-        this.state = {
-            show: false,
-            posStyle: {},
-        };
-    }
-
     getMenuRef = () => this._MenuRef;
 
     handleClick = (e: MouseEvent, item: BaseMenuItem, index: number) => {
@@ -141,5 +134,12 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
                 })}
             </ul>
         );
+    }
+
+    protected initialize() {
+        this.state = {
+            show: false,
+            posStyle: {},
+        };
     }
 }

@@ -1,3 +1,3 @@
-import { UniverTooltip, Tooltip } from './Tooltip';
+import { Tooltip } from './Tooltip';
 
-export { Tooltip, UniverTooltip };
+export { Tooltip };

@@ -21,7 +21,7 @@ export class RightMenuInput extends Component<IProps> {
         return (
             <div>
                 {this.getLocale(prefix)}
-                <Input onKeyUp={this.handleKeyUp.bind(this)} type="number" placeholder="1" onClick={this.handleClick}></Input>
+                <Input onPressEnter={this.handleKeyUp.bind(this)} type="number" placeholder="1" onClick={this.handleClick}></Input>
                 {this.getLocale(suffix)}
             </div>
         );

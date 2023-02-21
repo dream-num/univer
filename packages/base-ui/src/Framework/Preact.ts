@@ -15,8 +15,6 @@ abstract class Component<P = {}, S = {}> extends PreactComponent<P, S> {
         this.initialize(props);
     }
 
-    protected initialize(props?: P): void { }
-
     getContext(): Context {
         return this.context.context;
     }
@@ -24,6 +22,10 @@ abstract class Component<P = {}, S = {}> extends PreactComponent<P, S> {
     getLocale(name?: string) {
         if (!name) return;
         return this.getContext().getLocale().get(name);
+    }
+
+    protected initialize(props?: P): void {
+        //
     }
 }
 
@@ -37,14 +39,16 @@ abstract class PureComponent<P = {}, S = {}> extends PreactPureComponent<P, S> {
         this.initialize(props);
     }
 
-    protected initialize(props?: P): void { }
-
     getContext(): Context {
         return this.context.context;
     }
 
     getLocale(name: string) {
         return this.getContext().getLocale().get(name);
+    }
+
+    protected initialize(props?: P): void {
+        //
     }
 }
 

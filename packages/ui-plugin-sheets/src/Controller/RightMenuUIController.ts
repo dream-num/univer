@@ -5,7 +5,7 @@ import { PLUGIN_NAMES, Tools, UIObserver } from '@univerjs/core';
 import { SheetUIPlugin } from '..';
 import { DefaultRightMenuConfig, SheetRightMenuConfig } from '../Basics';
 import { RightMenu, RightMenuInput, RightMenuItem } from '../View';
-import styles from '../View/RightMenu/index.module.less'
+import styles from '../View/RightMenu/index.module.less';
 
 export interface CustomLabelOptions extends BaseSelectChildrenProps {
     locale?: string;
@@ -30,13 +30,13 @@ export interface RightMenuProps extends BaseMenuItem {
     children?: RightMenuProps[];
     suffix?: string;
     border?: boolean;
-    locale?: string
+    locale?: string;
 }
 
 export class RightMenuUIController {
     private _plugin: SheetUIPlugin;
 
-    private _sheetPlugin: SheetPlugin
+    private _sheetPlugin: SheetPlugin;
 
     private _rightMenu: RightMenu;
 
@@ -50,7 +50,6 @@ export class RightMenuUIController {
         this._sheetPlugin = plugin.getUniver().getCurrentUniverSheetInstance().context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
 
         this._config = Tools.deepMerge({}, DefaultRightMenuConfig, config);
-
 
         this._menuList = [
             {
@@ -69,7 +68,7 @@ export class RightMenuUIController {
                     props: {
                         prefix: 'rightClick.toTopAdd',
                         suffix: 'rightClick.row',
-                    }
+                    },
                 },
                 show: this._config.AddRowTop,
             },
@@ -294,18 +293,6 @@ export class RightMenuUIController {
         this._initialize();
     }
 
-    private _initialize() {
-        this._plugin.getComponentManager().register(RightMenuInput.name, RightMenuInput)
-        this._plugin.getComponentManager().register(RightMenuItem.name, RightMenuItem)
-
-        this._sheetPlugin.getMainComponent().onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            if (evt.button === 2) {
-                evt.preventDefault()
-                this._rightMenu.handleContextMenu(evt);
-            }
-        });
-    }
-
     // 获取RightMenu组件
     getComponent = (ref: RightMenu) => {
         this._rightMenu = ref;
@@ -356,7 +343,7 @@ export class RightMenuUIController {
         const height = (e.target as HTMLInputElement).value;
         const msg = {
             name: 'setRowHeight',
-            value: height
+            value: height,
         };
         this.setUIObserve(msg);
     }
@@ -368,7 +355,7 @@ export class RightMenuUIController {
         const width = (e.target as HTMLInputElement).value;
         const msg = {
             name: 'setColumnWidth',
-            value: width
+            value: width,
         };
         this.setUIObserve(msg);
     }
@@ -392,5 +379,17 @@ export class RightMenuUIController {
             name: 'clearContent',
         };
         this.setUIObserve(msg);
+    }
+
+    private _initialize() {
+        this._plugin.getComponentManager().register(RightMenuInput.name, RightMenuInput);
+        this._plugin.getComponentManager().register(RightMenuItem.name, RightMenuItem);
+
+        this._sheetPlugin.getMainComponent().onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            if (evt.button === 2) {
+                evt.preventDefault();
+                this._rightMenu.handleContextMenu(evt);
+            }
+        });
     }
 }

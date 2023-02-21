@@ -1,5 +1,4 @@
 import { BaseComponentProps, Component, ComponentChildren } from '@univerjs/base-ui';
-import { PLUGIN_NAMES } from '@univerjs/core';
 import { SheetUIPlugin } from '../../..';
 import { SHEET_UI_PLUGIN_NAME } from '../../../Basics';
 import styles from './index.module.less';

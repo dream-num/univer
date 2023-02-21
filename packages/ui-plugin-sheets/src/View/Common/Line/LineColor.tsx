@@ -1,4 +1,4 @@
-import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component, Icon } from '@univerjs/base-ui';
+import { BaseComponentProps, Component, Icon } from '@univerjs/base-ui';
 
 interface IState {
     color: string;

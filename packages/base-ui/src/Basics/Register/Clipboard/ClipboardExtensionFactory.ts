@@ -6,19 +6,19 @@ import { IClipboardData } from '../../Interfaces/IClipboardData';
  */
 export class BaseClipboardExtension<T extends Plugin = Plugin> {
     // protected _json: IKeyValue;
-    constructor(protected _data: IClipboardData, protected _plugin: T) {}
+    constructor(protected _data: IClipboardData, protected _plugin: T) { }
 
     /**
      * Execute the core logic after the check is successful
      */
-    execute() {}
+    execute() { }
 }
 
 /**
  * Determine whether to intercept and create BaseClipboardExtension
  */
 export class BaseClipboardExtensionFactory<T extends Plugin = Plugin> {
-    constructor(protected _plugin: T) {}
+    constructor(protected _plugin: T) { }
 
     get zIndex() {
         return 0;

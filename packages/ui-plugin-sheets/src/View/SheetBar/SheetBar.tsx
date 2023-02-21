@@ -1,21 +1,6 @@
-import {
-    AppContext,
-    AppContextValues,
-    BaseComponentPlugin,
-    BaseComponentRender,
-    BaseComponentSheet,
-    BaseMenuItem,
-    BaseSheetBarProps,
-    Button,
-    Component,
-    createRef,
-    Icon,
-    Menu,
-    PreactContext,
-    RefObject,
-} from '@univerjs/base-ui';
+import { BaseMenuItem, BaseSheetBarProps, Button, Component, createRef, Icon, Menu, RefObject } from '@univerjs/base-ui';
+import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { SheetBarMenu } from './SheetBarMenu';
-import { Nullable, Observer, PLUGIN_NAMES, Workbook } from '@univerjs/core';
 import styles from './index.module.less';
 import { SlideTabBar } from '../../Basics/SlideTabBar/SlideTabBar';
 import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '../..';
@@ -40,6 +25,17 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     sheetBarContentRef = createRef();
 
     slideTabBar: SlideTabBar;
+
+    // 先生成移动对象的副本,移动对象固定定位,达到边界的时候将副本移位
+    time = 0;
+
+    target: any = null;
+
+    cloneTarget: any = null;
+
+    startLeft: number;
+
+    startClientX: number;
 
     private _localeObserver: Nullable<Observer<Workbook>>;
 
@@ -190,17 +186,6 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     componentDidMount() {
         this.props.getComponent?.(this);
     }
-
-    // 先生成移动对象的副本,移动对象固定定位,达到边界的时候将副本移位
-    time = 0;
-
-    target: any = null;
-
-    cloneTarget: any = null;
-
-    startLeft: number;
-
-    startClientX: number;
 
     render(props: BaseSheetBarProps, state: SheetState) {
         const { sheetList, menuList, sheetUl } = state;

@@ -6,14 +6,6 @@ import { SheetUIPlugin } from '../SheetUIPlugin';
 import { RichText } from '../View/RichText';
 
 export class CellEditorUIController {
-    private _plugin: SheetUIPlugin;
-
-    private _sheetPlugin: SheetPlugin;
-
-    private _cellEditExtensionManager: CellEditExtensionManager;
-
-    private _keyboardManager: KeyboardManager;
-
     // Is it in editing state
     isEditMode: boolean;
 
@@ -23,6 +15,14 @@ export class CellEditorUIController {
 
     _richText: RichText;
 
+    private _plugin: SheetUIPlugin;
+
+    private _sheetPlugin: SheetPlugin;
+
+    private _cellEditExtensionManager: CellEditExtensionManager;
+
+    private _keyboardManager: KeyboardManager;
+
     constructor(plugin: SheetUIPlugin) {
         this._plugin = plugin;
         this._sheetPlugin = plugin.getUniver().getCurrentUniverSheetInstance().context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
@@ -30,139 +30,12 @@ export class CellEditorUIController {
         this._initialize();
     }
 
-    private _initialize() {
-        // this._initRegisterComponent();
-        // If other plugins are loaded asynchronously, they may be initialized after the rendering layer is loaded, and they will not receive obs listeners.
-
-        const main = this._sheetPlugin.getMainComponent();
-
-        main.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            // Prevent left + right double click
-            if (evt.button !== 2) {
-                this.enterEditMode();
-            }
-        });
-        main.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this.exitEditMode();
-            evt.preventDefault();
-        });
-
-        this._cellEditExtensionManager = new CellEditExtensionManager();
-
-        this._keyboardManager = new KeyboardManager(this._plugin);
-
-        // this._richTextEditEle
-    }
-
-    private _initRichText() {
-        this._richTextEle = getRefElement(this._richText.container);
-        this._richTextEditEle = $$('div', this._richTextEle);
-
-        // // focus
-        this._richTextEditEle.focus();
-
-        // this.focusEditEle();
-        this.hideEditContainer();
-
-        // init event
-        // this._handleKeyboardAction();
-        this._keyboardManager.handleKeyboardAction(this._richTextEditEle);
-        this._handleKeyboardObserver();
-
-        // Get the display status of the formula prompt box
-        this._richText.hooks.set('onKeyDown', (event: KeyboardEvent) => {
-            this._plugin.getObserver('onRichTextKeyDownObservable')?.notifyObservers(event);
-        });
-        // Get the display status of the formula prompt box
-        this._richText.hooks.set('onKeyUp', (event: KeyboardEvent) => {
-            this._plugin.getObserver('onRichTextKeyUpObservable')?.notifyObservers(event);
-        });
-    }
-
-    private _handleKeyboardObserver() {
-        const onKeyDownObservable = this._plugin.getGlobalContext().getObserverManager().getObserver<KeyboardEvent>('onKeyDownObservable', 'core');
-        const onKeyCompositionStartObservable = this._plugin.getGlobalContext().getObserverManager().getObserver<CompositionEvent>('onKeyCompositionStartObservable', 'core');
-
-        if (onKeyDownObservable && !onKeyDownObservable.hasObservers()) {
-            onKeyDownObservable.add((evt: KeyboardEvent) => {
-                if (!evt.ctrlKey && isKeyPrintable(evt.key)) {
-                    // character key
-                    this.enterEditMode(true);
-                } else {
-                    // control key
-                    switch (evt.key) {
-                        case 'Enter':
-                            if (this.isEditMode) {
-                                this.exitEditMode();
-
-                                const currentCell = this._sheetPlugin.getSelectionManager().getCurrentCellModel();
-                                if (!currentCell?.isMerged) {
-                                    // move to cell below
-                                    this._sheetPlugin.getSelectionManager().move(Direction.BOTTOM);
-                                }
-                            } else {
-                                this.enterEditMode();
-                            }
-                            break;
-
-                        case 'Space':
-                            if (!this.isEditMode) {
-                                this.enterEditMode(true);
-                            }
-                            break;
-
-                        case 'ArrowUp':
-                            if (!this.isEditMode) {
-                                this._sheetPlugin.getSelectionManager().move(Direction.TOP);
-                            }
-                            break;
-
-                        case 'ArrowDown':
-                            if (!this.isEditMode) {
-                                this._sheetPlugin.getSelectionManager().move(Direction.BOTTOM);
-                            }
-                            break;
-
-                        case 'ArrowLeft':
-                            if (!this.isEditMode) {
-                                this._sheetPlugin.getSelectionManager().move(Direction.LEFT);
-                            }
-                            break;
-
-                        case 'ArrowRight':
-                            if (!this.isEditMode) {
-                                this._sheetPlugin.getSelectionManager().move(Direction.RIGHT);
-                            }
-                            break;
-
-                        case 'Tab':
-                            if (!this.isEditMode) {
-                                this._sheetPlugin.getSelectionManager().move(Direction.RIGHT);
-                            }
-                            evt.preventDefault();
-                            break;
-
-                        default:
-                            break;
-                    }
-                }
-            });
-        }
-
-        if (onKeyCompositionStartObservable && !onKeyCompositionStartObservable.hasObservers()) {
-            onKeyCompositionStartObservable.add((evt: CompositionEvent) => {
-                if (!this.isEditMode) {
-                    this.enterEditMode(true);
-                }
-            });
-        }
-    }
-
     // Get the RichText component
     getComponent = (ref: RichText) => {
         this._richText = ref;
         this._initRichText();
     };
+
     getCellEditor() {
         return this._richText;
     }
@@ -316,10 +189,138 @@ export class CellEditorUIController {
     }
 
     getRichTextEle() {
-        return this._richTextEle
+        return this._richTextEle;
     }
 
     getRichTextEditEle() {
-        return this._richTextEditEle
+        return this._richTextEditEle;
+    }
+
+    private _initialize() {
+        // this._initRegisterComponent();
+        // If other plugins are loaded asynchronously, they may be initialized after the rendering layer is loaded, and they will not receive obs listeners.
+
+        const main = this._sheetPlugin.getMainComponent();
+
+        main.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            // Prevent left + right double click
+            if (evt.button !== 2) {
+                this.enterEditMode();
+            }
+        });
+        main.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this.exitEditMode();
+            evt.preventDefault();
+        });
+
+        this._cellEditExtensionManager = new CellEditExtensionManager();
+
+        this._keyboardManager = new KeyboardManager(this._plugin);
+
+        // this._richTextEditEle
+    }
+
+    private _initRichText() {
+        this._richTextEle = getRefElement(this._richText.container);
+        this._richTextEditEle = $$('div', this._richTextEle);
+
+        // // focus
+        this._richTextEditEle.focus();
+
+        // this.focusEditEle();
+        this.hideEditContainer();
+
+        // init event
+        // this._handleKeyboardAction();
+        this._keyboardManager.handleKeyboardAction(this._richTextEditEle);
+        this._handleKeyboardObserver();
+
+        // Get the display status of the formula prompt box
+        this._richText.hooks.set('onKeyDown', (event: KeyboardEvent) => {
+            this._plugin.getObserver('onRichTextKeyDownObservable')?.notifyObservers(event);
+        });
+        // Get the display status of the formula prompt box
+        this._richText.hooks.set('onKeyUp', (event: KeyboardEvent) => {
+            this._plugin.getObserver('onRichTextKeyUpObservable')?.notifyObservers(event);
+        });
+    }
+
+    private _handleKeyboardObserver() {
+        const onKeyDownObservable = this._plugin.getGlobalContext().getObserverManager().getObserver<KeyboardEvent>('onKeyDownObservable', 'core');
+        const onKeyCompositionStartObservable = this._plugin.getGlobalContext().getObserverManager().getObserver<CompositionEvent>('onKeyCompositionStartObservable', 'core');
+
+        if (onKeyDownObservable && !onKeyDownObservable.hasObservers()) {
+            onKeyDownObservable.add((evt: KeyboardEvent) => {
+                if (!evt.ctrlKey && isKeyPrintable(evt.key)) {
+                    // character key
+                    this.enterEditMode(true);
+                } else {
+                    // control key
+                    switch (evt.key) {
+                        case 'Enter':
+                            if (this.isEditMode) {
+                                this.exitEditMode();
+
+                                const currentCell = this._sheetPlugin.getSelectionManager().getCurrentCellModel();
+                                if (!currentCell?.isMerged) {
+                                    // move to cell below
+                                    this._sheetPlugin.getSelectionManager().move(Direction.BOTTOM);
+                                }
+                            } else {
+                                this.enterEditMode();
+                            }
+                            break;
+
+                        case 'Space':
+                            if (!this.isEditMode) {
+                                this.enterEditMode(true);
+                            }
+                            break;
+
+                        case 'ArrowUp':
+                            if (!this.isEditMode) {
+                                this._sheetPlugin.getSelectionManager().move(Direction.TOP);
+                            }
+                            break;
+
+                        case 'ArrowDown':
+                            if (!this.isEditMode) {
+                                this._sheetPlugin.getSelectionManager().move(Direction.BOTTOM);
+                            }
+                            break;
+
+                        case 'ArrowLeft':
+                            if (!this.isEditMode) {
+                                this._sheetPlugin.getSelectionManager().move(Direction.LEFT);
+                            }
+                            break;
+
+                        case 'ArrowRight':
+                            if (!this.isEditMode) {
+                                this._sheetPlugin.getSelectionManager().move(Direction.RIGHT);
+                            }
+                            break;
+
+                        case 'Tab':
+                            if (!this.isEditMode) {
+                                this._sheetPlugin.getSelectionManager().move(Direction.RIGHT);
+                            }
+                            evt.preventDefault();
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+            });
+        }
+
+        if (onKeyCompositionStartObservable && !onKeyCompositionStartObservable.hasObservers()) {
+            onKeyCompositionStartObservable.add((evt: CompositionEvent) => {
+                if (!this.isEditMode) {
+                    this.enterEditMode(true);
+                }
+            });
+        }
     }
 }

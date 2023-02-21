@@ -9,6 +9,7 @@ export interface BaseDropdownProps {
     showArrow?: boolean;
     icon?: ComponentChildren;
     onClick?: () => void;
+    onMainClick?: () => void; //非功能按钮事件
     tooltip?: string;
 }
 

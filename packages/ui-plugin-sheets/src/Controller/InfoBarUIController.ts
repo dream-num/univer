@@ -25,31 +25,6 @@ export class InfoBarUIController {
 
     private _infoList: BaseInfoBarProps;
 
-    private _refreshComponent(): void {
-        const name = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook().getConfig().name;
-        this._infoBarModel = new InfoBarModel(name);
-        this._infoList = {
-            back: {
-                locale: 'info.return',
-            },
-            rename: {
-                locale: 'info.tips',
-            },
-            update: {
-                locale: 'info.detailUpdate',
-            },
-            save: {
-                locale: 'info.detailSave',
-            },
-            sheet: {
-                label: name,
-                onBlur: (e) => {
-                    this.setSheetName(e);
-                },
-            },
-        };
-    }
-
     constructor(plugin: Plugin) {
         this._plugin = plugin;
     }
@@ -74,5 +49,30 @@ export class InfoBarUIController {
         const target = e.target as HTMLInputElement;
         const name = target.value;
         this._infoBarModel.setName(name);
+    }
+
+    private _refreshComponent(): void {
+        const name = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook().getConfig().name;
+        this._infoBarModel = new InfoBarModel(name);
+        this._infoList = {
+            back: {
+                locale: 'info.return',
+            },
+            rename: {
+                locale: 'info.tips',
+            },
+            update: {
+                locale: 'info.detailUpdate',
+            },
+            save: {
+                locale: 'info.detailSave',
+            },
+            sheet: {
+                label: name,
+                onBlur: (e) => {
+                    this.setSheetName(e);
+                },
+            },
+        };
     }
 }

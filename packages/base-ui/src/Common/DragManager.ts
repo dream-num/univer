@@ -12,11 +12,6 @@ export class DragManager {
         this._installObserver();
     }
 
-    private _installObserver() {
-        // Drag
-        this._observerManager.addObserver('onDropObservable', 'core', new Observable());
-    }
-
     /**
      * init Drag listener
      *
@@ -34,5 +29,10 @@ export class DragManager {
 
         element.addEventListener('drop', DropEvent);
         element.addEventListener('dragover', DragOverEvent);
+    }
+
+    private _installObserver() {
+        // Drag
+        this._observerManager.addObserver('onDropObservable', 'core', new Observable());
     }
 }

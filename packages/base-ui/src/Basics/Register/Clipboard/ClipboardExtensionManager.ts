@@ -10,12 +10,12 @@ export class ClipboardExtensionManager {
     // mounted on the instance
     private _register: ClipboardExtensionRegister;
 
-    getRegister(): ClipboardExtensionRegister {
-        return this._register;
-    }
-
     constructor() {
         this._register = new ClipboardExtensionRegister();
+    }
+
+    getRegister(): ClipboardExtensionRegister {
+        return this._register;
     }
 
     /**
@@ -33,25 +33,6 @@ export class ClipboardExtensionManager {
         if (extension) {
             extension.execute();
         }
-    }
-
-    /**
-     * Execute when the action is matched
-     * @param command
-     * @returns
-     */
-    private _checkExtension(data: IClipboardData) {
-        if (!this._clipboardExtensionFactoryList) return false;
-
-        let extension: BaseClipboardExtension | false = false;
-        for (let index = 0; index < this._clipboardExtensionFactoryList.length; index++) {
-            const extensionFactory = this._clipboardExtensionFactoryList[index];
-            extension = extensionFactory.check(data);
-            if (extension !== false) {
-                break;
-            }
-        }
-        return extension;
     }
 
     pasteResolver(evt?: ClipboardEvent) {
@@ -74,5 +55,24 @@ export class ClipboardExtensionManager {
                 resolve(data);
             });
         });
+    }
+
+    /**
+     * Execute when the action is matched
+     * @param command
+     * @returns
+     */
+    private _checkExtension(data: IClipboardData) {
+        if (!this._clipboardExtensionFactoryList) return false;
+
+        let extension: BaseClipboardExtension | false = false;
+        for (let index = 0; index < this._clipboardExtensionFactoryList.length; index++) {
+            const extensionFactory = this._clipboardExtensionFactoryList[index];
+            extension = extensionFactory.check(data);
+            if (extension !== false) {
+                break;
+            }
+        }
+        return extension;
     }
 }

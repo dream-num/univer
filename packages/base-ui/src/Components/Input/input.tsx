@@ -55,9 +55,11 @@ export class Input extends Component<BaseInputProps, IState> {
         onChange(e);
     };
 
-    handleKeyUp = (e: KeyboardEvent) => {
-        const { onKeyUp } = this.props;
-        onKeyUp?.(e);
+    handlePressEnter = (e: KeyboardEvent) => {
+        const { onPressEnter } = this.props;
+        if (e.key === 'Enter') {
+            onPressEnter?.(e);
+        }
     };
 
     onFocus = (e: Event) => {
@@ -117,7 +119,7 @@ export class Input extends Component<BaseInputProps, IState> {
                 onClick={this.onClick}
                 readonly={readonly}
                 id={id}
-                onKeyUp={this.handleKeyUp}
+                onKeyUp={this.handlePressEnter}
             ></input>
         );
     }

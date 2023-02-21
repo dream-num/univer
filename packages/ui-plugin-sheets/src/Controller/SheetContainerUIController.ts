@@ -1,9 +1,9 @@
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { DragManager, EventManager, getRefElement } from '@univerjs/base-ui';
-import { LocaleType, PLUGIN_NAMES, UIObserver, UniverSheet } from '@univerjs/core';
+import { LocaleType, PLUGIN_NAMES, UniverSheet } from '@univerjs/core';
 import { ISheetUIPluginConfig } from '../Basics';
 import { SheetUIPlugin } from '../SheetUIPlugin';
-import { SheetContainer, UI } from '../View';
+import { SheetContainer } from '../View';
 import { CellEditorUIController } from './CellEditorUIController';
 import { CountBarUIController } from './CountBarUIController';
 import { FormulaBarUIController } from './FormulaBarUIController';
@@ -47,7 +47,7 @@ export class SheetContainerUIController {
 
         this._initialize();
 
-        this._slotController = new SlotController(this._plugin)
+        this._slotController = new SlotController();
         this._toolbarController = new ToolbarUIController(this._plugin, this._config.layout?.toolbarConfig);
         this._cellEditorUIController = new CellEditorUIController(this._plugin);
         this._formulaBarUIController = new FormulaBarUIController(this._plugin);
@@ -94,18 +94,6 @@ export class SheetContainerUIController {
         // UI.create(config);
     }
 
-    private _initialize() {
-        this._dragManager = new DragManager(this._plugin);
-        this._eventManager = new EventManager(this._plugin);
-
-        this.setEventManager();
-    }
-
-    private _initSheetContainer() {
-        // handle drag event
-        this._dragManager.handleDragAction(getRefElement(this._sheetContainer));
-    }
-
     getUIConfig() {
         const config = {
             context: this._plugin.getContext(),
@@ -143,7 +131,7 @@ export class SheetContainerUIController {
                 },
                 slot: {
                     getComponent: this._slotController.getComponent,
-                }
+                },
             },
         };
         return config;
@@ -152,7 +140,7 @@ export class SheetContainerUIController {
     // 获取SheetContainer组件
     getComponent = (ref: SheetContainer) => {
         this._sheetContainer = ref;
-        this._plugin.getObserver('onUIDidMount')?.notifyObservers(this._sheetContainer)
+        this._plugin.getObserver('onUIDidMount')?.notifyObservers(this._sheetContainer);
 
         this._initSheetContainer();
     };
@@ -190,22 +178,32 @@ export class SheetContainerUIController {
     }
 
     getCellEditorUIController() {
-        return this._cellEditorUIController
+        return this._cellEditorUIController;
     }
 
     getFormulaBarUIController() {
-        return this._formulaBarUIController
+        return this._formulaBarUIController;
     }
 
     getMainSlotController() {
-        return this._slotController
+        return this._slotController;
     }
 
     UIDidMount(cb: Function) {
-        if (this._sheetContainer) return cb(this._sheetContainer)
+        if (this._sheetContainer) return cb(this._sheetContainer);
 
-        this._plugin.getObserver('onUIDidMount')?.add(() => {
-            return cb(this._sheetContainer)
-        })
+        this._plugin.getObserver('onUIDidMount')?.add(() => cb(this._sheetContainer));
+    }
+
+    private _initialize() {
+        this._dragManager = new DragManager(this._plugin);
+        this._eventManager = new EventManager(this._plugin);
+
+        this.setEventManager();
+    }
+
+    private _initSheetContainer() {
+        // handle drag event
+        this._dragManager.handleDragAction(getRefElement(this._sheetContainer));
     }
 }

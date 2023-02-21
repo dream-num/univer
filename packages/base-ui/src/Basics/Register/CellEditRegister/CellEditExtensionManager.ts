@@ -4,7 +4,18 @@ import { BaseCellEditExtension, BaseCellEditExtensionFactory } from './CellEditE
 import { CellEditExtensionRegister } from './CellEditExtensionRegister';
 
 export class CellEditExtensionManager {
+    static register: CellEditExtensionRegister;
+
     private _cellEditExtensionFactoryList: BaseCellEditExtensionFactory[];
+
+    static create(): CellEditExtensionRegister {
+        if (!this.register) {
+            this.register = new CellEditExtensionRegister();
+            this.register.initialize();
+        }
+
+        return this.register;
+    }
 
     /**
      * inject cell position
@@ -42,16 +53,5 @@ export class CellEditExtensionManager {
             }
         }
         return extension;
-    }
-
-    static register: CellEditExtensionRegister;
-
-    static create(): CellEditExtensionRegister {
-        if (!this.register) {
-            this.register = new CellEditExtensionRegister();
-            this.register.initialize();
-        }
-
-        return this.register;
     }
 }

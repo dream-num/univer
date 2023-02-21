@@ -1,10 +1,36 @@
-import { BorderInfo, SelectionControl, SheetPlugin } from '@univerjs/base-sheets';
+import { BorderInfo, SheetPlugin } from '@univerjs/base-sheets';
 import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren } from '@univerjs/base-ui';
-import { BorderType, DEFAULT_STYLES, FontItalic, FontStyleType, FontWeight, HorizontalAlign, IBorderData, IKeyValue, PLUGIN_NAMES, Range, Tools, UIObserver, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import {
+    BorderType,
+    CommandManager,
+    DEFAULT_STYLES,
+    HorizontalAlign,
+    IKeyValue,
+    ISheetActionData,
+    PLUGIN_NAMES,
+    SheetActionBase,
+    Tools,
+    UIObserver,
+    VerticalAlign,
+    WrapStrategy,
+    Range,
+    FontWeight,
+    FontItalic,
+} from '@univerjs/core';
 import { SheetUIPlugin } from '..';
 import { DefaultToolbarConfig, SheetToolbarConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
-import { BORDER_LINE_CHILDREN, BORDER_SIZE_CHILDREN, FONT_FAMILY_CHILDREN, FONT_SIZE_CHILDREN, HORIZONTAL_ALIGN_CHILDREN, MERGE_CHILDREN, TEXT_ROTATE_CHILDREN, TEXT_WRAP_CHILDREN, VERTICAL_ALIGN_CHILDREN } from '../View/ToolBar/Const';
+import {
+    BORDER_LINE_CHILDREN,
+    BORDER_SIZE_CHILDREN,
+    FONT_FAMILY_CHILDREN,
+    FONT_SIZE_CHILDREN,
+    HORIZONTAL_ALIGN_CHILDREN,
+    MERGE_CHILDREN,
+    TEXT_ROTATE_CHILDREN,
+    TEXT_WRAP_CHILDREN,
+    VERTICAL_ALIGN_CHILDREN,
+} from '../View/Toolbar/Const';
 import styles from '../View/ToolBar/index.module.less';
 
 // 继承基础下拉属性,添加国际化
@@ -25,13 +51,13 @@ enum ToolbarType {
 
 export interface IToolbarItemProps extends BaseToolbarSelectProps {
     active?: boolean;
+    unActive?: boolean; //button不需保持状态
     show?: boolean; //是否显示按钮
     toolbarType?: ToolbarType;
     tooltip?: string; //tooltip文字
     border?: boolean;
     suffix?: ComponentChildren;
 }
-
 
 export class ToolbarUIController {
     private _plugin: SheetUIPlugin;
@@ -50,13 +76,17 @@ export class ToolbarUIController {
 
     private _colorSelect1: ColorSelect;
 
+    private _textColor: string = '#000';
+
     private _colorSelect2: ColorSelect;
 
+    private _background: string = '#fff';
+
     private _borderInfo: BorderInfo = {
-        type: BorderType.TOP,
+        type: BorderType.ALL,
         color: '#000',
-        style: 1
-    } //存储边框信息
+        style: 1,
+    }; //存储边框信息
 
     constructor(plugin: SheetUIPlugin, config?: SheetToolbarConfig) {
         this._plugin = plugin;
@@ -70,21 +100,29 @@ export class ToolbarUIController {
                 toolbarType: 1,
                 tooltip: 'toolbar.undo',
                 name: 'undo',
+                unActive: true,
                 customLabel: {
                     name: 'ForwardIcon',
                 },
                 show: this._config.undo,
-                onClick: () => this.setUndo(),
+                onClick: () => {
+                    this.setUndo();
+                    this.hideTooltip();
+                },
             },
             {
                 toolbarType: 1,
                 tooltip: 'toolbar.redo',
+                unActive: true,
                 customLabel: {
                     name: 'BackIcon',
                 },
                 name: 'redo',
                 show: this._config.redo,
-                onClick: () => this.setRedo(),
+                onClick: () => {
+                    this.setRedo();
+                    this.hideTooltip();
+                },
             },
             {
                 type: 0,
@@ -93,6 +131,9 @@ export class ToolbarUIController {
                 name: 'font',
                 show: this._config.font,
                 border: true,
+                onMainClick: () => {
+                    this.hideTooltip();
+                },
                 onClick: (fontFamily: string) => {
                     this.setFontFamily(fontFamily);
                 },
@@ -107,8 +148,12 @@ export class ToolbarUIController {
                 onClick: (fontSize: number) => {
                     this.setFontSize(fontSize);
                 },
-                onKeyUp: (fontSize: number) => {
+                onMainClick: () => {
+                    this.hideTooltip();
+                },
+                onPressEnter: (fontSize: number) => {
                     this.setFontSize(fontSize);
+                    this.hideTooltip();
                 },
                 children: FONT_SIZE_CHILDREN,
             },
@@ -121,8 +166,9 @@ export class ToolbarUIController {
                 active: false,
                 name: 'bold',
                 show: this._config.bold,
-                onClick: (isBold: boolean) => {
+                onClick: (e, isBold: boolean) => {
                     this.setFontWeight(isBold);
+                    this.hideTooltip();
                 },
             },
             {
@@ -133,8 +179,9 @@ export class ToolbarUIController {
                 },
                 name: 'italic',
                 show: this._config.italic,
-                onClick: (isItalic: boolean) => {
-                    this.setFontStyle(isItalic)
+                onClick: (e, isItalic: boolean) => {
+                    this.setFontStyle(isItalic);
+                    this.hideTooltip();
                 },
             },
             {
@@ -145,8 +192,12 @@ export class ToolbarUIController {
                 },
                 name: 'strikethrough',
                 show: this._config.strikethrough,
-                onClick: (isStrikethrough: boolean) => {
-                    this.setStrikeThrough(isStrikethrough)
+                onClick: (e, isStrikethrough: boolean) => {
+                    this.hideTooltip();
+                    const strikethroughItem = this._toolList.find((item) => item.name === 'strikethrough');
+                    if (!strikethroughItem) return;
+                    strikethroughItem.active = isStrikethrough;
+                    this.setStrikeThrough(isStrikethrough);
                 },
             },
             {
@@ -157,8 +208,12 @@ export class ToolbarUIController {
                 },
                 name: 'underline',
                 show: this._config.underline,
-                onClick: (isUnderLine: boolean) => {
-                    this.setUnderline(isUnderLine)
+                onClick: (e, isUnderLine: boolean) => {
+                    this.hideTooltip();
+                    const underlineItem = this._toolList.find((item) => item.name === 'underline');
+                    if (!underlineItem) return;
+                    underlineItem.active = isUnderLine;
+                    this.setUnderline(isUnderLine);
                 },
             },
             {
@@ -168,13 +223,22 @@ export class ToolbarUIController {
                     name: SHEET_UI_PLUGIN_NAME + ColorSelect.name,
                     props: {
                         getComponent: (ref: ColorSelect) => {
-                            this._colorSelect1 = ref
+                            this._colorSelect1 = ref;
                         },
                         color: '#000',
                         customLabel: {
                             name: 'TextColorIcon',
                         },
                     },
+                },
+                onClick: () => {
+                    this.hideTooltip();
+                    const textColor = this._toolList.find((item) => item.name === 'textColor');
+                    if (!textColor) return;
+                    if (!textColor.customLabel) return;
+                    if (!textColor.customLabel.props) return;
+                    textColor.customLabel.props.color = this._textColor;
+                    this.changeColor(this._textColor);
                 },
                 hideSelectedIcon: true,
                 className: styles.selectColorPickerParent,
@@ -185,7 +249,7 @@ export class ToolbarUIController {
                             props: {
                                 onClick: (color: string, e: MouseEvent) => {
                                     this._colorSelect1.setColor(color);
-                                    this.setFontColor(color)
+                                    this._textColor = color;
                                 },
                             },
                         },
@@ -202,13 +266,22 @@ export class ToolbarUIController {
                     name: SHEET_UI_PLUGIN_NAME + ColorSelect.name,
                     props: {
                         getComponent: (ref: ColorSelect) => {
-                            this._colorSelect2 = ref
+                            this._colorSelect2 = ref;
                         },
                         color: '#fff',
                         customLabel: {
                             name: 'FillColorIcon',
                         },
                     },
+                },
+                onClick: () => {
+                    this.hideTooltip();
+                    const fillColor = this._toolList.find((item) => item.name === 'fillColor');
+                    if (!fillColor) return;
+                    if (!fillColor.customLabel) return;
+                    if (!fillColor.customLabel.props) return;
+                    fillColor.customLabel.props.color = this._background;
+                    this.setBackground(this._background);
                 },
                 hideSelectedIcon: true,
                 className: styles.selectColorPickerParent,
@@ -219,8 +292,8 @@ export class ToolbarUIController {
                             props: {
                                 onClick: (color: string, e: MouseEvent) => {
                                     this._colorSelect2.setColor(color);
-                                    this.setBackground(color)
-                                }
+                                    this._background = color;
+                                },
                             },
                         },
                         className: styles.selectColorPicker,
@@ -236,19 +309,23 @@ export class ToolbarUIController {
                 tooltip: 'toolbar.border.main',
                 className: styles.selectDoubleString,
                 onClick: (value: string) => {
-                    this._borderInfo.type = value as BorderType
-                    this.setBorder()
+                    if (value) {
+                        this._borderInfo.type = value as BorderType;
+                    }
+                    this.hideTooltip();
+                    this.setBorder();
                 },
                 name: 'border',
                 children: [
                     ...BORDER_LINE_CHILDREN,
                     {
+                        name: 'borderColor',
                         customLabel: {
                             name: SHEET_UI_PLUGIN_NAME + LineColor.name,
                             props: {
                                 color: '#000',
                                 label: 'borderLine.borderColor',
-                                getComponent: (ref: LineColor) => this._lineColor = ref
+                                getComponent: (ref: LineColor) => (this._lineColor = ref),
                             },
                         },
                         unSelectable: true,
@@ -259,8 +336,14 @@ export class ToolbarUIController {
                                     name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
                                     props: {
                                         onClick: (color: string, e: MouseEvent) => {
-                                            this._lineColor.setColor(color)
-                                            this._borderInfo.color = color
+                                            this._lineColor.setColor(color);
+                                            this._borderInfo.color = color;
+                                            const borderItem = this._toolList.find((item) => item.name === 'border');
+                                            const lineColor = borderItem?.children?.find((item) => item.name === 'borderColor');
+                                            if (!lineColor) return;
+                                            if (!lineColor.customLabel) return;
+                                            if (!lineColor.customLabel.props) return;
+                                            lineColor.customLabel.props.color = color;
                                         },
                                     },
                                 },
@@ -277,13 +360,13 @@ export class ToolbarUIController {
                             props: {
                                 img: 0,
                                 label: 'borderLine.borderSize',
-                                getComponent: (ref: LineBold) => this._lineBold = ref
+                                getComponent: (ref: LineBold) => (this._lineBold = ref),
                             },
                         },
                         onClick: (...arg) => {
-                            arg[0].stopPropagation()
-                            this._lineBold.setImg(BORDER_SIZE_CHILDREN[arg[2]].customLabel?.name)
-                            this._borderInfo.style = arg[1]
+                            arg[0].stopPropagation();
+                            this._lineBold.setImg(BORDER_SIZE_CHILDREN[arg[2]].customLabel?.name);
+                            this._borderInfo.style = arg[1];
                         },
                         className: styles.selectLineBoldParent,
                         unSelectable: true,
@@ -300,6 +383,7 @@ export class ToolbarUIController {
                 show: this._config.mergeCell,
                 onClick: (value: string) => {
                     this.setMerge(value);
+                    this.hideTooltip();
                 },
                 name: 'mergeCell',
                 children: MERGE_CHILDREN,
@@ -313,6 +397,7 @@ export class ToolbarUIController {
                 show: this._config.horizontalAlignMode,
                 onClick: (value: HorizontalAlign) => {
                     this.setHorizontalAlignment(value);
+                    this.hideTooltip();
                 },
                 children: HORIZONTAL_ALIGN_CHILDREN,
             },
@@ -325,6 +410,7 @@ export class ToolbarUIController {
                 show: this._config.verticalAlignMode,
                 onClick: (value: VerticalAlign) => {
                     this.setVerticalAlignment(value);
+                    this.hideTooltip();
                 },
                 children: VERTICAL_ALIGN_CHILDREN,
             },
@@ -337,6 +423,7 @@ export class ToolbarUIController {
                 show: this._config.textWrapMode,
                 onClick: (value: WrapStrategy) => {
                     this.setWrapStrategy(value);
+                    this.hideTooltip();
                 },
                 children: TEXT_WRAP_CHILDREN,
             },
@@ -349,131 +436,13 @@ export class ToolbarUIController {
                 show: this._config.textRotateMode,
                 onClick: (value: number | string) => {
                     this.setTextRotation(value);
+                    this.hideTooltip();
                 },
                 children: TEXT_ROTATE_CHILDREN,
             },
         ];
 
         this._initialize();
-    }
-
-    private _initialize() {
-        this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + ColorSelect.name, ColorSelect)
-        this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker)
-        this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + LineColor.name, LineColor)
-        this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + LineBold.name, LineBold)
-
-        this._sheetPlugin.getObserver('onChangeSelectionObserver')?.add((selectionControl: SelectionControl) => {
-            const manager = this._sheetPlugin.getSelectionManager();
-            const range = manager?.getCurrentCell();
-            if (range) {
-                this._changeToolbarState(range);
-            }
-        });
-    }
-
-    private _changeToolbarState(range: Range): void {
-        const workbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
-        const worksheet = workbook.getActiveSheet();
-        if (worksheet) {
-            const isBold = range.getFontWeight();
-            const IsItalic = range.getFontStyle()
-            const strikeThrough = range.getStrikeThrough();
-            const fontSize = range.getFontSize();
-            const fontWeight = range.getFontWeight();
-            const fontName = range.getFontFamily();
-            const fontItalic = range.getFontStyle();
-            // const fontColor = range.getFontColor();
-            // const background = range.getBackground();
-            const underline = range.getUnderline();
-            const horizontalAlign = range.getHorizontalAlignment() ?? HorizontalAlign.LEFT;
-            const verticalAlign = range.getVerticalAlignment() ?? VerticalAlign.BOTTOM;
-            const rotation = range.getTextRotation();
-            const warp = range.getWrapStrategy() ?? WrapStrategy.CLIP;
-
-            const bold = this._toolList.find((item) => item.name === 'bold')
-            const italic = this._toolList.find((item) => item.name === 'italic')
-            const textRotateModeItem = this._toolList.find((item) => item.name === 'textRotateMode');
-            const fontSizeItem = this._toolList.find((item) => item.name === 'fontSize');
-            const fontNameItem = this._toolList.find((item) => item.name === 'font');
-            const fontBoldItem = this._toolList.find((item) => item.name === 'bold');
-            const fontItalicItem = this._toolList.find((item) => item.name === 'italic');
-            // const textColor = this._toolList.find((item) => item.name === 'textColor')
-            // const fillColor = this._toolList.find((item) => item.name === 'fillColor')
-            const strikethroughItem = this._toolList.find((item) => item.name === 'strikethrough');
-            const underlineItem = this._toolList.find((item) => item.name === 'underline');
-            const horizontalAlignModeItem = this._toolList.find((item) => item.name === 'horizontalAlignMode');
-            const verticalAlignModeItem = this._toolList.find((item) => item.name === 'verticalAlignMode');
-            const textWrapMode = this._toolList.find((item) => item.name === 'textWrapMode');
-            // const border = this._toolList.find((item) => item.name === 'border')
-
-            if (bold) {
-                bold.active = isBold === FontWeight.BOLD
-            }
-
-            if (italic) {
-                italic.active = IsItalic === FontItalic.ITALIC
-            }
-
-            if (strikethroughItem) {
-                strikethroughItem.active = !!(strikeThrough && strikeThrough.s);
-            }
-            if (fontNameItem) {
-                fontNameItem.children?.forEach((item) => {
-                    item.selected = fontName === item.value;
-                });
-            }
-            if (fontSizeItem) {
-                fontSizeItem.label = fontSize.toString()
-            }
-            if (fontBoldItem) {
-                fontBoldItem.active = !!fontWeight;
-            }
-            if (fontItalicItem) {
-                fontItalicItem.active = !!fontItalic;
-            }
-            // if (textColor) {
-            //     const label = textColor.customLabel
-            //     if (label && label.props) {
-            //         label.props.color = fontColor
-            //     }
-            // }
-            // if (fillColor) {
-            //     const label = fillColor.customLabel
-            //     if (label && label.props) {
-            //         label.props.color = background
-            //     }
-            // }
-            if (underlineItem) {
-                underlineItem.active = !!(underline && underline.s);
-            }
-            if (horizontalAlignModeItem) {
-                horizontalAlignModeItem.children?.forEach((item) => {
-                    item.selected = horizontalAlign === item.value;
-                });
-            }
-            if (textRotateModeItem) {
-                textRotateModeItem.children?.forEach((item) => {
-                    if (rotation.v) {
-                        item.selected = item.value === 'v'
-                    } else {
-                        item.selected = rotation.a === item.value;
-                    }
-                });
-            }
-            if (verticalAlignModeItem) {
-                verticalAlignModeItem.children?.forEach((item) => {
-                    item.selected = verticalAlign === item.value;
-                });
-            }
-            if (textWrapMode) {
-                textWrapMode.children?.forEach((item) => {
-                    item.selected = warp === item.value;
-                });
-            }
-
-            this.setToolbar();
-        }
     }
 
     // 获取Toolbar组件
@@ -505,6 +474,18 @@ export class ToolbarUIController {
 
     setUIObserve<T>(msg: UIObserver<T>) {
         this._plugin.getContext().getObserverManager().requiredObserver<UIObserver<T>>('onUIChangeObservable', 'core').notifyObservers(msg);
+    }
+
+    changeColor(color: string) {
+        const strikethroughItem = this._toolList.find((item) => item.name === 'strikethrough');
+        const underlineItem = this._toolList.find((item) => item.name === 'underline');
+        this.setFontColor(color);
+        if (underlineItem) {
+            this.setUnderline(underlineItem.active ?? false);
+        }
+        if (strikethroughItem) {
+            this.setStrikeThrough(strikethroughItem.active ?? false);
+        }
     }
 
     setUndo() {
@@ -585,7 +566,6 @@ export class ToolbarUIController {
         this.setUIObserve(msg);
     }
 
-
     setMerge(value: string) {
         const msg = {
             name: 'merge',
@@ -632,5 +612,147 @@ export class ToolbarUIController {
             value: this._borderInfo,
         };
         this.setUIObserve<IKeyValue>(msg);
+    }
+
+    hideTooltip() {
+        const dom = this._toolbar.base as HTMLDivElement;
+        const tooltip = dom.querySelectorAll(`.${styles.tooltipTitle}.${styles.bottom}`);
+        tooltip.forEach((item) => {
+            (item as HTMLSpanElement).style.display = 'none';
+        });
+    }
+
+    private _changeToolbarState(range: Range): void {
+        const workbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
+        const worksheet = workbook.getActiveSheet();
+        if (worksheet) {
+            const isBold = range.getFontWeight();
+            const IsItalic = range.getFontStyle();
+            const strikeThrough = range.getStrikeThrough();
+            const fontSize = range.getFontSize();
+            const fontWeight = range.getFontWeight();
+            const fontName = range.getFontFamily();
+            const fontItalic = range.getFontStyle();
+            // const fontColor = range.getFontColor();
+            // const background = range.getBackground();
+            const underline = range.getUnderline();
+            const horizontalAlign = range.getHorizontalAlignment() ?? HorizontalAlign.LEFT;
+            const verticalAlign = range.getVerticalAlignment() ?? VerticalAlign.BOTTOM;
+            const rotation = range.getTextRotation();
+            const warp = range.getWrapStrategy() ?? WrapStrategy.CLIP;
+
+            const bold = this._toolList.find((item) => item.name === 'bold');
+            const italic = this._toolList.find((item) => item.name === 'italic');
+            const textRotateModeItem = this._toolList.find((item) => item.name === 'textRotateMode');
+            const fontSizeItem = this._toolList.find((item) => item.name === 'fontSize');
+            const fontNameItem = this._toolList.find((item) => item.name === 'font');
+            const fontBoldItem = this._toolList.find((item) => item.name === 'bold');
+            const fontItalicItem = this._toolList.find((item) => item.name === 'italic');
+            // const textColor = this._toolList.find((item) => item.name === 'textColor')
+            // const fillColor = this._toolList.find((item) => item.name === 'fillColor')
+            const strikethroughItem = this._toolList.find((item) => item.name === 'strikethrough');
+            const underlineItem = this._toolList.find((item) => item.name === 'underline');
+            const horizontalAlignModeItem = this._toolList.find((item) => item.name === 'horizontalAlignMode');
+            const verticalAlignModeItem = this._toolList.find((item) => item.name === 'verticalAlignMode');
+            const textWrapMode = this._toolList.find((item) => item.name === 'textWrapMode');
+
+            if (bold) {
+                bold.active = isBold === FontWeight.BOLD;
+            }
+
+            if (italic) {
+                italic.active = IsItalic === FontItalic.ITALIC;
+            }
+
+            if (strikethroughItem) {
+                strikethroughItem.active = !!(strikeThrough && strikeThrough.s);
+            }
+            if (fontNameItem) {
+                fontNameItem.children?.forEach((item) => {
+                    item.selected = fontName === item.value;
+                });
+            }
+            if (fontSizeItem) {
+                fontSizeItem.label = fontSize.toString();
+            }
+            if (fontBoldItem) {
+                fontBoldItem.active = !!fontWeight;
+            }
+            if (fontItalicItem) {
+                fontItalicItem.active = !!fontItalic;
+            }
+            // if (textColor) {
+            //     const label = textColor.customLabel
+            //     if (label && label.props) {
+            //         label.props.color = fontColor
+            //     }
+            // }
+            // if (fillColor) {
+            //     const label = fillColor.customLabel
+            //     if (label && label.props) {
+            //         label.props.color = background
+            //     }
+            // }
+            if (underlineItem) {
+                underlineItem.active = !!(underline && underline.s);
+            }
+            if (horizontalAlignModeItem) {
+                horizontalAlignModeItem.children?.forEach((item) => {
+                    item.selected = horizontalAlign === item.value;
+                });
+            }
+            if (textRotateModeItem) {
+                textRotateModeItem.children?.forEach((item) => {
+                    if (rotation.v) {
+                        item.selected = item.value === 'v';
+                    } else {
+                        item.selected = rotation.a === item.value;
+                    }
+                });
+            }
+            if (verticalAlignModeItem) {
+                verticalAlignModeItem.children?.forEach((item) => {
+                    item.selected = verticalAlign === item.value;
+                });
+            }
+            if (textWrapMode) {
+                textWrapMode.children?.forEach((item) => {
+                    item.selected = warp === item.value;
+                });
+            }
+
+            this.setToolbar();
+        }
+    }
+
+    private _initialize() {
+        this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + ColorSelect.name, ColorSelect);
+        this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
+        this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + LineColor.name, LineColor);
+        this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + LineBold.name, LineBold);
+
+        // this._sheetPlugin.getObserver('onChangeSelectionObserver')?.add(() => {
+        //     const manager = this._sheetPlugin.getSelectionManager();
+        //     const range = manager?.getCurrentCell();
+        //     if (range) {
+        //         this._changeToolbarState(range);
+        //     }
+        // });
+
+        CommandManager.getCommandObservers().add(({ actions }) => {
+            if (!actions || actions.length === 0) return;
+            const action = actions[0] as SheetActionBase<ISheetActionData, ISheetActionData, void>;
+
+            const currentUnitId = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getUnitId();
+            const actionUnitId = action.getWorkBook().getUnitId();
+
+            if (currentUnitId !== actionUnitId) return;
+
+            const manager = this._sheetPlugin.getSelectionManager();
+            const range = manager?.getCurrentCell();
+            if (range) {
+                this._changeToolbarState(range);
+            }
+        });
     }
 }

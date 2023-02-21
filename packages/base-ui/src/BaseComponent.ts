@@ -52,6 +52,7 @@ export interface BaseButtonProps extends BaseComponentProps {
     children?: any;
     className?: string;
     style?: JSX.CSSProperties;
+    unActive?: boolean;
 }
 export interface BaseCellRangeModalProps extends BaseComponentProps {
     placeholderProps?: string;

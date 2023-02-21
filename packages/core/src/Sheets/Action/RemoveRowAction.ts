@@ -1,6 +1,6 @@
 import { InsertRowApply, RemoveRowApply } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertRowActionData } from './InsertRowAction';
 
@@ -67,3 +67,5 @@ export class RemoveRowAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(RemoveRowAction.NAME, RemoveRowAction);

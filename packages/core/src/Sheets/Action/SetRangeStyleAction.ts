@@ -3,7 +3,7 @@ import { IRangeData, IStyleData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 
 export interface ISetRangeStyleActionData extends ISheetActionData {
     value: ObjectMatrixPrimitiveType<IStyleData>; //
@@ -85,3 +85,5 @@ export class SetRangeStyleAction extends SheetActionBase<ISetRangeStyleActionDat
         return false;
     }
 }
+
+CommandManager.register(SetRangeStyleAction.NAME, SetRangeStyleAction);

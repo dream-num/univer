@@ -1,7 +1,7 @@
 import { SetWorkSheetName } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -83,3 +83,5 @@ export class SetWorkSheetNameAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(SetWorkSheetNameAction.NAME, SetWorkSheetNameAction);

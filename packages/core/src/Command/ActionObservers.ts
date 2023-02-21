@@ -1,5 +1,5 @@
 import { Observable } from '../Observer';
-import { IActionData, ActionBase } from './ActionBase';
+import { IActionData, ActionBase } from './index';
 
 /**
  * Action type
@@ -23,4 +23,4 @@ export interface IActionObserverProps {
  *
  * @beta
  */
-export class ActionObservers extends Observable<IActionObserverProps> {}
+export class ActionObservers extends Observable<IActionObserverProps> { }

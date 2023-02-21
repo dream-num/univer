@@ -1,6 +1,5 @@
 import { sortRules } from '../Shared';
-import { BaseActionExtensionFactory } from './ActionExtensionFactory';
-import { REGISTRY_ACTION_FACTORY } from './RegistryFactory';
+import { BaseActionExtensionFactory, REGISTRY_ACTION_FACTORY } from './index';
 
 export class ActionExtensionRegister {
     private _actionExtensionFactoryList: BaseActionExtensionFactory[] = [];

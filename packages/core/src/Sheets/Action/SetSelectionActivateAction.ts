@@ -2,7 +2,7 @@ import { IRangeData } from '../../Interfaces';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { SetSelectionActivate } from '../Apply';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -121,3 +121,5 @@ export class SetSelectionActivateAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(SetSelectionActivateAction.NAME, SetSelectionActivateAction);

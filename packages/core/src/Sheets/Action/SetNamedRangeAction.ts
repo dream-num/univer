@@ -4,6 +4,7 @@ import {
     ActionObservers,
     ActionType,
     CommandUnit,
+    CommandManager,
 } from '../../Command';
 import { SetNamedRangeApply } from '../Apply';
 import { INamedRange } from '../../Interfaces';
@@ -79,3 +80,5 @@ export class SetNamedRangeAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(SetNamedRangeAction.NAME, SetNamedRangeAction);

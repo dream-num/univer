@@ -2,7 +2,7 @@ import { SetColumnHideApply, SetColumnShowApply } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { ISetColumnShowActionData } from './SetColumnShowAction';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -65,3 +65,5 @@ export class SetColumnHideAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(SetColumnHideAction.NAME, SetColumnHideAction);

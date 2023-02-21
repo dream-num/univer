@@ -1,7 +1,7 @@
 import { InsertDataColumnApply, RemoveColumnDataApply } from '../Apply';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { ObjectArray } from '../../Shared';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ICellData } from '../../Interfaces';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
@@ -69,3 +69,5 @@ export class InsertColumnDataAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(InsertColumnDataAction.NAME, InsertColumnDataAction);

@@ -1,11 +1,12 @@
-import { Dimension } from '../../Enum/Dimension';
 import { ICellData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
+import { Dimension } from '../../Enum/Dimension';
+import { IDeleteRangeActionData } from './DeleteRangeAction';
+import { CommandManager, CommandUnit } from '../../Command';
+import { SetRangeDataAction } from './SetRangeDataAction';
+import { DeleteRangeApply, InsertRangeApply } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { IDeleteRangeActionData } from './DeleteRangeAction';
-import { CommandUnit, SetRangeDataAction } from '../../Command';
-import { DeleteRangeApply, InsertRangeApply } from '../Apply';
 
 /**
  * @internal
@@ -85,3 +86,5 @@ export class InsertRangeAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(InsertRangeAction.NAME, InsertRangeAction);

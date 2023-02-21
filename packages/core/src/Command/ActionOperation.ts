@@ -1,4 +1,4 @@
-import { ActionOperationType, IActionData } from './ActionBase';
+import { ActionOperationType, IActionData } from './index';
 
 export class ActionOperation<T extends IActionData> {
     protected _action: T;

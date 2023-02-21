@@ -1,7 +1,7 @@
 import { SetSheetOrder } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 
 export interface ISetSheetOrderActionData extends ISheetActionData {
     sheetId: string;
@@ -71,3 +71,5 @@ export class SetSheetOrderAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(SetSheetOrderAction.NAME, SetSheetOrderAction);

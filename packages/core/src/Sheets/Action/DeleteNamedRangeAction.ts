@@ -4,11 +4,14 @@ import {
     ActionObservers,
     ActionType,
     CommandUnit,
-    AddNamedRangeAction,
+    CommandManager,
 } from '../../Command';
 import { AddNamedRangeApply, DeleteNamedRangeApply } from '../Apply';
 import { INamedRange } from '../../Interfaces';
-import { IAddNamedRangeActionData } from './AddNamedRangeAction';
+import {
+    AddNamedRangeAction,
+    IAddNamedRangeActionData,
+} from './AddNamedRangeAction';
 
 export interface IDeleteNamedRangeActionData extends ISheetActionData {
     namedRangeId: string;
@@ -74,3 +77,5 @@ export class DeleteNamedRangeAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(DeleteNamedRangeAction.NAME, DeleteNamedRangeAction);

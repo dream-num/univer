@@ -1,13 +1,16 @@
-import { ActionExtensionManager } from './ActionExtensionManager';
-import { UndoManager } from './UndoManager';
+import {
+    UndoManager,
+    ActionBase,
+    ActionExtensionManager,
+    IActionData,
+    ActionObservers,
+    CommandObservers,
+    CommandInjectorObservers,
+    ActionOperation,
+    Command,
+} from './index';
 import { Class } from '../Shared';
-import { ActionBase, IActionData } from './ActionBase';
-import { ActionObservers } from './ActionObservers';
-import { CommandObservers } from './CommandObservers';
-import { CommandInjectorObservers } from './CommandInjectorObservers';
-import { ContextBase } from '../Basics/ContextBase';
-import { Command } from './Command';
-import { ActionOperation } from './ActionOperation';
+import { ContextBase } from '../Basics';
 
 /**
  * Manage command
@@ -86,22 +89,18 @@ export class CommandManager {
         const { _actionDataList, _unit, _actionList } = command;
         // const server = _workbook.getServer();
         this._actionExtensionManager.handle(_actionDataList);
-
         _actionDataList.forEach((data) => {
             const ActionClass = CommandManager.getAction(data.actionName);
             const observers = CommandManager.getActionObservers();
             const action = new ActionClass(data, _unit, observers);
-
             if (ActionOperation.hasUndo(data)) {
                 _actionList.push(action);
             }
         });
         command.invoke();
-
         if (_actionList.length === 0) {
             return;
         }
-
         _undoManager.push(command);
         // server.pushMessageQueue(command.getDoData());
     }

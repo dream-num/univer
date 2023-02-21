@@ -1,7 +1,7 @@
+import { CommandManager, CommandUnit } from '../../Command';
 import { IRangeData } from '../../Interfaces';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers } from '../../Command/ActionObservers';
-import { CommandUnit } from '../../Command';
 import { IRemoveMergeActionData } from './RemoveMergeAction';
 import { addMergeApply, RemoveMergeApply } from '../Apply';
 
@@ -57,3 +57,5 @@ export class AddMergeAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(AddMergeAction.NAME, AddMergeAction);

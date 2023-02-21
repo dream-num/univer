@@ -1,6 +1,6 @@
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 import { SetColumnWidthApply } from '../Apply';
 
 /**
@@ -63,3 +63,5 @@ export class SetColumnWidthAction extends SheetActionBase<ISetColumnWidthActionD
         return false;
     }
 }
+
+CommandManager.register(SetColumnWidthAction.NAME, SetColumnWidthAction);

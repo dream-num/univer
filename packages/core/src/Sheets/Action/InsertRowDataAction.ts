@@ -2,7 +2,7 @@ import { InsertDataRowApply, RemoveRowDataApply } from '../Apply';
 import { ICellData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { ObjectArray } from '../../Shared';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveRowDataActionData } from './RemoveRowDataAction';
@@ -69,3 +69,5 @@ export class InsertRowDataAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(InsertRowDataAction.NAME, InsertRowDataAction);

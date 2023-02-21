@@ -2,9 +2,27 @@ import { SheetContext } from '../../Basics';
 import {
     IInsertColumnDataActionData,
     BorderStyleData,
-    Command,
-    CommandManager,
-    ISheetActionData,
+    SetZoomRatioAction,
+    InsertRowDataAction,
+    InsertRowAction,
+    InsertColumnDataAction,
+    InsertColumnAction,
+    ClearRangeAction,
+    SetTabColorAction,
+    SetBorderAction,
+    IInsertColumnActionData,
+    IRemoveColumnAction,
+    RemoveColumnAction,
+    RemoveColumnDataAction,
+    RemoveRowAction,
+    RemoveRowDataAction,
+    SetColumnHideAction,
+    SetColumnShowAction,
+    SetHiddenGridlinesAction,
+    SetRightToLeftAction,
+    SetRowHideAction,
+    SetRowShowAction,
+    SetWorkSheetHideAction,
     IClearRangeActionData,
     IInsertRowActionData,
     IInsertRowDataActionData,
@@ -22,29 +40,6 @@ import {
     SetWorkSheetActivateAction,
     SetWorkSheetNameAction,
     SetWorkSheetStatusAction,
-    SetZoomRatioAction,
-    InsertRowDataAction,
-    InsertRowAction,
-    InsertColumnDataAction,
-    InsertColumnAction,
-    ClearRangeAction,
-    SetTabColorAction,
-    SetBorderAction,
-} from '../../Command';
-import {
-    IInsertColumnActionData,
-    IRemoveColumnAction,
-    RemoveColumnAction,
-    RemoveColumnDataAction,
-    RemoveRowAction,
-    RemoveRowDataAction,
-    SetColumnHideAction,
-    SetColumnShowAction,
-    SetHiddenGridlinesAction,
-    SetRightToLeftAction,
-    SetRowHideAction,
-    SetRowShowAction,
-    SetWorkSheetHideAction,
 } from '../Action';
 import { DEFAULT_WORKSHEET } from '../../Const';
 import { Direction, BooleanNumber, SheetTypes } from '../../Enum';
@@ -65,8 +60,9 @@ import { Merges } from './Merges';
 import { Range } from './Range';
 import { RangeList } from './RangeList';
 import { RowManager } from './RowManager';
-import { Selection } from './Selection';
 import { Workbook } from './Workbook';
+import { Selection } from './Selection';
+import { Command, CommandManager, ISheetActionData } from '../../Command';
 
 /**
  * Access and modify spreadsheet sheets.

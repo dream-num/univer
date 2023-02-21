@@ -4,7 +4,7 @@ import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { ISetRangeDataActionData, SetRangeDataAction } from './SetRangeDataAction';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -81,3 +81,5 @@ export class ClearRangeAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(ClearRangeAction.NAME, ClearRangeAction);

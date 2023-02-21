@@ -4,7 +4,7 @@ import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertRangeActionData, InsertRangeAction } from './InsertRangeAction';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 import { DeleteRangeApply, InsertRangeApply } from '../Apply';
 
 /**
@@ -85,3 +85,5 @@ export class DeleteRangeAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(DeleteRangeAction.NAME, DeleteRangeAction);

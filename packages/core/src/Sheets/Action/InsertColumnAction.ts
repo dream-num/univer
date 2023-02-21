@@ -2,7 +2,7 @@ import { InsertColumnApply, RemoveColumnApply } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveColumnAction } from './removeColumnAction';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -65,3 +65,5 @@ export class InsertColumnAction extends SheetActionBase<
         return false;
     }
 }
+
+CommandManager.register(InsertColumnAction.NAME, InsertColumnAction);

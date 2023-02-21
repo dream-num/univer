@@ -1,12 +1,11 @@
 import { SheetContext } from '../../Basics';
+import { CommandManager, Command } from '../../Command';
 import {
-    CommandManager,
-    Command,
     IAddNamedRangeActionData,
     IDeleteNamedRangeActionData,
     ISetNamedRangeActionData,
     AddNamedRangeAction,
-} from '../../Command';
+} from '../Action';
 import { ACTION_NAMES } from '../../Const';
 import { Workbook } from './index';
 import { INamedRange } from '../../Interfaces';

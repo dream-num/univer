@@ -3,7 +3,7 @@ import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
 import { BooleanNumber } from '../../Enum';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 
 /**
  * @internal
@@ -81,3 +81,5 @@ export class SetWorkSheetStatusAction extends SheetActionBase<ISetWorkSheetStatu
         return false;
     }
 }
+
+CommandManager.register(SetWorkSheetStatusAction.NAME, SetWorkSheetStatusAction);

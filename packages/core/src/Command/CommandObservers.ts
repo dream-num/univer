@@ -1,6 +1,5 @@
 import { Observable } from '../Observer';
-import { ActionBase, IActionData } from './ActionBase';
-import { ActionType } from './ActionObservers';
+import { ActionBase, IActionData, ActionType } from './index';
 
 /**
  * Command observer props
@@ -13,4 +12,4 @@ interface ICommandObserverProps {
 /**
  * Command observers
  */
-export class CommandObservers extends Observable<ICommandObserverProps> {}
+export class CommandObservers extends Observable<ICommandObserverProps> { }

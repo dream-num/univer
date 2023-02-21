@@ -1,4 +1,4 @@
-import { ActionObservers } from './ActionObservers';
+import { ActionObservers } from './index';
 
 /**
  * Format of action data param

@@ -3,5 +3,5 @@ export * from './AntLineModel';
 export * from './RightMenuModel';
 export * from './SelectionModel';
 export * from './SheetBarModel';
-export * from './ToolBarModel';
+export * from './ToolbarModel';
 // @endindex

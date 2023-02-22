@@ -21,17 +21,18 @@ import { SheetUIPlugin } from '..';
 import { DefaultToolbarConfig, SheetToolbarConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
 import {
-    BORDER_LINE_CHILDREN,
-    BORDER_SIZE_CHILDREN,
     FONT_FAMILY_CHILDREN,
     FONT_SIZE_CHILDREN,
-    HORIZONTAL_ALIGN_CHILDREN,
+    BORDER_LINE_CHILDREN,
+    BORDER_SIZE_CHILDREN,
     MERGE_CHILDREN,
-    TEXT_ROTATE_CHILDREN,
-    TEXT_WRAP_CHILDREN,
+    HORIZONTAL_ALIGN_CHILDREN,
     VERTICAL_ALIGN_CHILDREN,
-} from '../View/Toolbar/Const';
-import styles from '../View/ToolBar/index.module.less';
+    TEXT_WRAP_CHILDREN,
+    TEXT_ROTATE_CHILDREN,
+} from '../View/ToolBar/Const';
+
+import styles from '../View/Toolbar/index.module.less';
 
 // 继承基础下拉属性,添加国际化
 export interface BaseToolbarSelectChildrenProps extends BaseSelectChildrenProps {

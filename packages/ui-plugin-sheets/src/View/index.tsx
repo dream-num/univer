@@ -38,7 +38,7 @@ export class UI {
 }
 
 export * from './SheetContainer';
-export * from './Toolbar1';
+export * from './Toolbar';
 export * from './RightMenu';
 export * from './InfoBar';
 export * from './Common';

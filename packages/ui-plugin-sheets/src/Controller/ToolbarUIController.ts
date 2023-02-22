@@ -30,7 +30,7 @@ import {
     VERTICAL_ALIGN_CHILDREN,
     TEXT_WRAP_CHILDREN,
     TEXT_ROTATE_CHILDREN,
-} from '../View/Toolbar1/Const';
+} from '../View/Toolbar/Const';
 
 import styles from '../View/Toolbar/index.module.less';
 

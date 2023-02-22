@@ -1,5 +1,5 @@
 import { SheetRightMenuConfig } from './RightMenuConfig';
-import { SheetToolbarConfig } from './ToolbarConfig1';
+import { SheetToolbarConfig } from './ToolbarConfig';
 
 export interface UniverSheetConfig {
     toolbarConfig?: SheetToolbarConfig;

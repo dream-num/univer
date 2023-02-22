@@ -37708,7 +37708,7 @@
     }
   };
 
-  // ../../packages/base-sheets/src/Controller/ToolBarController.ts
+  // ../../packages/base-sheets/src/Controller/ToolbarController.ts
   var ToolbarController = class {
     _plugin;
     constructor(plugin) {
@@ -47539,7 +47539,7 @@
     }
   };
 
-  // ../../packages/ui-plugin-sheets/src/View/Toolbar/Const.ts
+  // ../../packages/ui-plugin-sheets/src/View/ToolBar/Const.ts
   var FONT_SIZE_CHILDREN = [
     {
       label: "9",
@@ -47964,34 +47964,6 @@
     }
   ];
 
-  // stylePlugin:D:\code\github\univer\packages\ui-plugin-sheets\src\View\ToolBar\index.module.less
-  var index_module_default37 = {
-    "toolbarWarp": "univer-toolbar-warp",
-    "singleButton": "univer-single-button",
-    "moreHide": "univer-more-hide",
-    "moreShow": "univer-more-show",
-    "toolbar": "univer-toolbar",
-    "selectButton": "univer-select-button",
-    "colsMenu": "univer-cols-menu",
-    "selectLabelString": "univer-select-label-string",
-    "dropContent": "univer-drop-content",
-    "selectDoubleString": "univer-select-double-string",
-    "selectColorPickerParent": "univer-select-color-picker-parent",
-    "selectItemContent": "univer-select-item-content",
-    "selectColorPicker": "univer-select-color-picker",
-    "selectItem": "univer-select-item",
-    "selectLineBoldParent": "univer-select-line-bold-parent",
-    "selectSingle": "univer-select-single",
-    "selectInput": "univer-select-input",
-    "selectDouble": "univer-select-double",
-    "univericonNextIcon": "univer-univericon-nextIcon",
-    "textButton": "univer-text-button",
-    "moreButton": "univer-more-button",
-    "moreTool": "univer-more-tool",
-    "tooltipTitle": "univer-tooltip-title",
-    "bottom": "univer-bottom"
-  };
-
   // ../../packages/ui-plugin-sheets/src/Controller/ToolbarUIController.ts
   var ToolbarUIController = class {
     _plugin;
@@ -48047,7 +48019,7 @@
         {
           type: 0,
           tooltip: "toolbar.font",
-          className: index_module_default37.selectLabelString,
+          className: index_module_default35.selectLabelString,
           name: "font",
           show: this._config.font,
           border: true,
@@ -48166,7 +48138,7 @@
             this.changeColor(this._textColor);
           },
           hideSelectedIcon: true,
-          className: index_module_default37.selectColorPickerParent,
+          className: index_module_default35.selectColorPickerParent,
           children: [
             {
               customLabel: {
@@ -48178,7 +48150,7 @@
                   }
                 }
               },
-              className: index_module_default37.selectColorPicker
+              className: index_module_default35.selectColorPicker
             }
           ],
           name: "textColor",
@@ -48212,7 +48184,7 @@
             this.setBackground(this._background);
           },
           hideSelectedIcon: true,
-          className: index_module_default37.selectColorPickerParent,
+          className: index_module_default35.selectColorPickerParent,
           children: [
             {
               customLabel: {
@@ -48224,7 +48196,7 @@
                   }
                 }
               },
-              className: index_module_default37.selectColorPicker
+              className: index_module_default35.selectColorPicker
             }
           ],
           name: "fillColor",
@@ -48235,7 +48207,7 @@
           display: 1,
           show: this._config.border,
           tooltip: "toolbar.border.main",
-          className: index_module_default37.selectDoubleString,
+          className: index_module_default35.selectDoubleString,
           onClick: (value) => {
             if (value) {
               this._borderInfo.type = value;
@@ -48257,7 +48229,7 @@
                 }
               },
               unSelectable: true,
-              className: index_module_default37.selectColorPickerParent,
+              className: index_module_default35.selectColorPickerParent,
               children: [
                 {
                   customLabel: {
@@ -48278,7 +48250,7 @@
                       }
                     }
                   },
-                  className: index_module_default37.selectColorPicker,
+                  className: index_module_default35.selectColorPicker,
                   onClick: (...arg) => {
                     arg[0].stopPropagation();
                   }
@@ -48299,7 +48271,7 @@
                 this._lineBold.setImg(BORDER_SIZE_CHILDREN[arg[2]].customLabel?.name);
                 this._borderInfo.style = arg[1];
               },
-              className: index_module_default37.selectLineBoldParent,
+              className: index_module_default35.selectLineBoldParent,
               unSelectable: true,
               children: BORDER_SIZE_CHILDREN
             }
@@ -48322,7 +48294,7 @@
         {
           type: 3,
           tooltip: "toolbar.horizontalAlignMode.main",
-          className: index_module_default37.selectDoubleString,
+          className: index_module_default35.selectDoubleString,
           display: 1,
           name: "horizontalAlignMode",
           show: this._config.horizontalAlignMode,
@@ -48335,7 +48307,7 @@
         {
           type: 3,
           tooltip: "toolbar.verticalAlignMode.main",
-          className: index_module_default37.selectDoubleString,
+          className: index_module_default35.selectDoubleString,
           display: 1,
           name: "verticalAlignMode",
           show: this._config.verticalAlignMode,
@@ -48347,7 +48319,7 @@
         },
         {
           type: 3,
-          className: index_module_default37.selectDoubleString,
+          className: index_module_default35.selectDoubleString,
           tooltip: "toolbar.textWrapMode.main",
           display: 1,
           name: "textWrapMode",
@@ -48360,7 +48332,7 @@
         },
         {
           type: 3,
-          className: index_module_default37.selectDoubleString,
+          className: index_module_default35.selectDoubleString,
           name: "textRotateMode",
           tooltip: "toolbar.textRotateMode.main",
           display: 1,
@@ -48523,7 +48495,7 @@
     }
     hideTooltip() {
       const dom = this._toolbar.base;
-      const tooltip = dom.querySelectorAll(`.${index_module_default37.tooltipTitle}.${index_module_default37.bottom}`);
+      const tooltip = dom.querySelectorAll(`.${index_module_default35.tooltipTitle}.${index_module_default35.bottom}`);
       tooltip.forEach((item) => {
         item.style.display = "none";
       });
@@ -54872,7 +54844,7 @@
   }
 
   // stylePlugin:D:\code\github\univer\packages\sheets-plugin-formula\src\View\UI\SearchFormulaModal\index.module.less
-  var index_module_default38 = {
+  var index_module_default37 = {
     "functionModal": "univer-function-modal",
     "functionSearch": "univer-function-search",
     "functionSelect": "univer-function-select",
@@ -54938,11 +54910,11 @@
       this.highLightLi(0);
     }
     highLightLi(index) {
-      const item = this.functionListRef.current.querySelectorAll(`.${index_module_default38.functionListsItem}`);
+      const item = this.functionListRef.current.querySelectorAll(`.${index_module_default37.functionListsItem}`);
       for (let i4 = 0; i4 < item.length; i4++) {
-        item[i4].classList.remove(index_module_default38.functionListsItemActive);
+        item[i4].classList.remove(index_module_default37.functionListsItemActive);
       }
-      item[index].classList.add(index_module_default38.functionListsItemActive);
+      item[index].classList.add(index_module_default37.functionListsItemActive);
       item[index].click();
     }
     handleClick(item, index) {
@@ -54956,20 +54928,20 @@
       const { functionList } = this.state;
       if (!input)
         return;
-      return <div className={index_module_default38.functionModal}>
-        <div className={index_module_default38.functionSearch}>
-          <div className={index_module_default38.functionLabel}>{input.label}</div>
+      return <div className={index_module_default37.functionModal}>
+        <div className={index_module_default37.functionSearch}>
+          <div className={index_module_default37.functionLabel}>{input.label}</div>
           <Input2 placeholder={input.placeholder} onChange={debounce(this.changeInput.bind(this), 50)} />
         </div>
-        <div className={index_module_default38.functionSelect}>
-          <div className={index_module_default38.functionLabel}>{select.label}</div>
-          <div className={index_module_default38.functionSelector}><Select onClick={this.selectType.bind(this)} type={0} children={select.children} hideSelectedIcon={true} /></div>
+        <div className={index_module_default37.functionSelect}>
+          <div className={index_module_default37.functionLabel}>{select.label}</div>
+          <div className={index_module_default37.functionSelector}><Select onClick={this.selectType.bind(this)} type={0} children={select.children} hideSelectedIcon={true} /></div>
         </div>
-        <div className={index_module_default38.functionList} ref={this.functionListRef}>
-          <div className={index_module_default38.functionLabel}>{funList.label}</div>
-          <ul className={index_module_default38.functionLists}>{functionList?.map((item, index) => <li className={`${index_module_default38.functionListsItem}`} onClick={() => this.handleClick(item, index)}>
-            <div className={index_module_default38.functionListsItemName}>{item.n}</div>
-            <div className={index_module_default38.functionListsItemDetail}>{item.d}</div>
+        <div className={index_module_default37.functionList} ref={this.functionListRef}>
+          <div className={index_module_default37.functionLabel}>{funList.label}</div>
+          <ul className={index_module_default37.functionLists}>{functionList?.map((item, index) => <li className={`${index_module_default37.functionListsItem}`} onClick={() => this.handleClick(item, index)}>
+            <div className={index_module_default37.functionListsItemName}>{item.n}</div>
+            <div className={index_module_default37.functionListsItemDetail}>{item.d}</div>
           </li>)}</ul>
         </div>
       </div>;
@@ -55052,8 +55024,8 @@
       const { description, rangeList } = this.state;
       if (!funParams)
         return;
-      return <div className={index_module_default38.functionParamModal}>
-        <div className={index_module_default38.functionParamList}>{funParams.funParams?.p?.map((item, index) => <div>
+      return <div className={index_module_default37.functionParamModal}>
+        <div className={index_module_default37.functionParamList}>{funParams.funParams?.p?.map((item, index) => <div>
           <span>
             {item.name}
             {"\uFF1A"}
@@ -55064,15 +55036,15 @@
             {"{}"}
           </span>
         </div>)}</div>
-        <div className={index_module_default38.functionParamDesc}>
-          <div className={index_module_default38.functionParamDescDetail}>{funParams.funParams?.d}</div>
-          <div className={index_module_default38.functionParamDescDetails}><p>
+        <div className={index_module_default37.functionParamDesc}>
+          <div className={index_module_default37.functionParamDescDetail}>{funParams.funParams?.d}</div>
+          <div className={index_module_default37.functionParamDescDetails}><p>
             {description.name}
             {": "}
             {description.detail}
           </p></div>
         </div>
-        <div className={index_module_default38.functionParamResult}>
+        <div className={index_module_default37.functionParamResult}>
           {calc}
           {"="}
           {}
@@ -55269,7 +55241,7 @@
   };
 
   // stylePlugin:D:\code\github\univer\packages\sheets-plugin-formula\src\View\UI\FormulaPrompt\index.module.less
-  var index_module_default39 = {
+  var index_module_default38 = {
     "searchFunction": "univer-search-function",
     "formulaDetail": "univer-formula-detail",
     "searchFunctionActive": "univer-search-function-active",
@@ -55320,17 +55292,17 @@
     render(props, state) {
       const { activeIndex, functionInfo, helpFormulaActive, position } = state;
       return <div
-        className={index_module_default39.helpFunction}
+        className={index_module_default38.helpFunction}
         style={{ display: helpFormulaActive ? "block" : "none", position: "absolute", left: `${position.left}px`, top: `${position.top}px` }}
         ref={this.contentRef}
       >
-        <div class={index_module_default39.helpFunctionTitle}><Help title={functionInfo.n} value={functionInfo.p} type="name" active={activeIndex} /></div>
-        <div className={index_module_default39.helpFunctionContent}>
+        <div class={index_module_default38.helpFunctionTitle}><Help title={functionInfo.n} value={functionInfo.p} type="name" active={activeIndex} /></div>
+        <div className={index_module_default38.helpFunctionContent}>
           <div>{this.getLocale("formula.formulaMore.helpExample")}</div>
           <Help title={functionInfo.n} value={functionInfo.p} type="example" active={activeIndex} />
           <Params title={this.getLocale("formula.formulaMore.helpAbstract")} value={this.getLocale(functionInfo.d)} />
           <>{functionInfo && functionInfo.p && functionInfo.p.map((item, i4) => <Params
-            className={activeIndex === i4 ? index_module_default39.helpFunctionActive : ""}
+            className={activeIndex === i4 ? index_module_default38.helpFunctionActive : ""}
             title={this.getLocale(item.name)}
             value={this.getLocale(item.detail)}
             active={activeIndex}
@@ -55339,9 +55311,9 @@
       </div>;
     }
   };
-  var Params = (props) => <div className={`${index_module_default39.helpFunctionContentParams} ${props.className}`}>
-    <div className={index_module_default39.helpFunctionContentTitle}>{props.title}</div>
-    <div className={index_module_default39.helpFunctionContentDetail}>{props.value}</div>
+  var Params = (props) => <div className={`${index_module_default38.helpFunctionContentParams} ${props.className}`}>
+    <div className={index_module_default38.helpFunctionContentTitle}>{props.title}</div>
+    <div className={index_module_default38.helpFunctionContentDetail}>{props.value}</div>
   </div>;
   var Help = class extends Component {
     render(props, state) {
@@ -55350,7 +55322,7 @@
           {props.title}
           {"("}
         </span>
-        {props.value && props.value.map((item, i4) => <span className={props.active === i4 ? index_module_default39.helpFunctionActive : ""}>
+        {props.value && props.value.map((item, i4) => <span className={props.active === i4 ? index_module_default38.helpFunctionActive : ""}>
           {this.getLocale(item[`${props.type}`])}
           {","}
         </span>)}
@@ -55401,13 +55373,13 @@
     render(props, state) {
       const { selectIndex, formula, searchActive, position } = state;
       return <ul
-        className={index_module_default39.searchFunction}
+        className={index_module_default38.searchFunction}
         onKeyDown={this.onKeyDown.bind(this)}
         style={{ display: searchActive ? "block" : "none", position: "absolute", left: `${position.left}px`, top: `${position.top}px` }}
         ref={this.contentRef}
-      >{formula.map((item, i4) => <li className={selectIndex === i4 ? index_module_default39.searchFunctionActive : ""}>
-        <div className={index_module_default39.formulaName}>{item.n}</div>
-        <div className={index_module_default39.formulaDetail}>{this.getLocale(item.d)}</div>
+      >{formula.map((item, i4) => <li className={selectIndex === i4 ? index_module_default38.searchFunctionActive : ""}>
+        <div className={index_module_default38.formulaName}>{item.n}</div>
+        <div className={index_module_default38.formulaDetail}>{this.getLocale(item.d)}</div>
       </li>)}</ul>;
     }
   };

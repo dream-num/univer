@@ -11,7 +11,7 @@ import { FormulaBar } from '../FormulaBar';
 import { RichText } from '../RichText';
 import { ISheetUIPluginConfig } from '../../Basics';
 import { Slot } from '../Slot/Slot';
-import { Toolbar } from '../Toolbar';
+import { Toolbar } from '../Toolbar1';
 
 export interface BaseSheetContainerProps extends BaseComponentProps {
     config: ISheetUIPluginConfig;

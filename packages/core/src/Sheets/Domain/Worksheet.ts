@@ -75,8 +75,6 @@ import { Command, CommandManager, ISheetActionData } from '../../Command';
  * @beta
  */
 export class Worksheet {
-    protected _commandManager: CommandManager;
-
     protected _selection: Selection;
 
     protected _context: SheetContext;
@@ -165,7 +163,6 @@ export class Worksheet {
             // this._borderStyles = new BorderStyles(this);
             this._cellData = new ObjectMatrix<ICellData>(cellData);
             // this._protection = new Protection();
-            this._commandManager = this._context.getCommandManager();
             // this._selection.setWorkSheet(this);
             this._rowManager = new RowManager(this, rowData);
             this._columnManager = new ColumnManager(this, columnData);
@@ -194,7 +191,8 @@ export class Worksheet {
         if (this._config.status === BooleanNumber.TRUE) {
             return this;
         }
-        const { _context, _commandManager } = this;
+        const { _context } = this;
+        const _commandManager = this.getCommandManager();
         const before = _context.getContextObserver(
             'onBeforeChangeActiveSheetObservable'
         );
@@ -268,7 +266,8 @@ export class Worksheet {
      * @alpha
      */
     setName(name: string): Worksheet {
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const before = _context.getContextObserver(
             'onBeforeChangeSheetNameObservable'
         );
@@ -343,7 +342,7 @@ export class Worksheet {
      * @returns
      */
     getCommandManager(): CommandManager {
-        return this._commandManager;
+        return this._context.getCommandManager();
     }
 
     /**
@@ -461,7 +460,8 @@ export class Worksheet {
      * @returns WorkSheet Instance
      */
     setStatus(status: BooleanNumber): Worksheet {
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const configure: ISetWorkSheetStatusActionData = {
             actionName: SetWorkSheetStatusAction.NAME,
             sheetId: _sheetId,
@@ -490,7 +490,8 @@ export class Worksheet {
      * @param zoomRatio
      */
     setZoomRatio(zoomRatio: number): void {
-        const { _context, _sheetId, _commandManager } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const zoomRation = {
             actionName: SetZoomRatioAction.NAME,
             zoom: zoomRatio,
@@ -579,7 +580,8 @@ export class Worksheet {
             numRows = argument[1];
         }
 
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const insertRowData: IInsertRowDataActionData = {
             actionName: InsertRowDataAction.NAME,
             sheetId: _sheetId,
@@ -628,7 +630,8 @@ export class Worksheet {
             numRows = argument[1];
         }
 
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const insertRowData = {
             actionName: InsertRowDataAction.NAME,
             sheetId: _sheetId,
@@ -682,7 +685,8 @@ export class Worksheet {
             rowIndex = 0;
         }
 
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const insertRowData = {
             actionName: InsertRowDataAction.NAME,
             sheetId: _sheetId,
@@ -731,7 +735,8 @@ export class Worksheet {
             numColumns = argument[1];
         }
 
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const columnData = new ObjectMatrix<ICellData>();
         this._cellData.forEach((index) => {
             for (let i = columnIndex; i < columnIndex + numColumns; i++) {
@@ -791,7 +796,8 @@ export class Worksheet {
             columnIndex = 0;
         }
 
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const columnData = new ObjectMatrix<ICellData>();
         this._cellData.forEach((index) => {
             for (let i = columnIndex; i < columnIndex + numColumns; i++) {
@@ -847,7 +853,8 @@ export class Worksheet {
             numColumns = argument[1];
         }
 
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const columnData = new ObjectMatrix<ICellData>();
         this._cellData.forEach((index) => {
             for (let i = columnIndex; i < columnIndex + numColumns; i++) {
@@ -890,8 +897,8 @@ export class Worksheet {
      */
     clear(options: IOptionData): Worksheet;
     clear(...argument: any): Worksheet {
-        const { _context, _commandManager } = this;
-
+        const { _context } = this;
+        const _commandManager = this.getCommandManager();
         // collect all cell as a Range
         const _range = {
             startRow: 0,
@@ -932,7 +939,8 @@ export class Worksheet {
      * @returns WorkSheet This sheet, for chaining.
      */
     setTabColor(color: Nullable<string>): Worksheet {
-        const { _context, _commandManager } = this;
+        const { _context } = this;
+        const _commandManager = this.getCommandManager();
         const observer = _context.getContextObserver(
             'onSheetTabColorChangeObservable'
         );
@@ -957,7 +965,8 @@ export class Worksheet {
      * @returns Sheet — The current sheet.
      */
     hideSheet(): Worksheet {
-        const { _context, _commandManager } = this;
+        const { _context } = this;
+        const _commandManager = this.getCommandManager();
         const _workbook = _context.getWorkBook();
         if (!this._config.hidden) {
             const observer = _context.getContextObserver('onHideSheetObservable');
@@ -974,7 +983,6 @@ export class Worksheet {
             );
             _commandManager.invoke(command);
             observer.notifyObservers({ sheet: this });
-
             const index = _workbook.getSheetIndex(this);
             if (index) {
                 _workbook.activateSheetByIndex(index);
@@ -991,7 +999,8 @@ export class Worksheet {
         if (!this._config.hidden) {
             return this;
         }
-        const { _context, _commandManager } = this;
+        const { _context } = this;
+        const _commandManager = this.getCommandManager();
         const setHidden: ISetWorkSheetHideActionData = {
             hidden: BooleanNumber.FALSE,
             sheetId: this._sheetId,
@@ -1007,16 +1016,6 @@ export class Worksheet {
         _context
             .getContextObserver('onShowSheetObservable')
             .notifyObservers({ sheet: this });
-        return this;
-    }
-
-    /**
-     * Sets commandManager
-     * @param commandManager Command Manager
-     * @returns commandManager
-     */
-    setCommandManager(commandManager: CommandManager): Worksheet {
-        this._commandManager = commandManager;
         return this;
     }
 
@@ -1161,7 +1160,8 @@ export class Worksheet {
      * @returns WorkSheet Instance
      */
     deleteColumn(columnPosition: number): Worksheet {
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const deleteColumnData: IRemoveColumnDataAction = {
             actionName: RemoveColumnDataAction.NAME,
             sheetId: _sheetId,
@@ -1193,7 +1193,8 @@ export class Worksheet {
      * @returns WorkSheet Instance
      */
     deleteColumns(columnPosition: number, howMany: number): Worksheet {
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const deleteColumnData: IRemoveColumnDataAction = {
             actionName: RemoveColumnDataAction.NAME,
             sheetId: _sheetId,
@@ -1224,7 +1225,8 @@ export class Worksheet {
      * @returns WorkSheet Instance
      */
     deleteRow(rowPosition: number): Worksheet {
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const dataRowDelete: IRemoveRowDataActionData = {
             actionName: RemoveRowDataAction.NAME,
             sheetId: _sheetId,
@@ -1257,7 +1259,8 @@ export class Worksheet {
      * @returns WorkSheet Instance
      */
     deleteRows(rowPosition: number, howMany: number): Worksheet {
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const dataRowDelete: IRemoveRowDataActionData = {
             actionName: RemoveRowDataAction.NAME,
             sheetId: _sheetId,
@@ -1317,8 +1320,9 @@ export class Worksheet {
         style: IBorderStyleData,
         directions: Direction[]
     ) {
-        const { _commandManager, _sheetId } = this;
+        const { _sheetId } = this;
 
+        const _commandManager = this.getCommandManager();
         const context = this.getContext();
         const matrix = this.getCellMatrix();
         const workbook = context.getWorkBook();
@@ -1654,7 +1658,8 @@ export class Worksheet {
         const range = row.getRangeData();
         const index = range.startRow;
         const count = range.endRow - range.startRow + 1;
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const hideRow: ISetRowHideActionData = {
             actionName: SetRowHideAction.NAME,
             sheetId: _sheetId,
@@ -1690,7 +1695,8 @@ export class Worksheet {
         if (argument[1]) {
             count = argument[1];
         }
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const hideRow: ISetRowHideActionData = {
             actionName: SetRowHideAction.NAME,
             sheetId: _sheetId,
@@ -1716,7 +1722,8 @@ export class Worksheet {
         const range = column.getRangeData();
         const index = range.startColumn;
         const count = range.endColumn - range.startColumn + 1;
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const hideColumn: ISetColumnHideActionData = {
             actionName: SetColumnHideAction.NAME,
             sheetId: _sheetId,
@@ -1752,7 +1759,8 @@ export class Worksheet {
         if (argument[1]) {
             count = argument[1];
         }
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const hideColumn: ISetColumnHideActionData = {
             actionName: SetColumnHideAction.NAME,
             sheetId: _sheetId,
@@ -1778,7 +1786,8 @@ export class Worksheet {
         const range = row.getRangeData();
         const index = range.startRow;
         const count = range.endRow - range.startRow + 1;
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const unhideRow: ISetRowShowActionData = {
             actionName: SetRowShowAction.NAME,
             rowCount: count,
@@ -1804,7 +1813,8 @@ export class Worksheet {
         const range = column.getRangeData();
         const index = range.startColumn;
         const count = range.endColumn - range.startColumn + 1;
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const unhideColumn: ISetColumnShowActionData = {
             actionName: SetColumnShowAction.NAME,
             sheetId: _sheetId,
@@ -1840,7 +1850,8 @@ export class Worksheet {
         if (argument[1]) {
             count = argument[1];
         }
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const showColumn: ISetColumnShowActionData = {
             actionName: SetColumnShowAction.NAME,
             sheetId: _sheetId,
@@ -1876,7 +1887,8 @@ export class Worksheet {
         if (argument[1]) {
             count = argument[1];
         }
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const showRow: ISetRowShowActionData = {
             actionName: SetRowShowAction.NAME,
             sheetId: _sheetId,
@@ -2004,7 +2016,8 @@ export class Worksheet {
      * @returns WorkSheet Instance
      */
     setHiddenGridlines(hideGridlines: boolean): Worksheet {
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const configure = {
             actionName: SetHiddenGridlinesAction.NAME,
             hideGridlines,
@@ -2056,7 +2069,8 @@ export class Worksheet {
      * @returns WorkSheet Instance
      */
     setRightToLeft(rightToLeft: BooleanNumber): Worksheet {
-        const { _context, _commandManager, _sheetId } = this;
+        const { _context, _sheetId } = this;
+        const _commandManager = this.getCommandManager();
         const configure = {
             actionName: SetRightToLeftAction.NAME,
             rightToLeft,
@@ -2069,7 +2083,6 @@ export class Worksheet {
             configure
         );
         _commandManager.invoke(command);
-
         return this;
     }
 

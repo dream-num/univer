@@ -65,8 +65,6 @@ export class Workbook {
 
     private _context: SheetContext;
 
-    private _commandManager: CommandManager;
-
     private _namedRange: NamedRange;
 
     constructor(workbookData: Partial<IWorkbookConfig> = {}, context: SheetContext) {
@@ -80,7 +78,6 @@ export class Workbook {
         this._unitId = this._config.id;
         this._styles = new Styles(styles);
         this._worksheets = new Map<string, Worksheet>();
-        this._commandManager = context.getCommandManager();
         // this._formatManage = new FormatManager();
         this._getDefaultWorkSheet();
 
@@ -150,10 +147,6 @@ export class Workbook {
         this._context = context;
     }
 
-    setCommandManager(commandManager: CommandManager): void {
-        this._commandManager = commandManager;
-    }
-
     insertSheet(): Nullable<string>;
     insertSheet(index: number): Nullable<string>;
     insertSheet(name: string): Nullable<string>;
@@ -163,8 +156,8 @@ export class Workbook {
     insertSheet(index: number, data: Partial<IWorksheetConfig>): Nullable<string>;
     insertSheet(index: number, sheet: Worksheet): Nullable<string>;
     insertSheet(...argument: any[]): Nullable<string> {
-        const { _context, _commandManager } = this;
-
+        const { _context } = this;
+        const commandManager = this.getCommandManager();
         const before = _context.getContextObserver('onBeforeInsertSheetObservable');
         const after = _context.getContextObserver('onAfterInsertSheetObservable');
 
@@ -180,7 +173,7 @@ export class Workbook {
                 index,
                 sheetId: worksheetConfig.id,
             });
-            _commandManager.invoke(
+            commandManager.invoke(
                 new Command(
                     {
                         WorkBookUnit: _context.getWorkBook(),
@@ -211,7 +204,7 @@ export class Workbook {
                     index,
                     sheetId: worksheetConfig.id,
                 });
-                _commandManager.invoke(
+                commandManager.invoke(
                     new Command(
                         {
                             WorkBookUnit: _context.getWorkBook(),
@@ -243,7 +236,7 @@ export class Workbook {
                     index,
                     sheetId: worksheetConfig.id,
                 });
-                _commandManager.invoke(
+                commandManager.invoke(
                     new Command(
                         {
                             WorkBookUnit: _context.getWorkBook(),
@@ -276,7 +269,7 @@ export class Workbook {
                     index,
                     sheetId: worksheetConfig.id,
                 });
-                _commandManager.invoke(
+                commandManager.invoke(
                     new Command(
                         {
                             WorkBookUnit: _context.getWorkBook(),
@@ -304,7 +297,7 @@ export class Workbook {
                     index,
                     sheetId: worksheetConfig.id,
                 });
-                _commandManager.invoke(
+                commandManager.invoke(
                     new Command(
                         {
                             WorkBookUnit: _context.getWorkBook(),
@@ -339,7 +332,7 @@ export class Workbook {
                     index,
                     sheetId: worksheetConfig.id,
                 });
-                _commandManager.invoke(
+                commandManager.invoke(
                     new Command(
                         {
                             WorkBookUnit: _context.getWorkBook(),
@@ -369,7 +362,7 @@ export class Workbook {
                         index,
                         sheetId: worksheetConfig.id,
                     });
-                    _commandManager.invoke(
+                    commandManager.invoke(
                         new Command(
                             {
                                 WorkBookUnit: _context.getWorkBook(),
@@ -395,7 +388,7 @@ export class Workbook {
                         index,
                         sheetId: worksheetConfig.id,
                     });
-                    _commandManager.invoke(
+                    commandManager.invoke(
                         new Command(
                             {
                                 WorkBookUnit: _context.getWorkBook(),
@@ -582,7 +575,8 @@ export class Workbook {
         // const exclude = _sheetOrder.filter((currentId) => currentId !== sheetId);
         // exclude.splice(order, 0, sheetId);
         // this._sheetOrder = exclude;
-        const { _context, _commandManager } = this;
+        const { _context } = this;
+        const commandManager = this.getCommandManager();
         const observer = _context.getContextObserver('onSheetOrderObservable');
         const config: ISetSheetOrderActionData = {
             actionName: SetSheetOrderAction.NAME,
@@ -595,7 +589,7 @@ export class Workbook {
             },
             config
         );
-        _commandManager.invoke(command);
+        commandManager.invoke(command);
         observer.notifyObservers();
     }
 
@@ -617,8 +611,9 @@ export class Workbook {
     }
 
     removeSheetBySheetId(sheetId: string): void {
-        const { _commandManager, _config } = this;
+        const { _config } = this;
         const { sheetOrder } = _config;
+        const commandManager = this.getCommandManager();
         const sheet = this.getSheetBySheetId(sheetId);
 
         if (sheetOrder.length > 1 && sheet != null) {
@@ -632,7 +627,7 @@ export class Workbook {
             before.notifyObservers({
                 index,
             });
-            _commandManager.invoke(
+            commandManager.invoke(
                 new Command(
                     {
                         WorkBookUnit: this,
@@ -700,7 +695,7 @@ export class Workbook {
     // }
 
     getCommandManager(): CommandManager {
-        return this._commandManager;
+        return this._context.getCommandManager();
     }
 
     getPluginMeta<T>(name: string): T {

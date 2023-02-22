@@ -34,7 +34,10 @@ export class SheetContext extends ContextBase {
 
     protected _setObserver(): void {
         const manager = this.getObserverManager();
-
         new WorkBookObserverImpl().install(manager);
+    }
+
+    protected _initialize(): void {
+        // EMPTY Context Initialize
     }
 }

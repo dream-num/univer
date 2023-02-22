@@ -44,11 +44,11 @@
         "vite-plugin-external": "1.2.3"
     },
     "dependencies": {
-        "@univerjs/base-ui": "workspace:^0.0.1",
         "@univerjs/base-render": "workspace:^0.0.1",
         "@univerjs/base-sheets": "workspace:^0.0.1",
+        "@univerjs/base-ui": "workspace:^0.0.1",
         "@univerjs/common-plugin-data": "workspace:^0.0.1",
         "@univerjs/core": "workspace:^0.0.1",
-        "preact": "^10.5.14"
+        "preact": "^10.12.1"
     }
 }

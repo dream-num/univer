@@ -1,9 +1,11 @@
 // scripts/build.ts
 import { build } from "esbuild";
 import { promises } from "fs";
-import { commonBuildOptions, paths } from "./common";
+import { commonBuildOptions, hasFolder, paths } from "./common";
 
-promises.rm(paths.out, { recursive: true });
+if (hasFolder(paths.outDev)) {
+    promises.rm(paths.out, { recursive: true });
+}
 
 build({
     ...commonBuildOptions,

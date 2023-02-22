@@ -21,11 +21,13 @@
         "esModuleInterop": true, // auto allowSyntheticDefaultImports tru
         "suppressImplicitAnyIndexErrors": true,
         "experimentalDecorators": true,
-        "jsx": "preserve",
-        "jsxFactory": "h",
-        "jsxFragmentFactory": "Fragment",
+        // "jsx": "preserve",
+        // "jsxFactory": "h",
+        // "jsxFragmentFactory": "Fragment",
+        "jsx": "react-jsx",
+        "jsxImportSource": "preact",
         "strictPropertyInitialization": false,
         "types": ["jest", "node", "@types/jest"]
     },
-    "include": ["src/**/*", "test/**/*.test.(ts|tsx|js)"]
+    "include": ["src/**/*", "test/**/*.test.(ts|tsx|js)","preact"]
 }

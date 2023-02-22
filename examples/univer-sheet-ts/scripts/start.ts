@@ -1,21 +1,19 @@
 import * as esbuild from 'esbuild'
-import { commonBuildOptions, paths } from "./common";
+import { commonBuildOptions, hasFolder, paths } from "./common";
 import { promises } from "fs";
 
 
 (async () => {
 
-    await promises.rm(paths.outDev, { recursive: true });
+    if (hasFolder(paths.outDev)) {
+        await promises.rm(paths.outDev, { recursive: true });
+    }
     await promises.mkdir(paths.outDev);
     await promises.copyFile(paths.index, `${paths.outDev}/index.html`);
     let ctx = await esbuild.context({
         ...commonBuildOptions,
         outdir: paths.outDev,
         sourcemap: false,
-        // jsx: 'transform',
-        loader:{
-            '.tsx':'jsx'
-        }
     })
 
     await ctx.watch()
@@ -24,6 +22,16 @@ import { promises } from "fs";
         servedir: paths.outDev,
     })
 
-    console.log('local server:', host, port);
+    let url = `http://localhost:${port}`;
+
+    console.log('local server:', url);
+
+    var start =
+        process.platform == "darwin"
+            ? "open"
+            : process.platform == "win32"
+                ? "start"
+                : "xdg-open";
+    require("child_process").exec(start + " " + url);
 
 })();

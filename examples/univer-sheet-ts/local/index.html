@@ -16,7 +16,7 @@
     }
   </style>
 
-  <script src="./main.js"></script>
+
   <script>
     new EventSource('/esbuild').addEventListener('change', () => {
       console.info('reload--')
@@ -28,6 +28,8 @@
 <body>
   <div id="app" style="z-index: 1; position: fixed; font-size: 20px; color: green;"></div>
   <div id="universheet" style="height: 100%;"></div>
+
+  <script src="./main.js"></script>
 </body>
 
 </html>

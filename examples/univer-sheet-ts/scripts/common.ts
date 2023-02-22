@@ -2,6 +2,7 @@
 import { BuildOptions } from "esbuild";
 import stylePlugin from 'esbuild-style-plugin'
 import { resolve } from "path";
+import { existsSync, lstatSync } from "fs";
 const root = process.cwd();
 export const paths = {
   entry: resolve(root, "./src/main.tsx"),
@@ -26,3 +27,14 @@ export const commonBuildOptions: BuildOptions = {
     })
   ]
 };
+
+export function hasFolder(target) {
+
+  if (existsSync(target)) {
+    if (lstatSync(target).isDirectory()) {
+      return true
+    }
+  }
+  return false
+
+}

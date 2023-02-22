@@ -20,13 +20,15 @@
         "baseUrl": "./",
         "skipLibCheck": true,
         "esModuleInterop": true, // auto allowSyntheticDefaultImports true
-        "jsx": "preserve", // 
+        "jsx": "preserve",
         "jsxFactory": "h",
         "jsxFragmentFactory": "Fragment",
+        // "jsx": "react-jsx",
+        // "jsxImportSource": "preact",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "suppressImplicitAnyIndexErrors": true,
         "strictPropertyInitialization": false,
     },
-    "include": ["src/**/*", "test/**/*.test.(ts|tsx|js)"]
+    "include": ["src/**/*", "test/**/*.test.(ts|tsx|js)","preact"]
 }

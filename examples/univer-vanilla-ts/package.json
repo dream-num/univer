@@ -56,6 +56,6 @@
         "@univerjs/sheets-plugin-import-xlsx": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-numfmt": "workspace:^0.0.1",
         "@univerjs/ui-plugin-sheets": "workspace:^0.0.1",
-        "preact": "^10.5.14"
+        "preact": "^10.12.1"
     }
 }

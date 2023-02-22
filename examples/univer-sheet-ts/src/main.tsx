@@ -56,9 +56,11 @@ univer.install(new RenderEngine());
 const universheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 // sheet.installPlugin(new RenderEngine());
 univer.addUniverSheet(universheet);
-
+console.info('univr--',univer)
 // base-sheet
 universheet.installPlugin(new SheetPlugin());
+
+console.info('universheet--',universheet)
 // universheet.installPlugin(new FormulaPlugin(DEFAULT_FORMULA_DATA_DEMO));
 
 // ui-plugin-sheets
@@ -67,7 +69,7 @@ univer.install(
         container: 'universheet',
     })
 );
-FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO1).installTo(universheet);
+// FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO1).installTo(universheet);
 // sheets-plugin-ui univer.install(new SheetsUI)
 // sheets-plugin-ui univer.install(new SheetsUI
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);

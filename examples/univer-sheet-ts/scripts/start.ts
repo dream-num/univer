@@ -13,7 +13,6 @@ import { promises } from "fs";
     let ctx = await esbuild.context({
         ...commonBuildOptions,
         outdir: paths.outDev,
-        sourcemap: false,
     })
 
     await ctx.watch()

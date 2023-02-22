@@ -18,6 +18,7 @@ export const commonBuildOptions: BuildOptions = {
   loader: {
     ".svg": "file",
   },
+  sourcemap: true,
   plugins: [
     stylePlugin({
       cssModulesOptions: {

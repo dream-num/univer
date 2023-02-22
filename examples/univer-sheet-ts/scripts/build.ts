@@ -16,7 +16,7 @@ build({
     //   minify: true,
     // outExtension:{'.js':'.cjs'}, // esm => .js, cjs => .cjs, iife => .iife.js
     packages: 'external',
-    sourcemap: true,
+    sourcemap: false,
 }).then(() => {
     promises.copyFile(paths.index, `${paths.out}/index.html`);
 });

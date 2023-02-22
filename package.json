@@ -22,7 +22,7 @@
         "build:slide": "pnpm run --filter univer-slide-ts build:demo",
         "link": "node scripts/link.js",
         "build:customd": "cd cli/src/templates/univer-custom-build && npm run build:d",
-        "clean": "npm cache clean --force && pnpm dlx rimraf@3.0.2 node_modules **/node_modules/ package-lock.json yarn.lock pnpm-lock.yaml && pnpm install && pnpm dlx playwright install",
+        "clean": "npm cache clean --force && pnpm dlx rimraf@3.0.2 node_modules **/node_modules/ package-lock.json yarn.lock pnpm-lock.yaml && pnpm install",
         "node-server": "node scripts/server.js",
         "univer-cli": "cd cli && npm run cli",
         "postinstall": "node scripts/postinstall.js",

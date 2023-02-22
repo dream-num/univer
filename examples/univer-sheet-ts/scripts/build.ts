@@ -3,7 +3,7 @@ import { build } from "esbuild";
 import { promises } from "fs";
 import { commonBuildOptions, paths } from "./common";
 
-promises.rmdir(paths.out, { recursive: true });
+promises.rm(paths.out, { recursive: true });
 
 build({
     ...commonBuildOptions,

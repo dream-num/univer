@@ -20,7 +20,7 @@
         "baseUrl": "./",
         "skipLibCheck": true,
         "esModuleInterop": true, // auto allowSyntheticDefaultImports true
-        "jsx": "preserve",
+        "jsx": "preserve", // 
         "jsxFactory": "h",
         "jsxFragmentFactory": "Fragment",
         "experimentalDecorators": true,

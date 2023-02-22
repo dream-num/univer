@@ -5,13 +5,17 @@ import { promises } from "fs";
 
 (async () => {
 
-    await promises.rmdir(paths.outDev, { recursive: true });
+    await promises.rm(paths.outDev, { recursive: true });
     await promises.mkdir(paths.outDev);
     await promises.copyFile(paths.index, `${paths.outDev}/index.html`);
     let ctx = await esbuild.context({
         ...commonBuildOptions,
         outdir: paths.outDev,
-        sourcemap: false
+        sourcemap: false,
+        // jsx: 'transform',
+        loader:{
+            '.tsx':'jsx'
+        }
     })
 
     await ctx.watch()
@@ -20,6 +24,6 @@ import { promises } from "fs";
         servedir: paths.outDev,
     })
 
-    console.log('local server:',host,port);
-    
+    console.log('local server:', host, port);
+
 })();

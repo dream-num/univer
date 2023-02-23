@@ -1,5 +1,5 @@
 import { ClearRangeApply, SetRangeDataApply } from '../Apply';
-import { ICellData, IOptionsData, IRangeData } from '../../Interfaces';
+import { ICellData, IOptionData, IRangeData } from '../../Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
@@ -10,7 +10,7 @@ import { CommandManager, CommandUnit } from '../../Command';
  * @internal
  */
 export interface IClearRangeActionData extends ISheetActionData {
-    options: IOptionsData;
+    options: IOptionData;
     rangeData: IRangeData;
 }
 

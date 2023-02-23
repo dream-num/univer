@@ -161,20 +161,6 @@ export interface IOptionData {
      *  Whether to clear only the comments.
      */
 }
-/**
- * 	Whether to clear only the contents.Whether to clear only data validation rules.Whether to avoid clearing filtered rows.
- */
-export interface IOptionsData extends IOptionData {
-    commentsOnly?: boolean;
-    /**
-     * Whether to clear only data validation rules.
-     */
-    validationsOnly?: boolean;
-    /**
-     * Whether to avoid clearing filtered rows.
-     */
-    skipFilteredRows?: boolean;
-}
 
 /**
  * Option of copyTo function

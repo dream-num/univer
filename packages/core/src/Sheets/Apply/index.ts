@@ -25,8 +25,6 @@ export * from './SetHiddenGridlines';
 export * from './SetHideRows';
 export * from './SetNamedRange';
 export * from './SetRangeData';
-export * from './SetRangeFormat';
-export * from './SetRangeFormula';
 export * from './SetRangeNote';
 export * from './SetRangeStyle';
 export * from './SetRangeFormattedValue';

@@ -8,8 +8,6 @@ export enum ACTION_NAMES {
     INSERT_ROW_ACTION = 'InsertRowAction',
     REMOVE_ROW_ACTION = 'RemoveRowAction',
     SET_RANGE_STYLE_ACTION = 'SetRangeStyleAction',
-    SET_RANGE_FORMULA_ACTION = 'SetRangeFormulaAction',
-    SET_RANGE_FORMAT_ACTION = 'SetRangeFormatAction',
     SET_SELECTION_ACTION = 'SetSelectionActivateAction',
     SET_RANGE_DATA_ACTION = 'SetRangeDataAction',
     SET_RANGE_FORMATTED_VALUE_ACTION = 'SetRangeFormattedValueAction',

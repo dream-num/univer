@@ -1,4 +1,4 @@
-import { SetRangeData, SetRangeDataApply } from '../Apply';
+import { SetRangeDataApply } from '../Apply';
 import { ObjectMatrixPrimitiveType } from '../../Shared';
 import {
     SheetActionBase,
@@ -81,11 +81,7 @@ export class SetRangeDataAction extends SheetActionBase<
                 // actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                 actionName: SetRangeDataAction.NAME,
                 sheetId,
-                cellValue: SetRangeData(
-                    worksheet.getCellMatrix(),
-                    cellValue,
-                    styles
-                ),
+                cellValue: SetRangeDataApply(this._commandUnit, this._oldActionData),
                 options,
             };
 

@@ -7,7 +7,6 @@ import {
     IRemoveMergeActionData,
     IDeleteRangeActionData,
     ISetRangeDataActionData,
-    ISetRangeFormulaActionData,
     ISetRangeStyleActionData,
     ISetRangeFormattedValueActionData,
     SetRangeStyleAction,
@@ -41,7 +40,6 @@ import {
     ICellV,
     IDocumentData,
     IOptionData,
-    IOptionsData,
     IRangeData,
     IRangeType,
     IStyleData,
@@ -1145,73 +1143,6 @@ export class Range {
      */
     setFontWeights(fontWeights: Array<Array<Nullable<FontWeight>>>): Range {
         this._setStyles(fontWeights, 'bl');
-        return this;
-    }
-
-    /**
-     * Updates the formula for this range.
-     *
-     * @param formula A string representing the formula to set for the cell.
-     * @returns This range, for chaining.
-     */
-    setFormula(formula: string): Range {
-        const { _rangeData, _context, _commandManager, _worksheet } = this;
-        const { startRow, startColumn, endRow, endColumn } = _rangeData;
-        const cellValue = new ObjectMatrix<string>();
-        for (let r = startRow; r <= endRow; r++) {
-            for (let c = startColumn; c <= endColumn; c++) {
-                cellValue.setValue(r, c, formula);
-            }
-        }
-        const setValue: ISetRangeFormulaActionData = {
-            sheetId: _worksheet.getSheetId(),
-            actionName: ACTION_NAMES.SET_RANGE_FORMULA_ACTION,
-            cellFormula: cellValue.getData(),
-            rangeData: this._rangeData,
-        };
-        const command = new Command(
-            {
-                WorkBookUnit: _context.getWorkBook(),
-            },
-            setValue
-        );
-        _commandManager.invoke(command);
-
-        return this;
-    }
-
-    /**
-     * Sets a rectangular grid of formulas (must match dimensions of this range).
-     *
-     * @param formulas A two-dimensional string array of formulas.
-     * @returns This range, for chaining.
-     */
-    setFormulas(formulas: string[][]): Range {
-        const { _rangeData, _context, _commandManager, _worksheet } = this;
-
-        const { startRow, startColumn, endRow, endColumn } = _rangeData;
-
-        const cellValue = new ObjectMatrix<string>();
-        for (let r = 0; r <= endRow - startRow; r++) {
-            for (let c = 0; c <= endColumn - startColumn; c++) {
-                cellValue.setValue(r + startRow, c + startColumn, formulas[r][c]);
-            }
-        }
-
-        const setValue: ISetRangeFormulaActionData = {
-            sheetId: _worksheet.getSheetId(),
-            actionName: ACTION_NAMES.SET_RANGE_FORMULA_ACTION,
-            cellFormula: cellValue.getData(),
-            rangeData: this._rangeData,
-        };
-        const command = new Command(
-            {
-                WorkBookUnit: _context.getWorkBook(),
-            },
-            setValue
-        );
-        _commandManager.invoke(command);
-
         return this;
     }
 
@@ -3269,11 +3200,11 @@ export class Range {
      */
     clear(): Range;
     /**
-     * Clears the range of contents, format, data validation rules, and/or comments, as specified with the given advanced options. By default all data is cleared.
+     * Clears the range of contents and/or format, as specified with the given advanced options. By default all data is cleared.
      * @param options A JavaScript object that specifies advanced parameters, as listed below.
      * @returns This range, for chaining.
      */
-    clear(options: IOptionsData): Range;
+    clear(options: IOptionData): Range;
     clear(...argument: any): Range {
         const { _context, _worksheet, _commandManager, _rangeData } = this;
 
@@ -3321,15 +3252,6 @@ export class Range {
      */
     clearContent(): Range {
         return this.clear({ contentsOnly: true });
-    }
-
-    /**
-     * Clears the note in the given cell or cells.
-     *
-     * @returns Range This range, for chaining.
-     */
-    clearNote(): Range {
-        return this.clear({ commentsOnly: true });
     }
 
     /**

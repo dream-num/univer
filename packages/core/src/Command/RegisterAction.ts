@@ -23,8 +23,6 @@ import {
     SetHiddenGridlinesAction,
     SetNamedRangeAction,
     SetRangeDataAction,
-    SetRangeFormatAction,
-    SetRangeFormulaAction,
     SetRangeNoteAction,
     SetRangeStyleAction,
     SetRangeFormattedValueAction,
@@ -108,8 +106,6 @@ CommandManager.register(RemoveColumnAction.NAME, RemoveColumnAction);
 CommandManager.register(DeleteNamedRangeAction.NAME, DeleteNamedRangeAction);
 CommandManager.register(SetNamedRangeAction.NAME, SetNamedRangeAction);
 CommandManager.register(AddNamedRangeAction.NAME, AddNamedRangeAction);
-CommandManager.register(SetRangeFormatAction.NAME, SetRangeFormatAction);
-CommandManager.register(SetRangeFormulaAction.NAME, SetRangeFormulaAction);
 CommandManager.register(SetRangeNoteAction.NAME, SetRangeNoteAction);
 CommandManager.register(InsertSheetAction.NAME, InsertSheetAction);
 CommandManager.register(RemoveSheetAction.NAME, RemoveSheetAction);

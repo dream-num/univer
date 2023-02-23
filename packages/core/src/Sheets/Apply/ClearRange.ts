@@ -1,7 +1,8 @@
-import { ICellData, IOptionsData, IRangeData } from '../../Interfaces';
+import { ICellData, IOptionData, IRangeData } from '../../Interfaces';
 import { Tools, ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared';
 
-import { CommandUnit, IClearRangeActionData } from '../../Command';
+import { CommandUnit } from '../../Command';
+import { IClearRangeActionData } from '../Action';
 
 /**
  *
@@ -14,7 +15,7 @@ import { CommandUnit, IClearRangeActionData } from '../../Command';
  */
 export function ClearRange(
     cellMatrix: ObjectMatrix<ICellData>,
-    options: IOptionsData,
+    options: IOptionData,
     rangeData: IRangeData
 ): ObjectMatrixPrimitiveType<ICellData> {
     const { startRow, endRow, startColumn, endColumn } = rangeData;
@@ -37,7 +38,6 @@ export function ClearRange(
                     value.v = '';
                     value.m = '';
                 }
-                // TODO more options
 
                 cellMatrix.setValue(r, c, Tools.deepClone(value as ICellData));
             }
@@ -70,7 +70,6 @@ export function ClearRangeApply(unit: CommandUnit, data: IClearRangeActionData) 
                     value.v = '';
                     value.m = '';
                 }
-                // TODO more options
 
                 cellMatrix?.setValue(r, c, Tools.deepClone(value as ICellData));
             }

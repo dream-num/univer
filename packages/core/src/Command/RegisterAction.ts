@@ -1,7 +1,6 @@
 import {
     AddMergeAction,
     AddNamedRangeAction,
-    ClearRangeAction,
     DeleteNamedRangeAction,
     DeleteRangeAction,
     InsertColumnAction,
@@ -82,7 +81,6 @@ CommandManager.register(
     SetRangeFormattedValueAction
 );
 CommandManager.register(DeleteRangeAction.NAME, DeleteRangeAction);
-CommandManager.register(ClearRangeAction.NAME, ClearRangeAction);
 CommandManager.register(InsertRangeAction.NAME, InsertRangeAction);
 CommandManager.register(SetTabColorAction.NAME, SetTabColorAction);
 CommandManager.register(SetWorkSheetHideAction.NAME, SetWorkSheetHideAction);

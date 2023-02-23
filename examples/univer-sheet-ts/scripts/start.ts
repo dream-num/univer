@@ -11,6 +11,7 @@ import { Bright, FgCyan, FgGreen, Reset } from './color';
     }
     await promises.mkdir(paths.outDev);
     await promises.copyFile(paths.index, `${paths.outDev}/index.html`);
+
     let ctx = await esbuild.context({
         ...commonBuildOptions,
         outdir: paths.outDev,

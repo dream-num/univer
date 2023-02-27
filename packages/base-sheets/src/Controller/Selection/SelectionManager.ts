@@ -18,6 +18,7 @@ import { ACTION_NAMES, ISelectionsConfig } from '../../Basics';
 import { ISelectionModelValue, ISetSelectionValueActionData, SetSelectionValueAction } from '../../Model/Action/SetSelectionValueAction';
 import { SelectionModel } from '../../Model/SelectionModel';
 import { SheetPlugin } from '../../SheetPlugin';
+import { SheetView } from '../../View/Render/Views/SheetView';
 import { ColumnTitleController } from './ColumnTitleController';
 import { DragLineController } from './DragLineController';
 import { RowTitleController } from './RowTitleController';
@@ -29,6 +30,8 @@ import { SelectionControl, SELECTION_TYPE } from './SelectionController';
  * SelectionManager 维护model数据list，action也是修改这一层数据，obs监听到数据变动后，自动刷新（control仍然可以持有数据）
  */
 export class SelectionManager {
+    hasSelection: boolean = false;
+
     private _mainComponent: Spreadsheet;
 
     private _rowComponent: SpreadsheetRowTitle;
@@ -61,7 +64,11 @@ export class SelectionManager {
 
     private _dragLineControl: DragLineController;
 
-    hasSelection: boolean = false;
+    constructor(private _sheetView: SheetView) {
+        this._plugin = this._sheetView.getPlugin() as SheetPlugin;
+        this._initialize();
+        this._initializeObserver();
+    }
 
     getSheetView() {
         return this._sheetView;

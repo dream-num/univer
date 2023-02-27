@@ -11,11 +11,24 @@ import {
 import { ICopyToOptionsData, ICellData } from '../../Interfaces';
 
 /**
+ * 设置数据时的类型
+ */
+enum SetRangeDataType {
+    DEFAULT = 'default',
+
+    /**
+     * 
+     */
+    PASTE = 'paste',
+}
+
+/**
  * @internal
  */
 export interface ISetRangeDataActionData extends ISheetActionData {
     cellValue: ObjectMatrixPrimitiveType<ICellData>;
     options?: ICopyToOptionsData;
+    type?: SetRangeDataType;
 }
 
 /**

@@ -5,7 +5,7 @@ import { textIndexAdjustApply } from '../Apply/TextIndexAdjustApply';
 
 export interface ITextIndexAdjustAction
     extends IDocActionData,
-        ITextSelectionRangeParam {}
+    ITextSelectionRangeParam { }
 
 export class TextIndexAdjustAction extends DocActionBase<
     ITextIndexAdjustAction,
@@ -39,7 +39,7 @@ export class TextIndexAdjustAction extends DocActionBase<
     }
 
     undo(): void {
-        const actionData = this.getOldActionDaa();
+        const actionData = this.getOldActionData();
         const document = this.getDocument();
 
         textIndexAdjustApply(document, actionData);

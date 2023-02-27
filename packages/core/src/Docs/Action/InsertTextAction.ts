@@ -54,7 +54,7 @@ export class InsertTextAction extends DocActionBase<
     }
 
     undo(): void {
-        const actionData = this.getOldActionDaa();
+        const actionData = this.getOldActionData();
         const document = this.getDocument();
         // const { length, start, segmentId } = actionData;
         DeleteTextApply(document, { ...actionData });

@@ -8,7 +8,7 @@ import { DOC_ACTION_NAMES } from '../../Const/DOC_ACTION_NAMES';
 
 export interface IDeleteTextActionData
     extends IDocActionData,
-        ITextSelectionRangeParam {
+    ITextSelectionRangeParam {
     text: string;
 }
 
@@ -63,7 +63,7 @@ export class DeleteTextAction extends DocActionBase<
 
     undo(): void {
         // TODO ...
-        const actionData = this.getOldActionDaa();
+        const actionData = this.getOldActionData();
         const document = this.getDocument();
         // const { text, start, length } = actionData;
         InsertTextApply(document, { ...actionData });

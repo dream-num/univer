@@ -30,6 +30,8 @@ import { SelectionControl, SELECTION_TYPE } from './SelectionController';
  * SelectionManager 维护model数据list，action也是修改这一层数据，obs监听到数据变动后，自动刷新（control仍然可以持有数据）
  */
 export class SelectionManager {
+    hasSelection: boolean = false;
+
     private _mainComponent: Spreadsheet;
 
     private _rowComponent: SpreadsheetRowTitle;
@@ -62,7 +64,11 @@ export class SelectionManager {
 
     private _dragLineControl: DragLineController;
 
-    hasSelection: boolean = false;
+    constructor(private _sheetView: SheetView) {
+        this._plugin = this._sheetView.getPlugin() as SheetPlugin;
+        this._initialize();
+        this._initializeObserver();
+    }
 
     getSheetView() {
         return this._sheetView;
@@ -420,10 +426,168 @@ export class SelectionManager {
         this.addControlToCurrentByRangeData(rangeData, currentCellData);
     }
 
-    constructor(private _sheetView: SheetView) {
-        this._plugin = this._sheetView.getPlugin() as SheetPlugin;
-        this._initialize();
-        this._initializeObserver();
+    /**
+     * When mousedown and mouseup need to go to the coordination and undo stack, when mousemove does not need to go to the coordination and undo stack
+     * @param moveEvt
+     * @param selectionControl
+     * @returns
+     */
+    moving(moveEvt: IPointerEvent | IMouseEvent, selectionControl: Nullable<SelectionControl>) {
+        // console.log('moving');
+        const main = this._mainComponent;
+        const { offsetX: moveOffsetX, offsetY: moveOffsetY, clientX, clientY } = moveEvt;
+        const { startRow, startColumn, endRow, endColumn } = this._startSelectionRange;
+
+        const scrollXY = main.getAncestorScrollXY(this._startOffsetX, this._startOffsetY);
+        const moveCellInfo = main.calculateCellIndexByPosition(moveOffsetX, moveOffsetY, scrollXY);
+        const moveActualSelection = makeCellToSelection(moveCellInfo);
+
+        if (!moveActualSelection) {
+            return false;
+        }
+        const { startRow: moveStartRow, startColumn: moveStartColumn, endColumn: moveEndColumn, endRow: moveEndRow } = moveActualSelection;
+
+        const newStartRow = Math.min(moveStartRow, startRow);
+        const newStartColumn = Math.min(moveStartColumn, startColumn);
+        const newEndRow = Math.max(moveEndRow, endRow);
+        const newEndColumn = Math.max(moveEndColumn, endColumn);
+        const newBounding = main.getSelectionBounding(newStartRow, newStartColumn, newEndRow, newEndColumn);
+
+        if (!newBounding) {
+            return false;
+        }
+        const { startRow: finalStartRow, startColumn: finalStartColumn, endRow: finalEndRow, endColumn: finalEndColumn } = newBounding;
+
+        const startCell = main.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn);
+        const endCell = main.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn);
+
+        const newSelectionRange: ISelection = {
+            startColumn: finalStartColumn,
+            startRow: finalStartRow,
+            endColumn: finalEndColumn,
+            endRow: finalEndRow,
+            startY: startCell?.startY || 0,
+            endY: endCell?.endY || 0,
+            startX: startCell?.startX || 0,
+            endX: endCell?.endX || 0,
+        };
+        // Only notify when the selection changes
+        const {
+            startRow: oldStartRow,
+            endRow: oldEndRow,
+            startColumn: oldStartColumn,
+            endColumn: oldEndColumn,
+        } = selectionControl?.model || { startRow: -1, endRow: -1, startColumn: -1, endColumn: -1 };
+
+        if (oldStartColumn !== finalStartColumn || oldStartRow !== finalStartRow || oldEndColumn !== finalEndColumn || oldEndRow !== finalEndRow) {
+            selectionControl && selectionControl.update(newSelectionRange);
+            // update model
+            this.setSelectionModel();
+            selectionControl && this._plugin.getObserver('onChangeSelectionObserver')?.notifyObservers(selectionControl);
+        }
+    }
+
+    /**
+     * pointer up event
+     * @param moveEvt
+     * @param selectionControl
+     * @returns
+     */
+    up() {
+        // update model
+        this.setSelectionModel();
+    }
+
+    /**
+     * Get all range data of the current selection
+     * @returns
+     */
+    getActiveRangeListData(): Nullable<IRangeData[]> {
+        const models = this.getCurrentModels();
+        if (models && models.length > 0) {
+            const selections = models?.map((model: SelectionModel) => ({
+                startRow: model.startRow,
+                startColumn: model.startColumn,
+                endRow: model.endRow,
+                endColumn: model.endColumn,
+            }));
+
+            return selections;
+        }
+    }
+
+    /**
+     * Returns the list of active ranges in the active sheet or null if there are no active ranges.
+     * If there is a single range selected, this behaves as a getActiveRange() call.
+     *
+     * @returns
+     */
+    getActiveRangeList(): Nullable<RangeList> {
+        const rangeListData = this.getActiveRangeListData();
+        return rangeListData && this._worksheet?.getRangeList(rangeListData);
+    }
+
+    /**
+     * Get the range of the currently active cell
+     * @returns
+     */
+    getActiveRangeData(): Nullable<IRangeData> {
+        const models = this.getCurrentModels();
+        if (models && models.length > 0) {
+            for (const model of models) {
+                if (model.currentCell) {
+                    return {
+                        startRow: model.startRow,
+                        startColumn: model.startColumn,
+                        endRow: model.endRow,
+                        endColumn: model.endColumn,
+                    };
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns the selected range in the active sheet, or null if there is no active range. If multiple ranges are selected this method returns only the last selected range.
+     * @returns
+     */
+    getActiveRange(): Nullable<Range> {
+        const rangeData = this.getActiveRangeData();
+        return rangeData && this._worksheet?.getRange(rangeData);
+    }
+
+    /**
+     * get active selection control
+     * @returns
+     */
+    getCurrentCellData(): Nullable<IRangeData> {
+        const models = this.getCurrentModels();
+        if (models && models.length > 0) {
+            for (const model of models) {
+                const currentCell = model.currentCell;
+                if (currentCell) {
+                    return {
+                        startRow: currentCell.row,
+                        startColumn: currentCell.column,
+                        endRow: currentCell.row,
+                        endColumn: currentCell.column,
+                    };
+                }
+            }
+        }
+    }
+
+    /**
+     * get active selection control
+     * @returns
+     */
+    getCurrentCell(): Nullable<Range> {
+        const rangeData = this.getCurrentCellData();
+        return rangeData && this._worksheet?.getRange(rangeData);
+    }
+
+    getDragLineControl() {
+        return this._dragLineControl;
     }
 
     private _initialize() {
@@ -584,78 +748,6 @@ export class SelectionManager {
         });
     }
 
-    /**
-     * When mousedown and mouseup need to go to the coordination and undo stack, when mousemove does not need to go to the coordination and undo stack
-     * @param moveEvt
-     * @param selectionControl
-     * @returns
-     */
-    moving(moveEvt: IPointerEvent | IMouseEvent, selectionControl: Nullable<SelectionControl>) {
-        // console.log('moving');
-        const main = this._mainComponent;
-        const { offsetX: moveOffsetX, offsetY: moveOffsetY, clientX, clientY } = moveEvt;
-        const { startRow, startColumn, endRow, endColumn } = this._startSelectionRange;
-
-        const scrollXY = main.getAncestorScrollXY(this._startOffsetX, this._startOffsetY);
-        const moveCellInfo = main.calculateCellIndexByPosition(moveOffsetX, moveOffsetY, scrollXY);
-        const moveActualSelection = makeCellToSelection(moveCellInfo);
-
-        if (!moveActualSelection) {
-            return false;
-        }
-        const { startRow: moveStartRow, startColumn: moveStartColumn, endColumn: moveEndColumn, endRow: moveEndRow } = moveActualSelection;
-
-        const newStartRow = Math.min(moveStartRow, startRow);
-        const newStartColumn = Math.min(moveStartColumn, startColumn);
-        const newEndRow = Math.max(moveEndRow, endRow);
-        const newEndColumn = Math.max(moveEndColumn, endColumn);
-        const newBounding = main.getSelectionBounding(newStartRow, newStartColumn, newEndRow, newEndColumn);
-
-        if (!newBounding) {
-            return false;
-        }
-        const { startRow: finalStartRow, startColumn: finalStartColumn, endRow: finalEndRow, endColumn: finalEndColumn } = newBounding;
-
-        const startCell = main.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn);
-        const endCell = main.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn);
-
-        const newSelectionRange: ISelection = {
-            startColumn: finalStartColumn,
-            startRow: finalStartRow,
-            endColumn: finalEndColumn,
-            endRow: finalEndRow,
-            startY: startCell?.startY || 0,
-            endY: endCell?.endY || 0,
-            startX: startCell?.startX || 0,
-            endX: endCell?.endX || 0,
-        };
-        // Only notify when the selection changes
-        const {
-            startRow: oldStartRow,
-            endRow: oldEndRow,
-            startColumn: oldStartColumn,
-            endColumn: oldEndColumn,
-        } = selectionControl?.model || { startRow: -1, endRow: -1, startColumn: -1, endColumn: -1 };
-
-        if (oldStartColumn !== finalStartColumn || oldStartRow !== finalStartRow || oldEndColumn !== finalEndColumn || oldEndRow !== finalEndRow) {
-            selectionControl && selectionControl.update(newSelectionRange);
-            // update model
-            this.setSelectionModel();
-            selectionControl && this._plugin.getObserver('onChangeSelectionObserver')?.notifyObservers(selectionControl);
-        }
-    }
-
-    /**
-     * pointer up event
-     * @param moveEvt
-     * @param selectionControl
-     * @returns
-     */
-    up() {
-        // update model
-        this.setSelectionModel();
-    }
-
     private _rowEventInitial() {
         const row = this._rowComponent;
         row.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
@@ -800,97 +892,5 @@ export class SelectionManager {
             .add(() => {
                 this.renderCurrentControls();
             });
-    }
-
-    /**
-     * Get all range data of the current selection
-     * @returns
-     */
-    getActiveRangeListData(): Nullable<IRangeData[]> {
-        const models = this.getCurrentModels();
-        if (models && models.length > 0) {
-            const selections = models?.map((model: SelectionModel) => ({
-                startRow: model.startRow,
-                startColumn: model.startColumn,
-                endRow: model.endRow,
-                endColumn: model.endColumn,
-            }));
-
-            return selections;
-        }
-    }
-
-    /**
-     * Returns the list of active ranges in the active sheet or null if there are no active ranges.
-     * If there is a single range selected, this behaves as a getActiveRange() call.
-     *
-     * @returns
-     */
-    getActiveRangeList(): Nullable<RangeList> {
-        const rangeListData = this.getActiveRangeListData();
-        return rangeListData && this._worksheet?.getRangeList(rangeListData);
-    }
-
-    /**
-     * Get the range of the currently active cell
-     * @returns
-     */
-    getActiveRangeData(): Nullable<IRangeData> {
-        const models = this.getCurrentModels();
-        if (models && models.length > 0) {
-            for (const model of models) {
-                if (model.currentCell) {
-                    return {
-                        startRow: model.startRow,
-                        startColumn: model.startColumn,
-                        endRow: model.endRow,
-                        endColumn: model.endColumn,
-                    };
-                }
-            }
-        }
-    }
-
-    /**
-     * Returns the selected range in the active sheet, or null if there is no active range. If multiple ranges are selected this method returns only the last selected range.
-     * @returns
-     */
-    getActiveRange(): Nullable<Range> {
-        const rangeData = this.getActiveRangeData();
-        return rangeData && this._worksheet?.getRange(rangeData);
-    }
-
-    /**
-     * get active selection control
-     * @returns
-     */
-    getCurrentCellData(): Nullable<IRangeData> {
-        const models = this.getCurrentModels();
-        if (models && models.length > 0) {
-            for (const model of models) {
-                const currentCell = model.currentCell;
-                if (currentCell) {
-                    return {
-                        startRow: currentCell.row,
-                        startColumn: currentCell.column,
-                        endRow: currentCell.row,
-                        endColumn: currentCell.column,
-                    };
-                }
-            }
-        }
-    }
-
-    /**
-     * get active selection control
-     * @returns
-     */
-    getCurrentCell(): Nullable<Range> {
-        const rangeData = this.getCurrentCellData();
-        return rangeData && this._worksheet?.getRange(rangeData);
-    }
-
-    getDragLineControl() {
-        return this._dragLineControl;
     }
 }

@@ -51,93 +51,13 @@ export class SelectionControlDragAndDrop {
         this._initialize();
     }
 
-    private _initialize() {
-        const plugin = this._control.getPlugin();
-
-        const main = plugin.getMainComponent();
-
-        const { leftControl, rightControl, topControl, bottomControl, fillControl } = this._control;
-        leftControl.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            leftControl.cursor = CURSOR_TYPE.MOVE;
-        });
-
-        leftControl.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            leftControl.resetCursor();
-        });
-
-        rightControl.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            rightControl.cursor = CURSOR_TYPE.MOVE;
-        });
-
-        rightControl.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            rightControl.resetCursor();
-        });
-
-        topControl.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            topControl.cursor = CURSOR_TYPE.MOVE;
-        });
-
-        topControl.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            topControl.resetCursor();
-        });
-
-        bottomControl.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            bottomControl.cursor = CURSOR_TYPE.MOVE;
-        });
-
-        bottomControl.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            bottomControl.resetCursor();
-        });
-
-        bottomControl.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this.dragDown(evt, Direction.BOTTOM);
-        });
-
-        bottomControl.onPointerUpObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            bottomControl.resetCursor();
-        });
-
-        // init drag render box
-        const zIndex = this._zIndex;
-        this._leftDragControl = new Rect(SELECTION_DRAG_KEY.left + zIndex, {
-            top: 0,
-            left: -DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
-            width: DEFAULT_SELECTION_CONFIG.strokeWidth * 2,
-            fill: DEFAULT_SELECTION_CONFIG.strokeColor,
-            zIndex,
-        });
-        this._rightDragControl = new Rect(SELECTION_DRAG_KEY.right + zIndex, {
-            width: DEFAULT_SELECTION_CONFIG.strokeWidth * 2,
-            fill: DEFAULT_SELECTION_CONFIG.strokeColor,
-            zIndex,
-        });
-        this._topDragControl = new Rect(SELECTION_DRAG_KEY.top + zIndex, {
-            top: -DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
-            left: -DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
-            height: DEFAULT_SELECTION_CONFIG.strokeWidth * 2,
-            fill: DEFAULT_SELECTION_CONFIG.strokeColor,
-            zIndex,
-        });
-        this._bottomDragControl = new Rect(SELECTION_DRAG_KEY.bottom + zIndex, {
-            height: DEFAULT_SELECTION_CONFIG.strokeWidth * 2,
-            fill: DEFAULT_SELECTION_CONFIG.strokeColor,
-            left: -DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
-            zIndex,
-        });
-
-        this._selectionDragShape = new Group(SELECTION_DRAG_KEY.Selection + zIndex, this._leftDragControl, this._rightDragControl, this._topDragControl, this._bottomDragControl);
-
-        // this._selectionDragShape.visible = false;
-
-        this._selectionDragShape.evented = false;
-
-        this._selectionDragShape.zIndex = zIndex;
-
-        const scene = this._control.getScene();
-        scene.addObject(this._selectionDragShape);
+    static create(control: SelectionControl) {
+        return new SelectionControlDragAndDrop(control);
     }
 
-    dragEventInitial() {}
+    dragEventInitial() {
+        // TODO ...
+    }
 
     dragDown(evt: IPointerEvent | IMouseEvent, direction: Direction) {
         const main = this._control.getPlugin().getMainComponent();
@@ -348,7 +268,89 @@ export class SelectionControlDragAndDrop {
         bottomControl.onPointerLeaveObserver.clear();
     }
 
-    static create(control: SelectionControl) {
-        return new SelectionControlDragAndDrop(control);
+    private _initialize() {
+        const plugin = this._control.getPlugin();
+
+        const main = plugin.getMainComponent();
+
+        const { leftControl, rightControl, topControl, bottomControl, fillControl } = this._control;
+        leftControl.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            leftControl.cursor = CURSOR_TYPE.MOVE;
+        });
+
+        leftControl.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            leftControl.resetCursor();
+        });
+
+        rightControl.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            rightControl.cursor = CURSOR_TYPE.MOVE;
+        });
+
+        rightControl.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            rightControl.resetCursor();
+        });
+
+        topControl.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            topControl.cursor = CURSOR_TYPE.MOVE;
+        });
+
+        topControl.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            topControl.resetCursor();
+        });
+
+        bottomControl.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            bottomControl.cursor = CURSOR_TYPE.MOVE;
+        });
+
+        bottomControl.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            bottomControl.resetCursor();
+        });
+
+        bottomControl.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this.dragDown(evt, Direction.BOTTOM);
+        });
+
+        bottomControl.onPointerUpObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            bottomControl.resetCursor();
+        });
+
+        // init drag render box
+        const zIndex = this._zIndex;
+        this._leftDragControl = new Rect(SELECTION_DRAG_KEY.left + zIndex, {
+            top: 0,
+            left: -DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
+            width: DEFAULT_SELECTION_CONFIG.strokeWidth * 2,
+            fill: DEFAULT_SELECTION_CONFIG.strokeColor,
+            zIndex,
+        });
+        this._rightDragControl = new Rect(SELECTION_DRAG_KEY.right + zIndex, {
+            width: DEFAULT_SELECTION_CONFIG.strokeWidth * 2,
+            fill: DEFAULT_SELECTION_CONFIG.strokeColor,
+            zIndex,
+        });
+        this._topDragControl = new Rect(SELECTION_DRAG_KEY.top + zIndex, {
+            top: -DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
+            left: -DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
+            height: DEFAULT_SELECTION_CONFIG.strokeWidth * 2,
+            fill: DEFAULT_SELECTION_CONFIG.strokeColor,
+            zIndex,
+        });
+        this._bottomDragControl = new Rect(SELECTION_DRAG_KEY.bottom + zIndex, {
+            height: DEFAULT_SELECTION_CONFIG.strokeWidth * 2,
+            fill: DEFAULT_SELECTION_CONFIG.strokeColor,
+            left: -DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
+            zIndex,
+        });
+
+        this._selectionDragShape = new Group(SELECTION_DRAG_KEY.Selection + zIndex, this._leftDragControl, this._rightDragControl, this._topDragControl, this._bottomDragControl);
+
+        // this._selectionDragShape.visible = false;
+
+        this._selectionDragShape.evented = false;
+
+        this._selectionDragShape.zIndex = zIndex;
+
+        const scene = this._control.getScene();
+        scene.addObject(this._selectionDragShape);
     }
 }

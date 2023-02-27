@@ -8,31 +8,21 @@ export interface SlideTabItemAnimate {
 }
 
 export class SlideTabItem {
-    static midline(item: SlideTabItem) {
-        return item.getBoundingRect().x + item.getBoundingRect().width / 2;
-    }
+    protected _slideTabItem: HTMLElement;
 
-    static make(nodeList: NodeList, slideTabBar: SlideTabBar): SlideTabItem[] {
-        let result: SlideTabItem[] = [];
-        nodeList.forEach((item) => result.push(new SlideTabItem(item as HTMLElement, slideTabBar)));
-        return result;
-    }
+    protected _animate: Animate | null;
 
-    _slideTabItem: HTMLElement;
+    protected _midline: number;
 
-    _animate: Animate | null;
+    protected _translateX: number;
 
-    _midline: number;
+    protected _scrollbar: SlideScrollbar;
 
-    _translateX: number;
+    protected _slideTabBar: SlideTabBar;
 
-    _scrollbar: SlideScrollbar;
+    protected _editMode: boolean;
 
-    _slideTabBar: SlideTabBar;
-
-    _editMode: boolean;
-
-    _placeholder: HTMLElement | null;
+    protected _placeholder: HTMLElement | null;
 
     constructor(slideTabItem: HTMLElement, slideTabBar: SlideTabBar) {
         this._slideTabItem = slideTabItem;
@@ -43,6 +33,16 @@ export class SlideTabItem {
         this._placeholder = null;
         this._scrollbar = slideTabBar.getScrollbar();
         this.update();
+    }
+
+    static midline(item: SlideTabItem) {
+        return item.getBoundingRect().x + item.getBoundingRect().width / 2;
+    }
+
+    static make(nodeList: NodeList, slideTabBar: SlideTabBar): SlideTabItem[] {
+        let result: SlideTabItem[] = [];
+        nodeList.forEach((item) => result.push(new SlideTabItem(item as HTMLElement, slideTabBar)));
+        return result;
     }
 
     isEditMode(): boolean {

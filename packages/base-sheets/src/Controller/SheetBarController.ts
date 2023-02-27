@@ -4,10 +4,6 @@ import { SheetPlugin } from '../SheetPlugin';
 export class SheetBarControl {
     protected _plugin: SheetPlugin;
 
-    protected _getCoreObserver<T>(type: string) {
-        return this._plugin.getGlobalContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core');
-    }
-
     constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
     }
@@ -79,5 +75,9 @@ export class SheetBarControl {
                 }
             }
         });
+    }
+
+    protected _getCoreObserver<T>(type: string) {
+        return this._plugin.getGlobalContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core');
     }
 }

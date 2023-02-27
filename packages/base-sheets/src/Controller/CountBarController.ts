@@ -4,10 +4,6 @@ import { SheetPlugin } from '../SheetPlugin';
 export class CountBarController {
     private _plugin: SheetPlugin;
 
-    protected _getCoreObserver<T>(type: string) {
-        return this._plugin.getGlobalContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core');
-    }
-
     constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
     }
@@ -28,5 +24,9 @@ export class CountBarController {
                 }
             }
         });
+    }
+
+    protected _getCoreObserver<T>(type: string) {
+        return this._plugin.getGlobalContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core');
     }
 }

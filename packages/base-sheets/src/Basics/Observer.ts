@@ -1,17 +1,13 @@
 import { Observable, Plugin } from '@univerjs/core';
 import { SelectionControl } from '../Controller/Selection/SelectionController';
-import { SheetContainer } from '../View/UI/SheetContainer';
-import { Toolbar } from '../View/UI/Toolbar/Toolbar';
-import { LineColor } from '../View/UI/Common/Line/LineColor';
-import { LineBold } from '../View/UI/Common/Line/LineBold';
-import { ModalGroup } from '../View/UI/ModalGroup/ModalGroup';
-// import { RichText } from '../View/UI/RichText/RichText';
-import { CellRangeModal } from '../View/UI/Common/CellRange/CellRangeModal';
-import { ColorSelect } from '../View/UI/Common/ColorSelect/ColorSelect';
 
-interface ISelectionControlFillConfig {}
+interface ISelectionControlFillConfig {
+    //TODO ...
+}
 
-interface ISelectionControlDragAndDropConfig {}
+interface ISelectionControlDragAndDropConfig {
+    //TODO ...
+}
 
 export type SheetPluginObserve = {
     // onAfterChangeFontFamilyObservable: Observable<string>;
@@ -38,17 +34,6 @@ export type SheetPluginObserve = {
     onChangeSelectionObserver: Observable<SelectionControl>;
 
     onChangeCurrentSheetObserver: Observable<string>;
-
-    onToolbarDidMountObservable: Observable<Toolbar>;
-
-    onModalGroupDidMountObservable: Observable<ModalGroup>;
-
-    onLineColorDidMountObservable: Observable<LineColor>;
-    onLineBoldDidMountObservable: Observable<LineBold>;
-    onColorSelectDidMountObservable: Observable<ColorSelect>;
-
-    onSheetContainerDidMountObservable: Observable<SheetContainer>;
-    onCellRangeModalDidMountObservable: Observable<CellRangeModal>;
 
     // onSpreadsheetKeyDownObservable: Observable<IKeyboardEvent>;
     // onSpreadsheetKeyUpObservable: Observable<IKeyboardEvent>;
@@ -77,13 +62,7 @@ export function uninstall(plugin: Plugin) {
     plugin.deleteObserve('onFillingObserver');
     plugin.deleteObserve('onFillEndObserver');
     plugin.deleteObserve('onChangeSelectionObserver');
-
-    plugin.deleteObserve('onToolbarDidMountObservable');
-    plugin.deleteObserve('onModalGroupDidMountObservable');
-
     plugin.deleteObserve('onChangeCurrentSheetObserver');
-    plugin.deleteObserve('onSheetContainerDidMountObservable');
-    plugin.deleteObserve('onCellRangeModalDidMountObservable');
     // plugin.deleteObserve('onSpreadsheetKeyDownObservable');
     // plugin.deleteObserve('onSpreadsheetKeyUpObservable');
     // plugin.deleteObserve('onSpreadsheetKeyCopyObservable');
@@ -114,19 +93,6 @@ export function install(plugin: Plugin) {
 
     plugin.pushToObserve('onChangeCurrentSheetObserver');
 
-    plugin.pushToObserve('onToolbarDidMountObservable');
-    plugin.pushToObserve('onCellRangeModalDidMountObservable');
-    plugin.pushToObserve('onModalGroupDidMountObservable');
-
-    plugin.pushToObserve('onLineColorDidMountObservable');
-    plugin.pushToObserve('onLineBoldDidMountObservable');
-    plugin.pushToObserve('onColorSelectDidMountObservable');
-
-    plugin.pushToObserve('onSheetBarDidMountObservable');
-    plugin.pushToObserve('onCountBarDidMountObservable');
-    plugin.pushToObserve('onInfoBarDidMountObservable');
-    plugin.pushToObserve('onRightMenuDidMountObservable');
-    plugin.pushToObserve('onSheetContainerDidMountObservable');
     // plugin.pushToObserve('onSpreadsheetKeyDownObservable');
     // plugin.pushToObserve('onSpreadsheetKeyUpObservable');
     // plugin.pushToObserve('onSpreadsheetKeyCopyObservable');

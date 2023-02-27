@@ -1,1 +1,4 @@
-export class SpreadsheetAction {}
+export class SpreadsheetAction {
+    // TODO ...
+    static NAME = 'SpreadsheetAction';
+}

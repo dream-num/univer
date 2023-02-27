@@ -6,6 +6,16 @@ export class SelectionControlFill {
         this._initialize();
     }
 
+    static create(control: SelectionControl) {
+        return new SelectionControlFill(control);
+    }
+
+    remove() {
+        const { fillControl } = this._control;
+        fillControl.onPointerEnterObserver.clear();
+        fillControl.onPointerLeaveObserver.clear();
+    }
+
     private _initialize() {
         const { fillControl } = this._control;
         const plugin = this._control.getPlugin();
@@ -16,15 +26,5 @@ export class SelectionControlFill {
         fillControl.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent) => {
             fillControl.resetCursor();
         });
-    }
-
-    remove() {
-        const { fillControl } = this._control;
-        fillControl.onPointerEnterObserver.clear();
-        fillControl.onPointerLeaveObserver.clear();
-    }
-
-    static create(control: SelectionControl) {
-        return new SelectionControlFill(control);
     }
 }

@@ -15,6 +15,24 @@ export class CanvasView {
         this._initialize();
     }
 
+    getView(key: string) {
+        for (let view of this._views) {
+            if (view.viewKey === key) {
+                return view;
+            }
+        }
+    }
+
+    getSheetView(): SheetView {
+        return this.getView(CANVAS_VIEW_KEY.SHEET_VIEW) as SheetView;
+    }
+
+    updateToSheet(worksheet: Worksheet) {
+        for (let view of this._views) {
+            view.updateToSheet(worksheet);
+        }
+    }
+
     private _initialize() {
         const engine = this._engine;
         const context = this._plugin.getContext();
@@ -130,24 +148,6 @@ export class CanvasView {
                 app.innerText = `fps:${Math.round(engine.getFps()).toString()}`;
             }
         });
-    }
-
-    getView(key: string) {
-        for (let view of this._views) {
-            if (view.viewKey === key) {
-                return view;
-            }
-        }
-    }
-
-    getSheetView(): SheetView {
-        return this.getView(CANVAS_VIEW_KEY.SHEET_VIEW) as SheetView;
-    }
-
-    updateToSheet(worksheet: Worksheet) {
-        for (let view of this._views) {
-            view.updateToSheet(worksheet);
-        }
     }
 
     private _viewLoader(scene: Scene, plugin: SheetPlugin) {

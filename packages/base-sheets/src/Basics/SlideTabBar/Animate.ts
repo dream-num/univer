@@ -50,6 +50,31 @@ export enum AnimateStatus {
 }
 
 export class Animate {
+    protected _config: AnimateConfig;
+
+    protected _status: AnimateStatus;
+
+    protected _start: number;
+
+    protected _handle: number;
+
+    protected _delayHandle: NodeJS.Timeout;
+
+    constructor(config: Partial<AnimateConfig>) {
+        this._config = {
+            ...CONFIG,
+            ...config,
+        };
+        if (this._config.loop) {
+            this._config.complete = () => {
+                /*noop*/
+            };
+            this._config.success = () => {
+                this.request();
+            };
+        }
+    }
+
     static success(...animates: Animate[]): Promise<void> {
         let successNumber = 0;
         return new Promise<void>((resolve) => {
@@ -74,15 +99,26 @@ export class Animate {
         });
     }
 
-    protected _config: AnimateConfig;
+    request(): void {
+        if (this._config.delay === 0) {
+            this._status = AnimateStatus.Request;
+            this._start = Date.now();
+            this._fakeHandle();
+        } else {
+            this._delayHandle && clearTimeout(this._delayHandle);
+            this._delayHandle = setTimeout(() => {
+                this._status = AnimateStatus.Request;
+                this._start = Date.now();
+                this._fakeHandle();
+            }, this._config.delay);
+        }
+    }
 
-    protected _status: AnimateStatus;
-
-    protected _start: number;
-
-    protected _handle: number;
-
-    protected _delayHandle: NodeJS.Timeout;
+    cancel(): void {
+        this._status = AnimateStatus.Cancel;
+        this._delayHandle && clearTimeout(this._delayHandle);
+        cancelAnimationFrame(this._handle);
+    }
 
     protected _fakeHandle(): void {
         let times = Date.now() - this._start;
@@ -108,41 +144,5 @@ export class Animate {
         this._handle = requestAnimationFrame(() => {
             this._fakeHandle();
         });
-    }
-
-    constructor(config: Partial<AnimateConfig>) {
-        this._config = {
-            ...CONFIG,
-            ...config,
-        };
-        if (this._config.loop) {
-            this._config.complete = () => {
-                /*noop*/
-            };
-            this._config.success = () => {
-                this.request();
-            };
-        }
-    }
-
-    request(): void {
-        if (this._config.delay === 0) {
-            this._status = AnimateStatus.Request;
-            this._start = Date.now();
-            this._fakeHandle();
-        } else {
-            this._delayHandle && clearTimeout(this._delayHandle);
-            this._delayHandle = setTimeout(() => {
-                this._status = AnimateStatus.Request;
-                this._start = Date.now();
-                this._fakeHandle();
-            }, this._config.delay);
-        }
-    }
-
-    cancel(): void {
-        this._status = AnimateStatus.Cancel;
-        this._delayHandle && clearTimeout(this._delayHandle);
-        cancelAnimationFrame(this._handle);
     }
 }

@@ -44,20 +44,6 @@ export class RightMenuController {
             });
     }
 
-    private _getSelections() {
-        const controls = this._plugin?.getSelectionManager().getCurrentControls();
-        const selections = controls?.map((control: SelectionControl) => {
-            const model: SelectionModel = control.model;
-            return {
-                startRow: model.startRow,
-                startColumn: model.startColumn,
-                endRow: model.endRow,
-                endColumn: model.endColumn,
-            };
-        });
-        return selections;
-    }
-
     insertRow = () => {
         const selections = this._getSelections();
         if (selections?.length === 1) {
@@ -136,5 +122,19 @@ export class RightMenuController {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
             sheet.setRowHeights(selections[0].startRow, selections[0].endRow - selections[0].startRow + 1, Number(height));
         }
+    }
+
+    private _getSelections() {
+        const controls = this._plugin?.getSelectionManager().getCurrentControls();
+        const selections = controls?.map((control: SelectionControl) => {
+            const model: SelectionModel = control.model;
+            return {
+                startRow: model.startRow,
+                startColumn: model.startColumn,
+                endRow: model.endRow,
+                endColumn: model.endColumn,
+            };
+        });
+        return selections;
     }
 }

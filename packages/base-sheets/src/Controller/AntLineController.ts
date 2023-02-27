@@ -19,6 +19,74 @@ export class AntLineControl {
     private _activeSheetId: string;
 
     /**
+     * Create AntLineController
+     * @param plugin
+     */
+    constructor(plugin: SheetPlugin) {
+        this._plugin = plugin;
+        this._antLineModelList = [];
+        plugin
+            .getContext()
+            .getContextObserver('onAfterChangeActiveSheetObservable')
+            .add(() => {
+                this._activeSheetId = plugin.getWorkbook().getActiveSheet().getSheetId();
+                this._makeUpdateSceneAntLineRect();
+            });
+        plugin
+            .getContext()
+            .getContextObserver('onSheetRenderDidMountObservable')
+            .add(() => {
+                this._activeSheetId = plugin.getWorkbook().getActiveSheet().getSheetId();
+                this._makeUpdateSceneAntLineRect();
+            });
+    }
+
+    /**
+     * Remove AntLine By SheetId
+     * @param sheetId
+     */
+    removeSheetAntLine(sheetId: string = this._activeSheetId): void {
+        this._removeAntLineModelBySheetId(sheetId);
+        this._makeUpdateSceneAntLineRect();
+    }
+
+    /**
+     * Add New AntLine By SheetId
+     * @param sheetId
+     * @param range
+     */
+    addAntLineToSheet(range: IAntLineRange, sheetId: string = this._activeSheetId): void {
+        const antLineModel = this._findAntLineModelBySheetId(sheetId, new AntLineModel(sheetId));
+        antLineModel.addAntLine(new AntLine(range));
+        this._saveOrUpdateAntLineModel(antLineModel);
+        this._makeUpdateSceneAntLineRect();
+    }
+
+    /**
+     * Return SheetView
+     * @returns
+     */
+    getSheetView(): SheetView {
+        return this._plugin.getCanvasView().getSheetView();
+    }
+
+    /**
+     * Return WorkBook
+     * @returns Workbook
+     */
+    getWorkBook(): Workbook {
+        return this._plugin.getWorkbook();
+    }
+
+    /**
+     * Return SheetView Scene
+     * @returns
+     */
+    getSheetViewScene(): Scene {
+        return this._plugin.getCanvasView().getSheetView().getScene();
+    }
+
+    /**
      * Remove AntLineModel By SheetId
      * @param sheetId
      */
@@ -139,73 +207,5 @@ export class AntLineControl {
                 this.getSheetViewScene().addObject(antRect);
             }
         }
-    }
-
-    /**
-     * Create AntLineController
-     * @param plugin
-     */
-    constructor(plugin: SheetPlugin) {
-        this._plugin = plugin;
-        this._antLineModelList = [];
-        plugin
-            .getContext()
-            .getContextObserver('onAfterChangeActiveSheetObservable')
-            .add(() => {
-                this._activeSheetId = plugin.getWorkbook().getActiveSheet().getSheetId();
-                this._makeUpdateSceneAntLineRect();
-            });
-        plugin
-            .getContext()
-            .getContextObserver('onSheetRenderDidMountObservable')
-            .add(() => {
-                this._activeSheetId = plugin.getWorkbook().getActiveSheet().getSheetId();
-                this._makeUpdateSceneAntLineRect();
-            });
-    }
-
-    /**
-     * Remove AntLine By SheetId
-     * @param sheetId
-     */
-    removeSheetAntLine(sheetId: string = this._activeSheetId): void {
-        this._removeAntLineModelBySheetId(sheetId);
-        this._makeUpdateSceneAntLineRect();
-    }
-
-    /**
-     * Add New AntLine By SheetId
-     * @param sheetId
-     * @param range
-     */
-    addAntLineToSheet(range: IAntLineRange, sheetId: string = this._activeSheetId): void {
-        const antLineModel = this._findAntLineModelBySheetId(sheetId, new AntLineModel(sheetId));
-        antLineModel.addAntLine(new AntLine(range));
-        this._saveOrUpdateAntLineModel(antLineModel);
-        this._makeUpdateSceneAntLineRect();
-    }
-
-    /**
-     * Return SheetView
-     * @returns
-     */
-    getSheetView(): SheetView {
-        return this._plugin.getCanvasView().getSheetView();
-    }
-
-    /**
-     * Return WorkBook
-     * @returns Workbook
-     */
-    getWorkBook(): Workbook {
-        return this._plugin.getWorkbook();
-    }
-
-    /**
-     * Return SheetView Scene
-     * @returns
-     */
-    getSheetViewScene(): Scene {
-        return this._plugin.getCanvasView().getSheetView().getScene();
     }
 }

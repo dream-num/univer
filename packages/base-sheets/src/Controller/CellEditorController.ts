@@ -5,10 +5,10 @@ import { SheetPlugin } from '../SheetPlugin';
  * Cell Editor
  */
 export class CellEditorController {
-    private _plugin: SheetPlugin;
-
     // current edit cell
     currentEditRangeData: IRangeData;
+
+    private _plugin: SheetPlugin;
 
     constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
@@ -84,7 +84,7 @@ export class CellEditorController {
         // this._plugin.getMainComponent().makeDirty(true);
     }
 
-    handleBackSpace() {}
+    handleBackSpace() { }
 
     handleDirection(direction: Direction) {
         // todo

@@ -1,4 +1,4 @@
-import { SheetActionBase, ActionObservers, ActionType, ISheetActionData, ICellInfo, ISelection, Nullable, CommandUnit } from '@univerjs/core';
+import { SheetActionBase, ActionObservers, ActionType, ISheetActionData, ICellInfo, ISelection, Nullable, CommandUnit, CommandManager } from '@univerjs/core';
 import { ACTION_NAMES } from '../../Basics';
 import { SetSelectionValue } from '../Apply/SetSelectionValue';
 
@@ -79,3 +79,5 @@ export class SetSelectionValueAction extends SheetActionBase<ISetSelectionValueA
         return false;
     }
 }
+
+CommandManager.register(SetSelectionValueAction.NAME, SetSelectionValueAction);

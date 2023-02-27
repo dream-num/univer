@@ -80,6 +80,208 @@ export class SelectionControl {
         this._initialize();
     }
 
+    get zIndex() {
+        return this._zIndex;
+    }
+
+    get leftControl() {
+        return this._leftControl;
+    }
+
+    get rightControl() {
+        return this._rightControl;
+    }
+
+    get topControl() {
+        return this._topControl;
+    }
+
+    get bottomControl() {
+        return this._bottomControl;
+    }
+
+    get fillControl() {
+        return this._fillControl;
+    }
+
+    get backgroundControlTop() {
+        return this._backgroundControlTop;
+    }
+
+    get backgroundControlBottom() {
+        return this._backgroundControlBottom;
+    }
+
+    get backgroundControlMiddleLeft() {
+        return this._backgroundControlMiddleLeft;
+    }
+
+    get backgroundControlMiddleRight() {
+        return this._backgroundControlMiddleRight;
+    }
+
+    get selectionShape() {
+        return this._selectionShape;
+    }
+
+    get model() {
+        return this._selectionModel;
+    }
+
+    static create(manager: SelectionManager, zIndex: number) {
+        return new this(manager, zIndex);
+    }
+
+    static fromJson(manager: SelectionManager, zIndex: number, newSelectionRange: ISelection) {
+        const control = SelectionControl.create(manager, zIndex);
+        control.update(newSelectionRange);
+        return control;
+    }
+
+    /**
+     * just handle the view
+     *
+     * inner update
+     */
+    _updateControl() {
+        const { startX, startY, endX, endY } = this._selectionModel;
+
+        this.leftControl.resize(undefined, endY - startY);
+        this.rightControl.transformByState({
+            height: endY - startY,
+            left: endX - startX - DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
+        });
+        this.topControl.resize(endX - startX + DEFAULT_SELECTION_CONFIG.strokeWidth);
+        this.bottomControl.transformByState({
+            width: endX - startX + DEFAULT_SELECTION_CONFIG.strokeWidth,
+            top: endY - startY - DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
+        });
+
+        this.fillControl.translate(endX - startX - DEFAULT_SELECTION_CONFIG.fillSideLength / 2, endY - startY - DEFAULT_SELECTION_CONFIG.fillSideLength / 2);
+
+        this._updateBackgroundControl();
+        this._updateDragAndFill();
+
+        this.selectionShape.show();
+        this.selectionShape.translate(startX, startY);
+
+        this.selectionShape.makeDirty(true);
+    }
+
+    update(newSelectionRange: ISelection, highlight: Nullable<ICellInfo>) {
+        this._selectionModel.setValue(newSelectionRange, highlight);
+        this._updateControl();
+    }
+
+    // /**
+    //  *When switching to the current sheet
+    //  *
+    //  * 1. Reinitialize the rendering component
+    //  * 2. Calculate the position based on the current skeleton
+    //  * 3. Update data
+    //  * 4. Trigger rendering
+    //  */
+    // render() {
+    //     this._initialize();
+
+    //     let cellInfo = null;
+    //     const main = this._manager.getMainComponent();
+    //     const curCellRange = this._selectionModel.currentCell;
+
+    //     if (curCellRange) {
+    //         cellInfo = main.getCellByIndex(curCellRange.row, curCellRange.column);
+    //     }
+
+    //     const { startRow: finalStartRow, startColumn: finalStartColumn, endRow: finalEndRow, endColumn: finalEndColumn } = this._selectionModel;
+    //     const startCell = main.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn);
+    //     const endCell = main.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn);
+
+    //     this._manager.updateSelectionValue(
+    //         this,
+    //         {
+    //             startColumn: finalStartColumn,
+    //             startRow: finalStartRow,
+    //             endColumn: finalEndColumn,
+    //             endRow: finalEndRow,
+    //             startY: startCell?.startY || 0,
+    //             endY: endCell?.endY || 0,
+    //             startX: startCell?.startX || 0,
+    //             endX: endCell?.endX || 0,
+    //         },
+    //         cellInfo
+    //     );
+
+    //     this._updateControl();
+    // }
+
+    clearHighlight() {
+        this._selectionModel.clearCurrentCell();
+        this._updateControl();
+    }
+
+    dispose() {
+        this._leftControl?.dispose();
+        this._rightControl?.dispose();
+        this._topControl?.dispose();
+        this._bottomControl?.dispose();
+        this._backgroundControlTop?.dispose();
+        this._backgroundControlMiddleLeft?.dispose();
+        this._backgroundControlMiddleRight?.dispose();
+        this._backgroundControlBottom?.dispose();
+        this._fillControl?.dispose();
+        this._selectionShape?.dispose();
+
+        this._selectionDragAndDrop.dispose();
+    }
+
+    getScene() {
+        return this._manager.getScene();
+    }
+
+    getPlugin() {
+        return this._manager.getPlugin();
+    }
+
+    /**
+     * Get the cell information of the current selection, considering the case of merging cells
+     */
+    getCurrentCellInfo(): Nullable<ISelection> {
+        const currentCell = this.model.currentCell;
+
+        if (currentCell) {
+            let currentRangeData;
+
+            if (currentCell.isMerged) {
+                const mergeInfo = currentCell.mergeInfo;
+
+                currentRangeData = {
+                    startRow: mergeInfo.startRow,
+                    endRow: mergeInfo.endRow,
+                    startColumn: mergeInfo.startColumn,
+                    endColumn: mergeInfo.endColumn,
+                    startX: mergeInfo.startX,
+                    endX: mergeInfo.endX,
+                    startY: mergeInfo.startY,
+                    endY: mergeInfo.endY,
+                };
+            } else {
+                const { row, column, startX, endX, startY, endY } = currentCell;
+                currentRangeData = {
+                    startRow: row,
+                    endRow: row,
+                    startColumn: column,
+                    endColumn: column,
+                    startX,
+                    endX,
+                    startY,
+                    endY,
+                };
+            }
+
+            return currentRangeData;
+        }
+    }
+
     private _initialize() {
         this._selectionModel = new SelectionModel(SELECTION_TYPE.NORMAL, this._manager.getPlugin());
         const zIndex = this._zIndex;
@@ -162,40 +364,6 @@ export class SelectionControl {
 
         const scene = this.getScene();
         scene.addObject(this._selectionShape);
-    }
-
-    get zIndex() {
-        return this._zIndex;
-    }
-
-    /**
-     * just handle the view
-     *
-     * inner update
-     */
-    _updateControl() {
-        const { startX, startY, endX, endY } = this._selectionModel;
-
-        this.leftControl.resize(undefined, endY - startY);
-        this.rightControl.transformByState({
-            height: endY - startY,
-            left: endX - startX - DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
-        });
-        this.topControl.resize(endX - startX + DEFAULT_SELECTION_CONFIG.strokeWidth);
-        this.bottomControl.transformByState({
-            width: endX - startX + DEFAULT_SELECTION_CONFIG.strokeWidth,
-            top: endY - startY - DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
-        });
-
-        this.fillControl.translate(endX - startX - DEFAULT_SELECTION_CONFIG.fillSideLength / 2, endY - startY - DEFAULT_SELECTION_CONFIG.fillSideLength / 2);
-
-        this._updateBackgroundControl();
-        this._updateDragAndFill();
-
-        this.selectionShape.show();
-        this.selectionShape.translate(startX, startY);
-
-        this.selectionShape.makeDirty(true);
     }
 
     private _updateBackgroundControl() {
@@ -286,173 +454,5 @@ export class SelectionControl {
             this._fillControl.resize(0, 0);
             this._selectionControlFill.remove();
         }
-    }
-
-    update(newSelectionRange: ISelection, highlight: Nullable<ICellInfo>) {
-        this._selectionModel.setValue(newSelectionRange, highlight);
-        this._updateControl();
-    }
-
-    // /**
-    //  *When switching to the current sheet
-    //  *
-    //  * 1. Reinitialize the rendering component
-    //  * 2. Calculate the position based on the current skeleton
-    //  * 3. Update data
-    //  * 4. Trigger rendering
-    //  */
-    // render() {
-    //     this._initialize();
-
-    //     let cellInfo = null;
-    //     const main = this._manager.getMainComponent();
-    //     const curCellRange = this._selectionModel.currentCell;
-
-    //     if (curCellRange) {
-    //         cellInfo = main.getCellByIndex(curCellRange.row, curCellRange.column);
-    //     }
-
-    //     const { startRow: finalStartRow, startColumn: finalStartColumn, endRow: finalEndRow, endColumn: finalEndColumn } = this._selectionModel;
-    //     const startCell = main.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn);
-    //     const endCell = main.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn);
-
-    //     this._manager.updateSelectionValue(
-    //         this,
-    //         {
-    //             startColumn: finalStartColumn,
-    //             startRow: finalStartRow,
-    //             endColumn: finalEndColumn,
-    //             endRow: finalEndRow,
-    //             startY: startCell?.startY || 0,
-    //             endY: endCell?.endY || 0,
-    //             startX: startCell?.startX || 0,
-    //             endX: endCell?.endX || 0,
-    //         },
-    //         cellInfo
-    //     );
-
-    //     this._updateControl();
-    // }
-
-    clearHighlight() {
-        this._selectionModel.clearCurrentCell();
-        this._updateControl();
-    }
-
-    dispose() {
-        this._leftControl?.dispose();
-        this._rightControl?.dispose();
-        this._topControl?.dispose();
-        this._bottomControl?.dispose();
-        this._backgroundControlTop?.dispose();
-        this._backgroundControlMiddleLeft?.dispose();
-        this._backgroundControlMiddleRight?.dispose();
-        this._backgroundControlBottom?.dispose();
-        this._fillControl?.dispose();
-        this._selectionShape?.dispose();
-
-        this._selectionDragAndDrop.dispose();
-    }
-
-    getScene() {
-        return this._manager.getScene();
-    }
-
-    getPlugin() {
-        return this._manager.getPlugin();
-    }
-
-    get leftControl() {
-        return this._leftControl;
-    }
-
-    get rightControl() {
-        return this._rightControl;
-    }
-
-    get topControl() {
-        return this._topControl;
-    }
-
-    get bottomControl() {
-        return this._bottomControl;
-    }
-
-    get fillControl() {
-        return this._fillControl;
-    }
-
-    get backgroundControlTop() {
-        return this._backgroundControlTop;
-    }
-
-    get backgroundControlBottom() {
-        return this._backgroundControlBottom;
-    }
-
-    get backgroundControlMiddleLeft() {
-        return this._backgroundControlMiddleLeft;
-    }
-
-    get backgroundControlMiddleRight() {
-        return this._backgroundControlMiddleRight;
-    }
-
-    get selectionShape() {
-        return this._selectionShape;
-    }
-
-    get model() {
-        return this._selectionModel;
-    }
-
-    /**
-     * Get the cell information of the current selection, considering the case of merging cells
-     */
-    getCurrentCellInfo(): Nullable<ISelection> {
-        const currentCell = this.model.currentCell;
-
-        if (currentCell) {
-            let currentRangeData;
-
-            if (currentCell.isMerged) {
-                const mergeInfo = currentCell.mergeInfo;
-
-                currentRangeData = {
-                    startRow: mergeInfo.startRow,
-                    endRow: mergeInfo.endRow,
-                    startColumn: mergeInfo.startColumn,
-                    endColumn: mergeInfo.endColumn,
-                    startX: mergeInfo.startX,
-                    endX: mergeInfo.endX,
-                    startY: mergeInfo.startY,
-                    endY: mergeInfo.endY,
-                };
-            } else {
-                const { row, column, startX, endX, startY, endY } = currentCell;
-                currentRangeData = {
-                    startRow: row,
-                    endRow: row,
-                    startColumn: column,
-                    endColumn: column,
-                    startX,
-                    endX,
-                    startY,
-                    endY,
-                };
-            }
-
-            return currentRangeData;
-        }
-    }
-
-    static create(manager: SelectionManager, zIndex: number) {
-        return new this(manager, zIndex);
-    }
-
-    static fromJson(manager: SelectionManager, zIndex: number, newSelectionRange: ISelection) {
-        const control = SelectionControl.create(manager, zIndex);
-        control.update(newSelectionRange);
-        return control;
     }
 }

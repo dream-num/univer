@@ -25,15 +25,17 @@ export class BaseView {
         return this._plugin.getContext();
     }
 
-    updateToSheet(worksheet: Worksheet) {}
-
-    protected _initialize() {}
+    updateToSheet(worksheet: Worksheet) { }
 
     initialize(scene: Scene, plugin: SheetPlugin) {
         this._scene = scene;
         this._plugin = plugin;
         this._initialize();
         return this;
+    }
+
+    protected _initialize() {
+        // TODO
     }
 }
 

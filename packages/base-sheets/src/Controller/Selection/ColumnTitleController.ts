@@ -48,28 +48,6 @@ export class ColumnTitleController {
         this._initialize();
     }
 
-    // 拖拽图标
-    private _initialize() {
-        this._highlightItem.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._highlightItem.show();
-        });
-        this._highlightItem.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._highlightItem.show();
-        });
-        this._highlightItem.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._highlightItem.hide();
-        });
-        this._Item.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._Item.cursor = CURSOR_TYPE.COLUMN_RESIZE;
-        });
-        this._Item.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._Item.resetCursor();
-        });
-        this._Item.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this.pointerDown(evt);
-        });
-    }
-
     pointerDown(e: IPointerEvent | IMouseEvent) {
         const main = this._manager.getMainComponent();
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = e;
@@ -177,5 +155,27 @@ export class ColumnTitleController {
             left,
         });
         this._highlightItem.show();
+    }
+
+    // 拖拽图标
+    private _initialize() {
+        this._highlightItem.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this._highlightItem.show();
+        });
+        this._highlightItem.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this._highlightItem.show();
+        });
+        this._highlightItem.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this._highlightItem.hide();
+        });
+        this._Item.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this._Item.cursor = CURSOR_TYPE.COLUMN_RESIZE;
+        });
+        this._Item.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this._Item.resetCursor();
+        });
+        this._Item.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this.pointerDown(evt);
+        });
     }
 }

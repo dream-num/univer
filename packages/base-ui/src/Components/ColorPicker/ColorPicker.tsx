@@ -164,7 +164,7 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                                 </div>
                             ))}
                         </div>
-                        <div>
+                        <div onClick={(e) => e.stopImmediatePropagation()}>
                             <Button onClick={this.onSwitch}>{this.state.setting ? this.getLocale('colorPicker.collapse') : this.getLocale('colorPicker.customColor')}</Button>
                         </div>
                     </div>

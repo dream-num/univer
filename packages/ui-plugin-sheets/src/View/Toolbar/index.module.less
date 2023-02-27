@@ -70,15 +70,19 @@
             width: 100%;
         }
 
-        ul {
-            padding: 0;
-        }
-
         .select-color-picker {
-            padding: 0;
+            cursor: default;
+
+            &:hover {
+                background: var(--bg);
+            }
 
             .select-item {
                 padding: 0;
+            }
+
+            .color-picker-outer {
+                box-shadow: none;
             }
         }
     }
@@ -163,9 +167,9 @@
     line-height: 1;
 }
 
-// .tooltip-title {
-//     display: none;
-// }
+.tooltip-title {
+    opacity: 1;
+}
 
 .bottom {
     display: none;

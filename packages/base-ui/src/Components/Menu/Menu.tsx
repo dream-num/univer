@@ -48,16 +48,16 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
         const curPosition = current.getBoundingClientRect();
         let docPosition;
         const { dom, parent } = this.props;
-        // if (dom) {
-        //     docPosition = dom.getBoundingClientRect();
-        // } else {
-        docPosition = {
-            left: 0,
-            right: document.documentElement.clientWidth,
-            top: 0,
-            bottom: document.documentElement.clientHeight,
-        };
-        // }
+        if (dom) {
+            docPosition = dom.getBoundingClientRect();
+        } else {
+            docPosition = {
+                left: 0,
+                right: document.documentElement.clientWidth,
+                top: 0,
+                bottom: document.documentElement.clientHeight,
+            };
+        }
 
         // 处理li中包含的ul右边界
         if (parent) {
@@ -71,6 +71,10 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
             } else {
                 style.left = `${parPosition.right}px`;
                 style.top = `${parPosition.top}px`;
+            }
+            if (curPosition.bottom > docPosition.bottom) {
+                style.top = 'auto';
+                style.bottom = `5px`;
             }
             this.setState({
                 posStyle: style,

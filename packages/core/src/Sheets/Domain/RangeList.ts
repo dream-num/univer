@@ -11,7 +11,7 @@ import {
 import {
     ICellData,
     ICellV,
-    IOptionsData,
+    IOptionData,
     IRangeData,
     IRangeType,
     IStyleData,
@@ -24,7 +24,6 @@ import {
     IClearRangeActionData,
     ISetRangeDataActionData,
     ISetRangeFormattedValueActionData,
-    ISetRangeFormulaActionData,
     ISetRangeStyleActionData,
     SetRangeDataAction,
     SetRangeStyleAction,
@@ -151,12 +150,12 @@ export class RangeList {
     clear(): RangeList;
 
     /**
-     * Clears the range of contents, format, data validation rules, and comments, as specified with the given options. By default all data is cleared.
+     * Clears the range of contents and format, as specified with the given options. By default all data is cleared.
      *
-     * @param options 	A JavaScript object that specifies advanced parameters, as listed IOptionsData.
+     * @param options 	A JavaScript object that specifies advanced parameters, as listed IOptionData.
      * @returns  This range list, for chaining.
      */
-    clear(options: IOptionsData): RangeList;
+    clear(options: IOptionData): RangeList;
     clear(...argument: any): RangeList {
         const { _context, _worksheet, _commandManager, _rangeList } = this;
 
@@ -164,9 +163,6 @@ export class RangeList {
         let options = {
             formatOnly: true,
             contentsOnly: true,
-            commentsOnly: true,
-            validationsOnly: true,
-            skipFilteredRows: true,
         };
         if (Tuples.checkup(argument, Tuples.OBJECT_TYPE)) {
             options = argument[0];
@@ -444,45 +440,6 @@ export class RangeList {
     setFontWeight(fontWeight: Nullable<boolean | BooleanNumber>): RangeList {
         const fontBoolean = fontWeight ? BooleanNumber.TRUE : BooleanNumber.FALSE;
         return this._setStyle(fontBoolean, 'bl');
-    }
-
-    /**
-     * Updates the formula for each Range in the range list.
-     *
-     * @param formula A string representing the formula to set.
-     * @returns This range list, for chaining.
-     */
-    setFormula(formula: string): RangeList {
-        let { _rangeList, _context, _commandManager, _worksheet } = this;
-
-        const setList = _rangeList.map((range) => {
-            let { startRow, startColumn, endRow, endColumn } = range;
-
-            let cellValue = new ObjectMatrix<string>();
-            for (let r = startRow; r <= endRow; r++) {
-                for (let c = startColumn; c <= endColumn; c++) {
-                    cellValue.setValue(r, c, formula);
-                }
-            }
-
-            let setValue: ISetRangeFormulaActionData = {
-                sheetId: _worksheet.getSheetId(),
-                actionName: ACTION_NAMES.SET_RANGE_FORMULA_ACTION,
-                cellFormula: cellValue.getData(),
-                rangeData: range,
-            };
-
-            return setValue;
-        });
-
-        let command = new Command(
-            {
-                WorkBookUnit: _context.getWorkBook(),
-            },
-            ...setList
-        );
-        _commandManager.invoke(command);
-        return this;
     }
 
     /**

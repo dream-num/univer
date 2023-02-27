@@ -38,6 +38,7 @@ import styles from '../View/Toolbar/index.module.less';
 export interface BaseToolbarSelectChildrenProps extends BaseSelectChildrenProps {
     suffixLocale?: string;
     children?: BaseToolbarSelectChildrenProps[];
+    labelLocale?: string;
 }
 
 export interface BaseToolbarSelectProps extends BaseSelectProps {
@@ -245,6 +246,9 @@ export class ToolbarUIController {
                 className: styles.selectColorPickerParent,
                 children: [
                     {
+                        labelLocale: 'toolbar.resetColor',
+                    },
+                    {
                         customLabel: {
                             name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
                             props: {
@@ -287,6 +291,9 @@ export class ToolbarUIController {
                 hideSelectedIcon: true,
                 className: styles.selectColorPickerParent,
                 children: [
+                    {
+                        labelLocale: 'toolbar.resetColor',
+                    },
                     {
                         customLabel: {
                             name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,

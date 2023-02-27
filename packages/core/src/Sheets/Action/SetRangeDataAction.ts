@@ -1,4 +1,4 @@
-import { SetRangeData, SetRangeDataApply } from '../Apply';
+import { SetRangeDataApply } from '../Apply';
 import { ObjectMatrixPrimitiveType } from '../../Shared';
 import {
     SheetActionBase,
@@ -11,11 +11,24 @@ import {
 import { ICopyToOptionsData, ICellData } from '../../Interfaces';
 
 /**
+ * 设置数据时的类型
+ */
+enum SetRangeDataType {
+    DEFAULT = 'default',
+
+    /**
+     * 
+     */
+    PASTE = 'paste',
+}
+
+/**
  * @internal
  */
 export interface ISetRangeDataActionData extends ISheetActionData {
     cellValue: ObjectMatrixPrimitiveType<ICellData>;
     options?: ICopyToOptionsData;
+    type?: SetRangeDataType;
 }
 
 /**
@@ -81,11 +94,7 @@ export class SetRangeDataAction extends SheetActionBase<
                 // actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                 actionName: SetRangeDataAction.NAME,
                 sheetId,
-                cellValue: SetRangeData(
-                    worksheet.getCellMatrix(),
-                    cellValue,
-                    styles
-                ),
+                cellValue: SetRangeDataApply(this._commandUnit, this._oldActionData),
                 options,
             };
 

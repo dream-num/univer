@@ -6,8 +6,8 @@ import {
     ActionObservers,
     CommandObservers,
     CommandInjectorObservers,
-    ActionOperation,
     Command,
+    ActionOperation,
 } from './index';
 import { Class } from '../Shared';
 import { ContextBase } from '../Basics';
@@ -89,18 +89,20 @@ export class CommandManager {
         const { _actionDataList, _unit, _actionList } = command;
         // const server = _workbook.getServer();
         this._actionExtensionManager.handle(_actionDataList);
+
         _actionDataList.forEach((data) => {
             const ActionClass = CommandManager.getAction(data.actionName);
             const observers = CommandManager.getActionObservers();
             const action = new ActionClass(data, _unit, observers);
-            if (ActionOperation.hasUndo(data)) {
-                _actionList.push(action);
-            }
+            // if (ActionOperation.hasUndo(data)) {
+            _actionList.push(action);
+
+            // }
         });
         command.invoke();
-        if (_actionList.length === 0) {
-            return;
-        }
+        // if (_actionList.length === 0) {
+        //     return;
+        // }
         _undoManager.push(command);
         // server.pushMessageQueue(command.getDoData());
     }

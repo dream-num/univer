@@ -18,7 +18,6 @@ import { ACTION_NAMES, ISelectionsConfig } from '../../Basics';
 import { ISelectionModelValue, ISetSelectionValueActionData, SetSelectionValueAction } from '../../Model/Action/SetSelectionValueAction';
 import { SelectionModel } from '../../Model/SelectionModel';
 import { SheetPlugin } from '../../SheetPlugin';
-import { SheetView } from '../../View/Render/Views/SheetView';
 import { ColumnTitleController } from './ColumnTitleController';
 import { DragLineController } from './DragLineController';
 import { RowTitleController } from './RowTitleController';
@@ -30,8 +29,6 @@ import { SelectionControl, SELECTION_TYPE } from './SelectionController';
  * SelectionManager 维护model数据list，action也是修改这一层数据，obs监听到数据变动后，自动刷新（control仍然可以持有数据）
  */
 export class SelectionManager {
-    hasSelection: boolean = false;
-
     private _mainComponent: Spreadsheet;
 
     private _rowComponent: SpreadsheetRowTitle;
@@ -64,11 +61,7 @@ export class SelectionManager {
 
     private _dragLineControl: DragLineController;
 
-    constructor(private _sheetView: SheetView) {
-        this._plugin = this._sheetView.getPlugin() as SheetPlugin;
-        this._initialize();
-        this._initializeObserver();
-    }
+    hasSelection: boolean = false;
 
     getSheetView() {
         return this._sheetView;
@@ -411,15 +404,23 @@ export class SelectionManager {
                 break;
         }
 
+        const cellInfo = this._mainComponent.getCellByIndex(row, column);
+
+        const selectionData = makeCellToSelection(cellInfo);
+
+        if (!selectionData) return;
+
+        const { startRow, endRow, startColumn, endColumn } = selectionData;
+
         let rangeData: IRangeData = {
-            startRow: row,
-            endRow: row,
-            startColumn: column,
-            endColumn: column,
+            startRow,
+            endRow,
+            startColumn,
+            endColumn,
         };
         let currentCellData: IRangeCellData = {
-            row,
-            column,
+            row: startRow,
+            column: startColumn,
         };
 
         this.clearSelectionControls();
@@ -481,8 +482,9 @@ export class SelectionManager {
 
         if (oldStartColumn !== finalStartColumn || oldStartRow !== finalStartRow || oldEndColumn !== finalEndColumn || oldEndRow !== finalEndRow) {
             selectionControl && selectionControl.update(newSelectionRange);
+
             // update model
-            this.setSelectionModel();
+            // this.setSelectionModel();
             selectionControl && this._plugin.getObserver('onChangeSelectionObserver')?.notifyObservers(selectionControl);
         }
     }
@@ -714,7 +716,7 @@ export class SelectionManager {
             scrollTimer.startScroll(evtOffsetX, evtOffsetY);
 
             // update model
-            this.setSelectionModel();
+            // this.setSelectionModel();
 
             // Notification toolbar updates button state and value
             this._plugin.getObserver('onChangeSelectionObserver')?.notifyObservers(selectionControl);

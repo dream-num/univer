@@ -799,11 +799,20 @@ export class Worksheet {
         const { _context, _sheetId } = this;
         const _commandManager = this.getCommandManager();
         const columnData = new ObjectMatrix<ICellData>();
-        this._cellData.forEach((index) => {
-            for (let i = columnIndex; i < columnIndex + numColumns; i++) {
-                columnData.setValue(index, i - columnIndex, {});
+        if (this._cellData.getLength()) {
+            this._cellData.forEach((index) => {
+                for (let i = columnIndex; i < columnIndex + numColumns; i++) {
+                    columnData.setValue(index, i - columnIndex, {});
+                }
+            });
+        } else {
+            for (let i = 0; i < this._config.rowCount; i++) {
+                for (let j = columnIndex; j < columnIndex + numColumns; j++) {
+                    columnData.setValue(i, j - columnIndex, {});
+                }
             }
-        });
+        }
+
         const insertColumnData: IInsertColumnDataActionData = {
             actionName: InsertColumnDataAction.NAME,
             sheetId: _sheetId,

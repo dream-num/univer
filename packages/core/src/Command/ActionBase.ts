@@ -67,7 +67,7 @@ export abstract class ActionBase<
         return this._doActionData;
     }
 
-    getOldActionDaa() {
+    getOldActionData() {
         return this._oldActionData;
     }
 

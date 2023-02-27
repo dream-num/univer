@@ -23,8 +23,6 @@ export * from './SetColumnWidthAction';
 export * from './SetHiddenGridlinesAction';
 export * from './SetNamedRangeAction';
 export * from './SetRangeDataAction';
-export * from './SetRangeFormatAction';
-export * from './SetRangeFormulaAction';
 export * from './SetRangeNoteAction';
 export * from './SetRangeStyleAction';
 export * from './SetRangeFormattedValueAction';

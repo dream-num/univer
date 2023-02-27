@@ -6,6 +6,7 @@ import {
     ActionType,
     CommandInjector,
     CommandManager,
+    ActionOperation,
 } from './index';
 
 import { DocumentModel } from '../Docs/Domain/DocumentModel';
@@ -38,7 +39,7 @@ export class Command {
     }
 
     getOldData(): IActionData[] {
-        return this._actionList.map((action) => action.getOldActionDaa());
+        return this._actionList.map((action) => action.getOldActionData());
     }
 
     getInjector(): CommandInjector {
@@ -64,7 +65,11 @@ export class Command {
     }
 
     redo(): void {
-        this._actionList.forEach((action) => action.redo());
+        this._actionList.forEach((action) => {
+            if (ActionOperation.hasUndo(action.getDoActionData())) {
+                action.redo();
+            }
+        });
         CommandManager.getCommandObservers().notifyObservers({
             type: ActionType.REDO,
             actions: this._actionList,
@@ -76,7 +81,11 @@ export class Command {
         // 1. removeColumn C:E 2.insertColumnData A,
         // when undo, it should be
         // 1. removeColumn A, 2. insertColumnData C:E
-        this._actionList.reverse().forEach((action) => action.undo());
+        this._actionList.reverse().forEach((action) => {
+            if (ActionOperation.hasUndo(action.getOldActionData())) {
+                action.undo();
+            }
+        });
         CommandManager.getCommandObservers().notifyObservers({
             type: ActionType.UNDO,
             actions: this._actionList,

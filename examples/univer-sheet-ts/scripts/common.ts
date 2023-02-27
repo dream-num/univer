@@ -11,6 +11,19 @@ export const paths = {
   out: resolve(root, "./dist"),
   outDev: resolve(root, "./local"),
 };
+
+const preactCompatPlugin = {
+  name: "preact-compat",
+  setup(build) {
+      const path = require("path");
+      const preact = path.join(process.cwd(), "node_modules", "preact", "compat", "dist", "compat.module.js");
+
+      build.onResolve({filter: /^(react-dom|react)$/}, args => {
+          return {path: preact};
+      });
+  }
+}
+
 export const commonBuildOptions: BuildOptions = {
   entryPoints: [paths.entry],
   bundle: true,
@@ -18,7 +31,9 @@ export const commonBuildOptions: BuildOptions = {
   loader: {
     ".svg": "file",
   },
+  sourcemap: true,
   plugins: [
+    preactCompatPlugin,
     stylePlugin({
       cssModulesOptions: {
         localsConvention: 'camelCaseOnly',

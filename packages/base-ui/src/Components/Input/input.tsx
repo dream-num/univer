@@ -59,6 +59,7 @@ export class Input extends Component<BaseInputProps, IState> {
         const { onPressEnter } = this.props;
         if (e.key === 'Enter') {
             onPressEnter?.(e);
+            this.ref.current.blur();
         }
     };
 

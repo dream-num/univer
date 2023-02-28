@@ -182,7 +182,15 @@ export class ObjectMatrix<T> {
     // }
 
     insertColumns(columnIndex: number, columnData: ObjectMatrix<T>) {
-        const count = columnData.getRow(0)!.getLength();
+        let count = 0;
+        columnData.forEach((key) => {
+            const data = columnData.getRow(key);
+            if (data) {
+                count = data.getLength();
+                return false;
+            }
+        });
+
         this.forEach((index, value) => {
             for (let i = columnIndex; i < columnIndex + count; i++) {
                 const data = columnData.getRow(index)?.get(i - columnIndex);

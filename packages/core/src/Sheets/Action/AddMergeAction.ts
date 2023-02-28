@@ -50,7 +50,7 @@ export class AddMergeAction extends SheetActionBase<
     }
 
     undo(): void {
-        RemoveMergeApply(this._commandUnit, this._doActionData);
+        RemoveMergeApply(this._commandUnit, this._oldActionData);
     }
 
     validate(): boolean {

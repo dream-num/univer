@@ -4,7 +4,7 @@ import { Tools } from './Tools';
 /**
  * A square area containing four position information: startRow, startColumn, endRow, and endColumn
  */
-export class Rectangle {
+export class Rectangle implements IRangeData {
     startRow: number;
 
     startColumn: number;
@@ -49,22 +49,31 @@ export class Rectangle {
         }
     }
 
-    intersects(rectangle: Rectangle): boolean {
-        const currentStartRow = this.startRow;
-        const currentEndRow = this.endRow;
-        const currentStartColumn = this.startColumn;
-        const currentEndColumn = this.endColumn;
+    static equals(src: IRangeData, target: IRangeData): boolean {
+        return (
+            src.endRow === target.endRow &&
+            src.endColumn === target.endColumn &&
+            src.startRow === target.startRow &&
+            src.startColumn === target.startColumn
+        );
+    }
 
-        const incomingStartRow = rectangle.startRow;
-        const incomingEndRow = rectangle.endRow;
-        const incomingStartColumn = rectangle.startColumn;
-        const incomingEndColumn = rectangle.endColumn;
+    static intersects(src: IRangeData, target: IRangeData): boolean {
+        const currentStartRow = src.startRow;
+        const currentEndRow = src.endRow;
+        const currentStartColumn = src.startColumn;
+        const currentEndColumn = src.endColumn;
+
+        const incomingStartRow = target.startRow;
+        const incomingEndRow = target.endRow;
+        const incomingStartColumn = target.startColumn;
+        const incomingEndColumn = target.endColumn;
 
         const zx = Math.abs(
             currentStartColumn +
-                currentEndColumn -
-                incomingStartColumn -
-                incomingEndColumn
+            currentEndColumn -
+            incomingStartColumn -
+            incomingEndColumn
         );
         const x =
             Math.abs(currentStartColumn - currentEndColumn) +
@@ -77,6 +86,10 @@ export class Rectangle {
             Math.abs(incomingStartRow - incomingEndRow);
 
         return zx <= x && zy <= y;
+    }
+
+    intersects(rectangle: Rectangle): boolean {
+        return Rectangle.intersects(this, rectangle);
     }
 
     union(rectangle: Rectangle) {
@@ -101,11 +114,6 @@ export class Rectangle {
     }
 
     equals(rectangle: Rectangle) {
-        return (
-            this.endRow === rectangle.endRow &&
-            this.endColumn === rectangle.endColumn &&
-            this.startRow === rectangle.startRow &&
-            this.startColumn === rectangle.startColumn
-        );
+        return Rectangle.equals(this, rectangle);
     }
 }

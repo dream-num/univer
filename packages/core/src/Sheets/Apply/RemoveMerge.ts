@@ -1,6 +1,8 @@
 import { Merges } from '../Domain/Merges';
 import { IRangeData } from '../../Interfaces';
-import { CommandUnit, IRemoveMergeActionData } from '../../Command';
+import { CommandUnit } from '../../Command';
+import { IRemoveMergeActionData } from '../Action';
+import { Rectangle } from '../../Shared';
 
 /**
  *
@@ -23,11 +25,20 @@ export function RemoveMergeApply(
     data: IRemoveMergeActionData
 ): IRangeData[] {
     let worksheet = unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
-    let merges = worksheet!.getMerges();
-
-    let remove: IRangeData[] = [];
-    for (let i = 0; i < data.rectangles.length; i++) {
-        remove = remove.concat(merges.remove(data.rectangles[i]));
+    if (worksheet) {
+        let config = worksheet.getConfig();
+        let remove: IRangeData[] = [];
+        let mergeConfigData = config.mergeData;
+        let mergeRemoveData = data.rectangles;
+        for (let i = mergeConfigData.length - 1; i >= 0; i--) {
+            let configMerge = mergeConfigData[i];
+            let removeMerge = mergeRemoveData[i];
+            if (Rectangle.equals(configMerge, removeMerge)) {
+                remove.push(removeMerge);
+                mergeConfigData.splice(i, 1);
+            }
+        }
+        return remove;
     }
-    return remove;
+    return [];
 }

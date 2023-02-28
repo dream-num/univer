@@ -1,6 +1,7 @@
 import { Merges } from '../Domain/Merges';
 import { IRangeData } from '../../Interfaces';
-import { CommandUnit, IAddMergeActionData } from '../../Command';
+import { CommandUnit } from '../../Command';
+import { IAddMergeActionData } from '../Action';
 
 /**
  *
@@ -24,13 +25,14 @@ export function addMergeApply(
     data: IAddMergeActionData
 ): IRangeData[] {
     let worksheet = unit?.WorkBookUnit?.getSheetBySheetId(data.sheetId);
-    let removeMerges: IRangeData[] = [];
     if (worksheet) {
-        let sheetMerges = worksheet.getMerges();
-        for (let i = 0; i < data.rectangles.length; i++) {
-            sheetMerges.add(data.rectangles[i]);
-            removeMerges = removeMerges.concat(sheetMerges.add(data.rectangles[i]));
+        let config = worksheet.getConfig();
+        let mergeConfigData = config.mergeData;
+        let mergeAppendData = data.rectangles;
+        for (let i = 0; i < mergeAppendData.length; i++) {
+            mergeConfigData.push(mergeAppendData[i]);
         }
+        return mergeAppendData;
     }
-    return removeMerges;
+    return [];
 }

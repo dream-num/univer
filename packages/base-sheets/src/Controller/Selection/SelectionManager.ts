@@ -13,6 +13,9 @@ import {
     Command,
     Direction,
     ActionOperation,
+    ISelectionData,
+    DEFAULT_SELECTION,
+    DEFAULT_CELL,
 } from '@univerjs/core';
 import { ACTION_NAMES, ISelectionsConfig } from '../../Basics';
 import { ISelectionModelValue, ISetSelectionValueActionData, SetSelectionValueAction } from '../../Model/Action/SetSelectionValueAction';
@@ -63,6 +66,8 @@ export class SelectionManager {
     private _rowTitleControl: RowTitleController;
 
     private _dragLineControl: DragLineController;
+
+    private _previousSelection: ISelectionData;
 
     constructor(private _sheetView: SheetView) {
         this._plugin = this._sheetView.getPlugin() as SheetPlugin;
@@ -377,31 +382,51 @@ export class SelectionManager {
 
         if (!currentCell) return;
 
+        let { startRow: mergeStartRow, startColumn: mergeStartColumn, endRow: mergeEndRow, endColumn: mergeEndColumn } = currentCell.mergeInfo;
+
         let { row, column } = currentCell;
         const rowCount = this._worksheet?.getRowCount() || 1000;
         const columnCount = this._worksheet?.getColumnCount() || 50;
         switch (direction) {
             case Direction.TOP:
-                row--;
+                if (currentCell.isMerged || currentCell.isMergedMainCell) {
+                    row = --mergeStartRow;
+                } else {
+                    row--;
+                }
                 if (row < 0) {
                     row = 0;
                 }
                 break;
             case Direction.BOTTOM:
-                row++;
+                if (currentCell.isMerged || currentCell.isMergedMainCell) {
+                    row = ++mergeEndRow;
+                } else {
+                    row++;
+                }
 
                 if (row > rowCount) {
                     row = rowCount;
                 }
                 break;
             case Direction.LEFT:
-                column--;
+                if (currentCell.isMerged || currentCell.isMergedMainCell) {
+                    column = --mergeStartColumn;
+                } else {
+                    column--;
+                }
+
                 if (column < 0) {
                     column = 0;
                 }
                 break;
             case Direction.RIGHT:
-                column++;
+                if (currentCell.isMerged || currentCell.isMergedMainCell) {
+                    column = ++mergeEndColumn;
+                } else {
+                    column++;
+                }
+
                 if (column > columnCount) {
                     column = columnCount;
                 }
@@ -419,11 +444,20 @@ export class SelectionManager {
 
         const { startRow, endRow, startColumn, endColumn } = selectionData;
 
+        const main = this._mainComponent;
+        const newBounding = main.getSelectionBounding(startRow, startColumn, endRow, endColumn);
+
+        if (!newBounding) {
+            return;
+        }
+
+        const { startRow: finalStartRow, startColumn: finalStartColumn, endRow: finalEndRow, endColumn: finalEndColumn } = newBounding;
+
         let rangeData: IRangeData = {
-            startRow,
-            endRow,
-            startColumn,
-            endColumn,
+            startRow: finalStartRow,
+            endRow: finalEndRow,
+            startColumn: finalStartColumn,
+            endColumn: finalEndColumn,
         };
         let currentCellData: IRangeCellData = {
             row: startRow,
@@ -432,6 +466,7 @@ export class SelectionManager {
 
         this.clearSelectionControls();
         this.addControlToCurrentByRangeData(rangeData, currentCellData);
+        this.updatePreviousSelection();
     }
 
     /**
@@ -440,7 +475,7 @@ export class SelectionManager {
      * @param selectionControl
      * @returns
      */
-    moving(moveEvt: IPointerEvent | IMouseEvent, selectionControl: Nullable<SelectionControl>) {
+    moving(moveEvt: IPointerEvent | IMouseEvent, selectionControl: Nullable<SelectionControl>, setModel: boolean = false) {
         // console.log('moving');
         const main = this._mainComponent;
         const { offsetX: moveOffsetX, offsetY: moveOffsetY, clientX, clientY } = moveEvt;
@@ -480,19 +515,38 @@ export class SelectionManager {
             endX: endCell?.endX || 0,
         };
         // Only notify when the selection changes
-        const {
-            startRow: oldStartRow,
-            endRow: oldEndRow,
-            startColumn: oldStartColumn,
-            endColumn: oldEndColumn,
-        } = selectionControl?.model || { startRow: -1, endRow: -1, startColumn: -1, endColumn: -1 };
+        const { startRow: oldStartRow, endRow: oldEndRow, startColumn: oldStartColumn, endColumn: oldEndColumn } = selectionControl?.model || DEFAULT_SELECTION;
+        const { row: oldRow, column: oldColumn } = selectionControl?.model.currentCell || DEFAULT_CELL;
 
         if (oldStartColumn !== finalStartColumn || oldStartRow !== finalStartRow || oldEndColumn !== finalEndColumn || oldEndRow !== finalEndRow) {
             selectionControl && selectionControl.update(newSelectionRange);
 
-            // update model
-            // this.setSelectionModel();
             selectionControl && this._plugin.getObserver('onChangeSelectionObserver')?.notifyObservers(selectionControl);
+        }
+
+        if (setModel) {
+            if (!this._previousSelection) {
+                this.setSelectionModel();
+            } else {
+                // If it is different from the range when clicked, you need to update the model
+                const {
+                    startRow: mouseDownStartRow,
+                    endRow: mouseDownEndRow,
+                    startColumn: mouseDownStartColumn,
+                    endColumn: mouseDownEndColumn,
+                } = (this._previousSelection.selection as IRangeData) || DEFAULT_SELECTION;
+                const { row: mouseDownRow, column: mouseDownColumn } = (this._previousSelection.cell as IRangeCellData) || DEFAULT_CELL;
+                if (
+                    mouseDownStartColumn !== finalStartColumn ||
+                    mouseDownStartRow !== finalStartRow ||
+                    mouseDownEndColumn !== finalEndColumn ||
+                    mouseDownEndRow !== finalEndRow ||
+                    mouseDownRow !== oldRow ||
+                    mouseDownColumn !== oldColumn
+                ) {
+                    this.setSelectionModel();
+                }
+            }
         }
     }
 
@@ -502,9 +556,33 @@ export class SelectionManager {
      * @param selectionControl
      * @returns
      */
-    up() {
+    up(upEvt: IPointerEvent | IMouseEvent, selectionControl: Nullable<SelectionControl>) {
         // update model
-        this.setSelectionModel();
+
+        this.moving(upEvt, selectionControl, true);
+        this.updatePreviousSelection();
+    }
+
+    updatePreviousSelection() {
+        let selectionControl: Nullable<SelectionControl> = this.getCurrentControl();
+
+        if (!selectionControl) return;
+
+        // this.setSelectionModel();
+        const { startRow, endRow, startColumn, endColumn } = selectionControl.model;
+        const { row, column } = selectionControl.model.currentCell || DEFAULT_CELL;
+        this._previousSelection = {
+            selection: {
+                startRow,
+                endRow,
+                startColumn,
+                endColumn,
+            },
+            cell: {
+                row,
+                column,
+            },
+        };
     }
 
     /**
@@ -738,7 +816,7 @@ export class SelectionManager {
             });
 
             this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
-                this.up();
+                this.up(upEvt, selectionControl);
                 scene.onPointerMoveObserver.remove(this._moveObserver);
                 scene.onPointerUpObserver.remove(this._upObserver);
                 scene.enableEvent();

@@ -41,6 +41,13 @@ export const DEFAULT_SELECTION = {
     endRow: 0,
     endColumn: 0,
 };
+/**
+ * Used as an init cell return value
+ */
+export const DEFAULT_CELL = {
+    row: 0,
+    column: 0,
+};
 
 /**
  * Used as an init workbook return value

@@ -8,7 +8,7 @@
         "test:e2e": "pnpm run --filter @univerjs/base-sheets test:play",
         "dev": "node scripts/dev",
         "dev:sheet": "pnpm run --filter univer-sheet-ts dev",
-        "start:sheet": "pnpm run --filter univer-sheet-ts start",
+        "start:sheet": "eslint && pnpm run --filter univer-sheet-ts start",
         "dev:all": "pnpm run --filter univer-vanilla-ts dev",
         "dev:preact": "pnpm run --filter univer-sheet-preact dev",
         "dev:doc": "pnpm run --filter @univerjs/base-docs dev",
@@ -27,7 +27,8 @@
         "univer-cli": "cd cli && npm run cli",
         "postinstall": "node scripts/postinstall.js",
         "prepare": "husky install",
-        "lint": "lint-staged"
+        "pre-lint": "lint-staged",
+        "lint": "eslint ./packages/base-sheets/ --ext .ts"
     },
     "author": "DreamNum <msoffice2@126.com>",
     "license": "MIT",

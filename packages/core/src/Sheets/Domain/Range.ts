@@ -1880,9 +1880,9 @@ export class Range {
 
         const zx = Math.abs(
             currentStartColumn +
-            currentEndColumn -
-            incomingStartColumn -
-            incomingEndColumn
+                currentEndColumn -
+                incomingStartColumn -
+                incomingEndColumn
         );
         const x =
             Math.abs(currentStartColumn - currentEndColumn) +
@@ -3348,22 +3348,8 @@ export class Range {
      */
     merge(): Range {
         const { _worksheet } = this;
-        const _context = _worksheet.getContext();
-        const _sheetId = _worksheet.getSheetId();
-        const _commandManager = _worksheet.getCommandManager();
-        const dataRowInsert = {
-            actionName: ACTION_NAMES.ADD_MERGE_ACTION,
-            sheetId: _sheetId,
-            rectangles: [this._rangeData],
-        };
-        const command = new Command(
-            {
-                WorkBookUnit: _context.getWorkBook(),
-            },
-            dataRowInsert
-        );
-        _commandManager.invoke(command);
-
+        const merges = _worksheet.getMerges();
+        merges.add(this._rangeData);
         return this;
     }
 

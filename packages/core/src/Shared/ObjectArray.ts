@@ -1,4 +1,3 @@
-import { Tools } from './Tools';
 import { Nullable } from './Types';
 
 /**
@@ -28,6 +27,23 @@ export type ObjectArrayType<T> = ObjectArray<T> | ObjectArrayPrimitiveType<T>;
 
 const define = <T>(value?: T): value is T => value !== undefined && value !== null;
 
+const likeArr = (value: object): number => {
+    let keys: string[] = Object.keys(value);
+    let regexp = /^\d+$/;
+    let maxKey = 0;
+    for (let i = 0; i < keys.length; i++) {
+        let key = keys[i];
+        if (!regexp.test(key)) {
+            return -1;
+        }
+        let seq = parseInt(key) + 1;
+        if (seq > maxKey) {
+            maxKey = seq;
+        }
+    }
+    return maxKey;
+};
+
 /**
  * Arrays in object form and provide an array-like API
  *
@@ -39,32 +55,42 @@ export class ObjectArray<T> {
     private _length: number;
 
     constructor();
-    constructor(array: object);
+    constructor(array: ObjectArrayPrimitiveType<T>);
     constructor(size: number);
-    constructor(array: object, size: number);
+    constructor(array: ObjectArrayPrimitiveType<T>, size: number);
     constructor(...argument: any) {
-        if (Tools.hasLength(argument, 1)) {
-            if (Tools.isObject(argument[0])) {
-                this._array = argument[0] as { [index: number]: T };
-                this._length = ObjectArray.getMaxLength(this._array);
-                return;
-            }
-            if (Tools.isNumber(argument[0])) {
+        switch (argument.length) {
+            case 0: {
                 this._array = {};
-                this._length = argument[0];
+                this._length = 0;
                 return;
             }
-        }
-        if (Tools.hasLength(argument, 2)) {
-            const array = argument[0];
-            const size = argument[1];
-            this._array = array;
-            this._length = size;
-            return;
-        }
-        if (Tools.hasLength(argument, 0)) {
-            this._array = {};
-            this._length = 0;
+            case 1: {
+                if (typeof argument[0] === 'number') {
+                    this._array = {};
+                    this._length = argument[0];
+                    return;
+                }
+                const length = likeArr(argument[0]);
+                if (length > -1) {
+                    this._array = argument[0];
+                    this._length = length;
+                    return;
+                }
+                throw new Error(
+                    `create object array error ${JSON.stringify(argument[0])}`
+                );
+            }
+            case 2: {
+                if (likeArr(argument[0]) > -1) {
+                    this._array = argument[0];
+                    this._length = argument[1];
+                    return;
+                }
+                throw new Error(
+                    `create object array error ${JSON.stringify(argument[0])}`
+                );
+            }
         }
     }
 
@@ -201,7 +227,7 @@ export class ObjectArray<T> {
     }
 
     toJSON(): ObjectArrayPrimitiveType<T> {
-        return { ...this._array, length: this._length };
+        return this._array;
     }
 
     toArray(): T[] {

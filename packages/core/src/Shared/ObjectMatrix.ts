@@ -28,6 +28,12 @@ export class ObjectMatrix<T> {
         this._option = new ObjectArray<ObjectArrayPrimitiveType<T>>(matrix);
     }
 
+    static MakeObjectMatrixSize<T>(size: number): ObjectMatrix<T> {
+        return new ObjectMatrix({
+            [size - 1]: {},
+        });
+    }
+
     getMatrix() {
         return this._matrix;
     }

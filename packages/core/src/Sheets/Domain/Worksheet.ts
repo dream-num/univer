@@ -54,7 +54,7 @@ import {
     IStyleData,
     IWorksheetConfig,
 } from '../../Interfaces';
-import { Nullable, ObjectMatrix, Tools, ObjectArray, Tuples } from '../../Shared';
+import { Nullable, ObjectMatrix, Tools, Tuples } from '../../Shared';
 import { ColumnManager } from './ColumnManager';
 import { Merges } from './Merges';
 import { Range } from './Range';
@@ -586,7 +586,7 @@ export class Worksheet {
             actionName: InsertRowDataAction.NAME,
             sheetId: _sheetId,
             rowIndex,
-            rowData: new ObjectMatrix<ICellData>(new ObjectArray(numRows)).toJSON(),
+            rowData: ObjectMatrix.MakeObjectMatrixSize<ICellData>(numRows).toJSON(),
         };
         const insertRow: IInsertRowActionData = {
             actionName: InsertRowAction.NAME,
@@ -636,7 +636,7 @@ export class Worksheet {
             actionName: InsertRowDataAction.NAME,
             sheetId: _sheetId,
             rowIndex,
-            rowData: new ObjectMatrix<ICellData>(new ObjectArray(numRows)).toJSON(),
+            rowData: ObjectMatrix.MakeObjectMatrixSize<ICellData>(numRows).toJSON(),
         };
         const insertRow = {
             actionName: InsertRowAction.NAME,
@@ -691,7 +691,7 @@ export class Worksheet {
             actionName: InsertRowDataAction.NAME,
             sheetId: _sheetId,
             rowIndex,
-            rowData: new ObjectMatrix<ICellData>(new ObjectArray(numRows)).toJSON(),
+            rowData: ObjectMatrix.MakeObjectMatrixSize<ICellData>(numRows).toJSON(),
         };
         const insertRow = {
             actionName: InsertRowAction.NAME,

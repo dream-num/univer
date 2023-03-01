@@ -100,7 +100,7 @@ test('Test ObjectMatrix insertRow', () => {
 });
 
 test('Test ObjectMatrix forEach', () => {
-    const matrix = new ObjectMatrix<ObjectArray<number>>();
+    const matrix = new ObjectMatrix();
     matrix.insertRow(0, new ObjectArray({ 0: 0, 1: 1 }));
     matrix.insertRow(1, new ObjectArray({ 0: 0, 1: 1 }));
     matrix.insertRow(2, new ObjectArray({ 0: 0, 1: 1 }));
@@ -109,7 +109,7 @@ test('Test ObjectMatrix forEach', () => {
 
 test('Test ObjectMatrix BigData', () => {
     console.time();
-    const matrix = new ObjectMatrix<ObjectArray<number>>();
+    const matrix = new ObjectMatrix();
     for (let i = 0; i < 100000; i++) {
         matrix.insertRow(i, new ObjectArray());
     }

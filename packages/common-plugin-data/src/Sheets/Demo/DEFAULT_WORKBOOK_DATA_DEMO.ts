@@ -2431,7 +2431,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
         'sheet-0002': {
             type: SheetTypes.GRID,
             id: 'sheet-0002',
-            name: 'sheet0003',
+            name: 'sheet0002',
             cellData: {
                 '0': {
                     '0': {

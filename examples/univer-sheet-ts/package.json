@@ -20,6 +20,7 @@
         "build:esbuild": "ts-node --transpile-only ./scripts/build.ts"
     },
     "devDependencies": {
+        "@playwright/test": "^1.18.1",
         "@preact/preset-vite": "2.0.0",
         "@testing-library/preact": "^2.0.1",
         "@types/jest": "^27.5.2",

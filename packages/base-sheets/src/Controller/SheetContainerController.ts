@@ -32,6 +32,7 @@ export class SheetContainerController {
                     const canvasView = plugin.getCanvasView();
                     if (canvasView) {
                         canvasView.updateToSheet(worksheet);
+
                         plugin.getMainComponent().makeDirty(true);
                         plugin.getSelectionManager().renderCurrentControls(false);
                     }

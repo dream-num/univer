@@ -352,12 +352,12 @@ export class Merges {
         let removeAction: IRemoveMergeActionData = {
             actionName: RemoveMergeAction.NAME,
             sheetId: this._worksheet.getSheetId(),
-            rectangles: originMerge,
+            rectangles: [...originMerge],
         };
         let appendAction: IAddMergeActionData = {
             actionName: AddMergeAction.NAME,
             sheetId: this._worksheet.getSheetId(),
-            rectangles: currentMerge,
+            rectangles: [...currentMerge],
         };
         let command = new Command(
             {

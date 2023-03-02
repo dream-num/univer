@@ -11,7 +11,7 @@ export * from './IOSocket';
 export * from './KeyboardUtil';
 export * from './Locale';
 export * from './Logger';
-export * from './NameGen';
+export * from './GenName';
 export * from './LRU/index';
 export * from './Migrate/index';
 export * from './ObjectArray';

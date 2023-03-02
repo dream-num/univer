@@ -2,7 +2,7 @@ import { Workbook } from '../Sheets/Domain';
 import { WorkBookObserverImpl } from './WorkBookObserverImpl';
 import { ContextBase } from './ContextBase';
 import { Observable } from '../Observer';
-import { PropsFrom } from '../Shared';
+import { GenName, PropsFrom } from '../Shared';
 import { WorkBookObserver } from './WorkBookObserver';
 import { IWorkbookConfig } from '../Interfaces';
 
@@ -12,14 +12,21 @@ import { IWorkbookConfig } from '../Interfaces';
 export class SheetContext extends ContextBase {
     protected _workbook: Workbook;
 
+    protected _genname: GenName;
+
     constructor(univerSheetData: Partial<IWorkbookConfig> = {}) {
         super();
         this._setObserver();
+        this._genname = new GenName();
         this._workbook = new Workbook(univerSheetData, this);
     }
 
     getWorkBook(): Workbook {
         return this._workbook;
+    }
+
+    getGenName(): GenName {
+        return this._genname;
     }
 
     getContextObserver<Key extends keyof WorkBookObserver>(

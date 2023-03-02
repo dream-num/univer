@@ -8,6 +8,7 @@ import { RightMenuController, InfoBarController, SheetBarControl, CellEditorCont
 import { DEFAULT_SPREADSHEET_PLUGIN_DATA, install, ISheetPluginConfig } from './Basics';
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeActionExtension';
+import { en, zh } from './Locale';
 
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
@@ -48,6 +49,10 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     initialize(context: SheetContext): void {
         this.context = context;
 
+        this.getGlobalContext().getLocale().load({
+            en,
+            zh,
+        });
         install(this);
         this.initConfig();
         this.initController();

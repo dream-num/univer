@@ -27,7 +27,7 @@ import {
     IWorksheetConfig,
 } from '../../Interfaces';
 
-import { NameGen, Nullable, Tools, Tuples } from '../../Shared';
+import { Nullable, Tools, Tuples } from '../../Shared';
 import { RangeList } from './RangeList';
 import { Selection } from './Selection';
 import { Styles } from './Styles';
@@ -157,6 +157,7 @@ export class Workbook {
     insertSheet(index: number, sheet: Worksheet): Nullable<string>;
     insertSheet(...argument: any[]): Nullable<string> {
         const { _context } = this;
+        const genname = _context.getGenName();
         const commandManager = this.getCommandManager();
         const before = _context.getContextObserver('onBeforeInsertSheetObservable');
         const after = _context.getContextObserver('onAfterInsertSheetObservable');
@@ -164,7 +165,7 @@ export class Workbook {
         // insert empty sheet
         if (Tools.hasLength(argument, 0)) {
             const worksheetConfig = {
-                name: NameGen.getSheetName(),
+                name: genname.sheetName(),
                 status: 0,
                 id: Tools.generateRandomId(6),
             };
@@ -228,7 +229,7 @@ export class Workbook {
             if (Tools.isNumber(argument[0])) {
                 const index = argument[0];
                 const worksheetConfig = {
-                    name: NameGen.getSheetName(),
+                    name: genname.sheetName(),
                     status: 0,
                     id: Tools.generateRandomId(6),
                 };
@@ -798,6 +799,7 @@ export class Workbook {
     private _getDefaultWorkSheet(): void {
         const { _context, _config, _worksheets } = this;
         const { sheets, sheetOrder } = _config;
+        const genname = _context.getGenName();
 
         // One worksheet by default
         if (Tools.isEmptyObject(sheets)) {
@@ -810,7 +812,7 @@ export class Workbook {
 
         for (let sheetId in sheets) {
             let config = sheets[sheetId];
-            config.name = NameGen.getSheetName(config.name);
+            config.name = genname.sheetName(config.name);
             const worksheet = new Worksheet(_context, config);
             _worksheets.set(sheetId, worksheet);
             if (!sheetOrder.includes(sheetId)) {

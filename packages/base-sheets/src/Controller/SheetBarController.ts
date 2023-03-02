@@ -1,4 +1,4 @@
-import { NameGen, UIObserver } from '@univerjs/core';
+import { UIObserver } from '@univerjs/core';
 import { SheetPlugin } from '../SheetPlugin';
 
 export class SheetBarControl {
@@ -21,7 +21,10 @@ export class SheetBarControl {
                 case 'copySheet': {
                     const workbook = this._plugin.getContext().getWorkBook();
                     const activeSheet = workbook.getActiveSheet();
-                    const copySheet = activeSheet.copy(NameGen.getSheetName());
+                    const sheetContex = this._plugin.getContext();
+                    const genname = sheetContex.getGenName();
+                    const locale = this._plugin.getGlobalContext().getLocale();
+                    const copySheet = activeSheet.copy(genname.onlyName(`${activeSheet.getName()} ${locale.get('BaseSheetLocale.CopyName')}`));
                     if (workbook) {
                         workbook.insertSheet(workbook.getActiveSheetIndex() + 1, copySheet.getConfig());
                     }

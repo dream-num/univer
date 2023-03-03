@@ -341,20 +341,7 @@ pnpm install
     npm run univer-cli create inner
     ```
 
-    其中 create 表示创建一个插件，inner 表示在 Univer 主仓库内部新建插件，也就是放到 packages 文件夹下。inner 模式下，还需要项目根目录的 [tsconfig.json](../tsconfig.json) 文件中，增加当前添加插件的引用地址，必须这样写：
-
-    ```json
-    {
-        // 其他配置...
-        "references": [
-            // 已有配置
-            { "path": "./packages/core/tsconfig.ref.json" },
-            { "path": "./packages/base-render/tsconfig.ref.json" },
-            // 新加的配置
-            { "path": "./packages/sheets-plugin-data-validation/tsconfig.ref.json" }
-        ]
-    }
-    ```
+    其中 create 表示创建一个插件，inner 表示在 Univer 主仓库内部新建插件，也就是放到 packages 文件夹下。
 
     如果想在自己电脑的一个空白目录用脚手架新建一个插件，就不用加 inner，运行`npm run univer-cli create`即可。
 

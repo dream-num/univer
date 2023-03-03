@@ -25,7 +25,7 @@ export class BaseView {
         return this._plugin.getContext();
     }
 
-    updateToSheet(worksheet: Worksheet) { }
+    updateToSheet(worksheet: Worksheet) {}
 
     initialize(scene: Scene, plugin: SheetPlugin) {
         this._scene = scene;

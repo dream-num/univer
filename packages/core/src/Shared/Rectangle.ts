@@ -71,9 +71,9 @@ export class Rectangle implements IRangeData {
 
         const zx = Math.abs(
             currentStartColumn +
-            currentEndColumn -
-            incomingStartColumn -
-            incomingEndColumn
+                currentEndColumn -
+                incomingStartColumn -
+                incomingEndColumn
         );
         const x =
             Math.abs(currentStartColumn - currentEndColumn) +

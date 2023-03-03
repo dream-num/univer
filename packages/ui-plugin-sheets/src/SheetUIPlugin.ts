@@ -65,13 +65,13 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
         }, 0);
     }
 
-    initUI() { }
+    initUI() {}
 
     onMounted(ctx: Context): void {
         this.initialize(ctx);
     }
 
-    onDestroy(): void { }
+    onDestroy(): void {}
 
     getAppUIController() {
         return this._appUIController;

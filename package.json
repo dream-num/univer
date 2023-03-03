@@ -28,9 +28,8 @@
         "postinstall": "node scripts/postinstall.js",
         "prepare": "husky install",
         "pre-lint": "lint-staged",
-        "lint": "eslint ./packages/base-sheets/src --ext .ts,.tsx",
-        "lint-s": "eslint ./packages/base-sheets/src/Controller/Selection/SelectionManager.ts",
-        "lint-and-fix": "eslint ./packages/base-sheets/src/Controller/Selection/SelectionManager.ts --ext .ts,.tsx --fix"
+        "lint": "eslint ./packages/core/src --ext .ts,.tsx",
+        "lint-and-fix": "eslint ./packages/core/src --ext .ts,.tsx --fix"
     },
     "author": "DreamNum <msoffice2@126.com>",
     "license": "MIT",

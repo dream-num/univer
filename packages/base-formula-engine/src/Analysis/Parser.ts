@@ -4,14 +4,15 @@ import { ErrorNode } from '../AstNode/ErrorNode';
 import { NodeType } from '../AstNode/NodeType';
 import { ErrorType } from '../Basics/ErrorType';
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
-import '../AstNode';
-import { FORMULA_AST_NODE_REGISTRY, FORMULA_FUNCTION_REGISTRY } from '../Basics/Registry';
+import { LambdaNode } from '../AstNode';
+import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { LexerNode } from './LexerNode';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, DEFAULT_TOKEN_TYPE_PARAMETER, DEFAULT_TOKEN_TYPE_ROOT } from '../Basics/TokenType';
-import { LambdaNode } from '../AstNode';
 import { LambdaRuntime } from '../Basics/LambdaRuntime';
+
 export class AstTreeMaker {
     private _parserDataLoader = new ParserDataLoader();
+
     private _astNodeFactoryList: BaseAstNodeFactory[];
 
     parse(lexerNode: LexerNode) {

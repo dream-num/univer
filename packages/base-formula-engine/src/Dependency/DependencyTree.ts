@@ -10,15 +10,21 @@ export enum FDtreeStateType {
 
 export class FormulaDependencyTree implements IFormulaData {
     node: BaseAstNode;
+
     children: FormulaDependencyTree[] = [];
+
     parents: FormulaDependencyTree[] = [];
 
     private _state = FDtreeStateType.DEFAULT;
 
     formula: string;
+
     row: number;
+
     column: number;
+
     sheetId: string;
+
     unitId: string;
 
     rangeList: IUnitRange[] = [];

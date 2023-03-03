@@ -39,8 +39,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     private _namedRangeActionExtensionFactory: NamedRangeActionExtensionFactory;
 
-    // private _component: BaseComponentPlugin;
-
     constructor(config?: Partial<ISheetPluginConfig>) {
         super(PLUGIN_NAMES.SPREADSHEET);
         this._config = Object.assign(DEFAULT_SPREADSHEET_PLUGIN_DATA, config);

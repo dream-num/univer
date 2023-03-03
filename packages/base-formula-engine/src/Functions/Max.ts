@@ -24,7 +24,7 @@ export class Max extends BaseFunction {
         return accumulatorAll;
     }
 
-    calculate(...variants: Array<FunctionVariantType>) {
+    calculate(...variants: FunctionVariantType[]) {
         let accumulatorAll: BaseValueObject = new NumberValueObject(-Infinity);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];

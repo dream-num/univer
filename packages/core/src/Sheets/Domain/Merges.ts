@@ -179,7 +179,7 @@ export class Merges {
                                     continue;
                                 } else if (
                                     merge.startColumn >=
-                                    data.rangeData.startColumn &&
+                                        data.rangeData.startColumn &&
                                     merge.endColumn <= data.rangeData.endColumn
                                 ) {
                                     const count =

@@ -1,5 +1,5 @@
-import { SheetContext, Plugin, UniverSheet, PLUGIN_NAMES } from '@univerjs/core';
-import { BaseComponentPlugin } from '@univerjs/base-ui';
+import { SheetContext, Plugin, UniverSheet } from '@univerjs/core';
+import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
 import { en, zh } from './Locale';
 import { CLIPBOARD_PLUGIN } from './Const';
 import { Copy, Paste, UniverCopy, UniverPaste } from './Domain';
@@ -42,7 +42,7 @@ export class ClipboardPlugin extends Plugin<any, SheetContext> {
     registerExtension() {
         const clipboardRegister = this.getContext()
             .getPluginManager()
-            .getRequirePluginByName<BaseComponentPlugin>(PLUGIN_NAMES.BASE_COMPONENT)
+            .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
             .getRegisterManager()
             .getClipboardExtensionManager()
             .getRegister();
@@ -62,7 +62,7 @@ export class ClipboardPlugin extends Plugin<any, SheetContext> {
     onDestroy(): void {
         const clipboardRegister = this.getContext()
             .getPluginManager()
-            .getRequirePluginByName<BaseComponentPlugin>(PLUGIN_NAMES.BASE_COMPONENT)
+            .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
             .getRegisterManager()
             .getClipboardExtensionManager()
             .getRegister();

@@ -84,7 +84,7 @@ export class CellEditorController {
         // this._plugin.getMainComponent().makeDirty(true);
     }
 
-    handleBackSpace() { }
+    handleBackSpace() {}
 
     handleDirection(direction: Direction) {
         // todo

@@ -23,4 +23,4 @@ export interface IActionObserverProps {
  *
  * @beta
  */
-export class ActionObservers extends Observable<IActionObserverProps> { }
+export class ActionObservers extends Observable<IActionObserverProps> {}

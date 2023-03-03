@@ -1,4 +1,3 @@
-import { ABCToNumber } from '@univerjs/core';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
 import { NodeType, NODE_ORDER_MAP } from './NodeType';
@@ -6,7 +5,7 @@ import { REFERENCE_SINGLE_RANGE_REGEX, REFERENCE_REGEX_SINGLE_ROW, REFERENCE_REG
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
 import { LexerNode } from '../Analysis/LexerNode';
 import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
-import { SheetDataType, IInterpreterDatasetConfig, UnitDataType } from '../Basics/Common';
+import { IInterpreterDatasetConfig, UnitDataType } from '../Basics/Common';
 import { CellReferenceObject } from '../ReferenceObject/CellReferenceObject';
 import { RowReferenceObject } from '../ReferenceObject/RowReferenceObject';
 import { ColumnReferenceObject } from '../ReferenceObject/ColumnReferenceObject';
@@ -19,6 +18,7 @@ export class ReferenceNode extends BaseAstNode {
     get nodeType() {
         return NodeType.REFERENCE;
     }
+
     constructor(private _operatorString: string, private _referenceObject: BaseReferenceObject) {
         super(_operatorString);
     }

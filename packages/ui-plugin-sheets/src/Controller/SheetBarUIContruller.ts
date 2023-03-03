@@ -228,13 +228,13 @@ export class SheetBarUIController {
         return sheetUl;
     }
 
-    selectSheet() { }
+    selectSheet() {}
 
-    deleteSheet() { }
+    deleteSheet() {}
 
-    sortMenu(index: number, hidden?: boolean, hideIndex?: number) { }
+    sortMenu(index: number, hidden?: boolean, hideIndex?: number) {}
 
-    copySheet() { }
+    copySheet() {}
 
     addSheet = (position?: string, config?: SheetUlProps): void => {
         this.setUIObserve('onUIChangeObservable', {
@@ -246,13 +246,13 @@ export class SheetBarUIController {
         });
     };
 
-    hideSheet() { }
+    hideSheet() {}
 
     unHideSheet() {
         this._sheetBar.ref.current.showSelect();
     }
 
-    moveSheet(direct: string) { }
+    moveSheet(direct: string) {}
 
     changeSheetName = (event: Event) => {
         this.setUIObserve('onUIChangeObservable', {
@@ -301,7 +301,7 @@ export class SheetBarUIController {
                 this._dataId = target.dataset.id as string;
                 //this._barControl.contextMenu(e);
             },
-            changeSheetName: (event: Event) => { },
+            changeSheetName: (event: Event) => {},
             dragEnd: (elements: HTMLDivElement[]) => {
                 //this._barControl.dragEnd(elements);
             },

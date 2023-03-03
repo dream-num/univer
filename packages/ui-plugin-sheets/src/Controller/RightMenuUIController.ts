@@ -129,7 +129,7 @@ export class RightMenuUIController {
                         onKeyUp: this.setRowHeight.bind(this),
                     },
                 },
-                onClick: () => { },
+                onClick: () => {},
                 show: this._config.RowHeight,
             },
             {

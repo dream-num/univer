@@ -15,7 +15,7 @@ class Average extends BaseFunction {
         return FUNCTION_NAME;
     }
 
-    calculate(...variants: Array<FunctionVariantType>) {
+    calculate(...variants: FunctionVariantType[]) {
         const accumulatorSum = Sum.create().calculate(...variants);
         const accumulatorCount = Count.create().calculate(...variants);
 

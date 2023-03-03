@@ -58,6 +58,31 @@ export class Selection {
         this._currentCell = this._workSheet.getRange(DEFAULT_SELECTION);
     }
 
+    /**
+     * Determine whether the cell is in the rangeList
+     *
+     * @param rangeList
+     * @param cell
+     * @returns
+     */
+    static cellInRange(
+        rangeList: IRangeData[],
+        cell: IRangeData
+    ): Nullable<IRangeData> {
+        for (const item of rangeList) {
+            if (
+                item.startRow <= cell.startRow &&
+                cell.endRow <= item.endRow &&
+                item.startColumn <= cell.startColumn &&
+                cell.endColumn <= item.endColumn
+            ) {
+                return item;
+            }
+        }
+
+        return null;
+    }
+
     setWorkSheet(workSheet: Worksheet): void {
         this._workSheet = workSheet;
     }
@@ -756,30 +781,5 @@ export class Selection {
             };
         }
         return expandRangeData;
-    }
-
-    /**
-     * Determine whether the cell is in the rangeList
-     *
-     * @param rangeList
-     * @param cell
-     * @returns
-     */
-    static cellInRange(
-        rangeList: IRangeData[],
-        cell: IRangeData
-    ): Nullable<IRangeData> {
-        for (const item of rangeList) {
-            if (
-                item.startRow <= cell.startRow &&
-                cell.endRow <= item.endRow &&
-                item.startColumn <= cell.startColumn &&
-                cell.endColumn <= item.endColumn
-            ) {
-                return item;
-            }
-        }
-
-        return null;
     }
 }

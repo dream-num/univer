@@ -1,6 +1,6 @@
-import { IGridRange, IRangeData, IUnitRange, ObjectMatrix } from '@univerjs/core';
+import { IRangeData, IUnitRange, ObjectMatrix } from '@univerjs/core';
 import { generateAstNode } from '../Analysis/Tools';
-import { FunctionNode, PrefixNode, ReferenceNode, SuffixNode, UnionNode } from '../AstNode';
+import { FunctionNode, PrefixNode, SuffixNode } from '../AstNode';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { NodeType } from '../AstNode/NodeType';
 import { FormulaDataType, IInterpreterDatasetConfig, PreCalculateNodeType } from '../Basics/Common';
@@ -8,6 +8,7 @@ import { prefixToken, suffixToken } from '../Basics/Token';
 import { Interpreter } from '../Interpreter/Interpreter';
 import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
 import { FormulaDependencyTree } from './DependencyTree';
+
 export class FormulaDependencyGenerator {
     private _updateRangeFlattenCache = new Map<string, Map<string, IRangeData>>();
 

@@ -17,7 +17,7 @@ enum SetRangeDataType {
     DEFAULT = 'default',
 
     /**
-     * 
+     *
      */
     PASTE = 'paste',
 }

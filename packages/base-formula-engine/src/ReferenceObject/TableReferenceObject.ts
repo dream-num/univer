@@ -1,4 +1,3 @@
-import { IRangeData } from '@univerjs/core';
 import { ISuperTable, TableOptionType } from '../Basics/Common';
 import { $SUPER_TABLE_COLUMN_REGEX } from '../Basics/Regex';
 import { matchToken } from '../Basics/Token';

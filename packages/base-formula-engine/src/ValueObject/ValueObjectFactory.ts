@@ -11,18 +11,21 @@ export class ValueObjectFactory {
     static create(rawValue: string | number | boolean) {
         if (typeof rawValue === 'boolean') {
             return new BooleanValueObject(rawValue, true);
-        } else if (typeof rawValue === 'string') {
+        }
+        if (typeof rawValue === 'string') {
             const rawValueUpper = rawValue.toLocaleUpperCase();
             if (rawValueUpper === BooleanValue.TRUE || rawValueUpper === BooleanValue.FALSE) {
                 return new BooleanValueObject(rawValueUpper);
-            } else if (!isNaN(Number(rawValue))) {
-                return new NumberValueObject(rawValue);
-            } else if ($ARRAY_VALUE_REGEX.test(rawValue)) {
-                return new ArrayValueObject(rawValue);
-            } else {
-                return new StringValueObject(rawValue);
             }
-        } else if (typeof rawValue === 'number') {
+            if (!isNaN(Number(rawValue))) {
+                return new NumberValueObject(rawValue);
+            }
+            if ($ARRAY_VALUE_REGEX.test(rawValue)) {
+                return new ArrayValueObject(rawValue);
+            }
+            return new StringValueObject(rawValue);
+        }
+        if (typeof rawValue === 'number') {
             return new NumberValueObject(rawValue, true);
         }
         return ErrorValueObject.create(ErrorType.NA);

@@ -1,12 +1,9 @@
-import { CalculateValueType, FunctionVariantType, NodeValueType } from '../../Basics/Common';
+import { FunctionVariantType } from '../../Basics/Common';
 import { ErrorType } from '../../Basics/ErrorType';
 import { FORMULA_FUNCTION_REGISTRY } from '../../Basics/Registry';
 import { compareToken } from '../../Basics/Token';
 import { ErrorValueObject } from '../../OtherObject/ErrorValueObject';
 import { BaseReferenceObject } from '../../ReferenceObject/BaseReferenceObject';
-import { ArrayValueObject } from '../../ValueObject/ArrayValueObject';
-import { BaseValueObject } from '../../ValueObject/BaseValueObject';
-import { NumberValueObject } from '../../ValueObject/NumberValueObject';
 import { BaseFunction } from '../BaseFunction';
 
 const FUNCTION_NAME = 'UNION';
@@ -37,9 +34,11 @@ export class Union extends BaseFunction {
 
         if (variant1.isCell() && variant2.isCell()) {
             return variant1.unionBy(variant2);
-        } else if (variant1.isRow() && variant2.isRow()) {
+        }
+        if (variant1.isRow() && variant2.isRow()) {
             return variant1.unionBy(variant2);
-        } else if (variant1.isColumn() && variant2.isColumn()) {
+        }
+        if (variant1.isColumn() && variant2.isColumn()) {
             return variant1.unionBy(variant2);
         }
 

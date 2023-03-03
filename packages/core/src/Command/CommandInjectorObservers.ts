@@ -16,4 +16,4 @@ export interface CommandInjector {
     getActions(): Array<ActionBase<IActionData>>;
 }
 
-export class CommandInjectorObservers extends Observable<CommandInjector> { }
+export class CommandInjectorObservers extends Observable<CommandInjector> {}

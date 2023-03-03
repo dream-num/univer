@@ -1,8 +1,8 @@
-import { Plugin, PLUGIN_NAMES, SheetContext, UniverSheet } from '@univerjs/core';
+import { Plugin, SheetContext, UniverSheet } from '@univerjs/core';
+import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
 import { zh, en } from './Locale';
 import { IMPORT_XLSX_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
 import { ImportXlsxController } from './Controller/ImportXlsxController';
-import { BaseComponentPlugin } from '@univerjs/base-ui';
 import { DragAndDropExtensionFactory } from './Basic/Register/DragAndDropExtension';
 
 export interface IImportXlsxPluginConfig {}
@@ -31,8 +31,8 @@ export class ImportXlsxPlugin extends Plugin<any, SheetContext> {
          * load more Locale object
          */
         context.getLocale().load({
-            en: en,
-            zh: zh,
+            en,
+            zh,
         });
 
         this._importXlsxController = new ImportXlsxController(this);
@@ -42,7 +42,7 @@ export class ImportXlsxPlugin extends Plugin<any, SheetContext> {
     registerExtension() {
         const dragAndDropRegister = this.getContext()
             .getPluginManager()
-            .getRequirePluginByName<BaseComponentPlugin>(PLUGIN_NAMES.BASE_COMPONENT)
+            .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
             .getRegisterManager()
             .getDragAndDropExtensionManager()
             .getRegister();
@@ -58,7 +58,7 @@ export class ImportXlsxPlugin extends Plugin<any, SheetContext> {
     onDestroy(): void {
         const dragAndDropRegister = this.getContext()
             .getPluginManager()
-            .getRequirePluginByName<BaseComponentPlugin>(PLUGIN_NAMES.BASE_COMPONENT)
+            .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
             .getRegisterManager()
             .getDragAndDropExtensionManager()
             .getRegister();

@@ -19,10 +19,9 @@ export class ErrorValueObject extends ObjectClassType {
     static create(errorType: ErrorType) {
         if (this.errorMap.has(errorType)) {
             return this.errorMap.get(errorType)!;
-        } else {
-            const errorValueObject = new ErrorValueObject(errorType);
-            this.errorMap.set(errorType, errorValueObject);
-            return errorValueObject;
         }
+        const errorValueObject = new ErrorValueObject(errorType);
+        this.errorMap.set(errorType, errorValueObject);
+        return errorValueObject;
     }
 }

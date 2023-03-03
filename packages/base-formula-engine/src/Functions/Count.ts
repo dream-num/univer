@@ -14,7 +14,7 @@ export class Count extends BaseFunction {
         return FUNCTION_NAME;
     }
 
-    calculate(...variants: Array<FunctionVariantType>) {
+    calculate(...variants: FunctionVariantType[]) {
         let accumulatorAll: BaseValueObject = new NumberValueObject(0);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];

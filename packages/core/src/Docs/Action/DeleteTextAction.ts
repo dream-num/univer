@@ -8,7 +8,7 @@ import { DOC_ACTION_NAMES } from '../../Const/DOC_ACTION_NAMES';
 
 export interface IDeleteTextActionData
     extends IDocActionData,
-    ITextSelectionRangeParam {
+        ITextSelectionRangeParam {
     text: string;
 }
 

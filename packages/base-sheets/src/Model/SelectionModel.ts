@@ -30,32 +30,6 @@ export class SelectionModel implements ISelection {
         this._plugin = plugin;
     }
 
-    isEqual(selectionRange: ISelection) {
-        const { startColumn, startRow, endColumn, endRow, type } = this;
-        const { startColumn: newStartColumn, startRow: newStartRow, endColumn: newEndColumn, endRow: newEndRow } = selectionRange;
-        // if (type !== newType) {
-        //     return false;
-        // }
-        if (startColumn === newStartColumn && startRow === newStartRow && endColumn === newEndColumn && endRow === newEndRow) {
-            return true;
-        }
-        return false;
-    }
-
-    isInclude(selectionRange: ISelection) {
-        const { startColumn, startRow, endColumn, endRow, type } = this;
-        const { startColumn: newStartColumn, startRow: newStartRow, endColumn: newEndColumn, endRow: newEndRow } = selectionRange;
-
-        // if (type !== newType) {
-        //     return false;
-        // }
-
-        if (!(newEndColumn < startColumn || newStartColumn > endColumn || newStartRow > endRow || newEndRow < startRow)) {
-            return true;
-        }
-        return false;
-    }
-
     get startColumn() {
         return this._startColumn;
     }
@@ -94,6 +68,32 @@ export class SelectionModel implements ISelection {
 
     get currentCell() {
         return this._currentCell;
+    }
+
+    isEqual(selectionRange: ISelection) {
+        const { startColumn, startRow, endColumn, endRow, type } = this;
+        const { startColumn: newStartColumn, startRow: newStartRow, endColumn: newEndColumn, endRow: newEndRow } = selectionRange;
+        // if (type !== newType) {
+        //     return false;
+        // }
+        if (startColumn === newStartColumn && startRow === newStartRow && endColumn === newEndColumn && endRow === newEndRow) {
+            return true;
+        }
+        return false;
+    }
+
+    isInclude(selectionRange: ISelection) {
+        const { startColumn, startRow, endColumn, endRow, type } = this;
+        const { startColumn: newStartColumn, startRow: newStartRow, endColumn: newEndColumn, endRow: newEndRow } = selectionRange;
+
+        // if (type !== newType) {
+        //     return false;
+        // }
+
+        if (!(newEndColumn < startColumn || newStartColumn > endColumn || newStartRow > endRow || newEndRow < startRow)) {
+            return true;
+        }
+        return false;
     }
 
     highlightToSelection() {

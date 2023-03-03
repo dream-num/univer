@@ -4,8 +4,10 @@ import { compareToken } from '../Basics/Token';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { BaseValueObject } from './BaseValueObject';
 import { NumberValueObject } from './NumberValueObject';
+
 export class BooleanValueObject extends BaseValueObject {
     private _value: boolean;
+
     constructor(rawValue: string | number | boolean, isForce = false) {
         super(rawValue);
         if (isForce) {
@@ -61,9 +63,8 @@ export class BooleanValueObject extends BaseValueObject {
         const currentValue = this.getValue();
         if (currentValue) {
             return new NumberValueObject(1, true);
-        } else {
-            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
+        return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
     }
 
     plus(valueObject: BaseValueObject): CalculateValueType {

@@ -12,6 +12,7 @@ export class LambdaParameterNode extends BaseAstNode {
     get nodeType() {
         return NodeType.LAMBDA_PARAMETER;
     }
+
     constructor(token: string, private _lambdaParameter: string, private _currentLambdaPrivacyVar: LambdaPrivacyVarType) {
         super(token);
     }

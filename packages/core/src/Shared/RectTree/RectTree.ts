@@ -437,6 +437,7 @@ export class RectTree {
         level: number,
         path: RectTree.Node[]
     ) {
+        // eslint-disable-next-line no-constant-condition
         while (true) {
             path.push(node);
 

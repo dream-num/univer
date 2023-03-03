@@ -1,4 +1,3 @@
-import { OPERATOR_TOKEN_SET } from '../Basics/Token';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
 import { NodeType, NODE_ORDER_MAP } from './NodeType';
@@ -10,6 +9,7 @@ export class ValueNode extends BaseAstNode {
     get nodeType() {
         return NodeType.VALUE;
     }
+
     constructor(private _operatorString: string) {
         super(_operatorString);
     }
@@ -31,9 +31,11 @@ export class ValueNodeFactory extends BaseAstNodeFactory {
             const endToken = tokenTrim.charAt(tokenTrim.length - 1);
             if (startToken === '"' && endToken === '"') {
                 return this.create(tokenTrim);
-            } else if (startToken === '{' && endToken === '}') {
+            }
+            if (startToken === '{' && endToken === '}') {
                 return this.create(tokenTrim);
-            } else if (tokenTrim === BooleanValue.TRUE || tokenTrim === BooleanValue.FALSE) {
+            }
+            if (tokenTrim === BooleanValue.TRUE || tokenTrim === BooleanValue.FALSE) {
                 return this.create(tokenTrim);
             }
         } else {

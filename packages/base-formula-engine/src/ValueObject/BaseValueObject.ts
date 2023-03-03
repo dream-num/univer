@@ -1,4 +1,3 @@
-import { Nullable } from '@univerjs/core';
 import { CalculateValueType, ConcatenateType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
 import { ObjectClassType } from '../Basics/ObjectClassType';

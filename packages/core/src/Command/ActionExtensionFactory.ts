@@ -5,7 +5,7 @@ import { Plugin } from '../Plugin';
  * Manipulate the list of actions in a command
  */
 export class BaseActionExtension<T extends Plugin = Plugin> {
-    constructor(protected actionDataList: IActionData[], protected _plugin: T) { }
+    constructor(protected actionDataList: IActionData[], protected _plugin: T) {}
 
     getActionDataList(): IActionData[] {
         return this.actionDataList;
@@ -22,19 +22,19 @@ export class BaseActionExtension<T extends Plugin = Plugin> {
     /**
      * Modify the data of action
      */
-    setValue() { }
+    setValue() {}
 
     /**
      * Execute the core logic after the check is successful
      */
-    execute() { }
+    execute() {}
 }
 
 /**
  * Determine whether to intercept and create BaseActionExtension
  */
 export class BaseActionExtensionFactory<T extends Plugin = Plugin> {
-    constructor(protected _plugin: T) { }
+    constructor(protected _plugin: T) {}
 
     get zIndex() {
         return 0;

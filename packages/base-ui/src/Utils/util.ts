@@ -12,11 +12,11 @@ export function isElement(element: any) {
 export const isDOM =
     typeof HTMLElement === 'object'
         ? function (obj: any) {
-            return obj instanceof HTMLElement;
-        }
+              return obj instanceof HTMLElement;
+          }
         : function (obj: any) {
-            return obj && typeof obj === 'object' && obj.nodeType === 1 && typeof obj.nodeName === 'string';
-        };
+              return obj && typeof obj === 'object' && obj.nodeType === 1 && typeof obj.nodeName === 'string';
+          };
 
 /**
  * DOM selector

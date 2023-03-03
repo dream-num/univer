@@ -5,7 +5,7 @@ import { textIndexAdjustApply } from '../Apply/TextIndexAdjustApply';
 
 export interface ITextIndexAdjustAction
     extends IDocActionData,
-    ITextSelectionRangeParam { }
+        ITextSelectionRangeParam {}
 
 export class TextIndexAdjustAction extends DocActionBase<
     ITextIndexAdjustAction,

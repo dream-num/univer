@@ -1,5 +1,6 @@
 import { Component, createRef, RefObject } from '../../Framework';
 import Style from './index.module.less';
+
 type IProps = {
     width: string;
     height: string;

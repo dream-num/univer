@@ -1,4 +1,5 @@
 .eslintrc.js
+.eslintrc
 vite.config.ts
 **/*.test.js
 dist

@@ -3,27 +3,34 @@
         "rootDir": "./",
         "outDir": "lib",
         "target": "ESNext",
-
-        "lib": ["ESNext", "DOM", "WebWorker"],
+        "lib": [
+            "ESNext",
+            "DOM",
+            "WebWorker"
+        ],
         "module": "ESNext",
         "moduleResolution": "Node",
-
         "declaration": true,
         "declarationDir": "./lib",
         "declarationMap": true,
         "sourceMap": true,
         "resolveJsonModule": true,
         "allowJs": true,
-
         "baseUrl": "./",
         "skipLibCheck": true,
         "esModuleInterop": true,
         "suppressImplicitAnyIndexErrors": true,
         "experimentalDecorators": true,
-        "jsx": "preserve",
-        "jsxFactory": "h",
-        "jsxFragmentFactory": "Fragment",
-        "types": ["jest", "node", "@types/jest"]
+        "jsx": "react-jsx",
+        "jsxImportSource": "preact",
+        "types": [
+            "jest",
+            "node",
+            "@types/jest"
+        ]
     },
-    "include": ["src/**/*", "test/**/*.test.(ts|tsx|js)"]
+    "include": [
+        "src/**/*",
+        "test/**/*.test.(ts|tsx|js)"
+    ]
 }

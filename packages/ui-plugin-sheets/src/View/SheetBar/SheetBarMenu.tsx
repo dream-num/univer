@@ -58,9 +58,9 @@ export class SheetBarMenu extends Component<SheetBarMenuProps, IState> {
                     <li onClick={(e) => this.handleClick(e, item)} className={joinClassNames(styles.sheetBarMenuItem, item.hide ? styles.sheetBarMenuItemHide : '')}>
                         <span className={styles.sheetBarMenuIcon}>
                             {item.hide ? <Icon.HideIcon /> : ''}
-                            {item.selected ? <Icon.Data.CheckIcon /> : ''}
+                            {item.selected ? <Icon.Data.CheckIcon className={styles.sheetBarMenuSvg} /> : ''}
                         </span>
-                        {item.label}
+                        <span className={styles.sheetBarMenuTitle}>{item.label}</span>
                     </li>
                 ))}
             </ul>

@@ -8,16 +8,6 @@ export interface SlideTabItemAnimate {
 }
 
 export class SlideTabItem {
-    static midline(item: SlideTabItem) {
-        return item.getBoundingRect().x + item.getBoundingRect().width / 2;
-    }
-
-    static make(nodeList: NodeList, slideTabBar: SlideTabBar): SlideTabItem[] {
-        let result: SlideTabItem[] = [];
-        nodeList.forEach((item) => result.push(new SlideTabItem(item as HTMLElement, slideTabBar)));
-        return result;
-    }
-
     _slideTabItem: HTMLElement;
 
     _animate: Animate | null;
@@ -43,6 +33,16 @@ export class SlideTabItem {
         this._placeholder = null;
         this._scrollbar = slideTabBar.getScrollbar();
         this.update();
+    }
+
+    static midline(item: SlideTabItem) {
+        return item.getBoundingRect().x + item.getBoundingRect().width / 2;
+    }
+
+    static make(nodeList: NodeList, slideTabBar: SlideTabBar): SlideTabItem[] {
+        let result: SlideTabItem[] = [];
+        nodeList.forEach((item) => result.push(new SlideTabItem(item as HTMLElement, slideTabBar)));
+        return result;
     }
 
     isEditMode(): boolean {

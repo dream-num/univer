@@ -124,12 +124,11 @@ export class SheetBarUIController {
             const currentUnitId = currentWorkbook.getUnitId();
             if (unitId === currentUnitId) {
                 switch (data.actionName) {
-                    case SetWorkSheetActivateAction.NAME:
                     case SetSheetOrderAction.NAME:
+                    case SetWorkSheetActivateAction.NAME:
                     case InsertSheetAction.NAME:
                     case RemoveSheetAction.NAME:
                     case SetWorkSheetNameAction.NAME:
-                    case InsertSheetAction.NAME:
                     case SetTabColorAction.NAME:
                     case SetWorkSheetStatusAction.NAME:
                     case SetWorkSheetHideAction.NAME: {

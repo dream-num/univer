@@ -875,25 +875,25 @@ export class SelectionManager {
 
                 const cellInfo = cell
                     ? {
-                        row: cell.row,
-                        column: cell.column,
-                        isMerged: false,
-                        isMergedMainCell: false,
-                        startY: 0,
-                        endY: 0,
-                        startX: 0,
-                        endX: 0,
-                        mergeInfo: {
-                            startColumn,
-                            startRow,
-                            endColumn,
-                            endRow,
-                            startY: 0,
-                            endY: 0,
-                            startX: 0,
-                            endX: 0,
-                        },
-                    }
+                          row: cell.row,
+                          column: cell.column,
+                          isMerged: false,
+                          isMergedMainCell: false,
+                          startY: 0,
+                          endY: 0,
+                          startX: 0,
+                          endX: 0,
+                          mergeInfo: {
+                              startColumn,
+                              startRow,
+                              endColumn,
+                              endRow,
+                              startY: 0,
+                              endY: 0,
+                              startX: 0,
+                              endX: 0,
+                          },
+                      }
                     : null;
 
                 // Only update data, not render

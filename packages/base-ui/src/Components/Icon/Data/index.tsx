@@ -94,7 +94,7 @@ export const CleanIcon = (props: BaseIconProps) => (
 );
 
 export const CheckIcon = (props: BaseIconProps) => (
-    <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
+    <Icon spin={props.spin} className={props.className} rotate={props.rotate} name="foward" style={props.style}>
         <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5912" width="1em" height="1em" fill="currentColor">
             <path
                 d="M764.330667 592.170667l30.165333 30.165333L734.165333 682.666667l60.330667 60.330666-30.165333 30.165334-60.330667-60.330667-60.330667 60.330667-30.165333-30.165334L673.834667 682.666667l-60.330667-60.330667 30.165333-30.165333 60.330667 60.330666 60.330667-60.330666zM725.333333 512v42.666667H256v128h256v42.666666H213.333333v-213.333333h512z m47.829334-209.664l30.165333 30.165333L682.666667 453.12l-30.165334 30.165333-90.496-90.453333 30.165334-30.208 60.330666 60.330667 120.661334-120.661334zM725.333333 256v42.666667H256v128h256v42.666666H213.333333V256h512z"

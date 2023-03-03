@@ -220,7 +220,9 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                             <div className={`${styles.slideTabContent}`}>
                                 <div className={`${styles.slideTabDivider}`}></div>
                                 <div className={`${styles.slideTabTitle}`}>
-                                    <span style={{ padding: '2px 5px 2px 5px' }}>{item.label}</span>
+                                    <span className={`${styles.slideTabSpan}`} style={{ padding: '2px 5px 2px 5px' }}>
+                                        {item.label}
+                                    </span>
                                 </div>
                                 <div className={`${styles.slideTabIcon}`} data-slide-skip="true" style={{ lineHeight: 1 }} data-id={item.sheetId} onClick={this.contextMenu}>
                                     <Icon.NextIcon />

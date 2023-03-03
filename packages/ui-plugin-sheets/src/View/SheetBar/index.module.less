@@ -98,6 +98,10 @@
     margin-left: 6px;
 }
 
+.slide-tab-span {
+    outline-color: rgb(0, 162, 255);
+}
+
 .slide-tab-icon {
     width: 16px;
     height: 16px;
@@ -176,6 +180,7 @@
     border: 1px solid rgba(0, 0, 0, 0.2);
     border-radius: 0;
     transition: opacity 218ms;
+    padding: 5px;
     background: var(--bg);
     margin: 0;
     outline: 0;
@@ -189,13 +194,32 @@
 
     .sheet-bar-menu-item {
         position: relative;
-        padding: 5px 10px 5px 20px;
+        padding: 5px 10px 5px 5px;
+        text-align: left;
 
         .sheet-bar-menu-icon {
+            display: inline-block;
+            vertical-align: middle;
+            position: relative;
+            width: 20px;
+            height: 20px;
+        }
+
+        .sheet-bar-menu-svg {
             position: absolute;
-            left: 5px;
+            left: 50%;
             top: 50%;
-            transform: translateY(-50%);
+            width: 100%;
+            height: 100%;
+            font-size: 20px;
+            margin-left: -10px;
+            margin-top: -10px;
+        }
+
+        .sheet-bar-menu-title {
+            font-size: 14px;
+            vertical-align: middle;
+            padding: 5px 5px 5px 0px;
         }
 
         &-hide {

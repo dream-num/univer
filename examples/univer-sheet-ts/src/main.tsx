@@ -2,12 +2,7 @@ import { UniverSheet, UniverDoc, UniverSlide, Univer } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
-import {
-    DEFAULT_FORMULA_DATA,
-    DEFAULT_FORMULA_DATA_DEMO,
-    DEFAULT_FORMULA_DATA_DEMO1,
-    FormulaPlugin,
-} from '@univerjs/sheets-plugin-formula';
+import { DEFAULT_FORMULA_DATA, DEFAULT_FORMULA_DATA_DEMO, DEFAULT_FORMULA_DATA_DEMO1, FormulaPlugin } from '@univerjs/sheets-plugin-formula';
 import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
 import {
     DEFAULT_WORKBOOK_DATA,
@@ -19,8 +14,8 @@ import {
     DEFAULT_WORKBOOK_DATA_DOWN,
 } from '@univerjs/common-plugin-data';
 import { ClipboardPlugin } from '@univerjs/sheets-plugin-clipboard';
-import { BaseComponentPlugin } from '@univerjs/base-ui';
 import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
+import { FindPlugin } from '@univerjs/sheets-plugin-find';
 
 const uiDefaultConfigDemo = {
     container: 'universheet',
@@ -68,6 +63,7 @@ univer.install(
     })
 );
 FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(universheet);
+FindPlugin.create().installTo(universheet);
 // sheets-plugin-ui univer.install(new SheetsUI)
 // sheets-plugin-ui univer.install(new SheetsUI
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);

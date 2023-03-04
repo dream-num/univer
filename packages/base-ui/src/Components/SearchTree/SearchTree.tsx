@@ -16,6 +16,8 @@ interface IState {
 }
 
 class SearchTree extends Component<BaseSearchTreeProps, IState> {
+    input = createRef();
+
     initialize(props: BaseSearchTreeProps) {
         this.state = {
             searchValue: '',
@@ -26,8 +28,6 @@ class SearchTree extends Component<BaseSearchTreeProps, IState> {
             dataClone: [],
         };
     }
-
-    input = createRef();
 
     setLocale() {
         const locale = this.context.locale;

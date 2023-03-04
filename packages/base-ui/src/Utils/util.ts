@@ -11,12 +11,8 @@ export function isElement(element: any) {
 
 export const isDOM =
     typeof HTMLElement === 'object'
-        ? function (obj: any) {
-              return obj instanceof HTMLElement;
-          }
-        : function (obj: any) {
-              return obj && typeof obj === 'object' && obj.nodeType === 1 && typeof obj.nodeName === 'string';
-          };
+        ? (obj: any) => obj instanceof HTMLElement
+        : (obj: any) => obj && typeof obj === 'object' && obj.nodeType === 1 && typeof obj.nodeName === 'string';
 
 /**
  * DOM selector
@@ -150,7 +146,7 @@ export const getNodeindex = (elm: any) => [...elm.parentNode.children].indexOf(e
 // 防抖
 export function debounce(fn: Function, time: number) {
     let timer: any = null;
-    return function (...arg: any) {
+    return (...arg: any) => {
         clearTimeout(timer);
         timer = setTimeout(() => {
             fn(...arg);

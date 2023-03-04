@@ -2,7 +2,9 @@ export default {
     find: {
         findLabel: '查找替换',
         find: '查找',
+        advanced: '高级查找',
         replace: '替换',
+        replaceWith: '替换为',
         goto: '转到',
         location: '定位条件',
         formula: '公式',
@@ -23,6 +25,9 @@ export default {
         regexTextbox: '正则表达式匹配',
         wholeTextbox: '整词匹配',
         distinguishTextbox: '区分大小写匹配',
+        matchCase: '匹配大小写',
+        matchAll: '匹配整个单元格内容',
+        matchInFormula: '也在公式中搜索',
 
         allReplaceBtn: '全部替换',
         replaceBtn: '替换',

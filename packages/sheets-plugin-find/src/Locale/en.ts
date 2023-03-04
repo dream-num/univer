@@ -2,7 +2,9 @@ export default {
     find: {
         findLabel: 'Find and replace',
         find: 'Find',
+        advanced: 'Advanced Find',
         replace: 'Replace',
+        replaceWith: 'Replace With',
         goto: 'Go to',
         location: 'Location',
         formula: 'Formula',
@@ -19,6 +21,10 @@ export default {
 
         findTextbox: 'Find Content',
         replaceTextbox: 'Replace Content',
+
+        matchCase: 'Match case',
+        matchAll: 'Match entire cell contents',
+        matchInFormula: 'Also search within formulas',
 
         regexTextbox: 'Regular Expression',
         wholeTextbox: 'Whole word',

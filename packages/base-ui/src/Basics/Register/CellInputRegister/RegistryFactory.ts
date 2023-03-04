@@ -2,6 +2,10 @@
 class Registry {
     private _data: any[] = [];
 
+    static create() {
+        return new Registry();
+    }
+
     add(dataInstance: any) {
         this._data.push(dataInstance);
     }
@@ -13,10 +17,6 @@ class Registry {
 
     getData() {
         return this._data;
-    }
-
-    static create() {
-        return new Registry();
     }
 }
 

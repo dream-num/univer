@@ -38,7 +38,6 @@ interface CustomComponent {
         funParams?: FunParams;
         calcLocale?: string;
         range?: string;
-        onTableClick?: () => void;
         placeholderLocale?: string;
         titleLocale?: string;
         confirmTextLocale?: string;
@@ -124,7 +123,6 @@ export class SearchFormulaController {
                         funParams: this._funParams,
                         calcLocale: 'formula.formulaMore.calculationResult',
                         range: 'A1:B10',
-                        onTableClick: () => this.showCellRangeModal(true),
                     },
                 },
             },

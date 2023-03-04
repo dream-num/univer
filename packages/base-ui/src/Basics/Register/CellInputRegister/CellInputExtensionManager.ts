@@ -4,7 +4,18 @@ import { BaseCellInputExtension, BaseCellInputExtensionFactory } from './CellInp
 import { CellInputExtensionRegister } from './CellInputExtensionRegister';
 
 export class CellInputExtensionManager {
+    static register: CellInputExtensionRegister;
+
     private _cellInputExtensionFactoryList: BaseCellInputExtensionFactory[];
+
+    static create(): CellInputExtensionRegister {
+        if (!this.register) {
+            this.register = new CellInputExtensionRegister();
+            this.register.initialize();
+        }
+
+        return this.register;
+    }
 
     /**
      * inject cell position
@@ -43,16 +54,5 @@ export class CellInputExtensionManager {
             }
         }
         return extension;
-    }
-
-    static register: CellInputExtensionRegister;
-
-    static create(): CellInputExtensionRegister {
-        if (!this.register) {
-            this.register = new CellInputExtensionRegister();
-            this.register.initialize();
-        }
-
-        return this.register;
     }
 }

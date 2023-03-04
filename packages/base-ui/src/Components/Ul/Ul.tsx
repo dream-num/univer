@@ -1,6 +1,5 @@
 import { Component, createRef, cloneElement, VNode } from '../../Framework';
-import { JSXComponent } from '../../BaseComponent';
-import { BaseUlProps, UlComponent } from '../../Interfaces';
+import { BaseUlProps } from '../../Interfaces';
 import { debounce } from '../../Utils';
 import * as Icon from '../Icon';
 import styles from './index.module.less';
@@ -23,17 +22,6 @@ export class Ul extends Component<BaseUlProps, UlState> {
     ulRef = createRef<HTMLUListElement>();
 
     resizeUl: any;
-
-    protected initialize(props: BaseUlProps) {
-        this.state = {
-            style: {
-                display: 'none',
-            },
-            posStyle: {},
-        };
-
-        this.resizeUl = debounce(this.getStyle, 200);
-    }
 
     filterChildren = (node: HTMLElement) => {
         let flag;
@@ -194,7 +182,7 @@ export class Ul extends Component<BaseUlProps, UlState> {
     getIcon = (item: JSX.Element | string | null | undefined) => {
         let icon = item;
         if (typeof icon === 'string' && /Icon$/.test(icon)) {
-            icon = Icon.IconMap[icon];
+            icon = Icon[icon];
         }
         return <span className={styles.submenuArrow}>{icon}</span>;
     };
@@ -270,10 +258,15 @@ export class Ul extends Component<BaseUlProps, UlState> {
             </ul>
         );
     }
-}
 
-export class UniverUl implements UlComponent {
-    render(): JSXComponent<BaseUlProps> {
-        return Ul;
+    protected initialize(props: BaseUlProps) {
+        this.state = {
+            style: {
+                display: 'none',
+            },
+            posStyle: {},
+        };
+
+        this.resizeUl = debounce(this.getStyle, 200);
     }
 }

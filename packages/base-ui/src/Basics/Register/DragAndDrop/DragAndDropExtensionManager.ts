@@ -30,21 +30,6 @@ export class DragAndDropExtensionManager {
         this._checkExtension(data);
     }
 
-    /**
-     * Execute when the action is matched
-     * @param command
-     * @returns
-     */
-    private _checkExtension(data: IDragAndDropData[]) {
-        if (!this._DragAndDropExtensionFactoryList) return false;
-        this._DragAndDropExtensionFactoryList.forEach((extensionFactory) => {
-            const extension = extensionFactory.check(data);
-            if (extension !== false) {
-                extension.execute();
-            }
-        });
-    }
-
     dragResolver(evt: DragEvent) {
         return new Promise((resolve: (data: IDragAndDropData[]) => void, reject) => {
             if (!evt.dataTransfer) return;
@@ -81,6 +66,21 @@ export class DragAndDropExtensionManager {
             }
 
             resolve(dataList);
+        });
+    }
+
+    /**
+     * Execute when the action is matched
+     * @param command
+     * @returns
+     */
+    private _checkExtension(data: IDragAndDropData[]) {
+        if (!this._DragAndDropExtensionFactoryList) return false;
+        this._DragAndDropExtensionFactoryList.forEach((extensionFactory) => {
+            const extension = extensionFactory.check(data);
+            if (extension !== false) {
+                extension.execute();
+            }
         });
     }
 }

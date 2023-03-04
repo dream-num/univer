@@ -28,7 +28,7 @@
         "postinstall": "node scripts/postinstall.js",
         "prepare": "husky install",
         "pre-lint": "lint-staged",
-        "lint": "eslint ./packages/core/src --ext .ts,.tsx",
+        "lint": "eslint ./packages/cores/src --ext .ts,.tsx",
         "lint-and-fix": "eslint ./packages/core/src --ext .ts,.tsx --fix"
     },
     "author": "DreamNum <msoffice2@126.com>",

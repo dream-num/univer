@@ -55,43 +55,6 @@ export class SheetContainerUIController {
         this._rightMenuController = new RightMenuUIController(this._plugin, this._config.layout?.rightMenuConfig);
         this._countBarController = new CountBarUIController(this._plugin);
         this._sheetBarController = new SheetBarUIController(this._plugin);
-
-        // 初始化UI
-        // const config = {
-        //     context: this._plugin.getContext(),
-        //     config: this._config,
-        //     changeLocale: this.changeLocale,
-        //     getComponent: this.getComponent,
-        //     // 其余组件的props
-        //     methods: {
-        //         toolbar: {
-        //             getComponent: this._toolbarController.getComponent,
-        //         },
-        //         cellEditor: {
-        //             getComponent: this._cellEditorUIController.getComponent,
-        //         },
-        //         formulaBar: {
-        //             getComponent: this._formulaBarUIController.getComponent,
-        //         },
-        //         infoBar: {
-        //             getComponent: this._infoBarController.getComponent,
-        //             // renameSheet: this._infoBarController.renameSheet,
-        //         },
-        //         rightMenu: {
-        //             // getComponent: this._rightMenuController.getComponent,
-        //         },
-        //         countBar: {
-        //             // getComponent: this._countBarController.getComponent,
-        //         },
-        //         sheetBar: {
-        //             // getComponent: this._sheetBarController.getComponent,
-        //             // addSheet: this._sheetBarController.addSheet,
-        //             // selectSheet: this._sheetBarController.selectSheet,
-        //             // changeSheetName: this._sheetBarController.changeSheetName,
-        //         },
-        //     },
-        // };
-        // UI.create(config);
     }
 
     getUIConfig() {
@@ -187,6 +150,10 @@ export class SheetContainerUIController {
 
     getMainSlotController() {
         return this._slotController;
+    }
+
+    getToolbarController() {
+        return this._toolbarController;
     }
 
     UIDidMount(cb: Function) {

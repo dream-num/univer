@@ -15,7 +15,7 @@ export interface CheckboxComponent extends BaseComponent<BaseCheckboxProps> {
     render(): JSXComponent<BaseCheckboxProps>;
 }
 
-type options = {
+export type BaseCheckboxGroupOptions = {
     checked?: boolean;
     disabled?: boolean;
     name?: string;
@@ -26,7 +26,7 @@ type options = {
 export interface BaseCheckboxGroupProps extends BaseComponentProps {
     disabled?: boolean;
     name?: string;
-    options: options[];
+    options: BaseCheckboxGroupOptions[];
     onChange?: (value: string[]) => void;
 }
 

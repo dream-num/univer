@@ -462,9 +462,8 @@ export class ToolbarUIController {
     // 增加toolbar配置
     addToolbarConfig(config: IToolbarItemProps) {
         const index = this._toolList.findIndex((item) => item.name === config.name);
-        if (index > -1) {
-            this._toolList.push(config);
-        }
+        if (index > -1) return;
+        this._toolList.push(config);
     }
 
     // 删除toolbar配置
@@ -477,7 +476,7 @@ export class ToolbarUIController {
 
     // 刷新toolbar
     setToolbar() {
-        this._toolbar.setToolbar(this._toolList);
+        this._toolbar?.setToolbar(this._toolList);
     }
 
     setUIObserve<T>(msg: UIObserver<T>) {

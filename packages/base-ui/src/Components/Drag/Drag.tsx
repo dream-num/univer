@@ -20,6 +20,8 @@ interface IState {
 }
 
 class Drag extends Component<BaseDragProps, IState> {
+    root = createRef();
+
     initialize() {
         this.state = {
             left: '',
@@ -34,8 +36,6 @@ class Drag extends Component<BaseDragProps, IState> {
             offsetY: 0,
         };
     }
-
-    root = createRef();
 
     onMouseUp(e: MouseEvent) {
         window.removeEventListener('mousemove', this.onMouseMove);

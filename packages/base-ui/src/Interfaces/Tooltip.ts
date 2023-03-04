@@ -2,12 +2,12 @@ import { BaseComponent, BaseComponentProps, JSXComponent } from '../BaseComponen
 import { ComponentChildren } from '../Framework';
 
 export interface BaseTooltipProps extends BaseComponentProps {
+    [index: number]: string;
     title?: string;
     children: ComponentChildren;
     placement?: string;
     color?: string;
     styles?: {};
-    [index: number]: string;
 }
 
 export interface TooltipComponent extends BaseComponent<BaseTooltipProps> {

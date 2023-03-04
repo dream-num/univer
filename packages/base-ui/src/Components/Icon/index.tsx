@@ -73,3 +73,4 @@ export * from './Format';
 export * from './Font';
 export * from './Cell';
 export * from './Text';
+export * from './Sheet';

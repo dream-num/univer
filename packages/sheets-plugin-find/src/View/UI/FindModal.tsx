@@ -1,51 +1,68 @@
-import { BaseComponentRender, BaseComponentSheet, Component, ModalProps } from '@univerjs/base-ui';
-import { PLUGIN_NAMES } from '@univerjs/core';
-import { SheetPlugin } from '@univerjs/base-sheets';
-import { IProps } from '../../IData/IFind';
-import { FindPlugin } from '../../FindPlugin';
-import { FIND_PLUGIN_NAME } from '../../Const/PLUGIN_NAME';
-import { ModalDataProps } from '../../Controller/FindModalController';
+import { BaseCheckboxGroupOptions, BaseComponentProps, CheckboxGroup, Component, Icon, Input, Modal, Select } from '@univerjs/base-ui';
+import styles from './index.module.less';
+
+// Types for props
+export interface IProps extends BaseComponentProps {}
 
 // Types for state
 interface IState {
-    modalData: ModalProps[];
+    show: boolean;
+    title: string;
+    hideAdvanced: boolean;
 }
 
 export class FindModal extends Component<IProps, IState> {
-    Render: BaseComponentRender;
-
     active = 'find';
 
+    private _matchGroup: BaseCheckboxGroupOptions[] = [];
+
     initialize(props: IProps) {
-        // super(props);
-        const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this.Render = component.getComponentRender();
+        this._matchGroup = [
+            {
+                name: '',
+                label: 'find.matchCase',
+                value: '1',
+            },
+            {
+                name: '',
+                label: 'find.matchAll',
+                value: '2',
+            },
+            {
+                name: '',
+                label: 'find.matchInFormula',
+                value: '3',
+            },
+        ];
 
         this.state = {
-            modalData: [],
+            show: false,
+            title: 'find.find',
+            hideAdvanced: true,
         };
     }
 
     componentDidMount() {
-        const plugin = this._context.getPluginManager().getPluginByName<FindPlugin>(FIND_PLUGIN_NAME)!;
-        plugin.getObserver('onFindModalDidMountObservable')!.notifyObservers(this);
+        this.props.getComponent?.(this);
     }
 
-    setModal(modalData: ModalDataProps[]) {
-        const SheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
-
-        modalData.forEach((item) => {
-            const component = SheetPlugin.getRegisterComponent(item.children as string);
-            if (component) {
-                const Label = component.component;
-                const props = component.props ?? {};
-                item.children = <Label {...props} />;
-            }
-        });
-
+    showFindModal(show: boolean) {
         this.setState({
-            modalData,
+            show,
         });
+    }
+
+    // 国际化checkbox
+    getMatchGroup() {
+        const arr = JSON.parse(JSON.stringify(this._matchGroup));
+        arr.forEach((element: BaseCheckboxGroupOptions) => {
+            element.label = this.getLocale(element.label as string);
+        });
+        return arr;
+    }
+
+    handleChange(value) {
+        console.dir(value);
     }
 
     /**
@@ -54,20 +71,33 @@ export class FindModal extends Component<IProps, IState> {
      * @returns {void}
      */
     render() {
-        const Modal = this.Render.renderFunction('Modal');
-        const { modalData } = this.state;
+        const { show, title, hideAdvanced } = this.state;
         // Set Provider for entire Container
         return (
-            <>
-                {modalData.map((item) => {
-                    if (!item.show) return;
-                    return (
-                        <Modal title={item.title} visible={item.show} group={item.group} onCancel={item.onCancel}>
-                            {item.children}
-                        </Modal>
-                    );
-                })}
-            </>
+            <Modal className={styles.findModal} isDrag footer={false} title={this.getLocale(title)} visible={show}>
+                <div className={styles.findAdvance} style={{ display: hideAdvanced ? 'block' : 'none' }}>
+                    <Input></Input>
+                    <p>
+                        {this.getLocale('find.replace')}/{this.getLocale('find.advanced')}
+                        <Icon.Format.NextIcon />
+                    </p>
+                </div>
+                <div className={styles.box}>
+                    <span>{this.getLocale('find.find')}</span>
+                    <Input></Input>
+                </div>
+                <div className={styles.box}>
+                    <span>{this.getLocale('find.replaceWith')}</span>
+                    <Input></Input>
+                </div>
+                <div className={styles.box}>
+                    <span>{this.getLocale('find.replaceWith')}</span>
+                    <Select></Select>
+                </div>
+                <div>
+                    <CheckboxGroup options={this.getMatchGroup()} onChange={this.handleChange}></CheckboxGroup>
+                </div>
+            </Modal>
         );
     }
 }

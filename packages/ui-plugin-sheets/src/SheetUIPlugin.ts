@@ -7,6 +7,7 @@ import { zh, en } from './Locale';
 import { AppUIController } from './Controller/AppUIController';
 import { Fx } from './View/FormulaBar';
 import { SlotComponentProps } from './Controller/SlotController';
+import { IToolbarItemProps } from './Controller';
 
 export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
     private _appUIController: AppUIController;
@@ -114,5 +115,13 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
 
     addSlot(name: string, slot: SlotComponentProps, cb?: () => void) {
         this._appUIController.getSheetContainerController().getMainSlotController().addSlot(name, slot, cb);
+    }
+
+    addToolButton(config: IToolbarItemProps) {
+        this._appUIController.getSheetContainerController().getToolbarController().addToolbarConfig(config);
+    }
+
+    deleteToolButton(name: string) {
+        this._appUIController.getSheetContainerController().getToolbarController().deleteToolbarConfig(name);
     }
 }

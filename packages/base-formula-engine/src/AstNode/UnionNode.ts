@@ -1,4 +1,4 @@
-import { matchToken, operatorToken, OPERATOR_TOKEN_SET, suffixToken } from '../Basics/Token';
+import { matchToken } from '../Basics/Token';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
 import { NodeType, NODE_ORDER_MAP } from './NodeType';
@@ -16,6 +16,7 @@ export class UnionNode extends BaseAstNode {
     get nodeType() {
         return NodeType.UNION;
     }
+
     constructor(private _operatorString: string, private _functionExecutor: BaseFunction) {
         super(_operatorString);
     }
@@ -42,7 +43,7 @@ export class UnionNodeFactory extends BaseAstNodeFactory {
     create(param: string, parserDataLoader: ParserDataLoader): BaseAstNode {
         const functionExecutor = parserDataLoader.getExecutor(UNION_EXECUTOR_NAME);
         if (!functionExecutor) {
-            console.error('No function ' + param);
+            console.error(`No function ${param}`);
             return ErrorNode.create(ErrorType.NAME);
         }
         return new UnionNode(param, functionExecutor);

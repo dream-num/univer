@@ -33,52 +33,52 @@ export interface FormulaType {
 
 export const SelectCategoryType = [
     {
-        locale: 'formula.formulaMore.Math',
+        label: 'formula.formulaMore.Math',
     },
     {
-        locale: 'formula.formulaMore.Statistical',
+        label: 'formula.formulaMore.Statistical',
     },
     {
-        locale: 'formula.formulaMore.Lookup',
+        label: 'formula.formulaMore.Lookup',
     },
     {
-        locale: 'formula.formulaMore.universheet',
+        label: 'formula.formulaMore.universheet',
     },
     {
-        locale: 'formula.formulaMore.dataMining',
+        label: 'formula.formulaMore.dataMining',
     },
     {
-        locale: 'formula.formulaMore.Database',
+        label: 'formula.formulaMore.Database',
     },
     {
-        locale: 'formula.formulaMore.Date',
+        label: 'formula.formulaMore.Date',
     },
     {
-        locale: 'formula.formulaMore.Filter',
+        label: 'formula.formulaMore.Filter',
     },
     {
-        locale: 'formula.formulaMore.Financial',
+        label: 'formula.formulaMore.Financial',
     },
     {
-        locale: 'formula.formulaMore.Engineering',
+        label: 'formula.formulaMore.Engineering',
     },
     {
-        locale: 'formula.formulaMore.Logical',
+        label: 'formula.formulaMore.Logical',
     },
     {
-        locale: 'formula.formulaMore.Operator',
+        label: 'formula.formulaMore.Operator',
     },
     {
-        locale: 'formula.formulaMore.Text',
+        label: 'formula.formulaMore.Text',
     },
     {
-        locale: 'formula.formulaMore.Parser',
+        label: 'formula.formulaMore.Parser',
     },
     {
-        locale: 'formula.formulaMore.Array',
+        label: 'formula.formulaMore.Array',
     },
     {
-        locale: 'formula.formulaMore.other',
+        label: 'formula.formulaMore.other',
     },
 ];
 
@@ -106,8 +106,19 @@ export const FunList: FormulaType[] = [
         ],
     },
     {
-        n: 'SUMIF1',
-        t: 1,
+        n: 'TAN',
+        t: 0,
+        d: 'formula.functionList.TAN.d',
+        p: [
+            {
+                name: 'formula.functionList.TAN.p.rangeNumber.name',
+                detail: 'formula.functionList.TAN.p.rangeNumber.detail',
+            },
+        ],
+    },
+    {
+        n: 'SUMIF2',
+        t: 2,
         d: 'formula.functionList.SUMIF.d',
     },
     {
@@ -141,7 +152,3 @@ export const FunList: FormulaType[] = [
         d: 'formula.functionList.SUMIF.d',
     },
 ];
-
-// export { SelectCategoryType, FunList };
-
-// export type { FunctionList, P };

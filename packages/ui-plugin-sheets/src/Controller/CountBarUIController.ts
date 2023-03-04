@@ -96,7 +96,7 @@ export class CountBarUIController {
         });
     }
 
-    protected _refreshCountBarUI(): void { }
+    protected _refreshCountBarUI(): void {}
 
     protected _refreshComponent(): void {
         this._refreshCountBarUI();

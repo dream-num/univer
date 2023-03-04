@@ -30,7 +30,7 @@ export class FunctionNode extends BaseAstNode {
     }
 
     async executeAsync() {
-        const variants: Array<FunctionVariantType> = [];
+        const variants: FunctionVariantType[] = [];
         const children = this.getChildren();
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
@@ -47,7 +47,7 @@ export class FunctionNode extends BaseAstNode {
     }
 
     execute() {
-        const variants: Array<FunctionVariantType> = [];
+        const variants: FunctionVariantType[] = [];
         const children = this.getChildren();
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
@@ -68,7 +68,7 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
     create(token: string, parserDataLoader: ParserDataLoader): BaseAstNode {
         const functionExecutor = parserDataLoader.getExecutor(token);
         if (!functionExecutor) {
-            console.error('No function ' + token);
+            console.error(`No function ${token}`);
             return ErrorNode.create(ErrorType.NAME);
         }
         return new FunctionNode(token, functionExecutor);

@@ -6,7 +6,7 @@ import { NodeType } from './NodeType';
 
 interface AstNodeNodeJson {
     token: string;
-    children?: Array<AstNodeNodeJson>;
+    children?: AstNodeNodeJson[];
     nodeType: string;
 }
 
@@ -95,7 +95,7 @@ export class BaseAstNode {
         const token = this.getToken();
         const children = this.getChildren();
 
-        const childrenSerialization: Array<AstNodeNodeJson> = [];
+        const childrenSerialization: AstNodeNodeJson[] = [];
         const childrenCount = children.length;
 
         for (let i = 0; i < childrenCount; i++) {

@@ -28,6 +28,7 @@ export class OperatorNode extends BaseAstNode {
     get nodeType() {
         return NodeType.OPERATOR;
     }
+
     constructor(private _operatorString: string, private _functionExecutor: BaseFunction) {
         super(_operatorString);
     }
@@ -67,7 +68,7 @@ export class OperatorNodeFactory extends BaseAstNodeFactory {
 
         const functionExecutor = parserDataLoader.getExecutor(functionName);
         if (!functionExecutor) {
-            console.error('No function ' + param);
+            console.error(`No function ${param}`);
             return ErrorNode.create(ErrorType.NAME);
         }
         return new OperatorNode(tokenTrim, functionExecutor);

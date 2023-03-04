@@ -6,7 +6,6 @@ export type WorkBookObserver = {
     onAfterInsertSheetObservable: Observable<{ index: number; sheetId: string }>;
 
     onAfterSetSelectionObservable: Observable<void>;
-    onAfterChangeUILocaleObservable: Observable<void>;
 
     onBeforeChangeNameObservable: Observable<void>;
     onAfterChangeNameObservable: Observable<void>;

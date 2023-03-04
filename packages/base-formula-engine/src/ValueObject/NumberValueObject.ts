@@ -8,6 +8,7 @@ import { BooleanValueObject } from './BooleanValueObject';
 
 export class NumberValueObject extends BaseValueObject {
     private _value: number = 0;
+
     constructor(rawValue: string | number | boolean, isForce = false) {
         super(rawValue);
         if (isForce) {
@@ -106,7 +107,8 @@ export class NumberValueObject extends BaseValueObject {
         let currentValue = this.getValue();
         if (typeof value === 'string') {
             return ErrorValueObject.create(ErrorType.VALUE);
-        } else if (typeof value === 'number') {
+        }
+        if (typeof value === 'number') {
             this.setValue(currentValue + value);
         } else if (typeof value === 'boolean') {
             this.setValue(currentValue + (value ? 1 : 0));
@@ -118,7 +120,8 @@ export class NumberValueObject extends BaseValueObject {
         let currentValue = this.getValue();
         if (typeof value === 'string') {
             return ErrorValueObject.create(ErrorType.VALUE);
-        } else if (typeof value === 'number') {
+        }
+        if (typeof value === 'number') {
             this.setValue(currentValue - value);
         } else if (typeof value === 'boolean') {
             this.setValue(currentValue - (value ? 1 : 0));
@@ -130,7 +133,8 @@ export class NumberValueObject extends BaseValueObject {
         let currentValue = this.getValue();
         if (typeof value === 'string') {
             return ErrorValueObject.create(ErrorType.VALUE);
-        } else if (typeof value === 'number') {
+        }
+        if (typeof value === 'number') {
             this.setValue(currentValue * value);
         } else if (typeof value === 'boolean') {
             this.setValue(currentValue * (value ? 1 : 0));
@@ -142,7 +146,8 @@ export class NumberValueObject extends BaseValueObject {
         let currentValue = this.getValue();
         if (typeof value === 'string') {
             return ErrorValueObject.create(ErrorType.VALUE);
-        } else if (typeof value === 'number') {
+        }
+        if (typeof value === 'number') {
             if (value === 0) {
                 return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
             }

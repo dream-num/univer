@@ -68,7 +68,8 @@ export class Interpreter {
                 v: (objectValue as ErrorValueObject).getErrorType() as string,
                 t: CellValueType.STRING,
             };
-        } else if (objectValue.isValueObject()) {
+        }
+        if (objectValue.isValueObject()) {
             const vo = objectValue as BaseValueObject;
             const v = vo.getValue();
             if (vo.isNumber()) {
@@ -76,17 +77,17 @@ export class Interpreter {
                     v,
                     t: CellValueType.NUMBER,
                 };
-            } else if (vo.isBoolean()) {
+            }
+            if (vo.isBoolean()) {
                 return {
                     v,
                     t: CellValueType.BOOLEAN,
                 };
-            } else {
-                return {
-                    v,
-                    t: CellValueType.STRING,
-                };
             }
+            return {
+                v,
+                t: CellValueType.STRING,
+            };
         }
     }
 

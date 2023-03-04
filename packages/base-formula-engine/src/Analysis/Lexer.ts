@@ -1,8 +1,8 @@
+import { Nullable } from '@univerjs/core';
 import { ErrorType } from '../Basics/ErrorType';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, DEFAULT_TOKEN_TYPE_PARAMETER, DEFAULT_TOKEN_TYPE_ROOT } from '../Basics/TokenType';
 import { LexerNode } from './LexerNode';
-import { operatorToken, matchToken, OPERATOR_TOKEN_SET, OPERATOR_TOKEN_PRIORITY, suffixToken, SUFFIX_TOKEN_SET, prefixToken } from '../Basics/Token';
-import { Nullable } from '@univerjs/core';
+import { operatorToken, matchToken, OPERATOR_TOKEN_SET, OPERATOR_TOKEN_PRIORITY, SUFFIX_TOKEN_SET, prefixToken } from '../Basics/Token';
 
 enum bracketType {
     NORMAL,

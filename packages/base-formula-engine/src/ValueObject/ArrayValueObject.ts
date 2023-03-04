@@ -1,13 +1,10 @@
-import { CellValueType, Nullable, ObjectArray, ObjectMatrix } from '@univerjs/core';
+import { Nullable } from '@univerjs/core';
 import { fromObjectToString } from '../Basics/Calculate';
 import { CalculateValueType, IArrayValueObject } from '../Basics/Common';
-import { ErrorType, ERROR_TYPE_SET } from '../Basics/ErrorType';
+import { ErrorType } from '../Basics/ErrorType';
 import { compareToken } from '../Basics/Token';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { BaseValueObject } from './BaseValueObject';
-import { BooleanValueObject } from './BooleanValueObject';
-import { NumberValueObject } from './NumberValueObject';
-import { StringValueObject } from './StringValueObject';
 import { ValueObjectFactory } from './ValueObjectFactory';
 
 enum BatchOperatorType {

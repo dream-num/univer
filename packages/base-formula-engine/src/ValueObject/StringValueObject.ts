@@ -1,13 +1,12 @@
 import { reverseCompareOperator } from '../Basics/Calculate';
 import { CalculateValueType, ConcatenateType } from '../Basics/Common';
-import { ErrorType } from '../Basics/ErrorType';
 import { compareToken } from '../Basics/Token';
-import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { BaseValueObject } from './BaseValueObject';
 import { BooleanValueObject } from './BooleanValueObject';
 
 export class StringValueObject extends BaseValueObject {
     private _value: string;
+
     constructor(rawValue: string | number | boolean, isForce = false) {
         super(rawValue);
         if (isForce) {

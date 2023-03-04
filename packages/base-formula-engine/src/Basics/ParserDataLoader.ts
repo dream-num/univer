@@ -1,10 +1,11 @@
 import { sortRules } from '@univerjs/core';
 import { BaseAstNodeFactory } from '../AstNode/BaseAstNode';
-import { FORMULA_AST_NODE_REGISTRY, FORMULA_FUNCTION_REGISTRY } from '../Basics/Registry';
+import { FORMULA_AST_NODE_REGISTRY, FORMULA_FUNCTION_REGISTRY } from './Registry';
 import { BaseFunction } from '../Functions/BaseFunction';
 import { ISuperTable, TableOptionType } from './Common';
 import { LambdaRuntime } from './LambdaRuntime';
 import '../Functions';
+
 export class ParserDataLoader {
     private _astNodeFactoryArray: BaseAstNodeFactory[] = [];
 

@@ -54,16 +54,10 @@ export interface BaseButtonProps extends BaseComponentProps {
     style?: JSX.CSSProperties;
     unActive?: boolean;
 }
-export interface BaseCellRangeModalProps extends BaseComponentProps {
-    placeholderProps?: string;
-    valueProps?: string;
-}
+
 // component class
 export interface ButtonComponent extends BaseComponent<BaseButtonProps> {
     render(): JSXComponent<BaseButtonProps>;
-}
-export interface CellRangeModalComponent extends BaseComponent<BaseCellRangeModalProps> {
-    render(): JSXComponent<BaseCellRangeModalProps>;
 }
 
 // component type

@@ -219,7 +219,7 @@ export default {
         formulaMore: {
             valueTitle: '值',
             tipSelectDataRange: '选取数据范围',
-            tipDataRangeTile: '数据范围',
+            tipDataRangeTitle: '数据范围',
             findFunctionTitle: '查找函数',
             tipInputFunctionName: '请输入您要查找的函数名称或函数功能的简要描述',
             whole: '全部',

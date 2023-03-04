@@ -101,17 +101,7 @@ export class WorkBookObserverImpl {
             new Observable()
         );
         manager.addObserver(
-            'onAfterChangeUILocaleObservable',
-            'core',
-            new Observable()
-        );
-        manager.addObserver(
             'onSheetRenderDidMountObservable',
-            'core',
-            new Observable()
-        );
-        manager.addObserver(
-            'onAfterChangeUISkinObservable',
             'core',
             new Observable()
         );

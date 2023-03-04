@@ -1,7 +1,6 @@
 import { Avatar } from './Avatar';
 import { Button } from './Button';
 import { BorderLine } from './CanvasIcon';
-import { CellRangeModal } from './CellRangeModal';
 import { Checkbox, CheckboxGroup } from './Checkbox';
 import { Collapse, Panel } from './Collapse';
 import { ColorPicker } from './ColorPicker';
@@ -25,7 +24,11 @@ import { Tab, TabPane } from './Tabs';
 import { Tooltip } from './Tooltip';
 import { Ul } from './Ul';
 
+export * from './Prompt';
+
 export * from './Select';
+
+export * from './CellRange';
 
 export {
     Avatar,
@@ -52,7 +55,6 @@ export {
     FormatModal,
     Checkbox,
     CheckboxGroup,
-    CellRangeModal,
     Tab,
     TabPane,
     ColorPickerCircleButton,

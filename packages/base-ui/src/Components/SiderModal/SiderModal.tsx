@@ -1,4 +1,3 @@
-
 import { Component } from '../../Framework';
 import { JSXComponent } from '../../BaseComponent';
 import { BaseSiderModalProps, SiderModalComponent } from '../../Interfaces';

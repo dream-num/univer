@@ -12,6 +12,7 @@ export class EventManager {
     private _installObserver() {
         // Event = > UIcHnage
         this._observerManager.addObserver('onUIChangeObservable', 'core', new Observable());
+        this._observerManager.addObserver('onAfterChangeUISkinObservable', 'core', new Observable());
         this._observerManager.addObserver('onAfterChangeUILocaleObservable', 'core', new Observable());
         this._observerManager.addObserver('onViewComponentFocusChange', 'core', new Observable());
 

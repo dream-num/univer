@@ -3,11 +3,11 @@ import { LexerNode } from '../Analysis/LexerNode';
 import { ErrorType } from '../Basics/ErrorType';
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
-import { DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER, DEFAULT_TOKEN_TYPE_ROOT } from '../Basics/TokenType';
+import { DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../Basics/TokenType';
 import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
 import { ErrorNode } from './ErrorNode';
 import { NodeType, NODE_ORDER_MAP } from './NodeType';
-import { AstNodePromiseType, LambdaPrivacyVarType } from '../Basics/Common';
+import { LambdaPrivacyVarType } from '../Basics/Common';
 
 export const LAMBDA_TOKEN: string = 'LAMBDA';
 
@@ -15,6 +15,7 @@ export class LambdaNode extends BaseAstNode {
     get nodeType() {
         return NodeType.LAMBDA;
     }
+
     constructor(token: string, private _lambdaId: string) {
         super(token);
     }
@@ -80,7 +81,7 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
         }
 
         // const lambdaId = nanoid(8);
-        const lambdaId = Tools.generateRandomId(8)
+        const lambdaId = Tools.generateRandomId(8);
 
         const lambdaRuntime = parserDataLoader.getLambdaRuntime();
         const currentLambdaPrivacyVar = new Map<string, Nullable<BaseAstNode>>();

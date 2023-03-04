@@ -69,7 +69,7 @@ export class Observer<T = void> {
          * Defines the callback to call when the observer is notified
          */
         public callback: (eventData: T, eventState: EventState) => void
-    ) { }
+    ) {}
 }
 
 /**

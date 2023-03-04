@@ -7,7 +7,6 @@ import {
     CommandObservers,
     CommandInjectorObservers,
     Command,
-    ActionOperation,
 } from './index';
 import { Class } from '../Shared';
 import { ContextBase } from '../Basics';

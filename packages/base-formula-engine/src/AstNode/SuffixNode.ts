@@ -1,4 +1,4 @@
-import { operatorToken, OPERATOR_TOKEN_SET, suffixToken } from '../Basics/Token';
+import { suffixToken } from '../Basics/Token';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
 import { NodeType, NODE_ORDER_MAP } from './NodeType';
@@ -18,6 +18,7 @@ export class SuffixNode extends BaseAstNode {
     get nodeType() {
         return NodeType.SUFFIX;
     }
+
     constructor(private _operatorString: string, private _functionExecutor?: BaseFunction) {
         super(_operatorString);
     }
@@ -98,7 +99,7 @@ export class SuffixNodeFactory extends BaseAstNodeFactory {
 
         const functionExecutor = parserDataLoader.getExecutor(functionName);
         if (!functionExecutor) {
-            console.error('No function ' + param);
+            console.error(`No function ${param}`);
             return ErrorNode.create(ErrorType.NAME);
         }
         return new SuffixNode(tokenTrim, functionExecutor);

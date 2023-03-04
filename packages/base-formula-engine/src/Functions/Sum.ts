@@ -1,4 +1,4 @@
-import { CalculateValueType, FunctionVariantType } from '../Basics/Common';
+import { FunctionVariantType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
 import { FORMULA_FUNCTION_REGISTRY } from '../Basics/Registry';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
@@ -15,7 +15,7 @@ export class Sum extends BaseFunction {
         return FUNCTION_NAME;
     }
 
-    calculate(...variants: Array<FunctionVariantType>) {
+    calculate(...variants: FunctionVariantType[]) {
         let accumulatorAll: BaseValueObject = new NumberValueObject(0);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];

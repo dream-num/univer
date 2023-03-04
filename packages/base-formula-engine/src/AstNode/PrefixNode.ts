@@ -16,6 +16,7 @@ export class PrefixNode extends BaseAstNode {
     get nodeType() {
         return NodeType.PREFIX;
     }
+
     constructor(private _operatorString: string, private _functionExecutor?: BaseFunction) {
         super(_operatorString);
     }
@@ -37,11 +38,14 @@ export class PrefixNode extends BaseAstNode {
         // @ projection to current
         if (currentValue.isRow()) {
             return currentValue.getCellByColumn(currentColumn);
-        } else if (currentValue.isColumn()) {
+        }
+        if (currentValue.isColumn()) {
             return currentValue.getCellByRow(currentRow);
-        } else if (currentValue.isRange()) {
+        }
+        if (currentValue.isRange()) {
             return currentValue.getCellByPosition();
-        } else if (currentValue.isTable()) {
+        }
+        if (currentValue.isTable()) {
             return currentValue.getCellByPosition();
         }
 
@@ -91,7 +95,7 @@ export class PrefixNodeFactory extends BaseAstNodeFactory {
 
         const functionExecutor = parserDataLoader.getExecutor(functionName);
         if (!functionExecutor) {
-            console.error('No function ' + token);
+            console.error(`No function ${token}`);
             return ErrorNode.create(ErrorType.NAME);
         }
         return new PrefixNode(tokenTrim, functionExecutor);

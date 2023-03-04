@@ -1,5 +1,6 @@
+import { PureComponent } from 'preact/compat';
 import { Icon } from '..';
-import { ComponentChildren, Component, createRef, RefObject } from '../../Framework';
+import { ComponentChildren, createRef, RefObject } from '../../Framework';
 import { BaseMenuItem } from '../../Interfaces';
 import { Dropdown } from '../Dropdown';
 import { Input } from '../Input';
@@ -58,7 +59,7 @@ interface IState {
     value: any;
 }
 
-export class Select extends Component<BaseSelectProps, IState> {
+export class Select extends PureComponent<BaseSelectProps, IState> {
     ColorRef: any;
 
     onClick: (...arg: any) => void;
@@ -224,8 +225,8 @@ export class Select extends Component<BaseSelectProps, IState> {
     }
 
     componentWillReceiveProps(nextProps: BaseSelectProps) {
-        this.props = Object.assign(this.props, nextProps);
-        this.initData();
+        // this.props = Object.assign(this.props, nextProps);
+        // this.initData();
     }
 
     resetMenu(children: BaseSelectChildrenProps[], hideSelectedIcon?: boolean) {

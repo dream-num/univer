@@ -145,6 +145,7 @@ export class ObjectMatrix<T> {
 
     insertRows(rowIndex: number, matrix: ObjectMatrix<T>) {
         this._option.inserts(rowIndex, matrix._option);
+        console.dir(this._option);
     }
 
     spliceColumns(start: number, count: number): ObjectMatrix<T> {

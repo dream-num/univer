@@ -1,10 +1,9 @@
-import { CellValueType, ICellData, IRangeData, Nullable, ObjectArray, ObjectMatrix } from '@univerjs/core';
-import { CalculateValueType, IArrayValueObject, NodeValueType, SheetDataType, SheetNameMapType, UnitDataType } from '../Basics/Common';
+import { CellValueType, ICellData, IRangeData, Nullable } from '@univerjs/core';
+import { CalculateValueType, IArrayValueObject, NodeValueType, SheetNameMapType, UnitDataType } from '../Basics/Common';
 import { ErrorType, ERROR_TYPE_SET } from '../Basics/ErrorType';
 import { ObjectClassType } from '../Basics/ObjectClassType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { ArrayValueObject } from '../ValueObject/ArrayValueObject';
-import { BaseValueObject } from '../ValueObject/BaseValueObject';
 import { BooleanValueObject } from '../ValueObject/BooleanValueObject';
 import { NumberValueObject } from '../ValueObject/NumberValueObject';
 import { StringValueObject } from '../ValueObject/StringValueObject';
@@ -228,13 +227,14 @@ export class BaseReferenceObject extends ObjectClassType {
         const value = cell.v || 0;
         if (ERROR_TYPE_SET.has(value as string)) {
             return ErrorValueObject.create(value as ErrorType);
-        } else if (cell.t === CellValueType.BOOLEAN) {
-            return new BooleanValueObject(value);
-        } else if (cell.t === CellValueType.FORCE_STRING || cell.t === CellValueType.STRING) {
-            return new StringValueObject(value);
-        } else {
-            return new NumberValueObject(value);
         }
+        if (cell.t === CellValueType.BOOLEAN) {
+            return new BooleanValueObject(value);
+        }
+        if (cell.t === CellValueType.FORCE_STRING || cell.t === CellValueType.STRING) {
+            return new StringValueObject(value);
+        }
+        return new NumberValueObject(value);
     }
 
     getCellByRow(row: number) {

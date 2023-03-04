@@ -17,7 +17,7 @@ export class SlotController {
         this._slot = ref;
     };
 
-    addSlot<O, T = null>(name: string, slot: SlotComponentProps, cb?: () => void) {
+    addSlot(name: string, slot: SlotComponentProps, cb?: () => void) {
         if (this._slotGroup.get(name)) return;
         this._slotGroup.set(name, {
             component: slot.component,

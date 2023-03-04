@@ -237,7 +237,7 @@ export default {
         formulaMore: {
             valueTitle: 'Value',
             tipSelectDataRange: 'Select data range',
-            tipDataRangeTile: 'Data range',
+            tipDataRangeTitle: 'Data range',
             findFunctionTitle: 'Search function',
             tipInputFunctionName: 'Function name or brief description of function',
             whole: 'Whole',

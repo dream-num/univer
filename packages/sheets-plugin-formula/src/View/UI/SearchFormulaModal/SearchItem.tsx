@@ -1,17 +1,15 @@
-import { Component } from '@univerjs/base-ui';
-import { FORMULA_PLUGIN_NAME, P } from '../../../Basic';
+import { BaseComponentProps, CellRange, Component } from '@univerjs/base-ui';
+import { FormulaParamType } from '../../../Basic';
 import { FunParams } from '../../../Controller/SearchFormulaModalController';
-import { FormulaPlugin } from '../../../FormulaPlugin';
 import styles from './index.module.less';
 
-interface IProps {
+interface IProps extends BaseComponentProps {
     funParams: FunParams;
     calc: string;
-    onTableClick: () => void;
 }
 
 interface IState {
-    description: P;
+    description: FormulaParamType;
     rangeList: string[];
     index: number;
 }
@@ -26,9 +24,6 @@ export class SearchItem extends Component<IProps, IState> {
     }
 
     componentDidMount() {
-        const plugin = this.getContext().getPluginManager().getPluginByName<FormulaPlugin>(FORMULA_PLUGIN_NAME)!;
-        plugin.getObserver('onSearchItemDidMountObservable')!.notifyObservers(this);
-
         const { funParams } = this.props;
         const description = funParams?.funParams.p?.[0];
         this.setState({
@@ -55,7 +50,7 @@ export class SearchItem extends Component<IProps, IState> {
     }
 
     render() {
-        const { funParams, calc, onTableClick } = this.props;
+        const { funParams, calc } = this.props;
         const { description, rangeList } = this.state;
 
         if (!funParams) return;
@@ -65,8 +60,14 @@ export class SearchItem extends Component<IProps, IState> {
                 <div className={styles.functionParamList}>
                     {funParams.funParams?.p?.map((item, index) => (
                         <div>
-                            <span>{item.name}：</span>
-                            <CellRange onTableClick={onTableClick} value={rangeList[index]} onClick={() => this.handleClick(index)}></CellRange>
+                            <span>{item.name}:</span>
+                            <div onClick={() => this.handleClick(index)}>
+                                <CellRange
+                                    contentPlaceholder={this.getLocale('formula.formulaMore.tipDataRangeTitle')}
+                                    title={this.getLocale('formula.formulaMore.tipSelectDataRange')}
+                                    value={rangeList[index]}
+                                ></CellRange>
+                            </div>
                             <span>={'{}'}</span>
                         </div>
                     ))}

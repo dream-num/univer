@@ -5,6 +5,8 @@ import { RenderEngine } from '@univerjs/base-render';
 import { DefaultSheetUiConfig, installObserver, ISheetUIPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';
 import { zh, en } from './Locale';
 import { AppUIController } from './Controller/AppUIController';
+import { Fx } from './View/FormulaBar';
+import { SlotComponentProps } from './Controller/SlotController';
 
 export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
     private _appUIController: AppUIController;
@@ -97,6 +99,10 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
         this._appUIController.getSheetContainerController().getFormulaBarUIController().getFormulaBar().setFormulaContent(str);
     }
 
+    setFx(fx: Fx) {
+        this._appUIController.getSheetContainerController().getFormulaBarUIController().getFormulaBar().setFx(fx);
+    }
+
     /**
      * This API is used in plugins for initialization that depends on UI rendering
      * @param cb
@@ -104,5 +110,9 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
      */
     UIDidMount(cb: Function) {
         this._appUIController.getSheetContainerController().UIDidMount(cb);
+    }
+
+    addSlot(name: string, slot: SlotComponentProps, cb?: () => void) {
+        this._appUIController.getSheetContainerController().getMainSlotController().addSlot(name, slot, cb);
     }
 }

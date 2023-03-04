@@ -230,6 +230,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
                                     {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>}
                                     {<RichText {...methods.cellEditor}></RichText>}
                                 </Container>
+                                {/* <Prompt show={true} title="123" content="235" /> */}
                                 {/* extend main content */}
                             </Content>
 

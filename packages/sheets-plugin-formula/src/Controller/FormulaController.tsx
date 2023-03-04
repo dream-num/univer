@@ -81,39 +81,7 @@ export class FormulaController {
         //     ],
         // });
 
-        this._initialize();
-    }
-
-    private _initialize() {
-        this._sheetPlugin
-            .getContext()
-            .getContextObserver('onAfterChangeActiveSheetObservable')
-            .add(() => {
-                this._activeSheetId = this._sheetPlugin.getWorkbook().getActiveSheet().getSheetId();
-                this.clearArrayFormulaLineControl();
-                this.renderArrayFormulaLineControl();
-            });
-
-        this._sheetPlugin.getObserver('onChangeSelectionObserver')?.add(() => {
-            this.clearArrayFormulaLineControl();
-            this.renderArrayFormulaLineControl();
-        });
-    }
-
-    private _initRegisterComponent() {
-        // this._sheetPlugin.registerComponent(FORMULA_PLUGIN_NAME + FormulaLabel.name, FormulaLabel);
-        this._plugin
-            .getContext()
-            .getUniver()
-            .getGlobalContext()
-            .getPluginManager()
-            .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
-            .getAppUIController()
-            .getSheetContainerController()
-            .getMainSlotController()
-            .addSlot(FORMULA_PLUGIN_NAME + FormulaLabel.name, {
-                component: FormulaLabel,
-            });
+        // this._initialize();
     }
 
     getDataModel() {
@@ -146,42 +114,6 @@ export class FormulaController {
 
     getUnitId() {
         return this.getWorkbook().getUnitId();
-    }
-
-    private _toInterpreterCalculateProps(): IInterpreterDatasetConfig {
-        const workbook = this._context.getWorkBook();
-        const sheets = workbook.getSheets();
-        const sheetData: SheetDataType = {};
-        const unitData: UnitDataType = {};
-        const sheetNameMap: SheetNameMapType = {};
-
-        const currentUnitId = workbook.getUnitId();
-
-        for (let sheet of sheets) {
-            sheetData[sheet.getSheetId()] = sheet.getCellMatrix();
-            sheetNameMap[sheet.getName()] = sheet.getSheetId();
-        }
-
-        unitData[currentUnitId] = sheetData;
-
-        const formulaData = this._formulaDataModel.getFormulaData();
-
-        const activeSheet = workbook.getActiveSheet();
-
-        const rowCount = activeSheet.getRowCount();
-        const columnCount = activeSheet.getColumnCount();
-
-        return {
-            unitData,
-            formulaData,
-            sheetNameMap,
-            currentRow: -1,
-            currentColumn: -1,
-            currentSheetId: '',
-            currentUnitId,
-            rowCount,
-            columnCount,
-        };
     }
 
     addArrayFormulaData(value: ArrayFormulaDataType) {
@@ -218,5 +150,57 @@ export class FormulaController {
                 }
             }
         });
+    }
+
+    private _initRegisterComponent() {
+        // this._sheetPlugin.registerComponent(FORMULA_PLUGIN_NAME + FormulaLabel.name, FormulaLabel);
+        this._plugin
+            .getContext()
+            .getUniver()
+            .getGlobalContext()
+            .getPluginManager()
+            .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
+            .getAppUIController()
+            .getSheetContainerController()
+            .getMainSlotController()
+            .addSlot(FORMULA_PLUGIN_NAME + FormulaLabel.name, {
+                component: FormulaLabel,
+            });
+    }
+
+    private _toInterpreterCalculateProps(): IInterpreterDatasetConfig {
+        const workbook = this._context.getWorkBook();
+        const sheets = workbook.getSheets();
+        const sheetData: SheetDataType = {};
+        const unitData: UnitDataType = {};
+        const sheetNameMap: SheetNameMapType = {};
+
+        const currentUnitId = workbook.getUnitId();
+
+        for (let sheet of sheets) {
+            sheetData[sheet.getSheetId()] = sheet.getCellMatrix();
+            sheetNameMap[sheet.getName()] = sheet.getSheetId();
+        }
+
+        unitData[currentUnitId] = sheetData;
+
+        const formulaData = this._formulaDataModel.getFormulaData();
+
+        const activeSheet = workbook.getActiveSheet();
+
+        const rowCount = activeSheet.getRowCount();
+        const columnCount = activeSheet.getColumnCount();
+
+        return {
+            unitData,
+            formulaData,
+            sheetNameMap,
+            currentRow: -1,
+            currentColumn: -1,
+            currentSheetId: '',
+            currentUnitId,
+            rowCount,
+            columnCount,
+        };
     }
 }

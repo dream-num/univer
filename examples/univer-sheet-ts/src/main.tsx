@@ -67,7 +67,7 @@ univer.install(
         container: 'universheet',
     })
 );
-// FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO1).installTo(universheet);
+FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(universheet);
 // sheets-plugin-ui univer.install(new SheetsUI)
 // sheets-plugin-ui univer.install(new SheetsUI
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);

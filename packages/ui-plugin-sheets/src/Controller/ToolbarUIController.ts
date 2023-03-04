@@ -390,7 +390,7 @@ export class ToolbarUIController {
                 },
                 show: this._config.mergeCell,
                 onClick: (value: string) => {
-                    this.setMerge(value);
+                    this.setMerge(value ?? 'all');
                     this.hideTooltip();
                 },
                 name: 'mergeCell',
@@ -738,14 +738,6 @@ export class ToolbarUIController {
         this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
         this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + LineColor.name, LineColor);
         this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + LineBold.name, LineBold);
-
-        // this._sheetPlugin.getObserver('onChangeSelectionObserver')?.add(() => {
-        //     const manager = this._sheetPlugin.getSelectionManager();
-        //     const range = manager?.getCurrentCell();
-        //     if (range) {
-        //         this._changeToolbarState(range);
-        //     }
-        // });
 
         CommandManager.getCommandObservers().add(({ actions }) => {
             if (!actions || actions.length === 0) return;

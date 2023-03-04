@@ -1,6 +1,7 @@
 import { IRowData } from '../../Interfaces';
 import { ObjectArray, ObjectArrayPrimitiveType } from '../../Shared';
-import { CommandUnit, IInsertRowActionData } from '../../Command';
+import { CommandUnit } from '../../Command';
+import { IInsertRowActionData } from '../Action';
 
 /**
  * Inserts addData into rowData

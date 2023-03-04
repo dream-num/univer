@@ -1,32 +1,24 @@
-import { BaseComponentRender, BaseComponentSheet, Component, createRef, debounce, Select } from '@univerjs/base-ui';
-import { FunctionList } from '../../../Basic';
-import { FunListILabel, ILabel } from '../../../Controller/SearchFormulaModalController';
+import { BaseComponentProps, Component, createRef, debounce, Input, Select } from '@univerjs/base-ui';
+import { FormulaType } from '../../../Basic';
+import { FunListILabel, Label } from '../../../Controller/SearchFormulaModalController';
 import styles from './index.module.less';
 
-interface IProps {
-    input: ILabel;
-    select: ILabel;
+interface IProps extends BaseComponentProps {
+    select: Label[];
     funList: FunListILabel;
 }
 
 interface IState {
-    functionList: FunctionList[] | undefined;
+    functionList: FormulaType[] | undefined;
     type: number;
 }
 
 export class SearchFormulaContent extends Component<IProps, IState> {
-    private _render: BaseComponentRender;
-
     functionListRef = createRef();
 
     initialize() {
-        const component = this.getContext().getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this._render = component.getComponentRender();
-
-        const functionList = this.props.funList.children?.filter((item) => item.t === 0);
-
         this.state = {
-            functionList,
+            functionList: undefined,
             type: 0,
         };
     }
@@ -52,10 +44,10 @@ export class SearchFormulaContent extends Component<IProps, IState> {
 
     selectType(value: string, index: number) {
         const { funList } = this.props;
-        const children = funList.children?.filter((item) => item.t === index);
+        const functionList = funList.children?.filter((item) => item.t === index);
         this.setState(
             {
-                functionList: children,
+                functionList: this.getFunctionList(functionList ?? []),
                 type: index,
             },
             () => {
@@ -65,7 +57,16 @@ export class SearchFormulaContent extends Component<IProps, IState> {
     }
 
     componentDidMount() {
-        this.highLightLi(0);
+        const functionList = this.getFunctionList(this.props.funList.children?.filter((item) => item.t === 0) ?? []);
+        this.setState(
+            {
+                functionList,
+                type: 0,
+            },
+            () => {
+                this.highLightLi(0);
+            }
+        );
     }
 
     highLightLi(index: number) {
@@ -77,32 +78,57 @@ export class SearchFormulaContent extends Component<IProps, IState> {
         item[index].click();
     }
 
-    handleClick(item: FunctionList, index: number) {
+    handleClick(item: FormulaType, index: number) {
         const { funList } = this.props;
         this.highLightLi(index);
         funList.onClick(item);
     }
 
+    /**
+     * 国际化
+     */
+    getSelect() {
+        const { select } = this.props;
+        const arr = [];
+        for (let i = 0; i < select.length; i++) {
+            arr.push({
+                label: this.getLocale(select[i].label),
+            });
+        }
+        return arr;
+    }
+
+    getFunctionList(list: FormulaType[]) {
+        const functionList = JSON.parse(JSON.stringify(list));
+        for (let i = 0; i < functionList.length; i++) {
+            for (let k in functionList[i]) {
+                if (functionList[i][k] instanceof Array) {
+                    functionList[i][k] = this.getFunctionList(functionList[i][k]);
+                } else if (typeof functionList[i][k] === 'string') {
+                    functionList[i][k] = this.getLocale(functionList[i][k]);
+                }
+            }
+        }
+        return functionList;
+    }
+
     render() {
-        const Input = this._render.renderFunction('Input');
-        const { input, select, funList } = this.props;
         const { functionList } = this.state;
-        if (!input) return;
 
         return (
             <div className={styles.functionModal}>
                 <div className={styles.functionSearch}>
-                    <div className={styles.functionLabel}>{input.label}</div>
-                    <Input placeholder={input.placeholder} onChange={debounce(this.changeInput.bind(this), 50)} />
+                    <div className={styles.functionLabel}>{this.getLocale('formula.formulaMore.findFunctionTitle')}</div>
+                    <Input placeholder={this.getLocale('formula.formulaMore.tipInputFunctionName')} onChange={debounce(this.changeInput.bind(this), 50)} />
                 </div>
                 <div className={styles.functionSelect}>
-                    <div className={styles.functionLabel}>{select.label}</div>
+                    <div className={styles.functionLabel}>{this.getLocale('formula.formulaMore.selectCategory')}</div>
                     <div className={styles.functionSelector}>
-                        <Select onClick={this.selectType.bind(this)} type={0} children={select.children} hideSelectedIcon={true}></Select>
+                        <Select onClick={this.selectType.bind(this)} type={0} children={this.getSelect()} hideSelectedIcon={true}></Select>
                     </div>
                 </div>
                 <div className={styles.functionList} ref={this.functionListRef}>
-                    <div className={styles.functionLabel}>{funList.label}</div>
+                    <div className={styles.functionLabel}>{this.getLocale('formula.formulaMore.selectFunctionTitle')}</div>
                     <ul className={styles.functionLists}>
                         {functionList?.map((item, index) => (
                             <li className={`${styles.functionListsItem}`} onClick={() => this.handleClick(item, index)}>

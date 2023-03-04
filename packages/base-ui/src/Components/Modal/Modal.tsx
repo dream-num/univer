@@ -65,7 +65,7 @@ class Modal extends Component<BaseModalProps, IState> {
                                 }}
                             ></div>
                         ) : null}
-                        <Drag isDrag={isDrag}>
+                        <Drag isDrag={isDrag} className={styles.modalDrag}>
                             <div
                                 className={`${isDrag ? styles.modalDargWrapper : styles.modalWrapper}`}
                                 style={{
@@ -91,7 +91,7 @@ class Modal extends Component<BaseModalProps, IState> {
                                     <div className={styles.modalFooter}>
                                         {group.map((item) => (
                                             <Button type={item.type} onClick={() => this.handleClick(item.onClick)}>
-                                                {item.label}
+                                                {this.getLocale(item.label)}
                                             </Button>
                                         ))}
                                     </div>

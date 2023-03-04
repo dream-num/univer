@@ -1,6 +1,6 @@
 import { SheetContext, IOCContainer, UniverSheet, Plugin } from '@univerjs/core';
 import { FormulaEnginePlugin } from '@univerjs/base-formula-engine';
-import { CellEditExtensionManager, CellInputExtensionManager } from '@univerjs/base-ui';
+import { CellEditExtensionManager, CellInputExtensionManager, Icon } from '@univerjs/base-ui';
 import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
 import { zh, en } from './Locale';
 
@@ -16,13 +16,13 @@ import { SearchFormulaController } from './Controller/SearchFormulaModalControll
 import { FormulaPromptController } from './Controller/FormulaPromptController';
 
 export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
+    protected _formulaActionExtensionFactory: FormulaActionExtensionFactory;
+
     private _formulaController: FormulaController;
 
     private _searchFormulaController: SearchFormulaController;
 
     private _formulaPromptController: FormulaPromptController;
-
-    protected _formulaActionExtensionFactory: FormulaActionExtensionFactory;
 
     constructor(private _config?: IFormulaConfig) {
         super(FORMULA_PLUGIN_NAME);
@@ -51,6 +51,14 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
             this._formulaController.setFormulaEngine(formulaEngine as FormulaEnginePlugin);
 
             firstLoader(this._formulaController);
+            sheetPlugin.getComponentManager().register('FxIcon', Icon.Math.FxIcon);
+
+            sheetPlugin.setFx({
+                onClick: () => {
+                    this._searchFormulaController.showFormulaModal('SearchFormula', true);
+                },
+                icon: 'FxIcon',
+            });
         });
     }
 
@@ -110,7 +118,7 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
 
     registerExtension() {
         const cellEditRegister = CellEditExtensionManager.create();
-        cellEditRegister.add(new FormulaCellEditExtensionFactory(this));
+        cellEditRegister.add(new FormulaCellEditExtensionFactory());
 
         const cellInputRegister = CellInputExtensionManager.create();
         cellInputRegister.add(new FormulaCellInputExtensionFactory(this));

@@ -1,13 +1,14 @@
 import { ComponentChildren } from '@univerjs/base-ui';
-import { SheetPlugin, CellRangeModal } from '@univerjs/base-sheets';
+import { SheetPlugin } from '@univerjs/base-sheets';
 import { PLUGIN_NAMES } from '@univerjs/core';
-import { FORMULA_PLUGIN_NAME, FunctionList, FunList, SelectCategoryType } from '../Basic';
+import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
+import { FormulaType, FORMULA_PLUGIN_NAME, FunList, SelectCategoryType } from '../Basic';
 import { FormulaPlugin } from '../FormulaPlugin';
 import { SearchFormulaContent } from '../View/UI/SearchFormulaModal/SearchFormulaContent';
 import { SearchFormulaModal } from '../View/UI/SearchFormulaModal/SearchFormulaModal';
 import { SearchItem } from '../View/UI/SearchFormulaModal/SearchItem';
 
-interface Label {
+export interface Label {
     type?: string;
     locale?: string;
     label?: string;
@@ -21,19 +22,18 @@ export interface ILabel extends Label {
 }
 
 export interface FunListILabel extends Label {
-    children?: FunctionList[];
-    onClick: (value: FunctionList) => void;
+    children?: FormulaType[];
+    onClick: (value: FormulaType) => void;
 }
 
 export interface FunParams {
-    funParams: FunctionList;
+    funParams: FormulaType;
 }
 
 interface CustomComponent {
     name?: string;
     props: {
-        input?: ILabel;
-        select?: ILabel;
+        select?: Label[];
         funList?: FunListILabel;
         funParams?: FunParams;
         calcLocale?: string;
@@ -83,29 +83,21 @@ export class SearchFormulaController {
                 show: false,
                 group: [
                     {
-                        locale: 'button.confirm',
+                        label: 'button.confirm',
                         type: 'primary',
                         onClick: this.showSearchItemModal.bind(this),
                     },
                     {
-                        locale: 'button.cancel',
+                        label: 'button.cancel',
                     },
                 ],
                 onCancel: () => this.showFormulaModal('SearchFormula', false),
                 children: {
                     name: FORMULA_PLUGIN_NAME + SearchFormulaContent.name,
                     props: {
-                        input: {
-                            locale: 'formula.formulaMore.findFunctionTitle',
-                            placeholderLocale: 'formula.formulaMore.tipInputFunctionName',
-                        },
-                        select: {
-                            locale: 'formula.formulaMore.selectCategory',
-                            children: SelectCategoryType,
-                        },
+                        select: SelectCategoryType,
                         funList: {
                             onClick: this.selectFunParams.bind(this),
-                            locale: 'formula.formulaMore.selectFunctionTitle',
                             children: FunList,
                         },
                     },
@@ -118,11 +110,11 @@ export class SearchFormulaController {
                 mask: false,
                 group: [
                     {
-                        locale: 'button.confirm',
+                        label: 'button.confirm',
                         type: 'primary',
                     },
                     {
-                        locale: 'button.cancel',
+                        label: 'button.cancel',
                     },
                 ],
                 onCancel: () => this.showFormulaModal('SearchItem', false),
@@ -157,104 +149,10 @@ export class SearchFormulaController {
             },
         };
 
-        // this._initRegisterComponent();
-
         this._initialize();
     }
 
-    private _initialize() {
-        this._plugin.getObserver('onSearchFormulaModalDidMountObservable')!.add((component) => {
-            this._formulaModal = component;
-
-            this._modalData = this._resetLabel(this._modalData);
-            this._cellRangeModalData = this._resetLabel(this._cellRangeModalData);
-        });
-
-        this._plugin.getObserver('onSearchItemDidMountObservable')!.add((component) => {
-            this._searchItem = component;
-        });
-
-        const sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
-        sheetPlugin.getObserver('onChangeSelectionObserver')?.add((selection) => {
-            const info = selection.getCurrentCellInfo();
-            // this._searchItem.changeRange(info?.startColumn.toString() ?? '');
-        });
-    }
-
-    private _initRegisterComponent() {
-        const sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
-        sheetPlugin.registerModal(FORMULA_PLUGIN_NAME + SearchFormulaModal.name, SearchFormulaModal);
-        sheetPlugin.registerModal(FORMULA_PLUGIN_NAME + SearchItem.name, SearchItem);
-        sheetPlugin.registerComponent(FORMULA_PLUGIN_NAME + SearchFormulaContent.name, SearchFormulaContent);
-    }
-
-    private _resetLocale(label: string[] | string) {
-        const locale = this._plugin.context.getLocale();
-
-        let str = '';
-
-        if (label instanceof Array) {
-            label.forEach((item) => {
-                if (item.includes('.')) {
-                    str += locale.get(item);
-                } else {
-                    str += item;
-                }
-            });
-        } else {
-            if (label.includes('.')) {
-                str = locale.get(label);
-            } else {
-                str += label;
-            }
-        }
-
-        return str;
-    }
-
-    private _findLocale(obj: any) {
-        for (let k in obj) {
-            if (k === 'locale') {
-                obj.label = this._resetLocale(obj[k]);
-            } else if (k.endsWith('Locale')) {
-                const index = k.indexOf('Locale');
-                obj[k.slice(0, index)] = this._resetLocale(obj[k]);
-            } else if (!obj[k].$$typeof) {
-                if (Object.prototype.toString.call(obj[k]) === '[object Object]') {
-                    this._findLocale(obj[k]);
-                } else if (Object.prototype.toString.call(obj[k]) === '[object Array]') {
-                    this._resetLabel(obj[k]);
-                }
-            }
-        }
-
-        return obj;
-    }
-
-    private _resetLabel(list: any) {
-        if (list instanceof Array) {
-            for (let i = 0; i < list.length; i++) {
-                let item = list[i];
-
-                item = this._findLocale(item);
-
-                if (item.children) {
-                    item.children = this._resetLabel(item.children);
-                }
-            }
-
-            return list;
-        }
-        if (list instanceof Object) {
-            list = this._findLocale(list);
-            // for (let k in list) {
-            //     list[k] = this._findLocale(list[k]);
-            // }
-            return list;
-        }
-    }
-
-    selectFunParams(value: FunctionList) {
+    selectFunParams(value: FormulaType) {
         this._funParams.funParams = value;
     }
 
@@ -278,5 +176,30 @@ export class SearchFormulaController {
     showSearchItemModal() {
         this.showFormulaModal('SearchFormula', false);
         this.showFormulaModal('SearchItem', true);
+    }
+
+    private _initialize() {
+        this._initRegisterComponent();
+
+        const sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+        sheetPlugin.getObserver('onChangeSelectionObserver')?.add((selection) => {
+            const info = selection.getCurrentCellInfo();
+            // this._searchItem.changeRange(info?.startColumn.toString() ?? '');
+        });
+    }
+
+    private _initRegisterComponent() {
+        const sheetUiPlugin = this._plugin.getContext().getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
+        const ComponentManager = sheetUiPlugin.getComponentManager();
+        sheetUiPlugin.addSlot(FORMULA_PLUGIN_NAME + SearchFormulaModal.name, {
+            component: SearchFormulaModal,
+            props: {
+                getComponent: (ref: SearchFormulaModal) => {
+                    this._formulaModal = ref;
+                },
+            },
+        });
+        ComponentManager.register(FORMULA_PLUGIN_NAME + SearchItem.name, SearchItem);
+        ComponentManager.register(FORMULA_PLUGIN_NAME + SearchFormulaContent.name, SearchFormulaContent);
     }
 }

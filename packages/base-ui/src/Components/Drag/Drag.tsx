@@ -95,13 +95,13 @@ class Drag extends Component<BaseDragProps, IState> {
     }
 
     render() {
-        const { isDrag } = this.props;
+        const { isDrag, className = '' } = this.props;
         return (
             <>
                 {isDrag ? (
                     <div
                         ref={this.root}
-                        className={styles.drag}
+                        className={`${styles.drag} ${className}`}
                         style={{ top: this.state.top, left: this.state.left }}
                         onMouseUp={this.onMouseUp.bind(this)}
                         onMouseDown={this.onMouseDown.bind(this)}

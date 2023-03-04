@@ -1,7 +1,7 @@
 import { Component, Icon, joinClassNames } from '@univerjs/base-ui';
 import styles from './index.module.less';
 
-interface SheetBarMenuItem {
+export interface SheetBarMenuItem {
     label?: string;
     hide?: boolean;
     selected?: boolean;
@@ -55,10 +55,9 @@ export class SheetBarMenu extends Component<SheetBarMenuProps, IState> {
         return (
             <ul className={styles.sheetBarMenu} style={{ ...style, display: show ? 'block' : ' none' }}>
                 {menu.map((item) => (
-                    <li onClick={(e) => this.handleClick(e, item)} className={joinClassNames(styles.sheetBarMenuItem, item.hide ? styles.sheetBarMenuItemHide : '')}>
+                    <li onClick={(e) => this.handleClick(e, item)} className={joinClassNames(styles.sheetBarMenuItem)}>
                         <span className={styles.sheetBarMenuIcon}>
-                            {item.hide ? <Icon.HideIcon /> : ''}
-                            {item.selected ? <Icon.Data.CheckIcon className={styles.sheetBarMenuSvg} /> : ''}
+                            <EffIcon item={item}></EffIcon>
                         </span>
                         <span className={styles.sheetBarMenuTitle}>{item.label}</span>
                     </li>
@@ -66,4 +65,14 @@ export class SheetBarMenu extends Component<SheetBarMenuProps, IState> {
             </ul>
         );
     }
+}
+
+function EffIcon(props: { item: SheetBarMenuItem }) {
+    if (props.item.hide) {
+        return <Icon.HideIcon />;
+    }
+    if (props.item.selected) {
+        return <Icon.Data.CheckIcon className={styles.sheetBarMenuSvg} />;
+    }
+    return <></>;
 }

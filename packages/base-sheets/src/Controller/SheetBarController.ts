@@ -63,6 +63,7 @@ export class SheetBarControl {
                     const workbook = this._plugin.getContext().getWorkBook();
                     const worksheet = workbook.getSheetBySheetId(value as string);
                     if (worksheet) {
+                        debugger;
                         worksheet.hideSheet();
                     }
                     break;

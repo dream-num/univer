@@ -993,7 +993,7 @@ export class Worksheet {
             _commandManager.invoke(command);
             observer.notifyObservers({ sheet: this });
             const index = _workbook.getSheetIndex(this);
-            if (index) {
+            if (index != null) {
                 _workbook.activateSheetByIndex(index);
             }
         }

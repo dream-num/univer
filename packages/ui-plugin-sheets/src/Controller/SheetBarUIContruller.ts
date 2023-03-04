@@ -17,6 +17,7 @@ import {
 import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '..';
 import { SheetBar } from '../View/SheetBar';
 import styles from '../View/SheetBar/index.module.less';
+import { SheetBarMenuItem } from '../View/SheetBar/SheetBarMenu';
 
 interface CustomComponent {
     name: string;
@@ -48,7 +49,7 @@ export class SheetBarUIController {
 
     protected _sheetList: SheetUlProps[];
 
-    protected _menuList: SheetUlProps[];
+    protected _menuList: SheetBarMenuItem[];
 
     constructor(plugin: Plugin) {
         let that = this;
@@ -108,7 +109,6 @@ export class SheetBarUIController {
                     this._sheetBar.ref.current.showMenu(true);
                     that.setUIObserve('onUIChangeObservable', { name: 'unHideSheet', value: this._dataId });
                 },
-                border: true,
             },
         ];
         this._plugin
@@ -211,7 +211,7 @@ export class SheetBarUIController {
         return this._sheetList;
     }
 
-    getMenuList(): SheetUlProps[] {
+    getMenuList(): SheetBarMenuItem[] {
         return this._menuList;
     }
 
@@ -314,13 +314,15 @@ export class SheetBarUIController {
             label: sheet.getName(),
             index: String(index),
             sheetId: sheet.getSheetId(),
-            hidden: sheet.isSheetHidden(),
+            hide: sheet.isSheetHidden() === 1,
             selected: sheet.getStatus() === 1,
-            onClick: (e: MouseEvent) => {
-                const target = e.currentTarget as HTMLDivElement;
-                this._dataId = target.dataset.id as string;
-                sheet.showSheet();
-                sheet.activate();
+            onClick: (e?: MouseEvent) => {
+                if (e) {
+                    const target = e.currentTarget as HTMLDivElement;
+                    this._dataId = target.dataset.id as string;
+                    sheet.showSheet();
+                    sheet.activate();
+                }
             },
         }));
         this._sheetList = sheets

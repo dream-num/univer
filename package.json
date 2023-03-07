@@ -67,8 +67,7 @@
         "typescript": "^4.4.1-rc"
     },
     "lint-staged": {
-        "./packages/{core,base-render,base-ui,base-sheets,ui-plugin-sheets}/src/**/*.ts?(x)": [
-            ["eslint --fix","git add"]
-        ]
+        "./packages/{core,base-render,base-ui,base-sheets,ui-plugin-sheets}/src/**/*.ts?(x)": ["eslint --fix","git add"]
+        
     }
 }

@@ -47,7 +47,7 @@ export class CanvasView {
         const columnTitle = config.columnTitle;
 
         const scene = new Scene(CANVAS_VIEW_KEY.MAIN_SCENE, engine, {
-            width: 1200,
+            width: 1500,
             height: 1000,
         });
         scene.openTransformer();

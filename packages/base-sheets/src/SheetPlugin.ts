@@ -4,7 +4,7 @@ import { SheetContext, Plugin, PLUGIN_NAMES, DEFAULT_SELECTION } from '@univerjs
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
 import { CANVAS_VIEW_KEY } from './View/Render/BaseView';
 import { CanvasView } from './View/Render/CanvasView';
-import { RightMenuController, InfoBarController, SheetBarControl, CellEditorController, SheetContainerController, ToolbarController, CountBarController } from './Controller';
+import { RightMenuController, SheetBarControl, CellEditorController, SheetContainerController, ToolbarController, CountBarController } from './Controller';
 import { DEFAULT_SPREADSHEET_PLUGIN_DATA, install, ISheetPluginConfig } from './Basics';
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeActionExtension';
@@ -24,8 +24,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     private _rightMenuControl: RightMenuController;
 
     private _toolbarControl: ToolbarController;
-
-    private _infoBarControl: InfoBarController;
 
     private _formulaBarController: FormulaBarController;
 
@@ -180,10 +178,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     getToolbarControl() {
         return this._toolbarControl;
-    }
-
-    getInfoBarControl() {
-        return this._infoBarControl;
     }
 
     getSheetBarControl() {

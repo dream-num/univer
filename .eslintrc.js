@@ -1,5 +1,9 @@
 module.exports = {
   "root": true,
+  env: {
+    browser: true,
+    es2021: true,
+  },
   "parser": "@typescript-eslint/parser",
   "plugins": [
     "@typescript-eslint", "prettier", 'import', 'import-newlines', 'unused-imports'
@@ -11,6 +15,8 @@ module.exports = {
     "prettier"
   ],
   "parserOptions": {
+    "ecmaVersion": 12,
+    "sourceType": "module",
     "project": "./tsconfig.json"
   },
   rules: {

@@ -28,8 +28,8 @@
         "postinstall": "node scripts/postinstall.js",
         "prepare": "husky install",
         "pre-lint": "lint-staged",
-        "lint": "eslint ./packages/cores/src --ext .ts,.tsx",
-        "lint-and-fix": "eslint ./packages/core/src --ext .ts,.tsx --fix"
+        "lint": "eslint --cache --ext .ts,.tsx packages/{core,base-render,base-ui,base-sheets,ui-plugin-sheets}/src/*/**.ts{x,}",
+        "lint-and-fix": "eslint --ext .ts,.tsx packages/{core,base-render,base-ui,base-sheets,ui-plugin-sheets}/src/*/**.ts{x,} --fix"
     },
     "author": "DreamNum <msoffice2@126.com>",
     "license": "MIT",
@@ -67,8 +67,8 @@
         "typescript": "^4.4.1-rc"
     },
     "lint-staged": {
-        "./packages/**/*.ts?(x)": [
-            "eslint --fix"
+        "./packages/{core,base-render,base-ui,base-sheets,ui-plugin-sheets}/src/**/*.ts?(x)": [
+            ["eslint --fix","git add"]
         ]
     }
 }

@@ -44,7 +44,10 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
         this._componentManager = new ComponentManager();
         this._registerManager = new RegisterManager(this);
         this._appUIController = new AppUIController(this);
-        this.initRender();
+        // AppUIController initializes the DOM as an asynchronous rendering process, and must wait for the UI rendering to complete before starting to render the canvas
+        this.UIDidMount(() => {
+            this.initRender();
+        });
     }
 
     getConfig() {

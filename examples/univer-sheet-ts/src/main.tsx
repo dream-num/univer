@@ -60,9 +60,19 @@ universheet.installPlugin(new SheetPlugin());
 univer.install(
     new SheetUIPlugin({
         container: 'universheet',
+        layout: {
+            sheetContainerConfig: {
+            //   infoBar: false,
+            //   formulaBar: false,
+            //   toolbar:true,
+            //   sheetBar: false,
+            //   countBar: false,
+            //   rightMenu: false
+            }
+          }
     })
 );
-FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(universheet);
+// FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(universheet);
 FindPlugin.create().installTo(universheet);
 // sheets-plugin-ui univer.install(new SheetsUI)
 // sheets-plugin-ui univer.install(new SheetsUI

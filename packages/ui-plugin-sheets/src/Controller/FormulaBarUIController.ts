@@ -74,11 +74,11 @@ export class FormulaBarUIController {
                     if (cell) {
                         cellValue = cell.value;
                     }
-                    this._formulaBar.setFormulaContent(cellValue);
+                    this._formulaBar?.setFormulaContent(cellValue);
                 }
                 // empty cell
                 else {
-                    this._formulaBar.setFormulaContent('');
+                    this._formulaBar?.setFormulaContent('');
                 }
             }
         });

@@ -47,6 +47,7 @@ export class App extends Component<BaseUIProps, IState> {
                         fontSize: '14px',
                         zIndex: 100,
                     }}
+                    className="univer-dev-operation"
                 >
                     <span
                         style={{

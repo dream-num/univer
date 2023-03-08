@@ -1,7 +1,9 @@
-import { UniverSheet, UniverDoc, UniverSlide, Univer } from '@univerjs/core';
+import { UniverSheet, UniverDoc, UniverSlide, Univer, PLUGIN_NAMES } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
+import { CanvasView as SlideCanvasView } from '@univerjs/base-slides';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
+import { SlideUIPlugin } from '@univerjs/ui-plugin-slides';
 import {
     DEFAULT_FORMULA_DATA,
     DEFAULT_FORMULA_DATA_DEMO,
@@ -19,32 +21,7 @@ import {
     DEFAULT_WORKBOOK_DATA_DOWN,
 } from '@univerjs/common-plugin-data';
 import { ClipboardPlugin } from '@univerjs/sheets-plugin-clipboard';
-import { BaseComponentPlugin } from '@univerjs/base-ui';
 import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
-
-const uiDefaultConfigDemo = {
-    container: 'universheet',
-    selections: {
-        'sheet-0001': [
-            {
-                selection: {
-                    startRow: 2,
-                    endRow: 2,
-                    startColumn: 3,
-                    endColumn: 3,
-                },
-                cell: {
-                    row: 2,
-                    column: 3,
-                },
-            },
-        ],
-    },
-};
-
-const univerConfig = {
-    container: 'universheet',
-};
 
 // univer
 const univer = new Univer();
@@ -54,7 +31,6 @@ univer.install(new RenderEngine());
 
 // universheet instance
 const universheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
-// sheet.installPlugin(new RenderEngine());
 univer.addUniverSheet(universheet);
 
 // base-sheet
@@ -79,11 +55,28 @@ universheet.installPlugin(
     })
 );
 
-// // ui TODO: 不要安装
-// univer.install(new UniverComponentSheet());
-// univer.install(new BaseComponentPlugin(univerConfig));
+// base-slides init CanvasView
+univer.install(new SheetUIPlugin({
+    container:'universheet'
+}))
 
-univer.install(new SheetUIPlugin())
+
+// render canvas without ui plugin
+// const engine = univer.getGlobalContext().getPluginManager().getRequirePluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER).getEngine();
+// let container = document.querySelector('#universheet') as HTMLElement
+
+// // mount canvas to DOM container
+// engine.setContainer(container);
+
+// window.addEventListener('resize', () => {
+//     engine.resize();
+// });
+
+// // should be clear
+// setTimeout(() => {
+//     engine.resize();
+// }, 0);
+
 // sheets-plugin-ui univer.install(new SheetsUI)
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO1);

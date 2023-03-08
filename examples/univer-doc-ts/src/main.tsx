@@ -1,17 +1,26 @@
-import { UniverDoc } from '@univerjs/core';
+import { Univer, UniverDoc } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 
 import { DocPlugin } from '@univerjs/base-docs';
-import { BaseComponentPlugin } from '@univerjs/base-ui';
 import { DEFAULT_DOCUMENT_DATA_EN } from '@univerjs/common-plugin-data';
+import { DocUIPlugin } from "@univerjs/ui-plugin-docs";
 
-const docPluginConfig = {
+// univer
+const univer = new Univer();
+
+// base-render
+univer.install(new RenderEngine());
+
+// univerdoc instance
+const univerdoc = UniverDoc.newInstance(DEFAULT_DOCUMENT_DATA_EN);
+univer.addUniverDoc(univerdoc);
+
+// univerdoc.installPlugin(new DocPlugin());
+univer.install(new DocUIPlugin({
     container: 'univerdoc',
-};
-const univerDoc = UniverDoc.newInstance(DEFAULT_DOCUMENT_DATA_EN);
-
-univerDoc.installPlugin(new RenderEngine());
-univerDoc.installPlugin(new UniverComponentSheet());
-
-univerDoc.installPlugin(new DocPlugin(docPluginConfig));
-univerDoc.installPlugin(new BaseComponentPlugin());
+    layout: {
+        docContainerConfig:{
+            innerLeft: true,
+        }
+    },
+}))

@@ -1,0 +1,55 @@
+{
+    "name": "@univerjs/ui-plugin-docs",
+    "version": "0.0.1",
+    "description": "Univer normal ui-plugin-docs",
+    "keywords": [],
+    "author": "DreamNum <msoffice2@126.com>",
+    "license": "MIT",
+    "main": "./src/index.ts",
+    "module": "./src/index.ts",
+    "types": "./src/Types/index.d.ts",
+    "publishConfig": {
+        "main": "./lib/univer-ui-plugin-docs.cjs.js",
+        "module": "./lib/univer-ui-plugin-docs.es.js",
+        "types": "./lib/index.d.ts"
+    },
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*"
+    },
+    "directories": {
+        "lib": "lib"
+    },
+    "files": [
+        "lib"
+    ],
+    "scripts": {
+        "test": "jest",
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "watch": "vite build",
+        "link": "pnpm link ./",
+        "serve": "vite preview"
+    },
+    "devDependencies": {
+        "@preact/preset-vite": "2.0.0",
+        "@testing-library/preact": "^2.0.1",
+        "@types/jest": "^27.0.1",
+        "@types/node": "^16.4.6",
+        "@vitejs/plugin-legacy": "^1.5.1",
+        "less": "^4.1.1",
+        "prettier": "^2.3.2",
+        "ts-jest": "29.0.1",
+        "ts-node": "^10.2.1",
+        "typescript": "^4.4.1-rc",
+        "vite": "^2.4.4"
+    },
+    "dependencies": {
+        "@univerjs/base-render": "workspace:^0.0.1",
+        "@univerjs/base-docs": "workspace:^0.0.1",
+        "@univerjs/base-ui": "workspace:^0.0.1",
+        "@univerjs/core": "workspace:^0.0.1",
+        "css-vars-ponyfill": "^2.4.6",
+        "preact": "^10.12.1"
+    }
+}

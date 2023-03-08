@@ -23,8 +23,8 @@ export class FindModalController {
     }
 
     private _initialize() {
-        const sheetUiPlugin = this._plugin.getContext().getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
-        sheetUiPlugin.addSlot(FIND_PLUGIN_NAME + FindModal.name, {
+        const sheetUIPlugin = this._plugin.getContext().getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
+        sheetUIPlugin.addSlot(FIND_PLUGIN_NAME + FindModal.name, {
             component: FindModal,
             props: {
                 getComponent: this.getComponent.bind(this),

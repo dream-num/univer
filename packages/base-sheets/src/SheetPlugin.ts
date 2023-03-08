@@ -85,7 +85,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     }
 
     initCanvasView() {
-        const engine = this.getContext().getUniver().getGlobalContext().getPluginManager().getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
+        const engine = this.getGlobalContext().getPluginManager().getRequirePluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER).getEngine();
 
         this._canvasEngine = engine;
 

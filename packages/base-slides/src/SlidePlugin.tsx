@@ -153,7 +153,7 @@ export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
     }
 
     private _initializeRender() {
-        const engine = this.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
+        const engine = this.getGlobalContext().getPluginManager().getRequirePluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER).getEngine();
 
         this.register(engine);
     }

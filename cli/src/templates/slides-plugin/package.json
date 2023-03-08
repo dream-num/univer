@@ -1,7 +1,7 @@
 {
     "name": "@univerjs/<%= projectName %>",
     "version": "0.0.1",
-    "description": "UniverSheet normal <%= projectName %>",
+    "description": "Univer <%= projectName %>",
     "keywords": [],
     "author": "DreamNum <msoffice2@126.com>",
     "license": "MIT",

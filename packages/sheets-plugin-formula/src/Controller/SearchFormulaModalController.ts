@@ -187,9 +187,9 @@ export class SearchFormulaController {
     }
 
     private _initRegisterComponent() {
-        const sheetUiPlugin = this._plugin.getContext().getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
-        const ComponentManager = sheetUiPlugin.getComponentManager();
-        sheetUiPlugin.addSlot(FORMULA_PLUGIN_NAME + SearchFormulaModal.name, {
+        const sheetUIPlugin = this._plugin.getContext().getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
+        const ComponentManager = sheetUIPlugin.getComponentManager();
+        sheetUIPlugin.addSlot(FORMULA_PLUGIN_NAME + SearchFormulaModal.name, {
             component: SearchFormulaModal,
             props: {
                 getComponent: (ref: SearchFormulaModal) => {

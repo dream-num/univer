@@ -1,5 +1,4 @@
-import { Plugin, UniverSheet, Tools, PLUGIN_NAMES } from '@univerjs/core';
-import { Context } from '@univerjs/core/src/Basics/Context';
+import { Plugin, UniverSheet, Tools, PLUGIN_NAMES, Context } from '@univerjs/core';
 import { ComponentManager, getRefElement, RegisterManager } from '@univerjs/base-ui';
 import { RenderEngine } from '@univerjs/base-render';
 import { DefaultSheetUiConfig, installObserver, ISheetUIPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';

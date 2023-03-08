@@ -16,6 +16,7 @@ import {
     ISelectionData,
     DEFAULT_SELECTION,
     DEFAULT_CELL,
+    IGridRange,
 } from '@univerjs/core';
 import { ACTION_NAMES, ISelectionsConfig } from '../../Basics';
 import { ISelectionModelValue, ISetSelectionValueActionData, SetSelectionValueAction } from '../../Model/Action/SetSelectionValueAction';
@@ -434,6 +435,51 @@ export class SelectionManager {
 
             default:
                 break;
+        }
+
+        const cellInfo = this._mainComponent.getCellByIndex(row, column);
+
+        const selectionData = makeCellToSelection(cellInfo);
+
+        if (!selectionData) return;
+
+        const { startRow, endRow, startColumn, endColumn } = selectionData;
+
+        const main = this._mainComponent;
+        const newBounding = main.getSelectionBounding(startRow, startColumn, endRow, endColumn);
+
+        if (!newBounding) {
+            return;
+        }
+
+        const { startRow: finalStartRow, startColumn: finalStartColumn, endRow: finalEndRow, endColumn: finalEndColumn } = newBounding;
+
+        let rangeData: IRangeData = {
+            startRow: finalStartRow,
+            endRow: finalEndRow,
+            startColumn: finalStartColumn,
+            endColumn: finalEndColumn,
+        };
+        let currentCellData: IRangeCellData = {
+            row: startRow,
+            column: startColumn,
+        };
+
+        this.clearSelectionControls();
+        this.addControlToCurrentByRangeData(rangeData, currentCellData);
+        this.updatePreviousSelection();
+    }
+
+    setCurrentCell(gridData: IGridRange): void {
+        const { rangeData: girdRangeData, sheetId } = gridData;
+        const { startRow: row, startColumn: column } = girdRangeData;
+
+        // active new target sheet
+        const currentSheetId = this.getWorksheetId();
+        if (sheetId !== currentSheetId) {
+            const sheetIndex = this._worksheet?.getIndex();
+            if (sheetIndex == null) return;
+            this._plugin.getWorkbook().activateSheetByIndex(sheetIndex);
         }
 
         const cellInfo = this._mainComponent.getCellByIndex(row, column);

@@ -5,7 +5,7 @@ import { Locale, Nullable, PropsFrom } from '../Shared';
 import { Univer } from '../Basics';
 
 /**
- * Basic function of plugin
+ * Basics function of plugin
  */
 export interface BasePlugin {
     context: ContextBase;

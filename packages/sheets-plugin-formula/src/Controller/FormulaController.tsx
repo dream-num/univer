@@ -2,8 +2,8 @@ import { FormulaEnginePlugin, IInterpreterDatasetConfig, SheetDataType, UnitData
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { PLUGIN_NAMES, SheetContext } from '@univerjs/core';
 import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
-import { FORMULA_PLUGIN_NAME } from '../Basic';
-import { IFormulaConfig } from '../Basic/Interfaces/IFormula';
+import { FORMULA_PLUGIN_NAME } from '../Basics';
+import { IFormulaConfig } from '../Basics/Interfaces/IFormula';
 import { FormulaPlugin } from '../FormulaPlugin';
 import { FormulaDataModel } from '../Model/FormulaDataModel';
 import { FormulaLabel } from '../View/UI/FormulaLabel';

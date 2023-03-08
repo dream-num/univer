@@ -3,7 +3,7 @@ import { BaseComponentRender } from '@univerjs/base-ui';
 import { IToolbarItemProps, SelectTypes, SheetPlugin } from '@univerjs/base-sheets';
 
 import * as LuckyExcel from 'luckyexcel';
-import { IMPORT_XLSX_PLUGIN_NAME } from '../Basic/Const';
+import { IMPORT_XLSX_PLUGIN_NAME } from '../Basics/Const';
 import { ImportXlsxPlugin } from '../ImportXlsxPlugin';
 
 export class ImportXlsxController {

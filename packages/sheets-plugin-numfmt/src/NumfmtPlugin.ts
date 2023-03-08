@@ -1,10 +1,10 @@
 import { SheetContext, IRangeData, ObjectMatrixPrimitiveType, Plugin } from '@univerjs/core';
-import { NumfmtPluginObserve, install } from './Basic/Observer';
-import { NUMFMT_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
+import { NumfmtPluginObserve, install } from './Basics/Observer';
+import { NUMFMT_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { NumfmtController } from './Controller/NumfmtController';
 import { NumfmtModalController } from './Controller/NumfmtModalController';
 import { en, zh } from './Locale';
-import { NumfmtActionExtensionFactory } from './Basic/Register/NumfmtActionExtension';
+import { NumfmtActionExtensionFactory } from './Basics/Register/NumfmtActionExtension';
 
 export interface INumfmtPluginConfig {}
 

@@ -1,5 +1,5 @@
 import { CommandManager, Worksheet, Command, SheetContext } from '@univerjs/core';
-import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
+import { ACTION_NAMES } from '../Basics/Enum/ACTION_NAMES';
 
 export class Freeze {
     private _commandManager: CommandManager;

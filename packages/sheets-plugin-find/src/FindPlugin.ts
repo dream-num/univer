@@ -7,7 +7,7 @@ import { FIND_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 import { FindController } from './Controller/FindController';
 import en from './Locale/en';
 import zh from './Locale/zh';
-import { FindPluginObserve, install } from './Basic/Observer';
+import { FindPluginObserve, install } from './Basics/Observer';
 import { FindModalController } from './Controller/FindModalController';
 
 export interface IFindPluginConfig {}

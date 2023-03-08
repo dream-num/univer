@@ -1,7 +1,7 @@
 import { SheetActionBase, ActionObservers, ISheetActionData, Workbook } from '@univerjs/core';
 import { Allowed } from '../Controller';
 import { AddAllowed, RemoveAllowed } from '../Apply';
-import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
+import { ACTION_NAMES } from '../Basics/Enum/ACTION_NAMES';
 
 export interface IAddAllowedActionData extends ISheetActionData {
     allowed: Allowed;

@@ -1,6 +1,6 @@
 import { BaseComponentSheet, BaseSiderModalProps, Component, createRef, FunctionComponent } from '@univerjs/base-ui';
 import { SheetContext, IRangeData, Nullable, Observer, Workbook } from '@univerjs/core';
-import { PROTECTION_PLUGIN_NAME } from '../../Basic/Const';
+import { PROTECTION_PLUGIN_NAME } from '../../Basics/Const';
 import { Protection } from '../../Controller/Protection';
 
 import styles from './index.module.less';

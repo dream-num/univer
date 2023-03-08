@@ -1,6 +1,6 @@
 import { SheetActionBase, ActionObservers, ISheetActionData, Workbook } from '@univerjs/core';
 import { SetProtection } from '../Apply';
-import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
+import { ACTION_NAMES } from '../Basics/Enum/ACTION_NAMES';
 
 export interface ISetProtectionActionData extends ISheetActionData {
     enable: boolean;

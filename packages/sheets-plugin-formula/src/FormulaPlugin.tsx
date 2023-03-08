@@ -4,14 +4,14 @@ import { CellEditExtensionManager, CellInputExtensionManager, Icon } from '@univ
 import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
 import { zh, en } from './Locale';
 
-import { IFormulaConfig } from './Basic/Interfaces/IFormula';
-import { FORMULA_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
+import { IFormulaConfig } from './Basics/Interfaces/IFormula';
+import { FORMULA_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { FormulaController } from './Controller/FormulaController';
 import { firstLoader } from './Controller/FirstLoader';
-import { FormulaCellEditExtensionFactory } from './Basic/Register/FormulaCellEditExtension';
-import { FormulaCellInputExtensionFactory } from './Basic/Register/FormulaCellInputExtension';
-import { FormulaActionExtensionFactory } from './Basic/Register';
-import { FormulaPluginObserve, install } from './Basic/Observer';
+import { FormulaCellEditExtensionFactory } from './Basics/Register/FormulaCellEditExtension';
+import { FormulaCellInputExtensionFactory } from './Basics/Register/FormulaCellInputExtension';
+import { FormulaActionExtensionFactory } from './Basics/Register';
+import { FormulaPluginObserve, install } from './Basics/Observer';
 import { SearchFormulaController } from './Controller/SearchFormulaModalController';
 import { FormulaPromptController } from './Controller/FormulaPromptController';
 

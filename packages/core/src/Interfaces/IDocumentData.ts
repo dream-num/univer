@@ -199,7 +199,7 @@ export interface IHeaderAndFooterBase {
 }
 
 /**
- * Basic properties of doc style
+ * Basics properties of doc style
  */
 export interface IDocStyleBase extends IMargin {
     pageNumberStart?: number; // pageNumberStart

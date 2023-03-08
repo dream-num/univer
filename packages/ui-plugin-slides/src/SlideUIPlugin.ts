@@ -1,6 +1,6 @@
 import { Plugin, Context, UniverSlide } from '@univerjs/core';
 import { zh, en } from './Locale';
-import { SLIDE_UI_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
+import { SLIDE_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { UIController } from './Controller/UIController';
 
 export interface ISlideUIPluginConfig {}

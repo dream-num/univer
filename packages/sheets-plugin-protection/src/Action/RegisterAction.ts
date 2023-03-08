@@ -1,5 +1,5 @@
 import { CommandManager } from '@univerjs/core';
-import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
+import { ACTION_NAMES } from '../Basics/Enum/ACTION_NAMES';
 import { AddAllowedAction } from './AddAllowedAction';
 import { AddUnlockAction } from './AddUnlockAction';
 import { SetProtectionAction } from './SetProtectionAction';

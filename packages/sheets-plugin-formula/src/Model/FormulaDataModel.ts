@@ -1,6 +1,6 @@
 import { ArrayFormulaDataType, FormulaDataType } from '@univerjs/base-formula-engine';
 import { ObjectMatrix } from '@univerjs/core';
-import { IFormulaConfig, RecalculationModeType } from '../Basic/Interfaces/IFormula';
+import { IFormulaConfig, RecalculationModeType } from '../Basics/Interfaces/IFormula';
 
 export class FormulaDataModel {
     private _formulaData: FormulaDataType = {};

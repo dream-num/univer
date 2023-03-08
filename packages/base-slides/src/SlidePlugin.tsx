@@ -2,7 +2,7 @@ import { SlideContext, Plugin, PLUGIN_NAMES, UniverSheet, Tools, AsyncFunction }
 import { getRefElement, isElement, ISlotProps, RefObject, render } from '@univerjs/base-ui';
 import { Engine, RenderEngine } from '@univerjs/base-render';
 import { zh, en } from './Locale';
-import { install, SlidePluginObserve } from './Basic/Observer';
+import { install, SlidePluginObserve } from './Basics/Observer';
 import { ToolbarController } from './Controller/ToolbarController';
 import { SlideController } from './Controller/SlideController';
 import { InfoBarController } from './Controller/InfoBarController';

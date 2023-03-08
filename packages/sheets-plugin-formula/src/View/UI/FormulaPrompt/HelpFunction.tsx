@@ -1,5 +1,5 @@
 import { Component, createRef } from '@univerjs/base-ui';
-import { FormulaParamType, FormulaType } from '../../../Basic';
+import { FormulaParamType, FormulaType } from '../../../Basics';
 import styles from './index.module.less';
 
 interface IProps {

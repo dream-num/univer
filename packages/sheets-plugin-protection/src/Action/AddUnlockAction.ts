@@ -1,6 +1,6 @@
 import { SheetActionBase, ActionObservers, ISheetActionData, Range, Workbook } from '@univerjs/core';
 import { AddUnlock, RemoveUnlock } from '../Apply';
-import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
+import { ACTION_NAMES } from '../Basics/Enum/ACTION_NAMES';
 
 export interface IAddUnlockActionData extends ISheetActionData {
     unlock: Range;

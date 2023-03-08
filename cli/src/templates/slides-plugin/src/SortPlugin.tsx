@@ -1,6 +1,6 @@
 import { Plugin, SlideContext, UniverSlide } from '@univerjs/core';
 import { zh, en } from './Locale';
-import { <%= projectConstantValue %>_PLUGIN_NAME} from './Basic/Const/PLUGIN_NAME'
+import { <%= projectConstantValue %>_PLUGIN_NAME} from './Basics/Const/PLUGIN_NAME'
 import { <%= projectUpperValue %>Controller } from './Controller/<%= projectUpperValue %>Controller';
 
 export interface I<%= projectUpperValue %>PluginConfig {}

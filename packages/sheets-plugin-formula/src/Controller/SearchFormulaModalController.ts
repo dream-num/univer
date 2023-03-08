@@ -2,7 +2,7 @@ import { ComponentChildren } from '@univerjs/base-ui';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { PLUGIN_NAMES } from '@univerjs/core';
 import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
-import { FormulaType, FORMULA_PLUGIN_NAME, FunList, SelectCategoryType } from '../Basic';
+import { FormulaType, FORMULA_PLUGIN_NAME, FunList, SelectCategoryType } from '../Basics';
 import { FormulaPlugin } from '../FormulaPlugin';
 import { SearchFormulaContent } from '../View/UI/SearchFormulaModal/SearchFormulaContent';
 import { SearchFormulaModal } from '../View/UI/SearchFormulaModal/SearchFormulaModal';

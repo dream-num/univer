@@ -248,12 +248,12 @@ window.sheetFormula = {
             r: 1,
             c: 0,
             v: {
-                v: 'Basic Function',
+                v: 'Basics Function',
                 ct: {
                     fa: 'General',
                     t: 'g',
                 },
-                m: 'Basic Function',
+                m: 'Basics Function',
                 bg: null,
                 bl: 1,
                 it: 0,

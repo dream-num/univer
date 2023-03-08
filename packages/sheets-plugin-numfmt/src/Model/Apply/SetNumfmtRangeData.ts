@@ -1,6 +1,6 @@
 import { ObjectMatrix, ObjectMatrixPrimitiveType, Workbook } from '@univerjs/core';
 import { NumfmtPlugin } from '../../NumfmtPlugin';
-import { NUMFMT_PLUGIN_NAME } from '../../Basic/Const';
+import { NUMFMT_PLUGIN_NAME } from '../../Basics/Const';
 
 export function SetNumfmtRangeData(workbook: Workbook, sheetId: string, numfmtPrimitiveMatrix: ObjectMatrixPrimitiveType<string>): ObjectMatrixPrimitiveType<string> {
     const context = workbook.getContext();

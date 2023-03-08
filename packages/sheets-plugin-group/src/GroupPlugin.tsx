@@ -5,7 +5,7 @@ import { zh, en } from './Locale';
 import { IToolbarItemProps, ISlotElement } from '@univerjs/base-ui';
 import { IOCContainer } from '@univerjs/core';
 import { SheetPlugin } from '@univerjs/base-sheets';
-import { GROUP_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
+import { GROUP_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 
 export interface IGroupPluginConfig {}
 

@@ -34,7 +34,7 @@ export function toYMD_1904(ord) {
 
 // https://web.archive.org/web/20080209173858/https://www.microsoft.com/globaldev/DrIntl/columns/002/default.mspx
 // > [algorithm] is used in many Microsoft products, including all operating systems that
-// > support Arabic locales, Microsoft Office, COM, Visual Basic, VBA, and SQL Server 2000.
+// > support Arabic locales, Microsoft Office, COM, Visual Basics, VBA, and SQL Server 2000.
 export function toYMD_1317(ord) {
     if (ord === 60) {
         throw new Error('#VALUE!');

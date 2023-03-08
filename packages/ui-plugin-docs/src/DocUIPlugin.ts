@@ -1,6 +1,6 @@
 import { Plugin, Context, UniverDoc } from '@univerjs/core';
 import { zh, en } from './Locale';
-import { DOC_UI_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
+import { DOC_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { UIController } from './Controller/UIController';
 
 export interface IDocUIPluginConfig {}

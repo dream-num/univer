@@ -1,6 +1,6 @@
 import { ISheetActionData, SheetActionBase, Workbook, ActionObservers, ActionType } from '@univerjs/core';
 import { SetFrozenColumns } from '../Apply/SetFrozenColumns';
-import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
+import { ACTION_NAMES } from '../Basics/Enum/ACTION_NAMES';
 
 export interface ISetFrozenColumnsActionData extends ISheetActionData {
     numColumns: number;

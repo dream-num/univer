@@ -1,5 +1,5 @@
 import { CommandManager } from '@univerjs/core';
-import { ACTION_NAMES } from '../Basic/Enum/ACTION_NAMES';
+import { ACTION_NAMES } from '../Basics/Enum/ACTION_NAMES';
 import { SetCollapseAllColumnGroupsAction } from './SetCollapseAllColumnGroupsAction';
 import { SetCollapseAllRowGroupsAction } from './SetCollapseAllRowGroupsAction';
 

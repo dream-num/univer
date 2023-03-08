@@ -1,7 +1,7 @@
 import { ISlotElement, ISlotProps, IToolbarItemProps } from '@univerjs/base-ui';
 import { SheetContext, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univerjs/core';
 import { SheetPlugin } from '@univerjs/base-sheets';
-import { PROTECTION_PLUGIN_NAME } from './Basic/Const/PLUGIN_NAME';
+import { PROTECTION_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { IConfig } from './IData/IProtection';
 import { en, zh } from './Locale';
 import { ProtectionButton } from './UI/ProtectionButton';

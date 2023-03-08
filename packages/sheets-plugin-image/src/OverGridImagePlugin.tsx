@@ -3,7 +3,7 @@ import { Command, Plugin, PLUGIN_NAMES, Nullable, Worksheet, IOCContainer, Unive
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { IPictureProps } from '@univerjs/base-render';
 import { ACTION_NAMES } from './Const';
-import { ImagePluginObserve, install, uninstall } from './Basic/Observer';
+import { ImagePluginObserve, install, uninstall } from './Basics/Observer';
 import { OVER_GRID_IMAGE_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 import { OverImageRender } from './View/OverImageRender';
 import { BorderType } from './Enum/BorderType';

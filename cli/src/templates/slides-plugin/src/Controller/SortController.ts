@@ -1,6 +1,6 @@
 import { BaseComponentRender } from '@univerjs/base-ui';
 import { SlidePlugin } from '@univerjs/base-slides';
-import { <%= projectConstantValue %>_PLUGIN_NAME } from '../Basic/Const';
+import { <%= projectConstantValue %>_PLUGIN_NAME } from '../Basics/Const';
 import { <%= projectUpperValue %>Plugin } from '../<%= projectUpperValue %>Plugin';
 
 export class <%= projectUpperValue %>Controller {

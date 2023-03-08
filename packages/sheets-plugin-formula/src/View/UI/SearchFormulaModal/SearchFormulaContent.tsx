@@ -1,5 +1,5 @@
 import { BaseComponentProps, Component, createRef, debounce, Input, Select } from '@univerjs/base-ui';
-import { FormulaType } from '../../../Basic';
+import { FormulaType } from '../../../Basics';
 import { FunListILabel, Label } from '../../../Controller/SearchFormulaModalController';
 import styles from './index.module.less';
 

@@ -1,5 +1,5 @@
 import { BaseComponentProps, CellRange, Component } from '@univerjs/base-ui';
-import { FormulaParamType } from '../../../Basic';
+import { FormulaParamType } from '../../../Basics';
 import { FunParams } from '../../../Controller/SearchFormulaModalController';
 import styles from './index.module.less';
 

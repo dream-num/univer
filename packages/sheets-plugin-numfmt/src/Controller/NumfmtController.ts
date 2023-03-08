@@ -12,8 +12,8 @@ import {
 import { BaseComponentRender } from '@univerjs/base-ui';
 import { IToolbarItemProps, SheetPlugin } from '@univerjs/base-sheets';
 import { numfmt } from '@univerjs/base-numfmt-engine';
-import { ACTION_NAMES } from '../Basic/Enum';
-import { DEFAULT_DATA, NUMFMT_PLUGIN_NAME, NumftmConfig } from '../Basic/Const';
+import { ACTION_NAMES } from '../Basics/Enum';
+import { DEFAULT_DATA, NUMFMT_PLUGIN_NAME, NumftmConfig } from '../Basics/Const';
 import { NumfmtModel } from '../Model/NumfmtModel';
 import { NumfmtPlugin } from '../NumfmtPlugin';
 

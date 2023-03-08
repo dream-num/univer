@@ -1,1 +1,1 @@
-// Basic business components
+// Basics business components

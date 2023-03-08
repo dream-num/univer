@@ -35,7 +35,7 @@ export type ILocaleOptions = {
 };
 
 /**
- * Basic English internationalization object
+ * Basics English internationalization object
  *
  * The internationalized language pack of the plug-in will be dynamically loaded in each plug-in.
  */

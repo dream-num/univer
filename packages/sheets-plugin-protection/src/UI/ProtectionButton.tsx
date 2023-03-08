@@ -2,7 +2,7 @@ import { BaseComponentSheet, BaseIconProps, BaseSingleButtonProps, Component, Fu
 import { PLUGIN_NAMES, Nullable, Observer, Workbook } from '@univerjs/core';
 import { SheetPlugin } from '@univerjs/base-sheets';
 
-import { PROTECTION_PLUGIN_NAME } from '../Basic/Const';
+import { PROTECTION_PLUGIN_NAME } from '../Basics/Const';
 import { IProps } from '../IData/IProtection';
 
 // Types for state

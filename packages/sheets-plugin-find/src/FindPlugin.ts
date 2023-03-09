@@ -9,6 +9,7 @@ import en from './Locale/en';
 import zh from './Locale/zh';
 import { FindPluginObserve, install } from './Basics/Observer';
 import { FindModalController } from './Controller/FindModalController';
+import { TextFinder } from './Domain';
 
 export interface IFindPluginConfig {}
 
@@ -16,6 +17,8 @@ export class FindPlugin extends Plugin<FindPluginObserve> {
     private _findController: FindController;
 
     private _findModalController: FindModalController;
+
+    private _textFinder: TextFinder;
 
     constructor(config?: IFindPluginConfig) {
         super(FIND_PLUGIN_NAME);
@@ -28,6 +31,7 @@ export class FindPlugin extends Plugin<FindPluginObserve> {
     installTo(universheetInstance: UniverSheet) {
         universheetInstance.installPlugin(this);
 
+        this._textFinder = new TextFinder(this);
         this._findModalController = new FindModalController(this);
         this._findController = new FindController(this);
 
@@ -61,5 +65,9 @@ export class FindPlugin extends Plugin<FindPluginObserve> {
 
     getFindModalController() {
         return this._findModalController;
+    }
+
+    getTextFinder() {
+        return this._textFinder;
     }
 }

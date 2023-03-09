@@ -5,12 +5,81 @@
         border-radius: 4px;
     }
 
-    .find-advance {
-        p {
-            text-align: center;
-            cursor: pointer;
+    .cell-range-modal {
+        width: 30%;
+        margin-left: 1rem;
+
+        input {
+            height: 36px;
         }
     }
 
-    .box {}
+    p {
+        text-align: center;
+        cursor: pointer;
+    }
+
+    .box {
+        display: flex;
+        font-size: 14px;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        position: relative;
+
+        &:first-of-type {
+            margin-top: .5rem;
+        }
+
+        .count {
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 1;
+            height: 36px;
+            line-height: 36px;
+
+            >span {
+                padding: 0 5px;
+            }
+        }
+
+        >span {
+            width: 50px;
+            flex-shrink: 0
+        }
+
+        .select-component {
+            height: 36px;
+            cursor: pointer;
+            border: 1px solid #dadce0;
+        }
+
+        .drop-content {
+            height: 36px;
+        }
+    }
+
+    .checkbox-group {
+        display: flex;
+        flex-direction: column;
+
+        .checkbox-wrapper {
+            margin-bottom: 1rem;
+        }
+    }
+
+    .buttonGroup {
+        margin-top: 2rem;
+        display: flex;
+        flex-direction: row-reverse;
+
+        button {
+            margin-left: .5rem;
+            border-radius: 4px;
+            height: 36px;
+            line-height: 16px;
+            letter-spacing: 0.25px;
+            padding: 9px 24px 11px 24px;
+        }
+    }
 }

@@ -1,9 +1,9 @@
-import { BooleanNumber, CommandManager } from '@univerjs/core';
 import { DocPlugin, IDocPluginConfig } from '../DocPlugin';
 import { InputController } from './InputController';
 
 export class DocumentController {
     private _inputController: InputController;
+
     constructor(private _plugin: DocPlugin, private _config: Partial<IDocPluginConfig> = {}) {
         this._initialize();
     }

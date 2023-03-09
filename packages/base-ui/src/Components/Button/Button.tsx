@@ -59,7 +59,7 @@ class Button extends Component<BaseButtonProps, IState> {
 
     getClass() {
         const { isActive } = this.state;
-        const { type, shape, danger, block, loading, size, className, unActive } = this.props;
+        const { type, shape, danger, block, loading, size, className } = this.props;
         return joinClassNames(
             styles.btn,
             {
@@ -76,7 +76,7 @@ class Button extends Component<BaseButtonProps, IState> {
     }
 
     handleClick = (e: MouseEvent) => {
-        const { disabled, onClick, unActive } = this.props;
+        const { disabled, onClick, unActive = true } = this.props;
 
         if (disabled) {
             e.preventDefault();

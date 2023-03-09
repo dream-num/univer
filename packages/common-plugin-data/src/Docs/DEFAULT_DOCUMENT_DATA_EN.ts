@@ -33,9 +33,9 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     posOffset: 510,
                 },
                 angle: 0,
-                imageProperties: {
-                    contentUrl: 'https://gcore.jsdelivr.net/gh/dream-num/static@main/univer/slide/gartner-tech-2022.png',
-                },
+                // imageProperties: {
+                //     contentUrl: 'https://gcore.jsdelivr.net/gh/dream-num/static@main/univer/slide/gartner-tech-2022.png',
+                // },
             },
             layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
             behindDoc: BooleanNumber.FALSE,

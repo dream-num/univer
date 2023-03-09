@@ -1,7 +1,6 @@
-import { getColor, Rect, Documents, DocumentSkeleton } from '@univerjs/base-render';
+import { Documents, DocumentSkeleton } from '@univerjs/base-render';
 import { IDocumentData } from '@univerjs/core';
-import { BaseView, CanvasViewRegistry } from '../BaseView';
-import { CANVAS_VIEW_KEY } from '../BaseView';
+import { BaseView, CanvasViewRegistry, CANVAS_VIEW_KEY } from '../BaseView';
 
 export enum DOCS_VIEW_KEY {
     MAIN = '__DocsRender__',
@@ -15,6 +14,14 @@ export class DocsView extends BaseView {
     private _documentSkeleton: DocumentSkeleton;
 
     private _documents: Documents;
+
+    getDocumentSkeleton() {
+        return this._documentSkeleton;
+    }
+
+    getDocs() {
+        return this._documents;
+    }
 
     protected _initialize() {
         const scene = this.getScene();
@@ -70,14 +77,6 @@ export class DocsView extends BaseView {
         documents.calculatePagePosition();
 
         documents.enableEditor();
-    }
-
-    getDocumentSkeleton() {
-        return this._documentSkeleton;
-    }
-
-    getDocs() {
-        return this._documents;
     }
 
     private _buildSkeleton(snapshot: IDocumentData) {

@@ -30,7 +30,7 @@ interface SheetUl extends BaseMenuItem {
     children?: SheetUl[];
 }
 
-interface SheetUlProps extends BaseUlProps {
+export interface SheetUlProps extends BaseUlProps {
     index: string;
     color?: Nullable<string>;
     sheetId: string;

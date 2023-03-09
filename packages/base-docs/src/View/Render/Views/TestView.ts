@@ -1,4 +1,4 @@
-import { getColor, RegularPolygon, Documents, DocumentSkeleton, CustomObject, IPageRenderConfig, Transform, ptToPx, COLORS, Rect } from '@univerjs/base-render';
+import { getColor, RegularPolygon, COLORS } from '@univerjs/base-render';
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 
 const PAGE_VIEW_BACKGROUND = 'page_view_background';

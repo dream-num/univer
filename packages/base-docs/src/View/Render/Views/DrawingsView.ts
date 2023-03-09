@@ -1,4 +1,4 @@
-import { getColor, Rect, Documents, DocumentSkeleton, CustomObject, IPageRenderConfig, Transform, ptToPx, BaseObject, Picture, Liquid } from '@univerjs/base-render';
+import { Documents, BaseObject, Picture, Liquid } from '@univerjs/base-render';
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 import { DOCS_VIEW_KEY } from './DocsView';
 
@@ -51,8 +51,8 @@ export class DrawingsView extends BaseView {
                     url: objectProperties.imageProperties?.contentUrl || '',
                     left: aLeft + docsLeft + this._liquid.x,
                     top: aTop + docsTop + this._liquid.y,
-                    width: width,
-                    height: height,
+                    width,
+                    height,
                     zIndex: 11,
                     isTransformer: true,
                 });

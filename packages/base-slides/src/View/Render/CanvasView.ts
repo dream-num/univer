@@ -1,7 +1,6 @@
-import { Engine, EVENT_TYPE, IWheelEvent, Layer, Rect, Scene, SceneViewer, ScrollBar, Slide, Viewport } from '@univerjs/base-render';
-import { EventState, getColorStyle, IColorStyle, IPageElement, ISlidePage, Nullable, Registry, sortRules } from '@univerjs/core';
+import { Engine, EVENT_TYPE, IWheelEvent, Rect, Scene, ScrollBar, Slide, Viewport } from '@univerjs/base-render';
+import { EventState, getColorStyle, IColorStyle, ISlidePage, Nullable } from '@univerjs/core';
 import { SlidePlugin } from '../../SlidePlugin';
-import { SlideBar } from '../UI/SlideBar/SlideBar';
 import { ObjectProvider } from './ObjectProvider';
 
 export enum SLIDE_KEY {
@@ -29,14 +28,12 @@ export class CanvasView {
         return this._slide;
     }
 
-    createSlidePages(slideBar: SlideBar, pages: ISlidePage[]) {
-        const slideBarRef = slideBar.slideBarRef;
-        const thumbList = slideBarRef.current?.childNodes[0].childNodes;
+    createSlidePages(thumbList: NodeListOf<ChildNode> | undefined, pages: ISlidePage[]) {
         if (thumbList == null || thumbList.length !== pages.length) {
             return;
         }
 
-        for (var i = 0, len = thumbList.length; i < len; i++) {
+        for (let i = 0, len = thumbList.length; i < len; i++) {
             const thumbDom = (thumbList[i] as HTMLElement).querySelector('div');
             const page = pages[i];
             const { id } = page;
@@ -50,7 +47,7 @@ export class CanvasView {
         }
 
         setTimeout(() => {
-            for (var i = 0, len = thumbList.length; i < len; i++) {
+            for (let i = 0, len = thumbList.length; i < len; i++) {
                 const thumbDom = (thumbList[i] as HTMLElement).querySelector('div');
                 const page = pages[i];
                 const { id } = page;
@@ -99,6 +96,19 @@ export class CanvasView {
         }
 
         this._createScene(id, this._slide, page);
+    }
+
+    scrollToCenter() {
+        const viewMain = this._scene.getViewport(SLIDE_KEY.VIEW);
+        if (!viewMain) return;
+        const { left: viewPortLeft, top: viewPortTop } = this._getCenterPositionViewPort();
+
+        const { x, y } = viewMain.getBarScroll(viewPortLeft, viewPortTop);
+
+        viewMain.scrollTo({
+            x,
+            y,
+        });
     }
 
     private _initialize() {
@@ -259,7 +269,7 @@ export class CanvasView {
             height,
         });
 
-        const viewMain = new Viewport('PageViewer_' + pageId, scene, {
+        const viewMain = new Viewport(`PageViewer_${pageId}`, scene, {
             left: 0,
             top: 0,
             bottom: 0,

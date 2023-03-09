@@ -34,7 +34,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 },
                 angle: 0,
                 imageProperties: {
-                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/gartner-tech-2022.png',
+                    contentUrl: 'https://gcore.jsdelivr.net/gh/dream-num/static@main/univer/slide/gartner-tech-2022.png',
                 },
             },
             layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
@@ -60,7 +60,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 },
                 angle: 0,
                 imageProperties: {
-                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/hype-cycle-for-emerging-tech-2022.png',
+                    contentUrl: 'https://gcore.jsdelivr.net/gh/dream-num/static@main/univer/slide/hype-cycle-for-emerging-tech-2022.png',
                 },
             },
             layoutType: PositionedObjectLayoutType.WRAP_SQUARE,

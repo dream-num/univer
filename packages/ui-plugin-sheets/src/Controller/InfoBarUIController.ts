@@ -1,5 +1,5 @@
-import { Plugin } from '@univerjs/core';
 import { InfoBarModel } from '../Model/InfoBarModel';
+import { SheetUIPlugin } from '../SheetUIPlugin';
 import { InfoBar } from '../View/InfoBar';
 
 type IProps = {
@@ -21,11 +21,11 @@ export class InfoBarUIController {
 
     private _infoBar: InfoBar;
 
-    private _plugin: Plugin;
+    private _plugin: SheetUIPlugin;
 
     private _infoList: BaseInfoBarProps;
 
-    constructor(plugin: Plugin) {
+    constructor(plugin: SheetUIPlugin) {
         this._plugin = plugin;
     }
 
@@ -36,7 +36,7 @@ export class InfoBarUIController {
     };
 
     resetInfoList(list: BaseInfoBarProps) {
-        const locale = this._plugin.getContext().getLocale();
+        const locale = this._plugin.getGlobalContext().getLocale();
         for (let k in list) {
             if (list[k].locale) {
                 list[k].label = locale.get(list[k].locale);

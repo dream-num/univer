@@ -1,216 +1,84 @@
-import { SlideContext, Plugin, PLUGIN_NAMES, UniverSheet, Tools, AsyncFunction } from '@univerjs/core';
-import { getRefElement, isElement, ISlotProps, RefObject, render } from '@univerjs/base-ui';
+import { SlideContext, Plugin, PLUGIN_NAMES, UniverSlide } from '@univerjs/core';
 import { Engine, RenderEngine } from '@univerjs/base-render';
 import { zh, en } from './Locale';
-import { install, SlidePluginObserve } from './Basics/Observer';
-import { ToolbarController } from './Controller/ToolbarController';
-import { SlideController } from './Controller/SlideController';
-import { InfoBarController } from './Controller/InfoBarController';
-import { BaseSlideContainerConfig, defaultLayout, ILayout, ISlidePluginConfigBase, SlideContainer } from './View/UI/SlideContainer';
-import { SlideBarController } from './Controller/SlideBarController';
+import { install, SlidePluginObserve, uninstall } from './Basics/Observer';
 import { CanvasView } from './View/Render';
 
-export interface ISlidePluginConfig extends ISlidePluginConfigBase {
-    container: HTMLElement | string;
-}
+export interface ISlidePluginConfig {}
 
-const DEFAULT_SLIDE_PLUGIN_DATA = {
-    container: 'universlide',
-    layout: defaultLayout,
-};
+const DEFAULT_SLIDE_PLUGIN_DATA = {};
 
 export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
     private _config: ISlidePluginConfig;
-
-    private _infoBarControl: InfoBarController;
-
-    private _splitLeftRef: RefObject<HTMLDivElement>;
-
-    private _contentRef: RefObject<HTMLDivElement>;
-
-    private _addButtonFunc: Function;
-
-    private _addSiderFunc: AsyncFunction<ISlotProps>;
-
-    private _addMainFunc: Function;
-
-    private _showSiderByNameFunc: Function;
-
-    private _showMainByNameFunc: Function;
 
     private _canvasEngine: Engine;
 
     private _canvasView: CanvasView;
 
-    private _toolbarControl: ToolbarController;
-
-    private _slideBarControl: SlideBarController;
-
-    private _SlideController: SlideController;
-
-    private _componentList: Map<string, any>;
-
     constructor(config: Partial<ISlidePluginConfig> = {}) {
         super(PLUGIN_NAMES.SLIDE);
 
-        this._config = Tools.commonExtend(DEFAULT_SLIDE_PLUGIN_DATA, config);
+        this._config = Object.assign(DEFAULT_SLIDE_PLUGIN_DATA, config);
     }
 
     static create(config?: ISlidePluginConfig) {
         return new SlidePlugin(config);
     }
 
-    installTo(universheetInstance: UniverSheet) {
-        universheetInstance.installPlugin(this);
+    installTo(universlideInstance: UniverSlide) {
+        universlideInstance.installPlugin(this);
     }
 
-    initialize(): void {
-        const context = this.getContext();
+    initialize(context: SlideContext): void {
+        this.context = context;
 
-        this.getObserver('onSlideContainerDidMountObservable')?.add(() => {
-            this._initializeRender();
-        });
-
-        /**
-         * load more Locale object
-         */
-        context.getLocale().load({
+        this.getGlobalContext().getLocale().load({
             en,
             zh,
         });
-
-        this._componentList = new Map();
-
-        const layout = this._config.layout as ILayout;
-
-        if (layout.toolbar) {
-            this._toolbarControl = new ToolbarController(this);
-        }
-        if (layout.infoBar) {
-            this._infoBarControl = new InfoBarController(this);
-        }
-
-        this._slideBarControl = new SlideBarController(this);
-        this._SlideController = new SlideController(this);
-
-        const slideContainer = this._initContainer(this._config.container);
-
-        const config: BaseSlideContainerConfig = {
-            skin: 'default',
-            layout: this._config.layout,
-            container: slideContainer,
-            context,
-            getSplitLeftRef: (ref) => {
-                this._splitLeftRef = ref;
-            },
-            getContentRef: (ref) => {
-                this._contentRef = ref;
-            },
-            addButton: (cb: Function) => {
-                this._addButtonFunc = cb;
-            },
-            addSider: (cb: AsyncFunction<ISlotProps>) => {
-                this._addSiderFunc = cb;
-            },
-            addMain: (cb: Function) => {
-                this._addMainFunc = cb;
-            },
-            showSiderByName: (cb: Function) => {
-                this._showSiderByNameFunc = cb;
-            },
-            showMainByName: (cb: Function) => {
-                this._showMainByNameFunc = cb;
-            },
-            onDidMount: () => {},
-        };
-
-        render(<SlideContainer config={config} />, slideContainer);
-    }
-
-    /**
-     * Convert id to DOM
-     * @param container
-     * @returns
-     */
-    private _initContainer(container: HTMLElement | string) {
-        let slideContainer = null;
-        if (typeof container === 'string') {
-            const containerDOM = document.getElementById(container);
-            if (containerDOM == null) {
-                slideContainer = document.createElement('div');
-                slideContainer.id = container;
-            } else {
-                slideContainer = containerDOM;
-            }
-        } else if (isElement(container)) {
-            slideContainer = container;
-        } else {
-            slideContainer = document.createElement('div');
-            slideContainer.id = 'universlide';
-        }
-
-        return slideContainer;
-    }
-
-    private _initializeRender() {
-        const engine = this.getGlobalContext().getPluginManager().getRequirePluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER).getEngine();
-
-        this.register(engine);
-    }
-
-    register(engineInstance: Engine) {
-        // The preact ref component cannot determine whether ref.current or ref.current.base is DOM
-        let container: HTMLElement = getRefElement(this.getContentRef());
-
-        this._canvasEngine = engineInstance;
-
-        engineInstance.setContainer(container);
-
-        this._canvasView = new CanvasView(engineInstance, this);
-        window.addEventListener('resize', () => {
-            engineInstance.resize();
-        });
-        // window.onresize = () => {
-        //     engineInstance.resize();
-        // };
+        install(this);
+        this.initConfig();
+        this.initController();
+        this.initCanvasView();
+        this.registerExtension();
     }
 
     getConfig() {
         return this._config;
     }
 
-    getContentRef(): RefObject<HTMLDivElement> {
-        return this._contentRef;
+    initConfig() {}
+
+    initController() {}
+
+    initCanvasView() {
+        const engine = this.getGlobalContext().getPluginManager().getRequirePluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER).getEngine();
+
+        this._canvasEngine = engine;
+
+        if (this._canvasView == null) {
+            this._canvasView = new CanvasView(engine, this);
+        }
     }
 
-    getToolbarControl() {
-        return this._toolbarControl;
+    onMounted(ctx: SlideContext): void {
+        this.initialize(ctx);
     }
 
-    getInfoBarControl() {
-        return this._infoBarControl;
+    onDestroy(): void {
+        super.onDestroy();
+        uninstall(this);
     }
 
-    getSlideBarControl() {
-        return this._slideBarControl;
+    registerExtension() {}
+
+    listenEventManager() {}
+
+    getCanvasEngine() {
+        return this._canvasEngine;
     }
 
     getCanvasView() {
         return this._canvasView;
-    }
-
-    onMounted(): void {
-        install(this);
-        this.initialize();
-    }
-
-    onDestroy(): void {}
-
-    registerComponent(name: string, component: any) {
-        this._componentList.set(name, component);
-    }
-
-    getRegisterComponent(name: string) {
-        return this._componentList.get(name);
     }
 }

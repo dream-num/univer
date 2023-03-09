@@ -59,7 +59,7 @@ export class SheetContainerUIController {
 
     getUIConfig() {
         const config = {
-            context: this._plugin.getContext(),
+            context: this._plugin.getGlobalContext(),
             config: this._config,
             changeLocale: this.changeLocale,
             getComponent: this.getComponent,
@@ -105,7 +105,7 @@ export class SheetContainerUIController {
         this._sheetContainer = ref;
         this._plugin.getObserver('onUIDidMount')?.notifyObservers(this._sheetContainer);
 
-        this._initSheetContainer();
+        this.setSheetContainer();
     };
 
     /**
@@ -169,7 +169,7 @@ export class SheetContainerUIController {
         this.setEventManager();
     }
 
-    private _initSheetContainer() {
+    private setSheetContainer() {
         // handle drag event
         this._dragManager.handleDragAction(getRefElement(this._sheetContainer));
     }

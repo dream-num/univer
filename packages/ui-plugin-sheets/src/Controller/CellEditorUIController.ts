@@ -25,7 +25,7 @@ export class CellEditorUIController {
 
     constructor(plugin: SheetUIPlugin) {
         this._plugin = plugin;
-        this._sheetPlugin = plugin.getUniver().getCurrentUniverSheetInstance().context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+        this._sheetPlugin = plugin.getUniver().getCurrentUniverSheetInstance().context.getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
 
         this._initialize();
     }
@@ -33,7 +33,7 @@ export class CellEditorUIController {
     // Get the RichText component
     getComponent = (ref: RichText) => {
         this._richText = ref;
-        this._initRichText();
+        this.setRichText();
     };
 
     getCellEditor() {
@@ -220,7 +220,7 @@ export class CellEditorUIController {
         // this._richTextEditEle
     }
 
-    private _initRichText() {
+    private setRichText() {
         this._richTextEle = getRefElement(this._richText.container);
         this._richTextEditEle = $$('div', this._richTextEle);
 

@@ -26,7 +26,7 @@ export class FormulaBarUIController {
     getComponent = (ref: FormulaBar) => {
         this._formulaBar = ref;
 
-        this._initFormulaBar();
+        this.setFormulaBar();
     };
 
     getFormulaBar() {
@@ -88,7 +88,7 @@ export class FormulaBarUIController {
         // set NamedRange data
     }
 
-    private _initFormulaBar() {
+    private setFormulaBar() {
         // update named ranges data
         this._namedRanges = this._sheetPlugin.getContext().getWorkBook().getConfig().namedRanges;
 

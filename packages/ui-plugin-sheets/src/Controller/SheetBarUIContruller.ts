@@ -235,6 +235,9 @@ export class SheetBarUIController {
 
     copySheet() {}
 
+    /**
+     * Arrow functions must be used to bind `this`, otherwise `this` will be lost when the DOM component triggers the callback
+     */
     addSheet = (position?: string, config?: SheetUlProps): void => {
         this.setUIObserve('onUIChangeObservable', {
             name: 'addSheet',

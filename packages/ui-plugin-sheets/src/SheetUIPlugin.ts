@@ -1,7 +1,7 @@
 import { Plugin, UniverSheet, Tools, PLUGIN_NAMES, Context } from '@univerjs/core';
 import { ComponentManager, getRefElement, RegisterManager } from '@univerjs/base-ui';
 import { RenderEngine } from '@univerjs/base-render';
-import { DefaultSheetUiConfig, installObserver, ISheetUIPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';
+import { DefaultSheetUIConfig, installObserver, ISheetUIPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';
 import { zh, en } from './Locale';
 import { AppUIController } from './Controller/AppUIController';
 import { Fx } from './View/FormulaBar';
@@ -19,7 +19,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
 
     constructor(config?: ISheetUIPluginConfig) {
         super(SHEET_UI_PLUGIN_NAME);
-        this._config = Tools.deepMerge({}, DefaultSheetUiConfig, config);
+        this._config = Tools.deepMerge({}, DefaultSheetUIConfig, config);
     }
 
     static create(config?: ISheetUIPluginConfig) {

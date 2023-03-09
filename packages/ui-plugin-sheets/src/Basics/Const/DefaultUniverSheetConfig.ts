@@ -62,7 +62,7 @@ export const DefaultSheetContainerConfig = {
     sheetBar: true,
 };
 
-export const DefaultSheetUiConfig = {
+export const DefaultSheetUIConfig = {
     layout: {
         sheetContainerConfig: DefaultSheetContainerConfig,
         rightMenuConfig: DefaultRightMenuConfig,

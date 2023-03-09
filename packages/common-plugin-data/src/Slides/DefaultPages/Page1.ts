@@ -22,7 +22,7 @@ export const DEFAULT_FIRST_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/Picture1.jpg',
+                    contentUrl: 'https://gcore.jsdelivr.net/gh/dream-num/static@main/univer/slide/Picture1.jpg',
                 },
             },
         },

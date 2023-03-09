@@ -1,5 +1,5 @@
 import { Engine, RenderEngine } from '@univerjs/base-render';
-import { SheetContext, Plugin, PLUGIN_NAMES, DEFAULT_SELECTION } from '@univerjs/core';
+import { SheetContext, Plugin, PLUGIN_NAMES, DEFAULT_SELECTION, UniverSheet } from '@univerjs/core';
 
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
 import { CANVAS_VIEW_KEY } from './View/Render/BaseView';
@@ -40,6 +40,14 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     constructor(config?: Partial<ISheetPluginConfig>) {
         super(PLUGIN_NAMES.SPREADSHEET);
         this._config = Object.assign(DEFAULT_SPREADSHEET_PLUGIN_DATA, config);
+    }
+
+    static create(config?: ISheetPluginConfig) {
+        return new SheetPlugin(config);
+    }
+
+    installTo(universheetInstance: UniverSheet) {
+        universheetInstance.installPlugin(this);
     }
 
     initialize(context: SheetContext): void {

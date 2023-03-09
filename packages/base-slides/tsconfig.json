@@ -34,5 +34,5 @@
     "include": [
         "src/**/*",
         "test/**/*.test.(ts|tsx|js)"
-    ]
+, "../ui-plugin-slides/src/View/SlideBar", "../ui-plugin-slides/src/Controller/SlideBarUIController.ts"    ]
 }

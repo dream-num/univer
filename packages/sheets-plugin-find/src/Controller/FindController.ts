@@ -14,7 +14,6 @@ export class FindController {
             name: FIND_PLUGIN_NAME,
             toolbarType: 1,
             tooltip: 'find.findLabel',
-            unActive: true,
             customLabel: {
                 name: 'SearchIcon',
             },

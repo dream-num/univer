@@ -21,7 +21,7 @@ export default {
 
         findTextbox: 'Find Content',
         replaceTextbox: 'Replace Content',
-
+        search: 'Search',
         matchCase: 'Match case',
         matchAll: 'Match entire cell contents',
         matchInFormula: 'Also search within formulas',
@@ -39,6 +39,8 @@ export default {
         modeTip: 'This operation is not available in this mode',
 
         searchTargetSheet: 'Sheet',
+        specific: 'Specific range',
+        searchAll: 'All sheets',
         searchTargetCell: 'Cell',
         searchTargetValue: 'Value',
 

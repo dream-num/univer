@@ -38,6 +38,8 @@ export default {
         modeTip: '该模式下不可进行此操作',
 
         searchTargetSheet: '工作表',
+        specific: '具体范围',
+        searchAll: '所有工作表',
         searchTargetCell: '单元格',
         searchTargetValue: '值',
 
@@ -45,6 +47,7 @@ export default {
 
         noReplceTip: '没有可替换的内容',
         noMatchTip: '找不到匹配项',
+        search: '搜索',
 
         successTip: '已经帮您搜索并进行了${xlength}处替换',
 

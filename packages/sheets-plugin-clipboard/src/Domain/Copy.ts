@@ -2,7 +2,7 @@ import { SheetContext, PLUGIN_NAMES, Tools, handleJsonToDom, handleStyleToString
 import { SheetPlugin, SelectionModel, SelectionControl } from '@univerjs/base-sheets';
 import { RightMenuProps, SheetUIPlugin, SHEET_UI_PLUGIN_NAME, RightMenuItem } from '@univerjs/ui-plugin-sheets';
 import { Clipboard } from './Clipboard';
-import { ClipboardInput } from '../UI/ClipboardInput';
+// import { ClipboardInput } from '../UI/ClipboardInput';
 import { CLIPBOARD_PLUGIN } from '../Const';
 
 export abstract class Copy {
@@ -83,15 +83,15 @@ export class UniverCopy extends Copy {
                         onClick: () => this.copyArray2(),
                     },
                     {
-                        customLabel: {
-                            name: CLIPBOARD_PLUGIN + ClipboardInput.name,
-                            props: {
-                                prefixLocale: 'rightClick.array3',
-                                placeholder1Locale: 'rightClick.row',
-                                suffixLocale: 'rightClick.column',
-                                placeholder2Locale: 'rightClick.column',
-                            },
-                        },
+                        // customLabel: {
+                        //     name: CLIPBOARD_PLUGIN + ClipboardInput.name,
+                        //     props: {
+                        //         prefixLocale: 'rightClick.array3',
+                        //         placeholder1Locale: 'rightClick.row',
+                        //         suffixLocale: 'rightClick.column',
+                        //         placeholder2Locale: 'rightClick.column',
+                        //     },
+                        // },
                         // locale: [
                         //     'rightClick.array3',
                         //     {
@@ -133,7 +133,8 @@ export class UniverCopy extends Copy {
                 ],
             },
         ];
-        super(context, copyList, [ClipboardInput]);
+        super(context, copyList);
+        // super(context, copyList, [ClipboardInput]);
     }
 
     async copy(e: ClipboardEvent) {

@@ -130,7 +130,8 @@ export class RightMenuUIController {
                     },
                 },
                 onClick: () => {},
-                show: this._config.RowHeight,
+                // show: this._config.RowHeight,
+                show: true,
             },
             {
                 label: 'rightClick.hideSelectedColumn',
@@ -149,7 +150,8 @@ export class RightMenuUIController {
                         onKeyUp: this.setColumnWidth.bind(this),
                     },
                 },
-                show: this._config.ColumnWidth,
+                // show: this._config.ColumnWidth,
+                show: true,
             },
             {
                 show: this._config.DeleteCell,
@@ -337,6 +339,9 @@ export class RightMenuUIController {
     }
 
     setRowHeight(e: Event) {
+        console.dir(this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getConfig());
+        console.dir(this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getStyles());
+
         if ((e as KeyboardEvent).key !== 'Enter') {
             return;
         }

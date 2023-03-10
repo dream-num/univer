@@ -40,6 +40,12 @@ export class RightMenuController {
                     case 'clearContent':
                         this.clearContent();
                         break;
+                    case 'setRowHeight':
+                        this.setRowHeight(msg.value!);
+                        break;
+                    case 'setColumnWidth':
+                        this.setColumnWidth(msg.value!);
+                        break;
                 }
             });
     }
@@ -100,11 +106,7 @@ export class RightMenuController {
         }
     };
 
-    setColumnWidth(e: Event) {
-        if ((e as KeyboardEvent).key !== 'Enter') {
-            return;
-        }
-        const width = (e.target as HTMLInputElement).value;
+    setColumnWidth(width: string) {
         const selections = this._getSelections();
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
@@ -112,11 +114,7 @@ export class RightMenuController {
         }
     }
 
-    setRowHeight(e: Event) {
-        if ((e as KeyboardEvent).key !== 'Enter') {
-            return;
-        }
-        const height = (e.target as HTMLInputElement).value;
+    setRowHeight(height: string) {
         const selections = this._getSelections();
         if (selections?.length === 1) {
             const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();

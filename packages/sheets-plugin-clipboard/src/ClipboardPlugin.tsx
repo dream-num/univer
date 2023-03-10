@@ -40,7 +40,7 @@ export class ClipboardPlugin extends Plugin<any, SheetContext> {
     }
 
     registerExtension() {
-        const clipboardRegister = this.getContext()
+        const clipboardRegister = this.getGlobalContext()
             .getPluginManager()
             .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
             .getRegisterManager()
@@ -73,7 +73,7 @@ export class ClipboardPlugin extends Plugin<any, SheetContext> {
 
     onMounted(context: SheetContext): void {
         super.onMounted(context);
-        context.getLocale().load({
+        this.getLocale().load({
             en,
             zh,
         });

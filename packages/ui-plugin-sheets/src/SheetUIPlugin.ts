@@ -1,5 +1,5 @@
 import { Plugin, UniverSheet, Tools, PLUGIN_NAMES, Context } from '@univerjs/core';
-import { ComponentManager, getRefElement, RegisterManager } from '@univerjs/base-ui';
+import { ComponentManager, getRefElement, RegisterManager, KeyboardManager } from '@univerjs/base-ui';
 import { RenderEngine } from '@univerjs/base-render';
 import { DefaultSheetUIConfig, installObserver, ISheetUIPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';
 import { zh, en } from './Locale';
@@ -10,6 +10,8 @@ import { IToolbarItemProps } from './Controller';
 
 export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
     private _appUIController: AppUIController;
+
+    private _keyboardManager: KeyboardManager;
 
     private _registerManager: RegisterManager;
 
@@ -41,6 +43,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
         });
 
         this._componentManager = new ComponentManager();
+        this._keyboardManager = new KeyboardManager(this);
         this._registerManager = new RegisterManager(this);
         this._appUIController = new AppUIController(this);
         // AppUIController initializes the DOM as an asynchronous rendering process, and must wait for the UI rendering to complete before starting to render the canvas
@@ -92,6 +95,14 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
      */
     getRegisterManager(): RegisterManager {
         return this._registerManager;
+    }
+
+    /**
+     * usage this._clipboardExtensionManager.handle(data);
+     * @returns
+     */
+    getKeyboardManager(): KeyboardManager {
+        return this._keyboardManager;
     }
 
     /**

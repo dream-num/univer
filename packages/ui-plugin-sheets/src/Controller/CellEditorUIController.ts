@@ -1,6 +1,6 @@
 import { IPointerEvent, IMouseEvent } from '@univerjs/base-render';
 import { CANVAS_VIEW_KEY, SheetPlugin } from '@univerjs/base-sheets';
-import { getRefElement, CellEditExtensionManager, KeyboardManager, $$, setLastCaretPosition, handleStringToStyle, handleDomToJson } from '@univerjs/base-ui';
+import { getRefElement, CellEditExtensionManager, $$, setLastCaretPosition, handleStringToStyle, handleDomToJson } from '@univerjs/base-ui';
 import { Direction, handleStyleToString, ICellData, isKeyPrintable, PLUGIN_NAMES, Tools } from '@univerjs/core';
 import { SheetUIPlugin } from '../SheetUIPlugin';
 import { RichText } from '../View/RichText';
@@ -20,8 +20,6 @@ export class CellEditorUIController {
     private _sheetPlugin: SheetPlugin;
 
     private _cellEditExtensionManager: CellEditExtensionManager;
-
-    private _keyboardManager: KeyboardManager;
 
     constructor(plugin: SheetUIPlugin) {
         this._plugin = plugin;
@@ -214,10 +212,6 @@ export class CellEditorUIController {
         });
 
         this._cellEditExtensionManager = new CellEditExtensionManager();
-
-        this._keyboardManager = new KeyboardManager(this._plugin);
-
-        // this._richTextEditEle
     }
 
     private setRichText() {
@@ -231,8 +225,7 @@ export class CellEditorUIController {
         this.hideEditContainer();
 
         // init event
-        // this._handleKeyboardAction();
-        this._keyboardManager.handleKeyboardAction(this._richTextEditEle);
+        this._plugin.getKeyboardManager().handleKeyboardAction(this._richTextEditEle);
         this._handleKeyboardObserver();
 
         // Get the display status of the formula prompt box

@@ -3,6 +3,8 @@ import { RenderEngine } from '@univerjs/base-render';
 
 import { ISheetPluginConfig, SheetPlugin } from '@univerjs/base-sheets';
 import { SheetUIPlugin,ISheetUIPluginConfig } from '@univerjs/ui-plugin-sheets';
+import { DocUIPlugin, IDocUIPluginConfig } from '@univerjs/ui-plugin-docs';
+import { SlideUIPlugin, ISlideUIPluginConfig } from '@univerjs/ui-plugin-slides';
 import { IDocPluginConfig, DocPlugin } from '@univerjs/base-docs';
 import { ISlidePluginConfig, SlidePlugin } from '@univerjs/base-slides';
 import { DEFAULT_WORKBOOK_DATA } from '@univerjs/common-plugin-data';
@@ -34,7 +36,7 @@ class UniverSheetCustom {
         // universheet instance
         const universheet = UniverSheet.newInstance(config.coreConfig);
         univer.addUniverSheet(universheet);
-        // base-sheet
+        // base-sheets
         universheet.installPlugin(new SheetPlugin(config.baseSheetsConfig));
         // ui-plugin-sheets
         univer.install(
@@ -59,72 +61,97 @@ const univerSheetCustom = function (config?: ISheetPropsCustom) {
     return new UniverSheetCustom().init(config);
 };
 
-// interface IDocPropsCustom {
-//     coreConfig?: Partial<IDocumentData>;
-//     baseDocsConfig?: IDocPluginConfig;
-// }
+interface IDocPropsCustom {
+    coreConfig?: Partial<IDocumentData>;
+    baseDocsConfig?: IDocPluginConfig;
+    uiDocsConfig?: IDocUIPluginConfig;
+}
 
-// /**
-//  * Initialize the core and all plugins
-//  */
-// class UniverDocCustom {
-//     constructor() {}
-//     init(config: IDocPropsCustom = {}): UniverDoc {
-//         const univerdoc = UniverDoc.newInstance(config.coreConfig);
+/**
+ * Initialize the core and all plugins
+ */
+class UniverDocCustom {
+    constructor() {}
+    init(config: IDocPropsCustom = {}): UniverDoc {
 
-//         univerdoc.installPlugin(new RenderEngine());
-//         univerdoc.installPlugin(new DocPlugin(config.baseDocsConfig));
+        const univer = new Univer();
+        
+        // base-render
+        univer.install(new RenderEngine());
 
-//         return univerdoc;
-//     }
-// }
-// /**
-//  * Wrapped into a function,easy to use
-//  * @param config
-//  * @returns
-//  */
-// const univerDocCustom = function (config?: IDocPropsCustom) {
-//     return new UniverDocCustom().init(config);
-// };
+        // univerdoc instance
+        const univerdoc = UniverDoc.newInstance(config.coreConfig);
+        univer.addUniverDoc(univerdoc);
 
-// interface ISlidePropsCustom {
-//     coreConfig?: Partial<ISlideData>;
-//     baseSlidesConfig?: ISlidePluginConfig;
-// }
+        // base-docs
+        univerdoc.installPlugin(new DocPlugin(config.baseDocsConfig));
 
-// /**
-//  * Initialize the core and all plugins
-//  */
-// class UniverSlideCustom {
-//     constructor() {}
-//     init(config: ISlidePropsCustom = {}): UniverSlide {
-//         const universlide = UniverSlide.newInstance(config.coreConfig);
+        // ui-plugin-sheets
+        univer.install(
+            new DocUIPlugin(config.uiDocsConfig)
+        );
 
-//         universlide.installPlugin(new RenderEngine());
-//         universlide.installPlugin(new SlidePlugin(config.baseSlidesConfig));
-
-//         return universlide;
-//     }
-// }
+        return univerdoc;
+    }
+}
 /**
  * Wrapped into a function,easy to use
  * @param config
  * @returns
  */
-// const univerSlideCustom = function (config?: ISlidePropsCustom) {
-//     return new UniverSlideCustom().init(config);
-// };
+const univerDocCustom = function (config?: IDocPropsCustom) {
+    return new UniverDocCustom().init(config);
+};
 
-export { univerSheetCustom};
-// export { univerSheetCustom, univerDocCustom, univerSlideCustom };
+interface ISlidePropsCustom {
+    coreConfig?: Partial<ISlideData>;
+    baseSlidesConfig?: ISlidePluginConfig;
+    uiSlidesConfig?: ISlideUIPluginConfig;
+}
+
+/**
+ * Initialize the core and all plugins
+ */
+class UniverSlideCustom {
+    constructor() {}
+    init(config: ISlidePropsCustom = {}): UniverSlide {
+        const univer = new Univer();
+        
+        // base-render
+        univer.install(new RenderEngine());
+        // universlide instance
+        const universlide = UniverSlide.newInstance(config.coreConfig);
+        univer.addUniverSlide(universlide);
+        // base-slides
+        universlide.installPlugin(new SlidePlugin(config.baseSlidesConfig));
+        // ui-plugin-slides
+        univer.install(
+            new SlideUIPlugin(config.uiSlidesConfig)
+        );
+
+        return universlide;
+    }
+}
+/**
+ * Wrapped into a function,easy to use
+ * @param config
+ * @returns
+ */
+const univerSlideCustom = function (config?: ISlidePropsCustom) {
+    return new UniverSlideCustom().init(config);
+};
+
+export { univerSheetCustom, univerDocCustom, univerSlideCustom };
 
 export * as UniverCore from '@univerjs/core';
 export * as BaseRender from '@univerjs/base-render';
 export * as BaseComponent from '@univerjs/base-ui';
 export * as BaseSheets from '@univerjs/base-sheets';
-// export * as BaseDocs from '@univerjs/base-docs';
-// export * as BaseSlides from '@univerjs/base-slides';
+export * as BaseDocs from '@univerjs/base-docs';
+export * as BaseSlides from '@univerjs/base-slides';
 export * as UIPluginSheets from '@univerjs/ui-plugin-sheets';
+export * as UIPluginDocs from '@univerjs/ui-plugin-docs';
+export * as UIPluginSlides from '@univerjs/ui-plugin-slides';
 export * as CommonPluginData from '@univerjs/common-plugin-data';
 // export * as CommonPluginCollaboration from '@univerjs/common-plugin-collaboration';
 // export * as SheetsPluginFormula from '@univerjs/sheets-plugin-formula';

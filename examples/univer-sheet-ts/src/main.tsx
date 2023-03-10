@@ -75,6 +75,7 @@ univer.install(
 
 // FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(universheet);
 FindPlugin.create().installTo(universheet);
+universheet.installPlugin(new ClipboardPlugin());
 // sheets-plugin-ui univer.install(new SheetsUI)
 // sheets-plugin-ui univer.install(new SheetsUI
 // const univerSheetDemo = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
@@ -90,5 +91,5 @@ FindPlugin.create().installTo(universheet);
 // FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(univerSheetDemo);
 // FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO1).installTo(univerSheetDemo);
 
-// univerSheetDemo.installPlugin(new ClipboardPlugin());
+
 // univerSheetDemo.installPlugin(new ImportXlsxPlugin());

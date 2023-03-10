@@ -18,7 +18,7 @@ export class RegisterManager {
 
     setClipboardExtensionManager() {
         this._clipboardExtensionManager = new ClipboardExtensionManager();
-        const onKeyPasteObservable = this._plugin.getContext().getObserverManager().getObserver<ClipboardEvent>('onKeyPasteObservable', 'core');
+        const onKeyPasteObservable = this._plugin.getGlobalContext().getObserverManager().getObserver<ClipboardEvent>('onKeyPasteObservable', 'core');
 
         if (onKeyPasteObservable && !onKeyPasteObservable.hasObservers()) {
             onKeyPasteObservable.add((evt: ClipboardEvent) => {
@@ -32,7 +32,7 @@ export class RegisterManager {
     setDragAndDropExtensionManager() {
         this._dragAndDropExtensionManager = new DragAndDropExtensionManager();
 
-        const onDropObservable = this._plugin.getContext().getObserverManager().getObserver<DragEvent>('onDropObservable', 'core');
+        const onDropObservable = this._plugin.getGlobalContext().getObserverManager().getObserver<DragEvent>('onDropObservable', 'core');
 
         if (onDropObservable && !onDropObservable.hasObservers()) {
             onDropObservable.add((evt: DragEvent) => {

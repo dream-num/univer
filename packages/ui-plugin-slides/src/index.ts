@@ -1,1 +1,2 @@
-export *  from './SlideUIPlugin';
+export * from './SlideUIPlugin';
+export * from './Basics';

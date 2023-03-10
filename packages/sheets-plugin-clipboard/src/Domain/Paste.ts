@@ -14,7 +14,7 @@ export abstract class Paste {
     constructor(context: SheetContext, pasteList: RightMenuProps[]) {
         this._context = context;
         const SheetPlugin = this._context.getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
-        SheetPlugin.addRightMenu(pasteList);
+        // SheetPlugin.addRightMenu(pasteList);
 
         // SheetPlugin.getCellEditorController().isEditMode
         // const manager = this._context.getObserverManager();
@@ -168,6 +168,7 @@ export class UniverPaste extends Paste {
     // }
 
     pasteTo(data) {
+        debugger
         // const data = await this.pasteResolver(e);
         // if (data.length === 0) return;
 

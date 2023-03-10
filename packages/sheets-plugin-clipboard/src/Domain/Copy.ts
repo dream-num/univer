@@ -12,7 +12,7 @@ export abstract class Copy {
         this._context = context;
         const SheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
 
-        this._initRegisterComponent(componentList);
+        // this._initRegisterComponent(componentList);
         // SheetPlugin?.addRightMenu(copyList);
 
         const manager = this._context.getUniver().getGlobalContext().getObserverManager();

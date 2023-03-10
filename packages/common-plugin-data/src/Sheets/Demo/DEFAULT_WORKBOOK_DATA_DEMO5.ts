@@ -2651,7 +2651,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO5: IWorkbookConfig = {
             zoomRatio: 1,
             scrollTop: 0,
             scrollLeft: 0,
-            defaultColumnWidth: 73,
+            defaultColumnWidth: 41,
             defaultRowHeight: 25,
             mergeData: [
                 {
@@ -4501,11 +4501,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO5: IWorkbookConfig = {
                     h: 20,
                 },
             },
-            columnData: {
-                2: {
-                    w: 120,
-                },
-            },
+            columnData: {},
             showGridlines: 1,
             rowTitle: {
                 width: 46,

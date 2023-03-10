@@ -5,11 +5,14 @@ import styles from './index.module.less';
 type searchResult = {
     count: number;
     current: number;
+    replaceCount?: number;
 };
 
 // Types for props
 export interface IProps extends BaseComponentProps {
     findNext: (value: string) => searchResult;
+    replaceText: (value: string) => searchResult;
+    replaceAll: (value: string) => searchResult;
 }
 
 // Types for state
@@ -19,6 +22,7 @@ interface IState {
     showRange: boolean;
     current: number;
     count: number;
+    replaceCount: number;
 }
 
 export enum SelectSearch {
@@ -29,6 +33,8 @@ export enum SelectSearch {
 
 export class FindModal extends Component<IProps, IState> {
     private _searchRef = createRef();
+
+    private _replaceRef = createRef();
 
     private _matchGroup: BaseCheckboxGroupOptions[] = [];
 
@@ -42,6 +48,7 @@ export class FindModal extends Component<IProps, IState> {
             showRange: false,
             current: 0,
             count: 0,
+            replaceCount: 0,
         };
 
         this._matchGroup = [
@@ -128,13 +135,31 @@ export class FindModal extends Component<IProps, IState> {
         });
     }
 
-    search() {
+    findNext() {
         const value = this._searchRef.current.getValue();
         if (!value) return;
         const { count, current } = this.props.findNext(value);
         this.setState({
             count,
             current,
+        });
+    }
+
+    replaceText() {
+        const value = this._replaceRef.current.getValue();
+        if (!value) return;
+        const replaceCount = this.props.replaceText(value);
+        this.setState({
+            ...replaceCount,
+        });
+    }
+
+    replaceAll() {
+        const value = this._replaceRef.current.getValue();
+        if (!value) return;
+        const replaceCount = this.props.replaceAll(value);
+        this.setState({
+            ...replaceCount,
         });
     }
 
@@ -180,7 +205,7 @@ export class FindModal extends Component<IProps, IState> {
                     <>
                         <div className={styles.box}>
                             <span>{this.getLocale('find.replaceWith')}</span>
-                            <Input></Input>
+                            <Input ref={this._replaceRef}></Input>
                         </div>
                         <div className={styles.box}>
                             <span>{this.getLocale('find.search')}</span>
@@ -193,9 +218,9 @@ export class FindModal extends Component<IProps, IState> {
                         </div>
                         <div className={styles.buttonGroup}>
                             <Button type="primary">{this.getLocale('button.cancel')}</Button>
-                            <Button>{this.getLocale('find.allReplaceBtn')}</Button>
-                            <Button>{this.getLocale('find.replace')}</Button>
-                            <Button onClick={this.search.bind(this)}>{this.getLocale('find.find')}</Button>
+                            <Button onClick={this.replaceAll.bind(this)}>{this.getLocale('find.allReplaceBtn')}</Button>
+                            <Button onClick={this.replaceText.bind(this)}>{this.getLocale('find.replace')}</Button>
+                            <Button onClick={this.findNext.bind(this)}>{this.getLocale('find.find')}</Button>
                         </div>
                     </>
                 )}

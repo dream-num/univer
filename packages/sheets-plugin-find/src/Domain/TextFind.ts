@@ -1,4 +1,4 @@
-import { Range, RangeList, FormatType, IGridRange, ObjectMatrix, ICellData, Nullable } from '@univerjs/core';
+import { Range, FormatType, IGridRange, ObjectMatrix, ICellData, Nullable, Worksheet } from '@univerjs/core';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { getRegExpStr } from '../Util/util';
 import { FindType } from '../IData';
@@ -113,15 +113,27 @@ export class TextFinder {
      * Replaces all matches with the specified text. Returns the number of occurrences replaced, which may be different from the number of matched cells.
      */
     replaceAllWith(replaceText: string): number {
-        const range = this.findAll();
-        if (!range) return 0;
-        const rangType = [];
-        for (let i = 0; i < range.length; i++) {
-            rangType.push(range[i].getRangeData());
+        if (!this._range.length) return 0;
+
+        let count = 0;
+        let sheetId = this._range[0].sheetId;
+        let sheet = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(sheetId);
+        for (let i = 0; i < this._range.length; i++) {
+            if (sheetId !== this._range[i].sheetId) {
+                sheet = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(this._range[i].sheetId);
+            }
+            const range = this._range[i];
+            if (!sheet) continue;
+
+            const value = sheet.getRange(range.rangeData).getValue();
+            if (!value || !value.m) continue;
+            sheet.getRange(range.rangeData).setValue(value.m.replace(this._text as string, replaceText));
+            count++;
         }
-        const rangeList = new RangeList(this._workSheet, rangType);
-        rangeList.setValue(replaceText);
-        return range.length;
+        this._range = [];
+        this._index = -1;
+
+        return count;
     }
 
     /**
@@ -131,9 +143,14 @@ export class TextFinder {
         if (!this._range.length) return 0;
         const range = this._range[this._index];
         const sheet = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(range.sheetId);
-        sheet?.getRange(range.rangeData).setValue(replaceText);
+        if (!sheet) return 0;
 
-        this._index--;
+        const value = sheet.getRange(range.rangeData).getValue();
+        if (!value || !value.m) return 0;
+        sheet.getRange(range.rangeData).setValue(value.m.replace(this._text as string, replaceText));
+
+        this._range.splice(this._index, 1);
+        this._highlightCell(this._range[this._index]);
         return 1;
     }
 
@@ -286,6 +303,7 @@ export class TextFinder {
 
     // 高亮匹配单元格
     private _highlightCell(range: IGridRange) {
+        if (!range) return;
         this._plugin
             .getContext()
             .getUniver()
@@ -298,78 +316,17 @@ export class TextFinder {
             .setCurrentCell(range);
     }
 
-    // 按format寻找
-    // private _matchFormat(): Range[] {
-    //     const range = [];
-    //     for (let i = 0; i < this._rangeData.length; i++) {
-    //         const format = this._rangeData[i].getValue().fm?.t;
-    //         if (!format) continue;
-    //         if (format === this._type) {
-    //             range.push(this._rangeData[i]);
-    //         }
-    //     }
-    //     return range;
-    // }
-
-    // 寻找null的单元格
-    // private _matchNull(): Range[] {
-    //     const range = [];
-    //     for (let i = 0; i < this._rangeData.length; i++) {
-    //         let value = this._rangeData[i].getValue()?.v;
-    //         if (value == null) {
-    //             range.push(this._rangeData[i]);
-    //         }
-    //     }
-    //     return range;
-    // }
-
-    // todo: 等condition插件定好结构
-    // 寻找条件格式
-    // private _matchCondition(): Range[] {
-    //     const range: Range[] = [];
-    //     return range;
-    // }
-
-    // todo: 移到UI里,增加开始行列,间隔行列数
-    // 寻找间隔行间隔列,移到UI里
-    // private _matchInterval(param: 'column' | 'row'): Range[] {
-    //     const range = [];
-    //     for (let i = 0; i < this._rangeList.length; i++) {
-    //         const rangeArea = this._rangeList[i];
-    //         if (param === 'row') {
-    //             if (rangeArea.startRow === rangeArea.endRow) {
-    //                 continue;
-    //             }
-    //             for (let j = rangeArea.startRow; j <= rangeArea.endRow; j++) {
-    //                 if ((j - rangeArea.startRow) % 2 === 0) {
-    //                     range.push(
-    //                         new Range(this._workSheet, {
-    //                             startRow: j,
-    //                             endRow: j,
-    //                             startColumn: rangeArea.startColumn,
-    //                             endColumn: rangeArea.endColumn,
-    //                         })
-    //                     );
-    //                 }
-    //             }
-    //         } else {
-    //             if (rangeArea.startColumn === rangeArea.endColumn) {
-    //                 continue;
-    //             }
-    //             for (let j = rangeArea.startColumn; j <= rangeArea.endColumn; j++) {
-    //                 if ((j - rangeArea.startColumn) % 2 === 0) {
-    //                     range.push(
-    //                         new Range(this._workSheet, {
-    //                             startRow: rangeArea.startRow,
-    //                             endRow: rangeArea.endRow,
-    //                             startColumn: j,
-    //                             endColumn: j,
-    //                         })
-    //                     );
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     return range;
-    // }
+    private _replaceText(sheet: Worksheet, range: IGridRange, text: string) {
+        let match;
+        if (!this._matchEntire) {
+            match = 'ig';
+            if (this._matchCase) {
+                match = 'g';
+            }
+        }
+        let reg = new RegExp(getRegExpStr(this._text as string), match);
+        const value = sheet.getRange(range.rangeData).getValue();
+        if (!value || !value.m) return 0;
+        sheet.getRange(range.rangeData).setValue(value.m.replace(reg, text));
+    }
 }

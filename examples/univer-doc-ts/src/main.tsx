@@ -23,7 +23,7 @@ univer.install(
         container: 'univerdoc',
         layout: {
             docContainerConfig: {
-                innerLeft: true,
+                innerLeft: false,
             },
         },
     })

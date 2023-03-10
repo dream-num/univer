@@ -13,6 +13,18 @@ export class CanvasView {
         this._initialize();
     }
 
+    getView(key: string) {
+        for (let view of this._views) {
+            if (view.viewKey === key) {
+                return view;
+            }
+        }
+    }
+
+    getDocsView() {
+        return this.getView(CANVAS_VIEW_KEY.DOCS_VIEW);
+    }
+
     private _initialize() {
         const engine = this._engine;
         const context = this._plugin.getContext();
@@ -69,18 +81,6 @@ export class CanvasView {
                 app.innerText = `fps:${Math.round(engine.getFps()).toString()}`;
             }
         });
-    }
-
-    getView(key: string) {
-        for (let view of this._views) {
-            if (view.viewKey === key) {
-                return view;
-            }
-        }
-    }
-
-    getDocsView() {
-        return this.getView(CANVAS_VIEW_KEY.DOCS_VIEW);
     }
 
     private _viewLoader(scene: Scene, plugin: DocPlugin) {

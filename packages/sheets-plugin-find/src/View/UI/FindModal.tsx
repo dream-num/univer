@@ -13,6 +13,9 @@ export interface IProps extends BaseComponentProps {
     findNext: (value: string) => searchResult;
     replaceText: (value: string) => searchResult;
     replaceAll: (value: string) => searchResult;
+    findPrevious: (value: string) => searchResult;
+    matchCase: (matchCase: boolean) => void;
+    matchEntireCell: (matchEntire: boolean) => void;
 }
 
 // Types for state
@@ -113,8 +116,9 @@ export class FindModal extends Component<IProps, IState> {
         return arr;
     }
 
-    handleChange(value) {
-        console.dir(value);
+    handleChange(value: string[]) {
+        this.props.matchCase(!!value.includes('1'));
+        this.props.matchEntireCell(!!value.includes('2'));
     }
 
     handleHideAdvanced(hide: boolean) {
@@ -139,6 +143,16 @@ export class FindModal extends Component<IProps, IState> {
         const value = this._searchRef.current.getValue();
         if (!value) return;
         const { count, current } = this.props.findNext(value);
+        this.setState({
+            count,
+            current,
+        });
+    }
+
+    findPrevious() {
+        const value = this._searchRef.current.getValue();
+        if (!value) return;
+        const { count, current } = this.props.findPrevious(value);
         this.setState({
             count,
             current,
@@ -183,14 +197,14 @@ export class FindModal extends Component<IProps, IState> {
             >
                 <div className={styles.box}>
                     {hideAdvanced ? null : <span>{this.getLocale('find.find')}</span>}
-                    <Input ref={this._searchRef}></Input>
+                    <Input ref={this._searchRef} onPressEnter={this.findNext.bind(this)}></Input>
                     {count ? (
                         <div className={styles.count}>
-                            <span>
+                            <span onClick={this.findPrevious.bind(this)}>
                                 <Icon.Format.NextIcon rotate={90}></Icon.Format.NextIcon>
                             </span>
                             {current}/{count}
-                            <span>
+                            <span onClick={this.findNext.bind(this)}>
                                 <Icon.Format.NextIcon rotate={-90}></Icon.Format.NextIcon>
                             </span>
                         </div>
@@ -214,7 +228,7 @@ export class FindModal extends Component<IProps, IState> {
                         </div>
                         <div className={styles.box}>
                             <span></span>
-                            <CheckboxGroup options={this.getMatchGroup()} onChange={this.handleChange}></CheckboxGroup>
+                            <CheckboxGroup options={this.getMatchGroup()} onChange={this.handleChange.bind(this)}></CheckboxGroup>
                         </div>
                         <div className={styles.buttonGroup}>
                             <Button type="primary">{this.getLocale('button.cancel')}</Button>

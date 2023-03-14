@@ -125,9 +125,7 @@ export class TextFinder {
             const range = this._range[i];
             if (!sheet) continue;
 
-            const value = sheet.getRange(range.rangeData).getValue();
-            if (!value || !value.m) continue;
-            sheet.getRange(range.rangeData).setValue(value.m.replace(this._text as string, replaceText));
+            this._replaceText(sheet, range, replaceText);
             count++;
         }
         this._range = [];
@@ -145,9 +143,7 @@ export class TextFinder {
         const sheet = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(range.sheetId);
         if (!sheet) return 0;
 
-        const value = sheet.getRange(range.rangeData).getValue();
-        if (!value || !value.m) return 0;
-        sheet.getRange(range.rangeData).setValue(value.m.replace(this._text as string, replaceText));
+        this._replaceText(sheet, range, replaceText);
 
         this._range.splice(this._index, 1);
         this._highlightCell(this._range[this._index]);
@@ -281,10 +277,12 @@ export class TextFinder {
             //     }
             // }
             else {
-                let reg = new RegExp(getRegExpStr(this._text as string), 'ig');
+                let reg = new RegExp(getRegExpStr(this._text as string), this._matchCase ? 'g' : 'ig');
+
                 matrix.forValue((row, col, value) => {
                     if (!value.m) return;
                     if (reg.test(value.m)) {
+                        reg.lastIndex = 0;
                         range.push({
                             sheetId: this._rangeData[i].sheetId,
                             rangeData: {
@@ -317,16 +315,18 @@ export class TextFinder {
     }
 
     private _replaceText(sheet: Worksheet, range: IGridRange, text: string) {
-        let match;
+        const value = sheet.getRange(range.rangeData).getValue();
+        if (!value || !value.m) return 0;
         if (!this._matchEntire) {
+            let match;
             match = 'ig';
             if (this._matchCase) {
                 match = 'g';
             }
+            let reg = new RegExp(getRegExpStr(this._text as string), match);
+            sheet.getRange(range.rangeData).setValue(value.m.replace(reg, text));
+        } else {
+            sheet.getRange(range.rangeData).setValue(text);
         }
-        let reg = new RegExp(getRegExpStr(this._text as string), match);
-        const value = sheet.getRange(range.rangeData).getValue();
-        if (!value || !value.m) return 0;
-        sheet.getRange(range.rangeData).setValue(value.m.replace(reg, text));
     }
 }

@@ -14,6 +14,7 @@ export class FindModalController {
 
     constructor(plugin: FindPlugin) {
         this._plugin = plugin;
+        this._textFinder = plugin.getTextFinder();
 
         this._initialize();
     }
@@ -30,12 +31,14 @@ export class FindModalController {
         this._textFinder = this._plugin.getTextFinder().searchText(text);
         if (!this._textFinder) return { count: 0, current: 0 };
         this._textFinder.findNext();
-        const count = this._textFinder.getCount();
-        const current = this._textFinder.getCurrentIndex();
-        return {
-            count,
-            current: current + 1,
-        };
+        return this._getCountInfo();
+    }
+
+    findPrevious(text: string) {
+        this._textFinder = this._plugin.getTextFinder().searchText(text);
+        if (!this._textFinder) return { count: 0, current: 0 };
+        this._textFinder.findPrevious();
+        return this._getCountInfo();
     }
 
     replaceText(text: string) {
@@ -56,6 +59,16 @@ export class FindModalController {
         };
     }
 
+    matchCase(matchCase: boolean) {
+        if (!this._textFinder) return;
+        this._textFinder.matchCase(matchCase);
+    }
+
+    matchEntireCell(matchEntire: boolean) {
+        if (!this._textFinder) return;
+        this._textFinder.matchEntireCell(matchEntire);
+    }
+
     private _getCountInfo() {
         const count = this._textFinder?.getCount() ?? 0;
         const current = this._textFinder?.getCurrentIndex() ?? 0;
@@ -72,8 +85,11 @@ export class FindModalController {
             props: {
                 getComponent: this.getComponent.bind(this),
                 findNext: this.findNext.bind(this),
+                findPrevious: this.findPrevious.bind(this),
                 replaceText: this.replaceText.bind(this),
                 replaceAll: this.replaceAll.bind(this),
+                matchCase: this.matchCase.bind(this),
+                matchEntireCell: this.matchEntireCell.bind(this),
             },
         });
     }

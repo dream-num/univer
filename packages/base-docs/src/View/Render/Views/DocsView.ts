@@ -73,7 +73,6 @@ export class DocsView extends BaseView {
 
         //     documents.translate(docsLeft, docsTop);
         // }
-
         documents.calculatePagePosition();
 
         documents.enableEditor();

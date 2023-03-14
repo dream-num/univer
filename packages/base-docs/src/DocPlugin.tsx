@@ -111,4 +111,8 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
     }
 
     onDestroy(): void {}
+
+    calculatePagePosition() {
+        (this.getCanvasView().getDocsView() as DocsView).getDocs().calculatePagePosition();
+    }
 }

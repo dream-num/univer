@@ -1,9 +1,10 @@
 import { Scene } from '@univerjs/base-render';
-import { Registry, Worksheet } from '@univerjs/core';
+import { Registry } from '@univerjs/core';
 import { DocPlugin } from '../../DocPlugin';
 
 export class BaseView {
     zIndex = 0;
+
     viewKey = '';
 
     private _scene: Scene;
@@ -28,14 +29,14 @@ export class BaseView {
 
     updateToSheet() {}
 
-    protected _initialize() {}
-
     initialize(scene: Scene, plugin: DocPlugin) {
         this._scene = scene;
         this._plugin = plugin;
         this._initialize();
         return this;
     }
+
+    protected _initialize() {}
 }
 
 export enum CANVAS_VIEW_KEY {

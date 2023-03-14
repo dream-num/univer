@@ -1,8 +1,8 @@
 import { Engine, EVENT_TYPE, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univerjs/base-render';
 import { EventState, sortRules } from '@univerjs/core';
 import { BaseView, CanvasViewRegistry, CANVAS_VIEW_KEY } from './BaseView';
-import './Views';
 import { DocPlugin } from '../../DocPlugin';
+import './Views';
 
 export class CanvasView {
     private _scene: Scene;

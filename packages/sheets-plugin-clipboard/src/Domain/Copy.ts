@@ -55,7 +55,7 @@ export class UniverCopy extends Copy {
     constructor(context: SheetContext) {
         const copyList = [
             {
-                locale: ['rightClick.copy'],
+                locale: 'rightClick.copy',
                 onClick: () => this.copyTo(),
             },
             {

@@ -113,6 +113,18 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
     onDestroy(): void {}
 
     calculatePagePosition() {
-        (this.getCanvasView().getDocsView() as DocsView).getDocs().calculatePagePosition();
+        const DocsView = this.getCanvasView().getDocsView() as DocsView;
+        const { docsLeft, docsTop } = DocsView.getDocs().calculatePagePosition()!;
+
+        const pages = DocsView.getDocumentSkeleton().getSkeletonData().pages;
+        const marginLeft = DocsView.getDocs().pageMarginLeft;
+        const marginTop = DocsView.getDocs().pageMarginTop;
+
+        for (let i = 0; i < pages.length; i++) {
+            for (let k of pages[i].skeDrawings.keys()) {
+                const obj = DocsView.getScene().getObject(k);
+                obj?.translate(obj.left + docsLeft - marginLeft, obj.top + docsTop - marginTop);
+            }
+        }
     }
 }

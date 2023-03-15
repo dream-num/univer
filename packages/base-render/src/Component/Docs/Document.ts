@@ -128,6 +128,12 @@ export class Documents extends DocComponent {
         scene.resize(sceneWidth, sceneHeight + 200);
 
         this.translate(docsLeft, docsTop);
+
+        // 为了demo改动，后续删除
+        return {
+            docsLeft,
+            docsTop,
+        };
     }
 
     getFirstViewport() {

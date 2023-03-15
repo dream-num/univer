@@ -25,6 +25,7 @@ export enum DOCS_VIEW_KEY {
 
 export class DocsAdaptor extends ObjectAdaptor {
     zIndex = 5;
+
     viewKey = PageElementType.DOCUMENT;
 
     private _liquid = new Liquid();
@@ -153,8 +154,8 @@ export class DocsAdaptor extends ObjectAdaptor {
                     url: objectProperties.imageProperties?.contentUrl || '',
                     left: aLeft + docsLeft + this._liquid.x,
                     top: aTop + docsTop + this._liquid.y,
-                    width: width,
-                    height: height,
+                    width,
+                    height,
                     zIndex: 11,
                     isTransformer: true,
                 });

@@ -1,4 +1,4 @@
-import { BlockType, ICellData, IDocumentData, IElement, IRangeData, IStyleData, ITextDecoration, Tools } from '@univerjs/core';
+import { BlockType, getBorderStyleType, ICellData, IDocumentData, IElement, IRangeData, IStyleData, ITextDecoration, Tools } from '@univerjs/core';
 import { pxToPt } from '@univerjs/base-render';
 import { textTrim } from '../Utils';
 
@@ -328,6 +328,65 @@ export function handleStringToStyle($dom: HTMLElement) {
         if (key === 'overflow-wrap' || key === 'overflowWrap') {
             if (value === 'break-word') {
                 styleList.tb = 3;
+            }
+        }
+
+        if (key === 'border-color') {
+            if (!styleList.bd) {
+                styleList.bd = {
+                    b: {
+                        cl: {
+                            rgb: value,
+                        },
+                        s: 0,
+                    },
+                    t: {
+                        cl: {
+                            rgb: value,
+                        },
+                        s: 0,
+                    },
+                    l: {
+                        cl: {
+                            rgb: value,
+                        },
+                        s: 0,
+                    },
+                    r: {
+                        cl: {
+                            rgb: value,
+                        },
+                        s: 0,
+                    },
+                };
+            }
+            styleList.bd.b!.cl.rgb = value;
+            styleList.bd.t!.cl.rgb = value;
+            styleList.bd.l!.cl.rgb = value;
+            styleList.bd.r!.cl.rgb = value;
+        }
+
+        if (key === 'border-bottom' || key === 'border-top' || key === 'border-left' || key === 'border-right') {
+            if (!styleList.bd) {
+                styleList.bd = {};
+            }
+            const arr = value.split(' ');
+            const color = arr.splice(0, -1)[0];
+            const type = arr.join();
+            const obj = {
+                cl: {
+                    rgb: color,
+                },
+                s: getBorderStyleType(type),
+            };
+            if (key === 'border-bottom') {
+                styleList.bd.b = obj;
+            } else if (key === 'border-top') {
+                styleList.bd.t = obj;
+            } else if (key === 'border-left') {
+                styleList.bd.l = obj;
+            } else if (key === 'border-right') {
+                styleList.bd.r = obj;
             }
         }
 

@@ -464,3 +464,27 @@ function getBorderStyle(type: BorderStyleTypes) {
     }
     return str;
 }
+
+export function getBorderStyleType(type: string) {
+    let str = 0;
+    if (type === 'none') {
+        str = BorderStyleTypes.NONE;
+    } else if (type === '0.5pt solid') {
+        str = BorderStyleTypes.THIN;
+    } else if (type === '0.5pt double') {
+        str = BorderStyleTypes.HAIR;
+    } else if (type === '0.5pt dotted') {
+        str = BorderStyleTypes.DOTTED;
+    } else if (type === '0.5pt dashed') {
+        str = BorderStyleTypes.DASHED;
+    } else if (type === '1pt solid') {
+        str = BorderStyleTypes.MEDIUM;
+    } else if (type === '1pt dashed') {
+        str = BorderStyleTypes.MEDIUM_DASHED;
+    } else if (type === '1pt dotted') {
+        str = BorderStyleTypes.MEDIUM_DASH_DOT_DOT;
+    } else if (type === '1.5pt solid') {
+        str = BorderStyleTypes.THICK;
+    }
+    return str;
+}

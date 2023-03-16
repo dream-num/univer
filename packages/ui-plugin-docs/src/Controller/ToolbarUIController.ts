@@ -596,14 +596,14 @@ export class ToolbarUIController {
         this._plugin.getComponentManager().register(DOC_UI_PLUGIN_NAME + ColorSelect.name, ColorSelect);
         this._plugin.getComponentManager().register(DOC_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
 
-        CommandManager.getCommandObservers().add(({ actions }) => {
-            if (!actions || actions.length === 0) return;
-            const action = actions[0] as SheetActionBase<ISheetActionData, ISheetActionData, void>;
+        // CommandManager.getCommandObservers().add(({ actions }) => {
+        //     if (!actions || actions.length === 0) return;
+        //     const action = actions[0] as SheetActionBase<ISheetActionData, ISheetActionData, void>;
 
-            const currentUnitId = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getUnitId();
-            const actionUnitId = action.getWorkBook().getUnitId();
+        //     const currentUnitId = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getUnitId();
+        //     const actionUnitId = action.getWorkBook().getUnitId();
 
-            if (currentUnitId !== actionUnitId) return null;
-        });
+        //     if (currentUnitId !== actionUnitId) return null;
+        // });
     }
 }

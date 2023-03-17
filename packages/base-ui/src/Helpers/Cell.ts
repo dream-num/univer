@@ -371,8 +371,9 @@ export function handleStringToStyle($dom: HTMLElement) {
                 styleList.bd = {};
             }
             const arr = value.split(' ');
-            const color = arr.splice(0, -1)[0];
-            const type = arr.join();
+            const type = `${arr[0]} ${arr[1]}`;
+            arr.splice(0, 2);
+            const color = arr.join('');
             const obj = {
                 cl: {
                     rgb: color,
@@ -413,6 +414,46 @@ export function splitSpanText(text: string) {
     let arr = text.match(regex)!;
     let arr1 = arr.map((item) => item.replace(/\n/g, '\r\n'));
     return arr1;
+}
+
+export function handleTableColgroup(table: string) {
+    const content = document.createElement('DIV');
+    let data: any[] = [];
+    content.innerHTML = table;
+    let colgroup = content.querySelectorAll('table colgroup col');
+    if (!colgroup.length) return [];
+    for (let i = 0; i < colgroup.length; i++) {
+        const col = colgroup[i];
+        const width = parseFloat(col.getAttribute('width') ?? '72');
+        data.push(width);
+    }
+    return data;
+}
+
+export function handleTableRowGroup(table: string) {
+    const content = document.createElement('DIV');
+    let data: any[] = [];
+    content.innerHTML = table;
+    let rowGroup = content.querySelectorAll('table tr');
+    if (!rowGroup.length) return [];
+    for (let i = 0; i < rowGroup.length; i++) {
+        const row = rowGroup[i];
+        const tds = row.querySelectorAll('td');
+        let firstHeight = parseFloat(tds[0].style.height ?? '19');
+        for (let k = 0; k < tds.length; k++) {
+            const rowSpan = tds[k].getAttribute('rowSpan');
+            const height = parseFloat(tds[k].style.height ?? '19');
+            if (rowSpan && +rowSpan > 1) {
+                for (let j = 0; j < +rowSpan; j++) {
+                    data.push(height);
+                }
+                i = i + +rowSpan - 1;
+                break;
+            }
+        }
+        data.push(firstHeight);
+    }
+    return data;
 }
 
 // 将table数据转为sheet数据

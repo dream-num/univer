@@ -1,3 +1,4 @@
+import { Nullable } from '@univerjs/core';
 import { PasteType } from './Paste';
 
 export type ClipboardType = {
@@ -10,6 +11,8 @@ export class Clipboard {
 
     static textArea: HTMLTextAreaElement;
 
+    static localData: Nullable<string>;
+
     static async writeText(text: string, e?: ClipboardEvent) {
         if (Clipboard.clipboard) {
             return Clipboard.clipboard.writeText(text).then(
@@ -19,6 +22,7 @@ export class Clipboard {
         }
 
         e?.clipboardData?.setData('text/html', text);
+        e?.preventDefault();
     }
 
     static async write(data: ClipboardType, e?: ClipboardEvent) {
@@ -26,13 +30,15 @@ export class Clipboard {
             const blob = new Blob([data.data], { type: data.type ?? 'text/html' });
             const clipboardData = [new ClipboardItem({ 'text/html': blob })];
 
-            return Clipboard.clipboard.write(clipboardData).then(
-                () => true,
-                () => false
-            );
+            // return Clipboard.clipboard.write(clipboardData).then(
+            //     () => true,
+            //     () => false
+            // );
+            Clipboard.clipboard.write(clipboardData);
         }
-
         e?.clipboardData?.setData(data.type ?? 'text/html', data.data);
+        e?.preventDefault();
+        Clipboard.localData = data.data;
     }
 
     static async readText() {
@@ -50,7 +56,7 @@ export class Clipboard {
             .then(() => null);
     }
 
-    static async read(e?: ClipboardEvent): Promise<Array<PasteType | null> | null> {
+    static async read(e?: ClipboardEvent): Promise<Array<PasteType | null> | null | string> {
         if (Clipboard.clipboard) {
             const clipboardItems = await Clipboard.clipboard.read();
             const Promises: Array<Promise<PasteType | null>> = [];
@@ -78,17 +84,23 @@ export class Clipboard {
             return Promise.all(Promises);
         }
 
-        const result = [];
-        const clipboardData = e?.clipboardData;
-        const types = clipboardData?.types;
-        console.dir(types);
-        if (!types) return null;
-        for (let i = 0; i < types.length; i++) {
-            result.push({
-                type: types[i],
-                result: clipboardData.getData(types[i]),
-            });
+        if (e) {
+            const result = [];
+            const clipboardData = e?.clipboardData;
+            const types = clipboardData?.types;
+            if (!types) return null;
+            for (let i = 0; i < types.length; i++) {
+                result.push({
+                    type: types[i],
+                    result: clipboardData.getData(types[i]),
+                });
+            }
+            return result;
         }
+
+        const result = Clipboard.localData ?? null;
+        Clipboard.localData = null;
+
         return result;
     }
 }

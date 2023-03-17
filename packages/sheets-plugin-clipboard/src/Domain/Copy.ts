@@ -383,7 +383,7 @@ export class UniverCopy extends Copy {
         }
 
         let cpData = '';
-        let colGroup = '';
+        let colGroup = '<colgroup>';
 
         for (let i = 0; i < rowIndexArr.length; i++) {
             let r = rowIndexArr[i];
@@ -400,9 +400,9 @@ export class UniverCopy extends Copy {
                 if (r === rowIndexArr[0]) {
                     const colItem = colManager.get(c);
                     if (colItem && colItem.w) {
-                        `<colgroup width="${colItem.w}px"></colgroup>`;
+                        colGroup += `<col width="${colItem.w}px"></col>`;
                     } else {
-                        colGroup += '<colgroup width="72px"></colgroup>';
+                        colGroup += '<col width="72px"></col>';
                     }
                 }
 
@@ -413,12 +413,12 @@ export class UniverCopy extends Copy {
                     style += 'height:19px;';
                 }
 
-                const colItem = colManager.get(c);
-                if (colItem && colItem.w) {
-                    style += `width:${colItem.w}px;`;
-                } else {
-                    style += `width:72px;`;
-                }
+                // const colItem = colManager.get(c);
+                // if (colItem && colItem.w) {
+                //     style += `width:${colItem.w}px;`;
+                // } else {
+                //     style += `width:72px;`;
+                // }
 
                 if (cellValue && cellValue.s) {
                     const cellStyle = this.getContext().getWorkBook().getStyles().get(cellValue.s);
@@ -475,6 +475,7 @@ export class UniverCopy extends Copy {
 
             cpData += '</tr>';
         }
+        colGroup += '</colgroup>';
         let cpTable = `<table data-type="universheet_copy_action_table">${colGroup}${cpData}</table>`;
         return cpTable;
     }

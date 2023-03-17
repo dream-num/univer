@@ -1,4 +1,12 @@
-import { BaseClipboardExtension, BaseClipboardExtensionFactory, handelTableToJson, handlePlainToJson, IClipboardData } from '@univerjs/base-ui';
+import {
+    BaseClipboardExtension,
+    BaseClipboardExtensionFactory,
+    handelTableToJson,
+    handlePlainToJson,
+    handleTableColgroup,
+    handleTableRowGroup,
+    IClipboardData,
+} from '@univerjs/base-ui';
 import { ClipboardPlugin } from '../../ClipboardPlugin';
 
 export class ClipboardExtension extends BaseClipboardExtension<ClipboardPlugin> {
@@ -6,15 +14,23 @@ export class ClipboardExtension extends BaseClipboardExtension<ClipboardPlugin> 
         const content = this._data.html || this._data.plain;
 
         let data;
+        let colInfo;
+        let rowInfo;
         if (content) {
             if (content.indexOf('<table') > -1 && content.indexOf('<td') > -1) {
                 data = handelTableToJson(content);
+                colInfo = handleTableColgroup(content);
+                rowInfo = handleTableRowGroup(content);
             } else {
                 data = handlePlainToJson(content);
             }
         }
 
-        this._plugin.getUniverPaste().pasteTo(data);
+        this._plugin.getUniverPaste().pasteTo({
+            data,
+            colInfo,
+            rowInfo,
+        });
     }
 }
 

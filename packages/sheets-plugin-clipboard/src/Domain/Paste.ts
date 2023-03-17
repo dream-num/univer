@@ -1,5 +1,5 @@
 import { SelectionControl } from '@univerjs/base-sheets/src/Controller/Selection/SelectionController';
-import { SheetContext, PLUGIN_NAMES } from '@univerjs/core';
+import { SheetContext, PLUGIN_NAMES, Nullable } from '@univerjs/core';
 import { SelectionModel, SheetPlugin } from '@univerjs/base-sheets';
 import { handleTableMergeData } from '@univerjs/base-ui';
 import { RightMenuProps } from '@univerjs/ui-plugin-sheets';
@@ -7,6 +7,12 @@ import { RightMenuProps } from '@univerjs/ui-plugin-sheets';
 export interface PasteType {
     type: string;
     result: string | ArrayBuffer | null;
+}
+
+export interface PasteInfo {
+    data: Nullable<Array<[]>>;
+    colInfo: Nullable<number[]>;
+    rowInfo: Nullable<number[]>;
 }
 
 export abstract class Paste {
@@ -36,11 +42,12 @@ export class UniverPaste extends Paste {
         super(context, pasteList);
     }
 
-    pasteTo(data: any) {
+    pasteTo(info: PasteInfo) {
+        const { data, colInfo, rowInfo } = info;
         // const data = await this.pasteResolver(e);
         // if (data.length === 0) return;
 
-        if (!data || data?.length === 0) return;
+        if (!data || !data.length) return;
         const sheet = this.getContext().getWorkBook().getActiveSheet();
         if (!sheet) return;
         const SheetPlugin = this.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
@@ -86,6 +93,18 @@ export class UniverPaste extends Paste {
             sheet.getMerges().add(mergeData[i]);
         }
         sheet.getRange(minH, minC, maxH, maxC).setRangeDatas(tableData.data);
+
+        if (colInfo && colInfo.length) {
+            for (let i = 0; i < colInfo.length; i++) {
+                sheet.setColumnWidth(minC + i, colInfo[i]);
+            }
+        }
+
+        if (rowInfo && rowInfo.length) {
+            for (let i = 0; i < rowInfo.length; i++) {
+                sheet.setRowHeight(minH + i, rowInfo[i]);
+            }
+        }
     }
 
     paste(e: ClipboardEvent) {

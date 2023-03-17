@@ -421,7 +421,8 @@ export class UniverCopy extends Copy {
                 // }
 
                 if (cellValue && cellValue.s) {
-                    const cellStyle = this.getContext().getWorkBook().getStyles().get(cellValue.s);
+                    const cellStyle = this.getContext().getWorkBook().getStyles().getStyleByCell(cellValue);
+                    // const cellStyle = this.getContext().getWorkBook().getStyles().get(cellValue.s);
                     if (cellStyle) {
                         style += handleStyleToString(cellStyle);
                     }

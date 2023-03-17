@@ -1,4 +1,4 @@
-import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DEMO3, DEFAULT_WORKBOOK_DATA_DOWN } from '@univerjs/common-plugin-data';
+import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DEMO, DEFAULT_WORKBOOK_DATA_DEMO3, DEFAULT_WORKBOOK_DATA_DOWN } from '@univerjs/common-plugin-data';
 import { IWorkbookConfig, IWorksheetConfig, SheetTypes, Tools } from '@univerjs/core';
 import { univerSheetCustom } from '.';
 
@@ -38,7 +38,7 @@ let columnCount = 8;
 if (window.innerWidth < 1366) {
     columnCount = 5;
 }
-const defaultWorkbookData = Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO3);
+const defaultWorkbookData = Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO);
 // defaultWorkbookData.id = 'workbook-01';
 // defaultWorkbookData.styles = null;
 // defaultWorkbookData.namedRanges = null;

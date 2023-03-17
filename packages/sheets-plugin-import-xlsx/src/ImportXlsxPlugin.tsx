@@ -25,7 +25,7 @@ export class ImportXlsxPlugin extends Plugin<any, SheetContext> {
     }
 
     initialize(): void {
-        const context = this.getContext();
+        const context = this.getGlobalContext();
 
         /**
          * load more Locale object
@@ -40,7 +40,7 @@ export class ImportXlsxPlugin extends Plugin<any, SheetContext> {
     }
 
     registerExtension() {
-        const dragAndDropRegister = this.getContext()
+        const dragAndDropRegister = this.getGlobalContext()
             .getPluginManager()
             .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
             .getRegisterManager()
@@ -56,7 +56,7 @@ export class ImportXlsxPlugin extends Plugin<any, SheetContext> {
     }
 
     onDestroy(): void {
-        const dragAndDropRegister = this.getContext()
+        const dragAndDropRegister = this.getGlobalContext()
             .getPluginManager()
             .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
             .getRegisterManager()

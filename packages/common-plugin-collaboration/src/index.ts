@@ -1,1 +1,1 @@
-export *  from './CollaborationPlugin';
+export * from './CollaborationPlugin';

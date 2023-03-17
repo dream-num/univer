@@ -1,13 +1,13 @@
-import { IKeyValue, migrate, PLUGIN_NAMES, Tools } from '@univerjs/core';
+import { IKeyValue, migrate, Tools } from '@univerjs/core';
 import { BaseComponentRender } from '@univerjs/base-ui';
-import { IToolbarItemProps, SelectTypes, SheetPlugin } from '@univerjs/base-sheets';
+import { IToolbarItemProps, SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
 
 import * as LuckyExcel from 'luckyexcel';
 import { IMPORT_XLSX_PLUGIN_NAME } from '../Basics/Const';
 import { ImportXlsxPlugin } from '../ImportXlsxPlugin';
 
 export class ImportXlsxController {
-    protected _sheetPlugin: SheetPlugin;
+    protected _sheetUIPlugin: SheetUIPlugin;
 
     protected _toolButton: IToolbarItemProps;
 
@@ -17,25 +17,19 @@ export class ImportXlsxController {
 
     constructor(plugin: ImportXlsxPlugin) {
         this._plugin = plugin;
-        this._sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+        this._sheetUIPlugin = this._plugin.getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
 
         this._toolButton = {
             name: IMPORT_XLSX_PLUGIN_NAME,
-            type: SelectTypes.FIX,
-            locale: 'importXlsx.tooltip',
-            tooltipLocale: 'importXlsx.tooltip',
+            toolbarType: 1,
+            tooltip: 'importXlsx.tooltip',
             show: true,
-            hideSelectedIcon: true,
-            children: [
-                {
-                    locale: 'importXlsx.upload',
-                    onClick: () => {
-                        this.upload();
-                    },
-                },
-            ],
+            labelLocale: 'importXlsx.import',
+            onClick: () => {
+                this.upload();
+            },
         };
-        this._sheetPlugin.addToolButton(this._toolButton);
+        this._sheetUIPlugin.addToolButton(this._toolButton);
     }
 
     upload() {
@@ -50,6 +44,7 @@ export class ImportXlsxController {
 
         input.click();
     }
+
     handleFiles(files: File[] | FileList | null) {
         if (files == null || files.length == 0) {
             alert('No files wait for import');
@@ -59,7 +54,7 @@ export class ImportXlsxController {
         let name = files[0].name;
         let suffixArr = name.split('.');
         let suffix = suffixArr[suffixArr.length - 1];
-        if (suffix != 'xlsx') {
+        if (suffix !== 'xlsx') {
             alert('Currently only supports the import of xlsx files');
             return;
         }
@@ -95,9 +90,9 @@ export class ImportXlsxController {
             });
 
             // remove other sheets
-            // order.forEach((sheetId: string) => {
-            //     workbook.removeSheetBySheetId(sheetId);
-            // });
+            order.forEach((sheetId: string) => {
+                workbook.removeSheetBySheetId(sheetId);
+            });
         });
     }
 }

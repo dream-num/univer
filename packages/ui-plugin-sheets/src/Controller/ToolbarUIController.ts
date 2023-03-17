@@ -44,6 +44,7 @@ export interface BaseToolbarSelectChildrenProps extends BaseSelectChildrenProps 
 export interface BaseToolbarSelectProps extends BaseSelectProps {
     suffixLocale?: string;
     children?: BaseToolbarSelectChildrenProps[];
+    labelLocale?: string;
 }
 
 enum ToolbarType {

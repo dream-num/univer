@@ -1,3 +1,1 @@
-import { ImportXlsxPlugin } from './ImportXlsxPlugin';
-
-export { ImportXlsxPlugin };
+export * from './ImportXlsxPlugin';

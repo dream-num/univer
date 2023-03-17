@@ -1,18 +1,5 @@
 import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren } from '@univerjs/base-ui';
-import {
-    CommandManager,
-    DEFAULT_STYLES,
-    HorizontalAlign,
-    ISheetActionData,
-    SheetActionBase,
-    Tools,
-    UIObserver,
-    VerticalAlign,
-    WrapStrategy,
-    Range,
-    FontWeight,
-    FontItalic,
-} from '@univerjs/core';
+import { DEFAULT_STYLES, HorizontalAlign, Tools, UIObserver, VerticalAlign, WrapStrategy, Range, FontWeight, FontItalic } from '@univerjs/core';
 import { DefaultToolbarConfig, DocToolbarConfig, DOC_UI_PLUGIN_NAME } from '../Basics';
 import { DocUIPlugin } from '../DocUIPlugin';
 import { Toolbar } from '../View';
@@ -31,6 +18,7 @@ export interface BaseToolbarSelectChildrenProps extends BaseSelectChildrenProps 
 export interface BaseToolbarSelectProps extends BaseSelectProps {
     suffixLocale?: string;
     children?: BaseToolbarSelectChildrenProps[];
+    labelLocale?: string;
 }
 
 enum ToolbarType {

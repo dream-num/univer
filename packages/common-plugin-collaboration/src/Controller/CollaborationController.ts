@@ -1,20 +1,92 @@
-import { BaseComponentRender } from '@univerjs/base-ui';
 import { SheetPlugin } from '@univerjs/base-sheets';
-import { ACTION_NAMES, CommandManager, HEART_BEAT_MESSAGE, IOSocket, IOSocketListenType, ISheetActionData, PLUGIN_NAMES, SheetActionBase, SheetContext } from '@univerjs/core';
+import {
+    ACTION_NAMES,
+    CommandManager,
+    HEART_BEAT_MESSAGE,
+    IKeyValue,
+    IOSocket,
+    IOSocketListenType,
+    ISheetActionData,
+    PLUGIN_NAMES,
+    SheetActionBase,
+    SheetContext,
+} from '@univerjs/core';
 import { CollaborationPlugin } from '../CollaborationPlugin';
 
 export class CollaborationController {
-    protected _plugin: CollaborationPlugin;
-
-    protected _render: BaseComponentRender;
-
     socket: IOSocket;
 
     previousMessage: string;
 
+    protected _plugin: CollaborationPlugin;
+
     constructor(plugin: CollaborationPlugin) {
         this._plugin = plugin;
         this._initialize();
+    }
+
+    onMessage(data: string) {
+        const json = JSON.parse(data);
+        const content = json.content;
+        if (content === HEART_BEAT_MESSAGE || this.previousMessage === content) {
+            return;
+        }
+
+        this.previousMessage = content;
+
+        try {
+            const message = JSON.parse(content);
+
+            if (message && message.type === 'workbookData') {
+                console.log('refresh');
+                this.refresh(message.config);
+            }
+        } catch (error) {
+            console.error(content);
+        }
+    }
+
+    onError(data: IKeyValue) {
+        console.log('Collaboration Error: ', data);
+    }
+
+    onOpen(data: IKeyValue) {
+        console.log('Collaboration Open: ', data);
+    }
+
+    onClose(data: IKeyValue) {
+        console.log('Collaboration Close: ', data);
+    }
+
+    onRetry(data: IKeyValue) {
+        console.log('Collaboration Retry: ', data);
+    }
+
+    onDestroy(data: IKeyValue) {
+        console.log('Collaboration Destroy: ', data);
+    }
+
+    close() {
+        this.socket.close();
+    }
+
+    refresh(config: IKeyValue) {
+        const context = this._plugin.getContext() as SheetContext;
+        context.refreshWorkbook(config);
+
+        const worksheet = context.getWorkBook().getActiveSheet();
+        if (worksheet) {
+            try {
+                const sheetPlugin = context.getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
+                const canvasView = sheetPlugin.getCanvasView();
+                if (canvasView) {
+                    canvasView.updateToSheet(worksheet);
+                    sheetPlugin.getMainComponent().makeDirty(true);
+                }
+            } catch (error) {
+                console.info(error);
+            }
+        }
     }
 
     private _initialize() {
@@ -65,7 +137,7 @@ export class CollaborationController {
 
             if (actionName !== ACTION_NAMES.SET_RANGE_DATA_ACTION) return;
 
-            const context = plugin.context as SheetContext;
+            const context = plugin.getUniver().getCurrentUniverSheetInstance().context;
 
             const currentUnitId = context.getWorkBook().getUnitId();
             const actionUnitId = action.getWorkBook().getUnitId();
@@ -97,65 +169,5 @@ export class CollaborationController {
                 }
             }
         });
-    }
-
-    onMessage(data) {
-        const json = JSON.parse(data);
-        const content = json.content;
-        if (content === HEART_BEAT_MESSAGE || this.previousMessage === content) {
-            return;
-        }
-
-        this.previousMessage = content;
-
-        try {
-            const message = JSON.parse(content);
-
-            if (message && message.type === 'workbookData') {
-                console.log('refresh');
-                this.refresh(message.config);
-            }
-        } catch (error) {
-            console.error(content);
-        }
-    }
-    onError(data) {
-        console.log('onError====', data);
-    }
-    onOpen(data) {
-        console.log('onOpen====', data);
-    }
-    onClose(data) {
-        console.log('onClose====', data);
-    }
-    onRetry(data) {
-        console.log('onRetry====', data);
-    }
-    onDestroy(data) {
-        console.log('onDestroy====', data);
-    }
-
-    close() {
-        this.socket.close();
-    }
-
-    refresh(config) {
-        // console.log('onMessage===config====', config);
-        const context = this._plugin.getContext() as SheetContext;
-        context.refreshWorkbook(config);
-
-        const worksheet = context.getWorkBook().getActiveSheet();
-        if (worksheet) {
-            try {
-                const sheetPlugin = context.getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
-                const canvasView = sheetPlugin.getCanvasView();
-                if (canvasView) {
-                    canvasView.updateToSheet(worksheet);
-                    sheetPlugin.getMainComponent().makeDirty(true);
-                }
-            } catch (error) {
-                console.info(error);
-            }
-        }
     }
 }

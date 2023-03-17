@@ -8,8 +8,10 @@ export interface ICollaborationPluginConfig {
 }
 
 export class CollaborationPlugin extends Plugin {
-    private _collaborationController: CollaborationController;
     config: ICollaborationPluginConfig;
+
+    private _collaborationController: CollaborationController;
+
     constructor(config?: ICollaborationPluginConfig) {
         super(COLLABORATION_PLUGIN_NAME);
         this.config = config || { url: '' };
@@ -24,14 +26,14 @@ export class CollaborationPlugin extends Plugin {
     }
 
     initialize(): void {
-        const context = this.getContext();
+        const context = this.getGlobalContext();
 
         /**
          * load more Locale object
          */
         context.getLocale().load({
-            en: en,
-            zh: zh,
+            en,
+            zh,
         });
 
         this._collaborationController = new CollaborationController(this);

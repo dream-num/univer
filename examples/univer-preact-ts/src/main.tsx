@@ -2,18 +2,7 @@ import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DEMO3, DEFAULT_WORKBOOK_DA
 import { IWorkbookConfig, IWorksheetConfig, SheetTypes, Tools } from '@univerjs/core';
 import { univerSheetCustom } from '.';
 
-const sheetConfig = {
-    container: 'universheet-demo',
-    layout: {
-        sheetContainerConfig: {
-            infoBar: false,
-            formulaBar: false,
-            toolbar: false,
-            sheetBar: false,
-            countBar: false,
-            rightMenu: false,
-        },
-    },
+const baseSheetsConfig = {
     selections: {
         'sheet-01': [
             {
@@ -31,6 +20,19 @@ const sheetConfig = {
         ],
     },
 };
+let uiSheetsConfig = {
+    container: 'universheet-demo',
+    layout: {
+        sheetContainerConfig: {
+            infoBar: false,
+            formulaBar: false,
+            toolbar: true,
+            sheetBar: true,
+            countBar: false,
+            rightMenu: false,
+        },
+    },
+}
 
 let columnCount = 8;
 if (window.innerWidth < 1366) {
@@ -60,67 +62,68 @@ const defaultWorkbookData = Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO3);
 
 univerSheetCustom({
     coreConfig: defaultWorkbookData,
-    baseSheetsConfig: sheetConfig,
+    baseSheetsConfig,
+    uiSheetsConfig,
     collaborationConfig: {
         url: 'ws://localhost:8448/ws',
         // url: 'ws://luckysheet.lashuju.com/ws',
     },
 });
 
-const sheetConfigDown = {
-    container: 'universheet-demo-down',
-    layout: {
-        sheetContainerConfig: {
-            infoBar: false,
-            formulaBar: false,
-            toolbar: false,
-            sheetBar: true,
-            countBar: false,
-            rightMenu: false,
-        },
-    },
-    selections: {
-        'sheet-001': [
-            {
-                selection: {
-                    startRow: 0,
-                    endRow: 0,
-                    startColumn: 0,
-                    endColumn: 0,
-                },
-                cell: {
-                    row: 0,
-                    column: 0,
-                },
-            },
-        ],
-    },
-};
+// const sheetConfigDown = {
+//     container: 'universheet-demo-down',
+//     layout: {
+//         sheetContainerConfig: {
+//             infoBar: false,
+//             formulaBar: false,
+//             toolbar: false,
+//             sheetBar: true,
+//             countBar: false,
+//             rightMenu: false,
+//         },
+//     },
+//     selections: {
+//         'sheet-001': [
+//             {
+//                 selection: {
+//                     startRow: 0,
+//                     endRow: 0,
+//                     startColumn: 0,
+//                     endColumn: 0,
+//                 },
+//                 cell: {
+//                     row: 0,
+//                     column: 0,
+//                 },
+//             },
+//         ],
+//     },
+// };
 
-const defaultWorkbookDataDown = Tools.deepClone(DEFAULT_WORKBOOK_DATA_DOWN);
-defaultWorkbookDataDown.id = 'workbook-02';
-defaultWorkbookDataDown.styles = null;
-defaultWorkbookDataDown.namedRanges = null;
-defaultWorkbookDataDown.sheets = {
-    'sheet-001': {
-        type: 0,
-        id: 'sheet-001',
-        name: 'sheet001',
-        columnCount,
-        status: 1,
-    },
-    'sheet-002': {
-        type: 0,
-        id: 'sheet-002',
-        name: 'sheet002',
-        columnCount: columnCount + 10,
-    },
-};
+// const defaultWorkbookDataDown = Tools.deepClone(DEFAULT_WORKBOOK_DATA_DOWN);
+// defaultWorkbookDataDown.id = 'workbook-02';
+// defaultWorkbookDataDown.styles = null;
+// defaultWorkbookDataDown.namedRanges = null;
+// defaultWorkbookDataDown.sheets = {
+//     'sheet-001': {
+//         type: 0,
+//         id: 'sheet-001',
+//         name: 'sheet001',
+//         columnCount,
+//         status: 1,
+//     },
+//     'sheet-002': {
+//         type: 0,
+//         id: 'sheet-002',
+//         name: 'sheet002',
+//         columnCount: columnCount + 10,
+//     },
+// };
 
-univerSheetCustom({
-    coreConfig: defaultWorkbookDataDown,
-    baseSheetsConfig: sheetConfigDown,
-});
+// univerSheetCustom({
+//     coreConfig: defaultWorkbookDataDown,
+//     baseSheetsConfig: sheetConfigDown,
+// });
 
 // run('universheet-demo')
 // run('universheet-demo-down')

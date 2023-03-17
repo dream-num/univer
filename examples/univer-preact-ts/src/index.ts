@@ -10,6 +10,9 @@ import { ISlidePluginConfig, SlidePlugin } from '@univerjs/base-slides';
 import { DEFAULT_WORKBOOK_DATA } from '@univerjs/common-plugin-data';
 // import { CollaborationPlugin, ICollaborationPluginConfig } from '@univerjs/common-plugin-collaboration';
 import { DEFAULT_FORMULA_DATA, FormulaPlugin, IFormulaConfig } from '@univerjs/sheets-plugin-formula';
+import { CollaborationPlugin, ICollaborationPluginConfig } from '@univerjs/common-plugin-collaboration';
+import { ClipboardPlugin } from '@univerjs/sheets-plugin-clipboard';
+import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
 // import { INumfmtPluginConfig, NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
 // import { ClipboardPlugin } from '@univerjs/sheets-plugin-clipboard';
 // import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
@@ -20,7 +23,7 @@ interface ISheetPropsCustom {
     uiSheetsConfig?: ISheetUIPluginConfig;
     // numfmtConfig?: INumfmtPluginConfig;
     formulaConfig?: IFormulaConfig;
-    // collaborationConfig?: ICollaborationPluginConfig;
+    collaborationConfig?: ICollaborationPluginConfig;
 }
 
 /**
@@ -42,12 +45,12 @@ class UniverSheetCustom {
         univer.install(
             new SheetUIPlugin(config.uiSheetsConfig)
         );
+        univer.install(new CollaborationPlugin(config.collaborationConfig));
         // universheet.installPlugin(new NumfmtPlugin(config.numfmtConfig));
         // FormulaPlugin.create(config.formulaConfig).installTo(universheet);
 
-        // universheet.installPlugin(new ClipboardPlugin());
-        // universheet.installPlugin(new ImportXlsxPlugin());
-        // universheet.installPlugin(new CollaborationPlugin(config.collaborationConfig));
+        universheet.installPlugin(new ClipboardPlugin());
+        universheet.installPlugin(new ImportXlsxPlugin());
 
         return universheet;
     }

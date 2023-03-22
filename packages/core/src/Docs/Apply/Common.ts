@@ -4,12 +4,8 @@ import {
     IElement,
 } from '../../Interfaces/IDocumentData';
 
-export function getTextStartByAnchor(start: number) {
-    let textStart = start - 1;
-
-    textStart = textStart < 0 ? 0 : textStart;
-
-    return textStart;
+export function getTextIndexByCursor(index: number, isBack: boolean = false) {
+    return isBack ? index - 1 : index;
 }
 
 export function insertTextToContent(content: string, start: number, text: string) {

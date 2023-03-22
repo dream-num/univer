@@ -5,21 +5,22 @@ import {
     IParagraph,
     ParagraphElementType,
 } from '../../Interfaces/IDocumentData';
+import { ITextSelectionRangeStartParam } from '../../Interfaces/ISelectionData';
 import { DocumentModel } from '../Domain/DocumentModel';
 import {
     getDocsUpdateBody,
-    getTextStartByAnchor,
     insertTextToContent,
+    getTextIndexByCursor,
 } from './Common';
 
 export function InsertTextApply(
     document: DocumentModel,
-    config: { text: string; start: number; length: number; segmentId?: string }
+    text: string,
+    collapseRange: ITextSelectionRangeStartParam
 ) {
     const doc = document.getSnapshot();
-    const { text, start, length, segmentId } = config;
 
-    const textStart = getTextStartByAnchor(start);
+    const { segmentId } = collapseRange;
 
     const body = getDocsUpdateBody(doc, segmentId);
 
@@ -42,25 +43,28 @@ export function InsertTextApply(
 
         switch (blockType) {
             case BlockType.PARAGRAPH:
-                paragraphApply(
-                    text,
-                    start,
-                    textStart,
-                    blockElement,
-                    blockElement.paragraph
-                );
+                blockElement.paragraph &&
+                    insertText(
+                        text,
+                        blockElement,
+                        blockElement.paragraph,
+                        collapseRange
+                    );
         }
     }
 }
 
-function paragraphApply(
+function insertText(
     text: string,
-    start: number,
-    textStart: number,
     blockElement: IBlockElement,
-    paragraph?: IParagraph
+    paragraph: IParagraph,
+    collapseRange: ITextSelectionRangeStartParam
 ) {
     const { st, ed } = blockElement;
+
+    const { cursorStart, isStartBack, segmentId } = collapseRange;
+
+    const textStart = getTextIndexByCursor(cursorStart, isStartBack);
 
     if (textStart > ed || paragraph == null) {
         return;
@@ -96,7 +100,7 @@ function paragraphApply(
         if (paragraphElementType === ParagraphElementType.TEXT_RUN) {
             let relative = textStart - st + 1;
 
-            if (start === 0) {
+            if (textStart === 0) {
                 relative = 0;
             }
 

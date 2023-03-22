@@ -7,7 +7,7 @@ import {
 } from '../../Interfaces/IDocumentData';
 import { ITextSelectionRangeParam } from '../../Interfaces/ISelectionData';
 import { DocumentModel } from '../Domain/DocumentModel';
-import { deleteContent, getDocsUpdateBody } from './Common';
+import { deleteContent, getDocsUpdateBody, getTextIndexByCursor } from './Common';
 
 export function DeleteTextApply(
     document: DocumentModel,
@@ -48,6 +48,10 @@ function deleteText(
 ) {
     const { cursorStart, cursorEnd, isStartBack, isEndBack, isCollapse } = range;
 
+    const textStart = getTextIndexByCursor(cursorStart, isStartBack);
+
+    const textEnd = getTextIndexByCursor(cursorEnd, isEndBack);
+
     const { st, ed } = blockElement;
 
     if (cursorStart > ed || cursorEnd < st) {
@@ -75,7 +79,7 @@ function deleteText(
         if (paragraphElementType === ParagraphElementType.TEXT_RUN) {
             let relative = textStart - st + 1;
 
-            if (start === 0) {
+            if (textStart === 0) {
                 relative = 0;
             }
 

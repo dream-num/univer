@@ -29,14 +29,21 @@ export interface ICellInfo extends IPosition {
 
 export interface ISelection extends IPosition, IRangeData {}
 
-export interface ITextSelectionRange {
+export interface ITextSelectionRangeStart {
     cursorStart: number;
-    cursorEnd: number;
     isStartBack: boolean;
+}
+
+export interface ITextSelectionRange extends ITextSelectionRangeStart {
+    cursorEnd: number;
     isEndBack: boolean;
     isCollapse: boolean;
 }
 
 export interface ITextSelectionRangeParam extends ITextSelectionRange {
     segmentId?: string; //The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body.
+}
+
+export interface ITextSelectionRangeStartParam extends ITextSelectionRangeStart {
+    segmentId?: string;
 }

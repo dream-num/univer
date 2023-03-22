@@ -65,8 +65,8 @@ export class DeleteTextAction extends DocActionBase<
         // TODO ...
         const actionData = this.getOldActionData();
         const document = this.getDocument();
-        // const { text, start, length } = actionData;
-        InsertTextApply(document, { ...actionData });
+        const { text, cursorStart, isStartBack, segmentId } = actionData;
+        InsertTextApply(document, text, { cursorStart, isStartBack, segmentId });
     }
 
     validate(): boolean {

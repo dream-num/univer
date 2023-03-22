@@ -429,18 +429,26 @@ export function handleTableColgroup(table: string) {
     const content = document.createElement('DIV');
     let data: any[] = [];
     content.innerHTML = table;
-    let colgroup = content.querySelectorAll('table colgroup col');
+    let colgroup = content.querySelectorAll('table col');
     if (!colgroup.length) return [];
     for (let i = 0; i < colgroup.length; i++) {
         const col = colgroup[i];
-        const width = parseFloat(col.getAttribute('width') ?? '72');
-        data.push(width);
+        const colSpan = col.getAttribute('span');
+        if (colSpan && +colSpan > 1) {
+            for (let j = 0; j < +colSpan; j++) {
+                const width = getTdHeight(col.getAttribute('width'), 72);
+                data.push(width);
+            }
+        } else {
+            const width = getTdHeight(col.getAttribute('width'), 72);
+            data.push(width);
+        }
     }
     return data;
 }
 
-function getTdHeight(height: string | null) {
-    if (!height) return 19;
+function getTdHeight(height: string | null, defaultHeight: number) {
+    if (!height) return defaultHeight;
     let firstHeight;
     if (height.includes('pt')) {
         firstHeight = ptToPx(parseFloat(height));
@@ -461,7 +469,7 @@ export function handleTableRowGroup(table: string) {
     for (let i = 0; i < rowGroup.length; i++) {
         const row = rowGroup[i];
         const tds = row.querySelectorAll('td');
-        let firstHeight = getTdHeight(tds[0].style.height);
+        let firstHeight = getTdHeight(tds[0].style.height, 19);
 
         for (let k = 0; k < tds.length; k++) {
             const rowSpan = tds[k].getAttribute('rowSpan');
@@ -473,7 +481,7 @@ export function handleTableRowGroup(table: string) {
                 // i = i + +rowSpan - 1;
                 continue;
             }
-            firstHeight = getTdHeight(tds[k].style.height);
+            firstHeight = getTdHeight(tds[k].style.height, 19);
             break;
         }
         data.push(firstHeight);

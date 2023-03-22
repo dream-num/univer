@@ -16,6 +16,12 @@ class Drag extends Component<BaseDragProps, IState> {
 
         // Drag and drop function (mainly to trigger three events: onpointerdown\onpointermove\onpointerup)
         const drag = this.root.current;
+
+        // move to center
+        const {top,left} = this.getPosition()
+        drag.style.top = top + 'px'
+        drag.style.left = left + 'px'
+
         const divMask = drag.querySelector(`.${styles.dragMask}`);
     
         const dragBarTop = drag.querySelector(`.${styles.dragBarTop}`)
@@ -56,36 +62,36 @@ class Drag extends Component<BaseDragProps, IState> {
 
             function pointerMoveListener(e:PointerEvent) {
                 e = e || window.event // Compatible with IE browser
-                    let left = e.clientX-diffX
-                    let top = e.clientY-diffY
-            
-                    // Control the range of dragged objects can only be in the browser window, and scroll bars are not allowed
-                    // if (left <0) {
-                    //     left = 0
-                    // } else if (left> window.innerWidth-drag.offsetWidth) {
-                    //     left = window.innerWidth-drag.offsetWidth
-                    // }
-                    // if (top <0) {
-                    //     top = 0
-                    // } else if (top> window.innerHeight-drag.offsetHeight) {
-                    //     top = window.innerHeight-drag.offsetHeight
-                    // }
-                    
-                    if (left < -drag.offsetWidth + 100) {
-                    left = -drag.offsetWidth + 100
-                    } else if (left > window.innerWidth  - 100) {
-                    left = window.innerWidth - 100
-                    }
-                    if (top < -drag.offsetHeight + 100) {
-                    top = -drag.offsetHeight + 100
-                    } else if (top > window.innerHeight - 100) {
-                    top = window.innerHeight - 100
-                    }
-            
-                    // Regain the distance of the object when moving, and solve the phenomenon of shaking when dragging
-                    drag.style.left = left +'px'
-                    drag.style.top = top +'px'
-                    drag.style.transform =''
+                let left = e.clientX-diffX
+                let top = e.clientY-diffY
+        
+                // Control the range of dragged objects can only be in the browser window, and scroll bars are not allowed
+                // if (left <0) {
+                //     left = 0
+                // } else if (left> window.innerWidth-drag.offsetWidth) {
+                //     left = window.innerWidth-drag.offsetWidth
+                // }
+                // if (top <0) {
+                //     top = 0
+                // } else if (top> window.innerHeight-drag.offsetHeight) {
+                //     top = window.innerHeight-drag.offsetHeight
+                // }
+                
+                if (left < -drag.offsetWidth + 100) {
+                left = -drag.offsetWidth + 100
+                } else if (left > window.innerWidth  - 100) {
+                left = window.innerWidth - 100
+                }
+                if (top < -drag.offsetHeight + 100) {
+                top = -drag.offsetHeight + 100
+                } else if (top > window.innerHeight - 100) {
+                top = window.innerHeight - 100
+                }
+        
+                // Regain the distance of the object when moving, and solve the phenomenon of shaking when dragging
+                drag.style.left = left +'px'
+                drag.style.top = top +'px'
+                drag.style.transform =''
             }
     
             function pointerUpListener(e:PointerEvent) {
@@ -107,6 +113,20 @@ class Drag extends Component<BaseDragProps, IState> {
 
     }
 
+    getPosition(){
+        const w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+        const h = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+        const rootW = this.root.current.offsetWidth;
+        const rootH = this.root.current.offsetHeight;
+        const top = (h - rootH) / 2;
+        const left = (w - rootW) / 2;
+
+        return {
+            top,
+            left
+        }
+    }
+
     componentDidMount() {
         if (this.props.isDrag) {
             this.initDragDialog()
@@ -118,8 +138,8 @@ class Drag extends Component<BaseDragProps, IState> {
         return (
             <>
                 {isDrag ? (
-                    <div ref={this.root} className={styles.dragContainer} >
-                      <div className={`${styles.dragDialog} ${className}`}>
+                    <div className={styles.dragContainer} >
+                      <div ref={this.root} className={`${styles.dragDialog} ${className}`}>
                         {this.props.children}
                         
                         <div className={styles.dragBarLeft}></div>

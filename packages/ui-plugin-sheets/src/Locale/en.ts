@@ -497,6 +497,8 @@ export default {
         generateNewMatrix: 'Generate new matrix',
     },
     info: {
+        tooltip: 'Tooltip',
+        notChangeMerge: 'You cannot make partial changes to the merged cells',
         detailUpdate: 'New opened',
         detailSave: 'Local cache restored',
         row: '',

@@ -1,7 +1,7 @@
 import { SheetPlugin } from '@univerjs/base-sheets';
-import { DragManager, EventManager, getRefElement } from '@univerjs/base-ui';
+import { DragManager, EventManager, getRefElement, Prompt } from '@univerjs/base-ui';
 import { LocaleType, PLUGIN_NAMES, UniverSheet } from '@univerjs/core';
-import { ISheetUIPluginConfig } from '../Basics';
+import { ISheetUIPluginConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { SheetUIPlugin } from '../SheetUIPlugin';
 import { SheetContainer } from '../View';
 import { CellEditorUIController } from './CellEditorUIController';
@@ -55,6 +55,10 @@ export class SheetContainerUIController {
         this._rightMenuController = new RightMenuUIController(this._plugin, this._config.layout?.rightMenuConfig);
         this._countBarController = new CountBarUIController(this._plugin);
         this._sheetBarController = new SheetBarUIController(this._plugin);
+        // 插入prompt组件
+        this._slotController.addSlot(SHEET_UI_PLUGIN_NAME + Prompt.name, {
+            component: Prompt,
+        });
     }
 
     getUIConfig() {

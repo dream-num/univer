@@ -360,6 +360,8 @@ export default {
         generateNewMatrix: '生成新矩阵',
     },
     info: {
+        tooltip: '提示',
+        notChangeMerge: '不能对合并单元格做部分更改',
         detailUpdate: '新打开',
         detailSave: '已恢复本地缓存',
         row: '行',

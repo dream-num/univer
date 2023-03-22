@@ -61,8 +61,8 @@ export class Prompt extends Component<BaseConfirmProps, IState> {
         const { show } = this.state;
         return (
             <div className={styles.confirmModal}>
-                <Modal visible={show} isDrag={true} title={title} group={this.getGroup()}>
-                    {content}
+                <Modal visible={show} isDrag={true} title={this.getLocale(title)} group={this.getGroup()}>
+                    {this.getLocale(content)}
                 </Modal>
             </div>
         );

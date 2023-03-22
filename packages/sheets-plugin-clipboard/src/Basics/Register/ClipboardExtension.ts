@@ -1,6 +1,7 @@
 import {
     BaseClipboardExtension,
     BaseClipboardExtensionFactory,
+    handelExcelToJson,
     handelTableToJson,
     handlePlainToJson,
     handleTableColgroup,
@@ -17,7 +18,11 @@ export class ClipboardExtension extends BaseClipboardExtension<ClipboardPlugin> 
         let colInfo;
         let rowInfo;
         if (content) {
-            if (content.indexOf('<table') > -1 && content.indexOf('<td') > -1) {
+            if (content.indexOf('xmlns:x="urn:schemas-microsoft-com:office:excel"') > -1) {
+                data = handelExcelToJson(content);
+                colInfo = handleTableColgroup(content);
+                rowInfo = handleTableRowGroup(content);
+            } else if (content.indexOf('<table') > -1 && content.indexOf('<td') > -1) {
                 data = handelTableToJson(content);
                 colInfo = handleTableColgroup(content);
                 rowInfo = handleTableRowGroup(content);

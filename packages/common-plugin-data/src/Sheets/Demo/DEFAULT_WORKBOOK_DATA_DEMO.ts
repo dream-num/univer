@@ -285,7 +285,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
                 },
             },
             bg: {
-                rgb: 'rgba(237,125,49)',
+                rgb: 'rgb(237,125,49)',
             },
         },
         qFGJGc: {
@@ -307,7 +307,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
                 },
             },
             bg: {
-                rgb: 'rgba(237,125,49)',
+                rgb: 'rgb(237,125,49)',
             },
             fs: 20,
         },
@@ -330,25 +330,25 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
                 },
             },
             bg: {
-                rgb: 'rgba(237,125,49)',
+                rgb: 'rgb(237,125,49)',
             },
             fs: 20,
             bl: 1,
         },
         KT84dD: {
             bg: {
-                rgb: 'rgba(237,125,49)',
+                rgb: 'rgb(237,125,49)',
             },
         },
         qDQuhZ: {
             bg: {
-                rgb: 'rgba(237,125,49)',
+                rgb: 'rgb(237,125,49)',
             },
             ht: 2,
         },
         '4C9ySZ': {
             bg: {
-                rgb: 'rgba(237,125,49)',
+                rgb: 'rgb(237,125,49)',
             },
             ht: 2,
             vt: 2,
@@ -380,7 +380,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
                 },
             },
             bg: {
-                rgb: 'rgba(237,125,49)',
+                rgb: 'rgb(237,125,49)',
             },
             fs: 20,
             bl: 1,
@@ -430,7 +430,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
                 },
             },
             bg: {
-                rgb: 'rgba(237,125,49)',
+                rgb: 'rgb(237,125,49)',
             },
             fs: 20,
             bl: 1,
@@ -457,7 +457,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
         },
         KrPXyW: {
             bg: {
-                rgb: 'rgba(237,125,49)',
+                rgb: 'rgb(237,125,49)',
             },
             ht: 2,
             vt: 2,
@@ -484,7 +484,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
         },
         f9cBiW: {
             bg: {
-                rgb: 'rgba(237,125,49)',
+                rgb: 'rgb(237,125,49)',
             },
             ht: 2,
             vt: 2,
@@ -804,7 +804,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
                 },
             },
             bg: {
-                rgb: 'rgba(177,166,223)',
+                rgb: 'rgb(177,166,223)',
             },
         },
         aA37LW: {
@@ -831,7 +831,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             ht: 2,
             vt: 2,
             bg: {
-                rgb: 'rgba(177,166,223)',
+                rgb: 'rgb(177,166,223)',
             },
         },
         AeAego: {
@@ -858,7 +858,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             ht: 2,
             vt: 2,
             bg: {
-                rgb: 'rgba(177,166,223)',
+                rgb: 'rgb(177,166,223)',
             },
         },
         YYhEgD: {
@@ -879,7 +879,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
                 },
             },
             bg: {
-                rgb: 'rgba(177,166,223)',
+                rgb: 'rgb(177,166,223)',
             },
         },
         qdFDeG: {
@@ -1496,7 +1496,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             ht: 2,
             vt: 2,
             bg: {
-                rgb: 'rgba(177,166,223)',
+                rgb: 'rgb(177,166,223)',
             },
         },
         khtUqL: {
@@ -1511,7 +1511,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
                 },
             },
             bg: {
-                rgb: 'rgba(177,166,223)',
+                rgb: 'rgb(177,166,223)',
             },
         },
         '-4GCh_': {

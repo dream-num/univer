@@ -130,6 +130,10 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
         this._appUIController.getSheetContainerController().getMainSlotController().addSlot(name, slot, cb);
     }
 
+    getSlot(name: string) {
+        return this._appUIController.getSheetContainerController().getMainSlotController().getSlot(name);
+    }
+
     addToolButton(config: IToolbarItemProps) {
         this._appUIController.getSheetContainerController().getToolbarController().addToolbarConfig(config);
     }

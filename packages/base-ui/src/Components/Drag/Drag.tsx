@@ -42,19 +42,27 @@ class Drag extends Component<BaseDragProps, IState> {
     }
 
     onMouseDown(e: MouseEvent) {
+        // e.stopPropagation();
         // if (!((e.target as Element).className === styles.drag)) return;
-        window.addEventListener('mousemove', this.onMouseMove);
         let offsetX = e.offsetX;
         let offsetY = e.offsetY;
-        this.setState({
-            offsetX,
-            offsetY,
-        });
+        this.setState(
+            {
+                offsetX,
+                offsetY,
+            },
+            () => {
+                window.addEventListener('mousemove', this.onMouseMove);
+            }
+        );
     }
 
     onMouseMove = (e: MouseEvent) => {
+        // e.stopPropagation();
         let offsetX = this.state.offsetX;
         let offsetY = this.state.offsetY;
+
+        // if (e.x === offsetX && e.y === offsetY) return;
 
         let x = e.x;
         let y = e.y;

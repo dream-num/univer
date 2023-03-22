@@ -1,8 +1,8 @@
 import { SelectionControl } from '@univerjs/base-sheets/src/Controller/Selection/SelectionController';
 import { SheetContext, PLUGIN_NAMES, Nullable } from '@univerjs/core';
 import { SelectionModel, SheetPlugin } from '@univerjs/base-sheets';
-import { handleTableMergeData } from '@univerjs/base-ui';
-import { RightMenuProps } from '@univerjs/ui-plugin-sheets';
+import { handleTableMergeData, Prompt } from '@univerjs/base-ui';
+import { RightMenuProps, SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
 
 export interface PasteType {
     type: string;
@@ -84,6 +84,16 @@ export class UniverPaste extends Paste {
         let maxC = minC + copyC - 1;
         const isMerge = sheet.getMerges().getByRowColumn(minH, maxH, minC, maxC);
         if (isMerge) {
+            const prompt = this.getContext()
+                .getUniver()
+                .getGlobalContext()
+                .getPluginManager()
+                .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
+                .getSlot(SHEET_UI_PLUGIN_NAME + Prompt.name);
+            prompt.props.title = 'info.tooltip';
+            prompt.props.content = 'info.notChangeMerge';
+            prompt.showModal(true);
+
             return;
         }
         // 最终渲染数据

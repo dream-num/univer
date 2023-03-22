@@ -1,5 +1,5 @@
 import { BlockType, getBorderStyleType, ICellData, IDocumentData, IElement, IRangeData, IStyleData, ITextDecoration, Tools } from '@univerjs/core';
-import { pxToPt } from '@univerjs/base-render';
+import { ptToPx, pxToPt } from '@univerjs/base-render';
 import { textTrim } from '../Utils';
 
 // TODO: move to Utils
@@ -383,19 +383,19 @@ export function handleStringToStyle($dom: HTMLElement, cssStyle: string = '') {
                 s: getBorderStyleType(type),
             };
             if (key === 'border-bottom') {
-                styleList.bd.b = obj;
+                styleList.bd.b = value === 'none' ? null : obj;
             } else if (key === 'border-top') {
-                styleList.bd.t = obj;
+                styleList.bd.t = value === 'none' ? null : obj;
             } else if (key === 'border-left') {
-                styleList.bd.l = obj;
+                styleList.bd.l = value === 'none' ? null : obj;
             } else if (key === 'border-right') {
-                styleList.bd.r = obj;
+                styleList.bd.r = value === 'none' ? null : obj;
             } else if (key === 'border') {
                 styleList.bd = {
-                    r: obj,
-                    t: obj,
-                    b: obj,
-                    l: obj,
+                    r: value === 'none' ? null : obj,
+                    t: value === 'none' ? null : obj,
+                    b: value === 'none' ? null : obj,
+                    l: value === 'none' ? null : obj,
                 };
             }
         }
@@ -439,6 +439,19 @@ export function handleTableColgroup(table: string) {
     return data;
 }
 
+function getTdHeight(height: string | null) {
+    if (!height) return 19;
+    let firstHeight;
+    if (height.includes('pt')) {
+        firstHeight = ptToPx(parseFloat(height));
+    } else if (height.includes('px')) {
+        firstHeight = parseFloat(height);
+    } else {
+        firstHeight = (parseFloat(height) * 72) / 96;
+    }
+    return firstHeight;
+}
+
 export function handleTableRowGroup(table: string) {
     const content = document.createElement('DIV');
     let data: any[] = [];
@@ -448,17 +461,20 @@ export function handleTableRowGroup(table: string) {
     for (let i = 0; i < rowGroup.length; i++) {
         const row = rowGroup[i];
         const tds = row.querySelectorAll('td');
-        let firstHeight = parseFloat(tds[0].style.height ?? '19');
+        let firstHeight = getTdHeight(tds[0].style.height);
+
         for (let k = 0; k < tds.length; k++) {
             const rowSpan = tds[k].getAttribute('rowSpan');
-            const height = parseFloat(tds[k].style.height ?? '19');
+            // const height = getTdHeight(tds[k].style.height);
             if (rowSpan && +rowSpan > 1) {
-                for (let j = 0; j < +rowSpan; j++) {
-                    data.push(height);
-                }
-                i = i + +rowSpan - 1;
-                break;
+                // for (let j = 0; j < +rowSpan; j++) {
+                //     data.push(height);
+                // }
+                // i = i + +rowSpan - 1;
+                continue;
             }
+            firstHeight = getTdHeight(tds[k].style.height);
+            break;
         }
         data.push(firstHeight);
     }

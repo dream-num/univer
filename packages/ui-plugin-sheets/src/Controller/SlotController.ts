@@ -28,7 +28,8 @@ export class SlotController {
 
     getSlot(name: string) {
         const slotGroup = this._slot.getSlotGroup();
-        return slotGroup.get(name);
+        const slot = slotGroup.get(name);
+        return slot;
     }
 
     removeSlot(name: string) {

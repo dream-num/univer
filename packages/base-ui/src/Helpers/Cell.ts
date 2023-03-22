@@ -1,5 +1,5 @@
 import { BlockType, getBorderStyleType, ICellData, IDocumentData, IElement, IRangeData, IStyleData, ITextDecoration, Tools } from '@univerjs/core';
-import { pxToPt } from '@univerjs/base-render';
+import { ptToPx, pxToPt } from '@univerjs/base-render';
 import { textTrim } from '../Utils';
 
 // TODO: move to Utils
@@ -124,11 +124,13 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
  * @param $dom
  * @returns
  */
-export function handleStringToStyle($dom: HTMLElement) {
-    const cssText = $dom.style.cssText;
+export function handleStringToStyle($dom: HTMLElement, cssStyle: string = '') {
+    let cssText = $dom.style.cssText ?? '';
+    cssText += cssStyle;
     if (cssText == null || cssText.length === 0) {
         return {};
     }
+    cssText += cssStyle;
     let cssTextArray = cssText.split(';');
     let styleList: IStyleData = {};
     cssTextArray.forEach((s) => {
@@ -366,7 +368,7 @@ export function handleStringToStyle($dom: HTMLElement) {
             styleList.bd.r!.cl.rgb = value;
         }
 
-        if (key === 'border-bottom' || key === 'border-top' || key === 'border-left' || key === 'border-right') {
+        if (key === 'border-bottom' || key === 'border-top' || key === 'border-left' || key === 'border-right' || key === 'border') {
             if (!styleList.bd) {
                 styleList.bd = {};
             }
@@ -381,13 +383,20 @@ export function handleStringToStyle($dom: HTMLElement) {
                 s: getBorderStyleType(type),
             };
             if (key === 'border-bottom') {
-                styleList.bd.b = obj;
+                styleList.bd.b = value === 'none' ? null : obj;
             } else if (key === 'border-top') {
-                styleList.bd.t = obj;
+                styleList.bd.t = value === 'none' ? null : obj;
             } else if (key === 'border-left') {
-                styleList.bd.l = obj;
+                styleList.bd.l = value === 'none' ? null : obj;
             } else if (key === 'border-right') {
-                styleList.bd.r = obj;
+                styleList.bd.r = value === 'none' ? null : obj;
+            } else if (key === 'border') {
+                styleList.bd = {
+                    r: value === 'none' ? null : obj,
+                    t: value === 'none' ? null : obj,
+                    b: value === 'none' ? null : obj,
+                    l: value === 'none' ? null : obj,
+                };
             }
         }
 
@@ -420,14 +429,35 @@ export function handleTableColgroup(table: string) {
     const content = document.createElement('DIV');
     let data: any[] = [];
     content.innerHTML = table;
-    let colgroup = content.querySelectorAll('table colgroup col');
+    let colgroup = content.querySelectorAll('table col');
     if (!colgroup.length) return [];
     for (let i = 0; i < colgroup.length; i++) {
         const col = colgroup[i];
-        const width = parseFloat(col.getAttribute('width') ?? '72');
-        data.push(width);
+        const colSpan = col.getAttribute('span');
+        if (colSpan && +colSpan > 1) {
+            for (let j = 0; j < +colSpan; j++) {
+                const width = getTdHeight(col.getAttribute('width'), 72);
+                data.push(width);
+            }
+        } else {
+            const width = getTdHeight(col.getAttribute('width'), 72);
+            data.push(width);
+        }
     }
     return data;
+}
+
+function getTdHeight(height: string | null, defaultHeight: number) {
+    if (!height) return defaultHeight;
+    let firstHeight;
+    if (height.includes('pt')) {
+        firstHeight = ptToPx(parseFloat(height));
+    } else if (height.includes('px')) {
+        firstHeight = parseFloat(height);
+    } else {
+        firstHeight = (parseFloat(height) * 72) / 96;
+    }
+    return firstHeight;
 }
 
 export function handleTableRowGroup(table: string) {
@@ -439,17 +469,20 @@ export function handleTableRowGroup(table: string) {
     for (let i = 0; i < rowGroup.length; i++) {
         const row = rowGroup[i];
         const tds = row.querySelectorAll('td');
-        let firstHeight = parseFloat(tds[0].style.height ?? '19');
+        let firstHeight = getTdHeight(tds[0].style.height, 19);
+
         for (let k = 0; k < tds.length; k++) {
             const rowSpan = tds[k].getAttribute('rowSpan');
-            const height = parseFloat(tds[k].style.height ?? '19');
+            // const height = getTdHeight(tds[k].style.height);
             if (rowSpan && +rowSpan > 1) {
-                for (let j = 0; j < +rowSpan; j++) {
-                    data.push(height);
-                }
-                i = i + +rowSpan - 1;
-                break;
+                // for (let j = 0; j < +rowSpan; j++) {
+                //     data.push(height);
+                // }
+                // i = i + +rowSpan - 1;
+                continue;
             }
+            firstHeight = getTdHeight(tds[k].style.height, 19);
+            break;
         }
         data.push(firstHeight);
     }
@@ -511,16 +544,10 @@ export function handelTableToJson(table: string) {
             }
             if (data[r][c] == null) {
                 data[r][c] = cell;
-                let rowSpan = Number(td.getAttribute('rowSpan'));
-                let colSpan = Number(td.getAttribute('colSpan'));
-                if (Number.isNaN(rowSpan)) {
-                    rowSpan = 1;
-                }
-                if (Number.isNaN(colSpan)) {
-                    colSpan = 1;
-                }
+                let rowSpan = td.getAttribute('rowSpan') ?? 1;
+                let colSpan = td.getAttribute('colSpan') ?? 1;
                 if (rowSpan > 1 || colSpan > 1) {
-                    let first = { rs: rowSpan - 1, cs: colSpan - 1, r, c };
+                    let first = { rs: +rowSpan - 1, cs: +colSpan - 1, r, c };
                     data[r][c].mc = first;
                     for (let rp = 0; rp < rowSpan; rp++) {
                         for (let cp = 0; cp < colSpan; cp++) {
@@ -610,4 +637,108 @@ export function handleTableMergeData(data: any[], selection?: IRangeData) {
         data,
         mergeData,
     };
+}
+
+export function handelExcelToJson(html: string) {
+    let data: any[] = [];
+    const content = document.createElement('html');
+    content.innerHTML = html;
+    const styleText = content.querySelector('style')?.innerText;
+    if (!styleText) return;
+    const excelStyle = getStyles(styleText);
+
+    data = new Array(content.querySelectorAll('table tr').length);
+    if (!data.length) return [];
+    let colLen = 0;
+    const trs = content.querySelectorAll('table tr');
+    const firstTds = trs[0].querySelectorAll('td');
+    firstTds.forEach((item: HTMLTableCellElement) => {
+        let colSpan = 0;
+        const attr = item.getAttribute('colSpan');
+        if (attr !== null) {
+            colSpan = +attr;
+        } else {
+            colSpan = 1;
+        }
+        colLen += colSpan;
+    });
+    for (let i = 0; i < data.length; i++) {
+        data[i] = new Array(colLen);
+    }
+    let r = 0;
+    trs.forEach((item: any) => {
+        let c = 0;
+        item.querySelectorAll('td').forEach((td: HTMLTableCellElement) => {
+            let cell: ICellData = {};
+            if (td.querySelectorAll('span').length || td.querySelectorAll('font').length) {
+                const spanStyle = handleDomToJson(td);
+                if (typeof spanStyle !== 'string') {
+                    cell.p = spanStyle;
+                }
+            }
+            let txt = td.innerText;
+            if (txt.trim().length === 0) {
+                cell.v = '';
+                cell.m = '';
+            } else {
+                // Todo,处理格式
+                cell.v = txt;
+                cell.m = txt;
+            }
+
+            let cssText = '';
+            for (let attr in excelStyle) {
+                if (td.classList.contains(attr)) {
+                    cssText += excelStyle[attr];
+                }
+            }
+            const style = handleStringToStyle(td, cssText);
+
+            if (Tools.isPlainObject(style)) {
+                cell.s = style;
+            }
+            while (c < colLen && data[r][c] != null) {
+                c++;
+            }
+            if (c === colLen) {
+                return;
+            }
+            if (data[r][c] == null) {
+                data[r][c] = cell;
+                let rowSpan = td.getAttribute('rowSpan') ?? 1;
+                let colSpan = td.getAttribute('colSpan') ?? 1;
+
+                if (rowSpan > 1 || colSpan > 1) {
+                    let first = { rs: +rowSpan - 1, cs: +colSpan - 1, r, c };
+                    data[r][c].mc = first;
+                    for (let rp = 0; rp < rowSpan; rp++) {
+                        for (let cp = 0; cp < colSpan; cp++) {
+                            if (rp === 0 && cp === 0) {
+                                continue;
+                            }
+                            data[r + rp][c + cp] = { mc: null };
+                        }
+                    }
+                }
+            }
+            c++;
+        });
+        r++;
+    });
+
+    return data;
+}
+
+function getStyles(styleText: string) {
+    let output = {};
+    const string = styleText.slice(5, -4);
+    const style = string?.replaceAll('\t', '').replaceAll('\n', '').split('}');
+    for (let i = 0; i < style.length; i++) {
+        if (!style[i]) continue;
+        const attr = style[i].split('{')[0].trim().slice(1);
+        const value = style[i].split('{')[1].trim();
+        output[attr] = value;
+    }
+
+    return output;
 }

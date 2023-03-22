@@ -57,6 +57,20 @@ export class Clipboard {
     }
 
     static async read(e?: ClipboardEvent): Promise<Array<PasteType | null> | null | string> {
+        if (e) {
+            const result = [];
+            const clipboardData = e?.clipboardData;
+            const types = clipboardData?.types;
+            if (!types) return null;
+            for (let i = 0; i < types.length; i++) {
+                result.push({
+                    type: types[i],
+                    result: clipboardData.getData(types[i]),
+                });
+            }
+            return result;
+        }
+
         if (Clipboard.clipboard) {
             const clipboardItems = await Clipboard.clipboard.read();
             const Promises: Array<Promise<PasteType | null>> = [];
@@ -82,20 +96,6 @@ export class Clipboard {
                 }
             }
             return Promise.all(Promises);
-        }
-
-        if (e) {
-            const result = [];
-            const clipboardData = e?.clipboardData;
-            const types = clipboardData?.types;
-            if (!types) return null;
-            for (let i = 0; i < types.length; i++) {
-                result.push({
-                    type: types[i],
-                    result: clipboardData.getData(types[i]),
-                });
-            }
-            return result;
         }
 
         const result = Clipboard.localData ?? null;

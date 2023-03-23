@@ -43,8 +43,8 @@ export class InsertTextAction extends DocActionBase<
     do(): void {
         const actionData = this.getDoActionData();
         const document = this.getDocument();
-        // const { text, start, length, segmentId } = actionData;
-        InsertTextApply(document, { ...actionData });
+        const { text, cursorStart, isStartBack, segmentId } = actionData;
+        InsertTextApply(document, text, { cursorStart, isStartBack, segmentId });
 
         this._observers.notifyObservers({
             type: ActionType.REDO,

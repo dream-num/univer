@@ -731,7 +731,7 @@ export function handelExcelToJson(html: string) {
 
 function getStyles(styleText: string) {
     let output = {};
-    const string = styleText.slice(5, -4);
+    const string = styleText.replaceAll('<!--', '').replaceAll('-->', '').trim();
     const style = string?.replaceAll('\t', '').replaceAll('\n', '').split('}');
     for (let i = 0; i < style.length; i++) {
         if (!style[i]) continue;

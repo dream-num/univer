@@ -50,7 +50,7 @@ const univer = new Univer();
 univer.install(new RenderEngine());
 
 // universheet instance
-const universheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
+const universheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO1);
 // sheet.installPlugin(new RenderEngine());
 univer.addUniverSheet(universheet);
 // base-sheet
@@ -64,14 +64,13 @@ univer.install(
         container: 'universheet',
         layout: {
             sheetContainerConfig: {
-                // infoBar: false,
-                // formulaBar: false,
-                // toolbar: false,
-                // sheetBar: false,
-                // countBar: false,
-                // rightMenu: false,
-                // contentSplit: false,
-            },
+                infoBar: false,
+                formulaBar: false,
+                toolbar:false,
+                sheetBar: false,
+                countBar: false,
+                rightMenu: false
+            }
         },
     })
 );

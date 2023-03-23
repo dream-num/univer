@@ -15,6 +15,7 @@ export class SlotController {
 
     getComponent = (ref: Slot) => {
         this._slot = ref;
+        this.setSlot();
     };
 
     addSlot(name: string, slot: SlotComponentProps, cb?: () => void) {

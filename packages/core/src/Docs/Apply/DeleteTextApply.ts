@@ -7,7 +7,12 @@ import {
 } from '../../Interfaces/IDocumentData';
 import { ITextSelectionRangeParam } from '../../Interfaces/ISelectionData';
 import { DocumentModel } from '../Domain/DocumentModel';
-import { deleteContent, getDocsUpdateBody, getTextIndexByCursor } from './Common';
+import {
+    deleteContent,
+    getDocsUpdateBody,
+    getTextIndexByCursor,
+    mergeSameTextRun,
+} from './Common';
 
 export function DeleteTextApply(
     document: DocumentModel,
@@ -52,44 +57,66 @@ function deleteText(
 
     const textEnd = getTextIndexByCursor(cursorEnd, isEndBack);
 
-    const { st, ed } = blockElement;
+    const { st: blockStartIndex, ed: blockEndIndex } = blockElement;
 
-    if (cursorStart > ed || cursorEnd < st) {
+    if (cursorStart > blockEndIndex || cursorEnd < blockStartIndex) {
         return;
     }
 
     const { elements } = paragraph;
 
+    let preIsDeleted = false;
+
+    let index = 0;
+
     for (let element of elements) {
         const { et: paragraphElementType } = element;
 
         if (paragraphElementType === ParagraphElementType.DRAWING) {
+            index++;
             continue;
         }
 
-        const { st, ed, tr } = element;
+        const { st: elementStartIndex, ed: elementEndIndex, tr } = element;
 
-        if (tr == null) {
+        if (tr == null || tr.tab === BooleanNumber.TRUE) {
+            index++;
             continue;
         }
-        if (textStart < st || textStart > ed) {
+        if (textEnd < elementStartIndex || textStart > elementEndIndex) {
+            index++;
             continue;
         }
 
         if (paragraphElementType === ParagraphElementType.TEXT_RUN) {
-            let relative = textStart - st + 1;
+            let relativeStart = textStart - elementStartIndex + 1;
 
-            if (textStart === 0) {
-                relative = 0;
+            let relativeEnd = textEnd - elementStartIndex + 1;
+
+            if (relativeStart <= 0) {
+                relativeStart = 0;
             }
 
-            if (tr.tab === BooleanNumber.TRUE) {
-                continue;
+            if (relativeEnd >= elementEndIndex - elementStartIndex - 1) {
+                relativeStart = elementEndIndex - elementStartIndex - 1;
             }
 
-            const newContent = deleteContent(tr.ct || '', relative, length);
+            const newContent = deleteContent(
+                tr.ct || '',
+                relativeStart,
+                relativeEnd
+            );
 
             tr.ct = newContent;
         }
+
+        if (tr.ct?.length === 0) {
+            elements.splice(index, 1);
+            preIsDeleted = true;
+        } else if (preIsDeleted === true) {
+            const m = mergeSameTextRun(tr, tr);
+        }
+
+        index++;
     }
 }

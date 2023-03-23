@@ -2,6 +2,7 @@ import {
     IBlockElement,
     IDocumentData,
     IElement,
+    ITextRun,
 } from '../../Interfaces/IDocumentData';
 
 export function getTextIndexByCursor(index: number, isBack: boolean = false) {
@@ -12,9 +13,11 @@ export function insertTextToContent(content: string, start: number, text: string
     return content.slice(0, start) + text + content.slice(start);
 }
 
-export function deleteContent(content: string, start: number, length: number) {
-    const startDeleteIndex = start - length < 0 ? 0 : start - length;
-    return content.slice(0, startDeleteIndex) + content.slice(start);
+export function deleteContent(content: string, start: number, end: number) {
+    if (start > end) {
+        return content;
+    }
+    return content.slice(0, start) + content.slice(end);
 }
 
 export function moveElementCharIndex(element?: IElement, moveIndex: number = 0) {
@@ -51,4 +54,12 @@ export function getDocsUpdateBody(model: IDocumentData, segmentId?: string) {
     }
 
     return body;
+}
+
+export function isSameStyleTextRun(tr1: ITextRun, tr2: ITextRun) {
+    return false;
+}
+
+export function mergeSameTextRun(mainTr: ITextRun, mergeTr: ITextRun) {
+    const isSame = isSameStyleTextRun(mainTr, mergeTr);
 }

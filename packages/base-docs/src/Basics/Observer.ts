@@ -1,7 +1,5 @@
 import { IKeyboardEvent } from '@univerjs/base-render';
 import { Observable, Plugin } from '@univerjs/core';
-import { DocContainer } from '../View/UI/DocContainer';
-import { Toolbar } from '../View/UI/Toolbar/Toolbar';
 
 export type DocPluginObserve = {
     onAfterChangeFontFamilyObservable: Observable<string>;
@@ -14,10 +12,6 @@ export type DocPluginObserve = {
     onAfterChangeFontColorObservable: Observable<string>;
 
     onChangeCurrentSheetObserver: Observable<string>;
-
-    onToolbarDidMountObservable: Observable<Toolbar>;
-
-    onDocContainerDidMountObservable: Observable<DocContainer>;
 
     // ready to move to core as onKeyDownObservable
     onSpreadsheetKeyDownObservable: Observable<IKeyboardEvent>;
@@ -40,10 +34,8 @@ export function uninstall(plugin: Plugin) {
     plugin.deleteObserve('onAfterChangeFontBackgroundObservable');
     plugin.deleteObserve('onAfterChangeFontColorObservable');
 
-    plugin.deleteObserve('onToolbarDidMountObservable');
-
     plugin.deleteObserve('onChangeCurrentSheetObserver');
-    plugin.deleteObserve('onDocContainerDidMountObservable');
+
     plugin.deleteObserve('onSpreadsheetKeyDownObservable');
     plugin.deleteObserve('onSpreadsheetKeyUpObservable');
     plugin.deleteObserve('onSpreadsheetKeyCopyObservable');
@@ -73,13 +65,11 @@ export function install(plugin: Plugin) {
 
     plugin.pushToObserve('onChangeCurrentSheetObserver');
 
-    plugin.pushToObserve('onToolbarDidMountObservable');
-
     plugin.pushToObserve('onSheetBarDidMountObservable');
     plugin.pushToObserve('onCountBarDidMountObservable');
     plugin.pushToObserve('onInfoBarDidMountObservable');
     plugin.pushToObserve('onRightMenuDidMountObservable');
-    plugin.pushToObserve('onDocContainerDidMountObservable');
+
     plugin.pushToObserve('onSpreadsheetKeyDownObservable');
     plugin.pushToObserve('onSpreadsheetKeyUpObservable');
     plugin.pushToObserve('onSpreadsheetKeyCopyObservable');

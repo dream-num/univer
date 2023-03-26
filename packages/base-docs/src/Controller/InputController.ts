@@ -1,18 +1,15 @@
-import { Documents, IDocumentSkeletonSpan, SpanType } from '@univerjs/base-render';
-import { TextSelection } from '@univerjs/base-render/src/Component/Docs/Common/TextSelection';
+import { Documents, IDocumentSkeletonSpan, SpanType, TextSelection } from '@univerjs/base-render';
 import { KeyboardKeyType, Nullable } from '@univerjs/core';
 import { DocPlugin } from '../DocPlugin';
 
 export class InputController {
-    constructor(private _plugin: DocPlugin) {
-        this._plugin.getObserver('onDocContainerDidMountObservable')?.add(() => {
-            this._initialize();
-        });
-    }
-
     private _previousIMEContent: string = '';
 
     private _previousIMEStart: number;
+
+    constructor(private _plugin: DocPlugin) {
+        this._initialize();
+    }
 
     private _initialize() {
         const events = this._plugin.getInputEvent();
@@ -40,27 +37,29 @@ export class InputController {
             const { cursorStart, cursorEnd, isCollapse, isEndBack, isStartBack } = activeRange;
 
             if (e.key === KeyboardKeyType.backspace) {
-                if (isCollapse) {
-                    let cursor = cursorStart;
+                let cursor = cursorStart;
 
-                    if (isStartBack === false) {
-                        cursor += 1;
-                    }
-
-                    const selectionRemain = document.remainActiveSelection();
-
-                    // const content = document.findNodeByCharIndex(cursor - 1)?.content || '';
-
-                    docsModel.deleteText(activeRange, segmentId);
-
-                    skeleton.calculate();
-
-                    const span = document.findNodeByCharIndex(cursor - 2);
-
-                    this._adjustSelection(document, selectionRemain, span);
-
-                    this._resetIME();
+                if (isStartBack === true) {
+                    cursor -= 1;
                 }
+
+                if (isCollapse === false) {
+                    cursor += 1;
+                }
+
+                const selectionRemain = document.remainActiveSelection();
+
+                // const content = document.findNodeByCharIndex(cursor - 1)?.content || '';
+
+                docsModel.deleteText(activeRange, segmentId);
+
+                skeleton.calculate();
+
+                const span = document.findNodeByCharIndex(cursor - 1);
+
+                this._adjustSelection(document, selectionRemain, span);
+
+                this._resetIME();
             }
         });
 

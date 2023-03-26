@@ -26,4 +26,5 @@ export * from './Tuples';
 export * from './Types';
 export * from './TypeStore';
 export * from './HashAlgorithm';
+export * from './Compare';
 // @endindex

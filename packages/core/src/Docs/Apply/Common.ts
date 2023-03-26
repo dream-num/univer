@@ -4,6 +4,7 @@ import {
     IElement,
     ITextRun,
 } from '../../Interfaces/IDocumentData';
+import { deepCompare } from '../../Shared/Compare';
 
 export function getTextIndexByCursor(index: number, isBack: boolean = false) {
     return isBack ? index - 1 : index;
@@ -17,6 +18,11 @@ export function deleteContent(content: string, start: number, end: number) {
     if (start > end) {
         return content;
     }
+
+    if (start === end) {
+        start -= 1;
+    }
+
     return content.slice(0, start) + content.slice(end);
 }
 
@@ -57,9 +63,19 @@ export function getDocsUpdateBody(model: IDocumentData, segmentId?: string) {
 }
 
 export function isSameStyleTextRun(tr1: ITextRun, tr2: ITextRun) {
-    return false;
+    if (!tr1.ts || !tr2.ts) {
+        return false;
+    }
+    return deepCompare(tr1.ts, tr2.ts);
 }
 
 export function mergeSameTextRun(mainTr: ITextRun, mergeTr: ITextRun) {
     const isSame = isSameStyleTextRun(mainTr, mergeTr);
+    if (!isSame) {
+        return;
+    }
+
+    mainTr.ct += mergeTr.ct || '';
+
+    return mainTr;
 }

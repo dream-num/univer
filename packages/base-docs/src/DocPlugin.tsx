@@ -50,8 +50,8 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
         });
 
         install(this);
-        this.initController();
         this.initCanvasView();
+        this.initController();
     }
 
     initController() {

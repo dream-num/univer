@@ -101,6 +101,10 @@ export class DocContainerUIController {
         this._plugin.getObserver('onUIDidMount')?.add(() => cb(this._docContainer));
     }
 
+    getDocContainer() {
+        return this._docContainer;
+    }
+
     private _initialize() {
         this._eventManager = new EventManager(this._plugin);
 

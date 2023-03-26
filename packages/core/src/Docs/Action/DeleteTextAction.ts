@@ -1,5 +1,5 @@
 import { DocActionBase, IDocActionData } from '../../Command/DocActionBase';
-import { ActionObservers, CommandUnit } from '../../Command';
+import { ActionObservers, CommandManager, CommandUnit } from '../../Command';
 import { DeleteTextApply } from '../Apply/DeleteTextApply';
 import { IInsertTextActionData } from './InsertTextAction';
 import { InsertTextApply } from '../Apply/InsertTextApply';
@@ -73,3 +73,5 @@ export class DeleteTextAction extends DocActionBase<
         return false;
     }
 }
+
+CommandManager.register(DeleteTextAction.Name, DeleteTextAction);

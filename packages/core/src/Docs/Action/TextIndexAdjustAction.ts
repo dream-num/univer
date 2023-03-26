@@ -1,5 +1,10 @@
 import { DocActionBase, IDocActionData } from '../../Command/DocActionBase';
-import { ActionObservers, ActionType, CommandUnit } from '../../Command';
+import {
+    ActionObservers,
+    ActionType,
+    CommandManager,
+    CommandUnit,
+} from '../../Command';
 import { ITextSelectionRangeParam } from '../../Interfaces';
 import { textIndexAdjustApply } from '../Apply/TextIndexAdjustApply';
 
@@ -11,6 +16,8 @@ export class TextIndexAdjustAction extends DocActionBase<
     ITextIndexAdjustAction,
     ITextIndexAdjustAction
 > {
+    static Name = 'TextIndexAdjustAction';
+
     constructor(
         actionData: ITextIndexAdjustAction,
         commandUnit: CommandUnit,
@@ -55,3 +62,5 @@ export class TextIndexAdjustAction extends DocActionBase<
         return false;
     }
 }
+
+CommandManager.register(TextIndexAdjustAction.Name, TextIndexAdjustAction);

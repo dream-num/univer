@@ -29,7 +29,7 @@ export function textIndexAdjustApply(
 
     const { blockElements } = body;
 
-    let preBlockElement: Nullable<IBlockElement> = null;
+    let preParagraphBlockElement: Nullable<IBlockElement> = null;
 
     for (let blockElement of blockElements) {
         if (blockElement == null) {
@@ -45,12 +45,11 @@ export function textIndexAdjustApply(
                         blockElement,
                         blockElement.paragraph,
                         range,
-                        preBlockElement
+                        preParagraphBlockElement
                     );
                 }
+                preParagraphBlockElement = blockElement;
         }
-
-        preBlockElement = blockElement;
     }
 }
 
@@ -73,12 +72,12 @@ function paragraphIndexAdjust(
     const preBlockEnd = preBlockElement ? preBlockElement.ed : 0;
 
     if (cursorEnd < blockStart) {
-        const moveIndex = preBlockEnd - blockStart;
+        const moveIndex = preBlockEnd - blockStart + 1;
 
-        moveBlockCharIndex(blockElement, -moveIndex);
+        moveBlockCharIndex(blockElement, moveIndex);
 
         _iteratorElement(elements, (element) => {
-            moveElementCharIndex(element, -moveIndex);
+            moveElementCharIndex(element, moveIndex);
         });
     } else {
         let curStart = preBlockEnd + 1;

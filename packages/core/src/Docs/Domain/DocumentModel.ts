@@ -38,7 +38,6 @@ export class DocumentModel {
             actionName: DOC_ACTION_NAMES.INSERT_TEXT_ACTION_NAME,
             ...range,
             text,
-            length: text.length,
             segmentId,
         };
         const command = new Command(
@@ -75,25 +74,44 @@ export class DocumentModel {
         const { _context } = this;
         const _commandManager = _context.getCommandManager();
 
-        const deleteTextAction = {
-            actionName: DOC_ACTION_NAMES.DELETE_TEXT_ACTION_NAME,
-            text: oldText,
-            start: start + oldText.length,
-            length: oldText.length,
-            segmentId,
-        };
+        // const deleteTextAction = {
+        //     actionName: DOC_ACTION_NAMES.DELETE_TEXT_ACTION_NAME,
+        //     text: oldText,
+        //     start: start + oldText.length,
+        //     length: oldText.length,
+        //     segmentId,
+        // };
+        const deleteTextActionList = this._getDeleteTextAction(
+            {
+                cursorStart: start,
+                isStartBack: false,
+                isCollapse: false,
+                cursorEnd: start + oldText.length - 1,
+                isEndBack: false,
+            },
+            segmentId
+        );
+        // const insertTextAction = {
+        //     actionName: DOC_ACTION_NAMES.INSERT_TEXT_ACTION_NAME,
+        //     text: newText,
+        //     start,
+        //     length: newText.length,
+        //     segmentId,
+        // };
+
         const insertTextAction = {
             actionName: DOC_ACTION_NAMES.INSERT_TEXT_ACTION_NAME,
+            cursorStart: start,
+            isStartBack: false,
             text: newText,
-            start,
-            length: newText.length,
             segmentId,
         };
+
         const command = new Command(
             {
                 DocumentUnit: this,
             },
-            deleteTextAction,
+            ...deleteTextActionList,
             insertTextAction
         );
         _commandManager.invoke(command);

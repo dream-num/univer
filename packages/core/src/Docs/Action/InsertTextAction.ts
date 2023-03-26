@@ -1,5 +1,10 @@
 import { DocActionBase, IDocActionData } from '../../Command/DocActionBase';
-import { ActionObservers, ActionType, CommandUnit } from '../../Command';
+import {
+    ActionObservers,
+    ActionType,
+    CommandManager,
+    CommandUnit,
+} from '../../Command';
 import { InsertTextApply } from '../Apply/InsertTextApply';
 import { IDeleteTextActionData } from './DeleteTextAction';
 import { DeleteTextApply } from '../Apply/DeleteTextApply';
@@ -70,3 +75,5 @@ export class InsertTextAction extends DocActionBase<
         return false;
     }
 }
+
+CommandManager.register(InsertTextAction.NAME, InsertTextAction);

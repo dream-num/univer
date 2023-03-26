@@ -13,6 +13,7 @@
  */
 
 import './Sheets/Action';
+import './Docs/Action';
 
 export * from './Command';
 export * from './Basics';

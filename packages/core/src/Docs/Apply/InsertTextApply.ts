@@ -24,7 +24,7 @@ export function InsertTextApply(
 
     const body = getDocsUpdateBody(doc, segmentId);
 
-    if (length === 0) {
+    if (text.length === 0) {
         return;
     }
 
@@ -60,13 +60,13 @@ function insertText(
     paragraph: IParagraph,
     collapseRange: ITextSelectionRangeStartParam
 ) {
-    const { st, ed } = blockElement;
+    const { st: blockStartIndex, ed: blockEndIndex } = blockElement;
 
     const { cursorStart, isStartBack, segmentId } = collapseRange;
 
     const textStart = getTextIndexByCursor(cursorStart, isStartBack);
 
-    if (textStart > ed || paragraph == null) {
+    if (textStart > blockEndIndex || paragraph == null) {
         return;
     }
 
@@ -79,36 +79,32 @@ function insertText(
             continue;
         }
 
-        const { st, ed, tr } = element;
+        const { st: elementStartIndex, ed: elementEndIndex, tr } = element;
 
-        if (tr == null) {
+        if (tr == null || tr.tab === BooleanNumber.TRUE) {
             continue;
         }
-        if (textStart < st || textStart > ed) {
+        if (textStart < elementStartIndex || textStart > elementEndIndex) {
             continue;
         }
 
         console.log(
             'paragraphApply',
             textStart,
-            st,
-            ed,
+            elementStartIndex,
+            elementEndIndex,
             element,
-            textStart < st || textStart > ed
+            textStart < elementStartIndex || textStart > elementEndIndex
         );
 
         if (paragraphElementType === ParagraphElementType.TEXT_RUN) {
-            let relative = textStart - st + 1;
+            let relativeStart = textStart - elementStartIndex + 1;
 
-            if (textStart === 0) {
-                relative = 0;
+            if (relativeStart <= 0) {
+                relativeStart = 0;
             }
 
-            if (tr.tab === BooleanNumber.TRUE) {
-                continue;
-            }
-
-            const newContent = insertTextToContent(tr.ct || '', relative, text);
+            const newContent = insertTextToContent(tr.ct || '', relativeStart, text);
 
             tr.ct = newContent;
         }

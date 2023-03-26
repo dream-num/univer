@@ -15,8 +15,6 @@ univer.install(new RenderEngine());
 const univerdoc = UniverDoc.newInstance(DEFAULT_DOCUMENT_DATA_EN);
 univer.addUniverDoc(univerdoc);
 
-univerdoc.installPlugin(new DocPlugin());
-
 // univerdoc.installPlugin(new DocPlugin());
 univer.install(
     new DocUIPlugin({
@@ -28,3 +26,5 @@ univer.install(
         },
     })
 );
+
+univerdoc.installPlugin(new DocPlugin());

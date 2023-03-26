@@ -65,8 +65,6 @@ function deleteText(
 
     const { elements } = paragraph;
 
-    let preIsDeleted = false;
-
     let index = 0;
 
     for (let element of elements) {
@@ -112,11 +110,21 @@ function deleteText(
 
         if (tr.ct?.length === 0) {
             elements.splice(index, 1);
-            preIsDeleted = true;
-        } else if (preIsDeleted === true) {
-            const m = mergeSameTextRun(tr, tr);
-        }
+        } else {
+            const preTr = elements[index - 1]?.tr;
 
-        index++;
+            if (!preTr) {
+                index++;
+                continue;
+            }
+
+            const m = mergeSameTextRun(tr, preTr);
+
+            if (m) {
+                elements.splice(index, 1);
+            } else {
+                index++;
+            }
+        }
     }
 }

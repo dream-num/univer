@@ -13,6 +13,7 @@ import {
     DEFAULT_WORKBOOK_DATA_DEMO4,
     DEFAULT_WORKBOOK_DATA_DEMO5,
     DEFAULT_WORKBOOK_DATA_DEMO6,
+    DEFAULT_WORKBOOK_DATA_DEMO7,
     DEFAULT_WORKBOOK_DATA_DOWN,
 } from '@univerjs/common-plugin-data';
 import { ClipboardPlugin } from '@univerjs/sheets-plugin-clipboard';
@@ -50,7 +51,7 @@ const univer = new Univer();
 univer.install(new RenderEngine());
 
 // universheet instance
-const universheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO1);
+const universheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO7);
 // sheet.installPlugin(new RenderEngine());
 univer.addUniverSheet(universheet);
 // base-sheet
@@ -64,19 +65,19 @@ univer.install(
         container: 'universheet',
         layout: {
             sheetContainerConfig: {
-                infoBar: false,
-                formulaBar: false,
-                toolbar:false,
-                sheetBar: false,
-                countBar: false,
-                rightMenu: false
-            }
+                infoBar: true,
+                formulaBar: true,
+                toolbar: true,
+                sheetBar: true,
+                countBar: true,
+                rightMenu: true,
+            },
         },
     })
 );
 
 // FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(universheet);
-FindPlugin.create().installTo(universheet);
+// FindPlugin.create().installTo(universheet);
 universheet.installPlugin(new ClipboardPlugin());
 universheet.installPlugin(new ImportXlsxPlugin());
 // sheets-plugin-ui univer.install(new SheetsUI)

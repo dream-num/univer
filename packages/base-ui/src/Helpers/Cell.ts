@@ -735,7 +735,10 @@ function getStyles(styleText: string) {
     const style = string?.replaceAll('\t', '').replaceAll('\n', '').split('}');
     for (let i = 0; i < style.length; i++) {
         if (!style[i]) continue;
-        const attr = style[i].split('{')[0].trim().slice(1);
+        let attr = style[i].split('{')[0].trim();
+        if (attr.includes('.')) {
+            attr = attr.slice(1);
+        }
         const value = style[i].split('{')[1].trim();
         output[attr] = value;
     }

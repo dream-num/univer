@@ -14,6 +14,7 @@ import {
     DEFAULT_WORKBOOK_DATA_DEMO5,
     DEFAULT_WORKBOOK_DATA_DEMO6,
     DEFAULT_WORKBOOK_DATA_DEMO7,
+    DEFAULT_WORKBOOK_DATA_DEMO8,
     DEFAULT_WORKBOOK_DATA_DOWN,
 } from '@univerjs/common-plugin-data';
 import { ClipboardPlugin } from '@univerjs/sheets-plugin-clipboard';

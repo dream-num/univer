@@ -467,6 +467,7 @@ function getBorderStyle(type: BorderStyleTypes) {
 
 export function getBorderStyleType(type: string) {
     let str = 0;
+    type = type.trim();
     if (type === 'none') {
         str = BorderStyleTypes.NONE;
     } else if (type === '0.5pt solid') {
@@ -485,6 +486,8 @@ export function getBorderStyleType(type: string) {
         str = BorderStyleTypes.MEDIUM_DASH_DOT_DOT;
     } else if (type === '1.5pt solid') {
         str = BorderStyleTypes.THICK;
+    } else {
+        return BorderStyleTypes.NONE;
     }
     return str;
 }

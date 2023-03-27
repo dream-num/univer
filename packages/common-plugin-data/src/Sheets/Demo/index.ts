@@ -6,4 +6,5 @@ export * from './DEFAULT_WORKBOOK_DATA_DEMO4';
 export * from './DEFAULT_WORKBOOK_DATA_DEMO5';
 export * from './DEFAULT_WORKBOOK_DATA_DEMO6';
 export * from './DEFAULT_WORKBOOK_DATA_DEMO7';
+export * from './DEFAULT_WORKBOOK_DATA_DEMO8';
 

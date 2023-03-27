@@ -133,6 +133,14 @@ export function handleStringToStyle($dom: HTMLElement, cssStyle: string = '') {
     cssText += cssStyle;
     let cssTextArray = cssText.split(';');
     let styleList: IStyleData = {};
+
+    let borderInfo = {
+        t: '',
+        r: '',
+        b: '',
+        l: '',
+    };
+
     cssTextArray.forEach((s) => {
         s = s.toLowerCase();
         let key = textTrim(s.substr(0, s.indexOf(':')));
@@ -334,38 +342,82 @@ export function handleStringToStyle($dom: HTMLElement, cssStyle: string = '') {
         }
 
         if (key === 'border-color') {
+            const colors = handleBorder(value, ')');
             if (!styleList.bd) {
                 styleList.bd = {
                     b: {
                         cl: {
-                            rgb: value,
+                            rgb: '#000',
                         },
                         s: 0,
                     },
                     t: {
                         cl: {
-                            rgb: value,
+                            rgb: '#000',
                         },
                         s: 0,
                     },
                     l: {
                         cl: {
-                            rgb: value,
+                            rgb: '#000',
                         },
                         s: 0,
                     },
                     r: {
                         cl: {
-                            rgb: value,
+                            rgb: '#000',
                         },
                         s: 0,
                     },
                 };
+                for (let k in colors) {
+                    styleList.bd[k].cl.rgb = colors[k];
+                }
+            } else {
+                for (let k in colors) {
+                    styleList.bd[k].cl.rgb = colors[k];
+                }
             }
-            styleList.bd.b!.cl.rgb = value;
-            styleList.bd.t!.cl.rgb = value;
-            styleList.bd.l!.cl.rgb = value;
-            styleList.bd.r!.cl.rgb = value;
+        }
+
+        if (key === 'border-width' || key === 'border-style') {
+            const width = handleBorder(value, ' ');
+            for (let k in width) {
+                borderInfo[k] += ` ${width[k]}`;
+            }
+            if (!styleList.bd) {
+                styleList.bd = {
+                    b: {
+                        cl: {
+                            rgb: '#000',
+                        },
+                        s: getBorderStyleType(borderInfo.b),
+                    },
+                    t: {
+                        cl: {
+                            rgb: '#000',
+                        },
+                        s: getBorderStyleType(borderInfo.t),
+                    },
+                    l: {
+                        cl: {
+                            rgb: '#000',
+                        },
+                        s: getBorderStyleType(borderInfo.l),
+                    },
+                    r: {
+                        cl: {
+                            rgb: '#000',
+                        },
+                        s: getBorderStyleType(borderInfo.r),
+                    },
+                };
+            } else {
+                styleList.bd.b!.s = getBorderStyleType(borderInfo.b);
+                styleList.bd.t!.s = getBorderStyleType(borderInfo.t);
+                styleList.bd.l!.s = getBorderStyleType(borderInfo.l);
+                styleList.bd.r!.s = getBorderStyleType(borderInfo.r);
+            }
         }
 
         if (key === 'border-bottom' || key === 'border-top' || key === 'border-left' || key === 'border-right' || key === 'border') {
@@ -410,6 +462,49 @@ export function handleStringToStyle($dom: HTMLElement, cssStyle: string = '') {
     });
 
     return styleList;
+}
+
+function handleBorder(border: string, param: string) {
+    let arr;
+    if (param === ' ') {
+        arr = border.trim().split(param);
+    } else {
+        arr = border.trim().split(param).slice(0, -1);
+    }
+    arr.forEach((item) => `${item.trim()})`);
+    let obj = {};
+
+    if (arr.length === 1) {
+        obj = {
+            t: arr[0],
+            r: arr[0],
+            b: arr[0],
+            l: arr[0],
+        };
+    } else if (arr.length === 2) {
+        obj = {
+            t: arr[0],
+            r: arr[1],
+            b: arr[0],
+            l: arr[1],
+        };
+    } else if (arr.length === 3) {
+        obj = {
+            t: arr[0],
+            r: arr[1],
+            b: arr[2],
+            l: arr[1],
+        };
+    } else if (arr.length === 4) {
+        obj = {
+            t: arr[0],
+            r: arr[1],
+            b: arr[2],
+            l: arr[3],
+        };
+    }
+
+    return obj;
 }
 
 /**

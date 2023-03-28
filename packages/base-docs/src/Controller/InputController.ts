@@ -108,22 +108,20 @@ export class InputController {
 
             const { cursorStart, cursorEnd, isCollapse, isEndBack, isStartBack } = activeRange;
 
-            if (isCollapse) {
-                let cursor = cursorStart;
+            let cursor = cursorStart;
 
-                if (isStartBack === false) {
-                    cursor += 1;
-                }
-                this._previousIMEStart = cursor;
+            if (isStartBack === false) {
+                cursor += 1;
             }
+            this._previousIMEStart = cursor;
 
             // console.log('_previousIMEStart', this._previousIMEStart);
         });
 
         onCompositionupdateObservable.add((config) => {
-            const { event, content = '', document } = config;
+            const { event, document } = config;
 
-            const cursor = this._previousIMEStart;
+            let cursor = this._previousIMEStart;
 
             const skeleton = document.getSkeleton();
 
@@ -132,6 +130,8 @@ export class InputController {
             }
 
             const e = event as CompositionEvent;
+
+            const content = e.data;
 
             if (content === this._previousIMEContent) {
                 return;
@@ -143,13 +143,28 @@ export class InputController {
 
             // docsModel.insertText(increaseText, cursor);
 
+            if (this._previousIMEContent.length === 0) {
+                cursor -= 1;
+            }
+
             docsModel.updateText(content, this._previousIMEContent, cursor);
 
             skeleton.calculate();
 
-            const span = document.findNodeByCharIndex(cursor + content.length - 1);
+            const span = document.findNodeByCharIndex(cursor + content.length);
 
-            console.log('Compositionupdate', content, this._previousIMEContent, e.data, cursor, span, skeleton.getSkeletonData(), skeleton);
+            console.log(
+                'Compositionupdate',
+                content,
+                this._previousIMEContent,
+                e.data,
+                this._previousIMEStart,
+                cursor,
+                selectionRemain,
+                span,
+                skeleton.getSkeletonData(),
+                skeleton
+            );
 
             this._adjustSelection(document, selectionRemain, span);
 

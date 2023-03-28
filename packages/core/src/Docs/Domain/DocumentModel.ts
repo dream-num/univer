@@ -81,16 +81,23 @@ export class DocumentModel {
         //     length: oldText.length,
         //     segmentId,
         // };
-        const deleteTextActionList = this._getDeleteTextAction(
-            {
-                cursorStart: start,
-                isStartBack: false,
-                isCollapse: false,
-                cursorEnd: start + oldText.length - 1,
-                isEndBack: false,
-            },
-            segmentId
-        );
+        const deleteTextActionList = [];
+
+        if (oldText.length > 0) {
+            deleteTextActionList.push(
+                ...this._getDeleteTextAction(
+                    {
+                        cursorStart: start,
+                        isStartBack: false,
+                        isCollapse: false,
+                        cursorEnd: start + oldText.length,
+                        isEndBack: false,
+                    },
+                    segmentId
+                )
+            );
+        }
+
         // const insertTextAction = {
         //     actionName: DOC_ACTION_NAMES.INSERT_TEXT_ACTION_NAME,
         //     text: newText,

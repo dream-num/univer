@@ -149,6 +149,8 @@ export class InputController {
 
             const span = document.findNodeByCharIndex(cursor + content.length);
 
+            this._adjustSelection(document, selectionRemain, span);
+
             console.log(
                 'Compositionupdate',
                 content,
@@ -161,8 +163,6 @@ export class InputController {
                 skeleton.getSkeletonData(),
                 skeleton
             );
-
-            this._adjustSelection(document, selectionRemain, span);
 
             this._previousIMEContent = content;
         });

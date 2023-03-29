@@ -44,7 +44,8 @@ export class DocumentModel {
             {
                 DocumentUnit: this,
             },
-            insertTextAction
+            insertTextAction,
+            this._addTextIndexAdustAction(range, segmentId)
         );
         _commandManager.invoke(command);
         return this;
@@ -60,11 +61,13 @@ export class DocumentModel {
         // };
 
         const deleteTextActionList = this._getDeleteTextAction(range, segmentId);
+
         const command = new Command(
             {
                 DocumentUnit: this,
             },
-            ...deleteTextActionList
+            ...deleteTextActionList,
+            this._addTextIndexAdustAction(range, segmentId)
         );
         _commandManager.invoke(command);
         return this;
@@ -119,10 +122,36 @@ export class DocumentModel {
                 DocumentUnit: this,
             },
             ...deleteTextActionList,
-            insertTextAction
+            insertTextAction,
+            this._addTextIndexAdustAction(
+                {
+                    cursorStart: start,
+                    cursorEnd: start + Math.max(oldText.length, newText.length),
+                    isCollapse: false,
+                    isEndBack: false,
+                    isStartBack: false,
+                },
+                segmentId
+            )
         );
         _commandManager.invoke(command);
         return this;
+    }
+
+    private _addTextIndexAdustAction(
+        range: ITextSelectionRange,
+        segmentId?: string
+    ) {
+        const { cursorStart, cursorEnd, isCollapse, isEndBack, isStartBack } = range;
+        return {
+            actionName: DOC_ACTION_NAMES.TEXT_INDEX_ADJUST_ACTION_NAME,
+            cursorStart,
+            cursorEnd,
+            isCollapse,
+            isEndBack,
+            isStartBack,
+            segmentId,
+        };
     }
 
     private _getDeleteTextAction(range: ITextSelectionRange, segmentId?: string) {
@@ -138,15 +167,15 @@ export class DocumentModel {
             return [];
         }
 
-        actionList.push({
-            actionName: DOC_ACTION_NAMES.TEXT_INDEX_ADJUST_ACTION_NAME,
-            cursorStart,
-            cursorEnd,
-            isCollapse,
-            isEndBack,
-            isStartBack,
-            segmentId,
-        });
+        // actionList.push({
+        //     actionName: DOC_ACTION_NAMES.TEXT_INDEX_ADJUST_ACTION_NAME,
+        //     cursorStart,
+        //     cursorEnd,
+        //     isCollapse,
+        //     isEndBack,
+        //     isStartBack,
+        //     segmentId,
+        // });
 
         return actionList;
     }

@@ -69,7 +69,7 @@ function paragraphIndexAdjust(
 
     const { elements } = paragraph;
 
-    const preBlockEnd = preBlockElement ? preBlockElement.ed : 0;
+    const preBlockEnd = preBlockElement ? preBlockElement.ed : -1;
 
     if (cursorEnd < blockStart) {
         const moveIndex = preBlockEnd - blockStart + 1;

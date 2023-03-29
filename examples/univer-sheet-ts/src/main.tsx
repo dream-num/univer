@@ -52,7 +52,7 @@ const univer = new Univer();
 univer.install(new RenderEngine());
 
 // universheet instance
-const universheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO7);
+const universheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 // sheet.installPlugin(new RenderEngine());
 univer.addUniverSheet(universheet);
 // base-sheet

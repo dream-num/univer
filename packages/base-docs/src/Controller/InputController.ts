@@ -121,7 +121,7 @@ export class InputController {
         onCompositionupdateObservable.add((config) => {
             const { event, document } = config;
 
-            let cursor = this._previousIMEStart;
+            let cursor = this._previousIMEStart - 1;
 
             const skeleton = document.getSkeleton();
 
@@ -142,10 +142,6 @@ export class InputController {
             // const increaseText = this._getIncreaseText(content, this._previousIMEContent);
 
             // docsModel.insertText(increaseText, cursor);
-
-            if (this._previousIMEContent.length === 0) {
-                cursor -= 1;
-            }
 
             docsModel.updateText(content, this._previousIMEContent, cursor);
 

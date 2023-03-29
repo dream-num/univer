@@ -745,6 +745,14 @@ export class ToolbarUIController {
             const action = actions[0] as SheetActionBase<ISheetActionData, ISheetActionData, void>;
 
             const currentUnitId = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getUnitId();
+
+            // TODO not use try catch
+            try {
+                action.getWorkBook();
+            } catch (error) {
+                return;
+            }
+
             const actionUnitId = action.getWorkBook().getUnitId();
 
             if (currentUnitId !== actionUnitId) return;

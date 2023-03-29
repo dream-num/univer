@@ -1,6 +1,7 @@
 import { Plugin, Context, UniverDoc, PLUGIN_NAMES, Tools } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 import { ComponentManager, getRefElement, RegisterManager } from '@univerjs/base-ui';
+import { DocPlugin } from '@univerjs/base-docs';
 import { zh, en } from './Locale';
 import { DOC_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { DefaultDocUiConfig, IDocUIPluginConfig } from './Basics';
@@ -56,7 +57,7 @@ export class DocUIPlugin extends Plugin<any, Context> {
         // mount canvas to DOM container
         engine.setContainer(container);
 
-        // this.getUniver().getCurrentUniverDocInstance().context.getPluginManager().getRequirePluginByName<DocPlugin>(PLUGIN_NAMES.DOCUMENT).calculatePagePosition();
+        this.getUniver().getCurrentUniverDocInstance().context.getPluginManager().getRequirePluginByName<DocPlugin>(PLUGIN_NAMES.DOCUMENT).calculatePagePosition();
 
         window.addEventListener('resize', () => {
             engine.resize();

@@ -12,6 +12,14 @@ export class CountBarUIController {
         CommandManager.getActionObservers().add((event) => {
             const action = event.action as SheetActionBase<any>;
             const data = event.data;
+
+            // TODO Do not use try catch
+
+            try {
+                action.getWorkBook();
+            } catch (error) {
+                return;
+            }
             const workbook = action.getWorkBook();
             const unitId = workbook.getUnitId();
             const currentWorkbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();

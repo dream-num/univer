@@ -32,11 +32,19 @@ export class Merges {
         this._rectangleList = mergeData;
         CommandManager.getCommandObservers().add(({ actions }) => {
             if (!actions || actions.length === 0) return;
+
             const action = actions[0] as SheetActionBase<
                 ISheetActionData,
                 ISheetActionData,
                 void
             >;
+
+            // TODO not use try catch
+            try {
+                action.getWorkBook();
+            } catch (error) {
+                return;
+            }
             const currentUnitId = worksheet.getContext().getWorkBook().getUnitId();
             const actionUnitId = action.getWorkBook().getUnitId();
             if (currentUnitId !== actionUnitId) return;

@@ -43,6 +43,10 @@ export class Documents extends DocComponent {
 
     onPageRenderObservable = new Observable<IPageRenderConfig>();
 
+    docsLeft: number = 0;
+
+    docsTop: number = 0;
+
     private _drawLiquid: Liquid;
 
     private _findLiquid: Liquid;
@@ -99,7 +103,7 @@ export class Documents extends DocComponent {
         let parent = scene?.getParent();
         const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = this;
         if (parent == null) {
-            return;
+            return this;
         }
         const { width: engineWidth, height: engineHeight } = parent;
         let docsLeft = 0;
@@ -125,15 +129,15 @@ export class Documents extends DocComponent {
             sceneHeight = docsHeight + pageMarginTop * 2;
         }
 
+        this.docsLeft = docsLeft;
+
+        this.docsTop = docsTop;
+
         scene.resize(sceneWidth, sceneHeight + 200);
 
         this.translate(docsLeft, docsTop);
 
-        // 为了demo改动，后续删除
-        return {
-            docsLeft,
-            docsTop,
-        };
+        return this;
     }
 
     getFirstViewport() {

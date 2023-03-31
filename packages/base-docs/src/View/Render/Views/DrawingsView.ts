@@ -72,6 +72,8 @@ export class DrawingsView extends BaseView {
         scene.getTransformer()?.onChangingObservable.add((state) => {
             const { objects } = state;
 
+            const { docsLeft, docsTop } = documents;
+
             objects.forEach((object) => {
                 const { oKey, left, top, height, width } = object;
                 const cache = pageMarginCache.get(oKey);

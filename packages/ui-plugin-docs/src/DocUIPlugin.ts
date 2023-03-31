@@ -57,7 +57,7 @@ export class DocUIPlugin extends Plugin<any, Context> {
         // mount canvas to DOM container
         engine.setContainer(container);
 
-        this.getUniver().getCurrentUniverDocInstance().context.getPluginManager().getRequirePluginByName<DocPlugin>(PLUGIN_NAMES.DOCUMENT).calculatePagePosition();
+        this.getUniver().getCurrentUniverDocInstance().context.getPluginManager().getRequirePluginByName<DocPlugin>(PLUGIN_NAMES.DOCUMENT).initializeAfterUI();
 
         window.addEventListener('resize', () => {
             engine.resize();

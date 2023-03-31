@@ -45,10 +45,10 @@
         "vite": "^2.4.4"
     },
     "dependencies": {
-        "@univerjs/base-docs": "workspace:^0.0.1",
         "@univerjs/base-render": "workspace:^0.0.1",
         "@univerjs/base-ui": "workspace:^0.0.1",
         "@univerjs/core": "workspace:^0.0.1",
+        "@univerjs/base-docs": "workspace:^0.0.1",
         "css-vars-ponyfill": "^2.4.6",
         "preact": "^10.12.1"
     }

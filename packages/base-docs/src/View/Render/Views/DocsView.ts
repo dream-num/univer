@@ -73,7 +73,18 @@ export class DocsView extends BaseView {
 
         //     documents.translate(docsLeft, docsTop);
         // }
-        documents.calculatePagePosition();
+        // documents.calculatePagePosition();
+
+        const pages = documentSkeleton.getSkeletonData().pages;
+
+        const { pageMarginLeft, pageMarginTop, docsLeft, docsTop } = documents.calculatePagePosition();
+
+        for (let i = 0; i < pages.length; i++) {
+            for (let k of pages[i].skeDrawings.keys()) {
+                const obj = this.getScene().getObject(k);
+                obj?.translate(obj.left + docsLeft - pageMarginLeft, obj.top + docsTop - pageMarginTop);
+            }
+        }
 
         documents.enableEditor();
     }

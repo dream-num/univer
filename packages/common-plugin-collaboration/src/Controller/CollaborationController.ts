@@ -1,11 +1,14 @@
 import { SheetPlugin } from '@univerjs/base-sheets';
 import {
+    ActionOperation,
     ACTION_NAMES,
+    Command,
     CommandManager,
     HEART_BEAT_MESSAGE,
     IKeyValue,
     IOSocket,
     IOSocketListenType,
+    ISetRangeDataActionData,
     ISheetActionData,
     PLUGIN_NAMES,
     SheetActionBase,
@@ -13,19 +16,65 @@ import {
 } from '@univerjs/core';
 import { CollaborationPlugin } from '../CollaborationPlugin';
 
+interface MessageConfigType {
+    univerId: string;
+    actionData: ISetRangeDataActionData;
+}
+
 export class CollaborationController {
     socket: IOSocket;
 
     previousMessage: string;
 
-    protected _plugin: CollaborationPlugin;
+    private _plugin: CollaborationPlugin;
+
+    private _sheetPlugin: SheetPlugin;
 
     constructor(plugin: CollaborationPlugin) {
         this._plugin = plugin;
+        this._sheetPlugin = plugin.getUniver().getCurrentUniverSheetInstance().context.getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
         this._initialize();
     }
 
     onMessage(data: string) {
+        const json = JSON.parse(data);
+        const stringData = json.data;
+        if (json.type !== 'data' || stringData === HEART_BEAT_MESSAGE || this.previousMessage === stringData) {
+            return;
+        }
+
+        this.previousMessage = stringData;
+
+        try {
+            const message: MessageConfigType = JSON.parse(stringData);
+
+            const context = this._sheetPlugin.getContext();
+
+            const currentUnitId = context.getWorkBook().getUnitId();
+            const actionUnitId = message.univerId;
+
+            if (currentUnitId !== actionUnitId) return;
+
+            if (message) {
+                const { actionName } = message.actionData;
+
+                switch (actionName) {
+                    case ACTION_NAMES.SET_RANGE_DATA_ACTION:
+                        this.refreshRange(message);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        } catch (error) {
+            console.error(error, stringData);
+        }
+
+        console.info('onmessage json: ', json);
+    }
+
+    onMessage_back(data: string) {
         const json = JSON.parse(data);
         const content = json.content;
         if (content === HEART_BEAT_MESSAGE || this.previousMessage === content) {
@@ -68,6 +117,33 @@ export class CollaborationController {
 
     close() {
         this.socket.close();
+    }
+
+    refreshRange(config: MessageConfigType) {
+        const { actionData } = config;
+        const { sheetId, cellValue } = actionData;
+
+        const context = this._sheetPlugin.getContext();
+        const _commandManager = context.getCommandManager();
+        const worksheet = this._sheetPlugin.getWorkbook().getSheetBySheetId(sheetId);
+
+        if (!worksheet) return;
+
+        console.log('收到协同更新==范围：', '数据:', cellValue);
+
+        let setValue: ISetRangeDataActionData = {
+            sheetId: worksheet.getSheetId(),
+            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+            cellValue,
+        };
+        setValue = ActionOperation.make<ISetRangeDataActionData>(setValue).removeCollaboration().getAction();
+        const command = new Command(
+            {
+                WorkBookUnit: context.getWorkBook(),
+            },
+            setValue
+        );
+        _commandManager.invoke(command);
     }
 
     refresh(config: IKeyValue) {
@@ -126,6 +202,61 @@ export class CollaborationController {
     }
 
     private _initObserver() {
+        let timer: NodeJS.Timeout | null = null;
+        CommandManager.getCommandObservers().add(({ actions }) => {
+            const plugin: CollaborationPlugin = this._plugin;
+
+            if (!plugin) return;
+            if (!actions || actions.length === 0) return;
+            const action = actions[0] as SheetActionBase<ISheetActionData, ISheetActionData, void>;
+
+            const actionData = action.getDoActionData();
+            if (!ActionOperation.hasCollaboration(actionData)) return;
+
+            const actionName = actionData.actionName;
+            if (actionName !== ACTION_NAMES.SET_RANGE_DATA_ACTION) return;
+
+            const context = this._sheetPlugin.getContext();
+
+            const currentUnitId = context.getWorkBook().getUnitId();
+            const actionUnitId = action.getWorkBook().getUnitId();
+
+            if (currentUnitId !== actionUnitId) return;
+
+            // Only the currently active worksheet needs to be refreshed
+            const worksheet = action.getWorkBook().getActiveSheet();
+            if (worksheet) {
+                try {
+                    if (timer) {
+                        clearTimeout(timer);
+                        timer = null;
+                    }
+
+                    timer = setTimeout(() => {
+                        const currentEditRangeValue = this._sheetPlugin.getCellEditorController().getCurrentEditRangeData();
+                        const data: MessageConfigType = {
+                            univerId: currentUnitId,
+                            actionData: action.getDoActionData() as ISetRangeDataActionData,
+                        };
+
+                        let stringData = JSON.stringify(data);
+                        const message = {
+                            type: 'data',
+                            data: stringData,
+                        };
+
+                        const stringMessage = JSON.stringify(message);
+                        this.previousMessage = stringData;
+                        this.socket.send(stringMessage);
+                    }, 100);
+                } catch (error) {
+                    console.info(error);
+                }
+            }
+        });
+    }
+
+    private _initObserver_back() {
         let timer: NodeJS.Timeout | null = null;
         CommandManager.getCommandObservers().add(({ actions }) => {
             const plugin: CollaborationPlugin = this._plugin;

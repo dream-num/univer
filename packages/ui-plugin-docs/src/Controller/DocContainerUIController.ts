@@ -1,5 +1,5 @@
-import { EventManager } from '@univerjs/base-ui';
-import { LocaleType, UniverDoc } from '@univerjs/core';
+import { getRefElement } from '@univerjs/base-ui';
+import { LocaleType } from '@univerjs/core';
 import { IDocUIPluginConfig } from '../Basics';
 import { DocUIPlugin } from '../DocUIPlugin';
 import { DocContainer } from '../View';
@@ -16,8 +16,6 @@ export class DocContainerUIController {
     private _infoBarController: InfoBarUIController;
 
     private _config: IDocUIPluginConfig;
-
-    private _eventManager: EventManager;
 
     constructor(plugin: DocUIPlugin) {
         this._plugin = plugin;
@@ -54,7 +52,11 @@ export class DocContainerUIController {
     // 获取SheetContainer组件
     getComponent = (ref: DocContainer) => {
         this._docContainer = ref;
+
+        let container = getRefElement(ref.getContentRef());
+        this._plugin.initRender(container);
         this._plugin.getObserver('onUIDidMount')?.notifyObservers(this._docContainer);
+        this._plugin.getGlobalContext().getObserverManager().requiredObserver<boolean>('onUIDidMountObservable', 'core').notifyObservers(true);
 
         this._initDocContainer();
     };
@@ -80,17 +82,6 @@ export class DocContainerUIController {
         return this._docContainer.getContentRef();
     }
 
-    setEventManager() {
-        const univerDocs = this._plugin.getUniver().getAllUniverDocsInstance();
-        univerDocs.forEach((univerDoc: UniverDoc) => {
-            // univerDocs.getWorkBook().getContext().getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET).listenEventManager();
-        });
-    }
-
-    getEventManager() {
-        return this._eventManager;
-    }
-
     getToolbarController() {
         return this._toolbarController;
     }
@@ -105,11 +96,7 @@ export class DocContainerUIController {
         return this._docContainer;
     }
 
-    private _initialize() {
-        this._eventManager = new EventManager(this._plugin);
-
-        this.setEventManager();
-    }
+    private _initialize() {}
 
     private _initDocContainer() {
         // handle drag event

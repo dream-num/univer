@@ -1,6 +1,5 @@
-import { SlidePlugin } from '@univerjs/base-slides';
-import { DragManager, EventManager, getRefElement } from '@univerjs/base-ui';
-import { LocaleType, PLUGIN_NAMES, UniverSlide } from '@univerjs/core';
+import { DragManager, getRefElement } from '@univerjs/base-ui';
+import { LocaleType } from '@univerjs/core';
 import { ISlideUIPluginConfig } from '../Basics';
 import { SlideUIPlugin } from '../SlideUIPlugin';
 import { SlideContainer } from '../View';
@@ -22,8 +21,6 @@ export class SlideContainerUIController {
     private _config: ISlideUIPluginConfig;
 
     private _dragManager: DragManager;
-
-    private _eventManager: EventManager;
 
     constructor(plugin: SlideUIPlugin) {
         this._plugin = plugin;
@@ -68,6 +65,7 @@ export class SlideContainerUIController {
     getComponent = (ref: SlideContainer) => {
         this._slideContainer = ref;
         this._plugin.getObserver('onUIDidMount')?.notifyObservers(this._slideContainer);
+        this._plugin.getGlobalContext().getObserverManager().requiredObserver<boolean>('onUIDidMountObservable', 'core').notifyObservers(true);
 
         this.setSlideContainer();
     };
@@ -93,17 +91,6 @@ export class SlideContainerUIController {
         return this._slideContainer.getContentRef();
     }
 
-    setEventManager() {
-        const universlides = this._plugin.getUniver().getAllUniverSlidesInstance();
-        universlides.forEach((universlide: UniverSlide) => {
-            universlide.context.getPluginManager().getRequirePluginByName<SlidePlugin>(PLUGIN_NAMES.SLIDE).listenEventManager();
-        });
-    }
-
-    getEventManager() {
-        return this._eventManager;
-    }
-
     getToolbarController() {
         return this._toolbarController;
     }
@@ -116,9 +103,6 @@ export class SlideContainerUIController {
 
     private _initialize() {
         this._dragManager = new DragManager(this._plugin);
-        this._eventManager = new EventManager(this._plugin);
-
-        this.setEventManager();
     }
 
     private setSlideContainer() {

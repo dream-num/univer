@@ -1,7 +1,6 @@
-import { Plugin, Context, UniverDoc, PLUGIN_NAMES, Tools } from '@univerjs/core';
+import { Plugin, Context, PLUGIN_NAMES, Tools, Univer } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
-import { ComponentManager, getRefElement, RegisterManager } from '@univerjs/base-ui';
-import { DocPlugin } from '@univerjs/base-docs';
+import { ComponentManager, RegisterManager } from '@univerjs/base-ui';
 import { zh, en } from './Locale';
 import { DOC_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { DefaultDocUiConfig, IDocUIPluginConfig } from './Basics';
@@ -25,8 +24,8 @@ export class DocUIPlugin extends Plugin<any, Context> {
         return new DocUIPlugin(config);
     }
 
-    installTo(universheetInstance: UniverDoc) {
-        universheetInstance.installPlugin(this);
+    installTo(univerInstance: Univer) {
+        univerInstance.install(this);
     }
 
     initialize(ctx: Context): void {
@@ -41,23 +40,20 @@ export class DocUIPlugin extends Plugin<any, Context> {
         this._componentManager = new ComponentManager();
         this._appUIController = new AppUIController(this);
 
-        this.UIDidMount(() => {
-            this.initRender();
-        });
+        // this.UIDidMount(() => {
+        //     this.initRender();
+        // });
     }
 
     getConfig() {
         return this._config;
     }
 
-    initRender() {
+    initRender(container: HTMLElement) {
         const engine = this.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
-        let container = getRefElement(this._appUIController.getDocContainerController().getContentRef());
 
         // mount canvas to DOM container
         engine.setContainer(container);
-
-        this.getUniver().getCurrentUniverDocInstance().context.getPluginManager().getRequirePluginByName<DocPlugin>(PLUGIN_NAMES.DOCUMENT).initializeAfterUI();
 
         window.addEventListener('resize', () => {
             engine.resize();

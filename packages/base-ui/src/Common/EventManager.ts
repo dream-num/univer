@@ -5,13 +5,14 @@ export class EventManager {
     private _observerManager: ObserverManager;
 
     constructor(private _plugin: Plugin) {
-        this._observerManager = this._plugin.getContext().getObserverManager();
+        this._observerManager = this._plugin.getGlobalContext().getObserverManager();
         this._installObserver();
     }
 
     private _installObserver() {
         // Event = > UIcHnage
         this._observerManager.addObserver('onUIChangeObservable', 'core', new Observable());
+        this._observerManager.addObserver('onUIDidMountObservable', 'core', new Observable());
         this._observerManager.addObserver('onAfterChangeUISkinObservable', 'core', new Observable());
         this._observerManager.addObserver('onAfterChangeUILocaleObservable', 'core', new Observable());
         this._observerManager.addObserver('onViewComponentFocusChange', 'core', new Observable());

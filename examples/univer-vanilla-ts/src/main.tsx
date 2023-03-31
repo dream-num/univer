@@ -4,6 +4,7 @@ import { SheetPlugin } from '@univerjs/base-sheets';
 import { CanvasView as SlideCanvasView } from '@univerjs/base-slides';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 import { SlideUIPlugin } from '@univerjs/ui-plugin-slides';
+import { UIPlugin } from '@univerjs/base-ui';
 import {
     DEFAULT_FORMULA_DATA,
     DEFAULT_FORMULA_DATA_DEMO,
@@ -33,6 +34,7 @@ univer.install(new RenderEngine());
 const universheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 univer.addUniverSheet(universheet);
 
+univer.install(new UIPlugin())
 // base-sheet
 universheet.installPlugin(
     new SheetPlugin({

@@ -41,6 +41,7 @@ export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
         this.initController();
         this.initCanvasView();
         this.registerExtension();
+        this.listenEventManager();
     }
 
     getConfig() {

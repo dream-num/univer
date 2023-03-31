@@ -20,6 +20,7 @@ import {
 import { ClipboardPlugin } from '@univerjs/sheets-plugin-clipboard';
 import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
 import { FindPlugin } from '@univerjs/sheets-plugin-find';
+import { UIPlugin } from '@univerjs/base-ui';
 
 const uiDefaultConfigDemo = {
     container: 'universheet',
@@ -55,6 +56,7 @@ univer.install(new RenderEngine());
 const universheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 // sheet.installPlugin(new RenderEngine());
 univer.addUniverSheet(universheet);
+univer.install(new UIPlugin())
 // base-sheet
 universheet.installPlugin(new SheetPlugin());
 

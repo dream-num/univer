@@ -62,6 +62,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         this.initController();
         this.initCanvasView();
         this.registerExtension();
+        this.listenEventManager();
     }
 
     getConfig() {

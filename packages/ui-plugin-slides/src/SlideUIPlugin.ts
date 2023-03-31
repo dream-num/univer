@@ -1,4 +1,4 @@
-import { Plugin, Context, UniverSlide, Tools, PLUGIN_NAMES } from '@univerjs/core';
+import { Plugin, Context, Tools, PLUGIN_NAMES, Univer } from '@univerjs/core';
 import { RegisterManager, ComponentManager, getRefElement } from '@univerjs/base-ui';
 import { RenderEngine } from '@univerjs/base-render';
 import { SlidePlugin } from '@univerjs/base-slides';
@@ -26,8 +26,8 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve, Context> {
         return new SlideUIPlugin(config);
     }
 
-    installTo(universheetInstance: UniverSlide) {
-        universheetInstance.installPlugin(this);
+    installTo(univerInstance: Univer) {
+        univerInstance.install(this);
     }
 
     initialize(ctx: Context): void {

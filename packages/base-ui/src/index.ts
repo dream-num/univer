@@ -7,3 +7,4 @@ export * from './Helpers';
 export * from './Components';
 export * from './BaseComponent';
 export * from './Framework';
+export * from './UIPlugin';

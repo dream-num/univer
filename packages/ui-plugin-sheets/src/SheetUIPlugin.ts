@@ -1,4 +1,4 @@
-import { Plugin, UniverSheet, Tools, PLUGIN_NAMES, Context } from '@univerjs/core';
+import { Plugin, Tools, PLUGIN_NAMES, Context, Univer } from '@univerjs/core';
 import { ComponentManager, getRefElement, RegisterManager, KeyboardManager } from '@univerjs/base-ui';
 import { RenderEngine } from '@univerjs/base-render';
 import { DefaultSheetUIConfig, installObserver, ISheetUIPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';
@@ -28,8 +28,8 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
         return new SheetUIPlugin(config);
     }
 
-    installTo(univerInstance: UniverSheet) {
-        univerInstance.installPlugin(this);
+    installTo(univerInstance: Univer) {
+        univerInstance.install(this);
     }
 
     initialize(ctx: Context): void {

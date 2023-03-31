@@ -1,6 +1,5 @@
-import { SheetPlugin } from '@univerjs/base-sheets';
-import { DragManager, EventManager, getRefElement, Prompt } from '@univerjs/base-ui';
-import { LocaleType, PLUGIN_NAMES, UniverSheet } from '@univerjs/core';
+import { DragManager, getRefElement, Prompt } from '@univerjs/base-ui';
+import { LocaleType } from '@univerjs/core';
 import { ISheetUIPluginConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { SheetUIPlugin } from '../SheetUIPlugin';
 import { SheetContainer } from '../View';
@@ -37,8 +36,6 @@ export class SheetContainerUIController {
     private _config: ISheetUIPluginConfig;
 
     private _dragManager: DragManager;
-
-    private _eventManager: EventManager;
 
     constructor(plugin: SheetUIPlugin) {
         this._plugin = plugin;
@@ -109,6 +106,8 @@ export class SheetContainerUIController {
         this._sheetContainer = ref;
         this._plugin.getObserver('onUIDidMount')?.notifyObservers(this._sheetContainer);
 
+        this._plugin.getGlobalContext().getObserverManager().requiredObserver<boolean>('onUIDidMountObservable', 'core').notifyObservers(true);
+
         this.setSheetContainer();
     };
 
@@ -131,17 +130,6 @@ export class SheetContainerUIController {
 
     getContentRef() {
         return this._sheetContainer.getContentRef();
-    }
-
-    setEventManager() {
-        const universheets = this._plugin.getUniver().getAllUniverSheetsInstance();
-        universheets.forEach((universheet: UniverSheet) => {
-            universheet.getWorkBook().getContext().getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET).listenEventManager();
-        });
-    }
-
-    getEventManager() {
-        return this._eventManager;
     }
 
     getCellEditorUIController() {
@@ -168,9 +156,6 @@ export class SheetContainerUIController {
 
     private _initialize() {
         this._dragManager = new DragManager(this._plugin);
-        this._eventManager = new EventManager(this._plugin);
-
-        this.setEventManager();
     }
 
     private setSheetContainer() {

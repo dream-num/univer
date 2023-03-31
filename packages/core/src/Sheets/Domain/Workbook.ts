@@ -72,7 +72,7 @@ export class Workbook {
         this._context = context;
 
         const { styles } = this._config;
-        if (this._config.id === '') {
+        if (this._config.id == null || this._config.id.length === 0) {
             this._config.id = Tools.generateRandomId(6);
         }
         this._unitId = this._config.id;

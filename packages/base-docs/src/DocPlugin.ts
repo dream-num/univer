@@ -1,4 +1,4 @@
-import { DocContext, Plugin, PLUGIN_NAMES, UniverSheet } from '@univerjs/core';
+import { DocContext, Plugin, PLUGIN_NAMES, UIObserver, UniverSheet } from '@univerjs/core';
 import { Engine, RenderEngine } from '@univerjs/base-render';
 import { zh, en } from './Locale';
 import { DocPluginObserve, install } from './Basics/Observer';
@@ -50,6 +50,8 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
         });
 
         install(this);
+
+        this.listenEventManager();
     }
 
     initializeAfterUI() {
@@ -71,6 +73,12 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
         if (this._canvasView == null) {
             this._canvasView = new CanvasView(engine, this);
         }
+    }
+
+    listenEventManager() {
+        this._getCoreObserver<boolean>('onUIDidMountObservable').add(({ name, value }) => {
+            this.initializeAfterUI();
+        });
     }
 
     getConfig() {
@@ -118,4 +126,8 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
     }
 
     onDestroy(): void {}
+
+    protected _getCoreObserver<T>(type: string) {
+        return this.getGlobalContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core');
+    }
 }

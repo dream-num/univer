@@ -60,15 +60,230 @@ const defaultWorkbookData = Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO);
 //     },
 // };
 
-univerSheetCustom({
-    coreConfig: defaultWorkbookData,
-    baseSheetsConfig,
-    uiSheetsConfig,
-    collaborationConfig: {
-        url: 'ws://localhost:8448/ws',
-        // url: 'ws://luckysheet.lashuju.com/ws',
-    },
-});
+
+
+
+
+const serverURL = 'http://localhost:8080/new';
+const config = {"type":"sheet","template":"DEMO1"}
+const wsURL = 'ws://localhost:8080/ws/'
+
+insertButton()
+insertUpdateButton()
+
+function insertInputBox(id) {
+    // 创建一个输入框元素
+    const box = document.createElement('input');
+    box.type = 'text';
+
+    document.body.appendChild(box);
+
+    box.style.position = 'fixed';
+    box.style.right = '0';
+    box.style.top = '70px';
+    box.addEventListener('blur',(e)=>{
+        const txt = e.target.value;
+        const message = {
+            "type": "data",
+            "data": txt
+        }
+        sendMessage(message)
+    })
+
+    const url = `${wsURL}${id}`;
+    const socket = new WebSocket(url);
+
+    // 连接建立时触发的事件
+    socket.onopen = function(event) {
+    console.log("WebSocket connected");
+    };
+
+    // 接收到消息时触发的事件
+    socket.onmessage = function(event) {
+    const message = JSON.parse(event.data);
+    console.log("Received message:", message);
+    };
+
+    // 连接关闭时触发的事件
+    socket.onclose = function(event) {
+    console.log("WebSocket closed:", event);
+    };
+
+    // 发送消息
+    function sendMessage(message) {
+    socket.send(JSON.stringify(message));
+    }
+}
+// openDocs()
+function insertUpdateButton() {
+    // 创建一个输入框元素
+    const input = document.createElement('input');
+    input.type = 'text';
+
+    document.body.appendChild(input);
+
+    input.style.position = 'fixed';
+    input.style.right = '0';
+    input.style.top = '30px';
+
+    // 创建一个按钮元素
+    const button = document.createElement('button');
+    button.textContent = '确定';
+
+    document.body.appendChild(button);
+
+    button.style.position = 'fixed';
+    button.style.right = '0';
+    button.style.top = '50px';
+
+
+    // 添加按钮点击事件处理程序
+    button.addEventListener('click', function() {
+        // 获取输入框的值
+        const inputValue = input.value;
+        openDocs(inputValue,(json)=>{
+            const universheetconfig = json.config;
+            const id = json.id;
+
+            const downUISheetsConfig = {
+                container: 'universheet-demo',
+            }
+            univerSheetCustom({
+                coreConfig:JSON.parse(universheetconfig),
+                uiSheetsConfig:downUISheetsConfig,
+                collaborationConfig:{
+                    url: `${wsURL}${id}`
+                }
+            });
+
+
+            // insertInputBox(id)
+        })
+
+        // insertInputBox(inputValue)
+    });
+}
+
+function insertButton() {
+    // 创建一个按钮元素
+    const button = document.createElement('button');
+    // 设置按钮文本
+    button.textContent = 'New Docs';
+    // 将按钮添加到body元素中
+    document.body.appendChild(button);
+
+    button.style.position = 'fixed';
+    button.style.right = '0';
+    button.style.top = '0';
+
+
+    // 添加按钮点击事件处理程序
+    button.addEventListener('click', function() {
+        newDocs(serverURL,config,(json)=>{
+            const id = json.id;
+            const config = json.config;
+
+
+            console.log('id==: ',id)
+
+            let coreConfig
+            if(config === 'default'){
+                coreConfig = defaultWorkbookData
+            }
+            const universheet = univerSheetCustom({
+                coreConfig,
+                baseSheetsConfig,
+                uiSheetsConfig,
+            });
+
+            const universheetconfig = universheet.getWorkBook().getConfig()
+
+            updateDocs(id,universheetconfig)
+
+            
+        })
+    });
+
+
+    
+}
+function newDocs(url:string, params:object, cb?:(json:object)=>void) {
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(params)
+    }).then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error(response.statusText);
+        }
+      })
+      .then(document => {
+        // 处理获取到的文档信息
+        console.log(document);
+        cb && cb(document)
+      })
+      .catch(error => {
+        console.error(error);
+      }); 
+
+  }
+
+
+  function openDocs(id,cb?) {
+    // 定义请求参数
+        const data = new FormData();
+        data.append('id', id);
+
+        // 创建 XMLHttpRequest 对象
+        const xhr = new XMLHttpRequest();
+
+        // 监听请求完成事件
+        xhr.onload = function() {
+        if (xhr.status === 200) {
+            const document = JSON.parse(xhr.responseText);
+            // 处理获取到的文档信息
+            console.log(document);
+            cb && cb(document)
+        } else {
+            console.error(xhr.statusText);
+        }
+        };
+
+        // 发送 POST 请求
+        xhr.open('POST', 'http://localhost:8080/open', true);
+        xhr.send(data);
+
+  }
+  function updateDocs(id,config,cb?) {
+    // 定义请求参数
+        const data = new FormData();
+        data.append('id', id);
+        data.append('config', JSON.stringify(config));
+
+        // 创建 XMLHttpRequest 对象
+        const xhr = new XMLHttpRequest();
+
+        // 监听请求完成事件
+        xhr.onload = function() {
+        if (xhr.status === 200) {
+            const document = JSON.parse(xhr.responseText);
+            // 处理获取到的文档信息
+            console.log(document);
+            cb && cb(document)
+        } else {
+            console.error(xhr.statusText);
+        }
+        };
+
+        // 发送 POST 请求
+        xhr.open('POST', 'http://localhost:8080/update', true);
+        xhr.send(data);
+
+  }
 
 // const sheetConfigDown = {
 //     container: 'universheet-demo-down',

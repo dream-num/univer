@@ -50,6 +50,7 @@ import {
     Nullable,
     ObjectArrayPrimitiveType,
     ObjectMatrix,
+    ObjectMatrixPrimitiveType,
     Tools,
     Tuples,
 } from '../../Shared';
@@ -3149,7 +3150,7 @@ export class Range {
      * @returns Range — This range, for chaining.
      */
     setRangeDatas(values: ICellData[][]): Range;
-    setRangeDatas(values: ObjectMatrix<ICellData>): Range;
+    setRangeDatas(values: ObjectMatrixPrimitiveType<ICellData>): Range;
     setRangeDatas(...argument: any): Range {
         const { _rangeData, _context, _commandManager, _worksheet } = this;
         const values = argument[0];
@@ -3176,7 +3177,7 @@ export class Range {
                 setValue
             );
             _commandManager.invoke(command);
-        } else if (Tuples.checkup(argument, ObjectMatrix)) {
+        } else if (Tuples.checkup(argument, Tuples.OBJECT_TYPE)) {
             const setValue: ISetRangeDataActionData = {
                 sheetId: _worksheet.getSheetId(),
                 actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,

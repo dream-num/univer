@@ -18,6 +18,10 @@ export class FormulaEnginePlugin extends Plugin<FormulaEnginePluginObserver> {
         super('formulaEngine');
     }
 
+    static create(config?: IFormulaEnginePlugin) {
+        return new FormulaEnginePlugin(config);
+    }
+
     /**
      *
      * @param unitId
@@ -92,8 +96,4 @@ export class FormulaEnginePlugin extends Plugin<FormulaEnginePluginObserver> {
     }
 
     onDestroy(): void {}
-
-    static create(config?: IFormulaEnginePlugin) {
-        return new FormulaEnginePlugin(config);
-    }
 }

@@ -3,6 +3,7 @@ import { WorkBookObserverImpl } from './WorkBookObserverImpl';
 import { ContextBase } from './ContextBase';
 import { Observable } from '../Observer';
 import { GenName, PropsFrom } from '../Shared';
+import { Univer } from './Univer';
 import { WorkBookObserver } from './WorkBookObserver';
 import { IWorkbookConfig } from '../Interfaces';
 
@@ -27,6 +28,11 @@ export class SheetContext extends ContextBase {
 
     getGenName(): GenName {
         return this._genname;
+    }
+
+    onUniver(univer: Univer) {
+        super.onUniver(univer);
+        this._workbook.onUniver(univer);
     }
 
     getContextObserver<Key extends keyof WorkBookObserver>(

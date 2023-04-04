@@ -1,7 +1,7 @@
 import { Plugin, SheetContext, UniverSheet } from '@univerjs/core';
 import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
 import { zh, en } from './Locale';
-import { IMPORT_XLSX_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
+import { IMPORT_XLSX_PLUGIN_NAME } from './Basics';
 import { ImportXlsxController } from './Controller/ImportXlsxController';
 import { DragAndDropExtensionFactory } from './Basics/Register/DragAndDropExtension';
 

@@ -5,7 +5,7 @@ import {
 } from '../../Const';
 
 import { BooleanNumber } from '../../Enum';
-import { SheetContext } from '../../Basics';
+import { SheetContext, Univer } from '../../Basics';
 
 import {
     InsertSheetAction,
@@ -79,8 +79,6 @@ export class Workbook {
         this._styles = new Styles(styles);
         this._worksheets = new Map<string, Worksheet>();
         // this._formatManage = new FormatManager();
-        this._getDefaultWorkSheet();
-
         // namedRange
         this._namedRange = new NamedRange(this);
     }
@@ -100,6 +98,10 @@ export class Workbook {
 
     static isIRangeType(range: IRangeType | IRangeType[]): Boolean {
         return typeof range === 'string' || 'startRow' in range || 'row' in range;
+    }
+
+    onUniver(univer: Univer) {
+        this._getDefaultWorkSheet();
     }
 
     getUnitId() {

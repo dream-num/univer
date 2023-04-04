@@ -10,7 +10,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookConfig = {
     socketUrl: '',
     socketEnable: BooleanNumber.FALSE,
     extensions: [],
-    sheetOrder: [],
+    sheetOrder: ['sheet-0012','sheet-0011'],
     pluginMeta: {},
     styles:{
         "1": {

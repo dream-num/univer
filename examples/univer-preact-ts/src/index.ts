@@ -1,4 +1,4 @@
-import { Univer, IDocumentData, ISlideData, IWorkbookConfig, UniverDoc, UniverSheet, UniverSlide } from '@univerjs/core';
+import { Univer, IDocumentData, ISlideData, IWorkbookConfig, UniverDoc, UniverSheet, UniverSlide, IUniverData } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 
 import { ISheetPluginConfig, SheetPlugin } from '@univerjs/base-sheets';
@@ -19,6 +19,7 @@ import { UIPlugin } from '@univerjs/base-ui';
 // import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
 
 interface ISheetPropsCustom {
+    univerConfig?: Partial<IUniverData>;
     coreConfig?: Partial<IWorkbookConfig>;
     baseSheetsConfig?: ISheetPluginConfig;
     uiSheetsConfig?: ISheetUIPluginConfig;
@@ -33,7 +34,7 @@ interface ISheetPropsCustom {
 class UniverSheetCustom {
     constructor() {}
     init(config: ISheetPropsCustom = {}): UniverSheet {
-        const univer = new Univer();
+        const univer = new Univer(config.univerConfig);
         
         // base-render
         univer.install(new RenderEngine());
@@ -69,6 +70,7 @@ const univerSheetCustom = function (config?: ISheetPropsCustom) {
 };
 
 interface IDocPropsCustom {
+    univerConfig?: Partial<IUniverData>;
     coreConfig?: Partial<IDocumentData>;
     baseDocsConfig?: IDocPluginConfig;
     uiDocsConfig?: IDocUIPluginConfig;
@@ -81,7 +83,7 @@ class UniverDocCustom {
     constructor() {}
     init(config: IDocPropsCustom = {}): UniverDoc {
 
-        const univer = new Univer();
+        const univer = new Univer(config.univerConfig);
         
         // base-render
         univer.install(new RenderEngine());
@@ -112,6 +114,7 @@ const univerDocCustom = function (config?: IDocPropsCustom) {
 };
 
 interface ISlidePropsCustom {
+    univerConfig?: Partial<IUniverData>;
     coreConfig?: Partial<ISlideData>;
     baseSlidesConfig?: ISlidePluginConfig;
     uiSlidesConfig?: ISlideUIPluginConfig;
@@ -123,7 +126,7 @@ interface ISlidePropsCustom {
 class UniverSlideCustom {
     constructor() {}
     init(config: ISlidePropsCustom = {}): UniverSlide {
-        const univer = new Univer();
+        const univer = new Univer(config.univerConfig);
         
         // base-render
         univer.install(new RenderEngine());

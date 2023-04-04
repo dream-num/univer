@@ -1,4 +1,4 @@
-import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DEMO, DEFAULT_WORKBOOK_DATA_DEMO3, DEFAULT_WORKBOOK_DATA_DOWN } from '@univerjs/common-plugin-data';
+import { DEFAULT_WORKBOOK_DATA, DEFAULT_WORKBOOK_DATA_DEMO, DEFAULT_WORKBOOK_DATA_DEMO3, DEFAULT_WORKBOOK_DATA_DEMO5, DEFAULT_WORKBOOK_DATA_DEMO7, DEFAULT_WORKBOOK_DATA_DOWN } from '@univerjs/common-plugin-data';
 import { IWorkbookConfig, IWorksheetConfig, SheetTypes, Tools } from '@univerjs/core';
 import { univerSheetCustom } from '.';
 
@@ -38,7 +38,7 @@ let columnCount = 8;
 if (window.innerWidth < 1366) {
     columnCount = 5;
 }
-const defaultWorkbookData = Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO);
+const defaultWorkbookData = Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO7);
 // defaultWorkbookData.id = 'workbook-01';
 // defaultWorkbookData.styles = null;
 // defaultWorkbookData.namedRanges = null;
@@ -63,10 +63,8 @@ const defaultWorkbookData = Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO);
 
 
 
-
-const serverURL = 'http://localhost:8080/new';
+const ipAddress = '47.100.177.253:8500'
 const config = {"type":"sheet","template":"DEMO1"}
-const wsURL = 'ws://localhost:8080/ws/'
 
 insertButton()
 insertUpdateButton()
@@ -90,7 +88,7 @@ function insertInputBox(id) {
         sendMessage(message)
     })
 
-    const url = `${wsURL}${id}`;
+    const url = `${'ws://'+ipAddress+'/ws/'}${id}`;
     const socket = new WebSocket(url);
 
     // 连接建立时触发的事件
@@ -148,13 +146,19 @@ function insertUpdateButton() {
             const downUISheetsConfig = {
                 container: 'universheet-demo',
             }
-            univerSheetCustom({
+            const univerSheet = univerSheetCustom({
+                univerConfig:{
+                    id
+                },
                 coreConfig:JSON.parse(universheetconfig),
                 uiSheetsConfig:downUISheetsConfig,
                 collaborationConfig:{
-                    url: `${wsURL}${id}`
+                    url: `${'ws://'+ipAddress+'/ws/'}${id}`
                 }
             });
+
+            // const ids = univerSheet.getWorkBook().getContext().getUniver().getGlobalContext().getUniverId();
+            // console.info('ids===',ids)
 
 
             // insertInputBox(id)
@@ -179,27 +183,21 @@ function insertButton() {
 
     // 添加按钮点击事件处理程序
     button.addEventListener('click', function() {
-        newDocs(serverURL,config,(json)=>{
+        newDocs('http://'+ipAddress+'/new',config,(json)=>{
             const id = json.id;
             const config = json.config;
 
-
-            console.log('id==: ',id)
-
-            let coreConfig
+            
             if(config === 'default'){
-                coreConfig = defaultWorkbookData
-            }
-            const universheet = univerSheetCustom({
-                coreConfig,
-                baseSheetsConfig,
-                uiSheetsConfig,
-            });
+                const universheet = univerSheetCustom({
+                    uiSheetsConfig,
+                    coreConfig:defaultWorkbookData
+                });
 
-            const universheetconfig = universheet.getWorkBook().getConfig()
+                const universheetconfig = universheet.getWorkBook().getConfig()
 
             updateDocs(id,universheetconfig)
-
+            }
             
         })
     });
@@ -254,7 +252,7 @@ function newDocs(url:string, params:object, cb?:(json:object)=>void) {
         };
 
         // 发送 POST 请求
-        xhr.open('POST', 'http://localhost:8080/open', true);
+        xhr.open('POST', 'http://'+ipAddress+'/open', true);
         xhr.send(data);
 
   }
@@ -280,7 +278,7 @@ function newDocs(url:string, params:object, cb?:(json:object)=>void) {
         };
 
         // 发送 POST 请求
-        xhr.open('POST', 'http://localhost:8080/update', true);
+        xhr.open('POST', 'http://'+ipAddress+'/update', true);
         xhr.send(data);
 
   }

@@ -1,3 +1,4 @@
+import { IUniverData } from './../Interfaces/IUniverData';
 import { UniverSheet } from './UniverSheet';
 import { UniverDoc } from './UniverDoc';
 import { UniverSlide } from './UniverSlide';
@@ -14,12 +15,12 @@ export class Univer {
 
     private _context: Context;
 
-    constructor() {
+    constructor(univerData: Partial<IUniverData> = {}) {
         this._univerSheets = [];
         this._univerDocs = [];
         this._univerSlides = [];
 
-        this._context = new Context();
+        this._context = new Context(univerData);
         this._context.onUniver(this);
     }
 

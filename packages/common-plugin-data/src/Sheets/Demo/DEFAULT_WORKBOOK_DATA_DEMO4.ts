@@ -68,7 +68,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookConfig = {
     socketUrl: '',
     socketEnable: BooleanNumber.FALSE,
     extensions: [],
-    sheetOrder: [],
+    sheetOrder: ['sheet-0004'],
     pluginMeta: {},
     styles: {
         '1': {

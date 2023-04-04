@@ -1,5 +1,5 @@
 import { IUniverData } from '../Interfaces/IUniverData';
-import { Locale } from '../Shared';
+import { Locale, Tools } from '../Shared';
 import { ContextBase } from './ContextBase';
 
 /**
@@ -8,15 +8,27 @@ import { ContextBase } from './ContextBase';
 export class Context extends ContextBase {
     protected _locale: Locale;
 
+    private _univerId: string;
+
     constructor(univerData: Partial<IUniverData> = {}) {
         super();
 
         this._locale = new Locale();
         this._locale.initialize();
+
+        if (univerData.id == null || univerData.id.length === 0) {
+            this._univerId = Tools.generateRandomId(10);
+        } else {
+            this._univerId = univerData.id;
+        }
     }
 
     getLocale(): Locale {
         return this._locale;
+    }
+
+    getUniverId() {
+        return this._univerId;
     }
 
     protected _setObserver(): void {}

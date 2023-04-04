@@ -29,4 +29,12 @@ univer.install(
     })
 );
 
+document.querySelector('#univerdoc').style.width = '100%'
+
+setTimeout(() => {
+    univerdoc._context
+      .getPluginManager()
+      .getRequirePluginByName('document').getDocsView().getDocs().calculatePagePosition();
+}, 100);
+
 // univerdoc.installPlugin(new DocPlugin());

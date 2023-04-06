@@ -4,6 +4,8 @@ export interface IPictureProps extends IShapeProps {
     image?: HTMLImageElement;
     url?: string;
     success?: () => void;
+    liX?: number;
+    liY?: number;
     fail?: () => void;
     autoWidth?: boolean;
     autoHeight?: boolean;
@@ -58,6 +60,10 @@ export class Picture extends Shape<IPictureProps> {
 
     static create(id: string, url: string, callback?: () => void): Picture {
         return new Picture(id, { url, success: callback });
+    }
+
+    getPictureProps(): IPictureProps {
+        return this._props;
     }
 
     protected _draw(ctx: CanvasRenderingContext2D) {

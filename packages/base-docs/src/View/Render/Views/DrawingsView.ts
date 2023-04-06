@@ -53,6 +53,8 @@ export class DrawingsView extends BaseView {
                     top: aTop + docsTop + this._liquid.y,
                     width,
                     height,
+                    liY: this._liquid.y,
+                    liX: this._liquid.x,
                     zIndex: 11,
                     isTransformer: true,
                 });

@@ -1,4 +1,4 @@
-import { Documents, DocumentSkeleton } from '@univerjs/base-render';
+import { Documents, DocumentSkeleton, IDocumentSkeletonDrawing, Picture } from '@univerjs/base-render';
 import { IDocumentData } from '@univerjs/core';
 import { BaseView, CanvasViewRegistry, CANVAS_VIEW_KEY } from '../BaseView';
 
@@ -24,14 +24,21 @@ export class DocsView extends BaseView {
     }
 
     scrollToCenter() {
-        const { pageMarginLeft, pageMarginTop, docsLeft, docsTop } = this._documents.calculatePagePosition();
-
-        const pages = this._documentSkeleton.getSkeletonData().pages;
-
+        let { docsLeft, docsTop } = this._documents.calculatePagePosition();
+        let pages = this._documentSkeleton.getSkeletonData().pages;
         for (let i = 0; i < pages.length; i++) {
-            for (let k of pages[i].skeDrawings.keys()) {
+            const page = pages[i];
+            for (let k of page.skeDrawings.keys()) {
                 const obj = this.getScene().getObject(k);
-                obj?.translate(obj.left + docsLeft - pageMarginLeft, obj.top + docsTop - pageMarginTop);
+                if (obj) {
+                    const drawing = page.skeDrawings.get(k) as IDocumentSkeletonDrawing;
+                    if (obj instanceof Picture) {
+                        const props = obj.getPictureProps();
+                        obj.translate(drawing.aLeft + docsLeft + (props.liX ?? 0), drawing.aTop + docsTop + (props.liY ?? 0));
+                    } else {
+                        obj.translate(drawing.aLeft + docsLeft, drawing.aTop + docsTop);
+                    }
+                }
             }
         }
     }

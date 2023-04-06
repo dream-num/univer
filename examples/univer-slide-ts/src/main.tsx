@@ -1,4 +1,4 @@
-import { Univer, UniverSlide } from '@univerjs/core';
+import { PLUGIN_NAMES, Univer, UniverSlide } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 
 import { SlidePlugin } from '@univerjs/base-slides';

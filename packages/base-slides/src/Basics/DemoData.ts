@@ -34,7 +34,7 @@ export const docsDemoData: IDocumentData = {
                 },
                 angle: 0,
                 imageProperties: {
-                    contentUrl: 'https://cnbabylon.com/assets/img/agents.png',
+                    contentUrl: 'https://gcore.jsdelivr.net/gh/dream-num/static@main/img/agents.png',
                 },
             },
             layoutType: PositionedObjectLayoutType.WRAP_SQUARE,

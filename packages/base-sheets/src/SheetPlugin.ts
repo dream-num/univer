@@ -1,5 +1,5 @@
 import { Engine, RenderEngine } from '@univerjs/base-render';
-import { SheetContext, Plugin, PLUGIN_NAMES, DEFAULT_SELECTION, UniverSheet } from '@univerjs/core';
+import { SheetContext, Plugin, PLUGIN_NAMES, DEFAULT_SELECTION, UniverSheet, UIObserver } from '@univerjs/core';
 
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
 import { CANVAS_VIEW_KEY } from './View/Render/BaseView';
@@ -207,5 +207,9 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     getCountBarController() {
         return this._countBarController;
+    }
+
+    protected _getCoreObserver<T>(type: string) {
+        return this.getGlobalContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core');
     }
 }

@@ -23,6 +23,19 @@ export class DocsView extends BaseView {
         return this._documents;
     }
 
+    scrollToCenter() {
+        const { pageMarginLeft, pageMarginTop, docsLeft, docsTop } = this._documents.calculatePagePosition();
+
+        const pages = this._documentSkeleton.getSkeletonData().pages;
+
+        for (let i = 0; i < pages.length; i++) {
+            for (let k of pages[i].skeDrawings.keys()) {
+                const obj = this.getScene().getObject(k);
+                obj?.translate(obj.left + docsLeft - pageMarginLeft, obj.top + docsTop - pageMarginTop);
+            }
+        }
+    }
+
     protected _initialize() {
         const scene = this.getScene();
         const context = this.getContext();

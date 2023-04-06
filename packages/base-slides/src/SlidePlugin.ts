@@ -1,4 +1,4 @@
-import { SlideContext, Plugin, PLUGIN_NAMES, UniverSlide } from '@univerjs/core';
+import { SlideContext, Plugin, PLUGIN_NAMES, UniverSlide, UIObserver } from '@univerjs/core';
 import { Engine, RenderEngine } from '@univerjs/base-render';
 import { zh, en } from './Locale';
 import { install, SlidePluginObserve, uninstall } from './Basics/Observer';
@@ -73,7 +73,12 @@ export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
 
     registerExtension() {}
 
-    listenEventManager() {}
+    listenEventManager() {
+        this._getCoreObserver<boolean>('onUIDidMountObservable').add(({ name, value }) => {
+            // TODO: scroll in UI or render here?
+            // this.getCanvasView().scrollToCenter();
+        });
+    }
 
     getCanvasEngine() {
         return this._canvasEngine;
@@ -81,5 +86,9 @@ export class SlidePlugin extends Plugin<SlidePluginObserve, SlideContext> {
 
     getCanvasView() {
         return this._canvasView;
+    }
+
+    protected _getCoreObserver<T>(type: string) {
+        return this.getGlobalContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core');
     }
 }

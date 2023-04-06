@@ -60,8 +60,6 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve, Context> {
         // mount canvas to DOM container
         engine.setContainer(container);
 
-        this.getUniver().getCurrentUniverSlideInstance().context.getPluginManager().getRequirePluginByName<SlidePlugin>(PLUGIN_NAMES.SLIDE).getCanvasView().scrollToCenter();
-
         window.addEventListener('resize', () => {
             engine.resize();
         });
@@ -69,6 +67,7 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve, Context> {
         // should be clear
         setTimeout(() => {
             engine.resize();
+            this.getUniver().getCurrentUniverSlideInstance().context.getPluginManager().getRequirePluginByName<SlidePlugin>(PLUGIN_NAMES.SLIDE).getCanvasView().scrollToCenter();
         }, 0);
     }
 

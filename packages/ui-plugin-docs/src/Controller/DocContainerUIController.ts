@@ -56,6 +56,7 @@ export class DocContainerUIController {
         let container = getRefElement(ref.getContentRef());
         this._plugin.initRender(container);
         this._plugin.getObserver('onUIDidMount')?.notifyObservers(this._docContainer);
+
         this._plugin.getGlobalContext().getObserverManager().requiredObserver<boolean>('onUIDidMountObservable', 'core').notifyObservers(true);
 
         this._initDocContainer();

@@ -28,23 +28,3 @@ univer.install(
         },
     })
 );
-
-document.querySelector('#univerdoc').style.width = '100%'
-
-// setTimeout(() => {
-//     univerdoc._context
-//       .getPluginManager()
-//       .getRequirePluginByName('document').getDocsView().scrollToCenter();
-//       // .getRequirePluginByName('document').getDocsView().getDocs().calculatePagePosition();
-// }, 500);
-
-// univerdoc.installPlugin(new DocPlugin());
-
-
-window.addEventListener('resize', function (event) {
-  console.log('resize doc')
-  univerdoc._context
-    .getPluginManager()
-    .getRequirePluginByName('document').getDocsView().scrollToCenter();
-    // .getRequirePluginByName('document').getDocsView().getDocs().calculatePagePosition();
-}, true);

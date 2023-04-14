@@ -566,7 +566,6 @@ export class SelectionManager {
 
         if (oldStartColumn !== finalStartColumn || oldStartRow !== finalStartRow || oldEndColumn !== finalEndColumn || oldEndRow !== finalEndRow) {
             selectionControl && selectionControl.update(newSelectionRange);
-
             selectionControl && this._plugin.getObserver('onChangeSelectionObserver')?.notifyObservers(selectionControl);
         }
 
@@ -593,6 +592,8 @@ export class SelectionManager {
                     this.setSelectionModel();
                 }
             }
+
+            this.updatePreviousSelection();
         }
     }
 
@@ -606,7 +607,6 @@ export class SelectionManager {
         // update model
 
         this.moving(upEvt, selectionControl, true);
-        this.updatePreviousSelection();
     }
 
     updatePreviousSelection() {
@@ -846,8 +846,34 @@ export class SelectionManager {
             const scrollTimer = ScrollTimer.create(this.getScene());
             scrollTimer.startScroll(evtOffsetX, evtOffsetY);
 
-            // update model
-            // this.setSelectionModel();
+            // In edit mode, click other cells, you need to update the current model, otherwise when updating the cell value, the old active range will be redrawn
+            const currentModel = selectionControl.getCurrentCellInfo();
+            if (!this._previousSelection) {
+                // this.setSelectionModel();
+                const models = this._selectionControls.map((control) => control.model.getValue());
+                this.setModels(models);
+            } else {
+                // If it is different from the range when clicked, you need to update the model
+                const {
+                    startRow: mouseDownStartRow,
+                    endRow: mouseDownEndRow,
+                    startColumn: mouseDownStartColumn,
+                    endColumn: mouseDownEndColumn,
+                } = (this._previousSelection.selection as IRangeData) || DEFAULT_SELECTION;
+                const { row: mouseDownRow, column: mouseDownColumn } = (this._previousSelection.cell as IRangeCellData) || DEFAULT_CELL;
+                if (
+                    mouseDownStartColumn !== currentModel?.startColumn ||
+                    mouseDownStartRow !== currentModel?.startRow ||
+                    mouseDownEndColumn !== currentModel?.endColumn ||
+                    mouseDownEndRow !== currentModel?.endRow ||
+                    mouseDownRow !== currentModel?.startRow ||
+                    mouseDownColumn !== currentModel?.startColumn
+                ) {
+                    // this.setSelectionModel();
+                    const models = this._selectionControls.map((control) => control.model.getValue());
+                    this.setModels(models);
+                }
+            }
 
             // Notification toolbar updates button state and value
             this._plugin.getObserver('onChangeSelectionObserver')?.notifyObservers(selectionControl);

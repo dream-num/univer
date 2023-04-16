@@ -4,6 +4,7 @@ import {
     IBlockElement,
     IParagraph,
     ParagraphElementType,
+    IElement,
 } from '../../Interfaces/IDocumentData';
 import { ITextSelectionRangeStartParam } from '../../Interfaces/ISelectionData';
 import { DocumentModel } from '../Domain/DocumentModel';
@@ -15,7 +16,8 @@ import {
 
 export function InsertTextApply(
     document: DocumentModel,
-    text: string,
+    text: string | IElement[],
+    textLength: number,
     collapseRange: ITextSelectionRangeStartParam
 ) {
     const doc = document.getSnapshot();
@@ -24,7 +26,7 @@ export function InsertTextApply(
 
     const body = getDocsUpdateBody(doc, segmentId);
 
-    if (text.length === 0) {
+    if (textLength === 0) {
         return;
     }
 
@@ -46,6 +48,7 @@ export function InsertTextApply(
                 blockElement.paragraph &&
                     insertText(
                         text,
+                        textLength,
                         blockElement,
                         blockElement.paragraph,
                         collapseRange
@@ -55,7 +58,8 @@ export function InsertTextApply(
 }
 
 function insertText(
-    text: string,
+    text: string | IElement[],
+    textLength: number,
     blockElement: IBlockElement,
     paragraph: IParagraph,
     collapseRange: ITextSelectionRangeStartParam
@@ -72,19 +76,24 @@ function insertText(
 
     const { elements } = paragraph;
 
+    let index = 0;
+
     for (let element of elements) {
         const { et: paragraphElementType } = element;
 
         if (paragraphElementType === ParagraphElementType.DRAWING) {
+            index++;
             continue;
         }
 
         const { st: elementStartIndex, ed: elementEndIndex, tr } = element;
 
         if (tr == null || tr.tab === BooleanNumber.TRUE) {
+            index++;
             continue;
         }
         if (textStart < elementStartIndex || textStart > elementEndIndex) {
+            index++;
             continue;
         }
 
@@ -104,9 +113,60 @@ function insertText(
                 relativeStart = 0;
             }
 
-            const newContent = insertTextToContent(tr.ct || '', relativeStart, text);
+            if (text instanceof Object) {
+                const nextEle = elements[index + 1];
+                const insertedElements = splitTextRun(
+                    text,
+                    textLength,
+                    relativeStart,
+                    element,
+                    nextEle
+                );
+            } else {
+                const newContent = insertTextToContent(
+                    tr.ct || '',
+                    relativeStart,
+                    text as string
+                );
 
-            tr.ct = newContent;
+                tr.ct = newContent;
+
+                index++;
+            }
         }
+    }
+}
+
+function splitTextRun(
+    insertTextRunList: IElement[],
+    textLength: number,
+    relativeStart: number,
+    currentElement: IElement,
+    nextElement: IElement
+) {
+    const trLen = insertTextRunList.length;
+
+    const insertFirstEle = insertTextRunList[0];
+
+    const insertLastTrEle = insertTextRunList[trLen - 1];
+
+    const {
+        st: currentStartIndex,
+        ed: currentEndIndex,
+        tr: currentTr,
+    } = currentElement;
+
+    const currentContent = currentTr?.ct || '';
+
+    const newElements: IElement[] = [];
+
+    if (trLen === 1) {
+        const splitLeft = currentContent.slice(0, relativeStart);
+
+        const splitRight = currentContent.slice(relativeStart);
+    } else if (trLen > 1) {
+        const splitLeft = currentContent.slice(0, relativeStart);
+
+        const splitRight = currentContent.slice(relativeStart);
     }
 }

@@ -5,6 +5,7 @@ import { DocPlugin } from '@univerjs/base-docs';
 import { DEFAULT_DOCUMENT_DATA_EN } from '@univerjs/common-plugin-data';
 import { DocUIPlugin } from '@univerjs/ui-plugin-docs';
 import { UIPlugin } from '@univerjs/base-ui';
+import { DocsView } from '@univerjs/base-docs/src/View/Render/Views';
 
 // univer
 const univer = new Univer();
@@ -16,7 +17,7 @@ univer.install(new RenderEngine());
 const univerdoc = UniverDoc.newInstance(DEFAULT_DOCUMENT_DATA_EN);
 univer.addUniverDoc(univerdoc);
 
-univer.install(new UIPlugin())
+univer.install(new UIPlugin());
 univerdoc.installPlugin(new DocPlugin());
 univer.install(
     new DocUIPlugin({
@@ -29,7 +30,7 @@ univer.install(
     })
 );
 
-document.querySelector('#univerdoc').style.width = '100%'
+// document.querySelector('#univerdoc').style.width = '100%';
 
 // setTimeout(() => {
 //     univerdoc._context
@@ -40,11 +41,14 @@ document.querySelector('#univerdoc').style.width = '100%'
 
 // univerdoc.installPlugin(new DocPlugin());
 
-
-window.addEventListener('resize', function (event) {
-  console.log('resize doc')
-  univerdoc._context
-    .getPluginManager()
-    .getRequirePluginByName('document').getDocsView().scrollToCenter();
-    // .getRequirePluginByName('document').getDocsView().getDocs().calculatePagePosition();
-}, true);
+window.addEventListener(
+    'resize',
+    function (event) {
+        console.log('resize doc');
+        const docPlugin = univerdoc.context.getPluginManager().getRequirePluginByName('document') as DocPlugin;
+        const docsView = docPlugin.getDocsView() as DocsView;
+        docsView.scrollToCenter();
+        // .getRequirePluginByName('document').getDocsView().getDocs().calculatePagePosition();
+    },
+    true
+);

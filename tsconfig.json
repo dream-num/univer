@@ -1,5 +1,6 @@
 {
     "include": [
         "packages/*/src",
+        "examples/*/src",
     ]
 }

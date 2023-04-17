@@ -1,6 +1,11 @@
 import { DocContext } from '../../Basics';
 import { Command } from '../../Command';
-import { BlockType, IDocumentData, ITextSelectionRange } from '../../Interfaces';
+import {
+    BlockType,
+    IDocumentData,
+    ITextRun,
+    ITextSelectionRange,
+} from '../../Interfaces';
 import { DEFAULT_DOC } from '../../Const';
 import { DOC_ACTION_NAMES } from '../../Const/DOC_ACTION_NAMES';
 import { getDocsUpdateBody } from '../Apply/Common';
@@ -28,7 +33,7 @@ export class DocumentModel {
     }
 
     insertText(
-        text: string,
+        text: string | ITextRun,
         range: ITextSelectionRange,
         segmentId?: string
     ): DocumentModel {

@@ -1,4 +1,4 @@
-import { SheetPlugin } from '@univerjs/base-sheets';
+import { SheetPlugin, SetSelectionValueAction } from '@univerjs/base-sheets';
 import {
     ActionOperation,
     ACTION_NAMES,
@@ -13,12 +13,13 @@ import {
     PLUGIN_NAMES,
     SheetActionBase,
     SheetContext,
+    IActionData,
 } from '@univerjs/core';
 import { CollaborationPlugin } from '../CollaborationPlugin';
 
 interface MessageConfigType {
     univerId: string;
-    actionData: ISetRangeDataActionData;
+    actionData: IActionData;
 }
 
 export class CollaborationController {
@@ -29,6 +30,8 @@ export class CollaborationController {
     private _plugin: CollaborationPlugin;
 
     private _sheetPlugin: SheetPlugin;
+
+    private _collaborationActionList: string[];
 
     constructor(plugin: CollaborationPlugin) {
         this._plugin = plugin;
@@ -61,6 +64,9 @@ export class CollaborationController {
                 switch (actionName) {
                     case ACTION_NAMES.SET_RANGE_DATA_ACTION:
                         this.refreshRange(message);
+                        break;
+                    case SetSelectionValueAction.NAME:
+                        this.highlightCell(message);
                         break;
 
                     default:
@@ -121,7 +127,7 @@ export class CollaborationController {
 
     refreshRange(config: MessageConfigType) {
         const { actionData } = config;
-        const { sheetId, cellValue } = actionData;
+        const { sheetId, cellValue } = actionData as ISetRangeDataActionData;
 
         const context = this._sheetPlugin.getContext();
         const _commandManager = context.getCommandManager();
@@ -144,6 +150,34 @@ export class CollaborationController {
             setValue
         );
         _commandManager.invoke(command);
+    }
+
+    highlightCell(config: MessageConfigType) {
+        console.info('收到高亮消息===')
+        // const { actionData } = config;
+        // const { sheetId, cellValue } = actionData as ISetRangeDataActionData;
+
+        // const context = this._sheetPlugin.getContext();
+        // const _commandManager = context.getCommandManager();
+        // const worksheet = this._sheetPlugin.getWorkbook().getSheetBySheetId(sheetId);
+
+        // if (!worksheet) return;
+
+        // console.log('收到协同更新==范围：', '数据:', cellValue);
+
+        // let setValue: ISetRangeDataActionData = {
+        //     sheetId: worksheet.getSheetId(),
+        //     actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+        //     cellValue,
+        // };
+        // setValue = ActionOperation.make<ISetRangeDataActionData>(setValue).removeCollaboration().getAction();
+        // const command = new Command(
+        //     {
+        //         WorkBookUnit: context.getWorkBook(),
+        //     },
+        //     setValue
+        // );
+        // _commandManager.invoke(command);
     }
 
     refresh(config: IKeyValue) {
@@ -173,6 +207,8 @@ export class CollaborationController {
             console.warn('url must be input');
             return;
         }
+
+        this._collaborationActionList = [ACTION_NAMES.SET_RANGE_DATA_ACTION, SetSelectionValueAction.NAME];
 
         this._initSocket(url);
         this._initObserver();
@@ -214,7 +250,7 @@ export class CollaborationController {
             if (!ActionOperation.hasCollaboration(actionData)) return;
 
             const actionName = actionData.actionName;
-            if (actionName !== ACTION_NAMES.SET_RANGE_DATA_ACTION) return;
+            if (!this._collaborationActionList.includes(actionName)) return;
 
             const context = this._sheetPlugin.getContext();
 
@@ -233,10 +269,10 @@ export class CollaborationController {
                     }
 
                     timer = setTimeout(() => {
-                        const currentEditRangeValue = this._sheetPlugin.getCellEditorController().getCurrentEditRangeData();
+                        // const currentEditRangeValue = this._sheetPlugin.getCellEditorController().getCurrentEditRangeData();
                         const data: MessageConfigType = {
                             univerId: currentUnitId,
-                            actionData: action.getDoActionData() as ISetRangeDataActionData,
+                            actionData: action.getDoActionData(),
                         };
 
                         let stringData = JSON.stringify(data);

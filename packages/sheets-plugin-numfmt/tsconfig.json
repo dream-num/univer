@@ -20,7 +20,7 @@
         "baseUrl": "./",
         "skipLibCheck": true,
         "esModuleInterop": true,
-        "suppressImplicitAnyIndexErrors": true,
+        
         "experimentalDecorators": true,
         "jsx": "react-jsx",
         "jsxImportSource": "preact",

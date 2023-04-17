@@ -25,7 +25,7 @@
         "jsxImportSource": "preact",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-        "suppressImplicitAnyIndexErrors": true,
+        
         "strictPropertyInitialization": false,
     },
     "include": [

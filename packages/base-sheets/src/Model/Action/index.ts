@@ -1,3 +1,3 @@
 // @index('./*.ts', f => `export * from '${f.path}'`)
-export * from './SpreadsheetAction';
+export * from './SetSelectionValueAction';
 // @endindex

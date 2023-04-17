@@ -5,11 +5,13 @@ import { IInsertTextActionData } from './InsertTextAction';
 import { InsertTextApply } from '../Apply/InsertTextApply';
 import { ITextSelectionRangeParam } from '../../Interfaces/ISelectionData';
 import { DOC_ACTION_NAMES } from '../../Const/DOC_ACTION_NAMES';
+import { IElement } from '../../Interfaces/IDocumentData';
 
 export interface IDeleteTextActionData
     extends IDocActionData,
         ITextSelectionRangeParam {
-    text: string;
+    text: string | IElement[];
+    textLength: number;
 }
 
 export class DeleteTextAction extends DocActionBase<
@@ -26,10 +28,11 @@ export class DeleteTextAction extends DocActionBase<
         super(actionData, commandUnit, observers);
         this._doActionData = { ...actionData };
         this.do();
-        const { text, cursorStart, isStartBack, segmentId } = actionData;
+        const { text, cursorStart, isStartBack, textLength, segmentId } = actionData;
         this._oldActionData = {
             actionName: DOC_ACTION_NAMES.INSERT_TEXT_ACTION_NAME,
             text,
+            textLength,
             cursorStart,
             isStartBack,
             segmentId,
@@ -65,8 +68,12 @@ export class DeleteTextAction extends DocActionBase<
         // TODO ...
         const actionData = this.getOldActionData();
         const document = this.getDocument();
-        const { text, cursorStart, isStartBack, segmentId } = actionData;
-        InsertTextApply(document, text, { cursorStart, isStartBack, segmentId });
+        const { text, textLength, cursorStart, isStartBack, segmentId } = actionData;
+        InsertTextApply(document, text, textLength, {
+            cursorStart,
+            isStartBack,
+            segmentId,
+        });
     }
 
     validate(): boolean {

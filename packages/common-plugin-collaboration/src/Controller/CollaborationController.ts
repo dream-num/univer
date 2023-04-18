@@ -1,4 +1,4 @@
-import { SheetPlugin, SetSelectionValueAction } from '@univerjs/base-sheets';
+import { SheetPlugin, SetSelectionValueAction, ISetSelectionValueActionData } from '@univerjs/base-sheets';
 import {
     ActionOperation,
     ACTION_NAMES,
@@ -14,6 +14,8 @@ import {
     SheetActionBase,
     SheetContext,
     IActionData,
+    IGridRange,
+    Tools,
 } from '@univerjs/core';
 import { CollaborationPlugin } from '../CollaborationPlugin';
 
@@ -26,6 +28,8 @@ export class CollaborationController {
     socket: IOSocket;
 
     previousMessage: string;
+
+    userNum: number = 1;
 
     private _plugin: CollaborationPlugin;
 
@@ -153,31 +157,42 @@ export class CollaborationController {
     }
 
     highlightCell(config: MessageConfigType) {
-        console.info('收到高亮消息===')
-        // const { actionData } = config;
-        // const { sheetId, cellValue } = actionData as ISetRangeDataActionData;
+        const { actionData } = config;
+        const { sheetId, selections } = actionData as ISetSelectionValueActionData;
 
-        // const context = this._sheetPlugin.getContext();
-        // const _commandManager = context.getCommandManager();
-        // const worksheet = this._sheetPlugin.getWorkbook().getSheetBySheetId(sheetId);
+        const context = this._sheetPlugin.getContext();
+        const _commandManager = context.getCommandManager();
+        const worksheet = this._sheetPlugin.getWorkbook().getSheetBySheetId(sheetId);
 
-        // if (!worksheet) return;
+        if (!worksheet || !selections[0].cell) return;
 
-        // console.log('收到协同更新==范围：', '数据:', cellValue);
+        const { row: startRow, column: startColumn } = selections[0].cell;
+        const range: IGridRange = {
+            sheetId,
+            rangeData: {
+                startRow,
+                startColumn,
+                endRow: startRow,
+                endColumn: startColumn,
+            },
+        };
 
-        // let setValue: ISetRangeDataActionData = {
-        //     sheetId: worksheet.getSheetId(),
-        //     actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-        //     cellValue,
-        // };
-        // setValue = ActionOperation.make<ISetRangeDataActionData>(setValue).removeCollaboration().getAction();
-        // const command = new Command(
-        //     {
-        //         WorkBookUnit: context.getWorkBook(),
-        //     },
-        //     setValue
-        // );
-        // _commandManager.invoke(command);
+        // getEditTooltipsController
+        console.info('range===', range);
+        const key = Tools.generateRandomId();
+        const editTooltipsController = this._plugin
+            .getContext()
+            .getUniver()
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getContext()
+            .getPluginManager()
+            .getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)
+            ?.getEditTooltipsController();
+
+        editTooltipsController?.createIfEditTooltips(key, sheetId, { text: `User${this.userNum++}` });
+        editTooltipsController?.setRowColumn(key, sheetId, startRow, startColumn);
+        editTooltipsController?.refreshEditTooltips();
     }
 
     refresh(config: IKeyValue) {
@@ -268,23 +283,23 @@ export class CollaborationController {
                         timer = null;
                     }
 
-                    timer = setTimeout(() => {
-                        // const currentEditRangeValue = this._sheetPlugin.getCellEditorController().getCurrentEditRangeData();
-                        const data: MessageConfigType = {
-                            univerId: currentUnitId,
-                            actionData: action.getDoActionData(),
-                        };
+                    // timer = setTimeout(() => {
+                    // const currentEditRangeValue = this._sheetPlugin.getCellEditorController().getCurrentEditRangeData();
+                    const data: MessageConfigType = {
+                        univerId: currentUnitId,
+                        actionData: action.getDoActionData(),
+                    };
 
-                        let stringData = JSON.stringify(data);
-                        const message = {
-                            type: 'data',
-                            data: stringData,
-                        };
+                    let stringData = JSON.stringify(data);
+                    const message = {
+                        type: 'data',
+                        data: stringData,
+                    };
 
-                        const stringMessage = JSON.stringify(message);
-                        this.previousMessage = stringData;
-                        this.socket.send(stringMessage);
-                    }, 100);
+                    const stringMessage = JSON.stringify(message);
+                    this.previousMessage = stringData;
+                    this.socket.send(stringMessage);
+                    // }, 100);
                 } catch (error) {
                     console.info(error);
                 }

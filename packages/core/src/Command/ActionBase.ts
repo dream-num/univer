@@ -16,27 +16,30 @@ export enum ActionOperationType {
     /**
      * send obs
      */
-    OBSERVER_ACTION = 1,
+    OBSERVER_ACTION = 0x00000001,
 
     /**
      * send server
      */
-    SERVER_ACTION = 2,
+    SERVER_ACTION = 0x00000002,
 
     /**
      * push to UNDO/REDO stack
      */
-    UNDO_ACTION = 3,
+    UNDO_ACTION = 0x00000004,
 
     /**
      * action extension
      */
-    EXTENSION_ACTION = 4,
+    EXTENSION_ACTION = 0x00000008,
 
     /**
      * default obs
      */
-    DEFAULT_ACTION = 1 | 2 | 3 | 4,
+    DEFAULT_ACTION = ActionOperationType.OBSERVER_ACTION |
+        ActionOperationType.SERVER_ACTION |
+        ActionOperationType.UNDO_ACTION |
+        ActionOperationType.EXTENSION_ACTION,
 }
 
 /**

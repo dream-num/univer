@@ -12,6 +12,7 @@ export class EditTooltipsController {
 
     constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
+        this._editTooltipsPage = new Map();
     }
 
     removeEditTooltipsByKey(key: string): EditTooltips | null {
@@ -84,7 +85,7 @@ export class EditTooltipsController {
         const scene = this._plugin.getMainScene();
         if (scene) {
             if (this._layer == null) {
-                this._layer = new Layer(scene, []);
+                this._layer = new Layer(scene, [], 3);
                 scene.addLayer(this._layer);
             }
             this._layer.clear();

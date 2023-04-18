@@ -1,10 +1,10 @@
-import { IUniverData } from './../Interfaces/IUniverData';
 import { UniverSheet } from './UniverSheet';
 import { UniverDoc } from './UniverDoc';
 import { UniverSlide } from './UniverSlide';
 import { Nullable } from '../Shared';
 import { Context } from './Context';
 import { Plugin } from '../Plugin';
+import { IUniverData } from '../Interfaces';
 
 export class Univer {
     private _univerSheets: UniverSheet[];

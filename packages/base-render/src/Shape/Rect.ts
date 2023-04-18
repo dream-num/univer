@@ -9,10 +9,10 @@ export interface IRectProps extends IShapeProps {
 
 export const RECT_OBJECT_ARRAY = ['radius'];
 
-export class Rect extends Shape<IRectProps> {
+export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
     private _radius: number;
 
-    constructor(key?: string, props?: IRectProps) {
+    constructor(key?: string, props?: T) {
         super(key, props);
         if (props?.radius) {
             this._radius = props?.radius;

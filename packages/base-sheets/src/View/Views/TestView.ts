@@ -1,5 +1,5 @@
 import { EVENT_TYPE, getColor, Rect, Scene } from '@univerjs/base-render';
-import { SheetPlugin } from '../../../SheetPlugin';
+import { SheetPlugin } from '../../SheetPlugin';
 import { BaseView } from '../BaseView';
 
 export class TestView extends BaseView {

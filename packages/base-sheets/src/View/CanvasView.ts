@@ -3,7 +3,7 @@ import { EventState, Worksheet } from '@univerjs/core';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from './BaseView';
 import { SheetView } from './Views/SheetView';
 import './Views';
-import { SheetPlugin } from '../..';
+import { SheetPlugin } from '../index';
 
 // workbook
 export class CanvasView {

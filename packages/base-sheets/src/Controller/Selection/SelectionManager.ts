@@ -22,7 +22,7 @@ import { ACTION_NAMES, ISelectionsConfig } from '../../Basics';
 import { ISelectionModelValue, ISetSelectionValueActionData, SetSelectionValueAction } from '../../Model/Action/SetSelectionValueAction';
 import { SelectionModel } from '../../Model/SelectionModel';
 import { SheetPlugin } from '../../SheetPlugin';
-import { SheetView } from '../../View/Render/Views/SheetView';
+import { SheetView } from '../../View/Views/SheetView';
 import { ColumnTitleController } from './ColumnTitleController';
 import { DragLineController } from './DragLineController';
 import { RowTitleController } from './RowTitleController';

@@ -8,4 +8,5 @@ export * from './SheetBarController';
 export * from './SheetContainerController';
 export * from './SpreadsheetController';
 export * from './ToolbarController';
+export * from './EditTooltipsController';
 // @endindex

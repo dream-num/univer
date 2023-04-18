@@ -1,6 +1,6 @@
 import { Scene } from '@univerjs/base-render';
 import { Registry, Worksheet } from '@univerjs/core';
-import { SheetPlugin } from '../../SheetPlugin';
+import { SheetPlugin } from '../SheetPlugin';
 
 export class BaseView {
     viewKey = '';

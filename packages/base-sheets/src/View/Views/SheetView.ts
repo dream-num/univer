@@ -1,8 +1,8 @@
 import { getColor, Rect, Scene, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, SpreadsheetSkeleton } from '@univerjs/base-render';
 import { Worksheet } from '@univerjs/core';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from '../BaseView';
-import { SelectionManager } from '../../../Controller/Selection/SelectionManager';
-import { SheetPlugin } from '../../../SheetPlugin';
+import { SelectionManager } from '../../Controller/Selection/SelectionManager';
+import { SheetPlugin } from '../../SheetPlugin';
 
 export enum SHEET_VIEW_KEY {
     MAIN = '__SpreadsheetRender__',

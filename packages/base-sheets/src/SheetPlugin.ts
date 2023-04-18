@@ -2,9 +2,9 @@ import { Engine, RenderEngine } from '@univerjs/base-render';
 import { SheetContext, Plugin, PLUGIN_NAMES, DEFAULT_SELECTION, UniverSheet, UIObserver } from '@univerjs/core';
 
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
-import { CANVAS_VIEW_KEY } from './View/Render/BaseView';
-import { CanvasView } from './View/Render/CanvasView';
-import { RightMenuController, SheetBarControl, CellEditorController, SheetContainerController, ToolbarController, CountBarController } from './Controller';
+import { CANVAS_VIEW_KEY } from './View/BaseView';
+import { CanvasView } from './View/CanvasView';
+import { RightMenuController, SheetBarControl, CellEditorController, SheetContainerController, ToolbarController, CountBarController, EditTooltipsController } from './Controller';
 import { DEFAULT_SPREADSHEET_PLUGIN_DATA, install, ISheetPluginConfig } from './Basics';
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeActionExtension';
@@ -24,6 +24,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     private _rightMenuControl: RightMenuController;
 
     private _toolbarControl: ToolbarController;
+
+    private _editTooltipsController: EditTooltipsController;
 
     private _formulaBarController: FormulaBarController;
 
@@ -87,6 +89,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         this._sheetContainerController = new SheetContainerController(this);
         this._cellEditorController = new CellEditorController(this);
         this._formulaBarController = new FormulaBarController(this);
+        this._editTooltipsController = new EditTooltipsController(this);
         this._sheetBarControl = new SheetBarControl(this);
         this._toolbarControl = new ToolbarController(this);
         this._rightMenuControl = new RightMenuController(this);
@@ -127,6 +130,10 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         this._sheetBarControl.listenEventManager();
         this._toolbarControl.listenEventManager();
         this._rightMenuControl.listenEventManager();
+    }
+
+    getEditTooltipsController(): EditTooltipsController {
+        return this._editTooltipsController;
     }
 
     getCanvasEngine() {

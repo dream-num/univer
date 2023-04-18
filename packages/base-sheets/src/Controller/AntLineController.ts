@@ -1,6 +1,6 @@
 import { Workbook } from '@univerjs/core';
 import { Rect, Scene } from '@univerjs/base-render';
-import { SheetView } from '../View/Render/Views';
+import { SheetView } from '../View/Views';
 import { AntLine, AntLineModel, IAntLineRange } from '../Model/AntLineModel';
 import { SheetPlugin } from '../SheetPlugin';
 

@@ -1,6 +1,6 @@
 import { EditTooltips, EditTooltipsProps } from '@View/Views';
 import { SheetPlugin } from '@SheetPlugin';
-import { Range } from '@univerjs/core/src';
+import { Range } from '@univerjs/core';
 
 export class EditTooltipsController {
     _editTooltipsPage: Map<string, Map<string, EditTooltips>>;

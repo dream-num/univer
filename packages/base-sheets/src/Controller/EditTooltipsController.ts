@@ -1,11 +1,14 @@
-import { EditTooltips, EditTooltipsProps } from '@View/Views';
-import { SheetPlugin } from '@SheetPlugin';
 import { Range } from '@univerjs/core';
+import { Layer } from '@univerjs/base-render';
+import { EditTooltips, EditTooltipsProps } from '../View/Views';
+import { SheetPlugin } from '../SheetPlugin';
 
 export class EditTooltipsController {
     _editTooltipsPage: Map<string, Map<string, EditTooltips>>;
 
     _plugin: SheetPlugin;
+
+    _layer: Layer;
 
     constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
@@ -71,6 +74,24 @@ export class EditTooltipsController {
                 const width = sheet.getColumnWidth(column);
                 editTooltips.setWidth(width);
                 editTooltips.setHeight(height);
+            }
+        }
+    }
+
+    refreshEditTooltips(): void {
+        const sheet = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+        const sheetPage = this._editTooltipsPage.get(sheet.getSheetId());
+        const scene = this._plugin.getMainScene();
+        if (scene) {
+            if (this._layer == null) {
+                this._layer = new Layer(scene, []);
+                scene.addLayer(this._layer);
+            }
+            this._layer.clear();
+            if (sheetPage) {
+                sheetPage.forEach((editTooltips) => {
+                    this._layer.addObject(editTooltips);
+                });
             }
         }
     }

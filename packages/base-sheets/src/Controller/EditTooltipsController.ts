@@ -92,6 +92,7 @@ export class EditTooltipsController {
                 sheetPage.forEach((editTooltips) => {
                     this._layer.addObject(editTooltips);
                 });
+                scene.makeDirty(true);
             }
         }
     }

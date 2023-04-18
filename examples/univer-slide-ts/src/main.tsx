@@ -1,9 +1,9 @@
-import { PLUGIN_NAMES, Univer, UniverSlide } from '@univerjs/core';
+import { Univer, UniverSlide } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 
 import { SlidePlugin } from '@univerjs/base-slides';
 import { DEFAULT_SLIDE_DATA } from '@univerjs/common-plugin-data';
-import {SlideUIPlugin} from '@univerjs/ui-plugin-slides'
+import { SlideUIPlugin } from '@univerjs/ui-plugin-slides';
 import { UIPlugin } from '@univerjs/base-ui';
 
 // univer
@@ -16,13 +16,15 @@ univer.install(new RenderEngine());
 const universlide = UniverSlide.newInstance(DEFAULT_SLIDE_DATA);
 univer.addUniverSlide(universlide);
 
-univer.install(new UIPlugin())
+univer.install(new UIPlugin());
 universlide.installPlugin(new SlidePlugin());
-univer.install(new SlideUIPlugin({
-    container: 'universlide',
-    layout: {
-        slideContainerConfig:{
-            innerLeft: true,
-        }
-    },
-}))
+univer.install(
+    new SlideUIPlugin({
+        container: 'universlide',
+        layout: {
+            slideContainerConfig: {
+                innerLeft: true,
+            },
+        },
+    })
+);

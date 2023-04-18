@@ -22,8 +22,7 @@
         //     "@*": ["src/*"]
         // },
         "skipLibCheck": true,
-        "esModuleInterop": true, // auto allowSyntheticDefaultImports tru
-        "suppressImplicitAnyIndexErrors": true,
+        "esModuleInterop": true, // auto allowSyntheticDefaultImports true
         "experimentalDecorators": true,
         "jsx": "react-jsx",
         "jsxImportSource": "preact",

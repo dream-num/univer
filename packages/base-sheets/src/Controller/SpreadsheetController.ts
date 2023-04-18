@@ -1,1 +1,1 @@
-export class SpreadsheetAction {}
+export class SpreadsheetController {}

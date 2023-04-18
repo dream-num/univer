@@ -21,7 +21,7 @@
         "esModuleInterop": true, // auto allowSyntheticDefaultImports true
         "jsx": "preserve",
         "experimentalDecorators": true,
-        "suppressImplicitAnyIndexErrors": true,
+        
         "strictPropertyInitialization": false,
         "types": ["jest", "node", "@types/jest"]
     },

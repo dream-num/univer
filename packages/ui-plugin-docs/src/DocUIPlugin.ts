@@ -39,10 +39,6 @@ export class DocUIPlugin extends Plugin<any, Context> {
 
         this._componentManager = new ComponentManager();
         this._appUIController = new AppUIController(this);
-
-        // this.UIDidMount(() => {
-        //     this.initRender();
-        // });
     }
 
     getConfig() {

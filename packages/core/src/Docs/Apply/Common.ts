@@ -79,3 +79,14 @@ export function mergeSameTextRun(mainTr: ITextRun, mergeTr: ITextRun) {
 
     return mainTr;
 }
+
+export function getTextLength(text: string | ITextRun[]) {
+    if (text instanceof Object) {
+        let len = 0;
+        for (let textRun of text) {
+            len += textRun.ct?.length || 0;
+        }
+        return len;
+    }
+    return text.length;
+}

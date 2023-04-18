@@ -22,7 +22,7 @@
         "jsx": "preserve",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-        "suppressImplicitAnyIndexErrors": true,
+        
         "strictPropertyInitialization": false,
         "types": ["jest", "node", "@types/jest"]
     },

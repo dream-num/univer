@@ -2,14 +2,13 @@ import { Univer, IDocumentData, ISlideData, IWorkbookConfig, UniverDoc, UniverSh
 import { RenderEngine } from '@univerjs/base-render';
 
 import { ISheetPluginConfig, SheetPlugin } from '@univerjs/base-sheets';
-import { SheetUIPlugin,ISheetUIPluginConfig } from '@univerjs/ui-plugin-sheets';
+import { SheetUIPlugin, ISheetUIPluginConfig } from '@univerjs/ui-plugin-sheets';
 import { DocUIPlugin, IDocUIPluginConfig } from '@univerjs/ui-plugin-docs';
 import { SlideUIPlugin, ISlideUIPluginConfig } from '@univerjs/ui-plugin-slides';
 import { IDocPluginConfig, DocPlugin } from '@univerjs/base-docs';
 import { ISlidePluginConfig, SlidePlugin } from '@univerjs/base-slides';
-import { DEFAULT_WORKBOOK_DATA } from '@univerjs/common-plugin-data';
 // import { CollaborationPlugin, ICollaborationPluginConfig } from '@univerjs/common-plugin-collaboration';
-import { DEFAULT_FORMULA_DATA, FormulaPlugin, IFormulaConfig } from '@univerjs/sheets-plugin-formula';
+import { IFormulaConfig } from '@univerjs/sheets-plugin-formula';
 import { CollaborationPlugin, ICollaborationPluginConfig } from '@univerjs/common-plugin-collaboration';
 import { ClipboardPlugin } from '@univerjs/sheets-plugin-clipboard';
 import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
@@ -32,24 +31,21 @@ interface ISheetPropsCustom {
  * Initialize the core and all plugins
  */
 class UniverSheetCustom {
-    constructor() {}
     init(config: ISheetPropsCustom = {}): UniverSheet {
         const univer = new Univer(config.univerConfig);
-        
+
         // base-render
         univer.install(new RenderEngine());
         // universheet instance
         const universheet = UniverSheet.newInstance(config.coreConfig);
         univer.addUniverSheet(universheet);
 
-        univer.install(new UIPlugin())
+        univer.install(new UIPlugin());
         // base-sheets
         universheet.installPlugin(new SheetPlugin(config.baseSheetsConfig));
 
         // ui-plugin-sheets
-        univer.install(
-            new SheetUIPlugin(config.uiSheetsConfig)
-        );
+        univer.install(new SheetUIPlugin(config.uiSheetsConfig));
         univer.install(new CollaborationPlugin(config.collaborationConfig));
         // universheet.installPlugin(new NumfmtPlugin(config.numfmtConfig));
         // FormulaPlugin.create(config.formulaConfig).installTo(universheet);
@@ -80,11 +76,9 @@ interface IDocPropsCustom {
  * Initialize the core and all plugins
  */
 class UniverDocCustom {
-    constructor() {}
     init(config: IDocPropsCustom = {}): UniverDoc {
-
         const univer = new Univer(config.univerConfig);
-        
+
         // base-render
         univer.install(new RenderEngine());
 
@@ -92,14 +86,12 @@ class UniverDocCustom {
         const univerdoc = UniverDoc.newInstance(config.coreConfig);
         univer.addUniverDoc(univerdoc);
 
-        univer.install(new UIPlugin())
+        univer.install(new UIPlugin());
         // base-docs
         univerdoc.installPlugin(new DocPlugin(config.baseDocsConfig));
 
         // ui-plugin-sheets
-        univer.install(
-            new DocUIPlugin(config.uiDocsConfig)
-        );
+        univer.install(new DocUIPlugin(config.uiDocsConfig));
 
         return univerdoc;
     }
@@ -124,23 +116,20 @@ interface ISlidePropsCustom {
  * Initialize the core and all plugins
  */
 class UniverSlideCustom {
-    constructor() {}
     init(config: ISlidePropsCustom = {}): UniverSlide {
         const univer = new Univer(config.univerConfig);
-        
+
         // base-render
         univer.install(new RenderEngine());
         // universlide instance
         const universlide = UniverSlide.newInstance(config.coreConfig);
         univer.addUniverSlide(universlide);
 
-        univer.install(new UIPlugin())
+        univer.install(new UIPlugin());
         // base-slides
         universlide.installPlugin(new SlidePlugin(config.baseSlidesConfig));
         // ui-plugin-slides
-        univer.install(
-            new SlideUIPlugin(config.uiSlidesConfig)
-        );
+        univer.install(new SlideUIPlugin(config.uiSlidesConfig));
 
         return universlide;
     }

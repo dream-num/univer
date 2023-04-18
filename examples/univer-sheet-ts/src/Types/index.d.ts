@@ -1,6 +1,5 @@
 /// <reference types="vite/client" />
 
-export * from '../index';
 declare module 'univer-sheet-ts' {}
 
 // use css module

@@ -29,7 +29,7 @@ export class Merges {
 
     constructor(worksheet: Worksheet, mergeData: any) {
         this._worksheet = worksheet;
-        this._rectangleList = mergeData;
+        this._rectangleList = mergeData ?? [];
         CommandManager.getCommandObservers().add(({ actions }) => {
             if (!actions || actions.length === 0) return;
 

@@ -3,6 +3,8 @@ import { Layer } from '@univerjs/base-render';
 import { EditTooltips, EditTooltipsProps } from '../View/Views';
 import { SheetPlugin } from '../SheetPlugin';
 
+const colors = [];
+
 export class EditTooltipsController {
     _editTooltipsPage: Map<string, Map<string, EditTooltips>>;
 
@@ -15,7 +17,7 @@ export class EditTooltipsController {
         this._editTooltipsPage = new Map();
         CommandManager.getActionObservers().add((event) => {
             const data = event.data;
-            if (data.actionName === SetWorkSheetActivateAction.name) {
+            if (data.actionName === SetWorkSheetActivateAction.NAME) {
                 this.refreshEditTooltips();
             }
         });

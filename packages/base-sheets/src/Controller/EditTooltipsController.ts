@@ -74,10 +74,10 @@ export class EditTooltipsController {
             let width = 0;
             if (merges) {
                 let merge = merges[0];
-                for (let i = merge.startColumn; i < merge.endColumn; i++) {
+                for (let i = merge.startColumn; i <= merge.endColumn; i++) {
                     width += sheet.getColumnWidth(i);
                 }
-                for (let i = merge.startRow; i < merge.endRow; i++) {
+                for (let i = merge.startRow; i <= merge.endRow; i++) {
                     height += sheet.getRowHeight(i);
                 }
                 for (let i = 0; i < merge.startColumn; i++) {

@@ -1,4 +1,4 @@
-import { Range } from '@univerjs/core';
+import { CommandManager, Range, SetWorkSheetActivateAction } from '@univerjs/core';
 import { Layer } from '@univerjs/base-render';
 import { EditTooltips, EditTooltipsProps } from '../View/Views';
 import { SheetPlugin } from '../SheetPlugin';
@@ -13,6 +13,12 @@ export class EditTooltipsController {
     constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
         this._editTooltipsPage = new Map();
+        CommandManager.getActionObservers().add((event) => {
+            const data = event.data;
+            if (data.actionName === SetWorkSheetActivateAction.name) {
+                this.refreshEditTooltips();
+            }
+        });
     }
 
     removeEditTooltipsByKey(key: string): EditTooltips | null {

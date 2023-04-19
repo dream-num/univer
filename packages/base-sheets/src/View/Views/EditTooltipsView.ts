@@ -1,8 +1,8 @@
 import { IRectProps, Rect } from '@univerjs/base-render';
 
 export interface EditTooltipsProps extends IRectProps {
-    text?: string;
     textSize?: number;
+    text?: string;
     borderColor?: string;
 }
 

@@ -1,4 +1,4 @@
-import { CommandManager, Range, SetWorkSheetActivateAction } from '@univerjs/core';
+import { CommandManager, SetWorkSheetActivateAction } from '@univerjs/core';
 import { Layer } from '@univerjs/base-render';
 import { EditTooltips, EditTooltipsProps } from '../View/Views';
 import { SheetPlugin } from '../SheetPlugin';
@@ -74,24 +74,36 @@ export class EditTooltipsController {
             let width = 0;
             if (merges) {
                 let merge = merges[0];
-                Range.foreach(merge, (row, column) => {
-                    height += sheet.getRowHeight(row);
-                    width += sheet.getColumnWidth(column);
-                });
+                for (let i = merge.startColumn; i < merge.endColumn; i++) {
+                    width += sheet.getColumnWidth(i);
+                }
+                for (let i = merge.startRow; i < merge.endRow; i++) {
+                    height += sheet.getRowHeight(i);
+                }
+                for (let i = 0; i < merge.startColumn; i++) {
+                    left += sheet.getColumnWidth(i);
+                }
+                for (let i = 0; i < merge.startRow; i++) {
+                    top += sheet.getRowHeight(i);
+                }
+                editTooltips.setLeft(left);
+                editTooltips.setTop(top);
+                editTooltips.setWidth(width);
+                editTooltips.setHeight(height);
             } else {
                 height = sheet.getRowHeight(row);
                 width = sheet.getColumnWidth(column);
+                for (let i = 0; i < column; i++) {
+                    left += sheet.getColumnWidth(i);
+                }
+                for (let i = 0; i < row; i++) {
+                    top += sheet.getRowHeight(i);
+                }
+                editTooltips.setLeft(left);
+                editTooltips.setTop(top);
+                editTooltips.setWidth(width);
+                editTooltips.setHeight(height);
             }
-            for (let i = 0; i < column; i++) {
-                left += sheet.getColumnWidth(i);
-            }
-            for (let i = 0; i < row; i++) {
-                top += sheet.getRowHeight(i);
-            }
-            editTooltips.setLeft(left);
-            editTooltips.setTop(top);
-            editTooltips.setWidth(width);
-            editTooltips.setHeight(height);
         }
     }
 

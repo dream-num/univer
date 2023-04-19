@@ -1,10 +1,14 @@
 import { IRectProps, Rect } from '@univerjs/base-render';
+import { Random } from '@univerjs/core';
 
 export interface EditTooltipsProps extends IRectProps {
     textSize?: number;
     text?: string;
     borderColor?: string;
 }
+
+const colors = ['#c91c1c', '#621cc9', '#1c28c9', '#1c7bc9', '#1c7bc9', '#1cc94a', '#afc91c', '#c9841c', '#c94a1c'];
+const random = new Random(0, colors.length - 1);
 
 export class EditTooltips extends Rect<EditTooltipsProps> {
     textSize?: number;
@@ -18,7 +22,7 @@ export class EditTooltips extends Rect<EditTooltipsProps> {
     constructor(key?: string, props?: EditTooltipsProps) {
         props = {
             ...{
-                stroke: '#000000',
+                stroke: colors[random.next()],
                 strokeWidth: 2,
             },
             ...props,

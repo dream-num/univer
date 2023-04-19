@@ -3,8 +3,6 @@ import { Layer } from '@univerjs/base-render';
 import { EditTooltips, EditTooltipsProps } from '../View/Views';
 import { SheetPlugin } from '../SheetPlugin';
 
-const colors = [];
-
 export class EditTooltipsController {
     _editTooltipsPage: Map<string, Map<string, EditTooltips>>;
 

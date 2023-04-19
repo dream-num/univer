@@ -55,16 +55,21 @@ export class EditTooltips extends Rect<EditTooltipsProps> {
     }
 
     setText(text: string): void {
+        this.text = text;
         this.setProps({ text });
         this.makeDirty(true);
     }
 
     setTextSize(textSize: number): void {
+        this.textSize = textSize;
         this.setProps({ textSize });
         this.makeDirty(true);
     }
 
     setBorderColor(color: string): void {
+        this.setProps({
+            stroke: color,
+        });
         this.makeDirty(true);
     }
 

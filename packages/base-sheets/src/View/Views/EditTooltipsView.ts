@@ -50,7 +50,7 @@ export class EditTooltips extends Rect<EditTooltipsProps> {
             const rectWidth = rectRight - rectLeft;
             const rectHeight = rectBottom - rectTop;
 
-            ctx.fillStyle = '#000000';
+            ctx.fillStyle = props.stroke;
             ctx.fillRect(rectLeft, rectTop, rectWidth, rectHeight);
             ctx.fillStyle = '#ffffff';
             ctx.textBaseline = 'top';

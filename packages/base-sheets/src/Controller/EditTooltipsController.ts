@@ -59,23 +59,33 @@ export class EditTooltipsController {
         const sheet = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(sheetId);
         const editTooltips = this.createIfEditTooltips(key, sheetId);
         if (sheet) {
-            const merges = sheet.getMerges().getByRowColumn(row, column);
+            let merges = sheet.getMerges().getByRowColumn(row, column);
+            let rowTitle = sheet.getConfig().rowTitle;
+            let columnTitle = sheet.getConfig().columnTitle;
+            let left = rowTitle.width ?? 0;
+            let top = columnTitle.height ?? 0;
+            let height = 0;
+            let width = 0;
             if (merges) {
-                let height = 0;
-                let width = 0;
                 let merge = merges[0];
                 Range.foreach(merge, (row, column) => {
                     height += sheet.getRowHeight(row);
                     width += sheet.getColumnWidth(column);
                 });
-                editTooltips.setWidth(width);
-                editTooltips.setHeight(height);
             } else {
-                const height = sheet.getRowHeight(row);
-                const width = sheet.getColumnWidth(column);
-                editTooltips.setWidth(width);
-                editTooltips.setHeight(height);
+                height = sheet.getRowHeight(row);
+                width = sheet.getColumnWidth(column);
             }
+            for (let i = 0; i < column; i++) {
+                left += sheet.getColumnWidth(i);
+            }
+            for (let i = 0; i < row; i++) {
+                top += sheet.getRowHeight(i);
+            }
+            editTooltips.setLeft(left);
+            editTooltips.setTop(top);
+            editTooltips.setWidth(width);
+            editTooltips.setHeight(height);
         }
     }
 

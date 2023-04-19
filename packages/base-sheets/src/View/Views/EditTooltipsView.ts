@@ -11,13 +11,23 @@ export class EditTooltips extends Rect<EditTooltipsProps> {
 
     text?: string;
 
-    borderColor?: string;
+    translateTop: number;
+
+    translateLeft: number;
 
     constructor(key?: string, props?: EditTooltipsProps) {
+        props = {
+            ...{
+                stroke: '#000000',
+                strokeWidth: 2,
+            },
+            ...props,
+        };
         super(key, props);
-        this.textSize = props?.textSize;
-        this.text = props?.text;
-        this.borderColor = props?.borderColor;
+        this.textSize = props?.textSize ?? 15;
+        this.text = props?.text ?? 'User';
+        this.translateTop = 0;
+        this.translateLeft = 0;
     }
 
     static drawWith(ctx: CanvasRenderingContext2D, props: EditTooltips): void {
@@ -55,13 +65,22 @@ export class EditTooltips extends Rect<EditTooltipsProps> {
     }
 
     setBorderColor(color: string): void {
-        this.borderColor = color;
         this.makeDirty(true);
     }
 
     setWidth(width: number): void {
         this.width = width;
         this.makeDirty(true);
+    }
+
+    setLeft(left: number): void {
+        this.translateLeft = left;
+        this.translate(this.translateLeft, this.translateTop);
+    }
+
+    setTop(top: number): void {
+        this.translateTop = top;
+        this.translate(this.translateLeft, this.translateTop);
     }
 
     setHeight(height: number): void {

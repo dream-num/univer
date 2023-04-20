@@ -15,9 +15,23 @@ import {
     SheetContext,
     IActionData,
     IGridRange,
-    Tools,
 } from '@univerjs/core';
 import { CollaborationPlugin } from '../CollaborationPlugin';
+
+interface Clients {
+    clientName: string;
+    clientID: string;
+    selectionActionData: ISetSelectionValueActionData;
+}
+
+interface JsonDataType {
+    type: string;
+    revision: number;
+    data: string;
+    clientName: string;
+    clientID: string;
+    clients: Clients[];
+}
 
 interface MessageConfigType {
     univerId: string;
@@ -29,7 +43,7 @@ export class CollaborationController {
 
     previousMessage: string;
 
-    userNum: number = 1;
+    clientID: string;
 
     private _plugin: CollaborationPlugin;
 
@@ -44,9 +58,25 @@ export class CollaborationController {
     }
 
     onMessage(data: string) {
-        const json = JSON.parse(data);
+        const json: JsonDataType = JSON.parse(data);
         const stringData = json.data;
-        if (json.type !== 'data' || stringData === HEART_BEAT_MESSAGE || this.previousMessage === stringData) {
+
+        // 初始化获取clientID
+        if (json.type === 'document') {
+            return this.handleDocument(json);
+        }
+
+        // 获取其他客户端信息，初始化所有光标
+        if (json.type === 'clients') {
+            return this.handleClients(json);
+        }
+
+        // 其他客户端下线通知，移除光标
+        if (json.type === 'offline') {
+            return this.handleOffline(json);
+        }
+
+        if (json.type !== 'data' || stringData === HEART_BEAT_MESSAGE || this.previousMessage === stringData || this.clientID === json.clientID) {
             return;
         }
 
@@ -70,7 +100,7 @@ export class CollaborationController {
                         this.refreshRange(message);
                         break;
                     case SetSelectionValueAction.NAME:
-                        this.highlightCell(message);
+                        this.highlightCell(message, json.clientID, json.clientName);
                         break;
 
                     default:
@@ -129,6 +159,63 @@ export class CollaborationController {
         this.socket.close();
     }
 
+    handleDocument(json: JsonDataType) {
+        this.clientID = json.clientID;
+    }
+
+    handleClients(json: JsonDataType) {
+        const clients = json.clients;
+
+        if (clients == null) return;
+
+        const editTooltipsController = this._plugin
+            .getContext()
+            .getUniver()
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getContext()
+            .getPluginManager()
+            .getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)
+            ?.getEditTooltipsController();
+
+        clients.forEach((client) => {
+            const clientID = client.clientID;
+            if (clientID === this.clientID) {
+                return;
+            }
+            const clientName = client.clientName;
+            const sheetId = client.selectionActionData.sheetId;
+
+            if (!client.selectionActionData.selections) return;
+
+            const startRow = client.selectionActionData.selections[0].cell?.row;
+            const startColumn = client.selectionActionData.selections[0].cell?.column;
+            editTooltipsController?.createIfEditTooltips(clientID, sheetId, { text: clientName });
+            editTooltipsController?.setRowColumn(clientID, sheetId, startRow || 0, startColumn || 0);
+        });
+
+        editTooltipsController?.refreshEditTooltips();
+    }
+
+    handleOffline(json: JsonDataType) {
+        const clientID = json.clientID;
+
+        if (clientID == null || clientID === '') return;
+
+        const editTooltipsController = this._plugin
+            .getContext()
+            .getUniver()
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getContext()
+            .getPluginManager()
+            .getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)
+            ?.getEditTooltipsController();
+
+        editTooltipsController?.removeEditTooltipsByKey(clientID);
+        editTooltipsController?.refreshEditTooltips();
+    }
+
     refreshRange(config: MessageConfigType) {
         const { actionData } = config;
         const { sheetId, cellValue } = actionData as ISetRangeDataActionData;
@@ -156,7 +243,7 @@ export class CollaborationController {
         _commandManager.invoke(command);
     }
 
-    highlightCell(config: MessageConfigType) {
+    highlightCell(config: MessageConfigType, clientID: string, clientName: string) {
         const { actionData } = config;
         const { sheetId, selections } = actionData as ISetSelectionValueActionData;
 
@@ -177,9 +264,6 @@ export class CollaborationController {
             },
         };
 
-        // getEditTooltipsController
-        console.info('range===', range);
-        const key = Tools.generateRandomId();
         const editTooltipsController = this._plugin
             .getContext()
             .getUniver()
@@ -190,8 +274,8 @@ export class CollaborationController {
             .getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)
             ?.getEditTooltipsController();
 
-        editTooltipsController?.createIfEditTooltips(key, sheetId, { text: `User${this.userNum++}` });
-        editTooltipsController?.setRowColumn(key, sheetId, startRow, startColumn);
+        editTooltipsController?.createIfEditTooltips(clientID, sheetId, { text: clientName });
+        editTooltipsController?.setRowColumn(clientID, sheetId, startRow, startColumn);
         editTooltipsController?.refreshEditTooltips();
     }
 

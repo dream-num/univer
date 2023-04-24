@@ -16,7 +16,6 @@ univer.install(new RenderEngine());
 const universheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 univer.addUniverSheet(universheet);
 
-univer.install(new UIPlugin());
 // base-sheet
 universheet.installPlugin(
     new SheetPlugin({

@@ -12,7 +12,6 @@ import { IFormulaConfig } from '@univerjs/sheets-plugin-formula';
 import { CollaborationPlugin, ICollaborationPluginConfig } from '@univerjs/common-plugin-collaboration';
 import { ClipboardPlugin } from '@univerjs/sheets-plugin-clipboard';
 import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
-import { UIPlugin } from '@univerjs/base-ui';
 // import { INumfmtPluginConfig, NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
 // import { ClipboardPlugin } from '@univerjs/sheets-plugin-clipboard';
 // import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
@@ -40,7 +39,6 @@ class UniverSheetCustom {
         const universheet = UniverSheet.newInstance(config.coreConfig);
         univer.addUniverSheet(universheet);
 
-        univer.install(new UIPlugin());
         // base-sheets
         universheet.installPlugin(new SheetPlugin(config.baseSheetsConfig));
 
@@ -86,7 +84,6 @@ class UniverDocCustom {
         const univerdoc = UniverDoc.newInstance(config.coreConfig);
         univer.addUniverDoc(univerdoc);
 
-        univer.install(new UIPlugin());
         // base-docs
         univerdoc.installPlugin(new DocPlugin(config.baseDocsConfig));
 
@@ -125,7 +122,6 @@ class UniverSlideCustom {
         const universlide = UniverSlide.newInstance(config.coreConfig);
         univer.addUniverSlide(universlide);
 
-        univer.install(new UIPlugin());
         // base-slides
         universlide.installPlugin(new SlidePlugin(config.baseSlidesConfig));
         // ui-plugin-slides

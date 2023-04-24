@@ -22,6 +22,7 @@ export class RegisterManager {
 
         if (onKeyPasteObservable && !onKeyPasteObservable.hasObservers()) {
             onKeyPasteObservable.add((evt: ClipboardEvent) => {
+                // TODO: command 搜集action
                 this._clipboardExtensionManager.pasteResolver(evt).then((data: IClipboardData) => {
                     this._clipboardExtensionManager.handle(data);
                 });

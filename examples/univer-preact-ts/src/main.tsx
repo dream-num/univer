@@ -60,8 +60,8 @@ const defaultWorkbookData = Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO7);
 //     },
 // };
 
-// const ipAddress = 'localhost:8500';
-const ipAddress = '47.100.177.253:8500'
+const ipAddress = 'localhost:8500';
+// const ipAddress = '47.100.177.253:8500'
 const config = { type: 'sheet', template: 'DEMO1' };
 
 insertButton();

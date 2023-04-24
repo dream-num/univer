@@ -17,6 +17,8 @@ export abstract class Copy {
 
         const manager = this._context.getUniver().getGlobalContext().getObserverManager();
         manager.requiredObserver<ClipboardEvent>('onKeyCopyObservable', 'core').add((e) => {
+
+            // TODO: 注册，插件序列化model放到table,key=>model，根据开关是否需要序列号化（在extension里判断）
             this.copy(e);
         });
     }

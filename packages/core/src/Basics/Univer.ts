@@ -5,6 +5,7 @@ import { Nullable } from '../Shared';
 import { Context } from './Context';
 import { Plugin } from '../Plugin';
 import { IUniverData } from '../Interfaces';
+import { UniverObserverImpl } from './UniverObserverImpl';
 
 export class Univer {
     private _univerSheets: UniverSheet[];
@@ -21,6 +22,7 @@ export class Univer {
         this._univerSlides = [];
 
         this._context = new Context(univerData);
+        this._setObserver();
         this._context.onUniver(this);
     }
 
@@ -99,5 +101,10 @@ export class Univer {
      */
     uninstall(name: string): void {
         this._context.getPluginManager().uninstall(name);
+    }
+
+    protected _setObserver(): void {
+        const manager = this._context.getObserverManager();
+        new UniverObserverImpl().install(manager);
     }
 }

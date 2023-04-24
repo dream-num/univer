@@ -29,6 +29,8 @@ export class ClipboardExtensionManager {
         // get the dynamically added list
         this._clipboardExtensionFactoryList = clipboardExtensionFactoryList;
 
+        // TODO：搜集action执行
+
         const extension = this._checkExtension(data);
         if (extension) {
             extension.execute();

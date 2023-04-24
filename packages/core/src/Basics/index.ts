@@ -13,4 +13,6 @@ export * from './Univer';
 export * from './Version';
 export * from './WorkBookObserver';
 export * from './WorkBookObserverImpl';
+export * from './UniverObserver';
+export * from './UniverObserverImpl';
 // @endindex

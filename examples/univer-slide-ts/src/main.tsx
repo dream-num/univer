@@ -16,7 +16,6 @@ univer.install(new RenderEngine());
 const universlide = UniverSlide.newInstance(DEFAULT_SLIDE_DATA);
 univer.addUniverSlide(universlide);
 
-univer.install(new UIPlugin());
 universlide.installPlugin(new SlidePlugin());
 univer.install(
     new SlideUIPlugin({

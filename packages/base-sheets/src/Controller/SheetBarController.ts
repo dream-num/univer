@@ -21,10 +21,10 @@ export class SheetBarControl {
                 case 'copySheet': {
                     const workbook = this._plugin.getContext().getWorkBook();
                     const activeSheet = workbook.getActiveSheet();
-                    const sheetContex = this._plugin.getContext();
-                    const genname = sheetContex.getGenName();
+                    const sheetContext = this._plugin.getContext();
+                    const genName = sheetContext.getGenName();
                     const locale = this._plugin.getGlobalContext().getLocale();
-                    const copySheet = activeSheet.copy(genname.onlyName(`${activeSheet.getName()} ${locale.get('BaseSheetLocale.CopyName')}`));
+                    const copySheet = activeSheet.copy(genName.onlyName(`${activeSheet.getName()} ${locale.get('BaseSheetLocale.CopyName')}`));
                     if (workbook) {
                         workbook.insertSheet(workbook.getActiveSheetIndex() + 1, copySheet.getConfig());
                     }

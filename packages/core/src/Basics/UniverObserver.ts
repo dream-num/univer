@@ -7,12 +7,4 @@ export type UniverObserver<T> = {
     onAfterChangeUISkinObservable: Observable<string>;
     onAfterChangeUILocaleObservable: Observable<string>;
     onViewComponentFocusChange: Observable<void>;
-    onAddSheet: Observable<void>;
-    onDeleteSheet: Observable<void>;
-    onHideSheet: Observable<void>;
-    onToLeftSheet: Observable<void>;
-    onToRightSheet: Observable<void>;
-    onCopySheet: Observable<void>;
-    onRemoveSheet: Observable<void>;
-    onSheetColor: Observable<void>;
 };

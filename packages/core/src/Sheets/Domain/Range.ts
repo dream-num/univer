@@ -12,7 +12,12 @@ import {
     SetRangeStyleAction,
 } from '../Action';
 
-import { CommandManager, ISheetActionData, Command } from '../../Command';
+import {
+    CommandManager,
+    ISheetActionData,
+    Command,
+    IActionData,
+} from '../../Command';
 
 import { DEFAULT_RANGE, DEFAULT_STYLES, ACTION_NAMES } from '../../Const';
 
@@ -86,6 +91,8 @@ export class Range {
     private _rangeData: IRangeData;
 
     private _worksheet: Worksheet;
+
+    private _actionList: IActionData[] = [];
 
     constructor(workSheet: Worksheet, range: IRangeType) {
         this._context = workSheet.getContext();
@@ -3620,6 +3627,28 @@ export class Range {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Paste the action, assemble all the actions
+     */
+    addAction(action: IActionData) {
+        this._actionList.push(action);
+    }
+
+    /**
+     * Paste the action, send them together
+     */
+    invokeCommand() {
+        console.info('Range invoke=====', this._actionList);
+        const { _context, _commandManager } = this;
+        let command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            ...this._actionList
+        );
+        _commandManager.invoke(command);
     }
 
     /**

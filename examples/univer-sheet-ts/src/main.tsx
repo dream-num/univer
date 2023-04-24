@@ -5,7 +5,6 @@ import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
 import { ClipboardPlugin } from '@univerjs/sheets-plugin-clipboard';
 import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
-import { UIPlugin } from '@univerjs/base-ui';
 
 const uiDefaultConfigDemo = {
     container: 'universheet',

@@ -23,7 +23,7 @@ export const DEFAULT_SEVEN_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://gcore.jsdelivr.net/gh/dream-num/static@main/univer/slide/Picture1.jpg',
+                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/Picture1.jpg',
                 },
             },
         },

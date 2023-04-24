@@ -1,3 +1,4 @@
+import { Plugin } from '@univerjs/core';
 import { IClipboardData } from '../../Interfaces';
 import { PasteType } from '../../Interfaces/PasteType';
 import { BaseClipboardExtension, BaseClipboardExtensionFactory } from './ClipboardExtensionFactory';
@@ -10,7 +11,7 @@ export class ClipboardExtensionManager {
     // mounted on the instance
     private _register: ClipboardExtensionRegister;
 
-    constructor() {
+    constructor(private _plugin: Plugin) {
         this._register = new ClipboardExtensionRegister();
     }
 
@@ -28,13 +29,13 @@ export class ClipboardExtensionManager {
         // get the sorted list
         // get the dynamically added list
         this._clipboardExtensionFactoryList = clipboardExtensionFactoryList;
+        this._checkExtension(data);
+        // const extension = this._checkExtension(data);
 
-        // TODO：搜集action执行
-
-        const extension = this._checkExtension(data);
-        if (extension) {
-            extension.execute();
-        }
+        // Need to handle multiple extensions
+        // if (extension) {
+        //     extension.execute();
+        // }
     }
 
     pasteResolver(evt?: ClipboardEvent) {
@@ -67,14 +68,24 @@ export class ClipboardExtensionManager {
     private _checkExtension(data: IClipboardData) {
         if (!this._clipboardExtensionFactoryList) return false;
 
+        // TODO how to use range
+        const range = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getRange('A1');
+
         let extension: BaseClipboardExtension | false = false;
         for (let index = 0; index < this._clipboardExtensionFactoryList.length; index++) {
             const extensionFactory = this._clipboardExtensionFactoryList[index];
             extension = extensionFactory.check(data);
             if (extension !== false) {
-                break;
+                const action = extension.execute();
+                if (!action) {
+                    continue;
+                }
+                range.addAction(action);
+                // break;
             }
         }
-        return extension;
+
+        range.invokeCommand();
+        // return extension;
     }
 }

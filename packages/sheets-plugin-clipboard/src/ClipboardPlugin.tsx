@@ -5,6 +5,7 @@ import { CLIPBOARD_PLUGIN } from './Const';
 import { Copy, Paste, UniverCopy, UniverPaste } from './Domain';
 import { ClipboardExtensionFactory } from './Basics/Register/ClipboardExtension';
 import { ClipboardOfficeExtensionFactory } from './Basics/Register/ClipboardOfficeExtension';
+import { ClipboardSelectionExtensionFactory } from './Basics/Register/ClipboardSelectionExtension';
 
 interface CopyResolver {
     name: string;
@@ -26,6 +27,8 @@ export class ClipboardPlugin extends Plugin<any, SheetContext> {
     private _clipboardExtensionFactory: ClipboardExtensionFactory;
 
     private _clipboardOfficeExtensionFactory: ClipboardOfficeExtensionFactory;
+
+    private _clipboardSelectionExtensionFactory: ClipboardSelectionExtensionFactory;
 
     constructor() {
         super(CLIPBOARD_PLUGIN);
@@ -53,6 +56,9 @@ export class ClipboardPlugin extends Plugin<any, SheetContext> {
 
         this._clipboardOfficeExtensionFactory = new ClipboardOfficeExtensionFactory(this);
         clipboardRegister.add(this._clipboardOfficeExtensionFactory);
+
+        this._clipboardSelectionExtensionFactory = new ClipboardSelectionExtensionFactory(this);
+        clipboardRegister.add(this._clipboardSelectionExtensionFactory);
     }
 
     installTo(universheetInstance: UniverSheet) {
@@ -67,8 +73,8 @@ export class ClipboardPlugin extends Plugin<any, SheetContext> {
             .getClipboardExtensionManager()
             .getRegister();
         clipboardRegister.delete(this._clipboardExtensionFactory);
-
         clipboardRegister.delete(this._clipboardOfficeExtensionFactory);
+        clipboardRegister.delete(this._clipboardSelectionExtensionFactory);
     }
 
     onMounted(context: SheetContext): void {

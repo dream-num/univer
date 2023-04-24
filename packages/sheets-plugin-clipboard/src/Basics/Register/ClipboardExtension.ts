@@ -30,7 +30,6 @@ export class ClipboardExtension extends BaseClipboardExtension<ClipboardPlugin> 
                 data = handlePlainToJson(content);
             }
         }
-        // TODO 返回 action
 
         this._plugin.getUniverPaste().pasteTo({
             data,

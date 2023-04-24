@@ -48,7 +48,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://gcore.jsdelivr.net/gh/dream-num/static@main/univer/slide/title.png',
+                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/title.png',
                 },
             },
         },
@@ -100,7 +100,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://gcore.jsdelivr.net/gh/dream-num/static@main/univer/slide/P1.png',
+                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/P1.png',
                 },
             },
         },
@@ -116,7 +116,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://gcore.jsdelivr.net/gh/dream-num/static@main/univer/slide/P2.png',
+                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/P2.png',
                 },
             },
         },
@@ -132,7 +132,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://gcore.jsdelivr.net/gh/dream-num/static@main/univer/slide/P3.png',
+                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/P3.png',
                 },
             },
         },
@@ -148,7 +148,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://gcore.jsdelivr.net/gh/dream-num/static@main/univer/slide/P4.jpg',
+                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/P4.jpg',
                 },
             },
         },
@@ -218,7 +218,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://gcore.jsdelivr.net/gh/dream-num/static@main/univer/slide/icon1.png',
+                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/icon1.png',
                 },
             },
         },
@@ -253,7 +253,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://gcore.jsdelivr.net/gh/dream-num/static@main/univer/slide/icon2.png',
+                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/icon2.png',
                 },
             },
         },
@@ -288,7 +288,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://gcore.jsdelivr.net/gh/dream-num/static@main/univer/slide/icon3.png',
+                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/icon3.png',
                 },
             },
         },

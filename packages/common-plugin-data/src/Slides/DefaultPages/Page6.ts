@@ -49,7 +49,7 @@ export const DEFAULT_SIXTH_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://gcore.jsdelivr.net/gh/dream-num/static@main/univer/slide/title.png',
+                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/title.png',
                 },
             },
         },

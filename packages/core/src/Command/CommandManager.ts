@@ -40,7 +40,7 @@ export class CommandManager {
     }
 
     static getAction(name: string) {
-        return this._actionClass[name];
+        return this._actionClass.get(name);
     }
 
     static getActionObservers(): ActionObservers {
@@ -52,7 +52,7 @@ export class CommandManager {
     }
 
     static register(name: string, clazz: Class<ActionBase<IActionData>>) {
-        this._actionClass[name] = clazz;
+        this._actionClass.set(name, clazz);
     }
 
     static getCommandInjectorObservers(): CommandInjectorObservers {
@@ -65,45 +65,38 @@ export class CommandManager {
 
     undo(): void {
         const { _undoManager } = this;
-        // const server = _workbook.getServer();
         const command = _undoManager.undo();
         if (command) {
             command.undo();
-            // server.pushMessageQueue(command.getOldData());
         }
     }
 
     redo(): void {
         const { _undoManager } = this;
-        // const server = _workbook.getServer();
         const command = _undoManager.redo();
         if (command) {
             command.redo();
-            // server.pushMessageQueue(command.getDoData());
         }
     }
 
     invoke(command: Command): void {
         const { _undoManager } = this;
         const { _actionDataList, _unit, _actionList } = command;
-        // const server = _workbook.getServer();
+
+        // Action may be added or reissued
         this._actionExtensionManager.handle(_actionDataList);
 
         _actionDataList.forEach((data) => {
             const ActionClass = CommandManager.getAction(data.actionName);
+            if (!ActionClass) return;
             const observers = CommandManager.getActionObservers();
             const action = new ActionClass(data, _unit, observers);
-            // if (ActionOperation.hasUndo(data)) {
-            _actionList.push(action);
 
-            // }
+            _actionList.push(action);
         });
         command.invoke();
-        // if (_actionList.length === 0) {
-        //     return;
-        // }
+
         _undoManager.push(command);
-        // server.pushMessageQueue(command.getDoData());
     }
 }
 

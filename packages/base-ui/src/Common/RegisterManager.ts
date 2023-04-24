@@ -17,12 +17,11 @@ export class RegisterManager {
     }
 
     setClipboardExtensionManager() {
-        this._clipboardExtensionManager = new ClipboardExtensionManager();
+        this._clipboardExtensionManager = new ClipboardExtensionManager(this._plugin);
         const onKeyPasteObservable = this._plugin.getGlobalContext().getObserverManager().getObserver<ClipboardEvent>('onKeyPasteObservable', 'core');
 
         if (onKeyPasteObservable && !onKeyPasteObservable.hasObservers()) {
             onKeyPasteObservable.add((evt: ClipboardEvent) => {
-                // TODO: command 搜集action
                 this._clipboardExtensionManager.pasteResolver(evt).then((data: IClipboardData) => {
                     this._clipboardExtensionManager.handle(data);
                 });

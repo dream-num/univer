@@ -37,7 +37,7 @@ const richTextTest: IDocumentData = {
                 },
                 angle: 0,
                 imageProperties: {
-                    contentUrl: 'https://gcore.jsdelivr.net/gh/dream-num/static@main/img/agents.png',
+                    contentUrl: 'https://cnbabylon.com/assets/img/agents.png',
                 },
             },
             layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
@@ -435,7 +435,7 @@ export class OtherViewTest extends BaseView {
             zIndex: 11,
         });
         const picture = new Picture('picture_1', {
-            url: 'https://gcore.jsdelivr.net/gh/dream-num/static@main/img/agents.png',
+            url: 'https://cnbabylon.com/assets/img/agents.png',
             top: 500,
             left: 800,
             zIndex: 13,

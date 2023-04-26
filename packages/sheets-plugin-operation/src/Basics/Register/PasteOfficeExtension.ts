@@ -4,17 +4,17 @@ import { OperationPlugin } from '../../OperationPlugin';
 /**
  * TODO
  */
-export class ClipboardOfficeExtension extends BasePasteExtension<OperationPlugin> {
+export class PasteOfficeExtension extends BasePasteExtension<OperationPlugin> {
     execute() {}
 }
 
-export class ClipboardOfficeExtensionFactory extends BasePasteExtensionFactory<OperationPlugin> {
+export class PasteOfficeExtensionFactory extends BasePasteExtensionFactory<OperationPlugin> {
     get zIndex(): number {
         return 2;
     }
 
     create(data: IPasteData): BasePasteExtension {
-        return new ClipboardOfficeExtension(data, this._plugin);
+        return new PasteOfficeExtension(data, this._plugin);
     }
 
     check(data: IPasteData): false | BasePasteExtension {

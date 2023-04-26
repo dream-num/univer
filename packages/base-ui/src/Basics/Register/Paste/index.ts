@@ -1,6 +1,6 @@
 // @index(['./*.ts','./**/index.ts'], f => `export * from '${f.path}'`)
 
-export * from './ClipboardExtensionFactory';
-export * from './ClipboardExtensionManager';
-export * from './ClipboardExtensionRegister';
+export * from './PasteExtensionFactory';
+export * from './PasteExtensionManager';
+export * from './PasteExtensionRegister';
 // @endindex

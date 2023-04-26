@@ -93,6 +93,7 @@ export class Command {
     }
 
     invoke(): void {
+        console.info('invoke')
         CommandManager.getCommandInjectorObservers().notifyObservers(
             this.getInjector()
         );

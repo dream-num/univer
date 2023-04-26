@@ -1,9 +1,9 @@
 import { Plugin } from '@univerjs/core';
-import { IClipboardData, IDragAndDropData } from '../Basics/Interfaces';
-import { ClipboardExtensionManager, DragAndDropExtensionManager } from '../Basics/Register';
+import { IPasteData, IDragAndDropData } from '../Basics/Interfaces';
+import { PasteExtensionManager, DragAndDropExtensionManager } from '../Basics/Register';
 
 export class RegisterManager {
-    private _clipboardExtensionManager: ClipboardExtensionManager;
+    private _clipboardExtensionManager: PasteExtensionManager;
 
     private _dragAndDropExtensionManager: DragAndDropExtensionManager;
 
@@ -17,12 +17,12 @@ export class RegisterManager {
     }
 
     setClipboardExtensionManager() {
-        this._clipboardExtensionManager = new ClipboardExtensionManager(this._plugin);
+        this._clipboardExtensionManager = new PasteExtensionManager(this._plugin);
         const onKeyPasteObservable = this._plugin.getGlobalContext().getObserverManager().getObserver<ClipboardEvent>('onKeyPasteObservable', 'core');
 
         if (onKeyPasteObservable && !onKeyPasteObservable.hasObservers()) {
             onKeyPasteObservable.add((evt: ClipboardEvent) => {
-                this._clipboardExtensionManager.pasteResolver(evt).then((data: IClipboardData) => {
+                this._clipboardExtensionManager.pasteResolver(evt).then((data: IPasteData) => {
                     this._clipboardExtensionManager.handle(data);
                 });
             });
@@ -48,7 +48,7 @@ export class RegisterManager {
      * usage this._clipboardExtensionManager.handle(data);
      * @returns
      */
-    getClipboardExtensionManager(): ClipboardExtensionManager {
+    getClipboardExtensionManager(): PasteExtensionManager {
         return this._clipboardExtensionManager;
     }
 

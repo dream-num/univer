@@ -3,9 +3,8 @@ import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets'
 import { en, zh } from './Locale';
 import { OPERATION_PLUGIN } from './Const';
 import { Copy, Paste, UniverCopy, UniverPaste } from './Domain';
-import { ClipboardExtensionFactory } from './Basics/Register/ClipboardExtension';
-import { ClipboardOfficeExtensionFactory } from './Basics/Register/ClipboardOfficeExtension';
-import { ClipboardSelectionExtensionFactory } from './Basics/Register/ClipboardSelectionExtension';
+import { PasteExtensionFactory } from './Basics/Register/PasteExtension';
+import { PasteOfficeExtensionFactory } from './Basics/Register/PasteOfficeExtension';
 
 interface CopyResolver {
     name: string;
@@ -24,11 +23,9 @@ export class OperationPlugin extends Plugin<any, SheetContext> {
 
     private _univerPaste: UniverPaste;
 
-    private _clipboardExtensionFactory: ClipboardExtensionFactory;
+    private _clipboardExtensionFactory: PasteExtensionFactory;
 
-    private _clipboardOfficeExtensionFactory: ClipboardOfficeExtensionFactory;
-
-    private _clipboardSelectionExtensionFactory: ClipboardSelectionExtensionFactory;
+    private _clipboardOfficeExtensionFactory: PasteOfficeExtensionFactory;
 
     constructor() {
         super(OPERATION_PLUGIN);
@@ -51,14 +48,11 @@ export class OperationPlugin extends Plugin<any, SheetContext> {
             .getRegister();
         // const clipboardRegister = this.getGlobalContext().getPluginManager().getRequirePluginByName<RegisterPlugin>(REGISTER_PLUGIN_NAME).getClipboardExtensionManager().getRegister();
 
-        this._clipboardExtensionFactory = new ClipboardExtensionFactory(this);
+        this._clipboardExtensionFactory = new PasteExtensionFactory(this);
         clipboardRegister.add(this._clipboardExtensionFactory);
 
-        this._clipboardOfficeExtensionFactory = new ClipboardOfficeExtensionFactory(this);
+        this._clipboardOfficeExtensionFactory = new PasteOfficeExtensionFactory(this);
         clipboardRegister.add(this._clipboardOfficeExtensionFactory);
-
-        this._clipboardSelectionExtensionFactory = new ClipboardSelectionExtensionFactory(this);
-        clipboardRegister.add(this._clipboardSelectionExtensionFactory);
     }
 
     installTo(universheetInstance: UniverSheet) {
@@ -74,7 +68,6 @@ export class OperationPlugin extends Plugin<any, SheetContext> {
             .getRegister();
         clipboardRegister.delete(this._clipboardExtensionFactory);
         clipboardRegister.delete(this._clipboardOfficeExtensionFactory);
-        clipboardRegister.delete(this._clipboardSelectionExtensionFactory);
     }
 
     onMounted(context: SheetContext): void {

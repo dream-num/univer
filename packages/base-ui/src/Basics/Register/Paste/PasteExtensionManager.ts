@@ -1,21 +1,21 @@
 import { Command, IActionData, Plugin } from '@univerjs/core';
 import { IPasteData } from '../../Interfaces';
 import { PasteType } from '../../Interfaces/PasteType';
-import { BaseClipboardExtension, BaseClipboardExtensionFactory } from './ClipboardExtensionFactory';
-import { ClipboardExtensionRegister } from './ClipboardExtensionRegister';
+import { BasePasteExtension, BasePasteExtensionFactory } from './PasteExtensionFactory';
+import { PasteExtensionRegister } from './PasteExtensionRegister';
 import { Clipboard } from '../../Shared/Clipboard';
 
-export class ClipboardExtensionManager {
-    private _clipboardExtensionFactoryList: BaseClipboardExtensionFactory[];
+export class PasteExtensionManager {
+    private _pasteExtensionFactoryList: BasePasteExtensionFactory[];
 
     // mounted on the instance
-    private _register: ClipboardExtensionRegister;
+    private _register: PasteExtensionRegister;
 
     constructor(private _plugin: Plugin) {
-        this._register = new ClipboardExtensionRegister();
+        this._register = new PasteExtensionRegister();
     }
 
-    getRegister(): ClipboardExtensionRegister {
+    getRegister(): PasteExtensionRegister {
         return this._register;
     }
 
@@ -24,11 +24,11 @@ export class ClipboardExtensionManager {
      * @param command
      */
     handle(data: IPasteData) {
-        const clipboardExtensionFactoryList = this._register?.clipboardExtensionFactoryList;
+        const clipboardExtensionFactoryList = this._register?.pasteExtensionFactoryList;
         if (!clipboardExtensionFactoryList) return;
         // get the sorted list
         // get the dynamically added list
-        this._clipboardExtensionFactoryList = clipboardExtensionFactoryList;
+        this._pasteExtensionFactoryList = clipboardExtensionFactoryList;
         this._checkExtension(data);
         // const extension = this._checkExtension(data);
 
@@ -66,11 +66,11 @@ export class ClipboardExtensionManager {
      * @returns
      */
     private _checkExtension(data: IPasteData) {
-        if (!this._clipboardExtensionFactoryList) return false;
+        if (!this._pasteExtensionFactoryList) return false;
         let actionDataList: IActionData[] = [];
-        let extension: BaseClipboardExtension | false = false;
-        for (let index = 0; index < this._clipboardExtensionFactoryList.length; index++) {
-            const extensionFactory = this._clipboardExtensionFactoryList[index];
+        let extension: BasePasteExtension | false = false;
+        for (let index = 0; index < this._pasteExtensionFactoryList.length; index++) {
+            const extensionFactory = this._pasteExtensionFactoryList[index];
             extension = extensionFactory.check(data);
             if (extension !== false) {
                 const extensionActionList = extension.execute();
@@ -92,7 +92,6 @@ export class ClipboardExtensionManager {
             ...actionDataList
         );
 
-        console.info('manage invoke actoin======',actionDataList)
         _commandManager.invoke(command);
     }
 }

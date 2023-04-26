@@ -5,14 +5,14 @@
 //     data: string;
 // };
 
-// export class Clipboard {
+// export class Paste {
 //     static clipboard = window.navigator.clipboard;
 
 //     static textArea: HTMLTextAreaElement;
 
 //     static async writeText(text: string, e?: ClipboardEvent) {
-//         if (Clipboard.clipboard) {
-//             return Clipboard.clipboard.writeText(text).then(
+//         if (Paste.clipboard) {
+//             return Paste.clipboard.writeText(text).then(
 //                 () => true,
 //                 (err) => console.dir(err)
 //             );
@@ -22,11 +22,11 @@
 //     }
 
 //     static async write(data: ClipboardType, e?: ClipboardEvent) {
-//         if (Clipboard.clipboard) {
+//         if (Paste.clipboard) {
 //             const blob = new Blob([data.data], { type: data.type ?? 'text/html' });
 //             const clipboardData = [new ClipboardItem({ 'text/html': blob })];
 
-//             return Clipboard.clipboard.write(clipboardData).then(
+//             return Paste.clipboard.write(clipboardData).then(
 //                 () => true,
 //                 () => false
 //             );
@@ -36,23 +36,23 @@
 //     }
 
 //     static async readText() {
-//         if (Clipboard.clipboard) {
-//             return Clipboard.clipboard.readText().then(
+//         if (Paste.clipboard) {
+//             return Paste.clipboard.readText().then(
 //                 (text) => text,
 //                 () => null
 //             );
 //         }
-//         if (!Clipboard.textArea) return null;
+//         if (!Paste.textArea) return null;
 //         return new Promise((resolve, reject) => {
-//             resolve(Clipboard.textArea.value);
+//             resolve(Paste.textArea.value);
 //         })
 //             .then((text) => text)
 //             .then(() => null);
 //     }
 
 //     static async read(e?: ClipboardEvent): Promise<Array<PasteType | null> | null> {
-//         if (Clipboard.clipboard) {
-//             const clipboardItems = await Clipboard.clipboard.read();
+//         if (Paste.clipboard) {
+//             const clipboardItems = await Paste.clipboard.read();
 //             const Promises: Array<Promise<PasteType | null>> = [];
 //             for (const clipboardItem of clipboardItems) {
 //                 for (const type of clipboardItem.types) {
@@ -124,7 +124,7 @@ export class Clipboard {
             const blob = new Blob([data.data], { type: data.type ?? 'text/html' });
             const clipboardData = [new ClipboardItem({ 'text/html': blob })];
 
-            // return Clipboard.clipboard.write(clipboardData).then(
+            // return Paste.clipboard.write(clipboardData).then(
             //     () => true,
             //     () => false
             // );

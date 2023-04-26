@@ -4,7 +4,7 @@ import { IPasteData } from '../../Interfaces/IPasteData';
 /**
  * 转化table html/json为json
  */
-export class BaseClipboardExtension<T extends Plugin = Plugin> {
+export class BasePasteExtension<T extends Plugin = Plugin> {
     // protected _json: IKeyValue;
     constructor(protected _data: IPasteData, protected _plugin: T) {}
 
@@ -15,9 +15,9 @@ export class BaseClipboardExtension<T extends Plugin = Plugin> {
 }
 
 /**
- * Determine whether to intercept and create BaseClipboardExtension
+ * Determine whether to intercept and create BasePasteExtension
  */
-export class BaseClipboardExtensionFactory<T extends Plugin = Plugin> {
+export class BasePasteExtensionFactory<T extends Plugin = Plugin> {
     constructor(protected _plugin: T) {}
 
     get zIndex() {
@@ -29,8 +29,8 @@ export class BaseClipboardExtensionFactory<T extends Plugin = Plugin> {
      * @param data
      * @returns
      */
-    create(data: IPasteData): BaseClipboardExtension {
-        return new BaseClipboardExtension(data, this._plugin);
+    create(data: IPasteData): BasePasteExtension {
+        return new BasePasteExtension(data, this._plugin);
     }
 
     /**
@@ -38,7 +38,7 @@ export class BaseClipboardExtensionFactory<T extends Plugin = Plugin> {
      * @param data
      * @returns
      */
-    check(data: IPasteData): false | BaseClipboardExtension {
+    check(data: IPasteData): false | BasePasteExtension {
         return false;
     }
 }

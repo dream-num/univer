@@ -374,7 +374,7 @@ export class Worksheet {
      * Returns User Selection Range
      * @param row row index
      * @param column column index
-     * @param numRows row counr
+     * @param numRows row count
      * @returns range instance
      */
     getRange(row: number, column: number, numRows: number): Range;
@@ -382,8 +382,8 @@ export class Worksheet {
      * Returns User Selection Range
      * @param row row index
      * @param column column index
-     * @param numRows row counr
-     * @param numColumns column counr
+     * @param numRows row count
+     * @param numColumns column count
      * @returns range instance
      */
     getRange(

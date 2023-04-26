@@ -11,7 +11,7 @@ import {
 import { OperationPlugin } from '../../OperationPlugin';
 
 // copy paste delete cut insert // SheetsPluginOperation
-export class ClipboardExtension extends BasePasteExtension<OperationPlugin> {
+export class PasteExtension extends BasePasteExtension<OperationPlugin> {
     execute() {
         let content = this._data.html || this._data.plain;
 
@@ -19,6 +19,7 @@ export class ClipboardExtension extends BasePasteExtension<OperationPlugin> {
         let colInfo;
         let rowInfo;
         if (content) {
+            // TODO move to PasteOfficeExtension
             if (content.indexOf('xmlns:x="urn:schemas-microsoft-com:office:excel"') > -1) {
                 data = handelExcelToJson(content);
                 colInfo = handleTableColgroup(content);
@@ -42,13 +43,13 @@ export class ClipboardExtension extends BasePasteExtension<OperationPlugin> {
     }
 }
 
-export class ClipboardExtensionFactory extends BasePasteExtensionFactory<OperationPlugin> {
+export class PasteExtensionFactory extends BasePasteExtensionFactory<OperationPlugin> {
     get zIndex(): number {
         return 1;
     }
 
     create(data: IPasteData): BasePasteExtension {
-        return new ClipboardExtension(data, this._plugin);
+        return new PasteExtension(data, this._plugin);
     }
 
     check(data: IPasteData): false | BasePasteExtension {

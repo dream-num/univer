@@ -30,7 +30,7 @@ export class Clipboard {
             const blob = new Blob([data.data], { type: data.type ?? 'text/html' });
             const clipboardData = [new ClipboardItem({ 'text/html': blob })];
 
-            // return Clipboard.clipboard.write(clipboardData).then(
+            // return Paste.clipboard.write(clipboardData).then(
             //     () => true,
             //     () => false
             // );

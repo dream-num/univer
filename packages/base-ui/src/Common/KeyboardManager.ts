@@ -33,7 +33,7 @@ export class KeyboardManager {
             this._observerManager.requiredObserver<KeyboardEvent>('onKeyUpObservable', 'core')?.notifyObservers(evt);
         };
 
-        // Maybe move to Clipboard.ts
+        // Maybe move to Paste.ts
         const keyboardCopyEvent = (evt: ClipboardEvent) => {
             this._observerManager.requiredObserver<ClipboardEvent>('onKeyCopyObservable', 'core')?.notifyObservers(evt);
         };

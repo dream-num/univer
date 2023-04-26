@@ -1,20 +1,20 @@
 import { sortRules } from '@univerjs/core';
-import { BaseClipboardExtensionFactory } from './ClipboardExtensionFactory';
+import { BasePasteExtensionFactory } from './PasteExtensionFactory';
 
-export class ClipboardExtensionRegister {
-    private _clipboardExtensionFactoryList: BaseClipboardExtensionFactory[] = [];
+export class PasteExtensionRegister {
+    private _pasteExtensionFactoryList: BasePasteExtensionFactory[] = [];
 
-    get clipboardExtensionFactoryList(): BaseClipboardExtensionFactory[] {
-        return this._clipboardExtensionFactoryList;
+    get pasteExtensionFactoryList(): BasePasteExtensionFactory[] {
+        return this._pasteExtensionFactoryList;
     }
 
-    add(...extensionFactoryList: BaseClipboardExtensionFactory[]) {
-        this._clipboardExtensionFactoryList.push(...extensionFactoryList);
-        this._clipboardExtensionFactoryList.sort(sortRules);
+    add(...extensionFactoryList: BasePasteExtensionFactory[]) {
+        this._pasteExtensionFactoryList.push(...extensionFactoryList);
+        this._pasteExtensionFactoryList.sort(sortRules);
     }
 
-    delete(extensionFactory: BaseClipboardExtensionFactory) {
-        const index = this._clipboardExtensionFactoryList.indexOf(extensionFactory);
-        this._clipboardExtensionFactoryList.splice(index, 1);
+    delete(extensionFactory: BasePasteExtensionFactory) {
+        const index = this._pasteExtensionFactoryList.indexOf(extensionFactory);
+        this._pasteExtensionFactoryList.splice(index, 1);
     }
 }

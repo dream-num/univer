@@ -1,4 +1,4 @@
-export interface IClipboardData {
+export interface IPasteData {
     plain?: string;
     html?: string;
 }

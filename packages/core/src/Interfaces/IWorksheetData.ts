@@ -1,4 +1,5 @@
 import { BooleanNumber, SheetTypes } from '../Enum';
+import { IKeyValue } from '../Shared';
 import { ObjectArrayType } from '../Shared/ObjectArray';
 import { ObjectMatrixPrimitiveType } from '../Shared/ObjectMatrix';
 import { ICellData } from './ICellData';
@@ -63,5 +64,5 @@ export interface IWorksheetConfig {
     selections: IRangeType[];
     rightToLeft: BooleanNumber;
     // metaData: MetaData[];
-    pluginMeta: {};
+    pluginMeta: IKeyValue;
 }

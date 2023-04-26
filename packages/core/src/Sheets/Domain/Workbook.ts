@@ -19,6 +19,7 @@ import {
 import {
     IColumnStartEndData,
     IGridRange,
+    IRangeArrayData,
     IRangeData,
     IRangeStringData,
     IRangeType,
@@ -486,7 +487,7 @@ export class Workbook {
         });
         if (!activeSheetId) {
             console.warn('No active sheet, get first sheet');
-            return this._worksheets[0];
+            return this._worksheets.get(sheetOrder[0]) as Worksheet;
         }
         return this._worksheets.get(activeSheetId) as Worksheet;
     }
@@ -767,13 +768,14 @@ export class Workbook {
             return gridRange;
         }
         if (typeof range !== 'string' && 'row' in range) {
+            const rangeArrayData = range as IRangeArrayData;
             return {
                 sheetId: '',
                 rangeData: {
-                    startRow: range.row[0],
-                    startColumn: range.column[0],
-                    endRow: range.row[1],
-                    endColumn: range.column[1],
+                    startRow: rangeArrayData.row[0],
+                    startColumn: rangeArrayData.column[0],
+                    endRow: rangeArrayData.row[1],
+                    endColumn: rangeArrayData.column[1],
                 },
             };
             // ref : https://www.typescriptlang.org/docs/handbook/advanced-types.html#using-the-in-operator
@@ -839,7 +841,8 @@ export class Workbook {
             this._worksheets.forEach((sheet) => {
                 sheet.setStatus(BooleanNumber.FALSE);
             });
-            this._worksheets[0].setStatus(BooleanNumber.TRUE);
+            const { sheetOrder } = this._config;
+            this._worksheets.get(sheetOrder[0])?.setStatus(BooleanNumber.TRUE);
         }
     }
 

@@ -10,10 +10,10 @@ import { ISlidePluginConfig, SlidePlugin } from '@univerjs/base-slides';
 // import { CollaborationPlugin, ICollaborationPluginConfig } from '@univerjs/common-plugin-collaboration';
 import { IFormulaConfig } from '@univerjs/sheets-plugin-formula';
 import { CollaborationPlugin, ICollaborationPluginConfig } from '@univerjs/common-plugin-collaboration';
-import { ClipboardPlugin } from '@univerjs/sheets-plugin-clipboard';
+import { OperationPlugin } from '@univerjs/sheets-plugin-operation';
 import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
 // import { INumfmtPluginConfig, NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
-// import { ClipboardPlugin } from '@univerjs/sheets-plugin-clipboard';
+// import { OperationPlugin } from '@univerjs/sheets-plugin-operation';
 // import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
 
 interface ISheetPropsCustom {
@@ -48,7 +48,7 @@ class UniverSheetCustom {
         // universheet.installPlugin(new NumfmtPlugin(config.numfmtConfig));
         // FormulaPlugin.create(config.formulaConfig).installTo(universheet);
 
-        universheet.installPlugin(new ClipboardPlugin());
+        universheet.installPlugin(new OperationPlugin());
         universheet.installPlugin(new ImportXlsxPlugin());
 
         return universheet;
@@ -154,5 +154,5 @@ export * as CommonPluginData from '@univerjs/common-plugin-data';
 // export * as CommonPluginCollaboration from '@univerjs/common-plugin-collaboration';
 // export * as SheetsPluginFormula from '@univerjs/sheets-plugin-formula';
 // export * as SheetsPluginNumfmt from '@univerjs/sheets-plugin-numfmt';
-// export * as SheetsPluginClipboard from '@univerjs/sheets-plugin-clipboard';
+// export * as SheetsPluginClipboard from '@univerjs/sheets-plugin-operation';
 // export * as SheetsPluginImportXlsx from '@univerjs/sheets-plugin-import-xlsx';

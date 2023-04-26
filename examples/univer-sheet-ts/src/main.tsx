@@ -3,7 +3,7 @@ import { RenderEngine } from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
-import { ClipboardPlugin } from '@univerjs/sheets-plugin-clipboard';
+import { OperationPlugin } from '@univerjs/sheets-plugin-operation';
 import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
 
 const uiDefaultConfigDemo = {
@@ -64,5 +64,5 @@ univer.install(
 
 // FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(universheet);
 // FindPlugin.create().installTo(universheet);
-universheet.installPlugin(new ClipboardPlugin());
+universheet.installPlugin(new OperationPlugin());
 universheet.installPlugin(new ImportXlsxPlugin());

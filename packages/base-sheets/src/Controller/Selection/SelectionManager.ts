@@ -236,7 +236,7 @@ export class SelectionManager {
      * @param curCellRange
      * @returns
      */
-    addControlToCurrentByRangeData(selectionRange: IRangeData, curCellRange: Nullable<IRangeCellData>, command: boolean = true) {
+    addControlToCurrentByRangeData(selectionRange: IRangeData, curCellRange: Nullable<IRangeCellData>) {
         const currentControls = this.getCurrentControls();
         if (!currentControls) {
             return;
@@ -271,12 +271,7 @@ export class SelectionManager {
 
         currentControls.push(control);
 
-        if (command) {
-            this.setSelectionModel();
-        } else {
-            const models = this._selectionControls.map((control) => control.model.getValue());
-            return models;
-        }
+        this.setSelectionModel();
     }
 
     clearSelectionControls() {

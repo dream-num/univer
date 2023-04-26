@@ -1,4 +1,4 @@
-import { IActionData, Nullable, Plugin } from '@univerjs/core';
+import { Plugin } from '@univerjs/core';
 import { IClipboardData } from '../../Interfaces/IClipboardData';
 
 /**
@@ -11,7 +11,7 @@ export class BaseClipboardExtension<T extends Plugin = Plugin> {
     /**
      * Execute the core logic after the check is successful
      */
-    execute(): Nullable<IActionData> {}
+    execute() {}
 }
 
 /**

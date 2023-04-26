@@ -1146,24 +1146,6 @@ export class Worksheet {
     }
 
     /**
-     * Clears the sheet of all notes.
-     * @returns WorkSheet Instance
-     */
-    clearNotes(): Worksheet {
-        const { _config } = this;
-        const { rowCount, columnCount } = _config;
-        this.getRange({
-            startRow: 0,
-            endRow: rowCount,
-            startColumn: 0,
-            endColumn: columnCount,
-        }).clear({
-            commentsOnly: true,
-        });
-        return this;
-    }
-
-    /**
      * Deletes the column at the given column position.
      * @param columnPosition column index
      * @returns WorkSheet Instance

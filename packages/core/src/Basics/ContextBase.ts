@@ -33,10 +33,10 @@ export abstract class ContextBase {
     }
 
     onUniver(univer: Univer): void {
-        const glboalContext = univer.getGlobalContext();
+        const globalContext = univer.getGlobalContext();
         this._univer = univer;
-        this._undoManager = glboalContext.getUndoManager();
-        this._commandManager = glboalContext.getCommandManager();
+        this._undoManager = globalContext.getUndoManager();
+        this._commandManager = globalContext.getCommandManager();
     }
 
     getHook<T>(path: string): Nullable<ObservableHooks<T>> {

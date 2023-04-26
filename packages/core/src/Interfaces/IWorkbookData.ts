@@ -1,4 +1,4 @@
-import { IKeyType, Nullable } from '../Shared/Types';
+import { IKeyType, IKeyValue, Nullable } from '../Shared/Types';
 import { BooleanNumber, LocaleType } from '../Enum';
 import { IStyleData } from './IStyleData';
 import { IWorksheetConfig } from './IWorksheetData';
@@ -25,6 +25,6 @@ export interface IWorkbookConfig {
     styles: IKeyType<Nullable<IStyleData>>;
     sheets: { [sheetId: string]: Partial<IWorksheetConfig> };
     sheetOrder: string[]; // sheet id order list ['xxxx-sheet3', 'xxxx-sheet1','xxxx-sheet2']
-    pluginMeta: object;
+    pluginMeta: IKeyValue;
     namedRanges: INamedRange[];
 }

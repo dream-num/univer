@@ -67,25 +67,16 @@ export class ClipboardExtensionManager {
      */
     private _checkExtension(data: IClipboardData) {
         if (!this._clipboardExtensionFactoryList) return false;
-
-        // TODO how to use range
-        const range = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getRange('A1');
-
+        // const globelCollectoiion = 
         let extension: BaseClipboardExtension | false = false;
         for (let index = 0; index < this._clipboardExtensionFactoryList.length; index++) {
             const extensionFactory = this._clipboardExtensionFactoryList[index];
             extension = extensionFactory.check(data);
             if (extension !== false) {
-                const action = extension.execute();
-                if (!action) {
-                    continue;
-                }
-                range.addAction(action);
-                // break;
+                const actionData = extension.execute();
+                // xxx.push(actionData)
             }
         }
-
-        range.invokeCommand();
-        // return extension;
+        // xxxx.invoke()
     }
 }

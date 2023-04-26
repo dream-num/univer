@@ -43,7 +43,7 @@
         "@univerjs/common-plugin-collaboration": "workspace:^0.0.1",
         "@univerjs/common-plugin-data": "workspace:^0.0.1",
         "@univerjs/core": "workspace:^0.0.1",
-        "@univerjs/sheets-plugin-clipboard": "workspace:^0.0.1",
+        "@univerjs/sheets-plugin-operation": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-formula": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-import-xlsx": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-numfmt": "workspace:^0.0.1",

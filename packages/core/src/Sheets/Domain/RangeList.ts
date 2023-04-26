@@ -210,15 +210,6 @@ export class RangeList {
     }
 
     /**
-     * Clears the note for each Range in the range list.
-     *
-     *  @returns  This range list, for chaining.
-     */
-    clearNote(): RangeList {
-        return this.clear({ commentsOnly: true });
-    }
-
-    /**
      * Sets the background color for each Range in the range list.
      *
      * @param color  The background color code in CSS notation such as '#ffffff' or 'white'; a null value resets the color.

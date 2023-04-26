@@ -12,12 +12,7 @@ import {
     SetRangeStyleAction,
 } from '../Action';
 
-import {
-    CommandManager,
-    ISheetActionData,
-    Command,
-    IActionData,
-} from '../../Command';
+import { CommandManager, ISheetActionData, Command } from '../../Command';
 
 import { DEFAULT_RANGE, DEFAULT_STYLES, ACTION_NAMES } from '../../Const';
 
@@ -53,7 +48,6 @@ import {
 
 import {
     Nullable,
-    ObjectArrayPrimitiveType,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
     Tools,
@@ -62,6 +56,9 @@ import {
 
 import { DropCell } from '../../Shared/DropCell';
 import { Worksheet } from './Worksheet';
+
+// type FromProps<T> = T extends ISty
+export type PropsFrom<T> = T extends Nullable<infer Props> ? Props : T;
 
 /**
  * getObjectValues options type
@@ -91,8 +88,6 @@ export class Range {
     private _rangeData: IRangeData;
 
     private _worksheet: Worksheet;
-
-    private _actionList: IActionData[] = [];
 
     constructor(workSheet: Worksheet, range: IRangeType) {
         this._context = workSheet.getContext();
@@ -334,7 +329,7 @@ export class Range {
      */
     getObjectValues(
         options: IValueOptionsType = {}
-    ): ObjectArrayPrimitiveType<ICellData> {
+    ): ObjectMatrixPrimitiveType<ICellData> {
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
 
         // get object values from sheet matrix, or use this.getMatrix() create a new matrix then this.getMatrix().getData()
@@ -397,7 +392,7 @@ export class Range {
      * Returns the font families of the cells in the range.
      */
     getFontFamilies(): string[][] {
-        return this._getStyles('ff');
+        return this._getStyles('ff') as string[][];
     }
 
     /**
@@ -411,7 +406,7 @@ export class Range {
      * Returns the underlines of the cells in the range.
      */
     getUnderlines(): ITextDecoration[][] {
-        return this._getStyles('ul');
+        return this._getStyles('ul') as ITextDecoration[][];
     }
 
     /**
@@ -425,7 +420,7 @@ export class Range {
      * Returns the overlines of the cells in the range.
      */
     getOverlines(): ITextDecoration[][] {
-        return this._getStyles('ol');
+        return this._getStyles('ol') as ITextDecoration[][];
     }
 
     /**
@@ -439,7 +434,7 @@ export class Range {
      * Returns the strikeThroughs of the cells in the range.
      */
     getStrikeThroughs(): ITextDecoration[][] {
-        return this._getStyles('st');
+        return this._getStyles('st') as ITextDecoration[][];
     }
 
     /**
@@ -460,7 +455,7 @@ export class Range {
      * Returns the font sizes of the cells in the range.
      */
     getFontSizes(): number[][] {
-        return this._getStyles('fs');
+        return this._getStyles('fs') as number[][];
     }
 
     /**
@@ -472,7 +467,7 @@ export class Range {
     }
 
     getBorders(): IBorderData[][] {
-        return this._getStyles('bd');
+        return this._getStyles('bd') as IBorderData[][];
     }
 
     /**
@@ -486,7 +481,7 @@ export class Range {
      * Returns the font styles of the cells in the range.
      */
     getFontStyles(): FontItalic[][] {
-        return this._getStyles('it');
+        return this._getStyles('it') as FontItalic[][];
     }
 
     /**
@@ -500,7 +495,7 @@ export class Range {
      * Returns the font weights of the cells in the range.
      */
     getFontWeights(): FontWeight[][] {
-        return this._getStyles('bl');
+        return this._getStyles('bl') as FontWeight[][];
     }
 
     /**
@@ -551,7 +546,7 @@ export class Range {
      *Returns the horizontal alignments of the cells in the range.
      */
     getHorizontalAlignments(): HorizontalAlign[][] {
-        return this._getStyles('ht');
+        return this._getStyles('ht') as HorizontalAlign[][];
     }
 
     /**
@@ -742,7 +737,7 @@ export class Range {
      * Returns the text directions for the cells in the range.
      */
     getTextDirections(): number[][] {
-        return this._getStyles('td');
+        return this._getStyles('td') as number[][];
     }
 
     /**
@@ -791,7 +786,7 @@ export class Range {
      * Returns the vertical alignments of the cells in the range.
      */
     getVerticalAlignments(): VerticalAlign[][] {
-        return this._getStyles('vt');
+        return this._getStyles('vt') as VerticalAlign[][];
     }
 
     /**
@@ -818,20 +813,20 @@ export class Range {
      * Returns whether the text in the cells wrap.
      */
     getWraps(): BooleanNumber[][] {
-        return this._getStyles('tb');
+        return this._getStyles('tb') as BooleanNumber[][];
     }
 
     /**
      * Returns the text wrapping strategies for the cells in the range.
      */
-    getWrapStrategies(): Array<Array<Nullable<WrapStrategy>>> {
-        return this._getStyles('tb');
+    getWrapStrategies(): WrapStrategy[][] {
+        return this._getStyles('tb') as WrapStrategy[][];
     }
 
     /**
      * Returns the text wrapping strategy for the top left cell of the range.
      */
-    getWrapStrategy(): Nullable<WrapStrategy> {
+    getWrapStrategy(): WrapStrategy {
         return this.getWrapStrategies()[0][0];
     }
 
@@ -3519,7 +3514,7 @@ export class Range {
 
         const newRowList = Array.from(new Set(rowList.flat()));
 
-        const newData = {};
+        const newData: { [key: number]: { [key: number]: ICellData } } = {};
 
         newRowList.forEach((item, i) => {
             newData[i] = newCellValue[item];
@@ -3627,28 +3622,6 @@ export class Range {
             return false;
         }
         return true;
-    }
-
-    /**
-     * Paste the action, assemble all the actions
-     */
-    addAction(action: IActionData) {
-        this._actionList.push(action);
-    }
-
-    /**
-     * Paste the action, send them together
-     */
-    invokeCommand() {
-        console.info('Range invoke=====', this._actionList);
-        const { _context, _commandManager } = this;
-        let command = new Command(
-            {
-                WorkBookUnit: _context.getWorkBook(),
-            },
-            ...this._actionList
-        );
-        _commandManager.invoke(command);
     }
 
     /**
@@ -3776,7 +3749,9 @@ export class Range {
      * @param arg Shorthand for the style that gets
      * @returns style value
      */
-    private _getStyles(arg: string) {
+    private _getStyles<K>(
+        arg: keyof IStyleData
+    ): Array<Array<IStyleData[keyof IStyleData]>> {
         return this.getValues().map((row) =>
             row.map((cell: Nullable<ICellData>) => {
                 const styles = this._context.getWorkBook().getStyles();

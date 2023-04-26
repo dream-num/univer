@@ -1,5 +1,5 @@
-import { Plugin } from '@univerjs/core';
-import { IClipboardData } from '../../Interfaces';
+import { Command, IActionData, Plugin } from '@univerjs/core';
+import { IPasteData } from '../../Interfaces';
 import { PasteType } from '../../Interfaces/PasteType';
 import { BaseClipboardExtension, BaseClipboardExtensionFactory } from './ClipboardExtensionFactory';
 import { ClipboardExtensionRegister } from './ClipboardExtensionRegister';
@@ -23,7 +23,7 @@ export class ClipboardExtensionManager {
      * inject all actions
      * @param command
      */
-    handle(data: IClipboardData) {
+    handle(data: IPasteData) {
         const clipboardExtensionFactoryList = this._register?.clipboardExtensionFactoryList;
         if (!clipboardExtensionFactoryList) return;
         // get the sorted list
@@ -39,13 +39,13 @@ export class ClipboardExtensionManager {
     }
 
     pasteResolver(evt?: ClipboardEvent) {
-        return new Promise((resolve: (value: IClipboardData) => void, reject) => {
+        return new Promise((resolve: (value: IPasteData) => void, reject) => {
             Clipboard.read(evt).then((file: Array<PasteType | null> | null) => {
                 if (!file) return [];
                 const HtmlIndex = file.findIndex((item: PasteType | null, index: number) => item && item.type === 'text/html');
                 const PlainIndex = file.findIndex((item: PasteType | null, index: number) => item && item.type === 'text/plain');
 
-                const data: IClipboardData = {};
+                const data: IPasteData = {};
                 if (HtmlIndex > -1) {
                     const html = file[HtmlIndex]?.result as string;
                     data.html = html;
@@ -65,18 +65,34 @@ export class ClipboardExtensionManager {
      * @param command
      * @returns
      */
-    private _checkExtension(data: IClipboardData) {
+    private _checkExtension(data: IPasteData) {
         if (!this._clipboardExtensionFactoryList) return false;
-        // const globelCollectoiion = 
+        let actionDataList: IActionData[] = [];
         let extension: BaseClipboardExtension | false = false;
         for (let index = 0; index < this._clipboardExtensionFactoryList.length; index++) {
             const extensionFactory = this._clipboardExtensionFactoryList[index];
             extension = extensionFactory.check(data);
             if (extension !== false) {
-                const actionData = extension.execute();
-                // xxx.push(actionData)
+                const extensionActionList = extension.execute();
+                actionDataList = actionDataList.concat(extensionActionList)
             }
         }
-        // xxxx.invoke()
+        this._invokeAction(actionDataList)
+
+    }
+
+    private _invokeAction(actionDataList:IActionData[]) {
+         const _commandManager = this._plugin.getGlobalContext().getCommandManager();
+         const workBook = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook();
+
+         const command = new Command(
+            {
+                WorkBookUnit: workBook,
+            },
+            ...actionDataList
+        );
+
+        console.info('manage invoke actoin======',actionDataList)
+        _commandManager.invoke(command);
     }
 }

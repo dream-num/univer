@@ -1,17 +1,17 @@
 import {
-    BaseClipboardExtension,
-    BaseClipboardExtensionFactory,
+    BasePasteExtension,
+    BasePasteExtensionFactory,
     handelExcelToJson,
     handelTableToJson,
     handlePlainToJson,
     handleTableColgroup,
     handleTableRowGroup,
-    IClipboardData,
+    IPasteData,
 } from '@univerjs/base-ui';
 import { OperationPlugin } from '../../OperationPlugin';
 
 // copy paste delete cut insert // SheetsPluginOperation
-export class ClipboardExtension extends BaseClipboardExtension<OperationPlugin> {
+export class ClipboardExtension extends BasePasteExtension<OperationPlugin> {
     execute() {
         let content = this._data.html || this._data.plain;
 
@@ -31,25 +31,27 @@ export class ClipboardExtension extends BaseClipboardExtension<OperationPlugin> 
                 data = handlePlainToJson(content);
             }
         }
-        //
-        this._plugin.getUniverPaste().pasteTo({
+
+        const actionDataList = this._plugin.getUniverPaste().pasteTo({
             data,
             colInfo,
             rowInfo,
         });
+
+        return actionDataList
     }
 }
 
-export class ClipboardExtensionFactory extends BaseClipboardExtensionFactory<OperationPlugin> {
+export class ClipboardExtensionFactory extends BasePasteExtensionFactory<OperationPlugin> {
     get zIndex(): number {
         return 1;
     }
 
-    create(data: IClipboardData): BaseClipboardExtension {
+    create(data: IPasteData): BasePasteExtension {
         return new ClipboardExtension(data, this._plugin);
     }
 
-    check(data: IClipboardData): false | BaseClipboardExtension {
+    check(data: IPasteData): false | BasePasteExtension {
         const content = data.html || data.plain;
         if (content && content.indexOf('<table') > -1 && content.indexOf('<td') > -1) {
             return this.create(data);

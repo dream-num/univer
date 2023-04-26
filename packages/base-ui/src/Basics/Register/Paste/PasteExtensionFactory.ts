@@ -1,17 +1,17 @@
-import { Plugin } from '@univerjs/core';
-import { IClipboardData } from '../../Interfaces/IClipboardData';
+import { IActionData, Plugin } from '@univerjs/core';
+import { IPasteData } from '../../Interfaces/IPasteData';
 
 /**
  * 转化table html/json为json
  */
 export class BaseClipboardExtension<T extends Plugin = Plugin> {
     // protected _json: IKeyValue;
-    constructor(protected _data: IClipboardData, protected _plugin: T) {}
+    constructor(protected _data: IPasteData, protected _plugin: T) {}
 
     /**
      * Execute the core logic after the check is successful
      */
-    execute() {}
+    execute(): IActionData[] {return [{actionName:''}]}
 }
 
 /**
@@ -29,7 +29,7 @@ export class BaseClipboardExtensionFactory<T extends Plugin = Plugin> {
      * @param data
      * @returns
      */
-    create(data: IClipboardData): BaseClipboardExtension {
+    create(data: IPasteData): BaseClipboardExtension {
         return new BaseClipboardExtension(data, this._plugin);
     }
 
@@ -38,7 +38,7 @@ export class BaseClipboardExtensionFactory<T extends Plugin = Plugin> {
      * @param data
      * @returns
      */
-    check(data: IClipboardData): false | BaseClipboardExtension {
+    check(data: IPasteData): false | BaseClipboardExtension {
         return false;
     }
 }

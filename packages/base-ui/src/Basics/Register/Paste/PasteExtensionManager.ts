@@ -74,18 +74,17 @@ export class PasteExtensionManager {
             extension = extensionFactory.check(data);
             if (extension !== false) {
                 const extensionActionList = extension.execute();
-                actionDataList = actionDataList.concat(extensionActionList)
+                actionDataList = actionDataList.concat(extensionActionList);
             }
         }
-        this._invokeAction(actionDataList)
-
+        this._invokeAction(actionDataList);
     }
 
-    private _invokeAction(actionDataList:IActionData[]) {
-         const _commandManager = this._plugin.getGlobalContext().getCommandManager();
-         const workBook = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook();
+    private _invokeAction(actionDataList: IActionData[]) {
+        const _commandManager = this._plugin.getGlobalContext().getCommandManager();
+        const workBook = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook();
 
-         const command = new Command(
+        const command = new Command(
             {
                 WorkBookUnit: workBook,
             },

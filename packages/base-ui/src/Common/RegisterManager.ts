@@ -1,9 +1,11 @@
 import { Plugin } from '@univerjs/core';
-import { IPasteData, IDragAndDropData } from '../Basics/Interfaces';
-import { PasteExtensionManager, DragAndDropExtensionManager } from '../Basics/Register';
+import { IPasteData, IDragAndDropData, ICopyData } from '../Basics/Interfaces';
+import { PasteExtensionManager, DragAndDropExtensionManager, CopyExtensionManager } from '../Basics/Register';
 
 export class RegisterManager {
-    private _clipboardExtensionManager: PasteExtensionManager;
+    private _pasteExtensionManager: PasteExtensionManager;
+
+    private _copyExtensionManager: CopyExtensionManager;
 
     private _dragAndDropExtensionManager: DragAndDropExtensionManager;
 
@@ -17,14 +19,26 @@ export class RegisterManager {
     }
 
     setClipboardExtensionManager() {
-        this._clipboardExtensionManager = new PasteExtensionManager(this._plugin);
+        this._pasteExtensionManager = new PasteExtensionManager(this._plugin);
+        this._copyExtensionManager = new CopyExtensionManager(this._plugin);
         const onKeyPasteObservable = this._plugin.getGlobalContext().getObserverManager().getObserver<ClipboardEvent>('onKeyPasteObservable', 'core');
+        const onKeyCopyObservable = this._plugin.getGlobalContext().getObserverManager().getObserver<ClipboardEvent>('onKeyCopyObservable', 'core');
 
         if (onKeyPasteObservable && !onKeyPasteObservable.hasObservers()) {
             onKeyPasteObservable.add((evt: ClipboardEvent) => {
-                this._clipboardExtensionManager.pasteResolver(evt).then((data: IPasteData) => {
-                    this._clipboardExtensionManager.handle(data);
+                this._pasteExtensionManager.pasteResolver(evt).then((data: IPasteData) => {
+                    this._pasteExtensionManager.handle(data);
                 });
+            });
+        }
+        if (onKeyCopyObservable && !onKeyCopyObservable.hasObservers()) {
+            onKeyCopyObservable.add((evt: ClipboardEvent) => {
+                const data: ICopyData = {
+                    key: 'type',
+                    tag: 'univer',
+                    value: '',
+                };
+                this._copyExtensionManager.handle(data);
             });
         }
     }
@@ -45,11 +59,19 @@ export class RegisterManager {
     }
 
     /**
-     * usage this._clipboardExtensionManager.handle(data);
+     * usage this._pasteExtensionManager.handle(data);
      * @returns
      */
-    getClipboardExtensionManager(): PasteExtensionManager {
-        return this._clipboardExtensionManager;
+    getPasteExtensionManager(): PasteExtensionManager {
+        return this._pasteExtensionManager;
+    }
+
+    /**
+     * usage this._pasteExtensionManager.handle(data);
+     * @returns
+     */
+    getCopyExtensionManager(): CopyExtensionManager {
+        return this._copyExtensionManager;
     }
 
     getDragAndDropExtensionManager(): DragAndDropExtensionManager {

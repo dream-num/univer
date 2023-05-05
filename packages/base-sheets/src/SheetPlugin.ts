@@ -44,7 +44,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         this._config = Object.assign(DEFAULT_SPREADSHEET_PLUGIN_DATA, config);
     }
 
-    static create(config?: ISheetPluginConfig) {
+    static create(config?: Partial<ISheetPluginConfig>) {
         return new SheetPlugin(config);
     }
 

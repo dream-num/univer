@@ -15,12 +15,11 @@ export abstract class Copy {
         // this._initRegisterComponent(componentList);
         // SheetPlugin?.addRightMenu(copyList);
 
-        const manager = this._context.getUniver().getGlobalContext().getObserverManager();
-        manager.requiredObserver<ClipboardEvent>('onKeyCopyObservable', 'core').add((e) => {
-
-            // TODO: 注册，插件序列化model放到table,key=>model，根据开关是否需要序列号化（在extension里判断）
-            this.copy(e);
-        });
+        // const manager = this._context.getUniver().getGlobalContext().getObserverManager();
+        // manager.requiredObserver<ClipboardEvent>('onKeyCopyObservable', 'core').add((e) => {
+        //     // TODO: 注册，插件序列化model放到table,key=>model，根据开关是否需要序列号化（在extension里判断）
+        //     this.copy(e);
+        // });
     }
 
     getContext() {
@@ -140,7 +139,7 @@ export class UniverCopy extends Copy {
     }
 
     async copy(e: ClipboardEvent) {
-        const table = this._getCopyContent();
+        const table = this.getCopyContent();
         if (table) {
             Clipboard.write(
                 {
@@ -152,7 +151,7 @@ export class UniverCopy extends Copy {
     }
 
     async copyTo(...arg: any) {
-        const table = this._getCopyContent();
+        const table = this.getCopyContent();
         if (table) {
             const isWrite = await Clipboard.write({
                 data: table,
@@ -318,33 +317,11 @@ export class UniverCopy extends Copy {
         const isWrite = await Clipboard.writeText(JSON.stringify(ret));
     }
 
-    private _getSheetInfo() {
-        const sheet = this.getContext().getWorkBook().getActiveSheet();
-        const SheetPlugin = this.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
-        const spreadsheet = SheetPlugin?.getMainComponent();
-        const controls = SheetPlugin?.getSelectionManager().getCurrentControls();
-        const selections: any = controls?.map((control: SelectionControl) => {
-            const model: SelectionModel = control.model;
-            return {
-                startRow: model.startRow,
-                startColumn: model.startColumn,
-                endRow: model.endRow,
-                endColumn: model.endColumn,
-            };
-        });
-        return { sheet, spreadsheet, selections };
-    }
-
-    private _getRangeInfo() {
-        const { sheet, selections } = this._getSheetInfo();
-        if (!selections.length) return;
-        const range = sheet.getRange(selections[0]);
-        const rangeData = range.getValues();
-        if (!rangeData.length) return;
-        return { range, rangeData };
-    }
-
-    private _getCopyContent() {
+    /**
+     * TODO 加入univerId,sheetId,rangeData等
+     * @returns
+     */
+    getCopyContent() {
         const { sheet, spreadsheet, selections } = this._getSheetInfo();
         if (selections.length > 1) return;
 
@@ -481,5 +458,31 @@ export class UniverCopy extends Copy {
         colGroup += '</colgroup>';
         let cpTable = `<table data-type="universheet_copy_action_table">${colGroup}${cpData}</table>`;
         return cpTable;
+    }
+
+    private _getSheetInfo() {
+        const sheet = this.getContext().getWorkBook().getActiveSheet();
+        const SheetPlugin = this.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
+        const spreadsheet = SheetPlugin?.getMainComponent();
+        const controls = SheetPlugin?.getSelectionManager().getCurrentControls();
+        const selections: any = controls?.map((control: SelectionControl) => {
+            const model: SelectionModel = control.model;
+            return {
+                startRow: model.startRow,
+                startColumn: model.startColumn,
+                endRow: model.endRow,
+                endColumn: model.endColumn,
+            };
+        });
+        return { sheet, spreadsheet, selections };
+    }
+
+    private _getRangeInfo() {
+        const { sheet, selections } = this._getSheetInfo();
+        if (!selections.length) return;
+        const range = sheet.getRange(selections[0]);
+        const rangeData = range.getValues();
+        if (!rangeData.length) return;
+        return { range, rangeData };
     }
 }

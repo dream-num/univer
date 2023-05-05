@@ -11,7 +11,9 @@ export class BasePasteExtension<T extends Plugin = Plugin> {
     /**
      * Execute the core logic after the check is successful
      */
-    execute(): IActionData[] {return [{actionName:''}]}
+    execute(): IActionData[] {
+        return [{ actionName: '' }];
+    }
 }
 
 /**

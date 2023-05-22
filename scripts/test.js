@@ -1,6 +1,6 @@
 const execa = require('execa');
-const { osType } = require('./utils');
 const child_process = require('child_process');
+const { osType } = require('./utils');
 
 const devTarget = '@univerjs/core';
 // node scripts/server && pnpm run --filter @univerjs/core test

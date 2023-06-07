@@ -1,5 +1,4 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# lint all changed files
-npm run pre-commit
+npx --no -- commitlint --edit ${1}

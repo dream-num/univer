@@ -86,35 +86,8 @@ export enum DeviceInputEventType {
 /**
  *  Native friendly interface for Event Obj ect
  */
-export interface IEvent {
-    // Properties
-    /**
-     * Current target for an event
-     */
-    currentTarget?: any;
-
-    /**
-     * Alias for target
-     *  @deprecated
-     */
-    srcElement?: any;
-
-    /**
-     * Type of event
-     */
-    type: string;
-
-    /**
-     * Reference to object where object was dispatched
-     */
-    target: any;
-
+export interface IEvent extends Event {
     // Methods
-    /**
-     * Tells user agent  what to do when not explicitly handled
-     */
-    preventDefault: () => void;
-
     /**
      * Device type
      */
@@ -133,26 +106,11 @@ export interface IEvent {
     currentState: Nullable<number>;
 }
 
+// TODO@wzhudev: this interface maybe not necessary
 /**
  * Native friendly interface for UIEvent Object
  */
-export interface IUIEvent extends IEvent {
-    // Properties
-    /**
-     * Provides current click count
-     */
-    detail: number;
-
-    /**
-     * Horizontal coordinate of event
-     */
-    pageX: number;
-
-    /**
-     * Vertical coordinate of event
-     */
-    pageY: number;
-}
+export interface IUIEvent extends IEvent, UIEvent {}
 
 /**
  * Native friendly interface for KeyboardEvent Object
@@ -204,7 +162,7 @@ export interface IKeyboardEvent extends IUIEvent {
 /**
  * Native friendly interface for MouseEvent Object
  */
-export interface IMouseEvent extends IUIEvent {
+export interface IMouseEvent extends IUIEvent, MouseEvent {
     // Properties
     /**
      * Status of Alt key being pressed

@@ -534,8 +534,9 @@ export class SelectionManager {
         const { offsetX: moveOffsetX, offsetY: moveOffsetY, clientX, clientY } = moveEvt;
         const { startRow, startColumn, endRow, endColumn } = this._startSelectionRange;
 
+        // moveOffsetX and moveOffsetY is relative to the top left corner of the canvas
         const scrollXY = main.getAncestorScrollXY(this._startOffsetX, this._startOffsetY);
-        const moveCellInfo = main.calculateCellIndexByPosition(moveOffsetX, moveOffsetY, scrollXY);
+        const moveCellInfo = main.calculateCellIndexByPosition(moveOffsetX, moveOffsetY, scrollXY); // scrollXY is canvas content scrolling
         const moveActualSelection = makeCellToSelection(moveCellInfo);
 
         if (!moveActualSelection) {

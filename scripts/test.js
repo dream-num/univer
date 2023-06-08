@@ -2,16 +2,23 @@ const execa = require('execa');
 const child_process = require('child_process');
 const { osType } = require('./utils');
 
+const isCI = process.env.CI === 'true';
+
 const devTarget = '@univerjs/core';
-// node scripts/server && pnpm run --filter @univerjs/core test
+
 run();
 
 async function run() {
     await testAll(devTarget);
 }
+
 async function testAll(target) {
-    // start http server,/B will starts application without creating a new window.
-    // kill in IOHttp test script
+    if (isCI) {
+        // https://jestjs.io/docs/troubleshooting#tests-are-extremely-slow-on-docker-andor-continuous-integration-ci-server
+        await execa('pnpm', ['run', '--filter', target, 'test', '--runInBand'], { stdio: 'inherit' });
+        return;
+    }
+
     if (osType() === 'windows') {
         child_process.exec('start /B node scripts/server.js');
     } else if (osType() === 'mac') {

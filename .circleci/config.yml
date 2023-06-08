@@ -14,7 +14,7 @@ jobs:
       - checkout
 
       - run:
-          name: install pnpm
+          name: Install pnpm
           command: npm install -g pnpm
 
       # download and cache dependencies
@@ -23,11 +23,11 @@ jobs:
             - v1-dependencies-{{ checksum "package.json" }}
 
       - run:
-          name: install dependencies
+          name: Install dependencies
           command: pnpm install
 
       - run:
-          name: run tests
+          name: Run tests
           command: pnpm run test
 
       - save_cache:

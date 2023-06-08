@@ -17,24 +17,18 @@ jobs:
           name: Install pnpm
           command: npm install -g pnpm
 
-      # download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package.json" }}
-
+      # dependencies
+      # we do not use caches here because monorepos have their own package.json files
+      # it is fast to install dependencies on CI
       - run:
           name: Install dependencies
           command: pnpm install
 
+      # tests
       - run:
           name: Run tests
           command: pnpm run test
 
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+      # TODO: type check
 
-      - persist_to_workspace:
-          root: ~/repo
-          paths: .
+      # TODO: build

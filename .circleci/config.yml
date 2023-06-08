@@ -6,7 +6,7 @@ defaults: &defaults
     - image: circleci/node:16.17.1
 
 jobs:
-  core:
+  build:
     <<: *defaults
     working_directory: ~/repo
 
@@ -26,7 +26,7 @@ jobs:
           name: install dependencies
           command: pnpm install
 
-      - run: 
+      - run:
           name: run tests
           command: pnpm run test
 
@@ -38,13 +38,3 @@ jobs:
       - persist_to_workspace:
           root: ~/repo
           paths: .
-
-# workflows:
-#   version: 2
-#   core:
-#     jobs:
-#       - core:
-#           filters:
-#             branches:
-#               only:
-#                 - master

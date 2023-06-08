@@ -143,10 +143,7 @@ export class GroupDepth {
 export class StructGroup {
     protected _groupDepth: GroupDepth;
 
-    _processPrefix(
-        line: GroupLine,
-        table: Array<Map<GroupLineType, GroupLine[]>>
-    ): void {
+    _processPrefix(line: GroupLine, table: Array<Map<GroupLineType, GroupLine[]>>): void {
         let filter: GroupLine[] = [];
         let previous = line;
         for (let i = 0; i < table.length; i++) {
@@ -166,10 +163,7 @@ export class StructGroup {
         }
     }
 
-    _processSuffix(
-        line: GroupLine,
-        table: Array<Map<GroupLineType, GroupLine[]>>
-    ): void {
+    _processSuffix(line: GroupLine, table: Array<Map<GroupLineType, GroupLine[]>>): void {
         let filter: GroupLine[] = [];
         let previous = line;
         for (let i = 0; i < table.length; i++) {
@@ -189,10 +183,7 @@ export class StructGroup {
         }
     }
 
-    _processInclude(
-        line: GroupLine,
-        table: Array<Map<GroupLineType, GroupLine[]>>
-    ): void {}
+    _processInclude(line: GroupLine, table: Array<Map<GroupLineType, GroupLine[]>>): void {}
 
     constructor() {
         this._groupDepth = new GroupDepth();

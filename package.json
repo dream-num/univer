@@ -28,8 +28,8 @@
         "postinstall": "node scripts/postinstall.js",
         "prepare": "husky install",
         "pre-commit": "lint-staged",
-        "lint": "eslint --cache --ext .ts,.tsx packages/{core,base-render,base-ui,base-sheets,ui-plugin-sheets}/src/*/**.ts{x,}",
-        "lint-and-fix": "eslint --ext .ts,.tsx packages/{core,base-render,base-ui,base-sheets,ui-plugin-sheets}/src/*/**.ts{x,} --fix"
+        "lint": "eslint --cache packages/**/src/**/*.{tsx,ts}",
+        "lint:fix": "eslint packages/**/src/**/*.{tsx,ts} --fix"
     },
     "engines": {
         "node": "^16.20.0",

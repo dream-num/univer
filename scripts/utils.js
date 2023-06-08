@@ -1,44 +1,46 @@
 // Reference https://github.com/vuejs/vue-next/blob/master/scripts/utils.js
 
 const fs = require('fs');
-const kill = require('tree-kill');
-const find = require('find-process');
+const path = require('path');
 const os = require('os');
-const child_process = require('child_process');
 
 const targets = (exports.targets = fs.readdirSync('packages').filter((f) => {
     try {
         if (!fs.statSync(`packages/${f}`).isDirectory()) {
             return false;
         }
+        // eslint-disable-next-line import/no-dynamic-require, global-require
         const pkg = require(`../packages/${f}/package.json`);
         if (pkg.private && !pkg.buildOptions) {
             return false;
         }
         return true;
-    } catch (error) {}
+    } catch (error) {
+        return false;
+    }
 }));
 
 function osType() {
-    if (os.type() == 'Windows_NT') {
+    if (os.type() === 'Windows_NT') {
         //windows
         return 'windows';
-    } else if (os.type() == 'Darwin') {
+    }
+    if (os.type() === 'Darwin') {
         //mac
         return 'mac';
-    } else if (os.type() == 'Linux') {
+    }
+    if (os.type() === 'Linux') {
         //Linux
         return 'linux';
-    } else {
-        //Prompt not supported
-        return '';
     }
+    //Prompt not supported
+    return '';
 }
 
 exports.osType = osType;
 
-exports.copyFileSync = function (source, target) {
-    var targetFile = target;
+exports.copyFileSync = function copyFileSync(source, target) {
+    let targetFile = target;
 
     // If target is a directory, a new file with the same name will be created
     if (fs.existsSync(target)) {

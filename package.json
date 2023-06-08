@@ -31,6 +31,10 @@
         "lint": "eslint --cache --ext .ts,.tsx packages/{core,base-render,base-ui,base-sheets,ui-plugin-sheets}/src/*/**.ts{x,}",
         "lint-and-fix": "eslint --ext .ts,.tsx packages/{core,base-render,base-ui,base-sheets,ui-plugin-sheets}/src/*/**.ts{x,} --fix"
     },
+    "engines": {
+        "node": "^16.17.1",
+        "pnpm": "^8.6.1"
+    },
     "author": "DreamNum <msoffice2@126.com>",
     "license": "MIT",
     "devDependencies": {

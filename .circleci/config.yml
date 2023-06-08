@@ -1,0 +1,50 @@
+version: 2
+
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: circleci/node:16.17.1
+
+jobs:
+  core:
+    <<: *defaults
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - run:
+          name: install pnpm
+          command: npm install -g pnpm
+
+      # download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+
+      - run:
+          name: install dependencies
+          command: pnpm install
+
+      - run: 
+          name: run tests
+          command: pnpm run test
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+
+      - persist_to_workspace:
+          root: ~/repo
+          paths: .
+
+# workflows:
+#   version: 2
+#   core:
+#     jobs:
+#       - core:
+#           filters:
+#             branches:
+#               only:
+#                 - master

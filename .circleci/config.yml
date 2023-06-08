@@ -24,6 +24,8 @@ jobs:
     lint:
         <<: *defaults
         steps:
+            - checkout
+
             - run:
                   name: lint
                   command: pnpm run lint
@@ -31,6 +33,8 @@ jobs:
     test:
         <<: *defaults
         steps:
+            - checkout
+
             - run:
                   name: Unit test
                   command: pnpm run test

@@ -497,16 +497,19 @@ export class Worksheet {
             zoom: zoomRatio,
             sheetId: _sheetId,
         };
+
         const command = new Command(
             {
                 WorkBookUnit: _context.getWorkBook(),
             },
             zoomRation
         );
-        _commandManager.invoke(command);
 
+        // DEPT: notifyObservers should come before invoking command, and that is ambiguous
         const observer = _context.getContextObserver('onZoomRatioSheetObservable');
         observer.notifyObservers({ zoomRatio });
+
+        _commandManager.invoke(command);
     }
 
     /**

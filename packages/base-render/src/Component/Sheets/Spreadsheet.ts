@@ -160,13 +160,14 @@ export class Spreadsheet extends SheetComponent {
         }
 
         const { scaleX = 1, scaleY = 1 } = this.getParentScale();
+        const { x: scrollX, y: scrollY } = scrollXY;
 
         // these values are not affected by zooming (ideal positions)
         const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight, dataMergeCacheAll } = spreadsheetSkeleton;
 
         // so we should map physical positions to ideal positions
-        offsetX = (offsetX + scrollX) / scaleX - rowTitleWidth;
-        offsetY = (offsetY + scrollY) / scaleY - columnTitleHeight;
+        offsetX = offsetX / scaleX + scrollX - rowTitleWidth;
+        offsetY = offsetY / scaleY + scrollY - columnTitleHeight;
 
         let row = searchArray(rowHeightAccumulation, offsetY);
         let column = searchArray(columnWidthAccumulation, offsetX);
@@ -190,7 +191,6 @@ export class Spreadsheet extends SheetComponent {
                 column = 0;
             }
         }
-
 
         let { isMerged, startY, endY, startX, endX, mergeInfo, isMergedMainCell } = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, dataMergeCacheAll);
 

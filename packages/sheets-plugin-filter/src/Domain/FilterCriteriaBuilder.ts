@@ -1,5 +1,5 @@
 import { BooleanCriteria, Color, SheetContext, RelativeDate, Serializer, Tools, Tuples } from '@univerjs/core';
-import { ConditionValue } from '../../../sheets-plugin-conditional-format';
+import { ConditionValue } from '@univerjs/sheets-plugin-conditional-format/src/Types';
 import { FilterCriteria, IFilterCriteria } from './FilterCriteria';
 
 export class FilterCriteriaBuilder extends Serializer implements SheetContext.WithContext<FilterCriteriaBuilder> {

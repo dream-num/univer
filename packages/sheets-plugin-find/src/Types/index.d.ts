@@ -1,8 +1,5 @@
-
-
 export * from '../index';
-declare module '@univerjs/sheets-plugin-find' { }
-
+declare module '@univerjs/sheets-plugin-find' {}
 
 // use css module
 declare module '*.less' {

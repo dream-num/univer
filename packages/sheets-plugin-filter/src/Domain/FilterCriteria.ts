@@ -1,5 +1,5 @@
 import { BooleanCriteria, Color, SheetContext, RelativeDate, Sequence, Serializer, Tools } from '@univerjs/core';
-import { ConditionValue } from '../../../sheets-plugin-conditional-format';
+import { ConditionValue } from '@univerjs/sheets-plugin-conditional-format/src/Types';
 import { FilterCriteriaBuilder } from './FilterCriteriaBuilder';
 
 export interface IFilterCriteria extends Sequence {

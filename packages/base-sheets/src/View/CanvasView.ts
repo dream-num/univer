@@ -130,18 +130,6 @@ export class CanvasView {
                 sheet.setZoomRatio(nextRatio);
 
                 e.preventDefault();
-
-                // if (scene.scaleX + ratioDelta > 4) {
-                //     // TODO@huwenzhao: this is not correct, we are not changing in sheetConfig.zoomRatio
-                //     scene.scale(4, 4);
-                // } else if (scene.scaleX + ratioDelta < 0.1) {
-                //     scene.scale(0.1, 0.1);
-                // } else {
-                //     const value = e.deltaY > 0 ? 0.1 : -0.1;
-
-                //     sheet.setZoomRatio(sheet.getZoomRatio() + value);
-                //     // scene.scaleBy(scrollNum, scrollNum);
-                // }
             } else {
                 viewMain.onMouseWheel(e, state);
             }

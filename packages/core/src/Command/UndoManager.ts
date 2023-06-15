@@ -14,7 +14,9 @@ export class UndoManager {
     }
 
     push(command: Command): void {
-        this._redoStack.push(command);
+        if (command.canUndo()) {
+            this._redoStack.push(command);
+        }
     }
 
     undo(): Command | undefined {

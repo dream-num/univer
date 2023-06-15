@@ -64,6 +64,12 @@ export class Command {
         })();
     }
 
+    canUndo(): boolean {
+        return this._actionList.some((action) =>
+            ActionOperation.hasUndo(action.getDoActionData())
+        );
+    }
+
     redo(): void {
         this._actionList.forEach((action) => {
             if (ActionOperation.hasUndo(action.getDoActionData())) {

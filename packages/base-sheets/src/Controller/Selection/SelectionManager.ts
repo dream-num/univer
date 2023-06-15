@@ -17,6 +17,7 @@ import {
     DEFAULT_SELECTION,
     DEFAULT_CELL,
     IGridRange,
+    ActionOperationType,
 } from '@univerjs/core';
 import { ACTION_NAMES, ISelectionsConfig } from '../../Basics';
 import { ISelectionModelValue, ISetSelectionValueActionData, SetSelectionValueAction } from '../../Model/Action/SetSelectionValueAction';
@@ -311,6 +312,8 @@ export class SelectionManager {
             sheetId: this._worksheet.getSheetId(),
             actionName: SetSelectionValueAction.NAME,
             selections: models,
+            // The operation of selecting cells is not undoable, so set the UNDO_ACTION bit to 0
+            operation: ActionOperationType.DEFAULT_ACTION & ~ActionOperationType.UNDO_ACTION,
         };
 
         action = ActionOperation.make<ISetSelectionValueActionData>(action).removeUndo().getAction();

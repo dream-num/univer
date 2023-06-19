@@ -6,8 +6,6 @@ export class PasteImageExtension extends BasePasteExtension<OperationPlugin> {
     execute() {
         let content = this._data.html || this._data.plain;
 
-        console.info('image content', content);
-
         return [];
     }
 }
@@ -25,6 +23,8 @@ export class PasteImageExtensionFactory extends BasePasteExtensionFactory<Operat
         const content = data.html || data.plain;
 
         // TODO 识别univerId,sheetId,rangeData中的范围是否包含image信息，有则直接从本地取
+        // TODO office 来的图片
+        // TODO: embed从manager解析而来
         if (content && content.indexOf('data-image') > -1) {
             return this.create(data);
         }

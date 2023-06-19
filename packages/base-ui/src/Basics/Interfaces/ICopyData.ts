@@ -17,7 +17,7 @@ export interface ICopyData {
      *
      * property: image / filter ..., use plugin name
      * e.g
-     * <table data-image="[{left:0,right:0,width:100,height:100,url:''}]"
+     * <table data-image="[{left:0,right:0,width:100,height:100,url:''}] data-filter"
      */
     tag: string;
 

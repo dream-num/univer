@@ -90,8 +90,6 @@ export class CopyExtensionManager {
         let insertIndex = table.indexOf('<table') + '<table'.length; // 插入位置
         let result = table.slice(0, insertIndex) + propertyStr + table.slice(insertIndex); // 插入新字符串
 
-        console.info('handleTableData==》》===', result);
-
         this._copyResolver(result);
     }
 }

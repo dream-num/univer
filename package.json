@@ -18,6 +18,7 @@
         "lighthouse-dev": "start /B node scripts/dev && lighthouse http://127.0.0.1:3103 --output html --output-path ./report.html",
         "build": "node scripts/build.js",
         "build:sheet": "pnpm run --filter univer-sheet-ts build:demo",
+        "build:sheet-esbuild": "pnpm run --filter univer-sheet-ts build:esbuild",
         "build:doc": "pnpm run --filter univer-doc-ts build:demo",
         "build:slide": "pnpm run --filter univer-slide-ts build:demo",
         "link": "node scripts/link.js",

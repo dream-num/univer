@@ -29,6 +29,7 @@ export class CopyImageExtensionFactory extends BaseCopyExtensionFactory<Operatio
         if (embed) {
             data.key = 'property';
             data.tag = 'image';
+            //TODO <table data-image="[]" embed="false">
             return this.create(data);
         }
 

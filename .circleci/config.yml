@@ -1,0 +1,47 @@
+version: 2
+
+defaults: &defaults
+    docker:
+        - image: cimg/node:16.20.0
+
+jobs:
+    prepare:
+        <<: *defaults
+        steps:
+            - checkout
+
+            - run:
+                  name: Install pnpm
+                  command: npm install -g pnpm
+
+            # dependencies
+            # we do not use caches here because monorepos have their own package.json files
+            # it is fast to install dependencies on CI
+            - run:
+                  name: Install dependencies
+                  command: pnpm install
+
+    lint:
+        <<: *defaults
+        steps:
+            - run:
+                  name: lint
+                  command: pnpm run lint
+
+    test:
+        <<: *defaults
+        steps:
+            - run:
+                  name: Unit test
+                  command: pnpm run test
+
+workflow:
+    lint_and_build:
+        jobs:
+            - prepare
+            - lint:
+                  requires:
+                      - prepare
+            - test:
+                  requires:
+                      - prepare

@@ -13,7 +13,7 @@
         "dev:preact": "pnpm run --filter univer-sheet-preact dev",
         "dev:doc": "pnpm run --filter univer-doc-ts dev",
         "dev:slide": "pnpm run --filter univer-slide-ts dev",
-        "d": "pnpm run --filter univer-vanilla-ts dev",
+        "d": "pnpm run dev:all",
         "api": "node scripts/api",
         "lighthouse-dev": "start /B node scripts/dev && lighthouse http://127.0.0.1:3103 --output html --output-path ./report.html",
         "build": "node scripts/build.js",
@@ -28,14 +28,20 @@
         "univer-cli": "cd cli && npm run cli",
         "postinstall": "node scripts/postinstall.js",
         "prepare": "husky install",
-        "pre-lint": "lint-staged",
-        "lint": "eslint --cache --ext .ts,.tsx packages/{core,base-render,base-ui,base-sheets,ui-plugin-sheets}/src/*/**.ts{x,}",
-        "lint-and-fix": "eslint --ext .ts,.tsx packages/{core,base-render,base-ui,base-sheets,ui-plugin-sheets}/src/*/**.ts{x,} --fix"
+        "pre-commit": "lint-staged",
+        "lint": "eslint --cache packages/**/src/**/*.{tsx,ts}",
+        "lint:fix": "eslint packages/**/src/**/*.{tsx,ts} --fix"
+    },
+    "engines": {
+        "node": "^16.20.0",
+        "pnpm": "^8.6.1"
     },
     "author": "DreamNum <msoffice2@126.com>",
     "license": "MIT",
     "devDependencies": {
         "@changesets/cli": "^2.22.0",
+        "@commitlint/cli": "^17.6.5",
+        "@commitlint/config-conventional": "^17.6.5",
         "@microsoft/api-documenter": "^7.18.1",
         "@microsoft/api-extractor": "7.25.0",
         "@playwright/test": "^1.18.1",
@@ -68,7 +74,8 @@
         "typescript": "^4.4.1-rc"
     },
     "lint-staged": {
-        "./packages/{core,base-render,base-ui,base-sheets,ui-plugin-sheets}/src/**/*.ts?(x)": ["eslint --fix"]
-        
+        "packages/**/src/**/*.ts?(x)": [
+            "eslint --fix"
+        ]
     }
 }

@@ -1,4 +1,5 @@
 const execa = require('execa');
+const os = require('os');
 // const { targets: allTargets } = require('./util');
 
 const linkTargets = [
@@ -41,7 +42,7 @@ async function run() {
 }
 // Reference https://github.com/vuejs/vue-next/blob/master/scripts/build.js
 async function linkAll(targets) {
-    await runParallel(require('os').cpus().length, targets, link);
+    await runParallel(os.cpus().length, targets, link);
 }
 
 async function runParallel(maxConcurrency, source, iteratorFn) {

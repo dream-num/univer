@@ -1,8 +1,5 @@
-
-
-
 export * from '../index';
-declare module '@univerjs/sheets-plugin-screenshot' { }
+declare module '@univerjs/sheets-plugin-screenshot' {}
 
 // use css module
 declare module '*.less' {

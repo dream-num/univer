@@ -1,7 +1,7 @@
 import { IKeyboardEvent } from '@univerjs/base-render';
 import { Observable, Plugin } from '@univerjs/core';
+import { SlideBar } from '@univerjs/ui-plugin-slides/src/View/SlideBar/SlideBar';
 import { SlideContainer } from '../View/UI/SlideContainer';
-import { SlideBar } from '../../../ui-plugin-slides/src/View/SlideBar/SlideBar';
 import { Toolbar } from '../View/UI/ToolBar/Toolbar';
 
 export type SlidePluginObserve = {
@@ -18,8 +18,6 @@ export type SlidePluginObserve = {
 
     onToolbarDidMountObservable: Observable<Toolbar>;
     onSlideBarDidMountObservable: Observable<SlideBar>;
-
-
 
     onSlideContainerDidMountObservable: Observable<SlideContainer>;
 
@@ -45,8 +43,6 @@ export function uninstall(plugin: Plugin) {
 
     plugin.deleteObserve('onToolbarDidMountObservable');
     plugin.deleteObserve('onSlideBarDidMountObservable');
-
-
 
     plugin.deleteObserve('onChangeCurrentSheetObserver');
     plugin.deleteObserve('onSlideContainerDidMountObservable');
@@ -80,8 +76,6 @@ export function install(plugin: Plugin) {
     plugin.pushToObserve('onChangeCurrentSheetObserver');
 
     plugin.pushToObserve('onToolbarDidMountObservable');
-
-
 
     plugin.pushToObserve('onSheetBarDidMountObservable');
     plugin.pushToObserve('onCountBarDidMountObservable');

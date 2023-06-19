@@ -524,8 +524,9 @@ export class CellInputHandler {
             if (i === funcstack.length - 1) {
                 // function_str += str;
                 if (_this.iscelldata(str.trim())) {
-                    function_str += `<span class="universheet-formula-functionrange-cell" rangeindex="${_this.functionHTMLIndex}" dir="auto" style="color:${LUCKY_COLOR[_this.functionHTMLIndex]
-                        };">${str}</span>`;
+                    function_str += `<span class="universheet-formula-functionrange-cell" rangeindex="${_this.functionHTMLIndex}" dir="auto" style="color:${
+                        LUCKY_COLOR[_this.functionHTMLIndex]
+                    };">${str}</span>`;
                     _this.functionHTMLIndex++;
                 } else if (matchConfig.dquote > 0) {
                     function_str += `${str}</span>`;

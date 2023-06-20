@@ -46,8 +46,8 @@ export class ImportXlsxController {
     }
 
     handleFiles(files: File[] | FileList | null) {
-        if (files == null || files.length == 0) {
-            alert('No files wait for import');
+        if (files == null || files.length === 0) {
+            console.error('No files wait for import');
             return;
         }
 
@@ -55,14 +55,14 @@ export class ImportXlsxController {
         let suffixArr = name.split('.');
         let suffix = suffixArr[suffixArr.length - 1];
         if (suffix !== 'xlsx') {
-            alert('Currently only supports the import of xlsx files');
+            console.error('Currently only supports the import of xlsx files');
             return;
         }
         const transformExcelToLucky = LuckyExcel.default.transformExcelToLucky;
 
         transformExcelToLucky(files[0], (exportJson: IKeyValue) => {
-            if (exportJson.sheets == null || exportJson.sheets.length == 0) {
-                alert('Failed to read the content of the excel file, currently does not support xls files!');
+            if (exportJson.sheets == null || exportJson.sheets.length === 0) {
+                console.error('Failed to read the content of the excel file, currently does not support xls files!');
                 return;
             }
 
@@ -76,7 +76,7 @@ export class ImportXlsxController {
             const sheets = univerWorkbookConfig.sheets;
 
             if (!sheets) {
-                return alert('No content');
+                return console.error('No content');
             }
 
             const workbook = this._plugin.getContext().getWorkBook();

@@ -18,7 +18,7 @@ export class DeleteExtension extends BaseDeleteExtension<OperationPlugin> {
         let colInfo;
         let rowInfo;
         if (content) {
-            // TODO move to DeleteOfficeExtension 
+            // TODO move to DeleteOfficeExtension
             if (content.indexOf('xmlns:x="urn:schemas-microsoft-com:office:excel"') > -1) {
                 data = handelExcelToJson(content);
                 colInfo = handleTableColgroup(content);
@@ -38,7 +38,7 @@ export class DeleteExtension extends BaseDeleteExtension<OperationPlugin> {
             rowInfo,
         });
 
-        return actionDataList
+        return actionDataList;
     }
 }
 

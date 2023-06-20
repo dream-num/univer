@@ -2,3 +2,4 @@
 import JSX = preact.JSX;
 
 declare module 'enzyme';
+declare module 'luckyexcel';

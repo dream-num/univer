@@ -1,4 +1,4 @@
-import { SheetContext, PLUGIN_NAMES, Tools, handleJsonToDom, handleStyleToString } from '@univerjs/core';
+import { SheetContext, PLUGIN_NAMES, Tools, handleJsonToDom, handleStyleToString, ObjectArray, IColumnData, IRowData } from '@univerjs/core';
 import { SheetPlugin, SelectionModel, SelectionControl } from '@univerjs/base-sheets';
 import { RightMenuProps, SheetUIPlugin, SHEET_UI_PLUGIN_NAME, RightMenuItem } from '@univerjs/ui-plugin-sheets';
 import { Clipboard } from '@univerjs/base-ui';
@@ -14,12 +14,6 @@ export abstract class Copy {
 
         // this._initRegisterComponent(componentList);
         // SheetPlugin?.addRightMenu(copyList);
-
-        // const manager = this._context.getUniver().getGlobalContext().getObserverManager();
-        // manager.requiredObserver<ClipboardEvent>('onKeyCopyObservable', 'core').add((e) => {
-        //     // TODO: 注册，插件序列化model放到table,key=>model，根据开关是否需要序列号化（在extension里判断）
-        //     this.copy(e);
-        // });
     }
 
     getContext() {
@@ -318,15 +312,15 @@ export class UniverCopy extends Copy {
     }
 
     /**
-     * TODO 加入univerId,sheetId,rangeData等
+     * TODO 加入univerId,sheetId,rangeData等 @tony
      * @returns
      */
     getCopyContent() {
         const { sheet, spreadsheet, selections } = this._getSheetInfo();
         if (selections.length > 1) return;
 
-        const rowManager: any = sheet.getRowManager().getRowData();
-        const colManager: any = sheet.getColumnManager().getColumnData();
+        const rowManager = sheet.getRowManager().getRowData();
+        const colManager = sheet.getColumnManager().getColumnData();
         let rowIndexArr: number[] = [];
         let colIndexArr: number[] = [];
 

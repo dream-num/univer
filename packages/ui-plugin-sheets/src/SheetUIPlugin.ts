@@ -6,7 +6,7 @@ import { AppUIController } from './Controller/AppUIController';
 import { Fx } from './View/FormulaBar';
 import { SlotComponentProps } from './Controller/SlotController';
 import { IToolbarItemProps } from './Controller';
-// import {zh,en} from './Locale';
+import {zh,en} from './Locale';
 
 export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
     private _appUIController: AppUIController;
@@ -37,26 +37,30 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
         /**
          * load more Locale object
          */
-        const locale = this.getGlobalContext().getLocale().getCurrentLocale();
-        console.info(`./Locale/${locale}`);
-        if (locale === LocaleType.ZH) {
-            import(`./Locale/zh`).then((module) => {
-                this.loadLocale(locale, module);
-            });
-        } else if (locale === LocaleType.EN) {
-            import(`./Locale/en`).then((module) => {
-                this.loadLocale(locale, module);
-            });
-        }
+        this.getLocale().load({
+            zh,
+            en
+        });
+        // const locale = this.getGlobalContext().getLocale().getCurrentLocale();
+        // console.info(`./Locale/${locale}`);
+        // if (locale === LocaleType.ZH) {
+        //     import(`./Locale/zh`).then((module) => {
+        //         this.loadLocale(locale, module);
+        //     });
+        // } else if (locale === LocaleType.EN) {
+        //     import(`./Locale/en`).then((module) => {
+        //         this.loadLocale(locale, module);
+        //     });
+        // }
 
-        // this._componentManager = new ComponentManager();
-        // this._keyboardManager = new KeyboardManager(this);
-        // this._registerManager = new RegisterManager(this);
-        // this._appUIController = new AppUIController(this);
-        // // AppUIController initializes the DOM as an asynchronous rendering process, and must wait for the UI rendering to complete before starting to render the canvas
-        // this.UIDidMount(() => {
-        //     this.initRender();
-        // });
+        this._componentManager = new ComponentManager();
+        this._keyboardManager = new KeyboardManager(this);
+        this._registerManager = new RegisterManager(this);
+        this._appUIController = new AppUIController(this);
+        // AppUIController initializes the DOM as an asynchronous rendering process, and must wait for the UI rendering to complete before starting to render the canvas
+        this.UIDidMount(() => {
+            this.initRender();
+        });
     }
 
     loadLocale(locale: LocaleType, module: IKeyValue) {

@@ -218,7 +218,7 @@ export class UniverPaste extends Paste {
     private _getSelectionActionData(sheetId: string) {
         const selectionManager = this.getContext().getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET).getSelectionManager();
 
-        // TODO 从粘贴的表格中解析出来
+        // TODO 从粘贴的表格中解析出来 @tony
         const selectionRange = DEFAULT_SELECTION;
         const curCellRange = DEFAULT_CELL;
         selectionManager.clearSelectionControls();

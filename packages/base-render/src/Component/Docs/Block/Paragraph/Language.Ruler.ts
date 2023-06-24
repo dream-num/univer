@@ -9,7 +9,7 @@ interface LanguageResult {
     spanGroup: IDocumentSkeletonSpan[];
 }
 
-export function composeCharForLanguage(char: string, charIndex: number, charArray: string[], config: IFontCreateConfig): Nullable<LanguageResult> {
+export function composeCharForLanguage(char: string, charIndex: number, charArray: string, config: IFontCreateConfig): Nullable<LanguageResult> {
     if (hasArabic(char)) {
         return ArabicHandler(char, charIndex, charArray, config);
     }
@@ -21,7 +21,7 @@ export function composeCharForLanguage(char: string, charIndex: number, charArra
     }
 }
 
-function notCJKHandler(char: string, charIndex: number, charArray: string[], config: IFontCreateConfig) {
+function notCJKHandler(char: string, charIndex: number, charArray: string, config: IFontCreateConfig) {
     // Chinese, Japanese, and Korean (CJK) characters.
     // https://en.wikipedia.org/wiki/CJK_characters
     const { pageWidth = Infinity } = config;
@@ -51,7 +51,7 @@ function notCJKHandler(char: string, charIndex: number, charArray: string[], con
     };
 }
 
-function ArabicHandler(char: string, charIndex: number, charArray: string[], config: IFontCreateConfig) {
+function ArabicHandler(char: string, charIndex: number, charArray: string, config: IFontCreateConfig) {
     // 组合阿拉伯语的词组
     const span = [char];
     let newCharIndex = charIndex;
@@ -70,7 +70,7 @@ function ArabicHandler(char: string, charIndex: number, charArray: string[], con
     };
 }
 
-function TibetanHandler(char: string, charIndex: number, charArray: string[], config: IFontCreateConfig) {
+function TibetanHandler(char: string, charIndex: number, charArray: string, config: IFontCreateConfig) {
     // 组合藏语词组
     const span = [char];
     let newCharIndex = charIndex;

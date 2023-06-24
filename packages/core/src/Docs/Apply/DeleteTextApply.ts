@@ -1,10 +1,5 @@
 import { BooleanNumber } from '../../Enum/TextStyle';
-import {
-    BlockType,
-    IBlockElement,
-    IParagraph,
-    ParagraphElementType,
-} from '../../Interfaces/IDocumentData';
+import { BlockType, IParagraph } from '../../Interfaces/IDocumentData';
 import { ITextSelectionRangeParam } from '../../Interfaces/ISelectionData';
 import { DocumentModel } from '../Domain/DocumentModel';
 import {

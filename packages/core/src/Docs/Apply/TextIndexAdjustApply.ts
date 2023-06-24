@@ -1,10 +1,4 @@
-import {
-    BlockType,
-    IBlockElement,
-    IElement,
-    IParagraph,
-    ParagraphElementType,
-} from '../../Interfaces/IDocumentData';
+import { BlockType, IParagraph } from '../../Interfaces/IDocumentData';
 import { ITextSelectionRangeParam } from '../../Interfaces/ISelectionData';
 import { Nullable } from '../../Shared';
 import { DocumentModel } from '../Domain/DocumentModel';

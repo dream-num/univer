@@ -1,11 +1,5 @@
 import { BooleanNumber } from '../../Enum/TextStyle';
-import {
-    BlockType,
-    IBlockElement,
-    IParagraph,
-    ParagraphElementType,
-    IElement,
-} from '../../Interfaces/IDocumentData';
+import { BlockType, IParagraph } from '../../Interfaces/IDocumentData';
 import { ITextSelectionRangeStartParam } from '../../Interfaces/ISelectionData';
 import { DocumentModel } from '../Domain/DocumentModel';
 import {
@@ -145,8 +139,6 @@ function splitTextRun(
     nextElement: IElement
 ) {
     const trLen = insertTextRunList.length;
-
-    const insertFirstEle = insertTextRunList[0];
 
     const insertLastTrEle = insertTextRunList[trLen - 1];
 

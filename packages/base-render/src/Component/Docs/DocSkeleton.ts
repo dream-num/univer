@@ -1,10 +1,9 @@
 import {
     ColumnSeparatorType,
     ContextBase,
+    DocumentModelOrSimple,
     GridType,
     HorizontalAlign,
-    IBlockElement,
-    IDocumentData,
     ISectionBreak,
     ISectionColumnProperties,
     Observable,
@@ -19,17 +18,19 @@ import { createSkeletonPage } from './Common/Page';
 
 import { createSkeletonSection } from './Common/Section';
 
-import { dealWithBlocks } from './Block/Block';
+import { dealWithSections } from './Block/Section';
 
 import { IDocumentSkeletonCached, IDocumentSkeletonPage, ISkeletonResourceReference } from '../../Basics/IDocumentSkeletonCached';
 import { IDocsConfig, ISectionBreakConfig } from '../../Basics/Interfaces';
 import { Skeleton } from '../Skeleton';
 import { IBoundRect } from '../../Basics/Vector2';
 
-interface IDocumentContentMap {
-    blockElements: IBlockElement[];
-    sectionBreak?: ISectionBreak;
-}
+const DEFAULT_SECTION_BREAK: ISectionBreak = {
+    columnProperties: [],
+    columnSeparatorType: ColumnSeparatorType.NONE,
+    sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
+    startIndex: 0,
+};
 
 export enum DocumentSkeletonState {
     PENDING = 'pending',
@@ -38,50 +39,26 @@ export enum DocumentSkeletonState {
     INVALID = 'invalid',
 }
 
-interface IDrawingUpdateConfig {
-    left: number;
-    top: number;
-    height: number;
-    width: number;
-}
-
 export class DocumentSkeleton extends Skeleton {
     onRecalculateChangeObservable = new Observable<IDocumentSkeletonCached>();
 
-    private _documentData: IDocumentData;
+    private _docModel: DocumentModelOrSimple;
 
     private _skeletonData: IDocumentSkeletonCached;
 
     private _renderedBlockIdMap = new Map<string, boolean>();
 
-    constructor(documentData: IDocumentData, context: ContextBase) {
+    constructor(docModel: DocumentModelOrSimple, context: ContextBase) {
         super(context);
-        this._documentData = documentData;
+        this._docModel = docModel;
     }
 
-    static create(documentData: IDocumentData, context: ContextBase) {
-        return new DocumentSkeleton(documentData, context);
+    static create(docModel: DocumentModelOrSimple, context: ContextBase) {
+        return new DocumentSkeleton(docModel, context);
     }
 
-    updateDrawing(id: string, config: IDrawingUpdateConfig) {
-        const drawings = this._documentData.drawings;
-        if (!drawings) {
-            return;
-        }
-
-        const drawing = drawings[id];
-
-        if (!drawing) {
-            return;
-        }
-
-        const objectProperties = drawing.objectProperties;
-
-        objectProperties.size.width = config.width;
-        objectProperties.size.height = config.height;
-
-        objectProperties.positionH.posOffset = config.left;
-        objectProperties.positionV.posOffset = config.top;
+    getModel() {
+        return this._docModel;
     }
 
     calculate(bounds?: IBoundRect) {
@@ -98,81 +75,61 @@ export class DocumentSkeleton extends Skeleton {
     }
 
     getPageSize() {
-        return this._documentData.documentStyle.pageSize;
+        return this._docModel.documentStyle.pageSize;
     }
 
-    updateDocumentDataPageSize(width?: number, height?: number) {
-        const documentStyle = this._documentData.documentStyle;
-        if (!documentStyle.pageSize) {
-            width = width ?? Infinity;
-            height = height ?? Infinity;
-            documentStyle.pageSize = {
-                width,
-                height,
-            };
-            return;
-        }
+    // updateDocumentDataPageSize(width?: number, height?: number) {
+    //     const documentStyle = this._docModel.documentStyle;
+    //     if (!documentStyle.pageSize) {
+    //         width = width ?? Infinity;
+    //         height = height ?? Infinity;
+    //         documentStyle.pageSize = {
+    //             width,
+    //             height,
+    //         };
+    //         return;
+    //     }
 
-        if (width !== undefined) {
-            documentStyle.pageSize.width = width;
-        }
+    //     if (width !== undefined) {
+    //         documentStyle.pageSize.width = width;
+    //     }
 
-        if (height !== undefined) {
-            documentStyle.pageSize.height = height;
-        }
-    }
+    //     if (height !== undefined) {
+    //         documentStyle.pageSize.height = height;
+    //     }
+    // }
 
-    private __getContentMapArr() {
-        const { body } = this._documentData;
-        if (!body) {
-            return [];
-        }
-        const { blockElements } = body;
-
-        if (blockElements.length === 0) {
-            return [];
-        }
-
-        const documentContentMapArr: IDocumentContentMap[] = [];
-        let documentContentMap: IDocumentContentMap = {
-            blockElements: [],
-            sectionBreak: undefined,
-        };
-        // sectionBreak会在一个段落的底部，定义之前所有段落的页样式。
-        blockElements.forEach((dcd: IBlockElement) => {
-            const { sectionBreak: sSectionBreak } = dcd;
-            if (sSectionBreak) {
-                documentContentMap.sectionBreak = sSectionBreak;
-                documentContentMapArr.push(documentContentMap);
-                documentContentMap = {
-                    blockElements: [],
-                    sectionBreak: undefined,
-                };
-            } else {
-                documentContentMap.blockElements.push(dcd);
-            }
-        });
-
-        if (!documentContentMap.sectionBreak) {
-            documentContentMap.sectionBreak = {
-                columnProperties: [],
-                columnSeparatorType: ColumnSeparatorType.NONE,
-                sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
-            };
-
-            if (documentContentMap.blockElements.length > 0) {
-                documentContentMapArr.push(documentContentMap);
-            }
-        }
-        // console.log('documentContentMapArr', documentContentMapArr, blockElements);
-        return documentContentMapArr;
-    }
-
+    /**
+     * \v COLUMN_BREAK 换列
+     * \f PAGE_BREAK 换页
+     * \0 DOCS_END 文档结尾
+     * \t TAB 制表符
+     *
+     * Needs to be changed：
+     * \r PARAGRAPH 段落
+     * \n SECTION_BREAK 章节
+     *
+     * \b customBlock 图片 mention等不参与文档流的场景
+     *
+     * 表格
+     * \x1A table start 表格开始
+     * \x1B table row start 表格开始
+     * \x1C table cell start 表格开始
+     * \x1D table cell end 表格开始
+     * \x1E table row end 表格开始
+     * \x1F table end 表格结束
+     *
+     * 文档流内的特殊范围：超链接，field，structured document tags， bookmark，comment
+     * \x1F customRange start 自定义范围开始
+     * \x1E customRange end 自定义范围结束
+     *
+     * 按照SectionBreak分割文档，进行布局计算
+     * @returns view model: skeleton
+     */
     private _createSkeleton(bounds?: IBoundRect) {
-        const documentContentMapArr = this.__getContentMapArr();
         // 每一个布局
         const DEFAULT_PAGE_SIZE = { width: Infinity, height: Infinity };
-        const { documentStyle, footers, headers, lists, drawings } = this._documentData;
+        const { documentStyle, headerTreeMap, footerTreeMap, lists, drawings } = this._docModel;
         const {
             pageNumberStart: global_pageNumberStart = 1, // pageNumberStart
             pageSize: global_pageSize = DEFAULT_PAGE_SIZE,
@@ -210,15 +167,12 @@ export class DocumentSkeleton extends Skeleton {
             },
         } = documentStyle;
         const skeleton = this.__getNullSke();
-        if (documentContentMapArr.length === 0) {
-            return skeleton;
-        }
 
         const fontLocale = this.getFontLocale();
 
         const docsConfig: IDocsConfig = {
-            footers,
-            headers,
+            headerTreeMap,
+            footerTreeMap,
             lists,
             drawings,
 
@@ -231,26 +185,24 @@ export class DocumentSkeleton extends Skeleton {
             documentTextStyle: textStyle,
         };
 
-        const { skeHeaders, skeFooters, skeListLevel, blockAnchor } = skeleton;
+        const { skeHeaders, skeFooters, skeListLevel, drawingAnchor } = skeleton;
 
         const skeletonResourceReference: ISkeletonResourceReference = {
             skeHeaders,
             skeFooters,
             skeListLevel,
-            blockAnchor,
+            drawingAnchor,
         };
 
         const allSkeletonPages: IDocumentSkeletonPage[] = [];
 
         skeleton.pages = allSkeletonPages;
 
-        // 按照SectionBreak分割文档，进行布局计算
-        for (let i = 0; i < documentContentMapArr.length; i++) {
-            const documentContentMap = documentContentMapArr[i];
-            if (!documentContentMap.sectionBreak) {
-                continue;
-            }
+        const bodyModel = this._docModel.bodyModel;
 
+        for (let i = 0, len = bodyModel.children.length; i < len; i++) {
+            const sectionNode = bodyModel.children[i];
+            const sectionBreak = bodyModel.getSectionBreak(sectionNode.endIndex) || DEFAULT_SECTION_BREAK;
             const {
                 pageNumberStart = global_pageNumberStart,
                 pageSize = global_pageSize,
@@ -277,10 +229,10 @@ export class DocumentSkeleton extends Skeleton {
                 sectionType,
                 textDirection,
                 renderConfig = global_renderConfig,
-            } = documentContentMap.sectionBreak;
+            } = sectionBreak;
 
-            const dcmNext = documentContentMapArr[i + 1];
-            const sectionTypeNext = dcmNext?.sectionBreak?.sectionType;
+            const sectionNodeNext = bodyModel.children[i + 1];
+            const sectionTypeNext = bodyModel.getSectionBreak(sectionNodeNext.endIndex)?.sectionType;
 
             const headerIds = { defaultHeaderId, evenPageHeaderId, firstPageHeaderId };
             const footerIds = { defaultFooterId, evenPageFooterId, firstPageFooterId };
@@ -332,7 +284,7 @@ export class DocumentSkeleton extends Skeleton {
             }
             // 计算页内布局，block结构
             const context = this.getContext();
-            const blockInfo = dealWithBlocks(documentContentMap.blockElements, curSkeletonPage, sectionBreakConfig, skeletonResourceReference, this._renderedBlockIdMap, context);
+            const blockInfo = dealWithSections(sectionNode, curSkeletonPage, sectionBreakConfig, skeletonResourceReference, this._renderedBlockIdMap, context);
 
             // todo: 当本节有多个列，且下一节为连续节类型的时候，需要按照列数分割，重新计算lines
             if (sectionTypeNext === SectionType.CONTINUOUS && columnProperties.length > 0) {
@@ -380,7 +332,7 @@ export class DocumentSkeleton extends Skeleton {
             skeHeaders: new Map(),
             skeFooters: new Map(),
             skeListLevel: new Map(),
-            blockAnchor: new Map(),
+            drawingAnchor: new Map(),
         };
     }
 }

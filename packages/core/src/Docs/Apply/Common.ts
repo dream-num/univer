@@ -1,9 +1,4 @@
-import {
-    IBlockElement,
-    IDocumentData,
-    IElement,
-    ITextRun,
-} from '../../Interfaces/IDocumentData';
+import { IDocumentData, ITextRun } from '../../Interfaces/IDocumentData';
 import { deepCompare } from '../../Shared/Compare';
 
 export function getTextIndexByCursor(index: number, isBack: boolean = false) {

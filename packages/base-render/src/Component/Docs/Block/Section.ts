@@ -1,12 +1,11 @@
-import { BlockType, ContextBase, IBlockElement } from '@univerjs/core';
+import { DataStreamTreeNodeType, ContextBase, DataStreamTreeNode } from '@univerjs/core';
 import { dealWidthParagraph } from './Paragraph';
 import { dealWithBlockError } from './BlockError';
 import { IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../Basics/IDocumentSkeletonCached';
 import { ISectionBreakConfig } from '../../../Basics/Interfaces';
-import { dealWidthCustomBlock } from '../../../Custom/UseCustom';
 
-export function dealWithBlocks(
-    Blocks: IBlockElement[],
+export function dealWithSections(
+    sectionNode: DataStreamTreeNode,
     curPage: IDocumentSkeletonPage,
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
@@ -15,34 +14,30 @@ export function dealWithBlocks(
 ) {
     const allCurrentSkeletonPages: IDocumentSkeletonPage[] = [];
     const renderedBlockIdMap = new Map<string, boolean>();
-    for (let block of Blocks) {
-        const { paragraph, table, tableOfContents, blockType, customBlock, blockId } = block;
-        if (preRenderedBlockIdMap?.get(blockId)) {
-            continue;
-        }
-        let blockSkeletonPages: IDocumentSkeletonPage[] = [];
+    for (let node of sectionNode.children) {
+        // const { paragraph, table, tableOfContents, blockType, customBlock, blockId } = block;
+        // if (preRenderedBlockIdMap?.get(blockId)) {
+        //     continue;
+        // }
+        let skeletonPages: IDocumentSkeletonPage[] = [];
         let currentPageCache = curPage;
         if (allCurrentSkeletonPages.length > 0) {
             currentPageCache = allCurrentSkeletonPages[allCurrentSkeletonPages.length - 1];
         }
-        if (blockType === BlockType.PARAGRAPH && paragraph) {
+        if (node.nodeType === DataStreamTreeNodeType.PARAGRAPH) {
             // Paragraph 段落
-            blockSkeletonPages = dealWidthParagraph(block.blockId, paragraph, currentPageCache, sectionBreakConfig, skeletonResourceReference, context);
-        } else if (blockType === BlockType.TABLE && table) {
+            skeletonPages = dealWidthParagraph(node, currentPageCache, sectionBreakConfig, skeletonResourceReference, context);
+        } else if (node.nodeType === DataStreamTreeNodeType.TABLE) {
             // Table 表格
-        } else if (blockType === BlockType.SECTION_BREAK && tableOfContents) {
-            // TableOfContents 目录
-        } else if (blockType === BlockType.CUSTOM) {
-            blockSkeletonPages = dealWidthCustomBlock(block.blockId, customBlock, currentPageCache, sectionBreakConfig, skeletonResourceReference, context);
         }
 
-        if (blockSkeletonPages.length === 0) {
-            blockSkeletonPages = dealWithBlockError();
+        if (skeletonPages.length === 0) {
+            skeletonPages = dealWithBlockError();
         }
 
-        _pushPage(allCurrentSkeletonPages, blockSkeletonPages);
+        _pushPage(allCurrentSkeletonPages, skeletonPages);
 
-        renderedBlockIdMap.set(blockId, true);
+        // renderedBlockIdMap.set(blockId, true);
     }
 
     return {

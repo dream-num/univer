@@ -84,7 +84,7 @@ export class DrawingsView extends BaseView {
 
                 // console.log('onChangingObservable', top, docsTop, marginTop, top - docsTop - marginTop);
 
-                docsSkeleton?.updateDrawing(oKey, {
+                docsSkeleton?.getModel().updateDrawing(oKey, {
                     left: left - docsLeft - marginLeft,
                     top: top - docsTop - marginTop,
                     height,

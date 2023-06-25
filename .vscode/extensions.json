@@ -1,9 +1,10 @@
 {
   "recommendations": [
     "dbaeumer.vscode-eslint",
+    "editorconfig.editorconfig",
     "esbenp.prettier-vscode",
-    "streetsidesoftware.code-spell-checker",
+    "gruntfuggly.todo-tree",
     "intellsmi.comment-translate",
-    "Gruntfuggly.todo-tree"
+    "streetsidesoftware.code-spell-checker"
   ]
 }

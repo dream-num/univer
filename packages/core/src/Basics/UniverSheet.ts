@@ -5,6 +5,12 @@ import { IOHttp, IOHttpConfig, Logger } from '../Shared';
 import { SheetContext } from './SheetContext';
 import { VersionCode, VersionEnv } from './Version';
 
+interface IComposedConfig {
+    [key: string]: any;
+
+    workbookConfig: IWorkbookConfig;
+}
+
 /**
  * Externally provided UniverSheet root instance
  */
@@ -60,10 +66,7 @@ export class UniverSheet {
      * @param sheet
      * @param data
      */
-    static load<T extends { workbookConfig: IWorkbookConfig }>(
-        sheet: UniverSheet,
-        data: T
-    ) {
+    static load<T extends IComposedConfig>(sheet: UniverSheet, data: T) {
         sheet.getWorkBook().load(data.workbookConfig);
         sheet.context
             .getPluginManager()
@@ -85,9 +88,9 @@ export class UniverSheet {
      *
      * @param univerSheet
      */
-    static toJson(univerSheet: UniverSheet) {
+    static toJson(univerSheet: UniverSheet): IComposedConfig {
         const workbookConfig = univerSheet.getWorkBook().save();
-        const pluginConfig = {};
+        const pluginConfig: Partial<IComposedConfig> = {};
         univerSheet.context
             .getPluginManager()
             .getPlugins()

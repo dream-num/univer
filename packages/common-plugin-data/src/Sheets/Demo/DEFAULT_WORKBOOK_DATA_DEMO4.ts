@@ -1,47 +1,28 @@
-import { BlockType, BooleanNumber, BorderStyleTypes, IDocumentData, IWorkbookConfig, LocaleType, ParagraphElementType, SheetTypes } from '@univerjs/core';
+import { BooleanNumber, BorderStyleTypes, IDocumentData, IWorkbookConfig, LocaleType, SheetTypes } from '@univerjs/core';
 
 const richTextDemo1: IDocumentData = {
     id: 'd',
     body: {
-        blockElements: [
+        dataStream: `No.2824163`,
+        textRuns: [
             {
-                blockId: 'oneParagraph',
                 st: 0,
-                ed: 15,
-                blockType: BlockType.PARAGRAPH,
-                paragraph: {
-                    elements: [
-                        {
-                            eId: 'oneElement',
-                            st: 0,
-                            ed: 15,
-                            et: ParagraphElementType.TEXT_RUN,
-                            tr: {
-                                ct: 'No.',
-                                ts: {
-                                    cl: {
-                                        rgb: '#000',
-                                    },
-                                    fs: 20,
-                                },
-                            },
-                        },
-                        {
-                            eId: 'twoElement',
-                            st: 0,
-                            ed: 15,
-                            et: ParagraphElementType.TEXT_RUN,
-                            tr: {
-                                ct: '2824163',
-                                ts: {
-                                    cl: {
-                                        rgb: 'rgb(255,0,0)',
-                                    },
-                                    fs: 20,
-                                },
-                            },
-                        },
-                    ],
+                ed: 2,
+                ts: {
+                    cl: {
+                        rgb: '#000',
+                    },
+                    fs: 20,
+                },
+            },
+            {
+                st: 3,
+                ed: 9,
+                ts: {
+                    cl: {
+                        rgb: 'rgb(255,0,0)',
+                    },
+                    fs: 20,
                 },
             },
         ],

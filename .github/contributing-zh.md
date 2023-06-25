@@ -590,6 +590,10 @@ context.getWorkBook().setPluginMeta < IKeyType < IBandedRange >> (ALTERNATING_CO
 
 -   `context.getLocale().get('key')`来取得 key 对应的翻译即可，语言不用特定获取，因为在初始化的时候就配置好了
 
+1. 语言分开加载：语言包根据用户配置采用异步import的模式加载，避免初始化时一次性加载所有语言包；切换语言时也是异步import加载目标语言包
+2. 移动端：移动端在有需要的情况下，分开key值来取得翻译。比如PC 取得'btn'，移动端取得'btn-mobile'
+3. 如何安装：只需在Univer初始化的时候，配置语言即可，插件中会根据配置异步加载对应的语言包
+
 ### CSS 模块
 
 我们内部使用 `less + CSS module` 模式来编写样式，一个`.module.less`结尾的 css 文件会被识别为 CSS Module，如果您不需要 CSS Module 功能，可以仅仅使用`.less`结尾。

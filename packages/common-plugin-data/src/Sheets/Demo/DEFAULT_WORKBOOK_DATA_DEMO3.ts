@@ -1,115 +1,26 @@
-import { BlockType, BooleanNumber, BorderStyleTypes, IDocumentData, IWorkbookConfig, LocaleType, ParagraphElementType, SheetTypes } from '@univerjs/core';
+import { BooleanNumber, BorderStyleTypes, IDocumentData, IWorkbookConfig, LocaleType, SheetTypes } from '@univerjs/core';
 
 const richTextDemo: IDocumentData = {
     id: 'd',
     body: {
-        blockElements: [
+        dataStream: `Instructions:\f①Project division - Fill in the specific division of labor after the project is disassembled:\f②Responsible Person - Enter the responsible person's name here:\f③Date-The specific execution time of the project (detailed to the date of a certain month), and the gray color block marks the planned real-time time of the division of labor of the project (for example,\fthe specific execution time of [regional scene model arrangement and construction] is the 2 days marked in gray. \r\n`,
+        textRuns: [
             {
-                blockId: 'oneParagraph',
                 st: 0,
-                ed: 15,
-                blockType: BlockType.PARAGRAPH,
-                paragraph: {
-                    elements: [
-                        {
-                            eId: 'oneElement',
-                            st: 0,
-                            ed: 15,
-                            et: ParagraphElementType.TEXT_RUN,
-                            tr: {
-                                ct: 'Instructions:',
-                                ts: {
-                                    cl: {
-                                        rgb: 'rgb(92,92,92)',
-                                    },
-                                },
-                            },
-                        },
-                        {
-                            eId: 'breakElement',
-                            et: ParagraphElementType.PAGE_BREAK,
-                            st: 0,
-                            ed: 0,
-                        },
-                        {
-                            eId: 'twoElement',
-                            st: 0,
-                            ed: 15,
-                            et: ParagraphElementType.TEXT_RUN,
-                            tr: {
-                                ct: '①Project division - Fill in the specific division of labor after the project is disassembled:',
-                                ts: {
-                                    cl: {
-                                        rgb: 'rgb(92,92,92)',
-                                    },
-                                },
-                            },
-                        },
-                        {
-                            eId: 'breakElement1',
-                            et: ParagraphElementType.PAGE_BREAK,
-                            st: 0,
-                            ed: 0,
-                        },
-                        {
-                            eId: 'threeElement',
-                            st: 0,
-                            ed: 15,
-                            et: ParagraphElementType.TEXT_RUN,
-                            tr: {
-                                ct: "②Responsible Person - Enter the responsible person's name here:",
-                                ts: {
-                                    cl: {
-                                        rgb: 'rgb(92,92,92)',
-                                    },
-                                },
-                            },
-                        },
-                        {
-                            eId: 'breakElement2',
-                            et: ParagraphElementType.PAGE_BREAK,
-                            st: 0,
-                            ed: 0,
-                        },
-                        {
-                            eId: 'fourElement',
-                            st: 0,
-                            ed: 15,
-                            et: ParagraphElementType.TEXT_RUN,
-                            tr: {
-                                ct: '③Date-The specific execution time of the project (detailed to the date of a certain month), and the gray color block marks the planned real-time time of the division of labor of the project (for example,',
-                                ts: {
-                                    cl: {
-                                        rgb: 'rgb(92,92,92)',
-                                    },
-                                },
-                            },
-                        },
-                        {
-                            eId: 'breakElement3',
-                            et: ParagraphElementType.PAGE_BREAK,
-                            st: 0,
-                            ed: 0,
-                        },
-                        {
-                            eId: 'fiveElement',
-                            st: 0,
-                            ed: 15,
-                            et: ParagraphElementType.TEXT_RUN,
-                            tr: {
-                                ct: 'the specific execution time of [regional scene model arrangement and construction] is the 2 days marked in gray. ',
-                                ts: {
-                                    cl: {
-                                        rgb: 'rgb(92,92,92)',
-                                    },
-                                },
-                            },
-                        },
-                    ],
-                    paragraphStyle: {
-                        spaceAbove: 10,
-                        lineSpacing: 1.2,
+                ed: 488,
+                ts: {
+                    cl: {
+                        rgb: 'rgb(92,92,92)',
                     },
+                },
+            },
+        ],
+        paragraphs: [
+            {
+                startIndex: 489,
+                paragraphStyle: {
+                    spaceAbove: 10,
+                    lineSpacing: 1.2,
                 },
             },
         ],

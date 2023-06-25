@@ -1,12 +1,12 @@
-import { Plugin, Tools, PLUGIN_NAMES, Context, Univer } from '@univerjs/core';
+import { Plugin, Tools, PLUGIN_NAMES, Context, Univer, IKeyValue, LocaleType } from '@univerjs/core';
 import { ComponentManager, getRefElement, RegisterManager, KeyboardManager } from '@univerjs/base-ui';
 import { RenderEngine } from '@univerjs/base-render';
 import { DefaultSheetUIConfig, installObserver, ISheetUIPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';
-import { zh, en } from './Locale';
 import { AppUIController } from './Controller/AppUIController';
 import { Fx } from './View/FormulaBar';
 import { SlotComponentProps } from './Controller/SlotController';
 import { IToolbarItemProps } from './Controller';
+import {zh,en} from './Locale';
 
 export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
     private _appUIController: AppUIController;
@@ -39,8 +39,39 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
          */
         this.getLocale().load({
             zh,
-            en,
+            en
         });
+        // const locale = this.getGlobalContext().getLocale().getCurrentLocale();
+        // console.info(`./Locale/${locale}`);
+        // if (locale === LocaleType.ZH) {
+        //     import(`./Locale/zh`).then((module) => {
+        //         this.loadLocale(locale, module);
+        //     });
+        // } else if (locale === LocaleType.EN) {
+        //     import(`./Locale/en`).then((module) => {
+        //         this.loadLocale(locale, module);
+        //     });
+        // }
+
+        this._componentManager = new ComponentManager();
+        this._keyboardManager = new KeyboardManager(this);
+        this._registerManager = new RegisterManager(this);
+        this._appUIController = new AppUIController(this);
+        // AppUIController initializes the DOM as an asynchronous rendering process, and must wait for the UI rendering to complete before starting to render the canvas
+        this.UIDidMount(() => {
+            this.initRender();
+        });
+    }
+
+    loadLocale(locale: LocaleType, module: IKeyValue) {
+        // import(`./Locale/${locale}`).then((module) => {
+        // Do something with the module.
+        const localObject: IKeyValue = {};
+        localObject[locale] = module.default;
+
+        console.log('localObject===', locale, localObject);
+
+        this.getLocale().load(localObject);
 
         this._componentManager = new ComponentManager();
         this._keyboardManager = new KeyboardManager(this);

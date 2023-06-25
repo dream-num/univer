@@ -1,4 +1,4 @@
-import { UniverSheet, Univer } from '@univerjs/core';
+import { UniverSheet, Univer, LocaleType } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
@@ -31,7 +31,9 @@ const sheetUIConfig = {
 };
 
 // univer
-const univer = new Univer();
+const univer = new Univer({
+    locale: LocaleType.EN,
+});
 
 // base-render
 univer.install(new RenderEngine());

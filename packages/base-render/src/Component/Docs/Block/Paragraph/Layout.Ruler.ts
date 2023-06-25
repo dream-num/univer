@@ -120,7 +120,7 @@ function _divideOperator(
             // w不超过div宽度，加入到divide中去
             const currentLine = divide.parent;
             const maxBox = __maxFontBoundingBoxBySpanGroup(spanGroup);
-            if (currentLine && maxBox) {
+            if (currentLine && maxBox && !__isNullLine(currentLine)) {
                 const { paragraphLineGapDefault, linePitch, lineSpacing, spacingRule, snapToGrid, gridType } = getLineHeightConfig(sectionBreakConfig, paragraphConfig);
                 const { boundingBoxAscent, boundingBoxDescent } = maxBox;
                 const spanLineHeight = boundingBoxAscent + boundingBoxDescent;
@@ -132,7 +132,7 @@ function _divideOperator(
                     const spanGroupCachedLen = spanGroupCached.length;
                     let newSpanGroup = [];
                     let startIndex = 1;
-                    if (spanGroupCached[0].spanType === SpanType.LIST && spanGroupCachedLen > 2) {
+                    if (spanGroupCachedLen > 2 && spanGroupCached[0].spanType === SpanType.LIST) {
                         newSpanGroup = [spanGroupCached[0], spanGroupCached[1]];
                         startIndex = 2;
                     } else {
@@ -600,4 +600,11 @@ function __bulletIndentHandler(paragraphStyle: IParagraphStyle, bulletSkeleton: 
     if (indentStart === undefined) {
         paragraphStyle.indentStart = getNumberUnitValue(indentStartBullet || 0, charSpaceApply) - getNumberUnitValue(hangingBullet || 0, charSpaceApply);
     }
+}
+
+function __isNullLine(line: IDocumentSkeletonLine) {
+    if (line.divides[0].spanGroup[0]) {
+        return false;
+    }
+    return true;
 }

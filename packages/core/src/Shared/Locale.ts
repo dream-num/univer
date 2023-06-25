@@ -1,7 +1,11 @@
 import { Tools } from '.';
 import { LocaleType } from '../Enum';
-import { Nullable } from './Types';
+import { IKeyValue, Nullable } from './Types';
 
+export type ILocales = {
+    en: IKeyValue;
+    zh: IKeyValue;
+};
 /**
  * The data structure stored by the Locale class
  */
@@ -32,7 +36,7 @@ export type ILocaleOptions = {
      * }
      * ```
      */
-    locales: object;
+    locales: ILocales;
 };
 
 /**
@@ -62,7 +66,10 @@ export class Locale {
      *
      * @private
      */
-    private static getValue(locale: object, key: string): Nullable<string | object> {
+    private static getValue(
+        locale: IKeyValue,
+        key: string
+    ): Nullable<string | object> {
         try {
             return locale[key]
                 ? locale[key]
@@ -74,11 +81,7 @@ export class Locale {
 
     initialize(locale: Nullable<LocaleType>) {
         this.options = {
-            // use config first, or get language setting from browser
-            currentLocale:
-                locale || ['zh', 'zh-CN'].includes(Tools.getLanguage())
-                    ? LocaleType.ZH
-                    : LocaleType.EN,
+            currentLocale: locale || LocaleType.EN,
             locales: { zh, en },
         };
     }
@@ -120,7 +123,7 @@ export class Locale {
      * @returns void
      *
      */
-    load(locales: object): void {
+    load(locales: Partial<ILocales>): void {
         Tools.deepMerge(this.options.locales, locales);
     }
 

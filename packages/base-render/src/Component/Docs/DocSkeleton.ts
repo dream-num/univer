@@ -199,7 +199,7 @@ export class DocumentSkeleton extends Skeleton {
         skeleton.pages = allSkeletonPages;
 
         const bodyModel = this._docModel.bodyModel;
-
+        bodyModel.resetCache();
         for (let i = 0, len = bodyModel.children.length; i < len; i++) {
             const sectionNode = bodyModel.children[i];
             const sectionBreak = bodyModel.getSectionBreak(sectionNode.endIndex) || DEFAULT_SECTION_BREAK;
@@ -232,7 +232,7 @@ export class DocumentSkeleton extends Skeleton {
             } = sectionBreak;
 
             const sectionNodeNext = bodyModel.children[i + 1];
-            const sectionTypeNext = bodyModel.getSectionBreak(sectionNodeNext.endIndex)?.sectionType;
+            const sectionTypeNext = bodyModel.getSectionBreak(sectionNodeNext?.endIndex)?.sectionType;
 
             const headerIds = { defaultHeaderId, evenPageHeaderId, firstPageHeaderId };
             const footerIds = { defaultFooterId, evenPageFooterId, firstPageFooterId };

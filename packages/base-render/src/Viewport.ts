@@ -392,10 +392,13 @@ export class Viewport {
 
         const m = sceneTrans.getMatrix();
         const n = this.getScrollBarTransForm().getMatrix();
+
         ctx.save();
+
         if (!applyCanvasState && this._renderClipState) {
             ctx.beginPath();
-            ctx.rect(this.left, this.top, this.width || 0, this.height || 0);
+            // DEPT: left is set by upper views but width and height is not
+            ctx.rect(this.left, this.top, (this.width || 0) * m[0], (this.height || 0) * m[3]);
             ctx.clip();
         }
 

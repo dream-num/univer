@@ -1,5 +1,4 @@
 import {
-    ColumnSeparatorType,
     IBullet,
     IDrawing,
     IDrawings,
@@ -8,16 +7,15 @@ import {
     ContextBase,
     DataStreamTreeNode,
     GridType,
-    NamedStyleType,
     HorizontalAlign,
-    SpacingRule,
     BooleanNumber,
     DataStreamTreeTokenType,
+    ICustomBlock,
 } from '@univerjs/core';
 import { dealWidthBullet } from './Bullet';
 import { dealWidthInlineDrawing } from './InlineDrawing';
 
-import { getCharSpaceApply, getLastNotFullColumnInfo, getSpanGroupWidth, lineIterator } from '../../Common/Tools';
+import { clearFontCreateConfigCache, getCharSpaceApply, getFontCreateConfig, getLastNotFullColumnInfo, getSpanGroupWidth, lineIterator } from '../../Common/Tools';
 import { createSkeletonPage } from '../../Common/Page';
 import { setColumnFullState } from '../../Common/Section';
 
@@ -34,7 +32,6 @@ import {
     ISkeletonResourceReference,
 } from '../../../../Basics/IDocumentSkeletonCached';
 import { IParagraphConfig, ISectionBreakConfig } from '../../../../Basics/Interfaces';
-import { getFontStyleString } from '../../../../Basics/Tools';
 import { createSkeletonTabSpan, createSkeletonWordSpan } from '../../Common/Span';
 
 export function dealWidthParagraph(
@@ -47,10 +44,8 @@ export function dealWidthParagraph(
     const {
         gridType = GridType.LINES,
         charSpace = 0,
-        documentTextStyle = {},
         defaultTabStop = 10.5,
 
-        pageNumberStart,
         pageSize = {
             width: Infinity,
             height: Infinity,
@@ -59,18 +54,12 @@ export function dealWidthParagraph(
         marginRight = 0,
         marginLeft = 0,
 
-        columnProperties = [],
-        columnSeparatorType = ColumnSeparatorType.NONE,
-        contentDirection,
-        sectionType,
-        sectionTypeNext,
-        textDirection,
         lists,
         drawings = {},
         fontLocale,
     } = sectionBreakConfig;
 
-    const { endIndex, startIndex, content = '' } = paragraphNode;
+    const { endIndex, startIndex, content = '', blocks = [] } = paragraphNode;
 
     const bodyModel = paragraphNode.bodyModel;
 
@@ -94,15 +83,6 @@ export function dealWidthParagraph(
 
     // curPage.skeDrawings = affectSkeDrawings; // 加入本段落的对象
 
-    const paragraphConfig: IParagraphConfig = {
-        paragraphIndex: endIndex,
-        paragraphStyle,
-        // paragraphAffectSkeDrawings,
-        skeHeaders,
-        skeFooters,
-        drawingAnchor,
-    };
-
     // const pages = [curPage];
     // let lastPage = curPage;
 
@@ -119,68 +99,57 @@ export function dealWidthParagraph(
     // }
 
     const paragraphAffectSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
+
+    const paragraphConfig: IParagraphConfig = {
+        paragraphIndex: endIndex,
+        paragraphStyle,
+        paragraphAffectSkeDrawings,
+        skeHeaders,
+        skeFooters,
+        drawingAnchor,
+    };
+
     const listLevelAncestors = _getListLevelAncestors(bullet, skeListLevel); // 取得列表所有level的缓存
     const bulletSkeleton = dealWidthBullet(bullet, lists, listLevelAncestors, fontLocale, context); // 生成bullet
     _updateListLevelAncestors(bullet, bulletSkeleton, skeListLevel); // 更新最新的level缓存列表
-    // paragraphConfig.bulletSkeleton = bulletSkeleton;
+    paragraphConfig.bulletSkeleton = bulletSkeleton;
 
-    const {
-        namedStyleType = NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED,
-        horizontalAlign = HorizontalAlign.UNSPECIFIED,
-        lineSpacing = 1,
-        spacingRule = SpacingRule.AUTO,
-        snapToGrid = BooleanNumber.TRUE,
-        direction,
-        spaceAbove = 0,
-        spaceBelow = 0,
-        borderBetween,
-        borderTop,
-        borderBottom,
-        borderLeft,
-        borderRight,
-        indentFirstLine = 0,
-        hanging = 0,
-        indentStart = 0,
-        indentEnd = 0,
-        tabStops = [],
-        keepLines = BooleanNumber.FALSE,
-        keepNext = BooleanNumber.FALSE,
-        wordWrap = BooleanNumber.FALSE,
-        widowControl = BooleanNumber.FALSE,
-        shading,
-    } = paragraphStyle;
+    const { horizontalAlign = HorizontalAlign.UNSPECIFIED, snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 
     let allPages: IDocumentSkeletonPage[] = [curPage];
-    const pageWidth = pageSize.width || Infinity - marginLeft - marginRight;
+
+    const customBlockCache = new Map<number, Nullable<ICustomBlock>>();
+    for (let i = 0, len = blocks.length; i < len; i++) {
+        const charIndex = blocks[i];
+        const customBlock = bodyModel.getCustomBlock(charIndex);
+        if (customBlock == null) {
+            continue;
+        }
+        customBlockCache.set(charIndex, customBlock);
+        const blockId = customBlock.blockId;
+        const drawingOrigin = drawings[blockId];
+        if (drawingOrigin.layoutType !== PositionedObjectLayoutType.INLINE) {
+            paragraphAffectSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
+        }
+    }
+
+    clearFontCreateConfigCache();
 
     for (let i = 0, len = content.length; i < len; i++) {
         const charIndex = i + startIndex;
         const char = content[i];
 
-        const textRun = bodyModel.getTextRun(charIndex) || { ts: {} };
-        const { ts: textStyle = {} } = textRun;
-        const fontStyle = getFontStyleString(textStyle, fontLocale);
-
-        const mixTextStyle = {
-            ...documentTextStyle,
-            ...textStyle,
-        };
-
-        const fontCreateConfig = {
-            fontStyle,
-            textStyle: mixTextStyle,
-            charSpace,
-            gridType,
-            snapToGrid,
-            pageWidth,
-        };
+        const fontCreateConfig = getFontCreateConfig(i, paragraphNode, sectionBreakConfig, paragraphStyle);
 
         if (char === DataStreamTreeTokenType.TAB) {
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
             const tabSpan = createSkeletonTabSpan(fontCreateConfig, charSpaceApply); // measureText收敛到create中执行
             allPages = calculateParagraphLayout([tabSpan], allPages, sectionBreakConfig, paragraphConfig, true);
         } else if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
-            const customBlock = bodyModel.getCustomBlock(charIndex);
+            let customBlock = customBlockCache.get(charIndex);
+            if (customBlock == null) {
+                customBlock = bodyModel.getCustomBlock(charIndex);
+            }
             if (customBlock == null) {
                 continue;
             }
@@ -188,8 +157,6 @@ export function dealWidthParagraph(
             const drawingOrigin = drawings[blockId];
             if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
                 allPages = dealWidthInlineDrawing(drawingOrigin, sectionBreakConfig, allPages, paragraphConfig, fontLocale);
-            } else {
-                paragraphAffectSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
             }
         } else if (char === DataStreamTreeTokenType.PAGE_BREAK) {
             allPages.push(createSkeletonPage(sectionBreakConfig, skeletonResourceReference, _getNextPageNumber(allPages[allPages.length - 1]), BreakType.PAGE));
@@ -206,7 +173,7 @@ export function dealWidthParagraph(
             }
         } else {
             const paragraphStart = i === 0;
-            const languageHandlerResult = composeCharForLanguage(char, i, content, fontCreateConfig); // Handling special languages such as Tibetan, Arabic
+            const languageHandlerResult = composeCharForLanguage(char, i, content, paragraphNode, sectionBreakConfig, paragraphStyle); // Handling special languages such as Tibetan, Arabic
             let newSpanGroup = [];
             if (languageHandlerResult) {
                 const { charIndex: newCharIndex, spanGroup } = languageHandlerResult;

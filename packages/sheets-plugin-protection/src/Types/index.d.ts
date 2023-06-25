@@ -1,8 +1,5 @@
-
-
-
 export * from '../index';
-declare module '@univerjs/sheets-plugin-protection' { }
+declare module '@univerjs/sheets-plugin-protection' {}
 
 // use css module
 declare module '*.less' {

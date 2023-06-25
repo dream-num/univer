@@ -1,7 +1,7 @@
 const http = require('http');
 
 const server = http.createServer();
-server.on('request', function (req, res) {
+server.on('request', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Content-Length, Authorization, Accept,X-Requested-With');
     res.setHeader('Access-Control-Allow-Methods', 'PUT,POST,GET,DELETE,OPTIONS');
@@ -34,35 +34,28 @@ server.on('request', function (req, res) {
     }
 });
 
-server.listen(3998, function () {
+server.listen(3998, () => {
     console.log('Node server running on port 3998...');
 });
 
-const JSONize = (str) => {
+const JSONize = (str) =>
     // https://stackoverflow.com/questions/14432165/uncaught-syntaxerror-unexpected-token-with-json-parse/50730876
-    return (
-        str
-            .replace(/\\n/g, '\\n')
-            .replace(/\\'/g, "\\'")
-            .replace(/\\"/g, '\\"')
-            .replace(/\\&/g, '\\&')
-            .replace(/\\r/g, '\\r')
-            .replace(/\\t/g, '\\t')
-            .replace(/\\b/g, '\\b')
-            .replace(/\\f/g, '\\f')
-            // remove non-printable and other non-valid JSON chars
-            .replace(/[\u0000-\u0019]+/g, '')
+    str
+        .replace(/\\n/g, '\\n')
+        .replace(/\\'/g, "\\'")
+        .replace(/\\"/g, '\\"')
+        .replace(/\\&/g, '\\&')
+        .replace(/\\r/g, '\\r')
+        .replace(/\\t/g, '\\t')
+        .replace(/\\b/g, '\\b')
+        .replace(/\\f/g, '\\f')
+        // remove non-printable and other non-valid JSON chars
+        .replace(/[\u0000-\u0019]+/g, '')
 
-            // https://stackoverflow.com/questions/9036429/convert-object-string-to-json
-            // wrap keys without quote with valid double quote
-            .replace(/([\$\w]+)\s*:/g, function (_, $1) {
-                return '"' + $1 + '":';
-            })
-            // replacing single quote wrapped ones to double quote
-            .replace(/'([^']+)'/g, function (_, $1) {
-                return '"' + $1 + '"';
-            })
-            // '{ "value": "red",    }' to '{ "value": "red"    }'
-            .replace(/,(?=\s*})/g, '')
-    );
-};
+        // https://stackoverflow.com/questions/9036429/convert-object-string-to-json
+        // wrap keys without quote with valid double quote
+        .replace(/([$\w]+)\s*:/g, (_, $1) => `"${$1}":`)
+        // replacing single quote wrapped ones to double quote
+        .replace(/'([^']+)'/g, (_, $1) => `"${$1}"`)
+        // '{ "value": "red",    }' to '{ "value": "red"    }'
+        .replace(/,(?=\s*})/g, '');

@@ -1,5 +1,5 @@
 import { Documents, DocumentSkeleton, IDocumentSkeletonDrawing, Picture } from '@univerjs/base-render';
-import { IDocumentData } from '@univerjs/core';
+import { DocumentModel, IDocumentData } from '@univerjs/core';
 import { BaseView, CanvasViewRegistry, CANVAS_VIEW_KEY } from '../BaseView';
 
 export enum DOCS_VIEW_KEY {
@@ -111,8 +111,8 @@ export class DocsView extends BaseView {
 
     private _buildSkeleton(snapshot: IDocumentData) {
         const context = this.getContext();
-
-        const docsSkeleton = DocumentSkeleton.create(snapshot, context);
+        const docModel = new DocumentModel(snapshot, context);
+        const docsSkeleton = DocumentSkeleton.create(docModel, context);
 
         return docsSkeleton;
     }

@@ -39,6 +39,38 @@ export class ArrayFormulaLineControl {
         this._initialize();
     }
 
+    /**
+     * Return SheetView
+     * @returns
+     */
+    getSheetView(): SheetView {
+        return this._sheetPlugin.getCanvasView().getSheetView();
+    }
+
+    /**
+     * Return WorkBook
+     * @returns Workbook
+     */
+    getWorkBook(): Workbook {
+        return this._sheetPlugin.getWorkbook();
+    }
+
+    /**
+     * Return SheetView Scene
+     * @returns
+     */
+    getSheetViewScene(): Scene {
+        return this._sheetPlugin.getCanvasView().getSheetView().getScene();
+    }
+
+    dispose() {
+        this._leftControl?.dispose();
+        this._rightControl?.dispose();
+        this._topControl?.dispose();
+        this._bottomControl?.dispose();
+        this._arrayFormulaLine?.dispose();
+    }
+
     private _initialize() {
         const { startRow, startColumn, endRow, endColumn } = this._range;
         const sheetId = this._sheetId;
@@ -86,37 +118,5 @@ export class ArrayFormulaLineControl {
 
         this.getSheetViewScene().addObject(this._arrayFormulaLine);
         // this._arrayFormulaLine.makeDirty(true);
-    }
-
-    /**
-     * Return SheetView
-     * @returns
-     */
-    getSheetView(): SheetView {
-        return this._sheetPlugin.getCanvasView().getSheetView();
-    }
-
-    /**
-     * Return WorkBook
-     * @returns Workbook
-     */
-    getWorkBook(): Workbook {
-        return this._sheetPlugin.getWorkbook();
-    }
-
-    /**
-     * Return SheetView Scene
-     * @returns
-     */
-    getSheetViewScene(): Scene {
-        return this._sheetPlugin.getCanvasView().getSheetView().getScene();
-    }
-
-    dispose() {
-        this._leftControl?.dispose();
-        this._rightControl?.dispose();
-        this._topControl?.dispose();
-        this._bottomControl?.dispose();
-        this._arrayFormulaLine?.dispose();
     }
 }

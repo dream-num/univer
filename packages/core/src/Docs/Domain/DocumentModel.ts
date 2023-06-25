@@ -27,7 +27,9 @@ export class DocumentModelSimple {
     constructor(snapshot: IDocumentData) {
         this.snapshot = snapshot;
 
-        this.bodyModel = DocumentBodyModel.create(this.snapshot.body);
+        if (this.snapshot.body != null) {
+            this.bodyModel = DocumentBodyModel.create(this.snapshot.body);
+        }
     }
 
     get drawings() {
@@ -40,6 +42,10 @@ export class DocumentModelSimple {
 
     get lists() {
         return this.snapshot.lists;
+    }
+
+    getSnapshot() {
+        return this.snapshot;
     }
 
     updateDocumentDataPageSize(width?: number, height?: number) {

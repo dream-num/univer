@@ -1,9 +1,5 @@
-
-
 export * from '../index';
-declare module '@univerjs/sheets-plugin-data-validation' { }
-
-
+declare module '@univerjs/sheets-plugin-data-validation' {}
 
 // use css module
 declare module '*.less' {

@@ -1,8 +1,8 @@
 const execa = require('execa');
 const childProcess = require('child_process');
-const exec = childProcess.exec;
+
 const devTarget = '@univerjs/base-sheets';
-const { execFile } = require('child_process');
+
 run();
 // esbuild
 async function run() {

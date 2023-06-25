@@ -62,13 +62,14 @@ export class Engine {
 
     private _pointerDownEvent: (evt: any) => void;
 
-    private _pointerUpEvent: (evt: any) => void;
+    private _pointerUpEvent: (evt: Event) => void;
 
     private _pointerBlurEvent: (evt: any) => void;
 
     private _pointerWheelEvent: (evt: any) => void;
 
-    private __pointer: { [deviceSlot: number]: number } = {};
+    /** previous pointer position */
+    private pointer: { [deviceSlot: number]: number } = {};
 
     private __mouseId = -1;
 
@@ -327,15 +328,15 @@ export class Engine {
         this._pointerMoveEvent = (evt: any) => {
             const deviceType = this.__getPointerType(evt);
             // Store previous values for event
-            const previousHorizontal = this.__pointer[PointerInput.Horizontal];
-            const previousVertical = this.__pointer[PointerInput.Vertical];
-            const previousDeltaHorizontal = this.__pointer[PointerInput.DeltaHorizontal];
-            const previousDeltaVertical = this.__pointer[PointerInput.DeltaVertical];
+            const previousHorizontal = this.pointer[PointerInput.Horizontal];
+            const previousVertical = this.pointer[PointerInput.Vertical];
+            const previousDeltaHorizontal = this.pointer[PointerInput.DeltaHorizontal];
+            const previousDeltaVertical = this.pointer[PointerInput.DeltaVertical];
 
-            this.__pointer[PointerInput.Horizontal] = evt.clientX;
-            this.__pointer[PointerInput.Vertical] = evt.clientY;
-            this.__pointer[PointerInput.DeltaHorizontal] = evt.movementX;
-            this.__pointer[PointerInput.DeltaVertical] = evt.movementY;
+            this.pointer[PointerInput.Horizontal] = evt.clientX;
+            this.pointer[PointerInput.Vertical] = evt.clientY;
+            this.pointer[PointerInput.DeltaHorizontal] = evt.movementX;
+            this.pointer[PointerInput.DeltaVertical] = evt.movementY;
             // console.log('pointerMoveEvent_1', previousHorizontal, evt.clientX, previousVertical, evt.clientY, this.__pointer);
             let deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
@@ -343,28 +344,28 @@ export class Engine {
             if (previousHorizontal !== evt.clientX) {
                 deviceEvent.inputIndex = PointerInput.Horizontal;
                 deviceEvent.previousState = previousHorizontal;
-                deviceEvent.currentState = this.__pointer[PointerInput.Horizontal];
+                deviceEvent.currentState = this.pointer[PointerInput.Horizontal];
 
                 this.onInputChangedObservable.notifyObservers(deviceEvent);
             }
             if (previousVertical !== evt.clientY) {
                 deviceEvent.inputIndex = PointerInput.Vertical;
                 deviceEvent.previousState = previousVertical;
-                deviceEvent.currentState = this.__pointer[PointerInput.Vertical];
+                deviceEvent.currentState = this.pointer[PointerInput.Vertical];
 
                 this.onInputChangedObservable.notifyObservers(deviceEvent);
             }
-            if (this.__pointer[PointerInput.DeltaHorizontal] !== 0) {
+            if (this.pointer[PointerInput.DeltaHorizontal] !== 0) {
                 deviceEvent.inputIndex = PointerInput.DeltaHorizontal;
                 deviceEvent.previousState = previousDeltaHorizontal;
-                deviceEvent.currentState = this.__pointer[PointerInput.DeltaHorizontal];
+                deviceEvent.currentState = this.pointer[PointerInput.DeltaHorizontal];
 
                 this.onInputChangedObservable.notifyObservers(deviceEvent);
             }
-            if (this.__pointer[PointerInput.DeltaVertical] !== 0) {
+            if (this.pointer[PointerInput.DeltaVertical] !== 0) {
                 deviceEvent.inputIndex = PointerInput.DeltaVertical;
                 deviceEvent.previousState = previousDeltaVertical;
-                deviceEvent.currentState = this.__pointer[PointerInput.DeltaVertical];
+                deviceEvent.currentState = this.pointer[PointerInput.DeltaVertical];
 
                 this.onInputChangedObservable.notifyObservers(deviceEvent);
             }
@@ -372,18 +373,19 @@ export class Engine {
             // Lets Propagate the event for move with same position.
             if (!this._usingSafari && evt.button !== -1) {
                 deviceEvent.inputIndex = evt.button + 2;
-                deviceEvent.previousState = this.__pointer[evt.button + 2];
-                this.__pointer[evt.button + 2] = this.__pointer[evt.button + 2] ? 0 : 1; // Reverse state of button if evt.button has value
-                deviceEvent.currentState = this.__pointer[evt.button + 2];
+                deviceEvent.previousState = this.pointer[evt.button + 2];
+                this.pointer[evt.button + 2] = this.pointer[evt.button + 2] ? 0 : 1; // Reverse state of button if evt.button has value
+                deviceEvent.currentState = this.pointer[evt.button + 2];
                 this.onInputChangedObservable.notifyObservers(deviceEvent);
             }
         };
 
-        this._pointerDownEvent = (evt: any) => {
+        this._pointerDownEvent = (_evt: Event) => {
+            const evt = _evt as IPointerEvent;
             const deviceType = this.__getPointerType(evt);
-            const previousHorizontal = this.__pointer[PointerInput.Horizontal];
-            const previousVertical = this.__pointer[PointerInput.Vertical];
-            const previousButton = this.__pointer[evt.button + 2];
+            const previousHorizontal = this.pointer[PointerInput.Horizontal];
+            const previousVertical = this.pointer[PointerInput.Vertical];
+            const previousButton = this.pointer[evt.button + 2];
             // console.log('pointerDownEvent_1', previousHorizontal, evt.clientX, previousVertical, evt.clientY, this.__pointer);
 
             if (deviceType === DeviceType.Mouse) {
@@ -406,9 +408,9 @@ export class Engine {
                 }
             }
 
-            this.__pointer[PointerInput.Horizontal] = evt.clientX;
-            this.__pointer[PointerInput.Vertical] = evt.clientY;
-            this.__pointer[evt.button + 2] = 1;
+            this.pointer[PointerInput.Horizontal] = evt.clientX;
+            this.pointer[PointerInput.Vertical] = evt.clientY;
+            this.pointer[evt.button + 2] = 1;
 
             let deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
@@ -416,7 +418,7 @@ export class Engine {
             if (previousHorizontal !== evt.clientX) {
                 deviceEvent.inputIndex = PointerInput.Horizontal;
                 deviceEvent.previousState = previousHorizontal;
-                deviceEvent.currentState = this.__pointer[PointerInput.Horizontal];
+                deviceEvent.currentState = this.pointer[PointerInput.Horizontal];
 
                 this.onInputChangedObservable.notifyObservers(deviceEvent);
                 // console.log('pointerDownEvent_clientX');
@@ -424,7 +426,7 @@ export class Engine {
             if (previousVertical !== evt.clientY) {
                 deviceEvent.inputIndex = PointerInput.Vertical;
                 deviceEvent.previousState = previousVertical;
-                deviceEvent.currentState = this.__pointer[PointerInput.Vertical];
+                deviceEvent.currentState = this.pointer[PointerInput.Vertical];
 
                 this.onInputChangedObservable.notifyObservers(deviceEvent);
                 // console.log('pointerDownEvent_clientY');
@@ -432,20 +434,22 @@ export class Engine {
 
             deviceEvent.inputIndex = evt.button + 2;
             deviceEvent.previousState = previousButton;
-            deviceEvent.currentState = this.__pointer[evt.button + 2];
+            deviceEvent.currentState = this.pointer[evt.button + 2];
             this.onInputChangedObservable.notifyObservers(deviceEvent);
             // console.log('pointerDownEvent_2', previousHorizontal, evt.clientX, previousVertical, evt.clientY, this.__pointer);
         };
 
-        this._pointerUpEvent = (evt: any) => {
-            const deviceType = this.__getPointerType(evt);
-            const previousHorizontal = this.__pointer[PointerInput.Horizontal];
-            const previousVertical = this.__pointer[PointerInput.Vertical];
-            const previousButton = this.__pointer[evt.button + 2];
+        this._pointerUpEvent = (_evt: Event) => {
+            const evt = _evt as PointerEvent | MouseEvent;
 
-            this.__pointer[PointerInput.Horizontal] = evt.clientX;
-            this.__pointer[PointerInput.Vertical] = evt.clientY;
-            this.__pointer[evt.button + 2] = 0;
+            const deviceType = this.__getPointerType(evt);
+            const previousHorizontal = this.pointer[PointerInput.Horizontal];
+            const previousVertical = this.pointer[PointerInput.Vertical];
+            const previousButton = this.pointer[evt.button + 2];
+
+            this.pointer[PointerInput.Horizontal] = evt.clientX;
+            this.pointer[PointerInput.Vertical] = evt.clientY;
+            this.pointer[evt.button + 2] = 0;
 
             let deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
@@ -453,33 +457,33 @@ export class Engine {
             if (previousHorizontal !== evt.clientX) {
                 deviceEvent.inputIndex = PointerInput.Horizontal;
                 deviceEvent.previousState = previousHorizontal;
-                deviceEvent.currentState = this.__pointer[PointerInput.Horizontal];
+                deviceEvent.currentState = this.pointer[PointerInput.Horizontal];
 
                 this.onInputChangedObservable.notifyObservers(deviceEvent);
             }
             if (previousVertical !== evt.clientY) {
                 deviceEvent.inputIndex = PointerInput.Vertical;
                 deviceEvent.previousState = previousVertical;
-                deviceEvent.currentState = this.__pointer[PointerInput.Vertical];
+                deviceEvent.currentState = this.pointer[PointerInput.Vertical];
 
                 this.onInputChangedObservable.notifyObservers(deviceEvent);
             }
 
             deviceEvent.inputIndex = evt.button + 2;
             deviceEvent.previousState = previousButton;
-            deviceEvent.currentState = this.__pointer[evt.button + 2];
+            deviceEvent.currentState = this.pointer[evt.button + 2];
 
             if (deviceType === DeviceType.Mouse && this.__mouseId >= 0 && this._canvasEle.hasPointerCapture(this.__mouseId)) {
                 this._canvasEle.releasePointerCapture(this.__mouseId);
-            } else if (evt.pointerId && this._canvasEle.hasPointerCapture(evt.pointerId)) {
-                this._canvasEle.releasePointerCapture(evt.pointerId);
+            } else if (deviceEvent.pointerId && this._canvasEle.hasPointerCapture(deviceEvent.pointerId)) {
+                this._canvasEle.releasePointerCapture(deviceEvent.pointerId);
             }
 
             this.onInputChangedObservable.notifyObservers(deviceEvent);
 
             // We don't want to unregister the mouse because we may miss input data when a mouse is moving after a click
             if (deviceType !== DeviceType.Mouse) {
-                this.__pointer = {};
+                this.pointer = {};
             }
         };
 
@@ -489,39 +493,39 @@ export class Engine {
                 this.__mouseId = -1;
             }
 
-            this.__pointer = {};
+            this.pointer = {};
         };
 
         this._pointerWheelEvent = (evt: any) => {
             const deviceType = DeviceType.Mouse;
             // Store previous values for event
-            let previousWheelScrollX = this.__pointer[PointerInput.MouseWheelX];
-            let previousWheelScrollY = this.__pointer[PointerInput.MouseWheelY];
-            let previousWheelScrollZ = this.__pointer[PointerInput.MouseWheelZ];
+            let previousWheelScrollX = this.pointer[PointerInput.MouseWheelX];
+            let previousWheelScrollY = this.pointer[PointerInput.MouseWheelY];
+            let previousWheelScrollZ = this.pointer[PointerInput.MouseWheelZ];
 
-            this.__pointer[PointerInput.MouseWheelX] = evt.deltaX || 0;
-            this.__pointer[PointerInput.MouseWheelY] = evt.deltaY || evt.wheelDelta || 0;
-            this.__pointer[PointerInput.MouseWheelZ] = evt.deltaZ || 0;
+            this.pointer[PointerInput.MouseWheelX] = evt.deltaX || 0;
+            this.pointer[PointerInput.MouseWheelY] = evt.deltaY || evt.wheelDelta || 0;
+            this.pointer[PointerInput.MouseWheelZ] = evt.deltaZ || 0;
 
             let deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
 
-            if (this.__pointer[PointerInput.MouseWheelX] !== 0) {
+            if (this.pointer[PointerInput.MouseWheelX] !== 0) {
                 deviceEvent.inputIndex = PointerInput.MouseWheelX;
                 deviceEvent.previousState = previousWheelScrollX;
-                deviceEvent.currentState = this.__pointer[PointerInput.MouseWheelX];
+                deviceEvent.currentState = this.pointer[PointerInput.MouseWheelX];
                 this.onInputChangedObservable.notifyObservers(deviceEvent);
             }
-            if (this.__pointer[PointerInput.MouseWheelY] !== 0) {
+            if (this.pointer[PointerInput.MouseWheelY] !== 0) {
                 deviceEvent.inputIndex = PointerInput.MouseWheelY;
                 deviceEvent.previousState = previousWheelScrollY;
-                deviceEvent.currentState = this.__pointer[PointerInput.MouseWheelY];
+                deviceEvent.currentState = this.pointer[PointerInput.MouseWheelY];
                 this.onInputChangedObservable.notifyObservers(deviceEvent);
             }
-            if (this.__pointer[PointerInput.MouseWheelZ] !== 0) {
+            if (this.pointer[PointerInput.MouseWheelZ] !== 0) {
                 deviceEvent.inputIndex = PointerInput.MouseWheelZ;
                 deviceEvent.previousState = previousWheelScrollZ;
-                deviceEvent.currentState = this.__pointer[PointerInput.MouseWheelZ];
+                deviceEvent.currentState = this.pointer[PointerInput.MouseWheelZ];
                 this.onInputChangedObservable.notifyObservers(deviceEvent);
             }
         };

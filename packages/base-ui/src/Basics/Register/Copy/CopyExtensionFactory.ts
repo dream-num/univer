@@ -5,15 +5,22 @@ import { ICopyData } from '../../Interfaces/ICopyData';
  * base copy extension
  */
 export class BaseCopyExtension<T extends Plugin = Plugin> {
+    _data:ICopyData
     // protected _json: IKeyValue;
-    constructor(protected _data: ICopyData, protected _plugin: T) {}
+    constructor(protected _plugin: T) {
+        this._data = {
+            name:'',
+            value:'',
+            embed:true
+        }
+    }
 
     /**
      * Execute the core logic after the check is successful
      */
     execute() {}
 
-    getData() {
+    getData():ICopyData {
         return this._data;
     }
 }
@@ -33,8 +40,8 @@ export class BaseCopyExtensionFactory<T extends Plugin = Plugin> {
      * @param data
      * @returns
      */
-    create(data: ICopyData): BaseCopyExtension {
-        return new BaseCopyExtension(data, this._plugin);
+    create(): BaseCopyExtension {
+        return new BaseCopyExtension(this._plugin);
     }
 
     /**
@@ -42,7 +49,7 @@ export class BaseCopyExtensionFactory<T extends Plugin = Plugin> {
      * @param data
      * @returns
      */
-    check(data: ICopyData): false | BaseCopyExtension {
+    check(): false | BaseCopyExtension {
         return false;
     }
 }

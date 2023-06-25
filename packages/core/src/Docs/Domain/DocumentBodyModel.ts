@@ -3,16 +3,16 @@ import { IDocumentBody, ITextRun } from '../../Interfaces/IDocumentData';
 export type DocumentBodyModelOrSimple = DocumentBodyModelSimple | DocumentBodyModel;
 
 export class DocumentBodyModelSimple {
-    body: IDocumentBody;
-
     children: DataStreamTreeNode[] = [];
 
-    constructor(body?: IDocumentBody) {
-        if (body == null) {
+    constructor(public body: IDocumentBody) {
+        if (this.body == null) {
             return;
         }
         this.children = this.transformToTree(this.body.dataStream);
     }
+
+    resetCache() {}
 
     getSectionBreak(index: number) {
         return this.body.sectionBreaks?.[0];
@@ -43,6 +43,7 @@ export class DocumentBodyModelSimple {
         let content = '';
         let sectionList: DataStreamTreeNode[] = [];
         let nodeList: DataStreamTreeNode[] = [];
+        let currentBlocks: number[] = [];
 
         for (let i = 0; i < dataStreamLen; i++) {
             const char = dataStream[i];
@@ -51,11 +52,13 @@ export class DocumentBodyModelSimple {
                 const node = DataStreamTreeNode.create(
                     DataStreamTreeNodeType.PARAGRAPH,
                     this,
-                    content + DataStreamTreeTokenType.PARAGRAPH
+                    content
                 );
-                node.setIndexRange(i, i + content.length);
+                node.setIndexRange(i - content.length + 1, i);
+                node.addBlocks(currentBlocks);
                 nodeList.push(node);
                 content = '';
+                currentBlocks = [];
             } else if (char === DataStreamTreeTokenType.SECTION_BREAK) {
                 const sectionTree = DataStreamTreeNode.create(
                     DataStreamTreeNodeType.SECTION_BREAK,
@@ -94,6 +97,8 @@ export class DocumentBodyModelSimple {
                     nodeList,
                     DataStreamTreeNodeType.TABLE_CELL
                 );
+            } else if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
+                currentBlocks.push(i);
             } else {
                 content += char;
             }
@@ -155,7 +160,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
 
     private customRangeCurrentIndex = 0;
 
-    static create(body?: IDocumentBody) {
+    static create(body: IDocumentBody) {
         return new DocumentBodyModel(body);
     }
 
@@ -175,6 +180,9 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
     }
 
     getSectionBreak(index: number) {
+        if (index == null) {
+            return;
+        }
         const sectionBreaks = this.body.sectionBreaks;
         if (sectionBreaks == null) {
             return;
@@ -352,6 +360,8 @@ export class DataStreamTreeNode {
 
     endIndex: number;
 
+    blocks: number[] = [];
+
     constructor(
         public nodeType: DataStreamTreeNodeType,
         public bodyModel: DocumentBodyModelOrSimple,
@@ -380,7 +390,14 @@ export class DataStreamTreeNode {
         func(this.content || '', this.startIndex, this.endIndex, this.nodeType);
     }
 
-    setIndexRange(startIndex: number, endIndex: number) {}
+    addBlocks(blocks: number[]) {
+        this.blocks = this.blocks.concat(blocks);
+    }
+
+    setIndexRange(startIndex: number, endIndex: number) {
+        this.startIndex = startIndex;
+        this.endIndex = endIndex;
+    }
 
     include(index: number) {}
 

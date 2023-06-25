@@ -1,28 +1,22 @@
 export interface ICopyData {
     /**
-     * table type or property,
+     * table
+     * e.g
+     * <table data-type="universheet_copy_action_table"></table>
      *
-     * noEmbed does not need to be serialized to the table tag
+     * or plugin name: image / filter ...
+     * e.g
+     * <table data-image="[{left:0,right:0,width:100,height:100,url:''}] data-filter"
      */
-    key: 'type' | 'property' | 'noEmbed';
+    name: string;
 
     /**
-     * table type: univer / office / google / wps ...,
-     * e.g
-     * univer
-     * <table data-type="universheet_copy_action_table"
      *
-     * google
-     * <google-sheets-html-origin><table xmlns="http://www.w3.org/1999/xhtml"
-     *
-     * property: image / filter ..., use plugin name
-     * e.g
-     * <table data-image="[{left:0,right:0,width:100,height:100,url:''}]"
-     */
-    tag: string;
-
-    /**
-     * property value
+     * table html content or plugin config
      */
     value: string;
+    /**
+     * Whether to embed plugin configuration
+     */
+    embed: boolean;
 }

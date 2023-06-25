@@ -1,7 +1,7 @@
 import { Observable } from '@univerjs/core';
 import { FormulaPlugin } from '../FormulaPlugin';
 import { HelpFunction, SearchFunction } from '../View/UI/FormulaPrompt';
-import { SearchFormulaModal } from '../View/UI/SearchFormulaModal/SearchFormulaModal1';
+import { SearchFormulaModal } from '../View/UI/SearchFormulaModal/SearchFormulaModal';
 import { SearchItem } from '../View/UI/SearchFormulaModal/SearchItem';
 
 export type FormulaPluginObserve = {

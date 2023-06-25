@@ -10,9 +10,9 @@ const resolve = (url: string) => path.resolve(__dirname, url);
 export default defineConfig({
     build: {
         lib: {
-            entry: resolve('src/index.ts'),
+            entry: resolve('src/main.tsx'),
             name: 'UniverSheetTs',
-            formats: ['es', 'cjs', 'umd', 'iife'],
+            formats: ['es'],
             fileName: 'univer-sheet-ts',
         },
         outDir: './lib',

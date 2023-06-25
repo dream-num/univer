@@ -1,8 +1,8 @@
-import { handleJsonToDom, handleStyleToString } from '@univerjs/base-ui';
-import { SheetContext, PLUGIN_NAMES, Tools } from '@univerjs/core';
-import { SheetPlugin, SelectionModel, RightMenuProps, SelectionControl } from '@univerjs/base-sheets';
+import { SheetContext, PLUGIN_NAMES, Tools, handleJsonToDom, handleStyleToString } from '@univerjs/core';
+import { SheetPlugin, SelectionModel, SelectionControl } from '@univerjs/base-sheets';
 import { Clipboard } from './Clipboard';
 import { OPERATION_PLUGIN } from '../Const';
+import { RightMenuProps } from '@univerjs/ui-plugin-sheets';
 
 export abstract class Cut {
     private _context: SheetContext;
@@ -44,169 +44,6 @@ export class UniverCopy extends Cut {
             },
         ];
         super(context, cotList);
-    }
-
-    private _getSheetInfo() {
-        const sheet = this.getContext().getWorkBook().getActiveSheet();
-        const SheetPlugin = this.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
-        const spreadsheet = SheetPlugin?.getMainComponent();
-        const controls = SheetPlugin?.getSelectionManager().getCurrentControls();
-        const selections: any = controls?.map((control: SelectionControl) => {
-            const model: SelectionModel = control.model;
-            return {
-                startRow: model.startRow,
-                startColumn: model.startColumn,
-                endRow: model.endRow,
-                endColumn: model.endColumn,
-            };
-        });
-        return { sheet, spreadsheet, selections };
-    }
-
-    private _getRangeInfo() {
-        const { sheet, selections } = this._getSheetInfo();
-        if (!selections.length) return;
-        const range = sheet.getRange(selections[0]);
-        const rangeData = range.getValues();
-        if (!rangeData.length) return;
-        return { range, rangeData };
-    }
-
-    private _getCopyContent() {
-        const { sheet, spreadsheet, selections } = this._getSheetInfo();
-        if (selections.length > 1) return;
-
-        const rowManager: any = sheet.getRowManager().getRowData();
-        const colManager: any = sheet.getColumnManager().getColumnData();
-        let rowIndexArr: number[] = [];
-        let colIndexArr: number[] = [];
-
-        for (let s = 0; s < selections.length; s++) {
-            let range = selections[s];
-
-            let r1 = range.startRow;
-            let r2 = range.endRow;
-            let c1 = range.startColumn;
-            let c2 = range.endColumn;
-
-            for (let copyR = r1; copyR <= r2; copyR++) {
-                const rowItem = rowManager.get(copyR);
-                if (rowItem && rowItem.hd) {
-                    continue;
-                }
-
-                if (!rowIndexArr.includes(copyR)) {
-                    rowIndexArr.push(copyR);
-                }
-
-                for (let copyC = c1; copyC <= c2; copyC++) {
-                    const colItem = colManager.get(copyC);
-                    if (colItem && colItem.hd) {
-                        continue;
-                    }
-
-                    if (!colIndexArr.includes(copyC)) {
-                        colIndexArr.push(copyC);
-                    }
-                }
-            }
-        }
-
-        let cpData = '';
-        let colGroup = '';
-
-        for (let i = 0; i < rowIndexArr.length; i++) {
-            let r = rowIndexArr[i];
-            cpData += '<tr>';
-
-            for (let j = 0; j < colIndexArr.length; j++) {
-                let c = colIndexArr[j];
-
-                let cellValue = sheet.getRange(r, c).getValue();
-                let column = '';
-                let style = '';
-                let span = '';
-
-                if (r === rowIndexArr[0]) {
-                    const colItem = colManager.get(c);
-                    if (colItem && colItem.w) {
-                        `<colgroup width="${colItem.w}px"></colgroup>`;
-                    } else {
-                        colGroup += '<colgroup width="72px"></colgroup>';
-                    }
-                }
-
-                const rowItem = rowManager.get(r);
-                if (rowItem && rowItem.h) {
-                    style += `height:${rowItem.h}px;`;
-                } else {
-                    style += 'height:19px;';
-                }
-
-                const colItem = colManager.get(c);
-                if (colItem && colItem.w) {
-                    style += `width:${colItem.w}px;`;
-                } else {
-                    style += `width:72px;`;
-                }
-
-                if (cellValue && cellValue.s) {
-                    const cellStyle = this.getContext().getWorkBook().getStyles().get(cellValue.s);
-                    if (cellStyle) {
-                        style += handleStyleToString(cellStyle);
-                    }
-                }
-
-                const cellInfo = spreadsheet?.getCellByIndex(r, c);
-                if (cellInfo?.isMerged || (!cellInfo?.isMerged && cellInfo?.isMergedMainCell)) {
-                    if (cellInfo.isMergedMainCell) {
-                        span = `rowSpan="${cellInfo.mergeInfo.endRow - cellInfo.mergeInfo.startRow + 1}" colSpan="${
-                            cellInfo.mergeInfo.endColumn - cellInfo.mergeInfo.startColumn + 1
-                        }"`;
-                    } else {
-                        continue;
-                    }
-                }
-
-                if (style.includes('data-rotate')) {
-                    let rotate = style.split(';').find((item) => item.includes('data-rotate'));
-                    const match = rotate?.match(/\d+/g);
-                    let angle = 0;
-                    let ver = 0;
-                    if (match?.length) {
-                        angle = +match[0];
-                        ver = +match[1] ?? 0;
-                    }
-                    column += `<td ${span} ${ver ? `data-vertical=${ver}` : ''} style="display:inline-block;transform: rotate(${angle}deg);${style}">`;
-                } else {
-                    column = `<td ${span} style="${style}">`;
-                }
-
-                let c_value;
-
-                if (cellValue) {
-                    if (cellValue.p) {
-                        c_value = handleJsonToDom(cellValue.p);
-                    } else {
-                        c_value = sheet.getRange(r, c).getDisplayValue();
-                        if (c_value == null) {
-                            c_value = '';
-                        }
-                    }
-                } else {
-                    c_value = '';
-                }
-
-                column += c_value;
-
-                column += '</td>';
-                cpData += column;
-            }
-
-            cpData += '</tr>';
-        }
-        let cpTable = `<table data-type="universheet_copy_action_table">${colGroup}${cpData}</table>`;
-        return cpTable;
     }
 
     async copy(e: ClipboardEvent) {
@@ -400,5 +237,168 @@ export class UniverCopy extends Cut {
         }
 
         const isWrite = await Clipboard.writeText(JSON.stringify(ret));
+    }
+
+    private _getSheetInfo() {
+        const sheet = this.getContext().getWorkBook().getActiveSheet();
+        const SheetPlugin = this.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
+        const spreadsheet = SheetPlugin?.getMainComponent();
+        const controls = SheetPlugin?.getSelectionManager().getCurrentControls();
+        const selections: any = controls?.map((control: SelectionControl) => {
+            const model: SelectionModel = control.model;
+            return {
+                startRow: model.startRow,
+                startColumn: model.startColumn,
+                endRow: model.endRow,
+                endColumn: model.endColumn,
+            };
+        });
+        return { sheet, spreadsheet, selections };
+    }
+
+    private _getRangeInfo() {
+        const { sheet, selections } = this._getSheetInfo();
+        if (!selections.length) return;
+        const range = sheet.getRange(selections[0]);
+        const rangeData = range.getValues();
+        if (!rangeData.length) return;
+        return { range, rangeData };
+    }
+
+    private _getCopyContent() {
+        const { sheet, spreadsheet, selections } = this._getSheetInfo();
+        if (selections.length > 1) return;
+
+        const rowManager: any = sheet.getRowManager().getRowData();
+        const colManager: any = sheet.getColumnManager().getColumnData();
+        let rowIndexArr: number[] = [];
+        let colIndexArr: number[] = [];
+
+        for (let s = 0; s < selections.length; s++) {
+            let range = selections[s];
+
+            let r1 = range.startRow;
+            let r2 = range.endRow;
+            let c1 = range.startColumn;
+            let c2 = range.endColumn;
+
+            for (let copyR = r1; copyR <= r2; copyR++) {
+                const rowItem = rowManager.get(copyR);
+                if (rowItem && rowItem.hd) {
+                    continue;
+                }
+
+                if (!rowIndexArr.includes(copyR)) {
+                    rowIndexArr.push(copyR);
+                }
+
+                for (let copyC = c1; copyC <= c2; copyC++) {
+                    const colItem = colManager.get(copyC);
+                    if (colItem && colItem.hd) {
+                        continue;
+                    }
+
+                    if (!colIndexArr.includes(copyC)) {
+                        colIndexArr.push(copyC);
+                    }
+                }
+            }
+        }
+
+        let cpData = '';
+        let colGroup = '';
+
+        for (let i = 0; i < rowIndexArr.length; i++) {
+            let r = rowIndexArr[i];
+            cpData += '<tr>';
+
+            for (let j = 0; j < colIndexArr.length; j++) {
+                let c = colIndexArr[j];
+
+                let cellValue = sheet.getRange(r, c).getValue();
+                let column = '';
+                let style = '';
+                let span = '';
+
+                if (r === rowIndexArr[0]) {
+                    const colItem = colManager.get(c);
+                    if (colItem && colItem.w) {
+                        `<colgroup width="${colItem.w}px"></colgroup>`;
+                    } else {
+                        colGroup += '<colgroup width="72px"></colgroup>';
+                    }
+                }
+
+                const rowItem = rowManager.get(r);
+                if (rowItem && rowItem.h) {
+                    style += `height:${rowItem.h}px;`;
+                } else {
+                    style += 'height:19px;';
+                }
+
+                const colItem = colManager.get(c);
+                if (colItem && colItem.w) {
+                    style += `width:${colItem.w}px;`;
+                } else {
+                    style += `width:72px;`;
+                }
+
+                if (cellValue && cellValue.s) {
+                    const cellStyle = this.getContext().getWorkBook().getStyles().get(cellValue.s);
+                    if (cellStyle) {
+                        style += handleStyleToString(cellStyle);
+                    }
+                }
+
+                const cellInfo = spreadsheet?.getCellByIndex(r, c);
+                if (cellInfo?.isMerged || (!cellInfo?.isMerged && cellInfo?.isMergedMainCell)) {
+                    if (cellInfo.isMergedMainCell) {
+                        span = `rowSpan="${cellInfo.mergeInfo.endRow - cellInfo.mergeInfo.startRow + 1}" colSpan="${
+                            cellInfo.mergeInfo.endColumn - cellInfo.mergeInfo.startColumn + 1
+                        }"`;
+                    } else {
+                        continue;
+                    }
+                }
+
+                if (style.includes('data-rotate')) {
+                    let rotate = style.split(';').find((item) => item.includes('data-rotate'));
+                    const match = rotate?.match(/\d+/g);
+                    let angle = 0;
+                    let ver = 0;
+                    if (match?.length) {
+                        angle = +match[0];
+                        ver = +match[1] ?? 0;
+                    }
+                    column += `<td ${span} ${ver ? `data-vertical=${ver}` : ''} style="display:inline-block;transform: rotate(${angle}deg);${style}">`;
+                } else {
+                    column = `<td ${span} style="${style}">`;
+                }
+
+                let c_value;
+
+                if (cellValue) {
+                    if (cellValue.p) {
+                        c_value = handleJsonToDom(cellValue.p);
+                    } else {
+                        c_value = sheet.getRange(r, c).getDisplayValue();
+                        if (c_value == null) {
+                            c_value = '';
+                        }
+                    }
+                } else {
+                    c_value = '';
+                }
+
+                column += c_value;
+
+                column += '</td>';
+                cpData += column;
+            }
+
+            cpData += '</tr>';
+        }
+        let cpTable = `<table data-type="universheet_copy_action_table">${colGroup}${cpData}</table>`;
+        return cpTable;
     }
 }

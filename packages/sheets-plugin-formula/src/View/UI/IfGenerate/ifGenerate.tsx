@@ -1,6 +1,6 @@
 import { BaseButtonProps, BaseComponentSheet, BaseModalProps, BaseSelectProps, Component, FunctionComponent } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
-import { IConfig } from '../../Basics/Interfaces/IFormula';
+import { IConfig } from '../../../Basics/Interfaces/IFormula';
 import styles from './index.module.less';
 
 interface IProps {
@@ -17,13 +17,13 @@ interface IState {
 }
 
 class IfGenerate extends Component<IProps, IState> {
-    private _localeObserver: Nullable<Observer<Workbook>>;
-
     Button: FunctionComponent<BaseButtonProps>;
 
     Modal: FunctionComponent<BaseModalProps>;
 
     Select: FunctionComponent<BaseSelectProps>;
+
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     constructor(props: IProps) {
         super(props);
@@ -49,7 +49,7 @@ class IfGenerate extends Component<IProps, IState> {
      */
     componentWillMount() {
         this.setLocale();
-        this._localeObserver = this._context
+        this._localeObserver = this.getContext()
             .getObserverManager()
             .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
             ?.add(() => {
@@ -65,7 +65,7 @@ class IfGenerate extends Component<IProps, IState> {
     }
 
     setLocale() {
-        const locale = this._context.getLocale().get('formula');
+        const locale = this.getContext().getLocale().get('formula');
 
         this.setState({ locale });
     }

@@ -21,26 +21,26 @@ export function deleteContent(content: string, start: number, end: number) {
     return content.slice(0, start) + content.slice(end);
 }
 
-export function moveElementCharIndex(element?: IElement, moveIndex: number = 0) {
-    if (element == null) {
-        return;
-    }
+// export function moveElementCharIndex(element?: IElement, moveIndex: number = 0) {
+//     if (element == null) {
+//         return;
+//     }
 
-    element.st += moveIndex;
-    element.ed += moveIndex;
-}
+//     element.st += moveIndex;
+//     element.ed += moveIndex;
+// }
 
-export function moveBlockCharIndex(
-    blockElement?: IBlockElement,
-    moveIndex: number = 0
-) {
-    if (blockElement == null) {
-        return;
-    }
+// export function moveBlockCharIndex(
+//     blockElement?: IBlockElement,
+//     moveIndex: number = 0
+// ) {
+//     if (blockElement == null) {
+//         return;
+//     }
 
-    blockElement.st += moveIndex;
-    blockElement.ed += moveIndex;
-}
+//     blockElement.st += moveIndex;
+//     blockElement.ed += moveIndex;
+// }
 
 export function getDocsUpdateBody(model: IDocumentData, segmentId?: string) {
     let body = model.body;
@@ -64,24 +64,24 @@ export function isSameStyleTextRun(tr1: ITextRun, tr2: ITextRun) {
     return deepCompare(tr1.ts, tr2.ts);
 }
 
-export function mergeSameTextRun(mainTr: ITextRun, mergeTr: ITextRun) {
-    const isSame = isSameStyleTextRun(mainTr, mergeTr);
-    if (!isSame) {
-        return;
-    }
+// export function mergeSameTextRun(mainTr: ITextRun, mergeTr: ITextRun) {
+//     const isSame = isSameStyleTextRun(mainTr, mergeTr);
+//     if (!isSame) {
+//         return;
+//     }
 
-    mainTr.ct += mergeTr.ct || '';
+//     mainTr.ct += mergeTr.ct || '';
 
-    return mainTr;
-}
+//     return mainTr;
+// }
 
-export function getTextLength(text: string | ITextRun[]) {
-    if (text instanceof Object) {
-        let len = 0;
-        for (let textRun of text) {
-            len += textRun.ct?.length || 0;
-        }
-        return len;
-    }
-    return text.length;
-}
+// export function getTextLength(text: string | ITextRun[]) {
+//     if (text instanceof Object) {
+//         let len = 0;
+//         for (let textRun of text) {
+//             len += textRun.ct?.length || 0;
+//         }
+//         return len;
+//     }
+//     return text.length;
+// }

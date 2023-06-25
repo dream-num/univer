@@ -7,9 +7,6 @@ import { GroupOpenType, StructGroup } from '../../Module/Group';
  *
  * @internal
  */
-export function SetCollapseAllRowGroups(
-    structGroup: StructGroup,
-    openType: GroupOpenType
-) {
+export function SetCollapseAllRowGroups(structGroup: StructGroup, openType: GroupOpenType) {
     structGroup.setAllGroupOpenType(openType);
 }

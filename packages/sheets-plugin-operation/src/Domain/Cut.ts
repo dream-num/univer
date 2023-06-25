@@ -1,8 +1,8 @@
 import { SheetContext, PLUGIN_NAMES, Tools, handleJsonToDom, handleStyleToString } from '@univerjs/core';
 import { SheetPlugin, SelectionModel, SelectionControl } from '@univerjs/base-sheets';
+import { RightMenuProps } from '@univerjs/ui-plugin-sheets';
 import { Clipboard } from './Clipboard';
 import { OPERATION_PLUGIN } from '../Const';
-import { RightMenuProps } from '@univerjs/ui-plugin-sheets';
 
 export abstract class Cut {
     private _context: SheetContext;

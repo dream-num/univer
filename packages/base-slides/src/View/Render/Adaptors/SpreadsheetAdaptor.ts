@@ -13,7 +13,7 @@ import {
     SpreadsheetSkeleton,
     Viewport,
 } from '@univerjs/base-render';
-import { ContextBase, EventState, ICellData, IPageElement, ObjectMatrix, PageElementType, SheetContext, Styles, Worksheet } from '@univerjs/core';
+import { ContextBase, EventState, ICellData, IPageElement, ObjectMatrix, PageElementType, SheetContext, Styles } from '@univerjs/core';
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 
 enum SHEET_VIEW_KEY {
@@ -31,6 +31,7 @@ enum SHEET_VIEW_KEY {
 
 export class SpreadsheetAdaptor extends ObjectAdaptor {
     zIndex = 4;
+
     viewKey = PageElementType.SPREADSHEET;
 
     check(type: PageElementType) {

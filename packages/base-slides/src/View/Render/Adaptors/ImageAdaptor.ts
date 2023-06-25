@@ -4,6 +4,7 @@ import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 
 export class ImageAdaptor extends ObjectAdaptor {
     zIndex = 1;
+
     viewKey = PageElementType.IMAGE;
 
     check(type: PageElementType) {

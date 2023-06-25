@@ -5,6 +5,7 @@ import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 
 export class RichTextAdaptor extends ObjectAdaptor {
     zIndex = 2;
+
     viewKey = PageElementType.TEXT;
 
     check(type: PageElementType) {

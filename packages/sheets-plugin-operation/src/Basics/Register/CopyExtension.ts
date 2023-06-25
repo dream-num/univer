@@ -1,11 +1,11 @@
-import { BaseCopyExtension, BaseCopyExtensionFactory, ICopyData } from '@univerjs/base-ui';
+import { BaseCopyExtension, BaseCopyExtensionFactory } from '@univerjs/base-ui';
 import { OperationPlugin } from '../../OperationPlugin';
 
 export class CopyExtension extends BaseCopyExtension<OperationPlugin> {
     execute() {
         const value = this._plugin.getUniverCopy().getCopyContent();
         if (!value) return;
-        this._data.name = 'table'
+        this._data.name = 'table';
         this._data.value = value;
     }
 }

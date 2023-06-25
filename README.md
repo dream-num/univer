@@ -83,7 +83,7 @@ Univer sheet, document, and slide adopt the same rendering engine architecture, 
 Univer formula engine, supports asynchronous calculation, lambda function and range naming
 
 ![image](./docs/source/Formula%20Engine.png)
-
+<!-- 
 ## Development Plan
 
 ### Sheets
@@ -295,4 +295,4 @@ Univer formula engine, supports asynchronous calculation, lambda function and ra
 -   **PowerPoint import/export** `2023Q4`
 -   **Mobile** `2023Q4`
 -   **insert Sheets** `2023Q2`
--   **insert documents** `2023Q2`
+-   **insert documents** `2023Q2` -->

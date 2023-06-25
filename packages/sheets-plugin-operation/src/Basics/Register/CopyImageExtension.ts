@@ -1,4 +1,4 @@
-import { BaseCopyExtension, BaseCopyExtensionFactory, ICopyData } from '@univerjs/base-ui';
+import { BaseCopyExtension, BaseCopyExtensionFactory } from '@univerjs/base-ui';
 import { OperationPlugin } from '../../OperationPlugin';
 
 // TODO 这个模块应该放到图片插件 @jerry
@@ -27,9 +27,6 @@ export class CopyImageExtensionFactory extends BaseCopyExtensionFactory<Operatio
     }
 
     check(): false | BaseCopyExtension {
-   
-        
         return this.create();
-        
     }
 }

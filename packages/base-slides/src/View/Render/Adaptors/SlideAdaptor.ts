@@ -1,21 +1,5 @@
-import {
-    BaseObject,
-    Documents,
-    DocumentSkeleton,
-    Engine,
-    EVENT_TYPE,
-    IPageRenderConfig,
-    IWheelEvent,
-    Liquid,
-    Picture,
-    Rect,
-    Scene,
-    SceneViewer,
-    ScrollBar,
-    Slide,
-    Viewport,
-} from '@univerjs/base-render';
-import { ContextBase, SlideModel, EventState, getColorStyle, IColorStyle, IPageElement, ISlidePage, PageElementType, SlideContext } from '@univerjs/core';
+import { Engine, Rect, Scene, Slide, Viewport } from '@univerjs/base-render';
+import { ContextBase, SlideModel, getColorStyle, IColorStyle, IPageElement, ISlidePage, PageElementType, SlideContext } from '@univerjs/core';
 
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 import { ObjectProvider } from '../ObjectProvider';
@@ -30,6 +14,7 @@ export enum SLIDE_VIEW_KEY {
 
 export class SlideAdaptor extends ObjectAdaptor {
     zIndex = 6;
+
     viewKey = PageElementType.SLIDE;
 
     private _ObjectProvider: ObjectProvider;
@@ -80,7 +65,7 @@ export class SlideAdaptor extends ObjectAdaptor {
 
         this._ObjectProvider = new ObjectProvider();
 
-        for (var i = 0, len = pageOrder.length; i < len; i++) {
+        for (let i = 0, len = pageOrder.length; i < len; i++) {
             const page = pages[pageOrder[i]];
             const { id } = page;
             slideComponent.addPage(this._createScene(id, slideComponent, page, mainScene, model, context));
@@ -99,7 +84,7 @@ export class SlideAdaptor extends ObjectAdaptor {
             height,
         });
 
-        const viewMain = new Viewport('PageViewer_' + pageId, scene, {
+        const viewMain = new Viewport(`PageViewer_${pageId}`, scene, {
             left: 0,
             top: 0,
             bottom: 0,

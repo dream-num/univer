@@ -5,7 +5,7 @@ import { OperationPlugin } from '../../OperationPlugin';
 export class PasteImageExtension extends BasePasteExtension<OperationPlugin> {
     execute() {
         let content = this._data.html || this._data.plain;
-        console.info('cc--',content)
+        console.info('cc--', content);
         return [];
     }
 }

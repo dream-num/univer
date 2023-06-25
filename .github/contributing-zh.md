@@ -304,6 +304,8 @@ pnpm install
 
 6. 不要直接使用 `console.log` 原生方法，推荐使用 `Logger` 静态类提供的方法来打印日志，便于我们对日志进行更精细的控制。
 
+7. 如果model里还持有其他内存态的子model，那么子model的更新放在model里，apply只负责更新snapshot相关的数据。内存态的更新都放在model api上，紧跟action invoke
+
 ## 能力扩展
 
 核心能力的扩展，依靠 Plugin、Registry 和 Register 来提供

@@ -1,4 +1,4 @@
-import { SheetContext, PLUGIN_NAMES, Tools, handleJsonToDom, handleStyleToString, ObjectArray, IColumnData, IRowData } from '@univerjs/core';
+import { SheetContext, PLUGIN_NAMES, Tools, handleJsonToDom, handleStyleToString } from '@univerjs/core';
 import { SheetPlugin, SelectionModel, SelectionControl } from '@univerjs/base-sheets';
 import { RightMenuProps, SheetUIPlugin, SHEET_UI_PLUGIN_NAME, RightMenuItem } from '@univerjs/ui-plugin-sheets';
 import { Clipboard } from '@univerjs/base-ui';

@@ -5,14 +5,15 @@ import { ICopyData } from '../../Interfaces/ICopyData';
  * base copy extension
  */
 export class BaseCopyExtension<T extends Plugin = Plugin> {
-    _data:ICopyData
+    _data: ICopyData;
+
     // protected _json: IKeyValue;
     constructor(protected _plugin: T) {
         this._data = {
-            name:'',
-            value:'',
-            embed:true
-        }
+            name: '',
+            value: '',
+            embed: true,
+        };
     }
 
     /**
@@ -20,7 +21,7 @@ export class BaseCopyExtension<T extends Plugin = Plugin> {
      */
     execute() {}
 
-    getData():ICopyData {
+    getData(): ICopyData {
         return this._data;
     }
 }

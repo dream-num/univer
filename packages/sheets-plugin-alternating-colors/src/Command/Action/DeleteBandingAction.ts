@@ -31,7 +31,7 @@ export class DeleteBandingAction extends SheetActionBase<IDeleteBandingActionDat
         const worksheet = this.getWorkSheet();
         const context = worksheet.getContext();
         const manager = context.getPluginManager();
-        const plugin = <AlternatingColorsPlugin>manager.getPluginByName(ALTERNATING_COLORS_PLUGIN_NAME);
+        const plugin = manager.getPluginByName(ALTERNATING_COLORS_PLUGIN_NAME) as AlternatingColorsPlugin;
         this._observers.onActionDoObserver.notifyObservers(this);
         return DeleteBanding(plugin, bandedRangeId);
     }
@@ -52,7 +52,7 @@ export class DeleteBandingAction extends SheetActionBase<IDeleteBandingActionDat
         const worksheet = this.getWorkSheet();
         const context = worksheet.getContext();
         const manager = context.getPluginManager();
-        const plugin = <AlternatingColorsPlugin>manager.getPluginByName(ALTERNATING_COLORS_PLUGIN_NAME);
+        const plugin = manager.getPluginByName(ALTERNATING_COLORS_PLUGIN_NAME) as AlternatingColorsPlugin;
         this._observers.onActionUndoObserver.notifyObservers(this);
         AddBanding(plugin, bandedRange);
     }

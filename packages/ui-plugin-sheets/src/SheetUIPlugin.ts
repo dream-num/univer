@@ -6,7 +6,7 @@ import { AppUIController } from './Controller/AppUIController';
 import { Fx } from './View/FormulaBar';
 import { SlotComponentProps } from './Controller/SlotController';
 import { IToolbarItemProps } from './Controller';
-import {zh,en} from './Locale';
+import { zh, en } from './Locale';
 
 export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
     private _appUIController: AppUIController;
@@ -39,7 +39,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
          */
         this.getLocale().load({
             zh,
-            en
+            en,
         });
         // const locale = this.getGlobalContext().getLocale().getCurrentLocale();
         // console.info(`./Locale/${locale}`);

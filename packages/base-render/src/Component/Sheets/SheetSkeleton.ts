@@ -787,32 +787,11 @@ export class SpreadsheetSkeleton extends Skeleton {
             paragraph.paragraphStyle.horizontalAlign = horizontalAlign;
         }
 
-        // const blockElements = document.body.blockElements;
-        // for (let blockElement of blockElements) {
-        //     // if (blockElement.blockType === BlockType.SECTION_BREAK) {
-        //     //     if (!blockElement.sectionBreak) {
-        //     //         blockElement.sectionBreak = {};
-        //     //     }
-
-        //     //     blockElement.sectionBreak.renderConfig = renderConfig;
-        //     // } else
-        //     if (blockElement.blockType === BlockType.PARAGRAPH) {
-        //         if (!blockElement.paragraph) {
-        //             continue;
-        //         }
-
-        //         if (!blockElement.paragraph.paragraphStyle) {
-        //             blockElement.paragraph.paragraphStyle = {};
-        //         }
-
-        //         blockElement.paragraph.paragraphStyle.horizontalAlign = horizontalAlign;
-        //     }
-        // }
         return new DocumentModelSimple(document);
     }
 
     private _getDocumentDataByStyle(content: string, textStyle: ITextStyle, config: CellOtherConfig) {
-        const contentLength = content.length - 1;
+        const contentLength = content.length;
         const {
             textRotation = { a: 0, v: BooleanNumber.FALSE },
             textDirection = TextDirection.UNSPECIFIED,
@@ -856,44 +835,6 @@ export class SpreadsheetSkeleton extends Skeleton {
                         },
                     },
                 ],
-                // blockElements: [
-                //     {
-                //         blockId: 'oneParagraph',
-                //         st: 0,
-                //         ed: contentLength,
-                //         blockType: BlockType.PARAGRAPH,
-                //         paragraph: {
-                //             paragraphStyle: {
-                //                 horizontalAlign,
-                //             },
-                //             elements: [
-                //                 {
-                //                     eId: 'oneElement',
-                //                     st: 0,
-                //                     ed: contentLength,
-                //                     et: ParagraphElementType.TEXT_RUN,
-                //                     tr: {
-                //                         ct: content,
-                //                         ts: textStyle,
-                //                     },
-                //                 },
-                //             ],
-                //         },
-                //     },
-                //     // oneSectionBreak: {
-                //     //     blockId: 'oneSectionBreak',
-                //     //     st: 0,
-                //     //     ed: 0,
-                //     //     blockType: BlockType.SECTION_BREAK,
-                //     //     sectionBreak: {
-                //     //         columnProperties: [],
-                //     //         columnSeparatorType: ColumnSeparatorType.NONE,
-                //     //         sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
-                //     //         // textDirection: textDirectionDocument,
-                //     //         // contentDirection: textDirection!,
-                //     //     },
-                //     // },
-                // ],
             },
             documentStyle: {
                 pageSize: {
@@ -942,17 +883,16 @@ export class SpreadsheetSkeleton extends Skeleton {
             return {};
         }
         const { ff, fs, it, bl, ul, st, ol, cl, bg, bd } = format;
-
-        return {
-            ff,
-            fs,
-            it,
-            bl,
-            ul,
-            st,
-            ol,
-            cl,
-        };
+        const style: IStyleBase = {};
+        ff && (style.ff = ff);
+        fs && (style.fs = fs);
+        it && (style.it = it);
+        bl && (style.bl = bl);
+        ul && (style.ul = ul);
+        st && (style.st = st);
+        ol && (style.ol = ol);
+        cl && (style.cl = cl);
+        return style;
     }
 
     private _getOtherStyle(format?: Nullable<IStyleData>) {

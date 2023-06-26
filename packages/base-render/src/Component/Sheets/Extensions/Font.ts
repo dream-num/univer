@@ -104,7 +104,7 @@ export class Font extends SheetExtension {
         const cellHeight = endY - startY;
 
         if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
-            documentSkeleton.updateDocumentDataPageSize(cellWidth);
+            documentSkeleton.getModel().updateDocumentDataPageSize(cellWidth);
             documentSkeleton.calculate();
         }
 

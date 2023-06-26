@@ -3,7 +3,7 @@ import { BooleanNumber, BorderStyleTypes, IDocumentData, IWorkbookConfig, Locale
 const richTextDemo1: IDocumentData = {
     id: 'd',
     body: {
-        dataStream: `No.2824163`,
+        dataStream: `No.2824163\r\n`,
         textRuns: [
             {
                 st: 0,

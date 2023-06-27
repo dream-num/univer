@@ -245,39 +245,6 @@ export class RichText extends BaseObject {
                         ed: contentLength - 1,
                     },
                 ],
-                // blockElements: [
-                //     {
-                //         blockId: 'oneParagraph',
-                //         st: 0,
-                //         ed: contentLength,
-                //         blockType: BlockType.PARAGRAPH,
-                //         paragraph: {
-                //             elements: [
-                //                 {
-                //                     eId: 'oneElement',
-                //                     st: 0,
-                //                     ed: contentLength,
-                //                     et: ParagraphElementType.TEXT_RUN,
-                //                     tr: {
-                //                         ct: text,
-                //                         ts: {
-                //                             fs: this._fs || 14,
-                //                             ff: this._ff,
-                //                             it: this._it,
-                //                             bl: this._bl,
-                //                             ul: this._ul,
-                //                             st: this._st,
-                //                             ol: this._ol,
-                //                             bg: this._bg,
-                //                             bd: this._bd,
-                //                             cl: this._cl,
-                //                         },
-                //                     },
-                //                 },
-                //             ],
-                //         },
-                //     },
-                // ],
             },
             documentStyle: {
                 pageSize: {

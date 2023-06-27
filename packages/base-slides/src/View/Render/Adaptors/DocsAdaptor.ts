@@ -13,7 +13,7 @@ import {
     ScrollBar,
     Viewport,
 } from '@univerjs/base-render';
-import { ContextBase, DocContext, EventState, IPageElement, PageElementType } from '@univerjs/core';
+import { ContextBase, DocContext, DocumentModel, EventState, IPageElement, PageElementType } from '@univerjs/core';
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 
 export enum DOCS_VIEW_KEY {
@@ -43,7 +43,7 @@ export class DocsAdaptor extends ObjectAdaptor {
             return;
         }
 
-        const documentSkeleton = DocumentSkeleton.create(documentData, context as DocContext);
+        const documentSkeleton = DocumentSkeleton.create(new DocumentModel(documentData, context as DocContext), context as DocContext);
 
         const documents = new Documents(DOCS_VIEW_KEY.MAIN, documentSkeleton);
 
@@ -183,7 +183,7 @@ export class DocsAdaptor extends ObjectAdaptor {
 
                 // console.log('onChangingObservable', top, docsTop, marginTop, top - docsTop - marginTop);
 
-                documentSkeleton?.updateDrawing(oKey, {
+                documentSkeleton?.getModel().updateDrawing(oKey, {
                     left: left - docsLeft - marginLeft,
                     top: top - docsTop - marginTop,
                     height,

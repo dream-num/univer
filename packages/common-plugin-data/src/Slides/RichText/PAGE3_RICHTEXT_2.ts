@@ -1,4 +1,4 @@
-import { BlockType, PageElementType, ParagraphElementType } from '@univerjs/core';
+import { PageElementType } from '@univerjs/core';
 import { DEFAULT_LIST_TEST } from '../../Docs/DEFAULT_LIST';
 
 export const PAGE3_RICHTEXT_2 = {
@@ -16,66 +16,45 @@ export const PAGE3_RICHTEXT_2 = {
             id: 'd',
             lists: DEFAULT_LIST_TEST,
             body: {
-                blockElements: [
+                dataStream: `combine SaaS, PaaS and IaaS with tailored\rprovides a curated set of tools, capabilities and processes that are packaged for easy consumption by developers and end users\r\n`,
+                textRuns: [
                     {
-                        blockId: 'oneParagraph',
                         st: 0,
-                        ed: 59,
-                        blockType: BlockType.PARAGRAPH,
-                        paragraph: {
-                            bullet: {
-                                listId: 'testBullet',
-                                nestingLevel: 0,
-                                textStyle: {
-                                    fs: 20,
-                                },
-                            },
-                            paragraphStyle: {
-                                spaceBelow: 15,
-                            },
-                            elements: [
-                                {
-                                    eId: 'oneElement',
-                                    st: 0,
-                                    ed: 15,
-                                    et: ParagraphElementType.TEXT_RUN,
-                                    tr: {
-                                        ct: 'combine SaaS, PaaS and IaaS with tailored',
-                                        ts: {
-                                            fs: 12,
-                                        },
-                                    },
-                                },
-                            ],
+                        ed: 40,
+                        ts: {
+                            fs: 12,
                         },
                     },
                     {
-                        blockId: 'twoParagraph',
-                        st: 0,
-                        ed: 59,
-                        blockType: BlockType.PARAGRAPH,
-                        paragraph: {
-                            bullet: {
-                                listId: 'testBullet',
-                                nestingLevel: 0,
-                                textStyle: {
-                                    fs: 20,
-                                },
+                        st: 42,
+                        ed: 167,
+                        ts: {
+                            fs: 12,
+                        },
+                    },
+                ],
+                paragraphs: [
+                    {
+                        startIndex: 41,
+                        bullet: {
+                            listId: 'testBullet',
+                            nestingLevel: 0,
+                            textStyle: {
+                                fs: 20,
                             },
-                            elements: [
-                                {
-                                    eId: 'oneElement',
-                                    st: 0,
-                                    ed: 15,
-                                    et: ParagraphElementType.TEXT_RUN,
-                                    tr: {
-                                        ct: 'provides a curated set of tools, capabilities and processes that are packaged for easy consumption by developers and end users',
-                                        ts: {
-                                            fs: 12,
-                                        },
-                                    },
-                                },
-                            ],
+                        },
+                        paragraphStyle: {
+                            spaceBelow: 15,
+                        },
+                    },
+                    {
+                        startIndex: 168,
+                        bullet: {
+                            listId: 'testBullet',
+                            nestingLevel: 0,
+                            textStyle: {
+                                fs: 20,
+                            },
                         },
                     },
                 ],

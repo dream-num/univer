@@ -76,5 +76,8 @@
         "packages/**/src/**/*.ts?(x)": [
             "eslint --fix"
         ]
+    },
+    "dependencies": {
+        "pnpm": "^8.6.4"
     }
 }

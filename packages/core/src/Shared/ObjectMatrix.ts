@@ -24,8 +24,7 @@ export class ObjectMatrix<T> {
     private _matrix: ObjectMatrixPrimitiveType<T>;
 
     constructor(matrix: ObjectMatrixPrimitiveType<T> = {}) {
-        this._matrix = matrix;
-        this._option = new ObjectArray<ObjectArrayPrimitiveType<T>>(matrix);
+        this._setOriginValue(matrix);
     }
 
     static MakeObjectMatrixSize<T>(size: number): ObjectMatrix<T> {
@@ -97,7 +96,7 @@ export class ObjectMatrix<T> {
     }
 
     reset() {
-        this._matrix = {};
+        this._setOriginValue({});
     }
 
     hasValue() {
@@ -311,5 +310,10 @@ export class ObjectMatrix<T> {
             endRow,
             endColumn,
         };
+    }
+
+    private _setOriginValue(matrix: ObjectMatrixPrimitiveType<T> = {}) {
+        this._matrix = matrix;
+        this._option = new ObjectArray<ObjectArrayPrimitiveType<T>>(matrix);
     }
 }

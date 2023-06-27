@@ -22,14 +22,6 @@ export class ParserDataLoader {
 
     private _lambdaRuntime: LambdaRuntime;
 
-    private _initialNode() {
-        this.registerNode(...FORMULA_AST_NODE_REGISTRY.getData().sort(sortRules));
-    }
-
-    private _initialFunction() {
-        this._functionMap = FORMULA_FUNCTION_REGISTRY.getData();
-    }
-
     registerNode(...nodeFactories: BaseAstNodeFactory[]) {
         this._astNodeFactoryArray.push(...nodeFactories);
     }
@@ -96,5 +88,13 @@ export class ParserDataLoader {
     initialize() {
         this._initialNode();
         this._initialFunction();
+    }
+
+    private _initialNode() {
+        this.registerNode(...FORMULA_AST_NODE_REGISTRY.getData().sort(sortRules));
+    }
+
+    private _initialFunction() {
+        this._functionMap = FORMULA_FUNCTION_REGISTRY.getData();
     }
 }

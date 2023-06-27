@@ -24,45 +24,6 @@ export class ArrayValueObject extends BaseValueObject {
 
     private _columnCount: number;
 
-    private _formatValue(rawValue: string | IArrayValueObject) {
-        if (!(rawValue instanceof String)) {
-            rawValue = rawValue as IArrayValueObject;
-
-            this._rowCount = rawValue.rowCount;
-
-            this._columnCount = rawValue.columnCount;
-
-            return rawValue.calculateValueList;
-        }
-        rawValue = rawValue.slice(1, -1) as string;
-        const rowArray = rawValue.split(';');
-        const rowArrayCount = rowArray.length;
-        const result: CalculateValueType[][] = [];
-        let maxColumnCount = 0;
-        for (let r = 0; r < rowArrayCount; r++) {
-            const columnRaw = rowArray[r];
-            const columnArray = columnRaw.split(',');
-            const columnArrayCount = columnArray.length;
-
-            if (maxColumnCount < columnArrayCount) {
-                maxColumnCount = columnArrayCount;
-            }
-
-            const row: CalculateValueType[] = [];
-            for (let c = 0; c < columnArrayCount; c++) {
-                const cellRaw = columnArray[c];
-                row.push(ValueObjectFactory.create(cellRaw));
-            }
-            result.push(row);
-        }
-
-        this._rowCount = rowArrayCount;
-
-        this._columnCount = maxColumnCount;
-
-        return result;
-    }
-
     constructor(rawValue: string | IArrayValueObject) {
         if (rawValue instanceof String) {
             super(rawValue as string);
@@ -128,6 +89,34 @@ export class ArrayValueObject extends BaseValueObject {
                 }
             }
         }
+    }
+
+    plus(valueObject: BaseValueObject): CalculateValueType {
+        return this._batchOperator(valueObject, BatchOperatorType.PLUS);
+    }
+
+    minus(valueObject: BaseValueObject): CalculateValueType {
+        return this._batchOperator(valueObject, BatchOperatorType.MINUS);
+    }
+
+    multiply(valueObject: BaseValueObject): CalculateValueType {
+        return this._batchOperator(valueObject, BatchOperatorType.MULTIPLY);
+    }
+
+    divided(valueObject: BaseValueObject): CalculateValueType {
+        return this._batchOperator(valueObject, BatchOperatorType.DIVIDED);
+    }
+
+    compare(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
+        return this._batchOperator(valueObject, BatchOperatorType.COMPARE, operator);
+    }
+
+    concatenateFront(valueObject: BaseValueObject): CalculateValueType {
+        return this._batchOperator(valueObject, BatchOperatorType.CONCATENATE_FRONT);
+    }
+
+    concatenateBack(valueObject: BaseValueObject): CalculateValueType {
+        return this._batchOperator(valueObject, BatchOperatorType.CONCATENATE_BACK);
     }
 
     private _batchOperator(valueObject: BaseValueObject, batchOperatorType: BatchOperatorType, operator?: compareToken): CalculateValueType {
@@ -264,31 +253,42 @@ export class ArrayValueObject extends BaseValueObject {
         return this;
     }
 
-    plus(valueObject: BaseValueObject): CalculateValueType {
-        return this._batchOperator(valueObject, BatchOperatorType.PLUS);
-    }
+    private _formatValue(rawValue: string | IArrayValueObject) {
+        if (!(rawValue instanceof String)) {
+            rawValue = rawValue as IArrayValueObject;
 
-    minus(valueObject: BaseValueObject): CalculateValueType {
-        return this._batchOperator(valueObject, BatchOperatorType.MINUS);
-    }
+            this._rowCount = rawValue.rowCount;
 
-    multiply(valueObject: BaseValueObject): CalculateValueType {
-        return this._batchOperator(valueObject, BatchOperatorType.MULTIPLY);
-    }
+            this._columnCount = rawValue.columnCount;
 
-    divided(valueObject: BaseValueObject): CalculateValueType {
-        return this._batchOperator(valueObject, BatchOperatorType.DIVIDED);
-    }
+            return rawValue.calculateValueList;
+        }
+        rawValue = rawValue.slice(1, -1) as string;
+        const rowArray = rawValue.split(';');
+        const rowArrayCount = rowArray.length;
+        const result: CalculateValueType[][] = [];
+        let maxColumnCount = 0;
+        for (let r = 0; r < rowArrayCount; r++) {
+            const columnRaw = rowArray[r];
+            const columnArray = columnRaw.split(',');
+            const columnArrayCount = columnArray.length;
 
-    compare(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
-        return this._batchOperator(valueObject, BatchOperatorType.COMPARE, operator);
-    }
+            if (maxColumnCount < columnArrayCount) {
+                maxColumnCount = columnArrayCount;
+            }
 
-    concatenateFront(valueObject: BaseValueObject): CalculateValueType {
-        return this._batchOperator(valueObject, BatchOperatorType.CONCATENATE_FRONT);
-    }
+            const row: CalculateValueType[] = [];
+            for (let c = 0; c < columnArrayCount; c++) {
+                const cellRaw = columnArray[c];
+                row.push(ValueObjectFactory.create(cellRaw));
+            }
+            result.push(row);
+        }
 
-    concatenateBack(valueObject: BaseValueObject): CalculateValueType {
-        return this._batchOperator(valueObject, BatchOperatorType.CONCATENATE_BACK);
+        this._rowCount = rowArrayCount;
+
+        this._columnCount = maxColumnCount;
+
+        return result;
     }
 }

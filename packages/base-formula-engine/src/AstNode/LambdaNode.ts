@@ -12,12 +12,12 @@ import { LambdaPrivacyVarType } from '../Basics/Common';
 export const LAMBDA_TOKEN: string = 'LAMBDA';
 
 export class LambdaNode extends BaseAstNode {
-    get nodeType() {
-        return NodeType.LAMBDA;
-    }
-
     constructor(token: string, private _lambdaId: string) {
         super(token);
+    }
+
+    get nodeType() {
+        return NodeType.LAMBDA;
     }
 
     getLambdaId() {
@@ -34,31 +34,6 @@ export class LambdaNode extends BaseAstNode {
 export class LambdaNodeFactory extends BaseAstNodeFactory {
     get zIndex() {
         return NODE_ORDER_MAP.get(NodeType.LAMBDA) || 100;
-    }
-
-    private _updateLambdaStatement(functionStatementNode: LexerNode, lambdaId: string, currentLambdaPrivacyVar: LambdaPrivacyVarType) {
-        this._updateTree(functionStatementNode, lambdaId, currentLambdaPrivacyVar);
-    }
-
-    private _updateTree(functionStatementNode: LexerNode, lambdaId: string, currentLambdaPrivacyVar: LambdaPrivacyVarType) {
-        const children = functionStatementNode.getChildren();
-        const childrenCount = children.length;
-        for (let i = 0; i < childrenCount; i++) {
-            const node = children[i];
-            if (node instanceof LexerNode) {
-                this._updateTree(node, lambdaId, currentLambdaPrivacyVar);
-            } else {
-                const token = node.trim();
-                if (currentLambdaPrivacyVar.has(token)) {
-                    const newNode = new LexerNode();
-                    newNode.setToken(DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER);
-                    newNode.setLambdaId(lambdaId);
-                    newNode.setLambdaPrivacyVar(currentLambdaPrivacyVar);
-                    newNode.setLambdaParameter(token);
-                    children[i] = newNode;
-                }
-            }
-        }
     }
 
     create(param: LexerNode, parserDataLoader: ParserDataLoader): BaseAstNode {
@@ -114,6 +89,31 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
         }
 
         return this.create(param, parserDataLoader);
+    }
+
+    private _updateLambdaStatement(functionStatementNode: LexerNode, lambdaId: string, currentLambdaPrivacyVar: LambdaPrivacyVarType) {
+        this._updateTree(functionStatementNode, lambdaId, currentLambdaPrivacyVar);
+    }
+
+    private _updateTree(functionStatementNode: LexerNode, lambdaId: string, currentLambdaPrivacyVar: LambdaPrivacyVarType) {
+        const children = functionStatementNode.getChildren();
+        const childrenCount = children.length;
+        for (let i = 0; i < childrenCount; i++) {
+            const node = children[i];
+            if (node instanceof LexerNode) {
+                this._updateTree(node, lambdaId, currentLambdaPrivacyVar);
+            } else {
+                const token = node.trim();
+                if (currentLambdaPrivacyVar.has(token)) {
+                    const newNode = new LexerNode();
+                    newNode.setToken(DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER);
+                    newNode.setLambdaId(lambdaId);
+                    newNode.setLambdaPrivacyVar(currentLambdaPrivacyVar);
+                    newNode.setLambdaParameter(token);
+                    children[i] = newNode;
+                }
+            }
+        }
     }
 }
 

@@ -33,15 +33,6 @@ export class BooleanValueObject extends BaseValueObject {
         }
     }
 
-    private _convertTonNumber() {
-        const currentValue = this.getValue();
-        let result = 0;
-        if (currentValue) {
-            result = 1;
-        }
-        return new NumberValueObject(result, true);
-    }
-
     getValue() {
         return this._value;
     }
@@ -93,5 +84,14 @@ export class BooleanValueObject extends BaseValueObject {
 
     concatenateBack(valueObject: BaseValueObject): CalculateValueType {
         return this._convertTonNumber().concatenateBack(valueObject);
+    }
+
+    private _convertTonNumber() {
+        const currentValue = this.getValue();
+        let result = 0;
+        if (currentValue) {
+            result = 1;
+        }
+        return new NumberValueObject(result, true);
     }
 }

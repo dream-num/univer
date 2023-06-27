@@ -8,15 +8,6 @@ export interface IFilterPluginConfig extends Sequence {
 }
 
 export class FilterList extends Serializer implements GroupModel<{ [sheetId: string]: Filter }> {
-    static newInstance(sequence: IFilterPluginConfig): FilterList {
-        const listModel = new FilterList();
-        const filters = sequence.filters ?? {};
-        for (let key in filters) {
-            listModel._filters[key] = Filter.fromSequence(filters[key]);
-        }
-        return listModel;
-    }
-
     private _filters: {
         [sheetId: string]: Filter;
     };
@@ -24,6 +15,15 @@ export class FilterList extends Serializer implements GroupModel<{ [sheetId: str
     constructor() {
         super();
         this._filters = {};
+    }
+
+    static newInstance(sequence: IFilterPluginConfig): FilterList {
+        const listModel = new FilterList();
+        const filters = sequence.filters ?? {};
+        for (let key in filters) {
+            listModel._filters[key] = Filter.fromSequence(filters[key]);
+        }
+        return listModel;
     }
 
     addFilter(sheetId: string, filter: Filter): void {

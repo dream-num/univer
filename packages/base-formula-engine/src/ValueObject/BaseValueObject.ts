@@ -5,12 +5,12 @@ import { compareToken } from '../Basics/Token';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 
 export class BaseValueObject extends ObjectClassType {
-    isValueObject() {
-        return true;
-    }
-
     constructor(private _rawValue: string | number | boolean) {
         super();
+    }
+
+    isValueObject() {
+        return true;
     }
 
     getValue(): string | number | boolean {

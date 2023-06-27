@@ -1,5 +1,5 @@
 import { Nullable } from '@univerjs/core';
-import { FilterCriteriaColumn, IFilterCriteriaColumn } from '../Domain';
+import { IFilterCriteriaColumn } from '../Domain';
 import { FilterPlugin } from '../FilterPlugin';
 
 export function AddFilterCriteria(plugin: FilterPlugin, sheetId: string, criteriaColumn: Nullable<IFilterCriteriaColumn>) {
@@ -7,6 +7,6 @@ export function AddFilterCriteria(plugin: FilterPlugin, sheetId: string, criteri
     const filterModel = filterList.getFilter(sheetId);
     const criteriaModel = filterModel.getGroupModel();
     if (criteriaColumn) {
-        criteriaModel[criteriaColumn.column] = FilterCriteriaColumn.fromSequence<FilterCriteriaColumn>(criteriaColumn).withContext(plugin.getContext());
+        // criteriaModel[criteriaColumn.column] = FilterCriteriaColumn.fromSequence<FilterCriteriaColumn>(criteriaColumn).withContext(plugin.getContext());
     }
 }

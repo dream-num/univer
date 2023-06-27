@@ -15,7 +15,7 @@ export class OverImageRender {
     constructor(plugin: OverGridImagePlugin) {
         const engine = plugin.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
         this._plugin = plugin;
-        this._mainScene = engine.getScenes('mainScene')!;
+        this._mainScene = engine.getScene('mainScene')!;
         plugin.getObserver('onAddImage')!.add((eventData: OverGridImageProperty) => {
             eventData.autoWidth = true;
             eventData.autoHeight = true;
@@ -35,13 +35,18 @@ export class OverImageRender {
 
     removeOverImage(id: string): void {
         const layer = this._mainScene.getLayer(OverImageRender.LAYER_Z_INDEX);
-        if (!layer) {
-            return;
-        }
-        for (let i = 0; i < layer.objects.length; i++) {
-            const shape = layer.objects[i] as OverImageShape;
-            if (shape.getProperty().id === id) {
-                layer.objects.splice(i, 1);
+        if (layer != null) {
+            let readyRemove = [];
+            let layerObject = layer.getObjects();
+            for (let i = 0; i < layerObject.length; i++) {
+                const shape = layerObject[i] as OverImageShape;
+                if (shape.getProperty().id === id) {
+                    readyRemove.push(shape);
+                }
+            }
+            for (let i = 0; i < readyRemove.length; i++) {
+                const shape = layerObject[i] as OverImageShape;
+                layer.removeObject(shape);
             }
         }
     }

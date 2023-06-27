@@ -4,22 +4,22 @@ import { BaseAstNode } from './BaseAstNode';
 import { NodeType } from './NodeType';
 
 export class ErrorNode extends BaseAstNode {
+    constructor(errorType: ErrorType) {
+        super(errorType);
+        this._errorValueObject = ErrorValueObject.create(errorType);
+    }
+
     get nodeType() {
         return NodeType.ERROR;
     }
 
-    private _errorValueObject: ErrorValueObject;
-
-    constructor(errorType: ErrorType) {
-        super(errorType);
-        this._errorValueObject = ErrorValueObject.create(errorType);
+    static create(errorType: ErrorType) {
+        return new ErrorNode(errorType);
     }
 
     getValue() {
         return this._errorValueObject;
     }
 
-    static create(errorType: ErrorType) {
-        return new ErrorNode(errorType);
-    }
+    private _errorValueObject: ErrorValueObject;
 }

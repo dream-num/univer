@@ -314,11 +314,11 @@ export class ObjectArray<T> {
 
     concat(target: ObjectArray<T>): ObjectArray<T> {
         const srcArray = this._array;
-        const srcKeys = Object.keys(srcArray);
+        const srcKeys = Object.keys(srcArray) as unknown as number[];
         const srcLength = srcKeys.length;
 
         const targetArray = target._array;
-        const targetKeys = Object.keys(targetArray);
+        const targetKeys = Object.keys(targetArray) as unknown as number[];
         const targetLength = targetKeys.length;
 
         const container = new ObjectArray<T>(srcLength + targetLength);

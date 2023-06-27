@@ -31,7 +31,7 @@ export function SetWorkSheetHideServiceApply(
     unit: CommandUnit,
     data: ISetWorkSheetHideActionData
 ) {
-    const worksheet = unit.WorkBookUnit?.getSheetBySheetId(data.sheetId);
+    const worksheet = unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
 
     // get config
     const config = worksheet?.getConfig();

@@ -143,6 +143,13 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 },
             },
             {
+                st: 772,
+                ed: 1243,
+                ts: {
+                    fs: 16,
+                },
+            },
+            {
                 st: 1246,
                 ed: 1588,
                 ts: {

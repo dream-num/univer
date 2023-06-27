@@ -358,7 +358,7 @@ export class ObjectArray<T> {
             const end = start + count;
             const array = this._array;
             let effective = 0;
-            const splice = {};
+            const splice: ObjectArrayPrimitiveType<T> = {};
             for (let i = start; i < end; i++) {
                 const item = array[i];
                 if (define(item)) {
@@ -407,7 +407,7 @@ export class ObjectArray<T> {
         const array = this._array;
         const keys = Object.keys(array);
         const length = keys.length;
-        const result = {};
+        const result: ObjectArrayPrimitiveType<S> = {};
         for (let i = 0; i < length; i++) {
             const key = +keys[i];
             const value = array[key];
@@ -420,7 +420,7 @@ export class ObjectArray<T> {
         const array = this._array;
         const keys = Object.keys(array);
         const length = keys.length;
-        const filter = {};
+        const filter: ObjectArrayPrimitiveType<T> = {};
         let master = 0;
         for (let i = 0; i < length; i++) {
             const key = +keys[i];

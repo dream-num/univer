@@ -6,12 +6,12 @@ import { LexerNode } from '../Analysis/LexerNode';
 import { BooleanValue } from '../Basics/Common';
 
 export class ValueNode extends BaseAstNode {
-    get nodeType() {
-        return NodeType.VALUE;
-    }
-
     constructor(private _operatorString: string) {
         super(_operatorString);
+    }
+
+    get nodeType() {
+        return NodeType.VALUE;
     }
 
     execute() {

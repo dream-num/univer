@@ -1,4 +1,4 @@
-import { BaseSelectProps, Component, IToolbarItemProps } from '@univerjs/base-ui';
+import { BaseSelectProps, Component, Icon } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { IProps } from '../IData';
 import { FilterPlugin } from '../FilterPlugin';
@@ -13,27 +13,22 @@ export class FilterButton extends Component<IProps, IState> {
     protected _localeObserver: Nullable<Observer<Workbook>>;
 
     initialize(props: IProps) {
-        const FilterRankIcon = this.getComponentRender().renderFunction('FilterRankIcon');
-        const NextIcon = this.getComponentRender().renderFunction('NextIcon');
-        const FilterIcon = this.getComponentRender().renderFunction('FilterIcon');
-        const CleanIcon = this.getComponentRender().renderFunction('CleanIcon');
-
         this.state = {
             filter: {
                 locale: 'filter',
                 type: 'select',
-                label: <FilterRankIcon />,
-                icon: <NextIcon />,
+                label: <Icon.Data.FilterRankIcon />,
+                icon: <Icon.NextIcon />,
                 show: true,
                 children: [
                     {
                         locale: 'filter.filter',
-                        icon: <FilterIcon />,
+                        icon: <Icon.Data.FilterIcon />,
                         onClick: () => {},
                     },
                     {
                         locale: 'filter.clearFilter',
-                        icon: <CleanIcon />,
+                        icon: <Icon.Data.CleanIcon />,
                         onClick: () => {},
                     },
                 ],

@@ -56,7 +56,7 @@ export class Command {
             include<T>(action: Class<T>): Nullable<T> {
                 for (let i = 0; i < commandThis._actionList.length; i++) {
                     if (commandThis._actionList[i] instanceof action) {
-                        return commandThis._actionList[i] as T;
+                        return commandThis._actionList[i] as unknown as Nullable<T>;
                     }
                 }
                 return null;

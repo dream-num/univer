@@ -1,5 +1,6 @@
 import { RowManager } from '../Domain';
-import { CommandUnit, ISetRowHeightActionData } from '../../Command';
+import { CommandUnit } from '../../Command';
+import { ISetRowHeightActionData } from '../Action';
 
 /**
  *

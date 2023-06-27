@@ -1,5 +1,6 @@
 import { ColumnManager } from '../Domain/ColumnManager';
-import { CommandUnit, ISetColumnWidthActionData } from '../../Command';
+import { CommandUnit } from '../../Command';
+import { ISetColumnWidthActionData } from '../Action';
 
 /**
  *

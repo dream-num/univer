@@ -1,4 +1,6 @@
-function deleteEmpty(object: object) {
+import { IKeyType, IKeyValue } from './Types';
+
+function deleteEmpty(object: IKeyValue) {
     if (object) {
         Object.keys(object).forEach((key) => {
             const value = object[key];
@@ -10,7 +12,7 @@ function deleteEmpty(object: object) {
     return object;
 }
 
-function extend(src: object, ...target: object[]) {
+function extend(src: IKeyValue, ...target: IKeyValue[]) {
     for (const item of target) {
         if (item) {
             for (const key in item) {
@@ -25,7 +27,7 @@ function extend(src: object, ...target: object[]) {
     return src;
 }
 
-function objectToUrlSearch(object: object) {
+function objectToUrlSearch(object: IKeyValue) {
     if (unDef(object)) return '';
     let str = '';
     for (const key in object) {
@@ -57,7 +59,7 @@ function urlSearchToObject(search: string) {
     search = search.substring(index);
     search = search.replace(/\?/, '');
     const array = search.split('&');
-    const object = {
+    const object: IKeyType<string> = {
         $$url: url,
     };
     array.forEach((value) => {

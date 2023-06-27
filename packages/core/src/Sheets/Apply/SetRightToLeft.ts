@@ -1,6 +1,7 @@
 import { Worksheet } from '../Domain';
 import { BooleanNumber } from '../../Enum';
-import { CommandUnit, ISetRightToLeftActionData } from '../../Command';
+import { CommandUnit } from '../../Command';
+import { ISetRightToLeftActionData } from '../Action';
 
 /**
  *

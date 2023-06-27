@@ -2,6 +2,13 @@ import { Picture } from '@univerjs/base-render';
 import { OverGridImageBorderType, OverGridImageProperty } from '../OverGridImagePlugin';
 
 export class OverImageShape extends Picture {
+    protected _property: OverGridImageProperty;
+
+    constructor(property: OverGridImageProperty) {
+        super(property.id, property);
+        this._property = property;
+    }
+
     static drawRoundRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, tl: number, tr: number, bl: number, br: number) {
         ctx.beginPath();
         ctx.moveTo(x + tl, y);
@@ -80,19 +87,12 @@ export class OverImageShape extends Picture {
         }
     }
 
-    protected _property: OverGridImageProperty;
+    getProperty(): OverGridImageProperty {
+        return this._property;
+    }
 
     protected _draw(ctx: CanvasRenderingContext2D) {
         OverImageShape.drawWith(ctx, this);
         super._draw(ctx);
-    }
-
-    constructor(property: OverGridImageProperty) {
-        super(property);
-        this._property = property;
-    }
-
-    getProperty(): OverGridImageProperty {
-        return this._property;
     }
 }

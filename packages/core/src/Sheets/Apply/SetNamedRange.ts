@@ -1,5 +1,6 @@
 import { INamedRange } from '../../Interfaces/INamedRange';
-import { CommandUnit, ISetNamedRangeActionData } from '../../Command';
+import { CommandUnit } from '../../Command';
+import { ISetNamedRangeActionData } from '../Action';
 
 export function SetNamedRange(
     namedRanges: INamedRange[],

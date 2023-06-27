@@ -1,6 +1,7 @@
 import { ICellData } from '../../Interfaces';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { CommandUnit, IRemoveColumnDataAction } from '../../Command';
+import { CommandUnit } from '../../Command';
+import { IRemoveColumnDataAction } from '../Action';
 
 /**
  *

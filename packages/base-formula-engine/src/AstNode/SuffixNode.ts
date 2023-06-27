@@ -15,12 +15,26 @@ import { CellReferenceObject } from '../ReferenceObject/CellReferenceObject';
 import { LexerTreeMaker } from '../Analysis/Lexer';
 
 export class SuffixNode extends BaseAstNode {
+    constructor(private _operatorString: string, private _functionExecutor?: BaseFunction) {
+        super(_operatorString);
+    }
+
     get nodeType() {
         return NodeType.SUFFIX;
     }
 
-    constructor(private _operatorString: string, private _functionExecutor?: BaseFunction) {
-        super(_operatorString);
+    execute(interpreterCalculateProps?: IInterpreterDatasetConfig) {
+        const children = this.getChildren();
+        const value = children[0].getValue();
+        let result: FunctionVariantType;
+        if (this._operatorString === suffixToken.PERCENTAGE) {
+            result = this._functionExecutor!.calculate(value, new NumberValueObject(100)) as FunctionVariantType;
+        } else if (this._operatorString === suffixToken.POUND) {
+            result = this._handlerPound(value, interpreterCalculateProps);
+        } else {
+            result = ErrorValueObject.create(ErrorType.VALUE);
+        }
+        this.setValue(result);
     }
 
     private _handlerPound(value: FunctionVariantType, interpreterDatasetConfig?: IInterpreterDatasetConfig) {
@@ -55,20 +69,6 @@ export class SuffixNode extends BaseAstNode {
 
         return ErrorValueObject.create(ErrorType.VALUE);
         /** todo */
-    }
-
-    execute(interpreterCalculateProps?: IInterpreterDatasetConfig) {
-        const children = this.getChildren();
-        const value = children[0].getValue();
-        let result: FunctionVariantType;
-        if (this._operatorString === suffixToken.PERCENTAGE) {
-            result = this._functionExecutor!.calculate(value, new NumberValueObject(100)) as FunctionVariantType;
-        } else if (this._operatorString === suffixToken.POUND) {
-            result = this._handlerPound(value, interpreterCalculateProps);
-        } else {
-            result = ErrorValueObject.create(ErrorType.VALUE);
-        }
-        this.setValue(result);
     }
 }
 

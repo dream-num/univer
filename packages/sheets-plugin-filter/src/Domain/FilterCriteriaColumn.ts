@@ -6,19 +6,19 @@ export interface IFilterCriteriaColumn extends Sequence {
     criteria: IFilterCriteria;
 }
 
-export class FilterCriteriaColumn extends Serializer implements SheetContext.WithContext<FilterCriteriaColumn> {
+export class FilterCriteriaColumn extends Serializer {
+    private _criteria: FilterCriteria;
+
+    private _column: number;
+
+    private _context: SheetContext;
+
     static newInstance(sequence: IFilterCriteriaColumn): FilterCriteriaColumn {
         const criteriaColumn = new FilterCriteriaColumn();
         criteriaColumn._column = sequence.column;
         criteriaColumn._criteria = FilterCriteria.fromSequence(sequence.criteria);
         return criteriaColumn;
     }
-
-    private _criteria: FilterCriteria;
-
-    private _column: number;
-
-    private _context: SheetContext;
 
     withContext(context: SheetContext): FilterCriteriaColumn {
         this._context = context;

@@ -13,12 +13,12 @@ import { LexerNode } from '../Analysis/LexerNode';
 const UNION_EXECUTOR_NAME = 'UNION';
 
 export class UnionNode extends BaseAstNode {
-    get nodeType() {
-        return NodeType.UNION;
-    }
-
     constructor(private _operatorString: string, private _functionExecutor: BaseFunction) {
         super(_operatorString);
+    }
+
+    get nodeType() {
+        return NodeType.UNION;
     }
 
     execute() {

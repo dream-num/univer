@@ -8,7 +8,13 @@ export interface IRemoveFilterActionData extends ISheetActionData {}
 
 export class RemoveFilterAction extends SheetActionBase<IRemoveFilterActionData, IAddFilterActionData> {
     constructor(actionData: IRemoveFilterActionData, workbook: Workbook, observers: ActionObservers) {
-        super(actionData, workbook, observers);
+        super(
+            actionData,
+            {
+                WorkBookUnit: workbook,
+            },
+            observers
+        );
         this._doActionData = {
             ...actionData,
         };

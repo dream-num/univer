@@ -6,19 +6,11 @@ export class FileSelected {
         IMAGE: 'image/*',
     };
 
-    static async chooseImage(): Promise<File> {
-        return (await new FileSelected(false, FileSelected.ACCEPT.IMAGE).choose()) as File;
-    }
+    protected _element: HTMLInputElement;
 
-    static async chooseXlsx(): Promise<File> {
-        return (await new FileSelected(false, FileSelected.ACCEPT.IMAGE).choose()) as File;
-    }
+    protected _accept: string;
 
-    private _element: HTMLInputElement;
-
-    private _accept: string;
-
-    private _multiple: boolean;
+    protected _multiple: boolean;
 
     constructor(multiple: boolean, accept: string) {
         this._multiple = multiple;
@@ -29,6 +21,14 @@ export class FileSelected {
         if (multiple) {
             this._element.setAttribute('multiple', 'multiple');
         }
+    }
+
+    static async chooseImage(): Promise<File> {
+        return (await new FileSelected(false, FileSelected.ACCEPT.IMAGE).choose()) as File;
+    }
+
+    static async chooseXlsx(): Promise<File> {
+        return (await new FileSelected(false, FileSelected.ACCEPT.IMAGE).choose()) as File;
     }
 
     async choose(): Promise<File | FileList | null> {

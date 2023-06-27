@@ -12,40 +12,6 @@ export class CellReferenceObject extends BaseReferenceObject {
         this.setRangeData(grid.rangeData);
     }
 
-    private _createRange(newRangeData: IRangeData) {
-        const rangeReferenceObject = new RangeReferenceObject(newRangeData, this.getForcedSheetId(), this.getForcedUnitId());
-
-        rangeReferenceObject.setUnitData(this.getUnitData());
-
-        rangeReferenceObject.setDefaultSheetId(this.getDefaultSheetId());
-
-        rangeReferenceObject.setRowCount(this.getRowCount());
-
-        rangeReferenceObject.setColumnCount(this.getColumnCount());
-
-        rangeReferenceObject.setDefaultUnitId(this.getDefaultUnitId());
-
-        rangeReferenceObject.setRuntimeData(this.getRuntimeData());
-
-        const forceId = this.getForcedUnitId();
-
-        if (forceId != null) {
-            rangeReferenceObject.setForcedSheetIdDirect(this.getForcedUnitId());
-        }
-
-        // const forcedSheetID = this.getForcedSheetId();
-        // if (forcedSheetID) {
-        //     rangeReferenceObject.setForcedSheetIdDirect(forcedSheetID);
-        // }
-
-        // const forcedUnitId = this.getForcedUnitId();
-        // if (forcedUnitId) {
-        //     rangeReferenceObject.setForcedUnitIdDirect(forcedUnitId);
-        // }
-
-        return rangeReferenceObject;
-    }
-
     isCell() {
         return true;
     }
@@ -94,5 +60,39 @@ export class CellReferenceObject extends BaseReferenceObject {
         }
 
         return rangeData;
+    }
+
+    private _createRange(newRangeData: IRangeData) {
+        const rangeReferenceObject = new RangeReferenceObject(newRangeData, this.getForcedSheetId(), this.getForcedUnitId());
+
+        rangeReferenceObject.setUnitData(this.getUnitData());
+
+        rangeReferenceObject.setDefaultSheetId(this.getDefaultSheetId());
+
+        rangeReferenceObject.setRowCount(this.getRowCount());
+
+        rangeReferenceObject.setColumnCount(this.getColumnCount());
+
+        rangeReferenceObject.setDefaultUnitId(this.getDefaultUnitId());
+
+        rangeReferenceObject.setRuntimeData(this.getRuntimeData());
+
+        const forceId = this.getForcedUnitId();
+
+        if (forceId != null) {
+            rangeReferenceObject.setForcedSheetIdDirect(this.getForcedUnitId());
+        }
+
+        // const forcedSheetID = this.getForcedSheetId();
+        // if (forcedSheetID) {
+        //     rangeReferenceObject.setForcedSheetIdDirect(forcedSheetID);
+        // }
+
+        // const forcedUnitId = this.getForcedUnitId();
+        // if (forcedUnitId) {
+        //     rangeReferenceObject.setForcedUnitIdDirect(forcedUnitId);
+        // }
+
+        return rangeReferenceObject;
     }
 }

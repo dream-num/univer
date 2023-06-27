@@ -1,4 +1,4 @@
-import { BlockType, getBorderStyleType, ICellData, IDocumentData, IElement, IRangeData, IStyleData, ITextDecoration, Tools } from '@univerjs/core';
+import { getBorderStyleType, IBorderData, ICellData, IDocumentData, IKeyValue, IRangeData, IStyleData, ITextDecoration, ITextRun, Tools } from '@univerjs/core';
 import { ptToPx, pxToPt } from '@univerjs/base-render';
 import { textTrim } from '../Utils';
 
@@ -25,8 +25,10 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
     if (nodeList.length === 1 && nodeList[0].nodeName === '#text') {
         return nodeList[0].textContent as string;
     }
-    const elements: IElement[] = [];
+    const textRuns: ITextRun[] = [];
     let ed = 0;
+    let dataStream = $dom.textContent || '';
+    dataStream += '\r\n';
 
     for (let i = 0; i < nodeList.length; i++) {
         let span = nodeList[`${i}`] as HTMLElement;
@@ -44,17 +46,13 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
 
         spanTexts.forEach((item) => {
             ed = +item.length;
-            let eId = Tools.generateRandomId(6);
+            let sId = Tools.generateRandomId(6);
 
-            elements.push({
-                eId,
+            textRuns.push({
+                sId,
                 st: 0,
                 ed: item.length - 1,
-                et: 0,
-                tr: {
-                    ct: item,
-                    ts: textStyle,
-                },
+                ts: textStyle,
             });
             // // 如果有 \n 说明有换行，另起一段
             // if (item.includes('\n')) {
@@ -87,31 +85,11 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
     }
 
     const blockId = Tools.generateRandomId(6);
-    let p = {
+    let p: IDocumentData = {
         id: Tools.generateRandomId(6),
         body: {
-            blockElements: [
-                {
-                    blockId,
-                    st: 0,
-                    ed,
-                    blockType: 0,
-                    paragraph: {
-                        elements,
-                    },
-                },
-                {
-                    blockId: 'b',
-                    st: 0,
-                    ed: 0,
-                    blockType: BlockType.SECTION_BREAK,
-                    sectionBreak: {
-                        columnProperties: [],
-                        columnSeparatorType: 1,
-                        sectionType: 0,
-                    },
-                },
-            ],
+            dataStream,
+            textRuns,
         },
         documentStyle: {},
     };
@@ -371,11 +349,11 @@ export function handleStringToStyle($dom: HTMLElement, cssStyle: string = '') {
                     },
                 };
                 for (let k in colors) {
-                    styleList.bd[k].cl.rgb = colors[k];
+                    (styleList.bd as IKeyValue)[k].cl.rgb = colors[k as keyof IBorderData];
                 }
             } else {
                 for (let k in colors) {
-                    styleList.bd[k].cl.rgb = colors[k];
+                    (styleList.bd as IKeyValue)[k].cl.rgb = colors[k as keyof IBorderData];
                 }
             }
         }
@@ -383,7 +361,7 @@ export function handleStringToStyle($dom: HTMLElement, cssStyle: string = '') {
         if (key === 'border-width' || key === 'border-style') {
             const width = handleBorder(value, ' ');
             for (let k in width) {
-                borderInfo[k] += ` ${width[k]}`;
+                (borderInfo as IKeyValue)[k] += ` ${width[k as keyof IBorderData]}`;
             }
             if (!styleList.bd) {
                 styleList.bd = {
@@ -464,7 +442,7 @@ export function handleStringToStyle($dom: HTMLElement, cssStyle: string = '') {
     return styleList;
 }
 
-function handleBorder(border: string, param: string) {
+function handleBorder(border: string, param: string): IBorderData {
     let arr;
     if (param === ' ') {
         arr = border.trim().split(param);
@@ -639,8 +617,8 @@ export function handelTableToJson(table: string) {
             }
             if (data[r][c] == null) {
                 data[r][c] = cell;
-                let rowSpan = td.getAttribute('rowSpan') ?? 1;
-                let colSpan = td.getAttribute('colSpan') ?? 1;
+                let rowSpan = Number(td.getAttribute('rowSpan')) ?? 1;
+                let colSpan = Number(td.getAttribute('colSpan')) ?? 1;
                 if (rowSpan > 1 || colSpan > 1) {
                     let first = { rs: +rowSpan - 1, cs: +colSpan - 1, r, c };
                     data[r][c].mc = first;
@@ -800,8 +778,8 @@ export function handelExcelToJson(html: string) {
             }
             if (data[r][c] == null) {
                 data[r][c] = cell;
-                let rowSpan = td.getAttribute('rowSpan') ?? 1;
-                let colSpan = td.getAttribute('colSpan') ?? 1;
+                let rowSpan = Number(td.getAttribute('rowSpan')) ?? 1;
+                let colSpan = Number(td.getAttribute('colSpan')) ?? 1;
 
                 if (rowSpan > 1 || colSpan > 1) {
                     let first = { rs: +rowSpan - 1, cs: +colSpan - 1, r, c };
@@ -824,8 +802,8 @@ export function handelExcelToJson(html: string) {
     return data;
 }
 
-function getStyles(styleText: string) {
-    let output = {};
+function getStyles(styleText: string): IKeyValue {
+    let output: IKeyValue = {};
     const string = styleText.replaceAll('<!--', '').replaceAll('-->', '').trim();
     const style = string?.replaceAll('\t', '').replaceAll('\n', '').split('}');
     for (let i = 0; i < style.length; i++) {

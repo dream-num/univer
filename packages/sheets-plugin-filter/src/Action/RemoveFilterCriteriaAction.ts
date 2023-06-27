@@ -10,7 +10,13 @@ export interface IRemoveFilterCriteriaAction extends ISheetActionData {
 
 export class RemoveFilterCriteriaAction extends SheetActionBase<IRemoveFilterCriteriaAction, IAddFilterCriteriaActionData> {
     constructor(actionData: IRemoveFilterCriteriaAction, workbook: Workbook, observers: ActionObservers) {
-        super(actionData, workbook, observers);
+        super(
+            actionData,
+            {
+                WorkBookUnit: workbook,
+            },
+            observers
+        );
         this._doActionData = {
             ...actionData,
         };

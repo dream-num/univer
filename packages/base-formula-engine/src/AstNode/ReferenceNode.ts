@@ -15,12 +15,12 @@ import { ErrorNode } from './ErrorNode';
 import { ErrorType } from '../Basics/ErrorType';
 
 export class ReferenceNode extends BaseAstNode {
-    get nodeType() {
-        return NodeType.REFERENCE;
-    }
-
     constructor(private _operatorString: string, private _referenceObject: BaseReferenceObject) {
         super(_operatorString);
+    }
+
+    get nodeType() {
+        return NodeType.REFERENCE;
     }
 
     execute(interpreterCalculateProps?: IInterpreterDatasetConfig, runtimeData?: UnitDataType) {

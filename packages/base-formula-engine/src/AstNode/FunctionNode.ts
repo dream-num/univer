@@ -13,10 +13,6 @@ import { NodeType, NODE_ORDER_MAP } from './NodeType';
 import { PrefixNode } from './PrefixNode';
 
 export class FunctionNode extends BaseAstNode {
-    get nodeType() {
-        return NodeType.FUNCTION;
-    }
-
     constructor(token: string, private _functionExecutor: BaseFunction) {
         super(token);
 
@@ -27,6 +23,10 @@ export class FunctionNode extends BaseAstNode {
         if (this._functionExecutor.isAddress()) {
             this.setAddress();
         }
+    }
+
+    get nodeType() {
+        return NodeType.FUNCTION;
     }
 
     async executeAsync() {

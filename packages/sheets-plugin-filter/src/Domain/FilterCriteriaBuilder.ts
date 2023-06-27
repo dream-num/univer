@@ -1,49 +1,8 @@
 import { BooleanCriteria, Color, SheetContext, RelativeDate, Serializer, Tools, Tuples } from '@univerjs/core';
-import { ConditionValue } from '@univerjs/sheets-plugin-conditional-format/src/Types';
+import { ConditionValue } from '@univerjs/sheets-plugin-conditional-format';
 import { FilterCriteria, IFilterCriteria } from './FilterCriteria';
 
-export class FilterCriteriaBuilder extends Serializer implements SheetContext.WithContext<FilterCriteriaBuilder> {
-    static newInstance(sequence: IFilterCriteria): FilterCriteriaBuilder {
-        const builder = new FilterCriteriaBuilder();
-        builder._criteriaType = sequence.criteriaType;
-        builder._whenNumberGreaterThanOrEqualTo = sequence.whenNumberGreaterThanOrEqualTo;
-        builder._whenDateNotEqualToAny = sequence.whenDateNotEqualToAny;
-        builder._whenNumberBetweenStart = sequence.whenNumberBetweenStart;
-        builder._whenNumberBetweenEnd = sequence.whenNumberBetweenEnd;
-        builder._criteriaValues = sequence.criteriaValues;
-        builder._hiddenValues = sequence.hiddenValues;
-        builder._visibleValues = sequence.visibleValues;
-        builder._visibleForegroundColor = sequence.visibleForegroundColor;
-        builder._visibleBackgroundColor = sequence.visibleBackgroundColor;
-        builder._whenDateEqualToDate = sequence.whenDateEqualToDate;
-        builder._whenDateEqualToRelativeDate = sequence.whenDateEqualToRelativeDate;
-        builder._whenDateAfterRelativeDate = sequence.whenDateAfterRelativeDate;
-        builder._whenDateBeforeRelativeDate = sequence.whenDateBeforeRelativeDate;
-        builder._whenNumberEqualToAny = sequence.whenNumberEqualToAny;
-        builder._whenNumberGreaterThan = sequence.whenNumberGreaterThan;
-        builder._whenDateAfter = sequence.whenDateAfter;
-        builder._whenDateBefore = sequence.whenDateBefore;
-        builder._whenDateNotEqualTo = sequence.whenDateNotEqualTo;
-        builder._whenFormulaSatisfied = sequence.whenFormulaSatisfied;
-        builder._whenDateEqualToAny = sequence.whenDateEqualToAny;
-        builder._whenNumberEqualTo = sequence.whenNumberEqualTo;
-        builder._whenNumberNotEqualTo = sequence.whenNumberNotEqualTo;
-        builder._whenNumberNotEqualToAny = sequence.whenNumberNotEqualToAny;
-        builder._whenTextContains = sequence.whenTextContains;
-        builder._whenTextDoesNotContain = sequence.whenTextDoesNotContain;
-        builder._whenTextEndsWith = sequence.whenTextEndsWith;
-        builder._whenTextEqualTo = sequence.whenTextEqualTo;
-        builder._whenTextEqualToAny = sequence.whenTextEqualToAny;
-        builder._whenTextNotEqualTo = sequence.whenTextNotEqualTo;
-        builder._whenTextNotEqualToAny = sequence.whenTextNotEqualToAny;
-        builder._whenTextStartsWith = sequence.whenTextStartsWith;
-        builder._whenNumberNotBetweenStart = sequence.whenNumberNotBetweenStart;
-        builder._whenNumberNotBetweenEnd = sequence.whenNumberNotBetweenEnd;
-        builder._whenNumberLessThan = sequence.whenNumberLessThan;
-        builder._whenNumberLessThanOrEqualTo = sequence.whenNumberLessThanOrEqualTo;
-        return builder;
-    }
-
+export class FilterCriteriaBuilder extends Serializer {
     private _context: SheetContext;
 
     private _whenNumberGreaterThanOrEqualTo: number;
@@ -117,6 +76,47 @@ export class FilterCriteriaBuilder extends Serializer implements SheetContext.Wi
     private _whenNumberLessThan: number;
 
     private _whenNumberLessThanOrEqualTo: number;
+
+    static newInstance(sequence: IFilterCriteria): FilterCriteriaBuilder {
+        const builder = new FilterCriteriaBuilder();
+        builder._criteriaType = sequence.criteriaType;
+        builder._whenNumberGreaterThanOrEqualTo = sequence.whenNumberGreaterThanOrEqualTo;
+        builder._whenDateNotEqualToAny = sequence.whenDateNotEqualToAny;
+        builder._whenNumberBetweenStart = sequence.whenNumberBetweenStart;
+        builder._whenNumberBetweenEnd = sequence.whenNumberBetweenEnd;
+        builder._criteriaValues = sequence.criteriaValues;
+        builder._hiddenValues = sequence.hiddenValues;
+        builder._visibleValues = sequence.visibleValues;
+        builder._visibleForegroundColor = sequence.visibleForegroundColor;
+        builder._visibleBackgroundColor = sequence.visibleBackgroundColor;
+        builder._whenDateEqualToDate = sequence.whenDateEqualToDate;
+        builder._whenDateEqualToRelativeDate = sequence.whenDateEqualToRelativeDate;
+        builder._whenDateAfterRelativeDate = sequence.whenDateAfterRelativeDate;
+        builder._whenDateBeforeRelativeDate = sequence.whenDateBeforeRelativeDate;
+        builder._whenNumberEqualToAny = sequence.whenNumberEqualToAny;
+        builder._whenNumberGreaterThan = sequence.whenNumberGreaterThan;
+        builder._whenDateAfter = sequence.whenDateAfter;
+        builder._whenDateBefore = sequence.whenDateBefore;
+        builder._whenDateNotEqualTo = sequence.whenDateNotEqualTo;
+        builder._whenFormulaSatisfied = sequence.whenFormulaSatisfied;
+        builder._whenDateEqualToAny = sequence.whenDateEqualToAny;
+        builder._whenNumberEqualTo = sequence.whenNumberEqualTo;
+        builder._whenNumberNotEqualTo = sequence.whenNumberNotEqualTo;
+        builder._whenNumberNotEqualToAny = sequence.whenNumberNotEqualToAny;
+        builder._whenTextContains = sequence.whenTextContains;
+        builder._whenTextDoesNotContain = sequence.whenTextDoesNotContain;
+        builder._whenTextEndsWith = sequence.whenTextEndsWith;
+        builder._whenTextEqualTo = sequence.whenTextEqualTo;
+        builder._whenTextEqualToAny = sequence.whenTextEqualToAny;
+        builder._whenTextNotEqualTo = sequence.whenTextNotEqualTo;
+        builder._whenTextNotEqualToAny = sequence.whenTextNotEqualToAny;
+        builder._whenTextStartsWith = sequence.whenTextStartsWith;
+        builder._whenNumberNotBetweenStart = sequence.whenNumberNotBetweenStart;
+        builder._whenNumberNotBetweenEnd = sequence.whenNumberNotBetweenEnd;
+        builder._whenNumberLessThan = sequence.whenNumberLessThan;
+        builder._whenNumberLessThanOrEqualTo = sequence.whenNumberLessThanOrEqualTo;
+        return builder;
+    }
 
     // Constructs a filter criteria from the settings supplied to the builder.
     build(): FilterCriteria {

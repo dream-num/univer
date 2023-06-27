@@ -11,17 +11,7 @@ export interface IFilter extends Sequence {
     };
 }
 
-export class Filter extends Serializer implements GroupModel<{ [column: number]: FilterCriteriaColumn }>, SheetContext.WithContext<Filter> {
-    static newInstance(sequence: IFilter): Filter {
-        const filter = new Filter(sequence.sheetId, sequence.range);
-        const criteriaColumns = {};
-        for (let column in sequence.criteriaColumns) {
-            criteriaColumns[column] = FilterCriteriaColumn.fromSequence(sequence.criteriaColumns[column]);
-        }
-        filter._criteriaColumns = criteriaColumns;
-        return filter;
-    }
-
+export class Filter extends Serializer implements GroupModel<{ [column: number]: FilterCriteriaColumn }> {
     private _context: SheetContext;
 
     private _range: IRangeData;
@@ -37,6 +27,16 @@ export class Filter extends Serializer implements GroupModel<{ [column: number]:
         this._sheetId = sheetId;
         this._range = range;
         this._criteriaColumns = {};
+    }
+
+    static newInstance(sequence: IFilter): Filter {
+        const filter = new Filter(sequence.sheetId, sequence.range);
+        const criteriaColumns: any = {};
+        for (let column in sequence.criteriaColumns) {
+            criteriaColumns[column] = FilterCriteriaColumn.fromSequence(sequence.criteriaColumns[column]);
+        }
+        filter._criteriaColumns = criteriaColumns;
+        return filter;
     }
 
     withContext(context: SheetContext): Filter {
@@ -72,7 +72,12 @@ export class Filter extends Serializer implements GroupModel<{ [column: number]:
                 columnPosition,
                 criteriaColumn: criteriaColumn.toSequence(),
             };
-            const command = new Command(workbook, configure);
+            const command = new Command(
+                {
+                    WorkBookUnit: workbook,
+                },
+                configure
+            );
             commandManager.invoke(command);
         }
     }

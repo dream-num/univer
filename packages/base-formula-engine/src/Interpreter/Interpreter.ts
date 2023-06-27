@@ -22,76 +22,20 @@ export class Interpreter {
 
     private _unitArrayFormulaData: UnitArrayFormulaDataType = {};
 
-    private _checkAsyncNode(node: BaseAstNode, resultList: boolean[]) {
-        const children = node.getChildren();
-        const childrenCount = children.length;
-        for (let i = 0; i < childrenCount; i++) {
-            const item = children[i];
-            resultList.push(item.isAsync());
-            this._checkAsyncNode(item, resultList);
-        }
-    }
-
-    private async _executeAsync(node: BaseAstNode): Promise<AstNodePromiseType> {
-        const children = node.getChildren();
-        const childrenCount = children.length;
-        for (let i = 0; i < childrenCount; i++) {
-            const item = children[i];
-            this._executeAsync(item);
-        }
-
-        if (node.nodeType === NodeType.FUNCTION && (node as FunctionNode).isAsync()) {
-            await node.executeAsync(this._interpreterDatasetConfig);
-        } else {
-            node.execute(this._interpreterDatasetConfig, this._runtimeData);
-        }
-
-        return Promise.resolve(AstNodePromiseType.SUCCESS);
-    }
-
-    private _execute(node: BaseAstNode): AstNodePromiseType {
-        const children = node.getChildren();
-        const childrenCount = children.length;
-        for (let i = 0; i < childrenCount; i++) {
-            const item = children[i];
-            this._execute(item);
-        }
-
-        node.execute(this._interpreterDatasetConfig, this._runtimeData);
-
-        return AstNodePromiseType.SUCCESS;
-    }
-
-    private _objectValueToCellValue(objectValue: CalculateValueType) {
-        if (objectValue.isErrorObject()) {
-            return {
-                v: (objectValue as ErrorValueObject).getErrorType() as string,
-                t: CellValueType.STRING,
-            };
-        }
-        if (objectValue.isValueObject()) {
-            const vo = objectValue as BaseValueObject;
-            const v = vo.getValue();
-            if (vo.isNumber()) {
-                return {
-                    v,
-                    t: CellValueType.NUMBER,
-                };
-            }
-            if (vo.isBoolean()) {
-                return {
-                    v,
-                    t: CellValueType.BOOLEAN,
-                };
-            }
-            return {
-                v,
-                t: CellValueType.STRING,
-            };
-        }
-    }
-
     constructor(private _interpreterDatasetConfig?: IInterpreterDatasetConfig) {}
+
+    // static interpreter: Interpreter;
+
+    static create(interpreterDatasetConfig?: IInterpreterDatasetConfig) {
+        return new Interpreter(interpreterDatasetConfig);
+        // if (!this.interpreter) {
+        //     this.interpreter = new Interpreter(interpreterCalculateProps);
+        // }
+
+        // interpreterCalculateProps && this.interpreter.setProps(interpreterCalculateProps);
+
+        // return this.interpreter;
+    }
 
     async executeAsync(node: BaseAstNode): Promise<FunctionVariantType> {
         // if (!this._interpreterCalculateProps) {
@@ -213,16 +157,72 @@ export class Interpreter {
         this._interpreterDatasetConfig.currentUnitId = unitId;
     }
 
-    // static interpreter: Interpreter;
+    private _checkAsyncNode(node: BaseAstNode, resultList: boolean[]) {
+        const children = node.getChildren();
+        const childrenCount = children.length;
+        for (let i = 0; i < childrenCount; i++) {
+            const item = children[i];
+            resultList.push(item.isAsync());
+            this._checkAsyncNode(item, resultList);
+        }
+    }
 
-    static create(interpreterDatasetConfig?: IInterpreterDatasetConfig) {
-        return new Interpreter(interpreterDatasetConfig);
-        // if (!this.interpreter) {
-        //     this.interpreter = new Interpreter(interpreterCalculateProps);
-        // }
+    private async _executeAsync(node: BaseAstNode): Promise<AstNodePromiseType> {
+        const children = node.getChildren();
+        const childrenCount = children.length;
+        for (let i = 0; i < childrenCount; i++) {
+            const item = children[i];
+            this._executeAsync(item);
+        }
 
-        // interpreterCalculateProps && this.interpreter.setProps(interpreterCalculateProps);
+        if (node.nodeType === NodeType.FUNCTION && (node as FunctionNode).isAsync()) {
+            await node.executeAsync(this._interpreterDatasetConfig);
+        } else {
+            node.execute(this._interpreterDatasetConfig, this._runtimeData);
+        }
 
-        // return this.interpreter;
+        return Promise.resolve(AstNodePromiseType.SUCCESS);
+    }
+
+    private _execute(node: BaseAstNode): AstNodePromiseType {
+        const children = node.getChildren();
+        const childrenCount = children.length;
+        for (let i = 0; i < childrenCount; i++) {
+            const item = children[i];
+            this._execute(item);
+        }
+
+        node.execute(this._interpreterDatasetConfig, this._runtimeData);
+
+        return AstNodePromiseType.SUCCESS;
+    }
+
+    private _objectValueToCellValue(objectValue: CalculateValueType) {
+        if (objectValue.isErrorObject()) {
+            return {
+                v: (objectValue as ErrorValueObject).getErrorType() as string,
+                t: CellValueType.STRING,
+            };
+        }
+        if (objectValue.isValueObject()) {
+            const vo = objectValue as BaseValueObject;
+            const v = vo.getValue();
+            if (vo.isNumber()) {
+                return {
+                    v,
+                    t: CellValueType.NUMBER,
+                };
+            }
+            if (vo.isBoolean()) {
+                return {
+                    v,
+                    t: CellValueType.BOOLEAN,
+                };
+            }
+            return {
+                v,
+                t: CellValueType.STRING,
+            };
+        }
     }
 }

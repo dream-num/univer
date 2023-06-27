@@ -13,12 +13,12 @@ import { LexerNode } from '../Analysis/LexerNode';
 import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
 
 export class PrefixNode extends BaseAstNode {
-    get nodeType() {
-        return NodeType.PREFIX;
-    }
-
     constructor(private _operatorString: string, private _functionExecutor?: BaseFunction) {
         super(_operatorString);
+    }
+
+    get nodeType() {
+        return NodeType.PREFIX;
     }
 
     private _handlerAT(value: FunctionVariantType, interpreterDatasetConfig?: IInterpreterDatasetConfig) {

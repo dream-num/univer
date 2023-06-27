@@ -2,19 +2,11 @@ import { ErrorType } from '../Basics/ErrorType';
 import { ObjectClassType } from '../Basics/ObjectClassType';
 
 export class ErrorValueObject extends ObjectClassType {
-    getErrorType() {
-        return this._errorType;
-    }
-
-    isErrorObject() {
-        return true;
-    }
+    static errorMap: Map<ErrorType, ErrorValueObject> = new Map();
 
     constructor(private _errorType: ErrorType) {
         super();
     }
-
-    static errorMap: Map<ErrorType, ErrorValueObject> = new Map();
 
     static create(errorType: ErrorType) {
         if (this.errorMap.has(errorType)) {
@@ -23,5 +15,13 @@ export class ErrorValueObject extends ObjectClassType {
         const errorValueObject = new ErrorValueObject(errorType);
         this.errorMap.set(errorType, errorValueObject);
         return errorValueObject;
+    }
+
+    getErrorType() {
+        return this._errorType;
+    }
+
+    isErrorObject() {
+        return true;
     }
 }

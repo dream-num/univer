@@ -12,7 +12,13 @@ export interface IAddFilterCriteriaActionData extends ISheetActionData {
 
 export class AddFilterCriteriaAction extends SheetActionBase<IAddFilterCriteriaActionData, IRemoveFilterCriteriaAction> {
     constructor(actionData: IAddFilterCriteriaActionData, workbook: Workbook, observers: ActionObservers) {
-        super(actionData, workbook, observers);
+        super(
+            actionData,
+            {
+                WorkBookUnit: workbook,
+            },
+            observers
+        );
         this._doActionData = {
             ...actionData,
         };

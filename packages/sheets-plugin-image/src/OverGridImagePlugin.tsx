@@ -1,16 +1,11 @@
-import { ISlotElement, ISlotProps, IToolbarItemProps } from '@univerjs/base-ui';
-import { Command, Plugin, PLUGIN_NAMES, Nullable, Worksheet, IOCContainer, UniverSheet } from '@univerjs/core';
-import { SheetPlugin } from '@univerjs/base-sheets';
+import { Command, Plugin, Nullable, Worksheet, UniverSheet } from '@univerjs/core';
 import { IPictureProps } from '@univerjs/base-render';
 import { ACTION_NAMES } from './Const';
 import { ImagePluginObserve, install, uninstall } from './Basics/Observer';
 import { OVER_GRID_IMAGE_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 import { OverImageRender } from './View/OverImageRender';
-import { BorderType } from './Enum/BorderType';
-import { NormalType } from './Enum/NormalType';
-import { ImagePanelUI } from './UI/ImagePanel/ImagePanelUI';
-import { ImageUploadButtonUI } from './UI/ImageUploadButton/ImageUploadButtonUI';
 import './Command/RegisterAction';
+import { OverGridImageController } from './Controller/OverGridImageController';
 
 export enum OverGridImageBorderType {
     DASHED,
@@ -67,17 +62,22 @@ export class OverGridImage {
     }
 
     getSheet(): Nullable<Worksheet> {
-        return this.getPlugin().getContext().getWorkBook().getSheetBySheetId(this._property.sheetId);
+        return this.getPlugin().getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(this._property.sheetId);
     }
 
     setHeight(height: number): void {
         const manager = this.getPlugin().getContext().getCommandManager();
-        const workbook = this.getPlugin().getContext().getWorkBook();
+        const workbook = this.getPlugin().getUniver().getCurrentUniverSheetInstance().getWorkBook();
         const configure = {
             actionName: ACTION_NAMES.SET_IMAGE_TYPE_ACTION,
             sheetId: this._property.sheetId,
         };
-        const command = new Command(workbook, configure);
+        const command = new Command(
+            {
+                WorkBookUnit: workbook,
+            },
+            configure
+        );
         manager.invoke(command);
     }
 }
@@ -93,80 +93,39 @@ export class OverGridImagePlugin extends Plugin<ImagePluginObserve> {
 
     protected _render: OverImageRender;
 
-    constructor(config: IOverGridImagePluginConfig) {
+    protected _overGridImageController: OverGridImageController;
+
+    constructor(config: IOverGridImagePluginConfig = { value: [] }) {
         super(OVER_GRID_IMAGE_PLUGIN_NAME);
         this._config = config;
     }
 
-    static create(config: IOverGridImagePluginConfig) {
+    static create(config: IOverGridImagePluginConfig): OverGridImagePlugin {
         return new OverGridImagePlugin(config);
     }
 
-    installTo(universheetInstance: UniverSheet) {
-        universheetInstance.installPlugin(this);
-    }
-
-    onMapping(ioc: IOCContainer) {
-        super.onMapping(ioc);
+    installTo(univerSheetInstance: UniverSheet): void {
+        univerSheetInstance.installPlugin(this);
     }
 
     onMounted(): void {
         install(this);
-        const plugin = this.getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
-        const panel: ISlotProps = {
-            name: OVER_GRID_IMAGE_PLUGIN_NAME,
-            type: ISlotElement.JSX,
-            label: <ImagePanelUI normal={NormalType.MoveAndSize} fixed={false} borderStyle={BorderType.Solid} borderWidth={1} borderRadius={1} borderColor={'#000000'} />,
-        };
-        const button: IToolbarItemProps = {
-            locale: OVER_GRID_IMAGE_PLUGIN_NAME,
-            type: ISlotElement.JSX,
-            show: true,
-            label: (
-                <ImageUploadButtonUI
-                    chooseCallback={(src: string) => {
-                        const manager = this.getContext().getCommandManager();
-                        const workbook = this.getContext().getWorkBook();
-                        let image = new Image();
-                        image.src = src;
-                        image.onload = () => {
-                            const configure = {
-                                actionName: ACTION_NAMES.ADD_IMAGE_PROPERTY_ACTION,
-                                sheetId: workbook.getActiveSheet()!.getSheetId(),
-                                radius: 0,
-                                url: src,
-                                row: 0,
-                                column: 0,
-                                borderType: OverGridImageBorderType.DASHED,
-                                width: image.width,
-                                height: image.height,
-                                borderWidth: 5,
-                                borderColor: 'red',
-                            };
-                            const command = new Command(workbook, configure);
-                            manager.invoke(command);
-                        };
-                    }}
-                />
-            ),
-        };
-        plugin.addButton(button);
-        plugin.addSider(panel).then();
+        this._overGridImageController = new OverGridImageController(this);
         this._render = new OverImageRender(this);
     }
 
-    onDestroy() {
+    onDestroy(): void {
         uninstall(this);
     }
 
     hideOverImagePanel(): void {
-        const plugin: SheetPlugin = this.getPluginByName(PLUGIN_NAMES.SPREADSHEET)!;
-        plugin.showSiderByName(OVER_GRID_IMAGE_PLUGIN_NAME, false);
+        // const plugin: SheetPlugin = this.getPluginByName(PLUGIN_NAMES.SPREADSHEET)!;
+        // plugin.showSiderByName(OVER_GRID_IMAGE_PLUGIN_NAME, false);
     }
 
     showOverImagePanel(): void {
-        const plugin: SheetPlugin = this.getPluginByName(PLUGIN_NAMES.SPREADSHEET)!;
-        plugin.showSiderByName(OVER_GRID_IMAGE_PLUGIN_NAME, true);
+        // const plugin: SheetPlugin = this.getPluginByName(PLUGIN_NAMES.SPREADSHEET)!;
+        // plugin.showSiderByName(OVER_GRID_IMAGE_PLUGIN_NAME, true);
     }
 
     getConfig(): IOverGridImagePluginConfig {

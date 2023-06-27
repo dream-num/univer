@@ -1,5 +1,4 @@
 import { BooleanCriteria, Color, SheetContext, RelativeDate, Sequence, Serializer, Tools } from '@univerjs/core';
-import { ConditionValue } from '@univerjs/sheets-plugin-conditional-format/src/Types';
 import { FilterCriteriaBuilder } from './FilterCriteriaBuilder';
 
 export interface IFilterCriteria extends Sequence {
@@ -76,48 +75,7 @@ export interface IFilterCriteria extends Sequence {
     whenNumberLessThanOrEqualTo: number;
 }
 
-export class FilterCriteria extends Serializer implements SheetContext.WithContext<FilterCriteria> {
-    static newInstance(sequence: IFilterCriteria): FilterCriteria {
-        const criteria = new FilterCriteria();
-        criteria._criteriaType = sequence.criteriaType;
-        criteria._whenNumberGreaterThanOrEqualTo = sequence.whenNumberGreaterThanOrEqualTo;
-        criteria._whenDateNotEqualToAny = sequence.whenDateNotEqualToAny;
-        criteria._whenNumberBetweenStart = sequence.whenNumberBetweenStart;
-        criteria._whenNumberBetweenEnd = sequence.whenNumberBetweenEnd;
-        criteria._criteriaValues = sequence.criteriaValues;
-        criteria._hiddenValues = sequence.hiddenValues;
-        criteria._visibleValues = sequence.visibleValues;
-        criteria._visibleForegroundColor = sequence.visibleForegroundColor;
-        criteria._visibleBackgroundColor = sequence.visibleBackgroundColor;
-        criteria._whenDateEqualToDate = sequence.whenDateEqualToDate;
-        criteria._whenDateEqualToRelativeDate = sequence.whenDateEqualToRelativeDate;
-        criteria._whenDateAfterRelativeDate = sequence.whenDateAfterRelativeDate;
-        criteria._whenDateBeforeRelativeDate = sequence.whenDateBeforeRelativeDate;
-        criteria._whenNumberEqualToAny = sequence.whenNumberEqualToAny;
-        criteria._whenNumberGreaterThan = sequence.whenNumberGreaterThan;
-        criteria._whenDateAfter = sequence.whenDateAfter;
-        criteria._whenDateBefore = sequence.whenDateBefore;
-        criteria._whenDateNotEqualTo = sequence.whenDateNotEqualTo;
-        criteria._whenFormulaSatisfied = sequence.whenFormulaSatisfied;
-        criteria._whenDateEqualToAny = sequence.whenDateEqualToAny;
-        criteria._whenNumberEqualTo = sequence.whenNumberEqualTo;
-        criteria._whenNumberNotEqualTo = sequence.whenNumberNotEqualTo;
-        criteria._whenNumberNotEqualToAny = sequence.whenNumberNotEqualToAny;
-        criteria._whenTextContains = sequence.whenTextContains;
-        criteria._whenTextDoesNotContain = sequence.whenTextDoesNotContain;
-        criteria._whenTextEndsWith = sequence.whenTextEndsWith;
-        criteria._whenTextEqualTo = sequence.whenTextEqualTo;
-        criteria._whenTextEqualToAny = sequence.whenTextEqualToAny;
-        criteria._whenTextNotEqualTo = sequence.whenTextNotEqualTo;
-        criteria._whenTextNotEqualToAny = sequence.whenTextNotEqualToAny;
-        criteria._whenTextStartsWith = sequence.whenTextStartsWith;
-        criteria._whenNumberNotBetweenStart = sequence.whenNumberNotBetweenStart;
-        criteria._whenNumberNotBetweenEnd = sequence.whenNumberNotBetweenEnd;
-        criteria._whenNumberLessThan = sequence.whenNumberLessThan;
-        criteria._whenNumberLessThanOrEqualTo = sequence.whenNumberLessThanOrEqualTo;
-        return criteria;
-    }
-
+export class FilterCriteria extends Serializer {
     private _context: SheetContext;
 
     private _whenNumberGreaterThanOrEqualTo: number;
@@ -191,6 +149,47 @@ export class FilterCriteria extends Serializer implements SheetContext.WithConte
     private _whenNumberLessThan: number;
 
     private _whenNumberLessThanOrEqualTo: number;
+
+    static newInstance(sequence: IFilterCriteria): FilterCriteria {
+        const criteria = new FilterCriteria();
+        criteria._criteriaType = sequence.criteriaType;
+        criteria._whenNumberGreaterThanOrEqualTo = sequence.whenNumberGreaterThanOrEqualTo;
+        criteria._whenDateNotEqualToAny = sequence.whenDateNotEqualToAny;
+        criteria._whenNumberBetweenStart = sequence.whenNumberBetweenStart;
+        criteria._whenNumberBetweenEnd = sequence.whenNumberBetweenEnd;
+        criteria._criteriaValues = sequence.criteriaValues;
+        criteria._hiddenValues = sequence.hiddenValues;
+        criteria._visibleValues = sequence.visibleValues;
+        criteria._visibleForegroundColor = sequence.visibleForegroundColor;
+        criteria._visibleBackgroundColor = sequence.visibleBackgroundColor;
+        criteria._whenDateEqualToDate = sequence.whenDateEqualToDate;
+        criteria._whenDateEqualToRelativeDate = sequence.whenDateEqualToRelativeDate;
+        criteria._whenDateAfterRelativeDate = sequence.whenDateAfterRelativeDate;
+        criteria._whenDateBeforeRelativeDate = sequence.whenDateBeforeRelativeDate;
+        criteria._whenNumberEqualToAny = sequence.whenNumberEqualToAny;
+        criteria._whenNumberGreaterThan = sequence.whenNumberGreaterThan;
+        criteria._whenDateAfter = sequence.whenDateAfter;
+        criteria._whenDateBefore = sequence.whenDateBefore;
+        criteria._whenDateNotEqualTo = sequence.whenDateNotEqualTo;
+        criteria._whenFormulaSatisfied = sequence.whenFormulaSatisfied;
+        criteria._whenDateEqualToAny = sequence.whenDateEqualToAny;
+        criteria._whenNumberEqualTo = sequence.whenNumberEqualTo;
+        criteria._whenNumberNotEqualTo = sequence.whenNumberNotEqualTo;
+        criteria._whenNumberNotEqualToAny = sequence.whenNumberNotEqualToAny;
+        criteria._whenTextContains = sequence.whenTextContains;
+        criteria._whenTextDoesNotContain = sequence.whenTextDoesNotContain;
+        criteria._whenTextEndsWith = sequence.whenTextEndsWith;
+        criteria._whenTextEqualTo = sequence.whenTextEqualTo;
+        criteria._whenTextEqualToAny = sequence.whenTextEqualToAny;
+        criteria._whenTextNotEqualTo = sequence.whenTextNotEqualTo;
+        criteria._whenTextNotEqualToAny = sequence.whenTextNotEqualToAny;
+        criteria._whenTextStartsWith = sequence.whenTextStartsWith;
+        criteria._whenNumberNotBetweenStart = sequence.whenNumberNotBetweenStart;
+        criteria._whenNumberNotBetweenEnd = sequence.whenNumberNotBetweenEnd;
+        criteria._whenNumberLessThan = sequence.whenNumberLessThan;
+        criteria._whenNumberLessThanOrEqualTo = sequence.whenNumberLessThanOrEqualTo;
+        return criteria;
+    }
 
     copy(): FilterCriteriaBuilder {
         return FilterCriteriaBuilder.newInstance(this.toSequence());

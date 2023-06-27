@@ -46,11 +46,7 @@ export function InsertRange(
         // insert cell value from user
         for (let r = endRow; r >= startRow; r--) {
             for (let c = startColumn; c <= endColumn; c++) {
-                cellMatrix.setValue(
-                    r,
-                    c,
-                    (cellValue as ICellData)[r - startRow][c - startColumn]
-                );
+                cellMatrix.setValue(r, c, cellValue[r - startRow][c - startColumn]);
             }
         }
     } else if (shiftDimension === Dimension.COLUMNS) {
@@ -71,11 +67,7 @@ export function InsertRange(
         // }
         for (let r = startRow; r <= endRow; r++) {
             for (let c = endColumn; c >= startColumn; c--) {
-                cellMatrix.setValue(
-                    r,
-                    c,
-                    (cellValue as ICellData)[r - startRow][c - startColumn]
-                );
+                cellMatrix.setValue(r, c, cellValue[r - startRow][c - startColumn]);
             }
         }
     }
@@ -109,7 +101,7 @@ export function InsertRangeApply(unit: CommandUnit, data: IInsertRangeActionData
                 cellMatrix.setValue(
                     r,
                     c,
-                    (data.cellValue as ICellData)[r - startRow][c - startColumn]
+                    data.cellValue[r - startRow][c - startColumn]
                 );
             }
         }
@@ -133,7 +125,7 @@ export function InsertRangeApply(unit: CommandUnit, data: IInsertRangeActionData
                 cellMatrix.setValue(
                     r,
                     c,
-                    (data.cellValue as ICellData)[r - startRow][c - startColumn]
+                    data.cellValue[r - startRow][c - startColumn]
                 );
             }
         }

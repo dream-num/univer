@@ -1,5 +1,6 @@
 import { RowManager } from '../Domain/RowManager';
-import { CommandUnit, ISetRowHideActionData } from '../../Command';
+import { CommandUnit } from '../../Command';
+import { ISetRowHideActionData } from '../Action';
 
 /**
  *

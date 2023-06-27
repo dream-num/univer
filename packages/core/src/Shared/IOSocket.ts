@@ -1,3 +1,5 @@
+import { IKeyValue } from './Types';
+
 function isDef(v: any) {
     return v !== undefined && v !== null;
 }
@@ -10,7 +12,7 @@ function isBlank(v: string) {
     return unDef(v) || v.toString() === '';
 }
 
-function extend(src: object, ...target: object[]) {
+function extend(src: IKeyValue, ...target: IKeyValue[]) {
     for (const item of target) {
         if (item) {
             for (const key in item) {

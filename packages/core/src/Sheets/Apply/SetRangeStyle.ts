@@ -3,6 +3,7 @@ import { Styles } from '../Domain';
 import { IRangeData, ICellData, IDocumentData, ITextRun } from '../../Interfaces';
 import { IBorderData, IStyleData } from '../../Interfaces/IStyleData';
 import {
+    IKeyValue,
     Nullable,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
@@ -137,7 +138,7 @@ export function transformBorders(
         // 1. To modify the existing border,we need original setting to undo
         // 2. Newly set the border, we need null to undo
         if (!(k in oldBorders)) {
-            oldBorders[k] = null;
+            (oldBorders as IKeyValue)[k] = null;
         }
     }
 
@@ -170,7 +171,7 @@ export function mergeStyle(
         if (k in backupStyle && k === 'bd') {
             backupStyle[k] = Object.assign(backupStyle[k], newStyle[k]);
         } else {
-            backupStyle[k] = newStyle[k];
+            backupStyle[k] = (newStyle as IKeyValue)[k];
 
             // overline/strikethrough/underline add color
             if ('cl' in backupStyle) {

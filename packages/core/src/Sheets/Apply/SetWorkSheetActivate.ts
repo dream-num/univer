@@ -1,6 +1,6 @@
-import { ISheetStatus } from '../../Command';
 import { Worksheet } from '../Domain/Worksheet';
 import { BooleanNumber } from '../../Enum';
+import { ISheetStatus } from '../Action';
 
 /**
  *

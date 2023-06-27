@@ -1,6 +1,7 @@
 import { Worksheet } from '../Domain/Worksheet';
 import { BooleanNumber } from '../../Enum';
-import { CommandUnit, ISetWorkSheetHideActionData } from '../../Command';
+import { CommandUnit } from '../../Command';
+import { ISetWorkSheetHideActionData } from '../Action';
 
 /**
  *
@@ -31,10 +32,18 @@ export function SetWorkSheetHideServiceApply(
     unit: CommandUnit,
     data: ISetWorkSheetHideActionData
 ) {
-    const worksheet = unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
+    if (unit.WorkBookUnit == null) {
+        throw new Error('Error WorkBookUnit is null');
+    }
+
+    const worksheet = unit.WorkBookUnit.getSheetBySheetId(data.sheetId);
+
+    if (worksheet == null) {
+        throw new Error(`Error worksheet is null sheetId:${data.sheetId}`);
+    }
 
     // get config
-    const config = worksheet?.getConfig();
+    const config = worksheet.getConfig();
 
     // store old hidden setting
     const oldHidden = config?.hidden;

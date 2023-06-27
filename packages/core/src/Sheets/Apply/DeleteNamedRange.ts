@@ -1,5 +1,6 @@
 import { INamedRange } from '../../Interfaces';
-import { CommandUnit, IDeleteNamedRangeActionData } from '../../Command';
+import { CommandUnit } from '../../Command';
+import { IDeleteNamedRangeActionData } from '../Action';
 
 export function DeleteNamedRange(
     namedRanges: INamedRange[],

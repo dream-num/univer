@@ -1,7 +1,8 @@
 import { Dimension } from '../../Enum';
 import { ICellData, IRangeData } from '../../Interfaces';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared';
-import { CommandUnit, IInsertRangeActionData } from '../../Command';
+import { CommandUnit } from '../../Command';
+import { IInsertRangeActionData } from '../Action';
 
 /**
  *

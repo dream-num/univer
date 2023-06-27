@@ -1,5 +1,6 @@
 import { INamedRange } from '../../Interfaces';
-import { CommandUnit, IAddNamedRangeActionData } from '../../Command';
+import { CommandUnit } from '../../Command';
+import { IAddNamedRangeActionData } from '../Action';
 
 export function AddNamedRange(
     namedRanges: INamedRange[],

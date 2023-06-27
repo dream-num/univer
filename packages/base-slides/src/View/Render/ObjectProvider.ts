@@ -32,8 +32,6 @@ export class ObjectProvider {
                 return o;
             }
         }
-
-        return;
     }
 
     private _adaptorLoader() {

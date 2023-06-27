@@ -11,11 +11,12 @@ import {
     ISize,
     ITextStyle,
     ITransformState,
+    DocumentBodyModel,
 } from '@univerjs/core';
 import { TextSelection } from '../Component/Docs/Common/TextSelection';
 import { Documents } from '../Component/Docs/Document';
 import {
-    IDocumentSkeletonBlockAnchor,
+    IDocumentSkeletonDrawingAnchor,
     IDocumentSkeletonBullet,
     IDocumentSkeletonDrawing,
     IDocumentSkeletonFontStyle,
@@ -68,6 +69,8 @@ export interface IMeasureTextCache {
 export interface IDocsConfig extends IReferenceSource, IDocumentLayout {
     fontLocale: IFontLocale;
     documentTextStyle?: ITextStyle;
+    headerTreeMap: Map<string, DocumentBodyModel>;
+    footerTreeMap: Map<string, DocumentBodyModel>;
 }
 
 export interface IHeaderIds {
@@ -90,7 +93,7 @@ export interface ISectionBreakConfig extends IDocStyleBase, ISectionBreakBase, I
 }
 
 export interface IParagraphConfig {
-    blockId: string;
+    paragraphIndex: number;
     paragraphAffectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
     // headerAndFooterAffectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
     bulletSkeleton?: IDocumentSkeletonBullet;
@@ -99,7 +102,7 @@ export interface IParagraphConfig {
     paragraphStyle?: IParagraphStyle;
     skeHeaders: Map<string, Map<number, IDocumentSkeletonHeader>>;
     skeFooters: Map<string, Map<number, IDocumentSkeletonFooter>>;
-    blockAnchor?: Map<string, IDocumentSkeletonBlockAnchor>;
+    drawingAnchor?: Map<number, IDocumentSkeletonDrawingAnchor>;
     // sectionBreakConfig: ISectionBreakConfig;
 }
 

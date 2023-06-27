@@ -1,9 +1,10 @@
-import { Rect, Shape } from '@univerjs/base-render';
+import { Rect } from '@univerjs/base-render';
 import { getColorStyle, IPageElement, PageElementType, ShapeType } from '@univerjs/core';
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 
 export class ShapeAdaptor extends ObjectAdaptor {
     zIndex = 2;
+
     viewKey = PageElementType.SHAPE;
 
     check(type: PageElementType) {
@@ -47,7 +48,8 @@ export class ShapeAdaptor extends ObjectAdaptor {
                 forceRender: true,
                 ...strokeStyle,
             });
-        } else if (shapeType === ShapeType.ROUND_RECTANGLE) {
+        }
+        if (shapeType === ShapeType.ROUND_RECTANGLE) {
             const radius = shapeProperties?.radius || 0;
             return new Rect(id, {
                 fill,
@@ -68,7 +70,8 @@ export class ShapeAdaptor extends ObjectAdaptor {
                 radius,
                 ...strokeStyle,
             });
-        } else if (shapeType === ShapeType.ELLIPSE) {
+        }
+        if (shapeType === ShapeType.ELLIPSE) {
         }
     }
 }

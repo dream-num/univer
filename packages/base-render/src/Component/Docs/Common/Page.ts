@@ -1,8 +1,8 @@
-import { IBlockElement, IFooterData, IHeaderData, Nullable, PageOrientType } from '@univerjs/core';
+import { DocumentBodyModel, Nullable, PageOrientType } from '@univerjs/core';
 import { createSkeletonSection } from './Section';
 import { BreakType, IDocumentSkeletonFooter, IDocumentSkeletonHeader, IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../Basics/IDocumentSkeletonCached';
 import { ISectionBreakConfig } from '../../../Basics/Interfaces';
-import { dealWithBlocks } from '../Block';
+import { dealWithSections } from '../Block/Section';
 import { updateBlockIndex } from './Tools';
 
 // 新增数据结构框架
@@ -23,8 +23,8 @@ export function createSkeletonPage(
         footerIds = {},
         useFirstPageHeaderFooter,
         useEvenPageHeaderFooter,
-        footers,
-        headers,
+        footerTreeMap,
+        headerTreeMap,
         columnProperties = [],
         columnSeparatorType,
         marginTop = 0,
@@ -69,8 +69,8 @@ export function createSkeletonPage(
     if (headerId) {
         if (skeHeaders.get(headerId)?.has(pageWidth)) {
             header = skeHeaders.get(headerId)?.get(pageWidth);
-        } else if (headers) {
-            header = _createSkeletonHeader(headers[headerId], sectionBreakConfig, skeletonResourceReference) as IDocumentSkeletonHeader;
+        } else if (headerTreeMap && headerTreeMap.has(headerId)) {
+            header = _createSkeletonHeader(headerTreeMap.get(headerId)!, sectionBreakConfig, skeletonResourceReference) as IDocumentSkeletonHeader;
             skeHeaders.set(headerId, new Map([[pageWidth, header]]));
         }
         page.headerId = headerId;
@@ -79,8 +79,8 @@ export function createSkeletonPage(
     if (footerId) {
         if (skeFooters.get(footerId)?.has(pageWidth)) {
             footer = skeFooters.get(footerId)?.get(pageWidth);
-        } else if (footers) {
-            footer = _createSkeletonHeader(footers[footerId], sectionBreakConfig, skeletonResourceReference) as IDocumentSkeletonFooter;
+        } else if (footerTreeMap && footerTreeMap.has(footerId)) {
+            footer = _createSkeletonHeader(footerTreeMap.get(footerId)!, sectionBreakConfig, skeletonResourceReference) as IDocumentSkeletonFooter;
             skeFooters.set(headerId, new Map([[pageWidth, footer]]));
         }
         page.footerId = footerId;
@@ -136,16 +136,15 @@ function _getNullPage() {
 }
 
 function _createSkeletonHeader(
-    headerOrFooter: IHeaderData | IFooterData,
+    headerOrFooter: DocumentBodyModel,
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
     isHeader = true
 ): IDocumentSkeletonHeader | IDocumentSkeletonFooter {
-    const { body: headerOrFooterBody } = headerOrFooter;
     const {
         lists,
-        headers,
-        footers,
+        footerTreeMap,
+        headerTreeMap,
         fontLocale,
         pageSize,
         marginLeft = 0,
@@ -159,8 +158,8 @@ function _createSkeletonHeader(
     const pageWidth = pageSize?.width || Infinity;
     const headerConfig: ISectionBreakConfig = {
         lists,
-        headers,
-        footers,
+        footerTreeMap,
+        headerTreeMap,
         pageSize: {
             width: pageWidth - marginLeft - marginRight,
             height: Infinity,
@@ -169,14 +168,8 @@ function _createSkeletonHeader(
         drawings,
     };
 
-    const { blockElements } = headerOrFooterBody;
-    const blockElementArray: IBlockElement[] = [];
-    blockElements.forEach((dcd: IBlockElement) => {
-        blockElementArray.push(dcd);
-    });
-
     const areaPage = createSkeletonPage(headerConfig, skeletonResourceReference);
-    const page = dealWithBlocks(blockElementArray, areaPage, headerConfig, skeletonResourceReference).pages[0];
+    const page = dealWithSections(headerOrFooter.children[0], areaPage, headerConfig, skeletonResourceReference).pages[0];
     updateBlockIndex([page]);
     const column = page.sections[0].columns[0];
     const height = column.height || 0;

@@ -99,7 +99,7 @@ function add(s: TokensType | string, tokens: TokensType[]) {
     if (s.type === 'string' && tokens.length && tokens[tokens.length - 1].type === 'string') {
         tokens[tokens.length - 1].value += s.value;
     } else {
-        tokens.push(<TokensType>s);
+        tokens.push(s as TokensType);
     }
 }
 

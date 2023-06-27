@@ -1,10 +1,8 @@
 // import { IShapeProps, Shape, IObjectFullState, Group, Scene } from '.';
 
 import {
-    BlockType,
     IDocumentData,
     IKeyValue,
-    ParagraphElementType,
     ContextBase,
     ITransformState,
     IStyleBase,
@@ -13,6 +11,7 @@ import {
     IColorStyle,
     IBorderData,
     Nullable,
+    DocumentModelSimple,
 } from '@univerjs/core';
 import { Canvas } from '../Canvas';
 import { BaseObject } from '../BaseObject';
@@ -28,6 +27,10 @@ export interface IRichTextProps extends ITransformState, IStyleBase {
     zIndex: number;
     isTransformer?: boolean;
     forceRender?: boolean;
+}
+
+interface MyInterface {
+    [key: string]: number | string;
 }
 
 export const RICHTEXT_OBJECT_ARRAY = ['text', 'richText'];
@@ -93,7 +96,9 @@ export class RichText extends BaseObject {
 
         this._context = context;
 
-        this._documentSkeleton = DocumentSkeleton.create(this._documentData, this._context);
+        const docModel = new DocumentModelSimple(this._documentData);
+
+        this._documentSkeleton = DocumentSkeleton.create(docModel, this._context);
 
         this._documents = new Documents(`${this.oKey}_DOCUMENTS`, this._documentSkeleton, {
             pageMarginLeft: 0,
@@ -105,7 +110,7 @@ export class RichText extends BaseObject {
         this.onTransformChangeObservable.add((changeState) => {
             const { type, value, preValue } = changeState;
             if (type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize || type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.all) {
-                this._documentSkeleton.updateDocumentDataPageSize(this.width);
+                docModel.updateDocumentDataPageSize(this.width);
                 this._documentSkeleton.makeDirty(true);
                 this._documentSkeleton.calculate();
                 const size = this.getDocsSkeletonPageSize();
@@ -142,11 +147,13 @@ export class RichText extends BaseObject {
             return;
         }
         themeKeys.forEach((key) => {
+            // @ts-ignore
             if (props[key] === undefined) {
                 return true;
             }
 
             if (RICHTEXT_OBJECT_ARRAY.indexOf(key) === -1) {
+                // @ts-ignore
                 this[`_${key}`] = props[key];
             }
         });
@@ -198,7 +205,9 @@ export class RichText extends BaseObject {
     toJson() {
         const props: IKeyValue = {};
         RICHTEXT_OBJECT_ARRAY.forEach((key) => {
+            // @ts-ignore
             if (this[key]) {
+                // @ts-ignore
                 props[key] = this[key];
             }
         });
@@ -217,37 +226,23 @@ export class RichText extends BaseObject {
         const documentData: IDocumentData = {
             id: 'd',
             body: {
-                blockElements: [
+                dataStream: `${text}\r\n`,
+                textRuns: [
                     {
-                        blockId: 'oneParagraph',
-                        st: 0,
-                        ed: contentLength,
-                        blockType: BlockType.PARAGRAPH,
-                        paragraph: {
-                            elements: [
-                                {
-                                    eId: 'oneElement',
-                                    st: 0,
-                                    ed: contentLength,
-                                    et: ParagraphElementType.TEXT_RUN,
-                                    tr: {
-                                        ct: text,
-                                        ts: {
-                                            fs: this._fs || 14,
-                                            ff: this._ff,
-                                            it: this._it,
-                                            bl: this._bl,
-                                            ul: this._ul,
-                                            st: this._st,
-                                            ol: this._ol,
-                                            bg: this._bg,
-                                            bd: this._bd,
-                                            cl: this._cl,
-                                        },
-                                    },
-                                },
-                            ],
+                        ts: {
+                            fs: this._fs || 14,
+                            ff: this._ff,
+                            it: this._it,
+                            bl: this._bl,
+                            ul: this._ul,
+                            st: this._st,
+                            ol: this._ol,
+                            bg: this._bg,
+                            bd: this._bd,
+                            cl: this._cl,
                         },
+                        st: 0,
+                        ed: contentLength - 1,
                     },
                 ],
             },
@@ -262,7 +257,7 @@ export class RichText extends BaseObject {
     }
 
     private _initialProps(props?: IRichTextProps) {
-        this._documentSkeleton.updateDocumentDataPageSize(props?.width, props?.height);
+        this._documentSkeleton.getModel().updateDocumentDataPageSize(props?.width, props?.height);
 
         this._documentSkeleton.calculate();
 

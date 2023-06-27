@@ -19,5 +19,3 @@ export * from './InsertParagraphBulletAction';
 export * from './InsertSectionAction';
 export * from './UpdateBulletAction';
 export * from './UpdateParagraphBulletAction';
-
-export * from './TextIndexAdjustAction';

@@ -1,6 +1,6 @@
 import { IPointerEvent, IMouseEvent } from '@univerjs/base-render';
 import { CANVAS_VIEW_KEY, SheetPlugin } from '@univerjs/base-sheets';
-import { getRefElement, CellEditExtensionManager, $$, setLastCaretPosition, handleStringToStyle, handleDomToJson } from '@univerjs/base-ui';
+import { getRefElement, CellEditExtensionManager, $$, setLastCaretPosition, handleStringToStyle, handleDomToJson, isCtrlPressed } from '@univerjs/base-ui';
 import { Direction, handleStyleToString, ICellData, isKeyPrintable, PLUGIN_NAMES, Tools } from '@univerjs/core';
 import { SheetUIPlugin } from '../SheetUIPlugin';
 import { RichText } from '../View/RichText';
@@ -244,7 +244,7 @@ export class CellEditorUIController {
 
         if (onKeyDownObservable && !onKeyDownObservable.hasObservers()) {
             onKeyDownObservable.add((evt: KeyboardEvent) => {
-                if (!evt.ctrlKey && isKeyPrintable(evt.key)) {
+                if (!isCtrlPressed(evt) && isKeyPrintable(evt.key)) {
                     // character key
                     this.enterEditMode(true);
                 } else {

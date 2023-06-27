@@ -1,4 +1,4 @@
-import { BlockType, PageElementType, ParagraphElementType } from '@univerjs/core';
+import { PageElementType } from '@univerjs/core';
 import { DEFAULT_LIST_TEST } from '../../Docs/DEFAULT_LIST';
 
 export const PAGE3_RICHTEXT_3 = {
@@ -16,66 +16,45 @@ export const PAGE3_RICHTEXT_3 = {
             id: 'd',
             lists: DEFAULT_LIST_TEST,
             body: {
-                blockElements: [
+                dataStream: `SuperApps are more than composite applications that aggregate services.\rAdaptive AI allows for model behavior change post-deployment by using real-time feedback\r\n`,
+                textRuns: [
                     {
-                        blockId: 'oneParagraph',
                         st: 0,
-                        ed: 59,
-                        blockType: BlockType.PARAGRAPH,
-                        paragraph: {
-                            bullet: {
-                                listId: 'testBullet',
-                                nestingLevel: 0,
-                                textStyle: {
-                                    fs: 20,
-                                },
-                            },
-                            paragraphStyle: {
-                                spaceBelow: 15,
-                            },
-                            elements: [
-                                {
-                                    eId: 'oneElement',
-                                    st: 0,
-                                    ed: 15,
-                                    et: ParagraphElementType.TEXT_RUN,
-                                    tr: {
-                                        ct: 'SuperApps are more than composite applications that aggregate services.',
-                                        ts: {
-                                            fs: 12,
-                                        },
-                                    },
-                                },
-                            ],
+                        ed: 70,
+                        ts: {
+                            fs: 12,
                         },
                     },
                     {
-                        blockId: 'twoParagraph',
-                        st: 0,
-                        ed: 59,
-                        blockType: BlockType.PARAGRAPH,
-                        paragraph: {
-                            bullet: {
-                                listId: 'testBullet',
-                                nestingLevel: 0,
-                                textStyle: {
-                                    fs: 20,
-                                },
+                        st: 72,
+                        ed: 159,
+                        ts: {
+                            fs: 12,
+                        },
+                    },
+                ],
+                paragraphs: [
+                    {
+                        startIndex: 71,
+                        bullet: {
+                            listId: 'testBullet',
+                            nestingLevel: 0,
+                            textStyle: {
+                                fs: 20,
                             },
-                            elements: [
-                                {
-                                    eId: 'oneElement',
-                                    st: 0,
-                                    ed: 15,
-                                    et: ParagraphElementType.TEXT_RUN,
-                                    tr: {
-                                        ct: 'Adaptive AI allows for model behavior change post-deployment by using real-time feedback',
-                                        ts: {
-                                            fs: 12,
-                                        },
-                                    },
-                                },
-                            ],
+                        },
+                        paragraphStyle: {
+                            spaceBelow: 15,
+                        },
+                    },
+                    {
+                        startIndex: 160,
+                        bullet: {
+                            listId: 'testBullet',
+                            nestingLevel: 0,
+                            textStyle: {
+                                fs: 20,
+                            },
                         },
                     },
                 ],

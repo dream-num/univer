@@ -1,5 +1,5 @@
 import { Plugin } from '@univerjs/core';
-import { IPasteData, IDragAndDropData, ICopyData } from '../Basics/Interfaces';
+import { IPasteData, IDragAndDropData } from '../Basics/Interfaces';
 import { PasteExtensionManager, DragAndDropExtensionManager, CopyExtensionManager } from '../Basics/Register';
 
 export class RegisterManager {
@@ -33,12 +33,7 @@ export class RegisterManager {
         }
         if (onKeyCopyObservable && !onKeyCopyObservable.hasObservers()) {
             onKeyCopyObservable.add((evt: ClipboardEvent) => {
-                const data: ICopyData = {
-                    key: 'type',
-                    tag: 'univer',
-                    value: '',
-                };
-                this._copyExtensionManager.handle(data);
+                this._copyExtensionManager.handle();
             });
         }
     }

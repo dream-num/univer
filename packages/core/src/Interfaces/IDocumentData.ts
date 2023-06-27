@@ -58,6 +58,13 @@ export interface IDrawings {
 }
 
 /**
+ * Set of IStyles
+ */
+export interface IDocStyles {
+    [styleId: string]: IDocStyle;
+}
+
+/**
  * A width and height.
  */
 export interface ISizeData {
@@ -67,9 +74,37 @@ export interface ISizeData {
 
 /**
  * Properties of document body
+ * 三种更新类型，范围叠加、范围互斥、占位符
  */
 export interface IDocumentBody {
-    blockElements: IBlockElement[]; // block elements
+    dataStream: string;
+
+    textRuns?: ITextRun[]; // textRun 样式，交互
+
+    paragraphs?: IParagraph[]; // paragraph
+    sectionBreaks?: ISectionBreak[]; // SectionBreak https://support.microsoft.com/en-us/office/insert-a-section-break-eef20fd8-e38c-4ba6-a027-e503bdf8375c
+    customBlocks?: ICustomBlock[]; // customBlock 用户通过插件自定义的block
+    tables?: ITable[]; // table
+    // tableOfContents?: { [index: number]: ITableOfContent }; // tableOfContents 目录
+    // links?: { [index: number]: IHyperlink }; // links 超链接
+    customRanges?: ICustomRange[]; // plugin注册，实现针对stream的特殊逻辑，超链接，field，structured document tags， bookmark，comment
+}
+
+export interface placeHolder {}
+
+export interface IDocStyle {
+    name: string;
+    basedOn: string;
+    link: string;
+    type: DocStyleType;
+    textStyle: ITextStyle;
+}
+
+export enum DocStyleType {
+    character,
+    paragraph,
+    table,
+    numbering,
 }
 
 /**
@@ -147,31 +182,21 @@ export enum BulletAlignment {
     END, //	The bullet is aligned to the end of the space allotted for rendering the bullet. Right-aligned for LTR text, left-aligned otherwise.
 }
 
-/**
- * Properties of block element
- */
-export interface IBlockElement {
-    blockId: string; // blockId
-    st: number; // startIndex
-    ed: number; // endIndex
-    blockType: BlockType; // blockType
-    // Union field content can be only one of the following:
-    paragraph?: IParagraph; // paragraph
-    table?: ITable; // table
-    sectionBreak?: ISectionBreak; // SectionBreak https://support.microsoft.com/en-us/office/insert-a-section-break-eef20fd8-e38c-4ba6-a027-e503bdf8375c
-    tableOfContents?: IDocumentBody; // tableOfContents 目录
-    customBlock?: ICustomBlock; // customBlock 用户通过插件自定义的block
-}
-
-/**
- * Type of block
- */
-export enum BlockType {
-    PARAGRAPH,
-    TABLE,
-    SECTION_BREAK,
-    CUSTOM,
-}
+// /**
+//  * Properties of block element
+//  */
+// export interface IBlockElement {
+//     blockId: string; // blockId
+//     st: number; // startIndex
+//     ed: number; // endIndex
+//     blockType: BlockType; // blockType
+//     // Union field content can be only one of the following:
+//     paragraph?: IParagraph; // paragraph
+//     table?: ITable; // table
+//     sectionBreak?: ISectionBreak; // SectionBreak https://support.microsoft.com/en-us/office/insert-a-section-break-eef20fd8-e38c-4ba6-a027-e503bdf8375c
+//     tableOfContents?: IDocumentBody; // tableOfContents 目录
+//     customBlock?: ICustomBlock; // customBlock 用户通过插件自定义的block
+// }
 
 export interface IMargin {
     marginTop?: number; // marginTop
@@ -180,11 +205,58 @@ export interface IMargin {
     marginLeft?: number; // marginLeft
 }
 
+export interface ITableOfContent {}
+
+export interface IHyperlink {
+    url?: string;
+    bookmarkId?: string; // bookmarkId
+    headingId?: string; // headingId
+}
+
+/**
+ * A ParagraphElement that represents a run of text that all has the same styling.
+ */
+export interface ITextRun {
+    // ct?: string; // content
+    // len: number;
+    st: number;
+    ed: number;
+    sId?: string; // styleID
+    ts?: ITextStyle; // textStyle
+    // tab?: BooleanNumber; // 是否tab，默认为false
+}
+
+export interface ICustomRange {
+    startIndex: number;
+    endIndex: number;
+    rangeId: string;
+    rangeType: CustomRangeType;
+}
+
+export enum CustomRangeType {
+    HYPERLINK,
+    FIELD, // 17.16 Fields and Hyperlinks
+    SDT, // 17.5.2 Structured Document Tags
+    BOOKMARK,
+    COMMENT,
+    CUSTOM,
+}
+
 /**
  * Custom Block
  */
-export interface ICustomBlock extends IMargin {
-    size: ISizeData;
+export interface ICustomBlock {
+    startIndex: number;
+    blockType?: BlockType;
+    blockId: string;
+}
+
+/**
+ * Type of block
+ */
+export enum BlockType {
+    DRAWING,
+    CUSTOM,
 }
 
 export interface IHeaderAndFooterBase {
@@ -266,7 +338,9 @@ export interface ISectionBreakBase {
 export interface ISectionBreak
     extends IDocStyleBase,
         ISectionBreakBase,
-        IHeaderAndFooterBase {}
+        IHeaderAndFooterBase {
+    startIndex: number;
+}
 
 /**
  * Represents how the start of the current section is positioned relative to the previous section.
@@ -306,47 +380,48 @@ export interface ISectionColumnProperties {
 }
 
 export interface IParagraph {
-    elements: IElement[]; // elements
+    // elements: IElement[]; // elements
+    startIndex: number;
     paragraphStyle?: IParagraphStyle; // paragraphStyle
     bullet?: IBullet; // bullet
     // dIds?: string[]; // drawingIds objectId
 }
 
-export interface IElementsOrder {
-    elementId: string; // elementId
-    paragraphElementType: ParagraphElementType; // paragraphElementType
-}
+// export interface IElementsOrder {
+//     elementId: string; // elementId
+//     paragraphElementType: ParagraphElementType; // paragraphElementType
+// }
 
-/**
- * Properties of paragraph
- */
-export interface IElement {
-    eId: string; // elementId
-    st: number; // startIndex
-    ed: number; // endIndex
-    et: ParagraphElementType; // ParagraphElementType
-    // Union field content can be only one of the following:
-    tr?: ITextRun; // textRun
-    // dr?: IDrawing; // inlineDrawing https://developers.google.com/docs/api/reference/rest/v1/documents#InlineObjectElement
-    // https://developers.google.com/docs/api/reference/rest/v1/documents#AutoText
-    autoText?: {}; // autoText
-    pageBreak?: {}; // pageBreak
-    columnBreak?: {}; // columnBreak
-    footnoteReference?: {}; // footnoteReference
-    horizontalRule?: {}; // horizontalRule
-    equation?: {}; // equation
-    person?: {}; // person
-    richLink?: {}; // richLink
-    custom?: ICustomElement; // custom element
-}
+// /**
+//  * Properties of paragraph
+//  */
+// export interface IElement {
+//     eId: string; // elementId
+//     st: number; // startIndex
+//     ed: number; // endIndex
+//     et: ParagraphElementType; // ParagraphElementType
+//     // Union field content can be only one of the following:
+//     tr?: ITextRun; // textRun
+//     // dr?: IDrawing; // inlineDrawing https://developers.google.com/docs/api/reference/rest/v1/documents#InlineObjectElement
+//     // https://developers.google.com/docs/api/reference/rest/v1/documents#AutoText
+//     autoText?: {}; // autoText
+//     pageBreak?: {}; // pageBreak
+//     columnBreak?: {}; // columnBreak
+//     footnoteReference?: {}; // footnoteReference
+//     horizontalRule?: {}; // horizontalRule
+//     equation?: {}; // equation
+//     person?: {}; // person
+//     richLink?: {}; // richLink
+//     custom?: ICustomElement; // custom element
+// }
 
-export interface ICustomElement {
-    size: ISizeData;
-}
+// export interface ICustomElement {
+//     size: ISizeData;
+// }
 
-/**
- * Types of paragraph element
- */
+// /**
+//  * Types of paragraph element
+//  */
 export enum ParagraphElementType {
     TEXT_RUN,
     AUTO_TEXT,
@@ -358,15 +433,6 @@ export enum ParagraphElementType {
     DRAWING,
     PERSON,
     RICH_LINK,
-}
-
-/**
- * A ParagraphElement that represents a run of text that all has the same styling.
- */
-export interface ITextRun {
-    ct?: string; // content
-    ts?: ITextStyle; // textStyle
-    tab?: BooleanNumber; // 是否tab，默认为false
 }
 
 /**
@@ -464,14 +530,6 @@ export interface ITextStyle extends IStyleBase {
     sc?: number; // spacing
     pos?: number; // position
     sa?: number; // scale
-}
-/**
- * 3 选 1
- */
-interface ILink {
-    url?: string;
-    bookmarkId?: string; // bookmarkId
-    headingId?: string; // headingId
 }
 
 export interface IIndentStart {
@@ -601,6 +659,8 @@ export enum WidthType {
  * Properties of table
  */
 export interface ITable {
+    startIndex: number;
+    endIndex: number;
     rows: number; // rows
     columns: number; // columns
     tableRows: ITableRow[]; // tableRows
@@ -629,9 +689,9 @@ export interface ITableRowStyle {
  * Properties of table cell
  */
 export interface ITableCell {
-    st: number; // startIndex
-    ed: number; // endIndex
-    content: IBlockElement[]; // content
+    // st: number; // startIndex
+    // ed: number; // endIndex
+    // content: IBlockElement[]; // content
     tableCellStyle: ITableCellStyle; // tableCellStyle
 }
 

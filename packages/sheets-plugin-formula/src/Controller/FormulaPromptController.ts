@@ -8,6 +8,12 @@ import { HelpFunction, SearchFunction } from '../View/UI/FormulaPrompt';
 import { CellInputHandler } from './CellInputHandler';
 
 export class FormulaPromptController {
+    cellInputHandler: CellInputHandler;
+
+    richTextEle: HTMLElement;
+
+    richTextEditEle: HTMLElement;
+
     private _context: SheetContext;
 
     private _sheetPlugin: SheetPlugin;
@@ -17,12 +23,6 @@ export class FormulaPromptController {
     private _searchFunction: SearchFunction;
 
     private _helpFunction: HelpFunction;
-
-    cellInputHandler: CellInputHandler;
-
-    richTextEle: HTMLElement;
-
-    richTextEditEle: HTMLElement;
 
     constructor(private _plugin: FormulaPlugin) {
         this._context = this._plugin.getContext();

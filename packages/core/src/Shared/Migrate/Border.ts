@@ -1,4 +1,4 @@
-import { IWorksheetConfig, IBorderData } from '../../Interfaces';
+import { IWorksheetConfig, IBorderData, IStyleData } from '../../Interfaces';
 
 export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
     newSheet.cellData = {};
@@ -7,16 +7,16 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
             const rowIndex = borderInfo.value.row_index;
             const colIndex = borderInfo.value.col_index;
 
-            if (!newSheet.cellData[String(rowIndex)]) {
-                newSheet.cellData[String(rowIndex)] = {};
+            if (!newSheet.cellData[rowIndex]) {
+                newSheet.cellData[rowIndex] = {};
             }
 
-            if (!newSheet.cellData[String(rowIndex)][String(colIndex)]) {
-                newSheet.cellData[String(rowIndex)][String(colIndex)] = {};
+            if (!newSheet.cellData[rowIndex][colIndex]) {
+                newSheet.cellData[rowIndex][colIndex] = {};
             }
 
-            if (!newSheet.cellData[String(rowIndex)][String(colIndex)].s) {
-                newSheet.cellData[String(rowIndex)][String(colIndex)].s = {};
+            if (!newSheet.cellData[rowIndex][colIndex].s) {
+                newSheet.cellData[rowIndex][colIndex].s = {};
             }
 
             const newBorder: IBorderData = {};
@@ -30,12 +30,13 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                 };
 
                 if (
-                    newSheet.cellData[String(rowIndex)] &&
-                    newSheet.cellData[String(rowIndex)][String(colIndex - 1)]?.s?.bd
+                    newSheet.cellData[rowIndex] &&
+                    (newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData)?.bd
                         ?.r
                 ) {
-                    delete newSheet.cellData[String(rowIndex)][String(colIndex - 1)]
-                        .s.bd.r;
+                    delete (
+                        newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData
+                    )?.bd?.r;
                 }
             }
             if (borderInfo.value.r) {
@@ -47,12 +48,15 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                 };
 
                 if (
-                    newSheet.cellData[String(rowIndex)] &&
-                    newSheet.cellData[String(rowIndex)][String(Number(colIndex) + 1)]
-                        ?.s?.bd?.l
+                    newSheet.cellData[rowIndex] &&
+                    (
+                        newSheet.cellData[rowIndex][Number(colIndex) + 1]
+                            ?.s as IStyleData
+                    )?.bd?.l
                 ) {
-                    delete newSheet.cellData[String(rowIndex)][String(colIndex - 1)]
-                        .s.bd.l;
+                    delete (
+                        newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData
+                    )?.bd?.l;
                 }
             }
             if (borderInfo.value.t) {
@@ -64,11 +68,12 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                 };
 
                 if (
-                    newSheet.cellData[String(rowIndex - 1)] &&
-                    newSheet.cellData[String(rowIndex)][String(colIndex)]?.s?.bd?.b
+                    newSheet.cellData[rowIndex - 1] &&
+                    (newSheet.cellData[rowIndex][colIndex]?.s as IStyleData)?.bd?.b
                 ) {
-                    delete newSheet.cellData[String(rowIndex)][String(colIndex - 1)]
-                        .s.bd.b;
+                    delete (
+                        newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData
+                    )?.bd?.b;
                 }
             }
             if (borderInfo.value.b) {
@@ -80,17 +85,18 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                 };
 
                 if (
-                    newSheet.cellData[String(Number(rowIndex) + 1)] &&
-                    newSheet.cellData[String(rowIndex)][String(colIndex)]?.s?.bd?.t
+                    newSheet.cellData[Number(rowIndex) + 1] &&
+                    (newSheet.cellData[rowIndex][colIndex]?.s as IStyleData)?.bd?.t
                 ) {
-                    delete newSheet.cellData[String(rowIndex)][String(colIndex - 1)]
-                        .s.bd.t;
+                    delete (
+                        newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData
+                    )?.bd?.t;
                 }
             }
 
-            newSheet.cellData[String(rowIndex)][String(colIndex)].s.bd =
+            (newSheet.cellData[rowIndex][colIndex].s as IStyleData).bd =
                 Object.assign(
-                    newSheet.cellData[String(rowIndex)][String(colIndex)].s.bd || {},
+                    (newSheet.cellData[rowIndex][colIndex].s as IStyleData).bd || {},
                     newBorder
                 );
         } else if (borderInfo.rangeType === 'range') {
@@ -104,16 +110,16 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                     case 'border-left':
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = startColumn; c < startColumn + 1; c++) {
-                                if (!newSheet.cellData[String(r)]) {
-                                    newSheet.cellData[String(r)] = {};
+                                if (!newSheet.cellData[r]) {
+                                    newSheet.cellData[r] = {};
                                 }
 
-                                if (!newSheet.cellData[String(r)][String(c)]) {
-                                    newSheet.cellData[String(r)][String(c)] = {};
+                                if (!newSheet.cellData[r][c]) {
+                                    newSheet.cellData[r][c] = {};
                                 }
 
-                                if (!newSheet.cellData[String(r)][String(c)].s) {
-                                    newSheet.cellData[String(r)][String(c)].s = {};
+                                if (!newSheet.cellData[r][c].s) {
+                                    newSheet.cellData[r][c].s = {};
                                 }
 
                                 const newBorder: IBorderData = {};
@@ -125,9 +131,9 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     },
                                 };
 
-                                newSheet.cellData[String(r)][String(c)].s.bd =
+                                (newSheet.cellData[r][c].s as IStyleData).bd =
                                     Object.assign(
-                                        newSheet.cellData[String(r)][String(c)].s
+                                        (newSheet.cellData[r][c].s as IStyleData)
                                             .bd || {},
                                         newBorder
                                     );
@@ -138,11 +144,11 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = startColumn - 1; c < startColumn; c++) {
                                 if (
-                                    newSheet.cellData[String(r)] &&
-                                    newSheet.cellData[String(r)][String(c)]?.s?.bd?.r
+                                    newSheet.cellData[r] &&
+                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.r
                                 ) {
-                                    delete newSheet.cellData[String(r)][String(c)].s
-                                        .bd.r;
+                                    delete (newSheet.cellData[r][c].s as IStyleData)
+                                        ?.bd?.r;
                                 }
                             }
                         }
@@ -151,16 +157,16 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                     case 'border-right':
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = endColumn; c < endColumn + 1; c++) {
-                                if (!newSheet.cellData[String(r)]) {
-                                    newSheet.cellData[String(r)] = {};
+                                if (!newSheet.cellData[r]) {
+                                    newSheet.cellData[r] = {};
                                 }
 
-                                if (!newSheet.cellData[String(r)][String(c)]) {
-                                    newSheet.cellData[String(r)][String(c)] = {};
+                                if (!newSheet.cellData[r][c]) {
+                                    newSheet.cellData[r][c] = {};
                                 }
 
-                                if (!newSheet.cellData[String(r)][String(c)].s) {
-                                    newSheet.cellData[String(r)][String(c)].s = {};
+                                if (!newSheet.cellData[r][c].s) {
+                                    newSheet.cellData[r][c].s = {};
                                 }
 
                                 const newBorder: IBorderData = {};
@@ -172,9 +178,9 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     },
                                 };
 
-                                newSheet.cellData[String(r)][String(c)].s.bd =
+                                (newSheet.cellData[r][c].s as IStyleData).bd =
                                     Object.assign(
-                                        newSheet.cellData[String(r)][String(c)].s
+                                        (newSheet.cellData[r][c].s as IStyleData)
                                             .bd || {},
                                         newBorder
                                     );
@@ -185,11 +191,11 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = endColumn + 1; c < endColumn + 2; c++) {
                                 if (
-                                    newSheet.cellData[String(r)] &&
-                                    newSheet.cellData[String(r)][String(c)]?.s?.bd?.l
+                                    newSheet.cellData[r] &&
+                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.l
                                 ) {
-                                    delete newSheet.cellData[String(r)][String(c)].s
-                                        .bd.l;
+                                    delete (newSheet.cellData[r][c].s as IStyleData)
+                                        .bd?.l;
                                 }
                             }
                         }
@@ -198,16 +204,16 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                     case 'border-top':
                         for (let r = startRow; r < startRow + 1; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
-                                if (!newSheet.cellData[String(r)]) {
-                                    newSheet.cellData[String(r)] = {};
+                                if (!newSheet.cellData[r]) {
+                                    newSheet.cellData[r] = {};
                                 }
 
-                                if (!newSheet.cellData[String(r)][String(c)]) {
-                                    newSheet.cellData[String(r)][String(c)] = {};
+                                if (!newSheet.cellData[r][c]) {
+                                    newSheet.cellData[r][c] = {};
                                 }
 
-                                if (!newSheet.cellData[String(r)][String(c)].s) {
-                                    newSheet.cellData[String(r)][String(c)].s = {};
+                                if (!newSheet.cellData[r][c].s) {
+                                    newSheet.cellData[r][c].s = {};
                                 }
 
                                 const newBorder: IBorderData = {};
@@ -219,9 +225,9 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     },
                                 };
 
-                                newSheet.cellData[String(r)][String(c)].s.bd =
+                                (newSheet.cellData[r][c].s as IStyleData).bd =
                                     Object.assign(
-                                        newSheet.cellData[String(r)][String(c)].s
+                                        (newSheet.cellData[r][c].s as IStyleData)
                                             .bd || {},
                                         newBorder
                                     );
@@ -232,11 +238,11 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         for (let r = startRow - 1; r < startRow; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
                                 if (
-                                    newSheet.cellData[String(r)] &&
-                                    newSheet.cellData[String(r)][String(c)]?.s?.bd?.b
+                                    newSheet.cellData[r] &&
+                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.b
                                 ) {
-                                    delete newSheet.cellData[String(r)][String(c)].s
-                                        .bd.b;
+                                    delete (newSheet.cellData[r][c].s as IStyleData)
+                                        .bd?.b;
                                 }
                             }
                         }
@@ -245,16 +251,16 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                     case 'border-bottom':
                         for (let r = endRow; r < endRow + 1; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
-                                if (!newSheet.cellData[String(r)]) {
-                                    newSheet.cellData[String(r)] = {};
+                                if (!newSheet.cellData[r]) {
+                                    newSheet.cellData[r] = {};
                                 }
 
-                                if (!newSheet.cellData[String(r)][String(c)]) {
-                                    newSheet.cellData[String(r)][String(c)] = {};
+                                if (!newSheet.cellData[r][c]) {
+                                    newSheet.cellData[r][c] = {};
                                 }
 
-                                if (!newSheet.cellData[String(r)][String(c)].s) {
-                                    newSheet.cellData[String(r)][String(c)].s = {};
+                                if (!newSheet.cellData[r][c].s) {
+                                    newSheet.cellData[r][c].s = {};
                                 }
 
                                 const newBorder: IBorderData = {};
@@ -266,9 +272,9 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     },
                                 };
 
-                                newSheet.cellData[String(r)][String(c)].s.bd =
+                                (newSheet.cellData[r][c].s as IStyleData).bd =
                                     Object.assign(
-                                        newSheet.cellData[String(r)][String(c)].s
+                                        (newSheet.cellData[r][c].s as IStyleData)
                                             .bd || {},
                                         newBorder
                                     );
@@ -279,11 +285,11 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         for (let r = endRow + 1; r < endRow + 2; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
                                 if (
-                                    newSheet.cellData[String(r)] &&
-                                    newSheet.cellData[String(r)][String(c)]?.s?.bd?.t
+                                    newSheet.cellData[r] &&
+                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.t
                                 ) {
-                                    delete newSheet.cellData[String(r)][String(c)].s
-                                        .bd.t;
+                                    delete (newSheet.cellData[r][c].s as IStyleData)
+                                        .bd?.t;
                                 }
                             }
                         }
@@ -292,16 +298,16 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                     case 'border-all':
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
-                                if (!newSheet.cellData[String(r)]) {
-                                    newSheet.cellData[String(r)] = {};
+                                if (!newSheet.cellData[r]) {
+                                    newSheet.cellData[r] = {};
                                 }
 
-                                if (!newSheet.cellData[String(r)][String(c)]) {
-                                    newSheet.cellData[String(r)][String(c)] = {};
+                                if (!newSheet.cellData[r][c]) {
+                                    newSheet.cellData[r][c] = {};
                                 }
 
-                                if (!newSheet.cellData[String(r)][String(c)].s) {
-                                    newSheet.cellData[String(r)][String(c)].s = {};
+                                if (!newSheet.cellData[r][c].s) {
+                                    newSheet.cellData[r][c].s = {};
                                 }
 
                                 const newBorder: IBorderData = {};
@@ -339,7 +345,7 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     };
                                 }
 
-                                newSheet.cellData[String(r)][String(c)].s.bd =
+                                (newSheet.cellData[r][c].s as IStyleData).bd =
                                     newBorder;
                             }
                         }
@@ -348,11 +354,11 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = startColumn - 1; c < startColumn; c++) {
                                 if (
-                                    newSheet.cellData[String(r)] &&
-                                    newSheet.cellData[String(r)][String(c)]?.s?.bd?.r
+                                    newSheet.cellData[r] &&
+                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.r
                                 ) {
-                                    delete newSheet.cellData[String(r)][String(c)].s
-                                        .bd.r;
+                                    delete (newSheet.cellData[r][c].s as IStyleData)
+                                        .bd?.r;
                                 }
                             }
                         }
@@ -361,11 +367,11 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = endColumn + 1; c < endColumn + 2; c++) {
                                 if (
-                                    newSheet.cellData[String(r)] &&
-                                    newSheet.cellData[String(r)][String(c)]?.s?.bd?.l
+                                    newSheet.cellData[r] &&
+                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.l
                                 ) {
-                                    delete newSheet.cellData[String(r)][String(c)].s
-                                        .bd.l;
+                                    delete (newSheet.cellData[r][c].s as IStyleData)
+                                        .bd?.l;
                                 }
                             }
                         }
@@ -374,11 +380,11 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         for (let r = startRow - 1; r < startRow; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
                                 if (
-                                    newSheet.cellData[String(r)] &&
-                                    newSheet.cellData[String(r)][String(c)]?.s?.bd?.b
+                                    newSheet.cellData[r] &&
+                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.b
                                 ) {
-                                    delete newSheet.cellData[String(r)][String(c)].s
-                                        .bd.b;
+                                    delete (newSheet.cellData[r][c].s as IStyleData)
+                                        .bd?.b;
                                 }
                             }
                         }
@@ -387,11 +393,11 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         for (let r = endRow + 1; r < endRow + 2; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
                                 if (
-                                    newSheet.cellData[String(r)] &&
-                                    newSheet.cellData[String(r)][String(c)]?.s?.bd?.t
+                                    newSheet.cellData[r] &&
+                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.t
                                 ) {
-                                    delete newSheet.cellData[String(r)][String(c)].s
-                                        .bd.t;
+                                    delete (newSheet.cellData[r][c].s as IStyleData)
+                                        .bd?.t;
                                 }
                             }
                         }
@@ -400,16 +406,16 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                     case 'border-outside':
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
-                                if (!newSheet.cellData[String(r)]) {
-                                    newSheet.cellData[String(r)] = {};
+                                if (!newSheet.cellData[r]) {
+                                    newSheet.cellData[r] = {};
                                 }
 
-                                if (!newSheet.cellData[String(r)][String(c)]) {
-                                    newSheet.cellData[String(r)][String(c)] = {};
+                                if (!newSheet.cellData[r][c]) {
+                                    newSheet.cellData[r][c] = {};
                                 }
 
-                                if (!newSheet.cellData[String(r)][String(c)].s) {
-                                    newSheet.cellData[String(r)][String(c)].s = {};
+                                if (!newSheet.cellData[r][c].s) {
+                                    newSheet.cellData[r][c].s = {};
                                 }
 
                                 const newBorder: IBorderData = {};
@@ -451,9 +457,9 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     };
                                 }
 
-                                newSheet.cellData[String(r)][String(c)].s.bd =
+                                (newSheet.cellData[r][c].s as IStyleData).bd =
                                     Object.assign(
-                                        newSheet.cellData[String(r)][String(c)].s
+                                        (newSheet.cellData[r][c].s as IStyleData)
                                             .bd || {},
                                         newBorder
                                     );
@@ -464,11 +470,11 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = startColumn - 1; c < startColumn; c++) {
                                 if (
-                                    newSheet.cellData[String(r)] &&
-                                    newSheet.cellData[String(r)][String(c)]?.s?.bd?.r
+                                    newSheet.cellData[r] &&
+                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.r
                                 ) {
-                                    delete newSheet.cellData[String(r)][String(c)].s
-                                        .bd.r;
+                                    delete (newSheet.cellData[r][c].s as IStyleData)
+                                        .bd?.r;
                                 }
                             }
                         }
@@ -477,11 +483,11 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = endColumn + 1; c < endColumn + 2; c++) {
                                 if (
-                                    newSheet.cellData[String(r)] &&
-                                    newSheet.cellData[String(r)][String(c)]?.s?.bd?.l
+                                    newSheet.cellData[r] &&
+                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.l
                                 ) {
-                                    delete newSheet.cellData[String(r)][String(c)].s
-                                        .bd.l;
+                                    delete (newSheet.cellData[r][c].s as IStyleData)
+                                        .bd?.l;
                                 }
                             }
                         }
@@ -490,11 +496,11 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         for (let r = startRow - 1; r < startRow; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
                                 if (
-                                    newSheet.cellData[String(r)] &&
-                                    newSheet.cellData[String(r)][String(c)]?.s?.bd?.b
+                                    newSheet.cellData[r] &&
+                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.b
                                 ) {
-                                    delete newSheet.cellData[String(r)][String(c)].s
-                                        .bd.b;
+                                    delete (newSheet.cellData[r][c].s as IStyleData)
+                                        .bd?.b;
                                 }
                             }
                         }
@@ -503,11 +509,11 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         for (let r = endRow + 1; r < endRow + 2; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
                                 if (
-                                    newSheet.cellData[String(r)] &&
-                                    newSheet.cellData[String(r)][String(c)]?.s?.bd?.t
+                                    newSheet.cellData[r] &&
+                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.t
                                 ) {
-                                    delete newSheet.cellData[String(r)][String(c)].s
-                                        .bd.t;
+                                    delete (newSheet.cellData[r][c].s as IStyleData)
+                                        .bd?.t;
                                 }
                             }
                         }
@@ -516,16 +522,16 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                     case 'border-inside':
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
-                                if (!newSheet.cellData[String(r)]) {
-                                    newSheet.cellData[String(r)] = {};
+                                if (!newSheet.cellData[r]) {
+                                    newSheet.cellData[r] = {};
                                 }
 
-                                if (!newSheet.cellData[String(r)][String(c)]) {
-                                    newSheet.cellData[String(r)][String(c)] = {};
+                                if (!newSheet.cellData[r][c]) {
+                                    newSheet.cellData[r][c] = {};
                                 }
 
-                                if (!newSheet.cellData[String(r)][String(c)].s) {
-                                    newSheet.cellData[String(r)][String(c)].s = {};
+                                if (!newSheet.cellData[r][c].s) {
+                                    newSheet.cellData[r][c].s = {};
                                 }
 
                                 const newBorder: IBorderData = {};
@@ -568,7 +574,7 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     };
                                 }
 
-                                newSheet.cellData[String(r)][String(c)].s.bd =
+                                (newSheet.cellData[r][c].s as IStyleData).bd =
                                     newBorder;
                             }
                         }
@@ -577,16 +583,16 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                     case 'border-horizontal':
                         for (let r = startRow; r < endRow; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
-                                if (!newSheet.cellData[String(r)]) {
-                                    newSheet.cellData[String(r)] = {};
+                                if (!newSheet.cellData[r]) {
+                                    newSheet.cellData[r] = {};
                                 }
 
-                                if (!newSheet.cellData[String(r)][String(c)]) {
-                                    newSheet.cellData[String(r)][String(c)] = {};
+                                if (!newSheet.cellData[r][c]) {
+                                    newSheet.cellData[r][c] = {};
                                 }
 
-                                if (!newSheet.cellData[String(r)][String(c)].s) {
-                                    newSheet.cellData[String(r)][String(c)].s = {};
+                                if (!newSheet.cellData[r][c].s) {
+                                    newSheet.cellData[r][c].s = {};
                                 }
 
                                 const newBorder: IBorderData = {};
@@ -598,9 +604,9 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     },
                                 };
 
-                                newSheet.cellData[String(r)][String(c)].s.bd =
+                                (newSheet.cellData[r][c].s as IStyleData).bd =
                                     Object.assign(
-                                        newSheet.cellData[String(r)][String(c)].s
+                                        (newSheet.cellData[r][c].s as IStyleData)
                                             .bd || {},
                                         newBorder
                                     );
@@ -611,11 +617,11 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         for (let r = startRow + 1; r <= endRow; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
                                 if (
-                                    newSheet.cellData[String(r)] &&
-                                    newSheet.cellData[String(r)][String(c)]?.s?.bd?.t
+                                    newSheet.cellData[r] &&
+                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.t
                                 ) {
-                                    delete newSheet.cellData[String(r)][String(c)].s
-                                        .bd.t;
+                                    delete (newSheet.cellData[r][c].s as IStyleData)
+                                        .bd?.t;
                                 }
                             }
                         }
@@ -624,16 +630,16 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                     case 'border-vertical':
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = startColumn; c < endColumn; c++) {
-                                if (!newSheet.cellData[String(r)]) {
-                                    newSheet.cellData[String(r)] = {};
+                                if (!newSheet.cellData[r]) {
+                                    newSheet.cellData[r] = {};
                                 }
 
-                                if (!newSheet.cellData[String(r)][String(c)]) {
-                                    newSheet.cellData[String(r)][String(c)] = {};
+                                if (!newSheet.cellData[r][c]) {
+                                    newSheet.cellData[r][c] = {};
                                 }
 
-                                if (!newSheet.cellData[String(r)][String(c)].s) {
-                                    newSheet.cellData[String(r)][String(c)].s = {};
+                                if (!newSheet.cellData[r][c].s) {
+                                    newSheet.cellData[r][c].s = {};
                                 }
 
                                 const newBorder: IBorderData = {};
@@ -645,9 +651,9 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     },
                                 };
 
-                                newSheet.cellData[String(r)][String(c)].s.bd =
+                                (newSheet.cellData[r][c].s as IStyleData).bd =
                                     Object.assign(
-                                        newSheet.cellData[String(r)][String(c)].s
+                                        (newSheet.cellData[r][c].s as IStyleData)
                                             .bd || {},
                                         newBorder
                                     );
@@ -658,11 +664,11 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = startColumn + 1; c <= endColumn; c++) {
                                 if (
-                                    newSheet.cellData[String(r)] &&
-                                    newSheet.cellData[String(r)][String(c)]?.s?.bd?.l
+                                    newSheet.cellData[r] &&
+                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.l
                                 ) {
-                                    delete newSheet.cellData[String(r)][String(c)].s
-                                        .bd.l;
+                                    delete (newSheet.cellData[r][c].s as IStyleData)
+                                        .bd?.l;
                                 }
                             }
                         }
@@ -671,22 +677,22 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                     case 'border-none':
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
-                                if (!newSheet.cellData[String(r)]) {
+                                if (!newSheet.cellData[r]) {
                                     continue;
                                 }
 
-                                if (!newSheet.cellData[String(r)][String(c)]) {
+                                if (!newSheet.cellData[r][c]) {
                                     continue;
                                 }
 
-                                if (!newSheet.cellData[String(r)][String(c)].s) {
+                                if (!newSheet.cellData[r][c].s) {
                                     continue;
                                 }
 
                                 // 置空
                                 const newBorder: IBorderData = {};
 
-                                newSheet.cellData[String(r)][String(c)].s.bd =
+                                (newSheet.cellData[r][c].s as IStyleData).bd =
                                     newBorder;
                             }
                         }
@@ -695,11 +701,11 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = startColumn - 1; c < startColumn; c++) {
                                 if (
-                                    newSheet.cellData[String(r)] &&
-                                    newSheet.cellData[String(r)][String(c)]?.s?.bd?.r
+                                    newSheet.cellData[r] &&
+                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.r
                                 ) {
-                                    delete newSheet.cellData[String(r)][String(c)].s
-                                        .bd.r;
+                                    delete (newSheet.cellData[r][c].s as IStyleData)
+                                        .bd?.r;
                                 }
                             }
                         }
@@ -708,11 +714,11 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = endColumn + 1; c < endColumn + 2; c++) {
                                 if (
-                                    newSheet.cellData[String(r)] &&
-                                    newSheet.cellData[String(r)][String(c)]?.s?.bd?.l
+                                    newSheet.cellData[r] &&
+                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.l
                                 ) {
-                                    delete newSheet.cellData[String(r)][String(c)].s
-                                        .bd.l;
+                                    delete (newSheet.cellData[r][c].s as IStyleData)
+                                        .bd?.l;
                                 }
                             }
                         }
@@ -721,11 +727,11 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         for (let r = startRow - 1; r < startRow; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
                                 if (
-                                    newSheet.cellData[String(r)] &&
-                                    newSheet.cellData[String(r)][String(c)]?.s?.bd?.b
+                                    newSheet.cellData[r] &&
+                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.b
                                 ) {
-                                    delete newSheet.cellData[String(r)][String(c)].s
-                                        .bd.b;
+                                    delete (newSheet.cellData[r][c].s as IStyleData)
+                                        .bd?.b;
                                 }
                             }
                         }
@@ -734,11 +740,11 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         for (let r = endRow + 1; r < endRow + 2; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
                                 if (
-                                    newSheet.cellData[String(r)] &&
-                                    newSheet.cellData[String(r)][String(c)]?.s?.bd?.t
+                                    newSheet.cellData[r] &&
+                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.t
                                 ) {
-                                    delete newSheet.cellData[String(r)][String(c)].s
-                                        .bd.t;
+                                    delete (newSheet.cellData[r][c].s as IStyleData)
+                                        .bd?.t;
                                 }
                             }
                         }

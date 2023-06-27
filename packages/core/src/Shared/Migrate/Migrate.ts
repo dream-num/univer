@@ -1,11 +1,20 @@
 import {
+    BooleanNumber,
+    HorizontalAlign,
+    VerticalAlign,
+    WrapStrategy,
+} from '../../Enum';
+import {
     IWorkbookConfig,
     IWorksheetConfig,
     ICellData,
     ITextStyle,
     IStyleData,
     IElement,
+    IRowData,
+    IColumnData,
 } from '../../Interfaces';
+import { ObjectArrayPrimitiveType } from '../ObjectArray';
 import { Tools } from '../Tools';
 import { IKeyValue } from '../Types';
 import { border } from './Border';
@@ -108,8 +117,8 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                     for (const [rowIndex, height] of Object.entries(
                         sheet.config.rowlen
                     )) {
-                        newSheet.rowData[String(rowIndex)] = {
-                            h: height,
+                        newSheet.rowData[Number(rowIndex)] = {
+                            h: Number(height),
                             hd: 0,
                         };
                     }
@@ -120,8 +129,8 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                     for (const [colIndex, width] of Object.entries(
                         sheet.config.columnlen
                     )) {
-                        newSheet.columnData[String(colIndex)] = {
-                            w: width,
+                        newSheet.columnData[Number(colIndex)] = {
+                            w: Number(width),
                             hd: 0,
                         };
                     }
@@ -129,26 +138,32 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                 // 隐藏行
                 if (sheet.config.rowhidden) {
                     if (!newSheet.rowData) newSheet.rowData = {};
+                    let rowData = newSheet.rowData as ObjectArrayPrimitiveType<
+                        Partial<IRowData>
+                    >;
                     for (const [rowIndex, isHidden] of Object.entries(
                         sheet.config.rowhidden
                     )) {
-                        if (!newSheet.rowData[String(rowIndex)]) {
-                            newSheet.rowData[String(rowIndex)] = {};
+                        if (!rowData[Number(rowIndex)]) {
+                            rowData[Number(rowIndex)] = {};
                         }
 
-                        newSheet.rowData[String(rowIndex)].hd = isHidden;
+                        rowData[Number(rowIndex)].hd = isHidden as BooleanNumber;
                     }
                 }
                 // 隐藏列
                 if (sheet.config.colhidden) {
                     if (!newSheet.columnData) newSheet.columnData = {};
+                    let columnData = newSheet.columnData as ObjectArrayPrimitiveType<
+                        Partial<IColumnData>
+                    >;
                     for (const [colIndex, isHidden] of Object.entries(
                         sheet.config.colhidden
                     )) {
-                        if (!newSheet.columnData[String(colIndex)]) {
-                            newSheet.columnData[String(colIndex)] = {};
+                        if (!columnData[Number(colIndex)]) {
+                            columnData[Number(colIndex)] = {};
                         }
-                        newSheet.columnData[String(colIndex)].hd = isHidden;
+                        columnData[Number(colIndex)].hd = isHidden as BooleanNumber;
                     }
                 }
             }
@@ -320,19 +335,52 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                         }
 
                         const sMap = {
-                            '0': 2,
-                            '1': 1,
-                            '2': 3,
+                            '0': VerticalAlign.MIDDLE,
+                            '1': VerticalAlign.TOP,
+                            '2': VerticalAlign.BOTTOM,
                         };
+                        // const sMap = {
+                        //     '0': 2,
+                        //     '1': 1,
+                        //     '2': 3,
+                        // };
 
                         // 垂直对齐
                         if (cell.hasOwnProperty('vt')) {
-                            cellStyle.vt = sMap[String(cell.vt)];
+                            switch (String(cell.vt)) {
+                                case '0':
+                                    cellStyle.vt = VerticalAlign.MIDDLE;
+                                    break;
+                                case '1':
+                                    cellStyle.vt = VerticalAlign.TOP;
+                                    break;
+                                case '2':
+                                    cellStyle.vt = VerticalAlign.BOTTOM;
+                                    break;
+
+                                default:
+                                    break;
+                            }
+                            // cellStyle.vt = sMap[String(cell.vt)];
                         }
 
                         // 水平对齐
                         if (cell.hasOwnProperty('ht')) {
-                            cellStyle.ht = sMap[String(cell.ht)];
+                            switch (String(cell.ht)) {
+                                case '0':
+                                    cellStyle.ht = HorizontalAlign.CENTER;
+                                    break;
+                                case '1':
+                                    cellStyle.ht = HorizontalAlign.LEFT;
+                                    break;
+                                case '2':
+                                    cellStyle.ht = HorizontalAlign.RIGHT;
+                                    break;
+
+                                default:
+                                    break;
+                            }
+                            // cellStyle.ht = sMap[String(cell.ht)];
                         }
 
                         // 竖排文字
@@ -395,7 +443,21 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
 
                         // 文本换行
                         if (cell.hasOwnProperty('tb')) {
-                            cellStyle.tb = sMap[String(cell.tb)];
+                            switch (String(cell.tb)) {
+                                case '0':
+                                    cellStyle.tb = WrapStrategy.CLIP;
+                                    break;
+                                case '1':
+                                    cellStyle.tb = WrapStrategy.OVERFLOW;
+                                    break;
+                                case '2':
+                                    cellStyle.tb = WrapStrategy.WRAP;
+                                    break;
+
+                                default:
+                                    break;
+                            }
+                            //cellStyle.tb = sMap[String(cell.tb)];
                         }
 
                         newCell.s = Object.assign(newCell.s || {}, cellStyle);

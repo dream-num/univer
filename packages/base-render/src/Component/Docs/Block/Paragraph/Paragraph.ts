@@ -1,51 +1,77 @@
-import { ColumnSeparatorType, IBullet, IDrawing, IDrawings, IParagraph, Nullable, ParagraphElementType, PositionedObjectLayoutType, ContextBase, IElement } from '@univerjs/core';
-import { dealWidthTextRun } from './TextRun';
+import {
+    IBullet,
+    IDrawing,
+    IDrawings,
+    Nullable,
+    PositionedObjectLayoutType,
+    ContextBase,
+    DataStreamTreeNode,
+    GridType,
+    HorizontalAlign,
+    BooleanNumber,
+    DataStreamTreeTokenType,
+    ICustomBlock,
+} from '@univerjs/core';
 import { dealWidthBullet } from './Bullet';
 import { dealWidthInlineDrawing } from './InlineDrawing';
 
-import { getLastNotFullColumnInfo } from '../../Common/Tools';
+import { clearFontCreateConfigCache, getCharSpaceApply, getFontCreateConfig, getLastNotFullColumnInfo, getSpanGroupWidth, lineIterator } from '../../Common/Tools';
 import { createSkeletonPage } from '../../Common/Page';
 import { setColumnFullState } from '../../Common/Section';
 
-import { BreakType, IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../../Basics/IDocumentSkeletonCached';
+import { calculateParagraphLayout } from './Layout.Ruler';
+
+import { composeCharForLanguage } from './Language.Ruler';
+
+import {
+    BreakType,
+    IDocumentSkeletonBullet,
+    IDocumentSkeletonDrawing,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+    ISkeletonResourceReference,
+} from '../../../../Basics/IDocumentSkeletonCached';
 import { IParagraphConfig, ISectionBreakConfig } from '../../../../Basics/Interfaces';
+import { createSkeletonTabSpan, createSkeletonWordSpan } from '../../Common/Span';
 
 export function dealWidthParagraph(
-    blockId: string,
-    paragraph: IParagraph,
+    paragraphNode: DataStreamTreeNode,
     curPage: IDocumentSkeletonPage,
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
     context?: ContextBase
 ): IDocumentSkeletonPage[] {
     const {
-        pageNumberStart,
+        gridType = GridType.LINES,
+        charSpace = 0,
+        defaultTabStop = 10.5,
+
         pageSize = {
-            w: Infinity,
-            h: Infinity,
+            width: Infinity,
+            height: Infinity,
         },
 
         marginRight = 0,
         marginLeft = 0,
 
-        columnProperties = [],
-        columnSeparatorType = ColumnSeparatorType.NONE,
-        contentDirection,
-        sectionType,
-        sectionTypeNext,
-        textDirection,
         lists,
         drawings = {},
         fontLocale,
     } = sectionBreakConfig;
 
-    const { elements, paragraphStyle = {}, bullet } = paragraph;
+    const { endIndex, startIndex, content = '', blocks = [] } = paragraphNode;
+
+    const bodyModel = paragraphNode.bodyModel;
+
+    const paragraph = bodyModel.getParagraph(endIndex) || { startIndex: 0 };
+
+    const { paragraphStyle = {}, bullet } = paragraph;
 
     // const paragraphAffectSkeDrawings = _changeDrawingToSkeletonFormat(drawingIds, drawings);
 
     // curPage.skeDrawings = paragraphAffectSkeDrawings;
 
-    const { skeHeaders, skeFooters, skeListLevel, blockAnchor } = skeletonResourceReference;
+    const { skeHeaders, skeFooters, skeListLevel, drawingAnchor } = skeletonResourceReference;
 
     // const pageWidth = pageSize.w || Infinity;
     // const pageHeight = pageSize.h || Infinity;
@@ -57,17 +83,8 @@ export function dealWidthParagraph(
 
     // curPage.skeDrawings = affectSkeDrawings; // 加入本段落的对象
 
-    const paragraphConfig: IParagraphConfig = {
-        blockId,
-        paragraphStyle,
-        // paragraphAffectSkeDrawings,
-        skeHeaders,
-        skeFooters,
-        blockAnchor,
-    };
-
-    const pages = [curPage];
-    let lastPage = curPage;
+    // const pages = [curPage];
+    // let lastPage = curPage;
 
     // if (pageSize.h === Infinity) {
     //     // 无需分页的情况，适合表格单元格或者类似notion的block布局
@@ -82,54 +99,100 @@ export function dealWidthParagraph(
     // }
 
     const paragraphAffectSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
+
+    const paragraphConfig: IParagraphConfig = {
+        paragraphIndex: endIndex,
+        paragraphStyle,
+        paragraphAffectSkeDrawings,
+        skeHeaders,
+        skeFooters,
+        drawingAnchor,
+    };
+
     const listLevelAncestors = _getListLevelAncestors(bullet, skeListLevel); // 取得列表所有level的缓存
     const bulletSkeleton = dealWidthBullet(bullet, lists, listLevelAncestors, fontLocale, context); // 生成bullet
     _updateListLevelAncestors(bullet, bulletSkeleton, skeListLevel); // 更新最新的level缓存列表
     paragraphConfig.bulletSkeleton = bulletSkeleton;
 
-    elements.forEach((element: IElement, elementIndex: number) => {
-        const { eId: elementId, et: paragraphElementType } = element;
-        let currentPages: IDocumentSkeletonPage[] = [];
-        if (paragraphElementType === ParagraphElementType.DRAWING) {
-            const drawingOrigin = drawings[elementId];
-            if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
-                currentPages = dealWidthInlineDrawing(drawingOrigin, elementIndex, sectionBreakConfig, lastPage, paragraphConfig, fontLocale);
-            } else {
-                paragraphAffectSkeDrawings.set(elementId, _getDrawingSkeletonFormat(drawingOrigin));
-            }
-        }
-    });
+    const { horizontalAlign = HorizontalAlign.UNSPECIFIED, snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 
-    // let currentLine = createSkeletonLine({ ...paragraphConfig, bulletSkeleton, affectSkeDrawings: affectAllSkeDrawings });
-    // 处理1列的情况
-    // 如果下一节是连续的，则按照1列进行计算，计算结果返回后，用来预估列高度，然后在接来下的流程进行二次计算
-    elements.forEach((element: IElement, elementIndex: number) => {
-        const { eId: elementId, et: paragraphElementType } = element;
-        let currentPages: IDocumentSkeletonPage[] = [];
-        if (paragraphElementType === ParagraphElementType.TEXT_RUN) {
-            const { tr: textRun, st, ed } = element;
-            if (!textRun) {
-                return false;
+    let allPages: IDocumentSkeletonPage[] = [curPage];
+
+    const customBlockCache = new Map<number, Nullable<ICustomBlock>>();
+    for (let i = 0, len = blocks.length; i < len; i++) {
+        const charIndex = blocks[i];
+        const customBlock = bodyModel.getCustomBlock(charIndex);
+        if (customBlock == null) {
+            continue;
+        }
+        customBlockCache.set(charIndex, customBlock);
+        const blockId = customBlock.blockId;
+        const drawingOrigin = drawings[blockId];
+        if (drawingOrigin.layoutType !== PositionedObjectLayoutType.INLINE) {
+            paragraphAffectSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
+        }
+    }
+
+    clearFontCreateConfigCache();
+
+    for (let i = 0, len = content.length; i < len; i++) {
+        const charIndex = i + startIndex;
+        const char = content[i];
+
+        const fontCreateConfig = getFontCreateConfig(i, paragraphNode, sectionBreakConfig, paragraphStyle);
+
+        if (char === DataStreamTreeTokenType.TAB) {
+            const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
+            const tabSpan = createSkeletonTabSpan(fontCreateConfig, charSpaceApply); // measureText收敛到create中执行
+            allPages = calculateParagraphLayout([tabSpan], allPages, sectionBreakConfig, paragraphConfig, true);
+        } else if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
+            let customBlock = customBlockCache.get(charIndex);
+            if (customBlock == null) {
+                customBlock = bodyModel.getCustomBlock(charIndex);
             }
-            currentPages = dealWidthTextRun(textRun, elementIndex, sectionBreakConfig, lastPage, { ...paragraphConfig, paragraphAffectSkeDrawings }, fontLocale);
-        } else if (paragraphElementType === ParagraphElementType.PAGE_BREAK) {
-            // 换页标识，换页后还在同一个节内
-            currentPages = [createSkeletonPage(sectionBreakConfig, skeletonResourceReference, _getNextPageNumber(lastPage), BreakType.PAGE)];
+            if (customBlock == null) {
+                continue;
+            }
+            const blockId = customBlock.blockId;
+            const drawingOrigin = drawings[blockId];
+            if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
+                allPages = dealWidthInlineDrawing(drawingOrigin, sectionBreakConfig, allPages, paragraphConfig, fontLocale);
+            }
+        } else if (char === DataStreamTreeTokenType.PAGE_BREAK) {
+            allPages.push(createSkeletonPage(sectionBreakConfig, skeletonResourceReference, _getNextPageNumber(allPages[allPages.length - 1]), BreakType.PAGE));
             paragraphAffectSkeDrawings.clear();
-        } else if (paragraphElementType === ParagraphElementType.COLUMN_BREAK) {
+        } else if (char === DataStreamTreeTokenType.COLUMN_BREAK) {
             // 换列标识，还在同一个节内
+            const lastPage = allPages[allPages.length - 1];
             const columnInfo = getLastNotFullColumnInfo(lastPage);
 
             if (columnInfo && !columnInfo.isLast) {
                 setColumnFullState(columnInfo.column, true);
             } else {
-                currentPages = [createSkeletonPage(sectionBreakConfig, skeletonResourceReference, _getNextPageNumber(lastPage), BreakType.COLUMN)];
+                allPages.push(createSkeletonPage(sectionBreakConfig, skeletonResourceReference, _getNextPageNumber(lastPage), BreakType.COLUMN));
             }
-        }
+        } else {
+            const paragraphStart = i === 0;
+            const languageHandlerResult = composeCharForLanguage(char, i, content, paragraphNode, sectionBreakConfig, paragraphStyle); // Handling special languages such as Tibetan, Arabic
+            let newSpanGroup = [];
+            if (languageHandlerResult) {
+                const { charIndex: newCharIndex, spanGroup } = languageHandlerResult;
+                i = newCharIndex;
+                newSpanGroup = spanGroup;
+            } else {
+                const span = createSkeletonWordSpan(char, fontCreateConfig); // measureText收敛到create中执行
+                newSpanGroup.push(span);
+            }
 
-        lastPage = _checkAndPush(pages, currentPages); // The layout engine does not have a page break, so it does not need to be added to the page array
+            allPages = calculateParagraphLayout(newSpanGroup, allPages, sectionBreakConfig, paragraphConfig, paragraphStart);
+        }
+    }
+
+    lineIterator(allPages, (line: IDocumentSkeletonLine) => {
+        horizontalAlignHandler(line, horizontalAlign);
     });
-    return pages;
+
+    return allPages;
 }
 
 function _getListLevelAncestors(bullet?: IBullet, listLevel?: Map<string, IDocumentSkeletonBullet[]>): Array<Nullable<IDocumentSkeletonBullet>> | undefined {
@@ -226,4 +289,29 @@ function _checkAndPush(pages: IDocumentSkeletonPage[], currentPages: IDocumentSk
 
 function _getNextPageNumber(lastPage: IDocumentSkeletonPage) {
     return lastPage.pageNumber + 1;
+}
+
+function horizontalAlignHandler(line: IDocumentSkeletonLine, horizontalAlign: HorizontalAlign) {
+    if (horizontalAlign === HorizontalAlign.UNSPECIFIED || horizontalAlign === HorizontalAlign.LEFT) {
+        return;
+    }
+
+    const { divides } = line;
+    const divideLength = divides.length;
+    for (let i = 0; i < divideLength; i++) {
+        const divide = divides[i];
+        const { width, spanGroup } = divide;
+        const spanGroupWidth = getSpanGroupWidth(divide);
+        // console.log(spanGroup, spanGroupWidth, width);
+        if (width === Infinity) {
+            continue;
+        }
+        if (horizontalAlign === HorizontalAlign.CENTER) {
+            divide.paddingLeft = (width - spanGroupWidth) / 2;
+        } else if (horizontalAlign === HorizontalAlign.RIGHT) {
+            divide.paddingLeft = width - spanGroupWidth;
+        } else if (horizontalAlign === HorizontalAlign.JUSTIFIED) {
+            /**todo */
+        }
+    }
 }

@@ -1,5 +1,4 @@
 import {
-    BlockType,
     BooleanNumber,
     SheetContext,
     HorizontalAlign,
@@ -14,7 +13,6 @@ import {
     ITextStyle,
     ObjectArray,
     ObjectMatrix,
-    ParagraphElementType,
     Styles,
     TextDirection,
     TextDirectionType,
@@ -29,6 +27,7 @@ import {
     Nullable,
     getColorStyle,
     IDocumentRenderConfig,
+    DocumentModelSimple,
 } from '@univerjs/core';
 import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../Basics/Const';
 import { IStylesCache, BorderCache } from './Interfaces';
@@ -700,7 +699,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         const content = cell.m || cell.v;
 
-        let documentData: Nullable<IDocumentData>;
+        let documentModel: Nullable<DocumentModelSimple>;
         let fontString = 'document';
         const cellOtherConfig = this._getOtherStyle(style) as CellOtherConfig;
         // const {
@@ -724,7 +723,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 centerAngle = 90;
                 vertexAngle = 90;
             }
-            documentData = this._updateRenderConfigAndHorizon(cell.p, horizontalAlign, {
+            documentModel = this._updateRenderConfigAndHorizon(cell.p, horizontalAlign, {
                 horizontalAlign,
                 verticalAlign,
                 centerAngle,
@@ -738,7 +737,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 cache.font![fontString] = new ObjectMatrix();
             }
 
-            documentData = this._getDocumentDataByStyle(content.toString(), textStyle, cellOtherConfig);
+            documentModel = this._getDocumentDataByStyle(content.toString(), textStyle, cellOtherConfig);
         }
 
         const fontCache = cache.font![fontString];
@@ -747,8 +746,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         if (isVertical === BooleanNumber.TRUE) {
             angle = 90;
         }
-        if (documentData) {
-            const documentSkeleton = DocumentSkeleton.create(documentData, this.getContext());
+        if (documentModel) {
+            const documentSkeleton = DocumentSkeleton.create(documentModel, this.getContext());
             if (angle === 0 || wrapStrategy !== WrapStrategy.WRAP) {
                 documentSkeleton.calculate();
                 // console.log(cell.v, documentSkeleton);
@@ -769,7 +768,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             return;
         }
 
-        if (!document.body?.blockElements) {
+        if (!document.body?.dataStream) {
             return;
         }
 
@@ -778,32 +777,21 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
         document.documentStyle.renderConfig = renderConfig;
 
-        const blockElements = document.body.blockElements;
-        for (let blockElement of blockElements) {
-            // if (blockElement.blockType === BlockType.SECTION_BREAK) {
-            //     if (!blockElement.sectionBreak) {
-            //         blockElement.sectionBreak = {};
-            //     }
+        const paragraphs = document.body.paragraphs || [];
 
-            //     blockElement.sectionBreak.renderConfig = renderConfig;
-            // } else
-            if (blockElement.blockType === BlockType.PARAGRAPH) {
-                if (!blockElement.paragraph) {
-                    continue;
-                }
-
-                if (!blockElement.paragraph.paragraphStyle) {
-                    blockElement.paragraph.paragraphStyle = {};
-                }
-
-                blockElement.paragraph.paragraphStyle.horizontalAlign = horizontalAlign;
+        for (let paragraph of paragraphs) {
+            if (!paragraph.paragraphStyle) {
+                paragraph.paragraphStyle = {};
             }
+
+            paragraph.paragraphStyle.horizontalAlign = horizontalAlign;
         }
-        return document;
+
+        return new DocumentModelSimple(document);
     }
 
     private _getDocumentDataByStyle(content: string, textStyle: ITextStyle, config: CellOtherConfig) {
-        const contentLength = content.length - 1;
+        const contentLength = content.length;
         const {
             textRotation = { a: 0, v: BooleanNumber.FALSE },
             textDirection = TextDirection.UNSPECIFIED,
@@ -831,43 +819,21 @@ export class SpreadsheetSkeleton extends Skeleton {
         const documentData: IDocumentData = {
             id: 'd',
             body: {
-                blockElements: [
+                dataStream: `${content}\r\n`,
+                textRuns: [
                     {
-                        blockId: 'oneParagraph',
+                        ts: textStyle,
                         st: 0,
-                        ed: contentLength,
-                        blockType: BlockType.PARAGRAPH,
-                        paragraph: {
-                            paragraphStyle: {
-                                horizontalAlign,
-                            },
-                            elements: [
-                                {
-                                    eId: 'oneElement',
-                                    st: 0,
-                                    ed: contentLength,
-                                    et: ParagraphElementType.TEXT_RUN,
-                                    tr: {
-                                        ct: content,
-                                        ts: textStyle,
-                                    },
-                                },
-                            ],
+                        ed: contentLength - 1,
+                    },
+                ],
+                paragraphs: [
+                    {
+                        startIndex: contentLength,
+                        paragraphStyle: {
+                            horizontalAlign,
                         },
                     },
-                    // oneSectionBreak: {
-                    //     blockId: 'oneSectionBreak',
-                    //     st: 0,
-                    //     ed: 0,
-                    //     blockType: BlockType.SECTION_BREAK,
-                    //     sectionBreak: {
-                    //         columnProperties: [],
-                    //         columnSeparatorType: ColumnSeparatorType.NONE,
-                    //         sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
-                    //         // textDirection: textDirectionDocument,
-                    //         // contentDirection: textDirection!,
-                    //     },
-                    // },
                 ],
             },
             documentStyle: {
@@ -889,7 +855,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             },
         };
 
-        return documentData;
+        return new DocumentModelSimple(documentData);
     }
 
     private ___setBorderProps(r: number, c: number, type: BORDER_TYPE, style: IStyleData, cache: IStylesCache) {
@@ -917,17 +883,16 @@ export class SpreadsheetSkeleton extends Skeleton {
             return {};
         }
         const { ff, fs, it, bl, ul, st, ol, cl, bg, bd } = format;
-
-        return {
-            ff,
-            fs,
-            it,
-            bl,
-            ul,
-            st,
-            ol,
-            cl,
-        };
+        const style: IStyleBase = {};
+        ff && (style.ff = ff);
+        fs && (style.fs = fs);
+        it && (style.it = it);
+        bl && (style.bl = bl);
+        ul && (style.ul = ul);
+        st && (style.st = st);
+        ol && (style.ol = ol);
+        cl && (style.cl = cl);
+        return style;
     }
 
     private _getOtherStyle(format?: Nullable<IStyleData>) {

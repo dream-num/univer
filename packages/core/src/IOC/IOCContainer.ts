@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import { IKeyValue } from '../Shared';
 
 /**
  * IOC map class type
@@ -268,7 +269,7 @@ export class IOCContainer {
             );
             switch (typeof injecting) {
                 case 'string': {
-                    const value = target;
+                    const value = target as IKeyValue;
                     value[key] = this._getInstance(
                         injecting,
                         collect,
@@ -282,7 +283,7 @@ export class IOCContainer {
                     const { mapping } = config;
                     const { scope } = config;
                     const { argument } = config;
-                    const value = target;
+                    const value = target as IKeyValue;
                     value[key] = this._getInstance(
                         mapping,
                         collect,
@@ -292,15 +293,15 @@ export class IOCContainer {
                 }
             }
             if (container) {
-                const value = target;
+                const value = target as IKeyValue;
                 value[key] = this;
             }
             if (attribute) {
-                const value = target;
+                const value = target as IKeyValue;
                 value[key] = this._attribute;
             }
             if (attributeValue) {
-                const value = target;
+                const value = target as IKeyValue;
                 value[key] = this._attribute.getValue();
             }
         }

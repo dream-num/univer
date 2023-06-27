@@ -9,6 +9,7 @@ interface IState {
 
 export class GroupButton extends Component<IProps, IState> {
     private _localeObserver: Nullable<Observer<void>>;
+
     initialize(props: IProps) {
         const OrderASCIcon = this.getComponentRender().renderFunction('OrderASCIcon');
         const OrderDESCIcon = this.getComponentRender().renderFunction('OrderDESCIcon');
@@ -41,7 +42,7 @@ export class GroupButton extends Component<IProps, IState> {
         };
 
         this.state = {
-            group: group,
+            group,
         };
     }
 
@@ -60,12 +61,14 @@ export class GroupButton extends Component<IProps, IState> {
                 this.setLocale();
             });
     }
+
     /**
      * destory
      */
     componentWillUnmount() {
         // this._context.getObserverManager().getObserver('onAfterChangeUILocaleObservable','core')?.remove(this._localeObserver);
     }
+
     /**
      * set text by config setting and Locale message
      */
@@ -83,7 +86,7 @@ export class GroupButton extends Component<IProps, IState> {
                     ele.label = locale.get(`${ele.locale}`);
                 }
             });
-            item.label = typeof item.label == 'object' ? item.label : item.children![0].label;
+            item.label = typeof item.label === 'object' ? item.label : item.children![0].label;
 
             return {
                 group: item,

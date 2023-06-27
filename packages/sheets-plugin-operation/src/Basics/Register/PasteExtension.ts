@@ -19,7 +19,7 @@ export class PasteExtension extends BasePasteExtension<OperationPlugin> {
         let colInfo;
         let rowInfo;
         if (content) {
-            // TODO move to PasteOfficeExtension
+            // TODO move to PasteOfficeExtension @tony
             if (content.indexOf('xmlns:x="urn:schemas-microsoft-com:office:excel"') > -1) {
                 data = handelExcelToJson(content);
                 colInfo = handleTableColgroup(content);

@@ -14,7 +14,9 @@ export class Context extends ContextBase {
         super();
 
         this._locale = new Locale();
-        this._locale.initialize();
+
+        // Initialize internationalization
+        this._locale.initialize(univerData.locale);
 
         if (univerData.id == null || univerData.id.length === 0) {
             this._univerId = Tools.generateRandomId(10);

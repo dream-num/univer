@@ -1,10 +1,9 @@
-import { SheetContext, Plugin, PLUGIN_NAMES, UniverSheet } from '@univerjs/core';
+import { SheetContext, Plugin, PLUGIN_NAMES, UniverSheet, IOCContainer } from '@univerjs/core';
+import { IToolbarItemProps, ISlotElement } from '@univerjs/base-ui';
+import { SheetPlugin } from '@univerjs/base-sheets';
 import { GroupButton } from './View/UI/GroupButton';
 import { zh, en } from './Locale';
 
-import { IToolbarItemProps, ISlotElement } from '@univerjs/base-ui';
-import { IOCContainer } from '@univerjs/core';
-import { SheetPlugin } from '@univerjs/base-sheets';
 import { GROUP_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 
 export interface IGroupPluginConfig {}
@@ -29,8 +28,8 @@ export class GroupPlugin extends Plugin {
          * load more Locale object
          */
         context.getLocale().load({
-            en: en,
-            zh: zh,
+            en,
+            zh,
         });
 
         const item: IToolbarItemProps = {

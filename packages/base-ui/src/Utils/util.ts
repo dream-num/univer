@@ -301,3 +301,18 @@ export function findLocale<T>(obj: T, fn: Function) {
 
 //     return data;
 // }
+
+export function isCtrlPressed(event: KeyboardEvent) {
+    let isCtrl = false;
+
+    // Determine the corresponding key code of the Ctrl key according to the operating system
+    if (navigator.userAgent.indexOf('Mac') !== -1) {
+        // Mac
+        isCtrl = event.metaKey;
+    } else {
+        // Windows
+        isCtrl = event.ctrlKey;
+    }
+
+    return isCtrl;
+}

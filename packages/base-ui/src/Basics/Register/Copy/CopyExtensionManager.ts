@@ -1,5 +1,4 @@
 import { IKeyValue, Plugin } from '@univerjs/core';
-import { ICopyData } from '../../Interfaces';
 import { BaseCopyExtension, BaseCopyExtensionFactory } from './CopyExtensionFactory';
 import { CopyExtensionRegister } from './CopyExtensionRegister';
 import { Clipboard } from '../../Shared/Clipboard';
@@ -22,13 +21,13 @@ export class CopyExtensionManager {
      * inject all actions
      * @param command
      */
-    handle(data: ICopyData) {
+    handle() {
         const clipboardExtensionFactoryList = this._register?.copyExtensionFactoryList;
         if (!clipboardExtensionFactoryList) return;
         // get the sorted list
         // get the dynamically added list
         this._copyExtensionFactoryList = clipboardExtensionFactoryList;
-        this._checkExtension(data);
+        this._checkExtension();
         // const extension = this._checkExtension(data);
 
         // Need to handle multiple extensions
@@ -54,25 +53,29 @@ export class CopyExtensionManager {
      * @param command
      * @returns
      */
-    private _checkExtension(data: ICopyData) {
+    private _checkExtension() {
         if (!this._copyExtensionFactoryList) return false;
         let extension: BaseCopyExtension | false = false;
         let table = '';
         let property: IKeyValue = {};
         for (let index = 0; index < this._copyExtensionFactoryList.length; index++) {
             const extensionFactory = this._copyExtensionFactoryList[index];
-            extension = extensionFactory.check(data);
+            extension = extensionFactory.check();
             if (extension !== false) {
                 extension.execute();
                 const data = extension.getData();
 
-                if (data.key === 'type') {
+                if (data.name === 'table') {
                     table = data.value;
-                    if (data.tag !== 'univer') {
+
+                    const embed = true; //TODO: 待讨论，配置是在operation插件，但是base-ui不能从插件取配置，只能从核心取配置 @alex
+
+                    table = this._insertEmbedFlag(table, embed);
+                    if (!embed) {
                         break;
                     }
-                } else if (data.key === 'property') {
-                    property[data.tag] = data.value;
+                } else {
+                    property[data.name] = data.value;
                 }
             }
         }
@@ -90,8 +93,13 @@ export class CopyExtensionManager {
         let insertIndex = table.indexOf('<table') + '<table'.length; // 插入位置
         let result = table.slice(0, insertIndex) + propertyStr + table.slice(insertIndex); // 插入新字符串
 
-        console.info('handleTableData==》》===', result);
-
         this._copyResolver(result);
+    }
+
+    private _insertEmbedFlag(table: string, embed: boolean): string {
+        let insertIndex = table.indexOf('<table') + '<table'.length; // 插入位置
+        let result = `${table.slice(0, insertIndex)}embed="${embed}"${table.slice(insertIndex)}`; // 插入新字符串
+
+        return result;
     }
 }

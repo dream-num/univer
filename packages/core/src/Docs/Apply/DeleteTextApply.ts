@@ -1,24 +1,12 @@
-import { BooleanNumber } from '../../Enum/TextStyle';
-import {
-    BlockType,
-    IBlockElement,
-    IParagraph,
-    ParagraphElementType,
-} from '../../Interfaces/IDocumentData';
 import { ITextSelectionRangeParam } from '../../Interfaces/ISelectionData';
 import { DocumentModel } from '../Domain/DocumentModel';
-import {
-    deleteContent,
-    getDocsUpdateBody,
-    getTextIndexByCursor,
-    mergeSameTextRun,
-} from './Common';
+import { getDocsUpdateBody } from './Common';
 
 export function DeleteTextApply(
     document: DocumentModel,
     range: ITextSelectionRangeParam
 ) {
-    const doc = document.getSnapshot();
+    const doc = document.snapshot;
 
     const { segmentId } = range;
 
@@ -28,103 +16,103 @@ export function DeleteTextApply(
         throw new Error('no body has changed');
     }
 
-    const { blockElements } = body;
+    // const { blockElements } = body;
 
-    for (let blockElement of blockElements) {
-        if (blockElement == null) {
-            continue;
-        }
+    // for (let blockElement of blockElements) {
+    //     if (blockElement == null) {
+    //         continue;
+    //     }
 
-        const { blockType } = blockElement;
+    //     const { blockType } = blockElement;
 
-        switch (blockType) {
-            case BlockType.PARAGRAPH:
-                if (blockElement.paragraph) {
-                    deleteText(blockElement, blockElement.paragraph, range);
-                }
-        }
-    }
+    //     switch (blockType) {
+    //         case BlockType.PARAGRAPH:
+    //             if (blockElement.paragraph) {
+    //                 deleteText(blockElement, blockElement.paragraph, range);
+    //             }
+    //     }
+    // }
 }
 
-function deleteText(
-    blockElement: IBlockElement,
-    paragraph: IParagraph,
-    range: ITextSelectionRangeParam
-) {
-    const { cursorStart, cursorEnd, isStartBack, isEndBack, isCollapse } = range;
+// function deleteText(
+//     blockElement: IBlockElement,
+//     paragraph: IParagraph,
+//     range: ITextSelectionRangeParam
+// ) {
+//     const { cursorStart, cursorEnd, isStartBack, isEndBack, isCollapse } = range;
 
-    const textStart = getTextIndexByCursor(cursorStart, isStartBack);
+//     const textStart = getTextIndexByCursor(cursorStart, isStartBack);
 
-    const textEnd = getTextIndexByCursor(cursorEnd, isEndBack);
+//     const textEnd = getTextIndexByCursor(cursorEnd, isEndBack);
 
-    const { st: blockStartIndex, ed: blockEndIndex } = blockElement;
+//     const { st: blockStartIndex, ed: blockEndIndex } = blockElement;
 
-    if (cursorStart > blockEndIndex || cursorEnd < blockStartIndex) {
-        return;
-    }
+//     if (cursorStart > blockEndIndex || cursorEnd < blockStartIndex) {
+//         return;
+//     }
 
-    const { elements } = paragraph;
+//     const { elements } = paragraph;
 
-    let index = 0;
+//     let index = 0;
 
-    for (let element of elements) {
-        const { et: paragraphElementType } = element;
+//     for (let element of elements) {
+//         const { et: paragraphElementType } = element;
 
-        if (paragraphElementType === ParagraphElementType.DRAWING) {
-            index++;
-            continue;
-        }
+//         if (paragraphElementType === ParagraphElementType.DRAWING) {
+//             index++;
+//             continue;
+//         }
 
-        const { st: elementStartIndex, ed: elementEndIndex, tr } = element;
+//         const { st: elementStartIndex, ed: elementEndIndex, tr } = element;
 
-        if (tr == null || tr.tab === BooleanNumber.TRUE) {
-            index++;
-            continue;
-        }
-        if (textEnd < elementStartIndex || textStart > elementEndIndex) {
-            index++;
-            continue;
-        }
+//         if (tr == null || tr.tab === BooleanNumber.TRUE) {
+//             index++;
+//             continue;
+//         }
+//         if (textEnd < elementStartIndex || textStart > elementEndIndex) {
+//             index++;
+//             continue;
+//         }
 
-        if (paragraphElementType === ParagraphElementType.TEXT_RUN) {
-            let relativeStart = textStart - elementStartIndex + 1;
+//         if (paragraphElementType === ParagraphElementType.TEXT_RUN) {
+//             let relativeStart = textStart - elementStartIndex + 1;
 
-            let relativeEnd = textEnd - elementStartIndex + 1;
+//             let relativeEnd = textEnd - elementStartIndex + 1;
 
-            if (relativeStart <= 0) {
-                relativeStart = 0;
-            }
+//             if (relativeStart <= 0) {
+//                 relativeStart = 0;
+//             }
 
-            if (relativeEnd >= elementEndIndex - elementStartIndex - 1) {
-                relativeStart = elementEndIndex - elementStartIndex - 1;
-            }
+//             if (relativeEnd >= elementEndIndex - elementStartIndex - 1) {
+//                 relativeStart = elementEndIndex - elementStartIndex - 1;
+//             }
 
-            const newContent = deleteContent(
-                tr.ct || '',
-                relativeStart,
-                relativeEnd
-            );
+//             const newContent = deleteContent(
+//                 tr.ct || '',
+//                 relativeStart,
+//                 relativeEnd
+//             );
 
-            tr.ct = newContent;
-        }
+//             tr.ct = newContent;
+//         }
 
-        if (tr.ct?.length === 0) {
-            elements.splice(index, 1);
-        } else {
-            const preTr = elements[index - 1]?.tr;
+//         if (tr.ct?.length === 0) {
+//             elements.splice(index, 1);
+//         } else {
+//             const preTr = elements[index - 1]?.tr;
 
-            if (!preTr) {
-                index++;
-                continue;
-            }
+//             if (!preTr) {
+//                 index++;
+//                 continue;
+//             }
 
-            const m = mergeSameTextRun(tr, preTr);
+//             const m = mergeSameTextRun(tr, preTr);
 
-            if (m) {
-                elements.splice(index, 1);
-            } else {
-                index++;
-            }
-        }
-    }
-}
+//             if (m) {
+//                 elements.splice(index, 1);
+//             } else {
+//                 index++;
+//             }
+//         }
+//     }
+// }

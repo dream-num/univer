@@ -1,6 +1,6 @@
 import { IDrawing, Nullable, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import {
-    IDocumentSkeletonBlockAnchor,
+    IDocumentSkeletonDrawingAnchor,
     IDocumentSkeletonDivide,
     IDocumentSkeletonDrawing,
     IDocumentSkeletonLine,
@@ -44,13 +44,12 @@ interface ILineBoundingBox {
 
 // 处理divides， divideLen， lineIndex， 无序和有序列表标题， drawingTBIds 影响行的元素id集合
 export function createSkeletonLine(
-    blockId: string,
+    paragraphIndex: number,
     lineType: LineType,
     lineBoundingBox: ILineBoundingBox,
     columnWidth: number,
     lineIndex: number = 0,
-    elementIndex: number = 0,
-    isFirstSpan: boolean = false,
+    isParagraphStart: boolean = false,
     affectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>,
     headersDrawings?: Map<string, IDocumentSkeletonDrawing>,
     footersDrawings?: Map<string, IDocumentSkeletonDrawing>
@@ -67,9 +66,9 @@ export function createSkeletonLine(
         spaceBelowApply = 0,
     } = lineBoundingBox;
 
-    const lineSke = _getLineSke(lineType, blockId);
+    const lineSke = _getLineSke(lineType, paragraphIndex);
     lineSke.lineIndex = lineIndex;
-    lineSke.paragraphStart = isParagraphStart(elementIndex, isFirstSpan); // 是否段落开始的第一行
+    lineSke.paragraphStart = isParagraphStart; // 是否段落开始的第一行
     lineSke.contentHeight = contentHeight;
     lineSke.top = lineTop;
     lineSke.lineHeight = lineHeight;
@@ -90,7 +89,6 @@ export function createSkeletonLine(
 export function calculateLineTopByDrawings(
     lineHeight: number = 15.6,
     lineTop: number = 0,
-    elementIndex: number = 0,
     pageSkeDrawings?: Map<string, IDocumentSkeletonDrawing>,
     headersDrawings?: Map<string, IDocumentSkeletonDrawing>,
     footersDrawings?: Map<string, IDocumentSkeletonDrawing>
@@ -111,7 +109,7 @@ export function calculateLineTopByDrawings(
     });
 
     pageSkeDrawings?.forEach((drawing) => {
-        const top = _getLineTopWidthWrapTopBottom(drawing, lineHeight, lineTop, elementIndex);
+        const top = _getLineTopWidthWrapTopBottom(drawing, lineHeight, lineTop);
         if (top) {
             maxTop = Math.max(maxTop, top);
         }
@@ -120,7 +118,7 @@ export function calculateLineTopByDrawings(
     return maxTop;
 }
 
-function _getLineTopWidthWrapTopBottom(drawing: IDocumentSkeletonDrawing, lineHeight: number, lineTop: number, elementIndex?: number) {
+function _getLineTopWidthWrapTopBottom(drawing: IDocumentSkeletonDrawing, lineHeight: number, lineTop: number) {
     const { aTop, height, aLeft, width, angle = 0, drawingOrigin } = drawing;
     const { layoutType, distT = 0, distB = 0 } = drawingOrigin;
 
@@ -399,9 +397,9 @@ function __getDivideSKe(left: number, width: number): IDocumentSkeletonDivide {
     };
 }
 
-function _getLineSke(lineType: LineType, blockId: string): IDocumentSkeletonLine {
+function _getLineSke(lineType: LineType, paragraphIndex: number): IDocumentSkeletonLine {
     return {
-        blockId,
+        paragraphIndex,
         type: lineType,
         divides: [], // /divides 受到对象影响，把行切分为N部分
         lineHeight: 0, // lineHeight =max(span.fontBoundingBoxAscent + span.fontBoundingBoxDescent, span2.....) + space
@@ -421,21 +419,17 @@ function _getLineSke(lineType: LineType, blockId: string): IDocumentSkeletonLine
     };
 }
 
-export function isParagraphStart(elementIndex: number, isFirstSpan: boolean) {
-    return elementIndex === 0 && isFirstSpan === true;
-}
-
-export function createAndUpdateBlockAnchor(blockId: string, line: IDocumentSkeletonLine, top: number, blockAnchor?: Map<string, IDocumentSkeletonBlockAnchor>) {
-    if (!blockAnchor) {
+export function createAndUpdateBlockAnchor(paragraphIndex: number, line: IDocumentSkeletonLine, top: number, drawingAnchor?: Map<number, IDocumentSkeletonDrawingAnchor>) {
+    if (!drawingAnchor) {
         return;
     }
-    if (blockAnchor.has(blockId)) {
-        const anchor = blockAnchor.get(blockId);
+    if (drawingAnchor.has(paragraphIndex)) {
+        const anchor = drawingAnchor.get(paragraphIndex);
         anchor?.elements.push(line);
     } else {
-        blockAnchor.set(blockId, {
+        drawingAnchor.set(paragraphIndex, {
             elements: [line],
-            blockId,
+            paragraphIndex,
             top,
         });
     }

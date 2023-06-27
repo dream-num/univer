@@ -304,6 +304,8 @@ pnpm install
 
 6. 不要直接使用 `console.log` 原生方法，推荐使用 `Logger` 静态类提供的方法来打印日志，便于我们对日志进行更精细的控制。
 
+7. 如果model里还持有其他内存态的子model，那么子model的更新放在model里，apply只负责更新snapshot相关的数据。内存态的更新都放在model api上，紧跟action invoke
+
 ## 能力扩展
 
 核心能力的扩展，依靠 Plugin、Registry 和 Register 来提供
@@ -589,6 +591,10 @@ context.getWorkBook().setPluginMeta < IKeyType < IBandedRange >> (ALTERNATING_CO
     ```
 
 -   `context.getLocale().get('key')`来取得 key 对应的翻译即可，语言不用特定获取，因为在初始化的时候就配置好了
+
+1. 语言分开加载：语言包根据用户配置采用异步import的模式加载，避免初始化时一次性加载所有语言包；切换语言时也是异步import加载目标语言包
+2. 移动端：移动端在有需要的情况下，分开key值来取得翻译。比如PC 取得'btn'，移动端取得'btn-mobile'
+3. 如何安装：只需在Univer初始化的时候，配置语言即可，插件中会根据配置异步加载对应的语言包
 
 ### CSS 模块
 

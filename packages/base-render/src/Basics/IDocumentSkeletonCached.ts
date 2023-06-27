@@ -1,15 +1,4 @@
-import {
-    BulletAlignment,
-    ColumnSeparatorType,
-    IDrawing,
-    INestingLevel,
-    IParagraphStyle,
-    ITextStyle,
-    IDocumentRenderConfig,
-    IIndentStart,
-    PageOrientType,
-    IElement,
-} from '@univerjs/core';
+import { BulletAlignment, ColumnSeparatorType, IDrawing, INestingLevel, IParagraphStyle, ITextStyle, IDocumentRenderConfig, IIndentStart, PageOrientType } from '@univerjs/core';
 
 export interface IDocumentSkeletonCached extends ISkeletonResourceReference {
     pages: IDocumentSkeletonPage[];
@@ -24,13 +13,12 @@ export interface ISkeletonResourceReference {
     skeFooters: Map<string, Map<number, IDocumentSkeletonFooter>>;
     /* Global cache, does not participate in rendering, only helps skeleton generation */
     skeListLevel?: Map<string, IDocumentSkeletonBullet[]>; // 有序列表缓存，id：{ level: max(width)的bullet }
-    blockAnchor?: Map<string, IDocumentSkeletonBlockAnchor>; // Anchor point to assist floating element positioning
-    features?: Map<string, IDocumentSkeletonSpanFeature>;
+    drawingAnchor?: Map<number, IDocumentSkeletonDrawingAnchor>; // Anchor point to assist floating element positioning
 }
 
-export interface IDocumentSkeletonBlockAnchor {
+export interface IDocumentSkeletonDrawingAnchor {
     elements: IDocumentSkeletonLine[]; // element: lines, tr
-    blockId: string; // block id
+    paragraphIndex: number; // block id
     top: number; // relative height for previous block
 }
 
@@ -104,7 +92,7 @@ export interface IDocumentSkeletonColumn {
 }
 
 export interface IDocumentSkeletonLine {
-    blockId: string; // ID number associated with block
+    paragraphIndex: number; // ID number associated with block
     type: LineType; // 行的类型，可以是段落或者其他block
     // line坐标系相对于column
     divides: IDocumentSkeletonDivide[]; // divides 受到对象影响，把行切分为N部分
@@ -186,11 +174,6 @@ export interface IDocumentSkeletonDrawing {
     angle: number; // 旋转
     initialState: boolean; // 是否初始化
     drawingOrigin: IDrawing;
-}
-
-export interface IDocumentSkeletonSpanFeature {
-    featureId: string;
-    element: IElement;
 }
 
 export interface IDocumentSkeletonFontStyle {

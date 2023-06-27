@@ -1,26 +1,15 @@
-import { BooleanNumber } from '../../Enum/TextStyle';
-import {
-    BlockType,
-    IBlockElement,
-    IParagraph,
-    ParagraphElementType,
-    IElement,
-} from '../../Interfaces/IDocumentData';
+import { IDocumentBody } from '../../Interfaces/IDocumentData';
 import { ITextSelectionRangeStartParam } from '../../Interfaces/ISelectionData';
 import { DocumentModel } from '../Domain/DocumentModel';
-import {
-    getDocsUpdateBody,
-    insertTextToContent,
-    getTextIndexByCursor,
-} from './Common';
+import { getDocsUpdateBody } from './Common';
 
 export function InsertTextApply(
     document: DocumentModel,
-    text: string | IElement[],
+    insertBody: IDocumentBody,
     textLength: number,
     collapseRange: ITextSelectionRangeStartParam
 ) {
-    const doc = document.getSnapshot();
+    const doc = document.snapshot;
 
     const { segmentId } = collapseRange;
 
@@ -34,139 +23,137 @@ export function InsertTextApply(
         throw new Error('no body has changed');
     }
 
-    const { blockElements } = body;
+    // const { blockElements } = body;
 
-    for (let blockElement of blockElements) {
-        if (blockElement == null) {
-            continue;
-        }
+    // for (let blockElement of blockElements) {
+    //     if (blockElement == null) {
+    //         continue;
+    //     }
 
-        const { blockType } = blockElement;
+    //     const { blockType } = blockElement;
 
-        switch (blockType) {
-            case BlockType.PARAGRAPH:
-                blockElement.paragraph &&
-                    insertText(
-                        text,
-                        textLength,
-                        blockElement,
-                        blockElement.paragraph,
-                        collapseRange
-                    );
-        }
-    }
+    //     switch (blockType) {
+    //         case BlockType.PARAGRAPH:
+    //             blockElement.paragraph &&
+    //                 insertText(
+    //                     text,
+    //                     textLength,
+    //                     blockElement,
+    //                     blockElement.paragraph,
+    //                     collapseRange
+    //                 );
+    //     }
+    // }
 }
 
-function insertText(
-    text: string | IElement[],
-    textLength: number,
-    blockElement: IBlockElement,
-    paragraph: IParagraph,
-    collapseRange: ITextSelectionRangeStartParam
-) {
-    const { st: blockStartIndex, ed: blockEndIndex } = blockElement;
+// function insertText(
+//     text: string | IElement[],
+//     textLength: number,
+//     blockElement: IBlockElement,
+//     paragraph: IParagraph,
+//     collapseRange: ITextSelectionRangeStartParam
+// ) {
+//     const { st: blockStartIndex, ed: blockEndIndex } = blockElement;
 
-    const { cursorStart, isStartBack, segmentId } = collapseRange;
+//     const { cursorStart, isStartBack, segmentId } = collapseRange;
 
-    const textStart = getTextIndexByCursor(cursorStart, isStartBack);
+//     const textStart = getTextIndexByCursor(cursorStart, isStartBack);
 
-    if (textStart > blockEndIndex || paragraph == null) {
-        return;
-    }
+//     if (textStart > blockEndIndex || paragraph == null) {
+//         return;
+//     }
 
-    const { elements } = paragraph;
+//     const { elements } = paragraph;
 
-    let index = 0;
+//     let index = 0;
 
-    for (let element of elements) {
-        const { et: paragraphElementType } = element;
+//     for (let element of elements) {
+//         const { et: paragraphElementType } = element;
 
-        if (paragraphElementType === ParagraphElementType.DRAWING) {
-            index++;
-            continue;
-        }
+//         if (paragraphElementType === ParagraphElementType.DRAWING) {
+//             index++;
+//             continue;
+//         }
 
-        const { st: elementStartIndex, ed: elementEndIndex, tr } = element;
+//         const { st: elementStartIndex, ed: elementEndIndex, tr } = element;
 
-        if (tr == null || tr.tab === BooleanNumber.TRUE) {
-            index++;
-            continue;
-        }
-        if (textStart < elementStartIndex || textStart > elementEndIndex) {
-            index++;
-            continue;
-        }
+//         if (tr == null || tr.tab === BooleanNumber.TRUE) {
+//             index++;
+//             continue;
+//         }
+//         if (textStart < elementStartIndex || textStart > elementEndIndex) {
+//             index++;
+//             continue;
+//         }
 
-        console.log(
-            'paragraphApply',
-            textStart,
-            elementStartIndex,
-            elementEndIndex,
-            element,
-            textStart < elementStartIndex || textStart > elementEndIndex
-        );
+//         console.log(
+//             'paragraphApply',
+//             textStart,
+//             elementStartIndex,
+//             elementEndIndex,
+//             element,
+//             textStart < elementStartIndex || textStart > elementEndIndex
+//         );
 
-        if (paragraphElementType === ParagraphElementType.TEXT_RUN) {
-            let relativeStart = textStart - elementStartIndex + 1;
+//         if (paragraphElementType === ParagraphElementType.TEXT_RUN) {
+//             let relativeStart = textStart - elementStartIndex + 1;
 
-            if (relativeStart <= 0) {
-                relativeStart = 0;
-            }
+//             if (relativeStart <= 0) {
+//                 relativeStart = 0;
+//             }
 
-            if (text instanceof Object) {
-                const nextEle = elements[index + 1];
-                const insertedElements = splitTextRun(
-                    text,
-                    textLength,
-                    relativeStart,
-                    element,
-                    nextEle
-                );
-            } else {
-                const newContent = insertTextToContent(
-                    tr.ct || '',
-                    relativeStart,
-                    text as string
-                );
+//             if (text instanceof Object) {
+//                 const nextEle = elements[index + 1];
+//                 const insertedElements = splitTextRun(
+//                     text,
+//                     textLength,
+//                     relativeStart,
+//                     element,
+//                     nextEle
+//                 );
+//             } else {
+//                 const newContent = insertTextToContent(
+//                     tr.ct || '',
+//                     relativeStart,
+//                     text as string
+//                 );
 
-                tr.ct = newContent;
+//                 tr.ct = newContent;
 
-                index++;
-            }
-        }
-    }
-}
+//                 index++;
+//             }
+//         }
+//     }
+// }
 
-function splitTextRun(
-    insertTextRunList: IElement[],
-    textLength: number,
-    relativeStart: number,
-    currentElement: IElement,
-    nextElement: IElement
-) {
-    const trLen = insertTextRunList.length;
+// function splitTextRun(
+//     insertTextRunList: IElement[],
+//     textLength: number,
+//     relativeStart: number,
+//     currentElement: IElement,
+//     nextElement: IElement
+// ) {
+//     const trLen = insertTextRunList.length;
 
-    const insertFirstEle = insertTextRunList[0];
+//     const insertLastTrEle = insertTextRunList[trLen - 1];
 
-    const insertLastTrEle = insertTextRunList[trLen - 1];
+//     const {
+//         st: currentStartIndex,
+//         ed: currentEndIndex,
+//         tr: currentTr,
+//     } = currentElement;
 
-    const {
-        st: currentStartIndex,
-        ed: currentEndIndex,
-        tr: currentTr,
-    } = currentElement;
+//     const currentContent = currentTr?.ct || '';
 
-    const currentContent = currentTr?.ct || '';
+//     const newElements: IElement[] = [];
 
-    const newElements: IElement[] = [];
+//     if (trLen === 1) {
+//         const splitLeft = currentContent.slice(0, relativeStart);
 
-    if (trLen === 1) {
-        const splitLeft = currentContent.slice(0, relativeStart);
+//         const splitRight = currentContent.slice(relativeStart);
+//     } else if (trLen > 1) {
+//         const splitLeft = currentContent.slice(0, relativeStart);
 
-        const splitRight = currentContent.slice(relativeStart);
-    } else if (trLen > 1) {
-        const splitLeft = currentContent.slice(0, relativeStart);
-
-        const splitRight = currentContent.slice(relativeStart);
-    }
-}
+//         const splitRight = currentContent.slice(relativeStart);
+//     }
+// }

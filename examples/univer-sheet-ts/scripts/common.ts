@@ -1,7 +1,7 @@
 // scripts/common.ts
 import { BuildOptions } from "esbuild";
 import stylePlugin from 'esbuild-style-plugin'
-import { resolve } from "path";
+import path, { resolve } from "path";
 import { existsSync, lstatSync } from "fs";
 const root = process.cwd();
 export const paths = {

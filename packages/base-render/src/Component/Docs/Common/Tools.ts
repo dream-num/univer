@@ -11,6 +11,10 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     SpacingRule,
+    DataStreamTreeNode,
+    IParagraphStyle,
+    ITextStyle,
+    ObjectMatrix,
 } from '@univerjs/core';
 import {
     IDocumentSkeletonColumn,
@@ -20,7 +24,7 @@ import {
     IDocumentSkeletonSpan,
     SpanType,
 } from '../../../Basics/IDocumentSkeletonCached';
-import { isFunction } from '../../../Basics/Tools';
+import { getFontStyleString, isFunction } from '../../../Basics/Tools';
 import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../Basics/Const';
 import { IParagraphConfig, ISectionBreakConfig } from '../../../Basics/Interfaces';
 
@@ -622,4 +626,72 @@ export function getSpanGroupWidth(divide: IDocumentSkeletonDivide) {
         width += span.width;
     }
     return width;
+}
+
+interface IFontCreateConfig {
+    fontStyle: {
+        fontString: string;
+        fontSize: number;
+        fontFamily: string;
+    };
+    textStyle: ITextStyle;
+    charSpace: number;
+    gridType: GridType;
+    snapToGrid: BooleanNumber;
+    pageWidth: number;
+}
+
+const fontCreateConfigCache = new ObjectMatrix<IFontCreateConfig>();
+
+export function clearFontCreateConfigCache() {
+    fontCreateConfigCache.reset();
+}
+
+export function getFontCreateConfig(index: number, paragraphNode: DataStreamTreeNode, sectionBreakConfig: ISectionBreakConfig, paragraphStyle: IParagraphStyle) {
+    const { startIndex } = paragraphNode;
+    const bodyModel = paragraphNode.bodyModel;
+    const textRun = bodyModel.getTextRun(index + startIndex) || { ts: {}, st: 0, ed: 0 };
+    const { ts: textStyle = {}, st, ed } = textRun;
+    const cache = fontCreateConfigCache.getValue(st, ed);
+    if (cache) {
+        return cache;
+    }
+
+    const {
+        gridType = GridType.LINES,
+        charSpace = 0,
+        documentTextStyle = {},
+        pageSize = {
+            width: Infinity,
+            height: Infinity,
+        },
+
+        marginRight = 0,
+        marginLeft = 0,
+        fontLocale,
+    } = sectionBreakConfig;
+
+    const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
+
+    const fontStyle = getFontStyleString(textStyle, fontLocale);
+
+    const mixTextStyle: ITextStyle = {
+        ...documentTextStyle,
+        ...textStyle,
+    };
+
+    const pageWidth = pageSize.width || Infinity - marginLeft - marginRight;
+
+    const result = {
+        fontStyle,
+        textStyle: mixTextStyle,
+        charSpace,
+        gridType,
+        snapToGrid,
+        pageWidth,
+    };
+
+    fontCreateConfigCache.setValue(st, ed, result);
+
+    return result;
 }

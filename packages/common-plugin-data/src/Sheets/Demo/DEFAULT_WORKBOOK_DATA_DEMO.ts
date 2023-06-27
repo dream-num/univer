@@ -1,116 +1,27 @@
-import { BlockType, BooleanNumber, IDocumentData, IWorkbookConfig, LocaleType, ParagraphElementType, SheetTypes } from '@univerjs/core';
+import { BooleanNumber, IDocumentData, IWorkbookConfig, LocaleType, SheetTypes } from '@univerjs/core';
 import { PAGE5_RICHTEXT_1 } from '../../Slides/RichText/PAGE5_RICHTEXT_1';
 
 const richTextDemo: IDocumentData = {
     id: 'd',
     body: {
-        blockElements: [
+        dataStream: `Instructions:\f①Project division - Fill in the specific division of labor after the project is disassembled:\f②Responsible Person - Enter the responsible person's name here:\f③Date-The specific execution time of the project (detailed to the date of a certain month), and the gray color block marks the planned real-time time of the division of labor of the project (for example,\fthe specific execution time of [regional scene model arrangement and construction] is the 2 days marked in gray. \r\n`,
+        textRuns: [
             {
-                blockId: 'oneParagraph',
                 st: 0,
-                ed: 15,
-                blockType: BlockType.PARAGRAPH,
-                paragraph: {
-                    elements: [
-                        {
-                            eId: 'oneElement',
-                            st: 0,
-                            ed: 15,
-                            et: ParagraphElementType.TEXT_RUN,
-                            tr: {
-                                ct: 'Instructions:',
-                                ts: {
-                                    cl: {
-                                        rgb: 'rgb(92,92,92)',
-                                    },
-                                },
-                            },
-                        },
-                        {
-                            eId: 'breakElement',
-                            et: ParagraphElementType.PAGE_BREAK,
-                            st: 0,
-                            ed: 0,
-                        },
-                        {
-                            eId: 'twoElement',
-                            st: 0,
-                            ed: 15,
-                            et: ParagraphElementType.TEXT_RUN,
-                            tr: {
-                                ct: '①Project division - Fill in the specific division of labor after the project is disassembled:',
-                                ts: {
-                                    cl: {
-                                        rgb: 'rgb(92,92,92)',
-                                    },
-                                },
-                            },
-                        },
-                        {
-                            eId: 'breakElement1',
-                            et: ParagraphElementType.PAGE_BREAK,
-                            st: 0,
-                            ed: 0,
-                        },
-                        {
-                            eId: 'threeElement',
-                            st: 0,
-                            ed: 15,
-                            et: ParagraphElementType.TEXT_RUN,
-                            tr: {
-                                ct: "②Responsible Person - Enter the responsible person's name here:",
-                                ts: {
-                                    cl: {
-                                        rgb: 'rgb(92,92,92)',
-                                    },
-                                },
-                            },
-                        },
-                        {
-                            eId: 'breakElement2',
-                            et: ParagraphElementType.PAGE_BREAK,
-                            st: 0,
-                            ed: 0,
-                        },
-                        {
-                            eId: 'fourElement',
-                            st: 0,
-                            ed: 15,
-                            et: ParagraphElementType.TEXT_RUN,
-                            tr: {
-                                ct: '③Date-The specific execution time of the project (detailed to the date of a certain month), and the gray color block marks the planned real-time time of the division of labor of the project (for example,',
-                                ts: {
-                                    cl: {
-                                        rgb: 'rgb(92,92,92)',
-                                    },
-                                },
-                            },
-                        },
-                        {
-                            eId: 'breakElement3',
-                            et: ParagraphElementType.PAGE_BREAK,
-                            st: 0,
-                            ed: 0,
-                        },
-                        {
-                            eId: 'fiveElement',
-                            st: 0,
-                            ed: 15,
-                            et: ParagraphElementType.TEXT_RUN,
-                            tr: {
-                                ct: 'the specific execution time of [regional scene model arrangement and construction] is the 2 days marked in gray. ',
-                                ts: {
-                                    cl: {
-                                        rgb: 'rgb(92,92,92)',
-                                    },
-                                },
-                            },
-                        },
-                    ],
-                    paragraphStyle: {
-                        spaceAbove: 10,
-                        lineSpacing: 1.2,
+                ed: 488,
+                ts: {
+                    cl: {
+                        rgb: 'rgb(92,92,92)',
                     },
+                },
+            },
+        ],
+        paragraphs: [
+            {
+                startIndex: 489,
+                paragraphStyle: {
+                    spaceAbove: 10,
+                    lineSpacing: 1.2,
                 },
             },
         ],
@@ -130,45 +41,26 @@ const richTextDemo: IDocumentData = {
 const richTextDemo1: IDocumentData = {
     id: 'd',
     body: {
-        blockElements: [
+        dataStream: `No.2824163\r\n`,
+        textRuns: [
             {
-                blockId: 'oneParagraph',
                 st: 0,
-                ed: 15,
-                blockType: BlockType.PARAGRAPH,
-                paragraph: {
-                    elements: [
-                        {
-                            eId: 'oneElement',
-                            st: 0,
-                            ed: 15,
-                            et: ParagraphElementType.TEXT_RUN,
-                            tr: {
-                                ct: 'No.',
-                                ts: {
-                                    cl: {
-                                        rgb: '#000',
-                                    },
-                                    fs: 20,
-                                },
-                            },
-                        },
-                        {
-                            eId: 'twoElement',
-                            st: 0,
-                            ed: 15,
-                            et: ParagraphElementType.TEXT_RUN,
-                            tr: {
-                                ct: '2824163',
-                                ts: {
-                                    cl: {
-                                        rgb: 'rgb(255,0,0)',
-                                    },
-                                    fs: 20,
-                                },
-                            },
-                        },
-                    ],
+                ed: 2,
+                ts: {
+                    cl: {
+                        rgb: '#000',
+                    },
+                    fs: 20,
+                },
+            },
+            {
+                st: 3,
+                ed: 9,
+                ts: {
+                    cl: {
+                        rgb: 'rgb(255,0,0)',
+                    },
+                    fs: 20,
                 },
             },
         ],
@@ -195,7 +87,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
     socketUrl: '',
     socketEnable: BooleanNumber.FALSE,
     extensions: [],
-    sheetOrder: ['sheet-0010','sheet-0009','sheet-0008','sheet-0007','sheet-0006','sheet-0005','sheet-0004','sheet-0003','sheet-0002','sheet-0001'],
+    sheetOrder: ['sheet-0010', 'sheet-0009', 'sheet-0008', 'sheet-0007', 'sheet-0006', 'sheet-0005', 'sheet-0004', 'sheet-0003', 'sheet-0002', 'sheet-0001'],
     pluginMeta: {},
     styles: {
         '1': {

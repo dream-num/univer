@@ -29,7 +29,7 @@ export class SetBandingAction extends SheetActionBase<ISetBandingActionData, ISe
         const worksheet = this.getWorkSheet();
         const context = worksheet.getContext();
         const manager = context.getPluginManager();
-        const plugin = <AlternatingColorsPlugin>manager.getPluginByName(ALTERNATING_COLORS_PLUGIN_NAME);
+        const plugin = manager.getPluginByName(ALTERNATING_COLORS_PLUGIN_NAME) as AlternatingColorsPlugin;
         this._observers.onActionDoObserver.notifyObservers(this);
         return SetBanding(plugin, bandedRange);
     }
@@ -49,7 +49,7 @@ export class SetBandingAction extends SheetActionBase<ISetBandingActionData, ISe
         const worksheet = this.getWorkSheet();
         const context = worksheet.getContext();
         const manager = context.getPluginManager();
-        const plugin = <AlternatingColorsPlugin>manager.getPluginByName(ALTERNATING_COLORS_PLUGIN_NAME);
+        const plugin = manager.getPluginByName(ALTERNATING_COLORS_PLUGIN_NAME) as AlternatingColorsPlugin;
         this._observers.onActionUndoObserver.notifyObservers(this);
 
         // update current data

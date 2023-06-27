@@ -2,4 +2,4 @@
 import './Model/RegisterAction';
 
 export * from './FormulaPlugin';
-export * from './Basics'
+export * from './Basics';

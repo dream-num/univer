@@ -50,7 +50,7 @@ export interface IWorksheetConfig {
     hideColumn: [];
     status: BooleanNumber;
     cellData: ObjectMatrixPrimitiveType<ICellData>;
-    rowData: ObjectArrayType<Partial<IRowData>>;
+    rowData: ObjectArrayType<Partial<IRowData>>; // TODO:配置文件不能为ObjectArray实例，应该是纯json配置 @jerry
     columnData: ObjectArrayType<Partial<IColumnData>>;
     showGridlines: BooleanNumber;
     rowTitle: {

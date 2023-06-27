@@ -18,7 +18,7 @@ import {
     isColumnFull,
 } from '../../Common/Tools';
 import { createSkeletonPage } from '../../Common/Page';
-import { addSpanToDivide, calculateLineTopByDrawings, createAndUpdateBlockAnchor, createSkeletonLine, isParagraphStart, setDivideFullState } from '../../Common/Line';
+import { addSpanToDivide, calculateLineTopByDrawings, createAndUpdateBlockAnchor, createSkeletonLine, setDivideFullState } from '../../Common/Line';
 import { createSkeletonBulletSpan, setSpanGroupLeft } from '../../Common/Span';
 import { setColumnFullState } from '../../Common/Section';
 import {
@@ -38,10 +38,9 @@ export function calculateParagraphLayout(
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
-    elementIndex: number = 0,
-    isFirstSpan: boolean = false
+    paragraphStart: boolean = false
 ) {
-    if (isParagraphStart(elementIndex, isFirstSpan)) {
+    if (paragraphStart) {
         // elementIndex === 0 表示段落开始的第一个字符，需要新起一行，与之前的段落区分开
         if (paragraphConfig.bulletSkeleton) {
             const { bulletSkeleton, paragraphStyle = {} } = paragraphConfig;
@@ -55,13 +54,13 @@ export function calculateParagraphLayout(
             __bulletIndentHandler(paragraphStyle, bulletSkeleton, charSpaceApply);
 
             const bulletSpan = createSkeletonBulletSpan(spanGroup[0], bulletSkeleton, charSpaceApply);
-            _lineOperator([bulletSpan, ...spanGroup], pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan);
+            _lineOperator([bulletSpan, ...spanGroup], pages, sectionBreakConfig, paragraphConfig, paragraphStart);
             // _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan);
         } else {
-            _lineOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan);
+            _lineOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
         }
     } else {
-        _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan);
+        _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
     }
     return [...pages];
 }
@@ -71,8 +70,7 @@ function _divideOperator(
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
-    elementIndex: number = 0,
-    isFirstSpan: boolean = false,
+    paragraphStart: boolean = false,
     defaultSpanLineHeight?: number
 ) {
     const lastPage = getLastPage(pages);
@@ -99,7 +97,7 @@ function _divideOperator(
                     // divide.spanGroup.push(...spanGroup);
                     __makeColumnsFull(column?.parent?.columns);
                 } else {
-                    _pageOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
+                    _pageOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
                 }
             } else if (column && width > column.width) {
                 // 一个字符超列宽
@@ -109,20 +107,20 @@ function _divideOperator(
                     addSpanToDivide(divide, spanGroup);
                     // divide.spanGroup.push(...spanGroup);
                 } else {
-                    _columnOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
+                    _columnOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
                 }
             } else if (divideInfo.isLast) {
                 // 最后一个divide
-                _lineOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
+                _lineOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
             } else {
                 // 不是最后一个divide
-                _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
+                _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
             }
         } else {
             // w不超过div宽度，加入到divide中去
             const currentLine = divide.parent;
             const maxBox = __maxFontBoundingBoxBySpanGroup(spanGroup);
-            if (currentLine && maxBox) {
+            if (currentLine && maxBox && !__isNullLine(currentLine)) {
                 const { paragraphLineGapDefault, linePitch, lineSpacing, spacingRule, snapToGrid, gridType } = getLineHeightConfig(sectionBreakConfig, paragraphConfig);
                 const { boundingBoxAscent, boundingBoxDescent } = maxBox;
                 const spanLineHeight = boundingBoxAscent + boundingBoxDescent;
@@ -134,7 +132,7 @@ function _divideOperator(
                     const spanGroupCachedLen = spanGroupCached.length;
                     let newSpanGroup = [];
                     let startIndex = 1;
-                    if (spanGroupCached[0].spanType === SpanType.LIST && spanGroupCachedLen > 2) {
+                    if (spanGroupCachedLen > 2 && spanGroupCached[0].spanType === SpanType.LIST) {
                         newSpanGroup = [spanGroupCached[0], spanGroupCached[1]];
                         startIndex = 2;
                     } else {
@@ -142,11 +140,11 @@ function _divideOperator(
                     }
                     const column = currentLine.parent;
                     column?.lines.pop(); // Delete the previous line and recalculate according to the maximum content height
-                    _lineOperator(newSpanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, boundingBoxAscent + boundingBoxDescent);
+                    _lineOperator(newSpanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, boundingBoxAscent + boundingBoxDescent);
                     for (let i = startIndex; i < spanGroupCached.length; i++) {
-                        _divideOperator([spanGroupCached[i]], pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan);
+                        _divideOperator([spanGroupCached[i]], pages, sectionBreakConfig, paragraphConfig, paragraphStart);
                     }
-                    _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan);
+                    _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
                     return;
                 }
             }
@@ -159,7 +157,7 @@ function _divideOperator(
             // divide.spanGroup.push(...spanGroup);
         }
     } else {
-        _lineOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
+        _lineOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
     }
 }
 
@@ -168,15 +166,14 @@ function _lineOperator(
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
-    elementIndex: number = 0,
-    isFirstSpan: boolean = false,
+    paragraphStart: boolean = false,
     defaultSpanLineHeight?: number
 ) {
     let lastPage = getLastPage(pages);
     let columnInfo = getLastNotFullColumnInfo(lastPage);
     if (!columnInfo || !columnInfo.column) {
         // 如果列不存在，则做一个兜底策略，新增一页。
-        _pageOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex);
+        _pageOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig);
         lastPage = getLastPage(pages);
         columnInfo = getLastNotFullColumnInfo(lastPage);
     }
@@ -189,7 +186,7 @@ function _lineOperator(
     const { ba: ascent, bd: descent } = spanGroup[0].bBox;
     const spanLineHeight = defaultSpanLineHeight || ascent + descent;
 
-    const { paragraphStyle = {}, paragraphAffectSkeDrawings, skeHeaders, skeFooters, blockAnchor, blockId } = paragraphConfig;
+    const { paragraphStyle = {}, paragraphAffectSkeDrawings, skeHeaders, skeFooters, drawingAnchor, paragraphIndex } = paragraphConfig;
 
     const {
         namedStyleType = NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED,
@@ -220,7 +217,6 @@ function _lineOperator(
 
     const { paragraphLineGapDefault, linePitch, lineSpacing, spacingRule, snapToGrid, gridType } = getLineHeightConfig(sectionBreakConfig, paragraphConfig);
 
-    const paragraphStart = isParagraphStart(elementIndex, isFirstSpan);
     const { paddingTop, paddingBottom, contentHeight, lineSpacingApply } = __getLineHeight(
         spanLineHeight,
         paragraphLineGapDefault,
@@ -247,15 +243,15 @@ function _lineOperator(
     const headersDrawings = skeHeaders?.get(headerId)?.get(width)?.skeDrawings;
     const footersDrawings = skeFooters?.get(footerId)?.get(width)?.skeDrawings;
 
-    __updateDrawingPosition(lineTop, lineHeight, column, blockAnchor?.get(blockId)?.top, paragraphAffectSkeDrawings); // 初始化paragraphAffectSkeDrawings的位置，drawing的布局参照Paragraph开始位置，如果段落中有换页的情况，换页之后的drawing参照位置是0， 0
+    __updateDrawingPosition(lineTop, lineHeight, column, drawingAnchor?.get(paragraphIndex)?.top, paragraphAffectSkeDrawings); // 初始化paragraphAffectSkeDrawings的位置，drawing的布局参照Paragraph开始位置，如果段落中有换页的情况，换页之后的drawing参照位置是0， 0
 
-    const newLineTop = calculateLineTopByDrawings(lineHeight, lineTop, elementIndex, lastPage.skeDrawings, headersDrawings, footersDrawings); // WRAP_TOP_AND_BOTTOM的drawing会改变行的起始top
+    const newLineTop = calculateLineTopByDrawings(lineHeight, lineTop, lastPage.skeDrawings, headersDrawings, footersDrawings); // WRAP_TOP_AND_BOTTOM的drawing会改变行的起始top
 
     if (lineHeight + newLineTop > section.height && column.lines.length > 0 && lastPage.sections.length > 0) {
         // 行高超过Col高度，且列中已存在一行以上，且section大于一个；
         // console.log('_lineOperator', { spanGroup, pages, lineHeight, newLineTop, sectionHeight: section.height, lastPage });
         setColumnFullState(column, true);
-        _columnOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
+        _columnOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
         return;
     }
 
@@ -270,7 +266,7 @@ function _lineOperator(
     }
     // console.log(spanGroup[0].content, isParagraphStart(elementIndex, isFirstSpan), elementIndex, isFirstSpan);
     const newLine = createSkeletonLine(
-        blockId,
+        paragraphIndex,
         LineType.PARAGRAPH,
         {
             lineHeight,
@@ -285,16 +281,15 @@ function _lineOperator(
         },
         column.width,
         lineIndex,
-        elementIndex,
-        isFirstSpan,
+        paragraphStart,
         lastPage.skeDrawings,
         headersDrawings,
         footersDrawings
     );
     column.lines.push(newLine);
     newLine.parent = column;
-    createAndUpdateBlockAnchor(blockId, newLine, lineTop, blockAnchor);
-    _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
+    createAndUpdateBlockAnchor(paragraphIndex, newLine, lineTop, drawingAnchor);
+    _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
 }
 
 function _columnOperator(
@@ -302,16 +297,15 @@ function _columnOperator(
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
-    elementIndex: number = 0,
-    isFirstSpan: boolean = false,
+    paragraphStart: boolean = false,
     defaultSpanLineHeight?: number
 ) {
     const lastPage = getLastPage(pages);
     const column = isColumnFull(lastPage);
     if (column === true) {
-        _pageOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
+        _pageOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
     } else {
-        _lineOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
+        _lineOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
     }
 }
 
@@ -320,14 +314,13 @@ function _pageOperator(
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
-    elementIndex: number = 0,
-    isFirstSpan: boolean = false,
+    paragraphStart: boolean = false,
     defaultSpanLineHeight?: number
 ) {
     const curSkeletonPage: IDocumentSkeletonPage = getLastPage(pages);
     const { skeHeaders, skeFooters } = paragraphConfig;
     pages.push(createSkeletonPage(sectionBreakConfig, { skeHeaders, skeFooters }, curSkeletonPage?.pageNumber));
-    _columnOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, elementIndex, isFirstSpan, defaultSpanLineHeight);
+    _columnOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
 }
 
 /**
@@ -607,4 +600,11 @@ function __bulletIndentHandler(paragraphStyle: IParagraphStyle, bulletSkeleton: 
     if (indentStart === undefined) {
         paragraphStyle.indentStart = getNumberUnitValue(indentStartBullet || 0, charSpaceApply) - getNumberUnitValue(hangingBullet || 0, charSpaceApply);
     }
+}
+
+function __isNullLine(line: IDocumentSkeletonLine) {
+    if (line.divides[0].spanGroup[0]) {
+        return false;
+    }
+    return true;
 }

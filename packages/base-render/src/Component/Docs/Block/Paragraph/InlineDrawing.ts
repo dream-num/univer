@@ -4,9 +4,8 @@ import { IFontLocale, IParagraphConfig, ISectionBreakConfig } from '../../../../
 
 export function dealWidthInlineDrawing(
     drawing: IDrawing,
-    elementIndex: number,
     sectionBreakConfig: ISectionBreakConfig,
-    currentPage?: IDocumentSkeletonPage,
+    allPages?: IDocumentSkeletonPage[],
     paragraphConfig?: IParagraphConfig,
     fontLocale?: IFontLocale
 ) {

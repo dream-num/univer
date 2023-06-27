@@ -1,6 +1,7 @@
 import { IColumnData } from '../../Interfaces';
 import { ObjectArray, ObjectArrayPrimitiveType } from '../../Shared/ObjectArray';
-import { CommandUnit, IRemoveColumnAction } from '../../Command';
+import { CommandUnit } from '../../Command';
+import { IRemoveColumnAction } from '../Action';
 
 /**
  * Inserts addData into columnData

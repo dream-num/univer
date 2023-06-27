@@ -1,6 +1,7 @@
 import { Workbook, Worksheet } from '../Domain';
 import { IWorksheetConfig } from '../../Interfaces';
-import { CommandUnit, IInsertSheetActionData } from '../../Command';
+import { CommandUnit } from '../../Command';
+import { IInsertSheetActionData } from '../Action';
 
 export function InsertSheet(
     workbook: Workbook,

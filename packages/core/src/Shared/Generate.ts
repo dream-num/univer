@@ -1,6 +1,7 @@
 import numeral from 'numeral';
+import { IKeyType } from './Types';
 
-export const error = {
+export const error: IKeyType<string> = {
     v: '#VALUE!', // 错误的参数或运算符
     n: '#NAME?', // 公式名称错误
     na: '#N/A', // 函数或公式中没有可用数值

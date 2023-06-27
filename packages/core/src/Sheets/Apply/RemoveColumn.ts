@@ -1,6 +1,7 @@
 import { IColumnData } from '../../Interfaces';
 import { ObjectArray, ObjectArrayPrimitiveType } from '../../Shared';
-import { CommandUnit, IRemoveColumnAction } from '../../Command';
+import { CommandUnit } from '../../Command';
+import { IRemoveColumnAction } from '../Action';
 
 /**
  * Deletes the specified number of columns in columnData

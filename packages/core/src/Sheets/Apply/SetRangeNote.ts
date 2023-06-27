@@ -1,7 +1,8 @@
 import { ICellData, IRangeData } from '../../Interfaces';
 import { Nullable, Tools } from '../../Shared';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { CommandUnit, ISetRangeNoteActionData } from '../../Command';
+import { CommandUnit } from '../../Command';
+import { ISetRangeNoteActionData } from '../Action';
 
 /**
  *

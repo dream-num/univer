@@ -274,7 +274,10 @@ export class Tools {
                 return (oneValue as Date).getTime() === towValue.getTime();
             }
             if (Tools.isRegExp(oneValue)) {
-                return (oneValue as string).toString() === towValue.toString();
+                return (
+                    (oneValue as unknown as string).toString() ===
+                    towValue.toString()
+                );
             }
             return oneValue === towValue;
         }
@@ -293,7 +296,7 @@ export class Tools {
             return true;
         }
 
-        function diffObject(oneObject: object, towObject: object) {
+        function diffObject(oneObject: IKeyValue, towObject: IKeyValue) {
             const oneKeys = Object.keys(oneObject);
             const towKeys = Object.keys(towObject);
             if (oneKeys.length !== towKeys.length) {
@@ -333,7 +336,7 @@ export class Tools {
             return clone;
         }
         if (this.isObject(value)) {
-            const clone = {};
+            const clone: IKeyValue = {};
             Object.keys(value as IKeyValue).forEach((key) => {
                 const item = (value as IKeyValue)[key];
                 clone[key] = Tools.deepClone(item);
@@ -649,8 +652,8 @@ export class Tools {
      * @param extendJson
      * @returns
      */
-    static commonExtend<T>(originJson: object, extendJson: object): T {
-        let resultJsonObject = {};
+    static commonExtend<T>(originJson: IKeyValue, extendJson: IKeyValue): T {
+        let resultJsonObject: IKeyValue = {};
 
         for (let attr in originJson) {
             resultJsonObject[attr] = originJson[attr];
@@ -667,7 +670,7 @@ export class Tools {
         return resultJsonObject as unknown as T;
     }
 
-    static commonExtend1<T>(originJson: object, extendJson: object): T {
+    static commonExtend1<T>(originJson: IKeyValue, extendJson: IKeyValue): T {
         for (let attr in originJson) {
             if (extendJson[attr] == null) {
                 extendJson[attr] = originJson[attr];
@@ -677,7 +680,7 @@ export class Tools {
     }
 
     static arrayToObject(array: IKeyValue[][]) {
-        const obj = {};
+        const obj: IKeyValue = {};
         array.forEach((row, i) => {
             obj[i] = {};
             row.forEach((column, j) => {

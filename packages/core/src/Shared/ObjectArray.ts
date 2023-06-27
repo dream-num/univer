@@ -1,4 +1,4 @@
-import { Nullable } from './Types';
+import { IKeyValue, Nullable } from './Types';
 
 /**
  * Predicate Function type
@@ -298,7 +298,7 @@ export class ObjectArray<T> {
         const array = this._array;
         const length = this._length;
         if (length > 0) {
-            const fragment = {};
+            const fragment: IKeyValue = {};
             let effective = 0;
             for (let i = start; i < end; i++) {
                 const item = array[i];

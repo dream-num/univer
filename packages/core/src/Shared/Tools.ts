@@ -2,6 +2,7 @@ import { nanoid } from 'nanoid';
 import { Environment } from '../Basics';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from './ObjectMatrix';
 import { Class, IKeyValue } from './Types';
+import { ObjectArray, ObjectArrayPrimitiveType } from './ObjectArray';
 
 const rmsPrefix = /^-ms-/;
 const rDashAlpha = /-([a-z])/g;
@@ -688,5 +689,14 @@ export class Tools {
             });
         });
         return obj;
+    }
+
+    static createObjectArray<T>(
+        array: ObjectArrayPrimitiveType<T> | ObjectArray<T>
+    ): ObjectArray<T> {
+        if (array instanceof ObjectArray) {
+            return new ObjectArray<T>(array.toJSON());
+        }
+        return new ObjectArray<T>(array);
     }
 }

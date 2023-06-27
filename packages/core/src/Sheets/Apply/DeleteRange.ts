@@ -3,7 +3,8 @@ import { ICellData, IRangeData } from '../../Interfaces';
 import { Tools } from '../../Shared';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { Nullable } from '../../Shared/Types';
-import { CommandUnit, IDeleteRangeActionData } from '../../Command';
+import { CommandUnit } from '../../Command';
+import { IDeleteRangeActionData } from '../Action';
 
 /**
  *

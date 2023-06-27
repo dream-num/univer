@@ -28,6 +28,7 @@ import {
     getColorStyle,
     IDocumentRenderConfig,
     DocumentModelSimple,
+    Tools,
 } from '@univerjs/core';
 import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../Basics/Const';
 import { IStylesCache, BorderCache } from './Interfaces';
@@ -389,7 +390,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _generateRowMatrixCache(rowCount: number, rowData: ObjectArrayType<Partial<IRowData>>, defaultRowHeight: number) {
         let rowTotalHeight = 0;
         const rowHeightAccumulation: number[] = [];
-        const data = new ObjectArray<IRowData>(rowData);
+        const data = Tools.createObjectArray(rowData);
         for (let r = 0; r < rowCount; r++) {
             let rowHeight = defaultRowHeight;
 
@@ -426,7 +427,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         let columnTotalWidth = 0;
         const columnWidthAccumulation: number[] = [];
 
-        const data = new ObjectArray<IColumnData>(columnData);
+        const data = Tools.createObjectArray(columnData);
 
         for (let c = 0; c < colCount; c++) {
             let columnWidth = defaultColumnWidth;

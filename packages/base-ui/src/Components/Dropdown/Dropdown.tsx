@@ -1,6 +1,6 @@
 import { Icon } from '..';
 import { JSXComponent } from '../../BaseComponent';
-import { Component, createRef } from '../../Framework';
+import {  PureComponent, createRef } from '../../Framework';
 import { BaseDropdownProps, DropdownComponent } from '../../Interfaces';
 import { Menu } from '../Menu';
 import { Tooltip } from '../Tooltip';
@@ -10,7 +10,7 @@ interface IState {
     menuStyle: JSX.CSSProperties;
 }
 
-export class Dropdown extends Component<BaseDropdownProps, IState> {
+export class Dropdown extends PureComponent<BaseDropdownProps, IState> {
     MenuRef = createRef<Menu>();
 
     DropRef = createRef<HTMLDivElement>();

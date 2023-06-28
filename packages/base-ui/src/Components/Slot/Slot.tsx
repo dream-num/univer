@@ -1,16 +1,21 @@
 import { BaseComponentProps } from '../../BaseComponent';
+import { SlotComponent } from '../../Common/SlotManager';
 import { Component } from '../../Framework';
 
 interface IState {
-    slotGroup: any[];
+    slotGroup: Map<string, SlotComponent>;
 }
 
-export class Slot extends Component<BaseComponentProps, IState> {
-    refs: any[] = [];
+interface IProps extends BaseComponentProps {
+    name: string;
+}
+
+export class Slot extends Component<IProps, IState> {
+    private _refs: any[] = [];
 
     initialize() {
         this.state = {
-            slotGroup: [],
+            slotGroup: new Map(),
         };
     }
 
@@ -18,26 +23,58 @@ export class Slot extends Component<BaseComponentProps, IState> {
         this.props.getComponent?.(this);
     }
 
-    setSlotGroup(group: any[]) {
-        const slotGroup = group.map((item, index) => {
-            const Modal = plugin?.getRegisterComponent(item);
-            if (Modal) {
-                return <Modal ref={(ele: any) => (this.refs[index] = ele)} />;
+    setSlot(component: SlotComponent, cb?: () => void) {
+        const { slotGroup } = this.state;
+        slotGroup.set(component.name, component);
+
+        this.setState(
+            {
+                slotGroup,
+            },
+            () => {
+                cb?.();
             }
-            return null;
+        );
+    }
+
+    setSlotAll(slots: Map<string, SlotComponent>) {
+        const { slotGroup } = this.state;
+        slots.forEach((item) => {
+            slotGroup.set(item.name, item);
         });
 
         this.setState({
-            modalGroup,
+            slotGroup,
         });
     }
 
-    getModalGroup() {
-        return this.refs;
+    removeSlot(component: SlotComponent) {
+        const { slotGroup } = this.state;
+        const slot = slotGroup.get(component.name);
+        if (!slot) return;
+        slotGroup.delete(component.name);
+        this.setState({
+            slotGroup,
+        });
+    }
+
+    getSlots() {
+        return this._refs;
+    }
+
+    renderSlot() {
+        const { slotGroup } = this.state;
+        const arr: JSX.Element[] = [];
+        slotGroup.forEach((item, index) => {
+            const Label = this.context.componentManager.get(item.component.name);
+            if (Label) {
+                arr.push(<Label ref={(ref: any) => (this._refs[index as any] = ref)} {...item.component.props}></Label>);
+            }
+        });
+        return arr;
     }
 
     render() {
-        const { modalGroup } = this.state;
-        return <>{modalGroup.map((item) => item)}</>;
+        return <>{this.renderSlot()}</>;
     }
 }

@@ -3,7 +3,6 @@ import { SheetUIPlugin } from '../SheetUIPlugin';
 import { InfoBar } from '../View/InfoBar';
 
 type IProps = {
-    locale?: string;
     label?: string;
     onBlur?: (e: FocusEvent) => void;
 };
@@ -36,12 +35,6 @@ export class InfoBarUIController {
     };
 
     resetInfoList(list: BaseInfoBarProps) {
-        const locale = this._plugin.getGlobalContext().getLocale();
-        for (let k in list) {
-            if (list[k].locale) {
-                list[k].label = locale.get(list[k].locale);
-            }
-        }
         this._infoBar.setInfoList(list);
     }
 
@@ -56,16 +49,16 @@ export class InfoBarUIController {
         this._infoBarModel = new InfoBarModel(name);
         this._infoList = {
             back: {
-                locale: 'info.return',
+                label: 'info.return',
             },
             rename: {
-                locale: 'info.tips',
+                label: 'info.tips',
             },
             update: {
-                locale: 'info.detailUpdate',
+                label: 'info.detailUpdate',
             },
             save: {
-                locale: 'info.detailSave',
+                label: 'info.detailSave',
             },
             sheet: {
                 label: name,

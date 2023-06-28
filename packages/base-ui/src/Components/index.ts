@@ -30,6 +30,8 @@ export * from './Select';
 
 export * from './CellRange';
 
+export * from './Slot/Slot';
+
 export {
     Avatar,
     Button,

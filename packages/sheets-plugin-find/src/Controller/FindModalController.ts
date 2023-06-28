@@ -1,6 +1,5 @@
 import { Nullable } from '@univerjs/core';
 import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
-import { FIND_PLUGIN_NAME } from '../Const/PLUGIN_NAME';
 import { TextFinder } from '../Domain';
 import { FindPlugin } from '../FindPlugin';
 import { FindModal } from '../View/UI/FindModal';
@@ -80,16 +79,21 @@ export class FindModalController {
 
     private _initialize() {
         const sheetUIPlugin = this._plugin.getContext().getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
-        sheetUIPlugin.addSlot(FIND_PLUGIN_NAME + FindModal.name, {
-            component: FindModal,
-            props: {
-                getComponent: this.getComponent.bind(this),
-                findNext: this.findNext.bind(this),
-                findPrevious: this.findPrevious.bind(this),
-                replaceText: this.replaceText.bind(this),
-                replaceAll: this.replaceAll.bind(this),
-                matchCase: this.matchCase.bind(this),
-                matchEntireCell: this.matchEntireCell.bind(this),
+        const componentManager = sheetUIPlugin.getComponentManager();
+        componentManager.register(FindModal.name, FindModal);
+        sheetUIPlugin.setSlot('main', {
+            name: SHEET_UI_PLUGIN_NAME + FindModal.name,
+            component: {
+                name: FindModal.name,
+                props: {
+                    getComponent: this.getComponent.bind(this),
+                    findNext: this.findNext.bind(this),
+                    findPrevious: this.findPrevious.bind(this),
+                    replaceText: this.replaceText.bind(this),
+                    replaceAll: this.replaceAll.bind(this),
+                    matchCase: this.matchCase.bind(this),
+                    matchEntireCell: this.matchEntireCell.bind(this),
+                },
             },
         });
     }

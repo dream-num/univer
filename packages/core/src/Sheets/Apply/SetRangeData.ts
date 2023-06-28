@@ -80,9 +80,9 @@ export function SetRangeDataApply(unit: CommandUnit, data: ISetRangeDataActionDa
             }
 
             // update other value TODO: move
-            // if (value.p != null) {
-            //     cell.p = value.p;
-            // }
+            if (value.p != null) {
+                cell.p = value.p;
+            }
             if (value.v != null) {
                 cell.v = value.v;
             }

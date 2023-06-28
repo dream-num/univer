@@ -1,5 +1,5 @@
 import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren } from '@univerjs/base-ui';
-import { DEFAULT_STYLES, HorizontalAlign, Tools, UIObserver, VerticalAlign, WrapStrategy, Range, FontWeight, FontItalic } from '@univerjs/core';
+import { DEFAULT_STYLES, HorizontalAlign, Tools, UIObserver, VerticalAlign, WrapStrategy, Range, FontWeight, FontItalic, ITextRotation } from '@univerjs/core';
 import { DefaultToolbarConfig, DocToolbarConfig, DOC_UI_PLUGIN_NAME } from '../Basics';
 import { DocUIPlugin } from '../DocUIPlugin';
 import { Toolbar } from '../View';
@@ -558,10 +558,10 @@ export class ToolbarUIController {
             }
             if (textRotateModeItem) {
                 textRotateModeItem.children?.forEach((item) => {
-                    if (rotation.v) {
+                    if ((rotation as ITextRotation).v) {
                         item.selected = item.value === 'v';
                     } else {
-                        item.selected = rotation.a === item.value;
+                        item.selected = (rotation as ITextRotation).a === item.value;
                     }
                 });
             }

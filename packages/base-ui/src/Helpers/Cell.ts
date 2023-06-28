@@ -26,6 +26,7 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
         return nodeList[0].textContent as string;
     }
     const textRuns: ITextRun[] = [];
+    let st = 0;
     let ed = 0;
     let dataStream = $dom.textContent || '';
     dataStream += '\r\n';
@@ -45,13 +46,15 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
         let spanTexts = splitSpanText(str);
 
         spanTexts.forEach((item) => {
-            ed = +item.length;
+            const length = item.length;
+            ed += length;
+            st = ed - length;
             let sId = Tools.generateRandomId(6);
 
             textRuns.push({
                 sId,
-                st: 0,
-                ed: item.length - 1,
+                st,
+                ed: ed - 1,
                 ts: textStyle,
             });
             // // 如果有 \n 说明有换行，另起一段

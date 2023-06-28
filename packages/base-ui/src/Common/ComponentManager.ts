@@ -1,3 +1,4 @@
+import { IKeyValue } from '@univerjs/core';
 import {
     BorderDashDot,
     BorderDashDotDot,
@@ -52,7 +53,7 @@ export class ComponentManager {
     private _componentList: Map<string, any> = new Map();
 
     constructor() {
-        const iconList = {
+        const iconList: IKeyValue = {
             ForwardIcon,
             BackIcon,
             BoldIcon,

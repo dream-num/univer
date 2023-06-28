@@ -24,6 +24,7 @@ export class ToolbarController {
     }
 
     listenEventManager() {
+        const cellEditorController = this._plugin.getCellEditorController();
         this._plugin
             .getContext()
             .getUniver()
@@ -48,6 +49,7 @@ export class ToolbarController {
             .getObserverManager()
             .requiredObserver<UIObserver<number>>('onUIChangeObservable', 'core')
             .add((msg) => {
+                if (cellEditorController.getEditMode()) return;
                 switch (msg.name) {
                     case 'fontSize':
                         this.setFontSize(msg.value!);
@@ -74,6 +76,7 @@ export class ToolbarController {
             .getObserverManager()
             .requiredObserver<UIObserver<BorderInfo>>('onUIChangeObservable', 'core')
             .add((msg) => {
+                if (cellEditorController.getEditMode()) return;
                 switch (msg.name) {
                     case 'borderInfo':
                         this.setBorder(msg.value!);
@@ -88,6 +91,7 @@ export class ToolbarController {
             .getObserverManager()
             .requiredObserver<UIObserver<string>>('onUIChangeObservable', 'core')
             .add((msg) => {
+                if (cellEditorController.getEditMode()) return;
                 switch (msg.name) {
                     case 'fontFamily':
                         this.setFontFamily(msg.value!);
@@ -111,6 +115,7 @@ export class ToolbarController {
             .getObserverManager()
             .requiredObserver<UIObserver<boolean>>('onUIChangeObservable', 'core')
             .add((msg) => {
+                if (cellEditorController.getEditMode()) return;
                 switch (msg.name) {
                     case 'fontWeight':
                         this.setFontWeight(msg.value!);

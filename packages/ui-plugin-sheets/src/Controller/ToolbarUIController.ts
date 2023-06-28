@@ -16,6 +16,7 @@ import {
     Range,
     FontWeight,
     FontItalic,
+    ITextRotation,
 } from '@univerjs/core';
 import { SheetUIPlugin } from '..';
 import { DefaultToolbarConfig, SheetToolbarConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
@@ -712,10 +713,10 @@ export class ToolbarUIController {
             }
             if (textRotateModeItem) {
                 textRotateModeItem.children?.forEach((item) => {
-                    if (rotation.v) {
+                    if ((rotation as ITextRotation).v) {
                         item.selected = item.value === 'v';
                     } else {
-                        item.selected = rotation.a === item.value;
+                        item.selected = (rotation as ITextRotation).a === item.value;
                     }
                 });
             }

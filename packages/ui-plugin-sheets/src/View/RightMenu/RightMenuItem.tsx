@@ -11,7 +11,7 @@ export class RightMenuItem extends Component<IProps> {
 
         return (
             <div className={styles.rightMenuItem}>
-                {this.getLocale(label)}
+                {this.getLabel(label)}
                 <Icon.Format.RightIcon />
             </div>
         );

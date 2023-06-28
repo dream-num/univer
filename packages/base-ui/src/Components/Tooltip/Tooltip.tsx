@@ -96,7 +96,7 @@ export class Tooltip extends Component<BaseTooltipProps, TooltipState> {
                             display: `${this.state.show ? 'block' : 'none'}`,
                         }}
                     >
-                        {this.props.title}
+                        {this.getLabel(this.props.title)}
                         <span className={style.tooltipTriangle}></span>
                     </span>
                 ) : null}

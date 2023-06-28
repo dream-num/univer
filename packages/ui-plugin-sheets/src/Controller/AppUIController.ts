@@ -18,6 +18,8 @@ export class AppUIController {
         UI.create({
             context: this._plugin.getGlobalContext(),
             locale: this._plugin.getGlobalContext().getLocale().getCurrentLocale(),
+            componentManager: this._plugin.getComponentManager(),
+            zIndexManager: this._plugin.getZIndexManager(),
             changeLocale: this.changeLocale,
             UIConfig,
             container: this._plugin.getConfig().container,

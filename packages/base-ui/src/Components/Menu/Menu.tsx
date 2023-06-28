@@ -117,7 +117,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
                                     this.mouseLeave(e, index);
                                 }}
                             >
-                                {item.label}
+                                {this.getLabel(item.label)}
                                 {item.children ? (
                                     <Menu
                                         ref={(ele: Menu) => (this._refs[index] = ele)}

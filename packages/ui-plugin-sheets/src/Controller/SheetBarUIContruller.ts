@@ -1,4 +1,4 @@
-import { BaseMenuItem, BaseUlProps, ColorPicker } from '@univerjs/base-ui';
+import { BaseMenuItem, BaseUlProps, ColorPicker, CustomComponent } from '@univerjs/base-ui';
 import {
     Nullable,
     Plugin,
@@ -19,14 +19,8 @@ import { SheetBar } from '../View/SheetBar';
 import styles from '../View/SheetBar/index.module.less';
 import { SheetBarMenuItem } from '../View/SheetBar/SheetBarMenu';
 
-interface CustomComponent {
-    name: string;
-    props?: Record<string, any>;
-}
-
 interface SheetUl extends BaseMenuItem {
-    locale?: string;
-    customLabel?: CustomComponent;
+    label?: CustomComponent | string;
     children?: SheetUl[];
 }
 
@@ -56,30 +50,30 @@ export class SheetBarUIController {
         this._plugin = plugin;
         this._sheetUl = [
             {
-                locale: 'sheetConfig.delete',
+                label: 'sheetConfig.delete',
                 onClick: () => {
                     that.setUIObserve('onUIChangeObservable', { name: 'deleteSheet', value: this._dataId });
                 },
             },
             {
-                locale: 'sheetConfig.copy',
+                label: 'sheetConfig.copy',
                 onClick: () => {
                     that.setUIObserve('onUIChangeObservable', { name: 'copySheet' });
                 },
             },
             {
-                locale: 'sheetConfig.rename',
+                label: 'sheetConfig.rename',
                 onClick: () => {
                     this._sheetBar.reNameSheet(this._dataId);
                 },
             },
             {
-                locale: 'sheetConfig.changeColor',
+                label: 'sheetConfig.changeColor',
                 border: true,
                 className: styles.selectColorPickerParent,
                 children: [
                     {
-                        customLabel: {
+                        label: {
                             name: this._plugin.getPluginName() + ColorPicker.name,
                             props: {
                                 onClick: (color: string) => {
@@ -98,13 +92,13 @@ export class SheetBarUIController {
                 ],
             },
             {
-                locale: 'sheetConfig.hide',
+                label: 'sheetConfig.hide',
                 onClick: () => {
                     that.setUIObserve('onUIChangeObservable', { name: 'hideSheet', value: this._dataId });
                 },
             },
             {
-                locale: 'sheetConfig.unhide',
+                label: 'sheetConfig.unhide',
                 onClick: () => {
                     this._sheetBar.ref.current.showMenu(true);
                     that.setUIObserve('onUIChangeObservable', { name: 'unHideSheet', value: this._dataId });
@@ -161,49 +155,6 @@ export class SheetBarUIController {
         this._refreshComponent();
     };
 
-    resetLabel(label: string[] | string) {
-        const locale = this._plugin.getGlobalContext().getLocale();
-
-        let str = '';
-
-        if (label instanceof Array) {
-            label.forEach((item) => {
-                if (item.includes('.')) {
-                    str += locale.get(item);
-                } else {
-                    str += item;
-                }
-            });
-        } else {
-            if (label.includes('.')) {
-                str = locale.get(label);
-            } else {
-                str += label;
-            }
-        }
-
-        return str;
-    }
-
-    findLocale(obj: any) {
-        for (let k in obj) {
-            if (k === 'locale') {
-                obj.label = this.resetLabel(obj[k]);
-            } else if (k.endsWith('Locale')) {
-                const index = k.indexOf('Locale');
-                obj[k.slice(0, index)] = this.resetLabel(obj[k]);
-            } else if (!obj[k].$$typeof) {
-                if (Object.prototype.toString.call(obj[k]) === '[object Object]') {
-                    this.findLocale(obj[k]);
-                } else if (Object.prototype.toString.call(obj[k]) === '[object Array]') {
-                    obj[k] = this.resetSheetUl(obj[k]);
-                }
-            }
-        }
-
-        return obj;
-    }
-
     setUIObserve<T>(type: string, msg: UIObserver<T>) {
         this._plugin.getContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core').notifyObservers(msg);
     }
@@ -222,18 +173,6 @@ export class SheetBarUIController {
 
     getMenuList(): SheetBarMenuItem[] {
         return this._menuList;
-    }
-
-    resetSheetUl(sheetUl: SheetUl[]) {
-        for (let i = 0; i < sheetUl.length; i++) {
-            let item = sheetUl[i];
-            item = this.findLocale(item);
-
-            if (item.children) {
-                item.children = this.resetSheetUl(item.children);
-            }
-        }
-        return sheetUl;
     }
 
     selectSheet() {}
@@ -363,7 +302,6 @@ export class SheetBarUIController {
     }
 
     protected _refreshComponent(): void {
-        this._sheetUl = this.resetSheetUl(this._sheetUl);
         this._refreshSheetData();
         this._refreshSheetBarUI();
     }

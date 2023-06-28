@@ -1,4 +1,4 @@
-import { AppContext, AppContextValues, BaseComponentProps, Button, Component, Container, createRef, debounce, findLocale, PreactContext, Select, Tooltip } from '@univerjs/base-ui';
+import { AppContext, AppContextValues, BaseComponentProps, Button, Component, Container, createRef, debounce,  PreactContext, Select, Tooltip } from '@univerjs/base-ui';
 import { SheetUIPlugin } from '../..';
 import { SHEET_UI_PLUGIN_NAME } from '../../Basics';
 import { IToolbarItemProps } from '../../Controller';
@@ -143,35 +143,6 @@ export class Toolbar extends Component<IProps, IState> {
         }
     };
 
-    resetLabel = (toolList: IToolbarItemProps[]) => {
-        const componentManager = this.getContext().getPluginManager().getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager();
-
-        for (let i = 0; i < toolList.length; i++) {
-            const item = findLocale<IToolbarItemProps>(toolList[i], this.getLocale.bind(this));
-            // 优先寻找自定义组件
-            if (item.customLabel) {
-                const Label = componentManager?.get(item.customLabel.name);
-                if (Label) {
-                    const props = item.customLabel.props ?? {};
-                    item.label = <Label {...props} />;
-                }
-            }
-
-            if (item.customSuffix) {
-                const Suffix = componentManager?.get(item.customSuffix.name);
-                if (Suffix) {
-                    const props = item.customSuffix.props ?? {};
-                    item.suffix = <Suffix {...props} />;
-                }
-            }
-
-            if (item.children) {
-                item.children = this.resetLabel(item.children);
-            }
-        }
-        return toolList;
-    };
-
     setToolbar = (toolList: any[]) => {
         // toolList = this.resetLabel(toolList);
 
@@ -211,14 +182,13 @@ export class Toolbar extends Component<IProps, IState> {
 
     // 渲染dom
     getToolbarList(list: IToolbarItemProps[]) {
-        list = this.resetLabel(list);
         return list.map((item) => {
             if (item.toolbarType) {
                 if (item.show) {
                     return (
-                        <Tooltip title={this.getLocale(item.tooltip)} placement={'bottom'}>
+                        <Tooltip title={item.tooltip} placement={'bottom'}>
                             <Button unActive={item.unActive} className={styles.textButton} type="text" active={item.active} onClick={item.onClick}>
-                                {item.label}
+                                {this.getLabel(item.label)}
                             </Button>
                         </Tooltip>
                     );
@@ -227,12 +197,11 @@ export class Toolbar extends Component<IProps, IState> {
                 if (item.show) {
                     return (
                         <Select
-                            tooltip={this.getLocale(item.tooltip)}
+                            tooltip={item.tooltip}
                             type={item.type}
                             display={item.display}
                             children={item.children}
-                            customLabel={item.customLabel}
-                            customSuffix={item.customSuffix}
+                            suffix={item.suffix}
                             label={item.label}
                             onClick={item.onClick}
                             onPressEnter={item.onPressEnter}
@@ -257,7 +226,7 @@ export class Toolbar extends Component<IProps, IState> {
                     {this.getToolbarList(defaultToolList)}
 
                     <div ref={this.moreBtnRef} className={styles.moreButton} style={{ visibility: moreToolList.length ? 'visible' : 'hidden' }}>
-                        <Tooltip title={this.getLocale('toolbar.toolMoreTip')} placement={'bottom'}>
+                        <Tooltip title={'toolbar.toolMoreTip'} placement={'bottom'}>
                             <Button type="text" onClick={this.showMore}>
                                 <div style={{ fontSize: '14px' }}>{this.getLocale('toolbar.toolMore')}</div>
                             </Button>

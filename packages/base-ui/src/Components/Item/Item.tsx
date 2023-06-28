@@ -22,8 +22,8 @@ export class Item extends Component<BaseItemProps> {
                 ) : (
                     ''
                 )}
-                <span className={styles.selectItemContent}>{label}</span>
-                {suffix ? <span className={styles.selectItemSuffix}>{suffix}</span> : ''}
+                <span className={styles.selectItemContent}>{this.getLabel(label)}</span>
+                {suffix ? <span className={styles.selectItemSuffix}>{this.getLabel(suffix)}</span> : ''}
             </div>
         );
     }

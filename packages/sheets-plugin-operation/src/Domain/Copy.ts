@@ -1,9 +1,8 @@
 import { SheetContext, PLUGIN_NAMES, Tools, handleJsonToDom, handleStyleToString, ObjectArray, IColumnData, IRowData } from '@univerjs/core';
 import { SheetPlugin, SelectionModel, SelectionControl } from '@univerjs/base-sheets';
-import { RightMenuProps, SheetUIPlugin, SHEET_UI_PLUGIN_NAME, RightMenuItem } from '@univerjs/ui-plugin-sheets';
+import { RightMenuProps, RightMenuItem } from '@univerjs/ui-plugin-sheets';
 import { Clipboard } from '@univerjs/base-ui';
 // import { ClipboardInput } from '../UI/ClipboardInput';
-import { OPERATION_PLUGIN } from '../Const';
 
 export abstract class Copy {
     private _context: SheetContext;
@@ -22,27 +21,6 @@ export abstract class Copy {
 
     copy(e: Event) {
         e.preventDefault();
-    }
-
-    private _initRegisterComponent(component: any[]) {
-        // const SheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
-
-        const mainSlotController = this._context
-            .getUniver()
-            .getGlobalContext()
-            .getPluginManager()
-            .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
-            .getAppUIController()
-            .getSheetContainerController()
-            .getMainSlotController();
-
-        for (let i = 0; i < component.length; i++) {
-            // SheetPlugin.registerComponent(OPERATION_PLUGIN + component[i].name, component[i]);
-
-            mainSlotController.addSlot(OPERATION_PLUGIN + component[i].name, {
-                component: component[i],
-            });
-        }
     }
 }
 

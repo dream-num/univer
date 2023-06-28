@@ -12,13 +12,11 @@ import styles from '../View/Toolbar/index.module.less';
 export interface BaseToolbarSelectChildrenProps extends BaseSelectChildrenProps {
     suffixLocale?: string;
     children?: BaseToolbarSelectChildrenProps[];
-    labelLocale?: string;
 }
 
 export interface BaseToolbarSelectProps extends BaseSelectProps {
     suffixLocale?: string;
     children?: BaseToolbarSelectChildrenProps[];
-    labelLocale?: string;
 }
 
 enum ToolbarType {

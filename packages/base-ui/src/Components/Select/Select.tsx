@@ -1,6 +1,6 @@
-import { PureComponent } from 'preact/compat';
 import { Icon } from '..';
-import { ComponentChildren, createRef, RefObject } from '../../Framework';
+import { CustomComponent } from '../../Common';
+import { ComponentChildren, createRef, RefObject, PureComponent } from '../../Framework';
 import { BaseMenuItem } from '../../Interfaces';
 import { Dropdown } from '../Dropdown';
 import { Input } from '../Input';
@@ -21,17 +21,12 @@ enum DisplayTypes {
     SUFFIX,
 }
 
-interface CustomComponent {
-    name: string;
-    props?: Record<string, any>;
-}
-
 export interface BaseSelectChildrenProps extends BaseItemProps {
     onPressEnter?: (...arg: any) => void;
     children?: BaseSelectChildrenProps[];
     unSelectable?: boolean; //选中后不生效事件
-    customLabel?: CustomComponent;
-    customSuffix?: CustomComponent;
+    label?: CustomComponent | ComponentChildren | string;
+    suffix?: CustomComponent | ComponentChildren | string;
     name?: string;
 }
 
@@ -47,8 +42,7 @@ export interface BaseSelectProps {
     hideSelectedIcon?: boolean;
     className?: string;
     name?: string;
-    customLabel?: CustomComponent;
-    customSuffix?: CustomComponent;
+    suffix?: any;
     tooltip?: string;
 }
 
@@ -277,7 +271,7 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
         return (
             <div className={`${styles.selectSingle} ${className}`}>
                 <Dropdown onMainClick={onMainClick} tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
-                    <div>{content}</div>
+                    <div>{this.getLabel(content)}</div>
                 </Dropdown>
             </div>
         );
@@ -310,7 +304,7 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
         return (
             <div className={`${styles.selectDouble} ${className}`}>
                 <Dropdown onClick={onClick} tooltip={tooltip} menu={{ menu, onClick: this.onClick }} icon={<Icon.NextIcon />}>
-                    <div className={styles.selectLabel}>{content}</div>
+                    <div className={styles.selectLabel}>{this.getLabel(content)}</div>
                 </Dropdown>
             </div>
         );
@@ -323,7 +317,7 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
         return (
             <div className={`${styles.selectDouble} ${className}`}>
                 <Dropdown tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
-                    <div className={styles.selectLabel}>{label}</div>
+                    <div className={styles.selectLabel}>{this.getLabel(label)}</div>
                 </Dropdown>
             </div>
         );
@@ -332,11 +326,10 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
     getDoubleFix = () => {
         const { label, className = '', tooltip, onClick } = this.props;
         const { menu } = this.state;
-
         return (
             <div className={`${styles.selectDouble} ${className}`}>
                 <Dropdown tooltip={tooltip} onClick={onClick} menu={{ menu, onClick: this.onClick }} icon={<Icon.NextIcon />}>
-                    <div className={styles.selectLabel}>{label}</div>
+                    <div className={styles.selectLabel}>{this.getLabel(label)}</div>
                 </Dropdown>
             </div>
         );

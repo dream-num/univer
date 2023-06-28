@@ -1,36 +1,32 @@
 import { IMouseEvent, IPointerEvent } from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
-import { BaseMenuItem, BaseSelectChildrenProps } from '@univerjs/base-ui';
+import { BaseMenuItem, BaseSelectChildrenProps, ComponentChildren } from '@univerjs/base-ui';
 import { PLUGIN_NAMES, Tools, UIObserver } from '@univerjs/core';
 import { SheetUIPlugin } from '..';
 import { DefaultRightMenuConfig, SheetRightMenuConfig } from '../Basics';
 import { RightMenu, RightMenuInput, RightMenuItem } from '../View';
 import styles from '../View/RightMenu/index.module.less';
 
-export interface CustomLabelOptions extends BaseSelectChildrenProps {
-    locale?: string;
-}
 
 interface CustomLabelProps {
-    prefix?: string;
-    suffix?: string;
-    prefixLocale?: string[] | string;
-    suffixLocale?: string[] | string;
-    options?: CustomLabelOptions[];
+    prefix?: string[] | string;
+    suffix?: string[] | string;
+    options?: BaseSelectChildrenProps[];
     label?: string;
     children?: CustomLabelProps[];
     onKeyUp?: (e: Event) => void;
 }
 
+export interface CustomLabel{
+    name: string;
+    props?: CustomLabelProps;
+}
+
 export interface RightMenuProps extends BaseMenuItem {
-    customLabel?: {
-        name: string;
-        props?: CustomLabelProps;
-    };
+    label?: string | CustomLabel | ComponentChildren;
     children?: RightMenuProps[];
     suffix?: string;
     border?: boolean;
-    locale?: string;
 }
 
 export class RightMenuUIController {
@@ -63,7 +59,7 @@ export class RightMenuUIController {
                 show: this._config.InsertColumn,
             },
             {
-                customLabel: {
+                label: {
                     name: RightMenuInput.name,
                     props: {
                         prefix: 'rightClick.toTopAdd',
@@ -73,7 +69,7 @@ export class RightMenuUIController {
                 show: this._config.AddRowTop,
             },
             {
-                customLabel: {
+                label: {
                     name: RightMenuInput.name,
                     props: {
                         prefix: 'rightClick.toBottomAdd',
@@ -83,7 +79,7 @@ export class RightMenuUIController {
                 show: this._config.AddRowBottom,
             },
             {
-                customLabel: {
+                label: {
                     name: RightMenuInput.name,
                     props: {
                         prefix: 'rightClick.toLeftAdd',
@@ -93,7 +89,7 @@ export class RightMenuUIController {
                 show: this._config.AddColumnLeft,
             },
             {
-                customLabel: {
+                label: {
                     name: RightMenuInput.name,
                     props: {
                         prefix: 'rightClick.toRightAdd',
@@ -121,7 +117,7 @@ export class RightMenuUIController {
                 show: this._config.ShowRow,
             },
             {
-                customLabel: {
+                label: {
                     name: RightMenuInput.name,
                     props: {
                         prefix: 'rightClick.rowHeight',
@@ -142,7 +138,7 @@ export class RightMenuUIController {
                 show: this._config.ShowColumn,
             },
             {
-                customLabel: {
+                label: {
                     name: RightMenuInput.name,
                     props: {
                         prefix: 'rightClick.columnWidth',
@@ -155,7 +151,7 @@ export class RightMenuUIController {
             },
             {
                 show: this._config.DeleteCell,
-                customLabel: {
+                label: {
                     name: RightMenuItem.name,
                     props: {
                         label: 'rightClick.deleteCell',
@@ -183,106 +179,106 @@ export class RightMenuUIController {
             },
             // {
             //     show: this._config.hideMatrix,
-            //     customLabel: {
+            //     label: {
             //         name: RightMenuItem.name,
             //         props: {
-            //             locale: 'rightClick.matrix',
+            //             label: 'rightClick.matrix',
             //         },
             //     },
             //     children: [
             //         {
-            //             customLabel: {
+            //             label: {
             //                 name: RightMenuButton.name,
             //                 props: {
-            //                     locale: 'rightClick.flip',
+            //                     label: 'rightClick.flip',
             //                     children: [
             //                         {
-            //                             locale: 'rightClick.upAndDown',
+            //                             label: 'rightClick.upAndDown',
             //                         },
             //                         {
-            //                             locale: 'rightClick.leftAndRight',
+            //                             label: 'rightClick.leftAndRight',
             //                         },
             //                     ],
             //                 },
             //             },
             //         },
             //         {
-            //             customLabel: {
+            //             label: {
             //                 name: RightMenuButton.name,
             //                 props: {
-            //                     locale: 'rightClick.flip',
+            //                     label: 'rightClick.flip',
             //                     children: [
             //                         {
-            //                             locale: 'rightClick.clockwise',
+            //                             label: 'rightClick.clockwise',
             //                         },
             //                         {
-            //                             locale: 'rightClick.counterclockwise',
+            //                             label: 'rightClick.counterclockwise',
             //                         },
             //                     ],
             //                 },
             //             },
             //         },
             //         {
-            //             locale: ['rightClick.transpose'],
+            //             label: ['rightClick.transpose'],
             //         },
             //         {
-            //             customLabel: {
+            //             label: {
             //                 name: RightMenuSelect.name,
             //                 props: {
-            //                     locale: 'rightClick.matrixCalculation',
+            //                     label: 'rightClick.matrixCalculation',
             //                     options: [
             //                         {
-            //                             locale: 'rightClick.plus',
+            //                             label: 'rightClick.plus',
             //                         },
             //                         {
-            //                             locale: 'rightClick.minus',
+            //                             label: 'rightClick.minus',
             //                         },
             //                         {
-            //                             locale: 'rightClick.multiply',
+            //                             label: 'rightClick.multiply',
             //                         },
             //                         {
-            //                             locale: 'rightClick.divided',
+            //                             label: 'rightClick.divided',
             //                         },
             //                         {
-            //                             locale: 'rightClick.power',
+            //                             label: 'rightClick.power',
             //                         },
             //                         {
-            //                             locale: 'rightClick.root',
+            //                             label: 'rightClick.root',
             //                         },
             //                         {
-            //                             locale: 'rightClick.log',
-            //                         },
-            //                     ],
-            //                 },
-            //             },
-            //         },
-            //         {
-            //             customLabel: {
-            //                 name: RightMenuButton.name,
-            //                 props: {
-            //                     locale: 'rightClick.delete0',
-            //                     children: [
-            //                         {
-            //                             locale: 'rightClick.byRow',
-            //                         },
-            //                         {
-            //                             locale: 'rightClick.byCol',
+            //                             label: 'rightClick.log',
             //                         },
             //                     ],
             //                 },
             //             },
             //         },
             //         {
-            //             customLabel: {
+            //             label: {
             //                 name: RightMenuButton.name,
             //                 props: {
-            //                     locale: 'rightClick.removeDuplicate',
+            //                     label: 'rightClick.delete0',
             //                     children: [
             //                         {
-            //                             locale: 'rightClick.byRow',
+            //                             label: 'rightClick.byRow',
             //                         },
             //                         {
-            //                             locale: 'rightClick.byCol',
+            //                             label: 'rightClick.byCol',
+            //                         },
+            //                     ],
+            //                 },
+            //             },
+            //         },
+            //         {
+            //             label: {
+            //                 name: RightMenuButton.name,
+            //                 props: {
+            //                     label: 'rightClick.removeDuplicate',
+            //                     children: [
+            //                         {
+            //                             label: 'rightClick.byRow',
+            //                         },
+            //                         {
+            //                             label: 'rightClick.byCol',
             //                         },
             //                     ],
             //                 },

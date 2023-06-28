@@ -37,8 +37,6 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
 
     startClientX: number;
 
-    private _localeObserver: Nullable<Observer<Workbook>>;
-
     private _renderKey: number = 1;
 
     initialize(props: BaseSheetBarProps) {
@@ -49,40 +47,8 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         };
     }
 
-    resetLabel(list: any) {
-        const componentManager = this.getContext().getPluginManager().getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager();
-
-        for (let i = 0; i < list.length; i++) {
-            const item = list[i];
-
-            // 优先寻找自定义组件
-            if (item.customLabel) {
-                const Label = componentManager?.get(item.customLabel.name);
-                if (Label) {
-                    const props = item.customLabel.props ?? {};
-                    item.label = <Label {...props} />;
-                }
-            }
-
-            if (item.children) {
-                item.children = this.resetLabel(item.children);
-            }
-        }
-        return list;
-    }
-
     // setstate
     setValue = (value: any, fn?: () => void) => {
-        let { sheetList, menuList, sheetUl } = value;
-        if (sheetList) {
-            sheetList = this.resetLabel(sheetList);
-        }
-        if (menuList) {
-            menuList = this.resetLabel(menuList);
-        }
-        if (sheetUl) {
-            sheetUl = this.resetLabel(sheetUl);
-        }
         this.setState((prevState) => ({ ...value }), fn);
     };
 
@@ -221,7 +187,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                                 <div className={`${styles.slideTabDivider}`}></div>
                                 <div className={`${styles.slideTabTitle}`}>
                                     <span className={`${styles.slideTabSpan}`} style={{ padding: '2px 5px 2px 5px' }}>
-                                        {item.label}
+                                        {this.getLabel(item.label)}
                                     </span>
                                 </div>
                                 <div className={`${styles.slideTabIcon}`} data-slide-skip="true" style={{ lineHeight: 1 }} data-id={item.sheetId} onClick={this.contextMenu}>

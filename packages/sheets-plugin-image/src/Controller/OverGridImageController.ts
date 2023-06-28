@@ -22,7 +22,7 @@ export class OverGridImageController {
             toolbarType: 1,
             tooltip: '导入图片',
             show: true,
-            labelLocale: '图片',
+            label: '图片',
             onClick: () => {
                 FileSelected.chooseImage().then((img) => {});
             },

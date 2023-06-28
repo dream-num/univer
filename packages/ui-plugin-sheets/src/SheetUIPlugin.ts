@@ -1,5 +1,5 @@
-import { Plugin, Tools, PLUGIN_NAMES, Context, Univer, IKeyValue, LocaleType } from '@univerjs/core';
-import { ComponentManager, getRefElement, RegisterManager, KeyboardManager } from '@univerjs/base-ui';
+import { Plugin, Tools, PLUGIN_NAMES, Context, Univer } from '@univerjs/core';
+import { ComponentManager, getRefElement, RegisterManager, KeyboardManager, SlotComponent, ZIndexManager } from '@univerjs/base-ui';
 import { RenderEngine } from '@univerjs/base-render';
 import { DefaultSheetUIConfig, installObserver, ISheetUIPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';
 import { AppUIController } from './Controller/AppUIController';
@@ -16,6 +16,8 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
     private _registerManager: RegisterManager;
 
     private _config: ISheetUIPluginConfig;
+
+    private _zIndexManager: ZIndexManager;
 
     private _componentManager: ComponentManager;
 
@@ -54,6 +56,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
         // }
 
         this._componentManager = new ComponentManager();
+        this._zIndexManager = new ZIndexManager();
         this._keyboardManager = new KeyboardManager(this);
         this._registerManager = new RegisterManager(this);
         this._appUIController = new AppUIController(this);
@@ -63,25 +66,25 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
         });
     }
 
-    loadLocale(locale: LocaleType, module: IKeyValue) {
-        // import(`./Locale/${locale}`).then((module) => {
-        // Do something with the module.
-        const localObject: IKeyValue = {};
-        localObject[locale] = module.default;
+    // loadLocale(locale: LocaleType, module: IKeyValue) {
+    //     // import(`./Locale/${locale}`).then((module) => {
+    //     // Do something with the module.
+    //     const localObject: IKeyValue = {};
+    //     localObject[locale] = module.default;
 
-        console.log('localObject===', locale, localObject);
+    //     console.log('localObject===', locale, localObject);
 
-        this.getLocale().load(localObject);
+    //     this.getLocale().load(localObject);
 
-        this._componentManager = new ComponentManager();
-        this._keyboardManager = new KeyboardManager(this);
-        this._registerManager = new RegisterManager(this);
-        this._appUIController = new AppUIController(this);
-        // AppUIController initializes the DOM as an asynchronous rendering process, and must wait for the UI rendering to complete before starting to render the canvas
-        this.UIDidMount(() => {
-            this.initRender();
-        });
-    }
+    //     this._componentManager = new ComponentManager();
+    //     this._keyboardManager = new KeyboardManager(this);
+    //     this._registerManager = new RegisterManager(this);
+    //     this._appUIController = new AppUIController(this);
+    //     // AppUIController initializes the DOM as an asynchronous rendering process, and must wait for the UI rendering to complete before starting to render the canvas
+    //     this.UIDidMount(() => {
+    //         this.initRender();
+    //     });
+    // }
 
     getConfig() {
         return this._config;
@@ -120,6 +123,10 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
         return this._componentManager;
     }
 
+    getZIndexManager() {
+        return this._zIndexManager;
+    }
+
     /**
      * usage this._clipboardExtensionManager.handle(data);
      * @returns
@@ -155,6 +162,10 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
      */
     UIDidMount(cb: Function) {
         this._appUIController.getSheetContainerController().UIDidMount(cb);
+    }
+
+    setSlot(slotName: string, component: SlotComponent, cb?: () => {}) {
+        this._appUIController.getSheetContainerController().getSlotManager().setSlotComponent(slotName, component, cb);
     }
 
     addSlot(name: string, slot: SlotComponentProps, cb?: () => void) {

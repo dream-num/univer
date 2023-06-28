@@ -1,5 +1,5 @@
 import { BorderInfo, SheetPlugin } from '@univerjs/base-sheets';
-import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren } from '@univerjs/base-ui';
+import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren, CustomComponent } from '@univerjs/base-ui';
 import {
     BorderType,
     CommandManager,
@@ -16,6 +16,7 @@ import {
     Range,
     FontWeight,
     FontItalic,
+    ITextRotation,
 } from '@univerjs/core';
 import { SheetUIPlugin } from '..';
 import { DefaultToolbarConfig, SheetToolbarConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
@@ -34,17 +35,8 @@ import {
 
 import styles from '../View/Toolbar/index.module.less';
 
-// 继承基础下拉属性,添加国际化
-export interface BaseToolbarSelectChildrenProps extends BaseSelectChildrenProps {
-    suffixLocale?: string;
-    children?: BaseToolbarSelectChildrenProps[];
-    labelLocale?: string;
-}
-
 export interface BaseToolbarSelectProps extends BaseSelectProps {
-    suffixLocale?: string;
-    children?: BaseToolbarSelectChildrenProps[];
-    labelLocale?: string;
+    children?: BaseSelectChildrenProps[];
 }
 
 enum ToolbarType {
@@ -103,7 +95,7 @@ export class ToolbarUIController {
                 toolbarType: 1,
                 tooltip: 'toolbar.undo',
                 name: 'undo',
-                customLabel: {
+                label: {
                     name: 'ForwardIcon',
                 },
                 show: this._config.undo,
@@ -115,7 +107,7 @@ export class ToolbarUIController {
             {
                 toolbarType: 1,
                 tooltip: 'toolbar.redo',
-                customLabel: {
+                label: {
                     name: 'BackIcon',
                 },
                 name: 'redo',
@@ -161,7 +153,7 @@ export class ToolbarUIController {
             {
                 toolbarType: 1,
                 tooltip: 'toolbar.bold',
-                customLabel: {
+                label: {
                     name: 'BoldIcon',
                 },
                 unActive: false,
@@ -175,7 +167,7 @@ export class ToolbarUIController {
             {
                 toolbarType: 1,
                 tooltip: 'toolbar.italic',
-                customLabel: {
+                label: {
                     name: 'ItalicIcon',
                 },
                 unActive: false,
@@ -189,7 +181,7 @@ export class ToolbarUIController {
             {
                 toolbarType: 1,
                 tooltip: 'toolbar.strikethrough',
-                customLabel: {
+                label: {
                     name: 'DeleteLineIcon',
                 },
                 unActive: false,
@@ -206,7 +198,7 @@ export class ToolbarUIController {
             {
                 toolbarType: 1,
                 tooltip: 'toolbar.underline',
-                customLabel: {
+                label: {
                     name: 'UnderLineIcon',
                 },
                 unActive: false,
@@ -223,14 +215,14 @@ export class ToolbarUIController {
             {
                 type: 5,
                 tooltip: 'toolbar.textColor.main',
-                customLabel: {
+                label: {
                     name: SHEET_UI_PLUGIN_NAME + ColorSelect.name,
                     props: {
                         getComponent: (ref: ColorSelect) => {
                             this._colorSelect1 = ref;
                         },
                         color: '#000',
-                        customLabel: {
+                        label: {
                             name: 'TextColorIcon',
                         },
                     },
@@ -238,20 +230,19 @@ export class ToolbarUIController {
                 onClick: () => {
                     this.hideTooltip();
                     const textColor = this._toolList.find((item) => item.name === 'textColor');
-                    if (!textColor) return;
-                    if (!textColor.customLabel) return;
-                    if (!textColor.customLabel.props) return;
-                    textColor.customLabel.props.color = this._textColor;
+                    if (!textColor || !textColor.label) return;
+                    if (!((textColor.label as CustomComponent).props?.color)) return;
+                    (textColor.label as CustomComponent).props!.color = this._textColor;
                     this.changeColor(this._textColor);
                 },
                 hideSelectedIcon: true,
                 className: styles.selectColorPickerParent,
                 children: [
                     {
-                        labelLocale: 'toolbar.resetColor',
+                        label: 'toolbar.resetColor',
                     },
                     {
-                        customLabel: {
+                        label: {
                             name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
                             props: {
                                 onClick: (color: string, e: MouseEvent) => {
@@ -269,14 +260,14 @@ export class ToolbarUIController {
             {
                 type: 5,
                 tooltip: 'toolbar.fillColor.main',
-                customLabel: {
+                label: {
                     name: SHEET_UI_PLUGIN_NAME + ColorSelect.name,
                     props: {
                         getComponent: (ref: ColorSelect) => {
                             this._colorSelect2 = ref;
                         },
                         color: '#fff',
-                        customLabel: {
+                        label: {
                             name: 'FillColorIcon',
                         },
                     },
@@ -284,20 +275,19 @@ export class ToolbarUIController {
                 onClick: () => {
                     this.hideTooltip();
                     const fillColor = this._toolList.find((item) => item.name === 'fillColor');
-                    if (!fillColor) return;
-                    if (!fillColor.customLabel) return;
-                    if (!fillColor.customLabel.props) return;
-                    fillColor.customLabel.props.color = this._background;
+                    if (!fillColor || !fillColor.label) return;
+                    if (!((fillColor.label as CustomComponent).props?.color)) return;
+                    (fillColor.label as CustomComponent).props!.color = this._background;
                     this.setBackground(this._background);
                 },
                 hideSelectedIcon: true,
                 className: styles.selectColorPickerParent,
                 children: [
                     {
-                        labelLocale: 'toolbar.resetColor',
+                        label: 'toolbar.resetColor',
                     },
                     {
-                        customLabel: {
+                        label: {
                             name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
                             props: {
                                 onClick: (color: string, e: MouseEvent) => {
@@ -330,7 +320,7 @@ export class ToolbarUIController {
                     ...BORDER_LINE_CHILDREN,
                     {
                         name: 'borderColor',
-                        customLabel: {
+                        label: {
                             name: SHEET_UI_PLUGIN_NAME + LineColor.name,
                             props: {
                                 color: '#000',
@@ -342,7 +332,7 @@ export class ToolbarUIController {
                         className: styles.selectColorPickerParent,
                         children: [
                             {
-                                customLabel: {
+                                label: {
                                     name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
                                     props: {
                                         onClick: (color: string, e: MouseEvent) => {
@@ -350,10 +340,9 @@ export class ToolbarUIController {
                                             this._borderInfo.color = color;
                                             const borderItem = this._toolList.find((item) => item.name === 'border');
                                             const lineColor = borderItem?.children?.find((item) => item.name === 'borderColor');
-                                            if (!lineColor) return;
-                                            if (!lineColor.customLabel) return;
-                                            if (!lineColor.customLabel.props) return;
-                                            lineColor.customLabel.props.color = color;
+                                            if (!lineColor || !lineColor.label) return;
+                                            if (!((lineColor.label as CustomComponent).props?.color)) return;
+                                            (lineColor.label as CustomComponent).props!.color = color;
                                         },
                                     },
                                 },
@@ -365,7 +354,7 @@ export class ToolbarUIController {
                         ],
                     },
                     {
-                        customLabel: {
+                        label: {
                             name: SHEET_UI_PLUGIN_NAME + LineBold.name,
                             props: {
                                 img: 0,
@@ -375,7 +364,12 @@ export class ToolbarUIController {
                         },
                         onClick: (...arg) => {
                             arg[0].stopPropagation();
-                            this._lineBold.setImg(BORDER_SIZE_CHILDREN[arg[2]].customLabel?.name);
+                            const label = BORDER_SIZE_CHILDREN[arg[2]].label
+                            if(typeof label === 'string'){
+                                this._lineBold.setImg(label);
+                            }else{
+                                this._lineBold.setImg(label.name);
+                            }
                             this._borderInfo.style = arg[1];
                         },
                         className: styles.selectLineBoldParent,
@@ -387,7 +381,7 @@ export class ToolbarUIController {
             {
                 type: 5,
                 tooltip: 'toolbar.mergeCell.main',
-                customLabel: {
+                label: {
                     name: 'MergeIcon',
                 },
                 show: this._config.mergeCell,
@@ -647,7 +641,7 @@ export class ToolbarUIController {
             const underline = range.getUnderline();
             const horizontalAlign = range.getHorizontalAlignment() ?? HorizontalAlign.LEFT;
             const verticalAlign = range.getVerticalAlignment() ?? VerticalAlign.BOTTOM;
-            const rotation = range.getTextRotation();
+            const rotation = range.getTextRotation() as ITextRotation;
             const warp = range.getWrapStrategy() ?? WrapStrategy.CLIP;
 
             const bold = this._toolList.find((item) => item.name === 'bold');
@@ -691,13 +685,13 @@ export class ToolbarUIController {
                 fontItalicItem.active = !!fontItalic;
             }
             // if (textColor) {
-            //     const label = textColor.customLabel
+            //     const label = textColor.label
             //     if (label && label.props) {
             //         label.props.color = fontColor
             //     }
             // }
             // if (fillColor) {
-            //     const label = fillColor.customLabel
+            //     const label = fillColor.label
             //     if (label && label.props) {
             //         label.props.color = background
             //     }

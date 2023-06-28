@@ -6,6 +6,7 @@ import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
 import { OperationPlugin } from '@univerjs/sheets-plugin-operation';
 import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
 import { OverGridImagePlugin } from '@univerjs/sheets-plugin-image';
+import { FindPlugin } from '@univerjs/sheets-plugin-find';
 
 const uiDefaultConfigDemo = {
     container: 'universheet',
@@ -66,7 +67,7 @@ univer.install(
 );
 
 // FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(universheet);
-// FindPlugin.create().installTo(universheet);
+FindPlugin.create().installTo(universheet);
 universheet.installPlugin(new OperationPlugin());
 universheet.installPlugin(new ImportXlsxPlugin());
 universheet.installPlugin(new OverGridImagePlugin());

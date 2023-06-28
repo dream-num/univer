@@ -24,7 +24,7 @@ export class ImportXlsxController {
             toolbarType: 1,
             tooltip: 'importXlsx.tooltip',
             show: true,
-            labelLocale: 'importXlsx.import',
+            label: 'importXlsx.import',
             onClick: () => {
                 this.upload();
             },

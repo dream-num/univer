@@ -38,7 +38,7 @@ export class LineColor extends Component<IProps, IState> {
 
         return (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ display: 'inline-block', borderBottom: `3px solid ${color}` }}>{this.getLocale(label)}</span>
+                <span style={{ display: 'inline-block', borderBottom: `3px solid ${color}` }}>{this.getLabel(label)}</span>
                 <Icon.RightIcon />
             </div>
         );

@@ -1,7 +1,7 @@
 import { InsertColumnApply, RemoveColumnApply } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { IRemoveColumnAction } from './removeColumnAction';
+import { IRemoveColumnAction } from './removeColumnAction2';
 import { CommandManager, CommandUnit } from '../../Command';
 
 /**

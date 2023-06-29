@@ -1,6 +1,6 @@
-import { DragManager, getRefElement, Prompt } from '@univerjs/base-ui';
+import { DragManager, getRefElement, Prompt, SlotManager, ZIndexManager } from '@univerjs/base-ui';
 import { LocaleType } from '@univerjs/core';
-import { ISheetUIPluginConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
+import { ISheetUIPluginConfig } from '../Basics';
 import { SheetUIPlugin } from '../SheetUIPlugin';
 import { SheetContainer } from '../View';
 import { CellEditorUIController } from './CellEditorUIController';
@@ -20,6 +20,10 @@ export class SheetContainerUIController {
     private _toolbarController: ToolbarUIController;
 
     private _slotController: SlotController;
+
+    private _slotManager: SlotManager;
+
+    private _zIndexManager: ZIndexManager;
 
     private _cellEditorUIController: CellEditorUIController;
 
@@ -45,6 +49,7 @@ export class SheetContainerUIController {
         this._initialize();
 
         this._slotController = new SlotController();
+        this._slotManager = new SlotManager();
         this._toolbarController = new ToolbarUIController(this._plugin, this._config.layout?.toolbarConfig);
         this._cellEditorUIController = new CellEditorUIController(this._plugin);
         this._formulaBarUIController = new FormulaBarUIController(this._plugin);
@@ -53,8 +58,15 @@ export class SheetContainerUIController {
         this._countBarController = new CountBarUIController(this._plugin);
         this._sheetBarController = new SheetBarUIController(this._plugin);
         // 插入prompt组件
-        this._slotController.addSlot(SHEET_UI_PLUGIN_NAME + Prompt.name, {
-            component: Prompt,
+        // this._slotController.addSlot(SHEET_UI_PLUGIN_NAME + Prompt.name, {
+        //     component: Prompt,
+        // });
+        this._plugin.getComponentManager().register(Prompt.name, Prompt);
+        this._slotManager.setSlotComponent('main', {
+            name: Prompt.name,
+            component: {
+                name: Prompt.name,
+            },
         });
     }
 
@@ -94,7 +106,8 @@ export class SheetContainerUIController {
                     changeSheetName: this._sheetBarController.changeSheetName,
                 },
                 slot: {
-                    getComponent: this._slotController.getComponent,
+                    // getComponent: this._slotController.getComponent,
+                    getComponent: this._slotManager.getComponent,
                 },
             },
         };
@@ -142,6 +155,10 @@ export class SheetContainerUIController {
 
     getMainSlotController() {
         return this._slotController;
+    }
+
+    getSlotManager() {
+        return this._slotManager;
     }
 
     getToolbarController() {

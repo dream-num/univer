@@ -10,9 +10,9 @@ import {
     ICellData,
     ITextStyle,
     IStyleData,
-    IElement,
     IRowData,
     IColumnData,
+    ITextRun,
 } from '../../Interfaces';
 import { ObjectArrayPrimitiveType } from '../ObjectArray';
 import { Tools } from '../Tools';
@@ -188,7 +188,8 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                         newSheet.cellData[cellItem.r][cellItem.c];
 
                     if (cell?.ct?.t === 'inlineStr') {
-                        const elements: IElement[] = [];
+                        const textRuns: ITextRun[] = [];
+                        let dataStream = '';
 
                         cell.ct.s.forEach((element: any) => {
                             const textStyle: ITextStyle = {};
@@ -241,33 +242,23 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                                 };
                             }
 
-                            const eId = Tools.generateRandomId(6);
-                            elements.push({
-                                eId,
+                            const sId = Tools.generateRandomId(6);
+                            dataStream += element.v;
+                            textRuns.push({
+                                sId,
                                 st: 0,
                                 ed: element.v.length - 1,
-                                et: 0,
-                                tr: {
-                                    ct: element.v,
-                                    ts: textStyle,
-                                },
+                                ts: textStyle,
                             });
                         });
+
+                        dataStream += '\r\n';
 
                         newCell.p = {
                             id: Tools.generateRandomId(6),
                             body: {
-                                blockElements: [
-                                    {
-                                        blockId: 'p1',
-                                        st: 0,
-                                        ed: cell.ct.s.length - 1,
-                                        blockType: 0,
-                                        paragraph: {
-                                            elements,
-                                        },
-                                    },
-                                ],
+                                dataStream,
+                                textRuns,
                             },
                             documentStyle: {},
                         };

@@ -10,7 +10,7 @@ export * from './InsertRangeAction';
 export * from './InsertRowAction';
 export * from './InsertRowDataAction';
 export * from './InsertSheetAction';
-export * from './removeColumnAction';
+export * from './RemoveColumnAction';
 export * from './RemoveColumnDataAction';
 export * from './RemoveMergeAction';
 export * from './RemoveRowAction';

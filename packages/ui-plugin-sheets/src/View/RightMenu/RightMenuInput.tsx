@@ -20,9 +20,9 @@ export class RightMenuInput extends Component<IProps> {
         const { prefix, suffix } = this.props;
         return (
             <div>
-                {this.getLocale(prefix)}
+                {this.getLabel(prefix)}
                 <Input onPressEnter={this.handleKeyUp.bind(this)} type="number" placeholder="1" onClick={this.handleClick}></Input>
-                {this.getLocale(suffix)}
+                {this.getLabel(suffix)}
             </div>
         );
     }

@@ -1,7 +1,7 @@
 import { IPointerEvent, IMouseEvent } from '@univerjs/base-render';
 import { CANVAS_VIEW_KEY, SheetPlugin } from '@univerjs/base-sheets';
 import { getRefElement, CellEditExtensionManager, $$, setLastCaretPosition, handleStringToStyle, handleDomToJson, isCtrlPressed } from '@univerjs/base-ui';
-import { Direction, handleStyleToString, ICellData, isKeyPrintable, PLUGIN_NAMES, Tools } from '@univerjs/core';
+import { Direction, handleStyleToString, ICellData, isKeyPrintable, PLUGIN_NAMES, Tools, UIObserver } from '@univerjs/core';
 import { SheetUIPlugin } from '../SheetUIPlugin';
 import { RichText } from '../View/RichText';
 
@@ -26,6 +26,28 @@ export class CellEditorUIController {
         this._sheetPlugin = plugin.getUniver().getCurrentUniverSheetInstance().context.getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
 
         this._initialize();
+    }
+
+    listenEventManager() {
+        this._plugin
+            .getContext()
+            .getUniver()
+            .getGlobalContext()
+            .getObserverManager()
+            .requiredObserver<UIObserver<string>>('onUIChangeObservable', 'core')
+            .add((msg) => {
+                const value = msg.value;
+                switch (msg.name) {
+                    case 'fontWeight':
+                        // this.setUndo();
+                        console.info('fontWeightfontWeight====', msg);
+                        this._richText.cellTextStyle.updateFormat('bl', value ? '1' : '0');
+                        break;
+                    case 'redo':
+                        // this.setRedo();
+                        break;
+                }
+            });
     }
 
     // Get the RichText component
@@ -71,6 +93,7 @@ export class CellEditorUIController {
         }, 1);
 
         this.isEditMode = true;
+        this._sheetPlugin.getCellEditorController().setEditMode(this.isEditMode);
 
         const currentCell = this._sheetPlugin.getSelectionManager().getCurrentCellModel();
 
@@ -152,6 +175,7 @@ export class CellEditorUIController {
         if (!this.isEditMode) return;
 
         this.isEditMode = false;
+        this._sheetPlugin.getCellEditorController().setEditMode(this.isEditMode);
         // this._plugin.showMainByName('cellEditor', false).then(() => {
         const value = handleDomToJson(this._richTextEditEle);
         const text = this._richTextEditEle.innerText;
@@ -212,6 +236,8 @@ export class CellEditorUIController {
         });
 
         this._cellEditExtensionManager = new CellEditExtensionManager();
+
+        this.listenEventManager();
     }
 
     private setRichText() {

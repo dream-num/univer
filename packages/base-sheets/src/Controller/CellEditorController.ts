@@ -5,6 +5,8 @@ import { SheetPlugin } from '../SheetPlugin';
  * Cell Editor
  */
 export class CellEditorController {
+    isEditMode: boolean;
+
     // current edit cell
     currentEditRangeData: IRangeData;
 
@@ -12,6 +14,14 @@ export class CellEditorController {
 
     constructor(plugin: SheetPlugin) {
         this._plugin = plugin;
+    }
+
+    setEditMode(value: boolean) {
+        this.isEditMode = value;
+    }
+
+    getEditMode() {
+        return this.isEditMode;
     }
 
     setCurrentEditRangeData() {

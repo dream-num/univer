@@ -2,14 +2,15 @@ import { BaseComponent, JSXComponent } from '../BaseComponent';
 import { ComponentChildren, RefObject } from '../Framework';
 
 export interface BaseSiderModalProps {
+    name: string;
     title: string | any;
-    closeSide?: Function;
+    show?: boolean;
     children?: ComponentChildren;
     footer?: ComponentChildren;
-    pluginName: string;
     ref?: RefObject<HTMLElement>;
     className?: string;
-    style: JSX.CSSProperties;
+    zIndex?: number;
+    style?: JSX.CSSProperties;
 }
 
 export interface SiderModalComponent extends BaseComponent<BaseSiderModalProps> {

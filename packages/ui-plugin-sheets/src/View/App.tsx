@@ -1,10 +1,12 @@
-import { AppContext, BaseComponentProps, Component } from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps, Component, ComponentManager, ZIndexManager } from '@univerjs/base-ui';
 import { LocaleType } from '@univerjs/core';
 import { BaseSheetContainerProps, SheetContainer } from './SheetContainer';
 
 export interface BaseUIProps extends BaseComponentProps {
     locale: LocaleType;
     UIConfig: BaseSheetContainerProps;
+    componentManager: ComponentManager;
+    zIndexManager: ZIndexManager;
     changeLocale: (locale: string) => void;
 }
 
@@ -29,7 +31,7 @@ export class App extends Component<BaseUIProps, IState> {
     }
 
     render() {
-        const { context, UIConfig } = this.props;
+        const { context, UIConfig, componentManager, zIndexManager } = this.props;
         const { locale } = this.state;
 
         return (
@@ -37,6 +39,8 @@ export class App extends Component<BaseUIProps, IState> {
                 value={{
                     context,
                     locale,
+                    componentManager,
+                    zIndexManager,
                 }}
             >
                 <div

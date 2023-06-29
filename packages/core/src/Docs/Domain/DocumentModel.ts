@@ -5,6 +5,7 @@ import { DOC_ACTION_NAMES } from '../../Const/DOC_ACTION_NAMES';
 import { getDocsUpdateBody } from '../Apply/Common';
 import { Nullable, Tools } from '../../Shared';
 import { DocumentBodyModel } from './DocumentBodyModel';
+import { DEFAULT_DOC } from '../../Const';
 
 interface IDrawingUpdateConfig {
     left: number;
@@ -24,8 +25,9 @@ export class DocumentModelSimple {
 
     bodyModel: DocumentBodyModel;
 
-    constructor(snapshot: IDocumentData) {
-        this.snapshot = snapshot;
+    constructor(snapshot: Partial<IDocumentData>) {
+        // this.snapshot = snapshot;
+        this.snapshot = { ...DEFAULT_DOC, ...snapshot };
 
         if (this.snapshot.body != null) {
             this.bodyModel = DocumentBodyModel.create(this.snapshot.body);
@@ -96,7 +98,7 @@ export class DocumentModel extends DocumentModelSimple {
 
     private _unitId: string;
 
-    constructor(snapshot: IDocumentData, context: DocContext) {
+    constructor(snapshot: Partial<IDocumentData>, context: DocContext) {
         super(snapshot);
         this._context = context;
         this._unitId = this.snapshot.id ?? Tools.generateRandomId(6);

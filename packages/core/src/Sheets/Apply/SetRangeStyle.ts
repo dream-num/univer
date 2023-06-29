@@ -1,6 +1,6 @@
 import { ITextStyle } from '../../Interfaces/IDocumentData';
 import { Styles } from '../Domain';
-import { IRangeData, ICellData, IDocumentData, ITextRun } from '../../Interfaces';
+import { IRangeData, ICellData, IDocumentData } from '../../Interfaces';
 import { IBorderData, IStyleData } from '../../Interfaces/IStyleData';
 import {
     IKeyValue,
@@ -193,37 +193,55 @@ export function mergeRichTextStyle(
     p: IDocumentData,
     newStyle: Nullable<IStyleData>
 ) {
-    p.body?.blockElements.forEach((blockElement) => {
-        if (blockElement.blockType === 0) {
-            const paragraph = blockElement.paragraph;
-            paragraph?.elements.forEach((element) => {
-                if (!element.tr) {
-                    element.tr = {};
-                }
+    // p.body?.blockElements.forEach((blockElement) => {
+    //     if (blockElement.blockType === 0) {
+    //         const paragraph = blockElement.paragraph;
+    //         paragraph?.elements.forEach((element) => {
+    //             if (!element.tr) {
+    //                 element.tr = {};
+    //             }
 
-                const textRun = element.tr as ITextRun;
+    //             const textRun = element.tr as ITextRun;
 
-                if (!textRun.ts) {
-                    textRun.ts = {};
-                }
+    //             if (!textRun.ts) {
+    //                 textRun.ts = {};
+    //             }
 
-                const oldStyle = textRun.ts;
+    //             const oldStyle = textRun.ts;
 
-                const merge = mergeStyle(
-                    oldStyle as Nullable<IStyleData>,
-                    newStyle,
-                    true
-                );
+    //             const merge = mergeStyle(
+    //                 oldStyle as Nullable<IStyleData>,
+    //                 newStyle,
+    //                 true
+    //             );
 
-                // then remove null
-                merge && Tools.removeNull(merge);
+    //             // then remove null
+    //             merge && Tools.removeNull(merge);
 
-                if (Tools.isEmptyObject(merge)) {
-                    delete textRun.ts;
-                } else {
-                    textRun.ts = merge as ITextStyle;
-                }
-            });
+    //             if (Tools.isEmptyObject(merge)) {
+    //                 delete textRun.ts;
+    //             } else {
+    //                 textRun.ts = merge as ITextStyle;
+    //             }
+    //         });
+    //     }
+    // });
+    p.body?.textRuns?.forEach((textRun) => {
+        if (!textRun.ts) {
+            textRun.ts = {};
+        }
+
+        const oldStyle = textRun.ts || {};
+
+        const merge = mergeStyle(oldStyle as Nullable<IStyleData>, newStyle, true);
+
+        // then remove null
+        merge && Tools.removeNull(merge);
+
+        if (Tools.isEmptyObject(merge)) {
+            delete textRun.ts;
+        } else {
+            textRun.ts = merge as ITextStyle;
         }
     });
 }

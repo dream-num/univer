@@ -1,4 +1,4 @@
-import { BaseComponentProps, Component, Container, Content, createRef, Footer, Header, Layout, Sider } from '@univerjs/base-ui';
+import { BaseComponentProps, Component, Container, Content, createRef, Footer, Header, Layout, Sider, Slot } from '@univerjs/base-ui';
 import defaultSkin from '@univerjs/base-ui/Basics/CSS/Skin/default.module.less';
 import { Tools } from '@univerjs/core';
 import cssVars from 'css-vars-ponyfill';
@@ -10,7 +10,6 @@ import { SheetBar } from '../SheetBar';
 import { FormulaBar } from '../FormulaBar';
 import { RichText } from '../RichText';
 import { ISheetUIPluginConfig } from '../../Basics';
-import { Slot } from '../Slot/Slot';
 import { Toolbar } from '../Toolbar';
 
 export interface BaseSheetContainerProps extends BaseComponentProps {
@@ -107,7 +106,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
         const id = typeof container === 'string' ? container : container.id;
 
         // get all skins
-        const skins = {
+        const skins: Record<string, CSSModuleClasses> = {
             default: defaultSkin,
         };
 
@@ -220,7 +219,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
                                 {/* innerLeft */}
                             </Sider>
                             <Content className={config.contentSplit === 'vertical' ? style.contentContainerVertical : style.contentContainerHorizontal}>
-                                <Slot {...methods.slot}></Slot>
+                                {/* <Slot {...methods.slot}></Slot> */}
                                 {!!config.contentSplit && (
                                     <Container ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>
                                         <div className={style.hoverCursor} onMouseDown={this.handleSplitBarMouseDown}></div>
@@ -232,6 +231,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
                                 </Container>
                                 {/* <Prompt show={true} title="123" content="235" /> */}
                                 {/* extend main content */}
+                                <Slot name="main" {...methods.slot}></Slot>
                             </Content>
 
                             <Sider

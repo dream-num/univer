@@ -38,9 +38,10 @@ export class LineBold extends Component<IProps, IState> {
         if (!img) return null;
         const span = document.querySelector('.base-sheets-line-bold') as HTMLDivElement;
         const props = { width: span.offsetWidth };
-        const componentManager = this.getContext().getPluginManager().getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager();
-        const Img = componentManager?.get(img);
-        return <Img {...(props as any)} />;
+        const Img = this.context.componentManager.get(img);
+        if(Img){
+            return <Img {...(props as any)} />;
+        }
     }
 
     render() {
@@ -49,7 +50,7 @@ export class LineBold extends Component<IProps, IState> {
         return (
             <div style={{ paddingBottom: '3px', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className={'base-sheets-line-bold'} style={{ position: 'relative' }}>
-                    {this.getLocale(label)}
+                    {this.getLabel(label)}
                     <div style={{ width: '100%', height: 0, position: 'absolute', left: 0, bottom: '14px' }}>{img.length ? this.getImg(img) : ''}</div>
                 </span>
                 <Icon.RightIcon />

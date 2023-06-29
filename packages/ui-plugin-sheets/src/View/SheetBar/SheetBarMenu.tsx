@@ -59,7 +59,7 @@ export class SheetBarMenu extends Component<SheetBarMenuProps, IState> {
                         <span className={styles.sheetBarMenuIcon}>
                             <EffIcon item={item}></EffIcon>
                         </span>
-                        <span className={styles.sheetBarMenuTitle}>{item.label}</span>
+                        <span className={styles.sheetBarMenuTitle}>{this.getLabel(item.label ?? '')}</span>
                     </li>
                 ))}
             </ul>

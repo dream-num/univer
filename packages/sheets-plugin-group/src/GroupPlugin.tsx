@@ -1,9 +1,4 @@
-import { SheetContext, Plugin, PLUGIN_NAMES, UniverSheet, IOCContainer } from '@univerjs/core';
-import { IToolbarItemProps, ISlotElement } from '@univerjs/base-ui';
-import { SheetPlugin } from '@univerjs/base-sheets';
-import { GroupButton } from './View/UI/GroupButton';
-import { zh, en } from './Locale';
-
+import { SheetContext, Plugin, UniverSheet, IOCContainer } from '@univerjs/core';
 import { GROUP_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 
 export interface IGroupPluginConfig {}
@@ -22,23 +17,23 @@ export class GroupPlugin extends Plugin {
     }
 
     initialize(): void {
-        const context = this.getContext();
-
-        /**
-         * load more Locale object
-         */
-        context.getLocale().load({
-            en,
-            zh,
-        });
-
-        const item: IToolbarItemProps = {
-            locale: 'group',
-            type: ISlotElement.JSX,
-            show: true,
-            label: <GroupButton />,
-        };
-        context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
+        // const context = this.getContext();
+        //
+        // /**
+        //  * load more Locale object
+        //  */
+        // context.getLocale().load({
+        //     en,
+        //     zh,
+        // });
+        //
+        // const item: IToolbarItemProps = {
+        //     locale: 'group',
+        //     type: ISlotElement.JSX,
+        //     show: true,
+        //     label: <GroupButton />,
+        // };
+        // context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
     }
 
     onMapping(IOC: IOCContainer): void {}

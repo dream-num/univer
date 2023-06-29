@@ -1,4 +1,4 @@
-import { ISheetActionData, SheetActionBase, Workbook, ActionObservers, ActionType } from '@univerjs/core';
+import { ISheetActionData, SheetActionBase, ActionObservers, ActionType, CommandUnit } from '@univerjs/core';
 
 /**
  * @internal
@@ -11,8 +11,8 @@ export interface ISetCollapseAllColumnGroupsData extends ISheetActionData {}
  * @internal
  */
 export class SetCollapseAllColumnGroupsAction extends SheetActionBase<ISetCollapseAllColumnGroupsData, ISetCollapseAllColumnGroupsData> {
-    constructor(actionData: ISetCollapseAllColumnGroupsData, workbook: Workbook, observers: ActionObservers) {
-        super(actionData, workbook, observers);
+    constructor(actionData: ISetCollapseAllColumnGroupsData, commandUnit: CommandUnit, observers: ActionObservers) {
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
         };

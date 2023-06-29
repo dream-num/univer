@@ -1,11 +1,5 @@
-import { ISlotElement, ISlotProps, IToolbarItemProps } from '@univerjs/base-ui';
-import { SheetContext, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univerjs/core';
-import { SheetPlugin } from '@univerjs/base-sheets';
+import { SheetContext, IOCContainer, UniverSheet, Plugin } from '@univerjs/core';
 import { PROTECTION_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
-import { IConfig } from './IData/IProtection';
-import { en, zh } from './Locale';
-import { ProtectionButton } from './UI/ProtectionButton';
-import { ProtectionSide } from './UI/ProtectionSide';
 import { Protection } from './Controller';
 
 export interface IProtectionPluginConfig {}
@@ -28,41 +22,41 @@ export class ProtectionPlugin extends Plugin {
     initialize(): void {
         const context = this.getContext();
 
-        /**
-         * load more Locale object
-         */
-        context.getLocale().load({
-            en,
-            zh,
-        });
-        const config: IConfig = {
-            context,
-        };
-
-        const item: IToolbarItemProps = {
-            locale: PROTECTION_PLUGIN_NAME,
-            type: ISlotElement.JSX,
-            show: true,
-            label: <ProtectionButton config={config} />,
-        };
-        context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
-
-        // TODO
-        this._protectionSlider = new Protection();
-
-        const rangeData = {
-            startRow: 0,
-            endRow: 10,
-            startColumn: 0,
-            endColumn: 10,
-        };
-
-        const siderItem: ISlotProps = {
-            name: 'protection',
-            type: ISlotElement.JSX,
-            label: <ProtectionSide config={{ rangeData, context, protection: this._protectionSlider }} />,
-        };
-        context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addSider(siderItem);
+        // /**
+        //  * load more Locale object
+        //  */
+        // context.getLocale().load({
+        //     en,
+        //     zh,
+        // });
+        // const config: IConfig = {
+        //     context,
+        // };
+        //
+        // const item: IToolbarItemProps = {
+        //     locale: PROTECTION_PLUGIN_NAME,
+        //     type: ISlotElement.JSX,
+        //     show: true,
+        //     label: <ProtectionButton config={config} />,
+        // };
+        // context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
+        //
+        // // TODO
+        // this._protectionSlider = new Protection();
+        //
+        // const rangeData = {
+        //     startRow: 0,
+        //     endRow: 10,
+        //     startColumn: 0,
+        //     endColumn: 10,
+        // };
+        //
+        // const siderItem: ISlotProps = {
+        //     name: 'protection',
+        //     type: ISlotElement.JSX,
+        //     label: <ProtectionSide config={{ rangeData, context, protection: this._protectionSlider }} />,
+        // };
+        // context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addSider(siderItem);
     }
 
     onMapping(IOC: IOCContainer): void {}

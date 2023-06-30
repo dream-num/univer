@@ -1,10 +1,8 @@
 import { Tools } from '@univerjs/core';
 
 export class ActionSort {
-    constructor() {}
-
     orderbydata(data: any, index: number, isAsc: boolean = true) {
-        let a = function (x: any, y: any) {
+        let a = (x: any, y: any) => {
             let x1 = x[index];
             let y1 = y[index];
 
@@ -40,7 +38,7 @@ export class ActionSort {
             }
         };
 
-        let d = function (x: any, y: any) {
+        let d = (x: any, y: any) => {
             let x1 = x[index];
             let y1 = y[index];
 
@@ -61,7 +59,7 @@ export class ActionSort {
             }
 
             if (Tools.isDate(x1) && Tools.isDate(y1)) {
-                return diff(y1, x1);
+                return diff(x1, y1);
             }
             if (Tools.isNumber(x1) && Tools.isNumber(y1)) {
                 return Number(y1) - Number(x1);
@@ -83,4 +81,5 @@ export class ActionSort {
         return data.sort(d);
     }
 }
+
 function diff(x1: Date, y1: Date) {}

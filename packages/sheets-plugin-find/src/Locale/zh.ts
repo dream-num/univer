@@ -49,7 +49,7 @@ export default {
         noMatchTip: '找不到匹配项',
         search: '搜索',
 
-        successTip: '已经帮您搜索并进行了${xlength}处替换',
+        // successTip: '已经帮您搜索并进行了${xlength}处替换',
 
         locationConstant: '常量',
         locationFormula: '公式',

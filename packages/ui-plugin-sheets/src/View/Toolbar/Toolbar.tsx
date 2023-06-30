@@ -1,4 +1,4 @@
-import { AppContext, AppContextValues, BaseComponentProps, Button, Component, Container, createRef, debounce,  PreactContext, Select, Tooltip } from '@univerjs/base-ui';
+import { AppContext, AppContextValues, BaseComponentProps, Button, Component, Container, createRef, debounce, PreactContext, Select, Tooltip } from '@univerjs/base-ui';
 import { SheetUIPlugin } from '../..';
 import { SHEET_UI_PLUGIN_NAME } from '../../Basics';
 import { IToolbarItemProps } from '../../Controller';

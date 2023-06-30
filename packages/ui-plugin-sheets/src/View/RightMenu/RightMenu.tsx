@@ -1,6 +1,6 @@
 import { IMouseEvent } from '@univerjs/base-render';
-import { BaseRightMenuProps, Component,  createRef, Menu } from '@univerjs/base-ui';
-import {  RightMenuProps } from '../../Controller';
+import { BaseRightMenuProps, Component, createRef, Menu } from '@univerjs/base-ui';
+import { RightMenuProps } from '../../Controller';
 import Style from './index.module.less';
 
 interface IState {

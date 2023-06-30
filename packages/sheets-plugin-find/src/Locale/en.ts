@@ -49,7 +49,7 @@ export default {
         noReplceTip: 'There is nothing to replace',
         noMatchTip: 'No match found',
 
-        successTip: '${xlength} items found',
+        // successTip: "${xlength} items found",
 
         locationConstant: 'Const',
         locationFormula: 'Formula',

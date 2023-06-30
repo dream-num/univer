@@ -231,7 +231,7 @@ export class ToolbarUIController {
                     this.hideTooltip();
                     const textColor = this._toolList.find((item) => item.name === 'textColor');
                     if (!textColor || !textColor.label) return;
-                    if (!((textColor.label as CustomComponent).props?.color)) return;
+                    if (!(textColor.label as CustomComponent).props?.color) return;
                     (textColor.label as CustomComponent).props!.color = this._textColor;
                     this.changeColor(this._textColor);
                 },
@@ -276,7 +276,7 @@ export class ToolbarUIController {
                     this.hideTooltip();
                     const fillColor = this._toolList.find((item) => item.name === 'fillColor');
                     if (!fillColor || !fillColor.label) return;
-                    if (!((fillColor.label as CustomComponent).props?.color)) return;
+                    if (!(fillColor.label as CustomComponent).props?.color) return;
                     (fillColor.label as CustomComponent).props!.color = this._background;
                     this.setBackground(this._background);
                 },
@@ -341,7 +341,7 @@ export class ToolbarUIController {
                                             const borderItem = this._toolList.find((item) => item.name === 'border');
                                             const lineColor = borderItem?.children?.find((item) => item.name === 'borderColor');
                                             if (!lineColor || !lineColor.label) return;
-                                            if (!((lineColor.label as CustomComponent).props?.color)) return;
+                                            if (!(lineColor.label as CustomComponent).props?.color) return;
                                             (lineColor.label as CustomComponent).props!.color = color;
                                         },
                                     },
@@ -364,10 +364,10 @@ export class ToolbarUIController {
                         },
                         onClick: (...arg) => {
                             arg[0].stopPropagation();
-                            const label = BORDER_SIZE_CHILDREN[arg[2]].label
-                            if(typeof label === 'string'){
+                            const label = BORDER_SIZE_CHILDREN[arg[2]].label;
+                            if (typeof label === 'string') {
                                 this._lineBold.setImg(label);
-                            }else{
+                            } else {
                                 this._lineBold.setImg(label.name);
                             }
                             this._borderInfo.style = arg[1];

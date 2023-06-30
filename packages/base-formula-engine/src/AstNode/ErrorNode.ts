@@ -4,6 +4,8 @@ import { BaseAstNode } from './BaseAstNode';
 import { NodeType } from './NodeType';
 
 export class ErrorNode extends BaseAstNode {
+    private _errorValueObject: ErrorValueObject;
+
     constructor(errorType: ErrorType) {
         super(errorType);
         this._errorValueObject = ErrorValueObject.create(errorType);
@@ -20,6 +22,4 @@ export class ErrorNode extends BaseAstNode {
     getValue() {
         return this._errorValueObject;
     }
-
-    private _errorValueObject: ErrorValueObject;
 }

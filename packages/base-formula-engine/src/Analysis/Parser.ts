@@ -11,9 +11,20 @@ import { DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, DEFAULT_TOKEN_TYPE_PARAMETER, DEFA
 import { LambdaRuntime } from '../Basics/LambdaRuntime';
 
 export class AstTreeMaker {
+    static maker: AstTreeMaker;
+
     private _parserDataLoader = new ParserDataLoader();
 
     private _astNodeFactoryList: BaseAstNodeFactory[];
+
+    static create() {
+        if (!this.maker) {
+            this.maker = new AstTreeMaker();
+            this.maker._parserDataLoader.initialize();
+        }
+
+        return this.maker;
+    }
 
     parse(lexerNode: LexerNode) {
         this._astNodeFactoryList = FORMULA_AST_NODE_REGISTRY.getData() as BaseAstNodeFactory[];
@@ -21,6 +32,10 @@ export class AstTreeMaker {
         const astNode = new AstRootNode(DEFAULT_TOKEN_TYPE_ROOT);
         const node = this._parse(lexerNode, astNode);
         return node;
+    }
+
+    getDataLoader() {
+        return this._parserDataLoader;
     }
 
     private _lambdaParameterHandler(lexerNode: LexerNode, parent: LambdaNode) {
@@ -137,7 +152,7 @@ export class AstTreeMaker {
                 case NodeType.LAMBDA_PARAMETER:
                     calculateStack.push(astNode);
                     break;
-                case NodeType.OPERATOR:
+                case NodeType.OPERATOR: {
                     const parameterNode1 = calculateStack.pop();
                     const parameterNode2 = calculateStack.pop();
                     if (parameterNode2) {
@@ -156,6 +171,7 @@ export class AstTreeMaker {
 
                     calculateStack.push(astNode);
                     break;
+                }
                 case NodeType.REFERENCE:
                     calculateStack.push(astNode);
                     break;
@@ -202,19 +218,4 @@ export class AstTreeMaker {
     }
 
     private _findTopNode() {}
-
-    getDataLoader() {
-        return this._parserDataLoader;
-    }
-
-    static maker: AstTreeMaker;
-
-    static create() {
-        if (!this.maker) {
-            this.maker = new AstTreeMaker();
-            this.maker._parserDataLoader.initialize();
-        }
-
-        return this.maker;
-    }
 }

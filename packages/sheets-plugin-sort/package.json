@@ -33,6 +33,7 @@
     },
     "devDependencies": {
         "@preact/preset-vite": "2.0.0",
+        "enzyme": "^3.11.0",
         "@testing-library/preact": "^2.0.1",
         "@types/jest": "^27.5.2",
         "@types/node": "^18.14.0",

@@ -1,4 +1,4 @@
-import { SheetActionBase, ActionObservers, ISheetActionData, IRangeData, Workbook } from '@univerjs/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, IRangeData, CommandUnit } from '@univerjs/core';
 import { ACTION_NAMES } from '../Enum';
 import { IDescSortData } from './DescSortAction';
 
@@ -7,8 +7,8 @@ export interface IAscSortData extends ISheetActionData {
 }
 
 export class AscSortAction extends SheetActionBase<IAscSortData, IDescSortData> {
-    constructor(actionData: IAscSortData, workbook: Workbook, observers: ActionObservers) {
-        super(actionData, workbook, observers);
+    constructor(actionData: IAscSortData, commandUnit: CommandUnit, observers: ActionObservers) {
+        super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -22,7 +22,6 @@ export class AscSortAction extends SheetActionBase<IAscSortData, IDescSortData> 
     do(): void {
         const { rangeData } = this._doActionData;
         const worksheet = this.getWorkSheet();
-        if (worksheet) return;
     }
 
     redo(): void {

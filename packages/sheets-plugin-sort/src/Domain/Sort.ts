@@ -24,23 +24,23 @@ export class Sort {
 
     private _orderType: SortOrderType;
 
-    // 只影响选区
-    isOnlyRange: boolean;
-
-    // 石头包含标题行
-    hasHeader: boolean;
-
-    // 初始数据
-    soreBefore: any;
-
-    // 排序后数据
-    soreAfter: any;
-
-    sortCriteria: SortCriteria[];
+    // // 只影响选区
+    // isOnlyRange: boolean;
+    //
+    // // 石头包含标题行
+    // hasHeader: boolean;
+    //
+    // // 初始数据
+    // soreBefore: any;
+    //
+    // // 排序后数据
+    // soreAfter: any;
+    //
+    // sortCriteria: SortCriteria[];
 
     constructor(range: Range, order: SortOrderType = SortOrder.ASCENDING) {
         this._range = range;
-        this.isOnlyRange = false;
+        // this.isOnlyRange = false;
         this._orderType = order;
     }
 

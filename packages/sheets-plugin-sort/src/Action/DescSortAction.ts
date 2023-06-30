@@ -1,4 +1,4 @@
-import { SheetActionBase, ActionObservers, ISheetActionData, IRangeData, Workbook } from '@univerjs/core';
+import { SheetActionBase, ISheetActionData, IRangeData } from '@univerjs/core';
 import { IAscSortData } from './index';
 
 export interface IDescSortData extends ISheetActionData {
@@ -6,10 +6,6 @@ export interface IDescSortData extends ISheetActionData {
 }
 
 export class DescSortAction extends SheetActionBase<IDescSortData, IAscSortData> {
-    constructor(actionData: IDescSortData, workbook: Workbook, observers: ActionObservers) {
-        super(actionData, workbook, observers);
-    }
-
     do(): void {}
 
     redo(): void {

@@ -1,4 +1,4 @@
-import { GroupOpenType, StructGroup } from '../../Module/Group';
+import { GroupOpenType, StructGroup } from '../Controller/StructGroup';
 
 /**
  *

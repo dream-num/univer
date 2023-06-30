@@ -10,11 +10,11 @@ import { BaseFunction } from '../BaseFunction';
 const FUNCTION_NAME = 'COMPARE';
 
 export class Compare extends BaseFunction {
+    private _compareType: compareToken;
+
     get name() {
         return FUNCTION_NAME;
     }
-
-    private _compareType: compareToken;
 
     setCompareType(token: compareToken) {
         this._compareType = token;

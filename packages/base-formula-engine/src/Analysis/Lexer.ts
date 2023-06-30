@@ -31,6 +31,128 @@ export class LexerTreeMaker {
 
     constructor(private _formulaString: string) {}
 
+    getUpLevel() {
+        return this._upLevel;
+    }
+
+    isColonClose() {
+        return this._colonState === false;
+    }
+
+    isColonOpen() {
+        return this._colonState === true;
+    }
+
+    isDoubleQuotationClose() {
+        return this._doubleQuotationState === 0;
+    }
+
+    isLambdaOpen() {
+        return this._lambdaState === true;
+    }
+
+    isLambdaClose() {
+        return this._lambdaState === false;
+    }
+
+    isSingleQuotationClose() {
+        return this._singleQuotationState === 0;
+    }
+
+    isBracesClose() {
+        return this._bracesState === 0;
+    }
+
+    isBracketClose() {
+        return this._bracketState.length === 0;
+    }
+
+    getCurrentLexerNode() {
+        return this._currentLexerNode;
+    }
+
+    treeMaker() {
+        this._resetCurrentLexerNode();
+
+        this._currentLexerNode.setToken(DEFAULT_TOKEN_TYPE_ROOT);
+
+        const state = this._nodeMaker(this._formulaString);
+
+        // console.log('error', state);
+
+        this._currentLexerNode = this._getTopNode(this._currentLexerNode);
+
+        return this._currentLexerNode;
+    }
+
+    suffixExpressionHandler(lexerNode: LexerNode) {
+        const children = lexerNode.getChildren();
+        if (!children) {
+            return;
+        }
+        const childrenCount = children.length;
+
+        const baseStack: Array<string | LexerNode> = []; // S2
+        const symbolStack: string[] = []; // S1
+        for (let i = 0; i < childrenCount; i++) {
+            const node = children[i];
+            if (!(node instanceof LexerNode)) {
+                const char = node.trim();
+                if (char === '') {
+                    continue;
+                }
+
+                if (OPERATOR_TOKEN_SET.has(char)) {
+                    while (symbolStack.length > 0) {
+                        const lastSymbol = symbolStack[symbolStack.length - 1]?.trim();
+                        if (!lastSymbol || lastSymbol === matchToken.OPEN_BRACKET) {
+                            break;
+                        }
+
+                        const lastSymbolPriority = OPERATOR_TOKEN_PRIORITY.get(lastSymbol);
+                        const charPriority = OPERATOR_TOKEN_PRIORITY.get(char);
+
+                        if (!lastSymbolPriority || !charPriority) {
+                            break;
+                        }
+
+                        if (charPriority > lastSymbolPriority) {
+                            baseStack.push(symbolStack.pop()!);
+                        } else {
+                            break;
+                        }
+                    }
+                    symbolStack.push(node as string);
+                } else if (char === matchToken.OPEN_BRACKET) {
+                    symbolStack.push(node as string);
+                } else if (char === matchToken.CLOSE_BRACKET) {
+                    while (symbolStack.length > 0) {
+                        const lastSymbol = symbolStack[symbolStack.length - 1]?.trim();
+                        if (!lastSymbol) {
+                            break;
+                        }
+
+                        if (lastSymbol === matchToken.OPEN_BRACKET) {
+                            symbolStack.pop();
+                            break;
+                        }
+
+                        baseStack.push(symbolStack.pop()!);
+                    }
+                } else {
+                    baseStack.push(node as string);
+                }
+            } else {
+                this.suffixExpressionHandler(node as LexerNode);
+                baseStack.push(node);
+            }
+        }
+        while (symbolStack.length > 0) {
+            baseStack.push(symbolStack.pop()!);
+        }
+        lexerNode.setChildren(baseStack);
+    }
+
     private _resetCurrentLexerNode() {
         this._currentLexerNode = new LexerNode();
     }
@@ -115,42 +237,6 @@ export class LexerTreeMaker {
     private _closeColon() {
         this._upLevel = 0;
         this._colonState = false;
-    }
-
-    getUpLevel() {
-        return this._upLevel;
-    }
-
-    isColonClose() {
-        return this._colonState === false;
-    }
-
-    isColonOpen() {
-        return this._colonState === true;
-    }
-
-    isDoubleQuotationClose() {
-        return this._doubleQuotationState === 0;
-    }
-
-    isLambdaOpen() {
-        return this._lambdaState === true;
-    }
-
-    isLambdaClose() {
-        return this._lambdaState === false;
-    }
-
-    isSingleQuotationClose() {
-        return this._singleQuotationState === 0;
-    }
-
-    isBracesClose() {
-        return this._bracesState === 0;
-    }
-
-    isBracketClose() {
-        return this._bracketState.length === 0;
     }
 
     private _getLastChildCurrentLexerNode() {
@@ -252,92 +338,6 @@ export class LexerTreeMaker {
             }
             index--;
         }
-    }
-
-    getCurrentLexerNode() {
-        return this._currentLexerNode;
-    }
-
-    treeMaker() {
-        this._resetCurrentLexerNode();
-
-        this._currentLexerNode.setToken(DEFAULT_TOKEN_TYPE_ROOT);
-
-        const state = this._nodeMaker(this._formulaString);
-
-        // console.log('error', state);
-
-        this._currentLexerNode = this._getTopNode(this._currentLexerNode);
-
-        return this._currentLexerNode;
-    }
-
-    suffixExpressionHandler(lexerNode: LexerNode) {
-        const children = lexerNode.getChildren();
-        if (!children) {
-            return;
-        }
-        const childrenCount = children.length;
-
-        const baseStack: Array<string | LexerNode> = []; // S2
-        const symbolStack: string[] = []; // S1
-        for (let i = 0; i < childrenCount; i++) {
-            const node = children[i];
-            if (!(node instanceof LexerNode)) {
-                const char = node.trim();
-                if (char === '') {
-                    continue;
-                }
-
-                if (OPERATOR_TOKEN_SET.has(char)) {
-                    while (symbolStack.length > 0) {
-                        const lastSymbol = symbolStack[symbolStack.length - 1]?.trim();
-                        if (!lastSymbol || lastSymbol === matchToken.OPEN_BRACKET) {
-                            break;
-                        }
-
-                        const lastSymbolPriority = OPERATOR_TOKEN_PRIORITY.get(lastSymbol);
-                        const charPriority = OPERATOR_TOKEN_PRIORITY.get(char);
-
-                        if (!lastSymbolPriority || !charPriority) {
-                            break;
-                        }
-
-                        if (charPriority > lastSymbolPriority) {
-                            baseStack.push(symbolStack.pop()!);
-                        } else {
-                            break;
-                        }
-                    }
-                    symbolStack.push(node as string);
-                } else if (char === matchToken.OPEN_BRACKET) {
-                    symbolStack.push(node as string);
-                } else if (char === matchToken.CLOSE_BRACKET) {
-                    while (symbolStack.length > 0) {
-                        const lastSymbol = symbolStack[symbolStack.length - 1]?.trim();
-                        if (!lastSymbol) {
-                            break;
-                        }
-
-                        if (lastSymbol === matchToken.OPEN_BRACKET) {
-                            symbolStack.pop();
-                            break;
-                        }
-
-                        baseStack.push(symbolStack.pop()!);
-                    }
-                } else {
-                    baseStack.push(node as string);
-                }
-            } else {
-                this.suffixExpressionHandler(node as LexerNode);
-                baseStack.push(node);
-            }
-        }
-        while (symbolStack.length > 0) {
-            baseStack.push(symbolStack.pop()!);
-        }
-        lexerNode.setChildren(baseStack);
     }
 
     private _negativeCondition(prevString: string) {

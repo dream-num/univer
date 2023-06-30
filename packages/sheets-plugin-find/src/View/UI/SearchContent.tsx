@@ -1,8 +1,5 @@
-import { BaseComponentRender, BaseComponentSheet, Component } from '@univerjs/base-ui';
+import { Component } from '@univerjs/base-ui';
 import { Nullable } from '@univerjs/core';
-import { FIND_PLUGIN_NAME } from '../../Const/PLUGIN_NAME';
-import { FindPlugin } from '../../FindPlugin';
-import styles from './index.module.less';
 
 interface SearchProps {
     config: any;
@@ -28,87 +25,88 @@ type LabelProps = {
 };
 
 export class SearchContent extends Component<SearchProps, SearchState> {
-    Render: BaseComponentRender;
+    // Render: BaseComponentRender;
 
-    initialize() {
-        const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this.Render = component.getComponentRender();
-        this.state = {
-            tab: [],
-            content: [],
-            buttons: [],
-            match: [],
-            changeSearchText: null,
-            getMatch: null,
-        };
-    }
+    // initialize() {
+    //     const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+    //     this.Render = component.getComponentRender();
+    //     this.state = {
+    //         tab: [],
+    //         content: [],
+    //         buttons: [],
+    //         match: [],
+    //         changeSearchText: null,
+    //         getMatch: null,
+    //     };
+    // }
 
-    componentDidMount() {
-        const plugin = this._context.getPluginManager().getPluginByName<FindPlugin>(FIND_PLUGIN_NAME)!;
-        plugin.getObserver('onSearchContentDidMountObservable')!.notifyObservers(this);
-    }
+    // componentDidMount() {
+    //     const plugin = this._context.getPluginManager().getPluginByName<FindPlugin>(FIND_PLUGIN_NAME)!;
+    //     plugin.getObserver('onSearchContentDidMountObservable')!.notifyObservers(this);
+    // }
 
-    setSearchData(data: any) {
-        this.setState({
-            ...data,
-        });
-    }
+    // setSearchData(data: any) {
+    //     this.setState({
+    //         ...data,
+    //     });
+    // }
 
     render(props: SearchProps, state: SearchState) {
-        const Tab = this.Render.renderFunction('Tab');
-        const TabPane = this.Render.renderFunction('TabPane');
-        const Button = this.Render.renderFunction('Button');
-        const CheckboxGroup = this.Render.renderFunction('CheckboxGroup');
-        const Input = this.Render.renderFunction('Input');
-        const { tab, content, match, buttons, changeSearchText, getMatch } = state;
-        const { activeKey } = props;
+        // const Tab = this.Render.renderFunction('Tab');
+        // const TabPane = this.Render.renderFunction('TabPane');
+        // const Button = this.Render.renderFunction('Button');
+        // const CheckboxGroup = this.Render.renderFunction('CheckboxGroup');
+        // const Input = this.Render.renderFunction('Input');
+        // const { tab, content, match, buttons, changeSearchText, getMatch } = state;
+        // const { activeKey } = props;
 
-        if (!changeSearchText || !getMatch) return;
+        // if (!changeSearchText || !getMatch) return;
 
         return (
-            <Tab activeKey={activeKey} type="card">
-                {tab.map((item, index) => (
-                    <TabPane tab={item.label} keys={item.key} key={index}>
-                        <div className={styles.tabBox}>
-                            <div className={styles.inputBox}>
-                                <div className={styles.textBox}>
-                                    <div>
-                                        <span>{content[0].label}: </span>
-                                        <Input onChange={(e: Event) => changeSearchText(e)} />
-                                    </div>
-                                    {item.key === 'replace' ? (
-                                        <div>
-                                            <span>{content[1].label}: </span>
-                                            <Input />
-                                        </div>
-                                    ) : (
-                                        <></>
-                                    )}
-                                </div>
-                                <div>
-                                    <CheckboxGroup options={match} onChange={getMatch}></CheckboxGroup>
-                                </div>
-                            </div>
-                            <div className={styles.btnBox}>
-                                {buttons.map((item, index) => {
-                                    if (item.key === 'replace') {
-                                        return (
-                                            <Button key={index} onClick={item.onClick}>
-                                                {item.label}
-                                            </Button>
-                                        );
-                                    }
-                                    return (
-                                        <Button key={index} onClick={item.onClick}>
-                                            {item.label}
-                                        </Button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </TabPane>
-                ))}
-            </Tab>
+            <div></div>
+            // <Tab activeKey={activeKey} type="card">
+            //     {tab.map((item, index) => (
+            //         <TabPane tab={item.label} keys={item.key} key={index}>
+            //             <div className={styles.tabBox}>
+            //                 <div className={styles.inputBox}>
+            //                     <div className={styles.textBox}>
+            //                         <div>
+            //                             <span>{content[0].label}: </span>
+            //                             <Input onChange={(e: Event) => changeSearchText(e)} />
+            //                         </div>
+            //                         {item.key === 'replace' ? (
+            //                             <div>
+            //                                 <span>{content[1].label}: </span>
+            //                                 <Input />
+            //                             </div>
+            //                         ) : (
+            //                             <></>
+            //                         )}
+            //                     </div>
+            //                     <div>
+            //                         <CheckboxGroup options={match} onChange={getMatch}></CheckboxGroup>
+            //                     </div>
+            //                 </div>
+            //                 <div className={styles.btnBox}>
+            //                     {buttons.map((item, index) => {
+            //                         if (item.key === 'replace') {
+            //                             return (
+            //                                 <Button key={index} onClick={item.onClick}>
+            //                                     {item.label}
+            //                                 </Button>
+            //                             );
+            //                         }
+            //                         return (
+            //                             <Button key={index} onClick={item.onClick}>
+            //                                 {item.label}
+            //                             </Button>
+            //                         );
+            //                     })}
+            //                 </div>
+            //             </div>
+            //         </TabPane>
+            //     ))}
+            // </Tab>
         );
     }
 }

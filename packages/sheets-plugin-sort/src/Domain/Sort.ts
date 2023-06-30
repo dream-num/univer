@@ -92,7 +92,12 @@ export class Sort {
             sheetId: _workSheet.getSheetId(),
         };
 
-        const command = new Command(_context.getWorkBook(), actionData);
+        const command = new Command(
+            {
+                WorkBookUnit: _context.getWorkBook(),
+            },
+            actionData
+        );
         _commandManager.invoke(command);
     }
 }

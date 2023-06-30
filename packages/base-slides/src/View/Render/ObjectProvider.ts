@@ -1,13 +1,17 @@
 import { BaseObject, Scene } from '@univerjs/base-render';
 import { ContextBase, IPageElement, sortRules } from '@univerjs/core';
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from './Adaptor';
-import './Adaptors';
+// import './Adaptors';
 
 export class ObjectProvider {
     private _adaptors: ObjectAdaptor[] = [];
 
     constructor() {
         this._adaptorLoader();
+    }
+
+    static create() {
+        return new ObjectProvider();
     }
 
     convertToRenderObjects(pageElements: { [elementId: string]: IPageElement }, mainScene: Scene, context: ContextBase) {
@@ -40,9 +44,5 @@ export class ObjectProvider {
             .forEach((adaptor: ObjectAdaptor) => {
                 this._adaptors.push(adaptor);
             });
-    }
-
-    static create() {
-        return new ObjectProvider();
     }
 }

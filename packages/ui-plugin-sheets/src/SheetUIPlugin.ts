@@ -38,6 +38,8 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
         installObserver(this);
         /**
          * load more Locale object
+         *
+         * TODO 异步加载
          */
         this.getLocale().load({
             zh,

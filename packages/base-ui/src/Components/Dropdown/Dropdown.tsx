@@ -1,6 +1,6 @@
 import { Icon } from '..';
 import { JSXComponent } from '../../BaseComponent';
-import {  PureComponent, createRef } from '../../Framework';
+import { PureComponent, createRef } from '../../Framework';
 import { BaseDropdownProps, DropdownComponent } from '../../Interfaces';
 import { Menu } from '../Menu';
 import { Tooltip } from '../Tooltip';

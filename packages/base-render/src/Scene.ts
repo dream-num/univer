@@ -1,4 +1,4 @@
-import { EventState, Observable, Observer, sortRules, sortRulesByDesc, Nullable } from '@univerjs/core';
+import { EventState, Observable, Observer, sortRules, sortRulesByDesc, Nullable, IKeyValue } from '@univerjs/core';
 import { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './Basics/IEvents';
 
 import { requestNewFrame, precisionTo } from './Basics/Tools';
@@ -333,9 +333,9 @@ export class Scene {
             return;
         }
         optionKeys.forEach((pKey) => {
-            if (state[pKey] !== undefined) {
-                preKeys[pKey] = this[pKey];
-                this[pKey] = state[pKey];
+            if (state[pKey as keyof ISceneTransformState] !== undefined) {
+                (preKeys as IKeyValue)[pKey] = this[pKey as keyof Scene];
+                (this as IKeyValue)[pKey] = state[pKey as keyof ISceneTransformState];
             }
         });
 

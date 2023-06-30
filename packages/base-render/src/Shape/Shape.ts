@@ -362,12 +362,12 @@ export abstract class Shape<T> extends BaseObject {
             return;
         }
         themeKeys.forEach((key) => {
-            if (props[key] === undefined) {
+            if ((props as IKeyValue)[key] === undefined) {
                 return true;
             }
 
             if (BASE_OBJECT_ARRAY.indexOf(key) === -1) {
-                this[`_${key}`] = props[key];
+                (this as IKeyValue)[`_${key}`] = (props as IKeyValue)[key];
             }
         });
         this.makeDirty(true);
@@ -390,8 +390,8 @@ export abstract class Shape<T> extends BaseObject {
     toJson() {
         const props: IKeyValue = {};
         SHAPE_OBJECT_ARRAY.forEach((key) => {
-            if (this[key]) {
-                props[key] = this[key];
+            if (this[key as keyof Shape<T>]) {
+                props[key] = this[key as keyof Shape<T>];
             }
         });
         return {
@@ -437,15 +437,15 @@ export abstract class Shape<T> extends BaseObject {
         const transformState: IObjectFullState = {};
         let hasTransformState = false;
         themeKeys.forEach((key) => {
-            if (props[key] === undefined) {
+            if (props[key as keyof NonNullable<T>] === undefined) {
                 return true;
             }
 
             if (BASE_OBJECT_ARRAY.indexOf(key) > -1) {
-                transformState[key] = props[key];
+                transformState[key as keyof IObjectFullState] = props[key as keyof NonNullable<T>];
                 hasTransformState = true;
             } else {
-                this[`_${key}`] = props[key];
+                (this as IKeyValue)[`_${key}`] = props[key as keyof NonNullable<T>];
             }
         });
 

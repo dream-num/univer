@@ -440,9 +440,9 @@ export abstract class BaseObject {
             return;
         }
         optionKeys.forEach((pKey) => {
-            if (option[pKey] !== undefined) {
-                preKeys[pKey] = this[pKey];
-                this[pKey] = option[pKey];
+            if (option[pKey as keyof IObjectFullState] !== undefined) {
+                preKeys[pKey as keyof IObjectFullState] = this[pKey as keyof BaseObject];
+                (this as IKeyValue)[pKey] = option[pKey as keyof IObjectFullState];
             }
         });
 
@@ -512,18 +512,18 @@ export abstract class BaseObject {
     }
 
     on(eventType: EVENT_TYPE, func: (evt: unknown, state: EventState) => void) {
-        const observable = this[`on${eventType}Observer`] as Observable<unknown>;
+        const observable = (this as IKeyValue)[`on${eventType}Observer`] as Observable<unknown>;
         const observer = observable.add(func.bind(this));
         return observer;
     }
 
     off(eventType: EVENT_TYPE, observer: Nullable<Observer<unknown>>) {
-        const observable = this[`on${eventType}Observer`] as Observable<unknown>;
+        const observable = (this as IKeyValue)[`on${eventType}Observer`] as Observable<unknown>;
         observable.remove(observer);
     }
 
     clear(eventType: EVENT_TYPE) {
-        const observable = this[`on${eventType}Observer`] as Observable<unknown>;
+        const observable = (this as IKeyValue)[`on${eventType}Observer`] as Observable<unknown>;
         observable.clear();
     }
 
@@ -637,8 +637,8 @@ export abstract class BaseObject {
     toJson() {
         const props: IKeyValue = {};
         BASE_OBJECT_ARRAY.forEach((key) => {
-            if (this[key]) {
-                props[key] = this[key];
+            if (this[key as keyof BaseObject]) {
+                props[key] = this[key as keyof BaseObject];
             }
         });
         return props;

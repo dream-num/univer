@@ -1,4 +1,4 @@
-import { EventState, Observable, Nullable } from '@univerjs/core';
+import { EventState, Observable, Nullable, IKeyValue } from '@univerjs/core';
 import { toPx } from './Basics/Tools';
 
 import { PointerInput, IWheelEvent } from './Basics/IEvents';
@@ -249,8 +249,8 @@ export class Viewport {
         this._width = undefined;
         this._height = undefined;
         positionKeys.forEach((pKey) => {
-            if (position[pKey] !== undefined) {
-                this[pKey] = position[pKey];
+            if (position[pKey as keyof IViewPosition] !== undefined) {
+                (this as IKeyValue)[pKey] = position[pKey as keyof IViewPosition];
             }
         });
         this._resizeCacheCanvasAndScrollBar();

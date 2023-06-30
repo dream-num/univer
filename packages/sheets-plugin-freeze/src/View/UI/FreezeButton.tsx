@@ -13,9 +13,9 @@ interface IState {
 }
 
 export class FreezeButton extends Component<IProps, IState> {
-    private _localeObserver: Nullable<Observer<Workbook>>;
-
     Render: BaseComponentRender;
+
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     initialize(props: IProps) {
         // super(props);

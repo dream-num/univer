@@ -92,8 +92,8 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
     toJson() {
         const props: IKeyValue = {};
         REGULAR_POLYGON_OBJECT_ARRAY.forEach((key) => {
-            if (this[key]) {
-                props[key] = this[key];
+            if (this[key as keyof RegularPolygon]) {
+                props[key] = this[key as keyof RegularPolygon];
             }
         });
         return {

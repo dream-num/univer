@@ -1,3 +1,4 @@
+import { Nullable } from '@univerjs/core';
 import { IDocumentSkeletonBoundingBox, IDocumentSkeletonFontStyle } from './IDocumentSkeletonCached';
 import { DEFAULT_MEASURE_TEXT } from './Const';
 import { IMeasureTextCache } from './Interfaces';
@@ -46,10 +47,13 @@ export class FontCache {
 
     static setFontMeasureCache(fontStyle: string, content: string, tm: IMeasureTextCache) {
         if (!this._globalFontMeasureCache.has(fontStyle)) {
-            this._globalFontMeasureCache[fontStyle] = new Map();
+            this._globalFontMeasureCache.set(fontStyle, new Map());
         }
 
-        this._globalFontMeasureCache[fontStyle][content] = tm;
+        const fontMeasureCache = this._globalFontMeasureCache.get(fontStyle);
+        if (fontMeasureCache) {
+            fontMeasureCache.set(content, tm);
+        }
     }
 
     static clearFontMeasureCache(path: string) {
@@ -67,8 +71,8 @@ export class FontCache {
         return true;
     }
 
-    static getFontMeasureCache(fontStyle: string, content: string): IMeasureTextCache {
-        return this._globalFontMeasureCache[fontStyle]?.[content];
+    static getFontMeasureCache(fontStyle: string, content: string): Nullable<IMeasureTextCache> {
+        return this._globalFontMeasureCache.get(fontStyle)?.get(content);
     }
 
     // 自动清除文字缓存，阈值可调整，清除规则是触发上限后删除一半的缓存
@@ -196,7 +200,7 @@ export class FontCache {
 
         // 兼容不支持textMetrics的情况
         if (fontBoundingBoxAscent == null || fontBoundingBoxDescent == null || Number.isNaN(fontBoundingBoxAscent) || Number.isNaN(fontBoundingBoxDescent)) {
-            let oneLineTextHeight = this.getTextSizeByDom(DEFAULT_MEASURE_TEXT, fontString)[1];
+            let oneLineTextHeight = this.getTextSizeByDom(DEFAULT_MEASURE_TEXT, fontString).height;
 
             if (ctx.textBaseline === 'top') {
                 cache.fontBoundingBoxAscent = cache.actualBoundingBoxAscent = oneLineTextHeight;

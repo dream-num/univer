@@ -17,7 +17,7 @@ const RGB_PAREN = 'rgb(';
 const RGBA_PAREN = 'rgba(';
 const RGB_REGEX = /rgb\((\d{1,3}),(\d{1,3}),(\d{1,3})\)/;
 
-// TODO :move to core
+// TODO :move to core @jerry
 export const getColor = (RgbArray: number[], opacity?: number): string => {
     if (!RgbArray) {
         return `${RGB_PAREN}0,0,0)`;

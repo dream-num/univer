@@ -1,3 +1,4 @@
+import { IKeyValue } from '@univerjs/core';
 import { DeepImmutable, FloatArray } from './IEvents';
 import { Transform } from './Transform';
 
@@ -259,7 +260,7 @@ export class Vector2 implements IPoint {
      * @param result defines the target vector
      */
     static Transform(vector: DeepImmutable<Vector2>, transformation: DeepImmutable<Transform>, ignoreOffset: boolean = false) {
-        const t = transformation;
+        const t = transformation as IKeyValue;
         const p = vector;
 
         if (ignoreOffset) {

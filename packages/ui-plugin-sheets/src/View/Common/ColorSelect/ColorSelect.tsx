@@ -13,7 +13,6 @@ interface IState {
 }
 
 export class ColorSelect extends Component<IProps, IState> {
-
     componentDidMount(): void {
         this.props.getComponent?.(this);
     }
@@ -31,7 +30,7 @@ export class ColorSelect extends Component<IProps, IState> {
     }
 
     render() {
-        const {label} = this.props
+        const { label } = this.props;
         return (
             <div className={styles.colorSelect}>
                 <div>{this.getLabel(label)}</div>

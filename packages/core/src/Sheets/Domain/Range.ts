@@ -57,9 +57,6 @@ import {
 import { DropCell } from '../../Shared/DropCell';
 import { Worksheet } from './Worksheet';
 
-// type FromProps<T> = T extends ISty
-export type PropsFrom<T> = T extends Nullable<infer Props> ? Props : T;
-
 /**
  * getObjectValues options type
  */

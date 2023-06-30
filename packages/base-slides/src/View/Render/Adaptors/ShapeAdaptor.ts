@@ -71,8 +71,8 @@ export class ShapeAdaptor extends ObjectAdaptor {
                 ...strokeStyle,
             });
         }
-        if (shapeType === ShapeType.ELLIPSE) {
-        }
+        // if (shapeType === ShapeType.ELLIPSE) {
+        // }
     }
 }
 

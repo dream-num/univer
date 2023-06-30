@@ -1,6 +1,4 @@
 import { BaseComponentProps, Component, Icon } from '@univerjs/base-ui';
-import { SheetUIPlugin } from '../../..';
-import { SHEET_UI_PLUGIN_NAME } from '../../../Basics';
 
 interface IState {
     img: string;
@@ -39,7 +37,7 @@ export class LineBold extends Component<IProps, IState> {
         const span = document.querySelector('.base-sheets-line-bold') as HTMLDivElement;
         const props = { width: span.offsetWidth };
         const Img = this.context.componentManager.get(img);
-        if(Img){
+        if (Img) {
             return <Img {...(props as any)} />;
         }
     }

@@ -1,9 +1,7 @@
 import { BaseMenuItem, BaseSheetBarProps, Button, Component, createRef, Icon, Menu, RefObject } from '@univerjs/base-ui';
-import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { SheetBarMenu } from './SheetBarMenu';
 import styles from './index.module.less';
 import { SlideTabBar } from '../../Basics/SlideTabBar/SlideTabBar';
-import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '../..';
 
 type SheetState = {
     sheetList: BaseSheetBarProps[];

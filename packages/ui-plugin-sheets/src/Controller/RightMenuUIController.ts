@@ -7,7 +7,6 @@ import { DefaultRightMenuConfig, SheetRightMenuConfig } from '../Basics';
 import { RightMenu, RightMenuInput, RightMenuItem } from '../View';
 import styles from '../View/RightMenu/index.module.less';
 
-
 interface CustomLabelProps {
     prefix?: string[] | string;
     suffix?: string[] | string;
@@ -17,7 +16,7 @@ interface CustomLabelProps {
     onKeyUp?: (e: Event) => void;
 }
 
-export interface CustomLabel{
+export interface CustomLabel {
     name: string;
     props?: CustomLabelProps;
 }

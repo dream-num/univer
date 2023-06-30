@@ -1,8 +1,8 @@
 import { IKeyboardEvent } from '@univerjs/base-render';
 import { Observable, Plugin } from '@univerjs/core';
-import { SlideBar } from '@univerjs/ui-plugin-slides/src/View/SlideBar/SlideBar';
-import { SlideContainer } from '../View/UI/SlideContainer';
-import { Toolbar } from '../View/UI/ToolBar/Toolbar';
+// import { SlideBar } from '@univerjs/ui-plugin-slides/src/View/SlideBar/SlideBar';
+// import { SlideContainer } from '../View/UI/SlideContainer';
+// import { Toolbar } from '../View/UI/ToolBar/Toolbar';
 
 export type SlidePluginObserve = {
     onAfterChangeFontFamilyObservable: Observable<string>;
@@ -16,10 +16,10 @@ export type SlidePluginObserve = {
 
     onChangeCurrentSheetObserver: Observable<string>;
 
-    onToolbarDidMountObservable: Observable<Toolbar>;
-    onSlideBarDidMountObservable: Observable<SlideBar>;
+    // onToolbarDidMountObservable: Observable<Toolbar>;
+    // onSlideBarDidMountObservable: Observable<SlideBar>;
 
-    onSlideContainerDidMountObservable: Observable<SlideContainer>;
+    // onSlideContainerDidMountObservable: Observable<SlideContainer>;
 
     onSpreadsheetKeyDownObservable: Observable<IKeyboardEvent>;
     onSpreadsheetKeyUpObservable: Observable<IKeyboardEvent>;

@@ -1,4 +1,4 @@
-import { EventState } from '@univerjs/core';
+import { EventState, IKeyValue } from '@univerjs/core';
 import { Vector2 } from '../Basics/Vector2';
 import { IMouseEvent, IPointerEvent } from '../Basics/IEvents';
 import { COLORS, EVENT_TYPE, RENDER_CLASS_TYPE } from '../Basics/Const';
@@ -154,8 +154,8 @@ export class ScrollBar {
         }
 
         themeKeys.forEach((key) => {
-            if (props[key] !== undefined) {
-                this[`_${key}`] = props[key];
+            if (props[key as keyof IScrollBarProps] !== undefined) {
+                (this as IKeyValue)[`_${key}`] = props[key as keyof IScrollBarProps];
             }
         });
     }

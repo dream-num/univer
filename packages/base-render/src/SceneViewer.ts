@@ -1,4 +1,4 @@
-import { Nullable } from '@univerjs/core';
+import { IKeyValue, Nullable } from '@univerjs/core';
 import { IBoundRect, Vector2 } from './Basics/Vector2';
 import { BaseObject } from './BaseObject';
 import { Scene } from './Scene';
@@ -134,11 +134,11 @@ export class SceneViewer extends BaseObject {
         const transformState: IObjectFullState = {};
         let hasTransformState = false;
         themeKeys.forEach((key) => {
-            if (props[key] === undefined) {
+            if (props[key as keyof IObjectFullState] === undefined) {
                 return true;
             }
 
-            transformState[key] = props[key];
+            (transformState as IKeyValue)[key] = props[key as keyof IObjectFullState];
             hasTransformState = true;
         });
 

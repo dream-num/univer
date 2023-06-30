@@ -1,4 +1,4 @@
-import { Nullable, Observable, Observer } from '@univerjs/core';
+import { IKeyValue, Nullable, Observable, Observer } from '@univerjs/core';
 import { BaseObject } from './BaseObject';
 import { CURSOR_TYPE } from './Basics/Const';
 import { IMouseEvent, IPointerEvent } from './Basics/IEvents';
@@ -285,11 +285,11 @@ export class Transformer implements ITransformerConfig {
         }
 
         propsKeys.forEach((key) => {
-            if (props[key] === undefined) {
+            if (props[key as keyof ITransformerConfig] === undefined) {
                 return true;
             }
 
-            this[key] = props[key];
+            (this as IKeyValue)[key] = props[key as keyof ITransformerConfig];
         });
     }
 

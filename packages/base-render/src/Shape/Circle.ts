@@ -56,8 +56,8 @@ export class Circle extends Shape<ICircleProps> {
     toJson() {
         const props: IKeyValue = {};
         CIRCLE_OBJECT_ARRAY.forEach((key) => {
-            if (this[key]) {
-                props[key] = this[key];
+            if (this[key as keyof Circle]) {
+                props[key] = this[key as keyof Circle];
             }
         });
         return {

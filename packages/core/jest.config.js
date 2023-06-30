@@ -17,7 +17,6 @@ module.exports = {
         '<rootDir>/src/Controller/Group.ts',
         '<rootDir>/src/Module',
         '<rootDir>/src/Convertor',
-        '<rootDir>/src/Shared/DropCell.ts',
         '<rootDir>/src/Shared/Generate.ts',
         '<rootDir>/src/Shared/IOHttp.ts',
         '<rootDir>/src/Shared/IOSocket.ts',

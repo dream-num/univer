@@ -715,8 +715,8 @@ export class Path extends Shape<IPathProps> {
     toJson() {
         const props: IKeyValue = {};
         PATH_OBJECT_ARRAY.forEach((key) => {
-            if (this[key]) {
-                props[key] = this[key];
+            if (this[key as keyof Path]) {
+                props[key] = this[key as keyof Path];
             }
         });
         return {

@@ -437,15 +437,15 @@ export abstract class Shape<T> extends BaseObject {
         const transformState: IObjectFullState = {};
         let hasTransformState = false;
         themeKeys.forEach((key) => {
-            if (props[key as keyof NonNullable<T>] === undefined) {
+            if ((props as IKeyValue)[key] === undefined) {
                 return true;
             }
 
             if (BASE_OBJECT_ARRAY.indexOf(key) > -1) {
-                transformState[key as keyof IObjectFullState] = props[key as keyof NonNullable<T>];
+                transformState[key as keyof IObjectFullState] = (props as IKeyValue)[key];
                 hasTransformState = true;
             } else {
-                (this as IKeyValue)[`_${key}`] = props[key as keyof NonNullable<T>];
+                (this as IKeyValue)[`_${key}`] = (props as IKeyValue)[key];
             }
         });
 

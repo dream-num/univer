@@ -17,7 +17,6 @@ import { CommandManager, ISheetActionData, Command } from '../../Command';
 import { DEFAULT_RANGE, DEFAULT_STYLES, ACTION_NAMES } from '../../Const';
 
 import {
-    AutoFillSeries,
     BooleanNumber,
     BorderStyleTypes,
     BorderType,
@@ -54,7 +53,6 @@ import {
     Tuples,
 } from '../../Shared';
 
-import { DropCell } from '../../Shared/DropCell';
 import { Worksheet } from './Worksheet';
 
 /**
@@ -1544,115 +1542,115 @@ export class Range {
      * @param series The type of autoFill series that should be used to calculate new values. The effect of this series differs based on the type and amount of source data.
      * @returns This range, for chaining.
      */
-    autoFill(destination: Range, series: AutoFillSeries): Range {
-        const { _worksheet, _context, _commandManager } = this;
-        const { startRow, endRow, startColumn, endColumn } = this._rangeData;
-        const {
-            startRow: Dsr,
-            endRow: Der,
-            startColumn: Dsc,
-            endColumn: Dec,
-        } = destination._rangeData;
-        let direction = Direction.BOTTOM;
-        let csLen: number = 0;
-        let asLen: number = 0;
+    // autoFill(destination: Range, series: AutoFillSeries): Range {
+    //     const { _worksheet, _context, _commandManager } = this;
+    //     const { startRow, endRow, startColumn, endColumn } = this._rangeData;
+    //     const {
+    //         startRow: Dsr,
+    //         endRow: Der,
+    //         startColumn: Dsc,
+    //         endColumn: Dec,
+    //     } = destination._rangeData;
+    //     let direction = Direction.BOTTOM;
+    //     let csLen: number = 0;
+    //     let asLen: number = 0;
 
-        // 复制范围
-        const copy_str_r = startRow;
-        const copy_end_r = endRow;
-        const copy_str_c = startColumn;
-        const copy_end_c = endColumn;
+    //     // 复制范围
+    //     const copy_str_r = startRow;
+    //     const copy_end_r = endRow;
+    //     const copy_str_c = startColumn;
+    //     const copy_end_c = endColumn;
 
-        // 应用范围
-        const apply_str_r = Dsr;
-        const apply_end_r = Der;
-        const apply_str_c = Dsc;
-        const apply_end_c = Dec;
+    //     // 应用范围
+    //     const apply_str_r = Dsr;
+    //     const apply_end_r = Der;
+    //     const apply_str_c = Dsc;
+    //     const apply_end_c = Dec;
 
-        const matrix = new ObjectMatrix<ICellData>();
+    //     const matrix = new ObjectMatrix<ICellData>();
 
-        if (apply_str_c === copy_str_c && apply_end_c === copy_end_c) {
-            if (apply_end_r > copy_end_r) {
-                direction = Direction.BOTTOM;
-            } else {
-                direction = Direction.TOP;
-            }
-        } else if (apply_end_c > copy_end_c) {
-            direction = Direction.RIGHT;
-        } else {
-            direction = Direction.LEFT;
-        }
+    //     if (apply_str_c === copy_str_c && apply_end_c === copy_end_c) {
+    //         if (apply_end_r > copy_end_r) {
+    //             direction = Direction.BOTTOM;
+    //         } else {
+    //             direction = Direction.TOP;
+    //         }
+    //     } else if (apply_end_c > copy_end_c) {
+    //         direction = Direction.RIGHT;
+    //     } else {
+    //         direction = Direction.LEFT;
+    //     }
 
-        if (direction === Direction.BOTTOM || direction === Direction.TOP) {
-            // 列
-            csLen = copy_end_r - copy_str_r + 1;
-            asLen = apply_end_r - apply_str_r + 1;
+    //     if (direction === Direction.BOTTOM || direction === Direction.TOP) {
+    //         // 列
+    //         csLen = copy_end_r - copy_str_r + 1;
+    //         asLen = apply_end_r - apply_str_r + 1;
 
-            for (let i = 0; i <= endColumn - startColumn; i++) {
-                const sourceRange = this.getColumnMatrix(i).toArray();
+    //         for (let i = 0; i <= endColumn - startColumn; i++) {
+    //             const sourceRange = this.getColumnMatrix(i).toArray();
 
-                const copydata = DropCell.getCopyData(
-                    sourceRange,
-                    copy_str_r,
-                    copy_end_r,
-                    copy_str_c,
-                    copy_end_c,
-                    direction
-                );
-                copydata.forEach((item) => {
-                    const data = DropCell.getApplyData(
-                        item,
-                        csLen,
-                        asLen,
-                        series,
-                        direction
-                    );
-                    data.forEach((dataItem, j) => {
-                        matrix.setValue(j, i, dataItem);
-                    });
-                });
-            }
-        } else if (direction === Direction.RIGHT || direction === Direction.LEFT) {
-            asLen = apply_end_c - apply_str_c;
-            csLen = copy_end_c - copy_str_c;
-            // 行
-            for (let i = 0; i <= endRow - startRow; i++) {
-                const sourceRange = this.getRowMatrix(i).toArray();
+    //             const copydata = DropCell.getCopyData(
+    //                 sourceRange,
+    //                 copy_str_r,
+    //                 copy_end_r,
+    //                 copy_str_c,
+    //                 copy_end_c,
+    //                 direction
+    //             );
+    //             copydata.forEach((item) => {
+    //                 const data = DropCell.getApplyData(
+    //                     item,
+    //                     csLen,
+    //                     asLen,
+    //                     series,
+    //                     direction
+    //                 );
+    //                 data.forEach((dataItem, j) => {
+    //                     matrix.setValue(j, i, dataItem);
+    //                 });
+    //             });
+    //         }
+    //     } else if (direction === Direction.RIGHT || direction === Direction.LEFT) {
+    //         asLen = apply_end_c - apply_str_c;
+    //         csLen = copy_end_c - copy_str_c;
+    //         // 行
+    //         for (let i = 0; i <= endRow - startRow; i++) {
+    //             const sourceRange = this.getRowMatrix(i).toArray();
 
-                const copydata = DropCell.getCopyData(
-                    sourceRange,
-                    copy_str_r,
-                    copy_end_r,
-                    copy_str_c,
-                    copy_end_c,
-                    direction
-                );
-                copydata.forEach((item) => {
-                    const data = DropCell.getApplyData(
-                        item,
-                        csLen,
-                        asLen,
-                        series,
-                        direction
-                    );
-                });
-            }
-        }
+    //             const copydata = DropCell.getCopyData(
+    //                 sourceRange,
+    //                 copy_str_r,
+    //                 copy_end_r,
+    //                 copy_str_c,
+    //                 copy_end_c,
+    //                 direction
+    //             );
+    //             copydata.forEach((item) => {
+    //                 const data = DropCell.getApplyData(
+    //                     item,
+    //                     csLen,
+    //                     asLen,
+    //                     series,
+    //                     direction
+    //                 );
+    //             });
+    //         }
+    //     }
 
-        const setValue: ISetRangeDataActionData = {
-            sheetId: _worksheet.getSheetId(),
-            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-            cellValue: matrix.getData(),
-        };
-        const command = new Command(
-            {
-                WorkBookUnit: _context.getWorkBook(),
-            },
-            setValue
-        );
-        _commandManager.invoke(command);
-        return this;
-    }
+    //     const setValue: ISetRangeDataActionData = {
+    //         sheetId: _worksheet.getSheetId(),
+    //         actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+    //         cellValue: matrix.getData(),
+    //     };
+    //     const command = new Command(
+    //         {
+    //             WorkBookUnit: _context.getWorkBook(),
+    //         },
+    //         setValue
+    //     );
+    //     _commandManager.invoke(command);
+    //     return this;
+    // }
 
     // TODO
     // autoFillToNeighbor(series: AutoFillSeries) {}

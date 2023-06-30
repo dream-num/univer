@@ -143,6 +143,10 @@ export class GroupDepth {
 export class StructGroup {
     protected _groupDepth: GroupDepth;
 
+    constructor() {
+        this._groupDepth = new GroupDepth();
+    }
+
     _processPrefix(line: GroupLine, table: Array<Map<GroupLineType, GroupLine[]>>): void {
         let filter: GroupLine[] = [];
         let previous = line;
@@ -184,10 +188,6 @@ export class StructGroup {
     }
 
     _processInclude(line: GroupLine, table: Array<Map<GroupLineType, GroupLine[]>>): void {}
-
-    constructor() {
-        this._groupDepth = new GroupDepth();
-    }
 
     setAllGroupOpenType(type: GroupOpenType) {
         this._groupDepth.setAllGroupOpenType(type);

@@ -23,11 +23,11 @@ export class BaseAstNode {
 
     private _address = false;
 
+    constructor(private _token: string) {}
+
     get nodeType() {
         return NodeType.BASE;
     }
-
-    constructor(private _token: string) {}
 
     isAsync() {
         return this._async;

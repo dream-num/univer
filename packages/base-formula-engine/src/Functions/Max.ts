@@ -16,14 +16,6 @@ export class Max extends BaseFunction {
         return FUNCTION_NAME;
     }
 
-    private _validator(accumulatorAll: BaseValueObject, valueObject: BaseValueObject) {
-        const validator = accumulatorAll.compare(valueObject as BaseValueObject, compareToken.LESS_THAN) as BooleanValueObject;
-        if (validator.getValue()) {
-            accumulatorAll = valueObject as BaseValueObject;
-        }
-        return accumulatorAll;
-    }
-
     calculate(...variants: FunctionVariantType[]) {
         let accumulatorAll: BaseValueObject = new NumberValueObject(-Infinity);
         for (let i = 0; i < variants.length; i++) {
@@ -40,6 +32,14 @@ export class Max extends BaseFunction {
             }
         }
 
+        return accumulatorAll;
+    }
+
+    private _validator(accumulatorAll: BaseValueObject, valueObject: BaseValueObject) {
+        const validator = accumulatorAll.compare(valueObject as BaseValueObject, compareToken.LESS_THAN) as BooleanValueObject;
+        if (validator.getValue()) {
+            accumulatorAll = valueObject as BaseValueObject;
+        }
         return accumulatorAll;
     }
 }

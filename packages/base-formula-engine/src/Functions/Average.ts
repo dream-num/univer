@@ -10,7 +10,7 @@ import { Sum } from './Sum';
 
 const FUNCTION_NAME = 'AVERAGE';
 
-class Average extends BaseFunction {
+export class Average extends BaseFunction {
     get name() {
         return FUNCTION_NAME;
     }

@@ -15,8 +15,6 @@ export class FormulaDependencyTree implements IFormulaData {
 
     parents: FormulaDependencyTree[] = [];
 
-    private _state = FDtreeStateType.DEFAULT;
-
     formula: string;
 
     row: number;
@@ -29,9 +27,7 @@ export class FormulaDependencyTree implements IFormulaData {
 
     rangeList: IUnitRange[] = [];
 
-    private _pushParent(tree: FormulaDependencyTree) {
-        this.parents.push(tree);
-    }
+    private _state = FDtreeStateType.DEFAULT;
 
     setAdded() {
         this._state = FDtreeStateType.ADDED;
@@ -123,5 +119,9 @@ export class FormulaDependencyTree implements IFormulaData {
         }
 
         return false;
+    }
+
+    private _pushParent(tree: FormulaDependencyTree) {
+        this.parents.push(tree);
     }
 }

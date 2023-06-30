@@ -21,6 +21,20 @@ export class PrefixNode extends BaseAstNode {
         return NodeType.PREFIX;
     }
 
+    execute(interpreterDatasetConfig?: IInterpreterDatasetConfig) {
+        const children = this.getChildren();
+        const value = children[0].getValue();
+        let result: FunctionVariantType;
+        if (this._operatorString === prefixToken.MINUS) {
+            result = this._functionExecutor!.calculate(new NumberValueObject(0), value) as FunctionVariantType;
+        } else if (this._operatorString === prefixToken.AT) {
+            result = this._handlerAT(value, interpreterDatasetConfig);
+        } else {
+            result = ErrorValueObject.create(ErrorType.VALUE);
+        }
+        this.setValue(result);
+    }
+
     private _handlerAT(value: FunctionVariantType, interpreterDatasetConfig?: IInterpreterDatasetConfig) {
         if (!value.isReferenceObject()) {
             return ErrorValueObject.create(ErrorType.VALUE);
@@ -50,20 +64,6 @@ export class PrefixNode extends BaseAstNode {
         }
 
         return ErrorValueObject.create(ErrorType.VALUE);
-    }
-
-    execute(interpreterDatasetConfig?: IInterpreterDatasetConfig) {
-        const children = this.getChildren();
-        const value = children[0].getValue();
-        let result: FunctionVariantType;
-        if (this._operatorString === prefixToken.MINUS) {
-            result = this._functionExecutor!.calculate(new NumberValueObject(0), value) as FunctionVariantType;
-        } else if (this._operatorString === prefixToken.AT) {
-            result = this._handlerAT(value, interpreterDatasetConfig);
-        } else {
-            result = ErrorValueObject.create(ErrorType.VALUE);
-        }
-        this.setValue(result);
     }
 }
 

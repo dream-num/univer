@@ -25,12 +25,12 @@ const POWER_EXECUTOR_NAME = 'POWER';
 const COMPARE_EXECUTOR_NAME = 'COMPARE';
 
 export class OperatorNode extends BaseAstNode {
-    get nodeType() {
-        return NodeType.OPERATOR;
-    }
-
     constructor(private _operatorString: string, private _functionExecutor: BaseFunction) {
         super(_operatorString);
+    }
+
+    get nodeType() {
+        return NodeType.OPERATOR;
     }
 
     execute() {

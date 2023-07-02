@@ -1,4 +1,4 @@
-import { BooleanNumber, BulletAlignment, GridType } from '@univerjs/core';
+import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType } from '@univerjs/core';
 import { validationGrid } from './Tools';
 import { IDocumentSkeletonBullet, IDocumentSkeletonSpan, SpanType } from '../../../Basics/IDocumentSkeletonCached';
 import { FontCache } from '../../../Basics/FontCache';
@@ -13,11 +13,55 @@ export function createSkeletonLetterSpan(content: string, config: IFontCreateCon
 }
 
 export function createSkeletonTabSpan(config: IFontCreateConfig, spanWidth?: number): IDocumentSkeletonSpan {
-    return _createSkeletonWordOrLetter(SpanType.TAB, ' ', config, spanWidth);
+    return _createSkeletonWordOrLetter(SpanType.TAB, DT.TAB, config, spanWidth);
 }
 
-function _createSkeletonWordOrLetter(spanType: SpanType, content: string, config: IFontCreateConfig, spanWidth?: number): IDocumentSkeletonSpan {
+export function _createSkeletonWordOrLetter(spanType: SpanType, content: string, config: IFontCreateConfig, spanWidth?: number): IDocumentSkeletonSpan {
     const { fontStyle, textStyle, charSpace = 1, gridType = GridType.LINES, snapToGrid = BooleanNumber.FALSE } = config;
+    const skipWidthList: string[] = [
+        DT.SECTION_BREAK,
+        DT.TABLE_START,
+        DT.TABLE_END,
+        DT.TABLE_ROW_START,
+        DT.TABLE_ROW_END,
+        DT.TABLE_CELL_START,
+        DT.TABLE_CELL_END,
+        DT.CUSTOM_RANGE_START,
+        DT.CUSTOM_RANGE_END,
+        DT.COLUMN_BREAK,
+        DT.PAGE_BREAK,
+        DT.DOCS_END,
+        DT.CUSTOM_BLOCK,
+    ];
+    let streamType = DT.LETTER;
+    if (skipWidthList.indexOf(content) > -1) {
+        return {
+            content: '',
+            ts: textStyle,
+            fontStyle,
+            width: 0,
+            bBox: {
+                width: 0,
+                ba: 0,
+                bd: 0,
+                aba: 0,
+                abd: 0,
+                sp: 0,
+                sbr: 0,
+                sbo: 0,
+                spr: 0,
+                spo: 0,
+            },
+            paddingLeft: 0,
+            left: 0,
+            spanType: SpanType.PLACEHOLDER,
+            streamType: content as DT,
+        };
+    }
+    if (content === DT.PARAGRAPH) {
+        streamType = DT.PARAGRAPH;
+    }
+
     const bBox = FontCache.getTextSize(content, fontStyle);
     const { width: contentWidth = 0 } = bBox;
     let width = spanWidth ?? contentWidth;
@@ -39,6 +83,7 @@ function _createSkeletonWordOrLetter(spanType: SpanType, content: string, config
         paddingLeft,
         left: 0,
         spanType,
+        streamType,
     };
 }
 
@@ -73,6 +118,7 @@ export function createSkeletonBulletSpan(span: IDocumentSkeletonSpan, bulletSkel
         bBox,
         left,
         spanType: SpanType.LIST,
+        streamType: DT.LETTER,
     };
 }
 

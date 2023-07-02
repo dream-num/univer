@@ -65,6 +65,10 @@ export class DocumentBodyModelSimple {
                     this
                 );
                 this.batchParent(sectionTree, nodeList);
+                let lastNode = nodeList[nodeList.length - 1];
+                if (lastNode && lastNode.content) {
+                    lastNode.content += DataStreamTreeTokenType.SECTION_BREAK;
+                }
                 sectionList.push(sectionTree);
                 nodeList = [];
             } else if (char === DataStreamTreeTokenType.TABLE_START) {
@@ -99,6 +103,7 @@ export class DocumentBodyModelSimple {
                 );
             } else if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
                 currentBlocks.push(i);
+                content += char;
             } else {
                 content += char;
             }
@@ -125,6 +130,35 @@ export class DocumentBodyModelSimple {
 
         const recentTree = nodeList[nodeList.length - 1];
         this.batchParent(recentTree, nodeCollection, DataStreamTreeNodeType.TABLE);
+
+        if (untilNodeType === DataStreamTreeNodeType.TABLE_CELL) {
+            const firstNode = nodeCollection[0];
+            const lastNode = nodeCollection[nodeCollection.length];
+            firstNode.content =
+                DataStreamTreeTokenType.TABLE_CELL_START + firstNode.content || '';
+            firstNode.startIndex -= 1;
+            lastNode.content += DataStreamTreeTokenType.TABLE_CELL_END;
+            lastNode.endIndex += 1;
+        } else if (untilNodeType === DataStreamTreeNodeType.TABLE_ROW) {
+            const firstNode = nodeCollection[0].children[0];
+            let lastNode = nodeCollection[nodeCollection.length];
+            lastNode = lastNode.children[lastNode.children.length - 1];
+            firstNode.content =
+                DataStreamTreeTokenType.TABLE_ROW_START + firstNode.content || '';
+            firstNode.startIndex -= 1;
+            lastNode.content += DataStreamTreeTokenType.TABLE_ROW_END;
+            lastNode.endIndex += 1;
+        } else if (untilNodeType === DataStreamTreeNodeType.TABLE) {
+            const firstNode = nodeCollection[0].children[0].children[0];
+            let lastNode = nodeCollection[nodeCollection.length];
+            lastNode = lastNode.children[lastNode.children.length - 1];
+            lastNode = lastNode.children[lastNode.children.length - 1];
+            firstNode.content =
+                DataStreamTreeTokenType.TABLE_START + firstNode.content || '';
+            firstNode.startIndex -= 1;
+            lastNode.content += DataStreamTreeTokenType.TABLE_END;
+            lastNode.endIndex += 1;
+        }
     }
 
     private batchParent(
@@ -446,4 +480,6 @@ export enum DataStreamTreeTokenType {
     DOCS_END = '\0', // 文档结尾
     TAB = '\t', // 制表符
     CUSTOM_BLOCK = '\b', // 图片 mention等不参与文档流的场景
+
+    LETTER = '',
 }

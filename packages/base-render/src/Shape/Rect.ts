@@ -63,8 +63,8 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
     toJson() {
         const props: IKeyValue = {};
         RECT_OBJECT_ARRAY.forEach((key) => {
-            if (this[key]) {
-                props[key] = this[key];
+            if (this[key as keyof Rect]) {
+                props[key] = this[key as keyof Rect];
             }
         });
         return {

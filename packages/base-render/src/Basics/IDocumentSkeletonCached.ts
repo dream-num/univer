@@ -1,4 +1,15 @@
-import { BulletAlignment, ColumnSeparatorType, IDrawing, INestingLevel, IParagraphStyle, ITextStyle, IDocumentRenderConfig, IIndentStart, PageOrientType } from '@univerjs/core';
+import {
+    BulletAlignment,
+    ColumnSeparatorType,
+    IDrawing,
+    INestingLevel,
+    IParagraphStyle,
+    ITextStyle,
+    IDocumentRenderConfig,
+    IIndentStart,
+    PageOrientType,
+    DataStreamTreeTokenType,
+} from '@univerjs/core';
 
 export interface IDocumentSkeletonCached extends ISkeletonResourceReference {
     pages: IDocumentSkeletonPage[];
@@ -137,6 +148,7 @@ export interface IDocumentSkeletonSpan {
     // word or letter or image or custom
     eId?: string; // elementId, For custom cases
     spanType: SpanType; // SpanType
+    streamType: DataStreamTreeTokenType;
     width: number; // cum width
     bBox: IDocumentSkeletonBoundingBox; // bBox: size of Span
     paddingLeft: number; // paddingLeft, adjust text align in span
@@ -224,6 +236,7 @@ export enum SpanType {
     LETTER,
     WORD,
     LIST,
+    PLACEHOLDER,
     TAB,
     IMAGE,
     AT,

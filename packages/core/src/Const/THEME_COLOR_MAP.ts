@@ -1,6 +1,10 @@
 import { ThemeColors, ThemeColorType } from '../Enum';
 
-export const THEME_COLORS = {
+interface IThemeColors {
+    [key: string]: { [key: number]: string };
+}
+
+export const THEME_COLORS: IThemeColors = {
     [ThemeColors.OFFICE]: {
         [ThemeColorType.ACCENT1]: '#4472C4',
         [ThemeColorType.ACCENT2]: '#ED7D31',

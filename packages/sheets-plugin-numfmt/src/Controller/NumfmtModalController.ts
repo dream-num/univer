@@ -122,20 +122,8 @@ export class NumfmtModalController {
         this._initialize();
     }
 
-    private _initialize() {
-        this._plugin.getObserver('onNumfmtModalDidMountObservable')!.add((component) => {
-            this._numfmtModal = component;
-            this.resetModalData();
-        });
-    }
-
-    private _initRegisterComponent() {
-        this._sheetPlugin.registerComponent(NUMFMT_PLUGIN_NAME + FormatContent.name, FormatContent);
-        this._sheetPlugin.registerModal(NUMFMT_PLUGIN_NAME + NumfmtModal.name, NumfmtModal);
-    }
-
     resetContentData(data: any[]) {
-        const locale = this._plugin.getContext().getLocale();
+        const locale = this._plugin.getGlobalContext().getLocale();
         for (let i = 0; i < data.length; i++) {
             if (data[i].locale) {
                 data[i].label = locale.get(data[i].locale);
@@ -146,7 +134,7 @@ export class NumfmtModalController {
 
     // 渲染所需数据
     resetModalData() {
-        const locale = this._plugin.getContext().getLocale();
+        const locale = this._plugin.getGlobalContext().getLocale();
         this._modalData.forEach((item) => {
             item.title = locale.get(item.locale);
             if (item.group && item.group.length) {
@@ -164,5 +152,17 @@ export class NumfmtModalController {
             this._modalData[index].show = show;
             this.resetModalData();
         }
+    }
+
+    private _initialize() {
+        this._plugin.getObserver('onNumfmtModalDidMountObservable')!.add((component) => {
+            this._numfmtModal = component;
+            this.resetModalData();
+        });
+    }
+
+    private _initRegisterComponent() {
+        this._sheetPlugin.registerComponent(NUMFMT_PLUGIN_NAME + FormatContent.name, FormatContent);
+        this._sheetPlugin.registerModal(NUMFMT_PLUGIN_NAME + NumfmtModal.name, NumfmtModal);
     }
 }

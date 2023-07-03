@@ -145,18 +145,18 @@ export function dealWidthParagraph(
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
             const tabSpan = createSkeletonTabSpan(fontCreateConfig, charSpaceApply); // measureText收敛到create中执行
             allPages = calculateParagraphLayout([tabSpan], allPages, sectionBreakConfig, paragraphConfig, true);
+            continue;
         } else if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
             let customBlock = customBlockCache.get(charIndex);
             if (customBlock == null) {
                 customBlock = bodyModel.getCustomBlock(charIndex);
             }
-            if (customBlock == null) {
-                continue;
-            }
-            const blockId = customBlock.blockId;
-            const drawingOrigin = drawings[blockId];
-            if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
-                allPages = dealWidthInlineDrawing(drawingOrigin, sectionBreakConfig, allPages, paragraphConfig, fontLocale);
+            if (customBlock != null) {
+                const blockId = customBlock.blockId;
+                const drawingOrigin = drawings[blockId];
+                if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
+                    allPages = dealWidthInlineDrawing(drawingOrigin, sectionBreakConfig, allPages, paragraphConfig, fontLocale);
+                }
             }
         } else if (char === DataStreamTreeTokenType.PAGE_BREAK) {
             allPages.push(createSkeletonPage(sectionBreakConfig, skeletonResourceReference, _getNextPageNumber(allPages[allPages.length - 1]), BreakType.PAGE));
@@ -171,21 +171,21 @@ export function dealWidthParagraph(
             } else {
                 allPages.push(createSkeletonPage(sectionBreakConfig, skeletonResourceReference, _getNextPageNumber(lastPage), BreakType.COLUMN));
             }
-        } else {
-            const paragraphStart = i === 0;
-            const languageHandlerResult = composeCharForLanguage(char, i, content, paragraphNode, sectionBreakConfig, paragraphStyle); // Handling special languages such as Tibetan, Arabic
-            let newSpanGroup = [];
-            if (languageHandlerResult) {
-                const { charIndex: newCharIndex, spanGroup } = languageHandlerResult;
-                i = newCharIndex;
-                newSpanGroup = spanGroup;
-            } else {
-                const span = createSkeletonWordSpan(char, fontCreateConfig); // measureText收敛到create中执行
-                newSpanGroup.push(span);
-            }
-
-            allPages = calculateParagraphLayout(newSpanGroup, allPages, sectionBreakConfig, paragraphConfig, paragraphStart);
         }
+
+        const paragraphStart = i === 0;
+        const languageHandlerResult = composeCharForLanguage(char, i, content, paragraphNode, sectionBreakConfig, paragraphStyle); // Handling special languages such as Tibetan, Arabic
+        let newSpanGroup = [];
+        if (languageHandlerResult) {
+            const { charIndex: newCharIndex, spanGroup } = languageHandlerResult;
+            i = newCharIndex;
+            newSpanGroup = spanGroup;
+        } else {
+            const span = createSkeletonWordSpan(char, fontCreateConfig); // measureText收敛到create中执行
+            newSpanGroup.push(span);
+        }
+
+        allPages = calculateParagraphLayout(newSpanGroup, allPages, sectionBreakConfig, paragraphConfig, paragraphStart);
     }
 
     lineIterator(allPages, (line: IDocumentSkeletonLine) => {

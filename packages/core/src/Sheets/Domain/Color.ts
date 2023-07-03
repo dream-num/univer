@@ -387,7 +387,7 @@ export class ThemeColor extends Color {
             throw new Error('not find themeColors type');
         }
 
-        const hexValue = themeColors.get(this._themeColorType);
+        const hexValue = themeColors[this._themeColorType];
         if (hexValue == null) {
             throw new Error('not find themeColors value');
         }

@@ -41,13 +41,13 @@ interface ICurrentStyle {
 }
 
 export class AlternatingColorsSide extends Component<IPanelProps, IState> {
-    private _localeObserver: Nullable<Observer<Workbook>>;
-
     alternatingColorsPlugin: AlternatingColorsPlugin;
 
     panelContainerRef = createRef();
 
     panelBodyRef = createRef();
+
+    private _localeObserver: Nullable<Observer<Workbook>>;
 
     initialize(props: IPanelProps) {
         const { bandedRange, alternatingColorsPlugin } = props.config;

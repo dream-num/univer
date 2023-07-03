@@ -1,4 +1,4 @@
-import { Nullable, Observable, Observer } from '@univerjs/core';
+import { DataStreamTreeTokenType, Nullable, Observable, Observer } from '@univerjs/core';
 import { IDocumentSkeletonCached, IDocumentSkeletonSpan } from '../../Basics/IDocumentSkeletonCached';
 import { CURSOR_TYPE } from '../../Basics/Const';
 import { IMouseEvent, IPointerEvent } from '../../Basics/IEvents';
@@ -291,7 +291,7 @@ export class DocsEditor {
         return this._documents?.getSkeleton()?.getSkeletonData();
     }
 
-    private _getNodePosition(node: INodeInfo | false) {
+    private _getNodePosition(node: INodeInfo | false, isStart: Boolean = true) {
         if (node === false) {
             return;
         }
@@ -304,9 +304,14 @@ export class DocsEditor {
             return;
         }
 
+        let isBack = false;
+        if (ratioX < 0.5 || (span.streamType === DataStreamTreeTokenType.PARAGRAPH && isStart)) {
+            isBack = true;
+        }
+
         return {
             ...position,
-            isBack: ratioX < 0.5,
+            isBack,
         };
     }
 
@@ -424,9 +429,9 @@ export class DocsEditor {
 
         const endNode = this._documents.findNodeByCoord(moveOffsetX, moveOffsetY);
 
-        const endPosition = this._getNodePosition(endNode);
+        const endPosition = this._getNodePosition(endNode, false);
 
-        console.log('endNode', endNode, endPosition, { moveOffsetX, moveOffsetY, _viewportScrollY: this._viewportScrollY, scrollX });
+        // console.log('endNode', endNode, endPosition, { moveOffsetX, moveOffsetY, _viewportScrollY: this._viewportScrollY, scrollX });
 
         if (!endPosition) {
             return;

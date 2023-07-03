@@ -218,6 +218,7 @@ export class TextSelection {
             const data = this._getRangePointData(start!, start!, documents);
             const { pointGroup, cursorList } = data;
             this._setRangeList(cursorList);
+            console.log(pointGroup, cursorList);
             pointGroup.length > 0 && this._createAndUpdateAnchor(pointGroup, documents.left, documents.top);
             return;
         }
@@ -225,6 +226,7 @@ export class TextSelection {
         const data = this._getRangePointData(start!, end!, documents);
         const { pointGroup, cursorList } = data;
         this._setRangeList(cursorList);
+        console.log(pointGroup, cursorList);
         pointGroup.length > 0 && this._createAndUpdateRange(pointGroup, documents.left, documents.top);
     }
 

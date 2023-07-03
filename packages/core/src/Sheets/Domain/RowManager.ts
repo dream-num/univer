@@ -2,7 +2,7 @@ import { Command } from '../../Command';
 import { ISetRowHeightActionData, SetRowHeightAction } from '../Action';
 import { BooleanNumber } from '../../Enum';
 import { IRowData } from '../../Interfaces';
-import { Nullable, ObjectArray, ObjectArrayType } from '../../Shared';
+import { Nullable, ObjectArray, ObjectArrayType, Tools } from '../../Shared';
 import { Worksheet } from './Worksheet';
 
 /**
@@ -15,7 +15,7 @@ export class RowManager {
 
     constructor(workSheet: Worksheet, data: ObjectArrayType<Partial<IRowData>>) {
         this._workSheet = workSheet;
-        this._rowData = new ObjectArray<IRowData>(data);
+        this._rowData = Tools.createObjectArray(data) as ObjectArray<IRowData>;
     }
 
     /**

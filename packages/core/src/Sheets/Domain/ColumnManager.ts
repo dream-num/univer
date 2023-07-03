@@ -3,7 +3,7 @@ import { ISetColumnWidthActionData } from '../Action';
 import { ACTION_NAMES } from '../../Const';
 import { BooleanNumber } from '../../Enum';
 import { IColumnData } from '../../Interfaces';
-import { Nullable } from '../../Shared';
+import { Nullable, Tools } from '../../Shared';
 import { ObjectArray, ObjectArrayType } from '../../Shared/ObjectArray';
 import { Worksheet } from './Worksheet';
 
@@ -17,7 +17,7 @@ export class ColumnManager {
 
     constructor(workSheet: Worksheet, data: ObjectArrayType<Partial<IColumnData>>) {
         this._workSheet = workSheet;
-        this._columnData = new ObjectArray<IColumnData>(data);
+        this._columnData = Tools.createObjectArray(data) as ObjectArray<IColumnData>;
     }
 
     /**

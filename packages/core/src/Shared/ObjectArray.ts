@@ -22,6 +22,7 @@ export type ObjectArrayPrimitiveType<T> = { [key: number]: T; length?: number };
 
 /**
  * Object Array Type
+ * @deprecated
  */
 export type ObjectArrayType<T> = ObjectArray<T> | ObjectArrayPrimitiveType<T>;
 

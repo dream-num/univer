@@ -28,7 +28,7 @@ export class BaseCellEditExtension {
  * Determine whether to intercept and create BaseCellEditExtension
  */
 export class BaseCellEditExtensionFactory<T extends Plugin = Plugin> {
-    // constructor(protected _plugin: T) { }
+    constructor(protected _plugin: T) {}
 
     get zIndex() {
         return 0;

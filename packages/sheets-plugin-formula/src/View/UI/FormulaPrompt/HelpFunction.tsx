@@ -1,4 +1,5 @@
 import { Component, createRef } from '@univerjs/base-ui';
+import { IKeyValue } from '@univerjs/core';
 import { FormulaParamType, FormulaType } from '../../../Basics';
 import styles from './index.module.less';
 
@@ -125,7 +126,7 @@ class Help extends Component<IHelpProps, IHelpState> {
                 </span>
                 {props.value &&
                     props.value.map((item: FormulaParamType, i: number) => (
-                        <span className={props.active === i ? styles.helpFunctionActive : ''}>{this.getLocale(item[`${props.type}`])},</span>
+                        <span className={props.active === i ? styles.helpFunctionActive : ''}>{this.getLocale((item as IKeyValue)[`${props.type}`])},</span>
                     ))}
                 <span>{')'}</span>
             </div>

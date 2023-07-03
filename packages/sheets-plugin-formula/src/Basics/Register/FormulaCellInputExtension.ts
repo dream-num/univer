@@ -1,6 +1,6 @@
 import { IFormulaData } from '@univerjs/base-formula-engine';
 import { BaseCellInputExtension, BaseCellInputExtensionFactory, ICell } from '@univerjs/base-ui';
-import { IRangeData, Nullable } from '@univerjs/core';
+import { IRangeData, Nullable, ObjectArray } from '@univerjs/core';
 import { FormulaPlugin } from '../../FormulaPlugin';
 
 export class FormulaCellInputExtension extends BaseCellInputExtension {
@@ -47,7 +47,7 @@ export class FormulaCellInputExtensionFactory extends BaseCellInputExtensionFact
                 const sheetId = sheetIds[i];
                 const cellData = sheetData[sheetId];
                 Object.keys(cellData).forEach((cellRow) => {
-                    const rowArray = cellData[cellRow];
+                    const rowArray = cellData[Number(cellRow)] as unknown as ObjectArray<IFormulaData>;
                     rowArray.forEach((cellColumn: number, value: IFormulaData) => {
                         if (Number(cellRow) === row && cellColumn === column) {
                             formula = value.formula;
@@ -76,8 +76,8 @@ export class FormulaCellInputExtensionFactory extends BaseCellInputExtensionFact
                 const { startRow, startColumn, endRow, endColumn } = value;
                 if (row >= startRow && row < endRow && column >= startColumn && column < endColumn) {
                     const cellData = formulaData[unitId][sheetId];
-                    // TODO: cellData[startRow] is ObjectArray?
-                    formula = cellData[startRow].get(startColumn).formula;
+                    const array = cellData[startRow] as unknown as ObjectArray<IFormulaData>;
+                    formula = array.get(startColumn)?.formula;
                     return false;
                 }
             });

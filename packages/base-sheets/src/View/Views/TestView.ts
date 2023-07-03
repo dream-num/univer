@@ -1,11 +1,11 @@
-import { EVENT_TYPE, getColor, Rect, Scene } from '@univerjs/base-render';
+import { EVENT_TYPE, getColor, IRectProps, Rect, Scene } from '@univerjs/base-render';
 import { SheetPlugin } from '../../SheetPlugin';
 import { BaseView } from '../BaseView';
 
 export class TestView extends BaseView {
     protected _initialize() {
         const scene = this.getScene();
-        const rect1 = new Rect('green', {
+        const rect1 = new Rect<IRectProps>('green', {
             top: 100,
             left: 100,
             width: 250,
@@ -30,7 +30,7 @@ export class TestView extends BaseView {
             });
         });
 
-        const rect2 = new Rect('blue', {
+        const rect2 = new Rect<IRectProps>('blue', {
             top: 150,
             left: 500,
             width: 350,
@@ -52,7 +52,7 @@ export class TestView extends BaseView {
             });
         });
 
-        const rect3 = new Rect('purple', {
+        const rect3 = new Rect<IRectProps>('purple', {
             top: 0,
             left: 37.5,
             width: 250,

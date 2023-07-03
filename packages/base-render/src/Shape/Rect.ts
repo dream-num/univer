@@ -15,7 +15,7 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
     constructor(key?: string, props?: T) {
         super(key, props);
         if (props?.radius) {
-            this._radius = props?.radius;
+            this._radius = props.radius;
         }
     }
 

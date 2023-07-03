@@ -1,6 +1,6 @@
 import { IFormulaData } from '@univerjs/base-formula-engine';
 import { BaseCellEditExtension, BaseCellEditExtensionFactory, ICell } from '@univerjs/base-ui';
-import { IRangeData, Nullable } from '@univerjs/core';
+import { IRangeData, Nullable, ObjectArray } from '@univerjs/core';
 import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
 import { FormulaPlugin } from '../../FormulaPlugin';
 
@@ -48,7 +48,7 @@ export class FormulaCellEditExtensionFactory extends BaseCellEditExtensionFactor
                 const sheetId = sheetIds[i];
                 const cellData = sheetData[sheetId];
                 Object.keys(cellData).forEach((cellRow) => {
-                    const rowArray = cellData[cellRow];
+                    const rowArray = cellData[Number(cellRow)] as unknown as ObjectArray<IFormulaData>;
                     rowArray.forEach((cellColumn: number, value: IFormulaData) => {
                         if (Number(cellRow) === row && cellColumn === column) {
                             // Get the content of the formula and convert it into a DOM structure

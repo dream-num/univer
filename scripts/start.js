@@ -1,10 +1,20 @@
-import * as esbuild from 'esbuild';
-import { promises } from 'fs';
-import { exec } from 'child_process';
-import { commonBuildOptions, hasFolder, paths } from './common';
-import { Bright, FgCyan, FgGreen, Reset } from './color';
+// import * as esbuild from 'esbuild';
+// import { promises } from 'fs';
+// import { exec } from 'child_process';
+// import minimist from 'minimist';
+// import { commonBuildOptions, hasFolder, paths } from './common';
+// import { Bright, FgCyan, FgGreen, Reset } from './color';
+const esbuild = require('esbuild');
+const { promises } = require('fs');
+const { exec } = require('child_process');
+const minimist = require('minimist');
+const { commonBuildOptions, hasFolder, paths } = require('./common');
+const { Bright, FgCyan, FgGreen, Reset } = require('./color');
 
 (async () => {
+    const args = minimist(process.argv.slice(2));
+    const target = args.t;
+    console.info('target====', target, paths);
     if (hasFolder(paths.outDev)) {
         await promises.rm(paths.outDev, { recursive: true });
     }

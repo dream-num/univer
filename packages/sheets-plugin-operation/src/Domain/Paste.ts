@@ -1,4 +1,4 @@
-import { SelectionControl } from '@univerjs/base-sheets/src/Controller/Selection/SelectionController';
+import { SelectionControl, ISetSelectionValueActionData, SelectionModel, SetSelectionValueAction, SheetPlugin } from '@univerjs/base-sheets';
 import {
     SheetContext,
     PLUGIN_NAMES,
@@ -19,7 +19,6 @@ import {
     DEFAULT_SELECTION,
     DEFAULT_CELL,
 } from '@univerjs/core';
-import { ISetSelectionValueActionData, SelectionModel, SetSelectionValueAction, SheetPlugin } from '@univerjs/base-sheets';
 import { handleTableMergeData, Prompt } from '@univerjs/base-ui';
 import { RightMenuProps, SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
 

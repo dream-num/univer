@@ -259,15 +259,15 @@ export function setLastCaretPosition(dom: HTMLElement) {
 //     return str;
 // }
 
-export function findLocale<T>(obj: T, fn: Function) {
-    for (let k in obj) {
-        if (k.endsWith('Locale') && typeof obj[k] === 'string') {
-            const index = k.indexOf('Locale');
-            obj[k.slice(0, index)] = fn(obj[k]);
-        }
-    }
-    return obj;
-}
+// export function findLocale<T>(obj: T, fn: Function) {
+//     for (let k in obj) {
+//         if (k.endsWith('Locale') && typeof obj[k] === 'string') {
+//             const index = k.indexOf('Locale');
+//             obj[k.slice(0, index)] = fn(obj[k]);
+//         }
+//     }
+//     return obj;
+// }
 
 // function findLocale(obj: any, locale: Locale) {
 //     for (let k in obj) {

@@ -1,4 +1,4 @@
-const Tween = {
+const Tween: Record<string, Function> = {
     easeOutStrong(t: number, b: number, c: number, d: number): number {
         return -c * ((t = t / d - 1) * t * t * t - 1) + b;
     },

@@ -1,5 +1,5 @@
 import { BaseMenuItem, BaseSheetBarProps, Button, Component, createRef, Icon, Menu, RefObject } from '@univerjs/base-ui';
-import { SheetBarMenu } from './SheetBarMenu';
+import { SheetBarMenu, SheetBarMenuItem } from './SheetBarMenu';
 import styles from './index.module.less';
 import { SlideTabBar } from '../../Basics/SlideTabBar/SlideTabBar';
 
@@ -166,7 +166,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                     </Button>
                     <Button className={styles.sheetBarOptionsButton} onClick={(e: MouseEvent) => this.ref.current.showMenu(true)} type="text">
                         <Icon.MenuIcon style={{ fontSize: '20px' }} />
-                        <SheetBarMenu onClick={selectSheet} menu={menuList} ref={this.ref}></SheetBarMenu>
+                        <SheetBarMenu onClick={selectSheet} menu={menuList as SheetBarMenuItem[]} ref={this.ref}></SheetBarMenu>
                     </Button>
                 </div>
 

@@ -27,10 +27,6 @@ export interface BaseColorPickerProps extends BaseComponentProps {
      * class name
      */
     className?: string;
-
-    lang: {
-        [index: string]: string;
-    };
 }
 
 export interface ColorPickerComponent extends BaseComponent<BaseColorPickerProps> {

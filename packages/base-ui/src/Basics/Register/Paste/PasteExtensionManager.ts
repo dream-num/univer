@@ -40,19 +40,23 @@ export class PasteExtensionManager {
 
     pasteResolver(evt?: ClipboardEvent) {
         return new Promise((resolve: (value: IPasteData) => void, reject) => {
-            Clipboard.read(evt).then((file: Array<PasteType | null> | null) => {
+            Clipboard.read(evt).then((file: string | Array<PasteType | null> | null) => {
                 if (!file) return [];
-                const HtmlIndex = file.findIndex((item: PasteType | null, index: number) => item && item.type === 'text/html');
-                const PlainIndex = file.findIndex((item: PasteType | null, index: number) => item && item.type === 'text/plain');
-
                 const data: IPasteData = {};
-                if (HtmlIndex > -1) {
-                    const html = file[HtmlIndex]?.result as string;
-                    data.html = html;
-                }
-                if (PlainIndex > -1) {
-                    const plain = file[PlainIndex]?.result as string;
-                    data.plain = plain;
+                if (typeof file === 'string') {
+                    data.html = file;
+                } else {
+                    const HtmlIndex = file.findIndex((item: PasteType | null, index: number) => item && item.type === 'text/html');
+                    const PlainIndex = file.findIndex((item: PasteType | null, index: number) => item && item.type === 'text/plain');
+
+                    if (HtmlIndex > -1) {
+                        const html = file[HtmlIndex]?.result as string;
+                        data.html = html;
+                    }
+                    if (PlainIndex > -1) {
+                        const plain = file[PlainIndex]?.result as string;
+                        data.plain = plain;
+                    }
                 }
 
                 resolve(data);

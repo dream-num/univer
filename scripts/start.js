@@ -14,7 +14,6 @@ const { Bright, FgCyan, FgGreen, Reset } = require('./color');
 (async () => {
     const args = minimist(process.argv.slice(2));
     const target = args.t;
-    console.info('target====', target, paths);
     if (hasFolder(paths.outDev)) {
         await promises.rm(paths.outDev, { recursive: true });
     }

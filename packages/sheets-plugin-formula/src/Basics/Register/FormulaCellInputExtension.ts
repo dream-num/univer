@@ -47,9 +47,16 @@ export class FormulaCellInputExtensionFactory extends BaseCellInputExtensionFact
                 const sheetId = sheetIds[i];
                 const cellData = sheetData[sheetId];
                 Object.keys(cellData).forEach((cellRow) => {
-                    const rowArray = cellData[Number(cellRow)] as unknown as ObjectArray<IFormulaData>;
-                    rowArray.forEach((cellColumn: number, value: IFormulaData) => {
-                        if (Number(cellRow) === row && cellColumn === column) {
+                    const rowArray = cellData[Number(cellRow)];
+                    // rowArray.forEach((cellColumn: number, value: IFormulaData) => {
+                    //     if (Number(cellRow) === row && cellColumn === column) {
+                    //         formula = value.formula;
+                    //         return false;
+                    //     }
+                    // });
+                    Object.keys(rowArray).forEach((cellColumn) => {
+                        const value = rowArray[Number(cellColumn)];
+                        if (Number(cellRow) === row && Number(cellColumn) === column) {
                             formula = value.formula;
                             return false;
                         }

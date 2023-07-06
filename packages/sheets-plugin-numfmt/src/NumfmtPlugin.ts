@@ -18,7 +18,7 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
         super(NUMFMT_PLUGIN_NAME);
     }
 
-    static create(config?: INumfmtPluginConfig) {
+    static create(config?: INumfmtPluginConfig): NumfmtPlugin {
         return new NumfmtPlugin(config);
     }
 
@@ -32,7 +32,7 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
         actionRegister.add(this._numfmtActionExtensionFactory);
     }
 
-    onDestroy() {
+    onDestroy(): void {
         super.onDestroy();
         const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
         actionRegister.delete(this._numfmtActionExtensionFactory);
@@ -50,7 +50,7 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
         this._controller.setNumfmtByCoords(sheetId, row, column, format);
     }
 
-    getNumfmtModalController() {
+    getNumfmtModalController(): NumfmtModalController {
         return this._numfmtModalController;
     }
 }

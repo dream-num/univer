@@ -56,20 +56,21 @@ export class FormatContent extends Component<IProps, IState> {
      * @returns {void}
      */
     render() {
-        const { data } = this.props;
-
-        return (
-            <div className={styles.formatContent} ref={this._ref}>
-                {this.getInput()}
-                <ul>
-                    {data.map((item, index) => (
-                        <li onClick={() => this.handleClick(item.value, index)}>
-                            <span>{item.label}</span>
-                            <span>{item.suffix}</span>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        );
+        // const { data } = this.props;
+        //
+        // return (
+        //     <div className={styles.formatContent} ref={this._ref}>
+        //         {this.getInput()}
+        //         <ul>
+        //             {data.map((item, index) => (
+        //                 <li onClick={() => this.handleClick(item.value, index)}>
+        //                     <span>{item.label}</span>
+        //                     <span>{item.suffix}</span>
+        //                 </li>
+        //             ))}
+        //         </ul>
+        //     </div>
+        // );
+        return <></>;
     }
 }

@@ -4,11 +4,12 @@
 import { Workbook, Worksheet } from '../../src/Sheets/Domain';
 import { SheetContext } from '../../src/Basics';
 import {
-    SetRangeDataAction,
     CommandManager,
+    ICellData,
     ISetRangeDataActionData,
-} from '../../src/Command';
-import { ICellData, ObjectMatrixPrimitiveType } from '../../src';
+    ObjectMatrixPrimitiveType,
+    SetRangeDataAction,
+} from '../../src';
 import { IOCContainerStartUpReady } from '../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
@@ -47,7 +48,13 @@ test('Test SetRangeDataAction', () => {
         cellValue,
     };
 
-    const action = new SetRangeDataAction(configure, workbook, observers);
+    const action = new SetRangeDataAction(
+        configure,
+        {
+            WorkBookUnit: workbook,
+        },
+        observers
+    );
 
     const value = worksheet.getCellMatrix().getValue(0, 0);
     expect(value && value.v).toEqual(1);

@@ -46,20 +46,21 @@ export class NumfmtModal extends Component<IProps, IState> {
      * @returns {void}
      */
     render() {
-        const Modal = this._render.renderFunction('Modal');
-        const { modalData } = this.state;
-        // Set Provider for entire Container
-        return (
-            <>
-                {modalData.map((item) => {
-                    if (!item.show) return;
-                    return (
-                        <Modal title={item.title} visible={item.show} group={item.group} onCancel={item.onCancel}>
-                            {item.modal}
-                        </Modal>
-                    );
-                })}
-            </>
-        );
+        // const Modal = this._render.renderFunction('Modal');
+        // const { modalData } = this.state;
+        // // Set Provider for entire Container
+        // return (
+        //     <>
+        //         {modalData.map((item) => {
+        //             if (!item.show) return;
+        //             return (
+        //                 <Modal title={item.title} visible={item.show} group={item.group} onCancel={item.onCancel}>
+        //                     {item.modal}
+        //                 </Modal>
+        //             );
+        //         })}
+        //     </>
+        // );
+        return <></>;
     }
 }

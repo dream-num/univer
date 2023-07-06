@@ -1,7 +1,7 @@
 import { ComponentChildren } from '@univerjs/base-ui';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { PLUGIN_NAMES } from '@univerjs/core';
-import { SHEET_UI_PLUGIN_NAME, SheetUIPlugin } from '@univerjs/ui-plugin-sheets/src';
+import { SHEET_UI_PLUGIN_NAME, SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 import { NumfmtPlugin } from '../NumfmtPlugin';
 import { FormatContent } from '../View/UI/FormatContent';
 import { NumfmtModal } from '../View/UI/NumfmtModal';

@@ -52,7 +52,7 @@ export class CellTextStyle {
     }
 
     // TODO:指定单元格更新
-    updateFormat(attr: string, foucsStatus: number | string) {
+    updateFormat(attr: keyof IStyleSetting, foucsStatus: number | string) {
         if (attr in this.inlineStyleAffectAttribute) {
             // TODO: 不要使用 $$
             let value = this.editor.textContent!;
@@ -62,7 +62,7 @@ export class CellTextStyle {
         }
     }
 
-    updateInlineStringFormat(attr: string, value: number | string) {
+    updateInlineStringFormat(attr: keyof IStyleSetting, value: number | string) {
         let w = window.getSelection();
         let range;
         if (w?.type === 'None') {
@@ -208,7 +208,7 @@ export class CellTextStyle {
                 }
 
                 if (startSpanIndex < endSpanIndex) {
-                    for (let i = startSpanIndex + 1; i < endSpanIndex; i++) {
+                    for (let i: number = startSpanIndex + 1; i < endSpanIndex; i++) {
                         // let span = spans.get(i),
                         let span = spans[`${i}`];
                         let content = span.innerHTML;
@@ -226,7 +226,7 @@ export class CellTextStyle {
                     cont += `<span style='${endSpan.style.cssText}'>${eright}</span>`;
                 }
 
-                for (let i = endSpanIndex + 1; i < spans.length; i++) {
+                for (let i: number = endSpanIndex + 1; i < spans.length; i++) {
                     // let span = spans.get(i),
                     let span = spans[`${i}`];
                     let content = span.innerHTML;
@@ -238,8 +238,8 @@ export class CellTextStyle {
                 // console.log(replaceSpans, cont);
                 // replaceSpans.replaceWith(cont);
 
-                let startSeletedNodeIndex;
-                let endSeletedNodeIndex;
+                let startSeletedNodeIndex: number;
+                let endSeletedNodeIndex: number;
                 if (s1 === s2) {
                     startSeletedNodeIndex = startSpanIndex;
                     endSeletedNodeIndex = endSpanIndex;
@@ -263,7 +263,7 @@ export class CellTextStyle {
         let coverArray = cover.split(';');
         let newCss = '';
 
-        let addKeyList = {};
+        let addKeyList: Record<string, string | number> = {};
         for (let i = 0; i < originArray.length; i++) {
             let so = originArray[i];
             let isAdd = true;
@@ -323,9 +323,9 @@ export class CellTextStyle {
         return newCss;
     }
 
-    getCssText(cssText: string, attr: string, value: string | number) {
+    getCssText(cssText: string, attr: keyof IStyleSetting, value: string | number) {
         let styleObj: IStyleSetting = {};
-        styleObj[attr] = value;
+        (styleObj[attr] as string | number) = value;
         if (attr === 'un') {
             let fontColor = this.getClassWithcss(cssText, 'color');
             if (fontColor === '') {
@@ -433,7 +433,7 @@ export class CellTextStyle {
         }
         let style = '';
         for (let key in cell) {
-            let value = cell[key];
+            let value = cell[key as keyof IStyleSetting];
             if (isCheck) {
                 value = this.checkstatusByCell(cell, key);
             }

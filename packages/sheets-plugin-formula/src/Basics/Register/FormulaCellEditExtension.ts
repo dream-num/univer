@@ -1,4 +1,3 @@
-import { IFormulaData } from '@univerjs/base-formula-engine';
 import { BaseCellEditExtension, BaseCellEditExtensionFactory, ICell } from '@univerjs/base-ui';
 import { IRangeData, Nullable } from '@univerjs/core';
 import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
@@ -48,9 +47,17 @@ export class FormulaCellEditExtensionFactory extends BaseCellEditExtensionFactor
                 const sheetId = sheetIds[i];
                 const cellData = sheetData[sheetId];
                 Object.keys(cellData).forEach((cellRow) => {
-                    const rowArray = cellData[cellRow];
-                    rowArray.forEach((cellColumn: number, value: IFormulaData) => {
-                        if (Number(cellRow) === row && cellColumn === column) {
+                    const rowArray = cellData[Number(cellRow)];
+                    // rowArray.forEach((cellColumn: number, value: IFormulaData) => {
+                    //     if (Number(cellRow) === row && cellColumn === column) {
+                    //         // Get the content of the formula and convert it into a DOM structure
+                    //         formula = this._plugin.getFormulaPromptController().cellInputHandler.functionHTMLGenerate(value.formula);
+                    //         return false;
+                    //     }
+                    // });
+                    Object.keys(rowArray).forEach((cellColumn) => {
+                        const value = rowArray[Number(cellColumn)];
+                        if (Number(cellRow) === row && Number(cellColumn) === column) {
                             // Get the content of the formula and convert it into a DOM structure
                             formula = this._plugin.getFormulaPromptController().cellInputHandler.functionHTMLGenerate(value.formula);
                             return false;

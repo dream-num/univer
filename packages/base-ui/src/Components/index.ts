@@ -6,7 +6,7 @@ import { Collapse, Panel } from './Collapse';
 import { ColorPicker } from './ColorPicker';
 import { ColorPickerCircleButton } from './ColorPickerCircleButton';
 import { Container } from './Container';
-import { FormatModal } from './FormatModal';
+// import { FormatModal } from './FormatModal';
 import * as Icon from './Icon/index';
 import { Input } from './Input';
 import { Content, Footer, Header, Layout, Sider } from './Layout';
@@ -22,7 +22,7 @@ import { Slider } from './Slider';
 // import { IfGenerate } from './IfGenerate';
 import { Tab, TabPane } from './Tabs';
 import { Tooltip } from './Tooltip';
-import { Ul } from './Ul';
+// import { Ul } from './Ul';
 
 export * from './Prompt';
 
@@ -49,12 +49,12 @@ export {
     Input,
     Separator,
     ColorPicker,
-    Ul,
+    // Ul,
     Modal,
     Slider,
     Radio,
     RadioGroup,
-    FormatModal,
+    // FormatModal,
     Checkbox,
     CheckboxGroup,
     Tab,

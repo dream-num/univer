@@ -1,7 +1,7 @@
 // scripts/build.ts
-import { build } from "esbuild";
-import { promises } from "fs";
-import { commonBuildOptions, hasFolder, paths } from "./common";
+import { build } from 'esbuild';
+import { promises } from 'fs';
+import { commonBuildOptions, hasFolder, paths } from './common';
 
 if (hasFolder(paths.outDev)) {
     promises.rm(paths.out, { recursive: true });
@@ -10,7 +10,7 @@ if (hasFolder(paths.outDev)) {
 build({
     ...commonBuildOptions,
     outdir: paths.out,
-    define: { ["process.env.NODE_ENV"]: '"production"' },
+    define: { 'process.env.NODE_ENV': '"production"' },
     format: 'iife',
     globalName: 'UniverCore',
     //   minify: true,

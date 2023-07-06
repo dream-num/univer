@@ -118,7 +118,7 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
 
     registerExtension() {
         const cellEditRegister = CellEditExtensionManager.create();
-        cellEditRegister.add(new FormulaCellEditExtensionFactory());
+        cellEditRegister.add(new FormulaCellEditExtensionFactory(this));
 
         const cellInputRegister = CellInputExtensionManager.create();
         cellInputRegister.add(new FormulaCellInputExtensionFactory(this));

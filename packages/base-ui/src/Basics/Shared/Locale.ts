@@ -31,7 +31,7 @@ export type ILocaleOptions = {
      * }
      * ```
      */
-    locales: object;
+    locales: Record<string, any>;
 };
 
 /**
@@ -69,7 +69,7 @@ export class Locale {
      *
      * @private
      */
-    private static getValue(locale: object, key: string): Nullable<string | object> {
+    private static getValue(locale: Record<string, any>, key: string): Nullable<string | object> {
         try {
             return locale[key] ? locale[key] : key.split('.').reduce((a, b) => a[b], locale);
         } catch (error) {

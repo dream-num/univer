@@ -1,5 +1,5 @@
 import { $$, getNodeindex, xssDeal } from '@univerjs/base-ui';
-import { Nullable, Tools } from '@univerjs/core';
+import { IKeyValue, Nullable, Tools } from '@univerjs/core';
 import { FunList } from '../Basics';
 
 /**
@@ -84,7 +84,7 @@ export class CellInputHandler {
 
     covertOperatorjson() {
         let arr = this.operator.split('|');
-        let op = {};
+        let op: IKeyValue = {};
 
         for (let i = 0; i < arr.length; i++) {
             op[arr[i].toString()] = 1;
@@ -197,7 +197,7 @@ export class CellInputHandler {
         v_a.pop();
         vp_a.pop();
 
-        let pfri = _this.functionRangeIndex;
+        let pfri: IKeyValue = _this.functionRangeIndex;
         // let i = 0;
         let spanlen = vp_a.length > v_a.length ? v_a.length : vp_a.length;
 
@@ -374,7 +374,7 @@ export class CellInputHandler {
 
         // FIX: set position
         if (fri == null && currSelection) {
-            currSelection.selectAllChildren(obj[0]);
+            currSelection.selectAllChildren((obj as IKeyValue)[0]);
             currSelection.collapseToEnd();
         } else if (fri != null) {
             let span = $$('span', obj);
@@ -400,7 +400,7 @@ export class CellInputHandler {
 
         if (_this.operatorjson == null) {
             let arr = _this.operator.split('|');
-            let op = {};
+            let op: IKeyValue = {};
 
             for (let i = 0; i < arr.length; i++) {
                 op[arr[i].toString()] = 1;
@@ -760,7 +760,7 @@ export class CellInputHandler {
             for (let i = 0; i < FunList.length; i++) {
                 const n = FunList[i].n;
                 if (!n) continue;
-                _this.functionlistPosition[n] = i;
+                (_this.functionlistPosition as IKeyValue)[n] = i;
             }
         }
         if (!currSelection) {

@@ -1,17 +1,16 @@
-import { SheetContext, PLUGIN_NAMES, Tools, handleJsonToDom, handleStyleToString } from '@univerjs/core';
+import { SheetContext, PLUGIN_NAMES, Tools, handleJsonToDom, handleStyleToString, IKeyValue } from '@univerjs/core';
 import { SheetPlugin, SelectionModel, SelectionControl } from '@univerjs/base-sheets';
 import { RightMenuProps } from '@univerjs/ui-plugin-sheets';
 import { Clipboard } from './Clipboard';
-import { OPERATION_PLUGIN } from '../Const';
 
 export abstract class Cut {
     private _context: SheetContext;
 
     constructor(context: SheetContext, cutList: RightMenuProps[]) {
         this._context = context;
-        const SheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
+        // const SheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
 
-        SheetPlugin?.addRightMenu(cutList);
+        // SheetPlugin?.addRightMenu(cutList);
 
         const manager = this._context.getObserverManager();
         manager.requiredObserver<ClipboardEvent>('onSpreadsheetKeyCopyObservable', PLUGIN_NAMES.SPREADSHEET).add((e) => {
@@ -27,12 +26,12 @@ export abstract class Cut {
         e.preventDefault();
     }
 
-    private _initRegisterComponent(component: any[]) {
-        const SheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
-        for (let i = 0; i < component.length; i++) {
-            SheetPlugin.registerComponent(OPERATION_PLUGIN + component[i].name, component[i]);
-        }
-    }
+    // private _initRegisterComponent(component: any[]) {
+    //     const SheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+    //     for (let i = 0; i < component.length; i++) {
+    //         SheetPlugin.registerComponent(OPERATION_PLUGIN + component[i].name, component[i]);
+    //     }
+    // }
 }
 
 export class UniverCopy extends Cut {
@@ -80,7 +79,7 @@ export class UniverCopy extends Cut {
 
         let arr = [];
         if (rangeData.length === 1) {
-            let obj = {};
+            let obj: IKeyValue = {};
             for (let i = 0; i < rangeData[0].length; i++) {
                 const value = range.getValues()[0][i]?.v;
                 if (typeof value === 'string' || typeof value === 'number') {
@@ -92,7 +91,7 @@ export class UniverCopy extends Cut {
             arr.push(obj);
         } else {
             for (let r = 1; r < rangeData.length; r++) {
-                let obj = {};
+                let obj: IKeyValue = {};
                 for (let c = 0; c < rangeData[0].length; c++) {
                     const title = range.getValues()[0][c]?.v;
                     const value = range.getValues()[r][c]?.v;
@@ -120,7 +119,7 @@ export class UniverCopy extends Cut {
 
         let arr = [];
         for (let r = 0; r < rangeData.length; r++) {
-            let obj = {};
+            let obj: IKeyValue = {};
             for (let c = 0; c < rangeData[0].length; c++) {
                 const value = range.getValues()[r][c]?.v;
                 obj[Tools.chatAtABC(c + range.getRangeData().startColumn)] = value;

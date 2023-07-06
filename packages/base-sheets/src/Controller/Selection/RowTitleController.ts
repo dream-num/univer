@@ -56,8 +56,11 @@ export class RowTitleController {
         this._startOffsetX = evtOffsetX;
         this._startOffsetY = evtOffsetY;
         const scrollXY = main.getAncestorScrollXY(this._startOffsetX, this._startOffsetY);
-        const contentRef = this._manager.getPlugin().getSheetContainerControl().getContentRef();
-        const clientY = e.clientY + scrollXY.y - this._leftTopHeight - contentRef.current!.getBoundingClientRect().top;
+
+        // TODO 配合selection改造 @tony
+        // const contentRef = this._manager.getPlugin().getSheetContainerControl().getContentRef();
+        // const clientY = e.clientY + scrollXY.y - this._leftTopHeight - contentRef.current!.getBoundingClientRect().top;
+        const clientY = 100;
         const rowHeightAccumulation = main.getSkeleton()?.rowHeightAccumulation ?? [];
 
         for (let i = 0; i < rowHeightAccumulation?.length; i++) {
@@ -123,8 +126,11 @@ export class RowTitleController {
         this._startOffsetX = evtOffsetX;
         this._startOffsetY = evtOffsetY;
         const scrollXY = main.getAncestorScrollXY(this._startOffsetX, this._startOffsetY);
-        const contentRef = this._manager.getPlugin().getSheetContainerControl().getContentRef();
-        const clientY = e.clientY + scrollXY.y - this._leftTopHeight - contentRef.current!.getBoundingClientRect().top;
+
+        // TODO 配合selection改造 @tony
+        // const contentRef = this._manager.getPlugin().getSheetContainerControl().getContentRef();
+        // const clientY = e.clientY + scrollXY.y - this._leftTopHeight - contentRef.current!.getBoundingClientRect().top;
+        const clientY = 100;
         const rowHeightAccumulation = main.getSkeleton()?.rowHeightAccumulation ?? [];
 
         for (let i = 0; i < rowHeightAccumulation?.length; i++) {

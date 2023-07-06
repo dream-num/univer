@@ -54,8 +54,11 @@ export class ColumnTitleController {
         this._startOffsetX = evtOffsetX;
         this._startOffsetY = evtOffsetY;
         const scrollXY = main.getAncestorScrollXY(this._startOffsetX, this._startOffsetY);
-        const contentRef = this._manager.getPlugin().getSheetContainerControl().getContentRef();
-        const clientX = e.clientX + scrollXY.x - this._leftTopWidth - contentRef.current!.getBoundingClientRect().left;
+
+        // TODO 配合selection改造 @tony
+        // const contentRef = this._manager.getPlugin().getSheetContainerControl().getContentRef();
+        // const clientX = e.clientX + scrollXY.x - this._leftTopWidth - contentRef.current!.getBoundingClientRect().left;
+        const clientX = 100;
         const columnWidthAccumulation = main.getSkeleton()?.columnWidthAccumulation ?? [];
 
         for (let i = 0; i < columnWidthAccumulation?.length; i++) {
@@ -123,8 +126,11 @@ export class ColumnTitleController {
         this._startOffsetX = evtOffsetX;
         this._startOffsetY = evtOffsetY;
         const scrollXY = main.getAncestorScrollXY(this._startOffsetX, this._startOffsetY);
-        const contentRef = this._manager.getPlugin().getSheetContainerControl().getContentRef();
-        const clientX = e.clientX + scrollXY.x - this._leftTopWidth - contentRef.current!.getBoundingClientRect().left;
+
+        // TODO 配合selection改造 @tony
+        // const contentRef = this._manager.getPlugin().getSheetContainerControl().getContentRef();
+        // const clientX = e.clientX + scrollXY.x - this._leftTopWidth - contentRef.current!.getBoundingClientRect().left;
+        const clientX = 100;
         const columnWidthAccumulation = main.getSkeleton()?.columnWidthAccumulation ?? [];
 
         for (let i = 0; i < columnWidthAccumulation?.length; i++) {

@@ -58,9 +58,6 @@ export class SheetContainerUIController {
         this._countBarController = new CountBarUIController(this._plugin);
         this._sheetBarController = new SheetBarUIController(this._plugin);
         // 插入prompt组件
-        // this._slotController.addSlot(SHEET_UI_PLUGIN_NAME + Prompt.name, {
-        //     component: Prompt,
-        // });
         this._plugin.getComponentManager().register(Prompt.name, Prompt);
         this._slotManager.setSlotComponent('main', {
             name: Prompt.name,

@@ -49,8 +49,8 @@ export class InfoBar extends Component<IProps, IState> {
                         <Input bordered={false} value={slide.label} onBlur={renameSheet} />
                     </Tooltip>
                 </div>
-                <div className={styles.infoDetailUpdate}>{update.label}</div>
-                <div className={styles.infoDetailSave}>{save.label}</div>
+                <div className={styles.infoDetailUpdate}>{this.getLabel(update.label)}</div>
+                <div className={styles.infoDetailSave}>{this.getLabel(save.label)}</div>
             </Container>
         );
     }

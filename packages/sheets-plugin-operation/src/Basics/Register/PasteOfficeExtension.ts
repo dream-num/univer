@@ -4,9 +4,7 @@ import { OperationPlugin } from '../../OperationPlugin';
 /**
  * TODO
  */
-export class PasteOfficeExtension extends BasePasteExtension<OperationPlugin> {
-    execute() {}
-}
+export class PasteOfficeExtension extends BasePasteExtension<OperationPlugin> {}
 
 export class PasteOfficeExtensionFactory extends BasePasteExtensionFactory<OperationPlugin> {
     get zIndex(): number {

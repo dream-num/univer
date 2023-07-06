@@ -1,7 +1,5 @@
 import { BaseComponentProps, BaseComponentRender, BaseSelectChildrenProps, Component, debounce, Icon } from '@univerjs/base-ui';
 import { Nullable } from '@univerjs/core';
-import { SHEET_UI_PLUGIN_NAME } from '../../Basics';
-import { SheetUIPlugin } from '../../SheetUIPlugin';
 import styles from './index.module.less';
 
 type FormulaState = {
@@ -71,7 +69,7 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
     }
 
     getIcon(name: string) {
-        const componentManager = this.getContext().getPluginManager().getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager();
+        const componentManager = this.context.componentManager;
         const Icon = componentManager?.get(name);
         return <Icon />;
     }

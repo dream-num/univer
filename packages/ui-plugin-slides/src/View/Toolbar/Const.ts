@@ -66,83 +66,83 @@ export const FONT_SIZE_CHILDREN = [
 
 export const FONT_FAMILY_CHILDREN = [
     {
-        labelLocale: 'fontFamily.TimesNewRoman',
+        label: 'fontFamily.TimesNewRoman',
         style: { 'font-family': 'Times New Roman' },
         value: 'Times New Roman',
         selected: true,
     },
     {
-        labelLocale: 'fontFamily.Arial',
+        label: 'fontFamily.Arial',
         style: { 'font-family': 'Arial' },
         value: 'Arial',
     },
     {
-        labelLocale: 'fontFamily.Tahoma',
+        label: 'fontFamily.Tahoma',
         style: { 'font-family': 'Tahoma' },
         value: 'Tahoma',
     },
     {
-        labelLocale: 'fontFamily.Verdana',
+        label: 'fontFamily.Verdana',
         style: { 'font-family': 'Verdana' },
         value: 'Verdana',
     },
     {
-        labelLocale: 'fontFamily.MicrosoftAccorblack',
+        label: 'fontFamily.MicrosoftAccorblack',
         style: { 'font-family': '微软雅黑' },
         value: '微软雅黑',
     },
     {
-        labelLocale: 'fontFamily.SimSun',
+        label: 'fontFamily.SimSun',
         style: { 'font-family': '宋体' },
         value: '宋体',
     },
     {
-        labelLocale: 'fontFamily.SimHei',
+        label: 'fontFamily.SimHei',
         style: { 'font-family': '黑体' },
         value: '黑体',
     },
     {
-        labelLocale: 'fontFamily.Kaiti',
+        label: 'fontFamily.Kaiti',
         style: { 'font-family': '楷体' },
         value: '楷体',
     },
     {
-        labelLocale: 'fontFamily.FangSong',
+        label: 'fontFamily.FangSong',
         style: { 'font-family': '仿宋' },
         value: '仿宋',
     },
     {
-        labelLocale: 'fontFamily.NSimSun',
+        label: 'fontFamily.NSimSun',
         style: { 'font-family': '新宋体' },
         value: '新宋体',
     },
     {
-        labelLocale: 'fontFamily.STXinwei',
+        label: 'fontFamily.STXinwei',
         style: { 'font-family': '华文新魏' },
         value: '华文新魏',
     },
     {
-        labelLocale: 'fontFamily.STXingkai',
+        label: 'fontFamily.STXingkai',
         style: { 'font-family': '华文行楷' },
         value: '华文行楷',
     },
     {
-        labelLocale: 'fontFamily.STLiti',
+        label: 'fontFamily.STLiti',
         style: { 'font-family': '华文隶书' },
         value: '华文隶书',
     },
     {
-        labelLocale: 'fontFamily.HanaleiFill',
+        label: 'fontFamily.HanaleiFill',
         style: { 'font-family': 'HanaleiFill' },
         value: 'HanaleiFill',
     },
     {
-        labelLocale: 'fontFamily.Anton',
+        label: 'fontFamily.Anton',
         style: { 'font-family': 'Anton' },
         value: 'Anton',
     },
     {
-        labelLocale: 'fontFamily.Pacifico',
+        label: 'fontFamily.Pacifico',
         style: { 'font-family': 'Pacifico' },
         value: 'Pacifico',
     },
@@ -150,73 +150,73 @@ export const FONT_FAMILY_CHILDREN = [
 
 export const BORDER_LINE_CHILDREN = [
     {
-        labelLocale: 'borderLine.borderTop',
-        customSuffix: {
+        label: 'borderLine.borderTop',
+        suffix: {
             name: 'TopBorderIcon',
         },
         value: 'top',
     },
     {
-        labelLocale: 'borderLine.borderBottom',
-        customSuffix: {
+        label: 'borderLine.borderBottom',
+        suffix: {
             name: 'BottomBorderIcon',
         },
         value: 'bottom',
     },
     {
-        labelLocale: 'borderLine.borderLeft',
-        customSuffix: {
+        label: 'borderLine.borderLeft',
+        suffix: {
             name: 'LeftBorderIcon',
         },
         value: 'left',
     },
     {
-        labelLocale: 'borderLine.borderRight',
-        customSuffix: {
+        label: 'borderLine.borderRight',
+        suffix: {
             name: 'RightBorderIcon',
         },
         value: 'right',
         border: true,
     },
     {
-        labelLocale: 'borderLine.borderNone',
-        customSuffix: {
+        label: 'borderLine.borderNone',
+        suffix: {
             name: 'NoneBorderIcon',
         },
         value: 'none',
     },
     {
-        labelLocale: 'borderLine.borderAll',
-        customSuffix: {
+        label: 'borderLine.borderAll',
+        suffix: {
             name: 'FullBorderIcon',
         },
         value: 'all',
         selected: true,
     },
     {
-        labelLocale: 'borderLine.borderOutside',
-        customSuffix: {
+        label: 'borderLine.borderOutside',
+        suffix: {
             name: 'OuterBorderIcon',
         },
         value: 'outside',
     },
     {
-        labelLocale: 'borderLine.borderInside',
-        customSuffix: {
+        label: 'borderLine.borderInside',
+        suffix: {
             name: 'InnerBorderIcon',
         },
         value: 'inside',
     },
     {
-        labelLocale: 'borderLine.borderHorizontal',
-        customSuffix: {
+        label: 'borderLine.borderHorizontal',
+        suffix: {
             name: 'StripingBorderIcon',
         },
         value: 'horizontal',
     },
     {
-        labelLocale: 'borderLine.borderVertical',
-        customSuffix: {
+        label: 'borderLine.borderVertical',
+        suffix: {
             name: 'VerticalBorderIcon',
         },
         value: 'vertical',
@@ -225,71 +225,71 @@ export const BORDER_LINE_CHILDREN = [
 
 export const BORDER_SIZE_CHILDREN = [
     {
-        labelLocale: 'borderLine.borderNone',
+        label: 'borderLine.borderNone',
         value: BorderStyleTypes.NONE,
     },
     {
-        customLabel: {
+        label: {
             name: 'BorderThin',
         },
         value: BorderStyleTypes.THIN,
     },
     {
-        customLabel: {
+        label: {
             name: 'BorderHair',
         },
         value: BorderStyleTypes.HAIR,
     },
     {
-        customLabel: {
+        label: {
             name: 'BorderDotted',
         },
         value: BorderStyleTypes.DOTTED,
     },
     {
-        customLabel: {
+        label: {
             name: 'BorderDashed',
         },
         value: BorderStyleTypes.DASHED,
     },
     {
-        customLabel: {
+        label: {
             name: 'BorderDashDot',
         },
         value: BorderStyleTypes.DOTTED,
     },
     {
-        customLabel: {
+        label: {
             name: 'BorderDashDotDot',
         },
         value: BorderStyleTypes.DASH_DOT_DOT,
     },
     {
-        customLabel: {
+        label: {
             name: 'BorderMedium',
         },
         value: BorderStyleTypes.MEDIUM,
     },
     {
-        customLabel: {
+        label: {
             name: 'BorderMediumDashed',
         },
         value: BorderStyleTypes.MEDIUM_DASHED,
     },
     {
-        customLabel: {
+        label: {
             name: 'BorderMediumDashDot',
         },
         value: BorderStyleTypes.MEDIUM_DASH_DOT,
     },
     {
-        customLabel: {
+        label: {
             name: 'BorderMediumDashDotDot',
         },
         value: BorderStyleTypes.MEDIUM_DASH_DOT_DOT,
     },
     {
-        customLabel: {
+        label: {
             name: 'BorderThick',
         },
         value: BorderStyleTypes.THICK,
@@ -298,42 +298,42 @@ export const BORDER_SIZE_CHILDREN = [
 
 export const MERGE_CHILDREN = [
     {
-        labelLocale: 'merge.all',
+        label: 'merge.all',
         value: 'all',
     },
     {
-        labelLocale: 'merge.vertical',
+        label: 'merge.vertical',
         value: 'vertical',
     },
     {
-        labelLocale: 'merge.horizontal',
+        label: 'merge.horizontal',
         value: 'horizontal',
     },
     {
-        labelLocale: 'merge.cancel',
+        label: 'merge.cancel',
         value: 'cancel',
     },
 ];
 
 export const HORIZONTAL_ALIGN_CHILDREN = [
     {
-        labelLocale: 'align.left',
-        customSuffix: {
+        label: 'align.left',
+        suffix: {
             name: 'LeftAlignIcon',
         },
         value: 1,
     },
     {
-        labelLocale: 'align.center',
+        label: 'align.center',
         selected: true,
-        customSuffix: {
+        suffix: {
             name: 'CenterAlignIcon',
         },
         value: 2,
     },
     {
-        labelLocale: 'align.right',
-        customSuffix: {
+        label: 'align.right',
+        suffix: {
             name: 'RightAlignIcon',
         },
         value: 3,
@@ -342,22 +342,22 @@ export const HORIZONTAL_ALIGN_CHILDREN = [
 
 export const VERTICAL_ALIGN_CHILDREN = [
     {
-        labelLocale: 'align.top',
-        customSuffix: {
+        label: 'align.top',
+        suffix: {
             name: 'TopVerticalIcon',
         },
         value: 1,
     },
     {
-        labelLocale: 'align.middle',
-        customSuffix: {
+        label: 'align.middle',
+        suffix: {
             name: 'CenterVerticalIcon',
         },
         value: 2,
     },
     {
-        labelLocale: 'align.bottom',
-        customSuffix: {
+        label: 'align.bottom',
+        suffix: {
             name: 'BottomVerticalIcon',
         },
         value: 3,
@@ -366,22 +366,22 @@ export const VERTICAL_ALIGN_CHILDREN = [
 
 export const TEXT_WRAP_CHILDREN = [
     {
-        labelLocale: 'textWrap.overflow',
-        customSuffix: {
+        label: 'textWrap.overflow',
+        suffix: {
             name: 'OverflowIcon',
         },
         value: 1,
     },
     {
-        labelLocale: 'textWrap.wrap',
-        customSuffix: {
+        label: 'textWrap.wrap',
+        suffix: {
             name: 'BrIcon',
         },
         value: 3,
     },
     {
-        labelLocale: 'textWrap.clip',
-        customSuffix: {
+        label: 'textWrap.clip',
+        suffix: {
             name: 'CutIcon',
         },
         value: 2,
@@ -390,43 +390,43 @@ export const TEXT_WRAP_CHILDREN = [
 
 export const TEXT_ROTATE_CHILDREN = [
     {
-        labelLocale: 'textRotate.none',
-        customSuffix: {
+        label: 'textRotate.none',
+        suffix: {
             name: 'TextRotateIcon',
         },
         value: 0,
     },
     {
-        labelLocale: 'textRotate.angleUp',
-        customSuffix: {
+        label: 'textRotate.angleUp',
+        suffix: {
             name: 'TextRotateAngleUpIcon',
         },
         value: -45,
     },
     {
-        labelLocale: 'textRotate.angleDown',
-        customSuffix: {
+        label: 'textRotate.angleDown',
+        suffix: {
             name: 'TextRotateAngleDownIcon',
         },
         value: 45,
     },
     {
-        labelLocale: 'textRotate.vertical',
-        customSuffix: {
+        label: 'textRotate.vertical',
+        suffix: {
             name: 'TextRotateVerticalIcon',
         },
         value: 'v',
     },
     {
-        labelLocale: 'textRotate.rotationUp',
-        customSuffix: {
+        label: 'textRotate.rotationUp',
+        suffix: {
             name: 'TextRotateRotationUpIcon',
         },
         value: -90,
     },
     {
-        labelLocale: 'textRotate.rotationDown',
-        customSuffix: {
+        label: 'textRotate.rotationDown',
+        suffix: {
             name: 'TextRotateRotationDownIcon',
         },
         value: 90,

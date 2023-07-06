@@ -64,6 +64,7 @@ npm run api
 ```sh
 npm run clean
 ```
+PS: 如果失败请重新clean一下
 
 ## 脚本
 

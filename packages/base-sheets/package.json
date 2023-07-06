@@ -35,6 +35,7 @@
     "files": [
         "lib"
     ],
+    "private": false,
     "scripts": {
         "test": "jest",
         "test:play": "npx playwright test",

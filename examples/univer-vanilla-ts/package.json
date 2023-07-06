@@ -8,6 +8,7 @@
     "directories": {
         "lib": "lib"
     },
+    "private": true,
     "scripts": {
         "test": "jest",
         "dev": "vite",

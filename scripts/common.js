@@ -41,6 +41,9 @@ const commonBuildOptions = {
                 localsConvention: 'camelCaseOnly',
                 generateScopedName: 'univer-[local]',
             },
+            renderOptions: {
+                lessOptions: { rewriteUrls: 'all' },
+            },
         }),
     ],
 };

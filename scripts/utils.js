@@ -51,3 +51,7 @@ exports.copyFileSync = function copyFileSync(source, target) {
 
     fs.writeFileSync(targetFile, fs.readFileSync(source));
 };
+
+exports.covertToPascalCase = function covertToPascalCase(str) {
+    return str.replace(/\b\w/g, (match) => match.toUpperCase()).replace(/-/g, '');
+};

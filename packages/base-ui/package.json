@@ -34,6 +34,7 @@
     "files": [
         "lib"
     ],
+    "private": false,
     "scripts": {
         "test": "jest -c jest.config.js",
         "test:play": "npx playwright test",

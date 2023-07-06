@@ -1,40 +1,44 @@
 import {
-    Command,
-    Range,
-    IRangeData,
-    ObjectMatrix,
-    ObjectMatrixPrimitiveType,
     PLUGIN_NAMES,
+    ObjectMatrixPrimitiveType,
+    Command,
+    ObjectMatrix,
+    IRangeData,
+    Range,
     ACTION_NAMES as CORE_ACTION_NAME,
+    ICellData,
     ActionOperation,
     ISetRangeDataActionData,
 } from '@univerjs/core';
 import { BaseComponentRender } from '@univerjs/base-ui';
-import { IToolbarItemProps, SheetPlugin } from '@univerjs/base-sheets';
+import { SheetPlugin } from '@univerjs/base-sheets';
 import { numfmt } from '@univerjs/base-numfmt-engine';
+import { IToolbarItemProps, SHEET_UI_PLUGIN_NAME, SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 import { ACTION_NAMES } from '../Basics/Enum';
+import { NumfmtPlugin } from '../NumfmtPlugin';
 import { DEFAULT_DATA, NUMFMT_PLUGIN_NAME, NumftmConfig } from '../Basics/Const';
 import { NumfmtModel } from '../Model/NumfmtModel';
-import { NumfmtPlugin } from '../NumfmtPlugin';
 
 import styles from '../View/UI/index.module.less';
 
 export class NumfmtController {
     protected _sheetPlugin: SheetPlugin;
 
-    protected _model: NumfmtModel;
-
     protected _numfmtList: IToolbarItemProps;
 
+    protected _model: NumfmtModel;
+
     protected _plugin: NumfmtPlugin;
+
+    protected _sheetUIPlugin: SheetUIPlugin;
 
     protected _render: BaseComponentRender;
 
     constructor(plugin: NumfmtPlugin) {
+        this._sheetUIPlugin = plugin.getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
         this._model = new NumfmtModel();
         this._plugin = plugin;
         this._sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
-
         const executeFormatter = (type: string): void => {
             const manager = this._sheetPlugin.getSelectionManager();
             const workbook = this._plugin.getContext().getWorkBook();
@@ -46,7 +50,7 @@ export class NumfmtController {
             }
             // update cell data
             activeRange.getRangeList().forEach((range) => {
-                let matrix = new ObjectMatrix();
+                let matrix = new ObjectMatrix<ICellData>();
                 Range.foreach(range, (row, col) => {
                     const cell = cellMatrix.getValue(row, col);
                     if (cell) {
@@ -54,10 +58,10 @@ export class NumfmtController {
                         matrix.setValue(row, col, { v: cell.v, m: formatter(cell.v) });
                     }
                 });
-                const setRangeDataAction = {
+                const setRangeDataAction: ISetRangeDataActionData = {
                     sheetId: activeSheet.getSheetId(),
-                    actionName: CORE_ACTION_NAME.SET_RANGE_DATA_ACTION,
                     cellValue: matrix.getData(),
+                    actionName: CORE_ACTION_NAME.SET_RANGE_DATA_ACTION,
                 };
                 const newSetRangeDataAction = ActionOperation.make<ISetRangeDataActionData>(setRangeDataAction).removeExtension().getAction();
                 const cmd = new Command({ WorkBookUnit: workbook }, newSetRangeDataAction);
@@ -143,31 +147,31 @@ export class NumfmtController {
         this._numfmtList = {
             name: NUMFMT_PLUGIN_NAME,
             type: 0,
-            tooltipLocale: 'toolbar.moreFormats',
+            label: 'toolbar.moreFormats',
             className: styles.customFormat,
             show: NumftmConfig.show,
             border: true,
             children: [
                 ...CHILDREN_DATA,
                 {
-                    locale: 'defaultFmt.CustomFormats.text',
-                    customSuffix: { name: 'RightIcon' },
+                    label: 'defaultFmt.CustomFormats.text',
+                    suffix: { name: 'RightIcon' },
                     className: styles.customFormatMore,
                     children: [
                         {
-                            locale: 'format.moreCurrency',
+                            label: 'format.moreCurrency',
                             onClick: () => {
                                 this._plugin.getNumfmtModalController().showModal('currency', true);
                             },
                         },
                         {
-                            locale: 'format.moreDateTime',
+                            label: 'format.moreDateTime',
                             onClick: () => {
                                 this._plugin.getNumfmtModalController().showModal('date', true);
                             },
                         },
                         {
-                            locale: 'format.moreNumber',
+                            label: 'format.moreNumber',
                             onClick: () => {
                                 this._plugin.getNumfmtModalController().showModal('number', true);
                             },
@@ -176,7 +180,7 @@ export class NumfmtController {
                 },
             ],
         };
-        this._sheetPlugin.addToolButton(this._numfmtList);
+        this._sheetUIPlugin.addToolButton(this._numfmtList);
     }
 
     getNumfmtBySheetIdConfig(sheetId: string): ObjectMatrixPrimitiveType<string> {

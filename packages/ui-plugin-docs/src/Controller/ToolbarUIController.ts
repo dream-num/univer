@@ -1,4 +1,4 @@
-import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren } from '@univerjs/base-ui';
+import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren, CustomComponent } from '@univerjs/base-ui';
 import { DEFAULT_STYLES, HorizontalAlign, Tools, UIObserver, VerticalAlign, WrapStrategy, Range, FontWeight, FontItalic, ITextRotation } from '@univerjs/core';
 import { DefaultToolbarConfig, DocToolbarConfig, DOC_UI_PLUGIN_NAME } from '../Basics';
 import { DocUIPlugin } from '../DocUIPlugin';
@@ -8,15 +8,8 @@ import { FONT_FAMILY_CHILDREN, FONT_SIZE_CHILDREN, HORIZONTAL_ALIGN_CHILDREN, VE
 
 import styles from '../View/Toolbar/index.module.less';
 
-// 继承基础下拉属性,添加国际化
-export interface BaseToolbarSelectChildrenProps extends BaseSelectChildrenProps {
-    suffixLocale?: string;
-    children?: BaseToolbarSelectChildrenProps[];
-}
-
 export interface BaseToolbarSelectProps extends BaseSelectProps {
-    suffixLocale?: string;
-    children?: BaseToolbarSelectChildrenProps[];
+    children?: BaseSelectChildrenProps[];
 }
 
 enum ToolbarType {
@@ -61,7 +54,7 @@ export class ToolbarUIController {
                 toolbarType: 1,
                 tooltip: 'toolbar.undo',
                 name: 'undo',
-                customLabel: {
+                label: {
                     name: 'ForwardIcon',
                 },
                 show: this._config.undo,
@@ -73,7 +66,7 @@ export class ToolbarUIController {
             {
                 toolbarType: 1,
                 tooltip: 'toolbar.redo',
-                customLabel: {
+                label: {
                     name: 'BackIcon',
                 },
                 name: 'redo',
@@ -119,7 +112,7 @@ export class ToolbarUIController {
             {
                 toolbarType: 1,
                 tooltip: 'toolbar.bold',
-                customLabel: {
+                label: {
                     name: 'BoldIcon',
                 },
                 unActive: false,
@@ -133,7 +126,7 @@ export class ToolbarUIController {
             {
                 toolbarType: 1,
                 tooltip: 'toolbar.italic',
-                customLabel: {
+                label: {
                     name: 'ItalicIcon',
                 },
                 unActive: false,
@@ -147,7 +140,7 @@ export class ToolbarUIController {
             {
                 toolbarType: 1,
                 tooltip: 'toolbar.strikethrough',
-                customLabel: {
+                label: {
                     name: 'DeleteLineIcon',
                 },
                 unActive: false,
@@ -164,7 +157,7 @@ export class ToolbarUIController {
             {
                 toolbarType: 1,
                 tooltip: 'toolbar.underline',
-                customLabel: {
+                label: {
                     name: 'UnderLineIcon',
                 },
                 unActive: false,
@@ -181,14 +174,14 @@ export class ToolbarUIController {
             {
                 type: 5,
                 tooltip: 'toolbar.textColor.main',
-                customLabel: {
+                label: {
                     name: DOC_UI_PLUGIN_NAME + ColorSelect.name,
                     props: {
                         getComponent: (ref: ColorSelect) => {
                             this._colorSelect1 = ref;
                         },
                         color: '#000',
-                        customLabel: {
+                        label: {
                             name: 'TextColorIcon',
                         },
                     },
@@ -197,19 +190,19 @@ export class ToolbarUIController {
                     this.hideTooltip();
                     const textColor = this._toolList.find((item) => item.name === 'textColor');
                     if (!textColor) return;
-                    if (!textColor.customLabel) return;
-                    if (!textColor.customLabel.props) return;
-                    textColor.customLabel.props.color = this._textColor;
+                    if (!textColor.label) return;
+                    if (!(textColor.label as CustomComponent).props?.color) return;
+                    (textColor.label as CustomComponent).props!.color = this._textColor;
                     this.changeColor(this._textColor);
                 },
                 hideSelectedIcon: true,
                 className: styles.selectColorPickerParent,
                 children: [
                     {
-                        labelLocale: 'toolbar.resetColor',
+                        label: 'toolbar.resetColor',
                     },
                     {
-                        customLabel: {
+                        label: {
                             name: DOC_UI_PLUGIN_NAME + ColorPicker.name,
                             props: {
                                 onClick: (color: string, e: MouseEvent) => {
@@ -227,14 +220,14 @@ export class ToolbarUIController {
             {
                 type: 5,
                 tooltip: 'toolbar.fillColor.main',
-                customLabel: {
+                label: {
                     name: DOC_UI_PLUGIN_NAME + ColorSelect.name,
                     props: {
                         getComponent: (ref: ColorSelect) => {
                             this._colorSelect2 = ref;
                         },
                         color: '#fff',
-                        customLabel: {
+                        label: {
                             name: 'FillColorIcon',
                         },
                     },
@@ -243,19 +236,19 @@ export class ToolbarUIController {
                     this.hideTooltip();
                     const fillColor = this._toolList.find((item) => item.name === 'fillColor');
                     if (!fillColor) return;
-                    if (!fillColor.customLabel) return;
-                    if (!fillColor.customLabel.props) return;
-                    fillColor.customLabel.props.color = this._background;
+                    if (!fillColor.label) return;
+                    if (!(fillColor.label as CustomComponent).props?.color) return;
+                    (fillColor.label as CustomComponent).props!.color = this._background;
                     this.setBackground(this._background);
                 },
                 hideSelectedIcon: true,
                 className: styles.selectColorPickerParent,
                 children: [
                     {
-                        labelLocale: 'toolbar.resetColor',
+                        label: 'toolbar.resetColor',
                     },
                     {
-                        customLabel: {
+                        label: {
                             name: DOC_UI_PLUGIN_NAME + ColorPicker.name,
                             props: {
                                 onClick: (color: string, e: MouseEvent) => {

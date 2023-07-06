@@ -1,6 +1,4 @@
-import { Component, IToolbarItemProps, VNode } from '@univerjs/base-ui';
-import { SheetContext } from '@univerjs/core';
-import { FileSelected } from '../../Library/FileSelected';
+import { Component } from '@univerjs/base-ui';
 
 export interface ImageUploadButtonUIProps {
     chooseCallback: (url: string, file: File) => void;
@@ -11,19 +9,18 @@ export class ImageUploadButtonUI extends Component<ImageUploadButtonUIProps> {
         this.state = {};
     }
 
-    render(): VNode {
-        const SingleButton = this.getComponentRender().renderFunction('SingleButton');
-        const OrderIcon = this.getComponentRender().renderFunction('OrderIcon');
-        const Props: IToolbarItemProps = {
-            locale: 'ImageUploadButtonUI',
-            type: 'single',
-            label: <OrderIcon />,
-            show: true,
-            onClick: async (item: IToolbarItemProps, context: SheetContext) => {
-                const file = await FileSelected.chooseImage();
-                this.props.chooseCallback(URL.createObjectURL(file), file);
-            },
-        };
-        return <SingleButton tooltip={Props.tooltip} key={Props.locale} name={Props.locale} label={Props.label} onClick={Props.onClick} />;
+    render() {
+        // const Props: IToolbarItemProps = {
+        //     locale: 'ImageUploadButtonUI',
+        //     type: 'single',
+        //     label: <OrderIcon />,
+        //     show: true,
+        //     onClick: async (item: IToolbarItemProps, context: SheetContext) => {
+        //         const file = await FileSelected.chooseImage();
+        //         this.props.chooseCallback(URL.createObjectURL(file), file);
+        //     },
+        // };
+        // return <SingleButton tooltip={Props.tooltip} key={Props.locale} name={Props.locale} label={Props.label} onClick={Props.onClick} />;
+        return undefined;
     }
 }

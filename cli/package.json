@@ -10,6 +10,7 @@
         "module": "./lib/index.js",
         "types": "./lib/index.d.ts"
     },
+    "private": true,
     "scripts": {
         "dev": "tsc --project tsconfig.cli.json -w",
         "cli": "ts-node --project tsconfig.cli.json src/cli.ts",

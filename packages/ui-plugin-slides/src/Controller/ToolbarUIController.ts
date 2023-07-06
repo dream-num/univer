@@ -1,5 +1,5 @@
 import { BorderInfo, SlidePlugin } from '@univerjs/base-slides';
-import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren } from '@univerjs/base-ui';
+import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren, CustomComponent } from '@univerjs/base-ui';
 import { BorderType, CommandManager, DEFAULT_STYLES, HorizontalAlign, IKeyValue, PLUGIN_NAMES, Tools, UIObserver, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { SlideUIPlugin } from '..';
 import { DefaultToolbarConfig, SlideToolbarConfig, SLIDE_UI_PLUGIN_NAME } from '../Basics';
@@ -7,8 +7,6 @@ import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
 import {
     FONT_FAMILY_CHILDREN,
     FONT_SIZE_CHILDREN,
-    BORDER_LINE_CHILDREN,
-    BORDER_SIZE_CHILDREN,
     MERGE_CHILDREN,
     HORIZONTAL_ALIGN_CHILDREN,
     VERTICAL_ALIGN_CHILDREN,
@@ -18,17 +16,8 @@ import {
 
 import styles from '../View/Toolbar/index.module.less';
 
-// 继承基础下拉属性,添加国际化
-export interface BaseToolbarSelectChildrenProps extends BaseSelectChildrenProps {
-    suffixLocale?: string;
-    children?: BaseToolbarSelectChildrenProps[];
-    labelLocale?: string;
-}
-
 export interface BaseToolbarSelectProps extends BaseSelectProps {
-    suffixLocale?: string;
-    children?: BaseToolbarSelectChildrenProps[];
-    labelLocale?: string;
+    children?: BaseSelectChildrenProps[];
 }
 
 enum ToolbarType {
@@ -88,7 +77,7 @@ export class ToolbarUIController {
                 tooltip: 'toolbar.undo',
                 name: 'undo',
                 unActive: true,
-                customLabel: {
+                label: {
                     name: 'ForwardIcon',
                 },
                 show: this._config.undo,
@@ -101,7 +90,7 @@ export class ToolbarUIController {
                 toolbarType: 1,
                 tooltip: 'toolbar.redo',
                 unActive: true,
-                customLabel: {
+                label: {
                     name: 'BackIcon',
                 },
                 name: 'redo',
@@ -147,7 +136,7 @@ export class ToolbarUIController {
             {
                 toolbarType: 1,
                 tooltip: 'toolbar.bold',
-                customLabel: {
+                label: {
                     name: 'BoldIcon',
                 },
                 active: false,
@@ -161,7 +150,7 @@ export class ToolbarUIController {
             {
                 toolbarType: 1,
                 tooltip: 'toolbar.italic',
-                customLabel: {
+                label: {
                     name: 'ItalicIcon',
                 },
                 name: 'italic',
@@ -174,7 +163,7 @@ export class ToolbarUIController {
             {
                 toolbarType: 1,
                 tooltip: 'toolbar.strikethrough',
-                customLabel: {
+                label: {
                     name: 'DeleteLineIcon',
                 },
                 name: 'strikethrough',
@@ -190,7 +179,7 @@ export class ToolbarUIController {
             {
                 toolbarType: 1,
                 tooltip: 'toolbar.underline',
-                customLabel: {
+                label: {
                     name: 'UnderLineIcon',
                 },
                 name: 'underline',
@@ -206,14 +195,14 @@ export class ToolbarUIController {
             {
                 type: 5,
                 tooltip: 'toolbar.textColor.main',
-                customLabel: {
+                label: {
                     name: SLIDE_UI_PLUGIN_NAME + ColorSelect.name,
                     props: {
                         getComponent: (ref: ColorSelect) => {
                             this._colorSelect1 = ref;
                         },
                         color: '#000',
-                        customLabel: {
+                        label: {
                             name: 'TextColorIcon',
                         },
                     },
@@ -221,20 +210,19 @@ export class ToolbarUIController {
                 onClick: () => {
                     this.hideTooltip();
                     const textColor = this._toolList.find((item) => item.name === 'textColor');
-                    if (!textColor) return;
-                    if (!textColor.customLabel) return;
-                    if (!textColor.customLabel.props) return;
-                    textColor.customLabel.props.color = this._textColor;
+                    if (!textColor || !textColor.label) return;
+                    if (!(textColor.label as CustomComponent).props?.color) return;
+                    (textColor.label as CustomComponent).props!.color = this._textColor;
                     this.changeColor(this._textColor);
                 },
                 hideSelectedIcon: true,
                 className: styles.selectColorPickerParent,
                 children: [
                     {
-                        labelLocale: 'toolbar.resetColor',
+                        label: 'toolbar.resetColor',
                     },
                     {
-                        customLabel: {
+                        label: {
                             name: SLIDE_UI_PLUGIN_NAME + ColorPicker.name,
                             props: {
                                 onClick: (color: string, e: MouseEvent) => {
@@ -252,14 +240,14 @@ export class ToolbarUIController {
             {
                 type: 5,
                 tooltip: 'toolbar.fillColor.main',
-                customLabel: {
+                label: {
                     name: SLIDE_UI_PLUGIN_NAME + ColorSelect.name,
                     props: {
                         getComponent: (ref: ColorSelect) => {
                             this._colorSelect2 = ref;
                         },
                         color: '#fff',
-                        customLabel: {
+                        label: {
                             name: 'FillColorIcon',
                         },
                     },
@@ -267,20 +255,19 @@ export class ToolbarUIController {
                 onClick: () => {
                     this.hideTooltip();
                     const fillColor = this._toolList.find((item) => item.name === 'fillColor');
-                    if (!fillColor) return;
-                    if (!fillColor.customLabel) return;
-                    if (!fillColor.customLabel.props) return;
-                    fillColor.customLabel.props.color = this._background;
+                    if (!fillColor || !fillColor.label) return;
+                    if (!(fillColor.label as CustomComponent).props?.color) return;
+                    (fillColor.label as CustomComponent).props!.color = this._background;
                     this.setBackground(this._background);
                 },
                 hideSelectedIcon: true,
                 className: styles.selectColorPickerParent,
                 children: [
                     {
-                        labelLocale: 'toolbar.resetColor',
+                        label: 'toolbar.resetColor',
                     },
                     {
-                        customLabel: {
+                        label: {
                             name: SLIDE_UI_PLUGIN_NAME + ColorPicker.name,
                             props: {
                                 onClick: (color: string, e: MouseEvent) => {
@@ -295,82 +282,81 @@ export class ToolbarUIController {
                 name: 'fillColor',
                 show: this._config.fillColor,
             },
-            {
-                type: 3,
-                display: 1,
-                show: this._config.border,
-                tooltip: 'toolbar.border.main',
-                className: styles.selectDoubleString,
-                onClick: (value: string) => {
-                    if (value) {
-                        this._borderInfo.type = value as BorderType;
-                    }
-                    this.hideTooltip();
-                    this.setBorder();
-                },
-                name: 'border',
-                children: [
-                    ...BORDER_LINE_CHILDREN,
-                    {
-                        name: 'borderColor',
-                        customLabel: {
-                            name: SLIDE_UI_PLUGIN_NAME + LineColor.name,
-                            props: {
-                                color: '#000',
-                                label: 'borderLine.borderColor',
-                                getComponent: (ref: LineColor) => (this._lineColor = ref),
-                            },
-                        },
-                        unSelectable: true,
-                        className: styles.selectColorPickerParent,
-                        children: [
-                            {
-                                customLabel: {
-                                    name: SLIDE_UI_PLUGIN_NAME + ColorPicker.name,
-                                    props: {
-                                        onClick: (color: string, e: MouseEvent) => {
-                                            this._lineColor.setColor(color);
-                                            this._borderInfo.color = color;
-                                            const borderItem = this._toolList.find((item) => item.name === 'border');
-                                            const lineColor = borderItem?.children?.find((item) => item.name === 'borderColor');
-                                            if (!lineColor) return;
-                                            if (!lineColor.customLabel) return;
-                                            if (!lineColor.customLabel.props) return;
-                                            lineColor.customLabel.props.color = color;
-                                        },
-                                    },
-                                },
-                                className: styles.selectColorPicker,
-                                onClick: (...arg) => {
-                                    arg[0].stopPropagation();
-                                },
-                            },
-                        ],
-                    },
-                    {
-                        customLabel: {
-                            name: SLIDE_UI_PLUGIN_NAME + LineBold.name,
-                            props: {
-                                img: 0,
-                                label: 'borderLine.borderSize',
-                                getComponent: (ref: LineBold) => (this._lineBold = ref),
-                            },
-                        },
-                        onClick: (...arg) => {
-                            arg[0].stopPropagation();
-                            this._lineBold.setImg(BORDER_SIZE_CHILDREN[arg[2]].customLabel?.name);
-                            this._borderInfo.style = arg[1];
-                        },
-                        className: styles.selectLineBoldParent,
-                        unSelectable: true,
-                        children: BORDER_SIZE_CHILDREN,
-                    },
-                ],
-            },
+            // {
+            //     type: 3,
+            //     display: 1,
+            //     show: this._config.border,
+            //     tooltip: 'toolbar.border.main',
+            //     className: styles.selectDoubleString,
+            //     onClick: (value: string) => {
+            //         if (value) {
+            //             this._borderInfo.type = value as BorderType;
+            //         }
+            //         this.hideTooltip();
+            //         this.setBorder();
+            //     },
+            //     name: 'border',
+            //     children: [
+            //         ...BORDER_LINE_CHILDREN,
+            //         {
+            //             name: 'borderColor',
+            //             label: {
+            //                 name: SLIDE_UI_PLUGIN_NAME + LineColor.name,
+            //                 props: {
+            //                     color: '#000',
+            //                     label: 'borderLine.borderColor',
+            //                     getComponent: (ref: LineColor) => (this._lineColor = ref),
+            //                 },
+            //             },
+            //             unSelectable: true,
+            //             className: styles.selectColorPickerParent,
+            //             children: [
+            //                 {
+            //                     label: {
+            //                         name: SLIDE_UI_PLUGIN_NAME + ColorPicker.name,
+            //                         props: {
+            //                             onClick: (color: string, e: MouseEvent) => {
+            //                                 this._lineColor.setColor(color);
+            //                                 this._borderInfo.color = color;
+            //                                 const borderItem = this._toolList.find((item) => item.name === 'border');
+            //                                 const lineColor = borderItem?.children?.find((item) => item.name === 'borderColor');
+            //                                 if (!lineColor || !lineColor.label) return;
+            //                                 if (!(lineColor.label as CustomComponent).props?.color) return;
+            //                                 (lineColor.label as CustomComponent).props!.color = color;
+            //                             },
+            //                         },
+            //                     },
+            //                     className: styles.selectColorPicker,
+            //                     onClick: (...arg) => {
+            //                         arg[0].stopPropagation();
+            //                     },
+            //                 },
+            //             ],
+            //         },
+            //         {
+            //             label: {
+            //                 name: SLIDE_UI_PLUGIN_NAME + LineBold.name,
+            //                 props: {
+            //                     img: 0,
+            //                     label: 'borderLine.borderSize',
+            //                     getComponent: (ref: LineBold) => (this._lineBold = ref),
+            //                 },
+            //             },
+            //             onClick: (...arg) => {
+            //                 arg[0].stopPropagation();
+            //                 this._lineBold.setImg(BORDER_SIZE_CHILDREN[arg[2]].label?.name);
+            //                 this._borderInfo.style = arg[1];
+            //             },
+            //             className: styles.selectLineBoldParent,
+            //             unSelectable: true,
+            //             children: BORDER_SIZE_CHILDREN,
+            //         },
+            //     ],
+            // },
             {
                 type: 5,
                 tooltip: 'toolbar.mergeCell.main',
-                customLabel: {
+                label: {
                     name: 'MergeIcon',
                 },
                 show: this._config.mergeCell,

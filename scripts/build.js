@@ -1,46 +1,23 @@
 const execa = require('execa');
 const os = require('os');
-// const { targets: allTargets } = require('./util');
-
-const buildTargets = [
-    '@univerjs/core', // success
-    '@univerjs/base-render', // success
-    '@univerjs/base-sheets', // success
-
-    // '@univerjs/sheets-plugin-format',
-    // '@univerjs/sheets-plugin-formula',
-
-    '@univerjs/sheets-plugin-alternating-colors', // success
-    '@univerjs/sheets-plugin-conditional-format', // success
-    '@univerjs/sheets-plugin-data-validation', // success
-    '@univerjs/sheets-plugin-filter', // success
-    '@univerjs/sheets-plugin-find', // success
-    '@univerjs/sheets-plugin-freeze', // success
-    '@univerjs/sheets-plugin-image', // success
-    '@univerjs/sheets-plugin-insert-link', // success
-    '@univerjs/sheets-plugin-pivot-table', // success
-    '@univerjs/sheets-plugin-print', // success
-    '@univerjs/sheets-plugin-protection', // success
-    '@univerjs/sheets-plugin-screenshot', // success
-    '@univerjs/sheets-plugin-sort', // success
-    '@univerjs/sheets-plugin-split-column', // success
-
-    // '@univerjs/style-google',
-    '@univerjs/style-univer', // success
-    // '@univerjs/style-office365',
-    // '@univerjs/style-mobile',
-];
+// scripts/build.ts
+const { build } = require('esbuild');
+const { promises } = require('fs');
+const { resolve, join } = require('path');
+const { targets: allTargets, covertToPascalCase } = require('./utils');
+const { commonBuildOptions, hasFolder } = require('./common');
+const { Bright, FgCyan, FgGreen, Reset } = require('./color');
 
 // TODO: run => build d.ts => build esm/umd
 
 run();
 
 async function run() {
-    await buildAll(buildTargets);
+    await buildAll(allTargets);
 }
 // Reference https://github.com/vuejs/vue-next/blob/master/scripts/build.js
 async function buildAll(targets) {
-    await runParallel(os.cpus().length, targets, build);
+    await runParallel(os.cpus().length, targets, buildTarget);
 }
 
 async function runParallel(maxConcurrency, source, iteratorFn) {
@@ -61,29 +38,33 @@ async function runParallel(maxConcurrency, source, iteratorFn) {
     return Promise.all(ret);
 }
 
-async function build(target) {
-    await execa('pnpm', ['run', '--filter', target, 'build'], { stdio: 'inherit' });
+async function buildTarget(target) {
+    const buildPaths = {
+        entry: resolve(__dirname, `../packages/${target}/src/index.ts`),
+        // cssEntry: resolve(root, "./src/index.css"),
+        index: resolve(__dirname, `../packages/${target}/public/index.html`),
+        out: resolve(__dirname, `../packages/${target}/dist`),
+        outfile: resolve(__dirname, `../packages/${target}/dist/univer-${target}.js`),
+        outDev: resolve(__dirname, `../packages/${target}/local`),
+    };
+
+    if (hasFolder(buildPaths.outDev)) {
+        promises.rm(buildPaths.out, { recursive: true });
+    }
+
+    await build({
+        ...commonBuildOptions,
+        entryPoints: [buildPaths.entry],
+        // outdir: buildPaths.out,
+        define: { 'process.env.NODE_ENV': '"production"' },
+        format: 'esm',
+        globalName: `Univer${covertToPascalCase(target)}`,
+        outfile: buildPaths.outfile,
+        //   minify: true,
+        // outExtension:{'.js':'.cjs'}, // esm => .js, cjs => .cjs, iife => .iife.js
+        packages: 'external',
+        sourcemap: false,
+    });
+
+    console.log(`${FgGreen}Build success: ${Reset}${target}`);
 }
-
-// // scripts/build.ts
-// import { build } from 'esbuild';
-// import { promises } from 'fs';
-// import { commonBuildOptions, hasFolder, paths } from './common';
-
-// if (hasFolder(paths.outDev)) {
-//     promises.rm(paths.out, { recursive: true });
-// }
-
-// build({
-//     ...commonBuildOptions,
-//     outdir: paths.out,
-//     define: { 'process.env.NODE_ENV': '"production"' },
-//     format: 'iife',
-//     globalName: 'UniverCore',
-//     //   minify: true,
-//     // outExtension:{'.js':'.cjs'}, // esm => .js, cjs => .cjs, iife => .iife.js
-//     packages: 'external',
-//     sourcemap: false,
-// }).then(() => {
-//     promises.copyFile(paths.index, `${paths.out}/index.html`);
-// });

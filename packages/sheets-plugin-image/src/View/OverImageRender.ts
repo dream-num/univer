@@ -1,19 +1,21 @@
 import { RenderEngine, EVENT_TYPE, Scene } from '@univerjs/base-render';
 import { PLUGIN_NAMES } from '@univerjs/core';
+import { SHEET_UI_PLUGIN_NAME, SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 import { OverGridImagePlugin, OverGridImageProperty } from '../OverGridImagePlugin';
 import { OverImageShape } from './OverImageShape';
 
 export class OverImageRender {
-    static LAYER_Z_INDEX = 1000;
-
-    private _plugin: OverGridImagePlugin;
+    static LAYER_Z_INDEX: number = 1000;
 
     private _mainScene: Scene;
+
+    private _plugin: OverGridImagePlugin;
 
     private _activeShape: OverImageShape;
 
     constructor(plugin: OverGridImagePlugin) {
-        const engine = plugin.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
+        const sheetPlugin = plugin.getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
+        const engine = sheetPlugin.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
         this._plugin = plugin;
         this._mainScene = engine.getScene('mainScene')!;
         plugin.getObserver('onAddImage')!.add((eventData: OverGridImageProperty) => {

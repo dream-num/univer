@@ -14,9 +14,8 @@ interface IState {
 export class NumfmtModal extends Component<IProps, IState> {
     private _render: BaseComponentRender;
 
-    initialize(props: IProps) {
-        // super(props);
-        const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+    initialize(props: IProps): void {
+        const component = this.getContext().getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this._render = component.getComponentRender();
 
         this.state = {
@@ -24,25 +23,21 @@ export class NumfmtModal extends Component<IProps, IState> {
         };
     }
 
-    componentDidMount() {
-        const plugin = this._context.getPluginManager().getPluginByName<NumfmtPlugin>(NUMFMT_PLUGIN_NAME)!;
+    componentDidMount(): void {
+        const plugin = this.getContext().getPluginManager().getPluginByName<NumfmtPlugin>(NUMFMT_PLUGIN_NAME)!;
         plugin.getObserver('onNumfmtModalDidMountObservable')!.notifyObservers(this);
     }
 
-    setModal(modalData: ModalDataProps[]) {
-        const SheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
-
-        modalData.forEach((item) => {
-            const Label = SheetPlugin.getRegisterComponent(item.children.name);
+    setModal(modalData: ModalDataProps[]): void {
+        const SheetPlugin: SheetPlugin = this.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+        modalData.forEach((item): void => {
+            const Label = this.context.componentManager.get(item.children.name);
             if (Label) {
                 const props = item.children.props ?? {};
                 item.modal = <Label {...props} />;
             }
         });
-
-        this.setState({
-            modalData,
-        });
+        this.setState({ modalData });
     }
 
     /**
@@ -51,20 +46,21 @@ export class NumfmtModal extends Component<IProps, IState> {
      * @returns {void}
      */
     render() {
-        const Modal = this._render.renderFunction('Modal');
-        const { modalData } = this.state;
-        // Set Provider for entire Container
-        return (
-            <>
-                {modalData.map((item) => {
-                    if (!item.show) return;
-                    return (
-                        <Modal title={item.title} visible={item.show} group={item.group} onCancel={item.onCancel}>
-                            {item.modal}
-                        </Modal>
-                    );
-                })}
-            </>
-        );
+        // const Modal = this._render.renderFunction('Modal');
+        // const { modalData } = this.state;
+        // // Set Provider for entire Container
+        // return (
+        //     <>
+        //         {modalData.map((item) => {
+        //             if (!item.show) return;
+        //             return (
+        //                 <Modal title={item.title} visible={item.show} group={item.group} onCancel={item.onCancel}>
+        //                     {item.modal}
+        //                 </Modal>
+        //             );
+        //         })}
+        //     </>
+        // );
+        return <></>;
     }
 }

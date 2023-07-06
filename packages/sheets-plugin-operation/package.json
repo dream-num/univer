@@ -23,6 +23,7 @@
     "files": [
         "lib"
     ],
+    "private": false,
     "scripts": {
         "test": "jest",
         "dev": "vite",

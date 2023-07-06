@@ -1,4 +1,4 @@
-import { Context } from '@univerjs/core/src/Basics/Context';
+import { Context } from '@univerjs/core';
 import {
     cloneElement,
     Component as PreactComponent,
@@ -45,12 +45,13 @@ abstract class Component<P = {}, S = {}> extends PreactComponent<P, S> {
         if (isValidElement(label)) {
             return label;
         }
-        const Label = this.context.componentManager.get((label as CustomComponent).name);
-        if (Label) {
-            const props = (label as CustomComponent).props ?? {};
-            return <Label {...props}></Label>;
+        if (label) {
+            const Label = this.context.componentManager.get((label as CustomComponent).name);
+            if (Label) {
+                const props = (label as CustomComponent).props ?? {};
+                return <Label {...props}></Label>;
+            }
         }
-
         return null;
     }
 
@@ -82,12 +83,13 @@ abstract class PureComponent<P = {}, S = {}> extends PreactPureComponent<P, S> {
         if (isValidElement(label)) {
             return label;
         }
-        const Label = this.context.componentManager.get((label as CustomComponent).name);
-        if (Label) {
-            const props = (label as CustomComponent).props ?? {};
-            return <Label {...props}></Label>;
+        if (label) {
+            const Label = this.context.componentManager.get((label as CustomComponent).name);
+            if (Label) {
+                const props = (label as CustomComponent).props ?? {};
+                return <Label {...props}></Label>;
+            }
         }
-
         return null;
     }
 

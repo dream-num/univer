@@ -1,6 +1,4 @@
-import { Component, VNode } from '@univerjs/base-ui';
-import { PLUGIN_NAMES } from '@univerjs/core';
-import { SheetPlugin } from '@univerjs/base-sheets';
+import { ColorPickerCircleButton, Component, SiderModal, VNode } from '@univerjs/base-ui';
 import { BorderType } from '../../Enum/BorderType';
 import { NormalType } from '../../Enum/NormalType';
 import { OVER_GRID_IMAGE_PLUGIN_NAME } from '../../Const/PLUGIN_NAME';
@@ -35,10 +33,8 @@ export class ImagePanelUI extends Component<ImagePanelUIProps> {
     }
 
     render(): VNode {
-        const ColorPickerCircleButton = this.getComponentRender().renderFunction('ColorPickerCircleButton');
-        const SiderModal = this.getComponentRender().renderFunction('SiderModal');
         return (
-            <SiderModal pluginName={OVER_GRID_IMAGE_PLUGIN_NAME} title={'图片设置'} style={{}}>
+            <SiderModal name={OVER_GRID_IMAGE_PLUGIN_NAME} title={'图片设置'} style={{}}>
                 <div className={Style.imagePanelSetting}>
                     {/* 常规 */}
                     <div className={Style.section}>
@@ -119,8 +115,8 @@ export class ImagePanelUI extends Component<ImagePanelUIProps> {
     }
 
     closed() {
-        const plugin: SheetPlugin = this.getPluginByName(PLUGIN_NAMES.SPREADSHEET)!;
-        plugin.showSiderByName(OVER_GRID_IMAGE_PLUGIN_NAME, false);
+        // const plugin: SheetPlugin = this.getPluginByName(PLUGIN_NAMES.SPREADSHEET)!;
+        // plugin.showSiderByName(OVER_GRID_IMAGE_PLUGIN_NAME, false);
     }
 
     componentWillMount() {

@@ -15,9 +15,9 @@ import { SheetPlugin } from '@univerjs/base-sheets';
 import { numfmt } from '@univerjs/base-numfmt-engine';
 import { IToolbarItemProps, SHEET_UI_PLUGIN_NAME, SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 import { ACTION_NAMES } from '../Basics/Enum';
+import { NumfmtPlugin } from '../NumfmtPlugin';
 import { DEFAULT_DATA, NUMFMT_PLUGIN_NAME, NumftmConfig } from '../Basics/Const';
 import { NumfmtModel } from '../Model/NumfmtModel';
-import { NumfmtPlugin } from '../NumfmtPlugin';
 
 import styles from '../View/UI/index.module.less';
 

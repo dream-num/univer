@@ -7,6 +7,7 @@ import {
     CommandInjector,
     CommandManager,
     ActionOperation,
+    CommonParameter,
 } from './index';
 
 import { DocumentModel } from '../Docs/Domain/DocumentModel';
@@ -27,6 +28,8 @@ export class Command {
     _actionDataList: IActionData[];
 
     _actionList: Array<ActionBase<IActionData>>;
+
+    private _commonParameter = new CommonParameter();
 
     constructor(commandUnit: CommandUnit, ...list: IActionData[]) {
         this._unit = commandUnit;
@@ -67,7 +70,7 @@ export class Command {
     redo(): void {
         this._actionList.forEach((action) => {
             if (ActionOperation.hasUndo(action.getDoActionData())) {
-                action.redo();
+                action.redo(this._commonParameter.reset());
             }
         });
         CommandManager.getCommandObservers().notifyObservers({
@@ -81,9 +84,9 @@ export class Command {
         // 1. removeColumn C:E 2.insertColumnData A,
         // when undo, it should be
         // 1. removeColumn A, 2. insertColumnData C:E
-        this._actionList.reverse().forEach((action) => {
+        this._actionList.forEach((action) => {
             if (ActionOperation.hasUndo(action.getOldActionData())) {
-                action.undo();
+                action.undo(this._commonParameter.reset());
             }
         });
         CommandManager.getCommandObservers().notifyObservers({
@@ -93,6 +96,20 @@ export class Command {
     }
 
     invoke(): void {
+        this._actionDataList.forEach((data) => {
+            const ActionClass = CommandManager.getAction(data.actionName);
+            if (!ActionClass) return;
+            const observers = CommandManager.getActionObservers();
+            const action = new ActionClass(
+                data,
+                this._unit,
+                observers,
+                this._commonParameter.reset()
+            );
+
+            this._actionList.push(action);
+        });
+
         CommandManager.getCommandInjectorObservers().notifyObservers(
             this.getInjector()
         );

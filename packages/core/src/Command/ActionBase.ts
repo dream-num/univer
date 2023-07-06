@@ -1,4 +1,4 @@
-import { ActionObservers } from './index';
+import { ActionObservers, CommonParameter } from './index';
 
 /**
  * Format of action data param
@@ -86,11 +86,11 @@ export abstract class ActionBase<
         this._operation &= ~operation;
     }
 
-    abstract redo(): void;
+    abstract redo(commonParameter?: CommonParameter): void;
 
-    abstract undo(): void;
+    abstract undo(commonParameter?: CommonParameter): void;
 
-    abstract do(): R;
+    abstract do(commonParameter?: CommonParameter): R;
 
     abstract validate(): boolean;
 }

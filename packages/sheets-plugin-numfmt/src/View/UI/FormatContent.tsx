@@ -16,8 +16,7 @@ export class FormatContent extends Component<IProps, IState> {
     private _ref = createRef();
 
     initialize(props: IProps) {
-        // super(props);
-        const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = this.getContext().getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this._render = component.getComponentRender();
     }
 

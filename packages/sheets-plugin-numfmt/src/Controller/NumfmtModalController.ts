@@ -1,10 +1,11 @@
 import { ComponentChildren } from '@univerjs/base-ui';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { PLUGIN_NAMES } from '@univerjs/core';
-import { NUMBERFORMAT, NUMFMT_PLUGIN_NAME, CURRENCYDETAIL, DATEFMTLISG } from '../Basics/Const';
+import { SHEET_UI_PLUGIN_NAME, SheetUIPlugin } from '@univerjs/ui-plugin-sheets/src';
 import { NumfmtPlugin } from '../NumfmtPlugin';
 import { FormatContent } from '../View/UI/FormatContent';
 import { NumfmtModal } from '../View/UI/NumfmtModal';
+import { NUMBERFORMAT, NUMFMT_PLUGIN_NAME, CURRENCYDETAIL, DATEFMTLISG } from '../Basics/Const';
 
 interface GroupProps {
     locale: string;
@@ -28,16 +29,19 @@ export interface ModalDataProps {
 }
 
 export class NumfmtModalController {
-    private _plugin: NumfmtPlugin;
+    protected _plugin: NumfmtPlugin;
 
-    private _sheetPlugin: SheetPlugin;
+    protected _sheetUIPlugin: SheetUIPlugin;
 
-    private _numfmtModal: NumfmtModal;
+    protected _sheetPlugin: SheetPlugin;
 
-    private _modalData: ModalDataProps[];
+    protected _numfmtModal: NumfmtModal;
+
+    protected _modalData: ModalDataProps[];
 
     constructor(plugin: NumfmtPlugin) {
-        const locale = plugin.getContext().getLocale();
+        const locale = plugin.getGlobalContext().getLocale();
+        this._sheetUIPlugin = plugin.getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
         this._plugin = plugin;
         this._sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
         this._modalData = [
@@ -162,7 +166,7 @@ export class NumfmtModalController {
     }
 
     private _initRegisterComponent() {
-        this._sheetPlugin.registerComponent(NUMFMT_PLUGIN_NAME + FormatContent.name, FormatContent);
-        this._sheetPlugin.registerModal(NUMFMT_PLUGIN_NAME + NumfmtModal.name, NumfmtModal);
+        this._sheetUIPlugin.getComponentManager().register(NUMFMT_PLUGIN_NAME + FormatContent.name, FormatContent);
+        this._sheetUIPlugin.getComponentManager().register(NUMFMT_PLUGIN_NAME + NumfmtModal.name, NumfmtModal);
     }
 }

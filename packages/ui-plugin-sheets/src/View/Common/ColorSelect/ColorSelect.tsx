@@ -8,7 +8,6 @@ interface IProps extends BaseComponentProps {
 }
 
 interface IState {
-    label: ComponentChildren;
     color: string;
 }
 

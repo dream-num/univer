@@ -16,8 +16,7 @@ export class FormatContent extends Component<IProps, IState> {
     private _ref = createRef();
 
     initialize(props: IProps) {
-        // super(props);
-        const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
+        const component = this.getContext().getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this._render = component.getComponentRender();
     }
 
@@ -57,20 +56,21 @@ export class FormatContent extends Component<IProps, IState> {
      * @returns {void}
      */
     render() {
-        const { data } = this.props;
-
-        return (
-            <div className={styles.formatContent} ref={this._ref}>
-                {this.getInput()}
-                <ul>
-                    {data.map((item, index) => (
-                        <li onClick={() => this.handleClick(item.value, index)}>
-                            <span>{item.label}</span>
-                            <span>{item.suffix}</span>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        );
+        // const { data } = this.props;
+        //
+        // return (
+        //     <div className={styles.formatContent} ref={this._ref}>
+        //         {this.getInput()}
+        //         <ul>
+        //             {data.map((item, index) => (
+        //                 <li onClick={() => this.handleClick(item.value, index)}>
+        //                     <span>{item.label}</span>
+        //                     <span>{item.suffix}</span>
+        //                 </li>
+        //             ))}
+        //         </ul>
+        //     </div>
+        // );
+        return <></>;
     }
 }

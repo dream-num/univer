@@ -8,6 +8,7 @@ import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
 import { OverGridImagePlugin } from '@univerjs/sheets-plugin-image';
 import { FindPlugin } from '@univerjs/sheets-plugin-find';
 import { DEFAULT_FORMULA_DATA_DEMO, FormulaPlugin } from '@univerjs/sheets-plugin-formula';
+import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
 
 const uiDefaultConfigDemo = {
     container: 'universheet',
@@ -72,3 +73,4 @@ FindPlugin.create().installTo(universheet);
 universheet.installPlugin(new OperationPlugin());
 universheet.installPlugin(new ImportXlsxPlugin());
 universheet.installPlugin(new OverGridImagePlugin());
+universheet.installPlugin(new NumfmtPlugin());

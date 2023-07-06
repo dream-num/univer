@@ -11,8 +11,10 @@ export type SlotGroupProps = Map<string, Map<string, SlotComponent>>;
 export type SlotList = Map<string, Slot>;
 
 export class SlotManager {
+    // slot配置
     private _slotGroup: SlotGroupProps = new Map();
 
+    // slot实例
     private _slotList: SlotList = new Map();
 
     getComponent = (ref: Slot) => {

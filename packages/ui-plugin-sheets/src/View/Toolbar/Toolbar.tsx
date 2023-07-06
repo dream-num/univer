@@ -144,8 +144,6 @@ export class Toolbar extends Component<IProps, IState> {
     };
 
     setToolbar = (toolList: any[]) => {
-        // toolList = this.resetLabel(toolList);
-
         this.setState(
             {
                 toolList,

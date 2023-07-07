@@ -10,8 +10,16 @@
     "types": "./src/Types/index.d.ts",
     "publishConfig": {
         "main": "./lib/univer-sheets-plugin-data-validation.cjs.js",
-        "module": "./lib/univer-sheets-plugin-data-validation.es.js",
-        "types": "./lib/index.d.ts"
+        "module": "./lib/univer-sheets-plugin-data-validation.js",
+        "types": "./lib/index.d.ts",
+        "exports": {
+            ".": {
+                "require": "./lib/univer-sheets-plugin-data-validation.cjs.js",
+                "default": "./lib/univer-sheets-plugin-data-validation.js"
+            },
+            "./*": "./lib/*"
+        },
+        "access": "public"
     },
     "exports": {
         ".": "./src/index.ts",

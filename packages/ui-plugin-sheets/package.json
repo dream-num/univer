@@ -14,12 +14,12 @@
     "types": "./src/Types/index.d.ts",
     "publishConfig": {
         "main": "./lib/univer-ui-plugin-sheets.cjs.js",
-        "module": "./lib/univer-ui-plugin-sheets.es.js",
+        "module": "./lib/univer-ui-plugin-sheets.js",
         "types": "./lib/index.d.ts",
         "exports": {
             ".": {
                 "require": "./lib/univer-ui-plugin-sheets.cjs.js",
-                "default": "./lib/univer-ui-plugin-sheets.es.js"
+                "default": "./lib/univer-ui-plugin-sheets.js"
             },
             "./*": "./lib/*"
         },

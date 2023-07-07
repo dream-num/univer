@@ -14,12 +14,12 @@
     "types": "./src/Types/index.d.ts",
     "publishConfig": {
         "main": "./lib/univer-base-render.cjs.js",
-        "module": "./lib/univer-base-render.es.js",
+        "module": "./lib/univer-base-render.js",
         "types": "./lib/index.d.ts",
         "exports": {
             ".": {
                 "require": "./lib/univer-base-render.cjs.js",
-                "default": "./lib/univer-base-render.es.js"
+                "default": "./lib/univer-base-render.js"
             },
             "./*": "./lib/*"
         },

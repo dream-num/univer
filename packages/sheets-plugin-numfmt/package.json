@@ -10,8 +10,16 @@
     "types": "./src/Types/index.d.ts",
     "publishConfig": {
         "main": "./lib/univer-sheets-plugin-numfmt.cjs.js",
-        "module": "./lib/univer-sheets-plugin-numfmt.es.js",
-        "types": "./lib/index.d.ts"
+        "module": "./lib/univer-sheets-plugin-numfmt.js",
+        "types": "./lib/index.d.ts",
+        "exports": {
+            ".": {
+                "require": "./lib/univer-sheets-plugin-numfmt.cjs.js",
+                "default": "./lib/univer-sheets-plugin-numfmt.js"
+            },
+            "./*": "./lib/*"
+        },
+        "access": "public"
     },
     "exports": {
         ".": "./src/index.ts",

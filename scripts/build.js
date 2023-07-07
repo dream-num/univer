@@ -43,8 +43,8 @@ async function buildTarget(target) {
         entry: resolve(__dirname, `../packages/${target}/src/index.ts`),
         // cssEntry: resolve(root, "./src/index.css"),
         index: resolve(__dirname, `../packages/${target}/public/index.html`),
-        out: resolve(__dirname, `../packages/${target}/dist`),
-        outfile: resolve(__dirname, `../packages/${target}/dist/univer-${target}.js`),
+        out: resolve(__dirname, `../packages/${target}/lib`),
+        outfile: resolve(__dirname, `../packages/${target}/lib/univer-${target}.js`),
         outDev: resolve(__dirname, `../packages/${target}/local`),
     };
 

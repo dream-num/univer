@@ -14,12 +14,12 @@
     "types": "./src/Types/index.d.ts",
     "publishConfig": {
         "main": "./lib/univer-base-sheets.cjs.js",
-        "module": "./lib/univer-base-sheets.es.js",
+        "module": "./lib/univer-base-sheets.js",
         "types": "./lib/index.d.ts",
         "exports": {
             ".": {
                 "require": "./lib/univer-base-sheets.cjs.js",
-                "default": "./lib/univer-base-sheets.es.js"
+                "default": "./lib/univer-base-sheets.js"
             },
             "./*": "./lib/*"
         },

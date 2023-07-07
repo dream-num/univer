@@ -8,12 +8,12 @@
     "types": "./src/Types/index.d.ts",
     "publishConfig": {
         "main": "./lib/univer-common-plugin-data.cjs.js",
-        "module": "./lib/univer-common-plugin-data.es.js",
+        "module": "./lib/univer-common-plugin-data.js",
         "types": "./lib/index.d.ts",
         "exports": {
             ".": {
                 "require": "./lib/univer-common-plugin-data.cjs.js",
-                "default": "./lib/univer-common-plugin-data.es.js"
+                "default": "./lib/univer-common-plugin-data.js"
             },
             "./*": "./lib/*"
         },

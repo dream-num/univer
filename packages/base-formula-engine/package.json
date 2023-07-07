@@ -10,8 +10,16 @@
     "types": "./src/Types/index.d.ts",
     "publishConfig": {
         "main": "./lib/univer-base-formula-engine.cjs.js",
-        "module": "./lib/univer-base-formula-engine.es.js",
-        "types": "./lib/index.d.ts"
+        "module": "./lib/univer-base-formula-engine.js",
+        "types": "./lib/index.d.ts",
+        "exports": {
+            ".": {
+                "require": "./lib/univer-base-formula-engine.cjs.js",
+                "default": "./lib/univer-base-formula-engine.js"
+            },
+            "./*": "./lib/*"
+        },
+        "access": "public"
     },
     "exports": {
         ".": "./src/index.ts",
@@ -23,7 +31,7 @@
     "files": [
         "lib"
     ],
-    "private": true,
+    "private": false,
     "scripts": {
         "test": "jest",
         "dev": "vite",

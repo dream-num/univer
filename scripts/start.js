@@ -8,12 +8,22 @@ const esbuild = require('esbuild');
 const { promises } = require('fs');
 const { exec } = require('child_process');
 const minimist = require('minimist');
-const { commonBuildOptions, hasFolder, paths } = require('./common');
+const { resolve, join } = require('path');
+const { commonBuildOptions, hasFolder } = require('./common');
 const { Bright, FgCyan, FgGreen, Reset } = require('./color');
 
 (async () => {
     const args = minimist(process.argv.slice(2));
     const target = args.t;
+    console.info('target====', target);
+    const paths = {
+        entry: resolve(__dirname, `../examples/univer-${target}-ts/src/main.tsx`),
+        // cssEntry: resolve(root, "./src/index.css"),
+        index: resolve(__dirname, `../examples/univer-${target}-ts/public/index.html`),
+        out: resolve(__dirname, `../examples/univer-${target}-ts/dist`),
+        outDev: resolve(__dirname, `../examples/univer-${target}-ts/local`),
+    };
+
     if (hasFolder(paths.outDev)) {
         await promises.rm(paths.outDev, { recursive: true });
     }
@@ -22,6 +32,7 @@ const { Bright, FgCyan, FgGreen, Reset } = require('./color');
 
     let ctx = await esbuild.context({
         ...commonBuildOptions,
+        entryPoints: [paths.entry],
         outdir: paths.outDev,
     });
 

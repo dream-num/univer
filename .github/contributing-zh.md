@@ -1351,12 +1351,12 @@ import('@univerjs/sheets-plugin-filter').then(({ FilterPlugin }) => {
 npm run univer-cli -- build --  --include sort comment
 ```
 
-将核心和插件一起打包为一个完整的模块 `univer-custom-build.es.js`，文件位于`./cli/univer-custom-build/lib/`目录下，同级还有一个`style.css`。
+将核心和插件一起打包为一个完整的模块 `univer-custom-build.js`，文件位于`./cli/univer-custom-build/lib/`目录下，同级还有一个`style.css`。
 将这两个文件复制到你的工程项目里，引入模块即可，然后通过`univerSheetCustom`初始化整个 universheet 和插件，可以统一配置核心和插件
 
 ```js
 // 可能需要修改成你自己的模块路径
-import { univerSheetCustom } from './univer-custom-build.es.js';
+import { univerSheetCustom } from './univer-custom-build.js';
 import './style.css';
 
 // 可选的核心配置

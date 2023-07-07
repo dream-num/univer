@@ -7,7 +7,9 @@ import {
     CommandInjector,
     CommandManager,
     ActionOperation,
+    CommonParameter,
 } from './index';
+
 import { DocumentModel } from '../Docs/Domain/DocumentModel';
 
 export class CommandUnit {
@@ -21,41 +23,43 @@ export class CommandUnit {
  *
  */
 export class Command {
-    actionDataList: IActionData[];
+    _unit: CommandUnit;
 
-    unit: CommandUnit;
+    _actionDataList: IActionData[];
 
-    actionList: Array<ActionBase<IActionData>>;
+    _actionList: Array<ActionBase<IActionData>>;
+
+    private _commonParameter = new CommonParameter();
 
     constructor(commandUnit: CommandUnit, ...list: IActionData[]) {
-        this.unit = commandUnit;
-        this.actionDataList = list;
-        this.actionList = [];
+        this._unit = commandUnit;
+        this._actionDataList = list;
+        this._actionList = [];
     }
 
     getDoData(): IActionData[] {
-        return this.actionList.map((action) => action.getDoActionData());
+        return this._actionList.map((action) => action.getDoActionData());
     }
 
     getOldData(): IActionData[] {
-        return this.actionList.map((action) => action.getOldActionData());
+        return this._actionList.map((action) => action.getOldActionData());
     }
 
     getInjector(): CommandInjector {
         const commandThis = this;
         return new (class implements CommandInjector {
             injectAction(action: ActionBase<IActionData, IActionData, void>): void {
-                commandThis.actionList.push(action);
+                commandThis._actionList.push(action);
             }
 
             getActions(): Array<ActionBase<IActionData>> {
-                return commandThis.actionList.concat([]);
+                return commandThis._actionList.concat([]);
             }
 
             include<T>(action: Class<T>): Nullable<T> {
-                for (let i = 0; i < commandThis.actionList.length; i++) {
-                    if (commandThis.actionList[i] instanceof action) {
-                        return commandThis.actionList[i] as unknown as Nullable<T>;
+                for (let i = 0; i < commandThis._actionList.length; i++) {
+                    if (commandThis._actionList[i] instanceof action) {
+                        return commandThis._actionList[i] as unknown as Nullable<T>;
                     }
                 }
                 return null;
@@ -64,14 +68,14 @@ export class Command {
     }
 
     redo(): void {
-        this.actionList.forEach((action) => {
+        this._actionList.forEach((action) => {
             if (ActionOperation.hasUndo(action.getDoActionData())) {
-                action.redo();
+                action.redo(this._commonParameter.reset());
             }
         });
         CommandManager.getCommandObservers().notifyObservers({
             type: ActionType.REDO,
-            actions: this.actionList,
+            actions: this._actionList,
         });
     }
 
@@ -80,24 +84,38 @@ export class Command {
         // 1. removeColumn C:E 2.insertColumnData A,
         // when undo, it should be
         // 1. removeColumn A, 2. insertColumnData C:E
-        this.actionList.reverse().forEach((action) => {
+        this._actionList.forEach((action) => {
             if (ActionOperation.hasUndo(action.getOldActionData())) {
-                action.undo();
+                action.undo(this._commonParameter.reset());
             }
         });
         CommandManager.getCommandObservers().notifyObservers({
             type: ActionType.UNDO,
-            actions: this.actionList,
+            actions: this._actionList,
         });
     }
 
     invoke(): void {
+        this._actionDataList.forEach((data) => {
+            const ActionClass = CommandManager.getAction(data.actionName);
+            if (!ActionClass) return;
+            const observers = CommandManager.getActionObservers();
+            const action = new ActionClass(
+                data,
+                this._unit,
+                observers,
+                this._commonParameter.reset()
+            );
+
+            this._actionList.push(action);
+        });
+
         CommandManager.getCommandInjectorObservers().notifyObservers(
             this.getInjector()
         );
         CommandManager.getCommandObservers().notifyObservers({
             type: ActionType.REDO,
-            actions: this.actionList,
+            actions: this._actionList,
         });
     }
 }

@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
-import { name, version } from './package.json';
 import path from 'path';
 import createExternal from 'vite-plugin-external';
+import { name, version } from './package.json';
 
 const resolve = (url: string) => path.resolve(__dirname, url);
 
@@ -37,13 +37,13 @@ export default defineConfig({
     plugins: [
         createExternal({
             externals: {
-                'dayjs': 'dayjs',
-                'nanoid': 'nanoid',
-                'numeral': 'numeral',
+                dayjs: 'dayjs',
+                nanoid: 'nanoid',
+                numeral: 'numeral',
                 'es6-proxy-polyfill': 'es6-proxy-polyfill',
                 'reflect-metadata': 'reflect-metadata',
             },
-        })
+        }),
     ],
     resolve: {
         alias: {

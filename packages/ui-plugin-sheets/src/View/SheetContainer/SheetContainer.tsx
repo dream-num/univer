@@ -1,5 +1,4 @@
-import { BaseComponentProps, Component, Container, Content, createRef, Footer, Header, Layout, Sider, Slot } from '@univerjs/base-ui';
-import defaultSkin from '@univerjs/base-ui/Basics/CSS/Skin/default.module.less';
+import { BaseComponentProps, Component, Container, Content, createRef, Footer, Header, Layout, Sider, Slot, defaultSkin } from '@univerjs/base-ui';
 import { Tools } from '@univerjs/core';
 import cssVars from 'css-vars-ponyfill';
 import style from './index.module.less';

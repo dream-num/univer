@@ -1,4 +1,5 @@
 // @index(['./*.ts','./Action/index.ts'], f => `export * from '${f.path}'`);
+export * from './CommonParameter';
 export * from './ActionBase';
 export * from './ActionObservers';
 export * from './CommandInjectorObservers';

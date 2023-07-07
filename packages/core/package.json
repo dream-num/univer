@@ -39,6 +39,7 @@
     "files": [
         "lib"
     ],
+    "private": false,
     "scripts": {
         "test": "cross-env NODE_ENV=--experimental-vm-modules jest --config=jest.config.js",
         "dev": "vite",

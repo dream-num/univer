@@ -81,18 +81,18 @@ export class CommandManager {
 
     invoke(command: Command): void {
         const { _undoManager } = this;
-        const { _actionDataList, _unit, _actionList } = command;
+        const { actionDataList, unit, actionList } = command;
 
         // Action may be added or reissued
-        this._actionExtensionManager.handle(_actionDataList);
+        this._actionExtensionManager.handle(actionDataList);
 
-        _actionDataList.forEach((data) => {
+        actionDataList.forEach((data) => {
             const ActionClass = CommandManager.getAction(data.actionName);
             if (!ActionClass) return;
             const observers = CommandManager.getActionObservers();
-            const action = new ActionClass(data, _unit, observers);
+            const action = new ActionClass(data, unit, observers);
 
-            _actionList.push(action);
+            actionList.push(action);
         });
         command.invoke();
 

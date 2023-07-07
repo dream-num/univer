@@ -8,7 +8,6 @@ import {
     CommandManager,
     ActionOperation,
 } from './index';
-
 import { DocumentModel } from '../Docs/Domain/DocumentModel';
 
 export class CommandUnit {
@@ -22,41 +21,41 @@ export class CommandUnit {
  *
  */
 export class Command {
-    _unit: CommandUnit;
+    actionDataList: IActionData[];
 
-    _actionDataList: IActionData[];
+    unit: CommandUnit;
 
-    _actionList: Array<ActionBase<IActionData>>;
+    actionList: Array<ActionBase<IActionData>>;
 
     constructor(commandUnit: CommandUnit, ...list: IActionData[]) {
-        this._unit = commandUnit;
-        this._actionDataList = list;
-        this._actionList = [];
+        this.unit = commandUnit;
+        this.actionDataList = list;
+        this.actionList = [];
     }
 
     getDoData(): IActionData[] {
-        return this._actionList.map((action) => action.getDoActionData());
+        return this.actionList.map((action) => action.getDoActionData());
     }
 
     getOldData(): IActionData[] {
-        return this._actionList.map((action) => action.getOldActionData());
+        return this.actionList.map((action) => action.getOldActionData());
     }
 
     getInjector(): CommandInjector {
         const commandThis = this;
         return new (class implements CommandInjector {
             injectAction(action: ActionBase<IActionData, IActionData, void>): void {
-                commandThis._actionList.push(action);
+                commandThis.actionList.push(action);
             }
 
             getActions(): Array<ActionBase<IActionData>> {
-                return commandThis._actionList.concat([]);
+                return commandThis.actionList.concat([]);
             }
 
             include<T>(action: Class<T>): Nullable<T> {
-                for (let i = 0; i < commandThis._actionList.length; i++) {
-                    if (commandThis._actionList[i] instanceof action) {
-                        return commandThis._actionList[i] as unknown as Nullable<T>;
+                for (let i = 0; i < commandThis.actionList.length; i++) {
+                    if (commandThis.actionList[i] instanceof action) {
+                        return commandThis.actionList[i] as unknown as Nullable<T>;
                     }
                 }
                 return null;
@@ -65,14 +64,14 @@ export class Command {
     }
 
     redo(): void {
-        this._actionList.forEach((action) => {
+        this.actionList.forEach((action) => {
             if (ActionOperation.hasUndo(action.getDoActionData())) {
                 action.redo();
             }
         });
         CommandManager.getCommandObservers().notifyObservers({
             type: ActionType.REDO,
-            actions: this._actionList,
+            actions: this.actionList,
         });
     }
 
@@ -81,14 +80,14 @@ export class Command {
         // 1. removeColumn C:E 2.insertColumnData A,
         // when undo, it should be
         // 1. removeColumn A, 2. insertColumnData C:E
-        this._actionList.reverse().forEach((action) => {
+        this.actionList.reverse().forEach((action) => {
             if (ActionOperation.hasUndo(action.getOldActionData())) {
                 action.undo();
             }
         });
         CommandManager.getCommandObservers().notifyObservers({
             type: ActionType.UNDO,
-            actions: this._actionList,
+            actions: this.actionList,
         });
     }
 
@@ -98,7 +97,7 @@ export class Command {
         );
         CommandManager.getCommandObservers().notifyObservers({
             type: ActionType.REDO,
-            actions: this._actionList,
+            actions: this.actionList,
         });
     }
 }

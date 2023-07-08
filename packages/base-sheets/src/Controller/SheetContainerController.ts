@@ -1,26 +1,27 @@
-import { CommandManager, ISheetActionData, SheetActionBase } from '@univerjs/core';
-import { SheetPlugin } from '../SheetPlugin';
+import { CommandManager, ISheetActionData, SheetActionBase, SheetContext } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
+import { ISelectionManager, ISheetContext } from '../Services/tokens';
+import { SelectionManager } from './Selection';
+import { CanvasView } from '../View';
 // All skins' less file
 
 export class SheetContainerController {
-    private _plugin: SheetPlugin;
-
-    constructor(plugin: SheetPlugin) {
-        this._plugin = plugin;
-
+    constructor(
+        @ISelectionManager private readonly _selectionManager: SelectionManager,
+        @Inject(CanvasView) private readonly canvasView: CanvasView,
+        @ISheetContext private readonly sheetContext: SheetContext
+    ) {
         this._initialize();
     }
 
     private _initialize() {
         // Monitor all command changes and automatically trigger the refresh of the canvas
         CommandManager.getCommandObservers().add(({ actions }) => {
-            const plugin: SheetPlugin = this._plugin;
-
-            if (!plugin) return;
             if (!actions || actions.length === 0) return;
+
             const action = actions[0] as SheetActionBase<ISheetActionData, ISheetActionData, void>;
 
-            const currentUnitId = plugin.context.getWorkBook().getUnitId();
+            const currentUnitId = this.sheetContext.getWorkBook().getUnitId();
             // TODO not use try catch
             try {
                 action.getWorkBook();
@@ -36,12 +37,12 @@ export class SheetContainerController {
             const worksheet = action.getWorkBook().getActiveSheet();
             if (worksheet) {
                 try {
-                    const canvasView = plugin.getCanvasView();
+                    const canvasView = this.canvasView;
                     if (canvasView) {
+                        this._selectionManager.updateToSheet(worksheet);
                         canvasView.updateToSheet(worksheet);
-
-                        plugin.getMainComponent().makeDirty(true);
-                        plugin.getSelectionManager().renderCurrentControls(false);
+                        this.canvasView.getSheetView().getSpreadsheet().makeDirty(true);
+                        this._selectionManager.renderCurrentControls(false);
                     }
                 } catch (error) {
                     console.info(error);

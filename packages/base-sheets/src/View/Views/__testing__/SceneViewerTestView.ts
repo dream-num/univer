@@ -15,8 +15,8 @@ import {
     Viewport,
 } from '@univerjs/base-render';
 import { EventState, Worksheet } from '@univerjs/core';
-import { SheetPlugin } from '../../SheetPlugin';
-import { BaseView } from '../BaseView';
+import { SheetPlugin } from '../../../SheetPlugin';
+import { BaseView } from '../../BaseView';
 
 enum SHEET_VIEW_KEY {
     MAIN = '__SpreadsheetRender__Test',

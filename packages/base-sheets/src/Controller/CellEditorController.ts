@@ -1,5 +1,6 @@
-import { Direction, IDocumentData, IRangeData, IStyleData, Nullable, ICellData, handleJsonToDom } from '@univerjs/core';
-import { SheetPlugin } from '../SheetPlugin';
+import { Direction, IDocumentData, IRangeData, IStyleData, Nullable, ICellData, handleJsonToDom, SheetContext } from '@univerjs/core';
+import { ISelectionManager, ISheetContext } from '../Services/tokens';
+import { SelectionManager } from './Selection';
 
 /**
  * Cell Editor
@@ -10,11 +11,7 @@ export class CellEditorController {
     // current edit cell
     currentEditRangeData: IRangeData;
 
-    private _plugin: SheetPlugin;
-
-    constructor(plugin: SheetPlugin) {
-        this._plugin = plugin;
-    }
+    constructor(@ISelectionManager private readonly _selectionManager: SelectionManager, @ISheetContext private readonly _sheetContext: SheetContext) {}
 
     setEditMode(value: boolean) {
         this.isEditMode = value;
@@ -25,7 +22,7 @@ export class CellEditorController {
     }
 
     setCurrentEditRangeData() {
-        const currentCell = this._plugin.getSelectionManager().getCurrentCellModel();
+        const currentCell = this._selectionManager.getCurrentCellModel();
         if (!currentCell) return;
 
         let row;
@@ -55,15 +52,13 @@ export class CellEditorController {
     setCurrentEditRangeValue(cell: ICellData) {
         // only one selection
         const { startRow, startColumn, endRow, endColumn } = this.currentEditRangeData;
-        const range = this._plugin.getContext().getWorkBook().getActiveSheet().getRange(startRow, startColumn, endRow, endColumn);
+        const range = this._sheetContext.getWorkBook().getActiveSheet().getRange(startRow, startColumn, endRow, endColumn);
 
         range.setRangeData(cell);
-
-        // this._plugin.getMainComponent().makeDirty(true);
     }
 
     getSelectionValue(): string {
-        const range = this._plugin.getSelectionManager().getActiveRange();
+        const range = this._selectionManager.getActiveRange();
         if (!range) return '';
 
         const value = range && range.getDisplayValue();
@@ -77,11 +72,11 @@ export class CellEditorController {
     }
 
     getSelectionStyle(): Nullable<IStyleData> {
-        return this._plugin.getSelectionManager().getActiveRange()?.getTextStyle();
+        return this._selectionManager.getActiveRange()?.getTextStyle();
     }
 
     setSelectionValue(value: IDocumentData | string) {
-        const range = this._plugin.getSelectionManager().getActiveRange();
+        const range = this._selectionManager.getActiveRange();
         if (!range) return;
 
         if (typeof value === 'string') {
@@ -90,8 +85,6 @@ export class CellEditorController {
         if (typeof value === 'object') {
             range.setRangeData({ p: value });
         }
-
-        // this._plugin.getMainComponent().makeDirty(true);
     }
 
     handleBackSpace() {}

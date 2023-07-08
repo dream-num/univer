@@ -1,22 +1,14 @@
-import { UIObserver } from '@univerjs/core';
-import { SheetPlugin } from '../SheetPlugin';
+import { Context, SheetContext, UIObserver } from '@univerjs/core';
+import { IGlobalContext, ISheetContext } from '../Services/tokens';
 
 export class CountBarController {
-    private _plugin: SheetPlugin;
-
-    constructor(plugin: SheetPlugin) {
-        this._plugin = plugin;
-    }
-
-    getPlugin(): SheetPlugin {
-        return this._plugin;
-    }
+    constructor(@ISheetContext private readonly _sheetContext: SheetContext, @IGlobalContext private readonly _globalContext: Context) {}
 
     listenEventManager(): void {
         this._getCoreObserver<number>('onUIChangeObservable').add(({ name, value }) => {
             switch (name) {
                 case 'changeZoom': {
-                    const workbook = this._plugin.getContext().getWorkBook();
+                    const workbook = this._sheetContext.getWorkBook();
                     if (workbook) {
                         workbook.getActiveSheet().setZoomRatio(value!);
                     }
@@ -27,6 +19,6 @@ export class CountBarController {
     }
 
     protected _getCoreObserver<T>(type: string) {
-        return this._plugin.getGlobalContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core');
+        return this._globalContext.getObserverManager().requiredObserver<UIObserver<T>>(type, 'core');
     }
 }

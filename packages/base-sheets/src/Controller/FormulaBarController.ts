@@ -1,25 +1,11 @@
-import { SheetPlugin } from '../SheetPlugin';
-
 export class FormulaBarController {
-    private _plugin: SheetPlugin;
-
-    constructor(plugin: SheetPlugin) {
-        this._plugin = plugin;
-
-        // this._initialize();
-    }
-
     // private _initialize() {
-
     //     this._plugin.getObserver('onChangeSelectionObserver')?.add((selectionControl: SelectionControl) => {
     //         const currentCell = selectionControl.model.currentCell;
-
     //         if (currentCell) {
     //             let currentRangeData;
-
     //             if (currentCell.isMerged) {
     //                 const mergeInfo = currentCell.mergeInfo;
-
     //                 currentRangeData = {
     //                     startRow: mergeInfo.startRow,
     //                     endRow: mergeInfo.endRow,
@@ -35,19 +21,15 @@ export class FormulaBarController {
     //                     endColumn: column,
     //                 };
     //             }
-
     //             const cellData = this._plugin.getWorkbook().getActiveSheet().getRange(currentRangeData).getObjectValue({ isIncludeStyle: true });
-
     //             if (cellData) {
     //                 let cellValue = String(cellData.m || cellData.v || '');
-
     //                 // If the cell has a formula, it needs to be intercepted
     //                 const cell = this._cellInputExtensionManager.handle({
     //                     row: currentRangeData.startRow,
     //                     column: currentRangeData.startColumn,
     //                     value: cellValue,
     //                 });
-
     //                 if (cell) {
     //                     cellValue = cell.value;
     //                 }
@@ -59,6 +41,5 @@ export class FormulaBarController {
     //             }
     //         }
     //     });
-
     // }
 }

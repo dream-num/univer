@@ -1,11 +1,12 @@
 import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect } from '@univerjs/base-render';
-import { Nullable } from '@univerjs/core';
-import { DragLineDirection } from './DragLineController';
-import { SelectionManager } from './SelectionManager';
+import { Nullable, SheetContext } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
+import { DragLineController, DragLineDirection } from './DragLineController';
+import { CanvasView } from '../../View';
+import { ISheetContext } from '../../Services/tokens';
+import { IColumnTitleControllerHandlers } from './Shared';
 
 export class RowTitleController {
-    private _manager: SelectionManager;
-
     private _leftTopHeight: number;
 
     private _startOffsetX: number = 0;
@@ -22,11 +23,17 @@ export class RowTitleController {
 
     private _Item: Rect;
 
-    constructor(manager: SelectionManager) {
-        this._manager = manager;
-        this._leftTopHeight = this._manager.getSheetView().getSpreadsheetLeftTopPlaceholder().getState().height;
+    private handlers: IColumnTitleControllerHandlers | null = null;
 
-        const width = this._manager.getSheetView().getSpreadsheetSkeleton().rowTitleWidth;
+    constructor(
+        @ISheetContext private readonly _sheetContext: SheetContext,
+        @Inject(CanvasView) private readonly _canvasView: CanvasView,
+        @Inject(DragLineController) private readonly _dragLineController: DragLineController
+    ) {
+        const sheetView = this._canvasView.getSheetView();
+        this._leftTopHeight = sheetView.getSpreadsheetLeftTopPlaceholder().getState().height;
+
+        const width = sheetView.getSpreadsheetSkeleton().rowTitleWidth;
         // 创建高亮item
         this._content = new Rect('RowTitleContent', {
             width,
@@ -43,15 +50,19 @@ export class RowTitleController {
         this._highlightItem = new Group('RowTitleGroup', this._content, this._Item);
         this._highlightItem.hide();
 
-        const scene = this._manager.getScene();
+        const scene = sheetView.getScene();
 
         scene.addObject(this._highlightItem, 3);
 
         this._initialize();
     }
 
+    setHandlers(handlers: IColumnTitleControllerHandlers): void {
+        this.handlers = handlers;
+    }
+
     pointerDown(e: IPointerEvent | IMouseEvent) {
-        const main = this._manager.getMainComponent();
+        const main = this._canvasView.getSheetView().getSpreadsheet();
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = e;
         this._startOffsetX = evtOffsetX;
         this._startOffsetY = evtOffsetY;
@@ -80,21 +91,20 @@ export class RowTitleController {
             const end = rowHeightAccumulation[this._index] + this._leftTopHeight;
             const start = (this._index ? rowHeightAccumulation[this._index - 1] : 0) + this._leftTopHeight;
 
-            this._manager.getDragLineControl().create({
+            this._dragLineController.create({
                 direction: DragLineDirection.HORIZONTAL,
                 end,
                 start,
                 dragUp: this.setRowHeight.bind(this),
             });
-            this._manager.getDragLineControl().dragDown(e);
+            this._dragLineController.dragDown(e);
         }
         // 高亮当前行
         this.highlightRow();
     }
 
     setRowHeight(height: Nullable<number>) {
-        const plugin = this._manager.getPlugin();
-        const sheet = plugin.getContext().getWorkBook().getActiveSheet();
+        const sheet = this._sheetContext.getWorkBook().getActiveSheet();
         if (height === null) {
             sheet.setRowHeights(this._index, 1, 5);
         } else {
@@ -104,9 +114,9 @@ export class RowTitleController {
     }
 
     highlightRow() {
-        this._manager.clearSelectionControls();
-        const sheet = this._manager.getPlugin().getWorkbook().getActiveSheet();
-        this._manager.addControlToCurrentByRangeData(
+        this.handlers?.clearSelectionControls();
+        const sheet = this._sheetContext.getWorkBook().getActiveSheet();
+        this.handlers?.addControlToCurrentByRangeData(
             {
                 startRow: this._index,
                 startColumn: 0,
@@ -121,7 +131,7 @@ export class RowTitleController {
     }
 
     highlightRowTitle(e: IPointerEvent | IMouseEvent) {
-        const main = this._manager.getMainComponent();
+        const main = this._canvasView.getSheetView().getSpreadsheet();
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = e;
         this._startOffsetX = evtOffsetX;
         this._startOffsetY = evtOffsetY;

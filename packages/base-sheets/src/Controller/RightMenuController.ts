@@ -1,20 +1,18 @@
-import { UIObserver } from '@univerjs/core';
-import { SheetPlugin } from '../SheetPlugin';
-import { SelectionControl } from './Selection/SelectionController';
+import { Context, SheetContext, UIObserver } from '@univerjs/core';
+import { SelectionController } from './Selection/SelectionController';
 import { SelectionModel } from '../Model/SelectionModel';
+import { IGlobalContext, ISelectionManager, ISheetContext } from '../Services/tokens';
+import { SelectionManager } from './Selection';
 
 export class RightMenuController {
-    private _plugin: SheetPlugin;
-
-    constructor(plugin: SheetPlugin) {
-        this._plugin = plugin;
-    }
+    constructor(
+        @ISelectionManager private readonly _selectionManager: SelectionManager,
+        @ISheetContext private readonly _sheetContext: SheetContext,
+        @IGlobalContext private readonly _globalContext: Context
+    ) {}
 
     listenEventManager() {
-        this._plugin
-            .getContext()
-            .getUniver()
-            .getGlobalContext()
+        this._globalContext
             .getObserverManager()
             .requiredObserver<UIObserver<string>>('onUIChangeObservable', 'core')
             .add((msg) => {
@@ -53,7 +51,7 @@ export class RightMenuController {
     insertRow = () => {
         const selections = this._getSelections();
         if (selections?.length === 1) {
-            const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
+            const sheet = this._sheetContext.getWorkBook().getActiveSheet();
             sheet?.insertRowBefore(selections[0].startRow, selections[0].endRow - selections[0].startRow + 1);
         }
     };
@@ -61,7 +59,7 @@ export class RightMenuController {
     deleteRow = () => {
         const selections = this._getSelections();
         if (selections?.length === 1) {
-            const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
+            const sheet = this._sheetContext.getWorkBook().getActiveSheet();
             sheet?.deleteRows(selections[0].startRow, selections[0].endRow - selections[0].startRow + 1);
         }
     };
@@ -69,7 +67,7 @@ export class RightMenuController {
     insertColumn = () => {
         const selections = this._getSelections();
         if (selections?.length === 1) {
-            const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
+            const sheet = this._sheetContext.getWorkBook().getActiveSheet();
             sheet.insertColumnBefore(selections[0].startColumn, selections[0].endColumn - selections[0].startColumn + 1);
         }
     };
@@ -77,7 +75,7 @@ export class RightMenuController {
     deleteColumn = () => {
         const selections = this._getSelections();
         if (selections?.length === 1) {
-            const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
+            const sheet = this._sheetContext.getWorkBook().getActiveSheet();
             sheet.deleteColumns(selections[0].startColumn, selections[0].endColumn - selections[0].startColumn + 1);
         }
     };
@@ -85,7 +83,7 @@ export class RightMenuController {
     clearContent = () => {
         const selections = this._getSelections();
         if (selections?.length === 1) {
-            const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
+            const sheet = this._sheetContext.getWorkBook().getActiveSheet();
             sheet.getRange(selections[0]).clear();
         }
     };
@@ -93,7 +91,7 @@ export class RightMenuController {
     deleteCellLeft = () => {
         const selections = this._getSelections();
         if (selections?.length === 1) {
-            const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
+            const sheet = this._sheetContext.getWorkBook().getActiveSheet();
             sheet.getRange(selections[0]).deleteCells(0);
         }
     };
@@ -101,7 +99,7 @@ export class RightMenuController {
     deleteCellTop = () => {
         const selections = this._getSelections();
         if (selections?.length === 1) {
-            const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
+            const sheet = this._sheetContext.getWorkBook().getActiveSheet();
             sheet.getRange(selections[0]).deleteCells(1);
         }
     };
@@ -109,7 +107,7 @@ export class RightMenuController {
     setColumnWidth(width: string) {
         const selections = this._getSelections();
         if (selections?.length === 1) {
-            const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
+            const sheet = this._sheetContext.getWorkBook().getActiveSheet();
             sheet.setColumnWidth(selections[0].startColumn, selections[0].endColumn - selections[0].startColumn + 1, Number(width));
         }
     }
@@ -117,14 +115,14 @@ export class RightMenuController {
     setRowHeight(height: string) {
         const selections = this._getSelections();
         if (selections?.length === 1) {
-            const sheet = this._plugin.getContext().getWorkBook().getActiveSheet();
+            const sheet = this._sheetContext.getWorkBook().getActiveSheet();
             sheet.setRowHeights(selections[0].startRow, selections[0].endRow - selections[0].startRow + 1, Number(height));
         }
     }
 
     private _getSelections() {
-        const controls = this._plugin?.getSelectionManager().getCurrentControls();
-        const selections = controls?.map((control: SelectionControl) => {
+        const controls = this._selectionManager.getCurrentControls();
+        const selections = controls?.map((control: SelectionController) => {
             const model: SelectionModel = control.model;
             return {
                 startRow: model.startRow,

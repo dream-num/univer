@@ -1,6 +1,6 @@
-import { ICellInfo, ISelection, Nullable, makeCellToSelection } from '@univerjs/core';
+import { ICellInfo, ISelection, Nullable, SheetContext, makeCellToSelection } from '@univerjs/core';
 import { SELECTION_TYPE } from '../Controller/Selection/SelectionController';
-import { SheetPlugin } from '../SheetPlugin';
+import { ISheetContext } from '../Services/tokens';
 
 export class SelectionModel implements ISelection {
     private _startColumn: number;
@@ -23,11 +23,8 @@ export class SelectionModel implements ISelection {
 
     private _currentCell: Nullable<ICellInfo>;
 
-    private _plugin: SheetPlugin;
-
-    constructor(type: SELECTION_TYPE = SELECTION_TYPE.NORMAL, plugin: SheetPlugin) {
+    constructor(type: SELECTION_TYPE = SELECTION_TYPE.NORMAL, @ISheetContext private readonly _sheetContext: SheetContext) {
         this._type = type;
-        this._plugin = plugin;
     }
 
     get startColumn() {
@@ -165,8 +162,9 @@ export class SelectionModel implements ISelection {
      * Determine the type type based on the data
      */
     setTypeByData() {
-        const rowCount = this._plugin.getWorkbook().getActiveSheet().getConfig().rowCount;
-        const columnCount = this._plugin.getWorkbook().getActiveSheet().getConfig().columnCount;
+        const workbook = this._sheetContext.getWorkBook();
+        const rowCount = workbook.getActiveSheet().getConfig().rowCount;
+        const columnCount = workbook.getActiveSheet().getConfig().columnCount;
 
         if (this._startRow === 0 && this._endRow === rowCount - 1) {
             return (this._type = SELECTION_TYPE.COLUMN);

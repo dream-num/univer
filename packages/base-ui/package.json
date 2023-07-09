@@ -13,12 +13,12 @@
     "types": "./src/Types/index.d.ts",
     "publishConfig": {
         "main": "./lib/univer-base-ui.cjs.js",
-        "module": "./lib/univer-base-ui.es.js",
+        "module": "./lib/univer-base-ui.js",
         "types": "./lib/index.d.ts",
         "exports": {
             ".": {
                 "require": "./lib/univer-base-ui.cjs.js",
-                "default": "./lib/univer-base-ui.es.js"
+                "default": "./lib/univer-base-ui.js"
             },
             "./*": "./lib/*"
         },

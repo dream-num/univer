@@ -10,7 +10,7 @@
     "types": "./src/Types/index.d.ts",
     "publishConfig": {
         "main": "./lib/univer-<%= projectName %>.cjs.js",
-        "module": "./lib/univer-<%= projectName %>.es.js",
+        "module": "./lib/univer-<%= projectName %>.js",
         "types": "./lib/index.d.ts"
     },
     "exports": {

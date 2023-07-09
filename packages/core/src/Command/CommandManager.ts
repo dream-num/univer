@@ -81,10 +81,10 @@ export class CommandManager {
 
     invoke(command: Command): void {
         const { _undoManager } = this;
-        const { _actionDataList } = command;
+        const { actionDataList } = command;
 
         // Action may be added or reissued
-        this._actionExtensionManager.handle(_actionDataList);
+        this._actionExtensionManager.handle(actionDataList);
 
         command.invoke();
 

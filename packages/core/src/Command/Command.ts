@@ -1,15 +1,14 @@
 import { Class, Nullable } from '../Shared';
 import { Workbook } from '../Sheets';
 import {
-    ActionBase,
     IActionData,
     ActionType,
+    ActionBase,
     CommandInjector,
     CommandManager,
     ActionOperation,
     CommonParameter,
 } from './index';
-
 import { DocumentModel } from '../Docs/Domain/DocumentModel';
 
 export class CommandUnit {
@@ -23,59 +22,29 @@ export class CommandUnit {
  *
  */
 export class Command {
-    _unit: CommandUnit;
+    actionDataList: IActionData[];
 
-    _actionDataList: IActionData[];
+    unit: CommandUnit;
 
-    _actionList: Array<ActionBase<IActionData>>;
+    actionList: Array<ActionBase<IActionData>>;
 
     private _commonParameter = new CommonParameter();
 
     constructor(commandUnit: CommandUnit, ...list: IActionData[]) {
-        this._unit = commandUnit;
-        this._actionDataList = list;
-        this._actionList = [];
-    }
-
-    getDoData(): IActionData[] {
-        return this._actionList.map((action) => action.getDoActionData());
-    }
-
-    getOldData(): IActionData[] {
-        return this._actionList.map((action) => action.getOldActionData());
-    }
-
-    getInjector(): CommandInjector {
-        const commandThis = this;
-        return new (class implements CommandInjector {
-            injectAction(action: ActionBase<IActionData, IActionData, void>): void {
-                commandThis._actionList.push(action);
-            }
-
-            getActions(): Array<ActionBase<IActionData>> {
-                return commandThis._actionList.concat([]);
-            }
-
-            include<T>(action: Class<T>): Nullable<T> {
-                for (let i = 0; i < commandThis._actionList.length; i++) {
-                    if (commandThis._actionList[i] instanceof action) {
-                        return commandThis._actionList[i] as unknown as Nullable<T>;
-                    }
-                }
-                return null;
-            }
-        })();
+        this.unit = commandUnit;
+        this.actionDataList = list;
+        this.actionList = [];
     }
 
     redo(): void {
-        this._actionList.forEach((action) => {
+        this.actionList.forEach((action) => {
             if (ActionOperation.hasUndo(action.getDoActionData())) {
                 action.redo(this._commonParameter.reset());
             }
         });
         CommandManager.getCommandObservers().notifyObservers({
             type: ActionType.REDO,
-            actions: this._actionList,
+            actions: this.actionList,
         });
     }
 
@@ -84,30 +53,30 @@ export class Command {
         // 1. removeColumn C:E 2.insertColumnData A,
         // when undo, it should be
         // 1. removeColumn A, 2. insertColumnData C:E
-        this._actionList.forEach((action) => {
+        this.actionList.forEach((action) => {
             if (ActionOperation.hasUndo(action.getOldActionData())) {
                 action.undo(this._commonParameter.reset());
             }
         });
         CommandManager.getCommandObservers().notifyObservers({
             type: ActionType.UNDO,
-            actions: this._actionList,
+            actions: this.actionList,
         });
     }
 
     invoke(): void {
-        this._actionDataList.forEach((data) => {
+        this.actionDataList.forEach((data) => {
             const ActionClass = CommandManager.getAction(data.actionName);
             if (!ActionClass) return;
             const observers = CommandManager.getActionObservers();
             const action = new ActionClass(
                 data,
-                this._unit,
+                this.unit,
                 observers,
                 this._commonParameter.reset()
             );
 
-            this._actionList.push(action);
+            this.actionList.push(action);
         });
 
         CommandManager.getCommandInjectorObservers().notifyObservers(
@@ -115,7 +84,37 @@ export class Command {
         );
         CommandManager.getCommandObservers().notifyObservers({
             type: ActionType.REDO,
-            actions: this._actionList,
+            actions: this.actionList,
         });
+    }
+
+    getOldData(): IActionData[] {
+        return this.actionList.map((action) => action.getOldActionData());
+    }
+
+    getDoData(): IActionData[] {
+        return this.actionList.map((action) => action.getDoActionData());
+    }
+
+    getInjector(): CommandInjector {
+        const commandThis = this;
+        return new (class implements CommandInjector {
+            injectAction(action: ActionBase<IActionData, IActionData, void>): void {
+                commandThis.actionList.push(action);
+            }
+
+            getActions(): Array<ActionBase<IActionData>> {
+                return commandThis.actionList.concat([]);
+            }
+
+            include<T>(action: Class<T>): Nullable<T> {
+                for (let i = 0; i < commandThis.actionList.length; i++) {
+                    if (commandThis.actionList[i] instanceof action) {
+                        return commandThis.actionList[i] as unknown as Nullable<T>;
+                    }
+                }
+                return null;
+            }
+        })();
     }
 }

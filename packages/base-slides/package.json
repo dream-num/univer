@@ -10,8 +10,16 @@
     "types": "./src/Types/index.d.ts",
     "publishConfig": {
         "main": "./lib/univer-base-slides.cjs.js",
-        "module": "./lib/univer-base-slides.es.js",
-        "types": "./lib/index.d.ts"
+        "module": "./lib/univer-base-slides.js",
+        "types": "./lib/index.d.ts",
+        "exports": {
+            ".": {
+                "require": "./lib/univer-base-slides.cjs.js",
+                "default": "./lib/univer-base-slides.js"
+            },
+            "./*": "./lib/*"
+        },
+        "access": "public"
     },
     "exports": {
         ".": "./src/index.ts",

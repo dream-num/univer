@@ -10,8 +10,16 @@
     "types": "./src/Types/index.d.ts",
     "publishConfig": {
         "main": "./lib/univer-ui-plugin-docs.cjs.js",
-        "module": "./lib/univer-ui-plugin-docs.es.js",
-        "types": "./lib/index.d.ts"
+        "module": "./lib/univer-ui-plugin-docs.js",
+        "types": "./lib/index.d.ts",
+        "exports": {
+            ".": {
+                "require": "./lib/univer-ui-plugin-docs.cjs.js",
+                "default": "./lib/univer-ui-plugin-docs.js"
+            },
+            "./*": "./lib/*"
+        },
+        "access": "public"
     },
     "exports": {
         ".": "./src/index.ts",

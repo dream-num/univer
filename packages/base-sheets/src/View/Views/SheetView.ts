@@ -11,7 +11,7 @@ export enum SHEET_VIEW_KEY {
 }
 
 export class SheetView extends BaseView {
-    viewKey = CANVAS_VIEW_KEY.SHEET_VIEW;
+    override viewKey = CANVAS_VIEW_KEY.SHEET_VIEW;
 
     private _spreadsheetSkeleton: SpreadsheetSkeleton;
 
@@ -43,7 +43,7 @@ export class SheetView extends BaseView {
         return this._spreadsheetLeftTopPlaceholder;
     }
 
-    updateToSheet(worksheet: Worksheet) {
+    override updateToSheet(worksheet: Worksheet) {
         const scene = this.getScene();
         const spreadsheetSkeleton = this._buildSkeleton(worksheet);
         const { rowTotalHeight, columnTotalWidth, rowTitleWidth, columnTitleHeight } = spreadsheetSkeleton;
@@ -66,7 +66,7 @@ export class SheetView extends BaseView {
         this._updateViewport(rowTitleWidth, columnTitleHeight);
     }
 
-    protected _initialize() {
+    protected override _initialize() {
         const scene = this.getScene();
         const context = this.getContext();
         const workbook = context.getWorkBook();

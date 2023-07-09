@@ -120,11 +120,11 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         this._canvasEngine = engine;
     }
 
-    onMounted(ctx: SheetContext): void {
+    override onMounted(ctx: SheetContext): void {
         this.initialize(ctx);
     }
 
-    onDestroy(): void {
+    override onDestroy(): void {
         super.onDestroy();
         uninstall(this);
 

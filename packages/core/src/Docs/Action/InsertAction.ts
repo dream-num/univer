@@ -6,22 +6,25 @@ import {
     CommandUnit,
     CommonParameter,
 } from '../../Command';
-import { IDeleteTextActionData } from './DeleteAction';
+import { IDeleteActionData } from './DeleteAction';
+import { IDocumentBody } from '../../Interfaces';
+import { DOC_ACTION_NAMES } from '../../Const/DOC_ACTION_NAMES';
 
-export interface IInsertTextActionData extends IDocActionData {
-    text: string;
+export interface IInsertActionData extends IDocActionData {
+    body: IDocumentBody;
     len: number;
+    line: number;
     segmentId?: string; //The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body.
 }
 
-export class InsertTextAction extends DocActionBase<
-    IInsertTextActionData,
-    IDeleteTextActionData
+export class InsertAction extends DocActionBase<
+    IInsertActionData,
+    IDeleteActionData
 > {
-    static NAME = 'InsertTextAction';
+    static NAME = 'InsertAction';
 
     constructor(
-        actionData: IInsertTextActionData,
+        actionData: IInsertActionData,
         commandUnit: CommandUnit,
         observers: ActionObservers,
         commonParameter: CommonParameter
@@ -29,14 +32,13 @@ export class InsertTextAction extends DocActionBase<
         super(actionData, commandUnit, observers);
         this._doActionData = { ...actionData };
         this.do(commonParameter);
-        const { segmentId, text, len } = actionData;
-        // this._oldActionData = {
-        //     ...actionData,
-        //     actionName: DOC_ACTION_NAMES.DELETE_TEXT_ACTION_NAME,
-        //     cursorEnd: cursorStart + textLength,
-        //     isEndBack: isStartBack,
-        //     isCollapse: true,
-        // };
+        const { segmentId, line, len } = actionData;
+        this._oldActionData = {
+            actionName: DOC_ACTION_NAMES.DELETE_ACTION_NAME,
+            len,
+            line,
+            segmentId,
+        };
     }
 
     redo(commonParameter: CommonParameter): void {
@@ -46,7 +48,8 @@ export class InsertTextAction extends DocActionBase<
     do(commonParameter: CommonParameter): void {
         const actionData = this.getDoActionData();
         const document = this.getDocument();
-        const { text, len, segmentId } = actionData;
+        const { body, len, segmentId } = actionData;
+        commonParameter.moveCursor(len);
         // InsertTextApply(document, text, textLength, {
         //     cursorStart,
         //     isStartBack,
@@ -63,7 +66,8 @@ export class InsertTextAction extends DocActionBase<
     undo(commonParameter: CommonParameter): void {
         const actionData = this.getOldActionData();
         const document = this.getDocument();
-        // const { length, start, segmentId } = actionData;
+        const { len, segmentId } = actionData;
+        commonParameter.moveCursor(len);
         // DeleteTextApply(document, { ...actionData });
 
         this._observers.notifyObservers({
@@ -78,4 +82,4 @@ export class InsertTextAction extends DocActionBase<
     }
 }
 
-CommandManager.register(InsertTextAction.NAME, InsertTextAction);
+CommandManager.register(InsertAction.NAME, InsertAction);

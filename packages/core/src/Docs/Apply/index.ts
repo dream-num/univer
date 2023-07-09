@@ -1,2 +1,4 @@
-export * from './InsertTextApply';
-export * from './DeleteTextApply';
+export * from './InsertApply';
+export * from './DeleteApply';
+export * from './UpdateAttribute';
+export * from './UpdateDocument';

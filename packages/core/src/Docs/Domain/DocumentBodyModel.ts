@@ -1,4 +1,5 @@
 import { IDocumentBody, ITextRun } from '../../Interfaces/IDocumentData';
+import { Nullable, insertTextToContent } from '../../Shared';
 
 export type DocumentBodyModelOrSimple = DocumentBodyModelSimple | DocumentBodyModel;
 
@@ -198,11 +199,79 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         return new DocumentBodyModel(body);
     }
 
-    insert() {}
+    insert(insertBody: IDocumentBody, insertIndex = 0) {
+        const dataStream = insertBody.dataStream;
+        let dataStreamLen = dataStream.length;
+        const insertNode = this.getParagraphByTree(this.children, insertIndex);
+        if (insertNode == null) {
+            return;
+        }
+
+        if (dataStream[dataStream.length - 1] === '\n') {
+            const newBodyModel = new DocumentBodyModelSimple(insertBody);
+            dataStreamLen -= 1; // sectionBreak can not be inserted
+        } else {
+            insertNode.insertText(dataStream, insertIndex);
+
+            insertNode.endIndex += dataStreamLen;
+
+            this.foreachTop(insertNode.parent, (currentNode) => {
+                currentNode.endIndex += dataStreamLen;
+                const children = currentNode.children;
+                let isStartFix = false;
+                for (let node of children) {
+                    if (node === currentNode) {
+                        isStartFix = true;
+                    }
+
+                    if (!isStartFix) {
+                        continue;
+                    }
+
+                    this.foreachDown(node, (newNode) => {
+                        newNode.plus(dataStreamLen);
+                    });
+                }
+            });
+        }
+    }
 
     update() {}
 
     delete() {}
+
+    getParagraphByTree(
+        nodes: DataStreamTreeNode[],
+        insertIndex: number
+    ): Nullable<DataStreamTreeNode> {
+        for (let node of nodes) {
+            const { startIndex, endIndex, children } = node;
+            if (node.exclude(insertIndex)) {
+                continue;
+            }
+            if (node.nodeType === DataStreamTreeNodeType.PARAGRAPH) {
+                return node;
+            }
+            return this.getParagraphByTree(children, insertIndex);
+        }
+        return null;
+    }
+
+    foreachTop(node: DataStreamTreeNode, func: (node: DataStreamTreeNode) => void) {
+        let parent = node;
+        while (parent) {
+            func(parent);
+            parent = parent.parent;
+        }
+    }
+
+    foreachDown(node: DataStreamTreeNode, func: (node: DataStreamTreeNode) => void) {
+        func(node);
+        const children = node.children;
+        for (node of children) {
+            this.foreachDown(node, func);
+        }
+    }
 
     resetCache() {
         this.sectionBreakCurrentIndex = 0;
@@ -410,20 +479,6 @@ export class DataStreamTreeNode {
         return new DataStreamTreeNode(nodeType, bodyModel, content);
     }
 
-    forEach(
-        func: (
-            content: string,
-            startIndex: number,
-            endIndex: number,
-            type: DataStreamTreeNodeType
-        ) => void
-    ) {
-        for (let child of this.children) {
-            child.forEach(func);
-        }
-        func(this.content || '', this.startIndex, this.endIndex, this.nodeType);
-    }
-
     addBlocks(blocks: number[]) {
         this.blocks = this.blocks.concat(blocks);
     }
@@ -433,9 +488,22 @@ export class DataStreamTreeNode {
         this.endIndex = endIndex;
     }
 
-    include(index: number) {}
+    insertText(text: string, insertIndex: number) {
+        this.content = insertTextToContent(
+            this.content || '',
+            insertIndex - this.startIndex + 1,
+            text
+        );
+    }
 
-    plus(len: number) {}
+    exclude(index: number) {
+        return index < this.startIndex || index > this.endIndex;
+    }
+
+    plus(len: number) {
+        this.startIndex += len;
+        this.endIndex += len;
+    }
 
     minus(len: number) {}
 

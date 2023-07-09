@@ -1,8 +1,8 @@
 import { ITextSelectionRangeParam } from '../../Interfaces/ISelectionData';
 import { DocumentModel } from '../Domain/DocumentModel';
-import { getDocsUpdateBody } from './Common';
+import { getDocsUpdateBody } from '../../Shared/Common';
 
-export function DeleteTextApply(
+export function DeleteApply(
     document: DocumentModel,
     range: ITextSelectionRangeParam
 ) {

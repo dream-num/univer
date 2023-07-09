@@ -1,5 +1,5 @@
 import { DocActionBase, IDocActionData } from '../../Command/DocActionBase';
-import { ActionObservers, CommandUnit } from '../../Command';
+import { ActionObservers, CommandManager, CommandUnit } from '../../Command';
 
 export interface IUpdateDocumentActionData extends IDocActionData {
     text: string;
@@ -9,6 +9,8 @@ export class UpdateDocumentAction extends DocActionBase<
     IUpdateDocumentActionData,
     IUpdateDocumentActionData
 > {
+    static NAME = 'UpdateDocumentAction';
+
     constructor(
         actionData: IUpdateDocumentActionData,
         commandUnit: CommandUnit,
@@ -39,3 +41,5 @@ export class UpdateDocumentAction extends DocActionBase<
         return false;
     }
 }
+
+CommandManager.register(UpdateDocumentAction.NAME, UpdateDocumentAction);

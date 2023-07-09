@@ -1,9 +1,13 @@
 import { DocContext } from '../../Basics';
-import { Command, IActionData } from '../../Command';
-import { IDocumentData, ITextRun, ITextSelectionRange } from '../../Interfaces';
+import { Command } from '../../Command';
+import {
+    CommonParameterAttribute,
+    IDocumentBody,
+    IDocumentData,
+} from '../../Interfaces/IDocumentData';
+import { ITextSelectionRange } from '../../Interfaces/ISelectionData';
 import { DOC_ACTION_NAMES } from '../../Const/DOC_ACTION_NAMES';
-import { getDocsUpdateBody } from '../Apply/Common';
-import { Nullable, Tools } from '../../Shared';
+import { Tools, getTextIndexByCursor } from '../../Shared';
 import { DocumentBodyModel } from './DocumentBodyModel';
 import { DEFAULT_DOC } from '../../Const';
 
@@ -110,112 +114,137 @@ export class DocumentModel extends DocumentModelSimple {
         return this._unitId;
     }
 
-    insertText(
-        text: string | ITextRun,
+    insert(
+        body: IDocumentBody,
         range: ITextSelectionRange,
         segmentId?: string
     ): DocumentModel {
-        const { _context } = this;
-        const _commandManager = _context.getCommandManager();
-        const insertTextAction = {
-            actionName: DOC_ACTION_NAMES.INSERT_TEXT_ACTION_NAME,
-            ...range,
-            text,
-            segmentId,
-        };
-        const command = new Command(
-            {
-                DocumentUnit: this,
-            },
-            insertTextAction,
-            this._addTextIndexAdustAction(range, segmentId)
-        );
-        _commandManager.invoke(command);
-        return this;
-    }
+        const commandManager = this._context.getCommandManager();
 
-    deleteText(range: ITextSelectionRange, segmentId?: string): DocumentModel {
-        const { _context } = this;
-        const _commandManager = _context.getCommandManager();
-        // const deleteTextAction = {
-        //     actionName: DOC_ACTION_NAMES.DELETE_TEXT_ACTION_NAME,
-        //     ...range,
-        //     segmentId,
-        // };
+        const { cursorStart, cursorEnd, isEndBack, isStartBack, isCollapse } = range;
 
-        const deleteTextActionList = this._getDeleteTextAction(range, segmentId);
+        const textStart = getTextIndexByCursor(cursorStart, isStartBack);
 
-        const command = new Command(
-            {
-                DocumentUnit: this,
-            },
-            ...deleteTextActionList,
-            this._addTextIndexAdustAction(range, segmentId)
-        );
-        _commandManager.invoke(command);
-        return this;
-    }
+        const actionList = [];
 
-    updateText(newText: string, oldText: string, start: number, segmentId?: string) {
-        const { _context } = this;
-        const _commandManager = _context.getCommandManager();
-
-        // const deleteTextAction = {
-        //     actionName: DOC_ACTION_NAMES.DELETE_TEXT_ACTION_NAME,
-        //     text: oldText,
-        //     start: start + oldText.length,
-        //     length: oldText.length,
-        //     segmentId,
-        // };
-        const deleteTextActionList: IActionData[] = [];
-
-        if (oldText.length > 0) {
-            deleteTextActionList.push(
-                ...this._getDeleteTextAction(
-                    {
-                        cursorStart: start,
-                        isStartBack: false,
-                        isCollapse: false,
-                        cursorEnd: start + oldText.length,
-                        isEndBack: false,
-                    },
-                    segmentId
-                )
-            );
+        if (isCollapse) {
+            actionList.push({
+                actionName: DOC_ACTION_NAMES.RETAIN_ACTION_NAME,
+                len: textStart,
+                segmentId,
+            });
+        } else {
+            actionList.push(...this._getDeleteAction(range, segmentId));
         }
 
-        // const insertTextAction = {
-        //     actionName: DOC_ACTION_NAMES.INSERT_TEXT_ACTION_NAME,
-        //     text: newText,
-        //     start,
-        //     length: newText.length,
-        //     segmentId,
-        // };
-
-        const insertTextAction = {
-            actionName: DOC_ACTION_NAMES.INSERT_TEXT_ACTION_NAME,
-            cursorStart: start,
-            isStartBack: false,
-            text: newText,
+        actionList.push({
+            actionName: DOC_ACTION_NAMES.INSERT_ACTION_NAME,
+            body,
+            len: body.dataStream.length,
+            line: 0,
             segmentId,
-        };
+        });
 
         const command = new Command(
             {
                 DocumentUnit: this,
             },
-            ...deleteTextActionList,
-            insertTextAction,
-            this._addTextIndexAdustAction(
-                {
-                    cursorStart: start,
-                    cursorEnd: start + Math.max(oldText.length, newText.length),
-                    isCollapse: false,
-                    isEndBack: false,
-                    isStartBack: false,
-                },
-                segmentId
-            )
+            ...actionList
+        );
+        commandManager.invoke(command);
+        return this;
+    }
+
+    delete(range: ITextSelectionRange, segmentId?: string): DocumentModel {
+        const commandManager = this._context.getCommandManager();
+
+        const deleteActionList = this._getDeleteAction(range, segmentId);
+
+        const command = new Command(
+            {
+                DocumentUnit: this,
+            },
+            ...deleteActionList
+        );
+        commandManager.invoke(command);
+        return this;
+    }
+
+    update(
+        attribute: CommonParameterAttribute,
+        range: ITextSelectionRange,
+        segmentId?: string
+    ) {
+        const commandManager = this._context.getCommandManager();
+
+        const { cursorStart, cursorEnd, isEndBack, isStartBack } = range;
+        const actionList = [];
+
+        const textStart = getTextIndexByCursor(cursorStart, isStartBack);
+
+        const textEnd = getTextIndexByCursor(cursorEnd, isEndBack);
+
+        actionList.push({
+            actionName: DOC_ACTION_NAMES.RETAIN_ACTION_NAME,
+            len: textStart,
+            segmentId,
+        });
+
+        actionList.push({
+            actionName: DOC_ACTION_NAMES.RETAIN_ACTION_NAME,
+            len: textEnd - textStart + 1,
+            attribute,
+            segmentId,
+        });
+
+        const command = new Command(
+            {
+                DocumentUnit: this,
+            },
+            ...actionList
+        );
+        commandManager.invoke(command);
+        return this;
+    }
+
+    IMEInput(
+        newText: string,
+        oldTextLen: number,
+        start: number,
+        segmentId?: string
+    ) {
+        const _commandManager = this._context.getCommandManager();
+
+        const actionList = [];
+
+        actionList.push({
+            actionName: DOC_ACTION_NAMES.RETAIN_ACTION_NAME,
+            len: start,
+            segmentId,
+        });
+
+        actionList.push({
+            actionName: DOC_ACTION_NAMES.DELETE_ACTION_NAME,
+            len: oldTextLen,
+            line: 0,
+            segmentId,
+        });
+
+        actionList.push({
+            actionName: DOC_ACTION_NAMES.INSERT_ACTION_NAME,
+            body: {
+                dataStream: newText,
+            },
+            len: newText.length,
+            line: 0,
+            segmentId,
+        });
+
+        const command = new Command(
+            {
+                DocumentUnit: this,
+            },
+            ...actionList
         );
         _commandManager.invoke(command);
         return this;
@@ -248,236 +277,29 @@ export class DocumentModel extends DocumentModelSimple {
         }
     }
 
-    private _addTextIndexAdustAction(
-        range: ITextSelectionRange,
-        segmentId?: string
-    ) {
-        const { cursorStart, cursorEnd, isCollapse, isEndBack, isStartBack } = range;
-        return {
-            actionName: DOC_ACTION_NAMES.TEXT_INDEX_ADJUST_ACTION_NAME,
-            cursorStart,
-            cursorEnd,
-            isCollapse,
-            isEndBack,
-            isStartBack,
-            segmentId,
-        };
-    }
-
-    private _getDeleteTextAction(range: ITextSelectionRange, segmentId?: string) {
-        const { cursorStart, cursorEnd, isCollapse, isEndBack, isStartBack } = range;
-        let actionList = [];
-        if (isCollapse) {
-            actionList = this._getDeleteTextActionCollapse(range, segmentId);
-        } else {
-            actionList = this._getDeleteTextActionRange(range, segmentId);
-        }
-
-        if (actionList.length === 0) {
-            return [];
-        }
-
-        // actionList.push({
-        //     actionName: DOC_ACTION_NAMES.TEXT_INDEX_ADJUST_ACTION_NAME,
-        //     cursorStart,
-        //     cursorEnd,
-        //     isCollapse,
-        //     isEndBack,
-        //     isStartBack,
-        //     segmentId,
-        // });
-
-        return actionList;
-    }
-
-    private _getDeleteTextActionCollapse(
-        range: ITextSelectionRange,
-        segmentId?: string
-    ) {
-        const snapshot = this.snapshot;
-
-        const body = getDocsUpdateBody(snapshot, segmentId);
-
-        if (body == null) {
-            return [];
-        }
-        const { cursorStart, isCollapse, isStartBack } = range;
-
-        // const actionList = [];
-
-        let startBlockId: Nullable<string> = null;
-
-        let endBlockId: Nullable<string> = null;
-
-        let preBlockId: Nullable<string> = null;
-
-        // const { blockElements } = body;
-
-        // for (let blockElement of blockElements) {
-        //     if (blockElement == null) {
-        //         continue;
-        //     }
-
-        //     const { blockType, st, ed, blockId } = blockElement;
-
-        //     if (blockType === BlockType.PARAGRAPH) {
-        //         if (cursorStart > ed || cursorStart < st) {
-        //             continue;
-        //         }
-
-        //         if (cursorStart === st && isStartBack) {
-        //             if (blockElement.paragraph?.bullet) {
-        //                 // bullet
-        //                 actionList.push({
-        //                     actionName: DOC_ACTION_NAMES.DELETE_BULLET_ACTION_NAME,
-        //                     blockId,
-        //                     blockElement,
-        //                     segmentId,
-        //                 });
-        //             } else {
-        //                 startBlockId = preBlockId;
-        //                 endBlockId = blockId;
-        //             }
-        //         } else {
-        //             // textRun
-        //             actionList.push({
-        //                 actionName: DOC_ACTION_NAMES.DELETE_TEXT_ACTION_NAME,
-        //                 cursorStart,
-        //                 cursorEnd: cursorStart,
-        //                 isCollapse: true,
-        //                 isEndBack: isStartBack,
-        //                 isStartBack,
-        //                 segmentId,
-        //             });
-        //         }
-        //     }
-
-        //     preBlockId = blockId;
-        // }
-
-        // if (
-        //     startBlockId != null &&
-        //     endBlockId != null &&
-        //     startBlockId !== endBlockId
-        // ) {
-        //     actionList.push({
-        //         actionName: DOC_ACTION_NAMES.MERGE_PARAGRAPH_ACTION_NAME,
-        //         startBlockId,
-        //         endBlockId,
-        //         segmentId,
-        //         cursorStart,
-        //         isStartBack,
-        //     });
-        // }
-
-        return [];
-    }
-
-    private _getDeleteTextActionRange(
-        range: ITextSelectionRange,
-        segmentId?: string
-    ) {
-        const snapshot = this.snapshot;
-
-        const body = getDocsUpdateBody(snapshot, segmentId);
-
-        if (body == null) {
-            return [];
-        }
-
-        const { cursorStart, cursorEnd, isCollapse, isEndBack, isStartBack } = range;
-
+    private _getDeleteAction(range: ITextSelectionRange, segmentId?: string) {
+        const { cursorStart, cursorEnd, isEndBack, isStartBack } = range;
         const actionList = [];
 
-        let startBlockId: Nullable<string> = null;
+        const textStart = getTextIndexByCursor(cursorStart, isStartBack);
 
-        let endBlockId: Nullable<string> = null;
+        const textEnd = getTextIndexByCursor(cursorEnd, isEndBack);
 
-        return [];
+        if (textStart > 0) {
+            actionList.push({
+                actionName: DOC_ACTION_NAMES.RETAIN_ACTION_NAME,
+                len: textStart,
+                segmentId,
+            });
+        }
 
-        // const { blockElements } = body;
+        actionList.push({
+            actionName: DOC_ACTION_NAMES.DELETE_ACTION_NAME,
+            len: textEnd - textStart + 1,
+            line: 0,
+            segmentId,
+        });
 
-        // for (let blockElement of blockElements) {
-        //     if (blockElement == null) {
-        //         continue;
-        //     }
-
-        //     const { blockType, st, ed, blockId } = blockElement;
-
-        //     if (blockType === BlockType.PARAGRAPH) {
-        //         if (cursorStart > ed || cursorEnd < st) {
-        //             continue;
-        //         }
-
-        //         let start = st;
-
-        //         let end = ed;
-
-        //         let isStartBackCurrent = isStartBack;
-
-        //         let isEndBackCurrent = isEndBack;
-
-        //         if (st <= cursorStart && ed >= cursorStart) {
-        //             startBlockId = blockId;
-        //             start = cursorStart;
-        //         } else {
-        //             isStartBackCurrent = true;
-        //         }
-
-        //         if (st <= cursorEnd && ed >= cursorEnd) {
-        //             endBlockId = blockId;
-        //             end = cursorEnd;
-        //         } else {
-        //             isEndBackCurrent = false;
-        //         }
-
-        //         if (
-        //             (cursorStart < st || (cursorStart === st && isStartBack)) &&
-        //             (cursorEnd > ed || (cursorEnd === ed && !isEndBack)) &&
-        //             !isCollapse
-        //         ) {
-        //             // Paragraph
-        //             actionList.push({
-        //                 actionName: DOC_ACTION_NAMES.DELETE_PARAGRAPH_ACTION_NAME,
-        //                 cursorStart: st,
-        //                 cursorEnd: ed,
-        //                 isCollapse: false,
-        //                 isEndBack: false,
-        //                 isStartBack: true,
-        //                 blockId,
-        //                 blockElement,
-        //                 segmentId,
-        //             });
-        //         } else {
-        //             // textRun
-        //             actionList.push({
-        //                 actionName: DOC_ACTION_NAMES.DELETE_TEXT_ACTION_NAME,
-        //                 cursorStart: start,
-        //                 cursorEnd: end,
-        //                 isCollapse,
-        //                 isEndBack: isEndBackCurrent,
-        //                 isStartBack: isStartBackCurrent,
-        //                 segmentId,
-        //             });
-        //         }
-        //     }
-        // }
-
-        // if (
-        //     startBlockId != null &&
-        //     endBlockId != null &&
-        //     startBlockId !== endBlockId
-        // ) {
-        //     actionList.push({
-        //         actionName: DOC_ACTION_NAMES.MERGE_PARAGRAPH_ACTION_NAME,
-        //         startBlockId,
-        //         endBlockId,
-        //         segmentId,
-        //         cursorStart,
-        //         isStartBack,
-        //     });
-        // }
-
-        // return actionList;
+        return actionList;
     }
 }

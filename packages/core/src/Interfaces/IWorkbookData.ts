@@ -8,23 +8,23 @@ import { INamedRange } from './INamedRange';
  * Properties of a workbook's configuration
  */
 export interface IWorkbookConfig {
-    createdTime: string;
-    lastModifiedBy: string;
-    id: string; // unit id
-    locale: LocaleType;
-    name: string;
-    theme: string;
-    skin: string;
-    modifiedTime: string;
-    timeZone: string;
-    creator: string;
     appVersion: string;
-    socketUrl: string; // 协同
-    socketEnable: BooleanNumber; // 协同
+    createdTime: string;
+    creator: string;
     extensions: [];
-    styles: IKeyType<Nullable<IStyleData>>;
-    sheets: { [sheetId: string]: Partial<IWorksheetConfig> };
-    sheetOrder: string[]; // sheet id order list ['xxxx-sheet3', 'xxxx-sheet1','xxxx-sheet2']
-    pluginMeta: IKeyValue;
+    id: string; // unit id
+    lastModifiedBy: string;
+    locale: LocaleType;
+    modifiedTime: string;
+    name: string;
     namedRanges: INamedRange[];
+    pluginMeta: IKeyValue;
+    sheetOrder: string[]; // sheet id order list ['xxxx-sheet3', 'xxxx-sheet1','xxxx-sheet2']
+    sheets: { [sheetId: string]: Partial<IWorksheetConfig> };
+    skin: string;
+    socketEnable: BooleanNumber; // 协同
+    socketUrl: string; // 协同
+    styles: IKeyType<Nullable<IStyleData>>;
+    theme: string;
+    timeZone: string;
 }

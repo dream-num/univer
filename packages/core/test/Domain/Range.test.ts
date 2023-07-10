@@ -21,7 +21,7 @@ import {
     WrapStrategy,
 } from '../../src/Enum';
 import { ICellData, ICellV, IWorkbookConfig } from '../../src/Interfaces';
-import { IOCAttribute, IOCContainer } from '../../src/IOC/IOCContainer';
+import { IOCAttribute, IOCContainer } from '../../src/DI/IOCContainer';
 import { HooksManager } from '../../src/Observer/HooksManager';
 import { ObserverManager } from '../../src/Observer/ObserverManager';
 import { PluginManager } from '../../src/Plugin/PluginManager';

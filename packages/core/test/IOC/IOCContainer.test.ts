@@ -5,7 +5,7 @@ import {
     Inject,
     PreDestroy,
     PostConstruct,
-} from '../../src/IOC/IOCContainer';
+} from '../../src/DI/IOCContainer';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 

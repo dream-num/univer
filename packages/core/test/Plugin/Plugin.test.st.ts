@@ -3,7 +3,7 @@
  */
 import { SheetContext } from '../../src/Basics';
 import { Plugin, PluginManager } from '../../src/Plugin';
-import { IOCContainer } from '../../src/IOC';
+import { IOCContainer } from '../../src/DI';
 import { IOCContainerStartUpReady } from '../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));

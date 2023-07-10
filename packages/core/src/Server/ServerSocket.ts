@@ -1,6 +1,6 @@
 import { ISheetActionData } from '../Command';
+import { ICreatable } from '../DI';
 import { IWorkbookConfig } from '../Interfaces';
-import { AttributeValue, PostConstruct } from '../IOC/IOCContainer';
 import { IOSocket, IOSocketListenType } from '../Shared';
 import { MessageQueue } from './MessageQueue';
 import { IOServerMessage, IOServerReceive, ServerBase } from './ServerBase';
@@ -16,8 +16,8 @@ export enum MessageQueueStatus {
 /**
  * Manage messageQueue
  */
-export class ServerSocket extends ServerBase {
-    @AttributeValue()
+export class ServerSocket extends ServerBase implements ICreatable {
+    // TODO@huwenzhao: this should be injected
     private config: IWorkbookConfig;
 
     private globalSendResolve: Function;
@@ -28,8 +28,7 @@ export class ServerSocket extends ServerBase {
 
     private messageQueue: MessageQueue<IOServerMessage>;
 
-    @PostConstruct()
-    initialize() {
+    onCreate() {
         this.messageQueue = new MessageQueue<IOServerMessage>();
         this.status = MessageQueueStatus.WAIT;
         this.globalSendResolve = () => {};

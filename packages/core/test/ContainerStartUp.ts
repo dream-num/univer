@@ -3,7 +3,7 @@ import { CommandManager, UndoManager } from '../src/Command';
 import { Workbook, Worksheet } from '../src/Sheets/Domain';
 import { BooleanNumber } from '../src/Enum';
 import { IWorksheetConfig } from '../src/Interfaces';
-import { IOCAttribute, IOCContainer } from '../src/IOC';
+import { IOCAttribute, IOCContainer } from '../src/DI';
 import { HooksManager } from '../src/Observer/HooksManager';
 import { ObserverManager } from '../src/Observer/ObserverManager';
 import { PluginManager } from '../src/Plugin';
@@ -13,24 +13,24 @@ import { Locale } from '../src/Shared';
 export function IOCContainerStartUpReady(): IOCContainer {
     const configure = {
         value: {
-            id: '',
+            appVersion: '',
+            createdTime: '',
+            creator: '',
             extensions: [],
+            id: '',
+            lastModifiedBy: '',
+            locale: '',
+            modifiedTime: '',
+            name: '',
+            namedRanges: [],
             sheetOrder: [],
+            sheets: [],
+            skin: '',
             socketEnable: BooleanNumber.FALSE,
             socketUrl: '',
-            name: '',
-            timeZone: '',
-            appVersion: '',
-            theme: '',
-            skin: '',
-            locale: '',
-            creator: '',
             styles: [],
-            sheets: [],
-            lastModifiedBy: '',
-            createdTime: '',
-            modifiedTime: '',
-            namedRanges: [],
+            theme: '',
+            timeZone: '',
         },
     };
     const attribute = new IOCAttribute(configure);

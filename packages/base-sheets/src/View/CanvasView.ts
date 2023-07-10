@@ -111,29 +111,25 @@ export class CanvasView {
         });
 
         scene.addViewport(viewMain, viewLeft, viewTop, viewLeftTop).attachControl();
+
         // 鼠标滚轮缩放
         scene.on(EVENT_TYPE.wheel, (evt: unknown, state: EventState) => {
             const e = evt as IWheelEvent;
             if (e.ctrlKey) {
                 const deltaFactor = Math.abs(e.deltaX);
-                let scrollNum = deltaFactor < 40 ? 0.2 : deltaFactor < 80 ? 0.4 : 0.2;
-                scrollNum *= e.deltaY > 0 ? -1 : 1;
+                let ratioDelta = deltaFactor < 40 ? 0.2 : deltaFactor < 80 ? 0.4 : 0.2;
+                ratioDelta *= e.deltaY > 0 ? -1 : 1;
                 if (scene.scaleX < 1) {
-                    scrollNum /= 2;
+                    ratioDelta /= 2;
                 }
 
-                if (scene.scaleX + scrollNum > 4) {
-                    scene.scale(4, 4);
-                } else if (scene.scaleX + scrollNum < 0.1) {
-                    scene.scale(0.1, 0.1);
-                } else {
-                    const sheet = context.getWorkBook().getActiveSheet();
-                    const value = e.deltaY > 0 ? 0.1 : -0.1;
+                const sheet = context.getWorkBook().getActiveSheet();
+                const currentRatio = sheet.getZoomRatio();
+                let nextRatio = +parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
+                nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
+                sheet.setZoomRatio(nextRatio);
 
-                    sheet.setZoomRatio(sheet.getZoomRatio() + value);
-                    // scene.scaleBy(scrollNum, scrollNum);
-                    e.preventDefault();
-                }
+                e.preventDefault();
             } else {
                 viewMain.onMouseWheel(e, state);
             }
@@ -147,6 +143,7 @@ export class CanvasView {
 
         engine.runRenderLoop(() => {
             scene.render();
+
             const app = document.getElementById('app');
             if (app) {
                 app.innerText = `fps:${Math.round(engine.getFps()).toString()}`;

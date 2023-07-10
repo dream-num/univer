@@ -34,7 +34,7 @@ export class EditTooltips extends Rect<EditTooltipsProps> {
         this.translateLeft = 0;
     }
 
-    static drawWith(ctx: CanvasRenderingContext2D, props: EditTooltips): void {
+    static override drawWith(ctx: CanvasRenderingContext2D, props: EditTooltips): void {
         if (props.text) {
             ctx.font = `${props.textSize}px Arial`;
             const metrics = ctx.measureText(props.text);
@@ -97,7 +97,7 @@ export class EditTooltips extends Rect<EditTooltipsProps> {
         this.makeDirty(true);
     }
 
-    protected _draw(ctx: CanvasRenderingContext2D) {
+    protected override _draw(ctx: CanvasRenderingContext2D) {
         super._draw(ctx);
         EditTooltips.drawWith(ctx, this);
     }

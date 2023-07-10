@@ -14,7 +14,7 @@ import { SheetPlugin } from '../../SheetPlugin';
  * TODO insertColumn/insertRange/insertRange/deleteRange
  */
 export class NamedRangeActionExtension extends BaseActionExtension<SheetPlugin> {
-    execute() {
+    override execute() {
         const actionDataList = this.actionDataList;
 
         actionDataList.forEach((actionData) => {
@@ -50,11 +50,11 @@ export class NamedRangeActionExtension extends BaseActionExtension<SheetPlugin> 
 }
 
 export class NamedRangeActionExtensionFactory extends BaseActionExtensionFactory<SheetPlugin> {
-    get zIndex(): number {
+    override get zIndex(): number {
         return 3;
     }
 
-    create(actionDataList: ISheetActionData[]): BaseActionExtension<SheetPlugin> {
+    override create(actionDataList: ISheetActionData[]): BaseActionExtension<SheetPlugin> {
         return new NamedRangeActionExtension(actionDataList, this._plugin);
     }
 }

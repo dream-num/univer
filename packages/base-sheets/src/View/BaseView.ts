@@ -1,35 +1,31 @@
 import { Scene } from '@univerjs/base-render';
-import { Registry, Worksheet } from '@univerjs/core';
-import { SheetPlugin } from '../SheetPlugin';
+import { Registry, SheetContext, Worksheet } from '@univerjs/core';
+import { Injector } from '@wendellhu/redi';
+import { ISheetContext } from '../Services/tokens';
 
 export class BaseView {
     viewKey = '';
 
+    protected _injector: Injector;
+
     private _scene: Scene;
 
-    private _plugin: SheetPlugin;
-
-    // constructor(private _scene: Scene, private _plugin: Plugin) {
-    //     this._initialize();
-    // }
+    private _context: SheetContext;
 
     getScene() {
         return this._scene;
     }
 
-    getPlugin() {
-        return this._plugin;
-    }
-
     getContext() {
-        return this._plugin.getContext();
+        return this._context;
     }
 
     updateToSheet(worksheet: Worksheet) {}
 
-    initialize(scene: Scene, plugin: SheetPlugin) {
+    initialize(scene: Scene, injector: Injector) {
+        this._injector = injector;
+        this._context = injector.get(ISheetContext);
         this._scene = scene;
-        this._plugin = plugin;
         this._initialize();
         return this;
     }

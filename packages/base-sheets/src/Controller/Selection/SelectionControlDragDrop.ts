@@ -1,7 +1,9 @@
 import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect, ScrollTimer } from '@univerjs/base-render';
-import { Direction, ISelection, makeCellToSelection, Nullable, Observer } from '@univerjs/core';
+import { Direction, ICellInfo, ISelection, makeCellToSelection, Nullable, Observer } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 import { SelectionModel } from '../../Model';
-import { DEFAULT_SELECTION_CONFIG, SelectionControl, SELECTION_TYPE } from './SelectionController';
+import { DEFAULT_SELECTION_CONFIG, SELECTION_TYPE } from './SelectionController';
+import { CanvasView } from '../../View';
 
 enum SELECTION_DRAG_KEY {
     Selection = '__SelectionDragShape__',
@@ -16,6 +18,16 @@ interface IPositionOffset {
     right: number;
     top: number;
     bottom: number;
+}
+
+export interface ISelectionControlDragDropHandler {
+    leftControl: Rect;
+    rightControl: Rect;
+    topControl: Rect;
+    bottomControl: Rect;
+    fillControl: Rect;
+
+    update(newSelectionRange: ISelection, highlight: Nullable<ICellInfo>): void;
 }
 
 export class SelectionControlDragAndDrop {
@@ -45,14 +57,21 @@ export class SelectionControlDragAndDrop {
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
-    constructor(private _control: SelectionControl) {
-        this._zIndex = _control.zIndex + 1;
-        this._model = _control.model;
+    constructor(
+        zIndex: number,
+        model: SelectionModel,
+        private readonly _handlers: ISelectionControlDragDropHandler,
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(CanvasView) private readonly _canvasView: CanvasView
+    ) {
+        this._zIndex = zIndex + 1;
+        this._model = model;
+
         this._initialize();
     }
 
-    static create(control: SelectionControl) {
-        return new SelectionControlDragAndDrop(control);
+    static create(injector: Injector, zIndex: number, model: SelectionModel, handler: ISelectionControlDragDropHandler) {
+        return injector.createInstance(SelectionControlDragAndDrop, zIndex, model, handler);
     }
 
     dragEventInitial() {
@@ -60,11 +79,11 @@ export class SelectionControlDragAndDrop {
     }
 
     dragDown(evt: IPointerEvent | IMouseEvent, direction: Direction) {
-        const main = this._control.getPlugin().getMainComponent();
+        const main = this._canvasView.getSheetView().getSpreadsheet();
 
         // reset model
         const selection = this._model.getValue().selection;
-        this._model = new SelectionModel(SELECTION_TYPE.NORMAL, this._control.getPlugin());
+        this._model = this._injector.createInstance(SelectionModel, SELECTION_TYPE.NORMAL);
         this._model.setValue(selection);
 
         // update control
@@ -123,7 +142,7 @@ export class SelectionControlDragAndDrop {
             right: this._model.endColumn - startSelectionRange.endColumn,
         };
 
-        const scene = this._control.getScene();
+        const scene = this._canvasView.getSheetView().getScene();
 
         scene.disableEvent();
 
@@ -148,7 +167,7 @@ export class SelectionControlDragAndDrop {
     }
 
     dragMoving(moveEvt: IPointerEvent | IMouseEvent) {
-        const main = this._control.getPlugin().getMainComponent();
+        const main = this._canvasView.getSheetView().getSpreadsheet();
         const { offsetX: moveOffsetX, offsetY: moveOffsetY, clientX, clientY } = moveEvt;
 
         const scrollXY = main.getAncestorScrollXY(this._startOffsetX, this._startOffsetY);
@@ -212,7 +231,7 @@ export class SelectionControlDragAndDrop {
     }
 
     dragUp() {
-        const main = this._control.getPlugin().getMainComponent();
+        const main = this._canvasView.getSheetView().getSpreadsheet();
 
         this.hide();
 
@@ -220,7 +239,9 @@ export class SelectionControlDragAndDrop {
 
         // By default, the upper left corner is the active cell
         const cell = main.getCellByIndex(selection.startRow, selection.startColumn);
-        this._control.update(selection, cell);
+
+        // TODO@huwenzhao: add a handler here
+        this._handlers.update(selection, cell);
     }
 
     _updateControl() {
@@ -257,7 +278,8 @@ export class SelectionControlDragAndDrop {
     }
 
     remove() {
-        const { leftControl, rightControl, topControl, bottomControl } = this._control;
+        const { leftControl, rightControl, topControl, bottomControl } = this._handlers;
+
         leftControl.onPointerEnterObserver.clear();
         leftControl.onPointerLeaveObserver.clear();
         rightControl.onPointerEnterObserver.clear();
@@ -269,11 +291,8 @@ export class SelectionControlDragAndDrop {
     }
 
     private _initialize() {
-        const plugin = this._control.getPlugin();
+        const { leftControl, rightControl, topControl, bottomControl, fillControl } = this._handlers;
 
-        const main = plugin.getMainComponent();
-
-        const { leftControl, rightControl, topControl, bottomControl, fillControl } = this._control;
         leftControl.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
             leftControl.cursor = CURSOR_TYPE.MOVE;
         });
@@ -350,7 +369,7 @@ export class SelectionControlDragAndDrop {
 
         this._selectionDragShape.zIndex = zIndex;
 
-        const scene = this._control.getScene();
+        const scene = this._canvasView.getSheetView().getScene();
         scene.addObject(this._selectionDragShape);
     }
 }

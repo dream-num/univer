@@ -1,9 +1,10 @@
-import { Rect, Group, Spreadsheet } from '@univerjs/base-render';
+import { Rect, Group } from '@univerjs/base-render';
 import { Nullable, ISelection, ICellInfo } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 import { SelectionModel } from '../../Model/SelectionModel';
 import { SelectionControlDragAndDrop } from './SelectionControlDragDrop';
 import { SelectionControlFill } from './SelectionControlFill';
-import { SelectionManager } from './SelectionManager';
+import { CanvasView } from '../../View';
 
 // export enum DEFAULT_SELECTION_CONFIG {
 //     strokeColor = 'rgb(1,136,251)',
@@ -47,9 +48,7 @@ enum SELECTION_MANAGER_KEY {
 /**
  * The main selection canvas component
  */
-export class SelectionControl {
-    private _mainComponent: Spreadsheet;
-
+export class SelectionController {
     private _leftControl: Rect;
 
     private _rightControl: Rect;
@@ -76,7 +75,7 @@ export class SelectionControl {
 
     private _selectionControlFill: SelectionControlFill;
 
-    constructor(private _manager: SelectionManager, private _zIndex: number) {
+    constructor(private _zIndex: number, @Inject(Injector) private readonly _injector: Injector, @Inject(CanvasView) private readonly _canvasView: CanvasView) {
         this._initialize();
     }
 
@@ -128,15 +127,15 @@ export class SelectionControl {
         return this._selectionModel;
     }
 
-    static create(manager: SelectionManager, zIndex: number) {
-        return new this(manager, zIndex);
+    static create(injector: Injector, zIndex: number) {
+        return injector.createInstance(this, zIndex);
     }
 
-    static fromJson(manager: SelectionManager, zIndex: number, newSelectionRange: ISelection) {
-        const control = SelectionControl.create(manager, zIndex);
-        control.update(newSelectionRange);
-        return control;
-    }
+    // static fromJson(zIndex: number, newSelectionRange: ISelection) {
+    //     const control = SelectionController.create(zIndex);
+    //     control.update(newSelectionRange);
+    //     return control;
+    // }
 
     /**
      * just handle the view
@@ -234,14 +233,6 @@ export class SelectionControl {
         this._selectionDragAndDrop.dispose();
     }
 
-    getScene() {
-        return this._manager.getScene();
-    }
-
-    getPlugin() {
-        return this._manager.getPlugin();
-    }
-
     /**
      * Get the cell information of the current selection, considering the case of merging cells
      */
@@ -283,7 +274,7 @@ export class SelectionControl {
     }
 
     private _initialize() {
-        this._selectionModel = new SelectionModel(SELECTION_TYPE.NORMAL, this._manager.getPlugin());
+        this._selectionModel = this._injector.createInstance(SelectionModel, SELECTION_TYPE.NORMAL);
         const zIndex = this._zIndex;
         this._leftControl = new Rect(SELECTION_MANAGER_KEY.left + zIndex, {
             top: 0,
@@ -358,12 +349,20 @@ export class SelectionControl {
 
         this._selectionShape.zIndex = zIndex;
 
-        this._selectionDragAndDrop = SelectionControlDragAndDrop.create(this);
+        this._selectionDragAndDrop = SelectionControlDragAndDrop.create(this._injector, this._zIndex, this._selectionModel, {
+            leftControl: this.leftControl,
+            rightControl: this.rightControl,
+            topControl: this.topControl,
+            bottomControl: this.bottomControl,
+            fillControl: this.fillControl,
+            update: this.update.bind(this),
+        });
 
-        this._selectionControlFill = SelectionControlFill.create(this);
+        this._selectionControlFill = SelectionControlFill.create(this._injector, {
+            fillControl: this.fillControl,
+        });
 
-        const scene = this.getScene();
-        scene.addObject(this._selectionShape);
+        this._canvasView.getSheetView().getScene().addObject(this._selectionShape);
     }
 
     private _updateBackgroundControl() {

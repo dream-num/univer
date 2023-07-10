@@ -29,6 +29,7 @@
         "jsx": "react-jsx",
         "jsxImportSource": "preact",
         "strictPropertyInitialization": false,
+        "noImplicitOverride": true,
         "types": [
             "jest",
             "node",

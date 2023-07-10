@@ -1,17 +1,16 @@
-import { CommandManager, SetWorkSheetActivateAction } from '@univerjs/core';
-import { Layer } from '@univerjs/base-render';
+import { CommandManager, SetWorkSheetActivateAction, SheetContext } from '@univerjs/core';
+import { Engine, Layer } from '@univerjs/base-render';
+
 import { EditTooltips, EditTooltipsProps } from '../View/Views';
-import { SheetPlugin } from '../SheetPlugin';
+import { IRenderingEngine, ISheetContext } from '../Services/tokens';
+import { CANVAS_VIEW_KEY } from '../View';
 
 export class EditTooltipsController {
     _editTooltipsPage: Map<string, Map<string, EditTooltips>>;
 
-    _plugin: SheetPlugin;
-
     _layer: Layer;
 
-    constructor(plugin: SheetPlugin) {
-        this._plugin = plugin;
+    constructor(@IRenderingEngine private readonly _engine: Engine, @ISheetContext private readonly _sheetContext: SheetContext) {
         this._editTooltipsPage = new Map();
         CommandManager.getActionObservers().add((event) => {
             const data = event.data;
@@ -62,7 +61,7 @@ export class EditTooltipsController {
     }
 
     setRowColumn(key: string, sheetId: string, row: number, column: number): void {
-        const sheet = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(sheetId);
+        const sheet = this._sheetContext.getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(sheetId);
         const editTooltips = this.createIfEditTooltips(key, sheetId);
         if (sheet) {
             let merges = sheet.getMerges().getByRowColumn(row, column);
@@ -108,9 +107,9 @@ export class EditTooltipsController {
     }
 
     refreshEditTooltips(): void {
-        const sheet = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+        const sheet = this._sheetContext.getUniver().getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
         const sheetPage = this._editTooltipsPage.get(sheet.getSheetId());
-        const scene = this._plugin.getMainScene();
+        const scene = this._engine.getScene(CANVAS_VIEW_KEY.MAIN_SCENE);
         if (scene) {
             if (this._layer == null) {
                 this._layer = new Layer(scene, [], 3);

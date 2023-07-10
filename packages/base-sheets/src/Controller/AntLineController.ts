@@ -1,8 +1,10 @@
-import { Workbook } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
+
+import { SheetContext, Workbook } from '@univerjs/core';
 import { Rect, Scene } from '@univerjs/base-render';
-import { SheetView } from '../View/Views';
 import { AntLine, AntLineModel, IAntLineRange } from '../Model/AntLineModel';
-import { SheetPlugin } from '../SheetPlugin';
+import { ISheetContext } from '../Services/tokens';
+import { CanvasView } from '../View';
 
 enum ANT_LINE_MANAGER_KEY {
     AntLine = '__AntLineShape__',
@@ -14,31 +16,22 @@ enum ANT_LINE_MANAGER_KEY {
 export class AntLineControl {
     private _antLineModelList: AntLineModel[];
 
-    private _plugin: SheetPlugin;
-
     private _activeSheetId: string;
 
     /**
      * Create AntLineController
-     * @param plugin
      */
-    constructor(plugin: SheetPlugin) {
-        this._plugin = plugin;
+    constructor(@ISheetContext private readonly _sheetContext: SheetContext, @Inject(CanvasView) private readonly _canvasView: CanvasView) {
         this._antLineModelList = [];
-        plugin
-            .getContext()
-            .getContextObserver('onAfterChangeActiveSheetObservable')
-            .add(() => {
-                this._activeSheetId = plugin.getWorkbook().getActiveSheet().getSheetId();
-                this._makeUpdateSceneAntLineRect();
-            });
-        plugin
-            .getContext()
-            .getContextObserver('onSheetRenderDidMountObservable')
-            .add(() => {
-                this._activeSheetId = plugin.getWorkbook().getActiveSheet().getSheetId();
-                this._makeUpdateSceneAntLineRect();
-            });
+
+        this._sheetContext.getContextObserver('onAfterChangeActiveSheetObservable').add(() => {
+            this._activeSheetId = this._sheetContext.getWorkBook().getActiveSheet().getSheetId();
+            this._makeUpdateSceneAntLineRect();
+        });
+        this._sheetContext.getContextObserver('onSheetRenderDidMountObservable').add(() => {
+            this._activeSheetId = this._sheetContext.getWorkBook().getActiveSheet().getSheetId();
+            this._makeUpdateSceneAntLineRect();
+        });
     }
 
     /**
@@ -63,27 +56,19 @@ export class AntLineControl {
     }
 
     /**
-     * Return SheetView
-     * @returns
-     */
-    getSheetView(): SheetView {
-        return this._plugin.getCanvasView().getSheetView();
-    }
-
-    /**
      * Return WorkBook
      * @returns Workbook
      */
-    getWorkBook(): Workbook {
-        return this._plugin.getWorkbook();
+    private getWorkBook(): Workbook {
+        return this._sheetContext.getWorkBook();
     }
 
     /**
      * Return SheetView Scene
      * @returns
      */
-    getSheetViewScene(): Scene {
-        return this._plugin.getCanvasView().getSheetView().getScene();
+    private getSheetViewScene(): Scene {
+        return this._canvasView.getSheetView().getScene();
     }
 
     /**

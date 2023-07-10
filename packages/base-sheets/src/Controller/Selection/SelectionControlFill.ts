@@ -1,24 +1,27 @@
-import { CURSOR_TYPE, IMouseEvent, IPointerEvent } from '@univerjs/base-render';
-import { SelectionControl } from './SelectionController';
+import { CURSOR_TYPE, IMouseEvent, IPointerEvent, Rect } from '@univerjs/base-render';
+import { Injector } from '@wendellhu/redi';
+
+export interface ISelectionControlHandler {
+    fillControl: Rect;
+}
 
 export class SelectionControlFill {
-    constructor(private _control: SelectionControl) {
+    constructor(private readonly _handler: ISelectionControlHandler) {
         this._initialize();
     }
 
-    static create(control: SelectionControl) {
-        return new SelectionControlFill(control);
+    static create(injector: Injector, handler: ISelectionControlHandler) {
+        return injector.createInstance(SelectionControlFill, handler);
     }
 
     remove() {
-        const { fillControl } = this._control;
+        const { fillControl } = this._handler;
         fillControl.onPointerEnterObserver.clear();
         fillControl.onPointerLeaveObserver.clear();
     }
 
     private _initialize() {
-        const { fillControl } = this._control;
-        const plugin = this._control.getPlugin();
+        const { fillControl } = this._handler;
         fillControl.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
             fillControl.cursor = CURSOR_TYPE.CROSSHAIR;
         });

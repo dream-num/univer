@@ -1,8 +1,7 @@
 import { getColor, Rect, Scene, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, SpreadsheetSkeleton } from '@univerjs/base-render';
 import { Worksheet } from '@univerjs/core';
+import { Injector } from '@wendellhu/redi';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from '../BaseView';
-import { SelectionManager } from '../../Controller/Selection/SelectionManager';
-import { SheetPlugin } from '../../SheetPlugin';
 
 export enum SHEET_VIEW_KEY {
     MAIN = '__SpreadsheetRender__',
@@ -12,9 +11,7 @@ export enum SHEET_VIEW_KEY {
 }
 
 export class SheetView extends BaseView {
-    viewKey = CANVAS_VIEW_KEY.SHEET_VIEW;
-
-    private _selectionManager: SelectionManager;
+    override viewKey = CANVAS_VIEW_KEY.SHEET_VIEW;
 
     private _spreadsheetSkeleton: SpreadsheetSkeleton;
 
@@ -25,14 +22,6 @@ export class SheetView extends BaseView {
     private _spreadsheetColumnTitle: SpreadsheetColumnTitle;
 
     private _spreadsheetLeftTopPlaceholder: Rect;
-
-    getSelectionManager() {
-        return this._selectionManager;
-    }
-
-    getSelectionControls() {
-        return this._selectionManager.getCurrentControls();
-    }
 
     getSpreadsheetSkeleton() {
         return this._spreadsheetSkeleton;
@@ -54,7 +43,7 @@ export class SheetView extends BaseView {
         return this._spreadsheetLeftTopPlaceholder;
     }
 
-    updateToSheet(worksheet: Worksheet) {
+    override updateToSheet(worksheet: Worksheet) {
         const scene = this.getScene();
         const spreadsheetSkeleton = this._buildSkeleton(worksheet);
         const { rowTotalHeight, columnTotalWidth, rowTitleWidth, columnTitleHeight } = spreadsheetSkeleton;
@@ -75,10 +64,9 @@ export class SheetView extends BaseView {
             // height: this._rowHeightByTitle(worksheet) + rowTotalHeight + 200,
         });
         this._updateViewport(rowTitleWidth, columnTitleHeight);
-        this._selectionManager.updateToSheet(worksheet);
     }
 
-    protected _initialize() {
+    protected override _initialize() {
         const scene = this.getScene();
         const context = this.getContext();
         const workbook = context.getWorkBook();
@@ -121,8 +109,6 @@ export class SheetView extends BaseView {
         });
 
         this._updateViewport(rowTitleWidth, columnTitleHeight);
-
-        this._selectionManager = new SelectionManager(this);
     }
 
     private _updateViewport(rowTitleWidth: number, columnTitleHeight: number) {
@@ -182,12 +168,13 @@ export class SheetView extends BaseView {
 export class SheetViewFactory {
     /**
      * Generate SheetView Instance
-     * @param scene
-     * @param plugin
+     * @param injector
      * @returns
      */
-    create(scene: Scene, plugin: SheetPlugin): SheetView {
-        return new SheetView().initialize(scene, plugin);
+    create(scene: Scene, injector: Injector): SheetView {
+        // TODO@huwenzhao: should be created from DI system and remove the initialize method
+        return new SheetView().initialize(scene, injector);
     }
 }
+
 CanvasViewRegistry.add(new SheetViewFactory());

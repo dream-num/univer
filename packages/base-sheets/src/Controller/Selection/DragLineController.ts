@@ -1,6 +1,7 @@
 import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect } from '@univerjs/base-render';
 import { Nullable, Observer } from '@univerjs/core';
-import { SelectionManager } from './SelectionManager';
+import { Inject } from '@wendellhu/redi';
+import { CanvasView } from '../../View';
 
 enum DRAG_LINE_KEY {
     lineMain = '__SpreadsheetDragLineMain__',
@@ -39,8 +40,6 @@ export class DragLineController {
 
     private _dragLine: Group;
 
-    private _manager: SelectionManager;
-
     private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
@@ -55,9 +54,7 @@ export class DragLineController {
 
     private _dragUp: (distance: Nullable<number>, e: IPointerEvent | IMouseEvent) => void;
 
-    constructor(manager: SelectionManager) {
-        this._manager = manager;
-    }
+    constructor(@Inject(CanvasView) private readonly _canvasView: CanvasView) {}
 
     getDragLine() {
         return this._dragLine;
@@ -70,7 +67,7 @@ export class DragLineController {
         this._start = start;
         this._dragUp = dragUp;
 
-        const skeleton = this._manager.getSheetView().getSpreadsheetColumnTitle().getSkeleton();
+        const skeleton = this._canvasView.getSheetView().getSpreadsheetColumnTitle().getSkeleton();
         if (direction) {
             const width = skeleton?.rowTitleWidth;
             const contentWidth = skeleton?.columnTotalWidth;
@@ -113,13 +110,13 @@ export class DragLineController {
 
         this._dragLine.evented = false;
 
-        const scene = this._manager.getScene();
+        const scene = this._canvasView.getSheetView().getScene();
 
         scene.addObject(this._dragLine, 3);
     }
 
     dragDown(e: IPointerEvent | IMouseEvent) {
-        const scene = this._manager.getScene();
+        const scene = this._canvasView.getSheetView().getScene();
 
         scene.disableEvent();
 

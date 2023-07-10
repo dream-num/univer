@@ -1,9 +1,11 @@
+import { Inject, Injector } from '@wendellhu/redi';
+
 import { Engine, EVENT_TYPE, IScrollObserverParam, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univerjs/base-render';
-import { EventState, Worksheet } from '@univerjs/core';
+import { EventState, SheetContext, Worksheet } from '@univerjs/core';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from './BaseView';
 import { SheetView } from './Views/SheetView';
 import './Views';
-import { SheetPlugin } from '../index';
+import { IRenderingEngine, ISheetContext } from '../Services/tokens';
 
 // workbook
 export class CanvasView {
@@ -11,7 +13,11 @@ export class CanvasView {
 
     private _views: BaseView[] = []; // worksheet
 
-    constructor(private _engine: Engine, private _plugin: SheetPlugin) {
+    constructor(
+        @Inject(Injector) private readonly _injector: Injector,
+        @ISheetContext private readonly _sheetContext: SheetContext,
+        @IRenderingEngine private readonly _engine: Engine
+    ) {
         this._initialize();
     }
 
@@ -35,9 +41,8 @@ export class CanvasView {
 
     private _initialize() {
         const engine = this._engine;
-        const context = this._plugin.getContext();
-        // const workbook = context.getWorkBook();
-        const workbook = this._plugin.getWorkbook();
+        const context = this._sheetContext;
+        const workbook = context.getWorkBook();
         let worksheet = workbook.getActiveSheet();
         if (!worksheet) {
             worksheet = workbook.getSheets()[0];
@@ -102,34 +107,29 @@ export class CanvasView {
 
         // sheet zoom [0 ~ 1]
         context.getContextObserver('onZoomRatioSheetObservable').add((value) => {
-            const plugin = this._plugin;
             this._scene.scale(value.zoomRatio, value.zoomRatio);
         });
 
         scene.addViewport(viewMain, viewLeft, viewTop, viewLeftTop).attachControl();
+
         // 鼠标滚轮缩放
         scene.on(EVENT_TYPE.wheel, (evt: unknown, state: EventState) => {
             const e = evt as IWheelEvent;
             if (e.ctrlKey) {
                 const deltaFactor = Math.abs(e.deltaX);
-                let scrollNum = deltaFactor < 40 ? 0.2 : deltaFactor < 80 ? 0.4 : 0.2;
-                scrollNum *= e.deltaY > 0 ? -1 : 1;
+                let ratioDelta = deltaFactor < 40 ? 0.2 : deltaFactor < 80 ? 0.4 : 0.2;
+                ratioDelta *= e.deltaY > 0 ? -1 : 1;
                 if (scene.scaleX < 1) {
-                    scrollNum /= 2;
+                    ratioDelta /= 2;
                 }
 
-                if (scene.scaleX + scrollNum > 4) {
-                    scene.scale(4, 4);
-                } else if (scene.scaleX + scrollNum < 0.1) {
-                    scene.scale(0.1, 0.1);
-                } else {
-                    const sheet = context.getWorkBook().getActiveSheet();
-                    const value = e.deltaY > 0 ? 0.1 : -0.1;
+                const sheet = context.getWorkBook().getActiveSheet();
+                const currentRatio = sheet.getZoomRatio();
+                let nextRatio = +parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
+                nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
+                sheet.setZoomRatio(nextRatio);
 
-                    sheet.setZoomRatio(sheet.getZoomRatio() + value);
-                    // scene.scaleBy(scrollNum, scrollNum);
-                    e.preventDefault();
-                }
+                e.preventDefault();
             } else {
                 viewMain.onMouseWheel(e, state);
             }
@@ -139,10 +139,11 @@ export class CanvasView {
 
         scene.addLayer(Layer.create(scene, [], 0), Layer.create(scene, [], 2));
 
-        this._viewLoader(scene, this._plugin);
+        this._viewLoader(scene);
 
         engine.runRenderLoop(() => {
             scene.render();
+
             const app = document.getElementById('app');
             if (app) {
                 app.innerText = `fps:${Math.round(engine.getFps()).toString()}`;
@@ -150,9 +151,10 @@ export class CanvasView {
         });
     }
 
-    private _viewLoader(scene: Scene, plugin: SheetPlugin) {
+    private _viewLoader(scene: Scene) {
+        // FIXME: need a plugin here
         CanvasViewRegistry.getData().forEach((viewFactory) => {
-            this._views.push(viewFactory.create(scene, plugin));
+            this._views.push(viewFactory.create(scene, this._injector));
         });
     }
 }

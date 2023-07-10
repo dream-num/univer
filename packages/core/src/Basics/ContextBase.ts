@@ -51,14 +51,17 @@ export abstract class ContextBase {
         return this._observerManager;
     }
 
+    /** @deprecated DI */
     getPluginManager(): PluginManager {
         return this._pluginManager;
     }
 
+    /** @deprecated DI */
     getUndoManager(): UndoManager {
         return this._undoManager;
     }
 
+    /** @deprecated DI */
     getCommandManager(): CommandManager {
         return this._commandManager;
     }

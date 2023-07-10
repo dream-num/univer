@@ -12,8 +12,8 @@ import {
     SectionType,
     WrapTextType,
 } from '@univerjs/core';
-import { SheetPlugin } from '../../SheetPlugin';
-import { BaseView } from '../BaseView';
+import { SheetPlugin } from '../../../SheetPlugin';
+import { BaseView } from '../../BaseView';
 
 const richTextTest: IDocumentData = {
     id: 'd',

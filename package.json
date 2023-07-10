@@ -51,6 +51,7 @@
         "@types/numeral": "^2.0.2",
         "@typescript-eslint/eslint-plugin": "^5.54.0",
         "@typescript-eslint/parser": "^5.54.0",
+        "@wendellhu/redi": "^0.6.5",
         "cross-env": "^7.0.3",
         "esbuild": "^0.18.11",
         "esbuild-style-plugin": "^1.6.1",

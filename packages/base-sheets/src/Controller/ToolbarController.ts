@@ -1,9 +1,12 @@
-import { HorizontalAlign, VerticalAlign, WrapStrategy, BorderType, UIObserver } from '@univerjs/core';
-import { SheetPlugin } from '../SheetPlugin';
+import { Inject } from '@wendellhu/redi';
+import { HorizontalAlign, VerticalAlign, WrapStrategy, BorderType, UIObserver, Context, SheetContext } from '@univerjs/core';
 
-import { SelectionControl } from './Selection/SelectionController';
+import { SelectionController } from './Selection/SelectionController';
 
 import { SelectionModel } from '../Model';
+import { IGlobalContext, ISelectionManager, ISheetContext } from '../Services/tokens';
+import { CellEditorController } from './CellEditorController';
+import { SelectionManager } from './Selection';
 
 export interface BorderInfo {
     type: BorderType;
@@ -15,20 +18,18 @@ export interface BorderInfo {
  *
  */
 export class ToolbarController {
-    private _plugin: SheetPlugin;
-
-    constructor(plugin: SheetPlugin) {
-        this._plugin = plugin;
-
+    constructor(
+        @ISelectionManager private readonly _selectionManager: SelectionManager,
+        @IGlobalContext private readonly _globalContext: Context,
+        @ISheetContext private readonly _sheetContext: SheetContext,
+        @Inject(CellEditorController) private readonly _cellEditorController: CellEditorController
+    ) {
         this._initialize();
     }
 
     listenEventManager() {
-        const cellEditorController = this._plugin.getCellEditorController();
-        this._plugin
-            .getContext()
-            .getUniver()
-            .getGlobalContext()
+        const cellEditorController = this._cellEditorController;
+        this._globalContext
             .getObserverManager()
             .requiredObserver<UIObserver<number>>('onUIChangeObservable', 'core')
             .add((msg) => {
@@ -42,10 +43,7 @@ export class ToolbarController {
                 }
             });
 
-        this._plugin
-            .getContext()
-            .getUniver()
-            .getGlobalContext()
+        this._globalContext
             .getObserverManager()
             .requiredObserver<UIObserver<number>>('onUIChangeObservable', 'core')
             .add((msg) => {
@@ -69,10 +67,7 @@ export class ToolbarController {
                 }
             });
 
-        this._plugin
-            .getContext()
-            .getUniver()
-            .getGlobalContext()
+        this._globalContext
             .getObserverManager()
             .requiredObserver<UIObserver<BorderInfo>>('onUIChangeObservable', 'core')
             .add((msg) => {
@@ -84,10 +79,7 @@ export class ToolbarController {
                 }
             });
 
-        this._plugin
-            .getContext()
-            .getUniver()
-            .getGlobalContext()
+        this._globalContext
             .getObserverManager()
             .requiredObserver<UIObserver<string>>('onUIChangeObservable', 'core')
             .add((msg) => {
@@ -108,10 +100,7 @@ export class ToolbarController {
                 }
             });
 
-        this._plugin
-            .getContext()
-            .getUniver()
-            .getGlobalContext()
+        this._globalContext
             .getObserverManager()
             .requiredObserver<UIObserver<boolean>>('onUIChangeObservable', 'core')
             .add((msg) => {
@@ -155,47 +144,47 @@ export class ToolbarController {
     }
 
     setRedo() {
-        this._plugin.getContext().getCommandManager().redo();
+        this._sheetContext.getCommandManager().redo();
     }
 
     setUndo() {
-        this._plugin.getContext().getCommandManager().undo();
+        this._sheetContext.getCommandManager().undo();
     }
 
     setFontColor(value: string) {
-        this._plugin.getSelectionManager().getActiveRangeList()?.setFontColor(value);
+        this._selectionManager.getActiveRangeList()?.setFontColor(value);
     }
 
     setBackground(value: string) {
-        this._plugin.getSelectionManager().getActiveRangeList()?.setBackground(value);
+        this._selectionManager.getActiveRangeList()?.setBackground(value);
     }
 
     setFontSize(value: number) {
-        this._plugin.getSelectionManager().getActiveRangeList()?.setFontSize(value);
+        this._selectionManager.getActiveRangeList()?.setFontSize(value);
     }
 
     setFontFamily(value: string) {
-        this._plugin.getSelectionManager().getActiveRangeList()?.setFontFamily(value);
+        this._selectionManager.getActiveRangeList()?.setFontFamily(value);
     }
 
     setFontWeight(value: boolean) {
-        this._plugin.getSelectionManager().getActiveRangeList()?.setFontWeight(value);
+        this._selectionManager.getActiveRangeList()?.setFontWeight(value);
     }
 
     setFontStyle(value: boolean) {
-        this._plugin.getSelectionManager().getActiveRangeList()?.setFontStyle(value);
+        this._selectionManager.getActiveRangeList()?.setFontStyle(value);
     }
 
     setStrikeThrough(value: boolean) {
-        this._plugin.getSelectionManager().getActiveRangeList()?.setStrikeThrough(value);
+        this._selectionManager.getActiveRangeList()?.setStrikeThrough(value);
     }
 
     setUnderline(value: boolean) {
-        this._plugin.getSelectionManager().getActiveRangeList()?.setUnderline(value);
+        this._selectionManager.getActiveRangeList()?.setUnderline(value);
     }
 
     setMerge(value: string) {
-        const currentRange = this._plugin.getSelectionManager().getActiveRange();
+        const currentRange = this._selectionManager.getActiveRange();
 
         switch (value) {
             case 'all':
@@ -220,33 +209,30 @@ export class ToolbarController {
     }
 
     setHorizontalAlignment(value: HorizontalAlign) {
-        this._plugin.getSelectionManager().getActiveRangeList()?.setHorizontalAlignment(value);
+        this._selectionManager.getActiveRangeList()?.setHorizontalAlignment(value);
     }
 
     setVerticalAlignment(value: VerticalAlign) {
-        this._plugin.getSelectionManager().getActiveRangeList()?.setVerticalAlignment(value);
+        this._selectionManager.getActiveRangeList()?.setVerticalAlignment(value);
     }
 
     setWrapStrategy(value: WrapStrategy) {
-        this._plugin.getSelectionManager().getActiveRangeList()?.setWrapStrategy(value);
+        this._selectionManager.getActiveRangeList()?.setWrapStrategy(value);
     }
 
     setTextRotation(value: number | string) {
         if (value === 'v') {
-            this._plugin.getSelectionManager().getActiveRangeList()?.setVerticalText(1);
+            this._selectionManager.getActiveRangeList()?.setVerticalText(1);
         } else {
-            this._plugin
-                .getSelectionManager()
-                .getActiveRangeList()
-                ?.setTextRotation(value as number);
+            this._selectionManager.getActiveRangeList()?.setTextRotation(value as number);
         }
     }
 
     setBorder(info: BorderInfo) {
-        const controls = this._plugin.getSelectionManager().getCurrentControls();
+        const controls = this._selectionManager.getCurrentControls();
 
         if (controls && controls.length > 0) {
-            controls?.forEach((control: SelectionControl) => {
+            controls?.forEach((control: SelectionController) => {
                 const model: SelectionModel = control.model;
                 const range = {
                     startRow: model.startRow,
@@ -255,7 +241,7 @@ export class ToolbarController {
                     endColumn: model.endColumn,
                 };
 
-                this._plugin.getContext().getWorkBook().getActiveSheet().getRange(range).setBorderByType(info.type, info.color, info.style);
+                this._sheetContext.getWorkBook().getActiveSheet().getRange(range).setBorderByType(info.type, info.color, info.style);
             });
         }
     }

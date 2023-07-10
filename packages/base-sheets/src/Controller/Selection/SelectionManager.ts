@@ -17,7 +17,9 @@ import {
     DEFAULT_SELECTION,
     DEFAULT_CELL,
     IGridRange,
+    SheetContext,
 } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 import { ACTION_NAMES, ISelectionsConfig } from '../../Basics';
 import { ISelectionModelValue, ISetSelectionValueActionData, SetSelectionValueAction } from '../../Model/Action/SetSelectionValueAction';
 import { SelectionModel } from '../../Model/SelectionModel';
@@ -26,7 +28,8 @@ import { SheetView } from '../../View/Views/SheetView';
 import { ColumnTitleController } from './ColumnTitleController';
 import { DragLineController } from './DragLineController';
 import { RowTitleController } from './RowTitleController';
-import { SelectionControl, SELECTION_TYPE } from './SelectionController';
+import { SelectionController, SELECTION_TYPE } from './SelectionController';
+import { ISheetContext, ISheetPlugin } from '../../Services/tokens';
 
 /**
  * TODO 注册selection拦截，可能在有公式ArrayObject时，fx公式栏显示不同
@@ -48,11 +51,9 @@ export class SelectionManager {
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
-    private _selectionControls: SelectionControl[] = []; // sheetID:Controls
+    private _selectionControls: SelectionController[] = []; // sheetID:Controls
 
     private _selectionModels = new Map<string, SelectionModel[]>(); // sheetID:Models
-
-    private _plugin: SheetPlugin;
 
     private _startSelectionRange: ISelection;
 
@@ -62,32 +63,39 @@ export class SelectionManager {
 
     private _worksheet: Nullable<Worksheet>;
 
-    private _columnTitleControl: ColumnTitleController;
-
-    private _rowTitleControl: RowTitleController;
-
-    private _dragLineControl: DragLineController;
-
     private _previousSelection: ISelectionData;
 
-    constructor(private _sheetView: SheetView) {
-        this._plugin = this._sheetView.getPlugin() as SheetPlugin;
+    constructor(
+        /** @deprecated this should be divided into smaller pieces */
+        private readonly _sheetView: SheetView,
+        @Inject(Injector) private readonly _injector: Injector,
+        /** @deprecated this should be divided into smaller pieces */
+        @Inject(ISheetPlugin) private readonly _plugin: SheetPlugin,
+        @Inject(DragLineController) private readonly _dragLineController: DragLineController,
+        @Inject(ColumnTitleController) private readonly _columnTitleController: ColumnTitleController,
+        @Inject(RowTitleController) private readonly _rowTitleController: RowTitleController,
+        @ISheetContext private readonly _sheetContext: SheetContext
+    ) {
         this._initialize();
         this._initializeObserver();
     }
 
+    /** @deprecated */
     getSheetView() {
         return this._sheetView;
     }
 
+    /** @deprecated */
     getScene() {
         return this._sheetView.getScene();
     }
 
+    /** @deprecated */
     getContext() {
         return this._sheetView.getContext();
     }
 
+    /** @deprecated */
     getMainComponent() {
         return this._mainComponent;
     }
@@ -190,7 +198,7 @@ export class SelectionManager {
                 const curCellRange = model.currentCell;
                 const main = this._mainComponent;
 
-                const control = SelectionControl.create(this, this._selectionControls.length);
+                const control = SelectionController.create(this._injector, this._selectionControls.length);
 
                 let cellInfo = null;
                 if (curCellRange) {
@@ -243,7 +251,7 @@ export class SelectionManager {
         }
         const main = this._mainComponent;
 
-        const control = SelectionControl.create(this, currentControls.length);
+        const control = SelectionController.create(this._injector, currentControls.length);
 
         let cellInfo = null;
         if (curCellRange) {
@@ -370,7 +378,7 @@ export class SelectionManager {
         }
 
         const models = selections.map(({ selection, cell }) => {
-            const model = new SelectionModel(SELECTION_TYPE.NORMAL, this._plugin);
+            const model = this._injector.createInstance(SelectionModel, SELECTION_TYPE.NORMAL);
             model.setValue(selection, cell);
             return model;
         });
@@ -486,7 +494,7 @@ export class SelectionManager {
         if (sheetId !== currentSheetId) {
             const sheetIndex = this._worksheet?.getIndex();
             if (sheetIndex == null) return;
-            this._plugin.getWorkbook().activateSheetByIndex(sheetIndex);
+            this._sheetContext.getWorkBook().activateSheetByIndex(sheetIndex);
         }
 
         const cellInfo = this._mainComponent.getCellByIndex(row, column);
@@ -528,7 +536,7 @@ export class SelectionManager {
      * @param selectionControl
      * @returns
      */
-    moving(moveEvt: IPointerEvent | IMouseEvent, selectionControl: Nullable<SelectionControl>, setModel: boolean = false) {
+    moving(moveEvt: IPointerEvent | IMouseEvent, selectionControl: Nullable<SelectionController>, setModel: boolean = false) {
         // console.log('moving');
         const main = this._mainComponent;
         const { offsetX: moveOffsetX, offsetY: moveOffsetY, clientX, clientY } = moveEvt;
@@ -611,14 +619,14 @@ export class SelectionManager {
      * @param selectionControl
      * @returns
      */
-    up(upEvt: IPointerEvent | IMouseEvent, selectionControl: Nullable<SelectionControl>) {
+    up(upEvt: IPointerEvent | IMouseEvent, selectionControl: Nullable<SelectionController>) {
         // update model
 
         this.moving(upEvt, selectionControl, true);
     }
 
     updatePreviousSelection() {
-        let selectionControl: Nullable<SelectionControl> = this.getCurrentControl();
+        let selectionControl: Nullable<SelectionController> = this.getCurrentControl();
 
         if (!selectionControl) return;
 
@@ -728,7 +736,7 @@ export class SelectionManager {
     }
 
     getDragLineControl() {
-        return this._dragLineControl;
+        return this._dragLineController;
     }
 
     private _initialize() {
@@ -749,11 +757,14 @@ export class SelectionManager {
 
         this._initModels();
 
-        this._dragLineControl = new DragLineController(this);
+        const handler = {
+            clearSelectionControls: () => this.clearSelectionControls(),
+            addControlToCurrentByRangeData: (selectionRange: IRangeData, curCellRange: Nullable<IRangeCellData>, command: boolean = true) =>
+                this.addControlToCurrentByRangeData(selectionRange, curCellRange, command),
+        };
 
-        this._columnTitleControl = new ColumnTitleController(this);
-
-        this._rowTitleControl = new RowTitleController(this);
+        this._columnTitleController.setHandlers(handler);
+        this._rowTitleController.setHandlers(handler);
     }
 
     private _mainEventInitial() {
@@ -784,7 +795,7 @@ export class SelectionManager {
 
             this._startSelectionRange = startSelectionRange;
 
-            let selectionControl: Nullable<SelectionControl> = this.getCurrentControl();
+            let selectionControl: Nullable<SelectionController> = this.getCurrentControl();
 
             let curControls = this.getCurrentControls();
 
@@ -840,7 +851,7 @@ export class SelectionManager {
                 };
                 selectionControl.update(newSelectionRange, currentCell);
             } else {
-                selectionControl = SelectionControl.create(this, curControls.length);
+                selectionControl = SelectionController.create(this._injector, curControls.length);
                 selectionControl.update(startSelectionRange, cellInfo);
                 curControls.push(selectionControl);
             }
@@ -951,7 +962,7 @@ export class SelectionManager {
                 const { startColumn, startRow, endColumn, endRow } = selectionConfig.selection;
                 const cell = selectionConfig.cell;
 
-                const model = new SelectionModel(SELECTION_TYPE.NORMAL, this._plugin);
+                const model = this._injector.createInstance(SelectionModel, SELECTION_TYPE.NORMAL);
 
                 const cellInfo = cell
                     ? {
@@ -1005,14 +1016,14 @@ export class SelectionManager {
         const selections: ISelectionsConfig = this._plugin.getConfig().selections;
         Object.keys(selections).forEach((worksheetId) => {
             const selectionsList = selections[worksheetId];
-            const currentControls: SelectionControl[] = [];
+            const currentControls: SelectionController[] = [];
 
             selectionsList.forEach((selectionConfig) => {
                 const selectionRange = selectionConfig.selection;
                 const curCellRange = selectionConfig.cell;
                 const main = this._mainComponent;
 
-                const control = SelectionControl.create(this, currentControls.length);
+                const control = SelectionController.create(this._injector, currentControls.length);
 
                 let cellInfo = null;
                 if (curCellRange) {
@@ -1048,16 +1059,12 @@ export class SelectionManager {
      * Initialize the observer
      */
     private _initializeObserver() {
-        const context = this._plugin.getContext();
-        context.getContextObserver('onAfterChangeActiveSheetObservable').add(() => {
+        this._sheetContext.getContextObserver('onAfterChangeActiveSheetObservable').add(() => {
             this.renderCurrentControls();
         });
 
-        this._worksheet
-            ?.getContext()
-            .getContextObserver('onSheetRenderDidMountObservable')
-            .add(() => {
-                this.renderCurrentControls();
-            });
+        this._sheetContext.getContextObserver('onSheetRenderDidMountObservable').add(() => {
+            this.renderCurrentControls();
+        });
     }
 }

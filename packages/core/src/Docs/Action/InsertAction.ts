@@ -9,6 +9,7 @@ import {
 import { IDeleteActionData } from './DeleteAction';
 import { IDocumentBody } from '../../Interfaces';
 import { DOC_ACTION_NAMES } from '../../Const/DOC_ACTION_NAMES';
+import { InsertApply } from '../Apply/InsertApply';
 
 export interface IInsertActionData extends IDocActionData {
     body: IDocumentBody;
@@ -49,18 +50,17 @@ export class InsertAction extends DocActionBase<
         const actionData = this.getDoActionData();
         const document = this.getDocument();
         const { body, len, segmentId } = actionData;
-        commonParameter.moveCursor(len);
-        // InsertTextApply(document, text, textLength, {
-        //     cursorStart,
-        //     isStartBack,
-        //     segmentId,
-        // });
+
+        InsertApply(document, body, len, commonParameter.cursor, segmentId);
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
             action: this,
+            commonParameter,
         });
+
+        commonParameter.moveCursor(len);
     }
 
     undo(commonParameter: CommonParameter): void {

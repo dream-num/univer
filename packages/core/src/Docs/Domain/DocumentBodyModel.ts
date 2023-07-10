@@ -202,20 +202,64 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
     insert(insertBody: IDocumentBody, insertIndex = 0) {
         const dataStream = insertBody.dataStream;
         let dataStreamLen = dataStream.length;
-        const insertNode = this.getParagraphByTree(this.children, insertIndex);
-        if (insertNode == null) {
+        const insertedNode = this.getParagraphByTree(this.children, insertIndex);
+        if (insertedNode == null) {
             return;
         }
 
         if (dataStream[dataStream.length - 1] === '\n') {
-            const newBodyModel = new DocumentBodyModelSimple(insertBody);
+            const insertBodyModel = new DocumentBodyModelSimple(insertBody);
             dataStreamLen -= 1; // sectionBreak can not be inserted
+
+            const insertNodes = insertBodyModel.children;
+
+            for (let node of insertNodes) {
+                this.foreachDown(node, (newNode) => {
+                    newNode.plus(insertIndex);
+                });
+            }
+
+            const insertedNodeSplit = insertedNode.split(insertIndex);
+
+            if (insertedNodeSplit == null) {
+                return;
+            }
+
+            const { firstNode: insertedFirstNode, lastNode: insertedLastNode } =
+                insertedNodeSplit;
+
+            insertedNode.parent.children.splice(
+                insertedNode.getPositionInParent(),
+                1,
+                insertedFirstNode,
+                ...insertNodes,
+                insertedLastNode
+            );
+
+            this.foreachTop(insertedNode.parent, (currentNode) => {
+                currentNode.endIndex += dataStreamLen;
+                const children = currentNode.children;
+                let isStartFix = false;
+                for (let node of children) {
+                    if (node === insertedLastNode) {
+                        isStartFix = true;
+                    }
+
+                    if (!isStartFix) {
+                        continue;
+                    }
+
+                    this.foreachDown(node, (newNode) => {
+                        newNode.plus(dataStreamLen);
+                    });
+                }
+            });
         } else {
-            insertNode.insertText(dataStream, insertIndex);
+            insertedNode.insertText(dataStream, insertIndex);
 
-            insertNode.endIndex += dataStreamLen;
+            insertedNode.endIndex += dataStreamLen;
 
-            this.foreachTop(insertNode.parent, (currentNode) => {
+            this.foreachTop(insertedNode.parent, (currentNode) => {
                 currentNode.endIndex += dataStreamLen;
                 const children = currentNode.children;
                 let isStartFix = false;
@@ -479,6 +523,18 @@ export class DataStreamTreeNode {
         return new DataStreamTreeNode(nodeType, bodyModel, content);
     }
 
+    getProps() {
+        return {
+            children: this.children,
+            parent: this.parent,
+            startIndex: this.startIndex,
+            endIndex: this.endIndex,
+            nodeType: this.nodeType,
+            bodyModel: this.bodyModel,
+            content: this.content,
+        };
+    }
+
     addBlocks(blocks: number[]) {
         this.blocks = this.blocks.concat(blocks);
     }
@@ -503,6 +559,82 @@ export class DataStreamTreeNode {
     plus(len: number) {
         this.startIndex += len;
         this.endIndex += len;
+    }
+
+    split(index: number) {
+        const {
+            children,
+            parent,
+            startIndex,
+            endIndex,
+            nodeType,
+            bodyModel,
+            content = '',
+        } = this.getProps();
+
+        if (this.exclude(index)) {
+            return;
+        }
+
+        const firstStartIndex = 0;
+        const firstEndIndex = index - startIndex;
+
+        const lastStartIndex = index - startIndex + 1;
+        const lastEndIndex = endIndex;
+
+        const firstNode = DataStreamTreeNode.create(
+            nodeType,
+            bodyModel,
+            content.slice(firstStartIndex, firstEndIndex)
+        );
+
+        firstNode.parent = parent;
+        firstNode.setIndexRange(firstStartIndex, firstEndIndex);
+
+        const lastNode = DataStreamTreeNode.create(
+            nodeType,
+            bodyModel,
+            content.slice(lastStartIndex, lastEndIndex)
+        );
+
+        lastNode.parent = parent;
+        lastNode.setIndexRange(lastStartIndex, lastEndIndex);
+
+        const firstChildNodes: DataStreamTreeNode[] = [];
+        const lastChildNodes: DataStreamTreeNode[] = [];
+
+        for (let node of children) {
+            const { startIndex: childStartIndex } = node;
+            if (node.exclude(index)) {
+                if (index < childStartIndex) {
+                    firstChildNodes.push(node);
+                } else {
+                    lastChildNodes.push(node);
+                }
+            } else {
+                const splitData = node.split(index);
+                if (splitData == null) {
+                    firstChildNodes.push(node);
+                    continue;
+                }
+                const { firstNode, lastNode } = splitData;
+                firstChildNodes.push(firstNode);
+                firstChildNodes.push(lastNode);
+            }
+        }
+
+        firstNode.children = firstChildNodes;
+
+        lastNode.children = lastChildNodes;
+
+        return {
+            firstNode,
+            lastNode,
+        };
+    }
+
+    getPositionInParent() {
+        return this.parent.children.indexOf(this);
     }
 
     minus(len: number) {}

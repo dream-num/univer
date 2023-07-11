@@ -1,6 +1,7 @@
 import { DocActionBase, IDocActionData } from '../../Command/DocActionBase';
 import {
     ActionObservers,
+    ActionType,
     CommandManager,
     CommandUnit,
     CommonParameter,
@@ -8,6 +9,8 @@ import {
 import { IInsertActionData } from './InsertAction';
 import { DOC_ACTION_NAMES } from '../../Const/DOC_ACTION_NAMES';
 import { IDocumentBody } from '../../Interfaces';
+import { DeleteApply } from '../Apply/DeleteApply';
+import { InsertApply } from '../Apply/InsertApply';
 
 export interface IDeleteActionData extends IDocActionData {
     len: number;
@@ -55,30 +58,36 @@ export class DeleteAction extends DocActionBase<
         const actionData = this.getDoActionData();
         const document = this.getDocument();
         const { len, segmentId } = actionData;
+
+        const body = DeleteApply(document, len, commonParameter.cursor, segmentId);
+
         commonParameter.moveCursor(len);
-        // DeleteTextApply(document, {
-        //     cursorStart,
-        //     cursorEnd,
-        //     isStartBack,
-        //     isEndBack,
-        //     isCollapse,
-        //     segmentId,
-        // });
-        return {
-            dataStream: '',
-        };
+
+        this._observers.notifyObservers({
+            type: ActionType.REDO,
+            data: this._doActionData,
+            action: this,
+            commonParameter,
+        });
+
+        return body;
     }
 
     undo(commonParameter: CommonParameter): void {
         const actionData = this.getOldActionData();
         const document = this.getDocument();
         const { body, len, segmentId } = actionData;
+
+        InsertApply(document, body, len, commonParameter.cursor, segmentId);
+
         commonParameter.moveCursor(len);
-        // InsertTextApply(document, text, textLength, {
-        //     cursorStart,
-        //     isStartBack,
-        //     segmentId,
-        // });
+
+        this._observers.notifyObservers({
+            type: ActionType.UNDO,
+            data: this._oldActionData,
+            action: this,
+            commonParameter,
+        });
     }
 
     validate(): boolean {

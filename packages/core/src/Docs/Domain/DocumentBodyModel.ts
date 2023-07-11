@@ -280,9 +280,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         }
     }
 
-    update() {}
-
-    delete() {}
+    delete(currentIndex: number, textLength: number) {}
 
     getParagraphByTree(
         nodes: DataStreamTreeNode[],

@@ -10,6 +10,7 @@ import { IDeleteActionData } from './DeleteAction';
 import { IDocumentBody } from '../../Interfaces';
 import { DOC_ACTION_NAMES } from '../../Const/DOC_ACTION_NAMES';
 import { InsertApply } from '../Apply/InsertApply';
+import { DeleteApply } from '../Apply/DeleteApply';
 
 export interface IInsertActionData extends IDocActionData {
     body: IDocumentBody;
@@ -67,6 +68,9 @@ export class InsertAction extends DocActionBase<
         const actionData = this.getOldActionData();
         const document = this.getDocument();
         const { len, segmentId } = actionData;
+
+        DeleteApply(document, len, commonParameter.cursor, segmentId);
+
         commonParameter.moveCursor(len);
         // DeleteTextApply(document, { ...actionData });
 
@@ -74,6 +78,7 @@ export class InsertAction extends DocActionBase<
             type: ActionType.UNDO,
             data: this._oldActionData,
             action: this,
+            commonParameter,
         });
     }
 

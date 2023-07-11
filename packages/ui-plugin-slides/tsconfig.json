@@ -16,6 +16,7 @@
         "sourceMap": true,
         "resolveJsonModule": true,
         "strict": true,
+        "noImplicitOverride": true,
         "allowJs": true,
         "baseUrl": "./",
         "skipLibCheck": true,

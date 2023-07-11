@@ -14,6 +14,7 @@
         "sourceMap": true,
         "resolveJsonModule": true,
         "strict": true,
+        "noImplicitOverride": true,
         "allowJs": true,
 
         "baseUrl": "./",
@@ -21,7 +22,7 @@
         "esModuleInterop": true, // auto allowSyntheticDefaultImports true
         "jsx": "preserve",
         "experimentalDecorators": true,
-        
+
         "strictPropertyInitialization": false,
         "types": ["jest", "node", "@types/jest"]
     },

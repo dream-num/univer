@@ -16,6 +16,7 @@
         "sourceMap": true,
         "resolveJsonModule": true,
         "strict": true,
+        "noImplicitOverride": true,
         "allowJs": true,
         "downlevelIteration": true,
         "baseUrl": "./",
@@ -25,7 +26,7 @@
         "jsxImportSource": "preact",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-        
+
         "strictPropertyInitialization": false,
     },
     "include": [

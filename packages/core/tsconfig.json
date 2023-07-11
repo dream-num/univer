@@ -14,6 +14,7 @@
         "sourceMap": true,
         "resolveJsonModule": true,
         "strict": true,
+        "noImplicitOverride": true,
         "allowJs": true,
         "downlevelIteration": true,
         "baseUrl": "./",
@@ -22,7 +23,7 @@
         "jsx": "preserve",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-        
+
         "strictPropertyInitialization": false,
         "types": ["jest", "node", "@types/jest"]
     },

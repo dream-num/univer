@@ -158,4 +158,81 @@ export default {
         ChileanPeso: '智利比索',
         CFAFrancBEAC: '中非金融合作法郎',
     },
+    defaultFmt: {
+        Automatic: {
+            text: '自动',
+            value: 'General',
+            example: '',
+        },
+        Number: {
+            text: '数字',
+            value: '##0.00',
+            example: '1000.12',
+        },
+        Percent: {
+            text: '百分比',
+            value: '#0.00%',
+            example: '12.21%',
+        },
+        PlainText: {
+            text: '纯文本',
+            value: '@',
+            example: '',
+        },
+        Scientific: {
+            text: '科学计数',
+            value: '0.00E+00',
+            example: '1.01E+5',
+        },
+        Accounting: {
+            text: '会计',
+            value: '¥(0.00)',
+            example: '¥(1200.09)',
+        },
+        Thousand: {
+            text: '万元',
+            value: 'w',
+            example: '1亿2000万2500',
+        },
+        Currency: {
+            text: '货币',
+            value: '¥0.00',
+            example: '¥1200.09',
+        },
+        Digit: {
+            text: '万元2位小数',
+            value: 'w0.00',
+            example: '2万2500.55',
+        },
+        Date: {
+            text: '日期',
+            value: 'yyyy-MM-dd',
+            example: '2017-11-29',
+        },
+        Time: {
+            text: '时间',
+            value: 'hh:mm AM/PM',
+            example: '3:00 PM',
+        },
+        Time24H: {
+            text: '时间24H',
+            value: 'hh:mm',
+            example: '15:00',
+        },
+        DateTime: {
+            text: '日期时间',
+            value: 'yyyy-MM-dd hh:mm AM/PM',
+            example: '2017-11-29 3:00 PM',
+        },
+        DateTime24H: {
+            text: '日期时间24H',
+            value: 'yyyy-MM-dd hh:mm',
+            example: '2017-11-29 15:00',
+        },
+        CustomFormats: {
+            text: '自定义格式',
+            value: 'fmtOtherSelf',
+            example: '',
+        },
+    },
 };

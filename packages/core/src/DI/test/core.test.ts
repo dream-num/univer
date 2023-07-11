@@ -28,7 +28,7 @@ describe('core', () => {
 
             expectToThrow(
                 () => createIdentifier('a'),
-                '[redi]: Identifier "a" already exists.'
+                '[DI]: Identifier "a" already exists.'
             );
         });
 
@@ -161,7 +161,7 @@ describe('core', () => {
 
             expect(b.key).toBe('another undefined a');
             expect(spy).toHaveBeenCalledWith(
-                '[redi]: Expect 2 custom parameter(s) but get 1.'
+                '[DI]: Expect 2 custom parameter(s) but get 1.'
             );
 
             spy.mockRestore();
@@ -186,7 +186,7 @@ describe('core', () => {
 
             expectToThrow(
                 () => j.get(aI),
-                `[redi]: Detecting cyclic dependency. The last identifier is "B".`
+                `[DI]: Detecting cyclic dependency. The last identifier is "B".`
             );
         });
     });
@@ -283,7 +283,7 @@ describe('core', () => {
 
                 expectToThrow(() => {
                     setDependencies(A, [[B]]);
-                }, '[redi]: It seems that you register "undefined" as dependency on the 1 parameter of "A".');
+                }, '[DI]: It seems that you register "undefined" as dependency on the 1 parameter of "A".');
 
                 B = class {
                     key = 'b';
@@ -484,7 +484,7 @@ describe('core', () => {
 
                 expectToThrow(() => {
                     j.get(bbI);
-                }, '[redi]: Cannot get async item "bb" from sync api.');
+                }, '[DI]: Cannot get async item "bb" from sync api.');
             });
 
             it('should "AsyncHook" work', () =>
@@ -634,7 +634,7 @@ describe('core', () => {
                 class B {
                     constructor(@Optional() _a: A) {}
                 }
-            }, `[redi]: Could not find dependency registered on the 1 parameter of the constructor of "B".`);
+            }, `[DI]: Could not find dependency registered on the 1 parameter of the constructor of "B".`);
         });
 
         it('should throw error when a required / optional dependency is provided with many values', () => {
@@ -660,7 +660,7 @@ describe('core', () => {
 
             expectToThrow(
                 () => j.get(B),
-                `[redi]: Expect "required" dependency items for id "aI" but get 2.`
+                `[DI]: Expect "required" dependency items for id "aI" but get 2.`
             );
         });
     });
@@ -791,7 +791,7 @@ describe('core', () => {
 
             expectToThrow(
                 () => child.get(bI),
-                '[redi]: Cannot find "cI" registered by any injector.'
+                '[DI]: Cannot find "cI" registered by any injector.'
             );
         });
 
@@ -802,7 +802,7 @@ describe('core', () => {
 
             expectToThrow(
                 () => j.get(A),
-                `[redi]: Cannot find "A" registered by any injector.`
+                `[DI]: Cannot find "A" registered by any injector.`
             );
         });
     });
@@ -830,7 +830,7 @@ describe('core', () => {
 
         it('should work when "forwardRef" is used', () => {
             class A {
-                constructor(@Inject(forwardRef(() => B)) private b: B) {}
+                constructor(@Inject(forwardRef(() => B)) private b: any /** B */) {}
 
                 get key(): string {
                     return typeof this.b === 'undefined'

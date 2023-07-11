@@ -63,7 +63,7 @@ describe('singleton', () => {
         new Injector();
 
         expect(spy).toHaveBeenCalledWith(
-            '[redi]: Singleton dependencies has been fetched before by an other injector. Please avoid fetching singleton dependencies twice.'
+            '[DI]: Singleton dependencies has been fetched before by an other injector. Please avoid fetching singleton dependencies twice.'
         );
 
         spy.mockRestore();

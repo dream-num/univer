@@ -1,60 +1,60 @@
 export const DEFAULT_DATA = [
     {
-        locale: 'defaultFmt.Automatic.text',
+        label: 'defaultFmt.Automatic.text',
         selected: true,
     },
     {
-        locale: 'defaultFmt.PlainText.text',
+        label: 'defaultFmt.PlainText.text',
         border: true,
     },
     {
-        locale: 'defaultFmt.Number.text',
-        suffixLocale: 'defaultFmt.Number.example',
+        label: 'defaultFmt.Number.text',
+        suffix: 'defaultFmt.Number.example',
     },
     {
-        locale: 'defaultFmt.Percent.text',
-        suffixLocale: 'defaultFmt.Percent.example',
+        label: 'defaultFmt.Percent.text',
+        suffix: 'defaultFmt.Percent.example',
     },
     {
-        locale: 'defaultFmt.Scientific.text',
-        suffixLocale: 'defaultFmt.Scientific.example',
+        label: 'defaultFmt.Scientific.text',
+        suffix: 'defaultFmt.Scientific.example',
         border: true,
     },
     {
-        locale: 'defaultFmt.Accounting.text',
-        suffixLocale: 'defaultFmt.Accounting.example',
+        label: 'defaultFmt.Accounting.text',
+        suffix: 'defaultFmt.Accounting.example',
     },
     {
-        locale: 'defaultFmt.Thousand.text',
-        suffixLocale: 'defaultFmt.Thousand.example',
+        label: 'defaultFmt.Thousand.text',
+        suffix: 'defaultFmt.Thousand.example',
     },
     {
-        locale: 'defaultFmt.Currency.text',
-        suffixLocale: 'defaultFmt.Currency.example',
+        label: 'defaultFmt.Currency.text',
+        suffix: 'defaultFmt.Currency.example',
     },
     {
-        locale: 'defaultFmt.Digit.text',
-        suffixLocale: 'defaultFmt.Digit.example',
+        label: 'defaultFmt.Digit.text',
+        suffix: 'defaultFmt.Digit.example',
         border: true,
     },
     {
-        locale: 'defaultFmt.Date.text',
-        suffixLocale: 'defaultFmt.Date.example',
+        label: 'defaultFmt.Date.text',
+        suffix: 'defaultFmt.Date.example',
     },
     {
-        locale: 'defaultFmt.Time.text',
-        suffixLocale: 'defaultFmt.Time.example',
+        label: 'defaultFmt.Time.text',
+        suffix: 'defaultFmt.Time.example',
     },
     {
-        locale: 'defaultFmt.Time24H.text',
-        suffixLocale: 'defaultFmt.Time24H.example',
+        label: 'defaultFmt.Time24H.text',
+        suffix: 'defaultFmt.Time24H.example',
     },
     {
-        locale: 'defaultFmt.DateTime.text',
-        suffixLocale: 'defaultFmt.DateTime.example',
+        label: 'defaultFmt.DateTime.text',
+        suffix: 'defaultFmt.DateTime.example',
     },
     {
-        locale: 'defaultFmt.DateTime24H.text',
-        suffixLocale: 'defaultFmt.DateTime.example',
+        label: 'defaultFmt.DateTime24H.text',
+        suffix: 'defaultFmt.DateTime.example',
     },
 ];

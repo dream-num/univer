@@ -158,4 +158,81 @@ export default {
         ChileanPeso: 'Chilean Peso',
         CFAFrancBEAC: 'CFA Franc BEAC',
     },
+    defaultFmt: {
+        Automatic: {
+            text: 'Automatic',
+            value: 'General',
+            example: '',
+        },
+        Number: {
+            text: 'Number',
+            value: '##0.00',
+            example: '1000.12',
+        },
+        Percent: {
+            text: 'Percent',
+            value: '#0.00%',
+            example: '12.21%',
+        },
+        PlainText: {
+            text: 'Plain text',
+            value: '@',
+            example: '',
+        },
+        Scientific: {
+            text: 'Scientific',
+            value: '0.00E+00',
+            example: '1.01E+5',
+        },
+        Accounting: {
+            text: 'Accounting',
+            value: '¥(0.00)',
+            example: '¥(1200.09)',
+        },
+        Thousand: {
+            text: 'Ten Thousand',
+            value: 'w',
+            example: '1亿2000万2500',
+        },
+        Currency: {
+            text: 'Currency',
+            value: '¥0.00',
+            example: '¥1200.09',
+        },
+        Digit: {
+            text: '万元2位小数',
+            value: 'w0.00',
+            example: '2万2500.55',
+        },
+        Date: {
+            text: 'Date',
+            value: 'yyyy-MM-dd',
+            example: '2017-11-29',
+        },
+        Time: {
+            text: 'Time',
+            value: 'hh:mm AM/PM',
+            example: '3:00 PM',
+        },
+        Time24H: {
+            text: 'Time 24H',
+            value: 'hh:mm',
+            example: '15:00',
+        },
+        DateTime: {
+            text: 'Date time',
+            value: 'yyyy-MM-dd hh:mm AM/PM',
+            example: '2017-11-29 3:00 PM',
+        },
+        DateTime24H: {
+            text: 'Date time 24H',
+            value: 'yyyy-MM-dd hh:mm',
+            example: '2017-11-29 15:00',
+        },
+        CustomFormats: {
+            text: 'Custom Formats',
+            value: 'fmtOtherSelf',
+            example: '',
+        },
+    },
 };

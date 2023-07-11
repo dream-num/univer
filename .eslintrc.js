@@ -44,7 +44,7 @@ module.exports = {
         '@typescript-eslint/naming-convention': 'off',
         '@typescript-eslint/no-use-before-define': 'off',
         '@typescript-eslint/no-shadow': 'off',
-        'import/no-cycle': 'off',
+        'import/no-cycle': 2,
         'no-param-reassign': 'off',
         'no-bitwise': 'off',
         'default-case': 'off',

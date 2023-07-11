@@ -7,5 +7,6 @@
     "packages/**/*",
     "examples/**/*",
     "scripts/**/*",
+    ".eslintrc.js"
   ],
 }

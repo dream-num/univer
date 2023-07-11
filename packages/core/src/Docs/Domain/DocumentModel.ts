@@ -50,6 +50,22 @@ export class DocumentModelSimple {
         return this.snapshot.lists;
     }
 
+    getBodyModel(segmentId?: string) {
+        if (segmentId == null) {
+            return this.bodyModel;
+        }
+
+        if (this.headerTreeMap.has(segmentId)) {
+            return this.headerTreeMap.get(segmentId)!;
+        }
+
+        if (this.footerTreeMap.has(segmentId)) {
+            return this.footerTreeMap.get(segmentId)!;
+        }
+
+        return this.bodyModel;
+    }
+
     getSnapshot() {
         return this.snapshot;
     }

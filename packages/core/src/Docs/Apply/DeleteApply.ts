@@ -1,14 +1,16 @@
-import { ITextSelectionRangeParam } from '../../Interfaces/ISelectionData';
 import { DocumentModel } from '../Domain/DocumentModel';
 import { getDocsUpdateBody } from '../../Shared/Common';
+import { IDocumentBody } from '../../Interfaces/IDocumentData';
 
 export function DeleteApply(
     document: DocumentModel,
-    range: ITextSelectionRangeParam
+    textLength: number,
+    currentIndex: number,
+    segmentId?: string
 ) {
     const doc = document.snapshot;
 
-    const { segmentId } = range;
+    const bodyModel = document.getBodyModel(segmentId);
 
     const body = getDocsUpdateBody(doc, segmentId);
 
@@ -16,103 +18,113 @@ export function DeleteApply(
         throw new Error('no body has changed');
     }
 
-    // const { blockElements } = body;
+    updateAttributeByDelete(body, textLength, currentIndex);
 
-    // for (let blockElement of blockElements) {
-    //     if (blockElement == null) {
-    //         continue;
-    //     }
-
-    //     const { blockType } = blockElement;
-
-    //     switch (blockType) {
-    //         case BlockType.PARAGRAPH:
-    //             if (blockElement.paragraph) {
-    //                 deleteText(blockElement, blockElement.paragraph, range);
-    //             }
-    //     }
-    // }
+    bodyModel.delete();
 }
 
-// function deleteText(
-//     blockElement: IBlockElement,
-//     paragraph: IParagraph,
-//     range: ITextSelectionRangeParam
-// ) {
-//     const { cursorStart, cursorEnd, isStartBack, isEndBack, isCollapse } = range;
+function updateAttributeByDelete(
+    body: IDocumentBody,
+    textLength: number,
+    currentIndex: number
+) {
+    const {
+        textRuns,
+        paragraphs,
+        sectionBreaks,
+        customBlocks,
+        tables,
+        customRanges,
+        dataStream,
+    } = body;
 
-//     const textStart = getTextIndexByCursor(cursorStart, isStartBack);
+    const startIndex = currentIndex;
 
-//     const textEnd = getTextIndexByCursor(cursorEnd, isEndBack);
+    const endIndex = currentIndex + textLength - 1;
 
-//     const { st: blockStartIndex, ed: blockEndIndex } = blockElement;
+    if (textRuns) {
+        const newTextRuns = [];
+        for (let i = 0, len = textRuns.length; i < len; i++) {
+            const textRun = textRuns[i];
+            const { st, ed } = textRun;
+            if (startIndex >= st && startIndex <= ed) {
+                textRun.ed = startIndex - 1;
+            } else if (endIndex >= st && endIndex <= ed) {
+                textRun.st = endIndex + 1;
+            } else if (startIndex <= st && endIndex >= ed) {
+                continue;
+            } else if (st > endIndex) {
+                textRun.st -= textLength;
+                textRun.ed -= textLength;
+            }
+            newTextRuns.push(textRun);
+        }
+        body.textRuns = newTextRuns;
+    }
 
-//     if (cursorStart > blockEndIndex || cursorEnd < blockStartIndex) {
-//         return;
-//     }
+    if (paragraphs) {
+        for (let i = 0, len = paragraphs.length; i < len; i++) {
+            const paragraph = paragraphs[i];
+            const { startIndex } = paragraph;
+            if (startIndex > currentIndex) {
+                paragraph.startIndex += textLength;
+            }
+        }
+    }
 
-//     const { elements } = paragraph;
+    if (sectionBreaks) {
+        for (let i = 0, len = sectionBreaks.length; i < len; i++) {
+            const sectionBreak = sectionBreaks[i];
+            const { startIndex } = sectionBreak;
+            if (startIndex > currentIndex) {
+                sectionBreak.startIndex += textLength;
+            }
+        }
+    }
 
-//     let index = 0;
+    if (customBlocks) {
+        for (let i = 0, len = customBlocks.length; i < len; i++) {
+            const customBlock = customBlocks[i];
+            const { startIndex } = customBlock;
+            if (startIndex > currentIndex) {
+                customBlock.startIndex += textLength;
+            }
+        }
+    }
 
-//     for (let element of elements) {
-//         const { et: paragraphElementType } = element;
+    if (tables) {
+        for (let i = 0, len = tables.length; i < len; i++) {
+            const table = tables[i];
+            const { startIndex, endIndex } = table;
+            if (startIndex > currentIndex) {
+                table.startIndex += textLength;
+                table.endIndex += textLength;
+            } else if (endIndex >= currentIndex) {
+                table.endIndex += textLength;
+            }
+        }
+    }
 
-//         if (paragraphElementType === ParagraphElementType.DRAWING) {
-//             index++;
-//             continue;
-//         }
+    if (customRanges) {
+        for (let i = 0, len = customRanges.length; i < len; i++) {
+            const customRange = customRanges[i];
+            const { startIndex, endIndex } = customRange;
+            if (startIndex > currentIndex) {
+                customRange.startIndex += textLength;
+                customRange.endIndex += textLength;
+            } else if (endIndex >= currentIndex) {
+                customRange.endIndex += textLength;
+            }
+        }
+    }
 
-//         const { st: elementStartIndex, ed: elementEndIndex, tr } = element;
-
-//         if (tr == null || tr.tab === BooleanNumber.TRUE) {
-//             index++;
-//             continue;
-//         }
-//         if (textEnd < elementStartIndex || textStart > elementEndIndex) {
-//             index++;
-//             continue;
-//         }
-
-//         if (paragraphElementType === ParagraphElementType.TEXT_RUN) {
-//             let relativeStart = textStart - elementStartIndex + 1;
-
-//             let relativeEnd = textEnd - elementStartIndex + 1;
-
-//             if (relativeStart <= 0) {
-//                 relativeStart = 0;
-//             }
-
-//             if (relativeEnd >= elementEndIndex - elementStartIndex - 1) {
-//                 relativeStart = elementEndIndex - elementStartIndex - 1;
-//             }
-
-//             const newContent = deleteContent(
-//                 tr.ct || '',
-//                 relativeStart,
-//                 relativeEnd
-//             );
-
-//             tr.ct = newContent;
-//         }
-
-//         if (tr.ct?.length === 0) {
-//             elements.splice(index, 1);
-//         } else {
-//             const preTr = elements[index - 1]?.tr;
-
-//             if (!preTr) {
-//                 index++;
-//                 continue;
-//             }
-
-//             const m = mergeSameTextRun(tr, preTr);
-
-//             if (m) {
-//                 elements.splice(index, 1);
-//             } else {
-//                 index++;
-//             }
-//         }
-//     }
-// }
+    return {
+        textRuns,
+        paragraphs,
+        sectionBreaks,
+        customBlocks,
+        tables,
+        customRanges,
+        dataStream,
+    };
+}

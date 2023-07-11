@@ -13,7 +13,7 @@ export function InsertApply(
 ) {
     const doc = document.snapshot;
 
-    const bodyModel = document.bodyModel;
+    const bodyModel = document.getBodyModel(segmentId);
 
     const body = getDocsUpdateBody(doc, segmentId);
 
@@ -25,10 +25,12 @@ export function InsertApply(
         throw new Error('no body has changed');
     }
 
-    updateAttribute(body, insertBody, textLength, currentIndex);
+    updateAttributeByInsert(body, insertBody, textLength, currentIndex);
+
+    bodyModel.insert(insertBody, currentIndex);
 }
 
-function updateAttribute(
+function updateAttributeByInsert(
     body: IDocumentBody,
     insertBody: IDocumentBody,
     textLength: number,

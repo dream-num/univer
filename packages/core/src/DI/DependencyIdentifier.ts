@@ -1,7 +1,5 @@
-import { Ctor } from './DependencyItem';
 import { ForwardRef } from './DependencyForwardRef';
-
-export const IdentifierDecoratorSymbol = Symbol('$$IDENTIFIER_DECORATOR');
+import { Ctor, isCtor } from './Types';
 
 export type IdentifierDecorator<T> = {
     // call signature of an decorator
@@ -11,9 +9,7 @@ export type IdentifierDecorator<T> = {
 
     [IdentifierDecoratorSymbol]: true;
 
-    /**
-     * beautify console
-     */
+    // beautify console
     toString(): string;
 };
 
@@ -27,3 +23,15 @@ export type NormalizedDependencyIdentifier<T> = Exclude<
     DependencyIdentifier<T>,
     ForwardRef<T>
 >;
+
+export const IdentifierDecoratorSymbol = Symbol('$$IDENTIFIER_DECORATOR');
+
+export function prettyPrintIdentifier<T>(id: DependencyIdentifier<T>): string {
+    if (typeof id === 'undefined') {
+        return 'undefined';
+    }
+
+    return isCtor(id) && !(id as any)[IdentifierDecoratorSymbol]
+        ? id.name
+        : id.toString();
+}

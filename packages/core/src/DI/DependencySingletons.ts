@@ -1,6 +1,6 @@
 import { DIError } from './Error';
-import { DependencyIdentifier } from './DependencyIdentifier';
-import { DependencyItem, prettyPrintIdentifier } from './DependencyItem';
+import { DependencyIdentifier, prettyPrintIdentifier } from './DependencyIdentifier';
+import { DependencyItem } from './Decorators';
 
 let singletonFetchedLock = false;
 

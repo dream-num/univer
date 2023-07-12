@@ -1,6 +1,5 @@
-import { setDependency } from './Decorators';
-import { normalizeFactoryDeps } from './DependencyDescriptor';
-import { Ctor, FactoryDep } from './DependencyItem';
+import { FactoryDep, normalizeFactoryDeps, setDependency } from './Decorators';
+import { Ctor } from './Types';
 
 export function setDependencies<U>(
     registerTarget: Ctor<U>,

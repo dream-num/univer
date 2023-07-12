@@ -1,9 +1,8 @@
-import { DependencyIdentifier } from './DependencyIdentifier';
-import { Ctor, DependencyItem, prettyPrintIdentifier } from './DependencyItem';
-import { checkQuantity, retrieveQuantity } from './DependencyQuantity';
+import { DependencyIdentifier, prettyPrintIdentifier } from './DependencyIdentifier';
 import { IDisposable, isIDisposable } from './Lifecycle';
-import { Quantity } from './Types';
+import { Ctor, Quantity } from './Types';
 import { DIError } from './Error';
+import { DependencyItem, checkQuantity, retrieveQuantity } from './Decorators';
 
 export type DependencyPair<T> = [DependencyIdentifier<T>, DependencyItem<T>];
 export type DependencyClass<T> = [Ctor<T>];

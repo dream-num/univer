@@ -1,15 +1,5 @@
-import { getDependencies } from './Decorators';
 import {
-    Dependency,
-    DependencyCollection,
-    DependencyNotFoundError,
-    ResolvedDependencyCollection,
-    DependencyPair,
-} from './DependencyCollection';
-import { normalizeFactoryDeps } from './DependencyDescriptor';
-import { DependencyIdentifier } from './DependencyIdentifier';
-import {
-    Ctor,
+    getDependencies,
     DependencyItem,
     AsyncDependencyItem,
     isClassDependencyItem,
@@ -20,16 +10,27 @@ import {
     FactoryDependencyItem,
     AsyncHook,
     isAsyncHook,
-    isCtor,
     ValueDependencyItem,
+    normalizeFactoryDeps,
+} from './Decorators';
+import {
+    Dependency,
+    DependencyCollection,
+    DependencyNotFoundError,
+    ResolvedDependencyCollection,
+    DependencyPair,
+} from './DependencyCollection';
+import {
+    DependencyIdentifier,
+    NormalizedDependencyIdentifier,
     prettyPrintIdentifier,
-} from './DependencyItem';
-import { normalizeForwardRef } from './DependencyForwardRef';
+} from './DependencyIdentifier';
 import { IdleValue } from './IdleValue';
 import { getSingletonDependencies } from './DependencySingletons';
 import { DIError } from './Error';
-import { Quantity, LookUp } from './Types';
+import { Quantity, LookUp, Ctor, isCtor } from './Types';
 import { isICreatable } from './Lifecycle';
+import { isForwardRef } from './DependencyForwardRef';
 
 const MAX_RESOLUTIONS_QUEUED = 300;
 
@@ -63,6 +64,16 @@ class GetAsyncItemFromSyncApiError<T> extends DIError {
     constructor(id: DependencyIdentifier<T>) {
         super(`Cannot get async item "${prettyPrintIdentifier(id)}" from sync api.`);
     }
+}
+
+function normalizeForwardRef<T>(
+    id: DependencyIdentifier<T>
+): NormalizedDependencyIdentifier<T> {
+    if (isForwardRef(id)) {
+        return id.unwrap();
+    }
+
+    return id;
 }
 
 export class Injector {

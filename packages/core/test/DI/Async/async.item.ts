@@ -1,5 +1,5 @@
-import { DependencyPair } from '../../DependencyCollection';
-import { Inject } from '../../DependencyQuantity';
+import { DependencyPair } from '../../../src/DI/DependencyCollection';
+import { Inject } from '../../../src/DI/DependencyQuantity';
 import { AA, BB, bbI } from './async.base';
 
 export class BBImpl implements BB {

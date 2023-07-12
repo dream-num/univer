@@ -1,18 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-function */
 
-import { TEST_ONLY_clearKnownIdentifiers, createIdentifier } from '../Decorators';
-import { setDependencies } from '../DependencyDeclare';
-import { forwardRef } from '../DependencyForwardRef';
-import { AsyncHook } from '../DependencyItem';
-import { SkipSelf, Self } from '../DependencyLookUp';
-import { Inject, Many, Optional } from '../DependencyQuantity';
-import { TEST_ONLY_clearSingletonDependencies } from '../DependencySingletons';
-import { WithNew } from '../DependencyWithNew';
-import { IDisposable } from '../Lifecycle';
-import { Injector } from '../Injector';
+import { setDependencies } from '../../src/DI/DependencyDeclare';
+import { forwardRef } from '../../src/DI/DependencyForwardRef';
+import { AsyncHook } from '../../src/DI/DependencyItem';
+import { SkipSelf, Self } from '../../src/DI/DependencyLookUp';
+import { Inject, Many, Optional } from '../../src/DI/DependencyQuantity';
+import { TEST_ONLY_clearSingletonDependencies } from '../../src/DI/DependencySingletons';
+import { WithNew } from '../../src/DI/DependencyWithNew';
+import { IDisposable } from '../../src/DI/Lifecycle';
+import { Injector } from '../../src/DI/Injector';
 import { expectToThrow } from './Util/ExpectToThrow';
-import { AA, BB, bbI } from './async/async.base';
+import { AA, BB, bbI } from './Async/async.base';
+import {
+    TEST_ONLY_clearKnownIdentifiers,
+    createIdentifier,
+} from '../../src/DI/Decorators';
 
 function cleanupTest() {
     TEST_ONLY_clearKnownIdentifiers();
@@ -347,7 +350,7 @@ describe('core', () => {
                             bbI,
                             {
                                 useAsync: () =>
-                                    import('./async/async.item').then(
+                                    import('./Async/async.item').then(
                                         (module) => module.BBImpl
                                     ),
                             },
@@ -384,7 +387,7 @@ describe('core', () => {
                             bbI,
                             {
                                 useAsync: () =>
-                                    import('./async/async.item').then(
+                                    import('./Async/async.item').then(
                                         (module) => module.BBFactory
                                     ),
                             },
@@ -405,7 +408,7 @@ describe('core', () => {
                             bbI,
                             {
                                 useAsync: () =>
-                                    import('./async/async.item').then(
+                                    import('./Async/async.item').then(
                                         (module) => module.BBValue
                                     ),
                             },
@@ -451,7 +454,7 @@ describe('core', () => {
                             bbI,
                             {
                                 useAsync: () =>
-                                    import('./async/async.item').then(
+                                    import('./Async/async.item').then(
                                         (module) => module.BBLoader
                                     ),
                             },
@@ -475,7 +478,7 @@ describe('core', () => {
                         bbI,
                         {
                             useAsync: () =>
-                                import('./async/async.item').then(
+                                import('./Async/async.item').then(
                                     (module) => module.BBFactory
                                 ),
                         },
@@ -504,7 +507,7 @@ describe('core', () => {
                             bbI,
                             {
                                 useAsync: () =>
-                                    import('./async/async.item').then(
+                                    import('./Async/async.item').then(
                                         (module) => module.BBFactory
                                     ),
                             },

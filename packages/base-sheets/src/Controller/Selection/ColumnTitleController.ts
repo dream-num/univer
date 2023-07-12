@@ -1,6 +1,5 @@
-import { Inject } from '@wendellhu/redi';
+import { Inject, Nullable, SheetContext } from '@univerjs/core';
 import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect } from '@univerjs/base-render';
-import { Nullable, SheetContext } from '@univerjs/core';
 import { DragLineController, DragLineDirection } from './DragLineController';
 import { CanvasView } from '../../View';
 import { ISheetContext } from '../../Services/tokens';

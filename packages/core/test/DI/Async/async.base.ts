@@ -1,4 +1,4 @@
-import { createIdentifier } from '../../Decorators';
+import { createIdentifier } from '../../../src/DI/Decorators';
 
 export class AA {
     key = 'aa';

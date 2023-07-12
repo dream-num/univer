@@ -1,9 +1,12 @@
-import { TEST_ONLY_clearKnownIdentifiers, createIdentifier } from '../Decorators';
+import {
+    TEST_ONLY_clearKnownIdentifiers,
+    createIdentifier,
+} from '../../src/DI/Decorators';
 import {
     TEST_ONLY_clearSingletonDependencies,
     registerSingleton,
-} from '../DependencySingletons';
-import { Injector } from '../Injector';
+} from '../../src/DI/DependencySingletons';
+import { Injector } from '../../src/DI/Injector';
 
 describe('singleton', () => {
     beforeAll(() => {

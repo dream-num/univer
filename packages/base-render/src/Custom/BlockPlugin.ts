@@ -1,4 +1,4 @@
-import { SheetContext, IOCContainer, Observable, Plugin } from '@univerjs/core';
+import { SheetContext, Observable, Plugin } from '@univerjs/core';
 import { IDocumentSkeletonPage, ISkeletonResourceReference } from '../Basics/IDocumentSkeletonCached';
 import { ISectionBreakConfig } from '../Basics/Interfaces';
 
@@ -17,8 +17,6 @@ export class BlockPlugin extends Plugin<BlockPluginObserve> {
     ) {
         return [];
     }
-
-    onMapping(IOC: IOCContainer): void {}
 
     onMounted(ctx: SheetContext): void {}
 

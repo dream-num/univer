@@ -1,6 +1,5 @@
 import { Scene } from '@univerjs/base-render';
-import { Registry, SheetContext, Worksheet } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import { Registry, SheetContext, Worksheet, Injector } from '@univerjs/core';
 import { ISheetContext } from '../Services/tokens';
 
 export class BaseView {

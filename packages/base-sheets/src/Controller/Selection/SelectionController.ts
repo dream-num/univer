@@ -1,6 +1,5 @@
 import { Rect, Group } from '@univerjs/base-render';
-import { Nullable, ISelection, ICellInfo } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Nullable, ISelection, ICellInfo, Inject, Injector } from '@univerjs/core';
 import { SelectionModel } from '../../Model/SelectionModel';
 import { SelectionControlDragAndDrop } from './SelectionControlDragDrop';
 import { SelectionControlFill } from './SelectionControlFill';

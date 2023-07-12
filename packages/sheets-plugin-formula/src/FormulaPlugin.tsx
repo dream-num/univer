@@ -1,4 +1,4 @@
-import { SheetContext, IOCContainer, UniverSheet, Plugin } from '@univerjs/core';
+import { SheetContext, UniverSheet, Plugin } from '@univerjs/core';
 import { FormulaEnginePlugin } from '@univerjs/base-formula-engine';
 import { CellEditExtensionManager, CellInputExtensionManager, Icon } from '@univerjs/base-ui';
 import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
@@ -102,8 +102,6 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
         //     'sheet-0003'
         // );
     }
-
-    onMapping(IOC: IOCContainer): void {}
 
     onMounted(context: SheetContext): void {
         install(this);

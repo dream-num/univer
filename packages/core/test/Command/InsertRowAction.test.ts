@@ -4,12 +4,12 @@
 import { Workbook, Worksheet } from '../../src/Sheets/Domain';
 import { SheetContext } from '../../src/Basics';
 import { CommandManager, InsertRowAction } from '../../src/Command';
-import { IOCContainerStartUpReady } from '../ContainerStartUp';
+import { createCoreTestContainer } from '../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
 test('Undo a new Row', () => {
-    const container = IOCContainerStartUpReady();
+    const container = createCoreTestContainer();
     const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
 
@@ -34,7 +34,7 @@ test('Undo a new Row', () => {
 });
 
 test('Insert a new Row', () => {
-    const container = IOCContainerStartUpReady();
+    const container = createCoreTestContainer();
     const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
 

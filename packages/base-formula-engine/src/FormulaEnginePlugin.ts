@@ -1,4 +1,4 @@
-import { SheetContext, IUnitRange, Plugin, IOCContainer } from '@univerjs/core';
+import { SheetContext, IUnitRange, Plugin } from '@univerjs/core';
 
 import { LexerTreeMaker } from './Analysis/Lexer';
 import { FormulaEnginePluginObserver } from './Basics/Observer';
@@ -88,8 +88,6 @@ export class FormulaEnginePlugin extends Plugin<FormulaEnginePluginObserver> {
     }
 
     initialize(): void {}
-
-    onMapping(IOC: IOCContainer): void {}
 
     onMounted(ctx: SheetContext): void {
         this.initialize();

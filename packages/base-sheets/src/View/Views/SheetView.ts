@@ -1,6 +1,5 @@
 import { getColor, Rect, Scene, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, SpreadsheetSkeleton } from '@univerjs/base-render';
-import { Worksheet } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import { Worksheet, Injector } from '@univerjs/core';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from '../BaseView';
 
 export enum SHEET_VIEW_KEY {

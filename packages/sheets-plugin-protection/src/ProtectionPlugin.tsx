@@ -1,4 +1,4 @@
-import { SheetContext, IOCContainer, UniverSheet, Plugin } from '@univerjs/core';
+import { SheetContext, UniverSheet, Plugin } from '@univerjs/core';
 import { PROTECTION_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { Protection } from './Controller';
 
@@ -58,8 +58,6 @@ export class ProtectionPlugin extends Plugin {
         // };
         // context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addSider(siderItem);
     }
-
-    onMapping(IOC: IOCContainer): void {}
 
     onMounted(ctx: SheetContext): void {
         this.initialize();

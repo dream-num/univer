@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { SheetContext, IOCContainer, UniverSheet, Plugin } from '../../src';
+import { SheetContext,  UniverSheet, Plugin } from '../../src';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
@@ -36,7 +36,7 @@ describe('UniverSheet', () => {
                 this.context = context;
             }
 
-            onMapping(IOC: IOCContainer): void {}
+
 
             onMounted(ctx: SheetContext): void {
                 this.initialize(ctx);

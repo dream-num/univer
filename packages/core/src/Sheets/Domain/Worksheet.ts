@@ -103,6 +103,8 @@ export class Worksheet {
 
     constructor(context: SheetContext);
     constructor(context: SheetContext, config: Partial<IWorksheetConfig>);
+    // TODO: fix max lines
+    // eslint-disable-next-line max-lines-per-function
     constructor(...argument: any) {
         if (Tools.hasLength(argument, 1)) {
             const context = argument[0];
@@ -1309,6 +1311,8 @@ export class Worksheet {
      * @param style
      * @param directions
      */
+    // TODO: fix
+    // eslint-disable-next-line max-lines-per-function
     setBorderStyle(
         rangeData: IRangeData,
         style: IBorderStyleData,
@@ -2235,6 +2239,12 @@ export class Worksheet {
         const data = this._cellData.spliceColumns(startRow, endRow - startRow + 1);
         this._cellData.insertColumns(destinationIndex, data);
         return this;
+    }
+
+    setCommandManager(commandManager: CommandManager): void {
+        throw new Error(
+            'This method is deprecated. The method is here to prevent ts errors!'
+        );
     }
 
     private _initialize(): void {

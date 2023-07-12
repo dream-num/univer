@@ -3,9 +3,6 @@
  */
 import { ObjectMatrix } from '../../src';
 import { SheetContext } from '../../src/Basics/SheetContext';
-import { Environment } from '../../src/Basics/Environment';
-import { CommandManager } from '../../src/Command/CommandManager';
-import { UndoManager } from '../../src/Command/UndoManager';
 import { Workbook } from '../../src/Sheets/Domain/Workbook';
 import { Worksheet } from '../../src/Sheets/Domain/Worksheet';
 import {
@@ -20,14 +17,8 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '../../src/Enum';
-import { ICellData, ICellV, IWorkbookConfig } from '../../src/Interfaces';
-import { IOCAttribute, IOCContainer } from '../../src/IOC/IOCContainer';
-import { HooksManager } from '../../src/Observer/HooksManager';
-import { ObserverManager } from '../../src/Observer/ObserverManager';
-import { PluginManager } from '../../src/Plugin/PluginManager';
-import { ServerHttp } from '../../src/Server/ServerHttp';
-import { ServerSocket } from '../../src/Server/ServerSocket';
-import { Locale } from '../../src/Shared/Locale';
+import { ICellData, ICellV } from '../../src/Interfaces';
+import { createCoreTestContainer } from '../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
@@ -41,49 +32,8 @@ jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
     Tips: The test debugger with the same name will always execute. Please keep a unique name when testing, such as'Test setFontColor'
  */
 
-export function IOCContainerStartUpReady(
-    workbookConfig?: Partial<IWorkbookConfig>
-): IOCContainer {
-    const configure = {
-        id: '',
-        extensions: [],
-        sheetOrder: [],
-        socketEnable: BooleanNumber.FALSE,
-        socketUrl: '',
-        name: '',
-        timeZone: '',
-        appVersion: '',
-        theme: '',
-        skin: '',
-        locale: '',
-        creator: '',
-        styles: {},
-        sheets: [],
-        lastModifiedBy: '',
-        createdTime: '',
-        modifiedTime: '',
-        ...workbookConfig,
-    };
-    const attribute = new IOCAttribute({ value: configure });
-    const container = new IOCContainer(attribute);
-    container.addSingletonMapping('Environment', Environment);
-    container.addSingletonMapping('Server', ServerSocket);
-    container.addSingletonMapping('ServerSocket', ServerSocket);
-    container.addSingletonMapping('ServerHttp', ServerHttp);
-    container.addSingletonMapping('WorkBook', Workbook);
-    container.addSingletonMapping('Locale', Locale);
-    container.addSingletonMapping('Context', SheetContext);
-    container.addSingletonMapping('UndoManager', UndoManager);
-    container.addSingletonMapping('CommandManager', CommandManager);
-    container.addSingletonMapping('PluginManager', PluginManager);
-    container.addSingletonMapping('ObserverManager', ObserverManager);
-    container.addSingletonMapping('ObservableHooksManager', HooksManager);
-    container.addMapping('WorkSheet', Worksheet);
-    return container;
-}
-
 export function demo() {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
@@ -137,7 +87,7 @@ export function demo() {
 }
 
 test('Test setFontColor', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -194,7 +144,7 @@ test('Test setFontColor', () => {
 });
 
 test('Test setFontFamily', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -256,7 +206,7 @@ test('Test setFontFamily', () => {
 });
 
 test('Test setFontFamilies', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -318,7 +268,7 @@ test('Test setFontFamilies', () => {
 });
 
 test('Test setUnderline', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 ff: 'Arial',
@@ -371,7 +321,7 @@ test('Test setUnderline', () => {
     });
 });
 test('Test setOverline', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 ff: 'Arial',
@@ -424,7 +374,7 @@ test('Test setOverline', () => {
     });
 });
 test('Test setStrikeThrough', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 ff: 'Arial',
@@ -477,7 +427,7 @@ test('Test setStrikeThrough', () => {
     });
 });
 test('Test setFontSize', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -541,7 +491,7 @@ test('Test setFontSize', () => {
 });
 
 test('Test setHorizontalAlignment', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -602,7 +552,7 @@ test('Test setHorizontalAlignment', () => {
 });
 
 test('Test setVerticalAlignment', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -663,7 +613,7 @@ test('Test setVerticalAlignment', () => {
 });
 
 test('Test setTextDirection', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -724,7 +674,7 @@ test('Test setTextDirection', () => {
 });
 
 test('Test setWrapStrategy', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -809,7 +759,7 @@ test('Test setWrapStrategy', () => {
 });
 
 test('Test setWrapStrategies', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
@@ -877,7 +827,7 @@ test('Test setWrapStrategies', () => {
 });
 
 test('Test setBorder', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -1043,7 +993,7 @@ test('Test setBorder', () => {
 });
 
 test('Test copyTo formatOnly', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -1103,7 +1053,7 @@ test('Test copyTo formatOnly', () => {
 });
 
 test('Test copyTo contentsOnly', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -1182,7 +1132,7 @@ test('Test copyTo contentsOnly', () => {
 });
 
 test('Test copyTo CopyPasteType', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -1248,7 +1198,7 @@ test('Test copyTo CopyPasteType', () => {
 });
 
 test('Test copyFormatToRange by sheet', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -1319,7 +1269,7 @@ test('Test copyFormatToRange by sheet', () => {
     });
 });
 test('Test copyFormatToRange by sheetId', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -1391,7 +1341,7 @@ test('Test copyFormatToRange by sheetId', () => {
 });
 
 test('Test copyValuesToRange by sheet', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -1481,7 +1431,7 @@ test('Test copyValuesToRange by sheet', () => {
 });
 
 test('Test copyValuesToRange by sheetId', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -1570,7 +1520,7 @@ test('Test copyValuesToRange by sheetId', () => {
     });
 });
 test('Test moveTo', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -1711,7 +1661,7 @@ test('Test moveTo', () => {
     });
 });
 test('Test offset', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -1767,7 +1717,7 @@ test('Test offset', () => {
 });
 
 test('Test setValue', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -1821,7 +1771,7 @@ test('Test setValue', () => {
 });
 
 test('Test setValues ICellV', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -1875,7 +1825,7 @@ test('Test setValues ICellV', () => {
 });
 
 test('Test setValues ObjectMatrix', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -1934,7 +1884,7 @@ test('Test setValues ObjectMatrix', () => {
 });
 
 test('Test clear', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -1990,7 +1940,7 @@ test('Test clear', () => {
     expect(initValue && initValue.v).toEqual(1);
 });
 test('Test clearFormat', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -2046,7 +1996,7 @@ test('Test clearFormat', () => {
     expect(initValue && initValue.v).toEqual(1);
 });
 test('Test deleteCells', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -2191,7 +2141,7 @@ test('Test deleteCells', () => {
 });
 
 test('Test insertCells', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -2349,7 +2299,7 @@ test('Test insertCells', () => {
 });
 
 test('Test insertCells COLUMNS', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -2447,7 +2397,7 @@ test('Test insertCells COLUMNS', () => {
 });
 
 test('Create a Merge', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -2538,7 +2488,7 @@ test('Create a Merge', () => {
 });
 
 test('Test getBackground', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -2630,7 +2580,7 @@ test('Test getBackground', () => {
     expect(background).toEqual('#ff0000');
 });
 test('Test getBackgrounds', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -2687,7 +2637,7 @@ test('Test getBackgrounds', () => {
 });
 
 test('Test getCell', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -2744,7 +2694,7 @@ test('Test getCell', () => {
 });
 
 test('Test getColumn', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -2801,7 +2751,7 @@ test('Test getColumn', () => {
 });
 
 test('Test getDisplayValue', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -2858,7 +2808,7 @@ test('Test getDisplayValue', () => {
 });
 
 test('Test getDisplayValues', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -2915,7 +2865,7 @@ test('Test getDisplayValues', () => {
 });
 
 test('Test getFontColor', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -2972,7 +2922,7 @@ test('Test getFontColor', () => {
 });
 
 test('Test getFontColors', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -3029,7 +2979,7 @@ test('Test getFontColors', () => {
 });
 
 test('Test getFontFamily', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -3088,7 +3038,7 @@ test('Test getFontFamily', () => {
 });
 
 test('Test getFontFamilies', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -3147,7 +3097,7 @@ test('Test getFontFamilies', () => {
 });
 
 test('Test getFontLines', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 ul: { s: BooleanNumber.TRUE },
@@ -3206,7 +3156,7 @@ test('Test getFontLines', () => {
 });
 
 test('Test getFontLine', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 ul: { s: BooleanNumber.TRUE },
@@ -3259,7 +3209,7 @@ test('Test getFontLine', () => {
 });
 
 test('Test getFontSize', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -3318,7 +3268,7 @@ test('Test getFontSize', () => {
 });
 
 test('Test getFontSizes', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -3377,7 +3327,7 @@ test('Test getFontSizes', () => {
 });
 
 test('Test getFontWeight', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 bl: 1,
@@ -3428,7 +3378,7 @@ test('Test getFontWeight', () => {
     expect(B1).toEqual(0);
 });
 test('Test getFontWeights', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -3489,7 +3439,7 @@ test('Test getFontWeights', () => {
 });
 
 test('Test getHorizontalAlignment', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 ht: HorizontalAlign.LEFT,
@@ -3534,7 +3484,7 @@ test('Test getHorizontalAlignment', () => {
 });
 
 test('Test getHorizontalAlignments', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 ht: HorizontalAlign.LEFT,
@@ -3579,7 +3529,7 @@ test('Test getHorizontalAlignments', () => {
 });
 
 test('Test getVerticalAlignments', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 vt: VerticalAlign.TOP,
@@ -3624,7 +3574,7 @@ test('Test getVerticalAlignments', () => {
 });
 
 test('Test getVerticalAlignment', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 vt: VerticalAlign.TOP,
@@ -3669,7 +3619,7 @@ test('Test getVerticalAlignment', () => {
 });
 
 test('Test getFontStyles', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 it: 1,
@@ -3714,7 +3664,7 @@ test('Test getFontStyles', () => {
 });
 
 test('Test getFontStyle', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 it: 1,
@@ -3759,7 +3709,7 @@ test('Test getFontStyle', () => {
 });
 
 test('Test getTextDirections', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 td: 1,
@@ -3804,7 +3754,7 @@ test('Test getTextDirections', () => {
 });
 
 test('Test getTextDirection', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 td: 1,
@@ -3849,7 +3799,7 @@ test('Test getTextDirection', () => {
 });
 
 test('Test getTextRotations', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 tr: {
@@ -3907,7 +3857,7 @@ test('Test getTextRotations', () => {
 });
 
 test('Test getTextRotation', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 tr: {
@@ -3956,7 +3906,7 @@ test('Test getTextRotation', () => {
 });
 
 test('Test getTextStyles', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
@@ -4014,7 +3964,7 @@ test('Test getTextStyles', () => {
 });
 
 test('Test getTextStyle', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
@@ -4064,7 +4014,7 @@ test('Test getTextStyle', () => {
 });
 
 test('Test getSheet', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -4118,7 +4068,7 @@ test('Test getSheet', () => {
 });
 
 test('Test getNumColumns', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -4167,7 +4117,7 @@ test('Test getNumColumns', () => {
 });
 
 test('Test getNumRows', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -4221,7 +4171,7 @@ test('Test getNumRows', () => {
 });
 
 test('Test getRowIndex', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -4275,7 +4225,7 @@ test('Test getRowIndex', () => {
 });
 
 test('Test getLastColumn', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
@@ -4313,7 +4263,7 @@ test('Test getLastColumn', () => {
 });
 
 test('Test getWrapStrategies', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 tb: WrapStrategy.OVERFLOW,
@@ -4356,7 +4306,7 @@ test('Test getWrapStrategies', () => {
 });
 
 test('Test getWraps/getWrap', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 tb: WrapStrategy.OVERFLOW,
@@ -4399,7 +4349,7 @@ test('Test getWraps/getWrap', () => {
 });
 
 test('Test setFontColors', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -4472,7 +4422,7 @@ test('Test setFontColors', () => {
 });
 
 test('Test setBackground', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 bg: {
@@ -4549,7 +4499,7 @@ test('Test setBackground', () => {
 });
 
 test('Test setBackgrounds', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 bg: {
@@ -4631,7 +4581,7 @@ test('Test setBackgrounds', () => {
 });
 
 test('Test setBackgroundRGB', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 bg: {
@@ -4713,7 +4663,7 @@ test('Test setBackgroundRGB', () => {
 });
 
 test('Test setUnderline', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
@@ -4766,7 +4716,7 @@ test('Test setUnderline', () => {
 });
 
 test('Test setOverline', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
@@ -4819,7 +4769,7 @@ test('Test setOverline', () => {
 });
 
 test('Test setStrikeThrough', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
@@ -4872,7 +4822,7 @@ test('Test setStrikeThrough', () => {
 });
 
 test('Test setHorizontalAlignments', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
@@ -4949,7 +4899,7 @@ test('Test setHorizontalAlignments', () => {
 });
 
 test('Test isPartOfMerge', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
@@ -5552,7 +5502,7 @@ test('Test clearNote', () => {
 });
 
 test('Test removeDuplicates', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {},
     });
     const context = container.getSingleton<SheetContext>('Context');
@@ -5636,7 +5586,7 @@ test('Test removeDuplicates', () => {
 });
 
 test('Test getColumnMatrix', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {},
     });
     const context = container.getSingleton<SheetContext>('Context');
@@ -5700,7 +5650,7 @@ test('Test getColumnMatrix', () => {
 });
 
 test('Test isBlank', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {},
     });
     const context = container.getSingleton<SheetContext>('Context');
@@ -6050,7 +6000,7 @@ test('Test getWidth', () => {
 });
 
 test('Test trimWhitespace', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {

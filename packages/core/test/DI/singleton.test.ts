@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 import {
     TEST_ONLY_clearKnownIdentifiers,
     createIdentifier,

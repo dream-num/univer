@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable max-lines-per-function */
 
 import { setDependencies } from '../../src/DI/DependencyDeclare';
 import { forwardRef } from '../../src/DI/DependencyForwardRef';
@@ -635,7 +634,9 @@ describe('core', () => {
 
             expectToThrow(() => {
                 class B {
-                    constructor(@Optional() _a: A) {}
+                    constructor(@Optional() _a: A) {
+                        // empty
+                    }
                 }
             }, `[DI]: Could not find dependency registered on the 1 parameter of the constructor of "B".`);
         });

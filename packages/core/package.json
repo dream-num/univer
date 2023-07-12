@@ -15,7 +15,6 @@
     "author": "DreamNum <msoffice2@126.com>",
     "main": "./src/index.ts",
     "module": "./src/index.ts",
-    "types": "./src/Types/index.d.ts",
     "publishConfig": {
         "main": "./lib/univer-core.cjs.js",
         "module": "./lib/univer-core.js",

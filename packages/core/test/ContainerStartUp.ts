@@ -2,15 +2,21 @@ import { SheetContext, Environment } from '../src/Basics';
 import { CommandManager, UndoManager } from '../src/Command';
 import { Workbook, Worksheet } from '../src/Sheets/Domain';
 import { BooleanNumber } from '../src/Enum';
-import { IWorksheetConfig } from '../src/Interfaces';
-import { IOCAttribute, IOCContainer } from '../src/DI';
+import { IWorkbookConfig, IWorksheetConfig } from '../src/Interfaces';
 import { HooksManager } from '../src/Observer/HooksManager';
 import { ObserverManager } from '../src/Observer/ObserverManager';
 import { PluginManager } from '../src/Plugin';
-import { ServerHttp, ServerSocket } from '../src/Server';
+import {
+    IServerSocketWorkbookConfig,
+    ServerHttp,
+    ServerSocket,
+} from '../src/Server';
 import { Locale } from '../src/Shared';
+import { Injector } from '../src';
 
-export function IOCContainerStartUpReady(): IOCContainer {
+export function createCoreTestContainer(
+    workbookConfig?: Partial<IWorkbookConfig>
+): Injector {
     const configure = {
         value: {
             appVersion: '',
@@ -28,26 +34,30 @@ export function IOCContainerStartUpReady(): IOCContainer {
             skin: '',
             socketEnable: BooleanNumber.FALSE,
             socketUrl: '',
-            styles: [],
+            styles: {},
             theme: '',
             timeZone: '',
+            ...workbookConfig,
         },
     };
-    const attribute = new IOCAttribute(configure);
-    const container = new IOCContainer(attribute);
-    container.addSingletonMapping('Environment', Environment);
-    container.addSingletonMapping('Server', ServerSocket);
-    container.addSingletonMapping('ServerSocket', ServerSocket);
-    container.addSingletonMapping('ServerHttp', ServerHttp);
-    container.addSingletonMapping('WorkBook', Workbook);
-    container.addSingletonMapping('Locale', Locale);
-    container.addSingletonMapping('Context', SheetContext);
-    container.addSingletonMapping('UndoManager', UndoManager);
-    container.addSingletonMapping('CommandManager', CommandManager);
-    container.addSingletonMapping('PluginManager', PluginManager);
-    container.addSingletonMapping('ObserverManager', ObserverManager);
-    container.addSingletonMapping('ObservableHooksManager', HooksManager);
-    container.addMapping('WorkSheet', Worksheet);
+
+    const container = new Injector([
+        [IServerSocketWorkbookConfig, { useValue: configure }],
+        ['Environment', { useClass: Environment }],
+        ['Server', { useClass: ServerSocket }],
+        ['ServerSocket', { useClass: ServerSocket }],
+        ['ServerHttp', { useClass: ServerHttp }],
+        ['WorkBook', { useClass: Workbook }],
+        ['Locale', { useClass: Locale }],
+        ['Context', { useClass: SheetContext }],
+        ['UndoManager', { useClass: UndoManager }],
+        ['CommandManager', { useClass: CommandManager }],
+        ['PluginManager', { useClass: PluginManager }],
+        ['ObserverManager', { useClass: ObserverManager }],
+        ['ObservableHooksManager', { useClass: HooksManager }],
+        ['WorkSheet', { useClass: Worksheet }],
+    ]);
+
     return container;
 }
 
@@ -75,26 +85,24 @@ const defaultWorksheetConfigure = {
 export function TestInit(worksheetConfig?: Partial<IWorksheetConfig>) {
     const configure = Object.assign(defaultWorksheetConfigure, worksheetConfig);
 
-    const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const container = createCoreTestContainer();
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     // const worksheet = new WorkSheet(context, configure);
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
     return { worksheet, workbook };
 }
+
+// eslint-disable-next-line max-lines-per-function
 export function TestInitTwoSheet() {
-    const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const container = createCoreTestContainer();
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const sheetOneConfigure = {
@@ -139,16 +147,16 @@ export function TestInitTwoSheet() {
         status: 0,
     };
 
-    const worksheetOne = container.getInstance<Worksheet>(
-        'WorkSheet',
+    const worksheetOne = container.createInstance(
+        Worksheet,
         context,
         sheetOneConfigure
     );
     workbook.insertSheet(worksheetOne);
     worksheetOne.setCommandManager(commandManager);
 
-    const worksheetTwo = container.getInstance<Worksheet>(
-        'WorkSheet',
+    const worksheetTwo = container.createInstance(
+        Worksheet,
         context,
         sheetTwoConfigure
     );
@@ -160,9 +168,9 @@ export function TestInitTwoSheet() {
 
 export function TestInitSheetInstance(worksheetConfig?: Partial<IWorksheetConfig>) {
     const configure = Object.assign(defaultWorksheetConfigure, worksheetConfig);
-    const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const container = createCoreTestContainer();
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
     const worksheet = new Worksheet(context, configure);
     workbook.insertSheet(worksheet);

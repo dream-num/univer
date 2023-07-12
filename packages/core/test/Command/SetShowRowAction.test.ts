@@ -3,13 +3,13 @@
  */
 import { Workbook, Worksheet } from '../../src/Sheets/Domain';
 import { SheetContext } from '../../src/Basics';
-import { IOCContainerStartUpReady } from '../ContainerStartUp';
+import { createCoreTestContainer } from '../ContainerStartUp';
 import { CommandManager, SetRowShowAction } from '../../src/Command';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
 test('SetRowShowAction', () => {
-    const container = IOCContainerStartUpReady();
+    const container = createCoreTestContainer();
     const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
 

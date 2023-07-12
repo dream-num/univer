@@ -11,12 +11,12 @@ import { SheetContext } from '../../../../src/Basics';
 
 import { Workbook, Worksheet } from '../../../../src/Sheets/Domain';
 import { INamedRange } from '../../../../src/Interfaces/INamedRange';
-import { IOCContainerStartUpReady } from '../../../ContainerStartUp';
+import { createCoreTestContainer } from '../../../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
 test('Set NamedRange Action Test', () => {
-    const container = IOCContainerStartUpReady();
+    const container = createCoreTestContainer();
     const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
 

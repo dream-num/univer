@@ -1,5 +1,5 @@
 import { IToolbarItemProps, ISlotElement } from '@univerjs/base-ui';
-import { SheetContext, IOCContainer, UniverSheet, Nullable, Plugin, PLUGIN_NAMES } from '@univerjs/core';
+import { SheetContext, UniverSheet, Nullable, Plugin, PLUGIN_NAMES } from '@univerjs/core';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { COMMENT_COLORS_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 import { IConfig } from './IData/IComment';
@@ -47,8 +47,6 @@ export class CommentPlugin extends Plugin {
         // extend comment
         this.sheetPlugin?.addButton(item);
     }
-
-    onMapping(IOC: IOCContainer): void {}
 
     onMounted(ctx: SheetContext): void {
         this.initialize();

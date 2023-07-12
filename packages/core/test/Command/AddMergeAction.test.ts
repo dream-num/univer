@@ -4,14 +4,14 @@
 import { Workbook, Worksheet } from '../../src/Sheets/Domain';
 import { SheetContext } from '../../src/Basics';
 import { AddMergeAction, CommandManager } from '../../src/Command';
-import { IOCContainerStartUpReady } from '../ContainerStartUp';
+import { createCoreTestContainer } from '../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
 test('Test Create MergeCell', () => {
-    const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const container = createCoreTestContainer();
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
 
     const sheetId = 'sheet1';
     const worksheet = new Worksheet(context, { id: sheetId });
@@ -27,9 +27,9 @@ test('Test Create MergeCell', () => {
 });
 
 test('Test Undo MergeCell', () => {
-    const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const container = createCoreTestContainer();
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
 
     const sheetId = 'sheet1';
     const worksheet = new Worksheet(context, { id: sheetId });
@@ -49,9 +49,9 @@ test('Test Undo MergeCell', () => {
 });
 
 test('Test Cross MergeCell', () => {
-    const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const container = createCoreTestContainer();
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
 
     const sheetId = 'sheet1';
     const worksheet = new Worksheet(context, { id: sheetId });
@@ -72,9 +72,9 @@ test('Test Cross MergeCell', () => {
 });
 
 test('Test Multiple MergeCell', () => {
-    const container = IOCContainerStartUpReady();
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const container = createCoreTestContainer();
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
 
     const sheetId = 'sheet1';
     const worksheet = new Worksheet(context, { id: sheetId });

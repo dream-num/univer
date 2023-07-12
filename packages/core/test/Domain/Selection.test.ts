@@ -1,82 +1,26 @@
+/* eslint-disable max-lines-per-function */
+
 /**
  * @jest-environment jsdom
  */
-import {
-    BooleanNumber,
-    CommandManager,
-    Direction,
-    Environment,
-    HooksManager,
-    IOCAttribute,
-    IOCContainer,
-    IWorkbookConfig,
-    Locale,
-    Nullable,
-    ObserverManager,
-    PluginManager,
-    Range,
-    Selection,
-    ServerHttp,
-    ServerSocket,
-    UndoManager,
-} from '../../src';
+import { Direction, Nullable, Range, Selection } from '../../src';
 import { SheetContext } from '../../src/Basics/SheetContext';
 import { Workbook } from '../../src/Sheets/Domain/Workbook';
 import { Worksheet } from '../../src/Sheets/Domain/Worksheet';
+import { createCoreTestContainer } from '../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
-export function IOCContainerStartUpReady(
-    workbookConfig?: Partial<IWorkbookConfig>
-): IOCContainer {
-    const configure = {
-        id: '',
-        extensions: [],
-        sheetOrder: [],
-        socketEnable: BooleanNumber.FALSE,
-        socketUrl: '',
-        name: '',
-        timeZone: '',
-        appVersion: '',
-        theme: '',
-        skin: '',
-        locale: '',
-        creator: '',
-        styles: {},
-        sheets: [],
-        lastModifiedBy: '',
-        createdTime: '',
-        modifiedTime: '',
-        ...workbookConfig,
-    };
-    const attribute = new IOCAttribute({ value: configure });
-    const container = new IOCContainer(attribute);
-    container.addSingletonMapping('Environment', Environment);
-    container.addSingletonMapping('Server', ServerSocket);
-    container.addSingletonMapping('ServerSocket', ServerSocket);
-    container.addSingletonMapping('ServerHttp', ServerHttp);
-    container.addSingletonMapping('WorkBook', Workbook);
-    container.addSingletonMapping('Locale', Locale);
-    container.addSingletonMapping('Context', SheetContext);
-    container.addSingletonMapping('UndoManager', UndoManager);
-    container.addSingletonMapping('CommandManager', CommandManager);
-    container.addSingletonMapping('PluginManager', PluginManager);
-    container.addSingletonMapping('ObserverManager', ObserverManager);
-    container.addSingletonMapping('ObservableHooksManager', HooksManager);
-    container.addMapping('WorkSheet', Worksheet);
-    return container;
-}
-
 function demo() {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -119,11 +63,7 @@ function demo() {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -654,15 +594,15 @@ test('Test getNextDataRange:top1', () => {
 });
 
 test('Test getNextDataRange:top2', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -862,11 +802,7 @@ test('Test getNextDataRange:top2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -889,15 +825,15 @@ test('Test getNextDataRange:top2', () => {
     }
 });
 test('Test getNextDataRange:top2.1', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -1095,11 +1031,7 @@ test('Test getNextDataRange:top2.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -1122,15 +1054,15 @@ test('Test getNextDataRange:top2.1', () => {
     }
 });
 test('Test getNextDataRange:top2.2', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -1329,11 +1261,7 @@ test('Test getNextDataRange:top2.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -1357,15 +1285,15 @@ test('Test getNextDataRange:top2.2', () => {
 });
 
 test('Test getNextDataRange:top2.3', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -1468,11 +1396,7 @@ test('Test getNextDataRange:top2.3', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -1496,15 +1420,15 @@ test('Test getNextDataRange:top2.3', () => {
 });
 
 test('Test getNextDataRange:top2.4', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -1703,11 +1627,7 @@ test('Test getNextDataRange:top2.4', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -1731,15 +1651,15 @@ test('Test getNextDataRange:top2.4', () => {
 });
 
 test('Test getNextDataRange:top2.5', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -1939,11 +1859,7 @@ test('Test getNextDataRange:top2.5', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -1975,15 +1891,15 @@ test('Test getNextDataRange:top2.5', () => {
 });
 
 test('Test getNextDataRange:top3', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -2183,11 +2099,7 @@ test('Test getNextDataRange:top3', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -2219,15 +2131,15 @@ test('Test getNextDataRange:top3', () => {
 });
 
 test('Test getNextDataRange:top4', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -2427,11 +2339,7 @@ test('Test getNextDataRange:top4', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -2463,15 +2371,15 @@ test('Test getNextDataRange:top4', () => {
 });
 
 test('Test getNextDataRange:bottom1', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -2607,11 +2515,7 @@ test('Test getNextDataRange:bottom1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     // worksheet.getConfig().rowCount = 3;
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
@@ -2637,15 +2541,15 @@ test('Test getNextDataRange:bottom1', () => {
     }
 });
 test('Test getNextDataRange:bottom1.1', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -2779,11 +2683,7 @@ test('Test getNextDataRange:bottom1.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     worksheet.getConfig().rowCount = 3;
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
@@ -2809,15 +2709,15 @@ test('Test getNextDataRange:bottom1.1', () => {
     }
 });
 test('Test getNextDataRange:bottom2.1', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -2985,11 +2885,7 @@ test('Test getNextDataRange:bottom2.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     worksheet.getConfig().rowCount = 3;
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
@@ -3015,15 +2911,15 @@ test('Test getNextDataRange:bottom2.1', () => {
     }
 });
 test('Test getNextDataRange:bottom2.2', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3189,11 +3085,7 @@ test('Test getNextDataRange:bottom2.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     worksheet.getConfig().rowCount = 4;
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
@@ -3219,15 +3111,15 @@ test('Test getNextDataRange:bottom2.2', () => {
     }
 });
 test('Test getNextDataRange:bottom3.1', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3393,11 +3285,7 @@ test('Test getNextDataRange:bottom3.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     worksheet.getConfig().rowCount = 4;
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
@@ -3429,15 +3317,15 @@ test('Test getNextDataRange:bottom3.1', () => {
     }
 });
 test('Test getNextDataRange:bottom3.2', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3602,11 +3490,7 @@ test('Test getNextDataRange:bottom3.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     worksheet.getConfig().rowCount = 4;
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
@@ -3638,15 +3522,15 @@ test('Test getNextDataRange:bottom3.2', () => {
     }
 });
 test('Test getNextDataRange:bottom4.1', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -3812,11 +3696,7 @@ test('Test getNextDataRange:bottom4.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     worksheet.getConfig().rowCount = 4;
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
@@ -3848,15 +3728,15 @@ test('Test getNextDataRange:bottom4.1', () => {
     }
 });
 test('Test getNextDataRange:bottom4.2', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4023,11 +3903,7 @@ test('Test getNextDataRange:bottom4.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     worksheet.getConfig().rowCount = 4;
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
@@ -4059,15 +3935,15 @@ test('Test getNextDataRange:bottom4.2', () => {
     }
 });
 test('Test getNextDataRange:left1.1', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4107,11 +3983,7 @@ test('Test getNextDataRange:left1.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4143,15 +4015,15 @@ test('Test getNextDataRange:left1.1', () => {
 });
 
 test('Test getNextDataRange:left1.2', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4188,11 +4060,7 @@ test('Test getNextDataRange:left1.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4223,15 +4091,15 @@ test('Test getNextDataRange:left1.2', () => {
     }
 });
 test('Test getNextDataRange:left2.1', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4270,11 +4138,7 @@ test('Test getNextDataRange:left2.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4305,15 +4169,15 @@ test('Test getNextDataRange:left2.1', () => {
     }
 });
 test('Test getNextDataRange:left2.2', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4354,11 +4218,7 @@ test('Test getNextDataRange:left2.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4389,15 +4249,15 @@ test('Test getNextDataRange:left2.2', () => {
     }
 });
 test('Test getNextDataRange:left3.1', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4437,11 +4297,7 @@ test('Test getNextDataRange:left3.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4467,15 +4323,15 @@ test('Test getNextDataRange:left3.1', () => {
 });
 
 test('Test getNextDataRange:left3.2', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4513,11 +4369,7 @@ test('Test getNextDataRange:left3.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4543,15 +4395,15 @@ test('Test getNextDataRange:left3.2', () => {
 });
 
 test('Test getNextDataRange:left4.1', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4591,11 +4443,7 @@ test('Test getNextDataRange:left4.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4621,15 +4469,15 @@ test('Test getNextDataRange:left4.1', () => {
 });
 
 test('Test getNextDataRange:left4.2', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4667,11 +4515,7 @@ test('Test getNextDataRange:left4.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4697,15 +4541,15 @@ test('Test getNextDataRange:left4.2', () => {
 });
 
 test('Test getNextDataRange:right1.1', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4744,11 +4588,7 @@ test('Test getNextDataRange:right1.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -4774,15 +4614,15 @@ test('Test getNextDataRange:right1.1', () => {
 });
 
 test('Test getNextDataRange:right1.2', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4819,11 +4659,7 @@ test('Test getNextDataRange:right1.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     worksheet.getConfig().columnCount = 5;
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
@@ -4849,15 +4685,15 @@ test('Test getNextDataRange:right1.2', () => {
     }
 });
 test('Test getNextDataRange:right2.1', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4896,11 +4732,7 @@ test('Test getNextDataRange:right2.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     worksheet.getConfig().columnCount = 5;
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
@@ -4926,15 +4758,15 @@ test('Test getNextDataRange:right2.1', () => {
     }
 });
 test('Test getNextDataRange:right2.2', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -4975,11 +4807,7 @@ test('Test getNextDataRange:right2.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     worksheet.getConfig().columnCount = 5;
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
@@ -5005,15 +4833,15 @@ test('Test getNextDataRange:right2.2', () => {
     }
 });
 test('Test getNextDataRange:right3.1', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -5053,11 +4881,7 @@ test('Test getNextDataRange:right3.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     worksheet.getConfig().columnCount = 5;
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
@@ -5089,15 +4913,15 @@ test('Test getNextDataRange:right3.1', () => {
     }
 });
 test('Test getNextDataRange:right3.2', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -5135,11 +4959,7 @@ test('Test getNextDataRange:right3.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     worksheet.getConfig().columnCount = 5;
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
@@ -5172,15 +4992,15 @@ test('Test getNextDataRange:right3.2', () => {
 });
 
 test('Test getNextDataRange:right4.1', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -5220,11 +5040,7 @@ test('Test getNextDataRange:right4.1', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     worksheet.getConfig().columnCount = 5;
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
@@ -5256,15 +5072,15 @@ test('Test getNextDataRange:right4.1', () => {
     }
 });
 test('Test getNextDataRange:right4.2', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,
             },
         },
     });
-    const context = container.getSingleton<SheetContext>('Context');
-    const workbook = container.getSingleton<Workbook>('WorkBook');
+    const context = container.get<SheetContext>('Context');
+    const workbook = container.get<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();
 
     const configure = {
@@ -5305,11 +5121,7 @@ test('Test getNextDataRange:right4.2', () => {
         },
         status: 1,
     };
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.createInstance(Worksheet, context, configure);
     worksheet.getConfig().columnCount = 5;
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);

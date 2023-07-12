@@ -6,7 +6,7 @@ import { Workbook } from '../../src/Sheets/Domain/Workbook';
 import { Worksheet } from '../../src/Sheets/Domain/Worksheet';
 import { BooleanNumber, WrapStrategy } from '../../src/Enum';
 import { TestInit } from '../ContainerStartUp';
-import { IOCContainerStartUpReady } from './Range.test';
+import { createCoreTestContainer } from './Range.test';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
@@ -14,7 +14,7 @@ jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 // TODO 修复RangeList单元测试报错
 
 test('Test RangeList setValue', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -68,7 +68,7 @@ test('Test RangeList setValue', () => {
 });
 
 test('Test RangeList clear', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -128,7 +128,7 @@ test('Test RangeList clear', () => {
 });
 
 function demo() {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 fs: 12,

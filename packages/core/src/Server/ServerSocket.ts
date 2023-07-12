@@ -1,6 +1,6 @@
 import { ISheetActionData } from '../Command';
-import { ICreatable } from '../DI';
-import { IWorkbookConfig } from '../Interfaces';
+import { ICreatable, createIdentifier } from '../DI';
+import { IWorkbookConfig, IWorksheetConfig } from '../Interfaces';
 import { IOSocket, IOSocketListenType } from '../Shared';
 import { MessageQueue } from './MessageQueue';
 import { IOServerMessage, IOServerReceive, ServerBase } from './ServerBase';
@@ -13,13 +13,14 @@ export enum MessageQueueStatus {
     WORK = 'work',
 }
 
+export const IServerSocketWorkbookConfig = createIdentifier<IWorksheetConfig>(
+    'univer.server.workbook-config'
+);
+
 /**
  * Manage messageQueue
  */
 export class ServerSocket extends ServerBase implements ICreatable {
-    // TODO@huwenzhao: this should be injected
-    private config: IWorkbookConfig;
-
     private globalSendResolve: Function;
 
     private socket: IOSocket;
@@ -27,6 +28,12 @@ export class ServerSocket extends ServerBase implements ICreatable {
     private status: MessageQueueStatus;
 
     private messageQueue: MessageQueue<IOServerMessage>;
+
+    constructor(
+        @IServerSocketWorkbookConfig private readonly config: IWorkbookConfig
+    ) {
+        super();
+    }
 
     onCreate() {
         this.messageQueue = new MessageQueue<IOServerMessage>();

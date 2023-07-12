@@ -15,7 +15,6 @@ export interface ClassDependencyItem<T> extends DependencyItemHooks<T> {
     useClass: Ctor<T>;
     lazy?: boolean;
 }
-
 export function isClassDependencyItem<T>(
     thing: unknown
 ): thing is ClassDependencyItem<T> {
@@ -32,17 +31,14 @@ export type FactoryDepModifier =
     | typeof Optional
     | typeof Many
     | typeof WithNew;
-
 export type FactoryDep<T> =
     | [...FactoryDepModifier[], DependencyIdentifier<T>]
     | DependencyIdentifier<T>;
-
 export interface FactoryDependencyItem<T> extends DependencyItemHooks<T> {
     useFactory: (...deps: any[]) => T;
     dynamic?: true;
     deps?: Array<FactoryDep<any>>;
 }
-
 export function isFactoryDependencyItem<T>(
     thing: unknown
 ): thing is FactoryDependencyItem<T> {
@@ -56,7 +52,6 @@ export function isFactoryDependencyItem<T>(
 export interface ValueDependencyItem<T> extends DependencyItemHooks<T> {
     useValue: T;
 }
-
 export function isValueDependencyItem<T>(
     thing: unknown
 ): thing is ValueDependencyItem<T> {
@@ -72,7 +67,6 @@ export interface AsyncDependencyItem<T> extends DependencyItemHooks<T> {
         T | Ctor<T> | [DependencyIdentifier<T>, SyncDependencyItem<T>]
     >;
 }
-
 export function isAsyncDependencyItem<T>(
     thing: unknown
 ): thing is AsyncDependencyItem<T> {
@@ -82,11 +76,9 @@ export function isAsyncDependencyItem<T>(
 
     return false;
 }
-
 export interface AsyncHook<T> {
     whenReady(): Promise<T>;
 }
-
 export function isAsyncHook<T>(thing: unknown): thing is AsyncHook<T> {
     if (thing && typeof (thing as any).whenReady !== 'undefined') {
         return true;
@@ -99,11 +91,7 @@ export type SyncDependencyItem<T> =
     | ClassDependencyItem<T>
     | FactoryDependencyItem<T>
     | ValueDependencyItem<T>;
-
 export type DependencyItem<T> = SyncDependencyItem<T> | AsyncDependencyItem<T>;
-
-export const TARGET = Symbol('$$TARGET');
-export const DEPENDENCIES = Symbol('$$DEPENDENCIES');
 
 export interface DependencyDescriptor<T> {
     paramIndex: number;
@@ -296,6 +284,29 @@ export const Inject: InjectDecorator = quantifyDecoratorFactoryProducer(
     Quantity.REQUIRED
 );
 
+function withNewDecoratorFactoryProducer(withNew: boolean) {
+    return function DecoratorFactory<T>(this: any) {
+        if (this instanceof DecoratorFactory) {
+            return this;
+        }
+
+        return function d(target: Ctor<T>, _key: string, index: number) {
+            changeToSelf(target, index, withNew);
+        };
+    } as any;
+}
+
+interface ToSelfDecorator {
+    (): any;
+    // eslint-disable-next-line @typescript-eslint/no-misused-new
+    new (): ToSelfDecorator;
+}
+
+/**
+ * Always initialize a new instance of that dependency instead of getting the cached instance from the injector.
+ */
+export const WithNew: ToSelfDecorator = withNewDecoratorFactoryProducer(true);
+
 class DependencyDescriptorNotFoundError extends DIError {
     constructor(index: number, target: Ctor<any>) {
         const msg = `Could not find dependency registered on the ${
@@ -306,7 +317,7 @@ class DependencyDescriptorNotFoundError extends DIError {
     }
 }
 
-export class IdentifierUndefinedError extends DIError {
+class IdentifierUndefinedError extends DIError {
     constructor(target: Ctor<any>, index: number) {
         const msg = `It seems that you register "undefined" as dependency on the ${
             index + 1
@@ -317,6 +328,9 @@ export class IdentifierUndefinedError extends DIError {
         super(msg);
     }
 }
+
+export const TARGET = Symbol('$$TARGET');
+export const DEPENDENCIES = Symbol('$$DEPENDENCIES');
 
 /**
  * get dependencies declared on a class
@@ -422,26 +436,3 @@ function changeToSelf(target: Ctor<any>, index: number, withNew: boolean) {
     const descriptor = getDependencyByIndex(target, index);
     descriptor.withNew = withNew;
 }
-
-function withNewDecoratorFactoryProducer(withNew: boolean) {
-    return function DecoratorFactory<T>(this: any) {
-        if (this instanceof DecoratorFactory) {
-            return this;
-        }
-
-        return function d(target: Ctor<T>, _key: string, index: number) {
-            changeToSelf(target, index, withNew);
-        };
-    } as any;
-}
-
-interface ToSelfDecorator {
-    (): any;
-    // eslint-disable-next-line @typescript-eslint/no-misused-new
-    new (): ToSelfDecorator;
-}
-
-/**
- * Always initialize a new instance of that dependency instead of getting the cached instance from the injector.
- */
-export const WithNew: ToSelfDecorator = withNewDecoratorFactoryProducer(true);

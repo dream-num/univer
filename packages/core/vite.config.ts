@@ -41,7 +41,6 @@ export default defineConfig({
                 nanoid: 'nanoid',
                 numeral: 'numeral',
                 'es6-proxy-polyfill': 'es6-proxy-polyfill',
-                'reflect-metadata': 'reflect-metadata',
             },
         }),
     ],

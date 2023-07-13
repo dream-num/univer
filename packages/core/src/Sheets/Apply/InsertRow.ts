@@ -11,11 +11,7 @@ import { IInsertRowActionData } from '../Action';
  *
  * @internal
  */
-export function InsertRow(
-    rowIndex: number = 0,
-    rowCount: number = 1,
-    primitiveData: ObjectArrayPrimitiveType<IRowData>
-) {
+export function InsertRow(rowIndex: number = 0, rowCount: number = 1, primitiveData: ObjectArrayPrimitiveType<IRowData>) {
     const wrapper = new ObjectArray(primitiveData);
     wrapper.inserts(rowIndex, new ObjectArray(rowCount));
 }

@@ -1,5 +1,5 @@
-import { Tools } from '.';
-import { LocaleType } from '../Enum';
+import { Tools } from './Tools';
+import { LocaleType } from '../Enum/LocaleType';
 import { IKeyValue, Nullable } from './Types';
 
 export type ILocales = {

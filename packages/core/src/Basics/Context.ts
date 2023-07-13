@@ -1,5 +1,6 @@
 import { IUniverData } from '../Interfaces/IUniverData';
-import { Locale, Tools } from '../Shared';
+import { Locale } from '../Shared/Locale';
+import { Tools } from '../Shared/Tools';
 import { ContextBase } from './ContextBase';
 
 /**

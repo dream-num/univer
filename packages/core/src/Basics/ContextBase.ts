@@ -1,8 +1,9 @@
-import { CommandManager, UndoManager } from '../Command';
+import { CommandManager } from '../Command/CommandManager';
+import { UndoManager } from '../Command/UndoManager';
 import { ObservableHooks, ObserverManager } from '../Observer';
 import { HooksManager } from '../Observer/HooksManager';
 import { Univer } from './Univer';
-import { PluginManager } from '../Plugin';
+import { PluginManager } from '../Plugin/PluginManager';
 import { Nullable } from '../Shared';
 import { Environment } from './Environment';
 

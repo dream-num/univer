@@ -1,5 +1,4 @@
-import { BooleanNumber, ObjectArray } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { BooleanNumber, ObjectArray, Inject } from '@univerjs/core';
 import { IColumnRulerData } from '../Basics/Interfaces/IRulerManager';
 import { ColumnRulerManager } from '../Basics/Register/ColumnRegister';
 

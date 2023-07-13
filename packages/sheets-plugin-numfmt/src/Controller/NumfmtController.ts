@@ -9,9 +9,10 @@ import {
     ICellData,
     ActionOperation,
     ISetRangeDataActionData,
+    SheetContext,
 } from '@univerjs/core';
 import { BaseComponentRender } from '@univerjs/base-ui';
-import { SheetPlugin } from '@univerjs/base-sheets';
+import { ISheetContext, SheetPlugin } from '@univerjs/base-sheets';
 import { numfmt } from '@univerjs/base-numfmt-engine';
 import { IToolbarItemProps, SHEET_UI_PLUGIN_NAME, SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 import { ACTION_NAMES } from '../Basics/Enum';
@@ -34,7 +35,7 @@ export class NumfmtController {
 
     protected _render: BaseComponentRender;
 
-    constructor(plugin: NumfmtPlugin) {
+    constructor(@ISheetContext private readonly sheetContext: SheetContext, plugin: NumfmtPlugin) {
         this._sheetUIPlugin = plugin.getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
         this._model = new NumfmtModel();
         this._plugin = plugin;

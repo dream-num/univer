@@ -1,4 +1,5 @@
-import { Nullable } from '../Shared';
+import { Nullable } from '../Shared/Types';
+
 /**
  * A class serves as a medium between the observable and its observers
  */

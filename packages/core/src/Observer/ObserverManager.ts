@@ -1,4 +1,5 @@
-import { Nullable, Tools } from '../Shared';
+import { Tools } from '../Shared/Tools';
+import { Nullable } from '../Shared/Types';
 import { Observable } from './Observable';
 
 /**

@@ -1,4 +1,6 @@
-import { SheetContext, IRangeData, ObjectMatrixPrimitiveType, Plugin } from '@univerjs/core';
+import { SheetContext, IRangeData, ObjectMatrixPrimitiveType, Plugin, PLUGIN_NAMES, Injector } from '@univerjs/core';
+import { RenderEngine } from '@univerjs/base-render';
+import { IGlobalContext, IRenderingEngine, ISheetContext } from '@univerjs/base-sheets';
 import { NumfmtPluginObserve, install } from './Basics/Observer';
 import { NUMFMT_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { NumfmtController } from './Controller/NumfmtController';
@@ -10,14 +12,17 @@ import zh from './Locale/zh';
 export interface INumfmtPluginConfig {}
 
 export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
-    protected _numfmtController: NumfmtController;
+    private _numfmtController: NumfmtController;
 
-    protected _numfmtModalController: NumfmtModalController;
+    private _numfmtModalController: NumfmtModalController;
 
-    protected _numfmtActionExtensionFactory: NumfmtActionExtensionFactory;
+    private _injector: Injector;
+
+    private _numfmtActionExtensionFactory: NumfmtActionExtensionFactory;
 
     constructor(config?: INumfmtPluginConfig) {
         super(NUMFMT_PLUGIN_NAME);
+        this.initializeDependencies();
     }
 
     static create(config?: INumfmtPluginConfig): NumfmtPlugin {
@@ -29,8 +34,8 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
         console.log('NumfmtPlugin onMounted');
         this.getLocale().load({ en, zh });
         this._numfmtActionExtensionFactory = new NumfmtActionExtensionFactory(this);
-        this._numfmtController = new NumfmtController(this);
-        this._numfmtModalController = new NumfmtModalController(this);
+        this._numfmtController = this._injector.get(NumfmtController);
+        this._numfmtModalController = this._injector.get(NumfmtModalController);
         const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
         actionRegister.add(this._numfmtActionExtensionFactory);
     }
@@ -55,5 +60,15 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
 
     getNumfmtModalController(): NumfmtModalController {
         return this._numfmtModalController;
+    }
+
+    private initializeDependencies(): void {
+        this._injector = new Injector([
+            [IGlobalContext, { useFactory: () => this.getGlobalContext() }],
+            [ISheetContext, { useFactory: () => this.getContext() }],
+            [IRenderingEngine, { useFactory: () => this.getGlobalContext().getPluginManager().getRequirePluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER).getEngine() }],
+            [NumfmtController],
+            [NumfmtModalController],
+        ]);
     }
 }

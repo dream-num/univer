@@ -1,15 +1,12 @@
-import {
-    UndoManager,
-    ActionBase,
-    ActionExtensionManager,
-    IActionData,
-    ActionObservers,
-    CommandObservers,
-    CommandInjectorObservers,
-    Command,
-} from './index';
-import { Class } from '../Shared';
-import { ContextBase } from '../Basics';
+import { Class } from '../Shared/Types';
+import { ContextBase } from '../Basics/ContextBase';
+import { ActionBase, IActionData } from './ActionBase';
+import { CommandObservers } from './CommandObservers';
+import { ActionObservers } from './ActionObservers';
+import { CommandInjectorObservers } from './CommandInjectorObservers';
+import { UndoManager } from './UndoManager';
+import { ActionExtensionManager } from './ActionExtensionManager';
+import { Command } from './Command';
 
 /**
  * Manage command

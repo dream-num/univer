@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import { Environment } from '../Basics';
+import { Environment } from '../Basics/Environment';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from './ObjectMatrix';
 import { Class, IKeyValue } from './Types';
 import { ObjectArray, ObjectArrayPrimitiveType } from './ObjectArray';

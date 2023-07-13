@@ -1,4 +1,4 @@
-import { Nullable } from '../Shared';
+import { Nullable } from '../Shared/Types';
 import { ObservableHooks } from './ObservableHooks';
 
 /**

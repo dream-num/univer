@@ -1,5 +1,5 @@
-import { Nullable } from '../Shared';
-import { EventState, Observable, Observer } from '.';
+import { Nullable } from '../Shared/Types';
+import { EventState, Observable, Observer } from './Observable';
 
 /**
  * Observable Hooks
@@ -12,7 +12,7 @@ export class ObservableHooks<T> extends Observable<T> {
      * @param unregisterOnFirstCall defines if the observer as to be unregistered after the next notification
      * @returns the new observer created for the callback
      */
-    add(
+    override add(
         callback: (eventData: T, eventState: EventState) => void
     ): Nullable<Observer<T>> {
         if (!callback) {
@@ -29,11 +29,11 @@ export class ObservableHooks<T> extends Observable<T> {
         return observer;
     }
 
-    makeObserverTopPriority() {
+    override makeObserverTopPriority() {
         /** cancel * */
     }
 
-    makeObserverBottomPriority() {
+    override makeObserverBottomPriority() {
         /** cancel * */
     }
 }

@@ -15,16 +15,16 @@
 import './Sheets/Action';
 import './Docs/Action';
 
-export * from './Command';
 export * from './Basics';
+export * from './Command';
 export * from './Const';
-export * from './Sheets';
+export * from './DI';
 export * from './Docs/Domain';
-export * from './Slides/Domain';
 export * from './Enum';
 export * from './Interfaces';
-export * from './IOC';
 export * from './Observer';
 export * from './Plugin';
 export * from './Server';
 export * from './Shared';
+export * from './Sheets';
+export * from './Slides/Domain';

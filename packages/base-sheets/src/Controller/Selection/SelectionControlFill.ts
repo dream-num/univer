@@ -1,5 +1,5 @@
 import { CURSOR_TYPE, IMouseEvent, IPointerEvent, Rect } from '@univerjs/base-render';
-import { Injector } from '@wendellhu/redi';
+import { Injector } from '@univerjs/core';
 
 export interface ISelectionControlHandler {
     fillControl: Rect;

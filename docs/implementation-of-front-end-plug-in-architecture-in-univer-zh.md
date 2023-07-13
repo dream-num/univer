@@ -194,7 +194,7 @@ export abstract class Plugin<O = any> {
         this.deleteObserve(...this._observeNames);
     }
 
-    onMapping(ioc: IOCContainer): void {}
+
 
     getPluginName(): string {
         return this._name;

@@ -1,7 +1,6 @@
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier, Context, SheetContext } from '@univerjs/core';
 
 import { Engine } from '@univerjs/base-render';
-import { Context, SheetContext } from '@univerjs/core';
 
 import { SheetPlugin } from '../SheetPlugin';
 import { SelectionManager } from '../Controller';

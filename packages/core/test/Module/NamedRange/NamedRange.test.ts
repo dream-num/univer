@@ -7,7 +7,7 @@ import {
     INamedRange,
 } from '../../../src/Interfaces/INamedRange';
 import { NamedRange } from '../../../src/Sheets/Domain/NamedRange';
-import { IOCContainerStartUpReady } from '../../ContainerStartUp';
+import { createCoreTestContainer } from '../../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
@@ -18,7 +18,7 @@ export const newNamedRange = { ...DEFAULT_NAMED_RANGE, name: 'namedRange02' };
 test('Test Named Range', () => {
     // const { workbook, worksheet } = TestInitSheetInstance();
 
-    const container = IOCContainerStartUpReady();
+    const container = createCoreTestContainer();
     const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const commandManager = workbook.getCommandManager();

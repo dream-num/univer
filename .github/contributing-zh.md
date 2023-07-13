@@ -872,7 +872,7 @@ export class AlternatingColorsPlugin extends Plugin {
     /**
      * {@inheritDoc Plugin.onMapping}
      */
-    onMapping(IOC: IOCContainer): void {}
+
 }
 ```
 

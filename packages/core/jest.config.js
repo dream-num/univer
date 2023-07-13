@@ -6,10 +6,15 @@ module.exports = {
     coverageReporters: ['json', 'html'],
     globalSetup: '<rootDir>/test/globalSetup.js',
     // coveragePathIgnorePatterns: ['src/Render/'],
-    testMatch: ['<rootDir>/test/**/*.test.ts'],
+    testMatch: ['<rootDir>/**/test/**/*.test.ts'],
     // collectCoverageFrom: ['**/*.{js,jsx}', '!**/node_modules/**', '!**/vendor/**'],
     transform: {
-        '^.+\\.ts?$': 'ts-jest',
+        '^.+\\.ts?$': [
+            'ts-jest',
+            {
+                experimentalDecorators: true,
+            },
+        ],
     },
     coveragePathIgnorePatterns: [
         '<rootDir>/src/Server',

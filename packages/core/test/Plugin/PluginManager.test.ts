@@ -1,8 +1,8 @@
 /**
  * @jest-environment jsdom
  */
-import { IOCContainerStartUpReady } from '../ContainerStartUp';
-import { SheetContext, PluginManager, Plugin, IOCContainer } from '../../src';
+import { createCoreTestContainer } from '../ContainerStartUp';
+import { SheetContext, PluginManager, Plugin } from '../../src';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
@@ -13,52 +13,48 @@ test('Test _initialize', () => {
         }
 
         onMounted(context: SheetContext): void {}
-
-        onMapping(container: IOCContainer): void {}
     }
-    const container = IOCContainerStartUpReady();
-    const context: SheetContext = container.getSingleton('Context');
-    const manager2: PluginManager = container.getInstance(
-        'PluginManager',
+    const container = createCoreTestContainer();
+    const context: SheetContext = container.get('Context');
+    const manager2: PluginManager = container.createInstance(
+        PluginManager,
         context,
         []
     );
-    const manager1: PluginManager = container.getInstance('PluginManager', context, [
-        new MyPlugin(),
-    ]);
+    const manager1: PluginManager = container.createInstance(
+        PluginManager,
+        context,
+        [new MyPlugin()]
+    );
     manager1.setContext(context);
     manager2.setContext(context);
 });
 
 test('Test install', () => {
-    const container = IOCContainerStartUpReady();
-    const context: SheetContext = container.getSingleton('Context');
-    const manager: PluginManager = container.getInstance('PluginManager', context);
+    const container = createCoreTestContainer();
+    const context: SheetContext = container.get('Context');
+    const manager: PluginManager = container.createInstance(PluginManager, context);
     class MyPlugin extends Plugin {
         constructor() {
             super('plugin');
         }
 
         onMounted(context: SheetContext): void {}
-
-        onMapping(container: IOCContainer): void {}
     }
     const plugin = new MyPlugin();
     manager.install(plugin);
 });
 
 test('Test getPluginByName', () => {
-    const container = IOCContainerStartUpReady();
-    const context: SheetContext = container.getSingleton('Context');
-    const manager: PluginManager = container.getInstance('PluginManager', context);
+    const container = createCoreTestContainer();
+    const context: SheetContext = container.get('Context');
+    const manager: PluginManager = container.createInstance(PluginManager, context);
     class MyPlugin extends Plugin {
         constructor() {
             super('plugin');
         }
 
         onMounted(context: SheetContext): void {}
-
-        onMapping(container: IOCContainer): void {}
     }
     const plugin = new MyPlugin();
     manager.install(plugin);
@@ -66,17 +62,15 @@ test('Test getPluginByName', () => {
 });
 
 test('Test uninstall', () => {
-    const container = IOCContainerStartUpReady();
-    const context: SheetContext = container.getSingleton('Context');
-    const manager: PluginManager = container.getInstance('PluginManager', context);
+    const container = createCoreTestContainer();
+    const context: SheetContext = container.get('Context');
+    const manager: PluginManager = container.createInstance(PluginManager, context);
     class MyPlugin extends Plugin {
         constructor() {
             super('plugin');
         }
 
         onMounted(context: SheetContext): void {}
-
-        onMapping(container: IOCContainer): void {}
     }
     const plugin = new MyPlugin();
     manager.install(plugin);

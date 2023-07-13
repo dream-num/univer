@@ -525,3 +525,40 @@ export function getDocsUpdateBody(model: IDocumentData, segmentId?: string) {
 
     return body;
 }
+
+export function horizontalLineSegmentsSubtraction(
+    A1: number,
+    A2: number,
+    B1: number,
+    B2: number
+) {
+    // 确保A1 < A2, B1 < B2
+    if (A1 > A2) {
+        [A1, A2] = [A2, A1];
+    }
+    if (B1 > B2) {
+        [B1, B2] = [B2, B1];
+    }
+
+    // 检查线段是否重叠
+    if (A2 < B1 || B2 < A1) {
+        return [[A1, A2]]; // 无重叠，返回原线段A
+    }
+
+    const overlapStart = Math.max(A1, B1);
+    const overlapEnd = Math.min(A2, B2);
+
+    const result = [];
+
+    // 添加重叠之前的线段
+    if (overlapStart > A1) {
+        result.push([A1, overlapStart]);
+    }
+
+    // 添加重叠之后的线段
+    if (overlapEnd < A2) {
+        result.push([overlapEnd, A2]);
+    }
+
+    return result;
+}

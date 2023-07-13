@@ -48,6 +48,4 @@ export class SplitColumnPlugin extends Plugin {
     }
 
     onDestroy(): void {}
-
-    onMapping(): void {}
 }

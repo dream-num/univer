@@ -1,4 +1,7 @@
 {
+    "compilerOptions": {
+        "experimentalDecorators": true
+    },
     "include": [
         "packages/*/src",
         "examples/*/src",

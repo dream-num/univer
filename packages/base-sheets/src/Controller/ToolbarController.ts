@@ -1,5 +1,4 @@
-import { Inject } from '@wendellhu/redi';
-import { HorizontalAlign, VerticalAlign, WrapStrategy, BorderType, UIObserver, Context, SheetContext } from '@univerjs/core';
+import { Inject, HorizontalAlign, VerticalAlign, WrapStrategy, BorderType, UIObserver, Context, SheetContext } from '@univerjs/core';
 
 import { SelectionController } from './Selection/SelectionController';
 

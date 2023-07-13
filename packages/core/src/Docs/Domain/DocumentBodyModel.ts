@@ -1,5 +1,10 @@
 import { IDocumentBody, ITextRun } from '../../Interfaces/IDocumentData';
-import { Nullable, insertTextToContent } from '../../Shared';
+import {
+    deleteContent,
+    horizontalLineSegmentsSubtraction,
+    insertTextToContent,
+} from '../../Shared/Common';
+import { Nullable } from '../../Shared/Types';
 
 export type DocumentBodyModelOrSimple = DocumentBodyModelSimple | DocumentBodyModel;
 
@@ -228,7 +233,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
             const { firstNode: insertedFirstNode, lastNode: insertedLastNode } =
                 insertedNodeSplit;
 
-            insertedNode.parent.children.splice(
+            insertedNode.parent?.children.splice(
                 insertedNode.getPositionInParent(),
                 1,
                 insertedFirstNode,
@@ -280,7 +285,41 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         }
     }
 
-    delete(currentIndex: number, textLength: number) {}
+    delete(currentIndex: number, textLength: number) {
+        const nodes = this.children;
+        this.deleteTree(nodes, currentIndex, textLength);
+    }
+
+    deleteTree(
+        nodes: DataStreamTreeNode[],
+        currentIndex: number,
+        textLength: number
+    ) {
+        const startIndex = currentIndex;
+        const endIndex = currentIndex + textLength - 1;
+        let mergeNode: Nullable<DataStreamTreeNode> = null;
+        for (let node of nodes) {
+            const { startIndex: st, endIndex: ed, children } = node;
+
+            this.deleteTree(children, currentIndex, textLength);
+
+            if (startIndex <= st && endIndex >= ed) {
+                node.remove();
+            } else if (st <= startIndex && ed >= endIndex) {
+                node.minus(startIndex, ed);
+            } else if (startIndex >= st && startIndex <= ed) {
+                node.minus(startIndex, ed);
+                mergeNode = node;
+            } else if (endIndex >= st && endIndex <= ed) {
+                node.minus(st, endIndex);
+                if (mergeNode) {
+                    mergeNode.merge(node);
+                }
+            } else if (st > endIndex) {
+                node.plus(-textLength);
+            }
+        }
+    }
 
     getParagraphByTree(
         nodes: DataStreamTreeNode[],
@@ -299,8 +338,11 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         return null;
     }
 
-    foreachTop(node: DataStreamTreeNode, func: (node: DataStreamTreeNode) => void) {
-        let parent = node;
+    foreachTop(
+        node: Nullable<DataStreamTreeNode>,
+        func: (node: DataStreamTreeNode) => void
+    ) {
+        let parent: Nullable<DataStreamTreeNode> = node;
         while (parent) {
             func(parent);
             parent = parent.parent;
@@ -315,7 +357,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         }
     }
 
-    resetCache() {
+    override resetCache() {
         this.sectionBreakCurrentIndex = 0;
         this.paragraphCurrentIndex = 0;
         this.textRunCurrentIndex = 0;
@@ -324,7 +366,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         this.customRangeCurrentIndex = 0;
     }
 
-    getSectionBreak(index: number) {
+    override getSectionBreak(index: number) {
         if (index == null) {
             return;
         }
@@ -342,7 +384,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         }
     }
 
-    getParagraph(index: number) {
+    override getParagraph(index: number) {
         const paragraphs = this.body.paragraphs;
         if (paragraphs == null) {
             return;
@@ -357,7 +399,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         }
     }
 
-    getTextRunRange(startIndex: number = 0, endIndex: number) {
+    override getTextRunRange(startIndex: number = 0, endIndex: number) {
         const textRuns = this.body.textRuns;
         if (textRuns == null) {
             return [
@@ -412,7 +454,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         return trRange;
     }
 
-    getTextRun(index: number) {
+    override getTextRun(index: number) {
         const textRuns = this.body.textRuns;
         if (textRuns == null) {
             return;
@@ -442,7 +484,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         }
     }
 
-    getCustomBlock(index: number) {
+    override getCustomBlock(index: number) {
         const customBlocks = this.body.customBlocks;
         if (customBlocks == null) {
             return;
@@ -457,7 +499,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         }
     }
 
-    getTable(index: number) {
+    override getTable(index: number) {
         const tables = this.body.tables;
         if (tables == null) {
             return;
@@ -472,7 +514,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         }
     }
 
-    getCustomRange(index: number) {
+    override getCustomRange(index: number) {
         const customRanges = this.body.customRanges;
         if (customRanges == null) {
             return;
@@ -499,7 +541,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
 export class DataStreamTreeNode {
     children: DataStreamTreeNode[] = [];
 
-    parent: DataStreamTreeNode;
+    parent: Nullable<DataStreamTreeNode>;
 
     startIndex: number;
 
@@ -632,10 +674,45 @@ export class DataStreamTreeNode {
     }
 
     getPositionInParent() {
-        return this.parent.children.indexOf(this);
+        return this.parent?.children.indexOf(this) || -1;
     }
 
-    minus(len: number) {}
+    remove() {
+        this.children = [];
+        if (this.parent == null) {
+            return;
+        }
+        this.parent.children.splice(this.getPositionInParent(), 1);
+        this.parent = null;
+    }
+
+    minus(startIndex: number, endIndex: number) {
+        const segments = horizontalLineSegmentsSubtraction(
+            this.startIndex,
+            this.endIndex,
+            startIndex,
+            endIndex
+        );
+
+        if (segments.length > 2) {
+            const seg1 = segments[0];
+            const seg2 = segments[1];
+            this.startIndex = seg1[0];
+            this.endIndex = seg1[1] + seg2[1] - seg2[0] + 1;
+        } else {
+            this.startIndex = segments[0][0];
+            this.endIndex = segments[0][1];
+        }
+
+        this.content = deleteContent(this.content || '', startIndex, endIndex);
+    }
+
+    merge(node: DataStreamTreeNode) {
+        const { endIndex, children } = node;
+        this.endIndex = endIndex;
+        this.children.push(...children);
+        node.remove();
+    }
 
     moveTo(newParent: DataStreamTreeNode) {}
 }

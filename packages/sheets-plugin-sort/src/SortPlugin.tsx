@@ -1,5 +1,5 @@
 import { IToolbarItemProps, ISlotElement } from '@univerjs/base-ui';
-import { SheetContext, IOCContainer, IRangeType, Plugin, PLUGIN_NAMES, UniverSheet } from '@univerjs/core';
+import { SheetContext, IRangeType, Plugin, PLUGIN_NAMES, UniverSheet } from '@univerjs/core';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { SORT_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 import { Sort } from './Domain';
@@ -44,8 +44,6 @@ export class SortPlugin extends Plugin {
         };
         context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
     }
-
-    onMapping(IOC: IOCContainer): void {}
 
     onMounted(ctx: SheetContext): void {
         this.initialize();

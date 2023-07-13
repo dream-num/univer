@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1" name="viewport" />
-  <title>UniverSheet</title>
+  <title>Univer Sheet</title>
 
   <link rel="stylesheet" href="./main.css" />
   <style>
@@ -18,6 +18,7 @@
 
   <script>
     new EventSource('/esbuild').addEventListener('change', () => {
+      console.info('reload--')
       location.reload()
     })
   </script>
@@ -25,6 +26,7 @@
 
 <body>
   <div id="app" style="z-index: 1; position: fixed; font-size: 20px; color: green;"></div>
+  <!-- <div id="universheet" style="height: 225px;width: 400px;"></div> -->
   <div id="universheet" style="height: 100%;"></div>
 
   <script src="./main.js"></script>

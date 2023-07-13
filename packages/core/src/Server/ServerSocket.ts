@@ -1,6 +1,6 @@
 import { ISheetActionData } from '../Command';
-import { IWorkbookConfig } from '../Interfaces';
-import { AttributeValue, PostConstruct } from '../IOC/IOCContainer';
+import { ICreatable, createIdentifier } from '../DI';
+import { IWorkbookConfig, IWorksheetConfig } from '../Interfaces';
 import { IOSocket, IOSocketListenType } from '../Shared';
 import { MessageQueue } from './MessageQueue';
 import { IOServerMessage, IOServerReceive, ServerBase } from './ServerBase';
@@ -13,13 +13,14 @@ export enum MessageQueueStatus {
     WORK = 'work',
 }
 
+export const IServerSocketWorkbookConfig = createIdentifier<IWorksheetConfig>(
+    'univer.server.workbook-config'
+);
+
 /**
  * Manage messageQueue
  */
-export class ServerSocket extends ServerBase {
-    @AttributeValue()
-    private config: IWorkbookConfig;
-
+export class ServerSocket extends ServerBase implements ICreatable {
     private globalSendResolve: Function;
 
     private socket: IOSocket;
@@ -28,8 +29,13 @@ export class ServerSocket extends ServerBase {
 
     private messageQueue: MessageQueue<IOServerMessage>;
 
-    @PostConstruct()
-    initialize() {
+    constructor(
+        @IServerSocketWorkbookConfig private readonly config: IWorkbookConfig
+    ) {
+        super();
+    }
+
+    onCreate() {
         this.messageQueue = new MessageQueue<IOServerMessage>();
         this.status = MessageQueueStatus.WAIT;
         this.globalSendResolve = () => {};

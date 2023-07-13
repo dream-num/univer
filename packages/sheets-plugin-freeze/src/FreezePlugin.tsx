@@ -1,5 +1,5 @@
 import { IToolbarItemProps, ISlotElement } from '@univerjs/base-ui';
-import { SheetContext, IOCContainer, UniverSheet, Plugin, PLUGIN_NAMES } from '@univerjs/core';
+import { SheetContext, UniverSheet, Plugin, PLUGIN_NAMES } from '@univerjs/core';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { FROZEN_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { IConfig } from './IData';
@@ -47,8 +47,6 @@ export class FreezePlugin extends Plugin {
         // extend comment
         this.sheetPlugin?.addButton(item);
     }
-
-    onMapping(IOC: IOCContainer): void {}
 
     onMounted(ctx: SheetContext): void {
         this.initialize();

@@ -1,5 +1,5 @@
 import { ISlotElement, ISlotProps } from '@univerjs/base-ui';
-import { SheetContext, IOCContainer, UniverSheet, Nullable, Plugin, PLUGIN_NAMES, Command } from '@univerjs/core';
+import { SheetContext, UniverSheet, Nullable, Plugin, PLUGIN_NAMES, Command } from '@univerjs/core';
 import { IToolbarItemProps, SheetPlugin } from '@univerjs/base-sheets';
 import { Banding } from './Banding';
 import { IAddBandingActionData } from './Command';
@@ -83,7 +83,6 @@ export class AlternatingColorsPlugin extends Plugin<AlternatingColorsPluginObser
     /**
      * {@inheritDoc Plugin.onMapping}
      */
-    onMapping(IOC: IOCContainer): void {}
 
     onMounted(ctx: SheetContext): void {
         this.initialize();

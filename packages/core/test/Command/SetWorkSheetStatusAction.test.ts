@@ -5,12 +5,12 @@ import { SheetContext } from '../../src/Basics';
 import { CommandManager, SetWorkSheetStatusAction } from '../../src/Command';
 import { ACTION_NAMES } from '../../src/Const';
 import { Workbook, Worksheet } from '../../src/Sheets/Domain';
-import { IOCContainerStartUpReady } from '../ContainerStartUp';
+import { createCoreTestContainer } from '../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
 test('Set WorkSheet Status', () => {
-    const container = IOCContainerStartUpReady();
+    const container = createCoreTestContainer();
     const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
 

@@ -1,4 +1,4 @@
-import { SheetContext, Plugin, UniverSheet, IOCContainer } from '@univerjs/core';
+import { SheetContext, Plugin, UniverSheet } from '@univerjs/core';
 import { GROUP_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 
 export interface IGroupPluginConfig {}
@@ -35,8 +35,6 @@ export class GroupPlugin extends Plugin {
         // };
         // context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)?.addButton(item);
     }
-
-    onMapping(IOC: IOCContainer): void {}
 
     onMounted(ctx: SheetContext): void {
         this.initialize();

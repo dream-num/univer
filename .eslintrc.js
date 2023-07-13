@@ -103,7 +103,7 @@ module.exports = {
         // eslint-plugin-unused-imports
         '@typescript-eslint/no-unused-vars': 'off',
         'unused-imports/no-unused-imports': 'error',
-
+        'max-lines-per-function': ['error', 60],
         'prefer-regex-literals': 'off',
         '@typescript-eslint/default-param-last': 'off',
         'grouped-accessor-pairs': 'off',

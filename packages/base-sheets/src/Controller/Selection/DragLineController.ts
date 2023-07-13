@@ -1,6 +1,5 @@
 import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect } from '@univerjs/base-render';
-import { Nullable, Observer } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Nullable, Observer, Inject } from '@univerjs/core';
 import { CanvasView } from '../../View';
 
 enum DRAG_LINE_KEY {

@@ -8,13 +8,13 @@ import {
     CommandManager,
     RemoveMergeAction,
 } from '../../src/Command';
-import { IOCContainerStartUpReady } from '../ContainerStartUp';
+import { createCoreTestContainer } from '../ContainerStartUp';
 import { IRangeData } from '../../src/Interfaces';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
 test('Remove a new merge', () => {
-    const container = IOCContainerStartUpReady();
+    const container = createCoreTestContainer();
     const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
 

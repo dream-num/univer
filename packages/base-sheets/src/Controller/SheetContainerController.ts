@@ -1,5 +1,4 @@
-import { CommandManager, ISheetActionData, SheetActionBase, SheetContext } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { CommandManager, ISheetActionData, SheetActionBase, SheetContext, Inject } from '@univerjs/core';
 import { ISelectionManager, ISheetContext } from '../Services/tokens';
 import { SelectionManager } from './Selection';
 import { CanvasView } from '../View';

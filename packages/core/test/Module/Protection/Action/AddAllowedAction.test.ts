@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { IOCContainerStartUpReady } from '../../../ContainerStartUp';
+import { createCoreTestContainer } from '../../../ContainerStartUp';
 import { AddAllowedAction } from '../../../../src/Module/Protection/Action';
 import { Allowed } from '../../../../src/Module/Protection';
 import { SheetContext } from '../../../../src/Basics';
@@ -11,7 +11,7 @@ import { ActionObservers } from '../../../../src/Command';
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
 test('Add Allowed Action Test', () => {
-    const container = IOCContainerStartUpReady();
+    const container = createCoreTestContainer();
     const context = container.getSingleton<SheetContext>('Context');
     const workbook = container.getSingleton<Workbook>('WorkBook');
 

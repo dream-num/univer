@@ -7,12 +7,12 @@ import { Range } from '../../src/Sheets/Domain/Range';
 import { Workbook } from '../../src/Sheets/Domain/Workbook';
 import { Worksheet } from '../../src/Sheets/Domain/Worksheet';
 import { BooleanNumber } from '../../src/Enum';
-import { IOCContainerStartUpReady } from './Range.test';
+import { createCoreTestContainer } from './Range.test';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
 test('Test _getDefaultWorkSheet', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         sheets: { sheet1: { id: 'sheet1' }, sheet2: { id: 'sheet2' } },
     });
     const workbook = container.getSingleton<Workbook>('WorkBook');
@@ -20,7 +20,7 @@ test('Test _getDefaultWorkSheet', () => {
 });
 
 test('Test _setServerBase', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         sheets: { sheet1: { id: 'sheet1' }, sheet2: { id: 'sheet2' } },
     });
     const workbook = container.getSingleton<Workbook>('WorkBook');
@@ -29,7 +29,7 @@ test('Test _setServerBase', () => {
 });
 
 test('Test setDefaultActiveSheet', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         sheets: { sheet1: { id: 'sheet1' }, sheet2: { id: 'sheet2' } },
     });
     const workbook = container.getSingleton<Workbook>('WorkBook');
@@ -38,7 +38,7 @@ test('Test setDefaultActiveSheet', () => {
 });
 
 test('Test setContext', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         sheets: { sheet1: { id: 'sheet1' }, sheet2: { id: 'sheet2' } },
     });
     const workbook = container.getSingleton<Workbook>('WorkBook');
@@ -48,7 +48,7 @@ test('Test setContext', () => {
 });
 
 test('Test setCommandManager', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         sheets: { sheet1: { id: 'sheet1' }, sheet2: { id: 'sheet2' } },
     });
     const workbook = container.getSingleton<Workbook>('WorkBook');
@@ -58,13 +58,13 @@ test('Test setCommandManager', () => {
 });
 
 test('Test flush', () => {
-    const container = IOCContainerStartUpReady({});
+    const container = createCoreTestContainer({});
     const workbook = container.getSingleton<Workbook>('WorkBook');
     workbook.flush();
 });
 
 test('Test activateSheet', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -132,7 +132,7 @@ test('Test activateSheet', () => {
 });
 
 test('Test setActiveRange', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -190,7 +190,7 @@ test('Test setActiveRange', () => {
 });
 
 test('Test getIndexBySheetId', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -230,7 +230,7 @@ test('Test getIndexBySheetId', () => {
 });
 
 test('Test insertSheet', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -310,14 +310,14 @@ test('Test insertSheet', () => {
 });
 
 test('Test create', () => {
-    const container = IOCContainerStartUpReady({});
+    const container = createCoreTestContainer({});
     const workbook = container.getSingleton<Workbook>('WorkBook');
     const worksheet = workbook.create('sheet1', 100, 100);
     expect(worksheet).not.toBeUndefined();
 });
 
 test('Test getActiveRangeList', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -365,7 +365,7 @@ test('Test getActiveRangeList', () => {
 });
 
 test('Test getSelection', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -386,7 +386,7 @@ test('Test getSelection', () => {
 });
 
 test('Test getCurrentCell', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -441,7 +441,7 @@ test('Test getCurrentCell', () => {
 });
 
 test('Test setSheetOrder', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -487,7 +487,7 @@ test('Test setSheetOrder', () => {
 });
 
 test('Test removeSheetBySheetId', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -534,7 +534,7 @@ test('Test removeSheetBySheetId', () => {
 });
 
 test('Test getSheetBySheetName', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -628,7 +628,7 @@ test('Test getSheetBySheetName', () => {
 // });
 
 test('Test setActiveRangeList', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         sheets: { sheet1: { id: 'sheet1' }, sheet2: { id: 'sheet2' } },
     });
     const workbook = container.getSingleton<Workbook>('WorkBook');
@@ -644,7 +644,7 @@ test('Test setActiveRangeList', () => {
 });
 
 test('Test getSheetBySheetId', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -691,7 +691,7 @@ test('Test getSheetBySheetId', () => {
 });
 
 test('Test setActiveSheet', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -831,7 +831,7 @@ test('Test setActiveSheet', () => {
 // });
 
 test('Test getCommandManager', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         styles: {
             1: {
                 cl: {
@@ -886,7 +886,7 @@ test('Test getCommandManager', () => {
 // });
 
 test('Test getPluginMeta/setPluginMeta', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         sheets: { sheet1: { id: 'sheet1' }, sheet2: { id: 'sheet2' } },
     });
     const workbook = container.getSingleton<Workbook>('WorkBook');
@@ -904,7 +904,7 @@ test('Test getPluginMeta/setPluginMeta', () => {
 // });
 
 test('Test getConfig', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         sheets: { sheet1: { id: 'sheet1' }, sheet2: { id: 'sheet2' } },
     });
     const workbook = container.getSingleton<Workbook>('WorkBook');
@@ -912,7 +912,7 @@ test('Test getConfig', () => {
 });
 
 test('Test setActiveSheet', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         sheets: { sheet1: { id: 'sheet1' }, sheet2: { id: 'sheet2' } },
     });
     const workbook = container.getSingleton<Workbook>('WorkBook');
@@ -944,7 +944,7 @@ test('Test setActiveSheet', () => {
 });
 
 test('Test setSheetOrder', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         sheets: { sheet1: { id: 'sheet1' }, sheet2: { id: 'sheet2' } },
     });
     const workbook = container.getSingleton<Workbook>('WorkBook');
@@ -962,7 +962,7 @@ test('Test rangeDataToRangeStringData', () => {
 });
 
 test('Test rangeDataToRangeStringData', () => {
-    const container = IOCContainerStartUpReady({
+    const container = createCoreTestContainer({
         sheets: {
             sheet1: {
                 id: 'sheet1',

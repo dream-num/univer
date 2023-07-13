@@ -1,5 +1,9 @@
 import { DocumentModel } from '../Domain/DocumentModel';
-import { deleteContent, getDocsUpdateBody } from '../../Shared/Common';
+import {
+    deleteContent,
+    getDocsUpdateBody,
+    horizontalLineSegmentsSubtraction,
+} from '../../Shared/Common';
 import { IDocumentBody } from '../../Interfaces/IDocumentData';
 
 export function DeleteApply(
@@ -56,6 +60,23 @@ function updateAttributeByDelete(
                     ed: ed - currentIndex,
                 });
                 continue;
+            } else if (st <= startIndex && ed >= endIndex) {
+                const segments = horizontalLineSegmentsSubtraction(
+                    st,
+                    ed,
+                    startIndex,
+                    endIndex
+                );
+
+                if (segments.length > 2) {
+                    const seg1 = segments[0];
+                    const seg2 = segments[1];
+                    textRun.st = seg1[0];
+                    textRun.ed = seg1[1] + seg2[1] - seg2[0] + 1;
+                } else {
+                    textRun.st = segments[0][0];
+                    textRun.ed = segments[0][1];
+                }
             } else if (startIndex >= st && startIndex <= ed) {
                 removeTextRuns.push({
                     ...textRun,
@@ -155,6 +176,23 @@ function updateAttributeByDelete(
                     ed: ed - currentIndex,
                 });
                 continue;
+            } else if (st <= startIndex && ed >= endIndex) {
+                const segments = horizontalLineSegmentsSubtraction(
+                    st,
+                    ed,
+                    startIndex,
+                    endIndex
+                );
+
+                if (segments.length > 2) {
+                    const seg1 = segments[0];
+                    const seg2 = segments[1];
+                    table.startIndex = seg1[0];
+                    table.endIndex = seg1[1] + seg2[1] - seg2[0] + 1;
+                } else {
+                    table.startIndex = segments[0][0];
+                    table.endIndex = segments[0][1];
+                }
             } else if (endIndex < st) {
                 table.startIndex -= textLength;
                 table.endIndex -= textLength;
@@ -177,6 +215,23 @@ function updateAttributeByDelete(
                     ed: ed - currentIndex,
                 });
                 continue;
+            } else if (st <= startIndex && ed >= endIndex) {
+                const segments = horizontalLineSegmentsSubtraction(
+                    st,
+                    ed,
+                    startIndex,
+                    endIndex
+                );
+
+                if (segments.length > 2) {
+                    const seg1 = segments[0];
+                    const seg2 = segments[1];
+                    customRange.startIndex = seg1[0];
+                    customRange.endIndex = seg1[1] + seg2[1] - seg2[0] + 1;
+                } else {
+                    customRange.startIndex = segments[0][0];
+                    customRange.endIndex = segments[0][1];
+                }
             } else if (endIndex < st) {
                 customRange.startIndex -= textLength;
                 customRange.endIndex -= textLength;

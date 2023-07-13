@@ -130,6 +130,7 @@ export class RightMenuUIController {
             },
             {
                 label: 'rightClick.hideSelectedColumn',
+                onClick: () => this.hideColumn(),
                 show: this._config.HideColumn,
             },
             {
@@ -329,6 +330,13 @@ export class RightMenuUIController {
     deleteColumn() {
         const msg = {
             name: 'deleteColumn',
+        };
+        this.setUIObserve(msg);
+    }
+
+    hideColumn() {
+        const msg = {
+            name: 'hideColumn',
         };
         this.setUIObserve(msg);
     }

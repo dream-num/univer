@@ -21,7 +21,7 @@ export class BaseCellEditExtension {
     /**
      * Execute the core logic after the check is successful
      */
-    // execute() { }
+    execute() {}
 }
 
 /**

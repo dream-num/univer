@@ -14,6 +14,7 @@ import {
     CountBarController,
     EditTooltipsController,
     SelectionManager,
+    HideColumnController,
 } from './Controller';
 import { DEFAULT_SPREADSHEET_PLUGIN_DATA, install, ISheetPluginConfig } from './Basics';
 import { FormulaBarController } from './Controller/FormulaBarController';
@@ -23,6 +24,8 @@ import { IGlobalContext, IRenderingEngine, ISelectionManager, ISheetContext, ISh
 import { DragLineController } from './Controller/Selection/DragLineController';
 import { ColumnTitleController } from './Controller/Selection/ColumnTitleController';
 import { RowTitleController } from './Controller/Selection/RowTitleController';
+import { ColumnRulerManager } from './Basics/Register/ColumnRegister';
+import { HideColumnRulerFactory } from './Basics/Register/HideColumnRuler';
 
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
@@ -50,9 +53,15 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     private _countBarController: CountBarController;
 
+    private _hideColumnController: HideColumnController;
+
     private _sheetContainerController: SheetContainerController;
 
     private _namedRangeActionExtensionFactory: NamedRangeActionExtensionFactory;
+
+    private _columnRulerManager: ColumnRulerManager;
+
+    private _hideColumnRulerFactory: HideColumnRulerFactory;
 
     constructor(config?: Partial<ISheetPluginConfig>) {
         super(PLUGIN_NAMES.SPREADSHEET);
@@ -113,6 +122,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         this._toolbarController = this._injector.get(ToolbarController);
         this._rightMenuController = this._injector.get(RightMenuController);
         this._countBarController = this._injector.get(CountBarController);
+        this._hideColumnController = this._injector.get(HideColumnController);
     }
 
     initCanvasView() {
@@ -130,12 +140,20 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
         const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
         actionRegister.delete(this._namedRangeActionExtensionFactory);
+
+        const rulerRegister = this._columnRulerManager.getRegister();
+        rulerRegister.delete(this._hideColumnRulerFactory);
     }
 
     registerExtension() {
         const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
         this._namedRangeActionExtensionFactory = new NamedRangeActionExtensionFactory(this);
         actionRegister.add(this._namedRangeActionExtensionFactory);
+
+        this._columnRulerManager = this._injector.get(ColumnRulerManager);
+        const rulerRegister = this._columnRulerManager.getRegister();
+        this._hideColumnRulerFactory = new HideColumnRulerFactory(this);
+        rulerRegister.add(this._hideColumnRulerFactory);
     }
 
     listenEventManager() {
@@ -241,6 +259,11 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         return this._countBarController;
     }
 
+    /** @deprecated DI */
+    getHideColumnController() {
+        return this._hideColumnController;
+    }
+
     protected _getCoreObserver<T>(type: string) {
         return this.getGlobalContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core');
     }
@@ -279,6 +302,10 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
             [RowTitleController],
             [ColumnTitleController],
             [DragLineController],
+            [HideColumnController],
+
+            // RulerManager
+            [ColumnRulerManager],
             // #endregion Controllers
         ]);
     }

@@ -3,6 +3,8 @@ import { GROUP_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 
 export interface IGroupPluginConfig {}
 
+// TODO@jerry
+// Group affects row and column hiding, registered to RowRulerManager, ColumnRulerManager
 export class GroupPlugin extends Plugin {
     constructor(config?: IGroupPluginConfig) {
         super(GROUP_PLUGIN_NAME);

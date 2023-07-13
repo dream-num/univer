@@ -2,6 +2,8 @@ import { SheetContext, IRangeData, UniverSheet, Plugin } from '@univerjs/core';
 import { FILTER_PLUGIN_NAME } from './Const';
 import { Filter, FilterList, IFilterPluginConfig } from './Domain';
 
+// TODO@jerry
+// Filtering affects row hiding, registered to RowRulerManager
 export class FilterPlugin extends Plugin {
     private _filterList: FilterList;
 

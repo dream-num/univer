@@ -74,3 +74,11 @@ universheet.installPlugin(new OperationPlugin());
 universheet.installPlugin(new ImportXlsxPlugin());
 universheet.installPlugin(new OverGridImagePlugin());
 universheet.installPlugin(new NumfmtPlugin());
+
+// use for console test
+declare global {
+    interface Window {
+        univer?: any;
+    }
+}
+window.univer = univer;

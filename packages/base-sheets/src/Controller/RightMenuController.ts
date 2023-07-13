@@ -1,14 +1,17 @@
 import { Context, SheetContext, UIObserver } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
 import { SelectionController } from './Selection/SelectionController';
 import { SelectionModel } from '../Model/SelectionModel';
 import { IGlobalContext, ISelectionManager, ISheetContext } from '../Services/tokens';
 import { SelectionManager } from './Selection';
+import { HideColumnController } from './HideColumnController';
 
 export class RightMenuController {
     constructor(
         @ISelectionManager private readonly _selectionManager: SelectionManager,
         @ISheetContext private readonly _sheetContext: SheetContext,
-        @IGlobalContext private readonly _globalContext: Context
+        @IGlobalContext private readonly _globalContext: Context,
+        @Inject(HideColumnController) private readonly _hideColumnController: HideColumnController
     ) {}
 
     listenEventManager() {
@@ -28,6 +31,9 @@ export class RightMenuController {
                         break;
                     case 'deleteColumn':
                         this.deleteColumn();
+                        break;
+                    case 'hideColumn':
+                        this.hideColumn();
                         break;
                     case 'moveTop':
                         this.deleteCellTop();
@@ -77,6 +83,14 @@ export class RightMenuController {
         if (selections?.length === 1) {
             const sheet = this._sheetContext.getWorkBook().getActiveSheet();
             sheet.deleteColumns(selections[0].startColumn, selections[0].endColumn - selections[0].startColumn + 1);
+        }
+    };
+
+    hideColumn = () => {
+        const selections = this._getSelections();
+        if (selections?.length === 1) {
+            const sheet = this._sheetContext.getWorkBook().getActiveSheet();
+            this._hideColumnController.hideColumns(sheet.getSheetId(), selections[0].startColumn, selections[0].endColumn - selections[0].startColumn + 1);
         }
     };
 

@@ -15,7 +15,6 @@ const { Bright, FgCyan, FgGreen, Reset } = require('./color');
 (async () => {
     const args = minimist(process.argv.slice(2));
     const target = args.t;
-    console.info('target====', target);
     const paths = {
         entry: resolve(__dirname, `../examples/univer-${target}-ts/src/main.tsx`),
         // cssEntry: resolve(root, "./src/index.css"),

@@ -312,6 +312,7 @@ export class UniverCopy extends Copy {
 
             for (let copyR = r1; copyR <= r2; copyR++) {
                 const rowItem = rowManager.get(copyR);
+
                 if (rowItem && rowItem.hd) {
                     continue;
                 }

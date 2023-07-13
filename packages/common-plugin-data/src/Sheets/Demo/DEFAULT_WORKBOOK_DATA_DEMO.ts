@@ -24153,6 +24153,32 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             rightToLeft: BooleanNumber.FALSE,
             pluginMeta: {},
         },
+        'sheet-0011': {
+            type: SheetTypes.GRID,
+            id: 'sheet-0011',
+            name: 'sheet11',
+            columnData: {
+                1: {
+                    hd: BooleanNumber.FALSE,
+                },
+            },
+            cellData: {
+                0: {
+                    0: {
+                        v: 1,
+                        m: '1',
+                    },
+                    1: {
+                        v: 2,
+                        m: '2',
+                    },
+                    2: {
+                        v: 3,
+                        m: '3',
+                    },
+                },
+            },
+        },
     },
     namedRanges: [
         {

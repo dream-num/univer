@@ -2,7 +2,7 @@ import { DataStreamTreeTokenType, Nullable, Observable, Observer } from '@univer
 import { IDocumentSkeletonCached, IDocumentSkeletonSpan } from '../../Basics/IDocumentSkeletonCached';
 import { CURSOR_TYPE } from '../../Basics/Const';
 import { IMouseEvent, IPointerEvent } from '../../Basics/IEvents';
-import { getCurrentScrollXY, getOffsetRectForDom, transformBoundingCoord } from '../../Basics/Position';
+import { getOffsetRectForDom, transformBoundingCoord } from '../../Basics/Position';
 import { ScrollTimer } from '../../ScrollTimer';
 
 import { Documents } from './Document';
@@ -11,8 +11,15 @@ import { IScrollObserverParam, Viewport } from '../../Viewport';
 import { checkStyle, injectStyle } from '../../Basics/Tools';
 
 import { Vector2 } from '../../Basics/Vector2';
+import { getCurrentScrollXY } from '../../Basics/ScrollXY';
 
-import { IEditorInputConfig } from '../../Basics/Interfaces';
+interface IEditorInputConfig {
+    event: Event | CompositionEvent | KeyboardEvent;
+    content?: string;
+    document: Documents;
+    activeSelection?: TextSelection;
+    selectionList?: TextSelection[];
+}
 
 interface INodeInfo {
     node: IDocumentSkeletonSpan;

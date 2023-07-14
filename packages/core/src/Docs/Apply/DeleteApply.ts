@@ -32,20 +32,52 @@ function updateAttributeByDelete(
     textLength: number,
     currentIndex: number
 ): IDocumentBody {
-    const {
-        textRuns,
-        paragraphs,
-        sectionBreaks,
-        customBlocks,
-        tables,
-        customRanges,
-        dataStream,
-    } = body;
+    const { dataStream } = body;
 
     const startIndex = currentIndex;
 
     const endIndex = currentIndex + textLength - 1;
 
+    const removeTextRuns = processTextRuns(body, textLength, currentIndex);
+
+    const removeParagraphs = processParagraphs(body, textLength, currentIndex);
+
+    const removeSectionBreaks = processSectionBreaks(body, textLength, currentIndex);
+
+    const removeCustomBlocks = processCustomBlocks(body, textLength, currentIndex);
+
+    const removeTables = processTables(body, textLength, currentIndex);
+
+    const removeCustomRanges = processCustomRanges(body, textLength, currentIndex);
+
+    let removeDataStream = '';
+    if (dataStream) {
+        body.dataStream = deleteContent(dataStream, startIndex, endIndex);
+
+        removeDataStream = dataStream.slice(startIndex, endIndex);
+    }
+
+    return {
+        dataStream: removeDataStream,
+        textRuns: removeTextRuns,
+        paragraphs: removeParagraphs,
+        sectionBreaks: removeSectionBreaks,
+        customBlocks: removeCustomBlocks,
+        tables: removeTables,
+        customRanges: removeCustomRanges,
+    };
+}
+
+function processTextRuns(
+    body: IDocumentBody,
+    textLength: number,
+    currentIndex: number
+) {
+    const { textRuns } = body;
+
+    const startIndex = currentIndex;
+
+    const endIndex = currentIndex + textLength - 1;
     const removeTextRuns = [];
     if (textRuns) {
         const newTextRuns = [];
@@ -100,6 +132,19 @@ function updateAttributeByDelete(
         body.textRuns = newTextRuns;
     }
 
+    return removeTextRuns;
+}
+
+function processParagraphs(
+    body: IDocumentBody,
+    textLength: number,
+    currentIndex: number
+) {
+    const { paragraphs } = body;
+
+    const startIndex = currentIndex;
+
+    const endIndex = currentIndex + textLength - 1;
     const removeParagraphs = [];
     if (paragraphs) {
         const newParagraphs = [];
@@ -120,7 +165,19 @@ function updateAttributeByDelete(
         }
         body.paragraphs = newParagraphs;
     }
+    return removeParagraphs;
+}
 
+function processSectionBreaks(
+    body: IDocumentBody,
+    textLength: number,
+    currentIndex: number
+) {
+    const { sectionBreaks } = body;
+
+    const startIndex = currentIndex;
+
+    const endIndex = currentIndex + textLength - 1;
     const removeSectionBreaks = [];
     if (sectionBreaks) {
         const newSectionBreaks = [];
@@ -141,7 +198,19 @@ function updateAttributeByDelete(
         }
         body.sectionBreaks = newSectionBreaks;
     }
+    return removeSectionBreaks;
+}
 
+function processCustomBlocks(
+    body: IDocumentBody,
+    textLength: number,
+    currentIndex: number
+) {
+    const { customBlocks } = body;
+
+    const startIndex = currentIndex;
+
+    const endIndex = currentIndex + textLength - 1;
     const removeCustomBlocks = [];
     if (customBlocks) {
         const newCustomBlocks = [];
@@ -162,7 +231,19 @@ function updateAttributeByDelete(
         }
         body.customBlocks = newCustomBlocks;
     }
+    return removeCustomBlocks;
+}
 
+function processTables(
+    body: IDocumentBody,
+    textLength: number,
+    currentIndex: number
+) {
+    const { tables } = body;
+
+    const startIndex = currentIndex;
+
+    const endIndex = currentIndex + textLength - 1;
     const removeTables = [];
     if (tables) {
         const newTables = [];
@@ -201,7 +282,19 @@ function updateAttributeByDelete(
         }
         body.tables = newTables;
     }
+    return removeTables;
+}
 
+function processCustomRanges(
+    body: IDocumentBody,
+    textLength: number,
+    currentIndex: number
+) {
+    const { customRanges } = body;
+
+    const startIndex = currentIndex;
+
+    const endIndex = currentIndex + textLength - 1;
     const removeCustomRanges = [];
     if (customRanges) {
         const newCustomRanges = [];
@@ -240,21 +333,5 @@ function updateAttributeByDelete(
         }
         body.customRanges = newCustomRanges;
     }
-
-    let removeDataStream = '';
-    if (dataStream) {
-        body.dataStream = deleteContent(dataStream, startIndex, endIndex);
-
-        removeDataStream = dataStream.slice(startIndex, endIndex);
-    }
-
-    return {
-        dataStream: removeDataStream,
-        textRuns: removeTextRuns,
-        paragraphs: removeParagraphs,
-        sectionBreaks: removeSectionBreaks,
-        customBlocks: removeCustomBlocks,
-        tables: removeTables,
-        customRanges: removeCustomRanges,
-    };
+    return removeCustomRanges;
 }

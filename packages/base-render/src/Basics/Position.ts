@@ -1,24 +1,5 @@
 import { BaseObject } from '../BaseObject';
-import { ScrollTimer } from '../ScrollTimer';
 import { IBoundRect } from './Vector2';
-
-export function getCurrentScrollXY(scrollTimer: ScrollTimer) {
-    const scene = scrollTimer.getScene();
-    const viewport = scrollTimer.getViewportByCoord(scene);
-    let scrollX = 0;
-    let scrollY = 0;
-    if (!viewport) {
-        return {
-            scrollX,
-            scrollY,
-        };
-    }
-    const actualScroll = viewport.getActualScroll(viewport.scrollX, viewport.scrollY);
-    return {
-        scrollX: actualScroll.x,
-        scrollY: actualScroll.y,
-    };
-}
 
 export function getOffsetRectForDom(ele: HTMLElement) {
     let box = ele.getBoundingClientRect();

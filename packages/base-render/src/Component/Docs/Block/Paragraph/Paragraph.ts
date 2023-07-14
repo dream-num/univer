@@ -11,6 +11,7 @@ import {
     BooleanNumber,
     DataStreamTreeTokenType,
     ICustomBlock,
+    DocumentBodyModel,
 } from '@univerjs/core';
 import { dealWidthBullet } from './Bullet';
 import { dealWidthInlineDrawing } from './InlineDrawing';
@@ -34,7 +35,9 @@ import {
 import { IParagraphConfig, ISectionBreakConfig } from '../../../../Basics/Interfaces';
 import { createSkeletonTabSpan, createSkeletonWordSpan } from '../../Common/Span';
 
+// eslint-disable-next-line max-lines-per-function
 export function dealWidthParagraph(
+    bodyModel: DocumentBodyModel,
     paragraphNode: DataStreamTreeNode,
     curPage: IDocumentSkeletonPage,
     sectionBreakConfig: ISectionBreakConfig,
@@ -60,8 +63,6 @@ export function dealWidthParagraph(
     } = sectionBreakConfig;
 
     const { endIndex, startIndex, content = '', blocks = [] } = paragraphNode;
-
-    const bodyModel = paragraphNode.bodyModel;
 
     const paragraph = bodyModel.getParagraph(endIndex) || { startIndex: 0 };
 
@@ -139,7 +140,7 @@ export function dealWidthParagraph(
         const charIndex = i + startIndex;
         const char = content[i];
 
-        const fontCreateConfig = getFontCreateConfig(i, paragraphNode, sectionBreakConfig, paragraphStyle);
+        const fontCreateConfig = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
 
         if (char === DataStreamTreeTokenType.TAB) {
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
@@ -174,7 +175,7 @@ export function dealWidthParagraph(
         }
 
         const paragraphStart = i === 0;
-        const languageHandlerResult = composeCharForLanguage(char, i, content, paragraphNode, sectionBreakConfig, paragraphStyle); // Handling special languages such as Tibetan, Arabic
+        const languageHandlerResult = composeCharForLanguage(char, i, content, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle); // Handling special languages such as Tibetan, Arabic
         let newSpanGroup = [];
         if (languageHandlerResult) {
             const { charIndex: newCharIndex, spanGroup } = languageHandlerResult;

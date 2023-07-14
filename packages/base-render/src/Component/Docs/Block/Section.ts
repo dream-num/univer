@@ -1,10 +1,11 @@
-import { DataStreamTreeNodeType, ContextBase, DataStreamTreeNode } from '@univerjs/core';
+import { DataStreamTreeNodeType, ContextBase, DataStreamTreeNode, DocumentBodyModel } from '@univerjs/core';
 import { dealWidthParagraph } from './Paragraph';
 import { dealWithBlockError } from './BlockError';
 import { IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../Basics/IDocumentSkeletonCached';
 import { ISectionBreakConfig } from '../../../Basics/Interfaces';
 
 export function dealWithSections(
+    bodyModel: DocumentBodyModel,
     sectionNode: DataStreamTreeNode,
     curPage: IDocumentSkeletonPage,
     sectionBreakConfig: ISectionBreakConfig,
@@ -26,7 +27,7 @@ export function dealWithSections(
         }
         if (node.nodeType === DataStreamTreeNodeType.PARAGRAPH) {
             // Paragraph 段落
-            skeletonPages = dealWidthParagraph(node, currentPageCache, sectionBreakConfig, skeletonResourceReference, context);
+            skeletonPages = dealWidthParagraph(bodyModel, node, currentPageCache, sectionBreakConfig, skeletonResourceReference, context);
         } else if (node.nodeType === DataStreamTreeNodeType.TABLE) {
             // Table 表格
         }

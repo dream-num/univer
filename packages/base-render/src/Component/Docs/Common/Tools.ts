@@ -15,6 +15,7 @@ import {
     IParagraphStyle,
     ITextStyle,
     ObjectMatrix,
+    DocumentBodyModel,
 } from '@univerjs/core';
 import {
     IDocumentSkeletonColumn,
@@ -259,6 +260,7 @@ export function getCharSpaceConfig(sectionBreakConfig: ISectionBreakConfig, para
     };
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number = -1) {
     const firstPage = pages[0];
     const { st: firstPageStartIndex } = firstPage;
@@ -446,6 +448,7 @@ export function columnIterator(pages: IDocumentSkeletonPage[], iteratorFunction:
     }
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function getPositionHorizon(positionH: ObjectPositionH, column: IDocumentSkeletonColumn, page: IDocumentSkeletonPage, objectWidth: number, isPageBreak: boolean = false) {
     const { relativeFrom, align, posOffset, percent } = positionH;
 
@@ -647,9 +650,14 @@ export function clearFontCreateConfigCache() {
     fontCreateConfigCache.reset();
 }
 
-export function getFontCreateConfig(index: number, paragraphNode: DataStreamTreeNode, sectionBreakConfig: ISectionBreakConfig, paragraphStyle: IParagraphStyle) {
+export function getFontCreateConfig(
+    index: number,
+    bodyModel: DocumentBodyModel,
+    paragraphNode: DataStreamTreeNode,
+    sectionBreakConfig: ISectionBreakConfig,
+    paragraphStyle: IParagraphStyle
+) {
     const { startIndex } = paragraphNode;
-    const bodyModel = paragraphNode.bodyModel;
     const textRun = bodyModel.getTextRun(index + startIndex) || { ts: {}, st: 0, ed: 0 };
     const { ts: textStyle = {}, st, ed } = textRun;
     const cache = fontCreateConfigCache.getValue(st, ed);

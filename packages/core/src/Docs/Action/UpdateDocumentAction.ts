@@ -1,9 +1,6 @@
-import { DocActionBase, IDocActionData } from '../../Command/DocActionBase';
+import { DocActionBase } from '../../Command/DocActionBase';
 import { ActionObservers, CommandManager, CommandUnit } from '../../Command';
-
-export interface IUpdateDocumentActionData extends IDocActionData {
-    text: string;
-}
+import { IUpdateDocumentActionData } from './ActionDataInterface';
 
 export class UpdateDocumentAction extends DocActionBase<
     IUpdateDocumentActionData,

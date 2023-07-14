@@ -13,8 +13,6 @@ import {
     ITransformState,
     DocumentBodyModel,
 } from '@univerjs/core';
-import { TextSelection } from '../Component/Docs/Common/TextSelection';
-import { Documents } from '../Component/Docs/Document';
 import {
     IDocumentSkeletonDrawingAnchor,
     IDocumentSkeletonBullet,
@@ -113,14 +111,6 @@ export interface IFontCreateConfig {
     gridType?: GridType;
     snapToGrid: BooleanNumber;
     pageWidth?: number;
-}
-
-export interface IEditorInputConfig {
-    event: Event | CompositionEvent | KeyboardEvent;
-    content?: string;
-    document: Documents;
-    activeSelection?: TextSelection;
-    selectionList?: TextSelection[];
 }
 
 // export interface IPageConfig {

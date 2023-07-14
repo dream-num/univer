@@ -2,7 +2,7 @@ import { IKeyValue, Nullable, Observable, Observer } from '@univerjs/core';
 import { BaseObject } from './BaseObject';
 import { CURSOR_TYPE } from './Basics/Const';
 import { IMouseEvent, IPointerEvent } from './Basics/IEvents';
-import { getCurrentScrollXY } from './Basics/Position';
+import { getCurrentScrollXY } from './Basics/ScrollXY';
 import { Group } from './Group';
 import { Scene } from './Scene';
 import { ScrollTimer } from './ScrollTimer';

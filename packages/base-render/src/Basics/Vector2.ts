@@ -1,6 +1,4 @@
-import { IKeyValue } from '@univerjs/core';
 import { DeepImmutable, FloatArray } from './IEvents';
-import { Transform } from './Transform';
 
 export interface IPoint {
     x: number;
@@ -253,21 +251,21 @@ export class Vector2 implements IPoint {
         return new Vector2(x, y);
     }
 
-    /**
-     * Transforms the given vector coordinates by the given transformation Transform and stores the result in the vector "result" coordinates
-     * @param vector defines the vector to transform
-     * @param transformation defines the Transform to apply
-     * @param result defines the target vector
-     */
-    static Transform(vector: DeepImmutable<Vector2>, transformation: DeepImmutable<Transform>, ignoreOffset: boolean = false) {
-        const t = transformation as IKeyValue;
-        const p = vector;
+    // /**
+    //  * Transforms the given vector coordinates by the given transformation Transform and stores the result in the vector "result" coordinates
+    //  * @param vector defines the vector to transform
+    //  * @param transformation defines the Transform to apply
+    //  * @param result defines the target vector
+    //  */
+    // static Transform(vector: DeepImmutable<Vector2>, transformation: DeepImmutable<Transform>, ignoreOffset: boolean = false) {
+    //     const t = transformation as IKeyValue;
+    //     const p = vector;
 
-        if (ignoreOffset) {
-            return new Vector2(t[0] * p.x + t[2] * p.y, t[1] * p.x + t[3] * p.y);
-        }
-        return new Vector2(t[0] * p.x + t[2] * p.y + t[4], t[1] * p.x + t[3] * p.y + t[5]);
-    }
+    //     if (ignoreOffset) {
+    //         return new Vector2(t[0] * p.x + t[2] * p.y, t[1] * p.x + t[3] * p.y);
+    //     }
+    //     return new Vector2(t[0] * p.x + t[2] * p.y + t[4], t[1] * p.x + t[3] * p.y + t[5]);
+    // }
 
     /**
      * Determines if a given vector is included in a triangle

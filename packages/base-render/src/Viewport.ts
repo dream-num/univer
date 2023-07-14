@@ -439,6 +439,7 @@ export class Viewport {
         return svCoord;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     onMouseWheel(evt: IWheelEvent, state: EventState) {
         if (!this._scrollBar) {
             return;

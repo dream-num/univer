@@ -1,4 +1,4 @@
-import { DocActionBase, IDocActionData } from '../../Command/DocActionBase';
+import { DocActionBase } from '../../Command/DocActionBase';
 import {
     ActionObservers,
     ActionType,
@@ -6,17 +6,12 @@ import {
     CommandUnit,
     CommonParameter,
 } from '../../Command';
-import { IInsertActionData } from './InsertAction';
+
 import { DOC_ACTION_NAMES } from '../../Const/DOC_ACTION_NAMES';
 import { IDocumentBody } from '../../Interfaces';
 import { DeleteApply } from '../Apply/DeleteApply';
 import { InsertApply } from '../Apply/InsertApply';
-
-export interface IDeleteActionData extends IDocActionData {
-    len: number;
-    line: number;
-    segmentId?: string;
-}
+import { IDeleteActionData, IInsertActionData } from './ActionDataInterface';
 
 export class DeleteAction extends DocActionBase<
     IDeleteActionData,

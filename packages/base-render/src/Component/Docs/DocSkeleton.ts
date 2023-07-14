@@ -126,6 +126,7 @@ export class DocumentSkeleton extends Skeleton {
      * 按照SectionBreak分割文档，进行布局计算
      * @returns view model: skeleton
      */
+    // eslint-disable-next-line max-lines-per-function
     private _createSkeleton(bounds?: IBoundRect) {
         // 每一个布局
         const DEFAULT_PAGE_SIZE = { width: Infinity, height: Infinity };
@@ -284,7 +285,7 @@ export class DocumentSkeleton extends Skeleton {
             }
             // 计算页内布局，block结构
             const context = this.getContext();
-            const blockInfo = dealWithSections(sectionNode, curSkeletonPage, sectionBreakConfig, skeletonResourceReference, this._renderedBlockIdMap, context);
+            const blockInfo = dealWithSections(bodyModel, sectionNode, curSkeletonPage, sectionBreakConfig, skeletonResourceReference, this._renderedBlockIdMap, context);
 
             // todo: 当本节有多个列，且下一节为连续节类型的时候，需要按照列数分割，重新计算lines
             if (sectionTypeNext === SectionType.CONTINUOUS && columnProperties.length > 0) {

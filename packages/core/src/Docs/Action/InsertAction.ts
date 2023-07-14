@@ -1,4 +1,4 @@
-import { DocActionBase, IDocActionData } from '../../Command/DocActionBase';
+import { DocActionBase } from '../../Command/DocActionBase';
 import {
     ActionObservers,
     ActionType,
@@ -6,18 +6,10 @@ import {
     CommandUnit,
     CommonParameter,
 } from '../../Command';
-import { IDeleteActionData } from './DeleteAction';
-import { IDocumentBody } from '../../Interfaces';
 import { DOC_ACTION_NAMES } from '../../Const/DOC_ACTION_NAMES';
 import { InsertApply } from '../Apply/InsertApply';
 import { DeleteApply } from '../Apply/DeleteApply';
-
-export interface IInsertActionData extends IDocActionData {
-    body: IDocumentBody;
-    len: number;
-    line: number;
-    segmentId?: string; //The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body.
-}
+import { IInsertActionData, IDeleteActionData } from './ActionDataInterface';
 
 export class InsertAction extends DocActionBase<
     IInsertActionData,

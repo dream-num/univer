@@ -1,4 +1,4 @@
-import { DocActionBase, IDocActionData } from '../../Command/DocActionBase';
+import { DocActionBase } from '../../Command/DocActionBase';
 import {
     ActionObservers,
     CommandManager,
@@ -6,12 +6,7 @@ import {
     CommonParameter,
 } from '../../Command';
 import { CommonParameterAttribute } from '../../Interfaces/IDocumentData';
-
-export interface IRetainActionData extends IDocActionData {
-    attribute?: CommonParameterAttribute;
-    len: number;
-    segmentId?: string;
-}
+import { IRetainActionData } from './ActionDataInterface';
 
 export class RetainAction extends DocActionBase<
     IRetainActionData,

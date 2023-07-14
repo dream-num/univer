@@ -7,6 +7,7 @@ import { updateBlockIndex } from './Tools';
 
 // 新增数据结构框架
 // 判断奇数和偶数页码
+// eslint-disable-next-line max-lines-per-function
 export function createSkeletonPage(
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
@@ -169,7 +170,7 @@ function _createSkeletonHeader(
     };
 
     const areaPage = createSkeletonPage(headerConfig, skeletonResourceReference);
-    const page = dealWithSections(headerOrFooter.children[0], areaPage, headerConfig, skeletonResourceReference).pages[0];
+    const page = dealWithSections(headerOrFooter, headerOrFooter.children[0], areaPage, headerConfig, skeletonResourceReference).pages[0];
     updateBlockIndex([page]);
     const column = page.sections[0].columns[0];
     const height = column.height || 0;

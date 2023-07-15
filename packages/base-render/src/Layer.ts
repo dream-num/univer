@@ -1,13 +1,12 @@
 import { sortRules } from '@univerjs/core';
 import { BaseObject } from './BaseObject';
-import { Scene } from './Scene';
-import { Group } from './Group';
+import { ThinScene } from './ThinScene';
 import { RENDER_CLASS_TYPE } from './Basics/Const';
 
 export class Layer {
     private _objects: BaseObject[] = [];
 
-    constructor(private _scene: Scene, objects: BaseObject[] = [], private _zIndex: number = 1) {
+    constructor(private _scene: ThinScene, objects: BaseObject[] = [], private _zIndex: number = 1) {
         this.addObjects(objects);
     }
 
@@ -19,7 +18,7 @@ export class Layer {
         return this._zIndex;
     }
 
-    static create(scene: Scene, objects: BaseObject[] = [], zIndex: number = 1000) {
+    static create(scene: ThinScene, objects: BaseObject[] = [], zIndex: number = 1000) {
         return new this(scene, objects, zIndex);
     }
 
@@ -51,7 +50,7 @@ export class Layer {
 
     addObject(o: BaseObject) {
         if (o.classType === RENDER_CLASS_TYPE.GROUP) {
-            const objects = (o as Group).getObjects();
+            const objects = (o as BaseObject).getObjects();
             for (let object of objects) {
                 if (this.scene.getObject(object.oKey)) {
                     continue;

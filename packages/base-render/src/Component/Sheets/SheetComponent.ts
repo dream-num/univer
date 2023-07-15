@@ -1,5 +1,5 @@
-import { searchArray } from '@univerjs/core';
-import { IBoundRect } from '../../Basics/Vector2';
+import { ICellInfo, Nullable, searchArray } from '@univerjs/core';
+import { IBoundRect, Vector2 } from '../../Basics/Vector2';
 import { RenderComponent } from '../Component';
 import { SpreadsheetSkeleton } from './SheetSkeleton';
 import { SHEET_EXTENSION_TYPE } from './Extensions/SheetExtension';
@@ -20,7 +20,7 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
         this._skeleton = spreadsheetSkeleton;
     }
 
-    render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -51,6 +51,30 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
             scaleY,
         };
     }
+
+    getDocuments(): any {}
+
+    getCellByIndex(row: number, column: number) {}
+
+    getNoMergeCellPositionByIndex(rowIndex: number, columnIndex: number): Nullable<{ startY: number; startX: number; endX: number; endY: number }> {}
+
+    getScrollXYByRelativeCoords(coord: Vector2) {
+        return { x: 0, y: 0 };
+    }
+
+    calculateCellIndexByPosition(offsetX: number, offsetY: number, scrollXY: { x: number; y: number }): Nullable<ICellInfo> {}
+
+    getSelectionBounding(
+        startRow: number,
+        startColumn: number,
+        endRow: number,
+        endColumn: number
+    ): Nullable<{
+        startRow: number;
+        startColumn: number;
+        endRow: number;
+        endColumn: number;
+    }> {}
 
     /**
      *
@@ -121,7 +145,7 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
 }
 
 export class SpreadsheetTitle extends SheetComponent {
-    protected _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect): void {
+    protected override _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect): void {
         this.draw(ctx, bounds);
     }
 }

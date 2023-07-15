@@ -1,14 +1,25 @@
+import { Nullable } from '@univerjs/core';
 import { IBoundRect } from '../../Basics/Vector2';
-import { ITransformChangeState } from '../../Basics/Interfaces';
+import { INodeInfo, INodeSearch, ITransformChangeState } from '../../Basics/Interfaces';
 import { Canvas } from '../../Canvas';
 import { RenderComponent } from '../Component';
 import { DocumentSkeleton } from './DocSkeleton';
 import { Scene } from '../../Scene';
 import { DOCS_EXTENSION_TYPE } from './DocExtension';
-import { IDocumentSkeletonLine, IDocumentSkeletonSpan } from '../../Basics/IDocumentSkeletonCached';
+import { IDocumentSkeletonLine, IDocumentSkeletonSpan, PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
 import { RENDER_CLASS_TYPE } from '../../Basics/Const';
 
 export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE> {
+    pageWidth: number;
+
+    pageHeight: number;
+
+    pageMarginLeft: number;
+
+    pageMarginTop: number;
+
+    pageLayoutType: PageLayoutType;
+
     protected _cacheCanvas: Canvas;
 
     constructor(oKey: string, private _skeleton?: DocumentSkeleton, private _allowCache: boolean = false) {
@@ -32,7 +43,7 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
         this._skeleton = skeleton;
     }
 
-    render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -70,6 +81,16 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
             scaleY,
         };
     }
+
+    getFirstViewport() {}
+
+    findPositionBySpan(span: IDocumentSkeletonSpan): Nullable<INodeSearch> {}
+
+    findNodeByCoord(offsetX: number, offsetY: number): false | INodeInfo {
+        return false;
+    }
+
+    getActiveViewportByCoord(offsetX: number, offsetY: number) {}
 
     protected _getBounding(bounds?: IBoundRect) {}
 

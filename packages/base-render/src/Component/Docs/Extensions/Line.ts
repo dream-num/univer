@@ -10,13 +10,13 @@ import { fixLineWidthByScale, getScale } from '../../../Basics/Tools';
 const UNIQUE_KEY = 'DefaultDocsLineExtension';
 
 export class Line extends docExtension {
-    uKey = UNIQUE_KEY;
+    override uKey = UNIQUE_KEY;
 
-    zIndex = 40;
+    override zIndex = 40;
 
     private _preBackgroundColor = '';
 
-    draw(ctx: CanvasRenderingContext2D, parentScale: IScale, span: IDocumentSkeletonSpan) {
+    override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, span: IDocumentSkeletonSpan) {
         const line = span.parent?.parent;
         if (!line) {
             return;
@@ -95,7 +95,7 @@ export class Line extends docExtension {
         }
     }
 
-    clearCache() {
+    override clearCache() {
         this._preBackgroundColor = '';
     }
 

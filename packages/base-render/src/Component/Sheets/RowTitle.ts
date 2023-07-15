@@ -21,7 +21,7 @@ export class SpreadsheetRowTitle extends SpreadsheetTitle {
         return this._rowTitleLayoutExtension;
     }
 
-    draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         const spreadsheetSkeleton = this.getSkeleton();
         if (!spreadsheetSkeleton) {
             return;
@@ -42,7 +42,7 @@ export class SpreadsheetRowTitle extends SpreadsheetTitle {
         }
     }
 
-    isHit(coord: Vector2) {
+    override isHit(coord: Vector2) {
         const oCoord = this._getInverseCoord(coord);
         const skeleton = this.getSkeleton();
         if (!skeleton) {

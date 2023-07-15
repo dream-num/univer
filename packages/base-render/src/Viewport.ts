@@ -5,16 +5,15 @@ import { PointerInput, IWheelEvent } from './Basics/IEvents';
 
 import { Canvas } from './Canvas';
 
-import { Scene } from './Scene';
-
 import { IBoundRect, Vector2 } from './Basics/Vector2';
 
 import { Transform } from './Basics/Transform';
 
-import { SceneViewer } from './SceneViewer';
+import { BaseScrollBar } from './Shape/BaseScrollBar';
 
-import { ScrollBar } from './Shape/ScrollBar';
 import { RENDER_CLASS_TYPE } from './Basics/Const';
+
+import { ThinScene } from './ThinScene';
 
 interface IViewPosition {
     top?: number | string;
@@ -99,11 +98,11 @@ export class Viewport {
 
     private _height: Nullable<number>;
 
-    private _scene: Scene;
+    private _scene: ThinScene;
 
     private _cacheCanvas: Canvas;
 
-    private _scrollBar?: ScrollBar;
+    private _scrollBar?: BaseScrollBar;
 
     private _isWheelPreventDefaultX: boolean = false;
 
@@ -119,7 +118,7 @@ export class Viewport {
 
     private _renderClipState = true;
 
-    constructor(viewPortKey: string, scene: Scene, props?: IViewProps) {
+    constructor(viewPortKey: string, scene: ThinScene, props?: IViewProps) {
         this._viewPortKey = viewPortKey;
 
         this._scene = scene;
@@ -233,7 +232,7 @@ export class Viewport {
         this._resizeCacheCanvasAndScrollBar(true);
     }
 
-    setScrollBar(instance: ScrollBar) {
+    setScrollBar(instance: BaseScrollBar) {
         if (this._scrollBar) {
             console.warn('Old scrollBar will be replaced ');
         }
@@ -260,8 +259,15 @@ export class Viewport {
         this._resizeCacheCanvasAndScrollBar();
     }
 
-    makeDirty(state: boolean = true) {
+    makeDirty(state: boolean = true, refreshParent = false) {
         this._dirty = state;
+
+        if (refreshParent) {
+            const parent = this.scene.getParent();
+            if (parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                parent.makeDirty(true);
+            }
+        }
     }
 
     isDirty(): boolean {
@@ -367,7 +373,7 @@ export class Viewport {
     }
 
     render(parentCtx?: CanvasRenderingContext2D) {
-        const mainCtx = parentCtx || this._scene.getEngine()?.getCanvas().getContext();
+        const mainCtx = parentCtx;
         // console.log(this.viewPortKey, this._cacheCanvas);
         if (!this.isDirty() && this._allowCache) {
             this._applyCache(mainCtx);
@@ -590,7 +596,7 @@ export class Viewport {
             width = this._widthOrigin!;
         } else {
             const referenceWidth = parent.width;
-            let containerWidth = parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceWidth * (parent as SceneViewer).scaleX : referenceWidth;
+            let containerWidth = parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceWidth * parent.scaleX : referenceWidth;
             width = containerWidth - (this._left + this._right);
         }
 
@@ -598,7 +604,7 @@ export class Viewport {
             height = this._heightOrigin!;
         } else {
             const referenceHeight = parent.height;
-            let containerHeight = parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceHeight * (parent as SceneViewer).scaleY : referenceHeight;
+            let containerHeight = parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceHeight * parent.scaleY : referenceHeight;
             height = containerHeight - (this._top + this._bottom);
         }
 

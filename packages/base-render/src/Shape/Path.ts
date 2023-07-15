@@ -109,7 +109,7 @@ export class Path extends Shape<IPathProps> {
         return this._dataArray;
     }
 
-    static drawWith(ctx: CanvasRenderingContext2D, props: IPathProps | Path) {
+    static override drawWith(ctx: CanvasRenderingContext2D, props: IPathProps | Path) {
         const ca = props.dataArray;
         if (!ca) {
             return;
@@ -290,6 +290,7 @@ export class Path extends Shape<IPathProps> {
      *  L data for the purpose of high performance Path
      *  rendering
      */
+    // eslint-disable-next-line max-lines-per-function
     static parsePathData(data: string) {
         // Path Data Segment must begin with a moveTo
         //m (x y)+  Relative moveTo (subsequent points are treated as lineTo)
@@ -712,7 +713,7 @@ export class Path extends Shape<IPathProps> {
         return [cx, cy, rx, ry, theta, dTheta, psi, fs];
     }
 
-    toJson() {
+    override toJson() {
         const props: IKeyValue = {};
         PATH_OBJECT_ARRAY.forEach((key) => {
             if (this[key as keyof Path]) {
@@ -725,7 +726,7 @@ export class Path extends Shape<IPathProps> {
         };
     }
 
-    getState() {
+    override getState() {
         const { left, top, width, height } = this.getRect();
         return {
             left,
@@ -826,7 +827,7 @@ export class Path extends Shape<IPathProps> {
         return null;
     }
 
-    protected _draw(ctx: CanvasRenderingContext2D) {
+    protected override _draw(ctx: CanvasRenderingContext2D) {
         Path.drawWith(ctx, this);
     }
 
@@ -848,6 +849,7 @@ export class Path extends Shape<IPathProps> {
         this._setTransForm();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _getSelfRect() {
         if (!this._reCalculateCache) {
             return this._selfRectCache;

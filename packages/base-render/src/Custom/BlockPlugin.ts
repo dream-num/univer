@@ -18,7 +18,7 @@ export class BlockPlugin extends Plugin<BlockPluginObserve> {
         return [];
     }
 
-    onMounted(ctx: SheetContext): void {}
+    override onMounted(ctx: SheetContext): void {}
 
-    onDestroy(): void {}
+    override onDestroy(): void {}
 }

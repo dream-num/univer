@@ -7,13 +7,13 @@ import { Vector2 } from '../../../Basics/Vector2';
 const UNIQUE_KEY = 'DefaultDocsBackgroundExtension';
 
 export class Background extends docExtension {
-    uKey = UNIQUE_KEY;
+    override uKey = UNIQUE_KEY;
 
-    zIndex = 10;
+    override zIndex = 10;
 
     private _preBackgroundColor = '';
 
-    draw(ctx: CanvasRenderingContext2D, parentScale: IScale, span: IDocumentSkeletonSpan) {
+    override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, span: IDocumentSkeletonSpan) {
         const line = span.parent?.parent;
         if (!line) {
             return;
@@ -43,7 +43,7 @@ export class Background extends docExtension {
         }
     }
 
-    clearCache() {
+    override clearCache() {
         this._preBackgroundColor = '';
     }
 }

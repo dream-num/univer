@@ -9,9 +9,10 @@ import './Extensions';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../Basics/Draw';
 import { fixLineWidthByScale, getScale, degToRad } from '../../Basics/Tools';
 import { DocsEditor } from './Document.Editor';
-import { Liquid } from './Common';
+import { Liquid } from './Common/Liquid';
 import { Scene } from '../../Scene';
 import { TextSelection } from './Common/TextSelection';
+import { INodeSearch } from '../../Basics/Interfaces';
 
 export interface IDocumentsConfig {
     pageMarginLeft?: number;
@@ -29,16 +30,6 @@ export interface IPageRenderConfig {
 }
 
 export class Documents extends DocComponent {
-    pageWidth: number;
-
-    pageHeight: number;
-
-    pageMarginLeft: number;
-
-    pageMarginTop: number;
-
-    pageLayoutType: PageLayoutType;
-
     isCalculateSkeleton = true;
 
     onPageRenderObservable = new Observable<IPageRenderConfig>();
@@ -140,15 +131,15 @@ export class Documents extends DocComponent {
         return this;
     }
 
-    getFirstViewport() {
+    override getFirstViewport() {
         return (this.getScene() as Scene).getViewports()[0];
     }
 
-    getActiveViewportByCoord(offsetX: number, offsetY: number) {
+    override getActiveViewportByCoord(offsetX: number, offsetY: number) {
         return (this.getScene() as Scene).getActiveViewportByCoord(Vector2.FromArray([offsetX, offsetY]));
     }
 
-    getEngine() {
+    override getEngine() {
         return (this.getScene() as Scene).getEngine();
     }
 
@@ -195,7 +186,8 @@ export class Documents extends DocComponent {
         return this._editor.sync();
     }
 
-    draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    // eslint-disable-next-line max-lines-per-function
+    override draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         const documentSkeleton = this.getSkeleton();
         if (!documentSkeleton) {
             return;
@@ -412,7 +404,7 @@ export class Documents extends DocComponent {
         return this;
     }
 
-    findPositionBySpan(span: IDocumentSkeletonSpan) {
+    override findPositionBySpan(span: IDocumentSkeletonSpan): Nullable<INodeSearch> {
         const divide = span.parent;
 
         const line = divide?.parent;
@@ -511,7 +503,8 @@ export class Documents extends DocComponent {
         }
     }
 
-    findNodeByCoord(offsetX: number, offsetY: number) {
+    // eslint-disable-next-line max-lines-per-function
+    override findNodeByCoord(offsetX: number, offsetY: number) {
         const scene = this.getScene() as Scene;
         const originCoord = scene.transformToSceneCoord(Vector2.FromArray([offsetX, offsetY]));
 
@@ -641,7 +634,7 @@ export class Documents extends DocComponent {
         return false;
     }
 
-    protected _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    protected override _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         this.draw(ctx, bounds);
     }
 

@@ -1,6 +1,4 @@
-import { ScrollTimer } from '../ScrollTimer';
-
-export function getCurrentScrollXY(scrollTimer: ScrollTimer) {
+export function getCurrentScrollXY(scrollTimer: any) {
     const scene = scrollTimer.getScene();
     const viewport = scrollTimer.getViewportByCoord(scene);
     let scrollX = 0;

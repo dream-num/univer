@@ -1,14 +1,12 @@
 import { IPaddingData, Nullable } from '@univerjs/core';
 import { RENDER_CLASS_TYPE } from './Basics/Const';
-import { Viewport } from './Viewport';
-import { Scene } from './Scene';
 import { Vector2 } from './Basics/Vector2';
 import { requestNewFrame, cancelRequestFrame } from './Basics/Tools';
 
 export class ScrollTimer {
     private _requestNewFrameNumber: number;
 
-    private _viewport: Nullable<Viewport>;
+    private _viewport: Nullable<any>;
 
     private _offsetX: number = 0;
 
@@ -24,13 +22,13 @@ export class ScrollTimer {
 
     private _scrollFunction: (x?: number, y?: number) => void;
 
-    constructor(private _scene: Scene, private _padding?: IPaddingData, private _smoothRatioX = 0.05, private _smoothRatioY = 0.05) {
+    constructor(private _scene: any, private _padding?: IPaddingData, private _smoothRatioX = 0.05, private _smoothRatioY = 0.05) {
         if (!this._padding) {
             this._padding = { t: 20, b: 20, l: 46, r: 60 };
         }
     }
 
-    static create(scene: Scene, padding?: IPaddingData) {
+    static create(scene: any, padding?: IPaddingData) {
         return new ScrollTimer(scene, padding);
     }
 
@@ -46,7 +44,7 @@ export class ScrollTimer {
         this._runRenderLoop();
     }
 
-    _scroll(viewport: Nullable<Viewport>) {
+    _scroll(viewport: Nullable<any>) {
         const topBounding = viewport?.top || 0;
         const bottomBounding = topBounding + (viewport?.height || 0);
         const leftBounding = viewport?.left || 0;
@@ -101,7 +99,7 @@ export class ScrollTimer {
         cancelRequestFrame(this._requestNewFrameNumber);
     }
 
-    getViewportByCoord(scene?: Scene) {
+    getViewportByCoord(scene?: any) {
         // return scene?.getActiveViewportByCoord(Vector2.FromArray([this._offsetX, this._offsetY]));
 
         return scene?.getActiveViewportByRelativeCoord(Vector2.FromArray([this._offsetX, this._offsetY]));
@@ -117,7 +115,7 @@ export class ScrollTimer {
         this._requestNewFrameNumber = requestNewFrame(this._runRenderLoop.bind(this));
     }
 
-    private _findAncestorScene(scene?: Scene) {
+    private _findAncestorScene(scene?: any) {
         let parent: any = scene?.getParent();
         while (parent) {
             if (parent.classType === RENDER_CLASS_TYPE.SCENE) {

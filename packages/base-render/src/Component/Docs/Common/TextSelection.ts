@@ -13,8 +13,9 @@ import { IPoint } from '../../../Basics/Vector2';
 import { Scene } from '../../../Scene';
 import { Rect } from '../../../Shape/Rect';
 import { RegularPolygon } from '../../../Shape/RegularPolygon';
-import { Documents } from '../Document';
+
 import { Liquid } from './Liquid';
+import { DocComponent } from '../DocComponent';
 
 enum NodePositionStateType {
     NORMAL,
@@ -202,7 +203,7 @@ export class TextSelection {
         return true;
     }
 
-    refresh(documents: Documents) {
+    refresh(documents: DocComponent) {
         const start = this.startNodePosition;
 
         const end = this.endNodePosition;
@@ -528,7 +529,8 @@ export class TextSelection {
         this._scene.addObject(anchor, 2);
     }
 
-    private _getRangePointData(startOrigin: INodePosition, endOrigin: INodePosition, documents: Documents) {
+    // eslint-disable-next-line max-lines-per-function
+    private _getRangePointData(startOrigin: INodePosition, endOrigin: INodePosition, documents: DocComponent) {
         const pointGroup: IPoint[][] = [];
 
         const cursorList: ITextSelectionRange[] = [];
@@ -542,6 +544,7 @@ export class TextSelection {
 
         const { start, end } = this._compareNodePosition(startOrigin, endOrigin);
 
+        // eslint-disable-next-line max-lines-per-function
         this._selectionIterator(start!, end!, documents, (start_sp, end_sp, isFirst, isLast, divide, line) => {
             const { lineHeight } = line;
 
@@ -645,10 +648,11 @@ export class TextSelection {
         };
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _selectionIterator(
         startPosition: INodePosition,
         endPosition: INodePosition,
-        documents: Documents,
+        documents: DocComponent,
         func: (
             startSpanIndex: number,
             endSpanIndex: number,

@@ -1,5 +1,5 @@
 import { Nullable, sortRules } from '@univerjs/core';
-import { Scene } from './Scene';
+import { ThinScene } from './ThinScene';
 import { isString } from './Basics/Tools';
 import { IBoundRect, Vector2 } from './Basics/Vector2';
 import { BaseObject } from './BaseObject';
@@ -13,11 +13,11 @@ export class Group extends BaseObject {
         this.addObjects(...objects);
     }
 
-    get classType() {
+    override get classType() {
         return RENDER_CLASS_TYPE.GROUP;
     }
 
-    set cursor(val: CURSOR_TYPE) {
+    override set cursor(val: CURSOR_TYPE) {
         this.setCursor(val);
     }
 
@@ -30,7 +30,7 @@ export class Group extends BaseObject {
     addObject(o: BaseObject | string) {
         let object: Nullable<BaseObject | string> = o;
         if (isString(o)) {
-            const scene = this.getScene() as Scene;
+            const scene = this.getScene() as ThinScene;
             object = scene?.getObject(o);
             if (!object) {
                 console.info('No object be added');
@@ -95,7 +95,7 @@ export class Group extends BaseObject {
         return this._objects;
     }
 
-    render(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override render(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         ctx.save();
         const m = this.transform.getMatrix();
         ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
@@ -106,31 +106,31 @@ export class Group extends BaseObject {
         ctx.restore();
     }
 
-    resize(width?: number | string, height?: number | string) {
+    override resize(width?: number | string, height?: number | string) {
         return this;
     }
 
-    scale(scaleX?: number, scaleY?: number) {
+    override scale(scaleX?: number, scaleY?: number) {
         return this;
     }
 
-    skew(skewX?: number, skewY?: number) {
+    override skew(skewX?: number, skewY?: number) {
         return this;
     }
 
-    flip(flipX?: boolean, flipY?: boolean) {
+    override flip(flipX?: boolean, flipY?: boolean) {
         return this;
     }
 
     // 判断自己scope下的所有对象是否有被选中的
-    isHit(coord: Vector2) {
+    override isHit(coord: Vector2) {
         return true;
     }
 
     // 判断被选中的唯一对象
     pick(coord: Vector2) {}
 
-    dispose() {
+    override dispose() {
         this.getObjects().forEach((o) => {
             o.dispose();
         });

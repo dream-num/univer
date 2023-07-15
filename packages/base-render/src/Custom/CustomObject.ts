@@ -7,13 +7,13 @@ export class CustomObject extends BaseObject {
         super(key);
     }
 
-    toJson() {
+    override toJson() {
         return {
             ...super.toJson(),
         };
     }
 
-    render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -38,7 +38,7 @@ export class CustomObject extends BaseObject {
         return this;
     }
 
-    isHit(coord: Vector2) {
+    override isHit(coord: Vector2) {
         if (this._isHitCustom) {
             return this._isHitCustom(coord);
         }

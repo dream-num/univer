@@ -17,6 +17,7 @@ import {
     isBlankPage,
     isColumnFull,
 } from '../../Common/Tools';
+// eslint-disable-next-line import/no-cycle
 import { createSkeletonPage } from '../../Common/Page';
 import { addSpanToDivide, calculateLineTopByDrawings, createAndUpdateBlockAnchor, createSkeletonLine, setDivideFullState } from '../../Common/Line';
 import { createSkeletonBulletSpan, setSpanGroupLeft } from '../../Common/Span';
@@ -65,6 +66,7 @@ export function calculateParagraphLayout(
     return [...pages];
 }
 
+// eslint-disable-next-line max-lines-per-function
 function _divideOperator(
     spanGroup: IDocumentSkeletonSpan[],
     pages: IDocumentSkeletonPage[],
@@ -161,6 +163,7 @@ function _divideOperator(
     }
 }
 
+// eslint-disable-next-line max-lines-per-function
 function _lineOperator(
     spanGroup: IDocumentSkeletonSpan[],
     pages: IDocumentSkeletonPage[],

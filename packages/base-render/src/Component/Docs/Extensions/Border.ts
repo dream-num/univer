@@ -9,15 +9,15 @@ import { Vector2 } from '../../../Basics/Vector2';
 const UNIQUE_KEY = 'DefaultDocsBorderExtension';
 
 export class Border extends docExtension {
-    uKey = UNIQUE_KEY;
+    override uKey = UNIQUE_KEY;
 
-    zIndex = 30;
+    override zIndex = 30;
 
     private _preBorderStyle: Nullable<BorderStyleTypes>;
 
     private _preBorderColor = '';
 
-    draw(ctx: CanvasRenderingContext2D, parentScale: IScale, span: IDocumentSkeletonSpan) {
+    override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, span: IDocumentSkeletonSpan) {
         const line = span.parent?.parent;
         if (!line) {
             return;
@@ -67,7 +67,7 @@ export class Border extends docExtension {
         }
     }
 
-    clearCache() {
+    override clearCache() {
         this._preBorderStyle = null;
         this._preBorderColor = '';
     }

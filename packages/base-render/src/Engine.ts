@@ -1,20 +1,19 @@
 import { Observable } from '@univerjs/core';
-import { DeviceType, IEvent, IKeyboardEvent, IPointerEvent, PointerInput } from './Basics/IEvents';
+import { DeviceType, IKeyboardEvent, IPointerEvent, PointerInput } from './Basics/IEvents';
 
 import { getSizeForDom, getPointerPrefix, IsSafari, requestNewFrame } from './Basics/Tools';
 
-import { ITransformChangeState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './Basics/Interfaces';
+import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './Basics/Interfaces';
 
 import { PerformanceMonitor } from './Basics/PerformanceMonitor';
 
 import { Canvas } from './Canvas';
 
 import { Scene } from './Scene';
-import { RENDER_CLASS_TYPE } from './Basics/Const';
+import { ThinEngine } from './ThinEngine';
+import { CURSOR_TYPE } from './Basics/Const';
 
-export class Engine {
-    onInputChangedObservable = new Observable<IEvent>();
-
+export class Engine extends ThinEngine<Scene> {
     renderEvenInBackground = true;
 
     /**
@@ -27,17 +26,11 @@ export class Engine {
      */
     onEndFrameObservable = new Observable<Engine>();
 
-    onTransformChangeObservable = new Observable<ITransformChangeState>();
-
     private _container: HTMLElement;
 
     private _canvas: Canvas = new Canvas();
 
     private _canvasEle: HTMLCanvasElement;
-
-    private _scenes: { [sceneKey: string]: Scene } = {};
-
-    private _activeScene: Scene | null = null;
 
     private _renderingQueueLaunched = false;
 
@@ -76,26 +69,19 @@ export class Engine {
     private __isUsingFirefox = navigator.userAgent.indexOf('Firefox') !== -1;
 
     constructor(elemWidth: number = 100, elemHeight: number = 100) {
+        super();
         this._canvasEle = this._canvas.getCanvasEle();
         this._canvas.setSize(elemWidth, elemHeight);
         this._handleKeyboardAction();
         this._handlePointerAction();
     }
 
-    get width() {
+    override get width() {
         return this._canvas.getWidth();
     }
 
-    get height() {
+    override get height() {
         return this._canvas.getHeight();
-    }
-
-    get classType() {
-        return RENDER_CLASS_TYPE.ENGINE;
-    }
-
-    get activeScene() {
-        return this._activeScene;
     }
 
     get requestNewFrameHandler() {
@@ -109,42 +95,21 @@ export class Engine {
         return this._frameId;
     }
 
-    getCanvas() {
+    override setCanvasCursor(val: CURSOR_TYPE) {
+        const canvasEl = this.getCanvas().getCanvasEle();
+        canvasEl.style.cursor = val;
+    }
+
+    override clearCanvas() {
+        this.getCanvas().clear();
+    }
+
+    override getCanvas() {
         return this._canvas;
     }
 
-    getScenes() {
-        return this._scenes;
-    }
-
-    getScene(sceneKey: string): Scene | null {
-        return this._scenes[sceneKey];
-    }
-
-    hasScene(sceneKey: string): boolean {
-        return sceneKey in this._scenes;
-    }
-
-    addScene(sceneInstance: Scene): Scene {
-        const sceneKey = sceneInstance.sceneKey;
-        if (this.hasScene(sceneKey)) {
-            console.warn('Scenes has similar key, it will be covered');
-        }
-        // const newScene = new Scene(this);
-        this._scenes[sceneKey] = sceneInstance;
-        return sceneInstance;
-    }
-
-    setActiveScene(sceneKey: string): Scene | null {
-        const scene = this.getScene(sceneKey);
-        if (scene) {
-            this._activeScene = scene;
-        }
-        return scene;
-    }
-
-    hasActiveScene(): boolean {
-        return this._activeScene != null;
+    override getCanvasElement() {
+        return this._canvas.getCanvasEle();
     }
 
     setContainer(elem: HTMLElement) {
@@ -180,12 +145,8 @@ export class Engine {
         });
     }
 
-    dispose() {
-        const scenes = this.getScenes();
-        const sceneKeys = Object.keys(scenes);
-        sceneKeys.forEach((key) => {
-            scenes[key].dispose();
-        });
+    override dispose() {
+        super.dispose();
         const eventPrefix = getPointerPrefix();
         this._canvasEle.removeEventListener(`${eventPrefix}move`, this._pointerMoveEvent);
         this._canvasEle.removeEventListener(`${eventPrefix}down`, this._pointerDownEvent);
@@ -198,15 +159,6 @@ export class Engine {
         this.onBeginFrameObservable.clear();
         this.onEndFrameObservable.clear();
         this.onTransformChangeObservable.clear();
-    }
-
-    remainScene(key: string) {
-        const scenes = this.getScenes();
-        if (scenes[key]) {
-            const scene = scenes[key];
-            delete scenes[key];
-            return scene;
-        }
     }
 
     /**
@@ -322,6 +274,7 @@ export class Engine {
         this._canvasEle.addEventListener('keyup', keyboardUpEvent);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _handlePointerAction() {
         const eventPrefix = getPointerPrefix();
 

@@ -1,30 +1,25 @@
 import { DataStreamTreeTokenType, Nullable, Observable, Observer } from '@univerjs/core';
-import { IDocumentSkeletonCached, IDocumentSkeletonSpan } from '../../Basics/IDocumentSkeletonCached';
+import { IDocumentSkeletonCached } from '../../Basics/IDocumentSkeletonCached';
 import { CURSOR_TYPE } from '../../Basics/Const';
 import { IMouseEvent, IPointerEvent } from '../../Basics/IEvents';
 import { getOffsetRectForDom, transformBoundingCoord } from '../../Basics/Position';
 import { ScrollTimer } from '../../ScrollTimer';
 
-import { Documents } from './Document';
+import { DocComponent } from './DocComponent';
 import { INodePosition, TextSelection } from './Common/TextSelection';
 import { IScrollObserverParam, Viewport } from '../../Viewport';
 import { checkStyle, injectStyle } from '../../Basics/Tools';
 
 import { Vector2 } from '../../Basics/Vector2';
 import { getCurrentScrollXY } from '../../Basics/ScrollXY';
+import { INodeInfo } from '../../Basics/Interfaces';
 
-interface IEditorInputConfig {
+export interface IEditorInputConfig {
     event: Event | CompositionEvent | KeyboardEvent;
     content?: string;
-    document: Documents;
+    document: DocComponent;
     activeSelection?: TextSelection;
     selectionList?: TextSelection[];
-}
-
-interface INodeInfo {
-    node: IDocumentSkeletonSpan;
-    ratioX: number;
-    ratioY: number;
 }
 
 export class DocsEditor {
@@ -76,7 +71,7 @@ export class DocsEditor {
 
     private _isIMEInputApply = false;
 
-    constructor(private _documents?: Documents) {
+    constructor(private _documents?: DocComponent) {
         this._initialDom();
 
         this.activeViewport = this._documents?.getFirstViewport();
@@ -91,7 +86,7 @@ export class DocsEditor {
         this._activeViewport = viewport;
     }
 
-    static create(documents?: Documents) {
+    static create(documents?: DocComponent) {
         return new DocsEditor(documents);
     }
 
@@ -148,7 +143,7 @@ export class DocsEditor {
         this._input.blur();
     }
 
-    changeDocuments(documents: Documents) {
+    changeDocuments(documents: DocComponent) {
         if (this._documents) {
             this._detachEvent(this._documents);
         }
@@ -384,7 +379,7 @@ export class DocsEditor {
 
     private _getCanvasOffset() {
         const engine = this._documents?.getEngine();
-        const canvas = engine?.getCanvas()?.getCanvasEle();
+        const canvas = engine?.getCanvasElement();
 
         if (!canvas) {
             return {
@@ -516,6 +511,7 @@ export class DocsEditor {
         });
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _attachInputEvent() {
         this._input.addEventListener('keydown', (e) => {
             if (this._isIMEInputApply) {
@@ -628,7 +624,7 @@ export class DocsEditor {
         });
     }
 
-    private _attachSelectionEvent(documents: Documents) {
+    private _attachSelectionEvent(documents: DocComponent) {
         this._moveInObserver = documents.onPointerEnterObserver.add(() => {
             documents.cursor = CURSOR_TYPE.TEXT;
         });
@@ -701,7 +697,7 @@ export class DocsEditor {
         });
     }
 
-    private _detachEvent(documents: Documents) {
+    private _detachEvent(documents: DocComponent) {
         documents.onPointerEnterObserver.remove(this._moveInObserver);
         documents.onPointerLeaveObserver.remove(this._moveOutObserver);
         documents.onPointerDownObserver.remove(this._downObserver);

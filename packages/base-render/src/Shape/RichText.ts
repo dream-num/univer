@@ -161,7 +161,7 @@ export class RichText extends BaseObject {
         return this;
     }
 
-    render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -202,7 +202,7 @@ export class RichText extends BaseObject {
         return this._context;
     }
 
-    toJson() {
+    override toJson() {
         const props: IKeyValue = {};
         RICHTEXT_OBJECT_ARRAY.forEach((key) => {
             // @ts-ignore

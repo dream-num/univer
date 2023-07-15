@@ -8,15 +8,15 @@ import { Vector2 } from '../../../Basics/Vector2';
 const UNIQUE_KEY = 'DefaultDocsFontAndBaseLineExtension';
 
 export class FontAndBaseLine extends docExtension {
-    uKey = UNIQUE_KEY;
+    override uKey = UNIQUE_KEY;
 
-    zIndex = 20;
+    override zIndex = 20;
 
     private _preFontString = '';
 
     private _preFontColor = '';
 
-    draw(ctx: CanvasRenderingContext2D, parentScale: IScale, span: IDocumentSkeletonSpan) {
+    override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, span: IDocumentSkeletonSpan) {
         const line = span.parent?.parent;
         if (!line) {
             return;
@@ -72,7 +72,7 @@ export class FontAndBaseLine extends docExtension {
         ctx.fillText(content, spanPointWithFont.x, spanPointWithFont.y);
     }
 
-    clearCache() {
+    override clearCache() {
         this._preFontString = '';
         this._preFontColor = '';
     }

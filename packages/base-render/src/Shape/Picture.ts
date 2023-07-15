@@ -47,7 +47,7 @@ export class Picture extends Shape<IPictureProps> {
         }
     }
 
-    static drawWith(ctx: CanvasRenderingContext2D, picture: Picture) {
+    static override drawWith(ctx: CanvasRenderingContext2D, picture: Picture) {
         if (picture._native?.complete) {
             const { width, height } = picture;
             try {
@@ -66,7 +66,7 @@ export class Picture extends Shape<IPictureProps> {
         return this._props;
     }
 
-    protected _draw(ctx: CanvasRenderingContext2D) {
+    protected override _draw(ctx: CanvasRenderingContext2D) {
         Picture.drawWith(ctx, this);
     }
 

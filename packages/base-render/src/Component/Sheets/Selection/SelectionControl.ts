@@ -3,6 +3,7 @@ import { SelectionModel } from './SelectionModel';
 import { Rect } from '../../../Shape/Rect';
 import { Group } from '../../../Group';
 import { Scene } from '../../../Scene';
+import { SELECTION_TYPE } from '../../../Basics/Const';
 
 // export enum DEFAULT_SELECTION_CONFIG {
 //     strokeColor = 'rgb(1,136,251)',
@@ -20,12 +21,6 @@ export const DEFAULT_SELECTION_CONFIG = {
     fillStrokeLength: 1,
     fillStrokeColor: 'rgb(255,255,255)',
 };
-
-export enum SELECTION_TYPE {
-    NORMAL,
-    ROW,
-    COLUMN,
-}
 
 enum SELECTION_MANAGER_KEY {
     Selection = '__SpreadsheetSelectionShape__',

@@ -1,7 +1,7 @@
 import { IDocumentRenderConfig, Registry, IScale } from '@univerjs/core';
 import { getScale } from '../Basics/Tools';
-import { RenderComponent } from './Component';
 import { Vector2 } from '../Basics/Vector2';
+import { BaseObject } from '../BaseObject';
 
 export interface IExtensionConfig {
     originTranslate?: Vector2; // docs
@@ -19,7 +19,7 @@ export class ComponentExtension<T, U> {
 
     zIndex: number;
 
-    parent: RenderComponent<T, U>;
+    parent: BaseObject;
 
     translateX = 0;
 

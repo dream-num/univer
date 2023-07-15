@@ -20,6 +20,7 @@ import {
     IDocumentSkeletonFontStyle,
     IDocumentSkeletonFooter,
     IDocumentSkeletonHeader,
+    IDocumentSkeletonSpan,
 } from './IDocumentSkeletonCached';
 import { Vector2 } from './Vector2';
 
@@ -123,3 +124,18 @@ export interface IFontCreateConfig {
 //     useFirstPageHeaderFooter?: boolean;
 //     useEvenPageHeaderFooter?: boolean;
 // }
+
+export interface INodeInfo {
+    node: IDocumentSkeletonSpan;
+    ratioX: number;
+    ratioY: number;
+}
+
+export interface INodeSearch {
+    span: number;
+    divide: number;
+    line: number;
+    column: number;
+    section: number;
+    page: number;
+}

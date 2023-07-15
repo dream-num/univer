@@ -29,7 +29,7 @@ export const getColor = (RgbArray: number[], opacity?: number): string => {
     return `${RGB_PAREN + RgbArray.join(',')})`;
 };
 
-export const toPx = (num: number | string, ReferenceValue?: number): number => {
+export const toPx = (num: number | string, ReferenceValue: Nullable<number>): number => {
     if (Tools.isNumber(num)) {
         return num;
     }
@@ -125,7 +125,7 @@ export const getPointerPrefix = (): string => {
     let eventPrefix = 'pointer';
 
     // Check if pointer events are supported
-    if (typeof window !== 'undefined' && !window.PointerEvent && typeof navigator !== 'undefined' && !navigator.pointerEnabled) {
+    if (typeof window !== 'undefined' && !window.PointerEvent && typeof navigator !== 'undefined') {
         eventPrefix = 'mouse';
     }
 

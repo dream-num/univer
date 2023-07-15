@@ -23,7 +23,7 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
         return this._radius;
     }
 
-    static drawWith(ctx: CanvasRenderingContext2D, props: IRectProps | Rect) {
+    static override drawWith(ctx: CanvasRenderingContext2D, props: IRectProps | Rect) {
         let { radius, width, height } = props;
 
         radius = radius ?? 0;
@@ -60,7 +60,7 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
         this._renderPaintInOrder(ctx, props);
     }
 
-    toJson() {
+    override toJson() {
         const props: IKeyValue = {};
         RECT_OBJECT_ARRAY.forEach((key) => {
             if (this[key as keyof Rect]) {
@@ -73,7 +73,7 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
         };
     }
 
-    protected _draw(ctx: CanvasRenderingContext2D) {
+    protected override _draw(ctx: CanvasRenderingContext2D) {
         Rect.drawWith(ctx, this);
     }
 }

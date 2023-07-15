@@ -2,20 +2,20 @@ import { HorizontalAlign, IColorStyle, ObjectMatrix, WrapStrategy, IScale } from
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';
 import { SpreadsheetExtensionRegistry } from '../../Extension';
-import { Spreadsheet } from '../Spreadsheet';
+import { SheetComponent } from '../SheetComponent';
 import { fixLineWidthByScale } from '../../../Basics/Tools';
 import { fontCacheItem } from '../Interfaces';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
 export class Font extends SheetExtension {
-    uKey = UNIQUE_KEY;
+    override uKey = UNIQUE_KEY;
 
-    zIndex = 40;
+    override zIndex = 40;
 
     changeFontColor: ObjectMatrix<IColorStyle>;
 
     getDocuments() {
-        const parent = this.parent as Spreadsheet;
+        const parent = this.parent as SheetComponent;
         return parent.getDocuments();
     }
 
@@ -23,7 +23,7 @@ export class Font extends SheetExtension {
         this.changeFontColor.setValue(r, c, color);
     }
 
-    draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
+    override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
         const { rowColumnSegment, rowTitleWidth, columnTitleHeight, stylesCache, dataMergeCache, overflowCache } = spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
         if (!spreadsheetSkeleton) {

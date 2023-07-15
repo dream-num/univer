@@ -30,7 +30,7 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
         return this._pointsGroup;
     }
 
-    static drawWith(ctx: CanvasRenderingContext2D, props: IRegularPolygonProps | RegularPolygon) {
+    static override drawWith(ctx: CanvasRenderingContext2D, props: IRegularPolygonProps | RegularPolygon) {
         let { pointsGroup } = props;
 
         pointsGroup = pointsGroup ?? [[]];
@@ -89,7 +89,7 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
         this._setTransForm();
     }
 
-    toJson() {
+    override toJson() {
         const props: IKeyValue = {};
         REGULAR_POLYGON_OBJECT_ARRAY.forEach((key) => {
             if (this[key as keyof RegularPolygon]) {
@@ -102,7 +102,7 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
         };
     }
 
-    getState() {
+    override getState() {
         const { left, top, width, height } = this.getRect();
         return {
             left,
@@ -129,7 +129,7 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
         };
     }
 
-    protected _draw(ctx: CanvasRenderingContext2D) {
+    protected override _draw(ctx: CanvasRenderingContext2D) {
         RegularPolygon.drawWith(ctx, this);
     }
 

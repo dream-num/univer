@@ -8,7 +8,6 @@ export * from './Scene';
 export * from './SceneViewer';
 export * from './Viewport';
 export * from './Canvas';
-export * from './Scene.inputManager';
 export * from './Group';
 export * from './Shape';
 export * from './Component';

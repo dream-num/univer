@@ -315,7 +315,7 @@ export abstract class Shape<T> extends BaseObject {
 
     private static __setLineDash(ctx: CanvasRenderingContext2D) {}
 
-    render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -374,12 +374,12 @@ export abstract class Shape<T> extends BaseObject {
         return this;
     }
 
-    resizeCacheCanvas() {
+    override resizeCacheCanvas() {
         this._cacheCanvas?.setSize(this.width + this.strokeWidth, this.height + this.strokeWidth);
         this.makeDirty(true);
     }
 
-    scaleCacheCanvas() {
+    override scaleCacheCanvas() {
         let scaleX = this.getParent()?.ancestorScaleX || 1;
         let scaleY = this.getParent()?.ancestorScaleX || 1;
 
@@ -387,7 +387,7 @@ export abstract class Shape<T> extends BaseObject {
         this.makeDirty(true);
     }
 
-    toJson() {
+    override toJson() {
         const props: IKeyValue = {};
         SHAPE_OBJECT_ARRAY.forEach((key) => {
             if (this[key as keyof Shape<T>]) {

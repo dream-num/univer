@@ -7,9 +7,9 @@ export enum DOCS_EXTENSION_TYPE {
 }
 
 export class docExtension extends ComponentExtension<IDocumentSkeletonSpan | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE> {
-    type = DOCS_EXTENSION_TYPE.SPAN;
+    override type = DOCS_EXTENSION_TYPE.SPAN;
 
-    translateX = 0;
+    override translateX = 0;
 
-    translateY = 0;
+    override translateY = 0;
 }

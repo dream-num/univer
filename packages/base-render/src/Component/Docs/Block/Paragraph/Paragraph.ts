@@ -17,6 +17,7 @@ import { dealWidthBullet } from './Bullet';
 import { dealWidthInlineDrawing } from './InlineDrawing';
 
 import { clearFontCreateConfigCache, getCharSpaceApply, getFontCreateConfig, getLastNotFullColumnInfo, getSpanGroupWidth, lineIterator } from '../../Common/Tools';
+// eslint-disable-next-line import/no-cycle
 import { createSkeletonPage } from '../../Common/Page';
 import { setColumnFullState } from '../../Common/Section';
 

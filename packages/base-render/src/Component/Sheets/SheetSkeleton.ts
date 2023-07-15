@@ -580,6 +580,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     //     return mergeRangeCache;
     // }
 
+    // eslint-disable-next-line max-lines-per-function
     private _calculateStylesCache() {
         const cache: IStylesCache = {
             background: {},
@@ -666,6 +667,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return cache;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private __setCellCache(r: number, c: number, props: ISetCellCache, fontLocale?: IFontLocale) {
         const { cache, skipBackgroundAndBorder = false, styles, cellData } = props;
         if (!cellData) {

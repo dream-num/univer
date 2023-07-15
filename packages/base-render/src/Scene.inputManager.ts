@@ -1,12 +1,10 @@
 import { Observer, Nullable } from '@univerjs/core';
 import { IKeyboardEvent, IMouseEvent, IPointerEvent, IEvent, DeviceType, PointerInput, IWheelEvent } from './Basics/IEvents';
-
 import { Vector2 } from './Basics/Vector2';
-
 import { BaseObject } from './BaseObject';
-
-import { Scene } from './Scene';
+import { ThinScene } from './ThinScene';
 import { RENDER_CLASS_TYPE } from './Basics/Const';
+import { Viewport } from './Viewport';
 
 export class InputManager {
     /** The distance in pixel that you have to move to prevent some events */
@@ -43,9 +41,9 @@ export class InputManager {
 
     private _onKeyUp: (evt: IKeyboardEvent) => void;
 
-    private _scene: Scene;
+    private _scene: ThinScene;
 
-    private _currentMouseEnterPicked: Nullable<BaseObject | Scene>;
+    private _currentMouseEnterPicked: Nullable<BaseObject | ThinScene>;
 
     private _startingPosition = new Vector2(Infinity, Infinity);
 
@@ -53,12 +51,12 @@ export class InputManager {
 
     private _doubleClickOccurred = 0;
 
-    constructor(scene: Scene) {
+    constructor(scene: ThinScene) {
         this._scene = scene;
     }
 
     // 处理事件，比如mouseleave,mouseenter的触发。
-    mouseLeaveEnterHandler(o: Nullable<BaseObject | Scene>, evt: IMouseEvent) {
+    mouseLeaveEnterHandler(o: Nullable<BaseObject | ThinScene>, evt: IMouseEvent) {
         if (o === null || o === undefined) {
             this._currentMouseEnterPicked?.triggerPointerLeave(evt);
             this._currentMouseEnterPicked = null;
@@ -70,6 +68,7 @@ export class InputManager {
         }
     }
 
+    // eslint-disable-next-line max-lines-per-function
     attachControl(hasDown: boolean = true, hasUp: boolean = true, hasMove: boolean = true, hasWheel: boolean = true) {
         const engine = this._scene.getEngine();
 
@@ -138,7 +137,7 @@ export class InputManager {
             const currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
             const isStop = currentObject?.triggerMouseWheel(evt);
 
-            this._scene.getViewports().forEach((vp) => {
+            this._scene.getViewports().forEach((vp: Viewport) => {
                 if (vp.onMouseWheelObserver.hasObservers()) {
                     vp.onMouseWheelObserver.notifyObservers(evt);
                 }
@@ -228,7 +227,7 @@ export class InputManager {
         return this._scene?.pick(Vector2.FromArray([offsetX, offsetY]));
     }
 
-    private _checkDirectSceneEventTrigger(isTrigger: boolean, currentObject: Nullable<Scene | BaseObject>) {
+    private _checkDirectSceneEventTrigger(isTrigger: boolean, currentObject: Nullable<ThinScene | BaseObject>) {
         let notObject = false;
         if (currentObject == null) {
             notObject = true;
@@ -236,7 +235,7 @@ export class InputManager {
 
         let isNotInSceneViewer = true;
         if (currentObject && currentObject.classType === RENDER_CLASS_TYPE.BASE_OBJECT) {
-            const scene = (currentObject as BaseObject).getScene() as Scene;
+            const scene = (currentObject as BaseObject).getScene() as ThinScene;
             if (scene) {
                 const parent = scene.getParent();
                 isNotInSceneViewer = parent.classType !== RENDER_CLASS_TYPE.SCENE_VIEWER;

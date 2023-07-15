@@ -1,5 +1,5 @@
 import { ICellInfo, ISelection, Nullable, makeCellToSelection } from '@univerjs/core';
-import { SELECTION_TYPE } from './SelectionControl';
+import { SELECTION_TYPE } from '../../../Basics/Const';
 
 export class SelectionModel implements ISelection {
     private _startColumn: number;

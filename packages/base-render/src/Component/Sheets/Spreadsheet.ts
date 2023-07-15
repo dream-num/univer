@@ -87,11 +87,11 @@ export class Spreadsheet extends SheetComponent {
         return this._fontExtension;
     }
 
-    getDocuments() {
+    override getDocuments() {
         return this._documents;
     }
 
-    draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         // const { parent = { scaleX: 1, scaleY: 1 } } = this;
         // const mergeData = this.getMergeData();
         // const showGridlines = this.getShowGridlines() || 1;
@@ -118,7 +118,7 @@ export class Spreadsheet extends SheetComponent {
         }
     }
 
-    isHit(coord: Vector2) {
+    override isHit(coord: Vector2) {
         const oCoord = this._getInverseCoord(coord);
         const skeleton = this.getSkeleton();
         if (!skeleton) {
@@ -131,7 +131,7 @@ export class Spreadsheet extends SheetComponent {
         return false;
     }
 
-    getNoMergeCellPositionByIndex(rowIndex: number, columnIndex: number) {
+    override getNoMergeCellPositionByIndex(rowIndex: number, columnIndex: number) {
         const spreadsheetSkeleton = this.getSkeleton();
         if (!spreadsheetSkeleton) {
             return;
@@ -153,7 +153,7 @@ export class Spreadsheet extends SheetComponent {
         };
     }
 
-    calculateCellIndexByPosition(offsetX: number, offsetY: number, scrollXY: { x: number; y: number }): Nullable<ICellInfo> {
+    override calculateCellIndexByPosition(offsetX: number, offsetY: number, scrollXY: { x: number; y: number }): Nullable<ICellInfo> {
         const spreadsheetSkeleton = this.getSkeleton();
         if (!spreadsheetSkeleton) {
             return;
@@ -221,7 +221,7 @@ export class Spreadsheet extends SheetComponent {
         };
     }
 
-    getCellByIndex(row: number, column: number) {
+    override getCellByIndex(row: number, column: number) {
         const spreadsheetSkeleton = this.getSkeleton();
         if (!spreadsheetSkeleton) {
             return;
@@ -251,7 +251,7 @@ export class Spreadsheet extends SheetComponent {
         };
     }
 
-    getScrollXYByRelativeCoords(coord: Vector2) {
+    override getScrollXYByRelativeCoords(coord: Vector2) {
         let scene = this.getParent() as Scene;
         let x = 0;
         let y = 0;
@@ -293,11 +293,11 @@ export class Spreadsheet extends SheetComponent {
         };
     }
 
-    getSelectionBounding(startRow: number, startColumn: number, endRow: number, endColumn: number) {
+    override getSelectionBounding(startRow: number, startColumn: number, endRow: number, endColumn: number) {
         return this.getSkeleton()?.getMergeBounding(startRow, startColumn, endRow, endColumn);
     }
 
-    render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -342,7 +342,7 @@ export class Spreadsheet extends SheetComponent {
         // console.log('mainCtx', mainCtx, this.width, this.height);
     }
 
-    resizeCacheCanvas() {
+    override resizeCacheCanvas() {
         const parentSize = this._getAncestorSize();
         if (!parentSize || this._cacheCanvas == null) {
             return;
@@ -454,7 +454,7 @@ export class Spreadsheet extends SheetComponent {
         ctx.restore();
     }
 
-    protected _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    protected override _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         this.draw(ctx, bounds);
     }
 
@@ -568,6 +568,7 @@ export class Spreadsheet extends SheetComponent {
     //     return horizontalAlign;
     // }
 
+    // eslint-disable-next-line max-lines-per-function
     private _calculateOverflow() {
         const overflowCache = new ObjectMatrix<IRangeData>();
         const spreadsheetSkeleton = this.getSkeleton();

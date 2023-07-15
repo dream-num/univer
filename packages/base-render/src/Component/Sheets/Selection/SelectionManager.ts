@@ -1,9 +1,8 @@
 import { Nullable, Observer, ISelection, makeCellToSelection, IRangeData, IRangeCellData } from '@univerjs/core';
-
 import { SelectionControl } from './SelectionControl';
 import { ScrollTimer } from '../../../ScrollTimer';
 import { IMouseEvent, IPointerEvent } from '../../../Basics/IEvents';
-import { Spreadsheet } from '../Spreadsheet';
+import { SheetComponent } from '../SheetComponent';
 import { SelectionModel } from './SelectionModel';
 import { Vector2 } from '../../../Basics/Vector2';
 import { Scene } from '../../../Scene';
@@ -34,11 +33,11 @@ export class SelectionManager {
 
     private _cancelUpObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
-    constructor(private _spreadsheet: Spreadsheet) {
+    constructor(private _spreadsheet: SheetComponent) {
         this._mainEventInitial();
     }
 
-    static create(spreadsheet: Spreadsheet) {
+    static create(spreadsheet: SheetComponent) {
         return new SelectionManager(spreadsheet);
     }
 
@@ -285,8 +284,10 @@ export class SelectionManager {
         });
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _mainEventInitial() {
         const main = this._spreadsheet;
+        // eslint-disable-next-line max-lines-per-function
         main.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
             const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 

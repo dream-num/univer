@@ -1,15 +1,15 @@
 import { IKeyValue, Nullable } from '@univerjs/core';
 import { IBoundRect, Vector2 } from './Basics/Vector2';
 import { BaseObject } from './BaseObject';
-import { Scene } from './Scene';
+import { ThinScene } from './ThinScene';
 import { IObjectFullState } from './Basics/Interfaces';
 import { RENDER_CLASS_TYPE } from './Basics/Const';
 import { transformBoundingCoord } from './Basics/Position';
 
 export class SceneViewer extends BaseObject {
-    private _subScenes = new Map<string, Scene>();
+    private _subScenes = new Map<string, ThinScene>();
 
-    private _activeSubScene: Nullable<Scene>;
+    private _activeSubScene: Nullable<ThinScene>;
 
     private _allowSelectedClipElement = false;
 
@@ -18,11 +18,11 @@ export class SceneViewer extends BaseObject {
         this._initialProps(props);
     }
 
-    get classType() {
+    override get classType() {
         return RENDER_CLASS_TYPE.SCENE_VIEWER;
     }
 
-    render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
+    override render(mainCtx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -63,7 +63,7 @@ export class SceneViewer extends BaseObject {
         }
     }
 
-    addSubScene(scene: Scene) {
+    addSubScene(scene: ThinScene) {
         this._activeSubScene = scene;
         this._subScenes.set(scene.sceneKey, scene);
         this.makeDirty();
@@ -113,7 +113,7 @@ export class SceneViewer extends BaseObject {
         return this._activeSubScene?.pick(tCoord);
     }
 
-    dispose() {
+    override dispose() {
         super.dispose();
 
         this._subScenes.forEach((scene) => {

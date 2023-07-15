@@ -10,7 +10,7 @@ export class BulletPlugin extends Plugin<BulletPluginObserve> {
         return '';
     }
 
-    onMounted(ctx: SheetContext): void {}
+    override onMounted(ctx: SheetContext): void {}
 
-    onDestroy(): void {}
+    override onDestroy(): void {}
 }

@@ -684,6 +684,10 @@ export abstract class BaseObject {
         return null;
     }
 
+    getObjects(): BaseObject[] {
+        return [];
+    }
+
     protected _getInverseCoord(coord: Vector2) {
         return this._transform.clone().invert().applyPoint(coord);
     }

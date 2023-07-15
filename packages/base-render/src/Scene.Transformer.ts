@@ -4,9 +4,9 @@ import { CURSOR_TYPE } from './Basics/Const';
 import { IMouseEvent, IPointerEvent } from './Basics/IEvents';
 import { getCurrentScrollXY } from './Basics/ScrollXY';
 import { Group } from './Group';
-import { Scene } from './Scene';
+import { ThinScene } from './ThinScene';
 import { ScrollTimer } from './ScrollTimer';
-import { Rect } from './Shape';
+import { Rect } from './Shape/Rect';
 
 enum TransformerManagerType {
     RESIZE_LT = '__SpreadsheetTransformerResizeLT__',
@@ -189,7 +189,7 @@ export class Transformer implements ITransformerConfig {
 
     private _selectedObjectMap = new Map<string, BaseObject>();
 
-    constructor(private _scene: Scene, config?: ITransformerConfig) {
+    constructor(private _scene: ThinScene, config?: ITransformerConfig) {
         this._initialProps(config);
     }
 
@@ -687,6 +687,7 @@ export class Transformer implements ITransformerConfig {
         this.onClearControlObservable.notifyObservers(null);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _createControl(applyObject: BaseObject) {
         let { left, top, height, width, angle, scaleX, scaleY, skewX, skewY, flipX, flipY } = applyObject.getState();
         const oKey = applyObject.oKey;
@@ -816,7 +817,7 @@ export class Transformer implements ITransformerConfig {
         this._createControl(applyObject);
     }
 
-    private _addCancelObserver(scene: Scene) {
+    private _addCancelObserver(scene: ThinScene) {
         scene.onPointerDownObserver.remove(this._cancelFocusObserver);
         this._cancelFocusObserver = scene.onPointerDownObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             this._selectedObjectMap.clear();

@@ -373,7 +373,7 @@ export class Viewport {
     }
 
     render(parentCtx?: CanvasRenderingContext2D) {
-        const mainCtx = parentCtx;
+        const mainCtx = parentCtx || this._scene.getEngine()?.getCanvas().getContext();
         // console.log(this.viewPortKey, this._cacheCanvas);
         if (!this.isDirty() && this._allowCache) {
             this._applyCache(mainCtx);

@@ -1,9 +1,8 @@
-import { FunctionVariantType } from '../../Basics/Common';
 import { ErrorType } from '../../Basics/ErrorType';
 import { FORMULA_FUNCTION_REGISTRY } from '../../Basics/Registry';
 import { compareToken } from '../../Basics/Token';
 import { ErrorValueObject } from '../../OtherObject/ErrorValueObject';
-import { BaseReferenceObject } from '../../ReferenceObject/BaseReferenceObject';
+import { BaseReferenceObject, FunctionVariantType } from '../../ReferenceObject/BaseReferenceObject';
 import { BaseValueObject } from '../../ValueObject/BaseValueObject';
 import { BaseFunction } from '../BaseFunction';
 
@@ -12,7 +11,7 @@ const FUNCTION_NAME = 'COMPARE';
 export class Compare extends BaseFunction {
     private _compareType: compareToken;
 
-    get name() {
+    override get name() {
         return FUNCTION_NAME;
     }
 
@@ -20,7 +19,7 @@ export class Compare extends BaseFunction {
         this._compareType = token;
     }
 
-    calculate(variant1: FunctionVariantType, variant2: FunctionVariantType) {
+    override calculate(variant1: FunctionVariantType, variant2: FunctionVariantType) {
         if (variant1.isErrorObject() || variant2.isErrorObject()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }

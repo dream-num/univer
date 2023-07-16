@@ -1,14 +1,15 @@
 import { AstRootNode } from '../AstNode/AstRootNode';
-import { BaseAstNode, BaseAstNodeFactory } from '../AstNode/BaseAstNode';
-import { ErrorNode } from '../AstNode/ErrorNode';
+import { BaseAstNode, ErrorNode } from '../AstNode/BaseAstNode';
 import { NodeType } from '../AstNode/NodeType';
 import { ErrorType } from '../Basics/ErrorType';
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
-import { LambdaNode } from '../AstNode';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { LexerNode } from './LexerNode';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, DEFAULT_TOKEN_TYPE_PARAMETER, DEFAULT_TOKEN_TYPE_ROOT } from '../Basics/TokenType';
-import { LambdaRuntime } from '../Basics/LambdaRuntime';
+import { LambdaRuntime } from '../AstNode/LambdaRuntime';
+import { BaseAstNodeFactory } from '../AstNode/BaseAstNodeFactory';
+import { LambdaNode } from '../AstNode/LambdaNode';
+import '../AstNode';
 
 export class AstTreeMaker {
     static maker: AstTreeMaker;
@@ -88,6 +89,7 @@ export class AstTreeMaker {
         return parent;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _parse(lexerNode: LexerNode, parent: BaseAstNode): BaseAstNode {
         const children = lexerNode.getChildren();
         const childrenCount = children.length;

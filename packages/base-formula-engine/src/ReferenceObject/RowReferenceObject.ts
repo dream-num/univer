@@ -17,11 +17,11 @@ export class RowReferenceObject extends BaseReferenceObject {
         this.setRangeData(rangeData);
     }
 
-    isRow() {
+    override isRow() {
         return true;
     }
 
-    unionBy(referenceObject: BaseReferenceObject) {
+    override unionBy(referenceObject: BaseReferenceObject) {
         if (!referenceObject.isRow()) {
             return ErrorValueObject.create(ErrorType.REF);
         }

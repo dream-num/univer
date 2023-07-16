@@ -1,17 +1,8 @@
 import { DocumentModel } from '../Domain/DocumentModel';
-import {
-    deleteContent,
-    getDocsUpdateBody,
-    horizontalLineSegmentsSubtraction,
-} from '../../Shared/Common';
+import { deleteContent, getDocsUpdateBody, horizontalLineSegmentsSubtraction } from '../../Shared/Common';
 import { IDocumentBody } from '../../Interfaces/IDocumentData';
 
-export function DeleteApply(
-    document: DocumentModel,
-    textLength: number,
-    currentIndex: number,
-    segmentId?: string
-) {
+export function DeleteApply(document: DocumentModel, textLength: number, currentIndex: number, segmentId?: string) {
     const doc = document.snapshot;
 
     const bodyModel = document.getBodyModel(segmentId);
@@ -27,11 +18,7 @@ export function DeleteApply(
     return updateAttributeByDelete(body, textLength, currentIndex);
 }
 
-function updateAttributeByDelete(
-    body: IDocumentBody,
-    textLength: number,
-    currentIndex: number
-): IDocumentBody {
+function updateAttributeByDelete(body: IDocumentBody, textLength: number, currentIndex: number): IDocumentBody {
     const { dataStream } = body;
 
     const startIndex = currentIndex;
@@ -68,11 +55,7 @@ function updateAttributeByDelete(
     };
 }
 
-function processTextRuns(
-    body: IDocumentBody,
-    textLength: number,
-    currentIndex: number
-) {
+function processTextRuns(body: IDocumentBody, textLength: number, currentIndex: number) {
     const { textRuns } = body;
 
     const startIndex = currentIndex;
@@ -93,12 +76,7 @@ function processTextRuns(
                 });
                 continue;
             } else if (st <= startIndex && ed >= endIndex) {
-                const segments = horizontalLineSegmentsSubtraction(
-                    st,
-                    ed,
-                    startIndex,
-                    endIndex
-                );
+                const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
 
                 if (segments.length > 2) {
                     const seg1 = segments[0];
@@ -135,11 +113,7 @@ function processTextRuns(
     return removeTextRuns;
 }
 
-function processParagraphs(
-    body: IDocumentBody,
-    textLength: number,
-    currentIndex: number
-) {
+function processParagraphs(body: IDocumentBody, textLength: number, currentIndex: number) {
     const { paragraphs } = body;
 
     const startIndex = currentIndex;
@@ -168,11 +142,7 @@ function processParagraphs(
     return removeParagraphs;
 }
 
-function processSectionBreaks(
-    body: IDocumentBody,
-    textLength: number,
-    currentIndex: number
-) {
+function processSectionBreaks(body: IDocumentBody, textLength: number, currentIndex: number) {
     const { sectionBreaks } = body;
 
     const startIndex = currentIndex;
@@ -201,11 +171,7 @@ function processSectionBreaks(
     return removeSectionBreaks;
 }
 
-function processCustomBlocks(
-    body: IDocumentBody,
-    textLength: number,
-    currentIndex: number
-) {
+function processCustomBlocks(body: IDocumentBody, textLength: number, currentIndex: number) {
     const { customBlocks } = body;
 
     const startIndex = currentIndex;
@@ -234,11 +200,7 @@ function processCustomBlocks(
     return removeCustomBlocks;
 }
 
-function processTables(
-    body: IDocumentBody,
-    textLength: number,
-    currentIndex: number
-) {
+function processTables(body: IDocumentBody, textLength: number, currentIndex: number) {
     const { tables } = body;
 
     const startIndex = currentIndex;
@@ -258,12 +220,7 @@ function processTables(
                 });
                 continue;
             } else if (st <= startIndex && ed >= endIndex) {
-                const segments = horizontalLineSegmentsSubtraction(
-                    st,
-                    ed,
-                    startIndex,
-                    endIndex
-                );
+                const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
 
                 if (segments.length > 2) {
                     const seg1 = segments[0];
@@ -285,11 +242,7 @@ function processTables(
     return removeTables;
 }
 
-function processCustomRanges(
-    body: IDocumentBody,
-    textLength: number,
-    currentIndex: number
-) {
+function processCustomRanges(body: IDocumentBody, textLength: number, currentIndex: number) {
     const { customRanges } = body;
 
     const startIndex = currentIndex;
@@ -309,12 +262,7 @@ function processCustomRanges(
                 });
                 continue;
             } else if (st <= startIndex && ed >= endIndex) {
-                const segments = horizontalLineSegmentsSubtraction(
-                    st,
-                    ed,
-                    startIndex,
-                    endIndex
-                );
+                const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
 
                 if (segments.length > 2) {
                     const seg1 = segments[0];

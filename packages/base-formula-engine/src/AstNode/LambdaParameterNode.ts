@@ -1,23 +1,22 @@
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
-import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
+import { ErrorNode, BaseAstNode, LambdaPrivacyVarType } from './BaseAstNode';
 import { NodeType, NODE_ORDER_MAP } from './NodeType';
 import { LexerNode } from '../Analysis/LexerNode';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../Basics/TokenType';
-import { LambdaPrivacyVarType } from '../Basics/Common';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { ErrorType } from '../Basics/ErrorType';
-import { ErrorNode } from './ErrorNode';
+import { BaseAstNodeFactory } from './BaseAstNodeFactory';
 
 export class LambdaParameterNode extends BaseAstNode {
     constructor(token: string, private _lambdaParameter: string, private _currentLambdaPrivacyVar: LambdaPrivacyVarType) {
         super(token);
     }
 
-    get nodeType() {
+    override get nodeType() {
         return NodeType.LAMBDA_PARAMETER;
     }
 
-    execute() {
+    override execute() {
         const node = this._currentLambdaPrivacyVar.get(this._lambdaParameter);
         if (!node) {
             this.setValue(ErrorValueObject.create(ErrorType.SPILL));
@@ -28,11 +27,11 @@ export class LambdaParameterNode extends BaseAstNode {
 }
 
 export class LambdaParameterNodeFactory extends BaseAstNodeFactory {
-    get zIndex() {
+    override get zIndex() {
         return NODE_ORDER_MAP.get(NodeType.LAMBDA_PARAMETER) || 100;
     }
 
-    create(param: LexerNode): BaseAstNode {
+    override create(param: LexerNode): BaseAstNode {
         const lambdaId = param.getLambdaId();
         const currentLambdaPrivacyVar = param.getLambdaPrivacyVar();
         const lambdaParameter = param.getLambdaParameter();
@@ -44,7 +43,7 @@ export class LambdaParameterNodeFactory extends BaseAstNodeFactory {
         return new LambdaParameterNode(param.getToken(), lambdaParameter, currentLambdaPrivacyVar);
     }
 
-    checkAndCreateNodeType(param: LexerNode | string) {
+    override checkAndCreateNodeType(param: LexerNode | string) {
         if (!(param instanceof LexerNode)) {
             return false;
         }

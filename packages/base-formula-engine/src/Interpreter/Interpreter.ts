@@ -2,20 +2,13 @@ import { CellValueType, ICellData, IRangeData, ObjectMatrix } from '@univerjs/co
 import { FunctionNode } from '../AstNode';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { NodeType } from '../AstNode/NodeType';
-import {
-    AstNodePromiseType,
-    CalculateValueType,
-    FunctionVariantType,
-    IInterpreterDatasetConfig,
-    PreCalculateNodeType,
-    UnitArrayFormulaDataType,
-    UnitDataType,
-} from '../Basics/Common';
+import { AstNodePromiseType, IInterpreterDatasetConfig, UnitArrayFormulaDataType, UnitDataType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
-import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
+import { BaseReferenceObject, FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
 import { ArrayValueObject } from '../ValueObject/ArrayValueObject';
-import { BaseValueObject } from '../ValueObject/BaseValueObject';
+import { BaseValueObject, CalculateValueType } from '../ValueObject/BaseValueObject';
+import { PreCalculateNodeType } from '../Basics/NodeType';
 
 export class Interpreter {
     private _runtimeData: UnitDataType = {};

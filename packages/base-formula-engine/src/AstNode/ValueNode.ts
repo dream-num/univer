@@ -1,26 +1,27 @@
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
-import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
+import { BaseAstNode } from './BaseAstNode';
 import { NodeType, NODE_ORDER_MAP } from './NodeType';
-import { ValueObjectFactory } from '../ValueObject/ValueObjectFactory';
 import { LexerNode } from '../Analysis/LexerNode';
 import { BooleanValue } from '../Basics/Common';
+import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { ValueObjectFactory } from '../ValueObject/ArrayValueObject';
 
 export class ValueNode extends BaseAstNode {
     constructor(private _operatorString: string) {
         super(_operatorString);
     }
 
-    get nodeType() {
+    override get nodeType() {
         return NodeType.VALUE;
     }
 
-    execute() {
+    override execute() {
         this.setValue(ValueObjectFactory.create(this._operatorString));
     }
 }
 
 export class ValueNodeFactory extends BaseAstNodeFactory {
-    get zIndex() {
+    override get zIndex() {
         return NODE_ORDER_MAP.get(NodeType.VALUE) || 100;
     }
 
@@ -44,11 +45,11 @@ export class ValueNodeFactory extends BaseAstNodeFactory {
         return false;
     }
 
-    create(param: string): BaseAstNode {
+    override create(param: string): BaseAstNode {
         return new ValueNode(param);
     }
 
-    checkAndCreateNodeType(param: LexerNode | string) {
+    override checkAndCreateNodeType(param: LexerNode | string) {
         if (param instanceof LexerNode) {
             return false;
         }

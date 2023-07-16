@@ -4,10 +4,10 @@ import { ErrorType } from '../Basics/ErrorType';
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../Basics/TokenType';
-import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
-import { ErrorNode } from './ErrorNode';
+import { ErrorNode, BaseAstNode, LambdaPrivacyVarType } from './BaseAstNode';
+
 import { NodeType, NODE_ORDER_MAP } from './NodeType';
-import { LambdaPrivacyVarType } from '../Basics/Common';
+import { BaseAstNodeFactory } from './BaseAstNodeFactory';
 
 export const LAMBDA_TOKEN: string = 'LAMBDA';
 
@@ -16,7 +16,7 @@ export class LambdaNode extends BaseAstNode {
         super(token);
     }
 
-    get nodeType() {
+    override get nodeType() {
         return NodeType.LAMBDA;
     }
 
@@ -24,7 +24,7 @@ export class LambdaNode extends BaseAstNode {
         return this._lambdaId;
     }
 
-    execute() {
+    override execute() {
         const children = this.getChildren();
         const childrenCount = children.length;
         this.setValue(children[childrenCount - 1].getValue());
@@ -32,11 +32,11 @@ export class LambdaNode extends BaseAstNode {
 }
 
 export class LambdaNodeFactory extends BaseAstNodeFactory {
-    get zIndex() {
+    override get zIndex() {
         return NODE_ORDER_MAP.get(NodeType.LAMBDA) || 100;
     }
 
-    create(param: LexerNode, parserDataLoader: ParserDataLoader): BaseAstNode {
+    override create(param: LexerNode, parserDataLoader: ParserDataLoader): BaseAstNode {
         const children = param.getChildren();
         const lambdaVar = children[0];
         const parameterArray = children.slice(1, -1);
@@ -78,7 +78,7 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
         return new LambdaNode(param.getToken(), lambdaId);
     }
 
-    checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
+    override checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
         if (!(param instanceof LexerNode)) {
             return false;
         }

@@ -1,7 +1,7 @@
-import { FunctionVariantType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
 import { FORMULA_FUNCTION_REGISTRY } from '../Basics/Registry';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
+import { FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
 import { BaseValueObject } from '../ValueObject/BaseValueObject';
 
 import { BaseFunction } from './BaseFunction';
@@ -11,11 +11,11 @@ import { Sum } from './Sum';
 const FUNCTION_NAME = 'AVERAGE';
 
 export class Average extends BaseFunction {
-    get name() {
+    override get name() {
         return FUNCTION_NAME;
     }
 
-    calculate(...variants: FunctionVariantType[]) {
+    override calculate(...variants: FunctionVariantType[]) {
         const accumulatorSum = Sum.create().calculate(...variants);
         const accumulatorCount = Count.create().calculate(...variants);
 

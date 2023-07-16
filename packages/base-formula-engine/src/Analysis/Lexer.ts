@@ -347,6 +347,7 @@ export class LexerTreeMaker {
         return false;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _nodeMaker(formulaString: string) {
         if (formulaString.substring(0, 1) === operatorToken.EQUALS) {
             formulaString = formulaString.substring(1);

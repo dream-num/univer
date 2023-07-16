@@ -1,27 +1,8 @@
-import { BooleanNumber, ICellData, IRangeData, Nullable, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univerjs/core';
-import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
-import { BaseValueObject } from '../ValueObject/BaseValueObject';
-import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
-import { AsyncObject } from '../OtherObject/AsyncObject';
-import { BaseAstNode } from '../AstNode/BaseAstNode';
-import { ReferenceNode } from '../AstNode/ReferenceNode';
-import { UnionNode } from '../AstNode/UnionNode';
-import { PrefixNode } from '../AstNode/PrefixNode';
-import { SuffixNode } from '../AstNode/SuffixNode';
-
-export type NodeValueType = BaseValueObject | BaseReferenceObject | ErrorValueObject | AsyncObject;
-
-export type FunctionVariantType = BaseValueObject | BaseReferenceObject | ErrorValueObject;
-
-export type LambdaPrivacyVarType = Map<string, Nullable<BaseAstNode>>;
+import { BooleanNumber, ICellData, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univerjs/core';
 
 export type SheetDataType = { [sheetId: string]: ObjectMatrix<ICellData> };
 
 export type UnitDataType = { [unitId: string]: SheetDataType };
-
-export type CalculateValueType = BaseValueObject | ErrorValueObject;
-
-export type PreCalculateNodeType = ReferenceNode | UnionNode | PrefixNode | SuffixNode;
 
 export type ArrayFormulaDataType = { [sheetId: string]: ObjectMatrix<IRangeData> };
 
@@ -80,12 +61,6 @@ export interface ISuperTable {
     hasCustomTitle: BooleanNumber;
     titleMap: Map<string, number>;
     rangeData: IRangeData;
-}
-
-export interface IArrayValueObject {
-    calculateValueList: CalculateValueType[][];
-    rowCount: number;
-    columnCount: number;
 }
 
 export enum ConcatenateType {

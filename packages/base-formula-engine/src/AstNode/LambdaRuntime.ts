@@ -1,5 +1,5 @@
 import { Nullable } from '@univerjs/core';
-import { BaseAstNode } from '../AstNode/BaseAstNode';
+import { BaseAstNode } from './BaseAstNode';
 
 export class LambdaRuntime {
     // lambdaId: { key: BaseAstNode }

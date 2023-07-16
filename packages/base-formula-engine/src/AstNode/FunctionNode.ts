@@ -1,16 +1,16 @@
 import { Nullable } from '@univerjs/core';
 import { LexerNode } from '../Analysis/LexerNode';
-import { AstNodePromiseType, FunctionVariantType } from '../Basics/Common';
+import { AstNodePromiseType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { prefixToken } from '../Basics/Token';
 import { BaseFunction } from '../Functions/BaseFunction';
-import { AsyncObject } from '../OtherObject/AsyncObject';
-import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
-import { ErrorNode } from './ErrorNode';
+import { BaseAstNode, ErrorNode } from './BaseAstNode';
 import { NodeType, NODE_ORDER_MAP } from './NodeType';
 import { PrefixNode } from './PrefixNode';
+import { AsyncObject, FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
+import { BaseAstNodeFactory } from './BaseAstNodeFactory';
 
 export class FunctionNode extends BaseAstNode {
     constructor(token: string, private _functionExecutor: BaseFunction) {
@@ -25,11 +25,11 @@ export class FunctionNode extends BaseAstNode {
         }
     }
 
-    get nodeType() {
+    override get nodeType() {
         return NodeType.FUNCTION;
     }
 
-    async executeAsync() {
+    override async executeAsync() {
         const variants: FunctionVariantType[] = [];
         const children = this.getChildren();
         const childrenCount = children.length;
@@ -46,7 +46,7 @@ export class FunctionNode extends BaseAstNode {
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
-    execute() {
+    override execute() {
         const variants: FunctionVariantType[] = [];
         const children = this.getChildren();
         const childrenCount = children.length;
@@ -61,11 +61,11 @@ export class FunctionNode extends BaseAstNode {
 }
 
 export class FunctionNodeFactory extends BaseAstNodeFactory {
-    get zIndex() {
+    override get zIndex() {
         return NODE_ORDER_MAP.get(NodeType.FUNCTION) || 100;
     }
 
-    create(token: string, parserDataLoader: ParserDataLoader): BaseAstNode {
+    override create(token: string, parserDataLoader: ParserDataLoader): BaseAstNode {
         const functionExecutor = parserDataLoader.getExecutor(token);
         if (!functionExecutor) {
             console.error(`No function ${token}`);
@@ -74,7 +74,7 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         return new FunctionNode(token, functionExecutor);
     }
 
-    checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
+    override checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
         if (typeof param === 'string') {
             return false;
         }

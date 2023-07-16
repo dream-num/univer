@@ -21,7 +21,7 @@ export class ErrorValueObject extends ObjectClassType {
         return this._errorType;
     }
 
-    isErrorObject() {
+    override isErrorObject() {
         return true;
     }
 }

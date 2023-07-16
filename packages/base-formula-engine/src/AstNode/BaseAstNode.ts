@@ -1,14 +1,17 @@
-import { LexerNode } from '../Analysis/LexerNode';
-import { AstNodePromiseType, FunctionVariantType, IInterpreterDatasetConfig, UnitDataType } from '../Basics/Common';
-import { ParserDataLoader } from '../Basics/ParserDataLoader';
-
+import { Nullable } from '@univerjs/core';
+import { AstNodePromiseType, IInterpreterDatasetConfig, UnitDataType } from '../Basics/Common';
 import { NodeType } from './NodeType';
+import { ErrorType } from '../Basics/ErrorType';
+import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
+import { FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
 
 interface AstNodeNodeJson {
     token: string;
     children?: AstNodeNodeJson[];
     nodeType: string;
 }
+
+export type LambdaPrivacyVarType = Map<string, Nullable<BaseAstNode>>;
 
 export class BaseAstNode {
     private _children: BaseAstNode[] = [];
@@ -116,22 +119,23 @@ export class BaseAstNode {
     }
 }
 
-export class BaseAstNodeFactory {
-    get zIndex() {
-        return 0;
+export class ErrorNode extends BaseAstNode {
+    private _errorValueObject: ErrorValueObject;
+
+    constructor(errorType: ErrorType) {
+        super(errorType);
+        this._errorValueObject = ErrorValueObject.create(errorType);
     }
 
-    create(param: LexerNode | string, parserDataLoader?: ParserDataLoader): BaseAstNode {
-        let token;
-        if (param instanceof LexerNode) {
-            token = param.getToken();
-        } else {
-            token = param;
-        }
-        return new BaseAstNode(token);
+    override get nodeType() {
+        return NodeType.ERROR;
     }
 
-    checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader): false | BaseAstNode {
-        return false;
+    static create(errorType: ErrorType) {
+        return new ErrorNode(errorType);
+    }
+
+    override getValue() {
+        return this._errorValueObject;
     }
 }

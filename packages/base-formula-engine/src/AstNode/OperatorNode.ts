@@ -1,14 +1,14 @@
 import { OPERATOR_TOKEN_SET, OPERATOR_TOKEN_COMPARE_SET, operatorToken, compareToken } from '../Basics/Token';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
-import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
+import { ErrorNode, BaseAstNode } from './BaseAstNode';
 import { NodeType, NODE_ORDER_MAP } from './NodeType';
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
-import { ErrorNode } from './ErrorNode';
 import { ErrorType } from '../Basics/ErrorType';
 import { BaseFunction } from '../Functions/BaseFunction';
 import { LexerNode } from '../Analysis/LexerNode';
-import { FunctionVariantType } from '../Basics/Common';
 import { Compare } from '../Functions/meta/Compare';
+import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
 
 const PLUS_EXECUTOR_NAME = 'PLUS';
 
@@ -29,11 +29,11 @@ export class OperatorNode extends BaseAstNode {
         super(_operatorString);
     }
 
-    get nodeType() {
+    override get nodeType() {
         return NodeType.OPERATOR;
     }
 
-    execute() {
+    override execute() {
         const children = this.getChildren();
         if (this._functionExecutor.name === COMPARE_EXECUTOR_NAME) {
             (this._functionExecutor as Compare).setCompareType(this.getToken() as compareToken);
@@ -43,11 +43,11 @@ export class OperatorNode extends BaseAstNode {
 }
 
 export class OperatorNodeFactory extends BaseAstNodeFactory {
-    get zIndex() {
+    override get zIndex() {
         return NODE_ORDER_MAP.get(NodeType.OPERATOR) || 100;
     }
 
-    create(param: string, parserDataLoader: ParserDataLoader): BaseAstNode {
+    override create(param: string, parserDataLoader: ParserDataLoader): BaseAstNode {
         let functionName = '';
         const tokenTrim = param;
         if (tokenTrim === operatorToken.PLUS) {
@@ -74,7 +74,7 @@ export class OperatorNodeFactory extends BaseAstNodeFactory {
         return new OperatorNode(tokenTrim, functionExecutor);
     }
 
-    checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
+    override checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
         if (param instanceof LexerNode) {
             return false;
         }

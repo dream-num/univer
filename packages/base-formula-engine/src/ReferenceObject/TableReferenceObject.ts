@@ -49,7 +49,7 @@ export class TableReferenceObject extends BaseReferenceObject {
         });
     }
 
-    isTable() {
+    override isTable() {
         return true;
     }
 

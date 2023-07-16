@@ -4,13 +4,7 @@ import { DocumentModel } from '../Domain/DocumentModel';
 import { getDocsUpdateBody } from '../../Shared/Common';
 import { isSameStyleTextRun } from '../../Shared/Compare';
 
-export function InsertApply(
-    document: DocumentModel,
-    insertBody: IDocumentBody,
-    textLength: number,
-    currentIndex: number,
-    segmentId?: string
-) {
+export function InsertApply(document: DocumentModel, insertBody: IDocumentBody, textLength: number, currentIndex: number, segmentId?: string) {
     const doc = document.snapshot;
 
     const bodyModel = document.getBodyModel(segmentId);
@@ -30,12 +24,7 @@ export function InsertApply(
     updateAttributeByInsert(body, insertBody, textLength, currentIndex);
 }
 
-function updateAttributeByInsert(
-    body: IDocumentBody,
-    insertBody: IDocumentBody,
-    textLength: number,
-    currentIndex: number
-) {
+function updateAttributeByInsert(body: IDocumentBody, insertBody: IDocumentBody, textLength: number, currentIndex: number) {
     processTextRuns(body, insertBody, textLength, currentIndex);
 
     processParagraphs(body, insertBody, textLength, currentIndex);
@@ -49,12 +38,7 @@ function updateAttributeByInsert(
     processCustomRanges(body, insertBody, textLength, currentIndex);
 }
 
-function processTextRuns(
-    body: IDocumentBody,
-    insertBody: IDocumentBody,
-    textLength: number,
-    currentIndex: number
-) {
+function processTextRuns(body: IDocumentBody, insertBody: IDocumentBody, textLength: number, currentIndex: number) {
     const { textRuns } = body;
 
     if (textRuns == null) {
@@ -116,23 +100,12 @@ function processTextRuns(
                 insertTextRuns.pop();
             }
 
-            textRuns.splice(
-                insertIndex,
-                1,
-                startSplitTextRun,
-                ...insertTextRuns,
-                endSplitTextRun
-            );
+            textRuns.splice(insertIndex, 1, startSplitTextRun, ...insertTextRuns, endSplitTextRun);
         }
     }
 }
 
-function processParagraphs(
-    body: IDocumentBody,
-    insertBody: IDocumentBody,
-    textLength: number,
-    currentIndex: number
-) {
+function processParagraphs(body: IDocumentBody, insertBody: IDocumentBody, textLength: number, currentIndex: number) {
     const { paragraphs } = body;
 
     if (paragraphs == null) {
@@ -158,12 +131,7 @@ function processParagraphs(
     }
 }
 
-function processSectionBreaks(
-    body: IDocumentBody,
-    insertBody: IDocumentBody,
-    textLength: number,
-    currentIndex: number
-) {
+function processSectionBreaks(body: IDocumentBody, insertBody: IDocumentBody, textLength: number, currentIndex: number) {
     const { sectionBreaks } = body;
 
     if (sectionBreaks == null) {
@@ -190,12 +158,7 @@ function processSectionBreaks(
     }
 }
 
-function processCustomBlocks(
-    body: IDocumentBody,
-    insertBody: IDocumentBody,
-    textLength: number,
-    currentIndex: number
-) {
+function processCustomBlocks(body: IDocumentBody, insertBody: IDocumentBody, textLength: number, currentIndex: number) {
     const { customBlocks } = body;
 
     if (customBlocks == null) {
@@ -222,12 +185,7 @@ function processCustomBlocks(
     }
 }
 
-function processTables(
-    body: IDocumentBody,
-    insertBody: IDocumentBody,
-    textLength: number,
-    currentIndex: number
-) {
+function processTables(body: IDocumentBody, insertBody: IDocumentBody, textLength: number, currentIndex: number) {
     const { tables } = body;
 
     if (tables == null) {
@@ -258,12 +216,7 @@ function processTables(
     }
 }
 
-function processCustomRanges(
-    body: IDocumentBody,
-    insertBody: IDocumentBody,
-    textLength: number,
-    currentIndex: number
-) {
+function processCustomRanges(body: IDocumentBody, insertBody: IDocumentBody, textLength: number, currentIndex: number) {
     const { customRanges } = body;
 
     if (customRanges == null) {

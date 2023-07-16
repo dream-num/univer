@@ -1,21 +1,20 @@
-import { FunctionVariantType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
 import { FORMULA_FUNCTION_REGISTRY } from '../Basics/Registry';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
-import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
+import { BaseReferenceObject, FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
 import { ArrayValueObject } from '../ValueObject/ArrayValueObject';
 import { BaseValueObject } from '../ValueObject/BaseValueObject';
-import { NumberValueObject } from '../ValueObject/NumberValueObject';
+import { NumberValueObject } from '../ValueObject/PrimitiveObject';
 import { BaseFunction } from './BaseFunction';
 
 const FUNCTION_NAME = 'SUM';
 
 export class Sum extends BaseFunction {
-    get name() {
+    override get name() {
         return FUNCTION_NAME;
     }
 
-    calculate(...variants: FunctionVariantType[]) {
+    override calculate(...variants: FunctionVariantType[]) {
         let accumulatorAll: BaseValueObject = new NumberValueObject(0);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];

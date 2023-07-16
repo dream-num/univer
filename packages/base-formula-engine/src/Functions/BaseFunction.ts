@@ -1,6 +1,6 @@
 import { ErrorType } from '../Basics/ErrorType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
-import { FunctionVariantType, NodeValueType } from '../Basics/Common';
+import { FunctionVariantType, NodeValueType } from '../ReferenceObject/BaseReferenceObject';
 import { BaseValueObject } from '../ValueObject/BaseValueObject';
 
 export class BaseFunction {

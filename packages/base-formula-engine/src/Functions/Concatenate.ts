@@ -1,17 +1,17 @@
-import { FunctionVariantType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
 import { FORMULA_FUNCTION_REGISTRY } from '../Basics/Registry';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
+import { FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
 import { BaseFunction } from './BaseFunction';
 
 const FUNCTION_NAME = 'CONCATENATE';
 
 export class Concatenate extends BaseFunction {
-    get name() {
+    override get name() {
         return FUNCTION_NAME;
     }
 
-    calculate(numberVar: FunctionVariantType, powerVar: FunctionVariantType) {
+    override calculate(numberVar: FunctionVariantType, powerVar: FunctionVariantType) {
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 }

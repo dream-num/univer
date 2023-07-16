@@ -1,10 +1,15 @@
-import { Nullable } from '@univerjs/core';
-import { LambdaPrivacyVarType } from '../Basics/Common';
+import { Nullable, Observable } from '@univerjs/core';
+import { LambdaPrivacyVarType } from '../AstNode/BaseAstNode';
 
 interface LexerNodeJson {
     token: string;
     children: Array<LexerNodeJson | string>;
 }
+
+export type FormulaEnginePluginObserver = {
+    onBeforeFormulaCalculateObservable: Observable<string>;
+    onAfterFormulaLexerObservable: Observable<LexerNode>;
+};
 
 export class LexerNode {
     private _parent: LexerNode;

@@ -1,14 +1,10 @@
-import { sortRules } from '@univerjs/core';
-import { BaseAstNodeFactory } from '../AstNode/BaseAstNode';
-import { FORMULA_AST_NODE_REGISTRY, FORMULA_FUNCTION_REGISTRY } from './Registry';
+import { FORMULA_FUNCTION_REGISTRY } from './Registry';
 import { BaseFunction } from '../Functions/BaseFunction';
 import { ISuperTable, TableOptionType } from './Common';
-import { LambdaRuntime } from './LambdaRuntime';
+import { LambdaRuntime } from '../AstNode/LambdaRuntime';
 import '../Functions';
 
 export class ParserDataLoader {
-    private _astNodeFactoryArray: BaseAstNodeFactory[] = [];
-
     private _functionMap: Map<string, BaseFunction> = new Map();
 
     // 18.5.1.2 table (Table)
@@ -21,10 +17,6 @@ export class ParserDataLoader {
     private _definedNameMap: Map<string, string> = new Map();
 
     private _lambdaRuntime: LambdaRuntime;
-
-    registerNode(...nodeFactories: BaseAstNodeFactory[]) {
-        this._astNodeFactoryArray.push(...nodeFactories);
-    }
 
     registerFunction(...functions: BaseFunction[]) {
         for (let i = 0; i < functions.length; i++) {
@@ -51,10 +43,6 @@ export class ParserDataLoader {
 
     getFunctionMap() {
         return this._functionMap;
-    }
-
-    getAstNodeFactoryArray() {
-        return this._astNodeFactoryArray;
     }
 
     getTableMap() {
@@ -86,12 +74,7 @@ export class ParserDataLoader {
     }
 
     initialize() {
-        this._initialNode();
         this._initialFunction();
-    }
-
-    private _initialNode() {
-        this.registerNode(...FORMULA_AST_NODE_REGISTRY.getData().sort(sortRules));
     }
 
     private _initialFunction() {

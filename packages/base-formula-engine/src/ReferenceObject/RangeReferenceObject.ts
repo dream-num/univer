@@ -14,7 +14,7 @@ export class RangeReferenceObject extends BaseReferenceObject {
         }
     }
 
-    isRange() {
+    override isRange() {
         return true;
     }
 }

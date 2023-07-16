@@ -1,4 +1,4 @@
-import { FormulaASTCache } from '../Basics/CacheLRU';
+import { FormulaASTCache } from '../AstNode/CacheLRU';
 import { LexerTreeMaker } from './Lexer';
 import { AstTreeMaker } from './Parser';
 

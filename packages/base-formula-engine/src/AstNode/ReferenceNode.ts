@@ -1,5 +1,5 @@
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
-import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
+import { BaseAstNode, ErrorNode } from './BaseAstNode';
 import { NodeType, NODE_ORDER_MAP } from './NodeType';
 import { REFERENCE_SINGLE_RANGE_REGEX, REFERENCE_REGEX_SINGLE_ROW, REFERENCE_REGEX_SINGLE_COLUMN, $SUPER_TABLE_COLUMN_REGEX } from '../Basics/Regex';
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
@@ -11,19 +11,19 @@ import { RowReferenceObject } from '../ReferenceObject/RowReferenceObject';
 import { ColumnReferenceObject } from '../ReferenceObject/ColumnReferenceObject';
 import { TableReferenceObject } from '../ReferenceObject/TableReferenceObject';
 import { LexerTreeMaker } from '../Analysis/Lexer';
-import { ErrorNode } from './ErrorNode';
 import { ErrorType } from '../Basics/ErrorType';
+import { BaseAstNodeFactory } from './BaseAstNodeFactory';
 
 export class ReferenceNode extends BaseAstNode {
     constructor(private _operatorString: string, private _referenceObject: BaseReferenceObject) {
         super(_operatorString);
     }
 
-    get nodeType() {
+    override get nodeType() {
         return NodeType.REFERENCE;
     }
 
-    execute(interpreterCalculateProps?: IInterpreterDatasetConfig, runtimeData?: UnitDataType) {
+    override execute(interpreterCalculateProps?: IInterpreterDatasetConfig, runtimeData?: UnitDataType) {
         const props = interpreterCalculateProps;
         if (props) {
             this._referenceObject.setUnitData(props.unitData);
@@ -43,11 +43,11 @@ export class ReferenceNode extends BaseAstNode {
 }
 
 export class ReferenceNodeFactory extends BaseAstNodeFactory {
-    get zIndex() {
+    override get zIndex() {
         return NODE_ORDER_MAP.get(NodeType.REFERENCE) || 100;
     }
 
-    checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
+    override checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
         let isLexerNode = false;
         let tokenTrim: string;
         if (param instanceof LexerNode) {

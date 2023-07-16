@@ -1,11 +1,13 @@
 import { SheetContext, IUnitRange, Plugin } from '@univerjs/core';
 
 import { LexerTreeMaker } from './Analysis/Lexer';
-import { FormulaEnginePluginObserver } from './Basics/Observer';
+
 import { AstTreeMaker } from './Analysis/Parser';
 import { Interpreter } from './Interpreter/Interpreter';
-import { FormulaDataType, FunctionVariantType, IInterpreterDatasetConfig } from './Basics/Common';
+import { FormulaDataType, IInterpreterDatasetConfig } from './Basics/Common';
 import { FormulaDependencyGenerator } from './Dependency/FormulaDependency';
+import { FormulaEnginePluginObserver } from './Analysis/LexerNode';
+import { FunctionVariantType } from './ReferenceObject/BaseReferenceObject';
 
 interface IFormulaEnginePlugin {}
 
@@ -89,9 +91,9 @@ export class FormulaEnginePlugin extends Plugin<FormulaEnginePluginObserver> {
 
     initialize(): void {}
 
-    onMounted(ctx: SheetContext): void {
+    override onMounted(ctx: SheetContext): void {
         this.initialize();
     }
 
-    onDestroy(): void {}
+    override onDestroy(): void {}
 }

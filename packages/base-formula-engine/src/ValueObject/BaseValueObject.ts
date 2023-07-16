@@ -1,15 +1,22 @@
-import { CalculateValueType, ConcatenateType } from '../Basics/Common';
+import { ConcatenateType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
 import { ObjectClassType } from '../Basics/ObjectClassType';
 import { compareToken } from '../Basics/Token';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 
+export type CalculateValueType = BaseValueObject | ErrorValueObject;
+
+export interface IArrayValueObject {
+    calculateValueList: CalculateValueType[][];
+    rowCount: number;
+    columnCount: number;
+}
 export class BaseValueObject extends ObjectClassType {
     constructor(private _rawValue: string | number | boolean) {
         super();
     }
 
-    isValueObject() {
+    override isValueObject() {
         return true;
     }
 

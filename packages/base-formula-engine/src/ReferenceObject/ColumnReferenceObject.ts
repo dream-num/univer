@@ -17,11 +17,11 @@ export class ColumnReferenceObject extends BaseReferenceObject {
         this.setRangeData(rangeData);
     }
 
-    isColumn() {
+    override isColumn() {
         return true;
     }
 
-    unionBy(referenceObject: BaseReferenceObject) {
+    override unionBy(referenceObject: BaseReferenceObject) {
         if (!referenceObject.isColumn()) {
             return ErrorValueObject.create(ErrorType.REF);
         }

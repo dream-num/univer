@@ -3,11 +3,12 @@ import { generateAstNode } from '../Analysis/Tools';
 import { FunctionNode, PrefixNode, SuffixNode } from '../AstNode';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { NodeType } from '../AstNode/NodeType';
-import { FormulaDataType, IInterpreterDatasetConfig, PreCalculateNodeType } from '../Basics/Common';
+import { FormulaDataType, IInterpreterDatasetConfig } from '../Basics/Common';
 import { prefixToken, suffixToken } from '../Basics/Token';
 import { Interpreter } from '../Interpreter/Interpreter';
 import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
 import { FormulaDependencyTree } from './DependencyTree';
+import { PreCalculateNodeType } from '../Basics/NodeType';
 
 export class FormulaDependencyGenerator {
     private _updateRangeFlattenCache = new Map<string, Map<string, IRangeData>>();

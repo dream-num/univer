@@ -1,15 +1,16 @@
 import { LexerNode } from '../Analysis/LexerNode';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { DEFAULT_TOKEN_TYPE_ROOT } from '../Basics/TokenType';
-import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
+import { BaseAstNode } from './BaseAstNode';
+import { BaseAstNodeFactory } from './BaseAstNodeFactory';
 import { NodeType, NODE_ORDER_MAP } from './NodeType';
 
 export class AstRootNode extends BaseAstNode {
-    get nodeType() {
+    override get nodeType() {
         return NodeType.ROOT;
     }
 
-    execute() {
+    override execute() {
         const children = this.getChildren();
         const node = children[0];
         // if (node.nodeType === NodeType.FUNCTION) {
@@ -43,11 +44,11 @@ export class AstRootNode extends BaseAstNode {
 // }
 
 export class AstRootNodeFactory extends BaseAstNodeFactory {
-    get zIndex() {
+    override get zIndex() {
         return NODE_ORDER_MAP.get(NodeType.ROOT) || 100;
     }
 
-    checkAndCreateNodeType(param: LexerNode | string) {
+    override checkAndCreateNodeType(param: LexerNode | string) {
         if (!(param instanceof LexerNode)) {
             return false;
         }

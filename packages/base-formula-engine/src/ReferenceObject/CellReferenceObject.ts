@@ -12,11 +12,11 @@ export class CellReferenceObject extends BaseReferenceObject {
         this.setRangeData(grid.rangeData);
     }
 
-    isCell() {
+    override isCell() {
         return true;
     }
 
-    unionBy(referenceObject: BaseReferenceObject) {
+    override unionBy(referenceObject: BaseReferenceObject) {
         if (!referenceObject.isCell()) {
             return ErrorValueObject.create(ErrorType.REF);
         }
@@ -31,7 +31,7 @@ export class CellReferenceObject extends BaseReferenceObject {
         return this._createRange(newRangeData);
     }
 
-    unionRange(rangeData1: IRangeData, rangeData2: IRangeData) {
+    override unionRange(rangeData1: IRangeData, rangeData2: IRangeData) {
         const startRow1 = rangeData1.startRow;
         const startColumn1 = rangeData1.startColumn;
 

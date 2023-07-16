@@ -1,11 +1,11 @@
 import { Nullable } from '@univerjs/core';
-import { fromObjectToString } from '../Basics/Calculate';
-import { CalculateValueType, IArrayValueObject } from '../Basics/Common';
+import { $ARRAY_VALUE_REGEX } from '../Basics/Regex';
+import { BooleanValue } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
-import { compareToken } from '../Basics/Token';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
-import { BaseValueObject } from './BaseValueObject';
-import { ValueObjectFactory } from './ValueObjectFactory';
+import { compareToken } from '../Basics/Token';
+import { BaseValueObject, CalculateValueType, IArrayValueObject } from './BaseValueObject';
+import { BooleanValueObject, NumberValueObject, StringValueObject } from './PrimitiveObject';
 
 enum BatchOperatorType {
     MINUS,
@@ -15,6 +15,10 @@ enum BatchOperatorType {
     COMPARE,
     CONCATENATE_FRONT,
     CONCATENATE_BACK,
+}
+
+export function fromObjectToString(array: IArrayValueObject) {
+    return '';
 }
 
 export class ArrayValueObject extends BaseValueObject {
@@ -51,15 +55,15 @@ export class ArrayValueObject extends BaseValueObject {
         this._columnCount = columnCount;
     }
 
-    getArrayValue() {
+    override getArrayValue() {
         return this._value;
     }
 
-    setArrayValue(value: CalculateValueType[][]) {
+    override setArrayValue(value: CalculateValueType[][]) {
         this._value = value;
     }
 
-    isArray() {
+    override isArray() {
         return true;
     }
 
@@ -91,34 +95,35 @@ export class ArrayValueObject extends BaseValueObject {
         }
     }
 
-    plus(valueObject: BaseValueObject): CalculateValueType {
+    override plus(valueObject: BaseValueObject): CalculateValueType {
         return this._batchOperator(valueObject, BatchOperatorType.PLUS);
     }
 
-    minus(valueObject: BaseValueObject): CalculateValueType {
+    override minus(valueObject: BaseValueObject): CalculateValueType {
         return this._batchOperator(valueObject, BatchOperatorType.MINUS);
     }
 
-    multiply(valueObject: BaseValueObject): CalculateValueType {
+    override multiply(valueObject: BaseValueObject): CalculateValueType {
         return this._batchOperator(valueObject, BatchOperatorType.MULTIPLY);
     }
 
-    divided(valueObject: BaseValueObject): CalculateValueType {
+    override divided(valueObject: BaseValueObject): CalculateValueType {
         return this._batchOperator(valueObject, BatchOperatorType.DIVIDED);
     }
 
-    compare(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
+    override compare(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
         return this._batchOperator(valueObject, BatchOperatorType.COMPARE, operator);
     }
 
-    concatenateFront(valueObject: BaseValueObject): CalculateValueType {
+    override concatenateFront(valueObject: BaseValueObject): CalculateValueType {
         return this._batchOperator(valueObject, BatchOperatorType.CONCATENATE_FRONT);
     }
 
-    concatenateBack(valueObject: BaseValueObject): CalculateValueType {
+    override concatenateBack(valueObject: BaseValueObject): CalculateValueType {
         return this._batchOperator(valueObject, BatchOperatorType.CONCATENATE_BACK);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _batchOperator(valueObject: BaseValueObject, batchOperatorType: BatchOperatorType, operator?: compareToken): CalculateValueType {
         if (valueObject.isArray()) {
             let rowCount = (valueObject as ArrayValueObject).getRowCount();
@@ -290,5 +295,30 @@ export class ArrayValueObject extends BaseValueObject {
         this._columnCount = maxColumnCount;
 
         return result;
+    }
+}
+
+export class ValueObjectFactory {
+    static create(rawValue: string | number | boolean) {
+        if (typeof rawValue === 'boolean') {
+            return new BooleanValueObject(rawValue, true);
+        }
+        if (typeof rawValue === 'string') {
+            const rawValueUpper = rawValue.toLocaleUpperCase();
+            if (rawValueUpper === BooleanValue.TRUE || rawValueUpper === BooleanValue.FALSE) {
+                return new BooleanValueObject(rawValueUpper);
+            }
+            if (!isNaN(Number(rawValue))) {
+                return new NumberValueObject(rawValue);
+            }
+            if ($ARRAY_VALUE_REGEX.test(rawValue)) {
+                return new ArrayValueObject(rawValue);
+            }
+            return new StringValueObject(rawValue);
+        }
+        if (typeof rawValue === 'number') {
+            return new NumberValueObject(rawValue, true);
+        }
+        return ErrorValueObject.create(ErrorType.NA);
     }
 }

@@ -1,5 +1,4 @@
 export * from './AstRootNode';
-export * from './ErrorNode';
 export * from './FunctionNode';
 export * from './LambdaNode';
 export * from './LambdaParameterNode';

@@ -1,12 +1,15 @@
 import { CellValueType, ICellData, IRangeData, Nullable } from '@univerjs/core';
-import { CalculateValueType, IArrayValueObject, NodeValueType, SheetNameMapType, UnitDataType } from '../Basics/Common';
 import { ErrorType, ERROR_TYPE_SET } from '../Basics/ErrorType';
 import { ObjectClassType } from '../Basics/ObjectClassType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { ArrayValueObject } from '../ValueObject/ArrayValueObject';
-import { BooleanValueObject } from '../ValueObject/BooleanValueObject';
-import { NumberValueObject } from '../ValueObject/NumberValueObject';
-import { StringValueObject } from '../ValueObject/StringValueObject';
+import { BooleanValueObject, NumberValueObject, StringValueObject } from '../ValueObject/PrimitiveObject';
+import { BaseValueObject, CalculateValueType, IArrayValueObject } from '../ValueObject/BaseValueObject';
+import { SheetNameMapType, UnitDataType } from '../Basics/Common';
+
+export type NodeValueType = BaseValueObject | BaseReferenceObject | ErrorValueObject | AsyncObject;
+
+export type FunctionVariantType = BaseValueObject | BaseReferenceObject | ErrorValueObject;
 
 export class BaseReferenceObject extends ObjectClassType {
     private _forcedSheetId: string;
@@ -63,7 +66,7 @@ export class BaseReferenceObject extends ObjectClassType {
         };
     }
 
-    isReferenceObject() {
+    override isReferenceObject() {
         return true;
     }
 
@@ -309,5 +312,19 @@ export class BaseReferenceObject extends ObjectClassType {
             sheetId: this.getSheetId(),
             unitId: this.getUnitId(),
         };
+    }
+}
+
+export class AsyncObject extends ObjectClassType {
+    constructor(private _promise: Promise<FunctionVariantType>) {
+        super();
+    }
+
+    override isAsyncObject() {
+        return true;
+    }
+
+    getValue() {
+        return this._promise;
     }
 }

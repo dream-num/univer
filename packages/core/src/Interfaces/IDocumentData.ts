@@ -1,12 +1,5 @@
-import { IColorStyle, IStyleBase } from '.';
-import {
-    BooleanNumber,
-    HorizontalAlign,
-    LocaleType,
-    TextDirection,
-    VerticalAlign,
-    WrapStrategy,
-} from '../Enum';
+import { IColorStyle, IStyleBase } from './IStyleData';
+import { BooleanNumber, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../Enum';
 import { IImageProperties } from './IImageProperties';
 import { IShapeProperties } from './IShapeProperties';
 
@@ -72,13 +65,7 @@ export interface ISizeData {
     height?: number;
 }
 
-export type CommonParameterAttribute =
-    | ITextRun
-    | IParagraph
-    | ISectionBreak
-    | ICustomBlock
-    | ITable
-    | ICustomRange;
+export type CommonParameterAttribute = ITextRun | IParagraph | ISectionBreak | ICustomBlock | ITable | ICustomRange;
 
 /**
  * Properties of document body
@@ -313,10 +300,7 @@ export enum GridType {
     SNAP_TO_CHARS,
 }
 
-export interface IDocumentStyle
-    extends IDocStyleBase,
-        IDocumentLayout,
-        IHeaderAndFooterBase {
+export interface IDocumentStyle extends IDocStyleBase, IDocumentLayout, IHeaderAndFooterBase {
     textStyle?: ITextStyle; // 文字默认样式
 }
 
@@ -343,10 +327,7 @@ export interface ISectionBreakBase {
 /**
  * Properties of section break
  */
-export interface ISectionBreak
-    extends IDocStyleBase,
-        ISectionBreakBase,
-        IHeaderAndFooterBase {
+export interface ISectionBreak extends IDocStyleBase, ISectionBreakBase, IHeaderAndFooterBase {
     startIndex: number;
 }
 

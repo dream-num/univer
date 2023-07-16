@@ -1,29 +1,29 @@
 import { suffixToken } from '../Basics/Token';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
-import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
+import { BaseAstNode, ErrorNode } from './BaseAstNode';
 import { NodeType, NODE_ORDER_MAP } from './NodeType';
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
 import { ErrorType } from '../Basics/ErrorType';
-import { ErrorNode } from './ErrorNode';
 import { BaseFunction } from '../Functions/BaseFunction';
-import { NumberValueObject } from '../ValueObject/NumberValueObject';
-import { FunctionVariantType, IInterpreterDatasetConfig } from '../Basics/Common';
+import { NumberValueObject } from '../ValueObject/PrimitiveObject';
+import { IInterpreterDatasetConfig } from '../Basics/Common';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { LexerNode } from '../Analysis/LexerNode';
-import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
+import { BaseReferenceObject, FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
 import { CellReferenceObject } from '../ReferenceObject/CellReferenceObject';
 import { LexerTreeMaker } from '../Analysis/Lexer';
+import { BaseAstNodeFactory } from './BaseAstNodeFactory';
 
 export class SuffixNode extends BaseAstNode {
     constructor(private _operatorString: string, private _functionExecutor?: BaseFunction) {
         super(_operatorString);
     }
 
-    get nodeType() {
+    override get nodeType() {
         return NodeType.SUFFIX;
     }
 
-    execute(interpreterCalculateProps?: IInterpreterDatasetConfig) {
+    override execute(interpreterCalculateProps?: IInterpreterDatasetConfig) {
         const children = this.getChildren();
         const value = children[0].getValue();
         let result: FunctionVariantType;
@@ -73,11 +73,11 @@ export class SuffixNode extends BaseAstNode {
 }
 
 export class SuffixNodeFactory extends BaseAstNodeFactory {
-    get zIndex() {
+    override get zIndex() {
         return NODE_ORDER_MAP.get(NodeType.SUFFIX) || 100;
     }
 
-    checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
+    override checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
         if (!(param instanceof LexerNode)) {
             return false;
         }

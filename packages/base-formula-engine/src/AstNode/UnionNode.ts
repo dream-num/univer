@@ -1,14 +1,14 @@
 import { matchToken } from '../Basics/Token';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
-import { BaseAstNodeFactory, BaseAstNode } from './BaseAstNode';
+import { BaseAstNode, ErrorNode } from './BaseAstNode';
 import { NodeType, NODE_ORDER_MAP } from './NodeType';
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
 import { ErrorType } from '../Basics/ErrorType';
-import { ErrorNode } from './ErrorNode';
 import { BaseFunction } from '../Functions/BaseFunction';
-import { FunctionVariantType } from '../Basics/Common';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { LexerNode } from '../Analysis/LexerNode';
+import { FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
+import { BaseAstNodeFactory } from './BaseAstNodeFactory';
 
 const UNION_EXECUTOR_NAME = 'UNION';
 
@@ -17,11 +17,11 @@ export class UnionNode extends BaseAstNode {
         super(_operatorString);
     }
 
-    get nodeType() {
+    override get nodeType() {
         return NodeType.UNION;
     }
 
-    execute() {
+    override execute() {
         const children = this.getChildren();
         const leftNode = children[0].getValue();
         const rightNode = children[1].getValue();
@@ -36,11 +36,11 @@ export class UnionNode extends BaseAstNode {
 }
 
 export class UnionNodeFactory extends BaseAstNodeFactory {
-    get zIndex() {
+    override get zIndex() {
         return NODE_ORDER_MAP.get(NodeType.UNION) || 100;
     }
 
-    create(param: string, parserDataLoader: ParserDataLoader): BaseAstNode {
+    override create(param: string, parserDataLoader: ParserDataLoader): BaseAstNode {
         const functionExecutor = parserDataLoader.getExecutor(UNION_EXECUTOR_NAME);
         if (!functionExecutor) {
             console.error(`No function ${param}`);
@@ -49,7 +49,7 @@ export class UnionNodeFactory extends BaseAstNodeFactory {
         return new UnionNode(param, functionExecutor);
     }
 
-    checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
+    override checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
         if (!(param instanceof LexerNode)) {
             return false;
         }

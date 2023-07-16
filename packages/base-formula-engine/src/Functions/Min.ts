@@ -1,22 +1,20 @@
-import { FunctionVariantType } from '../Basics/Common';
 import { FORMULA_FUNCTION_REGISTRY } from '../Basics/Registry';
 import { compareToken } from '../Basics/Token';
-import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
+import { BaseReferenceObject, FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
 import { ArrayValueObject } from '../ValueObject/ArrayValueObject';
 import { BaseValueObject } from '../ValueObject/BaseValueObject';
-import { BooleanValueObject } from '../ValueObject/BooleanValueObject';
-import { NumberValueObject } from '../ValueObject/NumberValueObject';
+import { BooleanValueObject, NumberValueObject } from '../ValueObject/PrimitiveObject';
 
 import { BaseFunction } from './BaseFunction';
 
 const FUNCTION_NAME = 'MIN';
 
 export class Min extends BaseFunction {
-    get name() {
+    override get name() {
         return FUNCTION_NAME;
     }
 
-    calculate(...variants: FunctionVariantType[]) {
+    override calculate(...variants: FunctionVariantType[]) {
         let accumulatorAll: BaseValueObject = new NumberValueObject(Infinity);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];

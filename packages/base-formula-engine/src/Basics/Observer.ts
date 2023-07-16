@@ -1,14 +1,8 @@
-import { Observable, Plugin } from '@univerjs/core';
-import { LexerNode } from '../Analysis/LexerNode';
+import { Plugin } from '@univerjs/core';
 
 interface ISelectionControlFillConfig {}
 
 interface ISelectionControlDragAndDropConfig {}
-
-export type FormulaEnginePluginObserver = {
-    onBeforeFormulaCalculateObservable: Observable<string>;
-    onAfterFormulaLexerObservable: Observable<LexerNode>;
-};
 
 export function uninstall(plugin: Plugin) {
     plugin.deleteObserve('onBeforeFormulaCalculateObservable');

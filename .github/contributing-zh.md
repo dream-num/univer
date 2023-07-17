@@ -118,6 +118,29 @@ npm run clean
 pnpm install
 ```
 
+### PR流程
+
+1. 新建分支，进行开发
+```sh
+git checkout -b my-dev
+```
+2. commit中间执行rebase，不定期从dev同步最新代码到你的分支
+```sh
+git rebase dev
+```
+3. [可选]如果有冲突，解决冲突并继续
+```sh
+git add .
+git rebase --continue
+```
+4. 提交分支
+```sh
+git pull origin my-dev --rebase
+git add .
+git commit -m "new"
+git push origin my-dev
+```
+
 ## 风格指南
 
 我们严格参照 [Google 开源项目风格指南 - TypeScript 风格指南](https://zh-google-styleguide.readthedocs.io/en/latest/google-typescript-styleguide/contents/#)，本文档的风格指南，主要列出不同的地方和需要重点强调的部分。

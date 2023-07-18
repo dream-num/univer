@@ -1,5 +1,5 @@
 import { ClearRangeApply, SetRangeDataApply } from '../Apply';
-import { ICellData, IOptionData, IRangeData } from '../../Interfaces';
+import { ICellData, IOptionData, IRangeData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';

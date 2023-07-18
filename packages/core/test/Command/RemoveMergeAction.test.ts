@@ -9,7 +9,7 @@ import {
     RemoveMergeAction,
 } from '../../src/Command';
 import { createCoreTestContainer } from '../ContainerStartUp';
-import { IRangeData } from '../../src/Interfaces';
+import { IRangeData } from '../../src/Types/Interfaces';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 

@@ -1,5 +1,5 @@
-import { Dimension } from '../../Enum/Dimension';
-import { ICellData, IRangeData } from '../../Interfaces';
+import { Dimension } from '../../Types/Enum/Dimension';
+import { ICellData, IRangeData } from '../../Types/Interfaces';
 import { Tools } from '../../Shared';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { Nullable } from '../../Shared/Types';

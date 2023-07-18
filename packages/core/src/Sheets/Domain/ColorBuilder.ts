@@ -1,4 +1,4 @@
-import { ColorType, ThemeColors, ThemeColorType } from '../../Enum';
+import { ColorType, ThemeColors, ThemeColorType } from '../../Types/Enum';
 import { Nullable } from '../../Shared';
 import { Color, RgbColor, ThemeColor } from './Color';
 

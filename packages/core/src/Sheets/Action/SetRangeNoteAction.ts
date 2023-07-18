@@ -1,5 +1,5 @@
 import { SetRangeNote } from '../Apply';
-import { IRangeData } from '../../Interfaces';
+import { IRangeData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';

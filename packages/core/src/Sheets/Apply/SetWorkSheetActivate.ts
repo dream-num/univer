@@ -1,5 +1,5 @@
 import { Worksheet } from '../Domain/Worksheet';
-import { BooleanNumber } from '../../Enum';
+import { BooleanNumber } from '../../Types/Enum';
 import { ISheetStatus } from '../Action';
 
 /**

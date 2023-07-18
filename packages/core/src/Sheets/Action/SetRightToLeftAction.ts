@@ -1,5 +1,5 @@
 import { SetRightToLeft } from '../Apply';
-import { BooleanNumber } from '../../Enum';
+import { BooleanNumber } from '../../Types/Enum';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { CommandManager, CommandUnit } from '../../Command';

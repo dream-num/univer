@@ -1,5 +1,5 @@
 import { Styles } from '../Domain';
-import { ICellData, IStyleData } from '../../Interfaces';
+import { ICellData, IStyleData } from '../../Types/Interfaces';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared';
 import { CommandUnit } from '../../Command';
 import { BorderStyleData } from '../Action';

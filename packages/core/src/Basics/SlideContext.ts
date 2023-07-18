@@ -1,4 +1,4 @@
-import { ISlideData } from '../Interfaces/ISlideData';
+import { ISlideData } from '../Types/Interfaces/ISlideData';
 import { SlideModel } from '../Slides/Domain/SlideModel';
 import { ContextBase } from './ContextBase';
 

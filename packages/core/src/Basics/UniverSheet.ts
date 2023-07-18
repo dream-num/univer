@@ -1,5 +1,5 @@
 import { Workbook, ColorBuilder } from '../Sheets/Domain';
-import { IWorkbookConfig } from '../Interfaces';
+import { IWorkbookConfig } from '../Types/Interfaces';
 import { BasePlugin, Plugin } from '../Plugin';
 import { IOHttp, IOHttpConfig, Logger } from '../Shared';
 import { SheetContext } from './SheetContext';

@@ -1,7 +1,7 @@
 import { SetWorkSheetActivate } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { BooleanNumber } from '../../Enum';
+import { BooleanNumber } from '../../Types/Enum';
 import { ActionOperationType } from '../../Command/ActionBase';
 import { CommandManager, CommandUnit } from '../../Command';
 

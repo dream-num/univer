@@ -1,4 +1,4 @@
-import { IRowData } from '../../Interfaces';
+import { IRowData } from '../../Types/Interfaces';
 import { ObjectArray, ObjectArrayPrimitiveType } from '../../Shared';
 import { CommandUnit } from '../../Command';
 import { IInsertRowActionData } from '../Action';

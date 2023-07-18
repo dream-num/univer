@@ -1,4 +1,4 @@
-import { UIObserver } from '../Interfaces';
+import { UIObserver } from '../Types/Interfaces';
 import { Observable } from '../Observer/Observable';
 
 export type UniverObserver<T> = {

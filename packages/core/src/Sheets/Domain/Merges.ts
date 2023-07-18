@@ -17,7 +17,7 @@ import {
 } from '../Action';
 import { Nullable, Tools, Rectangle, Tuples } from '../../Shared';
 import { Worksheet } from './Worksheet';
-import { IRangeData } from '../../Interfaces';
+import { IRangeData } from '../../Types/Interfaces';
 
 /**
  * Manage merged cells

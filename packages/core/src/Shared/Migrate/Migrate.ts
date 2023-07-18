@@ -3,7 +3,7 @@ import {
     HorizontalAlign,
     VerticalAlign,
     WrapStrategy,
-} from '../../Enum';
+} from '../../Types/Enum';
 import {
     IWorkbookConfig,
     IWorksheetConfig,
@@ -13,7 +13,7 @@ import {
     IRowData,
     IColumnData,
     ITextRun,
-} from '../../Interfaces';
+} from '../../Types/Interfaces';
 import { ObjectArrayPrimitiveType } from '../ObjectArray';
 import { Tools } from '../Tools';
 import { IKeyValue } from '../Types';

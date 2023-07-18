@@ -1,4 +1,4 @@
-import { IDocumentBody, ITextRun } from '../../Interfaces/IDocumentData';
+import { IDocumentBody, ITextRun } from '../../Types/Interfaces/IDocumentData';
 
 import { Nullable } from '../../Shared/Types';
 import { DataStreamTreeNode } from './DataStreamTreeNode';

@@ -1,4 +1,4 @@
-import { IDocumentBody } from '../../Interfaces/IDocumentData';
+import { IDocumentBody } from '../../Types/Interfaces/IDocumentData';
 import { DocumentModel } from '../Domain/DocumentModel';
 import { getDocsUpdateBody } from '../../Shared/Common';
 import { insertCustomBlocks, insertCustomRanges, insertParagraphs, insertSectionBreaks, insertTables, insertTextRuns } from './Common';

@@ -6,9 +6,9 @@ import {
     SetSelectionActivateAction,
 } from '../Action';
 
-import { DEFAULT_SELECTION } from '../../Const';
-import { Direction } from '../../Enum';
-import { IRangeData, IRangeType, ISelectionData } from '../../Interfaces';
+import { DEFAULT_SELECTION } from '../../Types/Const';
+import { Direction } from '../../Types/Enum';
+import { IRangeData, IRangeType, ISelectionData } from '../../Types/Interfaces';
 import { Nullable, Tools } from '../../Shared';
 import { Range } from './Range';
 import { RangeList } from './RangeList';

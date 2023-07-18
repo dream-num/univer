@@ -1,4 +1,4 @@
-import { ISlideData } from '../Interfaces';
+import { ISlideData } from '../Types/Interfaces';
 import { Plugin } from '../Plugin';
 import { IOHttp, IOHttpConfig, Logger } from '../Shared';
 import { SlideContext } from './SlideContext';

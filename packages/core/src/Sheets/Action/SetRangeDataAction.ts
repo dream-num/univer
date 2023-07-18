@@ -8,7 +8,7 @@ import {
     CommandUnit,
     CommandManager,
 } from '../../Command';
-import { ICopyToOptionsData, ICellData } from '../../Interfaces';
+import { ICopyToOptionsData, ICellData } from '../../Types/Interfaces';
 
 /**
  * 设置数据时的类型

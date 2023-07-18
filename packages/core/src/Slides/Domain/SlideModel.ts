@@ -1,6 +1,6 @@
 import { SlideContext } from '../../Basics/SlideContext';
-import { DEFAULT_SLIDE } from '../../Const';
-import { ISlideData, ISlidePage, PageType } from '../../Interfaces';
+import { DEFAULT_SLIDE } from '../../Types/Const';
+import { ISlideData, ISlidePage, PageType } from '../../Types/Interfaces';
 import { Tools } from '../../Shared';
 
 export class SlideModel {

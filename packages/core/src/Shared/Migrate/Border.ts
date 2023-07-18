@@ -1,4 +1,4 @@
-import { IWorksheetConfig, IBorderData, IStyleData } from '../../Interfaces';
+import { IWorksheetConfig, IBorderData, IStyleData } from '../../Types/Interfaces';
 
 export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
     newSheet.cellData = {};

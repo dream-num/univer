@@ -1,4 +1,4 @@
-import { ThemeColorType } from '../../src/Enum';
+import { ThemeColorType } from '../../src/Types/Enum';
 import { Color, RgbColor, ThemeColor } from '../../src/Sheets/Domain/Color';
 import { ColorBuilder } from '../../src/Sheets/Domain/ColorBuilder';
 

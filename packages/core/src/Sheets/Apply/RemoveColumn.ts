@@ -1,4 +1,4 @@
-import { IColumnData } from '../../Interfaces';
+import { IColumnData } from '../../Types/Interfaces';
 import { ObjectArray, ObjectArrayPrimitiveType } from '../../Shared';
 import { CommandUnit } from '../../Command';
 import { IRemoveColumnAction } from '../Action';

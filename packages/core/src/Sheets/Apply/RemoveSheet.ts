@@ -1,5 +1,5 @@
 import { Workbook } from '../Domain';
-import { IWorksheetConfig } from '../../Interfaces';
+import { IWorksheetConfig } from '../../Types/Interfaces';
 import { CommandUnit } from '../../Command';
 import { IRemoveSheetActionData } from '../Action';
 

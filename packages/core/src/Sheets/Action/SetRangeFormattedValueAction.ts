@@ -1,5 +1,5 @@
 import { SetRangeFormattedValue } from '../Apply';
-import { ICellV, IRangeData } from '../../Interfaces';
+import { ICellV, IRangeData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';

@@ -1,4 +1,4 @@
-import { KEYBOARD_KEYS } from '../Const/KEYBOARD_KEYS';
+import { KEYBOARD_KEYS } from '../Types/Const/KEYBOARD_KEYS';
 
 const allKeys = Object.keys(KEYBOARD_KEYS).reduce(
     (acc, category) => [...acc, ...KEYBOARD_KEYS[category]],

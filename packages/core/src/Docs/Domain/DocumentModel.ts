@@ -4,12 +4,12 @@ import {
     CommonParameterAttribute,
     IDocumentBody,
     IDocumentData,
-} from '../../Interfaces/IDocumentData';
-import { ITextSelectionRange } from '../../Interfaces/ISelectionData';
-import { DOC_ACTION_NAMES } from '../../Const/DOC_ACTION_NAMES';
+} from '../../Types/Interfaces/IDocumentData';
+import { ITextSelectionRange } from '../../Types/Interfaces/ISelectionData';
+import { DOC_ACTION_NAMES } from '../../Types/Const/DOC_ACTION_NAMES';
 import { Tools, getTextIndexByCursor } from '../../Shared';
 import { DocumentBodyModel } from './DocumentBodyModel';
-import { DEFAULT_DOC } from '../../Const';
+import { DEFAULT_DOC } from '../../Types/Const';
 
 interface IDrawingUpdateConfig {
     left: number;

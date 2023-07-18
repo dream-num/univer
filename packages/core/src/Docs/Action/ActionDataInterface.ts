@@ -2,7 +2,7 @@ import { IDocActionData } from '../../Command/DocActionBase';
 import {
     CommonParameterAttribute,
     IDocumentBody,
-} from '../../Interfaces/IDocumentData';
+} from '../../Types/Interfaces/IDocumentData';
 
 export interface IDeleteActionData extends IDocActionData {
     len: number;

@@ -1,5 +1,5 @@
 import { InsertDataColumnApply, RemoveColumnDataApply } from '../Apply';
-import { ICellData } from '../../Interfaces';
+import { ICellData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';

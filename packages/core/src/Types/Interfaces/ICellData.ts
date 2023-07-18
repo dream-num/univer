@@ -1,7 +1,7 @@
-import { IDocumentData } from '.';
+import { IDocumentData } from './index';
 import { FormatType } from '../Enum/FormatType';
 import { CellValueType } from '../Enum/TextStyle';
-import { Nullable } from '../Shared/Types';
+import { Nullable } from '../../Shared/Types';
 import { IStyleData } from './IStyleData';
 
 /**
@@ -40,7 +40,7 @@ export interface ICellData {
      * 3. rangeId
      * 4. range
      * 5. email
-     * 
+     *
      *  u: "Formula!A1" // url
         m: "" // message
         t: "link" // type

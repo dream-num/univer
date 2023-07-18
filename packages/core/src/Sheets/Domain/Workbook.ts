@@ -2,9 +2,9 @@ import {
     DEFAULT_RANGE_ARRAY,
     DEFAULT_WORKBOOK,
     DEFAULT_WORKSHEET,
-} from '../../Const';
+} from '../../Types/Const';
 
-import { BooleanNumber } from '../../Enum';
+import { BooleanNumber } from '../../Types/Enum';
 import { SheetContext, Univer } from '../../Basics';
 
 import {
@@ -26,7 +26,7 @@ import {
     IRowStartEndData,
     IWorkbookConfig,
     IWorksheetConfig,
-} from '../../Interfaces';
+} from '../../Types/Interfaces';
 
 import { Nullable, Tools, Tuples } from '../../Shared';
 import { RangeList } from './RangeList';

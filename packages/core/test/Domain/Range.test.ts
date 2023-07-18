@@ -16,8 +16,8 @@ import {
     ThemeColorType,
     VerticalAlign,
     WrapStrategy,
-} from '../../src/Enum';
-import { ICellData, ICellV } from '../../src/Interfaces';
+} from '../../src/Types/Enum';
+import { ICellData, ICellV } from '../../src/Types/Interfaces';
 import { createCoreTestContainer } from '../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));

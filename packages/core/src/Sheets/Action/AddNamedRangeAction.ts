@@ -6,7 +6,7 @@ import {
     CommandUnit,
     CommandManager,
 } from '../../Command';
-import { INamedRange } from '../../Interfaces/INamedRange';
+import { INamedRange } from '../../Types/Interfaces/INamedRange';
 import { AddNamedRangeApply } from '../Apply';
 import { DeleteNamedRangeApply } from '../Apply/DeleteNamedRange';
 import {

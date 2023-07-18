@@ -7,7 +7,7 @@ import {
     CommandManager,
 } from '../../Command';
 import { AddNamedRangeApply, DeleteNamedRangeApply } from '../Apply';
-import { INamedRange } from '../../Interfaces';
+import { INamedRange } from '../../Types/Interfaces';
 import {
     AddNamedRangeAction,
     IAddNamedRangeActionData,

@@ -1,4 +1,4 @@
-import { IRangeData } from '../Interfaces/IRangeData';
+import { IRangeData } from '../Types/Interfaces/IRangeData';
 import {
     ObjectArray,
     ObjectArrayPrimitiveType,

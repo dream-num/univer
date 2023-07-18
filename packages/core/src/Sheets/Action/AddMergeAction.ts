@@ -1,5 +1,5 @@
 import { CommandManager, CommandUnit } from '../../Command';
-import { IRangeData } from '../../Interfaces';
+import { IRangeData } from '../../Types/Interfaces';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers } from '../../Command/ActionObservers';
 import { IRemoveMergeActionData } from './RemoveMergeAction';

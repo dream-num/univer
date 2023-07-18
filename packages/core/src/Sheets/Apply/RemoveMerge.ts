@@ -1,4 +1,4 @@
-import { IRangeData } from '../../Interfaces';
+import { IRangeData } from '../../Types/Interfaces';
 import { CommandUnit } from '../../Command';
 import { IRemoveMergeActionData } from '../Action';
 import { Rectangle } from '../../Shared';

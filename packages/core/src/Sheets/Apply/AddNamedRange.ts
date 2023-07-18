@@ -1,4 +1,4 @@
-import { INamedRange } from '../../Interfaces';
+import { INamedRange } from '../../Types/Interfaces';
 import { CommandUnit } from '../../Command';
 import { IAddNamedRangeActionData } from '../Action';
 

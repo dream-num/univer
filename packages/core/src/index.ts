@@ -17,11 +17,11 @@ import './Docs/Action';
 
 export * from './Basics';
 export * from './Command';
-export * from './Const';
+export * from './Types/Const';
 export * from './DI';
 export * from './Docs/Domain';
-export * from './Enum';
-export * from './Interfaces';
+export * from './Types/Enum';
+export * from './Types/Interfaces';
 export * from './Observer';
 export * from './Plugin';
 export * from './Server';

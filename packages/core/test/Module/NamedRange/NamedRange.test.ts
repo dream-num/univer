@@ -5,7 +5,7 @@ import { SheetContext, Workbook, Worksheet } from '../../../src';
 import {
     DEFAULT_NAMED_RANGE,
     INamedRange,
-} from '../../../src/Interfaces/INamedRange';
+} from '../../../src/Types/Interfaces/INamedRange';
 import { NamedRange } from '../../../src/Sheets/Domain/NamedRange';
 import { createCoreTestContainer } from '../../ContainerStartUp';
 

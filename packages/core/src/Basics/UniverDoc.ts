@@ -1,4 +1,4 @@
-import { IDocumentData } from '../Interfaces';
+import { IDocumentData } from '../Types/Interfaces';
 import { Plugin } from '../Plugin';
 import { IOHttp, IOHttpConfig, Logger } from '../Shared';
 import { DocContext } from './DocContext';

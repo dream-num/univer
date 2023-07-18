@@ -6,7 +6,7 @@ import {
     CommandUnit,
     CommonParameter,
 } from '../../Command';
-import { DOC_ACTION_NAMES } from '../../Const/DOC_ACTION_NAMES';
+import { DOC_ACTION_NAMES } from '../../Types/Const/DOC_ACTION_NAMES';
 import { InsertApply } from '../Apply/InsertApply';
 import { DeleteApply } from '../Apply/DeleteApply';
 import { IInsertActionData, IDeleteActionData } from './ActionDataInterface';

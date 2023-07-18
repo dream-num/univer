@@ -1,4 +1,4 @@
-import { ICellData, IStyleData } from '../../Interfaces';
+import { ICellData, IStyleData } from '../../Types/Interfaces';
 import { IKeyType, Nullable, Tools } from '../../Shared';
 
 /**

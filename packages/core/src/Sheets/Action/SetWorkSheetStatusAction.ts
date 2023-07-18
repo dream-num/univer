@@ -1,6 +1,6 @@
 import { SetWorkSheetStatus } from '../Apply';
-import { ACTION_NAMES } from '../../Const/ACTION_NAMES';
-import { BooleanNumber } from '../../Enum';
+import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
+import { BooleanNumber } from '../../Types/Enum';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { CommandManager, CommandUnit } from '../../Command';

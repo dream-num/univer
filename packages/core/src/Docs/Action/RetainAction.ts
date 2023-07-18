@@ -5,7 +5,7 @@ import {
     CommandUnit,
     CommonParameter,
 } from '../../Command';
-import { CommonParameterAttribute } from '../../Interfaces/IDocumentData';
+import { CommonParameterAttribute } from '../../Types/Interfaces/IDocumentData';
 import { IRetainActionData } from './ActionDataInterface';
 
 export class RetainAction extends DocActionBase<

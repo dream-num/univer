@@ -1,8 +1,8 @@
 import { Command } from '../../Command';
 import { ISetColumnWidthActionData } from '../Action';
-import { ACTION_NAMES } from '../../Const';
-import { BooleanNumber } from '../../Enum';
-import { IColumnData } from '../../Interfaces';
+import { ACTION_NAMES } from '../../Types/Const';
+import { BooleanNumber } from '../../Types/Enum';
+import { IColumnData } from '../../Types/Interfaces';
 import { Nullable, Tools } from '../../Shared';
 import { ObjectArray, ObjectArrayType } from '../../Shared/ObjectArray';
 import { Worksheet } from './Worksheet';

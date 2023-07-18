@@ -7,7 +7,7 @@ import {
     IColorStyle,
     IDocumentData,
     IStyleData,
-} from '../Interfaces';
+} from '../Types/Interfaces';
 import { ColorBuilder } from '../Sheets/Domain';
 import {
     BaselineOffset,
@@ -16,7 +16,7 @@ import {
     VerticalAlign,
     WrapStrategy,
     BorderStyleTypes,
-} from '../Enum';
+} from '../Types/Enum';
 
 export function makeCellToSelection(
     cellInfo: Nullable<ICellInfo>

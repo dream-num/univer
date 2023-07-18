@@ -1,5 +1,5 @@
 import { InsertSheetApply, RemoveSheetApply } from '../Apply';
-import { IWorksheetConfig } from '../../Interfaces';
+import { IWorksheetConfig } from '../../Types/Interfaces';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { CommandManager, CommandUnit } from '../../Command';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';

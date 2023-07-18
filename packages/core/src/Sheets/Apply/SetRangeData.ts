@@ -1,4 +1,4 @@
-import { ICellData, IStyleData } from '../../Interfaces';
+import { ICellData, IStyleData } from '../../Types/Interfaces';
 import { Nullable, Tools } from '../../Shared';
 import { ObjectMatrix } from '../../Shared/ObjectMatrix';
 import { mergeStyle, transformStyle } from './SetRangeStyle';

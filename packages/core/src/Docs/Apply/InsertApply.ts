@@ -1,4 +1,4 @@
-import { IDocumentBody } from '../../Interfaces/IDocumentData';
+import { IDocumentBody } from '../../Types/Interfaces/IDocumentData';
 import { sortRulesFactory } from '../../Shared/SortRules';
 import { DocumentModel } from '../Domain/DocumentModel';
 import { getDocsUpdateBody } from '../../Shared/Common';

@@ -6,9 +6,9 @@ import {
     ISetNamedRangeActionData,
     AddNamedRangeAction,
 } from '../Action';
-import { ACTION_NAMES } from '../../Const';
+import { ACTION_NAMES } from '../../Types/Const';
 import { Workbook } from './index';
-import { INamedRange } from '../../Interfaces';
+import { INamedRange } from '../../Types/Interfaces';
 
 /**
  * Create, access and modify named ranges in a spreadsheet. Named ranges are ranges that have associated string aliases.

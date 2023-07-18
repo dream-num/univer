@@ -1,4 +1,4 @@
-import { ITextRun } from '../Interfaces/IDocumentData';
+import { ITextRun } from '../Types/Interfaces/IDocumentData';
 
 type AnyObject = {
     [key: number | string]: AnyObject | AnyObject[] | Array<[number | string]> | any;

@@ -1,11 +1,5 @@
 import { DocActionBase } from '../../Command/DocActionBase';
-import {
-    ActionObservers,
-    ActionType,
-    CommandManager,
-    CommandUnit,
-    CommonParameter,
-} from '../../Command';
+import { ActionObservers, ActionType, CommandManager, CommandUnit, CommonParameter } from '../../Command';
 
 import { DOC_ACTION_NAMES } from '../../Const/DOC_ACTION_NAMES';
 import { IDocumentBody } from '../../Interfaces';
@@ -13,18 +7,10 @@ import { DeleteApply } from '../Apply/DeleteApply';
 import { InsertApply } from '../Apply/InsertApply';
 import { IDeleteActionData, IInsertActionData } from './ActionDataInterface';
 
-export class DeleteAction extends DocActionBase<
-    IDeleteActionData,
-    IInsertActionData
-> {
+export class DeleteAction extends DocActionBase<IDeleteActionData, IInsertActionData> {
     static Name = 'DeleteAction';
 
-    constructor(
-        actionData: IDeleteActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers,
-        commonParameter: CommonParameter
-    ) {
+    constructor(actionData: IDeleteActionData, commandUnit: CommandUnit, observers: ActionObservers, commonParameter: CommonParameter) {
         super(actionData, commandUnit, observers);
         this._doActionData = { ...actionData };
         const { len, line, segmentId } = actionData;

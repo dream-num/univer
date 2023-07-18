@@ -1,5 +1,6 @@
 import { IDocActionData } from '../../Command/DocActionBase';
-import { UpdateAttributeValueType, IDocumentBody } from '../../Interfaces/IDocumentData';
+import { IDocumentBody } from '../../Interfaces/IDocumentData';
+import { Nullable } from '../../Shared';
 import { UpdateDocsAttributeType } from '../../Shared/CommandEnum';
 
 export enum UpdateAttributeType {
@@ -24,8 +25,7 @@ export interface IInsertActionData extends IDocActionData {
 }
 
 export interface IRetainActionData extends IDocActionData {
-    attributes?: UpdateAttributeValueType[];
-    attributeType?: UpdateAttributeType;
+    body: Nullable<IDocumentBody>;
     len: number;
     coverType: UpdateDocsAttributeType;
     segmentId?: string;

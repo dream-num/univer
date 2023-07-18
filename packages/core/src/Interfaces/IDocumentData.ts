@@ -65,8 +65,6 @@ export interface ISizeData {
     height?: number;
 }
 
-export type UpdateAttributeValueType = ITextRun | IParagraph | ISectionBreak | ICustomBlock | ITable | ICustomRange;
-
 /**
  * Properties of document body
  * 三种更新类型，范围叠加、范围互斥、占位符

@@ -1,53 +1,53 @@
-import { UpdateAttributeValueType, IDocumentBody, ITextRun } from '../../Interfaces/IDocumentData';
+import { IDocumentBody } from '../../Interfaces/IDocumentData';
 import { DocumentModel } from '../Domain/DocumentModel';
 import { getDocsUpdateBody, horizontalLineSegmentsSubtraction } from '../../Shared/Common';
 import { UpdateDocsAttributeType } from '../../Shared/CommandEnum';
-import { UpdateAttributeType } from '../Action/ActionDataInterface';
+import { Nullable } from '../../Shared/Types';
 
 export function UpdateAttributeApply(
     document: DocumentModel,
+    updateBody: Nullable<IDocumentBody>,
     textLength: number,
     currentIndex: number,
-    attributes: UpdateAttributeValueType[],
-    attributeType: UpdateAttributeType,
     coverType: UpdateDocsAttributeType,
     segmentId?: string
 ) {
+    if (updateBody == null) {
+        return;
+    }
+
     const doc = document.snapshot;
 
     const body = getDocsUpdateBody(doc, segmentId);
-
-    if (textLength === 0) {
-        return [];
-    }
 
     if (body == null) {
         throw new Error('no body has changed');
     }
 
-    return updateAttribute(body, textLength, currentIndex, attributes, attributeType, coverType);
+    return updateAttribute(body, updateBody, textLength, currentIndex, coverType);
 }
 
-function updateAttribute(
-    body: IDocumentBody,
-    textLength: number,
-    currentIndex: number,
-    attributes: UpdateAttributeValueType[],
-    attributeType: UpdateAttributeType,
-    coverType: UpdateDocsAttributeType
-) {
-    if (attributeType === UpdateAttributeType.TEXT_RUN) {
-        return processTextRuns(body, textLength, currentIndex, attributes as ITextRun[], coverType);
-    }
+function updateAttribute(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType): IDocumentBody {
+    const removeTextRuns = updateTextRuns(body, updateBody, textLength, currentIndex, coverType);
 
-    return [];
+    return {
+        dataStream: '',
+        textRuns: removeTextRuns,
+        // paragraphs: removeParagraphs,
+        // sectionBreaks: removeSectionBreaks,
+        // customBlocks: removeCustomBlocks,
+        // tables: removeTables,
+        // customRanges: removeCustomRanges,
+    };
 }
 
-function processTextRuns(body: IDocumentBody, textLength: number, currentIndex: number, updateTextRuns: ITextRun[], coverType: UpdateDocsAttributeType) {
+function updateTextRuns(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType) {
     const { textRuns } = body;
 
-    if (textRuns == null) {
-        return [];
+    const { textRuns: updateTextRuns } = updateBody;
+
+    if (textRuns == null || updateTextRuns == null) {
+        return;
     }
 
     const startIndex = currentIndex;

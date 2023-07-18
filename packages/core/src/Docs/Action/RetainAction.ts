@@ -1,9 +1,10 @@
 import { DocActionBase } from '../../Command/DocActionBase';
 import { ActionObservers, CommandManager, CommandUnit, CommonParameter } from '../../Command';
-import { UpdateAttributeValueType } from '../../Interfaces/IDocumentData';
 import { IRetainActionData } from './ActionDataInterface';
 import { UpdateDocsAttributeType } from '../../Shared/CommandEnum';
 import { UpdateAttributeApply } from '../Apply/UpdateAttributeApply';
+import { IDocumentBody } from '../../Interfaces';
+import { Nullable } from '../../Shared';
 
 export class RetainAction extends DocActionBase<IRetainActionData, IRetainActionData> {
     static NAME = 'RetainAction';
@@ -11,40 +12,35 @@ export class RetainAction extends DocActionBase<IRetainActionData, IRetainAction
     constructor(actionData: IRetainActionData, commandUnit: CommandUnit, observers: ActionObservers, commonParameter: CommonParameter) {
         super(actionData, commandUnit, observers);
         this._doActionData = { ...actionData };
-        const undoData = { ...actionData, coverType: UpdateDocsAttributeType.REPLACE };
-
-        const attributes = this.do(commonParameter);
-        if (attributes.length > 0) {
-            undoData.attributes = attributes;
-        }
-        this._oldActionData = undoData;
+        this._oldActionData = {
+            ...actionData,
+            coverType: UpdateDocsAttributeType.REPLACE,
+            body: this.do(commonParameter),
+        };
     }
 
     redo(commonParameter: CommonParameter): void {
         this.do(commonParameter);
     }
 
-    do(commonParameter: CommonParameter): UpdateAttributeValueType[] {
+    do(commonParameter: CommonParameter): Nullable<IDocumentBody> {
         const actionData = this.getDoActionData();
         const document = this.getDocument();
-        const { len, segmentId, attributes, coverType, attributeType } = actionData;
+        const { len, segmentId, body, coverType } = actionData;
 
-        let results: UpdateAttributeValueType[] = [];
-        if (attributes && attributeType) {
-            results = UpdateAttributeApply(document, len, commonParameter.cursor, attributes, attributeType, coverType, segmentId);
-        }
+        let result: Nullable<IDocumentBody> = UpdateAttributeApply(document, body, len, commonParameter.cursor, coverType, segmentId);
 
         commonParameter.moveCursor(len);
 
-        return results;
+        return result;
     }
 
     undo(commonParameter: CommonParameter): void {
         const actionData = this.getOldActionData();
         const document = this.getDocument();
-        const { len, segmentId, attributes, coverType, attributeType } = actionData;
+        const { len, segmentId, body, coverType } = actionData;
 
-        if (attributes && attributeType) UpdateAttributeApply(document, len, commonParameter.cursor, attributes, attributeType, coverType, segmentId);
+        if (body) UpdateAttributeApply(document, body, len, commonParameter.cursor, coverType, segmentId);
 
         commonParameter.moveCursor(len);
     }

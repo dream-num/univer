@@ -1,28 +1,14 @@
 import { DocActionBase } from '../../Command/DocActionBase';
-import {
-    ActionObservers,
-    ActionType,
-    CommandManager,
-    CommandUnit,
-    CommonParameter,
-} from '../../Command';
+import { ActionObservers, ActionType, CommandManager, CommandUnit, CommonParameter } from '../../Command';
 import { DOC_ACTION_NAMES } from '../../Const/DOC_ACTION_NAMES';
 import { InsertApply } from '../Apply/InsertApply';
 import { DeleteApply } from '../Apply/DeleteApply';
 import { IInsertActionData, IDeleteActionData } from './ActionDataInterface';
 
-export class InsertAction extends DocActionBase<
-    IInsertActionData,
-    IDeleteActionData
-> {
+export class InsertAction extends DocActionBase<IInsertActionData, IDeleteActionData> {
     static NAME = 'InsertAction';
 
-    constructor(
-        actionData: IInsertActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers,
-        commonParameter: CommonParameter
-    ) {
+    constructor(actionData: IInsertActionData, commandUnit: CommandUnit, observers: ActionObservers, commonParameter: CommonParameter) {
         super(actionData, commandUnit, observers);
         this._doActionData = { ...actionData };
         this.do(commonParameter);

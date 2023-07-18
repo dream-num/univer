@@ -2,17 +2,10 @@ import { DocActionBase } from '../../Command/DocActionBase';
 import { ActionObservers, CommandManager, CommandUnit } from '../../Command';
 import { IUpdateDocumentActionData } from './ActionDataInterface';
 
-export class UpdateDocumentAction extends DocActionBase<
-    IUpdateDocumentActionData,
-    IUpdateDocumentActionData
-> {
+export class UpdateDocumentAction extends DocActionBase<IUpdateDocumentActionData, IUpdateDocumentActionData> {
     static NAME = 'UpdateDocumentAction';
 
-    constructor(
-        actionData: IUpdateDocumentActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
+    constructor(actionData: IUpdateDocumentActionData, commandUnit: CommandUnit, observers: ActionObservers) {
         super(actionData, commandUnit, observers);
         this._doActionData = { ...actionData };
         this.do();

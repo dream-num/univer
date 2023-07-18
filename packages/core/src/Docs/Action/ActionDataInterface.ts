@@ -1,9 +1,15 @@
 import { IDocActionData } from '../../Command/DocActionBase';
-import {
-    CommonParameterAttribute,
-    IDocumentBody,
-} from '../../Interfaces/IDocumentData';
+import { UpdateAttributeValueType, IDocumentBody } from '../../Interfaces/IDocumentData';
+import { UpdateDocsAttributeType } from '../../Shared/CommandEnum';
 
+export enum UpdateAttributeType {
+    TEXT_RUN,
+    PARAGRAPH,
+    SECTION,
+    CUSTOM_BLOCK,
+    TABLE,
+    CUSTOM_RANGE,
+}
 export interface IDeleteActionData extends IDocActionData {
     len: number;
     line: number;
@@ -18,8 +24,10 @@ export interface IInsertActionData extends IDocActionData {
 }
 
 export interface IRetainActionData extends IDocActionData {
-    attribute?: CommonParameterAttribute;
+    attributes?: UpdateAttributeValueType[];
+    attributeType?: UpdateAttributeType;
     len: number;
+    coverType: UpdateDocsAttributeType;
     segmentId?: string;
 }
 

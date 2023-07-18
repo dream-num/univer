@@ -65,7 +65,7 @@ export interface ISizeData {
     height?: number;
 }
 
-export type CommonParameterAttribute = ITextRun | IParagraph | ISectionBreak | ICustomBlock | ITable | ICustomRange;
+export type UpdateAttributeValueType = ITextRun | IParagraph | ISectionBreak | ICustomBlock | ITable | ICustomRange;
 
 /**
  * Properties of document body

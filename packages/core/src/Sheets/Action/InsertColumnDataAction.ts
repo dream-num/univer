@@ -3,7 +3,7 @@ import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { ObjectArray } from '../../Shared';
 import { CommandManager, CommandUnit } from '../../Command';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { ICellData } from '../../Interfaces';
+import { ICellData } from '../../Types/Interfaces';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveColumnDataAction } from './RemoveColumnDataAction';
 

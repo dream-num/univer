@@ -1,7 +1,7 @@
 import { Command } from '../../Command';
 import { ISetRowHeightActionData, SetRowHeightAction } from '../Action';
-import { BooleanNumber } from '../../Enum';
-import { IRowData } from '../../Interfaces';
+import { BooleanNumber } from '../../Types/Enum';
+import { IRowData } from '../../Types/Interfaces';
 import { Nullable, ObjectArray, ObjectArrayType, Tools } from '../../Shared';
 import { Worksheet } from './Worksheet';
 

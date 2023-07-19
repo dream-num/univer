@@ -39,7 +39,7 @@ import {
     SetZoomRatioAction,
 } from '../Sheets/Action';
 import { CommandManager } from './CommandManager';
-import { DOC_ACTION_NAMES } from '../Const/DOC_ACTION_NAMES';
+import { DOC_ACTION_NAMES } from '../Types/Const/DOC_ACTION_NAMES';
 import {
     InsertTextAction,
     DeleteTextAction,

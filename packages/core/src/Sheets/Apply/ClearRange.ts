@@ -1,4 +1,4 @@
-import { ICellData } from '../../Interfaces';
+import { ICellData } from '../../Types/Interfaces';
 import { Tools, ObjectMatrix } from '../../Shared';
 
 import { CommandUnit } from '../../Command';

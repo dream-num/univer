@@ -1,4 +1,4 @@
-import { IDocumentData } from '../Interfaces';
+import { IDocumentData } from '../Types/Interfaces';
 import { ContextBase } from './ContextBase';
 import { DocumentModel } from '../Docs/Domain/DocumentModel';
 

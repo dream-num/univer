@@ -5,7 +5,7 @@ import { Observable } from '../Observer';
 import { GenName, PropsFrom } from '../Shared';
 import { Univer } from './Univer';
 import { WorkBookObserver } from './WorkBookObserver';
-import { IWorkbookConfig } from '../Interfaces';
+import { IWorkbookConfig } from '../Types/Interfaces';
 
 /**
  * Core context, mount important instances, managers

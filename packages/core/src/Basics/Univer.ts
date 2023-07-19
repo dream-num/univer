@@ -4,7 +4,7 @@ import { UniverSlide } from './UniverSlide';
 import { Nullable } from '../Shared';
 import { Context } from './Context';
 import { Plugin } from '../Plugin';
-import { IUniverData } from '../Interfaces';
+import { IUniverData } from '../Types/Interfaces';
 import { UniverObserverImpl } from './UniverObserverImpl';
 
 export class Univer {

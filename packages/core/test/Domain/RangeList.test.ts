@@ -4,7 +4,7 @@
 import { SheetContext } from '../../src/Basics/SheetContext';
 import { Workbook } from '../../src/Sheets/Domain/Workbook';
 import { Worksheet } from '../../src/Sheets/Domain/Worksheet';
-import { BooleanNumber, WrapStrategy } from '../../src/Enum';
+import { BooleanNumber, WrapStrategy } from '../../src/Types/Enum';
 import { TestInit } from '../ContainerStartUp';
 import { createCoreTestContainer } from './Range.test';
 

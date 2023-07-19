@@ -1,7 +1,7 @@
-import { ITextStyle } from '../../Interfaces/IDocumentData';
+import { ITextStyle } from '../../Types/Interfaces/IDocumentData';
 import { Styles } from '../Domain';
-import { IRangeData, ICellData, IDocumentData } from '../../Interfaces';
-import { IBorderData, IStyleData } from '../../Interfaces/IStyleData';
+import { IRangeData, ICellData, IDocumentData } from '../../Types/Interfaces';
+import { IBorderData, IStyleData } from '../../Types/Interfaces/IStyleData';
 import {
     IKeyValue,
     Nullable,

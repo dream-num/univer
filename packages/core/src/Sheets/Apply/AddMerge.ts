@@ -1,5 +1,5 @@
 import { Merges } from '../Domain/Merges';
-import { IRangeData } from '../../Interfaces';
+import { IRangeData } from '../../Types/Interfaces';
 import { CommandUnit } from '../../Command';
 import { IAddMergeActionData } from '../Action';
 

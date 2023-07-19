@@ -1,6 +1,6 @@
-import { ICellData, IRangeData } from '../../Interfaces';
+import { ICellData, IRangeData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { Dimension } from '../../Enum/Dimension';
+import { Dimension } from '../../Types/Enum/Dimension';
 import { IDeleteRangeActionData } from './DeleteRangeAction';
 import { CommandManager, CommandUnit } from '../../Command';
 import { SetRangeDataAction } from './SetRangeDataAction';

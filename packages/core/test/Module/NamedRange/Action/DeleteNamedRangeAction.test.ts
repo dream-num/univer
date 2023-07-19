@@ -9,7 +9,7 @@ import {
 } from '../../../../src';
 import { SheetContext } from '../../../../src/Basics';
 import { Workbook, Worksheet } from '../../../../src/Sheets/Domain';
-import { INamedRange } from '../../../../src/Interfaces/INamedRange';
+import { INamedRange } from '../../../../src/Types/Interfaces/INamedRange';
 import { createCoreTestContainer } from '../../../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));

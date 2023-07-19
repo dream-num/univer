@@ -1,13 +1,13 @@
 import { Worksheet } from './index';
 import { SheetContext } from '../../Basics';
 import { Command, CommandManager } from '../../Command';
-import { ACTION_NAMES } from '../../Const';
+import { ACTION_NAMES } from '../../Types/Const';
 import {
     BooleanNumber,
     HorizontalAlign,
     VerticalAlign,
     WrapStrategy,
-} from '../../Enum';
+} from '../../Types/Enum';
 import {
     ICellData,
     ICellV,
@@ -16,7 +16,7 @@ import {
     IRangeType,
     IStyleData,
     ITextDecoration,
-} from '../../Interfaces';
+} from '../../Types/Interfaces';
 import { Workbook } from './Workbook';
 import { Nullable, ObjectMatrix, Tools, Tuples } from '../../Shared';
 import {

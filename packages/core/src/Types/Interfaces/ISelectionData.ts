@@ -1,4 +1,4 @@
-import { Range } from '../Sheets/Domain';
+import { Range } from '../../Sheets/Domain';
 import { IRangeData, IRangeType } from './IRangeData';
 
 /**

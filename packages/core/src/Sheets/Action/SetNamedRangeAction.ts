@@ -7,7 +7,7 @@ import {
     CommandManager,
 } from '../../Command';
 import { SetNamedRangeApply } from '../Apply';
-import { INamedRange } from '../../Interfaces';
+import { INamedRange } from '../../Types/Interfaces';
 
 export interface ISetNamedRangeActionData extends ISheetActionData {
     namedRange: INamedRange;

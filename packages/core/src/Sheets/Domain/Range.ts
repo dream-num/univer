@@ -14,7 +14,7 @@ import {
 
 import { CommandManager, ISheetActionData, Command } from '../../Command';
 
-import { DEFAULT_RANGE, DEFAULT_STYLES, ACTION_NAMES } from '../../Const';
+import { DEFAULT_RANGE, DEFAULT_STYLES, ACTION_NAMES } from '../../Types/Const';
 
 import {
     BooleanNumber,
@@ -29,7 +29,7 @@ import {
     VerticalAlign,
     WrapStrategy,
     CopyPasteType,
-} from '../../Enum';
+} from '../../Types/Enum';
 
 import {
     IBorderData,
@@ -43,7 +43,7 @@ import {
     IRangeType,
     IStyleData,
     ITextDecoration,
-} from '../../Interfaces';
+} from '../../Types/Interfaces';
 
 import {
     Nullable,

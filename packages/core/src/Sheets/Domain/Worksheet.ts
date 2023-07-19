@@ -41,8 +41,8 @@ import {
     SetWorkSheetNameAction,
     SetWorkSheetStatusAction,
 } from '../Action';
-import { DEFAULT_WORKSHEET } from '../../Const';
-import { Direction, BooleanNumber, SheetTypes } from '../../Enum';
+import { DEFAULT_WORKSHEET } from '../../Types/Const';
+import { Direction, BooleanNumber, SheetTypes } from '../../Types/Enum';
 import {
     IBorderStyleData,
     ICellData,
@@ -53,7 +53,7 @@ import {
     ISelectionData,
     IStyleData,
     IWorksheetConfig,
-} from '../../Interfaces';
+} from '../../Types/Interfaces';
 import { Nullable, ObjectMatrix, Tools, Tuples } from '../../Shared';
 import { ColumnManager } from './ColumnManager';
 import { Merges } from './Merges';

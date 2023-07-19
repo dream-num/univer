@@ -3,7 +3,7 @@ import { ActionObservers, CommandManager, CommandUnit, CommonParameter } from '.
 import { IRetainActionData } from './ActionDataInterface';
 import { UpdateDocsAttributeType } from '../../Shared/CommandEnum';
 import { UpdateAttributeApply } from '../Apply/UpdateAttributeApply';
-import { IDocumentBody } from '../../Interfaces';
+import { IDocumentBody } from '../../Types/Interfaces';
 import { Nullable } from '../../Shared';
 
 export class RetainAction extends DocActionBase<IRetainActionData, IRetainActionData> {

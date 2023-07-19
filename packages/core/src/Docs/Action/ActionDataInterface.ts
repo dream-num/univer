@@ -1,5 +1,5 @@
 import { IDocActionData } from '../../Command/DocActionBase';
-import { IDocumentBody } from '../../Interfaces/IDocumentData';
+import { IDocumentBody } from '../../Types/Interfaces/IDocumentData';
 import { Nullable } from '../../Shared';
 import { UpdateDocsAttributeType } from '../../Shared/CommandEnum';
 

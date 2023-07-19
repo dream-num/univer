@@ -1,4 +1,4 @@
-import { IKeyType, IKeyValue, Nullable } from '../Shared/Types';
+import { IKeyType, IKeyValue, Nullable } from '../../Shared/Types';
 import { BooleanNumber, LocaleType } from '../Enum';
 import { IStyleData } from './IStyleData';
 import { IWorksheetConfig } from './IWorksheetData';

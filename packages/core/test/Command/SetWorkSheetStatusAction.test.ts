@@ -3,7 +3,7 @@
  */
 import { SheetContext } from '../../src/Basics';
 import { CommandManager, SetWorkSheetStatusAction } from '../../src/Command';
-import { ACTION_NAMES } from '../../src/Const';
+import { ACTION_NAMES } from '../../src/Types/Const';
 import { Workbook, Worksheet } from '../../src/Sheets/Domain';
 import { createCoreTestContainer } from '../ContainerStartUp';
 

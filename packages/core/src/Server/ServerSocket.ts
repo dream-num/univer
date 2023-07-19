@@ -1,6 +1,6 @@
 import { ISheetActionData } from '../Command';
 import { ICreatable, createIdentifier } from '../DI';
-import { IWorkbookConfig, IWorksheetConfig } from '../Interfaces';
+import { IWorkbookConfig, IWorksheetConfig } from '../Types/Interfaces';
 import { IOSocket, IOSocketListenType } from '../Shared';
 import { MessageQueue } from './MessageQueue';
 import { IOServerMessage, IOServerReceive, ServerBase } from './ServerBase';

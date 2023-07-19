@@ -1,7 +1,7 @@
 import { ObjectMatrixPrimitiveType } from '../../Shared';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { SetBorderApply } from '../Apply';
-import { IStyleData } from '../../Interfaces';
+import { IStyleData } from '../../Types/Interfaces';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { CommandManager, CommandUnit } from '../../Command';
 

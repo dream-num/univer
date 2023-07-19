@@ -3,9 +3,9 @@
  */
 import { SheetContext } from '../../src/Basics';
 import { CommandManager, SetWorkSheetHideAction } from '../../src/Command';
-import { ACTION_NAMES } from '../../src/Const';
+import { ACTION_NAMES } from '../../src/Types/Const';
 import { Workbook, Worksheet } from '../../src/Sheets/Domain';
-import { BooleanNumber } from '../../src/Enum';
+import { BooleanNumber } from '../../src/Types/Enum';
 import { createCoreTestContainer } from '../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));

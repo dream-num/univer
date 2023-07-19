@@ -6,7 +6,7 @@ import { SheetContext } from '../../src/Basics/SheetContext';
 import { Range } from '../../src/Sheets/Domain/Range';
 import { Workbook } from '../../src/Sheets/Domain/Workbook';
 import { Worksheet } from '../../src/Sheets/Domain/Worksheet';
-import { BooleanNumber } from '../../src/Enum';
+import { BooleanNumber } from '../../src/Types/Enum';
 import { createCoreTestContainer } from './Range.test';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));

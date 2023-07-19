@@ -5,7 +5,7 @@ import { Workbook, Worksheet } from '../../src/Sheets/Domain';
 import { SheetContext } from '../../src/Basics';
 import { createCoreTestContainer } from '../ContainerStartUp';
 import { CommandManager, SetWorkSheetNameAction } from '../../src/Command';
-import { ACTION_NAMES } from '../../src/Const';
+import { ACTION_NAMES } from '../../src/Types/Const';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 

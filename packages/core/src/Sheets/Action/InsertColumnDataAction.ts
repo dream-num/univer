@@ -1,19 +1,9 @@
 import { InsertDataColumnApply, RemoveColumnDataApply } from '../Apply';
-import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { ObjectArray } from '../../Shared';
 import { CommandModel } from '../../Command';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { ICellData } from '../../Types/Interfaces';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveColumnDataAction } from './RemoveColumnDataAction';
-
-/**
- * @internal
- */
-export interface IInsertColumnDataActionData extends ISheetActionData {
-    columnIndex: number;
-    columnData: ObjectMatrixPrimitiveType<ICellData>; // TODO Does it need to be merged with IKeyValue
-}
 
 /**
  * Insert the column data of the specified column index
@@ -21,7 +11,6 @@ export interface IInsertColumnDataActionData extends ISheetActionData {
  * @internal
  */
 export class InsertColumnDataAction extends SheetActionBase<IInsertColumnDataActionData, IRemoveColumnDataAction> {
-    static NAME = 'InsertColumnDataAction';
 
     constructor(actionData: IInsertColumnDataActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

@@ -64,50 +64,51 @@ import {
     UpdateParagraphBulletAction,
     TextIndexAdjustAction,
 } from '../Docs';
+import { ACTION_NAMES } from '../Types/Const/ACTION_NAMES';
 
 /**
  * All Commands are registered statically. For each new Command, a static registration method must be added here.
  */
 
-CommandManager.register(InsertRowDataAction.NAME, InsertRowDataAction);
-CommandManager.register(InsertRowAction.NAME, InsertRowAction);
-CommandManager.register(RemoveRowDataAction.NAME, RemoveRowDataAction);
-CommandManager.register(RemoveRowAction.NAME, RemoveRowAction);
-CommandManager.register(SetRangeStyleAction.NAME, SetRangeStyleAction);
-CommandManager.register(SetWorkSheetStatusAction.NAME, SetWorkSheetStatusAction);
-CommandManager.register(SetSelectionActivateAction.NAME, SetSelectionActivateAction);
-CommandManager.register(SetRangeDataAction.NAME, SetRangeDataAction);
-CommandManager.register(SetRangeFormattedValueAction.NAME, SetRangeFormattedValueAction);
-CommandManager.register(DeleteRangeAction.NAME, DeleteRangeAction);
-CommandManager.register(InsertRangeAction.NAME, InsertRangeAction);
-CommandManager.register(SetTabColorAction.NAME, SetTabColorAction);
-CommandManager.register(SetWorkSheetHideAction.NAME, SetWorkSheetHideAction);
-CommandManager.register(SetWorkSheetActivateAction.NAME, SetWorkSheetActivateAction);
-CommandManager.register(SetRowHideAction.NAME, SetRowHideAction);
-CommandManager.register(SetRowShowAction.NAME, SetRowShowAction);
-CommandManager.register(SetColumnHideAction.NAME, SetColumnHideAction);
-CommandManager.register(SetColumnShowAction.NAME, SetColumnShowAction);
-CommandManager.register(AddMergeAction.NAME, AddMergeAction);
-CommandManager.register(RemoveMergeAction.NAME, RemoveMergeAction);
-CommandManager.register(SetWorkSheetNameAction.NAME, SetWorkSheetNameAction);
-CommandManager.register(SetHiddenGridlinesAction.NAME, SetHiddenGridlinesAction);
-CommandManager.register(SetColumnWidthAction.NAME, SetColumnWidthAction);
-CommandManager.register(SetRowHeightAction.NAME, SetRowHeightAction);
-CommandManager.register(SetBorderAction.NAME, SetBorderAction);
-CommandManager.register(SetRightToLeftAction.NAME, SetRightToLeftAction);
-CommandManager.register(InsertColumnDataAction.NAME, InsertColumnDataAction);
-CommandManager.register(RemoveColumnDataAction.NAME, RemoveColumnDataAction);
-CommandManager.register(InsertColumnAction.NAME, InsertColumnAction);
-CommandManager.register(RemoveColumnAction.NAME, RemoveColumnAction);
-CommandManager.register(DeleteNamedRangeAction.NAME, DeleteNamedRangeAction);
-CommandManager.register(SetNamedRangeAction.NAME, SetNamedRangeAction);
-CommandManager.register(AddNamedRangeAction.NAME, AddNamedRangeAction);
-CommandManager.register(SetRangeNoteAction.NAME, SetRangeNoteAction);
-CommandManager.register(InsertSheetAction.NAME, InsertSheetAction);
-CommandManager.register(RemoveSheetAction.NAME, RemoveSheetAction);
-CommandManager.register(SetSheetOrderAction.NAME, SetSheetOrderAction);
-CommandManager.register(SetZoomRatioAction.NAME, SetZoomRatioAction);
-CommandManager.register(ClearRangeAction.NAME, ClearRangeAction);
+CommandManager.register(ACTION_NAMES.INSERT_ROW_DATA_ACTION, InsertRowDataAction);
+CommandManager.register(ACTION_NAMES.INSERT_ROW_ACTION, InsertRowAction);
+CommandManager.register(ACTION_NAMES.REMOVE_ROW_DATA_ACTION, RemoveRowDataAction);
+CommandManager.register(ACTION_NAMES.REMOVE_ROW_ACTION, RemoveRowAction);
+CommandManager.register(ACTION_NAMES.SET_RANGE_STYLE_ACTION, SetRangeStyleAction);
+CommandManager.register(ACTION_NAMES.SET_WORKSHEET_STATUS_ACTION, SetWorkSheetStatusAction);
+CommandManager.register(ACTION_NAMES.SET_SELECTION_ACTION, SetSelectionActivateAction);
+CommandManager.register(ACTION_NAMES.SET_RANGE_DATA_ACTION, SetRangeDataAction);
+CommandManager.register(ACTION_NAMES.SET_RANGE_FORMATTED_VALUE_ACTION, SetRangeFormattedValueAction);
+CommandManager.register(ACTION_NAMES.DELETE_RANGE_ACTION, DeleteRangeAction);
+CommandManager.register(ACTION_NAMES.INSERT_RANGE_ACTION, InsertRangeAction);
+CommandManager.register(ACTION_NAMES.SET_TAB_COLOR_ACTION, SetTabColorAction);
+CommandManager.register(ACTION_NAMES.HIDE_SHEET_ACTION, SetWorkSheetHideAction);
+CommandManager.register(ACTION_NAMES.SET_WORKSHEET_ACTIVATE_ACTION, SetWorkSheetActivateAction);
+CommandManager.register(ACTION_NAMES.SET_HIDE_ROW_ACTION, SetRowHideAction);
+CommandManager.register(ACTION_NAMES.SET_SHOW_ROW_ACTION, SetRowShowAction);
+CommandManager.register(ACTION_NAMES.SET_HIDE_COLUMN_ACTION, SetColumnHideAction);
+CommandManager.register(ACTION_NAMES.SET_SHOW_COLUMN_ACTION, SetColumnShowAction);
+CommandManager.register(ACTION_NAMES.ADD_MERGE_ACTION, AddMergeAction);
+CommandManager.register(ACTION_NAMES.REMOVE_MERGE_ACTION, RemoveMergeAction);
+CommandManager.register(ACTION_NAMES.SET_WORKSHEET_NAME_ACTION, SetWorkSheetNameAction);
+CommandManager.register(ACTION_NAMES.SET_HIDDEN_GRIDLINES_ACTION, SetHiddenGridlinesAction);
+CommandManager.register(ACTION_NAMES.SET_COLUMN_WIDTH_ACTION, SetColumnWidthAction);
+CommandManager.register(ACTION_NAMES.SET_ROW_HEIGHT_ACTION, SetRowHeightAction);
+CommandManager.register(ACTION_NAMES.SET_BORDER_ACTION, SetBorderAction);
+CommandManager.register(ACTION_NAMES.SET_RIGHT_TO_LEFT_ACTION, SetRightToLeftAction);
+CommandManager.register(ACTION_NAMES.INSERT_COLUMN_DATA_ACTION, InsertColumnDataAction);
+CommandManager.register(ACTION_NAMES.REMOVE_COLUMN_DATA_ACTION, RemoveColumnDataAction);
+CommandManager.register(ACTION_NAMES.INSERT_COLUMN_ACTION, InsertColumnAction);
+CommandManager.register(ACTION_NAMES.REMOVE_COLUMN_ACTION, RemoveColumnAction);
+CommandManager.register(ACTION_NAMES.DELETE_NAMED_RANGE_ACTION, DeleteNamedRangeAction);
+CommandManager.register(ACTION_NAMES.SET_NAMED_RANGE_ACTION, SetNamedRangeAction);
+CommandManager.register(ACTION_NAMES.ADD_NAMED_RANGE_ACTION, AddNamedRangeAction);
+CommandManager.register(ACTION_NAMES.SET_RANGE_NOTE_ACTION, SetRangeNoteAction);
+CommandManager.register(ACTION_NAMES.INSERT_SHEET_ACTION, InsertSheetAction);
+CommandManager.register(ACTION_NAMES.REMOVE_SHEET_ACTION, RemoveSheetAction);
+CommandManager.register(ACTION_NAMES.SET_SHEET_ORDER_ACTION, SetSheetOrderAction);
+CommandManager.register(ACTION_NAMES.SET_ZOOM_RATIO_ACTION, SetZoomRatioAction);
+CommandManager.register(ACTION_NAMES.CLEAR_RANGE_ACTION, ClearRangeAction);
 
 ///====================================================================================================
 ///====================================================================================================

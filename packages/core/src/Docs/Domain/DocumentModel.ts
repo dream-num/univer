@@ -1,10 +1,6 @@
 import { DocContext } from '../../Basics';
 import { Command } from '../../Command';
-import {
-    CommonParameterAttribute,
-    IDocumentBody,
-    IDocumentData,
-} from '../../Types/Interfaces/IDocumentData';
+import { CommonParameterAttribute, IDocumentBody, IDocumentData } from '../../Types/Interfaces/IDocumentData';
 import { ITextSelectionRange } from '../../Types/Interfaces/ISelectionData';
 import { DOC_ACTION_NAMES } from '../../Types/Const/DOC_ACTION_NAMES';
 import { Tools, getTextIndexByCursor } from '../../Shared';
@@ -130,11 +126,7 @@ export class DocumentModel extends DocumentModelSimple {
         return this._unitId;
     }
 
-    insert(
-        body: IDocumentBody,
-        range: ITextSelectionRange,
-        segmentId?: string
-    ): DocumentModel {
+    insert(body: IDocumentBody, range: ITextSelectionRange, segmentId?: string): DocumentModel {
         const commandManager = this._context.getCommandManager();
 
         const { cursorStart, cursorEnd, isEndBack, isStartBack, isCollapse } = range;
@@ -186,11 +178,7 @@ export class DocumentModel extends DocumentModelSimple {
         return this;
     }
 
-    update(
-        attribute: CommonParameterAttribute,
-        range: ITextSelectionRange,
-        segmentId?: string
-    ) {
+    update(attribute: CommonParameterAttribute, range: ITextSelectionRange, segmentId?: string) {
         const commandManager = this._context.getCommandManager();
 
         const { cursorStart, cursorEnd, isEndBack, isStartBack } = range;
@@ -223,12 +211,7 @@ export class DocumentModel extends DocumentModelSimple {
         return this;
     }
 
-    IMEInput(
-        newText: string,
-        oldTextLen: number,
-        start: number,
-        segmentId?: string
-    ) {
+    IMEInput(newText: string, oldTextLen: number, start: number, segmentId?: string) {
         const _commandManager = this._context.getCommandManager();
 
         const actionList = [];
@@ -275,20 +258,14 @@ export class DocumentModel extends DocumentModelSimple {
         if (headers) {
             for (let headerId in headers) {
                 const header = headers[headerId];
-                this.headerTreeMap.set(
-                    headerId,
-                    DocumentBodyModel.create(header.body)
-                );
+                this.headerTreeMap.set(headerId, DocumentBodyModel.create(header.body));
             }
         }
 
         if (footers) {
             for (let footerId in footers) {
                 const footer = footers[footerId];
-                this.footerTreeMap.set(
-                    footerId,
-                    DocumentBodyModel.create(footer.body)
-                );
+                this.footerTreeMap.set(footerId, DocumentBodyModel.create(footer.body));
             }
         }
     }

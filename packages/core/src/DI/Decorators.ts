@@ -1,9 +1,4 @@
-import {
-    DependencyIdentifier,
-    IdentifierDecorator,
-    IdentifierDecoratorSymbol,
-    prettyPrintIdentifier,
-} from './DependencyIdentifier';
+import { DependencyIdentifier, IdentifierDecorator, IdentifierDecoratorSymbol, prettyPrintIdentifier } from './DependencyIdentifier';
 import { Ctor, LookUp, Quantity } from './Types';
 import { DIError } from './Error';
 
@@ -15,9 +10,7 @@ export interface ClassDependencyItem<T> extends DependencyItemHooks<T> {
     useClass: Ctor<T>;
     lazy?: boolean;
 }
-export function isClassDependencyItem<T>(
-    thing: unknown
-): thing is ClassDependencyItem<T> {
+export function isClassDependencyItem<T>(thing: unknown): thing is ClassDependencyItem<T> {
     if (thing && typeof (thing as any).useClass !== 'undefined') {
         return true;
     }
@@ -25,23 +18,14 @@ export function isClassDependencyItem<T>(
     return false;
 }
 
-export type FactoryDepModifier =
-    | typeof Self
-    | typeof SkipSelf
-    | typeof Optional
-    | typeof Many
-    | typeof WithNew;
-export type FactoryDep<T> =
-    | [...FactoryDepModifier[], DependencyIdentifier<T>]
-    | DependencyIdentifier<T>;
+export type FactoryDepModifier = typeof Self | typeof SkipSelf | typeof Optional | typeof Many | typeof WithNew;
+export type FactoryDep<T> = [...FactoryDepModifier[], DependencyIdentifier<T>] | DependencyIdentifier<T>;
 export interface FactoryDependencyItem<T> extends DependencyItemHooks<T> {
     useFactory: (...deps: any[]) => T;
     dynamic?: true;
     deps?: Array<FactoryDep<any>>;
 }
-export function isFactoryDependencyItem<T>(
-    thing: unknown
-): thing is FactoryDependencyItem<T> {
+export function isFactoryDependencyItem<T>(thing: unknown): thing is FactoryDependencyItem<T> {
     if (thing && typeof (thing as any).useFactory !== 'undefined') {
         return true;
     }
@@ -52,9 +36,7 @@ export function isFactoryDependencyItem<T>(
 export interface ValueDependencyItem<T> extends DependencyItemHooks<T> {
     useValue: T;
 }
-export function isValueDependencyItem<T>(
-    thing: unknown
-): thing is ValueDependencyItem<T> {
+export function isValueDependencyItem<T>(thing: unknown): thing is ValueDependencyItem<T> {
     if (thing && typeof (thing as any).useValue !== 'undefined') {
         return true;
     }
@@ -63,13 +45,9 @@ export function isValueDependencyItem<T>(
 }
 
 export interface AsyncDependencyItem<T> extends DependencyItemHooks<T> {
-    useAsync: () => Promise<
-        T | Ctor<T> | [DependencyIdentifier<T>, SyncDependencyItem<T>]
-    >;
+    useAsync: () => Promise<T | Ctor<T> | [DependencyIdentifier<T>, SyncDependencyItem<T>]>;
 }
-export function isAsyncDependencyItem<T>(
-    thing: unknown
-): thing is AsyncDependencyItem<T> {
+export function isAsyncDependencyItem<T>(thing: unknown): thing is AsyncDependencyItem<T> {
     if (thing && typeof (thing as any).useAsync !== 'undefined') {
         return true;
     }
@@ -87,10 +65,7 @@ export function isAsyncHook<T>(thing: unknown): thing is AsyncHook<T> {
     return false;
 }
 
-export type SyncDependencyItem<T> =
-    | ClassDependencyItem<T>
-    | FactoryDependencyItem<T>
-    | ValueDependencyItem<T>;
+export type SyncDependencyItem<T> = ClassDependencyItem<T> | FactoryDependencyItem<T> | ValueDependencyItem<T>;
 export type DependencyItem<T> = SyncDependencyItem<T> | AsyncDependencyItem<T>;
 
 export interface DependencyDescriptor<T> {
@@ -108,9 +83,7 @@ export interface Dependencies {
     dependencies: Array<DependencyDescriptor<any>>;
 }
 
-export function normalizeFactoryDeps(
-    deps?: Array<FactoryDep<any>>
-): Array<DependencyDescriptor<any>> {
+export function normalizeFactoryDeps(deps?: Array<FactoryDep<any>>): Array<DependencyDescriptor<any>> {
     if (!deps) {
         return [];
     }
@@ -132,23 +105,21 @@ export function normalizeFactoryDeps(
         let quantity = Quantity.REQUIRED;
         let withNew = false;
 
-        (modifiers as FactoryDepModifier[]).forEach(
-            (modifier: FactoryDepModifier) => {
-                if (modifier instanceof Self) {
-                    lookUp = LookUp.SELF;
-                } else if (modifier instanceof SkipSelf) {
-                    lookUp = LookUp.SKIP_SELF;
-                } else if (modifier instanceof Optional) {
-                    quantity = Quantity.OPTIONAL;
-                } else if (modifier instanceof Many) {
-                    quantity = Quantity.MANY;
-                } else if (modifier instanceof WithNew) {
-                    withNew = true;
-                } else {
-                    throw new DIError(`unknown dep modifier ${modifier}.`);
-                }
+        (modifiers as FactoryDepModifier[]).forEach((modifier: FactoryDepModifier) => {
+            if (modifier instanceof Self) {
+                lookUp = LookUp.SELF;
+            } else if (modifier instanceof SkipSelf) {
+                lookUp = LookUp.SKIP_SELF;
+            } else if (modifier instanceof Optional) {
+                quantity = Quantity.OPTIONAL;
+            } else if (modifier instanceof Many) {
+                quantity = Quantity.MANY;
+            } else if (modifier instanceof WithNew) {
+                withNew = true;
+            } else {
+                throw new DIError(`unknown dep modifier ${modifier}.`);
             }
-        );
+        });
 
         return {
             paramIndex: index,
@@ -185,9 +156,7 @@ interface SkipSelfDecorator {
 /**
  * when resolving this dependency, skip the current injector
  */
-export const SkipSelf: SkipSelfDecorator = lookupDecoratorFactoryProducer(
-    LookUp.SKIP_SELF
-);
+export const SkipSelf: SkipSelfDecorator = lookupDecoratorFactoryProducer(LookUp.SKIP_SELF);
 
 interface SelfDecorator {
     (): any;
@@ -201,23 +170,14 @@ export const Self: SelfDecorator = lookupDecoratorFactoryProducer(LookUp.SELF);
 
 class QuantityCheckError extends DIError {
     constructor(id: DependencyIdentifier<any>, quantity: Quantity, actual: number) {
-        const msg = `Expect "${quantity}" dependency items for id "${prettyPrintIdentifier(
-            id
-        )}" but get ${actual}.`;
+        const msg = `Expect "${quantity}" dependency items for id "${prettyPrintIdentifier(id)}" but get ${actual}.`;
 
         super(msg);
     }
 }
 
-export function checkQuantity(
-    id: DependencyIdentifier<any>,
-    quantity: Quantity,
-    length: number
-): void {
-    if (
-        (quantity === Quantity.OPTIONAL && length > 1) ||
-        (quantity === Quantity.REQUIRED && length !== 1)
-    ) {
+export function checkQuantity(id: DependencyIdentifier<any>, quantity: Quantity, length: number): void {
+    if ((quantity === Quantity.OPTIONAL && length > 1) || (quantity === Quantity.REQUIRED && length !== 1)) {
         throw new QuantityCheckError(id, quantity, length);
     }
 }
@@ -271,18 +231,14 @@ interface OptionalDecorator {
     // eslint-disable-next-line @typescript-eslint/no-misused-new
     new (): OptionalDecorator;
 }
-export const Optional: OptionalDecorator = quantifyDecoratorFactoryProducer(
-    Quantity.OPTIONAL
-);
+export const Optional: OptionalDecorator = quantifyDecoratorFactoryProducer(Quantity.OPTIONAL);
 
 interface InjectDecorator {
     (id: DependencyIdentifier<any>): any;
     // eslint-disable-next-line @typescript-eslint/no-misused-new
     new (): InjectDecorator;
 }
-export const Inject: InjectDecorator = quantifyDecoratorFactoryProducer(
-    Quantity.REQUIRED
-);
+export const Inject: InjectDecorator = quantifyDecoratorFactoryProducer(Quantity.REQUIRED);
 
 function withNewDecoratorFactoryProducer(withNew: boolean) {
     return function DecoratorFactory<T>(this: any) {
@@ -309,9 +265,7 @@ export const WithNew: ToSelfDecorator = withNewDecoratorFactoryProducer(true);
 
 class DependencyDescriptorNotFoundError extends DIError {
     constructor(index: number, target: Ctor<any>) {
-        const msg = `Could not find dependency registered on the ${
-            index + 1
-        } parameter of the constructor of "${prettyPrintIdentifier(target)}".`;
+        const msg = `Could not find dependency registered on the ${index + 1} parameter of the constructor of "${prettyPrintIdentifier(target)}".`;
 
         super(msg);
     }
@@ -319,9 +273,7 @@ class DependencyDescriptorNotFoundError extends DIError {
 
 class IdentifierUndefinedError extends DIError {
     constructor(target: Ctor<any>, index: number) {
-        const msg = `It seems that you register "undefined" as dependency on the ${
-            index + 1
-        } parameter of "${prettyPrintIdentifier(
+        const msg = `It seems that you register "undefined" as dependency on the ${index + 1} parameter of "${prettyPrintIdentifier(
             target
         )}". Please make sure that there is not cyclic dependency among your TypeScript files, or consider using "forwardRef".`;
 
@@ -338,21 +290,14 @@ export const DEPENDENCIES = Symbol('$$DEPENDENCIES');
  * @param registerTarget the class
  * @returns dependencies
  */
-export function getDependencies<T>(
-    registerTarget: Ctor<T>
-): Array<DependencyDescriptor<any>> {
+export function getDependencies<T>(registerTarget: Ctor<T>): Array<DependencyDescriptor<any>> {
     const target = registerTarget as any;
     return target[DEPENDENCIES] || [];
 }
 
-export function getDependencyByIndex<T>(
-    registerTarget: Ctor<T>,
-    index: number
-): DependencyDescriptor<any> {
+export function getDependencyByIndex<T>(registerTarget: Ctor<T>, index: number): DependencyDescriptor<any> {
     const allDependencies = getDependencies(registerTarget);
-    const dep = allDependencies.find(
-        (descriptor) => descriptor.paramIndex === index
-    );
+    const dep = allDependencies.find((descriptor) => descriptor.paramIndex === index);
 
     if (!dep) {
         throw new DependencyDescriptorNotFoundError(index, registerTarget);
@@ -413,11 +358,7 @@ export function createIdentifier<T>(id: string): IdentifierDecorator<T> {
         knownIdentifiers.add(id);
     }
 
-    const decorator = function d(
-        registerTarget: Ctor<T>,
-        _key: string,
-        index: number
-    ): void {
+    const decorator = function d(registerTarget: Ctor<T>, _key: string, index: number): void {
         setDependency(registerTarget, decorator, index);
     } as unknown as IdentifierDecorator<T>; // decorator as an identifier
 

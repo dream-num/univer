@@ -1,13 +1,5 @@
 import { BorderStyleTypes } from '../Enum/BorderStyleTypes';
-import {
-    BooleanNumber,
-    HorizontalAlign,
-    TextDecoration,
-    TextDirection,
-    BaselineOffset,
-    VerticalAlign,
-    WrapStrategy,
-} from '../Enum/TextStyle';
+import { BooleanNumber, HorizontalAlign, TextDecoration, TextDirection, BaselineOffset, VerticalAlign, WrapStrategy } from '../Enum/TextStyle';
 import { ThemeColorType } from '../Enum/ThemeColorType';
 import { Nullable } from '../../Shared/Types';
 

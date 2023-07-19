@@ -1,21 +1,13 @@
 import { SetWorkSheetHideService } from '../Apply';
 import { BooleanNumber } from '../../Types/Enum';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { CommandModel } from '../../Command';
 
 /**
  * @internal
  */
-export interface ISetWorkSheetHideActionData extends ISheetActionData {
-    hidden: BooleanNumber;
-}
-
-/**
- * @internal
- */
 export class SetWorkSheetHideAction extends SheetActionBase<ISetWorkSheetHideActionData, ISetWorkSheetHideActionData, BooleanNumber> {
-    static NAME = 'SetWorkSheetHideAction';
 
     constructor(actionData: ISetWorkSheetHideActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

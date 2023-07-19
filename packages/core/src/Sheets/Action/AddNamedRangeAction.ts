@@ -1,16 +1,10 @@
-import { ISheetActionData, SheetActionBase, ActionObservers, ActionType, CommandModel } from '../../Command';
-import { INamedRange } from '../../Types/Interfaces/INamedRange';
+import { SheetActionBase, ActionObservers, ActionType, CommandModel } from '../../Command';
+import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
+import { IAddNamedRangeActionData, IDeleteNamedRangeActionData } from '../../Types/Interfaces/IActionModel';
 import { AddNamedRangeApply } from '../Apply';
 import { DeleteNamedRangeApply } from '../Apply/DeleteNamedRange';
-import { DeleteNamedRangeAction, IDeleteNamedRangeActionData } from './DeleteNamedRangeAction';
-
-export interface IAddNamedRangeActionData extends ISheetActionData {
-    namedRange: INamedRange;
-}
 
 export class AddNamedRangeAction extends SheetActionBase<IAddNamedRangeActionData, IDeleteNamedRangeActionData, void> {
-    static NAME = 'AddNamedRangeAction';
-
     constructor(actionData: IAddNamedRangeActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
 
@@ -19,8 +13,8 @@ export class AddNamedRangeAction extends SheetActionBase<IAddNamedRangeActionDat
         };
         this.do();
         this._oldActionData = {
-            //actionName: ACTION_NAMES.DELETE_NAMED_RANGE_ACTION,
-            actionName: DeleteNamedRangeAction.NAME,
+            actionName: ACTION_NAMES.DELETE_NAMED_RANGE_ACTION,
+            // actionName: DeleteNamedRangeAction.NAME,
             sheetId: actionData.sheetId,
             namedRangeId: actionData.namedRange.namedRangeId,
         };

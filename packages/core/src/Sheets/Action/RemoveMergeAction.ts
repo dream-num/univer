@@ -1,16 +1,9 @@
 import { addMergeApply, RemoveMergeApply } from '../Apply';
 import { IRangeData } from '../../Types/Interfaces';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { CommandModel } from '../../Command';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IAddMergeActionData } from './AddMergeAction';
-
-/**
- * @internal
- */
-export interface IRemoveMergeActionData extends ISheetActionData {
-    rectangles: IRangeData[];
-}
 
 /**
  * Remove merged cells from a specified range
@@ -18,7 +11,6 @@ export interface IRemoveMergeActionData extends ISheetActionData {
  * @internal
  */
 export class RemoveMergeAction extends SheetActionBase<IRemoveMergeActionData, IAddMergeActionData, IRangeData[]> {
-    static NAME = 'RemoveMergeAction';
 
     constructor(actionData: IRemoveMergeActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

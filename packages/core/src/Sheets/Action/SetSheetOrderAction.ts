@@ -1,15 +1,9 @@
 import { SetSheetOrder } from '../Apply';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { CommandModel } from '../../Command';
 
-export interface ISetSheetOrderActionData extends ISheetActionData {
-    sheetId: string;
-    order: number;
-}
-
 export class SetSheetOrderAction extends SheetActionBase<ISetSheetOrderActionData, ISetSheetOrderActionData> {
-    static NAME = 'SetSheetOrderAction';
 
     constructor(actionData: ISetSheetOrderActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

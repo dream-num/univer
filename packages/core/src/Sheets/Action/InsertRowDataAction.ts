@@ -1,19 +1,9 @@
 import { InsertDataRowApply, RemoveRowDataApply } from '../Apply';
-import { ICellData } from '../../Types/Interfaces';
-import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { ObjectArray } from '../../Shared';
 import { CommandModel } from '../../Command';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveRowDataActionData } from './RemoveRowDataAction';
-
-/**
- * @internal
- */
-export interface IInsertRowDataActionData extends ISheetActionData {
-    rowIndex: number;
-    rowData: ObjectMatrixPrimitiveType<ICellData>;
-}
 
 /**
  * Insert the row data of the specified row index
@@ -21,7 +11,6 @@ export interface IInsertRowDataActionData extends ISheetActionData {
  * @internal
  */
 export class InsertRowDataAction extends SheetActionBase<IInsertRowDataActionData, IRemoveRowDataActionData> {
-    static NAME = 'InsertRowDataAction';
 
     constructor(actionData: IInsertRowDataActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

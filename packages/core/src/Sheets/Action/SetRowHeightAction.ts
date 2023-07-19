@@ -1,15 +1,7 @@
 import { SetRowHeight } from '../Apply';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { CommandModel } from '../../Command';
-
-/**
- * @internal
- */
-export interface ISetRowHeightActionData extends ISheetActionData {
-    rowIndex: number;
-    rowHeight: number[];
-}
 
 /**
  * Set the row height according to the specified row index
@@ -17,7 +9,6 @@ export interface ISetRowHeightActionData extends ISheetActionData {
  * @internal
  */
 export class SetRowHeightAction extends SheetActionBase<ISetRowHeightActionData> {
-    static NAME = 'SetRowHeightAction';
 
     constructor(actionData: ISetRowHeightActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

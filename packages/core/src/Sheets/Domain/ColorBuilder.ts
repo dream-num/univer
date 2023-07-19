@@ -24,12 +24,7 @@ export class ColorBuilder {
     }
 
     asThemeColor(): ThemeColor {
-        return new ThemeColor(
-            this._themeValue,
-            this._themeTint,
-            this._themeColors,
-            this
-        );
+        return new ThemeColor(this._themeValue, this._themeTint, this._themeColors, this);
     }
 
     build(): Nullable<Color> {

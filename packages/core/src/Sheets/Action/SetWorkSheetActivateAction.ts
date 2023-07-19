@@ -1,30 +1,13 @@
 import { SetWorkSheetActivate } from '../Apply';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { BooleanNumber } from '../../Types/Enum';
 import { ActionOperationType } from '../../Command/ActionBase';
 import { CommandModel } from '../../Command';
 
 /**
  * @internal
  */
-export interface ISetWorkSheetActivateActionData extends ISheetActionData {
-    status: BooleanNumber;
-}
-
-/**
- * @internal
- */
-export interface ISheetStatus {
-    oldSheetId: string;
-    status: BooleanNumber;
-}
-
-/**
- * @internal
- */
 export class SetWorkSheetActivateAction extends SheetActionBase<ISetWorkSheetActivateActionData, ISetWorkSheetActivateActionData, ISheetStatus> {
-    static NAME = 'SetWorkSheetActivateAction';
 
     constructor(actionData: ISetWorkSheetActivateActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

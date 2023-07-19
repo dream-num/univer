@@ -8,10 +8,10 @@ export abstract class DocActionBase<D extends IDocActionData, O extends IDocActi
 
     protected constructor(actionData: D, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, observers);
-        if (commandModel.DocumentUnit == null) {
+        if (commandModel.DocumentModel == null) {
             throw new Error('action document domain can not be null!');
         }
-        this._document = commandModel.DocumentUnit;
+        this._document = commandModel.DocumentModel;
     }
 
     getDocument(): DocumentModel {

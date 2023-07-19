@@ -51,10 +51,8 @@ function isdatetime(s: string | null) {
     return false;
 
     function checkDateTime(str: string) {
-        const reg1 =
-            /^(\d{4})-(\d{1,2})-(\d{1,2})(\s(\d{1,2}):(\d{1,2})(:(\d{1,2}))?)?$/;
-        const reg2 =
-            /^(\d{4})\/(\d{1,2})\/(\d{1,2})(\s(\d{1,2}):(\d{1,2})(:(\d{1,2}))?)?$/;
+        const reg1 = /^(\d{4})-(\d{1,2})-(\d{1,2})(\s(\d{1,2}):(\d{1,2})(:(\d{1,2}))?)?$/;
+        const reg2 = /^(\d{4})\/(\d{1,2})\/(\d{1,2})(\s(\d{1,2}):(\d{1,2})(:(\d{1,2}))?)?$/;
 
         if (!reg1.test(str) && !reg2.test(str)) {
             return false;
@@ -111,21 +109,13 @@ function parseDate(str: string | Date, fixdate?: number) {
     }
     const n = str.match(/\d+/g) || ['2017', '2', '19', '0', '0', '0'];
     let out = new Date(+n[0], +n[1] - 1, +n[2], +n[3] || 0, +n[4] || 0, +n[5] || 0);
-    if (str.indexOf('Z') > -1)
-        out = new Date(out.getTime() - out.getTimezoneOffset() * 60 * 1000);
+    if (str.indexOf('Z') > -1) out = new Date(out.getTime() - out.getTimezoneOffset() * 60 * 1000);
     return out;
 }
 
 const base1904 = new Date(1900, 2, 1, 0, 0, 0);
 export function datenum_local(v: Date, date1904?: number) {
-    let epoch = Date.UTC(
-        v.getFullYear(),
-        v.getMonth(),
-        v.getDate(),
-        v.getHours(),
-        v.getMinutes(),
-        v.getSeconds()
-    );
+    let epoch = Date.UTC(v.getFullYear(), v.getMonth(), v.getDate(), v.getHours(), v.getMinutes(), v.getSeconds());
     const dnthresh_utc = Date.UTC(1899, 11, 31, 0, 0, 0);
 
     if (date1904) epoch -= 1461 * 24 * 60 * 60 * 1000;
@@ -170,18 +160,10 @@ export function generate(value: string): any {
     } else if (valueIsError(value)) {
         m = value.toString();
         ct = { fa: 'General', t: 'e' };
-    } else if (
-        /^\d{6}(18|19|20)?\d{2}(0[1-9]|1[12])(0[1-9]|[12]\d|3[01])\d{3}(\d|X)$/i.test(
-            value
-        )
-    ) {
+    } else if (/^\d{6}(18|19|20)?\d{2}(0[1-9]|1[12])(0[1-9]|[12]\d|3[01])\d{3}(\d|X)$/i.test(value)) {
         m = value.toString();
         ct = { fa: '@', t: 's' };
-    } else if (
-        isRealNum(value) &&
-        Math.abs(parseFloat(value)) > 0 &&
-        (Math.abs(parseFloat(value)) >= 1e11 || Math.abs(parseFloat(value)) < 1e-9)
-    ) {
+    } else if (isRealNum(value) && Math.abs(parseFloat(value)) > 0 && (Math.abs(parseFloat(value)) >= 1e11 || Math.abs(parseFloat(value)) < 1e-9)) {
         v = numeral(value).value();
         const str = v.toExponential();
         if (str.indexOf('.') > -1) {
@@ -319,12 +301,7 @@ export function generate(value: string): any {
         m = value.toString();
         ct = { fa: 'General', t: 'n' };
         v = parseFloat(value);
-    } else if (
-        isdatetime(value) &&
-        (value.toString().indexOf('.') > -1 ||
-            value.toString().indexOf(':') > -1 ||
-            value.toString().length < 16)
-    ) {
+    } else if (isdatetime(value) && (value.toString().indexOf('.') > -1 || value.toString().indexOf(':') > -1 || value.toString().length < 16)) {
         v = datenum_local(parseDate(value.toString().replace(/-/g, '/')));
 
         if (v.toString().indexOf('.') > -1) {

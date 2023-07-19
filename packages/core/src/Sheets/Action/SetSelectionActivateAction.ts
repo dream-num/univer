@@ -1,5 +1,4 @@
-import { IRangeData } from '../../Types/Interfaces';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { SetSelectionActivate } from '../Apply';
 import { CommandModel } from '../../Command';
@@ -7,26 +6,7 @@ import { CommandModel } from '../../Command';
 /**
  * @internal
  */
-export interface ISetSelectionActivateActionData extends ISheetActionData {
-    activeRangeList: IRangeData | IRangeData[];
-    activeRange: IRangeData;
-    currentCell: IRangeData;
-}
-
-/**
- * @internal
- */
-export interface ISetSelectionActivateServiceData {
-    activeRangeList: IRangeData | IRangeData[];
-    activeRange: IRangeData;
-    currentCell: IRangeData;
-}
-
-/**
- * @internal
- */
 export class SetSelectionActivateAction extends SheetActionBase<ISetSelectionActivateActionData, ISetSelectionActivateActionData, ISetSelectionActivateServiceData> {
-    static NAME = 'SetSelectionActivateAction';
 
     constructor(actionData: ISetSelectionActivateActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

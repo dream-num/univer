@@ -49,9 +49,7 @@ export class BorderTree {
     }
 
     clearRight(node: BorderTree.Node): void {
-        this.rightTree.remove(node, (other) =>
-            node.equals(other as BorderTree.Node)
-        );
+        this.rightTree.remove(node, (other) => node.equals(other as BorderTree.Node));
     }
 
     clearTop(node: BorderTree.Node): void {
@@ -59,9 +57,7 @@ export class BorderTree {
     }
 
     clearBottom(node: BorderTree.Node): void {
-        this.bottomTree.remove(node, (other) =>
-            node.equals(other as BorderTree.Node)
-        );
+        this.bottomTree.remove(node, (other) => node.equals(other as BorderTree.Node));
     }
 
     clearWhole(node: BorderTree.Node): void {
@@ -111,12 +107,7 @@ export namespace BorderTree {
         }
 
         equals(other: BorderTree.Node) {
-            return (
-                this.minX === other.minX &&
-                this.minY === other.minY &&
-                other.maxX === this.maxX &&
-                other.maxY === this.maxY
-            );
+            return this.minX === other.minX && this.minY === other.minY && other.maxX === this.maxX && other.maxY === this.maxY;
         }
     }
 }

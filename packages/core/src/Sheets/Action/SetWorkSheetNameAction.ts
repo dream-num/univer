@@ -1,20 +1,12 @@
 import { SetWorkSheetName } from '../Apply';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { CommandModel } from '../../Command';
 
 /**
  * @internal
  */
-export interface ISetWorkSheetNameActionData extends ISheetActionData {
-    sheetName: string;
-}
-
-/**
- * @internal
- */
 export class SetWorkSheetNameAction extends SheetActionBase<ISetWorkSheetNameActionData, ISetWorkSheetNameActionData, string> {
-    static NAME = 'SetWorkSheetNameAction';
 
     constructor(actionData: ISetWorkSheetNameActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

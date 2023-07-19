@@ -1,16 +1,8 @@
 import { InsertColumnApply, RemoveColumnApply } from '../Apply';
 import { CommandModel } from '../../Command';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertColumnActionData } from './InsertColumnAction';
-
-/**
- * @internal
- */
-export interface IRemoveColumnAction extends ISheetActionData {
-    columnCount: number;
-    columnIndex: number;
-}
 
 /**
  * Remove the column configuration of the specified column index and column count
@@ -18,7 +10,6 @@ export interface IRemoveColumnAction extends ISheetActionData {
  * @internal
  */
 export class RemoveColumnAction extends SheetActionBase<IRemoveColumnAction, IInsertColumnActionData> {
-    static NAME = 'RemoveColumnAction';
 
     constructor(actionData: IRemoveColumnAction, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

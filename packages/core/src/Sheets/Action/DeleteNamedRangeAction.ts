@@ -1,14 +1,9 @@
-import { ISheetActionData, SheetActionBase, ActionObservers, ActionType, CommandModel } from '../../Command';
+import { SheetActionBase, ActionObservers, ActionType, CommandModel } from '../../Command';
 import { AddNamedRangeApply, DeleteNamedRangeApply } from '../Apply';
 import { INamedRange } from '../../Types/Interfaces';
-import { AddNamedRangeAction, IAddNamedRangeActionData } from './AddNamedRangeAction';
-
-export interface IDeleteNamedRangeActionData extends ISheetActionData {
-    namedRangeId: string;
-}
+import { IAddNamedRangeActionData, IDeleteNamedRangeActionData } from '../../Types/Interfaces/IActionModel';
 
 export class DeleteNamedRangeAction extends SheetActionBase<IDeleteNamedRangeActionData, IAddNamedRangeActionData, INamedRange> {
-    static NAME = 'DeleteNamedRangeAction';
 
     constructor(actionData: IDeleteNamedRangeActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

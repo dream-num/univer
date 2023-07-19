@@ -8,17 +8,13 @@ export type DependencyPair<T> = [DependencyIdentifier<T>, DependencyItem<T>];
 export type DependencyClass<T> = [Ctor<T>];
 export type Dependency<T = any> = DependencyPair<T> | DependencyClass<T>;
 
-export function isBareClassDependency<T>(
-    thing: Dependency<T>
-): thing is DependencyClass<T> {
+export function isBareClassDependency<T>(thing: Dependency<T>): thing is DependencyClass<T> {
     return thing.length === 1;
 }
 
 export class DependencyNotFoundError extends DIError {
     constructor(id: DependencyIdentifier<any>) {
-        const msg = `Cannot find "${prettyPrintIdentifier(
-            id
-        )}" registered by any injector.`;
+        const msg = `Cannot find "${prettyPrintIdentifier(id)}" registered by any injector.`;
 
         super(msg);
     }
@@ -30,23 +26,15 @@ export class DependencyNotFoundError extends DIError {
  * @internal
  */
 export class DependencyCollection implements IDisposable {
-    private readonly dependencyMap = new Map<
-        DependencyIdentifier<any>,
-        Array<DependencyItem<any>>
-    >();
+    private readonly dependencyMap = new Map<DependencyIdentifier<any>, Array<DependencyItem<any>>>();
 
     constructor(dependencies: Dependency[]) {
-        this.normalizeDependencies(dependencies).map((pair) =>
-            this.add(pair[0], pair[1])
-        );
+        this.normalizeDependencies(dependencies).map((pair) => this.add(pair[0], pair[1]));
     }
 
     add<T>(ctor: Ctor<T>): void;
     add<T>(id: DependencyIdentifier<T>, val: DependencyItem<T>): void;
-    add<T>(
-        ctorOrId: Ctor<T> | DependencyIdentifier<T>,
-        val?: DependencyItem<T>
-    ): void {
+    add<T>(ctorOrId: Ctor<T> | DependencyIdentifier<T>, val?: DependencyItem<T>): void {
         if (typeof val === 'undefined') {
             val = { useClass: ctorOrId as Ctor<T>, lazy: false };
         }
@@ -64,26 +52,11 @@ export class DependencyCollection implements IDisposable {
     }
 
     get<T>(id: DependencyIdentifier<T>): DependencyItem<T>;
-    get<T>(
-        id: DependencyIdentifier<T>,
-        quantity: Quantity.REQUIRED
-    ): DependencyItem<T>;
-    get<T>(
-        id: DependencyIdentifier<T>,
-        quantity: Quantity.MANY
-    ): Array<DependencyItem<T>>;
-    get<T>(
-        id: DependencyIdentifier<T>,
-        quantity: Quantity.OPTIONAL
-    ): DependencyItem<T> | null;
-    get<T>(
-        id: DependencyIdentifier<T>,
-        quantity: Quantity
-    ): DependencyItem<T> | Array<DependencyItem<T>> | null;
-    get<T>(
-        id: DependencyIdentifier<T>,
-        quantity: Quantity = Quantity.REQUIRED
-    ): DependencyItem<T> | Array<DependencyItem<T>> | null {
+    get<T>(id: DependencyIdentifier<T>, quantity: Quantity.REQUIRED): DependencyItem<T>;
+    get<T>(id: DependencyIdentifier<T>, quantity: Quantity.MANY): Array<DependencyItem<T>>;
+    get<T>(id: DependencyIdentifier<T>, quantity: Quantity.OPTIONAL): DependencyItem<T> | null;
+    get<T>(id: DependencyIdentifier<T>, quantity: Quantity): DependencyItem<T> | Array<DependencyItem<T>> | null;
+    get<T>(id: DependencyIdentifier<T>, quantity: Quantity = Quantity.REQUIRED): DependencyItem<T> | Array<DependencyItem<T>> | null {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const ret = this.dependencyMap.get(id)!;
 
@@ -96,9 +69,7 @@ export class DependencyCollection implements IDisposable {
     }
 
     append(dependencies: Array<Dependency<any>>): void {
-        this.normalizeDependencies(dependencies).forEach((pair) =>
-            this.add(pair[0], pair[1])
-        );
+        this.normalizeDependencies(dependencies).forEach((pair) => this.add(pair[0], pair[1]));
     }
 
     dispose(): void {
@@ -108,9 +79,7 @@ export class DependencyCollection implements IDisposable {
     /**
      * normalize dependencies to `DependencyItem`
      */
-    private normalizeDependencies(
-        dependencies: Dependency[]
-    ): Array<DependencyPair<any>> {
+    private normalizeDependencies(dependencies: Dependency[]): Array<DependencyPair<any>> {
         return dependencies.map((dependency) => {
             const id = dependency[0];
             let val: DependencyItem<any>;
@@ -134,10 +103,7 @@ export class DependencyCollection implements IDisposable {
  * @internal
  */
 export class ResolvedDependencyCollection implements IDisposable {
-    private readonly resolvedDependencies = new Map<
-        DependencyIdentifier<any>,
-        any[]
-    >();
+    private readonly resolvedDependencies = new Map<DependencyIdentifier<any>, any[]>();
 
     add<T>(id: DependencyIdentifier<T>, val: T | null): void {
         let arr = this.resolvedDependencies.get(id);
@@ -166,10 +132,7 @@ export class ResolvedDependencyCollection implements IDisposable {
     get<T>(id: DependencyIdentifier<T>, quantity: Quantity.REQUIRED): T;
     get<T>(id: DependencyIdentifier<T>, quantity: Quantity.MANY): T[];
     get<T>(id: DependencyIdentifier<T>, quantity: Quantity): T[] | T | null;
-    get<T>(
-        id: DependencyIdentifier<T>,
-        quantity: Quantity = Quantity.REQUIRED
-    ): T | T[] | null {
+    get<T>(id: DependencyIdentifier<T>, quantity: Quantity = Quantity.REQUIRED): T | T[] | null {
         const ret = this.resolvedDependencies.get(id);
 
         if (!ret) {
@@ -186,9 +149,7 @@ export class ResolvedDependencyCollection implements IDisposable {
 
     dispose(): void {
         Array.from(this.resolvedDependencies.values()).forEach((items) => {
-            items.forEach((item) =>
-                isIDisposable(item) ? item.dispose() : undefined
-            );
+            items.forEach((item) => (isIDisposable(item) ? item.dispose() : undefined));
         });
 
         this.resolvedDependencies.clear();

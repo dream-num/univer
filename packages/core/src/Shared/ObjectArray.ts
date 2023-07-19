@@ -78,9 +78,7 @@ export class ObjectArray<T> {
                     this._length = length;
                     return;
                 }
-                throw new Error(
-                    `create object array error ${JSON.stringify(argument[0])}`
-                );
+                throw new Error(`create object array error ${JSON.stringify(argument[0])}`);
             }
             case 2: {
                 if (likeArr(argument[0]) > -1) {
@@ -88,9 +86,7 @@ export class ObjectArray<T> {
                     this._length = argument[1];
                     return;
                 }
-                throw new Error(
-                    `create object array error ${JSON.stringify(argument[0])}`
-                );
+                throw new Error(`create object array error ${JSON.stringify(argument[0])}`);
             }
         }
     }

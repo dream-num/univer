@@ -1,20 +1,14 @@
 import { SetRangeStyle } from '../Apply';
-import { IRangeData, IStyleData } from '../../Types/Interfaces';
+import { IStyleData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { CommandModel } from '../../Command';
-
-export interface ISetRangeStyleActionData extends ISheetActionData {
-    value: ObjectMatrixPrimitiveType<IStyleData>; //
-    rangeData: IRangeData;
-}
 
 /**
  * @internal
  */
 export class SetRangeStyleAction extends SheetActionBase<ISetRangeStyleActionData> {
-    static NAME = 'SetRangeStyleAction';
 
     constructor(actionData: ISetRangeStyleActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

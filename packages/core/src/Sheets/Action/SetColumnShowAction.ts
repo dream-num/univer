@@ -1,15 +1,7 @@
 import { SetColumnHideApply, SetColumnShowApply } from '../Apply';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { CommandModel } from '../../Command';
-
-/**
- * @internal
- */
-export interface ISetColumnShowActionData extends ISheetActionData {
-    columnIndex: number;
-    columnCount: number;
-}
 
 /**
  * Set column display based on specified column index and number of columns
@@ -17,8 +9,6 @@ export interface ISetColumnShowActionData extends ISheetActionData {
  * @internal
  */
 export class SetColumnShowAction extends SheetActionBase<ISetColumnShowActionData> {
-    static NAME = 'SetColumnShowAction';
-
     constructor(actionData: ISetColumnShowActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
         this._doActionData = {

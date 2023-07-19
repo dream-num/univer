@@ -1,14 +1,8 @@
-import { SheetActionBase, ActionObservers, ActionType, ISheetActionData, CommandModel } from '../../Command';
+import { SheetActionBase, ActionObservers, ActionType, CommandModel } from '../../Command';
+import { ISetZoomRatioActionData } from '../../Types/Interfaces/IActionModel';
 import { SetZoomRatio } from '../Apply/SetZoomRatio';
 
-export interface ISetZoomRatioActionData extends ISheetActionData {
-    zoom: number;
-    sheetId: string;
-}
-
 export class SetZoomRatioAction extends SheetActionBase<ISetZoomRatioActionData, ISetZoomRatioActionData> {
-    static NAME = 'SetZoomRatioAction';
-
     constructor(actionData: ISetZoomRatioActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
         this._doActionData = {

@@ -1,7 +1,7 @@
 import { SetRangeFormattedValue } from '../Apply';
-import { ICellV, IRangeData } from '../../Types/Interfaces';
+import { ICellV } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { CommandModel } from '../../Command';
 import { SetRangeDataAction } from './SetRangeDataAction';
@@ -9,16 +9,7 @@ import { SetRangeDataAction } from './SetRangeDataAction';
 /**
  *
  */
-export interface ISetRangeFormattedValueActionData extends ISheetActionData {
-    cellValue: ObjectMatrixPrimitiveType<ICellV>;
-    rangeData: IRangeData;
-}
-
-/**
- *
- */
 export class SetRangeFormattedValueAction extends SheetActionBase<ISetRangeFormattedValueActionData, ISetRangeFormattedValueActionData, ObjectMatrixPrimitiveType<ICellV>> {
-    static NAME = 'SetRangeFormattedValueAction';
 
     constructor(actionData: ISetRangeFormattedValueActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

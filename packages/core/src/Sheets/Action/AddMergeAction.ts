@@ -1,17 +1,9 @@
-import { IRangeData } from '../../Types/Interfaces';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { IRangeData } from '../../Types/Interfaces/IRangeData';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers } from '../../Command/ActionObservers';
-import { IRemoveMergeActionData } from './RemoveMergeAction';
 import { addMergeApply, RemoveMergeApply } from '../Apply';
 import { CommandModel } from '../../Command/CommandModel';
-
-/**
- * @internal
- * Format of AddMergeActionData param
- */
-export interface IAddMergeActionData extends ISheetActionData {
-    rectangles: IRangeData[];
-}
+import { IAddMergeActionData, IRemoveMergeActionData } from '../../Types/Interfaces/IActionModel';
 
 /**
  * Set merged cell range
@@ -19,8 +11,6 @@ export interface IAddMergeActionData extends ISheetActionData {
  * @internal
  */
 export class AddMergeAction extends SheetActionBase<IAddMergeActionData, IRemoveMergeActionData, IRangeData[]> {
-    static NAME = 'AddMergeAction';
-
     constructor(actionData: IAddMergeActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
         this._doActionData = {

@@ -10,10 +10,7 @@ import { ISheetStatus } from '../Action';
  *
  * @internal
  */
-export function SetWorkSheetActivate(
-    worksheet: Worksheet,
-    status: BooleanNumber
-): ISheetStatus {
+export function SetWorkSheetActivate(worksheet: Worksheet, status: BooleanNumber): ISheetStatus {
     // store old status
 
     const oldSheet = worksheet.getContext().getWorkBook().getActiveSheet();

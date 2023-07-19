@@ -1,23 +1,13 @@
 import { SetRangeNote } from '../Apply';
-import { IRangeData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { CommandModel } from '../../Command';
 
 /**
  * @internal
  */
-export interface ISetRangeNoteActionData extends ISheetActionData {
-    cellNote: ObjectMatrixPrimitiveType<string>;
-    rangeData: IRangeData;
-}
-
-/**
- * @internal
- */
 export class SetRangeNoteAction extends SheetActionBase<ISetRangeNoteActionData, ISetRangeNoteActionData, ObjectMatrixPrimitiveType<string>> {
-    static NAME = 'SetRangeNoteAction';
 
     constructor(actionData: ISetRangeNoteActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

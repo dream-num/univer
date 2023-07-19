@@ -118,22 +118,10 @@ export class IOSocket {
     }
 
     private _bind(): void {
-        this._socket.addEventListener(
-            IOSocketListenType.MESSAGE,
-            this._message.bind(this)
-        );
-        this._socket.addEventListener(
-            IOSocketListenType.OPEN,
-            this._open.bind(this)
-        );
-        this._socket.addEventListener(
-            IOSocketListenType.CLOSE,
-            this._close.bind(this)
-        );
-        this._socket.addEventListener(
-            IOSocketListenType.ERROR,
-            this._error.bind(this)
-        );
+        this._socket.addEventListener(IOSocketListenType.MESSAGE, this._message.bind(this));
+        this._socket.addEventListener(IOSocketListenType.OPEN, this._open.bind(this));
+        this._socket.addEventListener(IOSocketListenType.CLOSE, this._close.bind(this));
+        this._socket.addEventListener(IOSocketListenType.ERROR, this._error.bind(this));
         // this._socket.addEventListener(IOSocketListenType.MESSAGE, (event: Event) => {
         //     this._message(event);
         // });
@@ -184,22 +172,10 @@ export class IOSocket {
             clearInterval(this._timer);
         }
         this._timer = -1;
-        this._socket.removeEventListener(
-            IOSocketListenType.MESSAGE,
-            this._message.bind(this)
-        );
-        this._socket.removeEventListener(
-            IOSocketListenType.OPEN,
-            this._open.bind(this)
-        );
-        this._socket.removeEventListener(
-            IOSocketListenType.CLOSE,
-            this._close.bind(this)
-        );
-        this._socket.removeEventListener(
-            IOSocketListenType.ERROR,
-            this._error.bind(this)
-        );
+        this._socket.removeEventListener(IOSocketListenType.MESSAGE, this._message.bind(this));
+        this._socket.removeEventListener(IOSocketListenType.OPEN, this._open.bind(this));
+        this._socket.removeEventListener(IOSocketListenType.CLOSE, this._close.bind(this));
+        this._socket.removeEventListener(IOSocketListenType.ERROR, this._error.bind(this));
         // this._socket.close();
     }
 

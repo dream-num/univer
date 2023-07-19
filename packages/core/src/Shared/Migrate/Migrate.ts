@@ -1,19 +1,5 @@
-import {
-    BooleanNumber,
-    HorizontalAlign,
-    VerticalAlign,
-    WrapStrategy,
-} from '../../Types/Enum';
-import {
-    IWorkbookConfig,
-    IWorksheetConfig,
-    ICellData,
-    ITextStyle,
-    IStyleData,
-    IRowData,
-    IColumnData,
-    ITextRun,
-} from '../../Types/Interfaces';
+import { BooleanNumber, HorizontalAlign, VerticalAlign, WrapStrategy } from '../../Types/Enum';
+import { IWorkbookConfig, IWorksheetConfig, ICellData, ITextStyle, IStyleData, IRowData, IColumnData, ITextRun } from '../../Types/Interfaces';
 import { ObjectArrayPrimitiveType } from '../ObjectArray';
 import { Tools } from '../Tools';
 import { IKeyValue } from '../Types';
@@ -114,9 +100,7 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                 // 行高
                 if (sheet.config.rowlen) {
                     newSheet.rowData = {};
-                    for (const [rowIndex, height] of Object.entries(
-                        sheet.config.rowlen
-                    )) {
+                    for (const [rowIndex, height] of Object.entries(sheet.config.rowlen)) {
                         newSheet.rowData[Number(rowIndex)] = {
                             h: Number(height),
                             hd: 0,
@@ -126,9 +110,7 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                 // 列宽
                 if (sheet.config.columnlen) {
                     newSheet.columnData = {};
-                    for (const [colIndex, width] of Object.entries(
-                        sheet.config.columnlen
-                    )) {
+                    for (const [colIndex, width] of Object.entries(sheet.config.columnlen)) {
                         newSheet.columnData[Number(colIndex)] = {
                             w: Number(width),
                             hd: 0,
@@ -138,12 +120,8 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                 // 隐藏行
                 if (sheet.config.rowhidden) {
                     if (!newSheet.rowData) newSheet.rowData = {};
-                    let rowData = newSheet.rowData as ObjectArrayPrimitiveType<
-                        Partial<IRowData>
-                    >;
-                    for (const [rowIndex, isHidden] of Object.entries(
-                        sheet.config.rowhidden
-                    )) {
+                    let rowData = newSheet.rowData as ObjectArrayPrimitiveType<Partial<IRowData>>;
+                    for (const [rowIndex, isHidden] of Object.entries(sheet.config.rowhidden)) {
                         if (!rowData[Number(rowIndex)]) {
                             rowData[Number(rowIndex)] = {};
                         }
@@ -154,12 +132,8 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
                 // 隐藏列
                 if (sheet.config.colhidden) {
                     if (!newSheet.columnData) newSheet.columnData = {};
-                    let columnData = newSheet.columnData as ObjectArrayPrimitiveType<
-                        Partial<IColumnData>
-                    >;
-                    for (const [colIndex, isHidden] of Object.entries(
-                        sheet.config.colhidden
-                    )) {
+                    let columnData = newSheet.columnData as ObjectArrayPrimitiveType<Partial<IColumnData>>;
+                    for (const [colIndex, isHidden] of Object.entries(sheet.config.colhidden)) {
                         if (!columnData[Number(colIndex)]) {
                             columnData[Number(colIndex)] = {};
                         }
@@ -184,8 +158,7 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
 
                     const cell = cellItem.v;
 
-                    const newCell: ICellData =
-                        newSheet.cellData[cellItem.r][cellItem.c];
+                    const newCell: ICellData = newSheet.cellData[cellItem.r][cellItem.c];
 
                     if (cell?.ct?.t === 'inlineStr') {
                         const textRuns: ITextRun[] = [];

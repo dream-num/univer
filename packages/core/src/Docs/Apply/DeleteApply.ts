@@ -1,7 +1,6 @@
 import { DocumentModel } from '../Domain/DocumentModel';
 import { deleteContent, getDocsUpdateBody } from '../../Shared/Common';
 import { IDocumentBody } from '../../Types/Interfaces/IDocumentData';
-import { deleteCustomBlocks, deleteCustomRanges, deleteParagraphs, deleteSectionBreaks, deleteTables, deleteTextRuns } from './Common';
 
 export function DeleteApply(document: DocumentModel, textLength: number, currentIndex: number, segmentId?: string) {
     const doc = document.snapshot;

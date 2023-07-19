@@ -14,6 +14,7 @@ export enum MessageQueueStatus {
 }
 
 export const IServerSocketWorkbookConfig = createIdentifier<IWorksheetConfig>('univer.server.workbook-config');
+export const IServerSocketWorkbookConfig = createIdentifier<IWorksheetConfig>('univer.server.workbook-config');
 
 /**
  * Manage messageQueue

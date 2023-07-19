@@ -1,9 +1,18 @@
 import { InsertSheetApply, RemoveSheetApply } from '../Apply';
 import { SheetActionBase } from '../../Command/SheetActionBase';
+<<<<<<< HEAD
 import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { IInsertSheetActionData, IRemoveSheetActionData } from '../../Types/Interfaces/IActionModel';
 
 export class InsertSheetAction extends SheetActionBase<IInsertSheetActionData, IRemoveSheetActionData> {
+=======
+import { CommandModel } from '../../Command';
+import { ActionObservers, ActionType } from '../../Command/ActionObservers';
+import { IRemoveSheetActionData } from './RemoveSheetAction';
+
+export class InsertSheetAction extends SheetActionBase<IInsertSheetActionData, IRemoveSheetActionData> {
+
+>>>>>>> 978105c8 (fix(core): action names, action interfaces)
     constructor(actionData: IInsertSheetActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
         this._doActionData = {

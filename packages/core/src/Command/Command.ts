@@ -6,6 +6,7 @@ import { CommandInjector } from './CommandInjectorObservers';
 import { CommandManager } from './CommandManager';
 import { CommandModel } from './CommandModel';
 import { CommonParameter } from './CommonParameter';
+
 /**
  * Execute the undo-redo command
  *

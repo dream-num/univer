@@ -82,7 +82,6 @@ export interface IInsertRowDataActionData extends ISheetActionData {
 
 export interface IInsertSheetActionData extends ISheetActionData {
     index: number;
-    sheet: IWorksheetConfig;
 }
 
 /**

@@ -1,18 +1,10 @@
 import { Class, Nullable } from '../Shared';
-import { Workbook } from '../Sheets';
-import {
-    IActionData,
-    ActionType,
-    ActionBase,
-    CommandInjector,
-    CommandManager,
-    ActionOperation,
-    CommonParameter,
-} from './index';
+import { IActionData, ActionType, ActionBase, CommandInjector, CommandManager, ActionOperation, CommonParameter } from './index';
 import { DocumentModel } from '../Docs/Domain/DocumentModel';
+import { WorkbookModel } from '../Sheets/Model/WorkbookModel';
 
 export class CommandUnit {
-    WorkBookUnit?: Workbook;
+    WorkBookUnit?: WorkbookModel;
 
     DocumentUnit?: DocumentModel;
 }
@@ -69,19 +61,12 @@ export class Command {
             const ActionClass = CommandManager.getAction(data.actionName);
             if (!ActionClass) return;
             const observers = CommandManager.getActionObservers();
-            const action = new ActionClass(
-                data,
-                this.unit,
-                observers,
-                this._commonParameter.reset()
-            );
+            const action = new ActionClass(data, this.unit, observers, this._commonParameter.reset());
 
             this.actionList.push(action);
         });
 
-        CommandManager.getCommandInjectorObservers().notifyObservers(
-            this.getInjector()
-        );
+        CommandManager.getCommandInjectorObservers().notifyObservers(this.getInjector());
         CommandManager.getCommandObservers().notifyObservers({
             type: ActionType.REDO,
             actions: this.actionList,

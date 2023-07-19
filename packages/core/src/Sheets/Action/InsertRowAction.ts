@@ -1,11 +1,4 @@
-import {
-    SheetActionBase,
-    ISheetActionData,
-    ActionObservers,
-    ActionType,
-    CommandUnit,
-    CommandManager,
-} from '../../Command';
+import { SheetActionBase, ISheetActionData, ActionObservers, ActionType, CommandUnit, CommandManager } from '../../Command';
 import { InsertRowApply, RemoveRowApply } from '../Apply';
 import { IRemoveRowActionData } from './RemoveRowAction';
 
@@ -22,17 +15,10 @@ export interface IInsertRowActionData extends ISheetActionData {
  *
  * @internal
  */
-export class InsertRowAction extends SheetActionBase<
-    IInsertRowActionData,
-    IRemoveRowActionData
-> {
+export class InsertRowAction extends SheetActionBase<IInsertRowActionData, IRemoveRowActionData> {
     static NAME = 'InsertRowAction';
 
-    constructor(
-        actionData: IInsertRowActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
+    constructor(actionData: IInsertRowActionData, commandUnit: CommandUnit, observers: ActionObservers) {
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,

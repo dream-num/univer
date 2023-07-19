@@ -1,10 +1,10 @@
 import { Class, Nullable } from '../Shared';
 import { IActionData, ActionType, ActionBase, CommandInjector, CommandManager, ActionOperation, CommonParameter } from './index';
 import { DocumentModel } from '../Docs/Domain/DocumentModel';
-import { SpreadsheetsModel } from '../Sheets/Model/SpreadsheetsModel';
+import { SpreadsheetModel } from '../Sheets/Model/SpreadsheetModel';
 
 export class CommandModel {
-    SpreadsheetsModel?: SpreadsheetsModel;
+    SpreadsheetModel?: SpreadsheetModel;
 
     DocumentModel?: DocumentModel;
 }

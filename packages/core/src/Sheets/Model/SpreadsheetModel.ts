@@ -1,5 +1,5 @@
 import { WorksheetModel } from './WorksheetModel';
 
-export class SpreadsheetsModel {
+export class SpreadsheetModel {
     worksheets: { [key: string]: WorksheetModel };
 }

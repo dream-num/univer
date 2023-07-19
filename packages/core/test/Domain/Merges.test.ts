@@ -1,11 +1,11 @@
-import { Merges } from '../../src';
+import { Merge } from '../../src';
 import { demo } from './Range.test';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
 test('Test Merges getByRowColumn', () => {
     let { worksheet } = demo();
-    const merges = new Merges(worksheet, [
+    const merges = new Merge(worksheet, [
         {
             startRow: 1,
             startColumn: 1,
@@ -24,7 +24,7 @@ test('Test Merges getByRowColumn', () => {
 
 test('Test Merges remove', () => {
     let { worksheet } = demo();
-    const merges = new Merges(worksheet, [
+    const merges = new Merge(worksheet, [
         {
             startRow: 1,
             startColumn: 1,
@@ -51,7 +51,7 @@ test('Test Merges remove', () => {
 
 test('Test Merges size', () => {
     let { worksheet } = demo();
-    const merges = new Merges(worksheet, [
+    const merges = new Merge(worksheet, [
         {
             startRow: 1,
             startColumn: 1,
@@ -70,7 +70,7 @@ test('Test Merges size', () => {
 
 test('Test Merges add', () => {
     let { worksheet } = demo();
-    const merges = new Merges(worksheet, [
+    const merges = new Merge(worksheet, [
         {
             startRow: 1,
             startColumn: 1,
@@ -96,7 +96,7 @@ test('Test Merges add', () => {
 
 test('Test Merges union', () => {
     let { worksheet } = demo();
-    const merges = new Merges(worksheet, [
+    const merges = new Merge(worksheet, [
         {
             startRow: 0,
             startColumn: 0,
@@ -110,7 +110,7 @@ test('Test Merges union', () => {
 
 test('Test Merges getMergedRanges', () => {
     let { worksheet } = demo();
-    const merges = new Merges(worksheet, [
+    const merges = new Merge(worksheet, [
         {
             startRow: 1,
             startColumn: 1,

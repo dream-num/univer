@@ -1,12 +1,12 @@
 import { Class, Nullable } from '../Shared';
 import { IActionData, ActionType, ActionBase, CommandInjector, CommandManager, ActionOperation, CommonParameter } from './index';
 import { DocumentModel } from '../Docs/Domain/DocumentModel';
-import { WorkbookModel } from '../Sheets/Model/WorkbookModel';
+import { SpreadsheetsModel } from '../Sheets/Model/SpreadsheetsModel';
 
-export class CommandUnit {
-    WorkBookUnit?: WorkbookModel;
+export class CommandModel {
+    SpreadsheetsModel?: SpreadsheetsModel;
 
-    DocumentUnit?: DocumentModel;
+    DocumentModel?: DocumentModel;
 }
 
 /**
@@ -16,16 +16,16 @@ export class CommandUnit {
 export class Command {
     actionDataList: IActionData[];
 
-    unit: CommandUnit;
-
     actionList: Array<ActionBase<IActionData>>;
+
+    commandModel: CommandModel;
 
     private _commonParameter = new CommonParameter();
 
-    constructor(commandUnit: CommandUnit, ...list: IActionData[]) {
-        this.unit = commandUnit;
-        this.actionDataList = list;
+    constructor(commandModel: CommandModel, ...list: IActionData[]) {
+        this.commandModel = commandModel;
         this.actionList = [];
+        this.actionDataList = list;
     }
 
     redo(): void {
@@ -61,8 +61,7 @@ export class Command {
             const ActionClass = CommandManager.getAction(data.actionName);
             if (!ActionClass) return;
             const observers = CommandManager.getActionObservers();
-            const action = new ActionClass(data, this.unit, observers, this._commonParameter.reset());
-
+            const action = new ActionClass(data, this.commandModel, observers, this._commonParameter.reset());
             this.actionList.push(action);
         });
 

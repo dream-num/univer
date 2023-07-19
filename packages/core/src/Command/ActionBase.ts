@@ -1,14 +1,5 @@
-import { ActionObservers } from './ActionObservers';
 import { CommonParameter } from './CommonParameter';
-
-/**
- * Format of action data param
- */
-export interface IActionData {
-    actionName: string;
-    memberId?: string;
-    operation?: ActionOperationType;
-}
+import { Observable } from '../Observer';
 
 /**
  * Action Operation Type
@@ -39,6 +30,40 @@ export enum ActionOperationType {
      */
     DEFAULT_ACTION = ActionOperationType.OBSERVER_ACTION | ActionOperationType.SERVER_ACTION | ActionOperationType.UNDO_ACTION | ActionOperationType.EXTENSION_ACTION,
 }
+
+/**
+ * Action type
+ */
+export enum ActionType {
+    REDO,
+    UNDO,
+}
+
+/**
+ * Format of action data param
+ */
+export interface IActionData {
+    actionName: string;
+    memberId?: string;
+    operation?: ActionOperationType;
+}
+
+/**
+ * Action observer props
+ */
+export interface IActionObserverProps {
+    type: ActionType;
+    data: IActionData;
+    action: ActionBase<IActionData, IActionData>;
+    commonParameter?: CommonParameter;
+}
+
+/**
+ * WorkBookObserver for action base
+ *
+ * @beta
+ */
+export class ActionObservers extends Observable<IActionObserverProps> {}
 
 /**
  * Basics class for action

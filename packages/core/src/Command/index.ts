@@ -15,5 +15,5 @@ export * from './ActionExtensionFactory';
 export * from './RegistryFactory';
 export * from './ActionExtensionRegister';
 export * from './ActionOperation';
-export * from './CommandModel'
+export * from './CommandModel';
 // @endindex

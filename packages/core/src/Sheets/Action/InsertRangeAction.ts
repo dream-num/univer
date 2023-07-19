@@ -2,7 +2,7 @@ import { ICellData, IRangeData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { Dimension } from '../../Types/Enum/Dimension';
 import { IDeleteRangeActionData } from './DeleteRangeAction';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { SetRangeDataAction } from './SetRangeDataAction';
 import { DeleteRangeApply, InsertRangeApply } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
@@ -22,18 +22,11 @@ export interface IInsertRangeActionData extends ISheetActionData {
  *
  * @internal
  */
-export class InsertRangeAction extends SheetActionBase<
-    IInsertRangeActionData,
-    IDeleteRangeActionData
-> {
+export class InsertRangeAction extends SheetActionBase<IInsertRangeActionData, IDeleteRangeActionData> {
     static NAME = 'InsertRangeAction';
 
-    constructor(
-        actionData: IInsertRangeActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: IInsertRangeActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -47,7 +40,7 @@ export class InsertRangeAction extends SheetActionBase<
     do(): void {
         const worksheet = this.getWorkSheet();
         if (worksheet) {
-            InsertRangeApply(this._commandUnit, this._doActionData);
+            InsertRangeApply(this._commandModel, this._doActionData);
             this._observers.notifyObservers({
                 type: ActionType.REDO,
                 data: this._doActionData,
@@ -70,7 +63,7 @@ export class InsertRangeAction extends SheetActionBase<
                 // actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                 actionName: SetRangeDataAction.NAME,
                 sheetId,
-                cellValue: DeleteRangeApply(this._commandUnit, this._oldActionData),
+                cellValue: DeleteRangeApply(this._commandModel, this._oldActionData),
                 rangeData,
                 shiftDimension,
             };
@@ -86,5 +79,3 @@ export class InsertRangeAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(InsertRangeAction.NAME, InsertRangeAction);

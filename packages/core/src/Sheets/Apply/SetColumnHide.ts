@@ -1,5 +1,5 @@
 import { ColumnManager } from '../Domain/ColumnManager';
-import { CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { ISetColumnShowActionData } from '../Action';
 
 /**
@@ -10,21 +10,14 @@ import { ISetColumnShowActionData } from '../Action';
  *
  * @internal
  */
-export function SetColumnHide(
-    columnIndex: number = 0,
-    columnCount: number,
-    columnManager: ColumnManager
-): void {
+export function SetColumnHide(columnIndex: number = 0, columnCount: number, columnManager: ColumnManager): void {
     for (let i = columnIndex; i < columnIndex + columnCount; i++) {
         const column = columnManager.getColumnOrCreate(i);
         column.hd = 1;
     }
 }
 
-export function SetColumnHideApply(
-    unit: CommandUnit,
-    data: ISetColumnShowActionData
-) {
+export function SetColumnHideApply(unit: CommandModel, data: ISetColumnShowActionData) {
     const workbook = unit.WorkBookUnit;
     const worksheet = workbook!.getSheetBySheetId(data.sheetId)!;
     const columnIndex = data.columnIndex;

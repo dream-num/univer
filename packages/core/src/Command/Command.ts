@@ -1,14 +1,11 @@
-import { Class, Nullable } from '../Shared';
-import { IActionData, ActionType, ActionBase, CommandInjector, CommandManager, ActionOperation, CommonParameter } from './index';
-import { DocumentModel } from '../Docs/Domain/DocumentModel';
-import { SpreadsheetModel } from '../Sheets/Model/SpreadsheetModel';
-
-export class CommandModel {
-    SpreadsheetModel?: SpreadsheetModel;
-
-    DocumentModel?: DocumentModel;
-}
-
+import { Class, Nullable } from '../Shared/Types';
+import { ActionBase, IActionData } from './ActionBase';
+import { ActionType } from './ActionObservers';
+import { ActionOperation } from './ActionOperation';
+import { CommandInjector } from './CommandInjectorObservers';
+import { CommandManager } from './CommandManager';
+import { CommandModel } from './CommandModel';
+import { CommonParameter } from './CommonParameter';
 /**
  * Execute the undo-redo command
  *

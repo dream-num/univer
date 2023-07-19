@@ -1,6 +1,6 @@
 import { IColumnData } from '../../Types/Interfaces';
 import { ObjectArray, ObjectArrayPrimitiveType } from '../../Shared';
-import { CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { IRemoveColumnAction } from '../Action';
 
 /**
@@ -11,11 +11,7 @@ import { IRemoveColumnAction } from '../Action';
  *
  * @internal
  */
-export function RemoveColumn(
-    columnIndex: number,
-    columnCount: number,
-    primitiveData: ObjectArrayPrimitiveType<IColumnData>
-): number {
+export function RemoveColumn(columnIndex: number, columnCount: number, primitiveData: ObjectArrayPrimitiveType<IColumnData>): number {
     const wrapper = new ObjectArray(primitiveData);
     const result = new ObjectArray<IColumnData>();
     const start = columnIndex;
@@ -29,7 +25,7 @@ export function RemoveColumn(
     return result.getLength();
 }
 
-export function RemoveColumnApply(unit: CommandUnit, data: IRemoveColumnAction) {
+export function RemoveColumnApply(unit: CommandModel, data: IRemoveColumnAction) {
     const worksheet = unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
     const columnManager = worksheet!.getColumnManager();
     const primitiveData = columnManager.getColumnData().toJSON();

@@ -1,6 +1,6 @@
 import { InsertRowApply, RemoveRowApply } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertRowActionData } from './InsertRowAction';
 
@@ -17,18 +17,11 @@ export interface IRemoveRowActionData extends ISheetActionData {
  *
  * @internal
  */
-export class RemoveRowAction extends SheetActionBase<
-    IRemoveRowActionData,
-    IInsertRowActionData
-> {
+export class RemoveRowAction extends SheetActionBase<IRemoveRowActionData, IInsertRowActionData> {
     static NAME = 'RemoveRowAction';
 
-    constructor(
-        actionData: IRemoveRowActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: IRemoveRowActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -40,7 +33,7 @@ export class RemoveRowAction extends SheetActionBase<
     }
 
     do(): number {
-        const result = RemoveRowApply(this._commandUnit, this._doActionData);
+        const result = RemoveRowApply(this._commandModel, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -55,7 +48,7 @@ export class RemoveRowAction extends SheetActionBase<
     }
 
     undo(): void {
-        InsertRowApply(this._commandUnit, this._oldActionData);
+        InsertRowApply(this._commandModel, this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -67,5 +60,3 @@ export class RemoveRowAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(RemoveRowAction.NAME, RemoveRowAction);

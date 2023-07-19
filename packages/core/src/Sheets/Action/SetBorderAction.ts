@@ -3,7 +3,7 @@ import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase
 import { SetBorderApply } from '../Apply';
 import { IStyleData } from '../../Types/Interfaces';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 
 /**
  * @internal
@@ -18,18 +18,11 @@ export interface BorderStyleData extends ISheetActionData {
  *
  * @internal
  */
-export class SetBorderAction extends SheetActionBase<
-    BorderStyleData,
-    BorderStyleData
-> {
+export class SetBorderAction extends SheetActionBase<BorderStyleData, BorderStyleData> {
     static NAME = 'SetBorderAction';
 
-    constructor(
-        actionData: BorderStyleData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: BorderStyleData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -41,7 +34,7 @@ export class SetBorderAction extends SheetActionBase<
     }
 
     do(): ObjectMatrixPrimitiveType<IStyleData> {
-        const result = SetBorderApply(this._commandUnit, this._doActionData);
+        const result = SetBorderApply(this._commandModel, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -55,7 +48,7 @@ export class SetBorderAction extends SheetActionBase<
     }
 
     undo(): void {
-        SetBorderApply(this._commandUnit, this._oldActionData);
+        SetBorderApply(this._commandModel, this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -67,5 +60,3 @@ export class SetBorderAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(SetBorderAction.NAME, SetBorderAction);

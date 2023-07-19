@@ -1,6 +1,6 @@
 import { Workbook } from '../Domain';
 import { IWorksheetConfig } from '../../Types/Interfaces';
-import { CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { IRemoveSheetActionData } from '../Action';
 
 export function RemoveSheet(
@@ -30,7 +30,7 @@ export function RemoveSheet(
     };
 }
 
-export function RemoveSheetApply(unit: CommandUnit, data: IRemoveSheetActionData) {
+export function RemoveSheetApply(unit: CommandModel, data: IRemoveSheetActionData) {
     let workbook = unit.WorkBookUnit;
     let sheetId = data.sheetId;
 

@@ -1,5 +1,5 @@
 import { FormulaDataType } from '@univerjs/base-formula-engine';
-import { SheetActionBase, ActionObservers, ISheetActionData, CommandUnit } from '@univerjs/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, CommandModel } from '@univerjs/core';
 import { SetFormulaRangeData } from '../Apply/SetFormulaRangeData';
 
 export interface ISetFormulaRangeActionData extends ISheetActionData {
@@ -7,8 +7,8 @@ export interface ISetFormulaRangeActionData extends ISheetActionData {
 }
 
 export class SetFormulaRangeDataAction extends SheetActionBase<ISetFormulaRangeActionData, ISetFormulaRangeActionData, FormulaDataType> {
-    constructor(actionData: ISetFormulaRangeActionData, commandUnit: CommandUnit, observers: ActionObservers) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetFormulaRangeActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };

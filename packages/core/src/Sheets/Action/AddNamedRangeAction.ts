@@ -1,36 +1,18 @@
-import {
-    ISheetActionData,
-    SheetActionBase,
-    ActionObservers,
-    ActionType,
-    CommandUnit,
-    CommandManager,
-} from '../../Command';
+import { ISheetActionData, SheetActionBase, ActionObservers, ActionType, CommandModel } from '../../Command';
 import { INamedRange } from '../../Types/Interfaces/INamedRange';
 import { AddNamedRangeApply } from '../Apply';
 import { DeleteNamedRangeApply } from '../Apply/DeleteNamedRange';
-import {
-    DeleteNamedRangeAction,
-    IDeleteNamedRangeActionData,
-} from './DeleteNamedRangeAction';
+import { DeleteNamedRangeAction, IDeleteNamedRangeActionData } from './DeleteNamedRangeAction';
 
 export interface IAddNamedRangeActionData extends ISheetActionData {
     namedRange: INamedRange;
 }
 
-export class AddNamedRangeAction extends SheetActionBase<
-    IAddNamedRangeActionData,
-    IDeleteNamedRangeActionData,
-    void
-> {
+export class AddNamedRangeAction extends SheetActionBase<IAddNamedRangeActionData, IDeleteNamedRangeActionData, void> {
     static NAME = 'AddNamedRangeAction';
 
-    constructor(
-        actionData: IAddNamedRangeActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: IAddNamedRangeActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
 
         this._doActionData = {
             ...actionData,
@@ -46,7 +28,7 @@ export class AddNamedRangeAction extends SheetActionBase<
     }
 
     do(): void {
-        AddNamedRangeApply(this._commandUnit, this._doActionData);
+        AddNamedRangeApply(this._commandModel, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -66,10 +48,7 @@ export class AddNamedRangeAction extends SheetActionBase<
             // actionName: ACTION_NAMES.ADD_NAMED_RANGE_ACTION,
             actionName: AddNamedRangeAction.NAME,
             sheetId,
-            namedRange: DeleteNamedRangeApply(
-                this._commandUnit,
-                this._oldActionData
-            ),
+            namedRange: DeleteNamedRangeApply(this._commandModel, this._oldActionData),
         };
 
         this._observers.notifyObservers({
@@ -83,5 +62,3 @@ export class AddNamedRangeAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(AddNamedRangeAction.NAME, AddNamedRangeAction);

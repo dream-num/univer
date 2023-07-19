@@ -1,7 +1,7 @@
 import { ICellData, ICellV, IRangeData } from '../../Types/Interfaces';
 import { Nullable, Tools } from '../../Shared';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { ISetRangeFormattedValueActionData } from '../Action';
 
 /**
@@ -41,10 +41,7 @@ export function SetRangeFormattedValue(
     return result.getData();
 }
 
-export function SetRangeFormattedValueApply(
-    unit: CommandUnit,
-    data: ISetRangeFormattedValueActionData
-) {
+export function SetRangeFormattedValueApply(unit: CommandModel, data: ISetRangeFormattedValueActionData) {
     const workbook = unit.WorkBookUnit;
     const worksheet = workbook!.getSheetBySheetId(data.sheetId)!;
     const cellMatrix = worksheet.getCellMatrix();

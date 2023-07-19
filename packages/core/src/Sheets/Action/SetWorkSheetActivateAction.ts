@@ -3,7 +3,7 @@ import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { BooleanNumber } from '../../Types/Enum';
 import { ActionOperationType } from '../../Command/ActionBase';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 
 /**
  * @internal
@@ -23,19 +23,11 @@ export interface ISheetStatus {
 /**
  * @internal
  */
-export class SetWorkSheetActivateAction extends SheetActionBase<
-    ISetWorkSheetActivateActionData,
-    ISetWorkSheetActivateActionData,
-    ISheetStatus
-> {
+export class SetWorkSheetActivateAction extends SheetActionBase<ISetWorkSheetActivateActionData, ISetWorkSheetActivateActionData, ISheetStatus> {
     static NAME = 'SetWorkSheetActivateAction';
 
-    constructor(
-        actionData: ISetWorkSheetActivateActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetWorkSheetActivateActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -80,10 +72,7 @@ export class SetWorkSheetActivateAction extends SheetActionBase<
         const oldStatus = this._oldActionData.status;
         const worksheet = this._workbook.getSheetBySheetId(sheetId);
         if (worksheet) {
-            const { oldSheetId, status } = SetWorkSheetActivate(
-                worksheet,
-                oldStatus
-            );
+            const { oldSheetId, status } = SetWorkSheetActivate(worksheet, oldStatus);
             // update current data
             this._doActionData = {
                 actionName: SetWorkSheetActivateAction.NAME,
@@ -103,5 +92,3 @@ export class SetWorkSheetActivateAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(SetWorkSheetActivateAction.NAME, SetWorkSheetActivateAction);

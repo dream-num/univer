@@ -1,5 +1,6 @@
 import { Observable } from '../Observer';
-import { IActionData, ActionBase, CommonParameter } from './index';
+import { IActionData, ActionBase } from './ActionBase';
+import { CommonParameter } from './CommonParameter';
 
 /**
  * Action type

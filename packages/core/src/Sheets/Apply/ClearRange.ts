@@ -1,10 +1,10 @@
 import { ICellData } from '../../Types/Interfaces';
 import { Tools, ObjectMatrix } from '../../Shared';
 
-import { CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { IClearRangeActionData } from '../Action';
 
-export function ClearRangeApply(unit: CommandUnit, data: IClearRangeActionData) {
+export function ClearRangeApply(unit: CommandModel, data: IClearRangeActionData) {
     const worksheet = unit.WorkBookUnit?.getSheetBySheetId(data.sheetId);
     const cellMatrix = worksheet?.getCellMatrix();
     const { startRow, endRow, startColumn, endColumn } = data.rangeData;

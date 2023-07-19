@@ -2,7 +2,7 @@ import { SetColumnHideApply, SetColumnShowApply } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { ISetColumnShowActionData } from './SetColumnShowAction';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 
 /**
  * @internal
@@ -17,18 +17,11 @@ export interface ISetColumnHideActionData extends ISheetActionData {
  *
  * @internal
  */
-export class SetColumnHideAction extends SheetActionBase<
-    ISetColumnHideActionData,
-    ISetColumnShowActionData
-> {
+export class SetColumnHideAction extends SheetActionBase<ISetColumnHideActionData, ISetColumnShowActionData> {
     static NAME = 'SetColumnHideAction';
 
-    constructor(
-        actionData: ISetColumnHideActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetColumnHideActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -40,7 +33,7 @@ export class SetColumnHideAction extends SheetActionBase<
     }
 
     do(): void {
-        SetColumnHideApply(this._commandUnit, this._doActionData);
+        SetColumnHideApply(this._commandModel, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -53,7 +46,7 @@ export class SetColumnHideAction extends SheetActionBase<
     }
 
     undo(): void {
-        SetColumnShowApply(this._commandUnit, this._oldActionData);
+        SetColumnShowApply(this._commandModel, this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -65,5 +58,3 @@ export class SetColumnHideAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(SetColumnHideAction.NAME, SetColumnHideAction);

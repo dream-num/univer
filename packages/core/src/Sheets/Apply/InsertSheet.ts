@@ -1,13 +1,9 @@
 import { Workbook, Worksheet } from '../Domain';
 import { IWorksheetConfig } from '../../Types/Interfaces';
-import { CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { IInsertSheetActionData } from '../Action';
 
-export function InsertSheet(
-    workbook: Workbook,
-    index: number,
-    worksheetConfig: IWorksheetConfig
-): string {
+export function InsertSheet(workbook: Workbook, index: number, worksheetConfig: IWorksheetConfig): string {
     const iSheets = workbook.getWorksheets();
     const config = workbook.getConfig();
     const { sheets, sheetOrder } = config;
@@ -16,14 +12,11 @@ export function InsertSheet(
     }
     sheets[worksheetConfig.id] = worksheetConfig;
     sheetOrder.splice(index, 0, worksheetConfig.id);
-    iSheets.set(
-        worksheetConfig.id,
-        new Worksheet(workbook.getContext(), worksheetConfig)
-    );
+    iSheets.set(worksheetConfig.id, new Worksheet(workbook.getContext(), worksheetConfig));
     return worksheetConfig.id;
 }
 
-export function InsertSheetApply(unit: CommandUnit, data: IInsertSheetActionData) {
+export function InsertSheetApply(unit: CommandModel, data: IInsertSheetActionData) {
     const worksheet = unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
     const index = data.index;
     const worksheetConfig = data.sheet;
@@ -36,9 +29,6 @@ export function InsertSheetApply(unit: CommandUnit, data: IInsertSheetActionData
     }
     sheets[worksheetConfig.id] = worksheetConfig;
     sheetOrder.splice(index, 0, worksheetConfig.id);
-    iSheets.set(
-        worksheetConfig.id,
-        new Worksheet(unit.WorkBookUnit!.getContext(), worksheetConfig)
-    );
+    iSheets.set(worksheetConfig.id, new Worksheet(unit.WorkBookUnit!.getContext(), worksheetConfig));
     return worksheetConfig.id;
 }

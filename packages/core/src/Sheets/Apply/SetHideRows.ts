@@ -1,5 +1,5 @@
 import { RowManager } from '../Domain/RowManager';
-import { CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { ISetRowHideActionData } from '../Action';
 
 /**
@@ -10,11 +10,7 @@ import { ISetRowHideActionData } from '../Action';
  *
  * @internal
  */
-export function SetHideRow(
-    rowIndex: number = 0,
-    rowCount: number,
-    rowManager: RowManager
-) {
+export function SetHideRow(rowIndex: number = 0, rowCount: number, rowManager: RowManager) {
     for (let i = rowIndex; i < rowIndex + rowCount; i++) {
         const row = rowManager.getRowOrCreate(i);
         if (row) {
@@ -23,7 +19,7 @@ export function SetHideRow(
     }
 }
 
-export function SetHideRowApply(unit: CommandUnit, data: ISetRowHideActionData) {
+export function SetHideRowApply(unit: CommandModel, data: ISetRowHideActionData) {
     const workbook = unit.WorkBookUnit;
     const worksheet = workbook!.getSheetBySheetId(data.sheetId)!;
     const rowIndex = data.rowIndex;

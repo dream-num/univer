@@ -1,7 +1,7 @@
 import { Styles } from '../Domain';
 import { ICellData, IStyleData } from '../../Types/Interfaces';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared';
-import { CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { BorderStyleData } from '../Action';
 
 /**
@@ -13,11 +13,7 @@ import { BorderStyleData } from '../Action';
  *
  * @internal
  */
-export function SetBorder(
-    matrix: ObjectMatrix<ICellData>,
-    globalStyles: Styles,
-    primitiveStyles: ObjectMatrixPrimitiveType<IStyleData>
-): ObjectMatrixPrimitiveType<IStyleData> {
+export function SetBorder(matrix: ObjectMatrix<ICellData>, globalStyles: Styles, primitiveStyles: ObjectMatrixPrimitiveType<IStyleData>): ObjectMatrixPrimitiveType<IStyleData> {
     const wrapper = new ObjectMatrix(primitiveStyles);
     const result = new ObjectMatrix<IStyleData>();
     wrapper.forValue((row, column, value) => {
@@ -33,10 +29,7 @@ export function SetBorder(
     return result.toJSON();
 }
 
-export function SetBorderApply(
-    unit: CommandUnit,
-    data: BorderStyleData
-): ObjectMatrixPrimitiveType<IStyleData> {
+export function SetBorderApply(unit: CommandModel, data: BorderStyleData): ObjectMatrixPrimitiveType<IStyleData> {
     const workbook = unit.WorkBookUnit;
     const worksheet = workbook!.getSheetBySheetId(data.sheetId)!;
     const globalStyles = workbook!.getStyles();

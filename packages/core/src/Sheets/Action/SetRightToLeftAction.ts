@@ -2,7 +2,7 @@ import { SetRightToLeft } from '../Apply';
 import { BooleanNumber } from '../../Types/Enum';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 
 /**
  * @internal
@@ -17,12 +17,8 @@ export interface ISetRightToLeftActionData extends ISheetActionData {
 export class SetRightToLeftAction extends SheetActionBase<ISetRightToLeftActionData> {
     static NAME = 'SetRightToLeftAction';
 
-    constructor(
-        actionData: ISetRightToLeftActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetRightToLeftActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -67,5 +63,3 @@ export class SetRightToLeftAction extends SheetActionBase<ISetRightToLeftActionD
         return false;
     }
 }
-
-CommandManager.register(SetRightToLeftAction.NAME, SetRightToLeftAction);

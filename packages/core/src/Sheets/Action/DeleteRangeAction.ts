@@ -4,7 +4,7 @@ import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertRangeActionData, InsertRangeAction } from './InsertRangeAction';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { DeleteRangeApply, InsertRangeApply } from '../Apply';
 
 /**
@@ -20,19 +20,11 @@ export interface IDeleteRangeActionData extends ISheetActionData {
  *
  * @internal
  */
-export class DeleteRangeAction extends SheetActionBase<
-    IDeleteRangeActionData,
-    IInsertRangeActionData,
-    ObjectMatrixPrimitiveType<ICellData>
-> {
+export class DeleteRangeAction extends SheetActionBase<IDeleteRangeActionData, IInsertRangeActionData, ObjectMatrixPrimitiveType<ICellData>> {
     static NAME = 'DeleteRangeAction';
 
-    constructor(
-        actionData: IDeleteRangeActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: IDeleteRangeActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
 
         this._doActionData = {
             ...actionData,
@@ -45,7 +37,7 @@ export class DeleteRangeAction extends SheetActionBase<
     }
 
     do(): ObjectMatrixPrimitiveType<ICellData> {
-        const result = DeleteRangeApply(this._commandUnit, this._doActionData);
+        const result = DeleteRangeApply(this._commandModel, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -71,7 +63,7 @@ export class DeleteRangeAction extends SheetActionBase<
     undo(): void {
         const worksheet = this.getWorkSheet();
         if (worksheet) {
-            InsertRangeApply(this._commandUnit, this._oldActionData);
+            InsertRangeApply(this._commandModel, this._oldActionData);
             this._observers.notifyObservers({
                 type: ActionType.UNDO,
                 data: this._oldActionData,
@@ -85,5 +77,3 @@ export class DeleteRangeAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(DeleteRangeAction.NAME, DeleteRangeAction);

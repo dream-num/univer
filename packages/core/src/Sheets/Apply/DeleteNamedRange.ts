@@ -1,11 +1,8 @@
 import { INamedRange } from '../../Types/Interfaces';
-import { CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { IDeleteNamedRangeActionData } from '../Action';
 
-export function DeleteNamedRange(
-    namedRanges: INamedRange[],
-    namedRangeId: string
-): INamedRange {
+export function DeleteNamedRange(namedRanges: INamedRange[], namedRangeId: string): INamedRange {
     return namedRanges.find((currentNamedRange: INamedRange, i) => {
         if (currentNamedRange.namedRangeId === namedRangeId) {
             // remove
@@ -16,10 +13,7 @@ export function DeleteNamedRange(
     })!;
 }
 
-export function DeleteNamedRangeApply(
-    unit: CommandUnit,
-    data: IDeleteNamedRangeActionData
-) {
+export function DeleteNamedRangeApply(unit: CommandModel, data: IDeleteNamedRangeActionData) {
     const workbook = unit.WorkBookUnit;
     const namedRanges = workbook?.getConfig().namedRanges;
     return namedRanges?.find((currentNamedRange: INamedRange, i) => {

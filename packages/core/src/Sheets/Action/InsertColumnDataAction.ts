@@ -1,7 +1,7 @@
 import { InsertDataColumnApply, RemoveColumnDataApply } from '../Apply';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { ObjectArray } from '../../Shared';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ICellData } from '../../Types/Interfaces';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
@@ -20,18 +20,11 @@ export interface IInsertColumnDataActionData extends ISheetActionData {
  *
  * @internal
  */
-export class InsertColumnDataAction extends SheetActionBase<
-    IInsertColumnDataActionData,
-    IRemoveColumnDataAction
-> {
+export class InsertColumnDataAction extends SheetActionBase<IInsertColumnDataActionData, IRemoveColumnDataAction> {
     static NAME = 'InsertColumnDataAction';
 
-    constructor(
-        actionData: IInsertColumnDataActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: IInsertColumnDataActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -44,7 +37,7 @@ export class InsertColumnDataAction extends SheetActionBase<
     }
 
     do(): void {
-        InsertDataColumnApply(this._commandUnit, this._doActionData);
+        InsertDataColumnApply(this._commandModel, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -57,7 +50,7 @@ export class InsertColumnDataAction extends SheetActionBase<
     }
 
     undo(): void {
-        RemoveColumnDataApply(this._commandUnit, this._oldActionData);
+        RemoveColumnDataApply(this._commandModel, this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -69,5 +62,3 @@ export class InsertColumnDataAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(InsertColumnDataAction.NAME, InsertColumnDataAction);

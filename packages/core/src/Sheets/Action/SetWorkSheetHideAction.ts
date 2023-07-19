@@ -2,7 +2,7 @@ import { SetWorkSheetHideService } from '../Apply';
 import { BooleanNumber } from '../../Types/Enum';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 
 /**
  * @internal
@@ -14,19 +14,11 @@ export interface ISetWorkSheetHideActionData extends ISheetActionData {
 /**
  * @internal
  */
-export class SetWorkSheetHideAction extends SheetActionBase<
-    ISetWorkSheetHideActionData,
-    ISetWorkSheetHideActionData,
-    BooleanNumber
-> {
+export class SetWorkSheetHideAction extends SheetActionBase<ISetWorkSheetHideActionData, ISetWorkSheetHideActionData, BooleanNumber> {
     static NAME = 'SetWorkSheetHideAction';
 
-    constructor(
-        actionData: ISetWorkSheetHideActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetWorkSheetHideActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -82,5 +74,3 @@ export class SetWorkSheetHideAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(SetWorkSheetHideAction.NAME, SetWorkSheetHideAction);

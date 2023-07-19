@@ -1,12 +1,9 @@
 import { IRangeData } from '../../Types/Interfaces';
-import { CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { IRemoveMergeActionData } from '../Action';
 import { Rectangle } from '../../Shared';
 
-export function RemoveMergeApply(
-    unit: CommandUnit,
-    data: IRemoveMergeActionData
-): IRangeData[] {
+export function RemoveMergeApply(unit: CommandModel, data: IRemoveMergeActionData): IRangeData[] {
     let worksheet = unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
     if (worksheet) {
         let config = worksheet.getConfig();

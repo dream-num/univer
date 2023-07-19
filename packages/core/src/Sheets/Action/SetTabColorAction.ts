@@ -2,7 +2,7 @@ import { SetTabColor } from '../Apply';
 import { Nullable } from '../../Shared/Types';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 
 /**
  * @internal
@@ -14,19 +14,11 @@ export interface ISetTabColorActionData extends ISheetActionData {
 /**
  * @internal
  */
-export class SetTabColorAction extends SheetActionBase<
-    ISetTabColorActionData,
-    ISetTabColorActionData,
-    Nullable<string>
-> {
+export class SetTabColorAction extends SheetActionBase<ISetTabColorActionData, ISetTabColorActionData, Nullable<string>> {
     static NAME = 'SetTabColorAction';
 
-    constructor(
-        actionData: ISetTabColorActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetTabColorActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
 
         this._doActionData = {
             ...actionData,
@@ -87,5 +79,3 @@ export class SetTabColorAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(SetTabColorAction.NAME, SetTabColorAction);

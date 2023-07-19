@@ -4,7 +4,7 @@ import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertColumnDataActionData } from './InsertColumnDataAction';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 
 /**
  * @internal
@@ -19,18 +19,11 @@ export interface IRemoveColumnDataAction extends ISheetActionData {
  *
  * @internal
  */
-export class RemoveColumnDataAction extends SheetActionBase<
-    IRemoveColumnDataAction,
-    IInsertColumnDataActionData
-> {
+export class RemoveColumnDataAction extends SheetActionBase<IRemoveColumnDataAction, IInsertColumnDataActionData> {
     static NAME = 'RemoveColumnDataAction';
 
-    constructor(
-        actionData: IRemoveColumnDataAction,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: IRemoveColumnDataAction, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -42,7 +35,7 @@ export class RemoveColumnDataAction extends SheetActionBase<
     }
 
     do(): ObjectMatrixPrimitiveType<ICellData> {
-        const result = RemoveColumnDataApply(this._commandUnit, this._doActionData);
+        const result = RemoveColumnDataApply(this._commandModel, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -56,7 +49,7 @@ export class RemoveColumnDataAction extends SheetActionBase<
     }
 
     undo(): void {
-        InsertDataColumnApply(this._commandUnit, this._oldActionData);
+        InsertDataColumnApply(this._commandModel, this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -68,5 +61,3 @@ export class RemoveColumnDataAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(RemoveColumnDataAction.NAME, RemoveColumnDataAction);

@@ -1,11 +1,4 @@
-import {
-    SheetActionBase,
-    ActionObservers,
-    ActionType,
-    ISheetActionData,
-    CommandUnit,
-    CommandManager,
-} from '../../Command';
+import { SheetActionBase, ActionObservers, ActionType, ISheetActionData, CommandModel } from '../../Command';
 import { SetZoomRatio } from '../Apply/SetZoomRatio';
 
 export interface ISetZoomRatioActionData extends ISheetActionData {
@@ -13,18 +6,11 @@ export interface ISetZoomRatioActionData extends ISheetActionData {
     sheetId: string;
 }
 
-export class SetZoomRatioAction extends SheetActionBase<
-    ISetZoomRatioActionData,
-    ISetZoomRatioActionData
-> {
+export class SetZoomRatioAction extends SheetActionBase<ISetZoomRatioActionData, ISetZoomRatioActionData> {
     static NAME = 'SetZoomRatioAction';
 
-    constructor(
-        actionData: ISetZoomRatioActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetZoomRatioActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -36,11 +22,7 @@ export class SetZoomRatioAction extends SheetActionBase<
     }
 
     redo(): number {
-        const result = SetZoomRatio(
-            this.getWorkBook(),
-            this._doActionData.sheetId,
-            this._doActionData.zoom
-        );
+        const result = SetZoomRatio(this.getWorkBook(), this._doActionData.sheetId, this._doActionData.zoom);
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -56,11 +38,7 @@ export class SetZoomRatioAction extends SheetActionBase<
     }
 
     undo(): void {
-        SetZoomRatio(
-            this.getWorkBook(),
-            this._oldActionData.sheetId,
-            this._oldActionData.zoom
-        );
+        SetZoomRatio(this.getWorkBook(), this._oldActionData.sheetId, this._oldActionData.zoom);
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -73,5 +51,3 @@ export class SetZoomRatioAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(SetZoomRatioAction.NAME, SetZoomRatioAction);

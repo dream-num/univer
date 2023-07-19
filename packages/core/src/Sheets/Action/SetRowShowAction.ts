@@ -1,7 +1,7 @@
 import { SetHideRow, SetShowRow } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 
 /**
  * @internal
@@ -17,12 +17,8 @@ export interface ISetRowShowActionData extends ISheetActionData {
 export class SetRowShowAction extends SheetActionBase<ISetRowShowActionData> {
     static NAME = 'SetRowShowAction';
 
-    constructor(
-        actionData: ISetRowShowActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetRowShowActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -36,11 +32,7 @@ export class SetRowShowAction extends SheetActionBase<ISetRowShowActionData> {
     do(): void {
         const worksheet = this.getWorkSheet();
 
-        SetShowRow(
-            this._doActionData.rowIndex,
-            this._doActionData.rowCount,
-            worksheet.getRowManager()
-        );
+        SetShowRow(this._doActionData.rowIndex, this._doActionData.rowCount, worksheet.getRowManager());
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -56,11 +48,7 @@ export class SetRowShowAction extends SheetActionBase<ISetRowShowActionData> {
     undo(): void {
         const worksheet = this.getWorkSheet();
 
-        SetHideRow(
-            this._oldActionData.rowIndex,
-            this._oldActionData.rowCount,
-            worksheet.getRowManager()
-        );
+        SetHideRow(this._oldActionData.rowIndex, this._oldActionData.rowCount, worksheet.getRowManager());
 
         this._observers.notifyObservers({
             type: ActionType.UNDO,
@@ -73,5 +61,3 @@ export class SetRowShowAction extends SheetActionBase<ISetRowShowActionData> {
         return false;
     }
 }
-
-CommandManager.register(SetRowShowAction.NAME, SetRowShowAction);

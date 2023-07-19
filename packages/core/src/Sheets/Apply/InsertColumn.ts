@@ -1,6 +1,6 @@
 import { IColumnData } from '../../Types/Interfaces';
 import { ObjectArray, ObjectArrayPrimitiveType } from '../../Shared/ObjectArray';
-import { CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { IRemoveColumnAction } from '../Action';
 
 /**
@@ -11,19 +11,12 @@ import { IRemoveColumnAction } from '../Action';
  *
  * @internal
  */
-export function InsertColumn(
-    columnIndex: number = 0,
-    columnCount: number = 1,
-    primitiveData: ObjectArrayPrimitiveType<IColumnData>
-) {
+export function InsertColumn(columnIndex: number = 0, columnCount: number = 1, primitiveData: ObjectArrayPrimitiveType<IColumnData>) {
     const wrapper = new ObjectArray(primitiveData);
     wrapper.inserts(columnIndex, new ObjectArray(columnCount));
 }
 
-export function InsertColumnApply(
-    unit: CommandUnit,
-    data: IRemoveColumnAction
-): void {
+export function InsertColumnApply(unit: CommandModel, data: IRemoveColumnAction): void {
     const worksheet = unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
     const columnManager = worksheet!.getColumnManager();
     const primitiveData = columnManager.getColumnData().toJSON();

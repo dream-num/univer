@@ -2,10 +2,10 @@ import { ICellData, IStyleData } from '../../Types/Interfaces';
 import { Nullable, Tools } from '../../Shared';
 import { ObjectMatrix } from '../../Shared/ObjectMatrix';
 import { mergeStyle, transformStyle } from './SetRangeStyle';
-import { CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { ISetRangeDataActionData } from '../Action';
 
-export function SetRangeDataApply(unit: CommandUnit, data: ISetRangeDataActionData) {
+export function SetRangeDataApply(unit: CommandModel, data: ISetRangeDataActionData) {
     const workbook = unit.WorkBookUnit;
     const worksheet = workbook!.getSheetBySheetId(data.sheetId)!;
     const cellMatrix = worksheet.getCellMatrix();
@@ -53,10 +53,7 @@ export function SetRangeDataApply(unit: CommandUnit, data: ISetRangeDataActionDa
             const old = styles.getStyleByCell(cell);
 
             // store old data
-            const oldCellStyle = transformStyle(
-                old,
-                value?.s as Nullable<IStyleData>
-            );
+            const oldCellStyle = transformStyle(old, value?.s as Nullable<IStyleData>);
             const oldCellData = Tools.deepClone(cell);
             oldCellData.s = oldCellStyle;
 

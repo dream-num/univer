@@ -1,7 +1,7 @@
 import { addMergeApply, RemoveMergeApply } from '../Apply';
 import { IRangeData } from '../../Types/Interfaces';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IAddMergeActionData } from './AddMergeAction';
 
@@ -17,19 +17,11 @@ export interface IRemoveMergeActionData extends ISheetActionData {
  *
  * @internal
  */
-export class RemoveMergeAction extends SheetActionBase<
-    IRemoveMergeActionData,
-    IAddMergeActionData,
-    IRangeData[]
-> {
+export class RemoveMergeAction extends SheetActionBase<IRemoveMergeActionData, IAddMergeActionData, IRangeData[]> {
     static NAME = 'RemoveMergeAction';
 
-    constructor(
-        actionData: IRemoveMergeActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: IRemoveMergeActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -41,7 +33,7 @@ export class RemoveMergeAction extends SheetActionBase<
     }
 
     do(): IRangeData[] {
-        const result = RemoveMergeApply(this._commandUnit, this._doActionData);
+        const result = RemoveMergeApply(this._commandModel, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -55,7 +47,7 @@ export class RemoveMergeAction extends SheetActionBase<
     }
 
     undo(): void {
-        addMergeApply(this._commandUnit, this._oldActionData);
+        addMergeApply(this._commandModel, this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -67,5 +59,3 @@ export class RemoveMergeAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(RemoveMergeAction.NAME, RemoveMergeAction);

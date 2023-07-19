@@ -1,7 +1,7 @@
 import { SetRowHeight } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 
 /**
  * @internal
@@ -19,12 +19,8 @@ export interface ISetRowHeightActionData extends ISheetActionData {
 export class SetRowHeightAction extends SheetActionBase<ISetRowHeightActionData> {
     static NAME = 'SetRowHeightAction';
 
-    constructor(
-        actionData: ISetRowHeightActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetRowHeightActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -38,11 +34,7 @@ export class SetRowHeightAction extends SheetActionBase<ISetRowHeightActionData>
     do(): number[] {
         const worksheet = this.getWorkSheet();
 
-        const result = SetRowHeight(
-            this._doActionData.rowIndex,
-            this._doActionData.rowHeight,
-            worksheet.getRowManager()
-        );
+        const result = SetRowHeight(this._doActionData.rowIndex, this._doActionData.rowHeight, worksheet.getRowManager());
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -60,11 +52,7 @@ export class SetRowHeightAction extends SheetActionBase<ISetRowHeightActionData>
     undo(): number[] {
         const worksheet = this.getWorkSheet();
 
-        const result = SetRowHeight(
-            this._oldActionData.rowIndex,
-            this._oldActionData.rowHeight,
-            worksheet.getRowManager()
-        );
+        const result = SetRowHeight(this._oldActionData.rowIndex, this._oldActionData.rowHeight, worksheet.getRowManager());
 
         this._observers.notifyObservers({
             type: ActionType.UNDO,
@@ -79,5 +67,3 @@ export class SetRowHeightAction extends SheetActionBase<ISetRowHeightActionData>
         return false;
     }
 }
-
-CommandManager.register(SetRowHeightAction.NAME, SetRowHeightAction);

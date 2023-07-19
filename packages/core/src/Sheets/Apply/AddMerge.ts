@@ -1,6 +1,6 @@
 import { Merges } from '../Domain/Merges';
 import { IRangeData } from '../../Types/Interfaces';
-import { CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { IAddMergeActionData } from '../Action';
 
 /**
@@ -20,10 +20,7 @@ export function addMerge(merges: Merges, rectangles: IRangeData[]): IRangeData[]
     return remove;
 }
 
-export function addMergeApply(
-    unit: CommandUnit,
-    data: IAddMergeActionData
-): IRangeData[] {
+export function addMergeApply(unit: CommandModel, data: IAddMergeActionData): IRangeData[] {
     let worksheet = unit?.WorkBookUnit?.getSheetBySheetId(data.sheetId);
     if (worksheet) {
         let config = worksheet.getConfig();

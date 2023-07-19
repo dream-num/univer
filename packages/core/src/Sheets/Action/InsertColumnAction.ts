@@ -2,7 +2,7 @@ import { InsertColumnApply, RemoveColumnApply } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveColumnAction } from './RemoveColumnAction';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 
 /**
  * @internal
@@ -17,18 +17,11 @@ export interface IInsertColumnActionData extends ISheetActionData {
  *
  * @internal
  */
-export class InsertColumnAction extends SheetActionBase<
-    IInsertColumnActionData,
-    IRemoveColumnAction
-> {
+export class InsertColumnAction extends SheetActionBase<IInsertColumnActionData, IRemoveColumnAction> {
     static NAME = 'InsertColumnAction';
 
-    constructor(
-        actionData: IInsertColumnActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: IInsertColumnActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -40,7 +33,7 @@ export class InsertColumnAction extends SheetActionBase<
     }
 
     do(): void {
-        InsertColumnApply(this._commandUnit, this._doActionData);
+        InsertColumnApply(this._commandModel, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -53,7 +46,7 @@ export class InsertColumnAction extends SheetActionBase<
     }
 
     undo(): void {
-        RemoveColumnApply(this._commandUnit, this._oldActionData);
+        RemoveColumnApply(this._commandModel, this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -65,5 +58,3 @@ export class InsertColumnAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(InsertColumnAction.NAME, InsertColumnAction);

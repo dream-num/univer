@@ -1,7 +1,7 @@
 import { SetColumnHideApply, SetColumnShowApply } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 
 /**
  * @internal
@@ -19,12 +19,8 @@ export interface ISetColumnShowActionData extends ISheetActionData {
 export class SetColumnShowAction extends SheetActionBase<ISetColumnShowActionData> {
     static NAME = 'SetColumnShowAction';
 
-    constructor(
-        actionData: ISetColumnShowActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetColumnShowActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -36,7 +32,7 @@ export class SetColumnShowAction extends SheetActionBase<ISetColumnShowActionDat
     }
 
     do(): void {
-        SetColumnShowApply(this._commandUnit, this._doActionData);
+        SetColumnShowApply(this._commandModel, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -49,7 +45,7 @@ export class SetColumnShowAction extends SheetActionBase<ISetColumnShowActionDat
     }
 
     undo(): void {
-        SetColumnHideApply(this._commandUnit, this._oldActionData);
+        SetColumnHideApply(this._commandModel, this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -61,5 +57,3 @@ export class SetColumnShowAction extends SheetActionBase<ISetColumnShowActionDat
         return false;
     }
 }
-
-CommandManager.register(SetColumnShowAction.NAME, SetColumnShowAction);

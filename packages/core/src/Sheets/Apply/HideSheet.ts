@@ -1,6 +1,6 @@
 import { Worksheet } from '../Domain/Worksheet';
 import { BooleanNumber } from '../../Types/Enum';
-import { CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { ISetWorkSheetHideActionData } from '../Action';
 
 /**
@@ -11,10 +11,7 @@ import { ISetWorkSheetHideActionData } from '../Action';
  *
  * @internal
  */
-export function SetWorkSheetHideService(
-    worksheet: Worksheet,
-    hidden: BooleanNumber
-): BooleanNumber {
+export function SetWorkSheetHideService(worksheet: Worksheet, hidden: BooleanNumber): BooleanNumber {
     // get config
     const config = worksheet.getConfig();
 
@@ -28,10 +25,7 @@ export function SetWorkSheetHideService(
     return oldHidden;
 }
 
-export function SetWorkSheetHideServiceApply(
-    unit: CommandUnit,
-    data: ISetWorkSheetHideActionData
-) {
+export function SetWorkSheetHideServiceApply(unit: CommandModel, data: ISetWorkSheetHideActionData) {
     if (unit.WorkBookUnit == null) {
         throw new Error('Error WorkBookUnit is null');
     }

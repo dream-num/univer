@@ -37,6 +37,7 @@ import {
     SetWorkSheetNameAction,
     SetWorkSheetStatusAction,
     SetZoomRatioAction,
+    ClearRangeAction,
 } from '../Sheets/Action';
 import { CommandManager } from './CommandManager';
 import { DOC_ACTION_NAMES } from '../Types/Const/DOC_ACTION_NAMES';
@@ -76,10 +77,7 @@ CommandManager.register(SetRangeStyleAction.NAME, SetRangeStyleAction);
 CommandManager.register(SetWorkSheetStatusAction.NAME, SetWorkSheetStatusAction);
 CommandManager.register(SetSelectionActivateAction.NAME, SetSelectionActivateAction);
 CommandManager.register(SetRangeDataAction.NAME, SetRangeDataAction);
-CommandManager.register(
-    SetRangeFormattedValueAction.NAME,
-    SetRangeFormattedValueAction
-);
+CommandManager.register(SetRangeFormattedValueAction.NAME, SetRangeFormattedValueAction);
 CommandManager.register(DeleteRangeAction.NAME, DeleteRangeAction);
 CommandManager.register(InsertRangeAction.NAME, InsertRangeAction);
 CommandManager.register(SetTabColorAction.NAME, SetTabColorAction);
@@ -108,8 +106,8 @@ CommandManager.register(SetRangeNoteAction.NAME, SetRangeNoteAction);
 CommandManager.register(InsertSheetAction.NAME, InsertSheetAction);
 CommandManager.register(RemoveSheetAction.NAME, RemoveSheetAction);
 CommandManager.register(SetSheetOrderAction.NAME, SetSheetOrderAction);
-CommandManager.register(SetSheetOrderAction.NAME, SetSheetOrderAction);
 CommandManager.register(SetZoomRatioAction.NAME, SetZoomRatioAction);
+CommandManager.register(ClearRangeAction.NAME, ClearRangeAction);
 
 ///====================================================================================================
 ///====================================================================================================
@@ -119,88 +117,31 @@ CommandManager.register(SetZoomRatioAction.NAME, SetZoomRatioAction);
 CommandManager.register(DOC_ACTION_NAMES.INSERT_TEXT_ACTION_NAME, InsertTextAction);
 CommandManager.register(DOC_ACTION_NAMES.DELETE_TEXT_ACTION_NAME, DeleteTextAction);
 
-CommandManager.register(
-    DOC_ACTION_NAMES.CLEAR_TEXT_STYLE_ACTION_NAME,
-    ClearTextStyleAction
-);
-CommandManager.register(
-    DOC_ACTION_NAMES.DELETE_PARAGRAPH_ACTION_NAME,
-    DeleteParagraphAction
-);
-CommandManager.register(
-    DOC_ACTION_NAMES.INSERT_PARAGRAPH_ACTION_NAME,
-    InsertParagraphAction
-);
-CommandManager.register(
-    DOC_ACTION_NAMES.MERGE_PARAGRAPH_ACTION_NAME,
-    MergeParagraphAction
-);
-CommandManager.register(
-    DOC_ACTION_NAMES.MOVE_PARAGRAPH_ACTION_NAME,
-    MoveParagraphAction
-);
-CommandManager.register(
-    DOC_ACTION_NAMES.SET_TEXT_STYLE_ACTION_NAME,
-    SetTextStyleAction
-);
-CommandManager.register(
-    DOC_ACTION_NAMES.SPLIT_PARAGRAPH_ACTION_NAME,
-    SplitParagraphAction
-);
-CommandManager.register(
-    DOC_ACTION_NAMES.UPDATE_DOCUMENT_STYLE_ACTION_NAME,
-    UpdateDocumentAction
-);
-CommandManager.register(
-    DOC_ACTION_NAMES.UPDATE_PARAGRAPH_STYLE_ACTION_NAME,
-    UpdateParagraphAction
-);
-CommandManager.register(
-    DOC_ACTION_NAMES.UPDATE_SECTION_ACTION_NAME,
-    UpdateSectionAction
-);
+CommandManager.register(DOC_ACTION_NAMES.CLEAR_TEXT_STYLE_ACTION_NAME, ClearTextStyleAction);
+CommandManager.register(DOC_ACTION_NAMES.DELETE_PARAGRAPH_ACTION_NAME, DeleteParagraphAction);
+CommandManager.register(DOC_ACTION_NAMES.INSERT_PARAGRAPH_ACTION_NAME, InsertParagraphAction);
+CommandManager.register(DOC_ACTION_NAMES.MERGE_PARAGRAPH_ACTION_NAME, MergeParagraphAction);
+CommandManager.register(DOC_ACTION_NAMES.MOVE_PARAGRAPH_ACTION_NAME, MoveParagraphAction);
+CommandManager.register(DOC_ACTION_NAMES.SET_TEXT_STYLE_ACTION_NAME, SetTextStyleAction);
+CommandManager.register(DOC_ACTION_NAMES.SPLIT_PARAGRAPH_ACTION_NAME, SplitParagraphAction);
+CommandManager.register(DOC_ACTION_NAMES.UPDATE_DOCUMENT_STYLE_ACTION_NAME, UpdateDocumentAction);
+CommandManager.register(DOC_ACTION_NAMES.UPDATE_PARAGRAPH_STYLE_ACTION_NAME, UpdateParagraphAction);
+CommandManager.register(DOC_ACTION_NAMES.UPDATE_SECTION_ACTION_NAME, UpdateSectionAction);
 
-CommandManager.register(
-    DOC_ACTION_NAMES.DELETE_BULLET_ACTION_NAME,
-    DeleteBulletAction
-);
+CommandManager.register(DOC_ACTION_NAMES.DELETE_BULLET_ACTION_NAME, DeleteBulletAction);
 
-CommandManager.register(
-    DOC_ACTION_NAMES.DELETE_PARAGRAPH_BULLET_ACTION_NAME,
-    DeleteParagraphBulletAction
-);
+CommandManager.register(DOC_ACTION_NAMES.DELETE_PARAGRAPH_BULLET_ACTION_NAME, DeleteParagraphBulletAction);
 
-CommandManager.register(
-    DOC_ACTION_NAMES.DELETE_SECTION_ACTION_NAME,
-    DeleteSectionAction
-);
+CommandManager.register(DOC_ACTION_NAMES.DELETE_SECTION_ACTION_NAME, DeleteSectionAction);
 
-CommandManager.register(
-    DOC_ACTION_NAMES.INSERT_BULLET_ACTION_NAME,
-    InsertBulletAction
-);
+CommandManager.register(DOC_ACTION_NAMES.INSERT_BULLET_ACTION_NAME, InsertBulletAction);
 
-CommandManager.register(
-    DOC_ACTION_NAMES.INSERT_PARAGRAPH_BULLET_ACTION_NAME,
-    InsertParagraphBulletAction
-);
+CommandManager.register(DOC_ACTION_NAMES.INSERT_PARAGRAPH_BULLET_ACTION_NAME, InsertParagraphBulletAction);
 
-CommandManager.register(
-    DOC_ACTION_NAMES.INSERT_SECTION_ACTION_NAME,
-    InsertSectionAction
-);
+CommandManager.register(DOC_ACTION_NAMES.INSERT_SECTION_ACTION_NAME, InsertSectionAction);
 
-CommandManager.register(
-    DOC_ACTION_NAMES.UPDATE_BULLET_ACTION_NAME,
-    UpdateBulletAction
-);
+CommandManager.register(DOC_ACTION_NAMES.UPDATE_BULLET_ACTION_NAME, UpdateBulletAction);
 
-CommandManager.register(
-    DOC_ACTION_NAMES.UPDATE_PARAGRAPH_BULLET_ACTION_NAME,
-    UpdateParagraphBulletAction
-);
+CommandManager.register(DOC_ACTION_NAMES.UPDATE_PARAGRAPH_BULLET_ACTION_NAME, UpdateParagraphBulletAction);
 
-CommandManager.register(
-    DOC_ACTION_NAMES.TEXT_INDEX_ADJUST_ACTION_NAME,
-    TextIndexAdjustAction
-);
+CommandManager.register(DOC_ACTION_NAMES.TEXT_INDEX_ADJUST_ACTION_NAME, TextIndexAdjustAction);

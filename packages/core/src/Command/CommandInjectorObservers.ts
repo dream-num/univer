@@ -1,6 +1,6 @@
 import { Observable } from '../Observer';
-import { Class, Nullable } from '../Shared';
-import { ActionBase, IActionData } from './index';
+import { Class, Nullable } from '../Shared/Types';
+import { ActionBase, IActionData } from './ActionBase';
 
 /**
  * Command injector, after the core triggers the Command, the plug-in receives the Command WorkBookObserver message, inserts its own Action, and combines it into one Command, which is convenient for undo/redo to be executed as a command.

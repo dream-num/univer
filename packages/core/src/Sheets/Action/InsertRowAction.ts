@@ -1,4 +1,4 @@
-import { SheetActionBase, ISheetActionData, ActionObservers, ActionType, CommandUnit, CommandManager } from '../../Command';
+import { SheetActionBase, ISheetActionData, ActionObservers, ActionType, CommandModel } from '../../Command';
 import { InsertRowApply, RemoveRowApply } from '../Apply';
 import { IRemoveRowActionData } from './RemoveRowAction';
 
@@ -18,8 +18,8 @@ export interface IInsertRowActionData extends ISheetActionData {
 export class InsertRowAction extends SheetActionBase<IInsertRowActionData, IRemoveRowActionData> {
     static NAME = 'InsertRowAction';
 
-    constructor(actionData: IInsertRowActionData, commandUnit: CommandUnit, observers: ActionObservers) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: IInsertRowActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -31,7 +31,7 @@ export class InsertRowAction extends SheetActionBase<IInsertRowActionData, IRemo
     }
 
     do(): void {
-        InsertRowApply(this._commandUnit, this._doActionData);
+        InsertRowApply(this._commandModel, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -44,7 +44,7 @@ export class InsertRowAction extends SheetActionBase<IInsertRowActionData, IRemo
     }
 
     undo(): void {
-        RemoveRowApply(this._commandUnit, this._oldActionData);
+        RemoveRowApply(this._commandModel, this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -56,5 +56,3 @@ export class InsertRowAction extends SheetActionBase<IInsertRowActionData, IRemo
         return false;
     }
 }
-
-CommandManager.register(InsertRowAction.NAME, InsertRowAction);

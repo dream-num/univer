@@ -2,7 +2,7 @@ import { InsertDataRowApply, RemoveRowDataApply } from '../Apply';
 import { ICellData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { ObjectArray } from '../../Shared';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveRowDataActionData } from './RemoveRowDataAction';
@@ -20,18 +20,11 @@ export interface IInsertRowDataActionData extends ISheetActionData {
  *
  * @internal
  */
-export class InsertRowDataAction extends SheetActionBase<
-    IInsertRowDataActionData,
-    IRemoveRowDataActionData
-> {
+export class InsertRowDataAction extends SheetActionBase<IInsertRowDataActionData, IRemoveRowDataActionData> {
     static NAME = 'InsertRowDataAction';
 
-    constructor(
-        actionData: IInsertRowDataActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: IInsertRowDataActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -44,7 +37,7 @@ export class InsertRowDataAction extends SheetActionBase<
     }
 
     do(): void {
-        InsertDataRowApply(this._commandUnit, this._doActionData);
+        InsertDataRowApply(this._commandModel, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -57,7 +50,7 @@ export class InsertRowDataAction extends SheetActionBase<
     }
 
     undo(): void {
-        RemoveRowDataApply(this._commandUnit, this._oldActionData);
+        RemoveRowDataApply(this._commandModel, this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -69,5 +62,3 @@ export class InsertRowDataAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(InsertRowDataAction.NAME, InsertRowDataAction);

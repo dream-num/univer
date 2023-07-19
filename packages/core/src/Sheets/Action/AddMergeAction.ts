@@ -1,9 +1,9 @@
-import { CommandManager, CommandUnit } from '../../Command';
 import { IRangeData } from '../../Types/Interfaces';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers } from '../../Command/ActionObservers';
 import { IRemoveMergeActionData } from './RemoveMergeAction';
 import { addMergeApply, RemoveMergeApply } from '../Apply';
+import { CommandModel } from '../../Command/CommandModel';
 
 /**
  * @internal
@@ -18,19 +18,11 @@ export interface IAddMergeActionData extends ISheetActionData {
  *
  * @internal
  */
-export class AddMergeAction extends SheetActionBase<
-    IAddMergeActionData,
-    IRemoveMergeActionData,
-    IRangeData[]
-> {
+export class AddMergeAction extends SheetActionBase<IAddMergeActionData, IRemoveMergeActionData, IRangeData[]> {
     static NAME = 'AddMergeAction';
 
-    constructor(
-        actionData: IAddMergeActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: IAddMergeActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -42,7 +34,7 @@ export class AddMergeAction extends SheetActionBase<
     }
 
     do(): IRangeData[] {
-        return addMergeApply(this._commandUnit, this._doActionData);
+        return addMergeApply(this._commandModel, this._doActionData);
     }
 
     redo(): void {
@@ -50,12 +42,10 @@ export class AddMergeAction extends SheetActionBase<
     }
 
     undo(): void {
-        RemoveMergeApply(this._commandUnit, this._oldActionData);
+        RemoveMergeApply(this._commandModel, this._oldActionData);
     }
 
     validate(): boolean {
         return false;
     }
 }
-
-CommandManager.register(AddMergeAction.NAME, AddMergeAction);

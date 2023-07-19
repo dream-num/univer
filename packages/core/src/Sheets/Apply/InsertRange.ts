@@ -1,7 +1,7 @@
 import { Dimension } from '../../Types/Enum';
 import { ICellData, IRangeData } from '../../Types/Interfaces';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared';
-import { CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { IInsertRangeActionData } from '../Action';
 
 /**
@@ -73,7 +73,7 @@ export function InsertRange(
     }
 }
 
-export function InsertRangeApply(unit: CommandUnit, data: IInsertRangeActionData) {
+export function InsertRangeApply(unit: CommandModel, data: IInsertRangeActionData) {
     const worksheet = unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
     const rowCount = worksheet!.getLastRow();
     const columnCount = worksheet!.getLastColumn();
@@ -98,11 +98,7 @@ export function InsertRangeApply(unit: CommandUnit, data: IInsertRangeActionData
         // insert cell value from user
         for (let r = endRow; r >= startRow; r--) {
             for (let c = startColumn; c <= endColumn; c++) {
-                cellMatrix.setValue(
-                    r,
-                    c,
-                    data.cellValue[r - startRow][c - startColumn]
-                );
+                cellMatrix.setValue(r, c, data.cellValue[r - startRow][c - startColumn]);
             }
         }
     } else if (data.shiftDimension === Dimension.COLUMNS) {
@@ -122,11 +118,7 @@ export function InsertRangeApply(unit: CommandUnit, data: IInsertRangeActionData
         // }
         for (let r = startRow; r <= endRow; r++) {
             for (let c = endColumn; c >= startColumn; c--) {
-                cellMatrix.setValue(
-                    r,
-                    c,
-                    data.cellValue[r - startRow][c - startColumn]
-                );
+                cellMatrix.setValue(r, c, data.cellValue[r - startRow][c - startColumn]);
             }
         }
     }

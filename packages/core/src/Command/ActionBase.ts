@@ -1,4 +1,5 @@
-import { ActionObservers, CommonParameter } from './index';
+import { ActionObservers } from './ActionObservers';
+import { CommonParameter } from './CommonParameter';
 
 /**
  * Format of action data param
@@ -36,10 +37,7 @@ export enum ActionOperationType {
     /**
      * default obs
      */
-    DEFAULT_ACTION = ActionOperationType.OBSERVER_ACTION |
-        ActionOperationType.SERVER_ACTION |
-        ActionOperationType.UNDO_ACTION |
-        ActionOperationType.EXTENSION_ACTION,
+    DEFAULT_ACTION = ActionOperationType.OBSERVER_ACTION | ActionOperationType.SERVER_ACTION | ActionOperationType.UNDO_ACTION | ActionOperationType.EXTENSION_ACTION,
 }
 
 /**
@@ -47,11 +45,7 @@ export enum ActionOperationType {
  *
  * @beta
  */
-export abstract class ActionBase<
-    D extends IActionData,
-    O extends IActionData = D,
-    R = void
-> {
+export abstract class ActionBase<D extends IActionData, O extends IActionData = D, R = void> {
     protected _observers: ActionObservers;
 
     protected _doActionData: D;

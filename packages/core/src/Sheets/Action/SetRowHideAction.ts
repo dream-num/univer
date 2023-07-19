@@ -2,7 +2,7 @@ import { SetHideRow, SetShowRow } from '../Apply';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { ISetRowShowActionData } from './SetRowShowAction';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 
 /**
  * @internal
@@ -17,18 +17,11 @@ export interface ISetRowHideActionData extends ISheetActionData {
  *
  * @internal
  */
-export class SetRowHideAction extends SheetActionBase<
-    ISetRowHideActionData,
-    ISetRowShowActionData
-> {
+export class SetRowHideAction extends SheetActionBase<ISetRowHideActionData, ISetRowShowActionData> {
     static NAME = 'SetRowHideAction';
 
-    constructor(
-        actionData: ISetRowHideActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetRowHideActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -42,11 +35,7 @@ export class SetRowHideAction extends SheetActionBase<
     do(): void {
         const worksheet = this.getWorkSheet();
 
-        SetHideRow(
-            this._doActionData.rowIndex,
-            this._doActionData.rowCount,
-            worksheet.getRowManager()
-        );
+        SetHideRow(this._doActionData.rowIndex, this._doActionData.rowCount, worksheet.getRowManager());
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -62,11 +51,7 @@ export class SetRowHideAction extends SheetActionBase<
     undo(): void {
         const worksheet = this.getWorkSheet();
 
-        SetShowRow(
-            this._oldActionData.rowIndex,
-            this._doActionData.rowCount,
-            worksheet.getRowManager()
-        );
+        SetShowRow(this._oldActionData.rowIndex, this._doActionData.rowCount, worksheet.getRowManager());
 
         this._observers.notifyObservers({
             type: ActionType.UNDO,
@@ -79,5 +64,3 @@ export class SetRowHideAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(SetRowHideAction.NAME, SetRowHideAction);

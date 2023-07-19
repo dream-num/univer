@@ -3,7 +3,7 @@ import { IRangeData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 
 /**
  * @internal
@@ -16,19 +16,11 @@ export interface ISetRangeNoteActionData extends ISheetActionData {
 /**
  * @internal
  */
-export class SetRangeNoteAction extends SheetActionBase<
-    ISetRangeNoteActionData,
-    ISetRangeNoteActionData,
-    ObjectMatrixPrimitiveType<string>
-> {
+export class SetRangeNoteAction extends SheetActionBase<ISetRangeNoteActionData, ISetRangeNoteActionData, ObjectMatrixPrimitiveType<string>> {
     static NAME = 'SetRangeNoteAction';
 
-    constructor(
-        actionData: ISetRangeNoteActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetRangeNoteActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
 
         this._doActionData = {
             ...actionData,
@@ -44,11 +36,7 @@ export class SetRangeNoteAction extends SheetActionBase<
     do(): ObjectMatrixPrimitiveType<string> {
         const worksheet = this.getWorkSheet();
 
-        const result = SetRangeNote(
-            worksheet.getCellMatrix(),
-            this._doActionData.cellNote,
-            this._doActionData.rangeData
-        );
+        const result = SetRangeNote(worksheet.getCellMatrix(), this._doActionData.cellNote, this._doActionData.rangeData);
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -80,11 +68,7 @@ export class SetRangeNoteAction extends SheetActionBase<
                 // actionName: ACTION_NAMES.SET_RANGE_NOTE_ACTION,
                 actionName: SetRangeNoteAction.NAME,
                 sheetId,
-                cellNote: SetRangeNote(
-                    worksheet.getCellMatrix(),
-                    cellNote,
-                    rangeData
-                ),
+                cellNote: SetRangeNote(worksheet.getCellMatrix(), cellNote, rangeData),
                 rangeData,
             };
             this._observers.notifyObservers({
@@ -99,5 +83,3 @@ export class SetRangeNoteAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(SetRangeNoteAction.NAME, SetRangeNoteAction);

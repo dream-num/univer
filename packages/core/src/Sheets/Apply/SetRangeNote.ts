@@ -1,7 +1,7 @@
 import { ICellData, IRangeData } from '../../Types/Interfaces';
 import { Nullable, Tools } from '../../Shared';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { ISetRangeNoteActionData } from '../Action';
 
 /**
@@ -13,11 +13,7 @@ import { ISetRangeNoteActionData } from '../Action';
  *
  * @internal
  */
-export function SetRangeNote(
-    cellMatrix: ObjectMatrix<ICellData>,
-    addMatrix: ObjectMatrixPrimitiveType<string>,
-    rangeData: IRangeData
-): ObjectMatrixPrimitiveType<string> {
+export function SetRangeNote(cellMatrix: ObjectMatrix<ICellData>, addMatrix: ObjectMatrixPrimitiveType<string>, rangeData: IRangeData): ObjectMatrixPrimitiveType<string> {
     const target = new ObjectMatrix(addMatrix);
     const result = new ObjectMatrix<string>();
     for (let i = rangeData.startRow; i <= rangeData.endRow; i++) {
@@ -39,10 +35,7 @@ export function SetRangeNote(
     return result.getData();
 }
 
-export function SetRangeNoteApply(
-    unit: CommandUnit,
-    data: ISetRangeNoteActionData
-): ObjectMatrixPrimitiveType<string> {
+export function SetRangeNoteApply(unit: CommandModel, data: ISetRangeNoteActionData): ObjectMatrixPrimitiveType<string> {
     const workbook = unit.WorkBookUnit;
     const worksheet = workbook!.getSheetBySheetId(data.sheetId)!;
     const cellMatrix = worksheet.getCellMatrix();

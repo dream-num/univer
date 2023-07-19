@@ -1,11 +1,4 @@
-import {
-    ISheetActionData,
-    SheetActionBase,
-    ActionObservers,
-    ActionType,
-    CommandUnit,
-    CommandManager,
-} from '../../Command';
+import { ISheetActionData, SheetActionBase, ActionObservers, ActionType, CommandModel } from '../../Command';
 import { SetNamedRangeApply } from '../Apply';
 import { INamedRange } from '../../Types/Interfaces';
 
@@ -13,19 +6,11 @@ export interface ISetNamedRangeActionData extends ISheetActionData {
     namedRange: INamedRange;
 }
 
-export class SetNamedRangeAction extends SheetActionBase<
-    ISetNamedRangeActionData,
-    ISetNamedRangeActionData,
-    INamedRange
-> {
+export class SetNamedRangeAction extends SheetActionBase<ISetNamedRangeActionData, ISetNamedRangeActionData, INamedRange> {
     static NAME = 'SetNamedRangeAction';
 
-    constructor(
-        actionData: ISetNamedRangeActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetNamedRangeActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
 
         this._doActionData = {
             ...actionData,
@@ -40,7 +25,7 @@ export class SetNamedRangeAction extends SheetActionBase<
     }
 
     do(): INamedRange {
-        const result = SetNamedRangeApply(this._commandUnit, this._doActionData);
+        const result = SetNamedRangeApply(this._commandModel, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -72,7 +57,7 @@ export class SetNamedRangeAction extends SheetActionBase<
             // actionName: ACTION_NAMES.SET_NAMED_RANGE_ACTION,
             actionName: SetNamedRangeAction.NAME,
             sheetId,
-            namedRange: SetNamedRangeApply(this._commandUnit, this._oldActionData),
+            namedRange: SetNamedRangeApply(this._commandModel, this._oldActionData),
         };
     }
 
@@ -80,5 +65,3 @@ export class SetNamedRangeAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(SetNamedRangeAction.NAME, SetNamedRangeAction);

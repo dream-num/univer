@@ -1,13 +1,6 @@
 import { SetRangeDataApply } from '../Apply';
 import { ObjectMatrixPrimitiveType } from '../../Shared';
-import {
-    SheetActionBase,
-    ISheetActionData,
-    ActionObservers,
-    ActionType,
-    CommandUnit,
-    CommandManager,
-} from '../../Command';
+import { SheetActionBase, ISheetActionData, ActionObservers, ActionType, CommandModel } from '../../Command';
 import { ICopyToOptionsData, ICellData } from '../../Types/Interfaces';
 
 /**
@@ -36,19 +29,11 @@ export interface ISetRangeDataActionData extends ISheetActionData {
  *
  * @internal
  */
-export class SetRangeDataAction extends SheetActionBase<
-    ISetRangeDataActionData,
-    ISetRangeDataActionData,
-    ObjectMatrixPrimitiveType<ICellData>
-> {
+export class SetRangeDataAction extends SheetActionBase<ISetRangeDataActionData, ISetRangeDataActionData, ObjectMatrixPrimitiveType<ICellData>> {
     static NAME = 'SetRangeDataAction';
 
-    constructor(
-        actionData: ISetRangeDataActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetRangeDataActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
 
         this._doActionData = {
             ...actionData,
@@ -62,7 +47,7 @@ export class SetRangeDataAction extends SheetActionBase<
     }
 
     do(): ObjectMatrixPrimitiveType<ICellData> {
-        const result = SetRangeDataApply(this._commandUnit, this._doActionData);
+        const result = SetRangeDataApply(this._commandModel, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -94,7 +79,7 @@ export class SetRangeDataAction extends SheetActionBase<
                 // actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                 actionName: SetRangeDataAction.NAME,
                 sheetId,
-                cellValue: SetRangeDataApply(this._commandUnit, this._oldActionData),
+                cellValue: SetRangeDataApply(this._commandModel, this._oldActionData),
                 options,
             };
 
@@ -110,5 +95,3 @@ export class SetRangeDataAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(SetRangeDataAction.NAME, SetRangeDataAction);

@@ -3,7 +3,7 @@ import { ICellV, IRangeData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { SetRangeDataAction } from './SetRangeDataAction';
 
 /**
@@ -17,19 +17,11 @@ export interface ISetRangeFormattedValueActionData extends ISheetActionData {
 /**
  *
  */
-export class SetRangeFormattedValueAction extends SheetActionBase<
-    ISetRangeFormattedValueActionData,
-    ISetRangeFormattedValueActionData,
-    ObjectMatrixPrimitiveType<ICellV>
-> {
+export class SetRangeFormattedValueAction extends SheetActionBase<ISetRangeFormattedValueActionData, ISetRangeFormattedValueActionData, ObjectMatrixPrimitiveType<ICellV>> {
     static NAME = 'SetRangeFormattedValueAction';
 
-    constructor(
-        actionData: ISetRangeFormattedValueActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetRangeFormattedValueActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
 
         this._doActionData = {
             ...actionData,
@@ -45,11 +37,7 @@ export class SetRangeFormattedValueAction extends SheetActionBase<
     do(): ObjectMatrixPrimitiveType<ICellV> {
         const worksheet = this.getWorkSheet();
 
-        const result = SetRangeFormattedValue(
-            worksheet.getCellMatrix(),
-            this._doActionData.cellValue,
-            this._doActionData.rangeData
-        );
+        const result = SetRangeFormattedValue(worksheet.getCellMatrix(), this._doActionData.cellValue, this._doActionData.rangeData);
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -81,11 +69,7 @@ export class SetRangeFormattedValueAction extends SheetActionBase<
                 // actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                 actionName: SetRangeDataAction.NAME,
                 sheetId,
-                cellValue: SetRangeFormattedValue(
-                    worksheet.getCellMatrix(),
-                    cellValue,
-                    rangeData
-                ),
+                cellValue: SetRangeFormattedValue(worksheet.getCellMatrix(), cellValue, rangeData),
                 rangeData,
             };
 
@@ -101,8 +85,3 @@ export class SetRangeFormattedValueAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(
-    SetRangeFormattedValueAction.NAME,
-    SetRangeFormattedValueAction
-);

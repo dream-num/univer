@@ -1,35 +1,17 @@
-import {
-    ISheetActionData,
-    SheetActionBase,
-    ActionObservers,
-    ActionType,
-    CommandUnit,
-    CommandManager,
-} from '../../Command';
+import { ISheetActionData, SheetActionBase, ActionObservers, ActionType, CommandModel } from '../../Command';
 import { AddNamedRangeApply, DeleteNamedRangeApply } from '../Apply';
 import { INamedRange } from '../../Types/Interfaces';
-import {
-    AddNamedRangeAction,
-    IAddNamedRangeActionData,
-} from './AddNamedRangeAction';
+import { AddNamedRangeAction, IAddNamedRangeActionData } from './AddNamedRangeAction';
 
 export interface IDeleteNamedRangeActionData extends ISheetActionData {
     namedRangeId: string;
 }
 
-export class DeleteNamedRangeAction extends SheetActionBase<
-    IDeleteNamedRangeActionData,
-    IAddNamedRangeActionData,
-    INamedRange
-> {
+export class DeleteNamedRangeAction extends SheetActionBase<IDeleteNamedRangeActionData, IAddNamedRangeActionData, INamedRange> {
     static NAME = 'DeleteNamedRangeAction';
 
-    constructor(
-        actionData: IDeleteNamedRangeActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: IDeleteNamedRangeActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
 
         this._doActionData = {
             ...actionData,
@@ -44,7 +26,7 @@ export class DeleteNamedRangeAction extends SheetActionBase<
     }
 
     do(): INamedRange {
-        const result = DeleteNamedRangeApply(this._commandUnit, this._doActionData);
+        const result = DeleteNamedRangeApply(this._commandModel, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -65,7 +47,7 @@ export class DeleteNamedRangeAction extends SheetActionBase<
     }
 
     undo(): void {
-        AddNamedRangeApply(this._commandUnit, this._oldActionData);
+        AddNamedRangeApply(this._commandModel, this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -77,5 +59,3 @@ export class DeleteNamedRangeAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(DeleteNamedRangeAction.NAME, DeleteNamedRangeAction);

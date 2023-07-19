@@ -1,5 +1,5 @@
 import { Worksheet } from '../Domain/Worksheet';
-import { CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { ISetHiddenGridlinesActionData } from '../Action';
 
 /**
@@ -10,10 +10,7 @@ import { ISetHiddenGridlinesActionData } from '../Action';
  *
  * @internal
  */
-export function SetHiddenGridlines(
-    worksheet: Worksheet,
-    hideGridlines: boolean
-): boolean {
+export function SetHiddenGridlines(worksheet: Worksheet, hideGridlines: boolean): boolean {
     // get config
     const config = worksheet.getConfig();
 
@@ -31,10 +28,7 @@ export function SetHiddenGridlines(
     return oldStatus;
 }
 
-export function SetHiddenGridlinesApply(
-    unit: CommandUnit,
-    data: ISetHiddenGridlinesActionData
-) {
+export function SetHiddenGridlinesApply(unit: CommandModel, data: ISetHiddenGridlinesActionData) {
     const workbook = unit.WorkBookUnit;
     const worksheet = workbook!.getSheetBySheetId(data.sheetId)!;
     const hideGridlines = data.hideGridlines;

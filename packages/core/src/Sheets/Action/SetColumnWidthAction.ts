@@ -1,6 +1,6 @@
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { SetColumnWidthApply } from '../Apply';
 
 /**
@@ -19,12 +19,8 @@ export interface ISetColumnWidthActionData extends ISheetActionData {
 export class SetColumnWidthAction extends SheetActionBase<ISetColumnWidthActionData> {
     static NAME = 'SetColumnWidthAction';
 
-    constructor(
-        actionData: ISetColumnWidthActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetColumnWidthActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -36,7 +32,7 @@ export class SetColumnWidthAction extends SheetActionBase<ISetColumnWidthActionD
     }
 
     do(): number[] {
-        const result = SetColumnWidthApply(this._commandUnit, this._doActionData);
+        const result = SetColumnWidthApply(this._commandModel, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -50,7 +46,7 @@ export class SetColumnWidthAction extends SheetActionBase<ISetColumnWidthActionD
     }
 
     undo(): number[] {
-        const result = SetColumnWidthApply(this._commandUnit, this._doActionData);
+        const result = SetColumnWidthApply(this._commandModel, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -63,5 +59,3 @@ export class SetColumnWidthAction extends SheetActionBase<ISetColumnWidthActionD
         return false;
     }
 }
-
-CommandManager.register(SetColumnWidthAction.NAME, SetColumnWidthAction);

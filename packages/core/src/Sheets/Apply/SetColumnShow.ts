@@ -1,5 +1,5 @@
 import { ColumnManager } from '../Domain/ColumnManager';
-import { CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { ISetColumnShowActionData } from '../Action';
 
 /**
@@ -10,11 +10,7 @@ import { ISetColumnShowActionData } from '../Action';
  *
  * @internal
  */
-export function SetColumnShow(
-    columnIndex: number = 0,
-    columnCount: number,
-    columnManager: ColumnManager
-): void {
+export function SetColumnShow(columnIndex: number = 0, columnCount: number, columnManager: ColumnManager): void {
     for (let i = columnIndex; i < columnIndex + columnCount; i++) {
         const column = columnManager.getColumn(i);
         if (column) {
@@ -23,10 +19,7 @@ export function SetColumnShow(
     }
 }
 
-export function SetColumnShowApply(
-    unit: CommandUnit,
-    data: ISetColumnShowActionData
-): void {
+export function SetColumnShowApply(unit: CommandModel, data: ISetColumnShowActionData): void {
     const workbook = unit.WorkBookUnit;
     const worksheet = workbook!.getSheetBySheetId(data.sheetId);
     const columnIndex = 0;

@@ -3,7 +3,7 @@ import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
 import { BooleanNumber } from '../../Types/Enum';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 
 /**
  * @internal
@@ -18,12 +18,8 @@ export interface ISetWorkSheetStatusActionData extends ISheetActionData {
 export class SetWorkSheetStatusAction extends SheetActionBase<ISetWorkSheetStatusActionData> {
     static NAME = 'SetWorkSheetStatusAction';
 
-    constructor(
-        actionData: ISetWorkSheetStatusActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetWorkSheetStatusActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -81,5 +77,3 @@ export class SetWorkSheetStatusAction extends SheetActionBase<ISetWorkSheetStatu
         return false;
     }
 }
-
-CommandManager.register(SetWorkSheetStatusAction.NAME, SetWorkSheetStatusAction);

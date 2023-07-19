@@ -3,7 +3,7 @@ import { ICellData, IRangeData } from '../../Types/Interfaces';
 import { Tools } from '../../Shared';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { Nullable } from '../../Shared/Types';
-import { CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 import { IDeleteRangeActionData } from '../Action';
 
 /**
@@ -96,10 +96,7 @@ export function DeleteRange(
     return result.getData();
 }
 
-export function DeleteRangeApply(
-    unit: CommandUnit,
-    data: IDeleteRangeActionData
-): ObjectMatrixPrimitiveType<ICellData> {
+export function DeleteRangeApply(unit: CommandModel, data: IDeleteRangeActionData): ObjectMatrixPrimitiveType<ICellData> {
     const worksheet = unit.WorkBookUnit?.getSheetBySheetId(data.sheetId);
     const cellMatrix = worksheet?.getCellMatrix();
     const count = {

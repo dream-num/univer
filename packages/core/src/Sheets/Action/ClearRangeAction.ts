@@ -4,7 +4,7 @@ import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { ISetRangeDataActionData, SetRangeDataAction } from './SetRangeDataAction';
-import { CommandManager, CommandUnit } from '../../Command';
+import { CommandModel } from '../../Command';
 
 /**
  * @internal
@@ -19,19 +19,11 @@ export interface IClearRangeActionData extends ISheetActionData {
  *
  * @internal
  */
-export class ClearRangeAction extends SheetActionBase<
-    IClearRangeActionData,
-    ISetRangeDataActionData,
-    ObjectMatrixPrimitiveType<ICellData>
-> {
+export class ClearRangeAction extends SheetActionBase<IClearRangeActionData, ISetRangeDataActionData, ObjectMatrixPrimitiveType<ICellData>> {
     static NAME = 'ClearRangeAction';
 
-    constructor(
-        actionData: IClearRangeActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: IClearRangeActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
 
         this._doActionData = {
             ...actionData,
@@ -44,7 +36,7 @@ export class ClearRangeAction extends SheetActionBase<
     }
 
     do(): ObjectMatrixPrimitiveType<ICellData> {
-        const result = ClearRangeApply(this._commandUnit, this._doActionData);
+        const result = ClearRangeApply(this._commandModel, this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -67,7 +59,7 @@ export class ClearRangeAction extends SheetActionBase<
     undo(): void {
         const worksheet = this.getWorkSheet();
         if (worksheet) {
-            SetRangeDataApply(this._commandUnit, this._oldActionData);
+            SetRangeDataApply(this._commandModel, this._oldActionData);
             // no need update current data
             this._observers.notifyObservers({
                 type: ActionType.UNDO,
@@ -81,5 +73,3 @@ export class ClearRangeAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(ClearRangeAction.NAME, ClearRangeAction);

@@ -1,4 +1,6 @@
 // @index(['./*.ts','./Action/index.ts'], f => `export * from '${f.path}'`);
+import './RegisterAction';
+
 export * from './CommonParameter';
 export * from './ActionBase';
 export * from './ActionObservers';
@@ -13,4 +15,5 @@ export * from './ActionExtensionFactory';
 export * from './RegistryFactory';
 export * from './ActionExtensionRegister';
 export * from './ActionOperation';
+export * from './CommandModel'
 // @endindex

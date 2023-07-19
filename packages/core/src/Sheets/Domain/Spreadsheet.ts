@@ -19,6 +19,8 @@ export class Spreadsheet {
 
     private merge: Merge;
 
+    private spreadsheetModel: SpreadsheetModel;
+
     private column: Column;
 
     private row: Row;

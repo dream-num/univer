@@ -43,20 +43,10 @@ import {
 } from '../Action';
 import { DEFAULT_WORKSHEET } from '../../Types/Const';
 import { Direction, BooleanNumber, SheetTypes } from '../../Types/Enum';
-import {
-    IBorderStyleData,
-    ICellData,
-    IOptionData,
-    IRangeData,
-    IRangeStringData,
-    IRangeType,
-    ISelectionData,
-    IStyleData,
-    IWorksheetConfig,
-} from '../../Types/Interfaces';
+import { IBorderStyleData, ICellData, IOptionData, IRangeData, IRangeStringData, IRangeType, ISelectionData, IStyleData, IWorksheetConfig } from '../../Types/Interfaces';
 import { Nullable, ObjectMatrix, Tools, Tuples } from '../../Shared';
 import { ColumnManager } from './ColumnManager';
-import { Merges } from './Merges';
+import { Merge } from './Merge';
 import { Range } from './Range';
 import { RangeList } from './RangeList';
 import { RowManager } from './RowManager';
@@ -83,7 +73,7 @@ export class Worksheet {
 
     protected _initialized: boolean;
 
-    protected _merges: Merges;
+    protected _merges: Merge;
 
     // protected _borderStyles: BorderStyles;
 
@@ -195,12 +185,8 @@ export class Worksheet {
         }
         const { _context } = this;
         const _commandManager = this.getCommandManager();
-        const before = _context.getContextObserver(
-            'onBeforeChangeActiveSheetObservable'
-        );
-        const after = _context.getContextObserver(
-            'onAfterChangeActiveSheetObservable'
-        );
+        const before = _context.getContextObserver('onBeforeChangeActiveSheetObservable');
+        const after = _context.getContextObserver('onAfterChangeActiveSheetObservable');
         const setActive: ISetWorkSheetActivateActionData = {
             sheetId: this._sheetId,
             actionName: SetWorkSheetActivateAction.NAME,
@@ -270,12 +256,8 @@ export class Worksheet {
     setName(name: string): Worksheet {
         const { _context, _sheetId } = this;
         const _commandManager = this.getCommandManager();
-        const before = _context.getContextObserver(
-            'onBeforeChangeSheetNameObservable'
-        );
-        const after = _context.getContextObserver(
-            'onAfterChangeSheetNameObservable'
-        );
+        const before = _context.getContextObserver('onBeforeChangeSheetNameObservable');
+        const after = _context.getContextObserver('onAfterChangeSheetNameObservable');
         const configure = {
             actionName: SetWorkSheetNameAction.NAME,
             sheetName: name,
@@ -335,7 +317,7 @@ export class Worksheet {
      *
      * @returns merge instance
      */
-    getMerges(): Merges {
+    getMerges(): Merge {
         return this._merges;
     }
 
@@ -388,12 +370,7 @@ export class Worksheet {
      * @param numColumns column count
      * @returns range instance
      */
-    getRange(
-        row: number,
-        column: number,
-        numRows: number,
-        numColumns: number
-    ): Range;
+    getRange(row: number, column: number, numRows: number, numColumns: number): Range;
     /**
      * Returns User Selection Range
      * @param a1Notation One of the range types
@@ -955,9 +932,7 @@ export class Worksheet {
     setTabColor(color: Nullable<string>): Worksheet {
         const { _context } = this;
         const _commandManager = this.getCommandManager();
-        const observer = _context.getContextObserver(
-            'onSheetTabColorChangeObservable'
-        );
+        const observer = _context.getContextObserver('onSheetTabColorChangeObservable');
         const setTabColor: ISetTabColorActionData = {
             sheetId: this._sheetId,
             actionName: SetTabColorAction.NAME,
@@ -1027,9 +1002,7 @@ export class Worksheet {
             setHidden
         );
         _commandManager.invoke(command);
-        _context
-            .getContextObserver('onShowSheetObservable')
-            .notifyObservers({ sheet: this });
+        _context.getContextObserver('onShowSheetObservable').notifyObservers({ sheet: this });
         return this;
     }
 
@@ -1054,9 +1027,7 @@ export class Worksheet {
         const range = argument[0];
 
         // just send range, we will handle Range instance or range string in Selection class
-        return range
-            ? this._selection.setSelection({ selection: range })
-            : this._selection.setSelection();
+        return range ? this._selection.setSelection({ selection: range }) : this._selection.setSelection();
     }
 
     /**
@@ -1313,11 +1284,7 @@ export class Worksheet {
      */
     // TODO: fix
     // eslint-disable-next-line max-lines-per-function
-    setBorderStyle(
-        rangeData: IRangeData,
-        style: IBorderStyleData,
-        directions: Direction[]
-    ) {
+    setBorderStyle(rangeData: IRangeData, style: IBorderStyleData, directions: Direction[]) {
         const { _sheetId } = this;
 
         const _commandManager = this.getCommandManager();
@@ -1604,9 +1571,7 @@ export class Worksheet {
      */
     getIndex(): Nullable<number> {
         const worksheets = this._context.getWorkBook().getSheets();
-        const index = worksheets.findIndex(
-            (sheet) => sheet && sheet.getSheetId() === this._sheetId
-        );
+        const index = worksheets.findIndex((sheet) => sheet && sheet.getSheetId() === this._sheetId);
         if (index > -1) return index + 1;
         return null;
     }
@@ -1958,11 +1923,7 @@ export class Worksheet {
      * @param width column width
      * @returns WorkSheet Instance
      */
-    setColumnWidth(
-        startColumn: number,
-        numColumns: number,
-        width: number
-    ): Worksheet;
+    setColumnWidth(startColumn: number, numColumns: number, width: number): Worksheet;
     setColumnWidth(...argument: any): Worksheet {
         let columnIndex;
         let columnWidth: number[] = [];
@@ -2189,12 +2150,7 @@ export class Worksheet {
      * @param numColumns column count
      * @returns the rectangular grid of values for this range starting at the given coordinates. A -1 value given as the row or column position is equivalent to getting the very last row or column that has data in the sheet.
      */
-    getSheetValues(
-        startRow: number,
-        startColumn: number,
-        numRows: number,
-        numColumns: number
-    ): Array<Array<Nullable<ICellData>>> {
+    getSheetValues(startRow: number, startColumn: number, numRows: number, numColumns: number): Array<Array<Nullable<ICellData>>> {
         const range = new Range(this, {
             startRow,
             startColumn,
@@ -2242,14 +2198,12 @@ export class Worksheet {
     }
 
     setCommandManager(commandManager: CommandManager): void {
-        throw new Error(
-            'This method is deprecated. The method is here to prevent ts errors!'
-        );
+        throw new Error('This method is deprecated. The method is here to prevent ts errors!');
     }
 
     private _initialize(): void {
         // this._selection = new Selection(this);
-        this._merges = new Merges(this, this._config.mergeData);
+        this._merges = new Merge(this, this._config.mergeData);
     }
 
     // /**

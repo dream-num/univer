@@ -32,9 +32,7 @@ export interface BasePlugin {
 /**
  * Plug-in base class, all plug-ins must inherit from this base class. provides the basic method
  */
-export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase>
-    implements BasePlugin
-{
+export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase> implements BasePlugin {
     context: O;
 
     private _name: string;
@@ -82,9 +80,7 @@ export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase>
         return this.context.getUniver();
     }
 
-    getObserver<K extends keyof Obs & string>(
-        name: K
-    ): Nullable<Observable<PropsFrom<Obs[K]>>> {
+    getObserver<K extends keyof Obs & string>(name: K): Nullable<Observable<PropsFrom<Obs[K]>>> {
         const manager = this.context.getObserverManager();
         return manager.getObserver(name, this._name);
     }

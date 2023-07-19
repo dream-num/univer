@@ -1,9 +1,5 @@
 import { IRangeData } from '../Types/Interfaces/IRangeData';
-import {
-    ObjectArray,
-    ObjectArrayPrimitiveType,
-    PredicateFunction,
-} from './ObjectArray';
+import { ObjectArray, ObjectArrayPrimitiveType, PredicateFunction } from './ObjectArray';
 import { Nullable } from './Types';
 
 /**
@@ -50,9 +46,7 @@ export class ObjectMatrix<T> {
         return this;
     }
 
-    forValue(
-        callback: (row: number, col: number, value: T) => Nullable<boolean>
-    ): ObjectMatrix<T> {
+    forValue(callback: (row: number, col: number, value: T) => Nullable<boolean>): ObjectMatrix<T> {
         const keys = this._option.getKeys();
         for (let i = 0; i < keys.length; i++) {
             const rowNumber = +keys[i];
@@ -180,12 +174,7 @@ export class ObjectMatrix<T> {
         });
     }
 
-    getFragments(
-        startRow: number,
-        endRow: number,
-        startColumn: number,
-        endColumn: number
-    ): ObjectMatrix<T> {
+    getFragments(startRow: number, endRow: number, startColumn: number, endColumn: number): ObjectMatrix<T> {
         const objectMatrix = new ObjectMatrix<T>();
         for (let r = startRow; r <= endRow; r++) {
             const row = new ObjectArray<T>();
@@ -230,9 +219,7 @@ export class ObjectMatrix<T> {
     }
 
     toArray(): T[][] {
-        return this._option
-            .toArray()
-            .map((item) => new ObjectArray(item).toArray()) as T[][];
+        return this._option.toArray().map((item) => new ObjectArray(item).toArray()) as T[][];
     }
 
     toJSON(): ObjectMatrixPrimitiveType<T> {
@@ -264,11 +251,7 @@ export class ObjectMatrix<T> {
                     startColumn = columnIndex;
                 }
                 const value = this.getValue(rowIndex, columnIndex) as T;
-                objectMatrix.setValue(
-                    rowIndex - startRow,
-                    columnIndex - startColumn,
-                    value
-                );
+                objectMatrix.setValue(rowIndex - startRow, columnIndex - startColumn, value);
             });
         });
 

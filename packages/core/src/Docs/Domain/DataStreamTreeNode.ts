@@ -1,8 +1,4 @@
-import {
-    deleteContent,
-    horizontalLineSegmentsSubtraction,
-    insertTextToContent,
-} from '../../Shared/Common';
+import { deleteContent, horizontalLineSegmentsSubtraction, insertTextToContent } from '../../Shared/Common';
 import { Nullable } from '../../Shared/Types';
 import { DataStreamTreeNodeType } from './Types';
 
@@ -45,11 +41,7 @@ export class DataStreamTreeNode {
     }
 
     insertText(text: string, insertIndex: number) {
-        this.content = insertTextToContent(
-            this.content || '',
-            insertIndex - this.startIndex + 1,
-            text
-        );
+        this.content = insertTextToContent(this.content || '', insertIndex - this.startIndex + 1, text);
     }
 
     exclude(index: number) {
@@ -62,14 +54,7 @@ export class DataStreamTreeNode {
     }
 
     split(index: number) {
-        const {
-            children,
-            parent,
-            startIndex,
-            endIndex,
-            nodeType,
-            content = '',
-        } = this.getProps();
+        const { children, parent, startIndex, endIndex, nodeType, content = '' } = this.getProps();
 
         if (this.exclude(index)) {
             return;
@@ -146,12 +131,7 @@ export class DataStreamTreeNode {
     }
 
     minus(startIndex: number, endIndex: number) {
-        const segments = horizontalLineSegmentsSubtraction(
-            this.startIndex,
-            this.endIndex,
-            startIndex,
-            endIndex
-        );
+        const segments = horizontalLineSegmentsSubtraction(this.startIndex, this.endIndex, startIndex, endIndex);
 
         if (segments.length > 2) {
             const seg1 = segments[0];

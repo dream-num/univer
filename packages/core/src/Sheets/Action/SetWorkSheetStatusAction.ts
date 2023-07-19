@@ -1,22 +1,13 @@
 import { SetWorkSheetStatus } from '../Apply';
 import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
-import { BooleanNumber } from '../../Types/Enum';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { CommandModel } from '../../Command';
 
 /**
  * @internal
  */
-export interface ISetWorkSheetStatusActionData extends ISheetActionData {
-    sheetStatus: BooleanNumber;
-}
-
-/**
- * @internal
- */
 export class SetWorkSheetStatusAction extends SheetActionBase<ISetWorkSheetStatusActionData> {
-    static NAME = 'SetWorkSheetStatusAction';
 
     constructor(actionData: ISetWorkSheetStatusActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

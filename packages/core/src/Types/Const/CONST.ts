@@ -1,12 +1,4 @@
-import {
-    BooleanNumber,
-    HorizontalAlign,
-    LocaleType,
-    SheetTypes,
-    TextDirection,
-    VerticalAlign,
-    WrapStrategy,
-} from '../Enum';
+import { BooleanNumber, HorizontalAlign, LocaleType, SheetTypes, TextDirection, VerticalAlign, WrapStrategy } from '../Enum';
 import { IStyleData, IWorkbookConfig, IWorksheetConfig } from '../Interfaces';
 
 /**

@@ -23,8 +23,6 @@ export class ActionExtensionRegister {
     }
 
     private _initExtensions() {
-        this._actionExtensionFactoryList.push(
-            ...REGISTRY_ACTION_FACTORY.getData().sort(sortRules)
-        );
+        this._actionExtensionFactoryList.push(...REGISTRY_ACTION_FACTORY.getData().sort(sortRules));
     }
 }

@@ -1,15 +1,7 @@
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { CommandModel } from '../../Command';
 import { SetColumnWidthApply } from '../Apply';
-
-/**
- * @internal
- */
-export interface ISetColumnWidthActionData extends ISheetActionData {
-    columnIndex: number;
-    columnWidth: number[];
-}
 
 /**
  * Set the column width according to the specified column index
@@ -17,7 +9,6 @@ export interface ISetColumnWidthActionData extends ISheetActionData {
  * @internal
  */
 export class SetColumnWidthAction extends SheetActionBase<ISetColumnWidthActionData> {
-    static NAME = 'SetColumnWidthAction';
 
     constructor(actionData: ISetColumnWidthActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

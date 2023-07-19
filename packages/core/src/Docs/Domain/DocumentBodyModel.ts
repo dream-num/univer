@@ -64,9 +64,7 @@ export class DocumentBodyModelSimple {
                 content = '';
                 currentBlocks = [];
             } else if (char === DataStreamTreeTokenType.SECTION_BREAK) {
-                const sectionTree = DataStreamTreeNode.create(
-                    DataStreamTreeNodeType.SECTION_BREAK
-                );
+                const sectionTree = DataStreamTreeNode.create(DataStreamTreeNodeType.SECTION_BREAK);
                 this.batchParent(sectionTree, nodeList);
                 let lastNode = nodeList[nodeList.length - 1];
                 if (lastNode && lastNode.content) {
@@ -75,32 +73,17 @@ export class DocumentBodyModelSimple {
                 sectionList.push(sectionTree);
                 nodeList = [];
             } else if (char === DataStreamTreeTokenType.TABLE_START) {
-                nodeList.push(
-                    DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE)
-                );
+                nodeList.push(DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE));
             } else if (char === DataStreamTreeTokenType.TABLE_ROW_START) {
-                nodeList.push(
-                    DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE_ROW)
-                );
+                nodeList.push(DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE_ROW));
             } else if (char === DataStreamTreeTokenType.TABLE_CELL_START) {
-                nodeList.push(
-                    DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE_CELL)
-                );
+                nodeList.push(DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE_CELL));
             } else if (char === DataStreamTreeTokenType.TABLE_END) {
-                this.processPreviousNodesUntil(
-                    nodeList,
-                    DataStreamTreeNodeType.TABLE
-                );
+                this.processPreviousNodesUntil(nodeList, DataStreamTreeNodeType.TABLE);
             } else if (char === DataStreamTreeTokenType.TABLE_ROW_END) {
-                this.processPreviousNodesUntil(
-                    nodeList,
-                    DataStreamTreeNodeType.TABLE_ROW
-                );
+                this.processPreviousNodesUntil(nodeList, DataStreamTreeNodeType.TABLE_ROW);
             } else if (char === DataStreamTreeTokenType.TABLE_CELL_END) {
-                this.processPreviousNodesUntil(
-                    nodeList,
-                    DataStreamTreeNodeType.TABLE_CELL
-                );
+                this.processPreviousNodesUntil(nodeList, DataStreamTreeNodeType.TABLE_CELL);
             } else if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
                 currentBlocks.push(i);
                 content += char;
@@ -112,10 +95,7 @@ export class DocumentBodyModelSimple {
         return sectionList;
     }
 
-    private processPreviousNodesUntil(
-        nodeList: DataStreamTreeNode[],
-        untilNodeType: DataStreamTreeNodeType
-    ) {
+    private processPreviousNodesUntil(nodeList: DataStreamTreeNode[], untilNodeType: DataStreamTreeNodeType) {
         const nodeCollection: DataStreamTreeNode[] = [];
         let node = nodeList.pop();
         while (node) {
@@ -134,8 +114,7 @@ export class DocumentBodyModelSimple {
         if (untilNodeType === DataStreamTreeNodeType.TABLE_CELL) {
             const firstNode = nodeCollection[0];
             const lastNode = nodeCollection[nodeCollection.length];
-            firstNode.content =
-                DataStreamTreeTokenType.TABLE_CELL_START + firstNode.content || '';
+            firstNode.content = DataStreamTreeTokenType.TABLE_CELL_START + firstNode.content || '';
             firstNode.startIndex -= 1;
             lastNode.content += DataStreamTreeTokenType.TABLE_CELL_END;
             lastNode.endIndex += 1;
@@ -143,8 +122,7 @@ export class DocumentBodyModelSimple {
             const firstNode = nodeCollection[0].children[0];
             let lastNode = nodeCollection[nodeCollection.length];
             lastNode = lastNode.children[lastNode.children.length - 1];
-            firstNode.content =
-                DataStreamTreeTokenType.TABLE_ROW_START + firstNode.content || '';
+            firstNode.content = DataStreamTreeTokenType.TABLE_ROW_START + firstNode.content || '';
             firstNode.startIndex -= 1;
             lastNode.content += DataStreamTreeTokenType.TABLE_ROW_END;
             lastNode.endIndex += 1;
@@ -153,31 +131,22 @@ export class DocumentBodyModelSimple {
             let lastNode = nodeCollection[nodeCollection.length];
             lastNode = lastNode.children[lastNode.children.length - 1];
             lastNode = lastNode.children[lastNode.children.length - 1];
-            firstNode.content =
-                DataStreamTreeTokenType.TABLE_START + firstNode.content || '';
+            firstNode.content = DataStreamTreeTokenType.TABLE_START + firstNode.content || '';
             firstNode.startIndex -= 1;
             lastNode.content += DataStreamTreeTokenType.TABLE_END;
             lastNode.endIndex += 1;
         }
     }
 
-    private batchParent(
-        parent: DataStreamTreeNode,
-        children: DataStreamTreeNode[],
-        nodeType = DataStreamTreeNodeType.SECTION_BREAK
-    ) {
+    private batchParent(parent: DataStreamTreeNode, children: DataStreamTreeNode[], nodeType = DataStreamTreeNodeType.SECTION_BREAK) {
         for (let child of children) {
             child.parent = parent;
             parent.children.push(child);
         }
 
-        const startOffset =
-            nodeType === DataStreamTreeNodeType.SECTION_BREAK ? 0 : 1;
+        const startOffset = nodeType === DataStreamTreeNodeType.SECTION_BREAK ? 0 : 1;
 
-        parent.setIndexRange(
-            children[0].startIndex - startOffset,
-            children[children.length - 1].endIndex + 1
-        );
+        parent.setIndexRange(children[0].startIndex - startOffset, children[children.length - 1].endIndex + 1);
     }
 }
 
@@ -224,16 +193,9 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
                 return;
             }
 
-            const { firstNode: insertedFirstNode, lastNode: insertedLastNode } =
-                insertedNodeSplit;
+            const { firstNode: insertedFirstNode, lastNode: insertedLastNode } = insertedNodeSplit;
 
-            insertedNode.parent?.children.splice(
-                insertedNode.getPositionInParent(),
-                1,
-                insertedFirstNode,
-                ...insertNodes,
-                insertedLastNode
-            );
+            insertedNode.parent?.children.splice(insertedNode.getPositionInParent(), 1, insertedFirstNode, ...insertNodes, insertedLastNode);
 
             this.foreachTop(insertedNode.parent, (currentNode) => {
                 currentNode.endIndex += dataStreamLen;
@@ -284,11 +246,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         this.deleteTree(nodes, currentIndex, textLength);
     }
 
-    deleteTree(
-        nodes: DataStreamTreeNode[],
-        currentIndex: number,
-        textLength: number
-    ) {
+    deleteTree(nodes: DataStreamTreeNode[], currentIndex: number, textLength: number) {
         const startIndex = currentIndex;
         const endIndex = currentIndex + textLength - 1;
         let mergeNode: Nullable<DataStreamTreeNode> = null;
@@ -315,10 +273,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         }
     }
 
-    getParagraphByTree(
-        nodes: DataStreamTreeNode[],
-        insertIndex: number
-    ): Nullable<DataStreamTreeNode> {
+    getParagraphByTree(nodes: DataStreamTreeNode[], insertIndex: number): Nullable<DataStreamTreeNode> {
         for (let node of nodes) {
             const { startIndex, endIndex, children } = node;
             if (node.exclude(insertIndex)) {
@@ -332,10 +287,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         return null;
     }
 
-    foreachTop(
-        node: Nullable<DataStreamTreeNode>,
-        func: (node: DataStreamTreeNode) => void
-    ) {
+    foreachTop(node: Nullable<DataStreamTreeNode>, func: (node: DataStreamTreeNode) => void) {
         let parent: Nullable<DataStreamTreeNode> = node;
         while (parent) {
             func(parent);
@@ -406,11 +358,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
 
         const trRange: ITextRun[] = [];
 
-        for (
-            let i = this.textRunCurrentIndex, textRunsLen = textRuns.length;
-            i < textRunsLen;
-            i++
-        ) {
+        for (let i = this.textRunCurrentIndex, textRunsLen = textRuns.length; i < textRunsLen; i++) {
             const textRun = textRuns[i];
             if (textRun.st > endIndex) {
                 this.textRunCurrentIndex = i;
@@ -465,11 +413,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
             }
         }
 
-        for (
-            let i = this.textRunCurrentIndex, textRunsLen = textRuns.length;
-            i < textRunsLen;
-            i++
-        ) {
+        for (let i = this.textRunCurrentIndex, textRunsLen = textRuns.length; i < textRunsLen; i++) {
             const textRun = textRuns[i];
             if (index >= textRun.st && index <= textRun.ed) {
                 this.textRunCurrentIndex = i;
@@ -513,11 +457,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         if (customRanges == null) {
             return;
         }
-        for (
-            let i = 0, customRangesLen = customRanges.length;
-            i < customRangesLen;
-            i++
-        ) {
+        for (let i = 0, customRangesLen = customRanges.length; i < customRangesLen; i++) {
             const customRange = customRanges[i];
             if (index >= customRange.startIndex && index <= customRange.endIndex) {
                 return customRange;

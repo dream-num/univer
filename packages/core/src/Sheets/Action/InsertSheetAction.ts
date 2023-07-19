@@ -1,17 +1,10 @@
 import { InsertSheetApply, RemoveSheetApply } from '../Apply';
-import { IWorksheetConfig } from '../../Types/Interfaces';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { CommandModel } from '../../Command';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IRemoveSheetActionData } from './RemoveSheetAction';
 
-export interface IInsertSheetActionData extends ISheetActionData {
-    index: number;
-    sheet: IWorksheetConfig;
-}
-
 export class InsertSheetAction extends SheetActionBase<IInsertSheetActionData, IRemoveSheetActionData> {
-    static NAME = 'InsertSheetAction';
 
     constructor(actionData: IInsertSheetActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

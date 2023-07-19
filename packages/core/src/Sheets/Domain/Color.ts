@@ -11,14 +11,7 @@ export class Color {
     }
 
     static rgbColorToHexValue(color: RgbColor): string {
-        return `#${(
-            (1 << 24) +
-            (color.getRed() << 16) +
-            (color.getGreen() << 8) +
-            color.getBlue()
-        )
-            .toString(16)
-            .slice(1)}`;
+        return `#${((1 << 24) + (color.getRed() << 16) + (color.getGreen() << 8) + color.getBlue()).toString(16).slice(1)}`;
     }
 
     static hexValueToRgbColor(hexValue: string): RgbColor {
@@ -130,11 +123,7 @@ export class HLSColor {
         const builder = new ColorBuilder();
 
         if (this._saturation === 0) {
-            builder.setRgbColor(
-                `rgba(${this._lightness * 255},${this._lightness * 255},${
-                    this._lightness * 255
-                },${this._alpha * 255})`
-            );
+            builder.setRgbColor(`rgba(${this._lightness * 255},${this._lightness * 255},${this._lightness * 255},${this._alpha * 255})`);
             return builder.asRgbColor();
         }
 
@@ -142,10 +131,7 @@ export class HLSColor {
         if (this._lightness < 0.5) {
             t1 = this._lightness * (1.0 + this._saturation);
         } else {
-            t1 =
-                this._lightness +
-                this._saturation -
-                this._lightness * this._saturation;
+            t1 = this._lightness + this._saturation - this._lightness * this._saturation;
         }
 
         const t2 = 2.0 * this._lightness - t1;
@@ -157,11 +143,7 @@ export class HLSColor {
         const tB = hue - 1.0 / 3.0;
         const blue = this.setColor(t1, t2, tB);
 
-        builder.setRgbColor(
-            `rgba(${Math.round(red * 255)},${Math.round(green * 255)},${Math.round(
-                blue * 255
-            )},${this._alpha * 255})`
-        );
+        builder.setRgbColor(`rgba(${Math.round(red * 255)},${Math.round(green * 255)},${Math.round(blue * 255)},${this._alpha * 255})`);
         return builder.asRgbColor();
     }
 
@@ -213,13 +195,9 @@ export class HLSColor {
 export class RgbColor extends Color {
     static RGB_COLOR_AMT: number = 0;
 
-    static RGBA_EXTRACT: RegExp = new RegExp(
-        `\\s*rgba\\s*\\((\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d.\\d|\\d\\s*)\\)\\s*`
-    );
+    static RGBA_EXTRACT: RegExp = new RegExp(`\\s*rgba\\s*\\((\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d.\\d|\\d\\s*)\\)\\s*`);
 
-    static RGB_EXTRACT: RegExp = new RegExp(
-        `\\s*rgb\\s*\\((\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d+\\s*)\\)\\s*`
-    );
+    static RGB_EXTRACT: RegExp = new RegExp(`\\s*rgb\\s*\\((\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d+\\s*)\\)\\s*`);
 
     private _cssString: string;
 
@@ -326,12 +304,7 @@ export class RgbColor extends Color {
 
     equals(color: Color): boolean {
         if (color instanceof RgbColor) {
-            return (
-                color._red === this._red &&
-                color._blue === this._blue &&
-                color._green === this._green &&
-                color._alpha === this._alpha
-            );
+            return color._red === this._red && color._blue === this._blue && color._green === this._green && color._alpha === this._alpha;
         }
         return false;
     }
@@ -342,10 +315,7 @@ export class RgbColor extends Color {
 }
 
 export class ThemeColor extends Color {
-    private static _cacheThemeColor = new Map<
-        ThemeColors,
-        Map<ThemeColorType, RgbColor>
-    >();
+    private static _cacheThemeColor = new Map<ThemeColors, Map<ThemeColorType, RgbColor>>();
 
     private _themeColorType: ThemeColorType;
 
@@ -353,12 +323,7 @@ export class ThemeColor extends Color {
 
     private _themeColors: ThemeColors;
 
-    constructor(
-        theme: ThemeColorType,
-        themeTint: number,
-        themeColors: ThemeColors,
-        builder: ColorBuilder
-    ) {
+    constructor(theme: ThemeColorType, themeTint: number, themeColors: ThemeColors, builder: ColorBuilder) {
         super(builder);
         this._themeColorType = theme;
         this._themeTint = themeTint;
@@ -394,10 +359,7 @@ export class ThemeColor extends Color {
 
         let themeCache;
         if (ThemeColor._cacheThemeColor.has(this._themeColors)) {
-            themeCache = ThemeColor._cacheThemeColor.get(this._themeColors) as Map<
-                ThemeColorType,
-                RgbColor
-            >;
+            themeCache = ThemeColor._cacheThemeColor.get(this._themeColors) as Map<ThemeColorType, RgbColor>;
             if (themeCache.has(this._themeColorType)) {
                 return themeCache.get(this._themeColorType) as RgbColor;
             }
@@ -407,9 +369,7 @@ export class ThemeColor extends Color {
         }
 
         const hlsColor = new HLSColor(Color.hexValueToRgbColor(hexValue));
-        hlsColor.setLightness(
-            this.lumValue(this._themeTint, hlsColor.getLightness() * 255) / 255
-        );
+        hlsColor.setLightness(this.lumValue(this._themeTint, hlsColor.getLightness() * 255) / 255);
         const rgbColor = hlsColor.asRgbColor();
         themeCache.set(this._themeColorType, rgbColor);
 
@@ -417,12 +377,7 @@ export class ThemeColor extends Color {
     }
 
     clone(): ThemeColor {
-        return new ThemeColor(
-            this._themeColorType,
-            this._themeTint,
-            this._themeColors,
-            this._builder
-        );
+        return new ThemeColor(this._themeColorType, this._themeTint, this._themeColors, this._builder);
     }
 
     equals(color: Color): boolean {

@@ -1,17 +1,9 @@
 import { ObjectMatrixPrimitiveType } from '../../Shared';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { SetBorderApply } from '../Apply';
 import { IStyleData } from '../../Types/Interfaces';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { CommandModel } from '../../Command';
-
-/**
- * @internal
- * Border style format
- */
-export interface BorderStyleData extends ISheetActionData {
-    styles: ObjectMatrixPrimitiveType<IStyleData>;
-}
 
 /**
  * set border style
@@ -19,7 +11,6 @@ export interface BorderStyleData extends ISheetActionData {
  * @internal
  */
 export class SetBorderAction extends SheetActionBase<BorderStyleData, BorderStyleData> {
-    static NAME = 'SetBorderAction';
 
     constructor(actionData: BorderStyleData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

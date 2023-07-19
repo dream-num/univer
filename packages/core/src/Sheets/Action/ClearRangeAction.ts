@@ -1,26 +1,18 @@
 import { ClearRangeApply, SetRangeDataApply } from '../Apply';
-import { ICellData, IOptionData, IRangeData } from '../../Types/Interfaces';
+import { ICellData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { ISetRangeDataActionData, SetRangeDataAction } from './SetRangeDataAction';
+import { SetRangeDataAction } from './SetRangeDataAction';
 import { CommandModel } from '../../Command';
-
-/**
- * @internal
- */
-export interface IClearRangeActionData extends ISheetActionData {
-    options: IOptionData;
-    rangeData: IRangeData;
-}
+import { IClearRangeActionData } from '../../Types/Interfaces/IActionModel';
 
 /**
  * Clearly specify a range of styles, content, comments, validation, filtering
  *
  * @internal
  */
-export class ClearRangeAction extends SheetActionBase<IClearRangeActionData, ISetRangeDataActionData, ObjectMatrixPrimitiveType<ICellData>> {
-    static NAME = 'ClearRangeAction';
+export class ClearRangeAction extends SheetActionBase<IClearRangeActionData, SetRangeDataAction, ObjectMatrixPrimitiveType<ICellData>> {
 
     constructor(actionData: IClearRangeActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

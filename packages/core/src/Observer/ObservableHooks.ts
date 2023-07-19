@@ -12,9 +12,7 @@ export class ObservableHooks<T> extends Observable<T> {
      * @param unregisterOnFirstCall defines if the observer as to be unregistered after the next notification
      * @returns the new observer created for the callback
      */
-    override add(
-        callback: (eventData: T, eventState: EventState) => void
-    ): Nullable<Observer<T>> {
+    override add(callback: (eventData: T, eventState: EventState) => void): Nullable<Observer<T>> {
         if (!callback) {
             return null;
         }

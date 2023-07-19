@@ -1,14 +1,6 @@
-import { SheetActionBase, ISheetActionData, ActionObservers, ActionType, CommandModel } from '../../Command';
+import { SheetActionBase, ActionObservers, ActionType, CommandModel } from '../../Command';
 import { InsertRowApply, RemoveRowApply } from '../Apply';
 import { IRemoveRowActionData } from './RemoveRowAction';
-
-/**
- * @internal
- */
-export interface IInsertRowActionData extends ISheetActionData {
-    rowIndex: number;
-    rowCount: number;
-}
 
 /**
  * Insert the row configuration of the specified row index
@@ -16,7 +8,6 @@ export interface IInsertRowActionData extends ISheetActionData {
  * @internal
  */
 export class InsertRowAction extends SheetActionBase<IInsertRowActionData, IRemoveRowActionData> {
-    static NAME = 'InsertRowAction';
 
     constructor(actionData: IInsertRowActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

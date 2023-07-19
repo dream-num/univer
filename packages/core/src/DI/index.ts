@@ -37,9 +37,7 @@ const globalObject: any =
 const __REDI_GLOBAL_LOCK__ = 'REDI_GLOBAL_LOCK';
 
 if (globalObject[__REDI_GLOBAL_LOCK__]) {
-    console.error(
-        '[DI]: Load scripts of DI more than once! This may cause undesired behavior in your application.'
-    );
+    console.error('[DI]: Load scripts of DI more than once! This may cause undesired behavior in your application.');
 } else {
     globalObject[__REDI_GLOBAL_LOCK__] = true;
 }

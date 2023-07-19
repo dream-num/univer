@@ -13,18 +13,8 @@ import {
     ValueDependencyItem,
     normalizeFactoryDeps,
 } from './Decorators';
-import {
-    Dependency,
-    DependencyCollection,
-    DependencyNotFoundError,
-    ResolvedDependencyCollection,
-    DependencyPair,
-} from './DependencyCollection';
-import {
-    DependencyIdentifier,
-    NormalizedDependencyIdentifier,
-    prettyPrintIdentifier,
-} from './DependencyIdentifier';
+import { Dependency, DependencyCollection, DependencyNotFoundError, ResolvedDependencyCollection, DependencyPair } from './DependencyCollection';
+import { DependencyIdentifier, NormalizedDependencyIdentifier, prettyPrintIdentifier } from './DependencyIdentifier';
 import { IdleValue } from './IdleValue';
 import { getSingletonDependencies } from './DependencySingletons';
 import { DIError } from './Error';
@@ -38,11 +28,7 @@ const NotInstantiatedSymbol = Symbol('$$NOT_INSTANTIATED_SYMBOL');
 
 class CircularDependencyError<T> extends DIError {
     constructor(id: DependencyIdentifier<T>) {
-        super(
-            `Detecting cyclic dependency. The last identifier is "${prettyPrintIdentifier(
-                id
-            )}".`
-        );
+        super(`Detecting cyclic dependency. The last identifier is "${prettyPrintIdentifier(id)}".`);
     }
 }
 
@@ -54,9 +40,7 @@ class InjectorAlreadyDisposedError extends DIError {
 
 class AsyncItemReturnAsyncItemError<T> extends DIError {
     constructor(id: DependencyIdentifier<T>) {
-        super(
-            `Async item "${prettyPrintIdentifier(id)}" returns another async item.`
-        );
+        super(`Async item "${prettyPrintIdentifier(id)}" returns another async item.`);
     }
 }
 
@@ -66,9 +50,7 @@ class GetAsyncItemFromSyncApiError<T> extends DIError {
     }
 }
 
-function normalizeForwardRef<T>(
-    id: DependencyIdentifier<T>
-): NormalizedDependencyIdentifier<T> {
+function normalizeForwardRef<T>(id: DependencyIdentifier<T>): NormalizedDependencyIdentifier<T> {
     if (isForwardRef(id)) {
         return id.unwrap();
     }
@@ -90,9 +72,7 @@ export class Injector {
     private disposed = false;
 
     constructor(collectionOrDependencies?: Dependency[], parent?: Injector) {
-        this.dependencyCollection = new DependencyCollection(
-            collectionOrDependencies || []
-        );
+        this.dependencyCollection = new DependencyCollection(collectionOrDependencies || []);
 
         if (!parent) {
             this.parent = null;
@@ -122,22 +102,14 @@ export class Injector {
     add<T>(ctor: Ctor<T>): void;
     add<T>(pair: DependencyPair<T>): void;
     add<T>(id: DependencyIdentifier<T>, item: DependencyItem<T> | T): void;
-    add<T>(
-        dependency: Ctor<T> | DependencyPair<T> | DependencyIdentifier<T>,
-        item?: DependencyItem<T> | T
-    ): void {
+    add<T>(dependency: Ctor<T> | DependencyPair<T> | DependencyIdentifier<T>, item?: DependencyItem<T> | T): void {
         if (typeof item !== 'undefined' || Array.isArray(dependency)) {
             if (Array.isArray(dependency)) {
                 item = dependency[1];
                 dependency = dependency[0];
             }
 
-            if (
-                isAsyncDependencyItem(item) ||
-                isClassDependencyItem(item) ||
-                isValueDependencyItem(item) ||
-                isFactoryDependencyItem(item)
-            ) {
+            if (isAsyncDependencyItem(item) || isClassDependencyItem(item) || isValueDependencyItem(item) || isFactoryDependencyItem(item)) {
                 this.dependencyCollection.add(dependency, item as DependencyItem<T>);
             } else {
                 this.resolvedDependencyCollection.add(dependency, item as T);
@@ -159,62 +131,26 @@ export class Injector {
      * get a dependency
      */
     get<T>(id: DependencyIdentifier<T>, lookUp?: LookUp): T;
-    get<T>(
-        id: DependencyIdentifier<T>,
-        quantity: Quantity.MANY,
-        lookUp?: LookUp
-    ): T[];
-    get<T>(
-        id: DependencyIdentifier<T>,
-        quantity: Quantity.OPTIONAL,
-        lookUp?: LookUp
-    ): T | null;
-    get<T>(
-        id: DependencyIdentifier<T>,
-        quantity: Quantity.REQUIRED,
-        lookUp?: LookUp
-    ): T;
-    get<T>(
-        id: DependencyIdentifier<T>,
-        quantity?: Quantity,
-        lookUp?: LookUp
-    ): T[] | T | null;
-    get<T>(
-        id: DependencyIdentifier<T>,
-        quantityOrLookup?: Quantity | LookUp,
-        lookUp?: LookUp
-    ): T[] | T | null;
-    get<T>(
-        id: DependencyIdentifier<T>,
-        quantityOrLookup?: Quantity | LookUp,
-        lookUp?: LookUp
-    ): T[] | T | null {
+    get<T>(id: DependencyIdentifier<T>, quantity: Quantity.MANY, lookUp?: LookUp): T[];
+    get<T>(id: DependencyIdentifier<T>, quantity: Quantity.OPTIONAL, lookUp?: LookUp): T | null;
+    get<T>(id: DependencyIdentifier<T>, quantity: Quantity.REQUIRED, lookUp?: LookUp): T;
+    get<T>(id: DependencyIdentifier<T>, quantity?: Quantity, lookUp?: LookUp): T[] | T | null;
+    get<T>(id: DependencyIdentifier<T>, quantityOrLookup?: Quantity | LookUp, lookUp?: LookUp): T[] | T | null;
+    get<T>(id: DependencyIdentifier<T>, quantityOrLookup?: Quantity | LookUp, lookUp?: LookUp): T[] | T | null {
         const newResult = this._get(id, quantityOrLookup, lookUp);
 
-        if (
-            (Array.isArray(newResult) && newResult.some((r) => isAsyncHook(r))) ||
-            isAsyncHook(newResult)
-        ) {
+        if ((Array.isArray(newResult) && newResult.some((r) => isAsyncHook(r))) || isAsyncHook(newResult)) {
             throw new GetAsyncItemFromSyncApiError(id);
         }
 
         return newResult as T | T[] | null;
     }
 
-    _get<T>(
-        id: DependencyIdentifier<T>,
-        quantityOrLookup?: Quantity | LookUp,
-        lookUp?: LookUp,
-        toSelf?: boolean
-    ): T[] | T | AsyncHook<T> | null {
+    _get<T>(id: DependencyIdentifier<T>, quantityOrLookup?: Quantity | LookUp, lookUp?: LookUp, toSelf?: boolean): T[] | T | AsyncHook<T> | null {
         this.ensureInjectorNotDisposed();
 
         let quantity: Quantity = Quantity.REQUIRED;
-        if (
-            quantityOrLookup === Quantity.REQUIRED ||
-            quantityOrLookup === Quantity.OPTIONAL ||
-            quantityOrLookup === Quantity.MANY
-        ) {
+        if (quantityOrLookup === Quantity.REQUIRED || quantityOrLookup === Quantity.OPTIONAL || quantityOrLookup === Quantity.MANY) {
             quantity = quantityOrLookup as Quantity;
         } else {
             lookUp = quantityOrLookup as LookUp;
@@ -229,11 +165,7 @@ export class Injector {
         }
 
         // see if the dependency can be instantiated by itself or its parent
-        return this.createDependency(id, quantity, lookUp, !toSelf) as
-            | T[]
-            | T
-            | AsyncHook<T>
-            | null;
+        return this.createDependency(id, quantity, lookUp, !toSelf) as T[] | T | AsyncHook<T> | null;
     }
 
     /**
@@ -258,10 +190,7 @@ export class Injector {
     /**
      * to instantiate a class withing the current injector
      */
-    createInstance<T extends unknown[], U extends unknown[], C>(
-        ctor: new (...args: [...T, ...U]) => C,
-        ...customArgs: T
-    ): C {
+    createInstance<T extends unknown[], U extends unknown[], C>(ctor: new (...args: [...T, ...U]) => C, ...customArgs: T): C {
         this.ensureInjectorNotDisposed();
 
         return this.resolveClass_(ctor as Ctor<C>, ...customArgs);
@@ -270,45 +199,26 @@ export class Injector {
     /**
      * resolve different types of dependencies
      */
-    private resolveDependency<T>(
-        id: DependencyIdentifier<T>,
-        item: DependencyItem<T>,
-        shouldCache = true
-    ): T | AsyncHook<T> {
+    private resolveDependency<T>(id: DependencyIdentifier<T>, item: DependencyItem<T>, shouldCache = true): T | AsyncHook<T> {
         if (isValueDependencyItem(item)) {
             return this.resolveValueDependency(id, item as ValueDependencyItem<T>);
         }
         if (isFactoryDependencyItem(item)) {
-            return this.resolveFactory(
-                id,
-                item as FactoryDependencyItem<T>,
-                shouldCache
-            );
+            return this.resolveFactory(id, item as FactoryDependencyItem<T>, shouldCache);
         }
         if (isClassDependencyItem(item)) {
-            return this.resolveClass(
-                id,
-                item as ClassDependencyItem<T>,
-                shouldCache
-            );
+            return this.resolveClass(id, item as ClassDependencyItem<T>, shouldCache);
         }
         return this.resolveAsync(id, item as AsyncDependencyItem<T>);
     }
 
-    private resolveValueDependency<T>(
-        id: DependencyIdentifier<T>,
-        item: ValueDependencyItem<T>
-    ): T {
+    private resolveValueDependency<T>(id: DependencyIdentifier<T>, item: ValueDependencyItem<T>): T {
         const thing = item.useValue;
         this.resolvedDependencyCollection.add(id, thing);
         return thing;
     }
 
-    private resolveClass<T>(
-        id: DependencyIdentifier<T> | null,
-        item: ClassDependencyItem<T>,
-        shouldCache = true
-    ): T {
+    private resolveClass<T>(id: DependencyIdentifier<T> | null, item: ClassDependencyItem<T>, shouldCache = true): T {
         const ctor = item.useClass;
         let thing: T;
 
@@ -341,11 +251,7 @@ export class Injector {
 
                     return property;
                 },
-                set(
-                    _target: any,
-                    key: string | number | symbol,
-                    value: any
-                ): boolean {
+                set(_target: any, key: string | number | symbol, value: any): boolean {
                     (idle.getValue() as any)[key] = value;
                     return true;
                 },
@@ -375,25 +281,15 @@ export class Injector {
 
         for (const dep of declaredDependencies) {
             // recursive happens here
-            const thing = this._get(
-                dep.identifier,
-                dep.quantity,
-                dep.lookUp,
-                dep.withNew
-            );
+            const thing = this._get(dep.identifier, dep.quantity, dep.lookUp, dep.withNew);
             resolvedArgs.push(thing);
         }
 
         let args = [...extraParams];
-        const firstDependencyArgIndex =
-            declaredDependencies.length > 0
-                ? declaredDependencies[0].paramIndex
-                : args.length;
+        const firstDependencyArgIndex = declaredDependencies.length > 0 ? declaredDependencies[0].paramIndex : args.length;
 
         if (args.length !== firstDependencyArgIndex) {
-            console.warn(
-                `[DI]: Expect ${firstDependencyArgIndex} custom parameter(s) but get ${args.length}.`
-            );
+            console.warn(`[DI]: Expect ${firstDependencyArgIndex} custom parameter(s) but get ${args.length}.`);
 
             const delta = firstDependencyArgIndex - args.length;
             if (delta > 0) {
@@ -417,23 +313,14 @@ export class Injector {
         }
     }
 
-    private resolveFactory<T>(
-        id: DependencyIdentifier<T>,
-        item: FactoryDependencyItem<T>,
-        shouldCache: boolean
-    ): T {
+    private resolveFactory<T>(id: DependencyIdentifier<T>, item: FactoryDependencyItem<T>, shouldCache: boolean): T {
         this.markNewResolution(id);
 
         const declaredDependencies = normalizeFactoryDeps(item.deps);
 
         const resolvedArgs: any[] = [];
         for (const dep of declaredDependencies) {
-            const thing = this._get(
-                dep.identifier,
-                dep.quantity,
-                dep.lookUp,
-                dep.withNew
-            );
+            const thing = this._get(dep.identifier, dep.quantity, dep.lookUp, dep.withNew);
             resolvedArgs.push(thing);
         }
 
@@ -450,20 +337,14 @@ export class Injector {
         return thing;
     }
 
-    private resolveAsync<T>(
-        id: DependencyIdentifier<T>,
-        item: AsyncDependencyItem<T>
-    ): AsyncHook<T> {
+    private resolveAsync<T>(id: DependencyIdentifier<T>, item: AsyncDependencyItem<T>): AsyncHook<T> {
         const asyncLoader: AsyncHook<T> = {
             whenReady: () => this.resolveAsync_(id, item),
         };
         return asyncLoader;
     }
 
-    private resolveAsync_<T>(
-        id: DependencyIdentifier<T>,
-        item: AsyncDependencyItem<T>
-    ): Promise<T> {
+    private resolveAsync_<T>(id: DependencyIdentifier<T>, item: AsyncDependencyItem<T>): Promise<T> {
         return item.useAsync().then((thing) => {
             // check if another promise has been resolved,
             // do not resolve the async item twice
@@ -495,16 +376,9 @@ export class Injector {
     /**
      * recursively get a dependency value
      */
-    private getValue<T>(
-        id: DependencyIdentifier<T>,
-        quantity: Quantity = Quantity.REQUIRED,
-        lookUp?: LookUp
-    ): null | T | T[] | typeof NotInstantiatedSymbol {
+    private getValue<T>(id: DependencyIdentifier<T>, quantity: Quantity = Quantity.REQUIRED, lookUp?: LookUp): null | T | T[] | typeof NotInstantiatedSymbol {
         const onSelf = () => {
-            if (
-                this.dependencyCollection.has(id) &&
-                !this.resolvedDependencyCollection.has(id)
-            ) {
+            if (this.dependencyCollection.has(id) && !this.resolvedDependencyCollection.has(id)) {
                 return NotInstantiatedSymbol;
             }
 
@@ -526,10 +400,7 @@ export class Injector {
             return onSelf();
         }
 
-        if (
-            this.resolvedDependencyCollection.has(id) ||
-            this.dependencyCollection.has(id)
-        ) {
+        if (this.resolvedDependencyCollection.has(id) || this.dependencyCollection.has(id)) {
             return onSelf();
         }
 
@@ -550,9 +421,7 @@ export class Injector {
 
             let ret: Array<T | AsyncHook<T>> | T | AsyncHook<T> | null = null;
             if (Array.isArray(registrations)) {
-                ret = registrations.map((dependencyItem) =>
-                    this.resolveDependency(id, dependencyItem, shouldCache)
-                );
+                ret = registrations.map((dependencyItem) => this.resolveDependency(id, dependencyItem, shouldCache));
             } else if (registrations) {
                 ret = this.resolveDependency(id, registrations, shouldCache);
             }
@@ -562,12 +431,7 @@ export class Injector {
 
         const onParent = () => {
             if (this.parent) {
-                return this.parent.createDependency(
-                    id,
-                    quantity,
-                    undefined,
-                    shouldCache
-                );
+                return this.parent.createDependency(id, quantity, undefined, shouldCache);
             }
             if (quantity === Quantity.OPTIONAL) {
                 return null;

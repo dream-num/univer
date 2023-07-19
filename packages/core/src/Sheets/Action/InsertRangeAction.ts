@@ -1,21 +1,9 @@
-import { ICellData, IRangeData } from '../../Types/Interfaces';
-import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { Dimension } from '../../Types/Enum/Dimension';
 import { IDeleteRangeActionData } from './DeleteRangeAction';
 import { CommandModel } from '../../Command';
 import { SetRangeDataAction } from './SetRangeDataAction';
 import { DeleteRangeApply, InsertRangeApply } from '../Apply';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-
-/**
- * @internal
- */
-export interface IInsertRangeActionData extends ISheetActionData {
-    shiftDimension: Dimension;
-    rangeData: IRangeData;
-    cellValue: ObjectMatrixPrimitiveType<ICellData>;
-}
 
 /**
  * Insert data into a range and move the range to the right or below
@@ -23,7 +11,6 @@ export interface IInsertRangeActionData extends ISheetActionData {
  * @internal
  */
 export class InsertRangeAction extends SheetActionBase<IInsertRangeActionData, IDeleteRangeActionData> {
-    static NAME = 'InsertRangeAction';
 
     constructor(actionData: IInsertRangeActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

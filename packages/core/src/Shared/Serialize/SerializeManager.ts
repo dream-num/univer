@@ -24,13 +24,9 @@ export class SerializeManager {
         }
     }
 
-    fromSequence<I extends Serialize>(
-        sequence: object[]
-    ): Array<SerializeInstance<I>>;
+    fromSequence<I extends Serialize>(sequence: object[]): Array<SerializeInstance<I>>;
     fromSequence<I extends Serialize>(sequence: object): SerializeInstance<I>;
-    fromSequence<I extends Serialize>(
-        sequence: object | object[]
-    ): Array<SerializeInstance<I>> | SerializeInstance<I> {
+    fromSequence<I extends Serialize>(sequence: object | object[]): Array<SerializeInstance<I>> | SerializeInstance<I> {
         if (Tools.isObject<Sequence>(sequence)) {
             const Clazz = this._storage.get(sequence.className!) as typeof Serialize;
             return Clazz.fromSequence(sequence) as SerializeInstance<I>;
@@ -47,9 +43,7 @@ export class SerializeManager {
 
     toSequence(instance: SerializeInstance[]): SequenceInstance[];
     toSequence(instance: SerializeInstance): SequenceInstance;
-    toSequence(
-        instance: SerializeInstance | SerializeInstance[]
-    ): SequenceInstance[] | SequenceInstance {
+    toSequence(instance: SerializeInstance | SerializeInstance[]): SequenceInstance[] | SequenceInstance {
         if (Tools.isObject<SerializeInstance>(instance)) {
             return instance.toSequence();
         }

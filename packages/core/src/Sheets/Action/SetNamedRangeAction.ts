@@ -1,14 +1,8 @@
-import { ISheetActionData, SheetActionBase, ActionObservers, ActionType, CommandModel } from '../../Command';
+import { SheetActionBase, ActionObservers, ActionType, CommandModel } from '../../Command';
 import { SetNamedRangeApply } from '../Apply';
 import { INamedRange } from '../../Types/Interfaces';
 
-export interface ISetNamedRangeActionData extends ISheetActionData {
-    namedRange: INamedRange;
-}
-
 export class SetNamedRangeAction extends SheetActionBase<ISetNamedRangeActionData, ISetNamedRangeActionData, INamedRange> {
-    static NAME = 'SetNamedRangeAction';
-
     constructor(actionData: ISetNamedRangeActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
 

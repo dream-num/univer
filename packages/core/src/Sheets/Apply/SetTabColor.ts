@@ -9,10 +9,7 @@ import { Nullable } from '../../Shared/Types';
  *
  * @internal
  */
-export function SetTabColor(
-    worksheet: Worksheet,
-    color: Nullable<string>
-): Nullable<string> {
+export function SetTabColor(worksheet: Worksheet, color: Nullable<string>): Nullable<string> {
     // get config
     const config = worksheet.getConfig();
 

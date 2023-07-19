@@ -1,4 +1,4 @@
-import { ActionOperationType, IActionData } from './index';
+import { ActionOperationType, IActionData } from './ActionBase';
 
 export class ActionOperation<T extends IActionData> {
     protected _action: T;
@@ -9,40 +9,28 @@ export class ActionOperation<T extends IActionData> {
 
     static hasObserver<U extends IActionData>(action: U): boolean {
         if (action.operation) {
-            return (
-                (action.operation & ActionOperationType.OBSERVER_ACTION) ===
-                ActionOperationType.OBSERVER_ACTION
-            );
+            return (action.operation & ActionOperationType.OBSERVER_ACTION) === ActionOperationType.OBSERVER_ACTION;
         }
         return true;
     }
 
     static hasUndo<U extends IActionData>(action: U): boolean {
         if (action.operation) {
-            return (
-                (action.operation & ActionOperationType.UNDO_ACTION) ===
-                ActionOperationType.UNDO_ACTION
-            );
+            return (action.operation & ActionOperationType.UNDO_ACTION) === ActionOperationType.UNDO_ACTION;
         }
         return true;
     }
 
     static hasCollaboration<U extends IActionData>(action: U): boolean {
         if (action.operation) {
-            return (
-                (action.operation & ActionOperationType.SERVER_ACTION) ===
-                ActionOperationType.SERVER_ACTION
-            );
+            return (action.operation & ActionOperationType.SERVER_ACTION) === ActionOperationType.SERVER_ACTION;
         }
         return true;
     }
 
     static hasExtension<U extends IActionData>(action: U): boolean {
         if (action.operation) {
-            return (
-                (action.operation & ActionOperationType.EXTENSION_ACTION) ===
-                ActionOperationType.EXTENSION_ACTION
-            );
+            return (action.operation & ActionOperationType.EXTENSION_ACTION) === ActionOperationType.EXTENSION_ACTION;
         }
         return true;
     }

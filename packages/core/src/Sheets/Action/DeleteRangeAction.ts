@@ -1,19 +1,10 @@
-import { Dimension } from '../../Types/Enum/Dimension';
-import { ICellData, IRangeData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { IInsertRangeActionData, InsertRangeAction } from './InsertRangeAction';
 import { CommandModel } from '../../Command';
 import { DeleteRangeApply, InsertRangeApply } from '../Apply';
-
-/**
- * @internal
- */
-export interface IDeleteRangeActionData extends ISheetActionData {
-    shiftDimension: Dimension;
-    rangeData: IRangeData;
-}
+import { ICellData } from '../../Types/Interfaces/ICellData';
 
 /**
  * Delete the specified range and move the right or lower range
@@ -21,7 +12,6 @@ export interface IDeleteRangeActionData extends ISheetActionData {
  * @internal
  */
 export class DeleteRangeAction extends SheetActionBase<IDeleteRangeActionData, IInsertRangeActionData, ObjectMatrixPrimitiveType<ICellData>> {
-    static NAME = 'DeleteRangeAction';
 
     constructor(actionData: IDeleteRangeActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

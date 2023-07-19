@@ -87,9 +87,7 @@ export class Observable<T> {
 
     protected _eventState: EventState;
 
-    protected _onObserverAdded:
-        | Nullable<(observer: Observer<T>) => void>
-        | undefined;
+    protected _onObserverAdded: Nullable<(observer: Observer<T>) => void> | undefined;
 
     /**
      * Creates a new observable
@@ -117,11 +115,7 @@ export class Observable<T> {
      * @param unregisterOnFirstCall defines if the observer as to be unregistered after the next notification
      * @returns the new observer created for the callback
      */
-    add(
-        callback: (eventData: T, eventState: EventState) => void,
-        insertFirst = false,
-        unregisterOnFirstCall = false
-    ): Nullable<Observer<T>> {
+    add(callback: (eventData: T, eventState: EventState) => void, insertFirst = false, unregisterOnFirstCall = false): Nullable<Observer<T>> {
         if (!callback) {
             return null;
         }
@@ -147,9 +141,7 @@ export class Observable<T> {
      * @param callback the callback that will be executed for that WorkBookObserver
      * @returns the new observer created for the callback
      */
-    addOnce(
-        callback: (eventData: T, eventState: EventState) => void
-    ): Nullable<Observer<T>> {
+    addOnce(callback: (eventData: T, eventState: EventState) => void): Nullable<Observer<T>> {
         return this.add(callback, undefined, true);
     }
 
@@ -178,9 +170,7 @@ export class Observable<T> {
      * @param callback the callback to remove
      * @returns false if it doesn't belong to this Observable
      */
-    removeCallback(
-        callback: (eventData: T, eventState: EventState) => void
-    ): boolean {
+    removeCallback(callback: (eventData: T, eventState: EventState) => void): boolean {
         for (let index = 0; index < this._observers.length; index++) {
             const observer = this._observers[index];
             if (observer._willBeUnregistered) {
@@ -307,10 +297,7 @@ export class Observable<T> {
      * @param observer defines the observer to notify
      * @param eventData defines the data to be sent to each callback
      */
-    notifyObserver(
-        observer: Observer<T>,
-        eventData: T
-    ): Nullable<INotifyObserversReturn> {
+    notifyObserver(observer: Observer<T>, eventData: T): Nullable<INotifyObserversReturn> {
         if (observer._willBeUnregistered) {
             return;
         }

@@ -9,10 +9,7 @@ import { BooleanNumber } from '../../Types/Enum';
  *
  * @internal
  */
-export function SetWorkSheetStatus(
-    worksheet: Worksheet,
-    sheetStatus: BooleanNumber
-): BooleanNumber {
+export function SetWorkSheetStatus(worksheet: Worksheet, sheetStatus: BooleanNumber): BooleanNumber {
     // get config
     const config = worksheet.getConfig();
 

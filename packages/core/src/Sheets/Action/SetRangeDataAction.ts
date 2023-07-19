@@ -1,28 +1,7 @@
 import { SetRangeDataApply } from '../Apply';
 import { ObjectMatrixPrimitiveType } from '../../Shared';
-import { SheetActionBase, ISheetActionData, ActionObservers, ActionType, CommandModel } from '../../Command';
-import { ICopyToOptionsData, ICellData } from '../../Types/Interfaces';
-
-/**
- * 设置数据时的类型
- */
-enum SetRangeDataType {
-    DEFAULT = 'default',
-
-    /**
-     *
-     */
-    PASTE = 'paste',
-}
-
-/**
- * @internal
- */
-export interface ISetRangeDataActionData extends ISheetActionData {
-    cellValue: ObjectMatrixPrimitiveType<ICellData>;
-    options?: ICopyToOptionsData;
-    type?: SetRangeDataType;
-}
+import { SheetActionBase, ActionObservers, ActionType, CommandModel } from '../../Command';
+import { ICellData } from '../../Types/Interfaces';
 
 /**
  * Modify values in the range
@@ -30,7 +9,6 @@ export interface ISetRangeDataActionData extends ISheetActionData {
  * @internal
  */
 export class SetRangeDataAction extends SheetActionBase<ISetRangeDataActionData, ISetRangeDataActionData, ObjectMatrixPrimitiveType<ICellData>> {
-    static NAME = 'SetRangeDataAction';
 
     constructor(actionData: ISetRangeDataActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);

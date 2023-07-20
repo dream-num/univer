@@ -2,25 +2,14 @@ import { InsertDataRowApply, RemoveRowDataApply } from '../Apply';
 import { ICellData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-<<<<<<< HEAD
 import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { IRemoveRowDataActionData, IInsertRowDataActionData } from '../../Types/Interfaces/IActionModel';
-=======
-import { CommandModel } from '../../Command';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { IInsertRowDataActionData } from './InsertRowDataAction';
->>>>>>> 978105c8 (fix(core): action names, action interfaces)
-
 /**
  * Remove the row data of the specified row index and row count
  *
  * @internal
  */
 export class RemoveRowDataAction extends SheetActionBase<IRemoveRowDataActionData, IInsertRowDataActionData> {
-<<<<<<< HEAD
-=======
-
->>>>>>> 978105c8 (fix(core): action names, action interfaces)
     constructor(actionData: IRemoveRowDataActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
         this._doActionData = {

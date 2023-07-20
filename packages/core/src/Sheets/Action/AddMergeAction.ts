@@ -1,6 +1,5 @@
 import { IRangeData } from '../../Types/Interfaces/IRangeData';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers } from '../../Command/ActionObservers';
 import { addMergeApply, RemoveMergeApply } from '../Apply';
 import { CommandModel } from '../../Command/CommandModel';
 import { ActionObservers } from '../../Command/ActionBase';
@@ -9,6 +8,7 @@ import { SheetActionBase } from '../../Command/SheetActionBase';
 import { IAddMergeActionData, IRemoveMergeActionData } from '../../Types/Interfaces/IActionModel';
 import { RemoveMergeApply } from '../Apply/RemoveMerge';
 import { IAddMergeActionData, IRemoveMergeActionData } from '../../Types/Interfaces/IActionModel';
+import { ActionObservers } from '../../Command/ActionBase';
 
 /**
  * Set merged cell range

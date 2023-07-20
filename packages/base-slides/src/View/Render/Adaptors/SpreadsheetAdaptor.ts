@@ -13,7 +13,7 @@ import {
     SpreadsheetSkeleton,
     Viewport,
 } from '@univerjs/base-render';
-import { ContextBase, EventState, ICellData, IPageElement, ObjectMatrix, PageElementType, SheetContext, Styles } from '@univerjs/core';
+import { ContextBase, EventState, ICellData, IPageElement, ObjectMatrix, PageElementType, SheetContext, Style } from '@univerjs/core';
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 
 enum SHEET_VIEW_KEY {
@@ -54,7 +54,7 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
 
         const cellDataMatrix = new ObjectMatrix<ICellData>(cellData);
 
-        const spreadsheetSkeleton = SpreadsheetSkeleton.create(worksheet, cellDataMatrix, new Styles(styles), context as SheetContext);
+        const spreadsheetSkeleton = SpreadsheetSkeleton.create(worksheet, cellDataMatrix, new Style(styles), context as SheetContext);
 
         const { rowTotalHeight, columnTotalWidth, rowTitleWidth, columnTitleHeight } = spreadsheetSkeleton;
 

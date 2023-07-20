@@ -13,7 +13,7 @@ import {
     ITextStyle,
     ObjectArray,
     ObjectMatrix,
-    Styles,
+    Style,
     TextDirection,
     TextDirectionType,
     VerticalAlign,
@@ -41,7 +41,7 @@ import { DocumentSkeleton } from '../Docs/DocSkeleton';
 interface ISetCellCache {
     cache: IStylesCache;
     skipBackgroundAndBorder: boolean;
-    styles?: Styles;
+    styles?: Style;
     cellData?: ObjectMatrix<ICellData>;
 }
 
@@ -104,7 +104,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     private _showGridlines: BooleanNumber;
 
-    constructor(private _config: IWorksheetConfig, private _cellData: ObjectMatrix<ICellData>, private _styles: Styles, context: SheetContext) {
+    constructor(private _config: IWorksheetConfig, private _cellData: ObjectMatrix<ICellData>, private _styles: Style, context: SheetContext) {
         super(context);
         this.updateLayout();
         this.updateDataMerge();
@@ -158,7 +158,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._dataMergeCacheAll;
     }
 
-    static create(config: IWorksheetConfig, cellData: ObjectMatrix<ICellData>, styles: Styles, context: SheetContext) {
+    static create(config: IWorksheetConfig, cellData: ObjectMatrix<ICellData>, styles: Style, context: SheetContext) {
         return new SpreadsheetSkeleton(config, cellData, styles, context);
     }
 

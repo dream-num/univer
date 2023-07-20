@@ -9,6 +9,7 @@ import { IInsertSheetActionData, IRemoveSheetActionData, ISetWorkSheetActivateAc
 import { ACTION_NAMES } from '../../Types/Const';
 import { BooleanNumber } from '../../Types/Enum';
 import { Nullable } from '../../Shared';
+import { Style } from './Style';
 
 export class Spreadsheet {
     private range: Range;
@@ -23,11 +24,14 @@ export class Spreadsheet {
 
     private commandManager: CommandManager;
 
+    private style: Style;
+
     constructor() {
         this.range = new Range();
         this.merge = new Merge();
         this.row = new Row();
         this.column = new Column();
+        this.style = new Style(this.model);
     }
 
     insertSheet(): string;

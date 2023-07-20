@@ -1,4 +1,4 @@
-import { Styles } from '../Domain';
+import { Style } from '../Domain';
 import { ICellData, IStyleData } from '../../Types/Interfaces';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared';
 import { CommandModel } from '../../Command';
@@ -13,7 +13,7 @@ import { BorderStyleData } from '../../Types/Interfaces/IActionModel';
  *
  * @internal
  */
-export function SetBorder(matrix: ObjectMatrix<ICellData>, globalStyles: Styles, primitiveStyles: ObjectMatrixPrimitiveType<IStyleData>): ObjectMatrixPrimitiveType<IStyleData> {
+export function SetBorder(matrix: ObjectMatrix<ICellData>, globalStyles: Style, primitiveStyles: ObjectMatrixPrimitiveType<IStyleData>): ObjectMatrixPrimitiveType<IStyleData> {
     const wrapper = new ObjectMatrix(primitiveStyles);
     const result = new ObjectMatrix<IStyleData>();
     wrapper.forValue((row, column, value) => {

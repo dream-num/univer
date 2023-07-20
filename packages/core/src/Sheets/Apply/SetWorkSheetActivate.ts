@@ -1,6 +1,6 @@
 import { Worksheet } from '../Domain/Worksheet';
 import { BooleanNumber } from '../../Types/Enum';
-import { ISheetStatus } from '../Action';
+import { ISheetStatus } from '../../Types/Interfaces/IActionModel';
 
 /**
  *

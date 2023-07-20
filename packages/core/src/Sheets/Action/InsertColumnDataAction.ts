@@ -1,9 +1,8 @@
 import { InsertDataColumnApply, RemoveColumnDataApply } from '../Apply';
 import { ObjectArray } from '../../Shared';
-import { CommandModel } from '../../Command';
+import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { IRemoveColumnDataAction } from './RemoveColumnDataAction';
+import { IInsertColumnDataActionData, IRemoveColumnDataAction } from '../../Types/Interfaces/IActionModel';
 
 /**
  * Insert the column data of the specified column index
@@ -11,7 +10,6 @@ import { IRemoveColumnDataAction } from './RemoveColumnDataAction';
  * @internal
  */
 export class InsertColumnDataAction extends SheetActionBase<IInsertColumnDataActionData, IRemoveColumnDataAction> {
-
     constructor(actionData: IInsertColumnDataActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
         this._doActionData = {

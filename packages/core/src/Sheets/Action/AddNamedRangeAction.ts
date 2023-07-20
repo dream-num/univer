@@ -39,8 +39,8 @@ export class AddNamedRangeAction extends SheetActionBase<IAddNamedRangeActionDat
         const { sheetId } = this._oldActionData;
         // update current data
         this._doActionData = {
-            // actionName: ACTION_NAMES.ADD_NAMED_RANGE_ACTION,
-            actionName: AddNamedRangeAction.NAME,
+            actionName: ACTION_NAMES.ADD_NAMED_RANGE_ACTION,
+            // actionName: AddNamedRangeAction.NAME,
             sheetId,
             namedRange: DeleteNamedRangeApply(this._commandModel, this._oldActionData),
         };

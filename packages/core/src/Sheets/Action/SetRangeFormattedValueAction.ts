@@ -2,15 +2,15 @@ import { SetRangeFormattedValue } from '../Apply';
 import { ICellV } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandModel } from '../../Command';
+import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { SetRangeDataAction } from './SetRangeDataAction';
+import { ISetRangeFormattedValueActionData } from '../../Types/Interfaces/IActionModel';
+import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
 
 /**
  *
  */
 export class SetRangeFormattedValueAction extends SheetActionBase<ISetRangeFormattedValueActionData, ISetRangeFormattedValueActionData, ObjectMatrixPrimitiveType<ICellV>> {
-
     constructor(actionData: ISetRangeFormattedValueActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
 
@@ -43,8 +43,8 @@ export class SetRangeFormattedValueAction extends SheetActionBase<ISetRangeForma
         // update pre data
         const { sheetId, rangeData } = this._doActionData;
         this._oldActionData = {
-            // actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-            actionName: SetRangeDataAction.NAME,
+            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+            // actionName: SetRangeDataAction.NAME,
             sheetId,
             cellValue: this.do(),
             rangeData,
@@ -57,8 +57,8 @@ export class SetRangeFormattedValueAction extends SheetActionBase<ISetRangeForma
         if (worksheet) {
             // update current data
             this._doActionData = {
-                // actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-                actionName: SetRangeDataAction.NAME,
+                actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+                // actionName: SetRangeDataAction.NAME,
                 sheetId,
                 cellValue: SetRangeFormattedValue(worksheet.getCellMatrix(), cellValue, rangeData),
                 rangeData,

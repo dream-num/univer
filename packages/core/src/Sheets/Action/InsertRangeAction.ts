@@ -1,9 +1,9 @@
-import { IDeleteRangeActionData } from './DeleteRangeAction';
-import { CommandModel } from '../../Command';
+import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { SetRangeDataAction } from './SetRangeDataAction';
 import { DeleteRangeApply, InsertRangeApply } from '../Apply';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
+import { IInsertRangeActionData, IDeleteRangeActionData } from '../../Types/Interfaces/IActionModel';
+import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
 
 /**
  * Insert data into a range and move the range to the right or below
@@ -11,7 +11,6 @@ import { ActionObservers, ActionType } from '../../Command/ActionObservers';
  * @internal
  */
 export class InsertRangeAction extends SheetActionBase<IInsertRangeActionData, IDeleteRangeActionData> {
-
     constructor(actionData: IInsertRangeActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
         this._doActionData = {
@@ -47,8 +46,8 @@ export class InsertRangeAction extends SheetActionBase<IInsertRangeActionData, I
         if (worksheet) {
             // update current data
             this._doActionData = {
-                // actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-                actionName: SetRangeDataAction.NAME,
+                actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+                // actionName: SetRangeDataAction.NAME,
                 sheetId,
                 cellValue: DeleteRangeApply(this._commandModel, this._oldActionData),
                 rangeData,

@@ -2,6 +2,8 @@ import { SetRangeDataApply } from '../Apply';
 import { ObjectMatrixPrimitiveType } from '../../Shared';
 import { SheetActionBase, ActionObservers, ActionType, CommandModel } from '../../Command';
 import { ICellData } from '../../Types/Interfaces';
+import { ISetRangeDataActionData } from '../../Types/Interfaces/IActionModel';
+import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
 
 /**
  * Modify values in the range
@@ -9,7 +11,6 @@ import { ICellData } from '../../Types/Interfaces';
  * @internal
  */
 export class SetRangeDataAction extends SheetActionBase<ISetRangeDataActionData, ISetRangeDataActionData, ObjectMatrixPrimitiveType<ICellData>> {
-
     constructor(actionData: ISetRangeDataActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
 
@@ -39,8 +40,8 @@ export class SetRangeDataAction extends SheetActionBase<ISetRangeDataActionData,
         // update pre data
         const { sheetId, options } = this._doActionData;
         this._oldActionData = {
-            // actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-            actionName: SetRangeDataAction.NAME,
+            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+            // actionName: SetRangeDataAction.NAME,
             sheetId,
             cellValue: this.do(),
             options,
@@ -54,8 +55,8 @@ export class SetRangeDataAction extends SheetActionBase<ISetRangeDataActionData,
         if (worksheet) {
             // update current data
             this._doActionData = {
-                // actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-                actionName: SetRangeDataAction.NAME,
+                actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+                // actionName: SetRangeDataAction.NAME,
                 sheetId,
                 cellValue: SetRangeDataApply(this._commandModel, this._oldActionData),
                 options,

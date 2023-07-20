@@ -1,7 +1,7 @@
 import { Worksheet } from '../Domain/Worksheet';
 import { BooleanNumber } from '../../Types/Enum';
 import { CommandModel } from '../../Command';
-import { ISetWorkSheetHideActionData } from '../Action';
+import { ISetWorkSheetHideActionData } from '../../Types/Interfaces/IActionModel';
 
 /**
  *

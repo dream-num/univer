@@ -2,7 +2,7 @@ import { Dimension } from '../../Types/Enum';
 import { ICellData, IRangeData } from '../../Types/Interfaces';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared';
 import { CommandModel } from '../../Command';
-import { IInsertRangeActionData } from '../Action';
+import { IInsertRangeActionData } from '../../Types/Interfaces/IActionModel';
 
 /**
  *

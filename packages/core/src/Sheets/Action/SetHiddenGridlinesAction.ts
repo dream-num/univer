@@ -1,13 +1,12 @@
 import { SetHiddenGridlinesApply } from '../Apply';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandModel } from '../../Command';
+import { ActionObservers, ActionType, CommandModel } from '../../Command';
+import { ISetHiddenGridlinesActionData } from '../../Types/Interfaces/IActionModel';
 
 /**
  * @internal
  */
 export class SetHiddenGridlinesAction extends SheetActionBase<ISetHiddenGridlinesActionData> {
-
     constructor(actionData: ISetHiddenGridlinesActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
         this._doActionData = {

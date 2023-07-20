@@ -1,6 +1,6 @@
 import { ColumnManager } from '../Domain/ColumnManager';
 import { CommandModel } from '../../Command';
-import { ISetColumnShowActionData } from '../Action';
+import { ISetColumnShowActionData } from '../../Types/Interfaces/IActionModel';
 
 /**
  *

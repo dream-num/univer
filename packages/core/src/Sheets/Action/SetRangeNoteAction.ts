@@ -1,14 +1,14 @@
 import { SetRangeNote } from '../Apply';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandModel } from '../../Command';
+import { ActionObservers, ActionType, CommandModel } from '../../Command';
+import { ISetRangeNoteActionData } from '../../Types/Interfaces/IActionModel';
+import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
 
 /**
  * @internal
  */
 export class SetRangeNoteAction extends SheetActionBase<ISetRangeNoteActionData, ISetRangeNoteActionData, ObjectMatrixPrimitiveType<string>> {
-
     constructor(actionData: ISetRangeNoteActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
 
@@ -41,8 +41,8 @@ export class SetRangeNoteAction extends SheetActionBase<ISetRangeNoteActionData,
         // update pre data
         const { sheetId, rangeData } = this._doActionData;
         this._oldActionData = {
-            // actionName: ACTION_NAMES.SET_RANGE_NOTE_ACTION,
-            actionName: SetRangeNoteAction.NAME,
+            actionName: ACTION_NAMES.SET_RANGE_NOTE_ACTION,
+            // actionName: SetRangeNoteAction.NAME,
             sheetId,
             cellNote: this.do(),
             rangeData,
@@ -55,8 +55,8 @@ export class SetRangeNoteAction extends SheetActionBase<ISetRangeNoteActionData,
         if (worksheet) {
             // update current data
             this._doActionData = {
-                // actionName: ACTION_NAMES.SET_RANGE_NOTE_ACTION,
-                actionName: SetRangeNoteAction.NAME,
+                actionName: ACTION_NAMES.SET_RANGE_NOTE_ACTION,
+                // actionName: SetRangeNoteAction.NAME,
                 sheetId,
                 cellNote: SetRangeNote(worksheet.getCellMatrix(), cellNote, rangeData),
                 rangeData,

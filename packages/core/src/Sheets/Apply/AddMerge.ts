@@ -1,7 +1,7 @@
 import { Merge } from '../Domain/Merge';
 import { IRangeData } from '../../Types/Interfaces';
 import { CommandModel } from '../../Command';
-import { IAddMergeActionData } from '../Action';
+import { IAddMergeActionData } from '../../Types/Interfaces/IActionModel';
 
 /**
  *

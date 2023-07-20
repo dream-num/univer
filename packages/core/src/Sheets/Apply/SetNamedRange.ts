@@ -1,6 +1,6 @@
 import { INamedRange } from '../../Types/Interfaces/INamedRange';
 import { CommandModel } from '../../Command';
-import { ISetNamedRangeActionData } from '../Action';
+import { ISetNamedRangeActionData } from '../../Types/Interfaces/IActionModel';
 
 export function SetNamedRange(namedRanges: INamedRange[], namedRange: INamedRange): INamedRange {
     return namedRanges.find((currentNamedRange: INamedRange, i) => {

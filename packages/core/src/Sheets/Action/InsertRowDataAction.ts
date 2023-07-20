@@ -1,9 +1,8 @@
 import { InsertDataRowApply, RemoveRowDataApply } from '../Apply';
 import { ObjectArray } from '../../Shared';
-import { CommandModel } from '../../Command';
+import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { IRemoveRowDataActionData } from './RemoveRowDataAction';
+import { IInsertRowDataActionData, IRemoveRowDataActionData } from '../../Types/Interfaces/IActionModel';
 
 /**
  * Insert the row data of the specified row index
@@ -11,7 +10,6 @@ import { IRemoveRowDataActionData } from './RemoveRowDataAction';
  * @internal
  */
 export class InsertRowDataAction extends SheetActionBase<IInsertRowDataActionData, IRemoveRowDataActionData> {
-
     constructor(actionData: IInsertRowDataActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
         this._doActionData = {

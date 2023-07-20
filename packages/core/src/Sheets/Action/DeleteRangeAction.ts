@@ -1,10 +1,10 @@
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { IInsertRangeActionData, InsertRangeAction } from './InsertRangeAction';
-import { CommandModel } from '../../Command';
+import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { DeleteRangeApply, InsertRangeApply } from '../Apply';
 import { ICellData } from '../../Types/Interfaces/ICellData';
+import { IDeleteRangeActionData, IInsertRangeActionData } from '../../Types/Interfaces/IActionModel';
+import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
 
 /**
  * Delete the specified range and move the right or lower range
@@ -12,7 +12,6 @@ import { ICellData } from '../../Types/Interfaces/ICellData';
  * @internal
  */
 export class DeleteRangeAction extends SheetActionBase<IDeleteRangeActionData, IInsertRangeActionData, ObjectMatrixPrimitiveType<ICellData>> {
-
     constructor(actionData: IDeleteRangeActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
 
@@ -42,8 +41,8 @@ export class DeleteRangeAction extends SheetActionBase<IDeleteRangeActionData, I
         const { sheetId, rangeData, shiftDimension } = this._doActionData;
         this._oldActionData = {
             sheetId,
-            // actionName: ACTION_NAMES.INSERT_RANGE_ACTION,
-            actionName: InsertRangeAction.NAME,
+            actionName: ACTION_NAMES.INSERT_RANGE_ACTION,
+            // actionName: InsertRangeAction.NAME,
             shiftDimension,
             rangeData,
             cellValue: this.do(),

@@ -2,7 +2,7 @@ import { ICellData, ICellV, IRangeData } from '../../Types/Interfaces';
 import { Nullable, Tools } from '../../Shared';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { CommandModel } from '../../Command';
-import { ISetRangeFormattedValueActionData } from '../Action';
+import { ISetRangeFormattedValueActionData } from '../../Types/Interfaces/IActionModel';
 
 /**
  *

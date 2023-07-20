@@ -1,6 +1,6 @@
 import { Worksheet } from '../Domain/Worksheet';
 import { CommandModel } from '../../Command';
-import { ISetHiddenGridlinesActionData } from '../Action';
+import { ISetHiddenGridlinesActionData } from '../../Types/Interfaces/IActionModel';
 
 /**
  *

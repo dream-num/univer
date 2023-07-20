@@ -1,7 +1,7 @@
 import { Worksheet } from '../Domain';
 import { BooleanNumber } from '../../Types/Enum';
 import { CommandModel } from '../../Command';
-import { ISetRightToLeftActionData } from '../Action';
+import { ISetRightToLeftActionData } from '../../Types/Interfaces/IActionModel';
 
 /**
  *

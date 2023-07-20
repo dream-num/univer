@@ -1,5 +1,5 @@
 import { ITextStyle } from '../../Types/Interfaces/IDocumentData';
-import { Styles } from '../Domain';
+import { Style } from '../Domain';
 import { IRangeData, ICellData, IDocumentData } from '../../Types/Interfaces';
 import { IBorderData, IStyleData } from '../../Types/Interfaces/IStyleData';
 import { IKeyValue, Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '../../Shared';
@@ -17,7 +17,7 @@ export function SetRangeStyle(
     cellMatrix: ObjectMatrix<ICellData>,
     value: ObjectMatrixPrimitiveType<IStyleData>,
     rangeData: IRangeData,
-    styles: Styles
+    styles: Style
 ): ObjectMatrixPrimitiveType<IStyleData> {
     const { startRow, endRow, startColumn, endColumn } = rangeData;
     const result = new ObjectMatrix<IStyleData>();

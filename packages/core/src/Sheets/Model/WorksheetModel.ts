@@ -9,9 +9,13 @@ import { IStyleData } from '../../Types/Interfaces/IStyleData';
 export class WorksheetModel {
     cell: ObjectMatrix<ICellData>;
 
-    row: ObjectArray<IRowData>;
-
     column: ObjectArray<IColumnData>;
+
+    sheetId: string;
+
+    activation: boolean;
+
+    row: ObjectArray<IRowData>;
 
     style: IKeyType<Nullable<IStyleData>>;
 }

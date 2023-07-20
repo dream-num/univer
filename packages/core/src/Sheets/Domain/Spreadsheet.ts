@@ -2,23 +2,24 @@ import { Column } from './Column';
 import { Row } from './Row';
 import { SpreadsheetCommand } from './SpreadsheetCommand';
 import { Merge } from './Merge';
+import { CommandManager } from '../../Command';
 import { Range } from './Range';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
-import { CommandManager } from '../../Command';
-import { IInsertSheetActionData, ISetWorkSheetActivateActionData } from '../../Types/Interfaces/IActionModel';
+import { IInsertSheetActionData, IRemoveSheetActionData, ISetWorkSheetActivateActionData } from '../../Types/Interfaces/IActionModel';
 import { ACTION_NAMES } from '../../Types/Const';
 import { BooleanNumber } from '../../Types/Enum';
+import { Nullable } from '../../Shared';
 
 export class Spreadsheet {
     private range: Range;
 
-    private row: Row;
-
-    private spreadsheetModel: SpreadsheetModel;
+    private model: SpreadsheetModel;
 
     private merge: Merge;
 
     private column: Column;
+
+    private row: Row;
 
     private commandManager: CommandManager;
 
@@ -39,7 +40,7 @@ export class Spreadsheet {
                     index: -1,
                     sheetId: '',
                 };
-                const command = new SpreadsheetCommand(this.spreadsheetModel, insertSheetAction);
+                const command = new SpreadsheetCommand(this.model, insertSheetAction);
                 this.commandManager.invoke(command);
                 return insertSheetAction.sheetId;
             }
@@ -51,7 +52,7 @@ export class Spreadsheet {
                     index,
                     sheetId: '',
                 };
-                const command = new SpreadsheetCommand(this.spreadsheetModel, insertSheetAction);
+                const command = new SpreadsheetCommand(this.model, insertSheetAction);
                 this.commandManager.invoke(command);
                 return insertSheetAction.actionName;
             }
@@ -59,16 +60,16 @@ export class Spreadsheet {
         throw new Error('overload method error');
     }
 
-    getSheetSize(): number {
-        return Object.keys(this.spreadsheetModel.worksheets).length;
-    }
-
     getActiveSheetIndex(): number {
-        return 0;
+        return Object.keys(this.model.worksheets).findIndex((sheetId) => this.model.worksheets[sheetId].activation);
     }
 
-    getActiveSheet(): number {
-        return 0;
+    getSheetSize(): number {
+        return Object.keys(this.model.worksheets).length;
+    }
+
+    getActiveSheet(): Nullable<string> {
+        return Object.keys(this.model.worksheets).find((sheetId) => this.model.worksheets[sheetId].activation);
     }
 
     setActiveSheet(sheetId: string): void {
@@ -77,9 +78,16 @@ export class Spreadsheet {
             sheetId,
             status: BooleanNumber.TRUE,
         };
-        const command = new SpreadsheetCommand(this.spreadsheetModel, insertSheetAction);
+        const command = new SpreadsheetCommand(this.model, insertSheetAction);
         this.commandManager.invoke(command);
     }
 
-    removeSheetById(sheetId: string): void {}
+    removeSheetById(sheetId: string): void {
+        const removeSheetAction: IRemoveSheetActionData = {
+            actionName: ACTION_NAMES.REMOVE_SHEET_ACTION,
+            sheetId,
+        };
+        const command = new SpreadsheetCommand(this.model, removeSheetAction);
+        this.commandManager.invoke(command);
+    }
 }

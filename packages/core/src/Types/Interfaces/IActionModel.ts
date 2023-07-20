@@ -5,7 +5,6 @@ import { ICellData, ICellV } from './ICellData';
 import { INamedRange } from './INamedRange';
 import { IRangeData, IOptionData, ICopyToOptionsData } from './IRangeData';
 import { IStyleData } from './IStyleData';
-import { IWorksheetConfig } from './IWorksheetData';
 
 /**
  * @internal

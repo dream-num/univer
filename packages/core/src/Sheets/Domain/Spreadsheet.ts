@@ -29,7 +29,7 @@ export class Spreadsheet {
     constructor() {
         this.range = new Range();
         this.merge = new Merge();
-        this.row = new Row();
+        this.row = new Row(this.commandManager,this.spreadsheetModel);
         this.column = new Column();
         this.style = new Style(this.model);
     }

@@ -6,39 +6,19 @@ import { CommandModel } from '../../Command';
 import { ISetRangeDataActionData } from '../../Types/Interfaces/IActionModel';
 
 export function SetRangeDataApply(unit: CommandModel, data: ISetRangeDataActionData) {
-    const workbook = unit.WorkBookUnit;
-    const worksheet = workbook!.getSheetBySheetId(data.sheetId)!;
-    const cellMatrix = worksheet.getCellMatrix();
-    const options = data.options;
+    const spreadsheetModel = unit.SpreadsheetModel;
+    const worksheet = spreadsheetModel?.worksheets[data.sheetId];
+    const cellMatrix = worksheet?.cell;
     const addMatrix = data.cellValue;
-    const styles = workbook!.getStyles();
+    const styles = worksheet?.style;
 
     const target = new ObjectMatrix(addMatrix);
     const result = new ObjectMatrix<ICellData>();
 
-    if (options) {
-        target.forValue((r, c, value) => {
-            const cell = cellMatrix.getValue(r, c);
-            const newCell: ICellData = {};
-
-            if (options.contentsOnly) {
-                newCell.m = cell?.m;
-                newCell.v = cell?.v;
-            }
-
-            if (options.formatOnly) {
-                // newCell.f = cell?.f;
-                newCell.v = cell?.v;
-                newCell.m = cell?.m;
-            }
-
-            result.setValue(r, c, newCell || {});
-
-            cellMatrix.setValue(r, c, value || {});
-        });
-
+    if(!cellMatrix){
         return result.getData();
     }
+
     target.forValue((r, c, value) => {
         const cell = cellMatrix.getValue(r, c) || {};
 

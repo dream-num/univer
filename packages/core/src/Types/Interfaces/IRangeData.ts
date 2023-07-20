@@ -155,8 +155,3 @@ export interface IOptionData {
      *  Whether to clear only the comments.
      */
 }
-
-/**
- * Option of copyTo function
- */
-export interface ICopyToOptionsData extends IOptionData {}

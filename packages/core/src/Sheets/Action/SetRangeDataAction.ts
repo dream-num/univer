@@ -38,18 +38,17 @@ export class SetRangeDataAction extends SheetActionBase<ISetRangeDataActionData,
 
     redo(): void {
         // update pre data
-        const { sheetId, options } = this._doActionData;
+        const { sheetId } = this._doActionData;
         this._oldActionData = {
             actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
             // actionName: SetRangeDataAction.NAME,
             sheetId,
             cellValue: this.do(),
-            options,
         };
     }
 
     undo(): void {
-        const { sheetId, cellValue, options } = this._oldActionData;
+        const { sheetId, cellValue } = this._oldActionData;
         const worksheet = this.getWorkSheet();
         const styles = this._workbook.getStyles();
         if (worksheet) {
@@ -59,7 +58,6 @@ export class SetRangeDataAction extends SheetActionBase<ISetRangeDataActionData,
                 // actionName: SetRangeDataAction.NAME,
                 sheetId,
                 cellValue: SetRangeDataApply(this._commandModel, this._oldActionData),
-                options,
             };
 
             this._observers.notifyObservers({

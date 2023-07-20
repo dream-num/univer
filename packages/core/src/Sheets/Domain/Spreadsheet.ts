@@ -10,7 +10,10 @@ import { ACTION_NAMES } from '../../Types/Const';
 import { BooleanNumber } from '../../Types/Enum';
 import { Nullable } from '../../Shared';
 import { Style } from './Style';
+<<<<<<< HEAD
 import { ISpreadsheetConfig } from '../../Types/Interfaces/ISpreadsheetData';
+=======
+>>>>>>> 5c42cf4b (fix(code): core api)
 
 export class Spreadsheet {
     private range: Range;
@@ -27,9 +30,16 @@ export class Spreadsheet {
 
     private style: Style;
 
+<<<<<<< HEAD
     constructor(private snapshot: Partial<ISpreadsheetConfig>, private commandManager: CommandManager) {
         this.model = new SpreadsheetModel(snapshot);
         this.range = new Range(this.commandManager, this.model);
+=======
+    private style: Style;
+
+    constructor() {
+        this.range = new Range();
+>>>>>>> 5c42cf4b (fix(code): core api)
         this.merge = new Merge();
         // this.row = new Row(this.commandManager, this.model);
         this.column = new Column();

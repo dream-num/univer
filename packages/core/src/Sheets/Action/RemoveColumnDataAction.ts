@@ -2,9 +2,8 @@ import { InsertDataColumnApply, RemoveColumnDataApply } from '../Apply';
 import { ICellData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { IInsertColumnDataActionData } from './InsertColumnDataAction';
-import { CommandModel } from '../../Command';
+import { ActionObservers, ActionType, CommandModel } from '../../Command';
+import { IRemoveColumnDataAction, IInsertColumnDataActionData } from '../../Types/Interfaces/IActionModel';
 
 /**
  * Remove the column data of the specified column index and column count
@@ -12,7 +11,6 @@ import { CommandModel } from '../../Command';
  * @internal
  */
 export class RemoveColumnDataAction extends SheetActionBase<IRemoveColumnDataAction, IInsertColumnDataActionData> {
-
     constructor(actionData: IRemoveColumnDataAction, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
         this._doActionData = {

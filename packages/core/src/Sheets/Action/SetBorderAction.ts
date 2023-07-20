@@ -2,8 +2,8 @@ import { ObjectMatrixPrimitiveType } from '../../Shared';
 import { SheetActionBase } from '../../Command/SheetActionBase';
 import { SetBorderApply } from '../Apply';
 import { IStyleData } from '../../Types/Interfaces';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandModel } from '../../Command';
+import { ActionObservers, ActionType, CommandModel } from '../../Command';
+import { BorderStyleData } from '../../Types/Interfaces/IActionModel';
 
 /**
  * set border style
@@ -11,7 +11,6 @@ import { CommandModel } from '../../Command';
  * @internal
  */
 export class SetBorderAction extends SheetActionBase<BorderStyleData, BorderStyleData> {
-
     constructor(actionData: BorderStyleData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
         this._doActionData = {

@@ -1,8 +1,7 @@
 import { IRowData } from '../../Types/Interfaces';
 import { ObjectArray, ObjectArrayPrimitiveType } from '../../Shared';
 import { CommandModel } from '../../Command';
-import { IRemoveRowActionData } from '../Action';
-
+import { IRemoveRowActionData } from '../../Types/Interfaces/IActionModel';
 /**
  * Deletes the specified number of rows in rowData
  * @param rowIndex

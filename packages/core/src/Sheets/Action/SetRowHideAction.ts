@@ -1,8 +1,7 @@
 import { SetHideRow, SetShowRow } from '../Apply';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { ISetRowShowActionData } from './SetRowShowAction';
-import { CommandModel } from '../../Command';
+import { ActionObservers, ActionType, CommandModel } from '../../Command';
+import { ISetRowHideActionData, ISetRowShowActionData } from '../../Types/Interfaces/IActionModel';
 
 /**
  * Set row hiding based on specified row index and number of rows
@@ -10,7 +9,6 @@ import { CommandModel } from '../../Command';
  * @internal
  */
 export class SetRowHideAction extends SheetActionBase<ISetRowHideActionData, ISetRowShowActionData> {
-
     constructor(actionData: ISetRowHideActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
         this._doActionData = {

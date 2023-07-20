@@ -1,7 +1,7 @@
 import { Workbook, Worksheet } from '../Domain';
 import { IWorksheetConfig } from '../../Types/Interfaces';
 import { CommandModel } from '../../Command';
-import { IInsertSheetActionData } from '../Action';
+import { IInsertSheetActionData } from '../../Types/Interfaces/IActionModel';
 
 export function InsertSheet(workbook: Workbook, index: number, worksheetConfig: IWorksheetConfig): string {
     const iSheets = workbook.getWorksheets();

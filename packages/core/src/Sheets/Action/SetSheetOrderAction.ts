@@ -1,10 +1,9 @@
 import { SetSheetOrder } from '../Apply';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandModel } from '../../Command';
+import { ActionObservers, ActionType, CommandModel } from '../../Command';
+import { ISetSheetOrderActionData } from '../../Types/Interfaces/IActionModel';
 
 export class SetSheetOrderAction extends SheetActionBase<ISetSheetOrderActionData, ISetSheetOrderActionData> {
-
     constructor(actionData: ISetSheetOrderActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
         this._doActionData = {

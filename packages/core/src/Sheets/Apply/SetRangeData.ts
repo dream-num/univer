@@ -3,7 +3,7 @@ import { Nullable, Tools } from '../../Shared';
 import { ObjectMatrix } from '../../Shared/ObjectMatrix';
 import { mergeStyle, transformStyle } from './SetRangeStyle';
 import { CommandModel } from '../../Command';
-import { ISetRangeDataActionData } from '../Action';
+import { ISetRangeDataActionData } from '../../Types/Interfaces/IActionModel';
 
 export function SetRangeDataApply(unit: CommandModel, data: ISetRangeDataActionData) {
     const workbook = unit.WorkBookUnit;

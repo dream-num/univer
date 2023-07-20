@@ -1,6 +1,6 @@
 import { INamedRange } from '../../Types/Interfaces';
 import { CommandModel } from '../../Command';
-import { IDeleteNamedRangeActionData } from '../Action';
+import { IDeleteNamedRangeActionData } from '../../Types/Interfaces/IActionModel';
 
 export function DeleteNamedRange(namedRanges: INamedRange[], namedRangeId: string): INamedRange {
     return namedRanges.find((currentNamedRange: INamedRange, i) => {

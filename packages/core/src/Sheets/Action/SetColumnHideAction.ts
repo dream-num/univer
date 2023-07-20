@@ -1,8 +1,7 @@
 import { SetColumnHideApply, SetColumnShowApply } from '../Apply';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { ISetColumnShowActionData } from './SetColumnShowAction';
-import { CommandModel } from '../../Command';
+import { ActionObservers, ActionType, CommandModel } from '../../Command';
+import { ISetColumnHideActionData, ISetColumnShowActionData } from '../../Types/Interfaces/IActionModel';
 
 /**
  * Set column hiding based on specified column index and number of columns
@@ -10,7 +9,6 @@ import { CommandModel } from '../../Command';
  * @internal
  */
 export class SetColumnHideAction extends SheetActionBase<ISetColumnHideActionData, ISetColumnShowActionData> {
-
     constructor(actionData: ISetColumnHideActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
         this._doActionData = {

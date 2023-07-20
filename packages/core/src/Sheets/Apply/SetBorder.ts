@@ -2,7 +2,7 @@ import { Styles } from '../Domain';
 import { ICellData, IStyleData } from '../../Types/Interfaces';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared';
 import { CommandModel } from '../../Command';
-import { BorderStyleData } from '../Action';
+import { BorderStyleData } from '../../Types/Interfaces/IActionModel';
 
 /**
  *

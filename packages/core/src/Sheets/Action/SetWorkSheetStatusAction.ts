@@ -1,14 +1,13 @@
 import { SetWorkSheetStatus } from '../Apply';
 import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandModel } from '../../Command';
+import { ActionObservers, ActionType, CommandModel } from '../../Command';
+import { ISetWorkSheetStatusActionData } from '../../Types/Interfaces/IActionModel';
 
 /**
  * @internal
  */
 export class SetWorkSheetStatusAction extends SheetActionBase<ISetWorkSheetStatusActionData> {
-
     constructor(actionData: ISetWorkSheetStatusActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
         this._doActionData = {

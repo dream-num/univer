@@ -1,6 +1,6 @@
 import { INamedRange } from '../../Types/Interfaces';
 import { CommandModel } from '../../Command';
-import { IAddNamedRangeActionData } from '../Action';
+import { IAddNamedRangeActionData } from '../../Types/Interfaces/IActionModel';
 
 export function AddNamedRange(namedRanges: INamedRange[], namedRange: INamedRange): void {
     namedRanges.push(namedRange);

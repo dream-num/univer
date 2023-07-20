@@ -1,6 +1,6 @@
 import { RowManager } from '../Domain';
 import { CommandModel } from '../../Command';
-import { ISetRowHeightActionData } from '../Action';
+import { ISetRowHeightActionData } from '../../Types/Interfaces/IActionModel';
 
 /**
  *

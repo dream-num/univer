@@ -1,8 +1,7 @@
 import { InsertColumnApply, RemoveColumnApply } from '../Apply';
-import { CommandModel } from '../../Command';
+import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { IInsertColumnActionData } from './InsertColumnAction';
+import { IRemoveColumnAction, IInsertColumnActionData } from '../../Types/Interfaces/IActionModel';
 
 /**
  * Remove the column configuration of the specified column index and column count
@@ -10,7 +9,6 @@ import { IInsertColumnActionData } from './InsertColumnAction';
  * @internal
  */
 export class RemoveColumnAction extends SheetActionBase<IRemoveColumnAction, IInsertColumnActionData> {
-
     constructor(actionData: IRemoveColumnAction, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
         this._doActionData = {

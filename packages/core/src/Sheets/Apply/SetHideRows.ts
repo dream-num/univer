@@ -1,6 +1,6 @@
 import { RowManager } from '../Domain/RowManager';
 import { CommandModel } from '../../Command';
-import { ISetRowHideActionData } from '../Action';
+import { ISetRowHideActionData } from '../../Types/Interfaces/IActionModel';
 
 /**
  *

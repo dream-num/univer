@@ -1,14 +1,13 @@
 import { SetRightToLeft } from '../Apply';
 import { BooleanNumber } from '../../Types/Enum';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandModel } from '../../Command';
+import { ActionObservers, ActionType, CommandModel } from '../../Command';
+import { ISetRightToLeftActionData } from '../../Types/Interfaces/IActionModel';
 
 /**
  * @internal
  */
 export class SetRightToLeftAction extends SheetActionBase<ISetRightToLeftActionData> {
-
     constructor(actionData: ISetRightToLeftActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
         this._doActionData = {

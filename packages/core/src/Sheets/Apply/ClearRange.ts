@@ -2,7 +2,7 @@ import { ICellData } from '../../Types/Interfaces';
 import { Tools, ObjectMatrix } from '../../Shared';
 
 import { CommandModel } from '../../Command';
-import { IClearRangeActionData } from '../Action';
+import { IClearRangeActionData } from '../../Types/Interfaces/IActionModel';
 
 export function ClearRangeApply(unit: CommandModel, data: IClearRangeActionData) {
     const worksheet = unit.WorkBookUnit?.getSheetBySheetId(data.sheetId);

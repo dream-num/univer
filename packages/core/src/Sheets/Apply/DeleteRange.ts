@@ -4,7 +4,7 @@ import { Tools } from '../../Shared';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { Nullable } from '../../Shared/Types';
 import { CommandModel } from '../../Command';
-import { IDeleteRangeActionData } from '../Action';
+import { IDeleteRangeActionData } from '../../Types/Interfaces/IActionModel';
 
 /**
  *

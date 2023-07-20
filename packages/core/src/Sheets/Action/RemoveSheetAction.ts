@@ -1,12 +1,10 @@
 import { InsertSheetApply, RemoveSheetApply } from '../Apply';
 import { IWorksheetConfig } from '../../Types/Interfaces';
-import { CommandModel } from '../../Command';
+import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { IInsertSheetActionData } from './InsertSheetAction';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
+import { IRemoveSheetActionData, IInsertSheetActionData } from '../../Types/Interfaces/IActionModel';
 
 export class RemoveSheetAction extends SheetActionBase<IRemoveSheetActionData, IInsertSheetActionData> {
-
     constructor(actionData: IRemoveSheetActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
         this._doActionData = {

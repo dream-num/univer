@@ -1,13 +1,13 @@
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
 import { SetSelectionActivate } from '../Apply';
-import { CommandModel } from '../../Command';
+import { ActionObservers, ActionType, CommandModel } from '../../Command';
+import { ISetSelectionActivateActionData, ISetSelectionActivateServiceData } from '../../Types/Interfaces/IActionModel';
+import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
 
 /**
  * @internal
  */
 export class SetSelectionActivateAction extends SheetActionBase<ISetSelectionActivateActionData, ISetSelectionActivateActionData, ISetSelectionActivateServiceData> {
-
     constructor(actionData: ISetSelectionActivateActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
 
@@ -47,8 +47,8 @@ export class SetSelectionActivateAction extends SheetActionBase<ISetSelectionAct
         const { sheetId } = this._doActionData;
         const { activeRangeList, activeRange, currentCell } = this.do();
         this._oldActionData = {
-            // actionName: ACTION_NAMES.SET_SELECTION_ACTION,
-            actionName: SetSelectionActivateAction.NAME,
+            actionName: ACTION_NAMES.SET_SELECTION_ACTION,
+            // actionName: SetSelectionActivateAction.NAME,
             sheetId,
             activeRangeList,
             activeRange,
@@ -63,8 +63,8 @@ export class SetSelectionActivateAction extends SheetActionBase<ISetSelectionAct
         const doData = SetSelectionActivate(worksheet, activeRangeList, activeRange, currentCell);
         // update current data
         this._doActionData = {
-            // actionName: ACTION_NAMES.SET_SELECTION_ACTION,
-            actionName: SetSelectionActivateAction.NAME,
+            actionName: ACTION_NAMES.SET_SELECTION_ACTION,
+            // actionName: SetSelectionActivateAction.NAME,
             sheetId,
             activeRangeList: doData.activeRangeList,
             activeRange: doData.activeRange,

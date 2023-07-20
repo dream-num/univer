@@ -1,6 +1,8 @@
 import { SheetActionBase, ActionObservers, ActionType, CommandModel } from '../../Command';
 import { SetNamedRangeApply } from '../Apply';
 import { INamedRange } from '../../Types/Interfaces';
+import { ISetNamedRangeActionData } from '../../Types/Interfaces/IActionModel';
+import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
 
 export class SetNamedRangeAction extends SheetActionBase<ISetNamedRangeActionData, ISetNamedRangeActionData, INamedRange> {
     constructor(actionData: ISetNamedRangeActionData, commandModel: CommandModel, observers: ActionObservers) {
@@ -10,8 +12,8 @@ export class SetNamedRangeAction extends SheetActionBase<ISetNamedRangeActionDat
             ...actionData,
         };
         this._oldActionData = {
-            // actionName: ACTION_NAMES.SET_NAMED_RANGE_ACTION,
-            actionName: SetNamedRangeAction.NAME,
+            actionName: ACTION_NAMES.SET_NAMED_RANGE_ACTION,
+            // actionName: SetNamedRangeAction.NAME,
             namedRange: this.do(),
             sheetId: actionData.sheetId,
         };
@@ -32,8 +34,8 @@ export class SetNamedRangeAction extends SheetActionBase<ISetNamedRangeActionDat
         // update pre data
         const { sheetId } = this._doActionData;
         this._oldActionData = {
-            // actionName: ACTION_NAMES.SET_NAMED_RANGE_ACTION,
-            actionName: SetNamedRangeAction.NAME,
+            actionName: ACTION_NAMES.SET_NAMED_RANGE_ACTION,
+            // actionName: SetNamedRangeAction.NAME,
             sheetId,
             namedRange: this.do(),
         };
@@ -48,8 +50,8 @@ export class SetNamedRangeAction extends SheetActionBase<ISetNamedRangeActionDat
         });
         // update current data
         this._doActionData = {
-            // actionName: ACTION_NAMES.SET_NAMED_RANGE_ACTION,
-            actionName: SetNamedRangeAction.NAME,
+            actionName: ACTION_NAMES.SET_NAMED_RANGE_ACTION,
+            // actionName: SetNamedRangeAction.NAME,
             sheetId,
             namedRange: SetNamedRangeApply(this._commandModel, this._oldActionData),
         };

@@ -1,7 +1,7 @@
 import { Workbook } from '../Domain';
 import { IWorksheetConfig } from '../../Types/Interfaces';
 import { CommandModel } from '../../Command';
-import { IRemoveSheetActionData } from '../Action';
+import { IRemoveSheetActionData } from '../../Types/Interfaces/IActionModel';
 
 export function RemoveSheet(
     workbook: Workbook,

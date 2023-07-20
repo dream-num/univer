@@ -1,6 +1,6 @@
-import { ISetSelectionActivateServiceData } from '../Action';
 import { Worksheet } from '../Domain/Worksheet';
 import { IRangeData } from '../../Types/Interfaces/IRangeData';
+import { ISetSelectionActivateServiceData } from '../../Types/Interfaces/IActionModel';
 
 /**
  *

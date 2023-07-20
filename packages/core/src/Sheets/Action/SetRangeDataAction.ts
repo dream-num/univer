@@ -48,7 +48,21 @@ export class SetRangeDataAction extends SheetActionBase<ISetRangeDataActionData,
     }
 
     undo(): void {
+<<<<<<< HEAD
         const { sheetId } = this._oldActionData;
+=======
+        const { sheetId, cellValue } = this._oldActionData;
+        const worksheet = this.getWorkSheet();
+        const styles = this._workbook.getStyles();
+        if (worksheet) {
+            // update current data
+            this._doActionData = {
+                actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+                // actionName: SetRangeDataAction.NAME,
+                sheetId,
+                cellValue: SetRangeDataApply(this._commandModel, this._oldActionData),
+            };
+>>>>>>> e7a4729b (chore(core): range api)
 
         // update current data
         this._doActionData = {

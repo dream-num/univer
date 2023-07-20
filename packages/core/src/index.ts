@@ -18,7 +18,6 @@ import './Docs/Action';
 export * from './Basics';
 export * from './Command';
 export * from './Types/Const';
-export * from './DI';
 export * from './Docs/Domain';
 export * from './Types/Enum';
 export * from './Types/Interfaces';

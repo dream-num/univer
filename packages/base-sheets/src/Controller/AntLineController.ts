@@ -1,4 +1,5 @@
-import { Inject, SheetContext, Workbook } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
+import { SheetContext, Workbook } from '@univerjs/core';
 
 import { Rect, Scene } from '@univerjs/base-render';
 import { AntLine, AntLineModel, IAntLineRange } from '../Model/AntLineModel';

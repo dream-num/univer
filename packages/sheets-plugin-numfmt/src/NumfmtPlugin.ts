@@ -1,11 +1,12 @@
-import { SheetContext, IRangeData, ObjectMatrixPrimitiveType, Plugin, PLUGIN_NAMES, Injector } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 import { IGlobalContext, IRenderingEngine, ISheetContext } from '@univerjs/base-sheets';
-import { NumfmtPluginObserve, install } from './Basics/Observer';
+import { IRangeData, ObjectMatrixPrimitiveType, Plugin, PLUGIN_NAMES, SheetContext } from '@univerjs/core';
+import { Injector } from '@wendellhu/redi';
 import { NUMFMT_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
+import { install, NumfmtPluginObserve } from './Basics/Observer';
+import { NumfmtActionExtensionFactory } from './Basics/Register/NumfmtActionExtension';
 import { NumfmtController } from './Controller/NumfmtController';
 import { NumfmtModalController } from './Controller/NumfmtModalController';
-import { NumfmtActionExtensionFactory } from './Basics/Register/NumfmtActionExtension';
 import en from './Locale/en';
 import zh from './Locale/zh';
 

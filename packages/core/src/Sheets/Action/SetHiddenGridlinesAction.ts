@@ -21,7 +21,7 @@ export class SetHiddenGridlinesAction extends SheetActionBase<ISetHiddenGridline
     }
 
     do(): boolean {
-        const result = SetHiddenGridlinesApply(this._commandModel, this._doActionData);
+        const result = SetHiddenGridlinesApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -35,7 +35,7 @@ export class SetHiddenGridlinesAction extends SheetActionBase<ISetHiddenGridline
     }
 
     undo(): void {
-        SetHiddenGridlinesApply(this._commandModel, this._oldActionData);
+        SetHiddenGridlinesApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

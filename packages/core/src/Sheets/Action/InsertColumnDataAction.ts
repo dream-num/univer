@@ -24,7 +24,7 @@ export class InsertColumnDataAction extends SheetActionBase<IInsertColumnDataAct
     }
 
     do(): void {
-        InsertDataColumnApply(this._commandModel, this._doActionData);
+        InsertDataColumnApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -37,7 +37,7 @@ export class InsertColumnDataAction extends SheetActionBase<IInsertColumnDataAct
     }
 
     undo(): void {
-        RemoveColumnDataApply(this._commandModel, this._oldActionData);
+        RemoveColumnDataApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

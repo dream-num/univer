@@ -21,7 +21,7 @@ export class SetNamedRangeAction extends SheetActionBase<ISetNamedRangeActionDat
     }
 
     do(): INamedRange {
-        const result = SetNamedRangeApply(this._commandModel, this._doActionData);
+        const result = SetNamedRangeApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -53,7 +53,7 @@ export class SetNamedRangeAction extends SheetActionBase<ISetNamedRangeActionDat
             actionName: ACTION_NAMES.SET_NAMED_RANGE_ACTION,
             // actionName: SetNamedRangeAction.NAME,
             sheetId,
-            namedRange: SetNamedRangeApply(this._commandModel, this._oldActionData),
+            namedRange: SetNamedRangeApply(this.getSpreadsheetModel(), this._oldActionData),
         };
     }
 

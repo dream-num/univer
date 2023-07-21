@@ -1,9 +1,9 @@
 import { SetRangeDataApply } from '../Apply';
-import { ObjectMatrixPrimitiveType } from '../../Shared';
 import { SheetActionBase, ActionObservers, ActionType, CommandModel } from '../../Command';
 import { ICellData } from '../../Types/Interfaces';
 import { ISetRangeDataActionData } from '../../Types/Interfaces/IActionModel';
 import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
+import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 
 /**
  * Modify values in the range
@@ -26,7 +26,7 @@ export class SetRangeDataAction extends SheetActionBase<ISetRangeDataActionData,
     }
 
     do(): ObjectMatrixPrimitiveType<ICellData> {
-        const result = SetRangeDataApply(this._commandModel, this._doActionData);
+        const result = SetRangeDataApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -48,24 +48,21 @@ export class SetRangeDataAction extends SheetActionBase<ISetRangeDataActionData,
     }
 
     undo(): void {
-        const { sheetId, cellValue } = this._oldActionData;
-        const worksheet = this.getWorkSheet();
-        const styles = this._workbook.getStyles();
-        if (worksheet) {
-            // update current data
-            this._doActionData = {
-                actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-                // actionName: SetRangeDataAction.NAME,
-                sheetId,
-                cellValue: SetRangeDataApply(this._commandModel, this._oldActionData),
-            };
+        const { sheetId } = this._oldActionData;
 
-            this._observers.notifyObservers({
-                type: ActionType.UNDO,
-                data: this._oldActionData,
-                action: this,
-            });
-        }
+        // update current data
+        this._doActionData = {
+            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+            // actionName: SetRangeDataAction.NAME,
+            sheetId,
+            cellValue: SetRangeDataApply(this.getSpreadsheetModel(), this._oldActionData),
+        };
+
+        this._observers.notifyObservers({
+            type: ActionType.UNDO,
+            data: this._oldActionData,
+            action: this,
+        });
     }
 
     validate(): boolean {

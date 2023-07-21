@@ -27,7 +27,7 @@ export class Spreadsheet {
     private style: Style;
 
     constructor() {
-        this.range = new Range();
+        this.range = new Range(this.commandManager,this.spreadsheetModel);
         this.merge = new Merge();
         this.row = new Row(this.commandManager,this.spreadsheetModel);
         this.column = new Column();

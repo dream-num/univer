@@ -24,7 +24,7 @@ export class SetBorderAction extends SheetActionBase<BorderStyleData, BorderStyl
     }
 
     do(): ObjectMatrixPrimitiveType<IStyleData> {
-        const result = SetBorderApply(this._commandModel, this._doActionData);
+        const result = SetBorderApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -38,7 +38,7 @@ export class SetBorderAction extends SheetActionBase<BorderStyleData, BorderStyl
     }
 
     undo(): void {
-        SetBorderApply(this._commandModel, this._oldActionData);
+        SetBorderApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

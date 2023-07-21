@@ -1,23 +1,19 @@
-import { ICellData, IStyleData } from '../../Types/Interfaces';
-import { Nullable, Tools } from '../../Shared';
 import { ObjectMatrix } from '../../Shared/ObjectMatrix';
-import { mergeStyle, transformStyle } from './SetRangeStyle';
-import { CommandModel } from '../../Command';
 import { ISetRangeDataActionData } from '../../Types/Interfaces/IActionModel';
+import { SpreadsheetModel } from '../Model/SpreadsheetModel';
+import { ICellData } from '../../Types/Interfaces/ICellData';
+import { Tools } from '../../Shared/Tools';
+import { IBorderData, IStyleData } from '../../Types/Interfaces/IStyleData';
+import { IKeyValue, Nullable } from '../../Shared/Types';
+import { IDocumentData, ITextStyle } from '../../Types/Interfaces';
 
-export function SetRangeDataApply(unit: CommandModel, data: ISetRangeDataActionData) {
-    const spreadsheetModel = unit.SpreadsheetModel;
-    const worksheet = spreadsheetModel?.worksheets[data.sheetId];
-    const cellMatrix = worksheet?.cell;
+export function SetRangeDataApply(spreadsheetModel: SpreadsheetModel, data: ISetRangeDataActionData) {
+    const worksheet = spreadsheetModel.worksheets[data.sheetId];
+    const cellMatrix = worksheet.cell;
     const addMatrix = data.cellValue;
-    const styles = worksheet?.style;
 
     const target = new ObjectMatrix(addMatrix);
     const result = new ObjectMatrix<ICellData>();
-
-    if(!cellMatrix){
-        return result.getData();
-    }
 
     target.forValue((r, c, value) => {
         const cell = cellMatrix.getValue(r, c) || {};
@@ -30,7 +26,7 @@ export function SetRangeDataApply(unit: CommandModel, data: ISetRangeDataActionD
             // update style
 
             // use null to clear style
-            const old = styles.getStyleByCell(cell);
+            const old = worksheet.getStyleByCell(cell);
 
             // store old data
             const oldCellStyle = transformStyle(old, value?.s as Nullable<IStyleData>);
@@ -53,7 +49,7 @@ export function SetRangeDataApply(unit: CommandModel, data: ISetRangeDataActionD
             if (Tools.isEmptyObject(merge)) {
                 delete cell.s;
             } else {
-                cell.s = styles.setValue(merge);
+                cell.s = worksheet.setStyleValue(merge);
             }
 
             // update other value TODO: move
@@ -76,4 +72,153 @@ export function SetRangeDataApply(unit: CommandModel, data: ISetRangeDataActionD
         }
     });
     return result.getData();
+}
+
+/**
+ * Convert old style data for storage
+ * @param style
+ */
+export function transformStyle(oldStyle: Nullable<IStyleData>, newStyle: Nullable<IStyleData>): Nullable<IStyleData> {
+    const backupStyle = transformNormalKey(oldStyle, newStyle);
+    return backupStyle;
+}
+/**
+ * Convert old style normal key for storage
+ *
+ * @param style
+ */
+export function transformNormalKey(oldStyle: Nullable<IStyleData>, newStyle: Nullable<IStyleData>): Nullable<IStyleData> {
+    // If there is no newly set style, directly store the historical style
+    if (!newStyle || !Object.keys(newStyle).length) {
+        return oldStyle;
+    }
+    const backupStyle = Tools.deepClone(oldStyle) || {};
+
+    for (const k in newStyle) {
+        if (k === 'bd') {
+            backupStyle[k] = transformBorders(backupStyle[k] || {}, newStyle[k]);
+        }
+        // 1. To modify the existing style,we need original setting to undo
+        // 2. Newly set the style, we need null to undo
+        else if (!(k in backupStyle)) {
+            backupStyle[k] = null;
+        }
+    }
+    return backupStyle;
+}
+/**
+ * Convert old style border for storage
+ *
+
+ * @param style
+ */
+export function transformBorders(oldBorders: IBorderData, newBorders: Nullable<IBorderData>): IBorderData {
+    // If there is no newly set border, directly store the historical border
+    if (!newBorders || !Object.keys(newBorders).length) {
+        return oldBorders;
+    }
+
+    for (const k in newBorders) {
+        // 1. To modify the existing border,we need original setting to undo
+        // 2. Newly set the border, we need null to undo
+        if (!(k in oldBorders)) {
+            (oldBorders as IKeyValue)[k] = null;
+        }
+    }
+
+    return oldBorders;
+}
+
+/**
+ * merge new style to old style
+ *
+ * @param oldStyle
+ * @param newStyle
+ */
+export function mergeStyle(oldStyle: Nullable<IStyleData>, newStyle: Nullable<IStyleData>, isRichText: boolean = false): Nullable<IStyleData> {
+    // clear style
+    if (newStyle === null) return newStyle;
+    // don't operate
+    if (newStyle === undefined) return oldStyle;
+
+    const backupStyle = Tools.deepClone(oldStyle) || {};
+
+    for (const k in newStyle) {
+        if (isRichText && ['bd', 'tr', 'td', 'ht', 'vt', 'tb', 'pd'].includes(k)) {
+            continue;
+        }
+        // you can only choose one of the themeColor and rgbColor of the border setting
+        if (k in backupStyle && k === 'bd') {
+            backupStyle[k] = Object.assign(backupStyle[k], newStyle[k]);
+        } else {
+            backupStyle[k] = (newStyle as IKeyValue)[k];
+
+            // overline/strikethrough/underline add color
+            if ('cl' in backupStyle) {
+                if (['ul', 'ol', 'st'].includes(k)) {
+                    backupStyle[k].cl = backupStyle.cl;
+                }
+            }
+        }
+    }
+    return backupStyle;
+}
+
+/**
+ * Find the text style of all paragraphs and modify it to the new style
+ * @param p
+ * @param newStyle
+ */
+export function mergeRichTextStyle(p: IDocumentData, newStyle: Nullable<IStyleData>) {
+    // p.body?.blockElements.forEach((blockElement) => {
+    //     if (blockElement.blockType === 0) {
+    //         const paragraph = blockElement.paragraph;
+    //         paragraph?.elements.forEach((element) => {
+    //             if (!element.tr) {
+    //                 element.tr = {};
+    //             }
+
+    //             const textRun = element.tr as ITextRun;
+
+    //             if (!textRun.ts) {
+    //                 textRun.ts = {};
+    //             }
+
+    //             const oldStyle = textRun.ts;
+
+    //             const merge = mergeStyle(
+    //                 oldStyle as Nullable<IStyleData>,
+    //                 newStyle,
+    //                 true
+    //             );
+
+    //             // then remove null
+    //             merge && Tools.removeNull(merge);
+
+    //             if (Tools.isEmptyObject(merge)) {
+    //                 delete textRun.ts;
+    //             } else {
+    //                 textRun.ts = merge as ITextStyle;
+    //             }
+    //         });
+    //     }
+    // });
+    p.body?.textRuns?.forEach((textRun) => {
+        if (!textRun.ts) {
+            textRun.ts = {};
+        }
+
+        const oldStyle = textRun.ts || {};
+
+        const merge = mergeStyle(oldStyle as Nullable<IStyleData>, newStyle, true);
+
+        // then remove null
+        merge && Tools.removeNull(merge);
+
+        if (Tools.isEmptyObject(merge)) {
+            delete textRun.ts;
+        } else {
+            textRun.ts = merge as ITextStyle;
+        }
+    });
 }

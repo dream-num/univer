@@ -26,7 +26,7 @@ export class ClearRangeAction extends SheetActionBase<IClearRangeActionData, ISe
     }
 
     do(): ObjectMatrixPrimitiveType<ICellData> {
-        const result = ClearRangeApply(this._commandModel, this._doActionData);
+        const result = ClearRangeApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -47,16 +47,14 @@ export class ClearRangeAction extends SheetActionBase<IClearRangeActionData, ISe
     }
 
     undo(): void {
-        const worksheet = this.getWorkSheet();
-        if (worksheet) {
-            SetRangeDataApply(this._commandModel, this._oldActionData);
+            SetRangeDataApply(this.getSpreadsheetModel(), this._oldActionData);
             // no need update current data
             this._observers.notifyObservers({
                 type: ActionType.UNDO,
                 data: this._oldActionData,
                 action: this,
             });
-        }
+        
     }
 
     validate(): boolean {

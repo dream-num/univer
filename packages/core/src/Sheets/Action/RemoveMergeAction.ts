@@ -23,7 +23,7 @@ export class RemoveMergeAction extends SheetActionBase<IRemoveMergeActionData, I
     }
 
     do(): IRangeData[] {
-        const result = RemoveMergeApply(this._commandModel, this._doActionData);
+        const result = RemoveMergeApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -37,7 +37,7 @@ export class RemoveMergeAction extends SheetActionBase<IRemoveMergeActionData, I
     }
 
     undo(): void {
-        addMergeApply(this._commandModel, this._oldActionData);
+        addMergeApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

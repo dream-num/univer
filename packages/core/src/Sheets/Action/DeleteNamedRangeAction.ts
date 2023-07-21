@@ -21,7 +21,7 @@ export class DeleteNamedRangeAction extends SheetActionBase<IDeleteNamedRangeAct
     }
 
     do(): INamedRange {
-        const result = DeleteNamedRangeApply(this._commandModel, this._doActionData);
+        const result = DeleteNamedRangeApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -42,7 +42,7 @@ export class DeleteNamedRangeAction extends SheetActionBase<IDeleteNamedRangeAct
     }
 
     undo(): void {
-        AddNamedRangeApply(this._commandModel, this._oldActionData);
+        AddNamedRangeApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

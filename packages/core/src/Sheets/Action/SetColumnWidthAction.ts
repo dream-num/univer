@@ -22,7 +22,7 @@ export class SetColumnWidthAction extends SheetActionBase<ISetColumnWidthActionD
     }
 
     do(): number[] {
-        const result = SetColumnWidthApply(this._commandModel, this._doActionData);
+        const result = SetColumnWidthApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -36,7 +36,7 @@ export class SetColumnWidthAction extends SheetActionBase<ISetColumnWidthActionD
     }
 
     undo(): number[] {
-        const result = SetColumnWidthApply(this._commandModel, this._doActionData);
+        const result = SetColumnWidthApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

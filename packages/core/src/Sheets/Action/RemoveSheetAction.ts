@@ -21,7 +21,7 @@ export class RemoveSheetAction extends SheetActionBase<IRemoveSheetActionData, I
     }
 
     redo(): { index: number; sheet: IWorksheetConfig } {
-        const result = RemoveSheetApply(this._commandModel, this._doActionData);
+        const result = RemoveSheetApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -32,7 +32,7 @@ export class RemoveSheetAction extends SheetActionBase<IRemoveSheetActionData, I
 
     undo(): void {
         const workbook = this.getWorkBook();
-        InsertSheetApply(this._commandModel, this._oldActionData);
+        InsertSheetApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

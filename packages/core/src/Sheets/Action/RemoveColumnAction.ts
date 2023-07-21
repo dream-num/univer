@@ -22,7 +22,7 @@ export class RemoveColumnAction extends SheetActionBase<IRemoveColumnAction, IIn
     }
 
     do(): number {
-        const result = RemoveColumnApply(this._commandModel, this._doActionData);
+        const result = RemoveColumnApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -36,7 +36,7 @@ export class RemoveColumnAction extends SheetActionBase<IRemoveColumnAction, IIn
     }
 
     undo(): void {
-        InsertColumnApply(this._commandModel, this._oldActionData);
+        InsertColumnApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

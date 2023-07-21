@@ -23,7 +23,6 @@ import {
     SetNamedRangeAction,
     SetRangeDataAction,
     SetRangeNoteAction,
-    SetRangeStyleAction,
     SetRangeFormattedValueAction,
     SetRightToLeftAction,
     SetRowHeightAction,
@@ -68,7 +67,6 @@ RegisterAction.register(ACTION_NAMES.INSERT_ROW_DATA_ACTION, InsertRowDataAction
 RegisterAction.register(ACTION_NAMES.INSERT_ROW_ACTION, InsertRowAction);
 RegisterAction.register(ACTION_NAMES.REMOVE_ROW_DATA_ACTION, RemoveRowDataAction);
 RegisterAction.register(ACTION_NAMES.REMOVE_ROW_ACTION, RemoveRowAction);
-RegisterAction.register(ACTION_NAMES.SET_RANGE_STYLE_ACTION, SetRangeStyleAction);
 RegisterAction.register(ACTION_NAMES.SET_WORKSHEET_STATUS_ACTION, SetWorkSheetStatusAction);
 RegisterAction.register(ACTION_NAMES.SET_SELECTION_ACTION, SetSelectionActivateAction);
 RegisterAction.register(ACTION_NAMES.SET_RANGE_DATA_ACTION, SetRangeDataAction);

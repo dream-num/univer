@@ -3,7 +3,7 @@ import { ObjectMatrixPrimitiveType, Nullable } from '../../Shared';
 import { Dimension, BooleanNumber } from '../Enum';
 import { ICellData, ICellV } from './ICellData';
 import { INamedRange } from './INamedRange';
-import { IRangeData, IOptionData, ICopyToOptionsData } from './IRangeData';
+import { IRangeData, IOptionData } from './IRangeData';
 import { IStyleData } from './IStyleData';
 
 /**
@@ -169,25 +169,12 @@ export interface ISetNamedRangeActionData extends ISheetActionData {
     namedRange: INamedRange;
 }
 
-/**
- * 设置数据时的类型
- */
-enum SetRangeDataType {
-    DEFAULT = 'default',
-
-    /**
-     *
-     */
-    PASTE = 'paste',
-}
 
 /**
  * @internal
  */
 export interface ISetRangeDataActionData extends ISheetActionData {
     cellValue: ObjectMatrixPrimitiveType<ICellData>;
-    options?: ICopyToOptionsData;
-    type?: SetRangeDataType;
 }
 
 /**

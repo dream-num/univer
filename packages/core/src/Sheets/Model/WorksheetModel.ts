@@ -13,6 +13,8 @@ export class WorksheetModel {
 
     column: ObjectArray<IColumnData>;
 
+    row: ObjectArray<IRowData>;
+
     cell: ObjectMatrix<ICellData>;
 
     sheetId: string;

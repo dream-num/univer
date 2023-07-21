@@ -1,4 +1,4 @@
-import { IRangeData } from '../Types/Interfaces';
+import { IRangeData } from '../Types/Interfaces/IRangeData';
 import { Tools } from './Tools';
 
 /**

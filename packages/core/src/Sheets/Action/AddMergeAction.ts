@@ -1,9 +1,10 @@
 import { IRangeData } from '../../Types/Interfaces/IRangeData';
-import { SheetActionBase } from '../../Command/SheetActionBase';
-import { addMergeApply, RemoveMergeApply } from '../Apply';
 import { CommandModel } from '../../Command/CommandModel';
-import { IAddMergeActionData, IRemoveMergeActionData } from '../../Types/Interfaces/IActionModel';
 import { ActionObservers } from '../../Command/ActionBase';
+import { addMergeApply } from '../Apply/AddMerge';
+import { SheetActionBase } from '../../Command/SheetActionBase';
+import { IAddMergeActionData, IRemoveMergeActionData } from '../../Types/Interfaces/IActionModel';
+import { RemoveMergeApply } from '../Apply/RemoveMerge';
 
 /**
  * Set merged cell range
@@ -24,7 +25,7 @@ export class AddMergeAction extends SheetActionBase<IAddMergeActionData, IRemove
     }
 
     do(): IRangeData[] {
-        return addMergeApply(this._commandModel, this._doActionData);
+        return addMergeApply(this.getSpreadsheetModel(), this._doActionData);
     }
 
     redo(): void {
@@ -32,7 +33,7 @@ export class AddMergeAction extends SheetActionBase<IAddMergeActionData, IRemove
     }
 
     undo(): void {
-        RemoveMergeApply(this._commandModel, this._oldActionData);
+        RemoveMergeApply(this.getSpreadsheetModel(), this._oldActionData);
     }
 
     validate(): boolean {

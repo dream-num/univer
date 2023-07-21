@@ -1,7 +1,8 @@
-import { SheetActionBase, ActionObservers, ActionType, CommandModel } from '../../Command';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { CommandModel } from '../../Command/CommandModel';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
 import { IAddNamedRangeActionData, IDeleteNamedRangeActionData } from '../../Types/Interfaces/IActionModel';
-import { AddNamedRangeApply } from '../Apply';
 import { DeleteNamedRangeApply } from '../Apply/DeleteNamedRange';
 
 export class AddNamedRangeAction extends SheetActionBase<IAddNamedRangeActionData, IDeleteNamedRangeActionData, void> {
@@ -22,7 +23,7 @@ export class AddNamedRangeAction extends SheetActionBase<IAddNamedRangeActionDat
     }
 
     do(): void {
-        AddNamedRangeApply(this._commandModel, this._doActionData);
+        AddNamedRangeApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -42,7 +43,7 @@ export class AddNamedRangeAction extends SheetActionBase<IAddNamedRangeActionDat
             actionName: ACTION_NAMES.ADD_NAMED_RANGE_ACTION,
             // actionName: AddNamedRangeAction.NAME,
             sheetId,
-            namedRange: DeleteNamedRangeApply(this._commandModel, this._oldActionData),
+            namedRange: DeleteNamedRangeApply(this.getSpreadsheetModel(), this._oldActionData),
         };
 
         this._observers.notifyObservers({

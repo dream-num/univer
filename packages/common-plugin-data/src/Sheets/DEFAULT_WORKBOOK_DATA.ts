@@ -1,7 +1,7 @@
 import {
     IDocumentData,
     BaselineOffset,
-    IWorkbookConfig,
+    ISpreadsheetConfig,
     LocaleType,
     BooleanNumber,
     BorderStyleTypes,
@@ -301,7 +301,7 @@ const richTextTest: IDocumentData = {
 /**
  * Default workbook data
  */
-export const DEFAULT_WORKBOOK_DATA: IWorkbookConfig = {
+export const DEFAULT_WORKBOOK_DATA: ISpreadsheetConfig = {
     id: 'workbook-01',
     theme: 'default',
     locale: LocaleType.EN,
@@ -743,7 +743,7 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookConfig = {
 /**
  * Default workbook data
  */
-export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookConfig = {
+export const DEFAULT_WORKBOOK_DATA_DOWN: ISpreadsheetConfig = {
     id: 'workbook-02',
     theme: 'default',
     locale: LocaleType.EN,

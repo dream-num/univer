@@ -1,12 +1,13 @@
 import { BooleanNumber, SheetTypes } from '../Enum';
-import { IKeyValue } from '../../Shared';
 import { ObjectArrayType } from '../../Shared/ObjectArray';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { ICellData } from './ICellData';
 import { IColumnData } from './IColumnData';
 import { IRangeData, IRangeType } from './IRangeData';
 import { IRowData } from './IRowData';
+import { IKeyValue } from '../../Shared/Types';
 
+export interface IWorksheet {}
 // type MetaData = {
 //     metadataId?: string;
 //     metadataKey: string;

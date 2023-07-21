@@ -1,6 +1,6 @@
 import { ISheetActionData } from '../Command';
 import { ICreatable, createIdentifier } from '../DI';
-import { IWorkbookConfig, IWorksheetConfig } from '../Types/Interfaces';
+import { ISpreadsheetConfig, IWorksheetConfig } from '../Types/Interfaces';
 import { IOSocket, IOSocketListenType } from '../Shared';
 import { MessageQueue } from './MessageQueue';
 import { IOServerMessage, IOServerReceive, ServerBase } from './ServerBase';
@@ -27,7 +27,7 @@ export class ServerSocket extends ServerBase implements ICreatable {
 
     private messageQueue: MessageQueue<IOServerMessage>;
 
-    constructor(@IServerSocketWorkbookConfig private readonly config: IWorkbookConfig) {
+    constructor(@IServerSocketWorkbookConfig private readonly config: ISpreadsheetConfig) {
         super();
     }
 

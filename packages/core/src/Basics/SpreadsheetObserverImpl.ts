@@ -1,6 +1,6 @@
 import { Observable, ObserverManager } from '../Observer';
 
-export class WorkBookObserverImpl {
+export class SpreadsheetObserverImpl {
     install(manager: ObserverManager) {
         // const manager = this.getObserverManager();
 

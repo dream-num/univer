@@ -7,7 +7,7 @@ import { INamedRange } from './INamedRange';
 /**
  * Properties of a workbook's configuration
  */
-export interface IWorkbookConfig {
+export interface ISpreadsheetConfig {
     appVersion: string;
     createdTime: string;
     creator: string;

@@ -1,7 +1,7 @@
 import { Observable } from '../Observer/Observable';
-import { Worksheet } from '../Sheets/Domain';
+import { IWorksheet } from '../Types/Interfaces/IWorksheetData';
 
-export type WorkBookObserver = {
+export type SpreadsheetObserver = {
     onBeforeInsertSheetObservable: Observable<{ index: number; sheetId: string }>;
     onAfterInsertSheetObservable: Observable<{ index: number; sheetId: string }>;
 
@@ -24,14 +24,14 @@ export type WorkBookObserver = {
 
     onZoomRatioSheetObservable: Observable<{ zoomRatio: number }>;
 
-    onHideSheetObservable: Observable<{ sheet: Worksheet }>;
-    onShowSheetObservable: Observable<{ sheet: Worksheet }>;
+    onHideSheetObservable: Observable<{ sheet: IWorksheet }>;
+    onShowSheetObservable: Observable<{ sheet: IWorksheet }>;
 
-    onBeforeChangeActiveSheetObservable: Observable<{ sheet: Worksheet }>;
-    onAfterChangeActiveSheetObservable: Observable<{ sheet: Worksheet }>;
+    onBeforeChangeActiveSheetObservable: Observable<{ sheet: IWorksheet }>;
+    onAfterChangeActiveSheetObservable: Observable<{ sheet: IWorksheet }>;
 
     onBeforeChangeSheetNameObservable: Observable<void>;
-    onAfterChangeSheetNameObservable: Observable<{ name: string; sheet: Worksheet }>;
+    onAfterChangeSheetNameObservable: Observable<{ name: string; sheet: IWorksheet }>;
 
     onBeforeRemoveSheetObservable: Observable<{ index: number }>;
     onAfterRemoveSheetObservable: Observable<{ index: number; sheetId: string }>;

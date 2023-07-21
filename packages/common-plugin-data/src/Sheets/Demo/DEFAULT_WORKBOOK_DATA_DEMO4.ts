@@ -1,4 +1,4 @@
-import { BooleanNumber, BorderStyleTypes, IDocumentData, IWorkbookConfig, LocaleType, SheetTypes } from '@univerjs/core';
+import { BooleanNumber, BorderStyleTypes, IDocumentData, ISpreadsheetConfig, LocaleType, SheetTypes } from '@univerjs/core';
 
 const richTextDemo1: IDocumentData = {
     id: 'd',
@@ -39,7 +39,7 @@ const richTextDemo1: IDocumentData = {
     },
 };
 
-export const DEFAULT_WORKBOOK_DATA_DEMO4: IWorkbookConfig = {
+export const DEFAULT_WORKBOOK_DATA_DEMO4: ISpreadsheetConfig = {
     id: 'workbook-01',
     theme: 'default',
     locale: LocaleType.EN,

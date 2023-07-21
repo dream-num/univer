@@ -10,6 +10,7 @@ import { ACTION_NAMES } from '../../Types/Const';
 import { BooleanNumber } from '../../Types/Enum';
 import { Nullable } from '../../Shared';
 import { Style } from './Style';
+import { ISpreadsheetConfig } from '../../Types/Interfaces/ISpreadsheetData';
 
 export class Spreadsheet {
     private range: Range;
@@ -22,14 +23,13 @@ export class Spreadsheet {
 
     private row: Row;
 
-    private commandManager: CommandManager;
-
     private style: Style;
 
-    constructor() {
-        this.range = new Range(this.commandManager,this.spreadsheetModel);
+    constructor(private univerSheetData: Partial<ISpreadsheetConfig>, private commandManager: CommandManager) {
+        this.model = new SpreadsheetModel(univerSheetData);
+        this.range = new Range(this.commandManager, this.model);
         this.merge = new Merge();
-        this.row = new Row(this.commandManager,this.spreadsheetModel);
+        this.row = new Row(this.commandManager, this.model);
         this.column = new Column();
         this.style = new Style(this.model);
     }
@@ -94,4 +94,5 @@ export class Spreadsheet {
         const command = new SpreadsheetCommand(this.model, removeSheetAction);
         this.commandManager.invoke(command);
     }
+
 }

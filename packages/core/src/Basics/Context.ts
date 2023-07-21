@@ -2,17 +2,22 @@ import { IUniverData } from '../Types/Interfaces/IUniverData';
 import { Locale } from '../Shared/Locale';
 import { Tools } from '../Shared/Tools';
 import { ContextBase } from './ContextBase';
+import { CommandManager } from '../Command/CommandManager';
 
 /**
  * univer context
  */
 export class Context extends ContextBase {
+    protected _commandManager: CommandManager;
+
     protected _locale: Locale;
 
     private _univerId: string;
 
     constructor(univerData: Partial<IUniverData> = {}) {
         super();
+
+        this._initialize();
 
         this._locale = new Locale();
 
@@ -26,12 +31,20 @@ export class Context extends ContextBase {
         }
     }
 
+    getCommandManger(){
+        return this._commandManager;
+    }
+
     getLocale(): Locale {
         return this._locale;
     }
 
     getUniverId() {
         return this._univerId;
+    }
+
+    protected _initialize(): void {
+        this._commandManager = new CommandManager();
     }
 
     protected _setObserver(): void {}

@@ -1,4 +1,4 @@
-import { Univer, IDocumentData, ISlideData, IWorkbookConfig, UniverDoc, UniverSheet, UniverSlide, IUniverData } from '@univerjs/core';
+import { Univer, IDocumentData, ISlideData, ISpreadsheetConfig, UniverDoc, UniverSheet, UniverSlide, IUniverData } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 
 import { ISheetPluginConfig, SheetPlugin } from '@univerjs/base-sheets';
@@ -18,7 +18,7 @@ import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
 
 interface ISheetPropsCustom {
     univerConfig?: Partial<IUniverData>;
-    coreConfig?: Partial<IWorkbookConfig>;
+    coreConfig?: Partial<ISpreadsheetConfig>;
     baseSheetsConfig?: ISheetPluginConfig;
     uiSheetsConfig?: ISheetUIPluginConfig;
     // numfmtConfig?: INumfmtPluginConfig;

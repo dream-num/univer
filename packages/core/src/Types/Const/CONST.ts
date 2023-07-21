@@ -1,5 +1,5 @@
 import { BooleanNumber, HorizontalAlign, LocaleType, SheetTypes, TextDirection, VerticalAlign, WrapStrategy } from '../Enum';
-import { IStyleData, IWorkbookConfig, IWorksheetConfig } from '../Interfaces';
+import { IStyleData, ISpreadsheetConfig, IWorksheetConfig } from '../Interfaces';
 
 /**
  * Used as an illegal range array return value
@@ -44,7 +44,7 @@ export const DEFAULT_CELL = {
 /**
  * Used as an init workbook return value
  */
-export const DEFAULT_WORKBOOK: IWorkbookConfig = {
+export const DEFAULT_WORKBOOK: ISpreadsheetConfig = {
     extensions: [],
     id: '',
     sheetOrder: [],

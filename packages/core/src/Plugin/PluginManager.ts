@@ -1,19 +1,15 @@
+import { Nullable } from '../Shared/Types';
 import { BasePlugin } from './Plugin';
-import { Nullable } from '../Shared';
-import { ContextBase } from '../Basics/ContextBase';
 
 /**
  * Provides APIs to initialize, install, and uninstall plugins
  */
 export class PluginManager {
-    protected _context: ContextBase;
-
     protected _plugins: BasePlugin[];
 
     protected _initialized: boolean;
 
-    constructor(context: ContextBase, plugins: BasePlugin[] = []) {
-        this._context = context;
+    constructor(plugins: BasePlugin[] = []) {
         this._plugins = [];
         this._initialized = true;
         this._plugins = this._plugins.concat(plugins);
@@ -23,8 +19,6 @@ export class PluginManager {
     install(plugin: BasePlugin) {
         const { _plugins } = this;
         _plugins.push(plugin);
-        plugin.onCreate(this._context);
-        plugin.onMounted(this._context);
     }
 
     uninstall(name: string) {
@@ -36,10 +30,6 @@ export class PluginManager {
                 plugin.onDestroy();
             }
         }
-    }
-
-    setContext(context: ContextBase) {
-        this._context = context;
     }
 
     getRequirePluginByName<T extends BasePlugin>(pluginName: string): T {
@@ -68,10 +58,7 @@ export class PluginManager {
     protected _initialize() {
         if (this._initialized) {
             this._initialized = false;
-            this._plugins.forEach((plugin: BasePlugin) => {
-                plugin.onCreate(this._context);
-                plugin.onMounted(this._context);
-            });
+            this._plugins.forEach((plugin: BasePlugin) => {});
         }
     }
 }

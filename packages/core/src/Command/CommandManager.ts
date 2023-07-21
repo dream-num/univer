@@ -1,4 +1,3 @@
-import { ContextBase } from '../Basics/ContextBase';
 import { Command } from './Command';
 import { CommandInjectorObservers } from './CommandInjectorObservers';
 import { UndoManager } from './UndoManager';
@@ -14,8 +13,8 @@ export class CommandManager {
 
     private _actionExtensionManager: ActionExtensionManager;
 
-    constructor(context: ContextBase) {
-        this._undoManager = context.getUndoManager();
+    constructor(undoManager: UndoManager) {
+        this._undoManager = undoManager;
         this._actionExtensionManager = new ActionExtensionManager();
     }
 

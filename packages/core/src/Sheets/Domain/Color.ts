@@ -1,7 +1,6 @@
 import { ThemeColorType, ColorType, ThemeColors } from '../../Types/Enum';
-import { Nullable } from '../../Shared';
-import { ColorBuilder } from './ColorBuilder';
 import { THEME_COLORS } from '../../Types/Const/THEME_COLOR_MAP';
+import { Nullable } from '../../Shared/Types';
 
 export class Color {
     protected _builder: ColorBuilder;
@@ -61,6 +60,128 @@ export class Color {
 
     equals(color: Color): boolean {
         return false;
+    }
+}
+
+export class RgbColor extends Color {
+    static RGB_COLOR_AMT: number = 0;
+
+    static RGBA_EXTRACT: RegExp = new RegExp(`\\s*rgba\\s*\\((\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d.\\d|\\d\\s*)\\)\\s*`);
+
+    static RGB_EXTRACT: RegExp = new RegExp(`\\s*rgb\\s*\\((\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d+\\s*)\\)\\s*`);
+
+    private _cssString: string;
+
+    private _red: number;
+
+    private _green: number;
+
+    private _blue: number;
+
+    private _alpha: number;
+
+    constructor(cssString: string, builder: ColorBuilder) {
+        super(builder);
+
+        let match = cssString.match(RgbColor.RGBA_EXTRACT);
+
+        if (match) {
+            const red = +match[1];
+            const green = +match[2];
+            const blue = +match[3];
+            const alpha = +match[4];
+
+            this._cssString = cssString;
+            this._red = red;
+            this._green = green;
+            this._blue = blue;
+            this._alpha = alpha;
+            return;
+        }
+
+        match = cssString.match(RgbColor.RGB_EXTRACT);
+
+        if (match) {
+            const red = +match[1];
+            const green = +match[2];
+            const blue = +match[3];
+
+            this._cssString = cssString;
+            this._red = red;
+            this._green = green;
+            this._blue = blue;
+            this._alpha = 1;
+            return;
+        }
+
+        throw new Error('Invalid rgba or rgb color');
+    }
+
+    asHexString(): string {
+        return Color.rgbColorToHexValue(this);
+    }
+
+    getRed(): number {
+        let r = this._red + RgbColor.RGB_COLOR_AMT;
+
+        if (r > 255) {
+            r = 255;
+        } else if (r < 0) {
+            r = 0;
+        }
+
+        return r;
+    }
+
+    getGreen(): number {
+        let g = this._green + RgbColor.RGB_COLOR_AMT;
+
+        if (g > 255) {
+            g = 255;
+        } else if (g < 0) {
+            g = 0;
+        }
+
+        return g;
+    }
+
+    getBlue(): number {
+        let b = this._blue + RgbColor.RGB_COLOR_AMT;
+
+        if (b > 255) {
+            b = 255;
+        } else if (b < 0) {
+            b = 0;
+        }
+
+        return b;
+    }
+
+    getAlpha(): number {
+        return this._alpha;
+    }
+
+    override getColorType(): ColorType {
+        return ColorType.RGB;
+    }
+
+    override clone(): RgbColor {
+        return new RgbColor(this._cssString, this._builder);
+    }
+
+    override asThemeColor(): ThemeColor {
+        throw new Error('rgb color not support to themeColor');
+    }
+
+    override equals(color: Color): boolean {
+        if (color instanceof RgbColor) {
+            return color._red === this._red && color._blue === this._blue && color._green === this._green && color._alpha === this._alpha;
+        }
+        return false;
+    }
+
+    getCssString() {
+        return this._cssString;
     }
 }
 
@@ -192,128 +313,6 @@ export class HLSColor {
     }
 }
 
-export class RgbColor extends Color {
-    static RGB_COLOR_AMT: number = 0;
-
-    static RGBA_EXTRACT: RegExp = new RegExp(`\\s*rgba\\s*\\((\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d.\\d|\\d\\s*)\\)\\s*`);
-
-    static RGB_EXTRACT: RegExp = new RegExp(`\\s*rgb\\s*\\((\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d+\\s*)\\)\\s*`);
-
-    private _cssString: string;
-
-    private _red: number;
-
-    private _green: number;
-
-    private _blue: number;
-
-    private _alpha: number;
-
-    constructor(cssString: string, builder: ColorBuilder) {
-        super(builder);
-
-        let match = cssString.match(RgbColor.RGBA_EXTRACT);
-
-        if (match) {
-            const red = +match[1];
-            const green = +match[2];
-            const blue = +match[3];
-            const alpha = +match[4];
-
-            this._cssString = cssString;
-            this._red = red;
-            this._green = green;
-            this._blue = blue;
-            this._alpha = alpha;
-            return;
-        }
-
-        match = cssString.match(RgbColor.RGB_EXTRACT);
-
-        if (match) {
-            const red = +match[1];
-            const green = +match[2];
-            const blue = +match[3];
-
-            this._cssString = cssString;
-            this._red = red;
-            this._green = green;
-            this._blue = blue;
-            this._alpha = 1;
-            return;
-        }
-
-        throw new Error('Invalid rgba or rgb color');
-    }
-
-    asHexString(): string {
-        return Color.rgbColorToHexValue(this);
-    }
-
-    getRed(): number {
-        let r = this._red + RgbColor.RGB_COLOR_AMT;
-
-        if (r > 255) {
-            r = 255;
-        } else if (r < 0) {
-            r = 0;
-        }
-
-        return r;
-    }
-
-    getGreen(): number {
-        let g = this._green + RgbColor.RGB_COLOR_AMT;
-
-        if (g > 255) {
-            g = 255;
-        } else if (g < 0) {
-            g = 0;
-        }
-
-        return g;
-    }
-
-    getBlue(): number {
-        let b = this._blue + RgbColor.RGB_COLOR_AMT;
-
-        if (b > 255) {
-            b = 255;
-        } else if (b < 0) {
-            b = 0;
-        }
-
-        return b;
-    }
-
-    getAlpha(): number {
-        return this._alpha;
-    }
-
-    getColorType(): ColorType {
-        return ColorType.RGB;
-    }
-
-    clone(): RgbColor {
-        return new RgbColor(this._cssString, this._builder);
-    }
-
-    asThemeColor(): ThemeColor {
-        throw new Error('rgb color not support to themeColor');
-    }
-
-    equals(color: Color): boolean {
-        if (color instanceof RgbColor) {
-            return color._red === this._red && color._blue === this._blue && color._green === this._green && color._alpha === this._alpha;
-        }
-        return false;
-    }
-
-    getCssString() {
-        return this._cssString;
-    }
-}
-
 export class ThemeColor extends Color {
     private static _cacheThemeColor = new Map<ThemeColors, Map<ThemeColorType, RgbColor>>();
 
@@ -346,7 +345,7 @@ export class ThemeColor extends Color {
         return value;
     }
 
-    asRgbColor(): RgbColor {
+    override asRgbColor(): RgbColor {
         const themeColors = THEME_COLORS[this._themeColors];
         if (themeColors == null) {
             throw new Error('not find themeColors type');
@@ -376,22 +375,88 @@ export class ThemeColor extends Color {
         return rgbColor;
     }
 
-    clone(): ThemeColor {
+    override clone(): ThemeColor {
         return new ThemeColor(this._themeColorType, this._themeTint, this._themeColors, this._builder);
     }
 
-    equals(color: Color): boolean {
+    override equals(color: Color): boolean {
         if (color instanceof ThemeColor) {
             return color._themeColorType === this._themeColorType;
         }
         return false;
     }
 
-    getColorType(): ColorType {
+    override getColorType(): ColorType {
         return ColorType.THEME;
     }
 
     getThemeColorType(): ThemeColorType {
         return this._themeColorType;
+    }
+}
+
+export class ColorBuilder {
+    private _themeValue: ThemeColorType;
+
+    private _themeColors: ThemeColors;
+
+    private _themeTint: number;
+
+    private _rgbValue: string;
+
+    private _colorType: ColorType;
+
+    constructor() {
+        this._colorType = ColorType.UNSUPPORTED;
+        this._themeColors = ThemeColors.OFFICE;
+        this._themeTint = 0;
+    }
+
+    asRgbColor(): RgbColor {
+        return new RgbColor(this._rgbValue, this);
+    }
+
+    asThemeColor(): ThemeColor {
+        return new ThemeColor(this._themeValue, this._themeTint, this._themeColors, this);
+    }
+
+    build(): Nullable<Color> {
+        switch (this._colorType) {
+            case ColorType.THEME: {
+                return this.asThemeColor();
+            }
+            case ColorType.RGB: {
+                return this.asRgbColor();
+            }
+            case ColorType.UNSUPPORTED: {
+                throw Error('unsupported color type');
+            }
+        }
+    }
+
+    setRgbColor(cssString: string): ColorBuilder {
+        this._colorType = ColorType.RGB;
+        this._rgbValue = cssString;
+        return this;
+    }
+
+    setThemeColors(value: ThemeColors) {
+        this._colorType = ColorType.THEME;
+        this._themeColors = value;
+    }
+
+    setThemeTint(value: number) {
+        this._colorType = ColorType.THEME;
+        this._themeTint = value;
+    }
+
+    setThemeColor(theme: ThemeColorType): ColorBuilder {
+        this._colorType = ColorType.THEME;
+        this._themeValue = theme;
+        return this;
+    }
+
+    getColorType(): ColorType {
+        return this._colorType;
     }
 }

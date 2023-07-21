@@ -1,51 +1,47 @@
-import { Workbook } from '../Sheets/Domain';
-import { WorkBookObserverImpl } from './WorkBookObserverImpl';
 import { ContextBase } from './ContextBase';
 import { Observable } from '../Observer';
-import { GenName, PropsFrom } from '../Shared';
-import { Univer } from './Univer';
-import { WorkBookObserver } from './WorkBookObserver';
-import { IWorkbookConfig } from '../Types/Interfaces';
+import { GenName } from '../Shared';
+import { ISpreadsheetConfig } from '../Types/Interfaces';
+import { Spreadsheet } from '../Sheets/Domain/Spreadsheet';
+import { CommandManager } from '../Command/CommandManager';
+import { PropsFrom } from '../Shared/PropsFrom';
+import { SpreadsheetObserver } from './WorkBookObserver';
+import { SpreadsheetObserverImpl } from './WorkBookObserverImpl';
 
 /**
  * Core context, mount important instances, managers
  */
 export class SheetContext extends ContextBase {
-    protected _workbook: Workbook;
+    protected _spreadsheet: Spreadsheet;
 
     protected _genname: GenName;
 
-    constructor(univerSheetData: Partial<IWorkbookConfig> = {}) {
+    constructor(univerSheetData: Partial<ISpreadsheetConfig> = {}, private commandManager: CommandManager) {
         super();
         this._setObserver();
         this._genname = new GenName();
-        this._workbook = new Workbook(univerSheetData, this);
+        this._spreadsheet = new Spreadsheet(univerSheetData, this.commandManager);
     }
 
-    getWorkBook(): Workbook {
-        return this._workbook;
+    getSpreadsheet(): Spreadsheet {
+        return this._spreadsheet;
     }
 
     getGenName(): GenName {
         return this._genname;
     }
 
-    onUniver(univer: Univer) {
-        super.onUniver(univer);
-        this._workbook.onUniver(univer);
-    }
-
-    getContextObserver<Key extends keyof WorkBookObserver>(value: Key): Observable<PropsFrom<WorkBookObserver[Key]>> {
+    getContextObserver<Key extends keyof SpreadsheetObserver>(value: Key): Observable<PropsFrom<SpreadsheetObserver[Key]>> {
         return this.getObserverManager().requiredObserver(value, 'core');
     }
 
-    refreshWorkbook(univerSheetData: Partial<IWorkbookConfig> = {}) {
-        this._workbook = new Workbook(univerSheetData, this);
+    refreshSpreadsheet(univerSheetData: Partial<ISpreadsheetConfig> = {}) {
+        this._spreadsheet = new Spreadsheet(univerSheetData, this.commandManager);
     }
 
     protected _setObserver(): void {
         const manager = this.getObserverManager();
-        new WorkBookObserverImpl().install(manager);
+        new SpreadsheetObserverImpl().install(manager);
     }
 
     protected _initialize(): void {

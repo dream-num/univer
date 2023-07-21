@@ -13,7 +13,7 @@ export * from './IShapeProperties';
 export * from './ISlideData';
 export * from './IStyleData';
 export * from './IUniverData';
-export * from './IWorkbookData';
+export * from './ISpreadsheetData';
 export * from './IWorksheetData';
 export * from './IWorksheetOrderData';
 // @endindex

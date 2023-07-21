@@ -3,9 +3,7 @@ import './RegisterAction';
 
 export * from './CommonParameter';
 export * from './ActionBase';
-export * from './ActionObservers';
 export * from './CommandInjectorObservers';
-export * from './CommandObservers';
 export * from './CommandManager';
 export * from './SheetActionBase';
 export * from './Command';

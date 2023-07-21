@@ -1,4 +1,6 @@
-import { IActionData, ActionExtensionRegister, BaseActionExtensionFactory } from './index';
+import { IActionData } from './ActionBase';
+import { BaseActionExtensionFactory } from './ActionExtensionFactory';
+import { ActionExtensionRegister } from './ActionExtensionRegister';
 
 export class ActionExtensionManager {
     private _actionExtensionFactoryList: BaseActionExtensionFactory[];

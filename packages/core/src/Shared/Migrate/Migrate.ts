@@ -1,12 +1,12 @@
 import { BooleanNumber, HorizontalAlign, VerticalAlign, WrapStrategy } from '../../Types/Enum';
-import { IWorkbookConfig, IWorksheetConfig, ICellData, ITextStyle, IStyleData, IRowData, IColumnData, ITextRun } from '../../Types/Interfaces';
+import { ISpreadsheetConfig, IWorksheetConfig, ICellData, ITextStyle, IStyleData, IRowData, IColumnData, ITextRun } from '../../Types/Interfaces';
 import { ObjectArrayPrimitiveType } from '../ObjectArray';
 import { Tools } from '../Tools';
 import { IKeyValue } from '../Types';
 import { border } from './Border';
 
-export function migrate(config: any): Partial<IWorkbookConfig> {
-    const newConfig: Partial<IWorkbookConfig> = {};
+export function migrate(config: any): Partial<ISpreadsheetConfig> {
+    const newConfig: Partial<ISpreadsheetConfig> = {};
     newConfig.styles = {};
     if (config.hasOwnProperty('lang')) {
         newConfig.locale = config.lang;

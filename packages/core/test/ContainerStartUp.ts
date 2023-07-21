@@ -2,7 +2,7 @@ import { SheetContext, Environment } from '../src/Basics';
 import { CommandManager, UndoManager } from '../src/Command';
 import { Workbook, Worksheet } from '../src/Sheets/Domain';
 import { BooleanNumber } from '../src/Types/Enum';
-import { IWorkbookConfig, IWorksheetConfig } from '../src/Types/Interfaces';
+import { ISpreadsheetConfig, IWorksheetConfig } from '../src/Types/Interfaces';
 import { HooksManager } from '../src/Observer/HooksManager';
 import { ObserverManager } from '../src/Observer/ObserverManager';
 import { PluginManager } from '../src/Plugin';
@@ -15,7 +15,7 @@ import { Locale } from '../src/Shared';
 import { Injector } from '../src';
 
 export function createCoreTestContainer(
-    workbookConfig?: Partial<IWorkbookConfig>
+    workbookConfig?: Partial<ISpreadsheetConfig>
 ): Injector {
     const configure = {
         value: {

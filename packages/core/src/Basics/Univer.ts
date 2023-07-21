@@ -1,10 +1,9 @@
 import { UniverSheet } from './UniverSheet';
-import { UniverDoc } from './UniverDoc';
 import { UniverSlide } from './UniverSlide';
 import { Nullable } from '../Shared';
 import { Context } from './Context';
 import { Plugin } from '../Plugin';
-import { IUniverData } from '../Types/Interfaces';
+import { ISpreadsheetConfig, IUniverData } from '../Types/Interfaces';
 import { UniverObserverImpl } from './UniverObserverImpl';
 
 export class Univer {
@@ -23,21 +22,23 @@ export class Univer {
 
         this._context = new Context(univerData);
         this._setObserver();
-        this._context.onUniver(this);
+    }
+
+    createUniverSheet(univerSheetData: Partial<ISpreadsheetConfig>) {
+        const commandManager = this._context.getCommandManger();
+        const univerSheet = new UniverSheet(univerSheetData, commandManager);
+        this._univerSheets.push(univerSheet);
     }
 
     addUniverSheet(univerSheet: UniverSheet): void {
-        univerSheet.context.onUniver(this);
         this._univerSheets.push(univerSheet);
     }
 
     addUniverDoc(univerDoc: UniverDoc): void {
-        univerDoc.context.onUniver(this);
         this._univerDocs.push(univerDoc);
     }
 
     addUniverSlide(univerSlide: UniverSlide): void {
-        univerSlide.context.onUniver(this);
         this._univerSlides.push(univerSlide);
     }
 

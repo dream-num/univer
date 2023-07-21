@@ -1,5 +1,5 @@
-import { IActionData } from './index';
 import { Plugin } from '../Plugin';
+import { IActionData } from './ActionBase';
 
 /**
  * Manipulate the list of actions in a command

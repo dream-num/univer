@@ -1,5 +1,6 @@
-import { ISheetActionData } from '../../Command';
-import { ObjectMatrixPrimitiveType, Nullable } from '../../Shared';
+import { ISheetActionData } from '../../Command/SheetActionBase';
+import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
+import { Nullable } from '../../Shared/Types';
 import { Dimension, BooleanNumber } from '../Enum';
 import { ICellData, ICellV } from './ICellData';
 import { INamedRange } from './INamedRange';
@@ -168,7 +169,6 @@ export interface ISetHiddenGridlinesActionData extends ISheetActionData {
 export interface ISetNamedRangeActionData extends ISheetActionData {
     namedRange: INamedRange;
 }
-
 
 /**
  * @internal

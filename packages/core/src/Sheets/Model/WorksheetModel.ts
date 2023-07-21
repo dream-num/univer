@@ -9,6 +9,9 @@ import { IRowData } from '../../Types/Interfaces/IRowData';
 import { IStyleData } from '../../Types/Interfaces/IStyleData';
 
 export class WorksheetModel {
+    activation: boolean;
+
+    row: ObjectArray<IRowData>;
 
     column: ObjectArray<IColumnData>;
 
@@ -17,10 +20,6 @@ export class WorksheetModel {
     sheetId: string;
 
     merge: IRangeData[];
-
-    activation: boolean;
-
-    row: ObjectArray<IRowData>;
 
     style: IKeyType<Nullable<IStyleData>>;
 

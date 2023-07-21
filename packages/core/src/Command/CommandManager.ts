@@ -1,23 +1,13 @@
-import { Class } from '../Shared/Types';
 import { ContextBase } from '../Basics/ContextBase';
-import { ActionBase, IActionData } from './ActionBase';
-import { CommandObservers } from './CommandObservers';
-import { ActionObservers } from './ActionObservers';
+import { Command } from './Command';
 import { CommandInjectorObservers } from './CommandInjectorObservers';
 import { UndoManager } from './UndoManager';
 import { ActionExtensionManager } from './ActionExtensionManager';
-import { Command } from './Command';
 
 /**
  * Manage command
  */
 export class CommandManager {
-    private static _actionClass: Map<string, Class<ActionBase<IActionData>>>;
-
-    private static _commandObservers: CommandObservers;
-
-    private static _actionObservers: ActionObservers;
-
     private static _commandInjectorObservers: CommandInjectorObservers;
 
     private _undoManager: UndoManager;
@@ -30,26 +20,7 @@ export class CommandManager {
     }
 
     static staticInitialize() {
-        this._actionClass = new Map<string, Class<ActionBase<IActionData>>>();
-        this._actionObservers = new ActionObservers();
-        this._commandObservers = new CommandObservers();
         this._commandInjectorObservers = new CommandInjectorObservers();
-    }
-
-    static getAction(name: string) {
-        return this._actionClass.get(name);
-    }
-
-    static getActionObservers(): ActionObservers {
-        return this._actionObservers;
-    }
-
-    static getCommandObservers(): CommandObservers {
-        return this._commandObservers;
-    }
-
-    static register(name: string, clazz: Class<ActionBase<IActionData>>) {
-        this._actionClass.set(name, clazz);
     }
 
     static getCommandInjectorObservers(): CommandInjectorObservers {
@@ -83,8 +54,8 @@ export class CommandManager {
         // Action may be added or reissued
         this._actionExtensionManager.handle(actionDataList);
 
+        CommandManager.getCommandInjectorObservers().notifyObservers(command.getInjector());
         command.invoke();
-
         _undoManager.push(command);
     }
 }

@@ -1,4 +1,4 @@
-import { Command } from './index';
+import { Command } from './Command';
 
 /**
  * Manage Undo Redo

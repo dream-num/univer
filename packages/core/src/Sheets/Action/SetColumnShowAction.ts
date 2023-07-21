@@ -22,7 +22,7 @@ export class SetColumnShowAction extends SheetActionBase<ISetColumnShowActionDat
     }
 
     do(): void {
-        SetColumnShowApply(this._commandModel, this._doActionData);
+        SetColumnShowApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -35,7 +35,7 @@ export class SetColumnShowAction extends SheetActionBase<ISetColumnShowActionDat
     }
 
     undo(): void {
-        SetColumnHideApply(this._commandModel, this._oldActionData);
+        SetColumnHideApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

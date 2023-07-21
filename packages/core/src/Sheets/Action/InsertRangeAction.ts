@@ -26,7 +26,7 @@ export class InsertRangeAction extends SheetActionBase<IInsertRangeActionData, I
     do(): void {
         const worksheet = this.getWorkSheet();
         if (worksheet) {
-            InsertRangeApply(this._commandModel, this._doActionData);
+            InsertRangeApply(this.getSpreadsheetModel(), this._doActionData);
             this._observers.notifyObservers({
                 type: ActionType.REDO,
                 data: this._doActionData,
@@ -49,7 +49,7 @@ export class InsertRangeAction extends SheetActionBase<IInsertRangeActionData, I
                 actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                 // actionName: SetRangeDataAction.NAME,
                 sheetId,
-                cellValue: DeleteRangeApply(this._commandModel, this._oldActionData),
+                cellValue: DeleteRangeApply(this.getSpreadsheetModel(), this._oldActionData),
                 rangeData,
                 shiftDimension,
             };

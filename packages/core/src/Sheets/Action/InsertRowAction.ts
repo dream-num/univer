@@ -21,7 +21,7 @@ export class InsertRowAction extends SheetActionBase<IInsertRowActionData, IRemo
     }
 
     do(): void {
-        InsertRowApply(this._commandModel, this._doActionData);
+        InsertRowApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -34,7 +34,7 @@ export class InsertRowAction extends SheetActionBase<IInsertRowActionData, IRemo
     }
 
     undo(): void {
-        RemoveRowApply(this._commandModel, this._oldActionData);
+        RemoveRowApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

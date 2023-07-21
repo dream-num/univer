@@ -16,7 +16,7 @@ export class InsertSheetAction extends SheetActionBase<IInsertSheetActionData, I
     }
 
     do(): string {
-        const result = InsertSheetApply(this._commandModel, this._doActionData);
+        const result = InsertSheetApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -30,7 +30,7 @@ export class InsertSheetAction extends SheetActionBase<IInsertSheetActionData, I
     }
 
     undo(): void {
-        RemoveSheetApply(this._commandModel, this._oldActionData);
+        RemoveSheetApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

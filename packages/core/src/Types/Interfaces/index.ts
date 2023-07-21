@@ -4,7 +4,6 @@ export * from './IColumnData';
 export * from './IDocumentData';
 export * from './IImageProperties';
 export * from './INamedRange';
-export * from './IObserveData';
 export * from './IPlaceholder';
 export * from './IRangeData';
 export * from './IRowData';

@@ -1,8 +1,8 @@
 import { CommandManager } from '../../Command/CommandManager';
 import { Nullable, ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared';
 import { ACTION_NAMES } from '../../Types/Const';
-import { ICellData, ICellV, IRangeData } from '../../Types/Interfaces';
-import { ISetRangeDataActionData } from '../../Types/Interfaces/IActionModel';
+import { ICellData, ICellV, IOptionData, IRangeData } from '../../Types/Interfaces';
+import { IClearRangeActionData, ISetRangeDataActionData } from '../../Types/Interfaces/IActionModel';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 import { SpreadsheetCommand } from './SpreadsheetCommand';
 
@@ -46,5 +46,17 @@ export class Range {
         const command = new SpreadsheetCommand(this.spreadsheetModel, setRangeDataAction);
         this.commandManager.invoke(command);
         return setRangeDataAction.sheetId;
+    }
+
+    clear(options: IOptionData, rangeData: IRangeData, sheetId: string) {
+        const clearDataAction: IClearRangeActionData = {
+            actionName: ACTION_NAMES.CLEAR_RANGE_ACTION,
+            sheetId,
+            options,
+            rangeData,
+        };
+        const command = new SpreadsheetCommand(this.spreadsheetModel, clearDataAction);
+        this.commandManager.invoke(command);
+        return clearDataAction.sheetId;
     }
 }

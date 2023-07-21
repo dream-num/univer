@@ -26,7 +26,7 @@ export class DeleteRangeAction extends SheetActionBase<IDeleteRangeActionData, I
     }
 
     do(): ObjectMatrixPrimitiveType<ICellData> {
-        const result = DeleteRangeApply(this._commandModel, this._doActionData);
+        const result = DeleteRangeApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -52,7 +52,7 @@ export class DeleteRangeAction extends SheetActionBase<IDeleteRangeActionData, I
     undo(): void {
         const worksheet = this.getWorkSheet();
         if (worksheet) {
-            InsertRangeApply(this._commandModel, this._oldActionData);
+            InsertRangeApply(this.getSpreadsheetModel(), this._oldActionData);
             this._observers.notifyObservers({
                 type: ActionType.UNDO,
                 data: this._oldActionData,

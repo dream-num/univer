@@ -24,7 +24,7 @@ export class RemoveColumnDataAction extends SheetActionBase<IRemoveColumnDataAct
     }
 
     do(): ObjectMatrixPrimitiveType<ICellData> {
-        const result = RemoveColumnDataApply(this._commandModel, this._doActionData);
+        const result = RemoveColumnDataApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -38,7 +38,7 @@ export class RemoveColumnDataAction extends SheetActionBase<IRemoveColumnDataAct
     }
 
     undo(): void {
-        InsertDataColumnApply(this._commandModel, this._oldActionData);
+        InsertDataColumnApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

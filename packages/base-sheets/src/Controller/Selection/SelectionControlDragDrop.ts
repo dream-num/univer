@@ -1,5 +1,6 @@
 import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect, ScrollTimer } from '@univerjs/base-render';
-import { Direction, ICellInfo, ISelection, makeCellToSelection, Nullable, Observer, Inject, Injector } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
+import { Direction, ICellInfo, ISelection, makeCellToSelection, Nullable, Observer } from '@univerjs/core';
 import { SelectionModel } from '../../Model';
 import { DEFAULT_SELECTION_CONFIG, SELECTION_TYPE } from './SelectionController';
 import { CanvasView } from '../../View';

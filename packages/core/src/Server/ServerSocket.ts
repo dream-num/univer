@@ -1,5 +1,5 @@
 import { ISheetActionData } from '../Command';
-import { ICreatable, createIdentifier } from '../DI';
+import { ICreatable, createIdentifier } from '@wendellhu/redi';
 import { IWorkbookConfig, IWorksheetConfig } from '../Types/Interfaces';
 import { IOSocket, IOSocketListenType } from '../Shared';
 import { MessageQueue } from './MessageQueue';

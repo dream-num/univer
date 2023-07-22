@@ -1,4 +1,5 @@
-import { createIdentifier, Context, SheetContext } from '@univerjs/core';
+import { createIdentifier } from '@wendellhu/redi';
+import { Context, SheetContext } from '@univerjs/core';
 
 import { Engine } from '@univerjs/base-render';
 

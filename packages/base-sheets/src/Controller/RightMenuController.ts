@@ -1,4 +1,5 @@
-import { Context, SheetContext, UIObserver, Inject } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
+import { Context, SheetContext, UIObserver } from '@univerjs/core';
 import { SelectionController } from './Selection/SelectionController';
 import { SelectionModel } from '../Model/SelectionModel';
 import { IGlobalContext, ISelectionManager, ISheetContext } from '../Services/tokens';

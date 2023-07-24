@@ -4,5 +4,5 @@ import { WorksheetModel } from './WorksheetModel';
 export class SpreadsheetModel {
     worksheets: { [key: string]: WorksheetModel };
 
-    constructor(private univerSheetData: Partial<ISpreadsheetConfig>) {}
+    constructor(private snapshot: Partial<ISpreadsheetConfig>) {}
 }

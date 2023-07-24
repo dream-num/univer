@@ -1,11 +1,10 @@
-import { Range } from '../../Sheets/Domain';
 import { IRangeData, IRangeType } from './IRangeData';
 
 /**
  * Properties of selection data
  */
 export interface ISelectionData {
-    selection?: IRangeType | IRangeType[] | Range;
+    selection?: IRangeType | IRangeType[];
     cell?: IRangeType;
 }
 

@@ -1,4 +1,4 @@
-import { DocumentModel } from '../Domain/DocumentModel';
+import { DocumentModel } from '../Domain/Document';
 import { deleteContent, getDocsUpdateBody } from '../../Shared/Common';
 import { IDocumentBody } from '../../Types/Interfaces/IDocumentData';
 

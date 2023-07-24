@@ -1,5 +1,5 @@
 import { ActionBase, IActionData, CommandModel, ActionObservers } from './index';
-import { DocumentModel } from '../Docs/Domain/DocumentModel';
+import { DocumentModel } from '../Docs/Domain/Document';
 
 export interface IDocActionData extends IActionData {}
 

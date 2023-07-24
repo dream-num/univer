@@ -1,4 +1,3 @@
-import { SlideContext } from '../../Basics/SlideContext';
 import { DEFAULT_SLIDE } from '../../Types/Const';
 import { ISlideData, ISlidePage, PageType } from '../../Types/Interfaces';
 import { Tools } from '../../Shared';
@@ -6,12 +5,9 @@ import { Tools } from '../../Shared';
 export class SlideModel {
     private _snapshot: ISlideData;
 
-    private _context: SlideContext;
-
     private _unitId: string;
 
-    constructor(snapshot: Partial<ISlideData>, context: SlideContext) {
-        this._context = context;
+    constructor(private snapshot: Partial<ISlideData>) {
         this._snapshot = { ...DEFAULT_SLIDE, ...snapshot };
         this._unitId = this._snapshot.id ?? Tools.generateRandomId(6);
     }

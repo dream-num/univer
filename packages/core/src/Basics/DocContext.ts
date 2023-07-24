@@ -1,19 +1,20 @@
 import { IDocumentData } from '../Types/Interfaces';
 import { ContextBase } from './ContextBase';
-import { DocumentModel } from '../Docs/Domain/DocumentModel';
+import { Document } from '../Docs/Domain/Document';
+import { CommandManager } from '../Command/CommandManager';
 
 /**
  * Core context, mount important instances, managers
  */
 export class DocContext extends ContextBase {
-    protected _document: DocumentModel;
+    protected _document: Document;
 
-    constructor(univerDocData: Partial<IDocumentData> = {}) {
+    constructor(private snapshot: Partial<IDocumentData> = {}, private commandManager: CommandManager) {
         super();
-        this._document = new DocumentModel(univerDocData, this);
+        this._document = new Document(snapshot, commandManager);
     }
 
-    getDocument(): DocumentModel {
+    getDocument(): Document {
         return this._document;
     }
 

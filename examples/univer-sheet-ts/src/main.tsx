@@ -43,9 +43,11 @@ const univer = new Univer({
 univer.install(new RenderEngine());
 
 // universheet instance
-const universheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
-// sheet.installPlugin(new RenderEngine());
-univer.addUniverSheet(universheet);
+const universheet = univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO)
+// // universheet instance
+// const universheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
+// // sheet.installPlugin(new RenderEngine());
+// univer.addUniverSheet(universheet);
 // base-sheet
 universheet.installPlugin(new SheetPlugin());
 
@@ -68,12 +70,12 @@ univer.install(
     })
 );
 
-FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(universheet);
-FindPlugin.create().installTo(universheet);
-universheet.installPlugin(new OperationPlugin());
-universheet.installPlugin(new ImportXlsxPlugin());
-universheet.installPlugin(new OverGridImagePlugin());
-universheet.installPlugin(new NumfmtPlugin());
+// FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(universheet);
+// FindPlugin.create().installTo(universheet);
+// universheet.installPlugin(new OperationPlugin());
+// universheet.installPlugin(new ImportXlsxPlugin());
+// universheet.installPlugin(new OverGridImagePlugin());
+// universheet.installPlugin(new NumfmtPlugin());
 
 // use for console test
 declare global {

@@ -5,8 +5,8 @@ import { ISpreadsheetConfig } from '../Types/Interfaces';
 import { Spreadsheet } from '../Sheets/Domain/Spreadsheet';
 import { CommandManager } from '../Command/CommandManager';
 import { PropsFrom } from '../Shared/PropsFrom';
-import { SpreadsheetObserver } from './WorkBookObserver';
-import { SpreadsheetObserverImpl } from './WorkBookObserverImpl';
+import { SpreadsheetObserver } from './SpreadsheetObserver';
+import { SpreadsheetObserverImpl } from './SpreadsheetObserverImpl';
 
 /**
  * Core context, mount important instances, managers
@@ -14,13 +14,13 @@ import { SpreadsheetObserverImpl } from './WorkBookObserverImpl';
 export class SheetContext extends ContextBase {
     protected _spreadsheet: Spreadsheet;
 
-    protected _genname: GenName;
+    protected _genName: GenName;
 
-    constructor(univerSheetData: Partial<ISpreadsheetConfig> = {}, private commandManager: CommandManager) {
+    constructor(private snapshot: Partial<ISpreadsheetConfig> = {}, private commandManager: CommandManager) {
         super();
         this._setObserver();
-        this._genname = new GenName();
-        this._spreadsheet = new Spreadsheet(univerSheetData, this.commandManager);
+        this._genName = new GenName();
+        this._spreadsheet = new Spreadsheet(snapshot, this.commandManager);
     }
 
     getSpreadsheet(): Spreadsheet {
@@ -28,7 +28,7 @@ export class SheetContext extends ContextBase {
     }
 
     getGenName(): GenName {
-        return this._genname;
+        return this._genName;
     }
 
     getContextObserver<Key extends keyof SpreadsheetObserver>(value: Key): Observable<PropsFrom<SpreadsheetObserver[Key]>> {

@@ -26,7 +26,6 @@ export * from './SetHideRows';
 export * from './SetNamedRange';
 export * from './SetRangeData';
 export * from './SetRangeNote';
-export * from './SetRangeStyle';
 export * from './SetRangeFormattedValue';
 export * from './SetRightToLeft';
 export * from './SetRowHeight';

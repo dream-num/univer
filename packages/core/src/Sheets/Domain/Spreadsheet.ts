@@ -96,5 +96,4 @@ export class Spreadsheet {
         const command = new SpreadsheetCommand(this.model, removeSheetAction);
         this.commandManager.invoke(command);
     }
-
 }

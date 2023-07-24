@@ -31,7 +31,7 @@ export class Context extends ContextBase {
         }
     }
 
-    getCommandManger(){
+    getCommandManger() {
         return this._commandManager;
     }
 

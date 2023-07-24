@@ -1,11 +1,11 @@
-import { DocContext } from '../../Basics';
-import { Command } from '../../Command';
-import { CommonParameterAttribute, IDocumentBody, IDocumentData } from '../../Types/Interfaces/IDocumentData';
+import { Command, CommandManager } from '../../Command';
+import { IDocumentBody, IDocumentData } from '../../Types/Interfaces/IDocumentData';
 import { ITextSelectionRange } from '../../Types/Interfaces/ISelectionData';
 import { DOC_ACTION_NAMES } from '../../Types/Const/DOC_ACTION_NAMES';
-import { Tools, getTextIndexByCursor } from '../../Shared';
+import { IKeyValue, Tools, getTextIndexByCursor } from '../../Shared';
 import { DocumentBodyModel } from './DocumentBodyModel';
 import { DEFAULT_DOC } from '../../Types/Const';
+import { DocumentModel } from '../Model/DocumentModel';
 
 interface IDrawingUpdateConfig {
     left: number;
@@ -14,10 +14,14 @@ interface IDrawingUpdateConfig {
     width: number;
 }
 
-export type DocumentModelOrSimple = DocumentModelSimple | DocumentModel;
+export type DocumentOrSimple = DocumentSimple | Document;
 
-export class DocumentModelSimple {
+export class DocumentSimple {
     snapshot: IDocumentData;
+
+    model: DocumentModel;
+
+    commandManager: CommandManager;
 
     headerTreeMap: Map<string, DocumentBodyModel>;
 
@@ -25,9 +29,11 @@ export class DocumentModelSimple {
 
     bodyModel: DocumentBodyModel;
 
-    constructor(snapshot: Partial<IDocumentData>) {
+    constructor(snapshot: Partial<IDocumentData>, commandManager: CommandManager) {
         // this.snapshot = snapshot;
         this.snapshot = { ...DEFAULT_DOC, ...snapshot };
+        this.commandManager = commandManager;
+        this.model = new DocumentModel(snapshot);
 
         if (this.snapshot.body != null) {
             this.bodyModel = DocumentBodyModel.create(this.snapshot.body);
@@ -109,14 +115,11 @@ export class DocumentModelSimple {
     }
 }
 
-export class DocumentModel extends DocumentModelSimple {
-    private _context: DocContext;
-
+export class Document extends DocumentSimple {
     private _unitId: string;
 
-    constructor(snapshot: Partial<IDocumentData>, context: DocContext) {
-        super(snapshot);
-        this._context = context;
+    constructor(snapshot: Partial<IDocumentData>, commandManager: CommandManager) {
+        super(snapshot, commandManager);
         this._unitId = this.snapshot.id ?? Tools.generateRandomId(6);
 
         this.initializeRowColTree();
@@ -126,8 +129,8 @@ export class DocumentModel extends DocumentModelSimple {
         return this._unitId;
     }
 
-    insert(body: IDocumentBody, range: ITextSelectionRange, segmentId?: string): DocumentModel {
-        const commandManager = this._context.getCommandManager();
+    insert(body: IDocumentBody, range: ITextSelectionRange, segmentId?: string): Document {
+        const commandManager = this.commandManager;
 
         const { cursorStart, cursorEnd, isEndBack, isStartBack, isCollapse } = range;
 
@@ -163,8 +166,8 @@ export class DocumentModel extends DocumentModelSimple {
         return this;
     }
 
-    delete(range: ITextSelectionRange, segmentId?: string): DocumentModel {
-        const commandManager = this._context.getCommandManager();
+    delete(range: ITextSelectionRange, segmentId?: string): Document {
+        const commandManager = this.commandManager;
 
         const deleteActionList = this._getDeleteAction(range, segmentId);
 
@@ -178,8 +181,8 @@ export class DocumentModel extends DocumentModelSimple {
         return this;
     }
 
-    update(attribute: CommonParameterAttribute, range: ITextSelectionRange, segmentId?: string) {
-        const commandManager = this._context.getCommandManager();
+    update(attribute: IKeyValue, range: ITextSelectionRange, segmentId?: string) {
+        const commandManager = this.commandManager;
 
         const { cursorStart, cursorEnd, isEndBack, isStartBack } = range;
         const actionList = [];
@@ -212,7 +215,7 @@ export class DocumentModel extends DocumentModelSimple {
     }
 
     IMEInput(newText: string, oldTextLen: number, start: number, segmentId?: string) {
-        const _commandManager = this._context.getCommandManager();
+        const _commandManager = this.commandManager;
 
         const actionList = [];
 

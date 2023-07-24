@@ -5,6 +5,7 @@ import { Context } from './Context';
 import { Plugin } from '../Plugin';
 import { ISpreadsheetConfig, IUniverData } from '../Types/Interfaces';
 import { UniverObserverImpl } from './UniverObserverImpl';
+import { UniverDoc } from './UniverDoc';
 
 export class Univer {
     private _univerSheets: UniverSheet[];
@@ -24,10 +25,12 @@ export class Univer {
         this._setObserver();
     }
 
-    createUniverSheet(univerSheetData: Partial<ISpreadsheetConfig>) {
+    createUniverSheet(univerSheetData: Partial<ISpreadsheetConfig>): UniverSheet {
         const commandManager = this._context.getCommandManger();
         const univerSheet = new UniverSheet(univerSheetData, commandManager);
         this._univerSheets.push(univerSheet);
+
+        return univerSheet
     }
 
     addUniverSheet(univerSheet: UniverSheet): void {

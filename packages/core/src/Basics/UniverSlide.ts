@@ -3,7 +3,6 @@ import { Plugin } from '../Plugin';
 import { IOHttp, IOHttpConfig, Logger } from '../Shared';
 import { SlideContext } from './SlideContext';
 import { VersionCode, VersionEnv } from './Version';
-import { ColorBuilder } from '../Sheets/Domain/ColorBuilder';
 
 /**
  * Externally provided UniverSlide root instance
@@ -49,10 +48,6 @@ export class UniverSlide {
      */
     static post<T = void>(config: Omit<IOHttpConfig, 'type'>): Promise<T> {
         return IOHttp({ ...config, type: 'POST' });
-    }
-
-    static newColor(): ColorBuilder {
-        return new ColorBuilder();
     }
 
     /**

@@ -1,5 +1,5 @@
 import { IDocumentBody } from '../../Types/Interfaces/IDocumentData';
-import { DocumentModel } from '../Domain/DocumentModel';
+import { DocumentModel } from '../Domain/Document';
 import { getDocsUpdateBody } from '../../Shared/Common';
 import { insertCustomBlocks, insertCustomRanges, insertParagraphs, insertSectionBreaks, insertTables, insertTextRuns } from './Common';
 

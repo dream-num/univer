@@ -24,7 +24,6 @@ export * from './SetHiddenGridlinesAction';
 export * from './SetNamedRangeAction';
 export * from './SetRangeDataAction';
 export * from './SetRangeNoteAction';
-export * from './SetRangeStyleAction';
 export * from './SetRangeFormattedValueAction';
 export * from './SetRightToLeftAction';
 export * from './SetRowHeightAction';

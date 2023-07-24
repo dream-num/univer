@@ -11,8 +11,8 @@ export * from './UniverSheet';
 export * from './UniverSlide';
 export * from './Univer';
 export * from './Version';
-export * from './WorkBookObserver';
-export * from './WorkBookObserverImpl';
+export * from './SpreadsheetObserver';
+export * from './SpreadsheetObserverImpl';
 export * from './UniverObserver';
 export * from './UniverObserverImpl';
 // @endindex

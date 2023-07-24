@@ -1,3 +1,4 @@
+import { Ctor, Injector, Optional, Disposable } from '@wendellhu/redi';
 import { Workbook, ColorBuilder } from '../Sheets/Domain';
 import { IWorkbookConfig } from '../Types/Interfaces';
 import { BasePlugin, Plugin } from '../Plugin';
@@ -11,17 +12,36 @@ interface IComposedConfig {
     workbookConfig: IWorkbookConfig;
 }
 
+class PluginStore {
+    private readonly plugins: Plugin[] = [];
+
+    addPlugin(plugin: Plugin): void {
+        this.plugins.push(plugin);
+    }
+
+    removePlugins(): Plugin[] {
+        const plugins = this.plugins.slice();
+        this.plugins.length = 0;
+        return plugins;
+    }
+}
+
 /**
  * Externally provided UniverSheet root instance
  */
-export class UniverSheet {
+export class UniverSheet implements Disposable {
     univerSheetConfig: Partial<IWorkbookConfig>;
+
+    private readonly _sheetInjector: Injector;
+
+    private readonly _pluginStore = new PluginStore();
 
     private _context: SheetContext;
 
-    constructor(univerSheetData: Partial<IWorkbookConfig> = {}) {
+    constructor(univerSheetData: Partial<IWorkbookConfig> = {}, @Optional(Injector) parentInjector?: Injector) {
         this.univerSheetConfig = univerSheetData;
         this._context = new SheetContext(univerSheetData);
+        this._sheetInjector = this.initializeInjector(parentInjector);
     }
 
     /**
@@ -101,11 +121,23 @@ export class UniverSheet {
         return { workbookConfig, ...pluginConfig };
     }
 
+    dispose(): void {}
+
     /**
      * get unit id
      */
     getUnitId(): string {
         return this.getWorkBook().getUnitId();
+    }
+
+    /**
+     * Add a plugin into UniverSheet. UniverSheet should add dependencies exposed from this plugin to its DI system.
+     * @param plugin constructor of the plugin class
+     */
+    addPlugin(plugin: typeof Plugin, options: any): void {
+        const pluginInstance: Plugin = this._sheetInjector.createInstance(plugin as unknown as Ctor<any>, options);
+        pluginInstance.onCreate(this._context); // TODO: remove context passed in here
+        this._pluginStore.addPlugin(pluginInstance);
     }
 
     /**
@@ -137,5 +169,9 @@ export class UniverSheet {
 
     refreshWorkbook(univerSheetData: Partial<IWorkbookConfig> = {}) {
         this._context.refreshWorkbook(univerSheetData);
+    }
+
+    private initializeInjector(parentInjector?: Injector): Injector {
+        return parentInjector ? parentInjector.createChild() : new Injector();
     }
 }

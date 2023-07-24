@@ -4,6 +4,14 @@ import { Observable } from '../Observer';
 import { Locale, Nullable, PropsFrom } from '../Shared';
 import { Univer } from '../Basics';
 
+/** Plugin types for different kinds of business. */
+export enum PluginType {
+    Univer,
+    Doc,
+    Sheet,
+    Slide,
+}
+
 /**
  * Basics function of plugin
  */
@@ -13,8 +21,20 @@ export interface BasePlugin {
     getGlobalContext(): Context;
     getLocale(): Locale;
     getPluginName(): string;
+
+    /**
+     * Could register dependencies at this lifecycle stage.
+     */
     onCreate(context: ContextBase): void;
+
+    /**
+     * Could setup initialization works at this lifecycle stage.
+     */
     onMounted(context: ContextBase): void;
+
+    /**
+     * Could do some initialization works at this lifecycle stage.
+     */
     onDestroy(): void;
 
     deleteObserve(...names: string[]): void;
@@ -30,11 +50,11 @@ export interface BasePlugin {
 }
 
 /**
- * Plug-in base class, all plug-ins must inherit from this base class. provides the basic method
+ * Plug-in base class, all plug-ins must inherit from this base class. Provide basic methods.
  */
-export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase>
-    implements BasePlugin
-{
+export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase> implements BasePlugin {
+    static type: PluginType;
+
     context: O;
 
     private _name: string;
@@ -82,9 +102,7 @@ export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase>
         return this.context.getUniver();
     }
 
-    getObserver<K extends keyof Obs & string>(
-        name: K
-    ): Nullable<Observable<PropsFrom<Obs[K]>>> {
+    getObserver<K extends keyof Obs & string>(name: K): Nullable<Observable<PropsFrom<Obs[K]>>> {
         const manager = this.context.getObserverManager();
         return manager.getObserver(name, this._name);
     }

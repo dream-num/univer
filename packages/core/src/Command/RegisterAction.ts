@@ -1,6 +1,5 @@
 import {
     AddMergeAction,
-    AddNamedRangeAction,
     DeleteNamedRangeAction,
     DeleteRangeAction,
     InsertColumnAction,
@@ -94,7 +93,6 @@ RegisterAction.register(ACTION_NAMES.INSERT_COLUMN_ACTION, InsertColumnAction);
 RegisterAction.register(ACTION_NAMES.REMOVE_COLUMN_ACTION, RemoveColumnAction);
 RegisterAction.register(ACTION_NAMES.DELETE_NAMED_RANGE_ACTION, DeleteNamedRangeAction);
 RegisterAction.register(ACTION_NAMES.SET_NAMED_RANGE_ACTION, SetNamedRangeAction);
-RegisterAction.register(ACTION_NAMES.ADD_NAMED_RANGE_ACTION, AddNamedRangeAction);
 RegisterAction.register(ACTION_NAMES.SET_RANGE_NOTE_ACTION, SetRangeNoteAction);
 RegisterAction.register(ACTION_NAMES.INSERT_SHEET_ACTION, InsertSheetAction);
 RegisterAction.register(ACTION_NAMES.REMOVE_SHEET_ACTION, RemoveSheetAction);

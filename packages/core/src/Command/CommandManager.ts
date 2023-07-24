@@ -18,7 +18,7 @@ export class CommandManager {
         this._actionExtensionManager = new ActionExtensionManager();
     }
 
-    static staticInitialize() {
+    static staticInitialize(): void {
         this._commandInjectorObservers = new CommandInjectorObservers();
     }
 

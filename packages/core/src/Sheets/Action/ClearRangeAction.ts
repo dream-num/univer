@@ -47,7 +47,7 @@ export class ClearRangeAction extends SheetActionBase<IClearRangeActionData, ISe
     }
 
     undo(): void {
-<<<<<<< HEAD
+
         SetRangeDataApply(this.getSpreadsheetModel(), this._oldActionData);
         // no need update current data
         this._observers.notifyObservers({
@@ -55,16 +55,6 @@ export class ClearRangeAction extends SheetActionBase<IClearRangeActionData, ISe
             data: this._oldActionData,
             action: this,
         });
-=======
-            SetRangeDataApply(this.getSpreadsheetModel(), this._oldActionData);
-            // no need update current data
-            this._observers.notifyObservers({
-                type: ActionType.UNDO,
-                data: this._oldActionData,
-                action: this,
-            });
-        
->>>>>>> a7d4abc3 (fix(core): action)
     }
 
     validate(): boolean {

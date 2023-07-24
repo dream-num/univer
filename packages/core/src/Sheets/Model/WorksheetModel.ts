@@ -11,9 +11,9 @@ import { IStyleData } from '../../Types/Interfaces/IStyleData';
 export class WorksheetModel {
     activation: boolean;
 
-    row: ObjectArray<IRowData>;
-
     column: ObjectArray<IColumnData>;
+
+    row: ObjectArray<IRowData>;
 
     cell: ObjectMatrix<ICellData>;
 

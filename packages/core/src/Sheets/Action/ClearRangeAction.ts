@@ -47,6 +47,7 @@ export class ClearRangeAction extends SheetActionBase<IClearRangeActionData, ISe
     }
 
     undo(): void {
+
         SetRangeDataApply(this.getSpreadsheetModel(), this._oldActionData);
         // no need update current data
         this._observers.notifyObservers({

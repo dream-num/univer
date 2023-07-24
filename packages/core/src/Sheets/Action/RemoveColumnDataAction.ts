@@ -5,6 +5,8 @@ import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { IRemoveColumnDataAction, IInsertColumnDataActionData } from '../../Types/Interfaces/IActionModel';
 
+
+
 /**
  * Remove the column data of the specified column index and column count
  *

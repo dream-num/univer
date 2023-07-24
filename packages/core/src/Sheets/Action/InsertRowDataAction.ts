@@ -1,8 +1,10 @@
-import { InsertDataRowApply, RemoveRowDataApply } from '../Apply';
-import { ObjectArray } from '../../Shared';
-import { ActionObservers, ActionType, CommandModel } from '../../Command';
+import { InsertDataRowApply } from '../Apply/InsertDataRow';
+import { RemoveRowDataApply } from '../Apply/RemoveRowData';
+import { ObjectArray } from '../../Shared/ObjectArray';
 import { SheetActionBase } from '../../Command/SheetActionBase';
 import { IInsertRowDataActionData, IRemoveRowDataActionData } from '../../Types/Interfaces/IActionModel';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
 
 /**
  * Insert the row data of the specified row index

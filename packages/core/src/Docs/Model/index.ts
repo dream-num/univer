@@ -1,1 +1,1 @@
-export * from '../Domain/Document';
+export * from './DocumentModel';

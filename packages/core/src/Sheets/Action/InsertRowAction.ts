@@ -1,6 +1,9 @@
-import { SheetActionBase, ActionObservers, ActionType, CommandModel } from '../../Command';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { CommandModel } from '../../Command/CommandModel';
+import { SheetActionBase } from '../../Command/SheetActionBase';
 import { IInsertRowActionData, IRemoveRowActionData } from '../../Types/Interfaces/IActionModel';
-import { InsertRowApply, RemoveRowApply } from '../Apply';
+import { InsertRowApply } from '../Apply/InsertRow';
+import { RemoveRowApply } from '../Apply/RemoveRow';
 
 /**
  * Insert the row configuration of the specified row index

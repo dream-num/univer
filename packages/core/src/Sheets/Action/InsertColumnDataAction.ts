@@ -1,8 +1,10 @@
-import { InsertDataColumnApply, RemoveColumnDataApply } from '../Apply';
-import { ObjectArray } from '../../Shared';
-import { ActionObservers, ActionType, CommandModel } from '../../Command';
+import { ObjectArray } from '../../Shared/ObjectArray';
 import { SheetActionBase } from '../../Command/SheetActionBase';
 import { IInsertColumnDataActionData, IRemoveColumnDataAction } from '../../Types/Interfaces/IActionModel';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { InsertDataColumnApply } from '../Apply/InsertDataColumn';
+import { RemoveColumnDataApply } from '../Apply/RemoveColumnData';
 
 /**
  * Insert the column data of the specified column index

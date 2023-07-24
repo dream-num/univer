@@ -1,55 +1,13 @@
-import { Workbook } from '../Domain';
-import { IWorksheetConfig } from '../../Types/Interfaces';
-import { CommandModel } from '../../Command';
 import { IRemoveSheetActionData } from '../../Types/Interfaces/IActionModel';
+import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
-export function RemoveSheet(
-    workbook: Workbook,
-    sheetId: string
-): {
-    index: number;
-    sheet: IWorksheetConfig;
-} {
-    const iSheets = workbook.getWorksheets();
-    const config = workbook.getConfig();
-    const { sheets } = config;
-    if (sheets[sheetId] == null) {
-        throw new Error(`Remove Sheet fail ${sheetId} is not exist`);
+export function RemoveSheetApply(spreadsheetModel: SpreadsheetModel, data: IRemoveSheetActionData) {
+    if (spreadsheetModel.worksheets[data.sheetId] == null) {
+        throw new Error(`Remove Sheet fail ${data.sheetId} is not exist`);
     }
-
-    const removeSheet = sheets[sheetId];
-    const removeIndex = config.sheetOrder.findIndex((id) => id === sheetId);
-    delete sheets[sheetId];
-
-    config.sheetOrder.splice(removeIndex, 1);
-    iSheets.delete(sheetId);
-
+    let removeWorksheet = spreadsheetModel.worksheets[data.sheetId];
+    delete spreadsheetModel.worksheets[data.sheetId];
     return {
-        index: removeIndex,
-        sheet: removeSheet as IWorksheetConfig,
-    };
-}
-
-export function RemoveSheetApply(unit: CommandModel, data: IRemoveSheetActionData) {
-    let workbook = unit.WorkBookUnit;
-    let sheetId = data.sheetId;
-
-    const iSheets = workbook!.getWorksheets();
-    const config = workbook!.getConfig();
-
-    const { sheets } = config;
-    if (sheets[sheetId] == null) {
-        throw new Error(`Remove Sheet fail ${sheetId} is not exist`);
-    }
-    const findSheet = sheets[sheetId];
-    const findIndex = config.sheetOrder.findIndex((id) => id === sheetId);
-    delete sheets[sheetId];
-
-    config.sheetOrder.splice(findIndex, 1);
-    iSheets.delete(sheetId);
-
-    return {
-        index: findIndex,
-        sheet: findSheet as IWorksheetConfig,
+        sheet: removeWorksheet,
     };
 }

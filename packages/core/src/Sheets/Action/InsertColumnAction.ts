@@ -1,7 +1,9 @@
-import { InsertColumnApply, RemoveColumnApply } from '../Apply';
+import { InsertColumnApply } from '../Apply/InsertColumn';
+import { RemoveColumnApply } from '../Apply/RemoveColumn';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { IInsertColumnActionData, IRemoveColumnAction } from '../../Types/Interfaces/IActionModel';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
 
 /**
  * Insert the column configuration of the specified column index

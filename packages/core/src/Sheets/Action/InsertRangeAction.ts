@@ -1,9 +1,8 @@
-import { ActionObservers, ActionType, CommandModel } from '../../Command';
-import { SetRangeDataAction } from './SetRangeDataAction';
-import { DeleteRangeApply, InsertRangeApply } from '../Apply';
 import { SheetActionBase } from '../../Command/SheetActionBase';
 import { IInsertRangeActionData, IDeleteRangeActionData } from '../../Types/Interfaces/IActionModel';
 import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers } from '../../Command/ActionBase';
 
 /**
  * Insert data into a range and move the range to the right or below

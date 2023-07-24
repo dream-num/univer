@@ -1,4 +1,4 @@
-import { ObjectArray } from '../../Shared';
+import { ObjectArray } from '../../Shared/ObjectArray';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 import { IInsertRowActionData } from '../../Types/Interfaces/IActionModel';
 

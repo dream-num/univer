@@ -18,9 +18,9 @@ import {
     DEFAULT_CELL,
     IGridRange,
     SheetContext,
-    Inject,
-    Injector,
 } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
+
 import { ACTION_NAMES, ISelectionsConfig } from '../../Basics';
 import { ISelectionModelValue, ISetSelectionValueActionData, SetSelectionValueAction } from '../../Model/Action/SetSelectionValueAction';
 import { SelectionModel } from '../../Model/SelectionModel';

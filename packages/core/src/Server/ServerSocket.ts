@@ -1,6 +1,6 @@
 import { ISheetActionData } from '../Command';
-import { ICreatable, createIdentifier } from '../DI';
-import { ISpreadsheetConfig, IWorksheetConfig } from '../Types/Interfaces';
+import { ICreatable, createIdentifier } from '@wendellhu/redi';
+import { IWorksheetConfig } from '../Types/Interfaces';
 import { IOSocket, IOSocketListenType } from '../Shared';
 import { MessageQueue } from './MessageQueue';
 import { IOServerMessage, IOServerReceive, ServerBase } from './ServerBase';
@@ -13,7 +13,6 @@ export enum MessageQueueStatus {
     WORK = 'work',
 }
 
-export const IServerSocketWorkbookConfig = createIdentifier<IWorksheetConfig>('univer.server.workbook-config');
 export const IServerSocketWorkbookConfig = createIdentifier<IWorksheetConfig>('univer.server.workbook-config');
 
 /**

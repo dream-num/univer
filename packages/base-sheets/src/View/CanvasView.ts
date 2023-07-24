@@ -1,4 +1,5 @@
-import { Inject, Injector, EventState, SheetContext, Worksheet } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
+import { EventState, SheetContext, Worksheet } from '@univerjs/core';
 
 import { Engine, EVENT_TYPE, IScrollObserverParam, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univerjs/base-render';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from './BaseView';

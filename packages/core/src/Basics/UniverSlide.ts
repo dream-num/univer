@@ -1,8 +1,8 @@
 import { ISlideData } from '../Types/Interfaces';
 import { Plugin } from '../Plugin';
-import { IOHttp, IOHttpConfig, Logger } from '../Shared';
+import { IOHttp, IOHttpConfig } from '../Shared';
 import { SlideContext } from './SlideContext';
-import { VersionCode, VersionEnv } from './Version';
+import { CommandManager } from '../Command/CommandManager';
 
 /**
  * Externally provided UniverSlide root instance
@@ -12,9 +12,9 @@ export class UniverSlide {
 
     private _context: SlideContext;
 
-    constructor(UniverSlideData: Partial<ISlideData> = {}) {
-        this.UniverSlideConfig = UniverSlideData;
-        this._context = new SlideContext(UniverSlideData);
+    constructor(univerSlideData: Partial<ISlideData> = {}, private commandManager: CommandManager) {
+        this.UniverSlideConfig = univerSlideData;
+        this._context = new SlideContext(univerSlideData, this.commandManager);
     }
 
     /**
@@ -22,11 +22,6 @@ export class UniverSlide {
      */
     get context() {
         return this._context;
-    }
-
-    static newInstance(UniverSlideData: Partial<ISlideData> = {}): UniverSlide {
-        Logger.capsule(VersionEnv, VersionCode, 'powered by :: UniverSlide :: ');
-        return new UniverSlide(UniverSlideData);
     }
 
     /**

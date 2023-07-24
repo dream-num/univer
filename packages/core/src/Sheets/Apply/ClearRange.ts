@@ -1,5 +1,6 @@
+import { ObjectMatrix } from '../../Shared/ObjectMatrix';
+import { Tools } from '../../Shared/Tools';
 import { ICellData } from '../../Types/Interfaces';
-import { Tools, ObjectMatrix } from '../../Shared';
 
 import { IClearRangeActionData } from '../../Types/Interfaces/IActionModel';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';

@@ -30,7 +30,7 @@ export class Univer {
         const univerSheet = new UniverSheet(univerSheetData, commandManager);
         this._univerSheets.push(univerSheet);
 
-        return univerSheet
+        return univerSheet;
     }
 
     addUniverSheet(univerSheet: UniverSheet): void {

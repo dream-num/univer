@@ -19,6 +19,8 @@ export class WorksheetModel {
 
     sheetId: string;
 
+    sheetOrder: number;
+
     merge: IRangeData[];
 
     style: IKeyType<Nullable<IStyleData>>;

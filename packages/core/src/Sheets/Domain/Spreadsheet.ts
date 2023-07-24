@@ -29,7 +29,7 @@ export class Spreadsheet {
         this.model = new SpreadsheetModel(snapshot);
         this.range = new Range(this.commandManager, this.model);
         this.merge = new Merge();
-        // this.row = new Row(this.commandManager, this.model);
+        this.row = new Row(this.commandManager, this.model);
         this.column = new Column();
         this.style = new Style(this.model);
     }

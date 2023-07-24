@@ -6,6 +6,7 @@ import { ICellData, ICellV } from './ICellData';
 import { INamedRange } from './INamedRange';
 import { IRangeData, IOptionData } from './IRangeData';
 import { IStyleData } from './IStyleData';
+import { IWorksheetConfig } from './IWorksheetData';
 
 /**
  * @internal
@@ -82,6 +83,7 @@ export interface IInsertRowDataActionData extends ISheetActionData {
 
 export interface IInsertSheetActionData extends ISheetActionData {
     index: number;
+    sheet: IWorksheetConfig;
 }
 
 /**

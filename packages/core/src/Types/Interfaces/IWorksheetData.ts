@@ -1,5 +1,5 @@
 import { BooleanNumber, SheetTypes } from '../Enum';
-import { ObjectArrayType } from '../../Shared/ObjectArray';
+import { ObjectArrayPrimitiveType } from '../../Shared/ObjectArray';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { ICellData } from './ICellData';
 import { IColumnData } from './IColumnData';
@@ -51,8 +51,8 @@ export interface IWorksheetConfig {
     hideColumn: [];
     status: BooleanNumber;
     cellData: ObjectMatrixPrimitiveType<ICellData>;
-    rowData: ObjectArrayType<Partial<IRowData>>; // TODO:配置文件不能为ObjectArray实例，应该是纯json配置 @jerry
-    columnData: ObjectArrayType<Partial<IColumnData>>;
+    rowData: ObjectArrayPrimitiveType<IRowData>; // TODO:配置文件不能为ObjectArray实例，应该是纯json配置 @jerry
+    columnData: ObjectArrayPrimitiveType<IColumnData>;
     showGridlines: BooleanNumber;
     rowTitle: {
         width: number;

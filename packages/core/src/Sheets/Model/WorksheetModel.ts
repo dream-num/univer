@@ -2,6 +2,8 @@ import { ObjectArray } from '../../Shared/ObjectArray';
 import { ObjectMatrix } from '../../Shared/ObjectMatrix';
 import { Tools } from '../../Shared/Tools';
 import { IKeyType, Nullable } from '../../Shared/Types';
+import { BooleanNumber } from '../../Types/Enum/TextStyle';
+import { IWorksheetConfig } from '../../Types/Interfaces';
 import { ICellData } from '../../Types/Interfaces/ICellData';
 import { IColumnData } from '../../Types/Interfaces/IColumnData';
 import { IRangeData } from '../../Types/Interfaces/IRangeData';
@@ -28,6 +30,14 @@ export class WorksheetModel {
     rowCount: number;
 
     columnCount: number;
+
+    showGridlines: BooleanNumber;
+
+    rightToLeft: BooleanNumber;
+
+    toJSON(): IWorksheetConfig {
+        return {};
+    }
 
     eachStyle(callback: (value: [string, Nullable<IStyleData>], index: number, array: Array<[string, Nullable<IStyleData>]>) => void) {
         Object.entries(this.style).forEach(callback);

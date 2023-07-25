@@ -17,10 +17,7 @@ export class SetSheetOrderAction extends SheetActionBase<ISetSheetOrderActionDat
     }
 
     do(): number {
-        const worksheet = this.getWorkSheet();
-        const context = worksheet.getContext();
-        const workbook = context.getWorkBook();
-        const result = SetSheetOrder(workbook, this._doActionData.sheetId, this._doActionData.order);
+        const result = SetSheetOrderApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -34,10 +31,7 @@ export class SetSheetOrderAction extends SheetActionBase<ISetSheetOrderActionDat
     }
 
     undo(): void {
-        const worksheet = this.getWorkSheet();
-        const context = worksheet.getContext();
-        const workbook = context.getWorkBook();
-        SetSheetOrder(workbook, this._oldActionData.sheetId, this._oldActionData.order);
+        SetSheetOrderApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

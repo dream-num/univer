@@ -18,11 +18,11 @@ export class RemoveSheetAction extends SheetActionBase<IRemoveSheetActionData, I
         };
     }
 
-    do(): { sheetOrder: number; sheet: IWorksheetConfig } {
+    do(): { index: number; sheet: IWorksheetConfig } {
         return this.redo();
     }
 
-    redo(): { sheetOrder: number; sheet: IWorksheetConfig } {
+    redo(): { index: number; sheet: IWorksheetConfig } {
         const result = RemoveSheetApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,

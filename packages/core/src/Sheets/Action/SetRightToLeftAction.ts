@@ -1,4 +1,4 @@
-import { SetRightToLeft } from '../Apply';
+import { SetRightToLeftApply } from '../Apply';
 import { BooleanNumber } from '../../Types/Enum';
 import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType, CommandModel } from '../../Command';
@@ -22,9 +22,8 @@ export class SetRightToLeftAction extends SheetActionBase<ISetRightToLeftActionD
     }
 
     do(): BooleanNumber {
-        const worksheet = this.getWorkSheet();
 
-        const result = SetRightToLeft(worksheet, this._doActionData.rightToLeft);
+        const result = SetRightToLeftApply(this.getSpreadsheetModel(), this._doActionData);
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -40,9 +39,7 @@ export class SetRightToLeftAction extends SheetActionBase<ISetRightToLeftActionD
     }
 
     undo(): void {
-        const { rightToLeft, sheetId } = this._oldActionData;
-        const worksheet = this.getWorkSheet();
-        SetRightToLeft(worksheet, this._oldActionData.rightToLeft);
+        SetRightToLeftApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

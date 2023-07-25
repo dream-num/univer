@@ -1,7 +1,8 @@
 import { SetHiddenGridlinesApply } from '../Apply/SetHiddenGridlines';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { ISetHiddenGridlinesActionData } from '../../Types/Interfaces/IActionModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { CommandModel } from '../../Command/CommandModel';
 
 /**
  * @internal

@@ -1,6 +1,6 @@
-import { Workbook } from '../Domain';
+import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
-export function SetSheetOrder(workbook: Workbook, sheetId: string, order: number): number {
+export function SetSheetOrderApply(spreadsheetModel: SpreadsheetModel, sheetId: string, order: number): number {
     const config = workbook.getConfig();
     const oldIndex = config.sheetOrder.findIndex((current) => current === sheetId);
     const exclude = config.sheetOrder.filter((currentId) => currentId !== sheetId);

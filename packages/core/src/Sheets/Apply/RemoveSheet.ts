@@ -9,7 +9,7 @@ export function RemoveSheetApply(spreadsheetModel: SpreadsheetModel, data: IRemo
     const sheetOrder = removeWorksheet.sheetOrder;
     delete spreadsheetModel.worksheets[data.sheetId];
     return {
-        sheetOrder,
-        sheet: removeWorksheet,
+        index: sheetOrder,
+        sheet: removeWorksheet.toJSON(),
     };
 }

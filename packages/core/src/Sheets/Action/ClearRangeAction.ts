@@ -6,7 +6,7 @@ import { SheetActionBase } from '../../Command/SheetActionBase';
 import { IClearRangeActionData, ISetRangeDataActionData } from '../../Types/Interfaces/IActionModel';
 import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
 import { CommandModel } from '../../Command/CommandModel';
-import { ActionObservers } from '../../Command/ActionBase';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
 
 /**
  * Clearly specify a range of styles, content, comments, validation, filtering

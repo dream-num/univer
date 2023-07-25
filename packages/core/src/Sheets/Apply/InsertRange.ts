@@ -1,8 +1,8 @@
 import { Dimension } from '../../Types/Enum';
 import { ICellData, IRangeData } from '../../Types/Interfaces';
-import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared';
-import { CommandModel } from '../../Command';
+import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { IInsertRangeActionData } from '../../Types/Interfaces/IActionModel';
+import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 /**
  *
@@ -59,12 +59,6 @@ export function InsertRange(
             }
         }
 
-        // insert cell value from user
-        // for (let r = endRow; r >= startRow; r--) {
-        //     for (let c = startColumn; c <= endColumn; c++) {
-        //         cellMatrix.setValue(r, c, (cellValue as ICellData)[r - startRow][c - startColumn]);
-        //     }
-        // }
         for (let r = startRow; r <= endRow; r++) {
             for (let c = endColumn; c >= startColumn; c--) {
                 cellMatrix.setValue(r, c, cellValue[r - startRow][c - startColumn]);
@@ -73,11 +67,11 @@ export function InsertRange(
     }
 }
 
-export function InsertRangeApply(unit: CommandModel, data: IInsertRangeActionData) {
-    const worksheet = unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
-    const rowCount = worksheet!.getLastRow();
-    const columnCount = worksheet!.getLastColumn();
-    const cellMatrix = worksheet!.getCellMatrix();
+export function InsertRangeApply(spreadsheetModel: SpreadsheetModel, data: IInsertRangeActionData) {
+    const worksheet = spreadsheetModel.worksheets[data.sheetId];
+    const cellMatrix = worksheet.cell;
+    const rowCount = cellMatrix.getLength();
+    const columnCount = cellMatrix.getRange().endColumn;
 
     const { startRow, endRow, startColumn, endColumn } = data.rangeData;
     const rows = endRow - startRow + 1;
@@ -110,12 +104,6 @@ export function InsertRangeApply(unit: CommandModel, data: IInsertRangeActionDat
                 cellMatrix.setValue(r, c + columns, value as ICellData);
             }
         }
-        // insert cell value from user
-        // for (let r = endRow; r >= startRow; r--) {
-        //     for (let c = startColumn; c <= endColumn; c++) {
-        //         cellMatrix.setValue(r, c, (cellValue as ICellData)[r - startRow][c - startColumn]);
-        //     }
-        // }
         for (let r = startRow; r <= endRow; r++) {
             for (let c = endColumn; c >= startColumn; c--) {
                 cellMatrix.setValue(r, c, data.cellValue[r - startRow][c - startColumn]);

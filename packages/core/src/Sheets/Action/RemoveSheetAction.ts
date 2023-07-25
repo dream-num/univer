@@ -18,11 +18,11 @@ export class RemoveSheetAction extends SheetActionBase<IRemoveSheetActionData, I
         };
     }
 
-    do(): { index: number; sheet: IWorksheetConfig } {
+    do(): { sheetOrder: number; sheet: IWorksheetConfig } {
         return this.redo();
     }
 
-    redo(): { index: number; sheet: IWorksheetConfig } {
+    redo(): { sheetOrder: number; sheet: IWorksheetConfig } {
         const result = RemoveSheetApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -33,7 +33,6 @@ export class RemoveSheetAction extends SheetActionBase<IRemoveSheetActionData, I
     }
 
     undo(): void {
-        const workbook = this.getWorkBook();
         InsertSheetApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,

@@ -25,6 +25,10 @@ export class WorksheetModel {
 
     style: IKeyType<Nullable<IStyleData>>;
 
+    rowCount: number;
+
+    columnCount: number;
+
     eachStyle(callback: (value: [string, Nullable<IStyleData>], index: number, array: Array<[string, Nullable<IStyleData>]>) => void) {
         Object.entries(this.style).forEach(callback);
         return this;

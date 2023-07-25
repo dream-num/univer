@@ -2,7 +2,9 @@ import { SheetActionBase } from '../../Command/SheetActionBase';
 import { IInsertRangeActionData, IDeleteRangeActionData } from '../../Types/Interfaces/IActionModel';
 import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
 import { CommandModel } from '../../Command/CommandModel';
-import { ActionObservers } from '../../Command/ActionBase';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { InsertRangeApply } from '../Apply/InsertRange';
+import { DeleteRangeApply } from '../Apply/DeleteRange';
 
 /**
  * Insert data into a range and move the range to the right or below
@@ -23,15 +25,12 @@ export class InsertRangeAction extends SheetActionBase<IInsertRangeActionData, I
     }
 
     do(): void {
-        const worksheet = this.getWorkSheet();
-        if (worksheet) {
-            InsertRangeApply(this.getSpreadsheetModel(), this._doActionData);
-            this._observers.notifyObservers({
-                type: ActionType.REDO,
-                data: this._doActionData,
-                action: this,
-            });
-        }
+        InsertRangeApply(this.getSpreadsheetModel(), this._doActionData);
+        this._observers.notifyObservers({
+            type: ActionType.REDO,
+            data: this._doActionData,
+            action: this,
+        });
     }
 
     redo(): void {
@@ -41,23 +40,21 @@ export class InsertRangeAction extends SheetActionBase<IInsertRangeActionData, I
 
     undo(): void {
         const { rangeData, sheetId, shiftDimension } = this._oldActionData;
-        const worksheet = this.getWorkSheet();
-        if (worksheet) {
-            // update current data
-            this._doActionData = {
-                actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-                // actionName: SetRangeDataAction.NAME,
-                sheetId,
-                cellValue: DeleteRangeApply(this.getSpreadsheetModel(), this._oldActionData),
-                rangeData,
-                shiftDimension,
-            };
-            this._observers.notifyObservers({
-                type: ActionType.UNDO,
-                data: this._oldActionData,
-                action: this,
-            });
-        }
+
+        // update current data
+        this._doActionData = {
+            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+            // actionName: SetRangeDataAction.NAME,
+            sheetId,
+            cellValue: DeleteRangeApply(this.getSpreadsheetModel(), this._oldActionData),
+            rangeData,
+            shiftDimension,
+        };
+        this._observers.notifyObservers({
+            type: ActionType.UNDO,
+            data: this._oldActionData,
+            action: this,
+        });
     }
 
     validate(): boolean {

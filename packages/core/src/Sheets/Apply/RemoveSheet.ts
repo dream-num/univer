@@ -6,8 +6,10 @@ export function RemoveSheetApply(spreadsheetModel: SpreadsheetModel, data: IRemo
         throw new Error(`Remove Sheet fail ${data.sheetId} is not exist`);
     }
     let removeWorksheet = spreadsheetModel.worksheets[data.sheetId];
+    const sheetOrder = removeWorksheet.sheetOrder;
     delete spreadsheetModel.worksheets[data.sheetId];
     return {
+        sheetOrder,
         sheet: removeWorksheet,
     };
 }

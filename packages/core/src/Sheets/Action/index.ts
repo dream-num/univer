@@ -1,8 +1,6 @@
 // @index('./*.ts', f => `export * from '${f.path}'`)
 export * from './AddMergeAction';
-export * from './AddNamedRangeAction';
 export * from './ClearRangeAction';
-export * from './DeleteNamedRangeAction';
 export * from './DeleteRangeAction';
 export * from './InsertColumnAction';
 export * from './InsertColumnDataAction';

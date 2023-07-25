@@ -50,16 +50,12 @@ export class DeleteRangeAction extends SheetActionBase<IDeleteRangeActionData, I
     }
 
     undo(): void {
-        const worksheet = this.getWorkSheet();
-        if (worksheet) {
-            InsertRangeApply(this.getSpreadsheetModel(), this._oldActionData);
-            this._observers.notifyObservers({
-                type: ActionType.UNDO,
-                data: this._oldActionData,
-                action: this,
-            });
-            // no need update current data
-        }
+        InsertRangeApply(this.getSpreadsheetModel(), this._oldActionData);
+        this._observers.notifyObservers({
+            type: ActionType.UNDO,
+            data: this._oldActionData,
+            action: this,
+        });
     }
 
     validate(): boolean {

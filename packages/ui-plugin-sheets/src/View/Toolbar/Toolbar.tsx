@@ -18,7 +18,7 @@ interface IState {
 }
 
 export class Toolbar extends Component<IProps, IState> {
-    static contextType: PreactContext<Partial<AppContextValues>> = AppContext;
+    static override contextType: PreactContext<Partial<AppContextValues>> = AppContext;
 
     toolbarRef = createRef();
 
@@ -37,7 +37,7 @@ export class Toolbar extends Component<IProps, IState> {
         this.setToolbarListWidth();
     }, 50);
 
-    initialize() {
+    override initialize() {
         this.state = {
             // Button contains main button and drop down arrow, translation file contains main and right
             showMore: false,

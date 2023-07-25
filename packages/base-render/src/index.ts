@@ -11,5 +11,5 @@ export * from './Canvas';
 export * from './Group';
 export * from './Shape';
 export * from './Component';
-export * from './RenderEngine';
+export { RenderEngine, IRenderingEngine } from './RenderEngine';
 export * from './ScrollTimer';

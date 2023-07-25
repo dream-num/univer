@@ -83,6 +83,7 @@ export class ToolbarUIController {
         style: 1,
     }; //存储边框信息
 
+    // eslint-disable-next-line max-lines-per-function
     constructor(plugin: SheetUIPlugin, config?: SheetToolbarConfig) {
         this._plugin = plugin;
 
@@ -90,6 +91,7 @@ export class ToolbarUIController {
 
         this._config = Tools.deepMerge({}, DefaultToolbarConfig, config);
 
+        // TODO@huwenzhao: toolbar config
         this._toolList = [
             {
                 toolbarType: 1,
@@ -208,7 +210,7 @@ export class ToolbarUIController {
                     this.hideTooltip();
                     const underlineItem = this._toolList.find((item) => item.name === 'underline');
                     if (!underlineItem) return;
-                    underlineItem.active = isUnderLine;
+                    underlineItem.active = isUnderLine; // huh? 如果是数据加载呢？
                     this.setUnderline(isUnderLine);
                 },
             },
@@ -625,6 +627,7 @@ export class ToolbarUIController {
         });
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _changeToolbarState(range: Range): void {
         const workbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
         const worksheet = workbook.getActiveSheet();
@@ -751,6 +754,10 @@ export class ToolbarUIController {
 
             if (currentUnitId !== actionUnitId) return;
 
+            // 所有功能的 UI 耦合在一起？
+            // 不同的环境下的 UI 需要全部重新写一遍？
+            // UI 没有可扩展性
+            // 这里有点问题的…… 每次都去全量获取状态？
             const manager = this._sheetPlugin.getSelectionManager();
             const range = manager?.getCurrentCell();
             if (range) {

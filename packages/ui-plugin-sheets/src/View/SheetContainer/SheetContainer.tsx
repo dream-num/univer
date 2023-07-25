@@ -38,7 +38,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
         this.changeSkin(props.config.container as string, 'default');
     }
 
-    componentDidMount() {
+    override componentDidMount() {
         this.props.getComponent?.(this);
     }
 
@@ -205,8 +205,13 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
                     <Sider style={{ display: config.outerLeft ? 'block' : 'none' }}></Sider>
                     <Layout className={style.mainContent} style={{ position: 'relative' }}>
                         <Header style={{ display: config.header ? 'block' : 'none' }}>
+                            {/* Info */}
                             {config.infoBar && <InfoBar {...methods.infoBar}></InfoBar>}
+
+                            {/* Toolbar */}
                             {config.toolbar && <Toolbar {...methods.toolbar}></Toolbar>}
+
+                            {/* FormularBar */}
                             {config.formulaBar && <FormulaBar {...methods.formulaBar}></FormulaBar>}
                         </Header>
                         <Layout>

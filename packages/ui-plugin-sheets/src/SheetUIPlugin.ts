@@ -6,7 +6,7 @@ import { DefaultSheetUIConfig, installObserver, ISheetUIPluginConfig, SheetUIPlu
 import { AppUIController } from './Controller/AppUIController';
 import { Fx } from './View/FormulaBar';
 import { SlotComponentProps } from './Controller/SlotController';
-import { IToolbarItemProps } from './Controller';
+import { IToolbarItemProps } from './Controller/ToolbarUIController';
 import { zh, en } from './Locale';
 
 export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
@@ -115,11 +115,11 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
 
     initUI() {}
 
-    onMounted(ctx: Context): void {
+    override onMounted(ctx: Context): void {
         this.initialize(ctx);
     }
 
-    onDestroy(): void {}
+    override onDestroy(): void {}
 
     getAppUIController() {
         return this._appUIController;

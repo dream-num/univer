@@ -1,11 +1,11 @@
-import { InsertDataColumnApply, RemoveColumnDataApply } from '../Apply';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { InsertDataColumnApply } from '../Apply/InsertDataColumn';
+import { RemoveColumnDataApply } from '../Apply/RemoveColumnData';
 import { ICellData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { IRemoveColumnDataAction, IInsertColumnDataActionData } from '../../Types/Interfaces/IActionModel';
-
-
+import { CommandModel } from '../../Command/CommandModel';
 
 /**
  * Remove the column data of the specified column index and column count

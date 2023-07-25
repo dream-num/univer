@@ -1,8 +1,11 @@
-import { SheetActionBase, ActionObservers, ActionType, CommandModel } from '../../Command';
-import { AddNamedRangeApply, DeleteNamedRangeApply } from '../Apply';
 import { INamedRange } from '../../Types/Interfaces';
 import { IAddNamedRangeActionData, IDeleteNamedRangeActionData } from '../../Types/Interfaces/IActionModel';
 import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
+import { DeleteNamedRangeApply } from '../Apply/DeleteNamedRange';
+import { SheetActionBase } from '../../Command/SheetActionBase';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { AddNamedRangeApply } from '../Apply/AddNamedRange';
 
 export class DeleteNamedRangeAction extends SheetActionBase<IDeleteNamedRangeActionData, IAddNamedRangeActionData, INamedRange> {
     constructor(actionData: IDeleteNamedRangeActionData, commandModel: CommandModel, observers: ActionObservers) {

@@ -1,8 +1,10 @@
-import { SheetActionBase, ActionObservers, ActionType, CommandModel } from '../../Command';
-import { SetNamedRangeApply } from '../Apply';
+import { SetNamedRangeApply } from '../ApplySetNamedRange';
 import { INamedRange } from '../../Types/Interfaces';
 import { ISetNamedRangeActionData } from '../../Types/Interfaces/IActionModel';
 import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
+import { SheetActionBase } from '../../Command/SheetActionBase';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers } from '../../Command/ActionBase';
 
 export class SetNamedRangeAction extends SheetActionBase<ISetNamedRangeActionData, ISetNamedRangeActionData, INamedRange> {
     constructor(actionData: ISetNamedRangeActionData, commandModel: CommandModel, observers: ActionObservers) {

@@ -1,4 +1,5 @@
-import { SetColumnHideApply, SetColumnShowApply } from '../Apply';
+import { SetColumnHideApply } from '../Apply/SetColumnHide';
+import { SetColumnShowApply } from '../Apply/SetColumnShow';
 import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { ISetColumnHideActionData, ISetColumnShowActionData } from '../../Types/Interfaces/IActionModel';

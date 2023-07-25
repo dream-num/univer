@@ -1,9 +1,11 @@
-import { InsertDataRowApply, RemoveRowDataApply } from '../Apply';
+import { RemoveRowDataApply } from '../Apply/RemoveRowData';
+import { InsertDataRowApply } from '../Apply/InsertDataRow';
 import { ICellData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { IRemoveRowDataActionData, IInsertRowDataActionData } from '../../Types/Interfaces/IActionModel';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
 /**
  * Remove the row data of the specified row index and row count
  *

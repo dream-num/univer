@@ -1,6 +1,6 @@
-import { ObjectMatrixPrimitiveType } from '../../Shared';
+import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { SetBorderApply } from '../Apply';
+import { SetBorderApply } from '../Apply/SetBorder';
 import { IStyleData } from '../../Types/Interfaces';
 import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { BorderStyleData } from '../../Types/Interfaces/IActionModel';

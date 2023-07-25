@@ -1,8 +1,10 @@
-import { addMergeApply, RemoveMergeApply } from '../Apply';
+import { RemoveMergeApply } from '../Apply/RemoveMerge';
+import { addMergeApply } from '../Apply/AddMerge';
 import { IRangeData } from '../../Types/Interfaces';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { IRemoveMergeActionData, IAddMergeActionData } from '../../Types/Interfaces/IActionModel';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
 
 /**
  * Remove merged cells from a specified range

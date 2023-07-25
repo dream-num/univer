@@ -1,7 +1,9 @@
-import { InsertRowApply, RemoveRowApply } from '../Apply';
+import { InsertRowApply } from '../Apply/InsertRow';
+import { RemoveRowApply } from '../Apply/RemoveRow';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { IRemoveRowActionData, IInsertRowActionData } from '../../Types/Interfaces/IActionModel';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
 
 /**
  * Remove the row configuration of the specified row index and row count

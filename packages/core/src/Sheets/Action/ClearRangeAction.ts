@@ -1,10 +1,12 @@
-import { ClearRangeApply, SetRangeDataApply } from '../Apply';
+import { ClearRangeApply } from '../Apply/ClearRange';
+import { SetRangeDataApply } from '../Apply/SetRangeData';
 import { ICellData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { IClearRangeActionData, ISetRangeDataActionData } from '../../Types/Interfaces/IActionModel';
 import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers } from '../../Command/ActionBase';
 
 /**
  * Clearly specify a range of styles, content, comments, validation, filtering
@@ -47,7 +49,6 @@ export class ClearRangeAction extends SheetActionBase<IClearRangeActionData, ISe
     }
 
     undo(): void {
-
         SetRangeDataApply(this.getSpreadsheetModel(), this._oldActionData);
         // no need update current data
         this._observers.notifyObservers({

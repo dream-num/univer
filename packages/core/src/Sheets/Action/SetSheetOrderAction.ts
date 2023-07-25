@@ -1,4 +1,4 @@
-import { SetSheetOrder } from '../Apply';
+import { SetSheetOrder } from '../Apply/SetSheetOrder';
 import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { ISetSheetOrderActionData } from '../../Types/Interfaces/IActionModel';

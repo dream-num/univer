@@ -1,4 +1,4 @@
-import { SetWorkSheetName } from '../Apply';
+import { SetWorkSheetName } from '../Apply/SetWorkSheetName';
 import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { ISetWorkSheetNameActionData } from '../../Types/Interfaces/IActionModel';

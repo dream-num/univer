@@ -1,9 +1,9 @@
-import { SetWorkSheetActivate } from '../Apply';
+import { SetWorkSheetActivate } from '../Apply/SetWorkSheetActivate';
 import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionOperationType, ActionType } from '../../Command/ActionBase';
-import { CommandModel } from '../../Command';
 import { ISetWorkSheetActivateActionData, ISheetStatus } from '../../Types/Interfaces/IActionModel';
 import { ACTION_NAMES } from '../../Types/Const';
+import { CommandModel } from '../../Command/CommandModel';
 
 /**
  * @internal

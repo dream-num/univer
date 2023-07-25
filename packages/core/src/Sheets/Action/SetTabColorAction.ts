@@ -1,9 +1,10 @@
-import { SetTabColor } from '../Apply';
+import { SetTabColor } from '../Apply/SetTabColor';
 import { Nullable } from '../../Shared/Types';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { ISetTabColorActionData } from '../../Types/Interfaces/IActionModel';
 import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers } from '../../Command/ActionBase';
 
 /**
  * @internal

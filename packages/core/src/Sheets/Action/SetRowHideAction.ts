@@ -1,7 +1,8 @@
-import { SetHideRow, SetShowRow } from '../Apply';
+import { SetHideRow } from '../Apply/SetHideRow';
+import { SetShowRow } from '../Apply/SetShowRow';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { ISetRowHideActionData, ISetRowShowActionData } from '../../Types/Interfaces/IActionModel';
+import { ActionType } from '../../Command/ActionBase';
 
 /**
  * Set row hiding based on specified row index and number of rows

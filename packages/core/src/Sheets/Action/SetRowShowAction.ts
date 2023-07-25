@@ -1,7 +1,9 @@
-import { SetHideRow, SetShowRow } from '../Apply';
+import { SetHideRow } from '../Apply/SetHideRow';
+import { SetShowRow } from '../Apply/SetShowRow';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { ISetRowShowActionData } from '../../Types/Interfaces/IActionModel';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
 
 /**
  * @internal

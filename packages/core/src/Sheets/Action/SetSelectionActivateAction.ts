@@ -1,8 +1,9 @@
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { SetSelectionActivate } from '../Apply';
-import { ActionObservers, ActionType, CommandModel } from '../../Command';
+import { SetSelectionActivate } from '../Apply/SetSelectionActivate';
 import { ISetSelectionActivateActionData, ISetSelectionActivateServiceData } from '../../Types/Interfaces/IActionModel';
 import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
 
 /**
  * @internal

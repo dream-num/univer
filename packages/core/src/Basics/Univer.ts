@@ -5,7 +5,7 @@ import { UniverDoc } from './UniverDoc';
 import { UniverSlide } from './UniverSlide';
 import { Nullable } from '../Shared';
 import { Context } from './Context';
-import { Plugin, PluginType } from '../Plugin';
+import { Plugin, PluginCtor, PluginType } from '../Plugin';
 import { IUniverData, IWorkbookConfig } from '../Types/Interfaces';
 import { UniverObserverImpl } from './UniverObserverImpl';
 
@@ -17,13 +17,13 @@ interface IPluginRegistryItem {
 class PluginRegistry {
     private readonly pluginsRegisteredByBusiness = new Map<PluginType, [IPluginRegistryItem]>();
 
-    registerPlugin(plugin: typeof Plugin, options: any) {
-        const type = plugin.type;
+    registerPlugin(pluginCtor: PluginCtor<any>, options: any) {
+        const type = pluginCtor.type;
         if (!this.pluginsRegisteredByBusiness.has(type)) {
             this.pluginsRegisteredByBusiness.set(type, [] as unknown[] as [IPluginRegistryItem]);
         }
 
-        this.pluginsRegisteredByBusiness.get(type)!.push({ plugin, options });
+        this.pluginsRegisteredByBusiness.get(type)!.push({ plugin: pluginCtor, options });
     }
 
     getRegisterPlugins(type: PluginType): [IPluginRegistryItem] {
@@ -79,10 +79,11 @@ export class Univer {
     }
 
     /** Register a plugin into univer. */
-    registerPlugin<T>(plugin: Ctor<T>, configs?: any): void {
+    registerPlugin<T extends Ctor<Plugin> & { type: PluginType }>(plugin: T, configs?: any): void {
         // TODO: type of `configs` could be optimized here using typescript infer
+
         if (plugin.type === PluginType.Univer) {
-            this.registerUniverPlugin(plugin);
+            this.registerUniverPlugin(plugin, configs);
         } else if (plugin.type === PluginType.Sheet) {
             this.registerSheetPlugin(plugin, configs);
         } else {
@@ -100,14 +101,6 @@ export class Univer {
         // TODO: initialize pligins for sheet
 
         return sheet;
-    }
-
-    private initializePluginsForSheet(sheet: UniverSheet): void {
-        const plugins = this._univerPluginRegistry.getRegisterPlugins(PluginType.Sheet);
-        plugins.forEach(p => {
-            const pluginInstance: Plugin = this._univerInjector.createInstance(p.plugin as unknown as Ctor<any>, p.options);
-            sheet.installPlugin(pluginInstance);
-        });
     }
 
     addUniverSheet(univerSheet: UniverSheet): void {
@@ -196,19 +189,33 @@ export class Univer {
         return new Injector();
     }
 
-    private registerUniverPlugin<T>(plugin: Ctor<T>, options?: any): void {
+    private registerUniverPlugin<T extends Plugin>(plugin: PluginCtor<T>, options?: any): void {
         // For plugins at Univer level. Plugins would be initialized immediately so they can register dependencies.
         const pluginInstance: Plugin = this._univerInjector.createInstance(plugin as unknown as Ctor<any>, options);
-        pluginInstance.onCreate(this._context); // TODO: remove this later
+
+        // TODO: remove these two lines later
+        pluginInstance.onCreate(this._context);
+        this._context.getPluginManager().install(pluginInstance);
+
         this._univerPluginStore.addPlugin(pluginInstance);
     }
 
-    private registerSheetPlugin(plugin: typeof Plugin, options?: any) {
+    private registerSheetPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
         // Add plugins to the plugin registration. And for each initialized UniverSheet, instantiate these dependencies immediately.
         if (this._univerSheets.length) {
-            // TODO: add plugin to these already instantiated UniverSheet instances.
+            this._univerSheets.forEach((sheet) => {
+                sheet.addPlugin(pluginCtor, options);
+            });
         } else {
-            this._univerPluginRegistry.registerPlugin(plugin, options);
+            this._univerPluginRegistry.registerPlugin(pluginCtor, options);
         }
+    }
+
+    private initializePluginsForSheet(sheet: UniverSheet): void {
+        const plugins = this._univerPluginRegistry.getRegisterPlugins(PluginType.Sheet);
+        plugins.forEach((p) => {
+            const pluginInstance: Plugin = this._univerInjector.createInstance(p.plugin as unknown as Ctor<any>, p.options);
+            sheet.installPlugin(pluginInstance);
+        });
     }
 }

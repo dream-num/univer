@@ -1,8 +1,8 @@
 import { CommandManager, SetWorkSheetActivateAction, SheetContext } from '@univerjs/core';
-import { Engine, Layer } from '@univerjs/base-render';
+import { Engine, IRenderingEngine, Layer } from '@univerjs/base-render';
 
 import { EditTooltips, EditTooltipsProps } from '../View/Views';
-import { IRenderingEngine, ISheetContext } from '../Services/tokens';
+import { ISheetContext } from '../Services/tokens';
 import { CANVAS_VIEW_KEY } from '../View';
 
 export class EditTooltipsController {

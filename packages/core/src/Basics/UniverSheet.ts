@@ -1,7 +1,7 @@
 import { Ctor, Injector, Optional, Disposable } from '@wendellhu/redi';
 import { Workbook, ColorBuilder } from '../Sheets/Domain';
 import { IWorkbookConfig } from '../Types/Interfaces';
-import { BasePlugin, Plugin } from '../Plugin';
+import { BasePlugin, Plugin, PluginCtor } from '../Plugin';
 import { IOHttp, IOHttpConfig, Logger } from '../Shared';
 import { SheetContext } from './SheetContext';
 import { VersionCode, VersionEnv } from './Version';
@@ -134,9 +134,12 @@ export class UniverSheet implements Disposable {
      * Add a plugin into UniverSheet. UniverSheet should add dependencies exposed from this plugin to its DI system.
      * @param plugin constructor of the plugin class
      */
-    addPlugin(plugin: typeof Plugin, options: any): void {
+    addPlugin<T extends Plugin>(plugin: PluginCtor<T>, options: any): void {
         const pluginInstance: Plugin = this._sheetInjector.createInstance(plugin as unknown as Ctor<any>, options);
-        pluginInstance.onCreate(this._context); // TODO: remove context passed in here
+
+        // TODO: remove context passed in here
+        pluginInstance.onCreate(this._context);
+
         this._pluginStore.addPlugin(pluginInstance);
     }
 

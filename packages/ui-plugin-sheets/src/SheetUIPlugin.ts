@@ -1,6 +1,7 @@
-import { Plugin, Tools, PLUGIN_NAMES, Context, Univer } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
+import { Plugin, Tools, Context, Univer, PluginType } from '@univerjs/core';
 import { ComponentManager, getRefElement, RegisterManager, KeyboardManager, SlotComponent, ZIndexManager } from '@univerjs/base-ui';
-import { RenderEngine } from '@univerjs/base-render';
+import { IRenderingEngine } from '@univerjs/base-render';
 import { DefaultSheetUIConfig, installObserver, ISheetUIPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';
 import { AppUIController } from './Controller/AppUIController';
 import { Fx } from './View/FormulaBar';
@@ -9,6 +10,8 @@ import { IToolbarItemProps } from './Controller';
 import { zh, en } from './Locale';
 
 export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
+    static override type = PluginType.Univer;
+
     private _appUIController: AppUIController;
 
     private _keyboardManager: KeyboardManager;
@@ -21,13 +24,14 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
 
     private _componentManager: ComponentManager;
 
-    constructor(config?: ISheetUIPluginConfig) {
+    constructor(config: ISheetUIPluginConfig, @Inject(Injector) private readonly _injector: Injector) {
         super(SHEET_UI_PLUGIN_NAME);
+
         this._config = Tools.deepMerge({}, DefaultSheetUIConfig, config);
     }
 
     static create(config?: ISheetUIPluginConfig) {
-        return new SheetUIPlugin(config);
+        return new SheetUIPlugin(config || {}, new Injector());
     }
 
     installTo(univerInstance: Univer) {
@@ -93,7 +97,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
     }
 
     initRender() {
-        const engine = this.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
+        const engine = this._injector.get(IRenderingEngine);
         let container = getRefElement(this._appUIController.getSheetContainerController().getContentRef());
 
         // mount canvas to DOM container

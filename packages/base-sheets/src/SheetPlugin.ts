@@ -1,6 +1,6 @@
-import { Engine, RenderEngine } from '@univerjs/base-render';
+import { Engine, IRenderingEngine } from '@univerjs/base-render';
 import { SheetContext, Plugin, PLUGIN_NAMES, DEFAULT_SELECTION, UniverSheet, UIObserver, PluginType } from '@univerjs/core';
-import { Dependency, Inject, Injector, Optional } from '@wendellhu/redi';
+import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
 import { CANVAS_VIEW_KEY } from './View/BaseView';
@@ -20,7 +20,7 @@ import { DEFAULT_SPREADSHEET_PLUGIN_DATA, install, ISheetPluginConfig } from './
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeActionExtension';
 import { en, zh } from './Locale';
-import { IGlobalContext, IRenderingEngine, ISelectionManager, ISheetContext, ISheetPlugin } from './Services/tokens';
+import { IGlobalContext, ISelectionManager, ISheetContext, ISheetPlugin } from './Services/tokens';
 import { DragLineController } from './Controller/Selection/DragLineController';
 import { ColumnTitleController } from './Controller/Selection/ColumnTitleController';
 import { RowTitleController } from './Controller/Selection/RowTitleController';
@@ -42,7 +42,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     private _rightMenuController: RightMenuController;
 
     private _toolbarController: ToolbarController;
-
 
     private _editTooltipsController: EditTooltipsController;
 
@@ -127,8 +126,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     }
 
     initCanvasView() {
-        const engine = this.getGlobalContext().getPluginManager().getRequirePluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER).getEngine();
-        this._canvasEngine = engine;
+        this._canvasEngine = this.sheetInjector.get(IRenderingEngine);
     }
 
     override onMounted(ctx: SheetContext): void {
@@ -272,10 +270,9 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     private initializeDependencies(sheetInjector: Injector) {
         const self = this;
 
-        const dependencies: Dependency[] = ([
+        const dependencies: Dependency[] = [
             [IGlobalContext, { useFactory: () => this.getGlobalContext() }],
             [ISheetContext, { useFactory: () => this.getContext() }],
-            [IRenderingEngine, { useFactory: () => this.getGlobalContext().getPluginManager().getRequirePluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER).getEngine() }],
             [ISheetPlugin, { useValue: self }],
 
             // Rendering Module
@@ -308,9 +305,9 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
             // RulerManager
             [ColumnRulerManager],
             // #endregion Controllers
-        ]);
+        ];
 
-        dependencies.forEach(d => {
+        dependencies.forEach((d) => {
             if (d.length === 1) {
                 sheetInjector.add(d[0]);
             } else {

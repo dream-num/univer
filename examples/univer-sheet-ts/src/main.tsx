@@ -1,4 +1,4 @@
-import { UniverSheet, Univer, LocaleType } from '@univerjs/core';
+import { Univer, LocaleType } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
@@ -18,9 +18,7 @@ const univer = new Univer({
 });
 
 // base-render
-univer.install(new RenderEngine());
-
-
+univer.registerPlugin(RenderEngine);
 // register plugins
 univer.registerPlugin(SheetPlugin);
 
@@ -30,21 +28,19 @@ univer.addUniverSheet(universheet);
 // base-sheet
 
 // ui-plugin-sheets
-univer.install(
-    new SheetUIPlugin({
-        container: 'universheet',
-        layout: {
-            sheetContainerConfig: {
-                infoBar: true,
-                formulaBar: true,
-                toolbar: true,
-                sheetBar: true,
-                countBar: true,
-                rightMenu: true,
-            },
+univer.registerPlugin(SheetUIPlugin, {
+    container: 'universheet',
+    layout: {
+        sheetContainerConfig: {
+            infoBar: true,
+            formulaBar: true,
+            toolbar: true,
+            sheetBar: true,
+            countBar: true,
+            rightMenu: true,
         },
-    })
-);
+    },
+});
 
 FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(universheet);
 FindPlugin.create().installTo(universheet);

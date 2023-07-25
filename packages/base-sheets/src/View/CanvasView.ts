@@ -1,11 +1,11 @@
 import { Inject, Injector } from '@wendellhu/redi';
 import { EventState, SheetContext, Worksheet } from '@univerjs/core';
 
-import { Engine, EVENT_TYPE, IScrollObserverParam, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univerjs/base-render';
+import { Engine, EVENT_TYPE, IRenderingEngine, IScrollObserverParam, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univerjs/base-render';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from './BaseView';
 import { SheetView } from './Views/SheetView';
 import './Views';
-import { IRenderingEngine, ISheetContext } from '../Services/tokens';
+import { ISheetContext } from '../Services/tokens';
 
 // workbook
 export class CanvasView {

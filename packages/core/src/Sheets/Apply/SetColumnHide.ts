@@ -1,6 +1,6 @@
-import { ColumnManager } from '../Domain/ColumnManager';
-import { CommandModel } from '../../Command';
 import { ISetColumnShowActionData } from '../../Types/Interfaces/IActionModel';
+import { SpreadsheetModel } from '../Model/SpreadsheetModel';
+import { BooleanNumber } from '../../Types/Enum';
 
 /**
  *
@@ -10,21 +10,23 @@ import { ISetColumnShowActionData } from '../../Types/Interfaces/IActionModel';
  *
  * @internal
  */
-export function SetColumnHide(columnIndex: number = 0, columnCount: number, columnManager: ColumnManager): void {
-    for (let i = columnIndex; i < columnIndex + columnCount; i++) {
-        const column = columnManager.getColumnOrCreate(i);
-        column.hd = 1;
-    }
-}
 
-export function SetColumnHideApply(unit: CommandModel, data: ISetColumnShowActionData) {
-    const workbook = unit.WorkBookUnit;
-    const worksheet = workbook!.getSheetBySheetId(data.sheetId)!;
+export function SetColumnHideApply(spreadsheetModel: SpreadsheetModel, data: ISetColumnShowActionData) {
+    const worksheetModel = spreadsheetModel.worksheets[data.sheetId];
+    const { column } = worksheetModel;
     const columnIndex = data.columnIndex;
     const columnCount = data.columnCount;
-    const columnManager = worksheet.getColumnManager();
+
     for (let i = columnIndex; i < columnIndex + columnCount; i++) {
-        const column = columnManager.getColumnOrCreate(i);
-        column.hd = 1;
+        const columnInfo = column.get(i);
+        if (columnInfo) {
+            columnInfo.hd = BooleanNumber.TRUE;
+        } else {
+            const defaultColumnInfo = {
+                w: worksheetModel.defaultColumnWidth,
+                hd: BooleanNumber.TRUE,
+            };
+            column.set(i, defaultColumnInfo);
+        }
     }
 }

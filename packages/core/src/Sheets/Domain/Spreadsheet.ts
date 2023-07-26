@@ -5,7 +5,15 @@ import { Merge } from './Merge';
 import { CommandManager } from '../../Command';
 import { Range } from './Range';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
-import { IInsertSheetActionData, IRemoveSheetActionData, ISetWorkSheetActivateActionData } from '../../Types/Interfaces/IActionModel';
+import {
+    IInsertSheetActionData,
+    IRemoveSheetActionData,
+    ISetColumnHideActionData,
+    ISetColumnShowActionData,
+    ISetRowHideActionData,
+    ISetRowShowActionData,
+    ISetWorkSheetActivateActionData,
+} from '../../Types/Interfaces/IActionModel';
 import { ACTION_NAMES } from '../../Types/Const';
 import { BooleanNumber } from '../../Types/Enum';
 import { Nullable } from '../../Shared';
@@ -32,7 +40,7 @@ export class Spreadsheet {
         this.range = new Range(this.commandManager, this.model);
         this.merge = new Merge();
         this.row = new Row(this.commandManager, this.model);
-        this.column = new Column();
+        this.column = new Column(this.commandManager, this.model);
         this.style = new Style(this.model);
     }
 
@@ -95,5 +103,77 @@ export class Spreadsheet {
         };
         const command = new SpreadsheetCommand(this.model, removeSheetAction);
         this.commandManager.invoke(command);
+    }
+
+    /**
+     * Hides one or more consecutive columns starting at the given index.
+     * @param columnIndex column index
+     * @param columnCount column count
+     * @returns WorkSheet Instance
+     */
+    hideColumns(columnIndex: number, columnCount: number, sheetId: string): string {
+        const hideColumnAction: ISetColumnHideActionData = {
+            actionName: ACTION_NAMES.SET_COLUMN_HIDE_ACTION,
+            columnCount,
+            columnIndex,
+            sheetId,
+        };
+        const command = new SpreadsheetCommand(this.model, hideColumnAction);
+        this.commandManager.invoke(command);
+        return sheetId;
+    }
+
+    /**
+     * Unhides one or more consecutive columns starting at the given index.
+     * @param columnIndex column index
+     * @param columnCount column count
+     * @returns WorkSheet Instance
+     */
+    showColumns(columnIndex: number, columnCount: number, sheetId: string): string {
+        const showColumnAction: ISetColumnShowActionData = {
+            actionName: ACTION_NAMES.SET_COLUMN_SHOW_ACTION,
+            sheetId,
+            columnCount,
+            columnIndex,
+        };
+        const command = new SpreadsheetCommand(this.model, showColumnAction);
+        this.commandManager.invoke(command);
+        return sheetId;
+    }
+
+    /**
+     * Hides one or more consecutive rows starting at the given index.
+     * @param rowIndex row index
+     * @param rowCount row count
+     * @returns WorkSheet Instance
+     */
+    hideRows(rowIndex: number, rowCount: number, sheetId: string): string {
+        const hideRowAction: ISetRowHideActionData = {
+            actionName: ACTION_NAMES.SET_ROW_HIDE_ACTION,
+            sheetId,
+            rowCount,
+            rowIndex,
+        };
+        const command = new SpreadsheetCommand(this.model, hideRowAction);
+        this.commandManager.invoke(command);
+        return sheetId;
+    }
+
+    /**
+     * Unhides one or more consecutive rows starting at the given index.
+     * @param rowIndex row index
+     * @param rowCount row count
+     * @returns WorkSheet Instance
+     */
+    showRows(rowIndex: number, rowCount: number, sheetId: string): string {
+        const showRowAction: ISetRowShowActionData = {
+            actionName: ACTION_NAMES.SET_ROW_SHOW_ACTION,
+            sheetId,
+            rowCount,
+            rowIndex,
+        };
+        const command = new SpreadsheetCommand(this.model, showRowAction);
+        this.commandManager.invoke(command);
+        return sheetId;
     }
 }

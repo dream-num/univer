@@ -1,7 +1,8 @@
-import { SetRowHeight } from '../Apply';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { CommandModel } from '../../Command/CommandModel';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { ISetRowHeightActionData } from '../../Types/Interfaces/IActionModel';
+import { SetRowHeightApply } from '../Apply/SetRowHeight';
 
 /**
  * Set the row height according to the specified row index
@@ -22,9 +23,7 @@ export class SetRowHeightAction extends SheetActionBase<ISetRowHeightActionData>
     }
 
     do(): number[] {
-        const worksheet = this.getWorkSheet();
-
-        const result = SetRowHeight(this._doActionData.rowIndex, this._doActionData.rowHeight, worksheet.getRowManager());
+        const result = SetRowHeightApply(this.getSpreadsheetModel(), this._doActionData);
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -40,9 +39,7 @@ export class SetRowHeightAction extends SheetActionBase<ISetRowHeightActionData>
     }
 
     undo(): number[] {
-        const worksheet = this.getWorkSheet();
-
-        const result = SetRowHeight(this._oldActionData.rowIndex, this._oldActionData.rowHeight, worksheet.getRowManager());
+        const result = SetRowHeightApply(this.getSpreadsheetModel(), this._oldActionData);
 
         this._observers.notifyObservers({
             type: ActionType.UNDO,

@@ -1,8 +1,9 @@
-import { SetHideRow } from '../Apply/SetHideRow';
-import { SetShowRow } from '../Apply/SetShowRow';
+import { CommandModel } from '../../Command/CommandModel';
 import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ISetRowHideActionData, ISetRowShowActionData } from '../../Types/Interfaces/IActionModel';
-import { ActionType } from '../../Command/ActionBase';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { SetRowHideApply } from '../Apply/SetRowHide';
+import { SetRowShowApply } from '../Apply/SetRowShow';
 
 /**
  * Set row hiding based on specified row index and number of rows
@@ -23,15 +24,14 @@ export class SetRowHideAction extends SheetActionBase<ISetRowHideActionData, ISe
     }
 
     do(): void {
-        const worksheet = this.getWorkSheet();
-
-        SetHideRow(this._doActionData.rowIndex, this._doActionData.rowCount, worksheet.getRowManager());
+        const result = SetRowHideApply(this.getSpreadsheetModel(), this._doActionData);
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
             action: this,
         });
+        return result;
     }
 
     redo(): void {
@@ -39,9 +39,7 @@ export class SetRowHideAction extends SheetActionBase<ISetRowHideActionData, ISe
     }
 
     undo(): void {
-        const worksheet = this.getWorkSheet();
-
-        SetShowRow(this._oldActionData.rowIndex, this._doActionData.rowCount, worksheet.getRowManager());
+        SetRowShowApply(this.getSpreadsheetModel(), this._doActionData);
 
         this._observers.notifyObservers({
             type: ActionType.UNDO,

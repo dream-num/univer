@@ -1,8 +1,9 @@
 import { SetColumnHideApply } from '../Apply/SetColumnHide';
 import { SetColumnShowApply } from '../Apply/SetColumnShow';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { ISetColumnShowActionData } from '../../Types/Interfaces/IActionModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { CommandModel } from '../../Command/CommandModel';
 
 /**
  * Set column display based on specified column index and number of columns

@@ -3,8 +3,8 @@ import { SetRangeDataApply } from '../Apply/SetRangeData';
 import { ICellData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { IClearRangeActionData, ISetRangeDataActionData } from '../../Types/Interfaces/IActionModel';
-import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
+import { IClearRangeActionData, ISetRangeDataActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
+import { SHEET_ACTION_NAMES } from '../../Types/Const/SHEET_ACTION_NAMES';
 import { CommandModel } from '../../Command/CommandModel';
 import { ActionObservers, ActionType } from '../../Command/ActionBase';
 
@@ -41,7 +41,7 @@ export class ClearRangeAction extends SheetActionBase<IClearRangeActionData, ISe
         // update pre data
         const { sheetId } = this._doActionData;
         this._oldActionData = {
-            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+            actionName: SHEET_ACTION_NAMES.SET_RANGE_DATA_ACTION,
             // actionName: SetRangeDataAction.NAME,
             sheetId,
             cellValue: this.do(),

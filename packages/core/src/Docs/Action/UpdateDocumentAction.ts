@@ -1,10 +1,9 @@
 import { DocActionBase } from '../../Command/DocActionBase';
-import { ActionObservers, CommandManager, CommandModel } from '../../Command';
-import { IUpdateDocumentActionData } from './ActionDataInterface';
+import { IUpdateDocumentActionData } from '../../Types/Interfaces/IDocActionInterfaces';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers } from '../../Command/ActionBase';
 
 export class UpdateDocumentAction extends DocActionBase<IUpdateDocumentActionData, IUpdateDocumentActionData> {
-    static NAME = 'UpdateDocumentAction';
-
     constructor(actionData: IUpdateDocumentActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
         this._doActionData = { ...actionData };
@@ -18,7 +17,7 @@ export class UpdateDocumentAction extends DocActionBase<IUpdateDocumentActionDat
 
     do(): void {
         const actionData = this.getDoActionData();
-        const document = this.getDocument();
+        const documentModel = this.getDocumentModel();
         // InsertTextApply(document, actionData.text);
     }
 
@@ -31,5 +30,3 @@ export class UpdateDocumentAction extends DocActionBase<IUpdateDocumentActionDat
         return false;
     }
 }
-
-CommandManager.register(UpdateDocumentAction.NAME, UpdateDocumentAction);

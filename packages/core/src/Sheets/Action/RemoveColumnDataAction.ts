@@ -4,7 +4,7 @@ import { RemoveColumnDataApply } from '../Apply/RemoveColumnData';
 import { ICellData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { IRemoveColumnDataAction, IInsertColumnDataActionData } from '../../Types/Interfaces/IActionModel';
+import { IRemoveColumnDataAction, IInsertColumnDataActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { CommandModel } from '../../Command/CommandModel';
 
 /**

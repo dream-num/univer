@@ -12,7 +12,7 @@ import {
     ObjectMatrix,
     ICellData,
     ISetRangeDataActionData,
-    ACTION_NAMES,
+    SHEET_ACTION_NAMES,
     ISetColumnWidthActionData,
     ISetRowHeightActionData,
     SetRowHeightAction,
@@ -167,7 +167,7 @@ export class UniverPaste extends Paste {
 
         const setValue: ISetRangeDataActionData = {
             sheetId,
-            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+            actionName: SHEET_ACTION_NAMES.SET_RANGE_DATA_ACTION,
             cellValue: cellValue.getData(),
         };
 
@@ -182,7 +182,7 @@ export class UniverPaste extends Paste {
                 const columnWidth = [colInfo[i]];
                 const setColumnWidth: ISetColumnWidthActionData = {
                     sheetId,
-                    actionName: ACTION_NAMES.SET_COLUMN_WIDTH_ACTION,
+                    actionName: SHEET_ACTION_NAMES.SET_COLUMN_WIDTH_ACTION,
                     columnIndex,
                     columnWidth,
                 };

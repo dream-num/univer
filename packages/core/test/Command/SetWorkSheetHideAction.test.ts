@@ -3,7 +3,7 @@
  */
 import { SheetContext } from '../../src/Basics';
 import { CommandManager, SetWorkSheetHideAction } from '../../src/Command';
-import { ACTION_NAMES } from '../../src/Types/Const';
+import { SHEET_ACTION_NAMES } from '../../src/Types/Const';
 import { Workbook, Worksheet } from '../../src/Sheets/Domain';
 import { BooleanNumber } from '../../src/Types/Enum';
 import { createCoreTestContainer } from '../ContainerStartUp';
@@ -19,7 +19,7 @@ test('Set WorkSheet Hide', () => {
     workbook.insertSheet(worksheet);
 
     const observers = CommandManager.getActionObservers();
-    const actionName = ACTION_NAMES.HIDE_SHEET_ACTION;
+    const actionName = SHEET_ACTION_NAMES.HIDE_SHEET_ACTION;
     const configure = {
         actionName,
         sheetId,

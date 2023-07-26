@@ -1,4 +1,4 @@
-import { ISetColumnShowActionData } from '../../Types/Interfaces/IActionModel';
+import { ISetColumnShowActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 import { BooleanNumber } from '../../Types/Enum';
 

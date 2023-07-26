@@ -2,7 +2,7 @@ import { ISpreadsheetConfig } from '../Types/Interfaces';
 import { Plugin } from '../Plugin';
 import { IOHttp, IOHttpConfig } from '../Shared';
 import { SheetContext } from './SheetContext';
-import { ColorBuilder } from '../Sheets/Domain/Color';
+import { ColorBuilder } from '../Shared/Color';
 import { CommandManager } from '../Command/CommandManager';
 import { Spreadsheet } from '../Sheets/Domain/Spreadsheet';
 

@@ -1,7 +1,7 @@
 import { ActionObservers, ActionType } from '../../Command/ActionBase';
 import { CommandModel } from '../../Command/CommandModel';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ISetRowHeightActionData } from '../../Types/Interfaces/IActionModel';
+import { ISetRowHeightActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SetRowHeightApply } from '../Apply/SetRowHeight';
 
 /**

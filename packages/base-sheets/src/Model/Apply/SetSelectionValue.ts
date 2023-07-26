@@ -1,5 +1,4 @@
-import { PLUGIN_NAMES, Worksheet } from '@univerjs/core';
-import { SheetPlugin } from '../..';
+import { SpreadsheetModel } from '@univerjs/core/src/Sheets/Model/SpreadsheetModel';
 import { ISelectionModelValue } from '../Action/SetSelectionValueAction';
 
 /**
@@ -12,12 +11,12 @@ import { ISelectionModelValue } from '../Action/SetSelectionValueAction';
  *
  * @internal
  */
-export function SetSelectionValue(worksheet: Worksheet, selections: ISelectionModelValue[]): ISelectionModelValue[] {
-    const selectionManager = worksheet.getContext().getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET).getSelectionManager();
+export function SetSelectionValueApply(spreadsheetModel: SpreadsheetModel, data: ISetSelectionValueActionData): ISelectionModelValue[] {
+    // const selectionManager = worksheet.getContext().getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET).getSelectionManager();
 
-    const result = selectionManager.getCurrentModelsValue();
+    // const result = selectionManager.getCurrentModelsValue();
 
-    selectionManager.setModels(selections);
+    // selectionManager.setModels(selections);
 
     return result;
 }

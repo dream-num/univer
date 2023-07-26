@@ -1,23 +1,24 @@
 import { DocActionBase } from '../../Command/DocActionBase';
-import { ActionObservers, ActionType, CommandManager, CommandModel, CommonParameter } from '../../Command';
 import { DOC_ACTION_NAMES } from '../../Types/Const/DOC_ACTION_NAMES';
 import { InsertApply } from '../Apply/InsertApply';
 import { DeleteApply } from '../Apply/DeleteApply';
-import { IInsertActionData, IDeleteActionData } from './ActionDataInterface';
+import { IInsertActionData, IDeleteActionData } from '../../Types/Interfaces/IDocActionInterfaces';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { CommonParameter } from '../../Command/CommonParameter';
 
 export class InsertAction extends DocActionBase<IInsertActionData, IDeleteActionData> {
-    static NAME = 'InsertAction';
-
     constructor(actionData: IInsertActionData, commandModel: CommandModel, observers: ActionObservers, commonParameter: CommonParameter) {
         super(actionData, commandModel, observers);
         this._doActionData = { ...actionData };
         this.do(commonParameter);
-        const { segmentId, line, len } = actionData;
+        const { segmentId, line, len, cursor } = actionData;
         this._oldActionData = {
             actionName: DOC_ACTION_NAMES.DELETE_ACTION_NAME,
             len,
             line,
             segmentId,
+            cursor,
         };
     }
 
@@ -27,10 +28,11 @@ export class InsertAction extends DocActionBase<IInsertActionData, IDeleteAction
 
     do(commonParameter: CommonParameter): void {
         const actionData = this.getDoActionData();
-        const document = this.getDocument();
+        const documentModel = this.getDocumentModel();
+        actionData.cursor = commonParameter.cursor;
         const { body, len, segmentId } = actionData;
 
-        InsertApply(document, body, len, commonParameter.cursor, segmentId);
+        InsertApply(documentModel, actionData);
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -44,10 +46,10 @@ export class InsertAction extends DocActionBase<IInsertActionData, IDeleteAction
 
     undo(commonParameter: CommonParameter): void {
         const actionData = this.getOldActionData();
-        const document = this.getDocument();
+        const documentModel = this.getDocumentModel();
         const { len, segmentId } = actionData;
 
-        DeleteApply(document, len, commonParameter.cursor, segmentId);
+        DeleteApply(documentModel, actionData);
 
         commonParameter.moveCursor(len);
         // DeleteTextApply(document, { ...actionData });
@@ -64,5 +66,3 @@ export class InsertAction extends DocActionBase<IInsertActionData, IDeleteAction
         return false;
     }
 }
-
-CommandManager.register(InsertAction.NAME, InsertAction);

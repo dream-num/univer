@@ -2,7 +2,7 @@ import { InsertDataRowApply } from '../Apply/InsertDataRow';
 import { RemoveRowDataApply } from '../Apply/RemoveRowData';
 import { ObjectArray } from '../../Shared/ObjectArray';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { IInsertRowDataActionData, IRemoveRowDataActionData } from '../../Types/Interfaces/IActionModel';
+import { IInsertRowDataActionData, IRemoveRowDataActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { CommandModel } from '../../Command/CommandModel';
 import { ActionObservers, ActionType } from '../../Command/ActionBase';
 

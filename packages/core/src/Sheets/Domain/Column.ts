@@ -1,6 +1,6 @@
 import { CommandManager } from '../../Command';
-import { ACTION_NAMES } from '../../Types/Const';
-import { ISetColumnWidthActionData } from '../../Types/Interfaces/IActionModel';
+import { SHEET_ACTION_NAMES } from '../../Types/Const';
+import { ISetColumnWidthActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 import { SpreadsheetCommand } from './SpreadsheetCommand';
 
@@ -16,7 +16,7 @@ export class Column {
     setColumnWidth(columnIndex: number, columnWidth: number[], sheetId: string): void {
         const setColumnWidthAction: ISetColumnWidthActionData = {
             sheetId,
-            actionName: ACTION_NAMES.SET_COLUMN_WIDTH_ACTION,
+            actionName: SHEET_ACTION_NAMES.SET_COLUMN_WIDTH_ACTION,
             columnIndex,
             columnWidth,
         };

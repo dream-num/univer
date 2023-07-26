@@ -1,7 +1,7 @@
 import { IRowData } from '../../Types/Interfaces';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 import { ObjectArray } from '../../Shared/ObjectArray';
-import { IRemoveRowActionData } from '../../Types/Interfaces/IActionModel';
+import { IRemoveRowActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 
 export function RemoveRowApply(spreadsheetModel: SpreadsheetModel, data: IRemoveRowActionData): number {
     const worksheet = spreadsheetModel.worksheets[data.sheetId];

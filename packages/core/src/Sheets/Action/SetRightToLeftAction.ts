@@ -1,6 +1,6 @@
 import { BooleanNumber } from '../../Types/Enum';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ISetRightToLeftActionData } from '../../Types/Interfaces/IActionModel';
+import { ISetRightToLeftActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SetRightToLeftApply } from '../Apply/SetRightToLeft';
 import { CommandModel } from '../../Command/CommandModel';
 import { ActionObservers, ActionType } from '../../Command/ActionBase';

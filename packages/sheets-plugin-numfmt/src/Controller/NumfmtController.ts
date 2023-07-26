@@ -5,7 +5,7 @@ import {
     ObjectMatrix,
     IRangeData,
     Range,
-    ACTION_NAMES as CORE_ACTION_NAME,
+    SHEET_ACTION_NAMES as CORE_ACTION_NAME,
     ICellData,
     ActionOperation,
     ISetRangeDataActionData,

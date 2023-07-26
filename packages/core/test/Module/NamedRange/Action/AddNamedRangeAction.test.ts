@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { ACTION_NAMES } from '../../../../src';
+import { SHEET_ACTION_NAMES } from '../../../../src';
 import { SheetContext } from '../../../../src/Basics';
 import { ActionObservers, AddNamedRangeAction } from '../../../../src/Command';
 import { Workbook, Worksheet } from '../../../../src/Sheets/Domain';
@@ -36,7 +36,7 @@ test('Add NamedRange Action Test', () => {
     new AddNamedRangeAction(
         {
             sheetId: worksheet.getSheetId(),
-            actionName: ACTION_NAMES.ADD_NAMED_RANGE_ACTION,
+            actionName: SHEET_ACTION_NAMES.ADD_NAMED_RANGE_ACTION,
             namedRange,
         },
         workbook,

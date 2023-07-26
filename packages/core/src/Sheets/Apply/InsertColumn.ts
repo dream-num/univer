@@ -1,5 +1,5 @@
 import { ObjectArray } from '../../Shared/ObjectArray';
-import { IRemoveColumnAction } from '../../Types/Interfaces/IActionModel';
+import { IRemoveColumnAction } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 export function InsertColumnApply(spreadsheetModel: SpreadsheetModel, data: IRemoveColumnAction): void {

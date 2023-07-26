@@ -1,6 +1,6 @@
-import { ThemeColorType, ColorType, ThemeColors } from '../../Types/Enum';
-import { THEME_COLORS } from '../../Types/Const/THEME_COLOR_MAP';
-import { Nullable } from '../../Shared/Types';
+import { ThemeColorType, ColorType, ThemeColors } from '../Types/Enum';
+import { THEME_COLORS } from '../Types/Const/THEME_COLOR_MAP';
+import { Nullable } from './Types';
 
 export class Color {
     protected _builder: ColorBuilder;

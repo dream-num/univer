@@ -1,14 +1,8 @@
-import { UniverSheet, Univer, LocaleType } from '@univerjs/core';
+import { Univer, LocaleType } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
-import { SheetPlugin } from '@univerjs/base-sheets';
-import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
-import { OperationPlugin } from '@univerjs/sheets-plugin-operation';
-import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
-import { OverGridImagePlugin } from '@univerjs/sheets-plugin-image';
-import { FindPlugin } from '@univerjs/sheets-plugin-find';
-import { DEFAULT_FORMULA_DATA_DEMO, FormulaPlugin } from '@univerjs/sheets-plugin-formula';
-import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
+import { initRender } from './init';
+import { SheetPlugin } from '@univerjs/base-sheets';
 
 const uiDefaultConfigDemo = {
     container: 'universheet',
@@ -39,17 +33,21 @@ const univer = new Univer({
     locale: LocaleType.EN,
 });
 
+const renderEngine = new RenderEngine();
 // base-render
-// univer.install(new RenderEngine());
+univer.install(renderEngine);
 
 // universheet instance
-// const universheet = univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO)
+const universheet = univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
+
 // // universheet instance
 // const universheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 // // sheet.installPlugin(new RenderEngine());
 // univer.addUniverSheet(universheet);
 // base-sheet
-// universheet.installPlugin(new SheetPlugin());
+universheet.installPlugin(new SheetPlugin());
+
+initRender(renderEngine);
 
 // universheet.installPlugin(new FormulaPlugin(DEFAULT_FORMULA_DATA_DEMO));
 

@@ -1,5 +1,5 @@
 import { IColumnData } from '../../Types/Interfaces/IColumnData';
-import { IRemoveColumnAction } from '../../Types/Interfaces/IActionModel';
+import { IRemoveColumnAction } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { ObjectArray } from '../../Shared/ObjectArray';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 

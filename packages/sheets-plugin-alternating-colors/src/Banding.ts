@@ -58,7 +58,7 @@ export class Banding {
 
     //     // Organize action data
     //     const actionData: ISetBandingActionData = {
-    //         actionName: ACTION_NAMES.SET_BANDING_ACTION,
+    //         actionName: SHEET_ACTION_NAMES.SET_BANDING_ACTION,
     //         bandedRange: {
     //             bandedRangeId,
     //             rangeData,
@@ -175,7 +175,7 @@ export class Banding {
 
     //     // Organize action data
     //     const actionData: ISetBandingActionData = {
-    //         actionName: ACTION_NAMES.SET_BANDING_ACTION,
+    //         actionName: SHEET_ACTION_NAMES.SET_BANDING_ACTION,
     //         bandedRange: {
     //             bandedRangeId,
     //             rangeData: range.getRangeData(),

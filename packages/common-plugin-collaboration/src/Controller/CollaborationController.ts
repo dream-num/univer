@@ -1,7 +1,7 @@
 import { SheetPlugin, SetSelectionValueAction, ISetSelectionValueActionData } from '@univerjs/base-sheets';
 import {
     ActionOperation,
-    ACTION_NAMES,
+    SHEET_ACTION_NAMES,
     Command,
     CommandManager,
     HEART_BEAT_MESSAGE,
@@ -96,7 +96,7 @@ export class CollaborationController {
                 const { actionName } = message.actionData;
 
                 switch (actionName) {
-                    case ACTION_NAMES.SET_RANGE_DATA_ACTION:
+                    case SHEET_ACTION_NAMES.SET_RANGE_DATA_ACTION:
                         this.refreshRange(message);
                         break;
                     case SetSelectionValueAction.NAME:
@@ -230,7 +230,7 @@ export class CollaborationController {
 
         let setValue: ISetRangeDataActionData = {
             sheetId: worksheet.getSheetId(),
-            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+            actionName: SHEET_ACTION_NAMES.SET_RANGE_DATA_ACTION,
             cellValue,
         };
         setValue = ActionOperation.make<ISetRangeDataActionData>(setValue).removeCollaboration().getAction();
@@ -307,7 +307,7 @@ export class CollaborationController {
             return;
         }
 
-        this._collaborationActionList = [ACTION_NAMES.SET_RANGE_DATA_ACTION, SetSelectionValueAction.NAME];
+        this._collaborationActionList = [SHEET_ACTION_NAMES.SET_RANGE_DATA_ACTION, SetSelectionValueAction.NAME];
 
         this._initSocket(url);
         this._initObserver();
@@ -401,7 +401,7 @@ export class CollaborationController {
             const action = actions[0] as SheetActionBase<ISheetActionData, ISheetActionData, void>;
             const actionName = action.getDoActionData().actionName;
 
-            if (actionName !== ACTION_NAMES.SET_RANGE_DATA_ACTION) return;
+            if (actionName !== SHEET_ACTION_NAMES.SET_RANGE_DATA_ACTION) return;
 
             const context = plugin.getUniver().getCurrentUniverSheetInstance().context;
 

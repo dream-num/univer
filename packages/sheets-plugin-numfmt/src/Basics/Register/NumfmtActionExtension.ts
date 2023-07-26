@@ -1,4 +1,4 @@
-import { BaseActionExtension, BaseActionExtensionFactory, ISetRangeDataActionData, ObjectMatrix, ISheetActionData, ACTION_NAMES, ActionOperation } from '@univerjs/core';
+import { BaseActionExtension, BaseActionExtensionFactory, ISetRangeDataActionData, ObjectMatrix, ISheetActionData, SHEET_ACTION_NAMES, ActionOperation } from '@univerjs/core';
 import { numfmt } from '@univerjs/base-numfmt-engine';
 import { ACTION_NAMES as PLUGIN_ACTION_NAMES } from '../Enum';
 import { NumfmtPlugin } from '../../NumfmtPlugin';
@@ -13,7 +13,7 @@ export class NumfmtActionExtension extends BaseActionExtension<NumfmtPlugin> {
                 return false;
             }
 
-            if (actionData.actionName !== ACTION_NAMES.SET_RANGE_DATA_ACTION) {
+            if (actionData.actionName !== SHEET_ACTION_NAMES.SET_RANGE_DATA_ACTION) {
                 return false;
             }
 

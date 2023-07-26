@@ -1,5 +1,5 @@
 import { Rectangle } from '../../Shared/Rectangle';
-import { IRemoveMergeActionData } from '../../Types/Interfaces/IActionModel';
+import { IRemoveMergeActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { IRangeData } from '../../Types/Interfaces/IRangeData';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 

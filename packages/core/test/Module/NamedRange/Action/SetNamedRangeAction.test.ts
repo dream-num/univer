@@ -3,7 +3,7 @@
  */
 import {
     ActionObservers,
-    ACTION_NAMES,
+    SHEET_ACTION_NAMES,
     AddNamedRangeAction,
     SetNamedRangeAction,
 } from '../../../../src';
@@ -41,7 +41,7 @@ test('Set NamedRange Action Test', () => {
     new AddNamedRangeAction(
         {
             sheetId: worksheet.getSheetId(),
-            actionName: ACTION_NAMES.ADD_NAMED_RANGE_ACTION,
+            actionName: SHEET_ACTION_NAMES.ADD_NAMED_RANGE_ACTION,
             namedRange,
         },
         workbook,
@@ -60,7 +60,7 @@ test('Set NamedRange Action Test', () => {
     new SetNamedRangeAction(
         {
             sheetId: worksheet.getSheetId(),
-            actionName: ACTION_NAMES.SET_NAMED_RANGE_ACTION,
+            actionName: SHEET_ACTION_NAMES.SET_NAMED_RANGE_ACTION,
             namedRange: newNamedRange,
         },
         workbook,

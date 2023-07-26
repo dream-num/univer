@@ -1,7 +1,7 @@
 import { SetWorkSheetStatusApply } from '../Apply/SetWorkSheetStatus';
-import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
+import { SHEET_ACTION_NAMES } from '../../Types/Const/SHEET_ACTION_NAMES';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ISetWorkSheetStatusActionData } from '../../Types/Interfaces/IActionModel';
+import { ISetWorkSheetStatusActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { ActionObservers, ActionType } from '../../Command/ActionBase';
 import { CommandModel } from '../../Command/CommandModel';
 
@@ -39,7 +39,7 @@ export class SetWorkSheetStatusAction extends SheetActionBase<ISetWorkSheetStatu
         const { sheetId } = this._doActionData;
         this._oldActionData = {
             sheetId,
-            actionName: ACTION_NAMES.SET_WORKSHEET_STATUS_ACTION,
+            actionName: SHEET_ACTION_NAMES.SET_WORKSHEET_STATUS_ACTION,
             sheetStatus: this.do(),
         };
     }
@@ -48,7 +48,7 @@ export class SetWorkSheetStatusAction extends SheetActionBase<ISetWorkSheetStatu
         const { sheetId } = this._oldActionData;
         // update current data
         this._doActionData = {
-            actionName: ACTION_NAMES.SET_WORKSHEET_STATUS_ACTION,
+            actionName: SHEET_ACTION_NAMES.SET_WORKSHEET_STATUS_ACTION,
             sheetId,
             sheetStatus: SetWorkSheetStatusApply(this.getSpreadsheetModel(), this._oldActionData),
         };

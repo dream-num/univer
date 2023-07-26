@@ -46,7 +46,7 @@ export class FilterPlugin extends Plugin {
         // const worksheet = workbook.getActiveSheet();
         // if (worksheet) {
         //     const configure = {
-        //         actionName: ACTION_NAMES.ADD_FILTER_ACTION,
+        //         actionName: SHEET_ACTION_NAMES.ADD_FILTER_ACTION,
         //         filter: filter.toSequence(),
         //         sheetId: worksheet.getSheetId(),
         //     };

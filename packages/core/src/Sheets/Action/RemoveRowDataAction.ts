@@ -3,7 +3,7 @@ import { InsertDataRowApply } from '../Apply/InsertDataRow';
 import { ICellData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { IRemoveRowDataActionData, IInsertRowDataActionData } from '../../Types/Interfaces/IActionModel';
+import { IRemoveRowDataActionData, IInsertRowDataActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { CommandModel } from '../../Command/CommandModel';
 import { ActionObservers, ActionType } from '../../Command/ActionBase';
 /**

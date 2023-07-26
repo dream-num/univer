@@ -2,7 +2,7 @@ import { IDocumentBody, ITextRun } from '../../Types/Interfaces/IDocumentData';
 
 import { Nullable } from '../../Shared/Types';
 import { DataStreamTreeNode } from './DataStreamTreeNode';
-import { DataStreamTreeNodeType, DataStreamTreeTokenType } from './Types';
+import { DataStreamTreeNodeType, DataStreamTreeTokenType } from '../Domain/Types';
 
 export type DocumentBodyModelOrSimple = DocumentBodyModelSimple | DocumentBodyModel;
 

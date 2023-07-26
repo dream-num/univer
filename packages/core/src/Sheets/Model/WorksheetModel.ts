@@ -2,6 +2,7 @@ import { ObjectArray } from '../../Shared/ObjectArray';
 import { ObjectMatrix } from '../../Shared/ObjectMatrix';
 import { Tools } from '../../Shared/Tools';
 import { IKeyType, Nullable } from '../../Shared/Types';
+import { DEFAULT_WORKSHEET } from '../../Types/Const';
 import { BooleanNumber } from '../../Types/Enum/TextStyle';
 import { IWorksheetConfig } from '../../Types/Interfaces';
 import { ICellData } from '../../Types/Interfaces/ICellData';
@@ -40,7 +41,7 @@ export class WorksheetModel {
     defaultColumnWidth: number;
 
     toJSON(): IWorksheetConfig {
-        return {};
+        return DEFAULT_WORKSHEET;
     }
 
     eachStyle(callback: (value: [string, Nullable<IStyleData>], index: number, array: Array<[string, Nullable<IStyleData>]>) => void) {

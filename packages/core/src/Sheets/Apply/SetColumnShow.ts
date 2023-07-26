@@ -1,5 +1,5 @@
 import { BooleanNumber } from '../../Types/Enum';
-import { ISetColumnShowActionData } from '../../Types/Interfaces/IActionModel';
+import { ISetColumnShowActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 /**

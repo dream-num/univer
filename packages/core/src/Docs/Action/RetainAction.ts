@@ -1,14 +1,14 @@
 import { DocActionBase } from '../../Command/DocActionBase';
-import { ActionObservers, CommandManager, CommandModel, CommonParameter } from '../../Command';
-import { IRetainActionData } from './ActionDataInterface';
+import { IRetainActionData } from '../../Types/Interfaces/IDocActionInterfaces';
 import { UpdateDocsAttributeType } from '../../Shared/CommandEnum';
 import { UpdateAttributeApply } from '../Apply/UpdateAttributeApply';
 import { IDocumentBody } from '../../Types/Interfaces';
 import { Nullable } from '../../Shared';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers } from '../../Command/ActionBase';
+import { CommonParameter } from '../../Command/CommonParameter';
 
 export class RetainAction extends DocActionBase<IRetainActionData, IRetainActionData> {
-    static NAME = 'RetainAction';
-
     constructor(actionData: IRetainActionData, commandModel: CommandModel, observers: ActionObservers, commonParameter: CommonParameter) {
         super(actionData, commandModel, observers);
         this._doActionData = { ...actionData };
@@ -25,10 +25,11 @@ export class RetainAction extends DocActionBase<IRetainActionData, IRetainAction
 
     do(commonParameter: CommonParameter): Nullable<IDocumentBody> {
         const actionData = this.getDoActionData();
-        const document = this.getDocument();
+        const documentModel = this.getDocumentModel();
+        actionData.cursor = commonParameter.cursor;
         const { len, segmentId, body, coverType } = actionData;
 
-        let result: Nullable<IDocumentBody> = UpdateAttributeApply(document, body, len, commonParameter.cursor, coverType, segmentId);
+        let result: Nullable<IDocumentBody> = UpdateAttributeApply(documentModel, actionData);
 
         commonParameter.moveCursor(len);
 
@@ -37,10 +38,10 @@ export class RetainAction extends DocActionBase<IRetainActionData, IRetainAction
 
     undo(commonParameter: CommonParameter): void {
         const actionData = this.getOldActionData();
-        const document = this.getDocument();
+        const documentModel = this.getDocumentModel();
         const { len, segmentId, body, coverType } = actionData;
 
-        if (body) UpdateAttributeApply(document, body, len, commonParameter.cursor, coverType, segmentId);
+        if (body) UpdateAttributeApply(documentModel, actionData);
 
         commonParameter.moveCursor(len);
     }
@@ -49,5 +50,3 @@ export class RetainAction extends DocActionBase<IRetainActionData, IRetainAction
         return false;
     }
 }
-
-CommandManager.register(RetainAction.NAME, RetainAction);

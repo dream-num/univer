@@ -1,4 +1,4 @@
-import { IRemoveSheetActionData } from '../../Types/Interfaces/IActionModel';
+import { IRemoveSheetActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 export function RemoveSheetApply(spreadsheetModel: SpreadsheetModel, data: IRemoveSheetActionData) {

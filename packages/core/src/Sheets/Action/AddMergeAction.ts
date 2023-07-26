@@ -3,7 +3,7 @@ import { CommandModel } from '../../Command/CommandModel';
 import { ActionObservers } from '../../Command/ActionBase';
 import { addMergeApply } from '../Apply/AddMerge';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { IAddMergeActionData, IRemoveMergeActionData } from '../../Types/Interfaces/IActionModel';
+import { IAddMergeActionData, IRemoveMergeActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { RemoveMergeApply } from '../Apply/RemoveMerge';
 
 /**

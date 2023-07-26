@@ -1,5 +1,5 @@
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ISetColumnWidthActionData } from '../../Types/Interfaces/IActionModel';
+import { ISetColumnWidthActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { CommandModel } from '../../Command/CommandModel';
 import { ActionObservers, ActionType } from '../../Command/ActionBase';
 import { SetColumnWidthApply } from '../Apply/SetColumnWidth';

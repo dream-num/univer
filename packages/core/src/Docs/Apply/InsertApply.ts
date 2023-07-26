@@ -1,12 +1,16 @@
 import { IDocumentBody } from '../../Types/Interfaces/IDocumentData';
-import { DocumentModel } from '../Domain/Document';
+
+import { DocumentModel } from '../Model/DocumentModel';
+import { IInsertActionData } from '../../Types/Interfaces/IDocActionInterfaces';
 import { getDocsUpdateBody } from '../../Shared/Common';
 import { insertCustomBlocks, insertCustomRanges, insertParagraphs, insertSectionBreaks, insertTables, insertTextRuns } from './Common';
 
-export function InsertApply(document: DocumentModel, insertBody: IDocumentBody, textLength: number, currentIndex: number, segmentId?: string) {
-    const doc = document.snapshot;
+export function InsertApply(documentModel: DocumentModel, data: IInsertActionData) {
+    // export function InsertApply(document: DocumentModel, insertBody: IDocumentBody, textLength: number, currentIndex: number, segmentId?: string) {
+    const { len: textLength, body: insertBody, cursor: currentIndex, segmentId } = data;
+    const doc = documentModel.getSnapshot();
 
-    const bodyModel = document.getBodyModel(segmentId);
+    const bodyModel = documentModel.getBodyModel(segmentId);
 
     const body = getDocsUpdateBody(doc, segmentId);
 

@@ -1,8 +1,8 @@
 import { SetWorkSheetActivate } from '../Apply/SetWorkSheetActivate';
 import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ActionObservers, ActionOperationType, ActionType } from '../../Command/ActionBase';
-import { ISetWorkSheetActivateActionData, ISheetStatus } from '../../Types/Interfaces/IActionModel';
-import { ACTION_NAMES } from '../../Types/Const';
+import { ISetWorkSheetActivateActionData, ISheetStatus } from '../../Types/Interfaces/ISheetActionInterfaces';
+import { SHEET_ACTION_NAMES } from '../../Types/Const';
 import { CommandModel } from '../../Command/CommandModel';
 
 /**
@@ -40,7 +40,7 @@ export class SetWorkSheetActivateAction extends SheetActionBase<ISetWorkSheetAct
         // update pre data
         const { oldSheetId, status } = this.do();
         this._oldActionData = {
-            actionName: ACTION_NAMES.SET_WORKSHEET_ACTIVATE_ACTION,
+            actionName: SHEET_ACTION_NAMES.SET_WORKSHEET_ACTIVATE_ACTION,
             // actionName: SetWorkSheetActivateAction.NAME,
             sheetId: oldSheetId,
             status,
@@ -51,7 +51,7 @@ export class SetWorkSheetActivateAction extends SheetActionBase<ISetWorkSheetAct
         const { oldSheetId, status } = SetWorkSheetActivate(this.getSpreadsheetModel(), this._oldActionData);
         // update current data
         this._doActionData = {
-            actionName: ACTION_NAMES.SET_WORKSHEET_ACTIVATE_ACTION,
+            actionName: SHEET_ACTION_NAMES.SET_WORKSHEET_ACTIVATE_ACTION,
             // actionName: SetWorkSheetActivateAction.NAME,
             sheetId: oldSheetId,
             status,

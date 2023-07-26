@@ -1,22 +1,17 @@
-import { IDocumentBody } from '../../Interfaces/IDocumentData';
-import { DocumentModel } from '../Domain/Document';
-import { getDocsUpdateBody, horizontalLineSegmentsSubtraction } from '../../Shared/Common';
 import { UpdateDocsAttributeType } from '../../Shared/CommandEnum';
-import { Nullable } from '../../Shared/Types';
+import { getDocsUpdateBody, horizontalLineSegmentsSubtraction } from '../../Shared/Common';
+import { IRetainActionData } from '../../Types/Interfaces/IDocActionInterfaces';
+import { IDocumentBody } from '../../Types/Interfaces/IDocumentData';
+import { DocumentModel } from '../Model/DocumentModel';
 
-export function UpdateAttributeApply(
-    document: DocumentModel,
-    updateBody: Nullable<IDocumentBody>,
-    textLength: number,
-    currentIndex: number,
-    coverType: UpdateDocsAttributeType,
-    segmentId?: string
-) {
+export function UpdateAttributeApply(documentModel: DocumentModel, data: IRetainActionData) {
+    const { len: textLength, body: updateBody, cursor: currentIndex, coverType, segmentId } = data;
+
     if (updateBody == null) {
         return;
     }
 
-    const doc = document.snapshot;
+    const doc = documentModel.getSnapshot();
 
     const body = getDocsUpdateBody(doc, segmentId);
 

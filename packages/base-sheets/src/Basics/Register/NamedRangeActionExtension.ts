@@ -1,6 +1,6 @@
 import {
     ActionOperation,
-    ACTION_NAMES,
+    SHEET_ACTION_NAMES,
     BaseActionExtension,
     BaseActionExtensionFactory,
     ISetNamedRangeActionData,
@@ -22,7 +22,7 @@ export class NamedRangeActionExtension extends BaseActionExtension<SheetPlugin> 
                 return false;
             }
 
-            if (actionData.actionName === ACTION_NAMES.INSERT_ROW_ACTION) {
+            if (actionData.actionName === SHEET_ACTION_NAMES.INSERT_ROW_ACTION) {
                 const { sheetId, rowCount, rowIndex } = actionData as IInsertRowActionData;
                 const namedRanges = Tools.deepClone(this._plugin.getWorkbook().getConfig().namedRanges);
 
@@ -38,7 +38,7 @@ export class NamedRangeActionExtension extends BaseActionExtension<SheetPlugin> 
                     }
 
                     const actionData: ISetNamedRangeActionData = {
-                        actionName: ACTION_NAMES.SET_NAMED_RANGE_ACTION,
+                        actionName: SHEET_ACTION_NAMES.SET_NAMED_RANGE_ACTION,
                         namedRange: namedRanges[i],
                         sheetId,
                     };

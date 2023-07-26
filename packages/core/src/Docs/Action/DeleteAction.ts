@@ -1,15 +1,15 @@
 import { DocActionBase } from '../../Command/DocActionBase';
-import { ActionObservers, ActionType, CommandManager, CommandModel, CommonParameter } from '../../Command';
 
 import { DOC_ACTION_NAMES } from '../../Types/Const/DOC_ACTION_NAMES';
 import { IDocumentBody } from '../../Types/Interfaces';
 import { DeleteApply } from '../Apply/DeleteApply';
 import { InsertApply } from '../Apply/InsertApply';
-import { IDeleteActionData, IInsertActionData } from './ActionDataInterface';
+import { IDeleteActionData, IInsertActionData } from '../../Types/Interfaces/IDocActionInterfaces';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { CommonParameter } from '../../Command/CommonParameter';
 
 export class DeleteAction extends DocActionBase<IDeleteActionData, IInsertActionData> {
-    static Name = 'DeleteAction';
-
     constructor(actionData: IDeleteActionData, commandModel: CommandModel, observers: ActionObservers, commonParameter: CommonParameter) {
         super(actionData, commandModel, observers);
         this._doActionData = { ...actionData };
@@ -37,10 +37,11 @@ export class DeleteAction extends DocActionBase<IDeleteActionData, IInsertAction
 
     do(commonParameter: CommonParameter): IDocumentBody {
         const actionData = this.getDoActionData();
-        const document = this.getDocument();
+        const documentModel = this.getDocumentModel();
+        actionData.cursor = commonParameter.cursor;
         const { len, segmentId } = actionData;
 
-        const body = DeleteApply(document, len, commonParameter.cursor, segmentId);
+        const body = DeleteApply(documentModel, actionData);
 
         commonParameter.moveCursor(len);
 
@@ -56,10 +57,10 @@ export class DeleteAction extends DocActionBase<IDeleteActionData, IInsertAction
 
     undo(commonParameter: CommonParameter): void {
         const actionData = this.getOldActionData();
-        const document = this.getDocument();
+        const documentModel = this.getDocumentModel();
         const { body, len, segmentId } = actionData;
 
-        InsertApply(document, body, len, commonParameter.cursor, segmentId);
+        InsertApply(documentModel, actionData);
 
         commonParameter.moveCursor(len);
 
@@ -75,5 +76,3 @@ export class DeleteAction extends DocActionBase<IDeleteActionData, IInsertAction
         return false;
     }
 }
-
-CommandManager.register(DeleteAction.Name, DeleteAction);

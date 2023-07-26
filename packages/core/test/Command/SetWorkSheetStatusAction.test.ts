@@ -3,7 +3,7 @@
  */
 import { SheetContext } from '../../src/Basics';
 import { CommandManager, SetWorkSheetStatusAction } from '../../src/Command';
-import { ACTION_NAMES } from '../../src/Types/Const';
+import { SHEET_ACTION_NAMES } from '../../src/Types/Const';
 import { Workbook, Worksheet } from '../../src/Sheets/Domain';
 import { createCoreTestContainer } from '../ContainerStartUp';
 
@@ -20,7 +20,7 @@ test('Set WorkSheet Status', () => {
     workbook.insertSheet(worksheet);
 
     const observers = CommandManager.getActionObservers();
-    const actionName = ACTION_NAMES.SET_WORKSHEET_STATUS_ACTION;
+    const actionName = SHEET_ACTION_NAMES.SET_WORKSHEET_STATUS_ACTION;
     const newStatus = 0;
     const configure = {
         actionName,

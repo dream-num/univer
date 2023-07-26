@@ -1,11 +1,13 @@
-import { Command, CommandManager } from '../../Command';
 import { IDocumentBody, IDocumentData } from '../../Types/Interfaces/IDocumentData';
 import { ITextSelectionRange } from '../../Types/Interfaces/ISelectionData';
 import { DOC_ACTION_NAMES } from '../../Types/Const/DOC_ACTION_NAMES';
-import { IKeyValue, Tools, getTextIndexByCursor } from '../../Shared';
-import { DocumentBodyModel } from './DocumentBodyModel';
-import { DEFAULT_DOC } from '../../Types/Const';
+import { DocumentBodyModel } from '../Model/DocumentBodyModel';
 import { DocumentModel } from '../Model/DocumentModel';
+import { DocumentCommand } from './DocumentCommand';
+import { CommandManager } from '../../Command/CommandManager';
+import { Tools } from '../../Shared/Tools';
+import { getTextIndexByCursor } from '../../Shared/Common';
+import { IKeyValue } from '../../Shared/Types';
 
 interface IDrawingUpdateConfig {
     left: number;
@@ -17,6 +19,9 @@ interface IDrawingUpdateConfig {
 export type DocumentOrSimple = DocumentSimple | Document;
 
 export class DocumentSimple {
+    /**
+     * @deprecated
+     */
     snapshot: IDocumentData;
 
     model: DocumentModel;
@@ -27,17 +32,18 @@ export class DocumentSimple {
 
     footerTreeMap: Map<string, DocumentBodyModel>;
 
+    /**
+     * @deprecated
+     */
     bodyModel: DocumentBodyModel;
 
     constructor(snapshot: Partial<IDocumentData>, commandManager: CommandManager) {
-        // this.snapshot = snapshot;
-        this.snapshot = { ...DEFAULT_DOC, ...snapshot };
         this.commandManager = commandManager;
         this.model = new DocumentModel(snapshot);
 
-        if (this.snapshot.body != null) {
-            this.bodyModel = DocumentBodyModel.create(this.snapshot.body);
-        }
+        // TODO use model to get snapshot or body model
+        this.snapshot = this.model.getSnapshot();
+        this.bodyModel = this.model.getBodyModel();
     }
 
     get drawings() {
@@ -160,12 +166,7 @@ export class Document extends DocumentSimple {
             segmentId,
         });
 
-        const command = new Command(
-            {
-                DocumentUnit: this,
-            },
-            ...actionList
-        );
+        const command = new DocumentCommand(this.getModel(), ...actionList);
         commandManager.invoke(command);
         return this;
     }
@@ -175,12 +176,7 @@ export class Document extends DocumentSimple {
 
         const deleteActionList = this._getDeleteAction(range, segmentId);
 
-        const command = new Command(
-            {
-                DocumentUnit: this,
-            },
-            ...deleteActionList
-        );
+        const command = new DocumentCommand(this.getModel(), ...deleteActionList);
         commandManager.invoke(command);
         return this;
     }
@@ -208,12 +204,7 @@ export class Document extends DocumentSimple {
             segmentId,
         });
 
-        const command = new Command(
-            {
-                DocumentUnit: this,
-            },
-            ...actionList
-        );
+        const command = new DocumentCommand(this.getModel(), ...actionList);
         commandManager.invoke(command);
         return this;
     }
@@ -246,12 +237,7 @@ export class Document extends DocumentSimple {
             segmentId,
         });
 
-        const command = new Command(
-            {
-                DocumentUnit: this,
-            },
-            ...actionList
-        );
+        const command = new DocumentCommand(this.getModel(), ...actionList);
         _commandManager.invoke(command);
         return this;
     }

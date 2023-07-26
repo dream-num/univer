@@ -1,5 +1,5 @@
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ISetRowShowActionData } from '../../Types/Interfaces/IActionModel';
+import { ISetRowShowActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { CommandModel } from '../../Command/CommandModel';
 import { ActionObservers, ActionType } from '../../Command/ActionBase';
 import { SetRowShowApply } from '../Apply/SetRowShow';

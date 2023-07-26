@@ -1,8 +1,8 @@
 import { SetTabColor } from '../Apply/SetTabColor';
 import { Nullable } from '../../Shared/Types';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ISetTabColorActionData } from '../../Types/Interfaces/IActionModel';
-import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
+import { ISetTabColorActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
+import { SHEET_ACTION_NAMES } from '../../Types/Const/SHEET_ACTION_NAMES';
 import { CommandModel } from '../../Command/CommandModel';
 import { ActionObservers, ActionType } from '../../Command/ActionBase';
 
@@ -40,7 +40,7 @@ export class SetTabColorAction extends SheetActionBase<ISetTabColorActionData, I
         const { sheetId } = this._doActionData;
         this._oldActionData = {
             sheetId,
-            actionName: ACTION_NAMES.SET_TAB_COLOR_ACTION,
+            actionName: SHEET_ACTION_NAMES.SET_TAB_COLOR_ACTION,
             // actionName: SetTabColorAction.NAME,
             color: this.do(),
         };
@@ -50,7 +50,7 @@ export class SetTabColorAction extends SheetActionBase<ISetTabColorActionData, I
         const { color, sheetId } = this._oldActionData;
         // update current data
         this._doActionData = {
-            actionName: ACTION_NAMES.SET_TAB_COLOR_ACTION,
+            actionName: SHEET_ACTION_NAMES.SET_TAB_COLOR_ACTION,
             // actionName: SetTabColorAction.NAME,
             sheetId,
             color: SetTabColor(this.getSpreadsheetModel(), color),

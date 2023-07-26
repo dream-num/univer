@@ -20,7 +20,7 @@ export class DescSortAction extends SheetActionBase<IDescSortData, IAscSortData>
 }
 
 // const actionData: IDescSortData = {
-//     actionName: ACTION_NAMES.DESC_SORT_ACTION,
+//     actionName: SHEET_ACTION_NAMES.DESC_SORT_ACTION,
 //     range: range.getRangeData(),
 //     sheetId: this._workSheet.getSheetId(),
 // };

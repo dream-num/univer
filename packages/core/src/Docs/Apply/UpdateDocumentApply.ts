@@ -1,10 +1,10 @@
-import { DocumentModel } from '../Domain/Document';
 import { getDocsUpdateBody } from '../../Shared/Common';
+import { DocumentModel } from '../Model/DocumentModel';
 
-export function UpdateDocumentApply(document: DocumentModel, textLength: number, currentIndex: number, segmentId?: string) {
-    const doc = document.snapshot;
+export function UpdateDocumentApply(documentModel: DocumentModel, textLength: number, currentIndex: number, segmentId?: string) {
+    const doc = documentModel.getSnapshot();
 
-    const bodyModel = document.getBodyModel(segmentId);
+    const bodyModel = documentModel.getBodyModel(segmentId);
 
     const body = getDocsUpdateBody(doc, segmentId);
 

@@ -1,6 +1,6 @@
-import { RowManager } from '../Domain';
-import { CommandModel } from '../../Command';
+import { BooleanNumber } from '../../Types/Enum';
 import { ISetRowHeightActionData } from '../../Types/Interfaces/IActionModel';
+import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 /**
  *
@@ -11,28 +11,28 @@ import { ISetRowHeightActionData } from '../../Types/Interfaces/IActionModel';
  *
  * @internal
  */
-export function SetRowHeight(rowIndex: number = 0, rowHeight: number[], rowManager: RowManager) {
-    const result: number[] = [];
-    for (let i = rowIndex; i < rowIndex + rowHeight.length; i++) {
-        const row = rowManager.getRowOrCreate(i);
-        result[i - rowIndex] = row.h;
-        row.h = rowHeight[i - rowIndex];
-    }
-    return result;
-}
 
-export function SetRowHeightApply(unit: CommandModel, data: ISetRowHeightActionData) {
-    const workbook = unit.WorkBookUnit;
-    const worksheet = workbook!.getSheetBySheetId(data.sheetId);
+export function SetRowHeightApply(spreadsheetModel: SpreadsheetModel, data: ISetRowHeightActionData) {
+    const worksheetModel = spreadsheetModel.worksheets[data.sheetId];
+    const { row } = worksheetModel;
     const rowIndex = data.rowIndex;
     const rowHeight = data.rowHeight;
-    const rowManager = worksheet!.getRowManager();
 
     const result: number[] = [];
     for (let i = rowIndex; i < rowIndex + rowHeight.length; i++) {
-        const row = rowManager.getRowOrCreate(i);
-        result[i - rowIndex] = row.h;
-        row.h = rowHeight[i - rowIndex];
+        const rowInfo = row.get(i);
+        const height = rowHeight[i - rowIndex];
+        if (rowInfo) {
+            result[i - rowIndex] = rowInfo.h;
+            rowInfo.h = height;
+        } else {
+            const defaultRowInfo = {
+                h: height,
+                hd: BooleanNumber.FALSE,
+            };
+            row.set(i, defaultRowInfo);
+            result[i - rowIndex] = worksheetModel.defaultRowHeight;
+        }
     }
     return result;
 }

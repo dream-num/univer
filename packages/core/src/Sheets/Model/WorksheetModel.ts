@@ -35,6 +35,10 @@ export class WorksheetModel {
 
     rightToLeft: BooleanNumber;
 
+    defaultRowHeight: number;
+
+    defaultColumnWidth: number;
+
     toJSON(): IWorksheetConfig {
         return {};
     }

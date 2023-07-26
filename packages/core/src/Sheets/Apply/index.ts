@@ -1,6 +1,5 @@
 // @index('./*.ts', f => `export * from '${f.path}'`)
 export * from './AddMerge';
-export * from './ClearRange';
 export * from './DeleteRange';
 export * from './HideSheet';
 export * from './InsertColumn';
@@ -19,12 +18,12 @@ export * from './SetColumnHide';
 export * from './SetColumnShow';
 export * from './SetColumnWidth';
 export * from './SetHiddenGridlines';
-export * from './SetHideRows';
+export * from './SetRowHide';
 export * from './SetRangeData';
 export * from './SetRightToLeft';
 export * from './SetRowHeight';
 export * from './SetSheetOrder';
-export * from './SetShowRow';
+export * from './SetRowShow';
 export * from './SetTabColor';
 export * from './SetWorkSheetActivate';
 export * from './SetWorkSheetName';

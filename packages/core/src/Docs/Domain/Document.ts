@@ -52,6 +52,10 @@ export class DocumentSimple {
         return this.snapshot.lists;
     }
 
+    getModel() {
+        return this.model;
+    }
+
     getBodyModel(segmentId?: string) {
         if (segmentId == null) {
             return this.bodyModel;

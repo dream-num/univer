@@ -8,4 +8,8 @@ export class Slide {
     constructor(private snapshot: Partial<ISlideData>, private commandManager: CommandManager) {
         this.model = new SlideModel(snapshot);
     }
+
+    getModel(){
+        return this.model;
+    }
 }

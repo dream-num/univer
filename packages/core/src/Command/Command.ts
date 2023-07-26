@@ -1,39 +1,54 @@
-import { Class, Nullable } from '../Shared';
-import { Workbook } from '../Sheets';
-import {
-    IActionData,
-    ActionType,
-    ActionBase,
-    CommandInjector,
-    CommandManager,
-    ActionOperation,
-    CommonParameter,
-} from './index';
-import { DocumentModel } from '../Docs/Domain/DocumentModel';
+import { Class, Nullable } from '../Shared/Types';
+import { ActionBase, ActionObservers, ActionType, IActionData } from './ActionBase';
+import { ActionOperation } from './ActionOperation';
+import { CommandInjector } from './CommandInjectorObservers';
+import { CommandModel } from './CommandModel';
+import { CommonParameter } from './CommonParameter';
+import { Observable } from '../Observer';
+import { RegisterAction } from './RegisterAction';
 
-export class CommandUnit {
-    WorkBookUnit?: Workbook;
-
-    DocumentUnit?: DocumentModel;
+/**
+ * Command observer props
+ */
+interface ICommandObserverProps {
+    type: ActionType;
+    actions: Array<ActionBase<IActionData>>;
 }
+
+/**
+ * Command observers
+ */
+export class CommandObservers extends Observable<ICommandObserverProps> {}
 
 /**
  * Execute the undo-redo command
  *
  */
 export class Command {
-    actionDataList: IActionData[];
+    private static _commandObservers: CommandObservers;
 
-    unit: CommandUnit;
+    private static _actionObservers: ActionObservers;
+
+    actionDataList: IActionData[];
 
     actionList: Array<ActionBase<IActionData>>;
 
+    commandModel: CommandModel;
+
     private _commonParameter = new CommonParameter();
 
-    constructor(commandUnit: CommandUnit, ...list: IActionData[]) {
-        this.unit = commandUnit;
-        this.actionDataList = list;
+    constructor(commandModel: CommandModel, ...list: IActionData[]) {
+        this.commandModel = commandModel;
         this.actionList = [];
+        this.actionDataList = list;
+    }
+
+    static getCommandObservers(): CommandObservers {
+        return this._commandObservers;
+    }
+
+    static getActionObservers(): ActionObservers {
+        return this._actionObservers;
     }
 
     redo(): void {
@@ -42,7 +57,7 @@ export class Command {
                 action.redo(this._commonParameter.reset());
             }
         });
-        CommandManager.getCommandObservers().notifyObservers({
+        Command.getCommandObservers().notifyObservers({
             type: ActionType.REDO,
             actions: this.actionList,
         });
@@ -58,7 +73,7 @@ export class Command {
                 action.undo(this._commonParameter.reset());
             }
         });
-        CommandManager.getCommandObservers().notifyObservers({
+        Command.getCommandObservers().notifyObservers({
             type: ActionType.UNDO,
             actions: this.actionList,
         });
@@ -66,23 +81,14 @@ export class Command {
 
     invoke(): void {
         this.actionDataList.forEach((data) => {
-            const ActionClass = CommandManager.getAction(data.actionName);
+            const ActionClass = RegisterAction.getAction(data.actionName);
             if (!ActionClass) return;
-            const observers = CommandManager.getActionObservers();
-            const action = new ActionClass(
-                data,
-                this.unit,
-                observers,
-                this._commonParameter.reset()
-            );
-
+            const observers = Command.getActionObservers();
+            const action = new ActionClass(data, this.commandModel, observers, this._commonParameter.reset());
             this.actionList.push(action);
         });
 
-        CommandManager.getCommandInjectorObservers().notifyObservers(
-            this.getInjector()
-        );
-        CommandManager.getCommandObservers().notifyObservers({
+        Command.getCommandObservers().notifyObservers({
             type: ActionType.REDO,
             actions: this.actionList,
         });

@@ -1,21 +1,17 @@
 import { ISlideData } from '../Types/Interfaces';
 import { Plugin } from '../Plugin';
-import { IOHttp, IOHttpConfig, Logger } from '../Shared';
+import { IOHttp, IOHttpConfig } from '../Shared';
 import { SlideContext } from './SlideContext';
-import { VersionCode, VersionEnv } from './Version';
-import { ColorBuilder } from '../Sheets/Domain/ColorBuilder';
+import { CommandManager } from '../Command/CommandManager';
 
 /**
  * Externally provided UniverSlide root instance
  */
 export class UniverSlide {
-    UniverSlideConfig: Partial<ISlideData>;
-
     private _context: SlideContext;
 
-    constructor(UniverSlideData: Partial<ISlideData> = {}) {
-        this.UniverSlideConfig = UniverSlideData;
-        this._context = new SlideContext(UniverSlideData);
+    constructor(univerSlideData: Partial<ISlideData> = {}, private commandManager: CommandManager) {
+        this._context = new SlideContext(univerSlideData, this.commandManager);
     }
 
     /**
@@ -25,9 +21,12 @@ export class UniverSlide {
         return this._context;
     }
 
-    static newInstance(UniverSlideData: Partial<ISlideData> = {}): UniverSlide {
-        Logger.capsule(VersionEnv, VersionCode, 'powered by :: UniverSlide :: ');
-        return new UniverSlide(UniverSlideData);
+    /**
+     * get universlide id
+     * @returns
+     */
+    getUnitId(): string {
+        return this._context.getSlide().getModel().getUnitId();
     }
 
     /**
@@ -49,10 +48,6 @@ export class UniverSlide {
      */
     static post<T = void>(config: Omit<IOHttpConfig, 'type'>): Promise<T> {
         return IOHttp({ ...config, type: 'POST' });
-    }
-
-    static newColor(): ColorBuilder {
-        return new ColorBuilder();
     }
 
     /**

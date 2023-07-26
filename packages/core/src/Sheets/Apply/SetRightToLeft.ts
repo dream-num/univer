@@ -1,50 +1,16 @@
-import { Worksheet } from '../Domain';
-import { BooleanNumber } from '../../Types/Enum';
-import { CommandUnit } from '../../Command';
-import { ISetRightToLeftActionData } from '../Action';
+import { ISetRightToLeftActionData } from '../../Types/Interfaces/IActionModel';
+import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
-/**
- *
- * @param worksheet
- * @param rightToLeft
- * @returns
- *
- * @internal
- */
-export function SetRightToLeft(
-    worksheet: Worksheet,
-    rightToLeft: BooleanNumber
-): BooleanNumber {
-    // get config
-    const config = worksheet.getConfig();
-
-    // store old sheet name
-    const oldState = config.rightToLeft;
-
-    // set new sheet name
-    config.rightToLeft = rightToLeft;
-
-    // return old sheet name to undo
-    return oldState;
-}
-
-export function SetRightToLeftApply(
-    unit: CommandUnit,
-    data: ISetRightToLeftActionData
-) {
-    const workbook = unit.WorkBookUnit;
-    const worksheet = workbook!.getSheetBySheetId(data.sheetId)!;
+export function SetRightToLeftApply(spreadsheetModel: SpreadsheetModel, data: ISetRightToLeftActionData) {
+    const worksheet = spreadsheetModel.worksheets[data.sheetId];
     const rightToLeft = data.rightToLeft;
 
-    // get config
-    const config = worksheet.getConfig();
+    // store old
+    const oldState = worksheet.rightToLeft;
 
-    // store old sheet name
-    const oldState = config.rightToLeft;
+    // set new
+    worksheet.rightToLeft = rightToLeft;
 
-    // set new sheet name
-    config.rightToLeft = rightToLeft;
-
-    // return old sheet name to undo
+    // return old
     return oldState;
 }

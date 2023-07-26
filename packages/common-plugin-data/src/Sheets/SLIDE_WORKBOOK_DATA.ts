@@ -1,7 +1,7 @@
-import { BooleanNumber, BorderStyleTypes, IWorkbookConfig, LocaleType, SheetTypes } from '@univerjs/core';
+import { BooleanNumber, BorderStyleTypes, ISpreadsheetConfig, LocaleType, SheetTypes } from '@univerjs/core';
 import { PAGE5_RICHTEXT_1 } from '../Slides/RichText/PAGE5_RICHTEXT_1';
 
-export const SLIDE_WORKBOOK_DATA: IWorkbookConfig = {
+export const SLIDE_WORKBOOK_DATA: ISpreadsheetConfig = {
     id: 'workbook-01',
     theme: 'default',
     locale: LocaleType.EN,

@@ -1,36 +1,19 @@
-import { InsertDataRowApply, RemoveRowDataApply } from '../Apply';
+import { RemoveRowDataApply } from '../Apply/RemoveRowData';
+import { InsertDataRowApply } from '../Apply/InsertDataRow';
 import { ICellData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { CommandManager, CommandUnit } from '../../Command';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { IInsertRowDataActionData } from './InsertRowDataAction';
-
-/**
- * @internal
- */
-export interface IRemoveRowDataActionData extends ISheetActionData {
-    rowIndex: number;
-    rowCount: number;
-}
-
+import { SheetActionBase } from '../../Command/SheetActionBase';
+import { IRemoveRowDataActionData, IInsertRowDataActionData } from '../../Types/Interfaces/IActionModel';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
 /**
  * Remove the row data of the specified row index and row count
  *
  * @internal
  */
-export class RemoveRowDataAction extends SheetActionBase<
-    IRemoveRowDataActionData,
-    IInsertRowDataActionData
-> {
-    static NAME = 'RemoveRowDataAction';
-
-    constructor(
-        actionData: IRemoveRowDataActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+export class RemoveRowDataAction extends SheetActionBase<IRemoveRowDataActionData, IInsertRowDataActionData> {
+    constructor(actionData: IRemoveRowDataActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -42,7 +25,7 @@ export class RemoveRowDataAction extends SheetActionBase<
     }
 
     do(): ObjectMatrixPrimitiveType<ICellData> {
-        const result = RemoveRowDataApply(this._commandUnit, this._doActionData);
+        const result = RemoveRowDataApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -56,7 +39,7 @@ export class RemoveRowDataAction extends SheetActionBase<
     }
 
     undo(): void {
-        InsertDataRowApply(this._commandUnit, this._oldActionData);
+        InsertDataRowApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -68,5 +51,3 @@ export class RemoveRowDataAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(RemoveRowDataAction.NAME, RemoveRowDataAction);

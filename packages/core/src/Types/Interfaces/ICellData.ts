@@ -1,8 +1,8 @@
-import { IDocumentData } from './index';
 import { FormatType } from '../Enum/FormatType';
 import { CellValueType } from '../Enum/TextStyle';
 import { Nullable } from '../../Shared/Types';
 import { IStyleData } from './IStyleData';
+import { IDocumentData } from './IDocumentData';
 
 /**
  * Cell value type
@@ -68,12 +68,7 @@ export interface IFormatData {
 /**
  * Cell data type
  */
-export type ICellDataType =
-    | Nullable<ICellData>
-    | Nullable<IStyleData>
-    | string
-    | number
-    | boolean;
+export type ICellDataType = Nullable<ICellData> | Nullable<IStyleData> | string | number | boolean;
 
 /**
  * Cell data matrix type

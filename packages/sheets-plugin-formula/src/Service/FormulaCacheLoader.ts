@@ -1,4 +1,4 @@
-import { CellValueType, ICellData, IWorkbookConfig, ObjectMatrix } from '@univerjs/core';
+import { CellValueType, ICellData, ISpreadsheetConfig, ObjectMatrix } from '@univerjs/core';
 
 type SheetDataType = { [sheetName: string]: ObjectMatrix<ICellData> };
 
@@ -20,7 +20,7 @@ export class FormulaCacheLoader {
     // formula runtime data
     private _sheetDataCache: SheetDataType = {};
 
-    loadSheetData(workBookData: IWorkbookConfig) {}
+    loadSheetData(workBookData: ISpreadsheetConfig) {}
 
     loadTableData(tableData: { [tableName: string]: string }) {}
 

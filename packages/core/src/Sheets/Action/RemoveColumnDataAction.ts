@@ -1,36 +1,20 @@
-import { InsertDataColumnApply, RemoveColumnDataApply } from '../Apply';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { InsertDataColumnApply } from '../Apply/InsertDataColumn';
+import { RemoveColumnDataApply } from '../Apply/RemoveColumnData';
 import { ICellData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { IInsertColumnDataActionData } from './InsertColumnDataAction';
-import { CommandManager, CommandUnit } from '../../Command';
-
-/**
- * @internal
- */
-export interface IRemoveColumnDataAction extends ISheetActionData {
-    columnIndex: number;
-    columnCount: number;
-}
+import { SheetActionBase } from '../../Command/SheetActionBase';
+import { IRemoveColumnDataAction, IInsertColumnDataActionData } from '../../Types/Interfaces/IActionModel';
+import { CommandModel } from '../../Command/CommandModel';
 
 /**
  * Remove the column data of the specified column index and column count
  *
  * @internal
  */
-export class RemoveColumnDataAction extends SheetActionBase<
-    IRemoveColumnDataAction,
-    IInsertColumnDataActionData
-> {
-    static NAME = 'RemoveColumnDataAction';
-
-    constructor(
-        actionData: IRemoveColumnDataAction,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+export class RemoveColumnDataAction extends SheetActionBase<IRemoveColumnDataAction, IInsertColumnDataActionData> {
+    constructor(actionData: IRemoveColumnDataAction, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -42,7 +26,7 @@ export class RemoveColumnDataAction extends SheetActionBase<
     }
 
     do(): ObjectMatrixPrimitiveType<ICellData> {
-        const result = RemoveColumnDataApply(this._commandUnit, this._doActionData);
+        const result = RemoveColumnDataApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -56,7 +40,7 @@ export class RemoveColumnDataAction extends SheetActionBase<
     }
 
     undo(): void {
-        InsertDataColumnApply(this._commandUnit, this._oldActionData);
+        InsertDataColumnApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -68,5 +52,3 @@ export class RemoveColumnDataAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(RemoveColumnDataAction.NAME, RemoveColumnDataAction);

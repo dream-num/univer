@@ -1,44 +1,26 @@
-import { Workbook, Worksheet } from '../Domain';
-import { IWorksheetConfig } from '../../Types/Interfaces';
-import { CommandUnit } from '../../Command';
-import { IInsertSheetActionData } from '../Action';
+import { ObjectArray } from '../../Shared/ObjectArray';
+import { WorksheetModel } from '../Model/WorksheetModel';
+import { ObjectMatrix } from '../../Shared/ObjectMatrix';
+import { IInsertSheetActionData } from '../../Types/Interfaces/IActionModel';
+import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
-export function InsertSheet(
-    workbook: Workbook,
-    index: number,
-    worksheetConfig: IWorksheetConfig
-): string {
-    const iSheets = workbook.getWorksheets();
-    const config = workbook.getConfig();
-    const { sheets, sheetOrder } = config;
-    if (sheets[worksheetConfig.id]) {
-        throw new Error(`Insert Sheet fail ${worksheetConfig.id} is already exist`);
-    }
-    sheets[worksheetConfig.id] = worksheetConfig;
-    sheetOrder.splice(index, 0, worksheetConfig.id);
-    iSheets.set(
-        worksheetConfig.id,
-        new Worksheet(workbook.getContext(), worksheetConfig)
-    );
-    return worksheetConfig.id;
-}
-
-export function InsertSheetApply(unit: CommandUnit, data: IInsertSheetActionData) {
-    const worksheet = unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
+export function InsertSheetApply(spreadsheetModel: SpreadsheetModel, data: IInsertSheetActionData) {
+    const worksheetModel = spreadsheetModel.worksheets[data.sheetId];
+    const newWorksheetConfig = data.sheet;
     const index = data.index;
-    const worksheetConfig = data.sheet;
-
-    const iSheets = unit.WorkBookUnit!.getWorksheets();
-    const config = unit.WorkBookUnit!.getConfig();
-    const { sheets, sheetOrder } = config;
-    if (sheets[worksheetConfig.id]) {
-        throw new Error(`Insert Sheet fail ${worksheetConfig.id} is already exist`);
+    const { sheetOrder } = worksheetModel;
+    if (spreadsheetModel.worksheets[newWorksheetConfig.id]) {
+        throw new Error(`Insert worksheet fail ${newWorksheetConfig.id} is already exist`);
     }
-    sheets[worksheetConfig.id] = worksheetConfig;
-    sheetOrder.splice(index, 0, worksheetConfig.id);
-    iSheets.set(
-        worksheetConfig.id,
-        new Worksheet(unit.WorkBookUnit!.getContext(), worksheetConfig)
-    );
-    return worksheetConfig.id;
+    const newWorksheetModel = new WorksheetModel();
+    newWorksheetModel.merge = [];
+    newWorksheetModel.style = {};
+    newWorksheetModel.activation = false;
+    newWorksheetModel.sheetOrder = sheetOrder;
+    newWorksheetModel.row = new ObjectArray(newWorksheetConfig.rowData);
+    newWorksheetModel.column = new ObjectArray(newWorksheetConfig.columnData);
+    newWorksheetModel.cell = new ObjectMatrix(newWorksheetConfig.cellData);
+    newWorksheetModel.sheetId = newWorksheetConfig.id;
+    spreadsheetModel.worksheets[newWorksheetConfig.id] = newWorksheetModel;
+    return newWorksheetConfig.id;
 }

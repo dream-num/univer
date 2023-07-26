@@ -1,4 +1,4 @@
-import { SheetActionBase, ActionObservers, ISheetActionData, CommandUnit } from '@univerjs/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, CommandModel } from '@univerjs/core';
 import { SetProtection } from '../Apply';
 import { ACTION_NAMES } from '../Basics/Enum/ACTION_NAMES';
 
@@ -10,8 +10,8 @@ export interface ISetProtectionActionData extends ISheetActionData {
 export class SetProtectionAction extends SheetActionBase<ISetProtectionActionData, ISetProtectionActionData> {
     protected _oldValue: [boolean, string];
 
-    constructor(actionData: ISetProtectionActionData, commandUnit: CommandUnit, observers: ActionObservers) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetProtectionActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };

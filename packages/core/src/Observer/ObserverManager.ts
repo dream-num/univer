@@ -42,9 +42,7 @@ export class ObserverManager {
             const name = parameter[0];
             const namespace = parameter[1];
 
-            const item = this._observableArray.find(
-                (obs) => obs.path === name && obs.namespace === namespace
-            );
+            const item = this._observableArray.find((obs) => obs.path === name && obs.namespace === namespace);
             return item ? item.observable : null;
         }
     }
@@ -77,9 +75,7 @@ export class ObserverManager {
     removeObserver<T = void>(...parameter: any): void {
         if (Tools.hasLength(parameter, 1)) {
             const name = parameter[0];
-            const index = this._observableArray.findIndex(
-                (obs) => obs.path === name
-            );
+            const index = this._observableArray.findIndex((obs) => obs.path === name);
             if (index > -1) {
                 this._observableArray.splice(index, 1);
             }
@@ -88,9 +84,7 @@ export class ObserverManager {
         if (Tools.hasLength(parameter, 2)) {
             const name = parameter[0];
             const namespace = parameter[1];
-            const index = this._observableArray.findIndex(
-                (obs) => obs.path === name && obs.namespace === namespace
-            );
+            const index = this._observableArray.findIndex((obs) => obs.path === name && obs.namespace === namespace);
             if (index > -1) {
                 this._observableArray.splice(index, 1);
             }
@@ -98,11 +92,7 @@ export class ObserverManager {
     }
 
     addObserver<T = void>(name: string, observable: Observable<T>): void;
-    addObserver<T = void>(
-        name: string,
-        namespace: string,
-        observable: Observable<T>
-    ): void;
+    addObserver<T = void>(name: string, namespace: string, observable: Observable<T>): void;
     addObserver<T = void>(...parameter: any): void {
         if (parameter.length === 1) {
             const name = parameter[0];
@@ -110,9 +100,7 @@ export class ObserverManager {
             if (this.hasObserver(name, name)) {
                 this.removeObserver(name);
             }
-            this._observableArray.push(
-                new PathObservable<T>(name, name, observable)
-            );
+            this._observableArray.push(new PathObservable<T>(name, name, observable));
             return;
         }
         if (parameter.length === 3) {
@@ -122,9 +110,7 @@ export class ObserverManager {
             if (this.hasObserver(name, name)) {
                 this.removeObserver(name, namespace);
             }
-            this._observableArray.push(
-                new PathObservable<T>(name, namespace, observable)
-            );
+            this._observableArray.push(new PathObservable<T>(name, namespace, observable));
         }
     }
 }

@@ -1,32 +1,17 @@
-import { SetWorkSheetHideService } from '../Apply';
 import { BooleanNumber } from '../../Types/Enum';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandManager, CommandUnit } from '../../Command';
+import { SheetActionBase } from '../../Command/SheetActionBase';
+import { ISetWorkSheetHideActionData } from '../../Types/Interfaces/IActionModel';
+import { ACTION_NAMES } from '../../Types/Const';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { SetWorkSheetHideServiceApply } from '../Apply/HideSheet';
 
 /**
  * @internal
  */
-export interface ISetWorkSheetHideActionData extends ISheetActionData {
-    hidden: BooleanNumber;
-}
-
-/**
- * @internal
- */
-export class SetWorkSheetHideAction extends SheetActionBase<
-    ISetWorkSheetHideActionData,
-    ISetWorkSheetHideActionData,
-    BooleanNumber
-> {
-    static NAME = 'SetWorkSheetHideAction';
-
-    constructor(
-        actionData: ISetWorkSheetHideActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+export class SetWorkSheetHideAction extends SheetActionBase<ISetWorkSheetHideActionData, ISetWorkSheetHideActionData, BooleanNumber> {
+    constructor(actionData: ISetWorkSheetHideActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -38,16 +23,12 @@ export class SetWorkSheetHideAction extends SheetActionBase<
     }
 
     do(): BooleanNumber {
-        const worksheet = this.getWorkSheet();
-
-        const result = SetWorkSheetHideService(worksheet, this._doActionData.hidden);
-
+        const result = SetWorkSheetHideServiceApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
             action: this,
         });
-
         return result;
     }
 
@@ -55,20 +36,19 @@ export class SetWorkSheetHideAction extends SheetActionBase<
         const { sheetId } = this._doActionData;
         this._oldActionData = {
             sheetId,
-            // actionName: ACTION_NAMES.HIDE_SHEET_ACTION,
-            actionName: SetWorkSheetHideAction.NAME,
+            actionName: ACTION_NAMES.HIDE_SHEET_ACTION,
+            // actionName: SetWorkSheetHideAction.NAME,
             hidden: this.do(),
         };
     }
 
     undo(): void {
         const { hidden, sheetId } = this._oldActionData;
-        const worksheet = this.getWorkSheet();
-
         this._doActionData = {
-            actionName: SetWorkSheetHideAction.NAME,
+            actionName: ACTION_NAMES.HIDE_SHEET_ACTION,
+            // actionName: SetWorkSheetHideAction.NAME,
             sheetId,
-            hidden: SetWorkSheetHideService(worksheet, hidden),
+            hidden: SetWorkSheetHideServiceApply(this.getSpreadsheetModel(), this._oldActionData),
         };
 
         this._observers.notifyObservers({
@@ -82,5 +62,3 @@ export class SetWorkSheetHideAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(SetWorkSheetHideAction.NAME, SetWorkSheetHideAction);

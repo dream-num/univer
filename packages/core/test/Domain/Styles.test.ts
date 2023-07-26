@@ -1,10 +1,10 @@
 import { nanoid } from 'nanoid';
-import { Styles } from '../../src';
+import { Style } from '../../src';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
 test('Test Styles', () => {
-    const styles = new Styles({
+    const styles = new Style({
         1: {
             cl: {
                 rgb: 'red',
@@ -32,7 +32,7 @@ test('Test each', () => {
     const map = {
         [nanoid(6)]: { cl: { rgb: 'red' } },
     };
-    const styles = new Styles(map);
+    const styles = new Style(map);
     styles.each(([id, val]) => {
         if (val && val.cl) {
             expect(val.cl.rgb).toEqual('red');
@@ -44,7 +44,7 @@ test('Test search', () => {
     const map = {
         [nanoid(6)]: { cl: { rgb: 'red' } },
     };
-    const styles = new Styles(map);
+    const styles = new Style(map);
     const find = styles.search({ cl: { rgb: 'red' } });
     expect(find).not.toBeUndefined();
 });
@@ -53,7 +53,7 @@ test('Test get', () => {
     const map = {
         [nanoid(6)]: { cl: { rgb: 'red' } },
     };
-    const styles = new Styles(map);
+    const styles = new Style(map);
     // const find1 = styles.get({ cl: { rgb: 'red' } });
     // expect(find1).not.toBeUndefined();
     const find2 = styles.get('0');
@@ -62,7 +62,7 @@ test('Test get', () => {
 
 test('Test add', () => {
     const map = {};
-    const styles = new Styles(map);
+    const styles = new Style(map);
 
     styles.add({ cl: { rgb: 'red' } });
     styles.add({ tr: { a: 10 } });
@@ -76,7 +76,7 @@ test('Test add', () => {
 
 test('Test setValue', () => {
     const map = {};
-    const styles = new Styles(map);
+    const styles = new Style(map);
     styles.add({ cl: { rgb: 'red' } });
     styles.add({ tr: { a: 10 } });
 

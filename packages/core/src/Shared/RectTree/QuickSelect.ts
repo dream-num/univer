@@ -8,21 +8,14 @@ function QuickCompare<T>(a: T, b: T): number {
     return a < b ? -1 : a > b ? 1 : 0;
 }
 
-function QuickStep<T>(
-    array: T[],
-    k: number,
-    left: number,
-    right: number,
-    compare: Compare<T>
-): void {
+function QuickStep<T>(array: T[], k: number, left: number, right: number, compare: Compare<T>): void {
     while (right > left) {
         if (right - left > 600) {
             const n = right - left + 1;
             const m = k - left + 1;
             const z = Math.log(n);
             const s = 0.5 * Math.exp((2 * z) / 3);
-            const sd =
-                0.5 * Math.sqrt((z * s * (n - s)) / n) * (m - n / 2 < 0 ? -1 : 1);
+            const sd = 0.5 * Math.sqrt((z * s * (n - s)) / n) * (m - n / 2 < 0 ? -1 : 1);
             const newLeft = Math.max(left, Math.floor(k - (m * s) / n + sd));
             const newRight = Math.min(right, Math.floor(k + ((n - m) * s) / n + sd));
             QuickStep(array, k, newLeft, newRight, compare);
@@ -67,18 +60,6 @@ function QuickStep<T>(
 
 export type Compare<T> = (a: T, b: T) => number;
 
-export function QuickSelect<T>(
-    array: T[],
-    k: number,
-    left: number,
-    right: number,
-    compare: Compare<T>
-) {
-    QuickStep(
-        array,
-        k,
-        left || 0,
-        right || array.length - 1,
-        compare || QuickCompare
-    );
+export function QuickSelect<T>(array: T[], k: number, left: number, right: number, compare: Compare<T>) {
+    QuickStep(array, k, left || 0, right || array.length - 1, compare || QuickCompare);
 }

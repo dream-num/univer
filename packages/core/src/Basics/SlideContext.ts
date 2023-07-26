@@ -1,19 +1,20 @@
+import { CommandManager } from '../Command/CommandManager';
+import { Slide } from '../Slides/Domain/Slide';
 import { ISlideData } from '../Types/Interfaces/ISlideData';
-import { SlideModel } from '../Slides/Domain/SlideModel';
 import { ContextBase } from './ContextBase';
 
 /**
  * Core context, mount important instances, managers
  */
 export class SlideContext extends ContextBase {
-    protected _slide: SlideModel;
+    protected _slide: Slide;
 
-    constructor(univerSlideData: Partial<ISlideData> = {}) {
+    constructor(private snapshot: Partial<ISlideData> = {}, private commandManager: CommandManager) {
         super();
-        this._slide = new SlideModel(univerSlideData, this);
+        this._slide = new Slide(snapshot, commandManager);
     }
 
-    getSlide(): SlideModel {
+    getSlide(): Slide {
         return this._slide;
     }
 

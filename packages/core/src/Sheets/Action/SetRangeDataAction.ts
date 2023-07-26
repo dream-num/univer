@@ -1,54 +1,20 @@
-import { SetRangeDataApply } from '../Apply';
-import { ObjectMatrixPrimitiveType } from '../../Shared';
-import {
-    SheetActionBase,
-    ISheetActionData,
-    ActionObservers,
-    ActionType,
-    CommandUnit,
-    CommandManager,
-} from '../../Command';
-import { ICopyToOptionsData, ICellData } from '../../Types/Interfaces';
-
-/**
- * 设置数据时的类型
- */
-enum SetRangeDataType {
-    DEFAULT = 'default',
-
-    /**
-     *
-     */
-    PASTE = 'paste',
-}
-
-/**
- * @internal
- */
-export interface ISetRangeDataActionData extends ISheetActionData {
-    cellValue: ObjectMatrixPrimitiveType<ICellData>;
-    options?: ICopyToOptionsData;
-    type?: SetRangeDataType;
-}
+import { ICellData } from '../../Types/Interfaces';
+import { ISetRangeDataActionData } from '../../Types/Interfaces/IActionModel';
+import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
+import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
+import { SheetActionBase } from '../../Command/SheetActionBase';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { SetRangeDataApply } from '../Apply/SetRangeData';
 
 /**
  * Modify values in the range
  *
  * @internal
  */
-export class SetRangeDataAction extends SheetActionBase<
-    ISetRangeDataActionData,
-    ISetRangeDataActionData,
-    ObjectMatrixPrimitiveType<ICellData>
-> {
-    static NAME = 'SetRangeDataAction';
-
-    constructor(
-        actionData: ISetRangeDataActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+export class SetRangeDataAction extends SheetActionBase<ISetRangeDataActionData, ISetRangeDataActionData, ObjectMatrixPrimitiveType<ICellData>> {
+    constructor(actionData: ISetRangeDataActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
 
         this._doActionData = {
             ...actionData,
@@ -62,7 +28,7 @@ export class SetRangeDataAction extends SheetActionBase<
     }
 
     do(): ObjectMatrixPrimitiveType<ICellData> {
-        const result = SetRangeDataApply(this._commandUnit, this._doActionData);
+        const result = SetRangeDataApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -74,41 +40,34 @@ export class SetRangeDataAction extends SheetActionBase<
 
     redo(): void {
         // update pre data
-        const { sheetId, options } = this._doActionData;
+        const { sheetId } = this._doActionData;
         this._oldActionData = {
-            // actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-            actionName: SetRangeDataAction.NAME,
+            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+            // actionName: SetRangeDataAction.NAME,
             sheetId,
             cellValue: this.do(),
-            options,
         };
     }
 
     undo(): void {
-        const { sheetId, cellValue, options } = this._oldActionData;
-        const worksheet = this.getWorkSheet();
-        const styles = this._workbook.getStyles();
-        if (worksheet) {
-            // update current data
-            this._doActionData = {
-                // actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-                actionName: SetRangeDataAction.NAME,
-                sheetId,
-                cellValue: SetRangeDataApply(this._commandUnit, this._oldActionData),
-                options,
-            };
+        const { sheetId } = this._oldActionData;
 
-            this._observers.notifyObservers({
-                type: ActionType.UNDO,
-                data: this._oldActionData,
-                action: this,
-            });
-        }
+        // update current data
+        this._doActionData = {
+            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+            // actionName: SetRangeDataAction.NAME,
+            sheetId,
+            cellValue: SetRangeDataApply(this.getSpreadsheetModel(), this._oldActionData),
+        };
+
+        this._observers.notifyObservers({
+            type: ActionType.UNDO,
+            data: this._oldActionData,
+            action: this,
+        });
     }
 
     validate(): boolean {
         return false;
     }
 }
-
-CommandManager.register(SetRangeDataAction.NAME, SetRangeDataAction);

@@ -1,49 +1,19 @@
-import { IColumnData } from '../../Types/Interfaces';
-import { ObjectArray, ObjectArrayPrimitiveType } from '../../Shared';
-import { CommandUnit } from '../../Command';
-import { IRemoveColumnAction } from '../Action';
+import { IColumnData } from '../../Types/Interfaces/IColumnData';
+import { IRemoveColumnAction } from '../../Types/Interfaces/IActionModel';
+import { ObjectArray } from '../../Shared/ObjectArray';
+import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
-/**
- * Deletes the specified number of columns in columnData
- * @param columnIndex
- * @param columnCount
- * @param columnData
- *
- * @internal
- */
-export function RemoveColumn(
-    columnIndex: number,
-    columnCount: number,
-    primitiveData: ObjectArrayPrimitiveType<IColumnData>
-): number {
-    const wrapper = new ObjectArray(primitiveData);
-    const result = new ObjectArray<IColumnData>();
-    const start = columnIndex;
-    const end = columnIndex + columnCount;
-    for (let i = start; i < end; i++) {
-        const splice = wrapper.splice(columnIndex, 1);
-        if (splice.getLength()) {
-            result.set(i, splice.first() as IColumnData);
-        }
-    }
-    return result.getLength();
-}
-
-export function RemoveColumnApply(unit: CommandUnit, data: IRemoveColumnAction) {
-    const worksheet = unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
-    const columnManager = worksheet!.getColumnManager();
-    const primitiveData = columnManager.getColumnData().toJSON();
-
-    const wrapper = new ObjectArray(primitiveData);
-    const result = new ObjectArray<IColumnData>();
+export function RemoveColumnApply(spreadsheetModel: SpreadsheetModel, data: IRemoveColumnAction) {
+    const worksheetModel = spreadsheetModel.worksheets[data.sheetId]; //unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
+    const columnModel = worksheetModel.column;
     const start = data.columnIndex;
     const end = data.columnIndex + data.columnCount;
+    const result = new ObjectArray<IColumnData>();
     for (let i = start; i < end; i++) {
-        const splice = wrapper.splice(data.columnIndex, 1);
+        const splice = columnModel.splice(data.columnIndex, 1);
         if (splice.getLength()) {
             result.set(i, splice.first() as IColumnData);
         }
     }
-
     return result.getLength();
 }

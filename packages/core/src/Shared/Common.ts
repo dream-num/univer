@@ -1,26 +1,10 @@
 import { Tools } from './Tools';
 import { Nullable } from '.';
-import {
-    ICellInfo,
-    ISelection,
-    ICellData,
-    IColorStyle,
-    IDocumentData,
-    IStyleData,
-} from '../Types/Interfaces';
+import { ICellInfo, ISelection, ICellData, IColorStyle, IDocumentData, IStyleData } from '../Types/Interfaces';
 import { ColorBuilder } from '../Sheets/Domain';
-import {
-    BaselineOffset,
-    TextDirection,
-    HorizontalAlign,
-    VerticalAlign,
-    WrapStrategy,
-    BorderStyleTypes,
-} from '../Types/Enum';
+import { BaselineOffset, TextDirection, HorizontalAlign, VerticalAlign, WrapStrategy, BorderStyleTypes } from '../Types/Enum';
 
-export function makeCellToSelection(
-    cellInfo: Nullable<ICellInfo>
-): Nullable<ISelection> {
+export function makeCellToSelection(cellInfo: Nullable<ICellInfo>): Nullable<ISelection> {
     if (!cellInfo) {
         return;
     }
@@ -80,11 +64,7 @@ export function getColorStyle(color: Nullable<IColorStyle>): Nullable<string> {
             return color.rgb;
         }
         if (color.th) {
-            return new ColorBuilder()
-                .setThemeColor(color.th)
-                .asThemeColor()
-                .asRgbColor()
-                .getCssString();
+            return new ColorBuilder().setThemeColor(color.th).asThemeColor().asRgbColor().getCssString();
         }
     }
     return null;
@@ -213,17 +193,12 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
                 if (style.ul?.s) {
                     // If there are existing lines, add new lines
                     if (str.indexOf('text-decoration-line') > -1) {
-                        str = str.replace(
-                            /(?<=text-decoration-line:.*)\b(?=;)/g,
-                            ' underline'
-                        );
+                        str = str.replace(/(?<=text-decoration-line:.*)\b(?=;)/g, ' underline');
                     } else {
                         str += `text-decoration-line: underline; `;
                     }
                     if (style.ul.cl && str.indexOf('text-decoration-color') === -1) {
-                        str += `text-decoration-color: ${getColorStyle(
-                            style.ul.cl
-                        )}; `;
+                        str += `text-decoration-color: ${getColorStyle(style.ul.cl)}; `;
                     }
                     if (style.ul.t && str.indexOf('text-decoration-style') === -1) {
                         str += `text-decoration-style: ${style.ul.t} `;
@@ -236,17 +211,12 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             () => {
                 if (style.st?.s) {
                     if (str.indexOf('text-decoration-line') > -1) {
-                        str = str.replace(
-                            /(?<=text-decoration-line:.*)\b(?=;)/g,
-                            ' line-through'
-                        );
+                        str = str.replace(/(?<=text-decoration-line:.*)\b(?=;)/g, ' line-through');
                     } else {
                         str += `text-decoration-line: line-through; `;
                     }
                     if (style.st.cl && str.indexOf('text-decoration-color') === -1) {
-                        str += `text-decoration-color: ${getColorStyle(
-                            style.st.cl
-                        )}; `;
+                        str += `text-decoration-color: ${getColorStyle(style.st.cl)}; `;
                     }
                     if (style.st.t && str.indexOf('text-decoration-style') === -1) {
                         str += `text-decoration-style: ${style.st.t} `;
@@ -259,17 +229,12 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             () => {
                 if (style.ol?.s) {
                     if (str.indexOf('text-decoration-line') > -1) {
-                        str = str.replace(
-                            /(?<=text-decoration-line:.*)\b(?=;)/g,
-                            ' overline'
-                        );
+                        str = str.replace(/(?<=text-decoration-line:.*)\b(?=;)/g, ' overline');
                     } else {
                         str += `text-decoration-line: overline; `;
                     }
                     if (style.ol.cl && str.indexOf('text-decoration-color') === -1) {
-                        str += `text-decoration-color: ${getColorStyle(
-                            style.ol.cl
-                        )}; `;
+                        str += `text-decoration-color: ${getColorStyle(style.ol.cl)}; `;
                     }
                     if (style.ol.t && str.indexOf('text-decoration-style') === -1) {
                         str += `text-decoration-style: ${style.ol.t} `;
@@ -287,24 +252,16 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             'bd',
             () => {
                 if (style.bd?.b) {
-                    str += `border-bottom: ${getBorderStyle(style.bd?.b.s)} ${
-                        getColorStyle(style.bd.b.cl) ?? ''
-                    }; `;
+                    str += `border-bottom: ${getBorderStyle(style.bd?.b.s)} ${getColorStyle(style.bd.b.cl) ?? ''}; `;
                 }
                 if (style.bd?.t) {
-                    str += `border-top: ${getBorderStyle(style.bd?.t.s)} ${
-                        getColorStyle(style.bd.t.cl) ?? ''
-                    }; `;
+                    str += `border-top: ${getBorderStyle(style.bd?.t.s)} ${getColorStyle(style.bd.t.cl) ?? ''}; `;
                 }
                 if (style.bd?.r) {
-                    str += `border-right: ${getBorderStyle(style.bd?.r.s)} ${
-                        getColorStyle(style.bd.r.cl) ?? ''
-                    }; `;
+                    str += `border-right: ${getBorderStyle(style.bd?.r.s)} ${getColorStyle(style.bd.r.cl) ?? ''}; `;
                 }
                 if (style.bd?.l) {
-                    str += `border-left: ${getBorderStyle(style.bd?.l.s)} ${
-                        getColorStyle(style.bd.l.cl) ?? ''
-                    }; `;
+                    str += `border-left: ${getBorderStyle(style.bd?.l.s)} ${getColorStyle(style.bd.l.cl) ?? ''}; `;
                 }
             },
         ],
@@ -341,9 +298,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
         [
             'tr',
             () => {
-                str += `data-rotate: (${style.tr?.a}deg${
-                    style.tr?.v ? ` ,${style.tr?.v}` : ''
-                });`;
+                str += `data-rotate: (${style.tr?.a}deg${style.tr?.v ? ` ,${style.tr?.v}` : ''});`;
             },
         ],
         [
@@ -526,12 +481,7 @@ export function getDocsUpdateBody(model: IDocumentData, segmentId?: string) {
     return body;
 }
 
-export function horizontalLineSegmentsSubtraction(
-    A1: number,
-    A2: number,
-    B1: number,
-    B2: number
-) {
+export function horizontalLineSegmentsSubtraction(A1: number, A2: number, B1: number, B2: number) {
     // 确保A1 < A2, B1 < B2
     if (A1 > A2) {
         [A1, A2] = [A2, A1];

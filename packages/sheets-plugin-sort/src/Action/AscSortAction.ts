@@ -1,4 +1,4 @@
-import { SheetActionBase, ActionObservers, ISheetActionData, IRangeData, CommandUnit } from '@univerjs/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, IRangeData, CommandModel } from '@univerjs/core';
 import { ACTION_NAMES } from '../Enum';
 import { IDescSortData } from './DescSortAction';
 
@@ -7,8 +7,8 @@ export interface IAscSortData extends ISheetActionData {
 }
 
 export class AscSortAction extends SheetActionBase<IAscSortData, IDescSortData> {
-    constructor(actionData: IAscSortData, commandUnit: CommandUnit, observers: ActionObservers) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: IAscSortData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };

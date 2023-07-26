@@ -1,37 +1,19 @@
-import { InsertDataColumnApply, RemoveColumnDataApply } from '../Apply';
-import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { ObjectArray } from '../../Shared';
-import { CommandManager, CommandUnit } from '../../Command';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { ICellData } from '../../Types/Interfaces';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { IRemoveColumnDataAction } from './RemoveColumnDataAction';
-
-/**
- * @internal
- */
-export interface IInsertColumnDataActionData extends ISheetActionData {
-    columnIndex: number;
-    columnData: ObjectMatrixPrimitiveType<ICellData>; // TODO Does it need to be merged with IKeyValue
-}
+import { ObjectArray } from '../../Shared/ObjectArray';
+import { SheetActionBase } from '../../Command/SheetActionBase';
+import { IInsertColumnDataActionData, IRemoveColumnDataAction } from '../../Types/Interfaces/IActionModel';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { InsertDataColumnApply } from '../Apply/InsertDataColumn';
+import { RemoveColumnDataApply } from '../Apply/RemoveColumnData';
 
 /**
  * Insert the column data of the specified column index
  *
  * @internal
  */
-export class InsertColumnDataAction extends SheetActionBase<
-    IInsertColumnDataActionData,
-    IRemoveColumnDataAction
-> {
-    static NAME = 'InsertColumnDataAction';
-
-    constructor(
-        actionData: IInsertColumnDataActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+export class InsertColumnDataAction extends SheetActionBase<IInsertColumnDataActionData, IRemoveColumnDataAction> {
+    constructor(actionData: IInsertColumnDataActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -44,7 +26,7 @@ export class InsertColumnDataAction extends SheetActionBase<
     }
 
     do(): void {
-        InsertDataColumnApply(this._commandUnit, this._doActionData);
+        InsertDataColumnApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -57,7 +39,7 @@ export class InsertColumnDataAction extends SheetActionBase<
     }
 
     undo(): void {
-        RemoveColumnDataApply(this._commandUnit, this._oldActionData);
+        RemoveColumnDataApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -69,5 +51,3 @@ export class InsertColumnDataAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(InsertColumnDataAction.NAME, InsertColumnDataAction);

@@ -1,23 +1,25 @@
+import { ObjectMatrix } from '../../Shared/ObjectMatrix';
+import { Tools } from '../../Shared/Tools';
 import { ICellData } from '../../Types/Interfaces';
-import { Tools, ObjectMatrix } from '../../Shared';
 
-import { CommandUnit } from '../../Command';
-import { IClearRangeActionData } from '../Action';
+import { IClearRangeActionData } from '../../Types/Interfaces/IActionModel';
+import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
-export function ClearRangeApply(unit: CommandUnit, data: IClearRangeActionData) {
-    const worksheet = unit.WorkBookUnit?.getSheetBySheetId(data.sheetId);
-    const cellMatrix = worksheet?.getCellMatrix();
+export function ClearRangeApply(spreadsheetModel: SpreadsheetModel, data: IClearRangeActionData) {
+    const worksheet = spreadsheetModel.worksheets[data.sheetId];
+    const cellMatrix = worksheet.cell;
+
     const { startRow, endRow, startColumn, endColumn } = data.rangeData;
 
-    const rows = endRow - startRow + 1;
-    const columns = endColumn - startColumn + 1;
-
     const result = new ObjectMatrix<ICellData>();
+    if (!cellMatrix) {
+        return result.getData();
+    }
     // build new data
     for (let r = startRow; r <= endRow; r++) {
         for (let c = startColumn; c <= endColumn; c++) {
             // get current value
-            const value = cellMatrix?.getValue(r, c);
+            const value = cellMatrix.getValue(r, c);
             result.setValue(r, c, Tools.deepClone(value as ICellData));
             if (value) {
                 if (data.options.formatOnly) {
@@ -28,7 +30,7 @@ export function ClearRangeApply(unit: CommandUnit, data: IClearRangeActionData) 
                     value.m = '';
                 }
 
-                cellMatrix?.setValue(r, c, Tools.deepClone(value as ICellData));
+                cellMatrix.setValue(r, c, Tools.deepClone(value as ICellData));
             }
         }
     }

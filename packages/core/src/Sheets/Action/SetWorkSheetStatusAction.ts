@@ -1,29 +1,16 @@
-import { SetWorkSheetStatus } from '../Apply';
+import { SetWorkSheetStatusApply } from '../Apply/SetWorkSheetStatus';
 import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
-import { BooleanNumber } from '../../Types/Enum';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandManager, CommandUnit } from '../../Command';
-
-/**
- * @internal
- */
-export interface ISetWorkSheetStatusActionData extends ISheetActionData {
-    sheetStatus: BooleanNumber;
-}
+import { SheetActionBase } from '../../Command/SheetActionBase';
+import { ISetWorkSheetStatusActionData } from '../../Types/Interfaces/IActionModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { CommandModel } from '../../Command/CommandModel';
 
 /**
  * @internal
  */
 export class SetWorkSheetStatusAction extends SheetActionBase<ISetWorkSheetStatusActionData> {
-    static NAME = 'SetWorkSheetStatusAction';
-
-    constructor(
-        actionData: ISetWorkSheetStatusActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetWorkSheetStatusActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -36,9 +23,7 @@ export class SetWorkSheetStatusAction extends SheetActionBase<ISetWorkSheetStatu
     }
 
     do(): number {
-        const worksheet = this.getWorkSheet();
-
-        const result = SetWorkSheetStatus(worksheet, this._doActionData.sheetStatus);
+        const result = SetWorkSheetStatusApply(this.getSpreadsheetModel(), this._doActionData);
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -60,14 +45,12 @@ export class SetWorkSheetStatusAction extends SheetActionBase<ISetWorkSheetStatu
     }
 
     undo(): void {
-        const { sheetStatus, sheetId } = this._oldActionData;
-        const worksheet = this.getWorkSheet();
-
+        const { sheetId } = this._oldActionData;
         // update current data
         this._doActionData = {
             actionName: ACTION_NAMES.SET_WORKSHEET_STATUS_ACTION,
             sheetId,
-            sheetStatus: SetWorkSheetStatus(worksheet, sheetStatus),
+            sheetStatus: SetWorkSheetStatusApply(this.getSpreadsheetModel(), this._oldActionData),
         };
 
         this._observers.notifyObservers({
@@ -81,5 +64,3 @@ export class SetWorkSheetStatusAction extends SheetActionBase<ISetWorkSheetStatu
         return false;
     }
 }
-
-CommandManager.register(SetWorkSheetStatusAction.NAME, SetWorkSheetStatusAction);

@@ -1,8 +1,6 @@
-import {
-    IActionData,
-    ActionExtensionRegister,
-    BaseActionExtensionFactory,
-} from './index';
+import { IActionData } from './ActionBase';
+import { BaseActionExtensionFactory } from './ActionExtensionFactory';
+import { ActionExtensionRegister } from './ActionExtensionRegister';
 
 export class ActionExtensionManager {
     private _actionExtensionFactoryList: BaseActionExtensionFactory[];
@@ -24,8 +22,7 @@ export class ActionExtensionManager {
      * @param command
      */
     handle(actions: IActionData[]) {
-        const actionExtensionFactoryList =
-            this._register?.actionExtensionFactoryList;
+        const actionExtensionFactoryList = this._register?.actionExtensionFactoryList;
         if (!actionExtensionFactoryList) return;
         // get the sorted list
         // get the dynamically added list

@@ -1,6 +1,6 @@
 import { ISheetActionData } from '../Command';
 import { ICreatable, createIdentifier } from '@wendellhu/redi';
-import { IWorkbookConfig, IWorksheetConfig } from '../Types/Interfaces';
+import { IWorksheetConfig } from '../Types/Interfaces';
 import { IOSocket, IOSocketListenType } from '../Shared';
 import { MessageQueue } from './MessageQueue';
 import { IOServerMessage, IOServerReceive, ServerBase } from './ServerBase';
@@ -13,9 +13,7 @@ export enum MessageQueueStatus {
     WORK = 'work',
 }
 
-export const IServerSocketWorkbookConfig = createIdentifier<IWorksheetConfig>(
-    'univer.server.workbook-config'
-);
+export const IServerSocketWorkbookConfig = createIdentifier<IWorksheetConfig>('univer.server.workbook-config');
 
 /**
  * Manage messageQueue
@@ -29,9 +27,7 @@ export class ServerSocket extends ServerBase implements ICreatable {
 
     private messageQueue: MessageQueue<IOServerMessage>;
 
-    constructor(
-        @IServerSocketWorkbookConfig private readonly config: IWorkbookConfig
-    ) {
+    constructor(@IServerSocketWorkbookConfig private readonly config: ISpreadsheetConfig) {
         super();
     }
 

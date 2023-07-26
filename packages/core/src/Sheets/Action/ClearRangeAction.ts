@@ -1,37 +1,21 @@
-import { ClearRangeApply, SetRangeDataApply } from '../Apply';
-import { ICellData, IOptionData, IRangeData } from '../../Types/Interfaces';
+import { ClearRangeApply } from '../Apply/ClearRange';
+import { SetRangeDataApply } from '../Apply/SetRangeData';
+import { ICellData } from '../../Types/Interfaces';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { ISetRangeDataActionData, SetRangeDataAction } from './SetRangeDataAction';
-import { CommandManager, CommandUnit } from '../../Command';
-
-/**
- * @internal
- */
-export interface IClearRangeActionData extends ISheetActionData {
-    options: IOptionData;
-    rangeData: IRangeData;
-}
+import { SheetActionBase } from '../../Command/SheetActionBase';
+import { IClearRangeActionData, ISetRangeDataActionData } from '../../Types/Interfaces/IActionModel';
+import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
 
 /**
  * Clearly specify a range of styles, content, comments, validation, filtering
  *
  * @internal
  */
-export class ClearRangeAction extends SheetActionBase<
-    IClearRangeActionData,
-    ISetRangeDataActionData,
-    ObjectMatrixPrimitiveType<ICellData>
-> {
-    static NAME = 'ClearRangeAction';
-
-    constructor(
-        actionData: IClearRangeActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+export class ClearRangeAction extends SheetActionBase<IClearRangeActionData, ISetRangeDataActionData, ObjectMatrixPrimitiveType<ICellData>> {
+    constructor(actionData: IClearRangeActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
 
         this._doActionData = {
             ...actionData,
@@ -44,7 +28,7 @@ export class ClearRangeAction extends SheetActionBase<
     }
 
     do(): ObjectMatrixPrimitiveType<ICellData> {
-        const result = ClearRangeApply(this._commandUnit, this._doActionData);
+        const result = ClearRangeApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -57,29 +41,24 @@ export class ClearRangeAction extends SheetActionBase<
         // update pre data
         const { sheetId } = this._doActionData;
         this._oldActionData = {
-            // actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-            actionName: SetRangeDataAction.NAME,
+            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+            // actionName: SetRangeDataAction.NAME,
             sheetId,
             cellValue: this.do(),
         };
     }
 
     undo(): void {
-        const worksheet = this.getWorkSheet();
-        if (worksheet) {
-            SetRangeDataApply(this._commandUnit, this._oldActionData);
-            // no need update current data
-            this._observers.notifyObservers({
-                type: ActionType.UNDO,
-                data: this._oldActionData,
-                action: this,
-            });
-        }
+        SetRangeDataApply(this.getSpreadsheetModel(), this._oldActionData);
+        // no need update current data
+        this._observers.notifyObservers({
+            type: ActionType.UNDO,
+            data: this._oldActionData,
+            action: this,
+        });
     }
 
     validate(): boolean {
         return false;
     }
 }
-
-CommandManager.register(ClearRangeAction.NAME, ClearRangeAction);

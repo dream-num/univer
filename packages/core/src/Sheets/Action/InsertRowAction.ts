@@ -1,39 +1,18 @@
-import {
-    SheetActionBase,
-    ISheetActionData,
-    ActionObservers,
-    ActionType,
-    CommandUnit,
-    CommandManager,
-} from '../../Command';
-import { InsertRowApply, RemoveRowApply } from '../Apply';
-import { IRemoveRowActionData } from './RemoveRowAction';
-
-/**
- * @internal
- */
-export interface IInsertRowActionData extends ISheetActionData {
-    rowIndex: number;
-    rowCount: number;
-}
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { CommandModel } from '../../Command/CommandModel';
+import { SheetActionBase } from '../../Command/SheetActionBase';
+import { IInsertRowActionData, IRemoveRowActionData } from '../../Types/Interfaces/IActionModel';
+import { InsertRowApply } from '../Apply/InsertRow';
+import { RemoveRowApply } from '../Apply/RemoveRow';
 
 /**
  * Insert the row configuration of the specified row index
  *
  * @internal
  */
-export class InsertRowAction extends SheetActionBase<
-    IInsertRowActionData,
-    IRemoveRowActionData
-> {
-    static NAME = 'InsertRowAction';
-
-    constructor(
-        actionData: IInsertRowActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+export class InsertRowAction extends SheetActionBase<IInsertRowActionData, IRemoveRowActionData> {
+    constructor(actionData: IInsertRowActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -45,7 +24,7 @@ export class InsertRowAction extends SheetActionBase<
     }
 
     do(): void {
-        InsertRowApply(this._commandUnit, this._doActionData);
+        InsertRowApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -58,7 +37,7 @@ export class InsertRowAction extends SheetActionBase<
     }
 
     undo(): void {
-        RemoveRowApply(this._commandUnit, this._oldActionData);
+        RemoveRowApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -70,5 +49,3 @@ export class InsertRowAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(InsertRowAction.NAME, InsertRowAction);

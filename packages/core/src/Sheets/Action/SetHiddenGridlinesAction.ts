@@ -1,27 +1,15 @@
-import { SetHiddenGridlinesApply } from '../Apply';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandManager, CommandUnit } from '../../Command';
-
-/**
- * @internal
- */
-export interface ISetHiddenGridlinesActionData extends ISheetActionData {
-    hideGridlines: boolean;
-}
+import { SetHiddenGridlinesApply } from '../Apply/SetHiddenGridlines';
+import { SheetActionBase } from '../../Command/SheetActionBase';
+import { ISetHiddenGridlinesActionData } from '../../Types/Interfaces/IActionModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { CommandModel } from '../../Command/CommandModel';
 
 /**
  * @internal
  */
 export class SetHiddenGridlinesAction extends SheetActionBase<ISetHiddenGridlinesActionData> {
-    static NAME = 'SetHiddenGridlinesAction';
-
-    constructor(
-        actionData: ISetHiddenGridlinesActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetHiddenGridlinesActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -34,10 +22,7 @@ export class SetHiddenGridlinesAction extends SheetActionBase<ISetHiddenGridline
     }
 
     do(): boolean {
-        const result = SetHiddenGridlinesApply(
-            this._commandUnit,
-            this._doActionData
-        );
+        const result = SetHiddenGridlinesApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -51,7 +36,7 @@ export class SetHiddenGridlinesAction extends SheetActionBase<ISetHiddenGridline
     }
 
     undo(): void {
-        SetHiddenGridlinesApply(this._commandUnit, this._oldActionData);
+        SetHiddenGridlinesApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -63,5 +48,3 @@ export class SetHiddenGridlinesAction extends SheetActionBase<ISetHiddenGridline
         return false;
     }
 }
-
-CommandManager.register(SetHiddenGridlinesAction.NAME, SetHiddenGridlinesAction);

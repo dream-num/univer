@@ -1,6 +1,6 @@
-import { ColumnManager } from '../Domain/ColumnManager';
-import { CommandUnit } from '../../Command';
-import { ISetColumnWidthActionData } from '../Action';
+import { BooleanNumber } from '../../Types/Enum';
+import { ISetColumnWidthActionData } from '../../Types/Interfaces/IActionModel';
+import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 /**
  *
@@ -11,35 +11,27 @@ import { ISetColumnWidthActionData } from '../Action';
  *
  * @internal
  */
-export function SetColumnWidth(
-    columnIndex: number = 0,
-    columnWidth: number[],
-    columnManager: ColumnManager
-) {
-    const result: number[] = [];
-    for (let i = columnIndex; i < columnIndex + columnWidth.length; i++) {
-        const column = columnManager.getColumnOrCreate(i);
-        result[i - columnIndex] = column.w;
-        column.w = columnWidth[i - columnIndex];
-    }
-    return result;
-}
-
-export function SetColumnWidthApply(
-    unit: CommandUnit,
-    data: ISetColumnWidthActionData
-) {
-    const workbook = unit.WorkBookUnit;
-    const worksheet = workbook!.getSheetBySheetId(data.sheetId);
+export function SetColumnWidthApply(spreadsheetModel: SpreadsheetModel, data: ISetColumnWidthActionData) {
+    const worksheetModel = spreadsheetModel.worksheets[data.sheetId];
+    const { column } = worksheetModel;
     const columnIndex = data.columnIndex;
     const columnWidth = data.columnWidth;
-    const columnManager = worksheet!.getColumnManager();
 
     const result: number[] = [];
     for (let i = columnIndex; i < columnIndex + columnWidth.length; i++) {
-        const column = columnManager.getColumnOrCreate(i);
-        result[i - columnIndex] = column.w;
-        column.w = columnWidth[i - columnIndex];
+        const columnInfo = column.get(i);
+        const width = columnWidth[i - columnIndex];
+        if (columnInfo) {
+            result[i - columnIndex] = columnInfo.w;
+            columnInfo.w = width;
+        } else {
+            const defaultColumnInfo = {
+                w: width,
+                hd: BooleanNumber.FALSE,
+            };
+            column.set(i, defaultColumnInfo);
+            result[i - columnIndex] = worksheetModel.defaultColumnWidth;
+        }
     }
     return result;
 }

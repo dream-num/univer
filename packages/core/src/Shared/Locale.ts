@@ -66,14 +66,9 @@ export class Locale {
      *
      * @private
      */
-    private static getValue(
-        locale: IKeyValue,
-        key: string
-    ): Nullable<string | object> {
+    private static getValue(locale: IKeyValue, key: string): Nullable<string | object> {
         try {
-            return locale[key]
-                ? locale[key]
-                : key.split('.').reduce((a, b) => a[b], locale);
+            return locale[key] ? locale[key] : key.split('.').reduce((a, b) => a[b], locale);
         } catch (error) {
             console.error('Key %s not found', key);
         }

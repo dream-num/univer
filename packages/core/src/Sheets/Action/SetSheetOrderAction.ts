@@ -1,25 +1,12 @@
-import { SetSheetOrder } from '../Apply';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandManager, CommandUnit } from '../../Command';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { CommandModel } from '../../Command/CommandModel';
+import { SheetActionBase } from '../../Command/SheetActionBase';
+import { ISetSheetOrderActionData } from '../../Types/Interfaces/IActionModel';
+import { SetSheetOrderApply } from '../Apply/SetSheetOrder';
 
-export interface ISetSheetOrderActionData extends ISheetActionData {
-    sheetId: string;
-    order: number;
-}
-
-export class SetSheetOrderAction extends SheetActionBase<
-    ISetSheetOrderActionData,
-    ISetSheetOrderActionData
-> {
-    static NAME = 'SetSheetOrderAction';
-
-    constructor(
-        actionData: ISetSheetOrderActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+export class SetSheetOrderAction extends SheetActionBase<ISetSheetOrderActionData, ISetSheetOrderActionData> {
+    constructor(actionData: ISetSheetOrderActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -31,14 +18,7 @@ export class SetSheetOrderAction extends SheetActionBase<
     }
 
     do(): number {
-        const worksheet = this.getWorkSheet();
-        const context = worksheet.getContext();
-        const workbook = context.getWorkBook();
-        const result = SetSheetOrder(
-            workbook,
-            this._doActionData.sheetId,
-            this._doActionData.order
-        );
+        const result = SetSheetOrderApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -52,14 +32,7 @@ export class SetSheetOrderAction extends SheetActionBase<
     }
 
     undo(): void {
-        const worksheet = this.getWorkSheet();
-        const context = worksheet.getContext();
-        const workbook = context.getWorkBook();
-        SetSheetOrder(
-            workbook,
-            this._oldActionData.sheetId,
-            this._oldActionData.order
-        );
+        SetSheetOrderApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -71,5 +44,3 @@ export class SetSheetOrderAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(SetSheetOrderAction.NAME, SetSheetOrderAction);

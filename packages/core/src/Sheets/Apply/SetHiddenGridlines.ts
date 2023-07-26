@@ -1,57 +1,21 @@
-import { Worksheet } from '../Domain/Worksheet';
-import { CommandUnit } from '../../Command';
-import { ISetHiddenGridlinesActionData } from '../Action';
+import { BooleanNumber } from '../../Types/Enum';
+import { ISetHiddenGridlinesActionData } from '../../Types/Interfaces/IActionModel';
+import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
-/**
- *
- * @param worksheet
- * @param hideGridlines
- * @returns
- *
- * @internal
- */
-export function SetHiddenGridlines(
-    worksheet: Worksheet,
-    hideGridlines: boolean
-): boolean {
-    // get config
-    const config = worksheet.getConfig();
-
-    // store old sheet name
-    const oldStatus = config.showGridlines === 0;
-
-    // set new sheet name
-    if (hideGridlines) {
-        config.showGridlines = 0;
-    } else {
-        config.showGridlines = 1;
-    }
-
-    // return old sheet name to undo
-    return oldStatus;
-}
-
-export function SetHiddenGridlinesApply(
-    unit: CommandUnit,
-    data: ISetHiddenGridlinesActionData
-) {
-    const workbook = unit.WorkBookUnit;
-    const worksheet = workbook!.getSheetBySheetId(data.sheetId)!;
+export function SetHiddenGridlinesApply(spreadsheetModel: SpreadsheetModel, data: ISetHiddenGridlinesActionData) {
+    const worksheet = spreadsheetModel.worksheets[data.sheetId];
     const hideGridlines = data.hideGridlines;
 
-    // get config
-    const config = worksheet.getConfig();
+    // store old
+    const oldStatus = worksheet.showGridlines === 0;
 
-    // store old sheet name
-    const oldStatus = config.showGridlines === 0;
-
-    // set new sheet name
+    // set new
     if (hideGridlines) {
-        config.showGridlines = 0;
+        worksheet.showGridlines = BooleanNumber.FALSE;
     } else {
-        config.showGridlines = 1;
+        worksheet.showGridlines = BooleanNumber.TRUE;
     }
 
-    // return old sheet name to undo
+    // return old
     return oldStatus;
 }

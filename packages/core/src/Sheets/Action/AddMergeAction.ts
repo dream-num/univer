@@ -1,36 +1,19 @@
-import { CommandManager, CommandUnit } from '../../Command';
-import { IRangeData } from '../../Types/Interfaces';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { ActionObservers } from '../../Command/ActionObservers';
-import { IRemoveMergeActionData } from './RemoveMergeAction';
-import { addMergeApply, RemoveMergeApply } from '../Apply';
-
-/**
- * @internal
- * Format of AddMergeActionData param
- */
-export interface IAddMergeActionData extends ISheetActionData {
-    rectangles: IRangeData[];
-}
+import { IRangeData } from '../../Types/Interfaces/IRangeData';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers } from '../../Command/ActionBase';
+import { addMergeApply } from '../Apply/AddMerge';
+import { SheetActionBase } from '../../Command/SheetActionBase';
+import { IAddMergeActionData, IRemoveMergeActionData } from '../../Types/Interfaces/IActionModel';
+import { RemoveMergeApply } from '../Apply/RemoveMerge';
 
 /**
  * Set merged cell range
  *
  * @internal
  */
-export class AddMergeAction extends SheetActionBase<
-    IAddMergeActionData,
-    IRemoveMergeActionData,
-    IRangeData[]
-> {
-    static NAME = 'AddMergeAction';
-
-    constructor(
-        actionData: IAddMergeActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+export class AddMergeAction extends SheetActionBase<IAddMergeActionData, IRemoveMergeActionData, IRangeData[]> {
+    constructor(actionData: IAddMergeActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -42,7 +25,7 @@ export class AddMergeAction extends SheetActionBase<
     }
 
     do(): IRangeData[] {
-        return addMergeApply(this._commandUnit, this._doActionData);
+        return addMergeApply(this.getSpreadsheetModel(), this._doActionData);
     }
 
     redo(): void {
@@ -50,12 +33,10 @@ export class AddMergeAction extends SheetActionBase<
     }
 
     undo(): void {
-        RemoveMergeApply(this._commandUnit, this._oldActionData);
+        RemoveMergeApply(this.getSpreadsheetModel(), this._oldActionData);
     }
 
     validate(): boolean {
         return false;
     }
 }
-
-CommandManager.register(AddMergeAction.NAME, AddMergeAction);

@@ -28,9 +28,7 @@ export enum ServerReceiveType {
  * Basics class for Server
  */
 export abstract class ServerBase {
-    static isMessageResponseReceive(
-        receive: IOServerReceive<unknown>
-    ): receive is IOServerReceive<IOServerMessage> {
+    static isMessageResponseReceive(receive: IOServerReceive<unknown>): receive is IOServerReceive<IOServerMessage> {
         return receive.type === ServerReceiveType.MESSAGE_RESPONSE;
     }
 

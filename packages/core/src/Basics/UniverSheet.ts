@@ -1,27 +1,25 @@
-import { Workbook, ColorBuilder } from '../Sheets/Domain';
-import { IWorkbookConfig } from '../Types/Interfaces';
-import { BasePlugin, Plugin } from '../Plugin';
-import { IOHttp, IOHttpConfig, Logger } from '../Shared';
+import { ISpreadsheetConfig } from '../Types/Interfaces';
+import { Plugin } from '../Plugin';
+import { IOHttp, IOHttpConfig } from '../Shared';
 import { SheetContext } from './SheetContext';
-import { VersionCode, VersionEnv } from './Version';
+import { ColorBuilder } from '../Sheets/Domain/Color';
+import { CommandManager } from '../Command/CommandManager';
+import { Spreadsheet } from '../Sheets/Domain/Spreadsheet';
 
 interface IComposedConfig {
     [key: string]: any;
 
-    workbookConfig: IWorkbookConfig;
+    SpreadsheetConfig: ISpreadsheetConfig;
 }
 
 /**
  * Externally provided UniverSheet root instance
  */
 export class UniverSheet {
-    univerSheetConfig: Partial<IWorkbookConfig>;
-
     private _context: SheetContext;
 
-    constructor(univerSheetData: Partial<IWorkbookConfig> = {}) {
-        this.univerSheetConfig = univerSheetData;
-        this._context = new SheetContext(univerSheetData);
+    constructor(univerSheetData: Partial<ISpreadsheetConfig> = {}, private commandManager: CommandManager) {
+        this._context = new SheetContext(univerSheetData, this.commandManager);
     }
 
     /**
@@ -29,11 +27,6 @@ export class UniverSheet {
      */
     get context() {
         return this._context;
-    }
-
-    static newInstance(univerSheetData: Partial<IWorkbookConfig> = {}): UniverSheet {
-        Logger.capsule(VersionEnv, VersionCode, 'powered by :: universheet :: ');
-        return new UniverSheet(univerSheetData);
     }
 
     /**
@@ -66,15 +59,15 @@ export class UniverSheet {
      * @param sheet
      * @param data
      */
-    static load<T extends IComposedConfig>(sheet: UniverSheet, data: T) {
-        sheet.getWorkBook().load(data.workbookConfig);
-        sheet.context
-            .getPluginManager()
-            .getPlugins()
-            .forEach((plugin: BasePlugin) => {
-                plugin.load(data[`${plugin.getPluginName()}Config`]);
-            });
-    }
+    // static load<T extends IComposedConfig>(sheet: UniverSheet, data: T) {
+    //     sheet.getSpreadsheet().load(data.SpreadsheetConfig);
+    //     sheet.context
+    //         .getPluginManager()
+    //         .getPlugins()
+    //         .forEach((plugin: BasePlugin) => {
+    //             plugin.load(data[`${plugin.getPluginName()}Config`]);
+    //         });
+    // }
 
     static newColor(): ColorBuilder {
         return new ColorBuilder();
@@ -88,24 +81,20 @@ export class UniverSheet {
      *
      * @param univerSheet
      */
-    static toJson(univerSheet: UniverSheet): IComposedConfig {
-        const workbookConfig = univerSheet.getWorkBook().save();
-        const pluginConfig: Partial<IComposedConfig> = {};
-        univerSheet.context
-            .getPluginManager()
-            .getPlugins()
-            .forEach((plugin: BasePlugin) => {
-                pluginConfig[`${plugin.getPluginName()}Config`] = plugin.save();
-            });
+    // static toJson(univerSheet: UniverSheet): IComposedConfig {
+    //     const SpreadsheetConfig = univerSheet.getSpreadsheet().save();
+    //     const pluginConfig: Partial<IComposedConfig> = {};
+    //     univerSheet.context
+    //         .getPluginManager()
+    //         .getPlugins()
+    //         .forEach((plugin: BasePlugin) => {
+    //             pluginConfig[`${plugin.getPluginName()}Config`] = plugin.save();
+    //         });
 
-        return { workbookConfig, ...pluginConfig };
-    }
-
-    /**
-     * get unit id
-     */
+    //     return { SpreadsheetConfig, ...pluginConfig };
+    // }
     getUnitId(): string {
-        return this.getWorkBook().getUnitId();
+        return this._context.getSpreadsheet().getModel().getUnitId();
     }
 
     /**
@@ -127,15 +116,15 @@ export class UniverSheet {
     }
 
     /**
-     * get WorkBook
+     * get Spreadsheet
      *
-     * @returns Workbook
+     * @returns Spreadsheet
      */
-    getWorkBook(): Workbook {
-        return this._context.getWorkBook();
+    getSpreadsheet(): Spreadsheet {
+        return this._context.getSpreadsheet();
     }
 
-    refreshWorkbook(univerSheetData: Partial<IWorkbookConfig> = {}) {
-        this._context.refreshWorkbook(univerSheetData);
+    refreshSpreadsheet(univerSheetData: Partial<ISpreadsheetConfig> = {}) {
+        this._context.refreshSpreadsheet(univerSheetData);
     }
 }

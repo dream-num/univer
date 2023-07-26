@@ -1,5 +1,6 @@
-import { sortRules } from '../Shared';
-import { BaseActionExtensionFactory, REGISTRY_ACTION_FACTORY } from './index';
+import { sortRules } from '../Shared/SortRules';
+import { BaseActionExtensionFactory } from './ActionExtensionFactory';
+import { REGISTRY_ACTION_FACTORY } from './RegistryFactory';
 
 export class ActionExtensionRegister {
     private _actionExtensionFactoryList: BaseActionExtensionFactory[] = [];
@@ -23,8 +24,6 @@ export class ActionExtensionRegister {
     }
 
     private _initExtensions() {
-        this._actionExtensionFactoryList.push(
-            ...REGISTRY_ACTION_FACTORY.getData().sort(sortRules)
-        );
+        this._actionExtensionFactoryList.push(...REGISTRY_ACTION_FACTORY.getData().sort(sortRules));
     }
 }

@@ -1,20 +1,17 @@
 import { IDocumentData } from '../Types/Interfaces';
 import { Plugin } from '../Plugin';
-import { IOHttp, IOHttpConfig, Logger } from '../Shared';
+import { IOHttp, IOHttpConfig } from '../Shared';
 import { DocContext } from './DocContext';
-import { VersionCode, VersionEnv } from './Version';
+import { CommandManager } from '../Command/CommandManager';
 
 /**
  * Externally provided UniverDoc root instance
  */
 export class UniverDoc {
-    univerDocConfig: Partial<IDocumentData>;
-
     private _context: DocContext;
 
-    constructor(UniverDocData: Partial<IDocumentData> = {}) {
-        this.univerDocConfig = UniverDocData;
-        this._context = new DocContext(UniverDocData);
+    constructor(univerDocData: Partial<IDocumentData> = {}, private commandManager: CommandManager) {
+        this._context = new DocContext(univerDocData, this.commandManager);
     }
 
     /**
@@ -22,11 +19,6 @@ export class UniverDoc {
      */
     get context() {
         return this._context;
-    }
-
-    static newInstance(UniverDocData: Partial<IDocumentData> = {}): UniverDoc {
-        Logger.capsule(VersionEnv, VersionCode, 'powered by :: UniverDoc :: ');
-        return new UniverDoc(UniverDocData);
     }
 
     /**

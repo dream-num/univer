@@ -1,17 +1,13 @@
-import { IRangeData } from '../../Types/Interfaces';
-import { CommandUnit } from '../../Command';
-import { IRemoveMergeActionData } from '../Action';
-import { Rectangle } from '../../Shared';
+import { Rectangle } from '../../Shared/Rectangle';
+import { IRemoveMergeActionData } from '../../Types/Interfaces/IActionModel';
+import { IRangeData } from '../../Types/Interfaces/IRangeData';
+import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
-export function RemoveMergeApply(
-    unit: CommandUnit,
-    data: IRemoveMergeActionData
-): IRangeData[] {
-    let worksheet = unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
+export function RemoveMergeApply(model: SpreadsheetModel, data: IRemoveMergeActionData): IRangeData[] {
+    let worksheet = model.worksheets[data.sheetId];
     if (worksheet) {
-        let config = worksheet.getConfig();
         let remove: IRangeData[] = [];
-        let mergeConfigData = config.mergeData;
+        let mergeConfigData = worksheet.merge;
         let mergeRemoveData = data.rectangles;
         for (let j = 0; j < mergeRemoveData.length; j++) {
             for (let i = mergeConfigData.length - 1; i >= 0; i--) {

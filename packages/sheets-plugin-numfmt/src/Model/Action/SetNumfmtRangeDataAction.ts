@@ -1,4 +1,4 @@
-import { SheetActionBase, ActionObservers, ISheetActionData, ObjectMatrixPrimitiveType, CommandUnit } from '@univerjs/core';
+import { SheetActionBase, ActionObservers, ISheetActionData, ObjectMatrixPrimitiveType, CommandModel } from '@univerjs/core';
 import { SetNumfmtRangeData } from '../Apply/SetNumfmtRangeData';
 
 export interface ISetNumfmtRangeActionData extends ISheetActionData {
@@ -6,8 +6,8 @@ export interface ISetNumfmtRangeActionData extends ISheetActionData {
 }
 
 export class SetNumfmtRangeDataAction extends SheetActionBase<ISetNumfmtRangeActionData, ISetNumfmtRangeActionData> {
-    constructor(actionData: ISetNumfmtRangeActionData, commandUnit: CommandUnit, observers: ActionObservers) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetNumfmtRangeActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };

@@ -1,34 +1,18 @@
-import { InsertColumnApply, RemoveColumnApply } from '../Apply';
-import { CommandManager, CommandUnit } from '../../Command';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { IInsertColumnActionData } from './InsertColumnAction';
-
-/**
- * @internal
- */
-export interface IRemoveColumnAction extends ISheetActionData {
-    columnCount: number;
-    columnIndex: number;
-}
+import { InsertColumnApply } from '../Apply/InsertColumn';
+import { RemoveColumnApply } from '../Apply/RemoveColumn';
+import { SheetActionBase } from '../../Command/SheetActionBase';
+import { IRemoveColumnAction, IInsertColumnActionData } from '../../Types/Interfaces/IActionModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { CommandModel } from '../../Command/CommandModel';
 
 /**
  * Remove the column configuration of the specified column index and column count
  *
  * @internal
  */
-export class RemoveColumnAction extends SheetActionBase<
-    IRemoveColumnAction,
-    IInsertColumnActionData
-> {
-    static NAME = 'RemoveColumnAction';
-
-    constructor(
-        actionData: IRemoveColumnAction,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+export class RemoveColumnAction extends SheetActionBase<IRemoveColumnAction, IInsertColumnActionData> {
+    constructor(actionData: IRemoveColumnAction, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -40,7 +24,7 @@ export class RemoveColumnAction extends SheetActionBase<
     }
 
     do(): number {
-        const result = RemoveColumnApply(this._commandUnit, this._doActionData);
+        const result = RemoveColumnApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -54,7 +38,7 @@ export class RemoveColumnAction extends SheetActionBase<
     }
 
     undo(): void {
-        InsertColumnApply(this._commandUnit, this._oldActionData);
+        InsertColumnApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -66,5 +50,3 @@ export class RemoveColumnAction extends SheetActionBase<
         return false;
     }
 }
-
-CommandManager.register(RemoveColumnAction.NAME, RemoveColumnAction);

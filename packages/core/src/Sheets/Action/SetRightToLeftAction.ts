@@ -1,28 +1,16 @@
-import { SetRightToLeft } from '../Apply';
 import { BooleanNumber } from '../../Types/Enum';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { CommandManager, CommandUnit } from '../../Command';
-
-/**
- * @internal
- */
-export interface ISetRightToLeftActionData extends ISheetActionData {
-    rightToLeft: BooleanNumber;
-}
+import { SheetActionBase } from '../../Command/SheetActionBase';
+import { ISetRightToLeftActionData } from '../../Types/Interfaces/IActionModel';
+import { SetRightToLeftApply } from '../Apply/SetRightToLeft';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
 
 /**
  * @internal
  */
 export class SetRightToLeftAction extends SheetActionBase<ISetRightToLeftActionData> {
-    static NAME = 'SetRightToLeftAction';
-
-    constructor(
-        actionData: ISetRightToLeftActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetRightToLeftActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -35,9 +23,7 @@ export class SetRightToLeftAction extends SheetActionBase<ISetRightToLeftActionD
     }
 
     do(): BooleanNumber {
-        const worksheet = this.getWorkSheet();
-
-        const result = SetRightToLeft(worksheet, this._doActionData.rightToLeft);
+        const result = SetRightToLeftApply(this.getSpreadsheetModel(), this._doActionData);
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -53,9 +39,7 @@ export class SetRightToLeftAction extends SheetActionBase<ISetRightToLeftActionD
     }
 
     undo(): void {
-        const { rightToLeft, sheetId } = this._oldActionData;
-        const worksheet = this.getWorkSheet();
-        SetRightToLeft(worksheet, this._oldActionData.rightToLeft);
+        SetRightToLeftApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -67,5 +51,3 @@ export class SetRightToLeftAction extends SheetActionBase<ISetRightToLeftActionD
         return false;
     }
 }
-
-CommandManager.register(SetRightToLeftAction.NAME, SetRightToLeftAction);

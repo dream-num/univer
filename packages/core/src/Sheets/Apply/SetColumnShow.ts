@@ -1,6 +1,6 @@
-import { ColumnManager } from '../Domain/ColumnManager';
-import { CommandUnit } from '../../Command';
-import { ISetColumnShowActionData } from '../Action';
+import { BooleanNumber } from '../../Types/Enum';
+import { ISetColumnShowActionData } from '../../Types/Interfaces/IActionModel';
+import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 /**
  *
@@ -10,33 +10,23 @@ import { ISetColumnShowActionData } from '../Action';
  *
  * @internal
  */
-export function SetColumnShow(
-    columnIndex: number = 0,
-    columnCount: number,
-    columnManager: ColumnManager
-): void {
-    for (let i = columnIndex; i < columnIndex + columnCount; i++) {
-        const column = columnManager.getColumn(i);
-        if (column) {
-            column.hd = 0;
-        }
-    }
-}
 
-export function SetColumnShowApply(
-    unit: CommandUnit,
-    data: ISetColumnShowActionData
-): void {
-    const workbook = unit.WorkBookUnit;
-    const worksheet = workbook!.getSheetBySheetId(data.sheetId);
-    const columnIndex = 0;
-    const columnCount = 0;
-    const columnManager = worksheet!.getColumnManager();
+export function SetColumnShowApply(spreadsheetModel: SpreadsheetModel, data: ISetColumnShowActionData): void {
+    const worksheetModel = spreadsheetModel.worksheets[data.sheetId];
+    const { column } = worksheetModel;
+    const columnIndex = data.columnIndex;
+    const columnCount = data.columnCount;
 
     for (let i = columnIndex; i < columnIndex + columnCount; i++) {
-        const column = columnManager.getColumn(i);
-        if (column) {
-            column.hd = 0;
+        const columnInfo = column.get(i);
+        if (columnInfo) {
+            columnInfo.hd = BooleanNumber.FALSE;
+        } else {
+            const defaultColumnInfo = {
+                w: worksheetModel.defaultColumnWidth,
+                hd: BooleanNumber.FALSE,
+            };
+            column.set(i, defaultColumnInfo);
         }
     }
 }

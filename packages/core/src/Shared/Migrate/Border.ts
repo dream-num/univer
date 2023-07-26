@@ -29,14 +29,8 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                     },
                 };
 
-                if (
-                    newSheet.cellData[rowIndex] &&
-                    (newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData)?.bd
-                        ?.r
-                ) {
-                    delete (
-                        newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData
-                    )?.bd?.r;
+                if (newSheet.cellData[rowIndex] && (newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData)?.bd?.r) {
+                    delete (newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData)?.bd?.r;
                 }
             }
             if (borderInfo.value.r) {
@@ -47,16 +41,8 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                     },
                 };
 
-                if (
-                    newSheet.cellData[rowIndex] &&
-                    (
-                        newSheet.cellData[rowIndex][Number(colIndex) + 1]
-                            ?.s as IStyleData
-                    )?.bd?.l
-                ) {
-                    delete (
-                        newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData
-                    )?.bd?.l;
+                if (newSheet.cellData[rowIndex] && (newSheet.cellData[rowIndex][Number(colIndex) + 1]?.s as IStyleData)?.bd?.l) {
+                    delete (newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData)?.bd?.l;
                 }
             }
             if (borderInfo.value.t) {
@@ -67,13 +53,8 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                     },
                 };
 
-                if (
-                    newSheet.cellData[rowIndex - 1] &&
-                    (newSheet.cellData[rowIndex][colIndex]?.s as IStyleData)?.bd?.b
-                ) {
-                    delete (
-                        newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData
-                    )?.bd?.b;
+                if (newSheet.cellData[rowIndex - 1] && (newSheet.cellData[rowIndex][colIndex]?.s as IStyleData)?.bd?.b) {
+                    delete (newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData)?.bd?.b;
                 }
             }
             if (borderInfo.value.b) {
@@ -84,21 +65,12 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                     },
                 };
 
-                if (
-                    newSheet.cellData[Number(rowIndex) + 1] &&
-                    (newSheet.cellData[rowIndex][colIndex]?.s as IStyleData)?.bd?.t
-                ) {
-                    delete (
-                        newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData
-                    )?.bd?.t;
+                if (newSheet.cellData[Number(rowIndex) + 1] && (newSheet.cellData[rowIndex][colIndex]?.s as IStyleData)?.bd?.t) {
+                    delete (newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData)?.bd?.t;
                 }
             }
 
-            (newSheet.cellData[rowIndex][colIndex].s as IStyleData).bd =
-                Object.assign(
-                    (newSheet.cellData[rowIndex][colIndex].s as IStyleData).bd || {},
-                    newBorder
-                );
+            (newSheet.cellData[rowIndex][colIndex].s as IStyleData).bd = Object.assign((newSheet.cellData[rowIndex][colIndex].s as IStyleData).bd || {}, newBorder);
         } else if (borderInfo.rangeType === 'range') {
             for (const range of borderInfo.range) {
                 const startRow = range.row[0];
@@ -131,24 +103,15 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     },
                                 };
 
-                                (newSheet.cellData[r][c].s as IStyleData).bd =
-                                    Object.assign(
-                                        (newSheet.cellData[r][c].s as IStyleData)
-                                            .bd || {},
-                                        newBorder
-                                    );
+                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign((newSheet.cellData[r][c].s as IStyleData).bd || {}, newBorder);
                             }
                         }
 
                         // 去除 左侧单元格的右边框
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = startColumn - 1; c < startColumn; c++) {
-                                if (
-                                    newSheet.cellData[r] &&
-                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.r
-                                ) {
-                                    delete (newSheet.cellData[r][c].s as IStyleData)
-                                        ?.bd?.r;
+                                if (newSheet.cellData[r] && (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.r) {
+                                    delete (newSheet.cellData[r][c].s as IStyleData)?.bd?.r;
                                 }
                             }
                         }
@@ -178,24 +141,15 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     },
                                 };
 
-                                (newSheet.cellData[r][c].s as IStyleData).bd =
-                                    Object.assign(
-                                        (newSheet.cellData[r][c].s as IStyleData)
-                                            .bd || {},
-                                        newBorder
-                                    );
+                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign((newSheet.cellData[r][c].s as IStyleData).bd || {}, newBorder);
                             }
                         }
 
                         // 去除 右侧单元格的左边框
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = endColumn + 1; c < endColumn + 2; c++) {
-                                if (
-                                    newSheet.cellData[r] &&
-                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.l
-                                ) {
-                                    delete (newSheet.cellData[r][c].s as IStyleData)
-                                        .bd?.l;
+                                if (newSheet.cellData[r] && (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.l) {
+                                    delete (newSheet.cellData[r][c].s as IStyleData).bd?.l;
                                 }
                             }
                         }
@@ -225,24 +179,15 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     },
                                 };
 
-                                (newSheet.cellData[r][c].s as IStyleData).bd =
-                                    Object.assign(
-                                        (newSheet.cellData[r][c].s as IStyleData)
-                                            .bd || {},
-                                        newBorder
-                                    );
+                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign((newSheet.cellData[r][c].s as IStyleData).bd || {}, newBorder);
                             }
                         }
 
                         // 去除 上侧单元格的下边框
                         for (let r = startRow - 1; r < startRow; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
-                                if (
-                                    newSheet.cellData[r] &&
-                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.b
-                                ) {
-                                    delete (newSheet.cellData[r][c].s as IStyleData)
-                                        .bd?.b;
+                                if (newSheet.cellData[r] && (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.b) {
+                                    delete (newSheet.cellData[r][c].s as IStyleData).bd?.b;
                                 }
                             }
                         }
@@ -272,24 +217,15 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     },
                                 };
 
-                                (newSheet.cellData[r][c].s as IStyleData).bd =
-                                    Object.assign(
-                                        (newSheet.cellData[r][c].s as IStyleData)
-                                            .bd || {},
-                                        newBorder
-                                    );
+                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign((newSheet.cellData[r][c].s as IStyleData).bd || {}, newBorder);
                             }
                         }
 
                         // 去除 下侧单元格的上边框
                         for (let r = endRow + 1; r < endRow + 2; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
-                                if (
-                                    newSheet.cellData[r] &&
-                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.t
-                                ) {
-                                    delete (newSheet.cellData[r][c].s as IStyleData)
-                                        .bd?.t;
+                                if (newSheet.cellData[r] && (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.t) {
+                                    delete (newSheet.cellData[r][c].s as IStyleData).bd?.t;
                                 }
                             }
                         }
@@ -345,20 +281,15 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     };
                                 }
 
-                                (newSheet.cellData[r][c].s as IStyleData).bd =
-                                    newBorder;
+                                (newSheet.cellData[r][c].s as IStyleData).bd = newBorder;
                             }
                         }
 
                         // 去除 左侧单元格的右边框
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = startColumn - 1; c < startColumn; c++) {
-                                if (
-                                    newSheet.cellData[r] &&
-                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.r
-                                ) {
-                                    delete (newSheet.cellData[r][c].s as IStyleData)
-                                        .bd?.r;
+                                if (newSheet.cellData[r] && (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.r) {
+                                    delete (newSheet.cellData[r][c].s as IStyleData).bd?.r;
                                 }
                             }
                         }
@@ -366,12 +297,8 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         // 去除 右侧单元格的左边框
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = endColumn + 1; c < endColumn + 2; c++) {
-                                if (
-                                    newSheet.cellData[r] &&
-                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.l
-                                ) {
-                                    delete (newSheet.cellData[r][c].s as IStyleData)
-                                        .bd?.l;
+                                if (newSheet.cellData[r] && (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.l) {
+                                    delete (newSheet.cellData[r][c].s as IStyleData).bd?.l;
                                 }
                             }
                         }
@@ -379,12 +306,8 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         // 去除 上侧单元格的下边框
                         for (let r = startRow - 1; r < startRow; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
-                                if (
-                                    newSheet.cellData[r] &&
-                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.b
-                                ) {
-                                    delete (newSheet.cellData[r][c].s as IStyleData)
-                                        .bd?.b;
+                                if (newSheet.cellData[r] && (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.b) {
+                                    delete (newSheet.cellData[r][c].s as IStyleData).bd?.b;
                                 }
                             }
                         }
@@ -392,12 +315,8 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         // 去除 下侧单元格的上边框
                         for (let r = endRow + 1; r < endRow + 2; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
-                                if (
-                                    newSheet.cellData[r] &&
-                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.t
-                                ) {
-                                    delete (newSheet.cellData[r][c].s as IStyleData)
-                                        .bd?.t;
+                                if (newSheet.cellData[r] && (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.t) {
+                                    delete (newSheet.cellData[r][c].s as IStyleData).bd?.t;
                                 }
                             }
                         }
@@ -457,24 +376,15 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     };
                                 }
 
-                                (newSheet.cellData[r][c].s as IStyleData).bd =
-                                    Object.assign(
-                                        (newSheet.cellData[r][c].s as IStyleData)
-                                            .bd || {},
-                                        newBorder
-                                    );
+                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign((newSheet.cellData[r][c].s as IStyleData).bd || {}, newBorder);
                             }
                         }
 
                         // 去除 左侧单元格的右边框
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = startColumn - 1; c < startColumn; c++) {
-                                if (
-                                    newSheet.cellData[r] &&
-                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.r
-                                ) {
-                                    delete (newSheet.cellData[r][c].s as IStyleData)
-                                        .bd?.r;
+                                if (newSheet.cellData[r] && (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.r) {
+                                    delete (newSheet.cellData[r][c].s as IStyleData).bd?.r;
                                 }
                             }
                         }
@@ -482,12 +392,8 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         // 去除 右侧单元格的左边框
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = endColumn + 1; c < endColumn + 2; c++) {
-                                if (
-                                    newSheet.cellData[r] &&
-                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.l
-                                ) {
-                                    delete (newSheet.cellData[r][c].s as IStyleData)
-                                        .bd?.l;
+                                if (newSheet.cellData[r] && (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.l) {
+                                    delete (newSheet.cellData[r][c].s as IStyleData).bd?.l;
                                 }
                             }
                         }
@@ -495,12 +401,8 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         // 去除 上侧单元格的下边框
                         for (let r = startRow - 1; r < startRow; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
-                                if (
-                                    newSheet.cellData[r] &&
-                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.b
-                                ) {
-                                    delete (newSheet.cellData[r][c].s as IStyleData)
-                                        .bd?.b;
+                                if (newSheet.cellData[r] && (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.b) {
+                                    delete (newSheet.cellData[r][c].s as IStyleData).bd?.b;
                                 }
                             }
                         }
@@ -508,12 +410,8 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         // 去除 下侧单元格的上边框
                         for (let r = endRow + 1; r < endRow + 2; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
-                                if (
-                                    newSheet.cellData[r] &&
-                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.t
-                                ) {
-                                    delete (newSheet.cellData[r][c].s as IStyleData)
-                                        .bd?.t;
+                                if (newSheet.cellData[r] && (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.t) {
+                                    delete (newSheet.cellData[r][c].s as IStyleData).bd?.t;
                                 }
                             }
                         }
@@ -574,8 +472,7 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     };
                                 }
 
-                                (newSheet.cellData[r][c].s as IStyleData).bd =
-                                    newBorder;
+                                (newSheet.cellData[r][c].s as IStyleData).bd = newBorder;
                             }
                         }
 
@@ -604,24 +501,15 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     },
                                 };
 
-                                (newSheet.cellData[r][c].s as IStyleData).bd =
-                                    Object.assign(
-                                        (newSheet.cellData[r][c].s as IStyleData)
-                                            .bd || {},
-                                        newBorder
-                                    );
+                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign((newSheet.cellData[r][c].s as IStyleData).bd || {}, newBorder);
                             }
                         }
 
                         // 去除 第二行开始的上边框
                         for (let r = startRow + 1; r <= endRow; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
-                                if (
-                                    newSheet.cellData[r] &&
-                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.t
-                                ) {
-                                    delete (newSheet.cellData[r][c].s as IStyleData)
-                                        .bd?.t;
+                                if (newSheet.cellData[r] && (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.t) {
+                                    delete (newSheet.cellData[r][c].s as IStyleData).bd?.t;
                                 }
                             }
                         }
@@ -651,24 +539,15 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     },
                                 };
 
-                                (newSheet.cellData[r][c].s as IStyleData).bd =
-                                    Object.assign(
-                                        (newSheet.cellData[r][c].s as IStyleData)
-                                            .bd || {},
-                                        newBorder
-                                    );
+                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign((newSheet.cellData[r][c].s as IStyleData).bd || {}, newBorder);
                             }
                         }
 
                         // 去除 第二列开始的左边框
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = startColumn + 1; c <= endColumn; c++) {
-                                if (
-                                    newSheet.cellData[r] &&
-                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.l
-                                ) {
-                                    delete (newSheet.cellData[r][c].s as IStyleData)
-                                        .bd?.l;
+                                if (newSheet.cellData[r] && (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.l) {
+                                    delete (newSheet.cellData[r][c].s as IStyleData).bd?.l;
                                 }
                             }
                         }
@@ -692,20 +571,15 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                 // 置空
                                 const newBorder: IBorderData = {};
 
-                                (newSheet.cellData[r][c].s as IStyleData).bd =
-                                    newBorder;
+                                (newSheet.cellData[r][c].s as IStyleData).bd = newBorder;
                             }
                         }
 
                         // 去除 左侧单元格的右边框
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = startColumn - 1; c < startColumn; c++) {
-                                if (
-                                    newSheet.cellData[r] &&
-                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.r
-                                ) {
-                                    delete (newSheet.cellData[r][c].s as IStyleData)
-                                        .bd?.r;
+                                if (newSheet.cellData[r] && (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.r) {
+                                    delete (newSheet.cellData[r][c].s as IStyleData).bd?.r;
                                 }
                             }
                         }
@@ -713,12 +587,8 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         // 去除 右侧单元格的左边框
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = endColumn + 1; c < endColumn + 2; c++) {
-                                if (
-                                    newSheet.cellData[r] &&
-                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.l
-                                ) {
-                                    delete (newSheet.cellData[r][c].s as IStyleData)
-                                        .bd?.l;
+                                if (newSheet.cellData[r] && (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.l) {
+                                    delete (newSheet.cellData[r][c].s as IStyleData).bd?.l;
                                 }
                             }
                         }
@@ -726,12 +596,8 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         // 去除 上侧单元格的下边框
                         for (let r = startRow - 1; r < startRow; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
-                                if (
-                                    newSheet.cellData[r] &&
-                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.b
-                                ) {
-                                    delete (newSheet.cellData[r][c].s as IStyleData)
-                                        .bd?.b;
+                                if (newSheet.cellData[r] && (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.b) {
+                                    delete (newSheet.cellData[r][c].s as IStyleData).bd?.b;
                                 }
                             }
                         }
@@ -739,12 +605,8 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                         // 去除 下侧单元格的上边框
                         for (let r = endRow + 1; r < endRow + 2; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
-                                if (
-                                    newSheet.cellData[r] &&
-                                    (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.t
-                                ) {
-                                    delete (newSheet.cellData[r][c].s as IStyleData)
-                                        .bd?.t;
+                                if (newSheet.cellData[r] && (newSheet.cellData[r][c]?.s as IStyleData)?.bd?.t) {
+                                    delete (newSheet.cellData[r][c].s as IStyleData).bd?.t;
                                 }
                             }
                         }

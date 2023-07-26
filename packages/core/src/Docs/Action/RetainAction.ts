@@ -1,5 +1,5 @@
 import { DocActionBase } from '../../Command/DocActionBase';
-import { ActionObservers, CommandManager, CommandUnit, CommonParameter } from '../../Command';
+import { ActionObservers, CommandManager, CommandModel, CommonParameter } from '../../Command';
 import { IRetainActionData } from './ActionDataInterface';
 import { UpdateDocsAttributeType } from '../../Shared/CommandEnum';
 import { UpdateAttributeApply } from '../Apply/UpdateAttributeApply';
@@ -9,8 +9,8 @@ import { Nullable } from '../../Shared';
 export class RetainAction extends DocActionBase<IRetainActionData, IRetainActionData> {
     static NAME = 'RetainAction';
 
-    constructor(actionData: IRetainActionData, commandUnit: CommandUnit, observers: ActionObservers, commonParameter: CommonParameter) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: IRetainActionData, commandModel: CommandModel, observers: ActionObservers, commonParameter: CommonParameter) {
+        super(actionData, commandModel, observers);
         this._doActionData = { ...actionData };
         this._oldActionData = {
             ...actionData,

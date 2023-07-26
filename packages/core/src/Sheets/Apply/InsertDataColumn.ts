@@ -1,32 +1,8 @@
-import { ICellData } from '../../Types/Interfaces';
-import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { CommandUnit } from '../../Command';
-import { IInsertColumnDataActionData } from '../Action';
+import { ObjectMatrix } from '../../Shared/ObjectMatrix';
+import { IInsertColumnDataActionData } from '../../Types/Interfaces/IActionModel';
+import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
-/**
- *
- * @param columnIndex
- * @param columnData
- * @param cellData
- *
- * @internal
- */
-export function InsertDataColumn(
-    columnIndex: number,
-    columnData: ObjectMatrixPrimitiveType<ICellData>,
-    primitiveData: ObjectMatrixPrimitiveType<ICellData>
-) {
-    const wrapper = new ObjectMatrix(primitiveData);
-    wrapper.insertColumns(columnIndex, new ObjectMatrix(columnData));
-}
-
-export function InsertDataColumnApply(
-    unit: CommandUnit,
-    data: IInsertColumnDataActionData
-) {
-    const worksheet = unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
-    const primitiveData = worksheet!.getCellMatrix().toJSON();
-
-    const wrapper = new ObjectMatrix(primitiveData);
-    wrapper.insertColumns(data.columnIndex, new ObjectMatrix(data.columnData));
+export function InsertDataColumnApply(spreadsheetModel: SpreadsheetModel, data: IInsertColumnDataActionData) {
+    const worksheetModel = spreadsheetModel.worksheets[data.sheetId];
+    worksheetModel.cell.insertColumns(data.columnIndex, new ObjectMatrix(data.columnData));
 }

@@ -1,5 +1,5 @@
 import { IDocumentBody } from '../../Interfaces/IDocumentData';
-import { DocumentModel } from '../Domain/DocumentModel';
+import { DocumentModel } from '../Domain/Document';
 import { getDocsUpdateBody, horizontalLineSegmentsSubtraction } from '../../Shared/Common';
 import { UpdateDocsAttributeType } from '../../Shared/CommandEnum';
 import { Nullable } from '../../Shared/Types';

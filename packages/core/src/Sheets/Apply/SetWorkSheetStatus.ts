@@ -1,5 +1,5 @@
-import { Worksheet } from '../Domain/Worksheet';
 import { BooleanNumber } from '../../Types/Enum';
+import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 /**
  *
@@ -9,19 +9,17 @@ import { BooleanNumber } from '../../Types/Enum';
  *
  * @internal
  */
-export function SetWorkSheetStatus(
-    worksheet: Worksheet,
-    sheetStatus: BooleanNumber
-): BooleanNumber {
-    // get config
-    const config = worksheet.getConfig();
+export function SetWorkSheetStatusApply(spreadsheetModel: SpreadsheetModel, data: ISetWorkSheetStatusActionData): BooleanNumber {
+    // // get config
+    // const config = worksheet.getConfig();
 
-    // store old sheet name
-    const oldStatus = config.status;
+    // // store old sheet name
+    // const oldStatus = config.status;
 
-    // set new sheet name
-    config.status = sheetStatus;
+    // // set new sheet name
+    // config.status = sheetStatus;
 
-    // return old sheet name to undo
-    return oldStatus;
+    // // return old sheet name to undo
+    // return oldStatus;
+    return BooleanNumber.FALSE;
 }

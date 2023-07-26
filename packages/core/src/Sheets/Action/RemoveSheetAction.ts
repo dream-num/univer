@@ -1,26 +1,14 @@
-import { InsertSheetApply, RemoveSheetApply } from '../Apply';
+import { InsertSheetApply } from '../Apply/InsertSheet';
+import { RemoveSheetApply } from '../Apply/RemoveSheet';
 import { IWorksheetConfig } from '../../Types/Interfaces';
-import { CommandManager, CommandUnit } from '../../Command';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { IInsertSheetActionData } from './InsertSheetAction';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
+import { SheetActionBase } from '../../Command/SheetActionBase';
+import { IRemoveSheetActionData, IInsertSheetActionData } from '../../Types/Interfaces/IActionModel';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
 
-export interface IRemoveSheetActionData extends ISheetActionData {
-    sheetId: string;
-}
-
-export class RemoveSheetAction extends SheetActionBase<
-    IRemoveSheetActionData,
-    IInsertSheetActionData
-> {
-    static NAME = 'RemoveSheetAction';
-
-    constructor(
-        actionData: IRemoveSheetActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
-        super(actionData, commandUnit, observers);
+export class RemoveSheetAction extends SheetActionBase<IRemoveSheetActionData, IInsertSheetActionData> {
+    constructor(actionData: IRemoveSheetActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
         this._doActionData = {
             ...actionData,
         };
@@ -35,7 +23,7 @@ export class RemoveSheetAction extends SheetActionBase<
     }
 
     redo(): { index: number; sheet: IWorksheetConfig } {
-        const result = RemoveSheetApply(this._commandUnit, this._doActionData);
+        const result = RemoveSheetApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -45,8 +33,7 @@ export class RemoveSheetAction extends SheetActionBase<
     }
 
     undo(): void {
-        const workbook = this.getWorkBook();
-        InsertSheetApply(this._commandUnit, this._oldActionData);
+        InsertSheetApply(this.getSpreadsheetModel(), this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,
@@ -58,5 +45,3 @@ export class RemoveSheetAction extends SheetActionBase<
         throw new Error('Method not implemented.');
     }
 }
-
-CommandManager.register(RemoveSheetAction.NAME, RemoveSheetAction);

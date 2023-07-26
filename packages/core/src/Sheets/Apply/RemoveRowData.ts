@@ -1,32 +1,7 @@
-import { ICellData } from '../../Types/Interfaces';
-import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { CommandUnit } from '../../Command';
-import { IRemoveRowDataActionData } from '../Action';
+import { IRemoveRowDataActionData } from '../../Types/Interfaces/IActionModel';
+import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
-/**
- *
- * @param rowIndex
- * @param rowCount
- * @param cellData
- * @returns
- *
- * @internal
- */
-export function RemoveRowData(
-    rowIndex: number,
-    rowCount: number,
-    primitiveData: ObjectMatrixPrimitiveType<ICellData>
-): ObjectMatrixPrimitiveType<ICellData> {
-    const wrapper = new ObjectMatrix(primitiveData);
-    return wrapper.spliceRows(rowIndex, rowCount).toJSON();
-}
-
-export function RemoveRowDataApply(
-    unit: CommandUnit,
-    data: IRemoveRowDataActionData
-) {
-    const worksheet = unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
-    const primitiveData = worksheet!.getCellMatrix().toJSON();
-    const wrapper = new ObjectMatrix(primitiveData);
-    return wrapper.spliceRows(data.rowIndex, data.rowCount).toJSON();
+export function RemoveRowDataApply(spreadsheetModel: SpreadsheetModel, data: IRemoveRowDataActionData) {
+    const worksheet = spreadsheetModel.worksheets[data.sheetId];
+    return worksheet.cell.spliceRows(data.rowIndex, data.rowCount).toJSON();
 }

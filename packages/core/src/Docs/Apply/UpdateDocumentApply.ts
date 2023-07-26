@@ -1,4 +1,4 @@
-import { DocumentModel } from '../Domain/DocumentModel';
+import { DocumentModel } from '../Domain/Document';
 import { getDocsUpdateBody } from '../../Shared/Common';
 
 export function UpdateDocumentApply(document: DocumentModel, textLength: number, currentIndex: number, segmentId?: string) {

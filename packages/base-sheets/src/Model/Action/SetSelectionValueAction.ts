@@ -1,4 +1,4 @@
-import { SheetActionBase, ActionObservers, ActionType, ISheetActionData, ICellInfo, ISelection, Nullable, CommandUnit, CommandManager } from '@univerjs/core';
+import { SheetActionBase, ActionObservers, ActionType, ISheetActionData, ICellInfo, ISelection, Nullable, CommandManager, CommandModel } from '@univerjs/core';
 import { ACTION_NAMES } from '../../Basics';
 import { SetSelectionValue } from '../Apply/SetSelectionValue';
 
@@ -14,8 +14,8 @@ export interface ISetSelectionValueActionData extends ISheetActionData {
 export class SetSelectionValueAction extends SheetActionBase<ISetSelectionValueActionData, ISetSelectionValueActionData, ISelectionModelValue[]> {
     static NAME = 'SetSelectionValueAction';
 
-    constructor(actionData: ISetSelectionValueActionData, commandUnit: CommandUnit, observers: ActionObservers) {
-        super(actionData, commandUnit, observers);
+    constructor(actionData: ISetSelectionValueActionData, commandModel: CommandModel, observers: ActionObservers) {
+        super(actionData, commandModel, observers);
 
         this._doActionData = {
             ...actionData,

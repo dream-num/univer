@@ -1,10 +1,10 @@
 import { Dimension } from '../../Types/Enum/Dimension';
 import { ICellData, IRangeData } from '../../Types/Interfaces';
-import { Tools } from '../../Shared';
+import { Tools } from '../../Shared/Tools';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { Nullable } from '../../Shared/Types';
-import { CommandUnit } from '../../Command';
-import { IDeleteRangeActionData } from '../Action';
+import { IDeleteRangeActionData } from '../../Types/Interfaces/IActionModel';
+import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 /**
  *
@@ -96,15 +96,12 @@ export function DeleteRange(
     return result.getData();
 }
 
-export function DeleteRangeApply(
-    unit: CommandUnit,
-    data: IDeleteRangeActionData
-): ObjectMatrixPrimitiveType<ICellData> {
-    const worksheet = unit.WorkBookUnit?.getSheetBySheetId(data.sheetId);
-    const cellMatrix = worksheet?.getCellMatrix();
+export function DeleteRangeApply(spreadsheetModel: SpreadsheetModel, data: IDeleteRangeActionData): ObjectMatrixPrimitiveType<ICellData> {
+    const worksheet = spreadsheetModel.worksheets[data.sheetId];
+    const cellMatrix = worksheet.cell;
     const count = {
-        rowCount: worksheet?.getConfig().rowCount,
-        columnCount: worksheet?.getConfig().columnCount,
+        rowCount: worksheet.rowCount,
+        columnCount: worksheet.columnCount,
     };
 
     const { startRow, endRow, startColumn, endColumn } = data.rangeData;

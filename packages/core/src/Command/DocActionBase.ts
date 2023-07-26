@@ -1,25 +1,17 @@
-import { ActionBase, IActionData, CommandUnit, ActionObservers } from './index';
-import { DocumentModel } from '../Docs/Domain/DocumentModel';
+import { DocumentModel } from '../Docs/Model/DocumentModel';
+import { ActionBase, IActionData, CommandModel, ActionObservers } from './index';
 
 export interface IDocActionData extends IActionData {}
 
-export abstract class DocActionBase<
-    D extends IDocActionData,
-    O extends IDocActionData = D,
-    R = void
-> extends ActionBase<D, O, R> {
+export abstract class DocActionBase<D extends IDocActionData, O extends IDocActionData = D, R = void> extends ActionBase<D, O, R> {
     protected _document: DocumentModel;
 
-    protected constructor(
-        actionData: D,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
+    protected constructor(actionData: D, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, observers);
-        if (commandUnit.DocumentUnit == null) {
+        if (commandModel.DocumentModel == null) {
             throw new Error('action document domain can not be null!');
         }
-        this._document = commandUnit.DocumentUnit;
+        this._document = commandModel.DocumentModel;
     }
 
     getDocument(): DocumentModel {

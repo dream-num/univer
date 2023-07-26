@@ -1,5 +1,6 @@
-import { Workbook, Worksheet } from '../Sheets/Domain';
-import { ActionBase, IActionData, ActionObservers, CommandUnit } from './index';
+import { SpreadsheetModel } from '../Sheets/Model/SpreadsheetModel';
+import { ActionBase, ActionObservers, IActionData } from './ActionBase';
+import { CommandModel } from './CommandModel';
 
 /**
  * Format of action data param
@@ -15,35 +16,18 @@ export interface ISheetActionData extends IActionData {
  * TODO: SlideAction/DocAction
  * @beta
  */
-export abstract class SheetActionBase<
-    D extends ISheetActionData,
-    O extends ISheetActionData = D,
-    R = void
-> extends ActionBase<D, O, R> {
-    protected _commandUnit: CommandUnit;
+export abstract class SheetActionBase<D extends ISheetActionData, O extends ISheetActionData = D, R = void> extends ActionBase<D, O, R> {
+    private _spreadsheetModel: SpreadsheetModel;
 
-    protected _workbook: Workbook;
-
-    protected constructor(
-        actionData: D,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
+    protected constructor(actionData: D, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, observers);
-        if (commandUnit.WorkBookUnit == null) {
+        if (commandModel.SpreadsheetModel == null) {
             throw new Error('action workbook domain can not be null!');
         }
-        this._commandUnit = commandUnit;
-        this._workbook = commandUnit.WorkBookUnit;
+        this._spreadsheetModel = commandModel.SpreadsheetModel;
     }
 
-    getWorkSheet(): Worksheet {
-        const { _workbook, _doActionData } = this;
-        const { sheetId } = _doActionData;
-        return _workbook.getSheetBySheetId(sheetId) as Worksheet;
-    }
-
-    getWorkBook(): Workbook {
-        return this._workbook;
+    getSpreadsheetModel(): SpreadsheetModel {
+        return this._spreadsheetModel;
     }
 }

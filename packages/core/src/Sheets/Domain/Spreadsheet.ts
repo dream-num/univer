@@ -44,6 +44,10 @@ export class Spreadsheet {
         this.style = new Style(this.model);
     }
 
+    getModel(){
+        return this.model;
+    }
+
     insertSheet(): string;
     insertSheet(index: number): string;
     insertSheet(...parameter: any[]): string {

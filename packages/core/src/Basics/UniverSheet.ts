@@ -16,12 +16,9 @@ interface IComposedConfig {
  * Externally provided UniverSheet root instance
  */
 export class UniverSheet {
-    univerSheetConfig: Partial<ISpreadsheetConfig>;
-
     private _context: SheetContext;
 
     constructor(univerSheetData: Partial<ISpreadsheetConfig> = {}, private commandManager: CommandManager) {
-        this.univerSheetConfig = univerSheetData;
         this._context = new SheetContext(univerSheetData, this.commandManager);
     }
 
@@ -97,7 +94,7 @@ export class UniverSheet {
     //     return { SpreadsheetConfig, ...pluginConfig };
     // }
     getUnitId(): string {
-        return this.univerSheetConfig.id || '';
+        return this._context.getSpreadsheet().getModel().getUnitId();
     }
 
     /**

@@ -8,12 +8,9 @@ import { CommandManager } from '../Command/CommandManager';
  * Externally provided UniverSlide root instance
  */
 export class UniverSlide {
-    UniverSlideConfig: Partial<ISlideData>;
-
     private _context: SlideContext;
 
     constructor(univerSlideData: Partial<ISlideData> = {}, private commandManager: CommandManager) {
-        this.UniverSlideConfig = univerSlideData;
         this._context = new SlideContext(univerSlideData, this.commandManager);
     }
 
@@ -22,6 +19,14 @@ export class UniverSlide {
      */
     get context() {
         return this._context;
+    }
+
+    /**
+     * get universlide id
+     * @returns
+     */
+    getUnitId(): string {
+        return this._context.getSlide().getModel().getUnitId();
     }
 
     /**

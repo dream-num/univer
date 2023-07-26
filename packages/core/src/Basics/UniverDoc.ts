@@ -8,12 +8,9 @@ import { CommandManager } from '../Command/CommandManager';
  * Externally provided UniverDoc root instance
  */
 export class UniverDoc {
-    univerDocConfig: Partial<IDocumentData>;
-
     private _context: DocContext;
 
     constructor(univerDocData: Partial<IDocumentData> = {}, private commandManager: CommandManager) {
-        this.univerDocConfig = univerDocData;
         this._context = new DocContext(univerDocData, this.commandManager);
     }
 

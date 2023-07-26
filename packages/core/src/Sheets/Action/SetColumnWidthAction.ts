@@ -1,8 +1,8 @@
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { SetColumnWidthApply } from '../Apply/SetColumnWidth';
 import { ISetColumnWidthActionData } from '../../Types/Interfaces/IActionModel';
 import { CommandModel } from '../../Command/CommandModel';
 import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { SetColumnWidthApply } from '../Apply/SetColumnWidth';
 
 /**
  * Set the column width according to the specified column index

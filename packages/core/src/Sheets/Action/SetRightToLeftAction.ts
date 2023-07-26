@@ -1,8 +1,9 @@
-import { SetRightToLeftApply } from '../Apply';
 import { BooleanNumber } from '../../Types/Enum';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { ISetRightToLeftActionData } from '../../Types/Interfaces/IActionModel';
+import { SetRightToLeftApply } from '../Apply/SetRightToLeft';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
 
 /**
  * @internal
@@ -22,7 +23,6 @@ export class SetRightToLeftAction extends SheetActionBase<ISetRightToLeftActionD
     }
 
     do(): BooleanNumber {
-
         const result = SetRightToLeftApply(this.getSpreadsheetModel(), this._doActionData);
 
         this._observers.notifyObservers({

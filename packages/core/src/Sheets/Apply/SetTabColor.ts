@@ -1,5 +1,5 @@
-import { Worksheet } from '../Domain/Worksheet';
 import { Nullable } from '../../Shared/Types';
+import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 /**
  *
@@ -9,16 +9,17 @@ import { Nullable } from '../../Shared/Types';
  *
  * @internal
  */
-export function SetTabColor(worksheet: Worksheet, color: Nullable<string>): Nullable<string> {
-    // get config
-    const config = worksheet.getConfig();
+export function SetTabColor(spreadsheetModel: SpreadsheetModel, color: Nullable<string>): Nullable<string> {
+    // // get config
+    // const config = worksheet.getConfig();
 
-    // store old tab color
-    const oldTabColor = config.tabColor;
+    // // store old tab color
+    // const oldTabColor = config.tabColor;
 
-    // set new tab color
-    config.tabColor = color!;
+    // // set new tab color
+    // config.tabColor = color!;
 
     // return old color to undo
-    return oldTabColor;
+    // return oldTabColor;
+    return '';
 }

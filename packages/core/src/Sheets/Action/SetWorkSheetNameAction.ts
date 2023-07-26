@@ -1,8 +1,9 @@
-import { SetWorkSheetName } from '../Apply/SetWorkSheetName';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { ISetWorkSheetNameActionData } from '../../Types/Interfaces/IActionModel';
 import { ACTION_NAMES } from '../../Types/Const';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { SetWorkSheetNameApply } from '../Apply/SetWorkSheetName';
 
 /**
  * @internal
@@ -22,10 +23,7 @@ export class SetWorkSheetNameAction extends SheetActionBase<ISetWorkSheetNameAct
     }
 
     do(): string {
-        const worksheet = this.getWorkSheet();
-
-        const result = SetWorkSheetName(worksheet, this._doActionData.sheetName);
-
+        const result = SetWorkSheetNameApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -47,17 +45,14 @@ export class SetWorkSheetNameAction extends SheetActionBase<ISetWorkSheetNameAct
     }
 
     undo(): void {
-        const { sheetName, sheetId } = this._oldActionData;
-        const worksheet = this.getWorkSheet();
-
+        const { sheetId } = this._oldActionData;
         // update current data
         this._doActionData = {
             actionName: ACTION_NAMES.SET_WORKSHEET_NAME_ACTION,
             // actionName: SetWorkSheetNameAction.NAME,
             sheetId,
-            sheetName: SetWorkSheetName(worksheet, sheetName),
+            sheetName: SetWorkSheetNameApply(this.getSpreadsheetModel(), this._oldActionData),
         };
-
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

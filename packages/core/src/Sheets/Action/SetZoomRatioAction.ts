@@ -2,6 +2,7 @@ import { ActionObservers, ActionType } from '../../Command/ActionBase';
 import { CommandModel } from '../../Command/CommandModel';
 import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ISetZoomRatioActionData } from '../../Types/Interfaces/IActionModel';
+import { SetZoomRatio } from '../Apply/SetZoomRatio';
 
 export class SetZoomRatioAction extends SheetActionBase<ISetZoomRatioActionData, ISetZoomRatioActionData> {
     constructor(actionData: ISetZoomRatioActionData, commandModel: CommandModel, observers: ActionObservers) {
@@ -17,7 +18,7 @@ export class SetZoomRatioAction extends SheetActionBase<ISetZoomRatioActionData,
     }
 
     redo(): number {
-        const result = SetZoomRatio(this.getWorkBook(), this._doActionData.sheetId, this._doActionData.zoom);
+        const result = SetZoomRatio(this.getSpreadsheetModel(), this._doActionData);
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -33,7 +34,7 @@ export class SetZoomRatioAction extends SheetActionBase<ISetZoomRatioActionData,
     }
 
     undo(): void {
-        SetZoomRatio(this.getWorkBook(), this._oldActionData.sheetId, this._oldActionData.zoom);
+        SetZoomRatio(this.getSpreadsheetModel(), this._oldActionData);
 
         this._observers.notifyObservers({
             type: ActionType.REDO,

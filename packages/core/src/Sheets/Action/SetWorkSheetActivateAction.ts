@@ -26,10 +26,7 @@ export class SetWorkSheetActivateAction extends SheetActionBase<ISetWorkSheetAct
 
     do(): ISheetStatus {
         const { sheetId, status } = this._doActionData;
-        const worksheet = this._workbook.getSheetBySheetId(sheetId)!;
-
-        const result = SetWorkSheetActivate(worksheet, status);
-
+        const result = SetWorkSheetActivate(this.getSpreadsheetModel(), this.getDoActionData());
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -51,25 +48,20 @@ export class SetWorkSheetActivateAction extends SheetActionBase<ISetWorkSheetAct
     }
 
     undo(): void {
-        const { sheetId } = this._oldActionData;
-        const oldStatus = this._oldActionData.status;
-        const worksheet = this._workbook.getSheetBySheetId(sheetId);
-        if (worksheet) {
-            const { oldSheetId, status } = SetWorkSheetActivate(worksheet, oldStatus);
-            // update current data
-            this._doActionData = {
-                actionName: ACTION_NAMES.SET_WORKSHEET_ACTIVATE_ACTION,
-                // actionName: SetWorkSheetActivateAction.NAME,
-                sheetId: oldSheetId,
-                status,
-            };
+        const { oldSheetId, status } = SetWorkSheetActivate(this.getSpreadsheetModel(), this._oldActionData);
+        // update current data
+        this._doActionData = {
+            actionName: ACTION_NAMES.SET_WORKSHEET_ACTIVATE_ACTION,
+            // actionName: SetWorkSheetActivateAction.NAME,
+            sheetId: oldSheetId,
+            status,
+        };
 
-            this._observers.notifyObservers({
-                type: ActionType.UNDO,
-                data: this._oldActionData,
-                action: this,
-            });
-        }
+        this._observers.notifyObservers({
+            type: ActionType.UNDO,
+            data: this._oldActionData,
+            action: this,
+        });
     }
 
     validate(): boolean {

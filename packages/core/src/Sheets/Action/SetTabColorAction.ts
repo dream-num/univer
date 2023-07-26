@@ -4,7 +4,7 @@ import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ISetTabColorActionData } from '../../Types/Interfaces/IActionModel';
 import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
 import { CommandModel } from '../../Command/CommandModel';
-import { ActionObservers } from '../../Command/ActionBase';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
 
 /**
  * @internal
@@ -25,10 +25,7 @@ export class SetTabColorAction extends SheetActionBase<ISetTabColorActionData, I
     }
 
     do(): Nullable<string> {
-        const worksheet = this.getWorkSheet();
-
-        const result = SetTabColor(worksheet, this._doActionData.color);
-
+        const result = SetTabColor(this.getSpreadsheetModel(), this._doActionData.color);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -51,16 +48,13 @@ export class SetTabColorAction extends SheetActionBase<ISetTabColorActionData, I
 
     undo(): void {
         const { color, sheetId } = this._oldActionData;
-        const worksheet = this.getWorkSheet();
-
         // update current data
         this._doActionData = {
             actionName: ACTION_NAMES.SET_TAB_COLOR_ACTION,
             // actionName: SetTabColorAction.NAME,
             sheetId,
-            color: SetTabColor(worksheet, color),
+            color: SetTabColor(this.getSpreadsheetModel(), color),
         };
-
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

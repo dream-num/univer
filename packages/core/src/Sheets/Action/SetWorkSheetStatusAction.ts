@@ -1,4 +1,4 @@
-import { SetWorkSheetStatus } from '../Apply/SetWorkSheetStatus';
+import { SetWorkSheetStatusApply } from '../Apply/SetWorkSheetStatus';
 import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
 import { SheetActionBase } from '../../Command/SheetActionBase';
 import { ISetWorkSheetStatusActionData } from '../../Types/Interfaces/IActionModel';
@@ -23,9 +23,7 @@ export class SetWorkSheetStatusAction extends SheetActionBase<ISetWorkSheetStatu
     }
 
     do(): number {
-        const worksheet = this.getWorkSheet();
-
-        const result = SetWorkSheetStatus(worksheet, this._doActionData.sheetStatus);
+        const result = SetWorkSheetStatusApply(this.getSpreadsheetModel(), this._doActionData);
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -47,14 +45,12 @@ export class SetWorkSheetStatusAction extends SheetActionBase<ISetWorkSheetStatu
     }
 
     undo(): void {
-        const { sheetStatus, sheetId } = this._oldActionData;
-        const worksheet = this.getWorkSheet();
-
+        const { sheetId } = this._oldActionData;
         // update current data
         this._doActionData = {
             actionName: ACTION_NAMES.SET_WORKSHEET_STATUS_ACTION,
             sheetId,
-            sheetStatus: SetWorkSheetStatus(worksheet, sheetStatus),
+            sheetStatus: SetWorkSheetStatusApply(this.getSpreadsheetModel(), this._oldActionData),
         };
 
         this._observers.notifyObservers({

@@ -1,4 +1,5 @@
-import { Worksheet } from '../Domain';
+import { ISetWorkSheetNameActionData } from '../../Types/Interfaces/IActionModel';
+import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 /**
  *
@@ -8,18 +9,18 @@ import { Worksheet } from '../Domain';
  *
  * @internal
  */
-export function SetWorkSheetName(worksheet: Worksheet, sheetName: string): string {
-    // get config
-    const config = worksheet.getConfig();
+export function SetWorkSheetNameApply(spreadsheetModel: SpreadsheetModel, data: ISetWorkSheetNameActionData): string {
+    // // get config
+    // const config = worksheet.getConfig();
 
-    // store old sheet name
-    const oldSheetName = config.name;
+    // // store old sheet name
+    // const oldSheetName = config.name;
 
-    // set new sheet name
-    config.name = sheetName;
+    // // set new sheet name
+    // config.name = sheetName;
 
-    // return old sheet name to undo
-    return oldSheetName;
+    // // return old sheet name to undo
+    // return oldSheetName;
+
+    return '';
 }
-
-export function SetWorkSheetNameApply() {}

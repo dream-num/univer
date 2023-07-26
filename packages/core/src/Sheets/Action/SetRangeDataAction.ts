@@ -1,9 +1,11 @@
-import { SetRangeDataApply } from '../Apply';
-import { SheetActionBase, ActionObservers, ActionType, CommandModel } from '../../Command';
 import { ICellData } from '../../Types/Interfaces';
 import { ISetRangeDataActionData } from '../../Types/Interfaces/IActionModel';
 import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
+import { SheetActionBase } from '../../Command/SheetActionBase';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { SetRangeDataApply } from '../Apply/SetRangeData';
 
 /**
  * Modify values in the range

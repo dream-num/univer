@@ -1,9 +1,10 @@
-import { SetWorkSheetHideService } from '../Apply';
 import { BooleanNumber } from '../../Types/Enum';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { ISetWorkSheetHideActionData } from '../../Types/Interfaces/IActionModel';
 import { ACTION_NAMES } from '../../Types/Const';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
+import { SetWorkSheetHideServiceApply } from '../Apply/HideSheet';
 
 /**
  * @internal
@@ -22,16 +23,12 @@ export class SetWorkSheetHideAction extends SheetActionBase<ISetWorkSheetHideAct
     }
 
     do(): BooleanNumber {
-        const worksheet = this.getWorkSheet();
-
-        const result = SetWorkSheetHideService(worksheet, this._doActionData.hidden);
-
+        const result = SetWorkSheetHideServiceApply(this.getSpreadsheetModel(), this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
             action: this,
         });
-
         return result;
     }
 
@@ -47,13 +44,11 @@ export class SetWorkSheetHideAction extends SheetActionBase<ISetWorkSheetHideAct
 
     undo(): void {
         const { hidden, sheetId } = this._oldActionData;
-        const worksheet = this.getWorkSheet();
-
         this._doActionData = {
             actionName: ACTION_NAMES.HIDE_SHEET_ACTION,
             // actionName: SetWorkSheetHideAction.NAME,
             sheetId,
-            hidden: SetWorkSheetHideService(worksheet, hidden),
+            hidden: SetWorkSheetHideServiceApply(this.getSpreadsheetModel(), this._oldActionData),
         };
 
         this._observers.notifyObservers({

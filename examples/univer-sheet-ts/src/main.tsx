@@ -40,35 +40,35 @@ const univer = new Univer({
 });
 
 // base-render
-univer.install(new RenderEngine());
+// univer.install(new RenderEngine());
 
 // universheet instance
-const universheet = univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO)
+// const universheet = univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO)
 // // universheet instance
 // const universheet = UniverSheet.newInstance(DEFAULT_WORKBOOK_DATA_DEMO);
 // // sheet.installPlugin(new RenderEngine());
 // univer.addUniverSheet(universheet);
 // base-sheet
-universheet.installPlugin(new SheetPlugin());
+// universheet.installPlugin(new SheetPlugin());
 
 // universheet.installPlugin(new FormulaPlugin(DEFAULT_FORMULA_DATA_DEMO));
 
 // ui-plugin-sheets
-univer.install(
-    new SheetUIPlugin({
-        container: 'universheet',
-        layout: {
-            sheetContainerConfig: {
-                infoBar: true,
-                formulaBar: true,
-                toolbar: true,
-                sheetBar: true,
-                countBar: true,
-                rightMenu: true,
-            },
-        },
-    })
-);
+// univer.install(
+//     new SheetUIPlugin({
+//         container: 'universheet',
+//         layout: {
+//             sheetContainerConfig: {
+//                 infoBar: true,
+//                 formulaBar: true,
+//                 toolbar: true,
+//                 sheetBar: true,
+//                 countBar: true,
+//                 rightMenu: true,
+//             },
+//         },
+//     })
+// );
 
 // FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(universheet);
 // FindPlugin.create().installTo(universheet);

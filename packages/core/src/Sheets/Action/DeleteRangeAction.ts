@@ -1,10 +1,11 @@
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType, CommandModel } from '../../Command';
 import { DeleteRangeApply, InsertRangeApply } from '../Apply';
 import { ICellData } from '../../Types/Interfaces/ICellData';
 import { IDeleteRangeActionData, IInsertRangeActionData } from '../../Types/Interfaces/IActionModel';
 import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
+import { CommandModel } from '../../Command/CommandModel';
+import { ActionObservers, ActionType } from '../../Command/ActionBase';
 
 /**
  * Delete the specified range and move the right or lower range

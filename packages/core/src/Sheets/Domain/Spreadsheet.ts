@@ -27,8 +27,6 @@ export class Spreadsheet {
 
     private merge: Merge;
 
-    private spreadsheetModel: SpreadsheetModel;
-
     private column: Column;
 
     private row: Row;
@@ -38,7 +36,7 @@ export class Spreadsheet {
     constructor(private snapshot: Partial<ISpreadsheetConfig>, private commandManager: CommandManager) {
         this.model = new SpreadsheetModel(snapshot);
         this.range = new Range(this.commandManager, this.model);
-        this.merge = new Merge();
+        this.merge = new Merge(this.commandManager, this.model);
         this.row = new Row(this.commandManager, this.model);
         this.column = new Column(this.commandManager, this.model);
         this.style = new Style(this.model);

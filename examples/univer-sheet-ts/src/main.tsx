@@ -1,8 +1,8 @@
 import { Univer, LocaleType } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
-import { initRender } from './init';
 import { SheetPlugin } from '@univerjs/base-sheets';
+import { initRender } from './init';
 
 const uiDefaultConfigDemo = {
     container: 'universheet',
@@ -45,9 +45,11 @@ const universheet = univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
 // // sheet.installPlugin(new RenderEngine());
 // univer.addUniverSheet(universheet);
 // base-sheet
-universheet.installPlugin(new SheetPlugin());
+const baseSheet = new SheetPlugin();
+universheet.installPlugin(baseSheet);
 
 initRender(renderEngine);
+baseSheet.initCanvasView(renderEngine);
 
 // universheet.installPlugin(new FormulaPlugin(DEFAULT_FORMULA_DATA_DEMO));
 

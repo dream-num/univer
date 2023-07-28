@@ -1,1 +1,2 @@
-export class Freeze {}
+export class Freeze {
+}

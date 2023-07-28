@@ -1,6 +1,6 @@
 import {
     ActionOperation,
-    ACTION_NAMES,
+    SHEET_ACTION_NAMES,
     BaseActionExtension,
     BaseActionExtensionFactory,
     Command,
@@ -35,7 +35,7 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
                 return false;
             }
 
-            if (actionData.actionName !== ACTION_NAMES.SET_RANGE_DATA_ACTION) {
+            if (actionData.actionName !== SHEET_ACTION_NAMES.SET_RANGE_DATA_ACTION) {
                 return false;
             }
 
@@ -133,7 +133,7 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
                     }
 
                     const action = {
-                        actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+                        actionName: SHEET_ACTION_NAMES.SET_RANGE_DATA_ACTION,
                         sheetId,
                         cellValue: {
                             [r]: {

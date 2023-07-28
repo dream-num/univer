@@ -3,7 +3,7 @@
  */
 import {
     ActionObservers,
-    ACTION_NAMES,
+    SHEET_ACTION_NAMES,
     AddNamedRangeAction,
     DeleteNamedRangeAction,
 } from '../../../../src';
@@ -42,7 +42,7 @@ test('Delete NamedRange Action Test', () => {
     new AddNamedRangeAction(
         {
             sheetId: worksheet.getSheetId(),
-            actionName: ACTION_NAMES.ADD_NAMED_RANGE_ACTION,
+            actionName: SHEET_ACTION_NAMES.ADD_NAMED_RANGE_ACTION,
             namedRange,
         },
         workbook,
@@ -53,7 +53,7 @@ test('Delete NamedRange Action Test', () => {
     new DeleteNamedRangeAction(
         {
             sheetId: worksheet.getSheetId(),
-            actionName: ACTION_NAMES.DELETE_NAMED_RANGE_ACTION,
+            actionName: SHEET_ACTION_NAMES.DELETE_NAMED_RANGE_ACTION,
             namedRangeId: 'named-range-1',
         },
         workbook,

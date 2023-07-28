@@ -1,11 +1,15 @@
-import { DocumentModel } from '../Domain/Document';
-import { deleteContent, getDocsUpdateBody } from '../../Shared/Common';
 import { IDocumentBody } from '../../Types/Interfaces/IDocumentData';
+import { IDeleteActionData } from '../../Types/Interfaces/IDocActionInterfaces';
+import { deleteCustomBlocks, deleteCustomRanges, deleteParagraphs, deleteSectionBreaks, deleteTables, deleteTextRuns } from './Common';
+import { DocumentModel } from '../Model/DocumentModel';
+import { deleteContent, getDocsUpdateBody } from '../../Shared/Common';
 
-export function DeleteApply(document: DocumentModel, textLength: number, currentIndex: number, segmentId?: string) {
-    const doc = document.snapshot;
+export function DeleteApply(documentModel: DocumentModel, data: IDeleteActionData) {
+    const doc = documentModel.getSnapshot();
+    // export function DeleteApply(document: DocumentModel, textLength: number, currentIndex: number, segmentId?: string) {
+    const { len: textLength, cursor: currentIndex, segmentId } = data;
 
-    const bodyModel = document.getBodyModel(segmentId);
+    const bodyModel = documentModel.getBodyModel(segmentId);
 
     const body = getDocsUpdateBody(doc, segmentId);
 

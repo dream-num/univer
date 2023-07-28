@@ -1,7 +1,7 @@
 import { Dimension } from '../../Types/Enum';
 import { ICellData, IRangeData } from '../../Types/Interfaces';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { IInsertRangeActionData } from '../../Types/Interfaces/IActionModel';
+import { IInsertRangeActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 /**

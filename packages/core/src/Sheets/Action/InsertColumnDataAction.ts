@@ -1,6 +1,6 @@
 import { ObjectArray } from '../../Shared/ObjectArray';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { IInsertColumnDataActionData, IRemoveColumnDataAction } from '../../Types/Interfaces/IActionModel';
+import { IInsertColumnDataActionData, IRemoveColumnDataAction } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { CommandModel } from '../../Command/CommandModel';
 import { ActionObservers, ActionType } from '../../Command/ActionBase';
 import { InsertDataColumnApply } from '../Apply/InsertDataColumn';

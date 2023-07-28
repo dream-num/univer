@@ -1,7 +1,7 @@
-import { Command } from './Command';
 import { CommandInjectorObservers } from './CommandInjectorObservers';
 import { UndoManager } from './UndoManager';
 import { ActionExtensionManager } from './ActionExtensionManager';
+import { Command } from './Command';
 
 /**
  * Manage command

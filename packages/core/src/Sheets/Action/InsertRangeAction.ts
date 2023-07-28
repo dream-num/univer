@@ -1,6 +1,6 @@
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { IInsertRangeActionData, IDeleteRangeActionData } from '../../Types/Interfaces/IActionModel';
-import { ACTION_NAMES } from '../../Types/Const/ACTION_NAMES';
+import { IInsertRangeActionData, IDeleteRangeActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
+import { SHEET_ACTION_NAMES } from '../../Types/Const/SHEET_ACTION_NAMES';
 import { CommandModel } from '../../Command/CommandModel';
 import { ActionObservers, ActionType } from '../../Command/ActionBase';
 import { InsertRangeApply } from '../Apply/InsertRange';
@@ -43,7 +43,7 @@ export class InsertRangeAction extends SheetActionBase<IInsertRangeActionData, I
 
         // update current data
         this._doActionData = {
-            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+            actionName: SHEET_ACTION_NAMES.SET_RANGE_DATA_ACTION,
             // actionName: SetRangeDataAction.NAME,
             sheetId,
             cellValue: DeleteRangeApply(this.getSpreadsheetModel(), this._oldActionData),

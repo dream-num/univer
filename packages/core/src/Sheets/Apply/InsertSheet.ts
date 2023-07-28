@@ -1,7 +1,7 @@
 import { ObjectArray } from '../../Shared/ObjectArray';
 import { WorksheetModel } from '../Model/WorksheetModel';
 import { ObjectMatrix } from '../../Shared/ObjectMatrix';
-import { IInsertSheetActionData } from '../../Types/Interfaces/IActionModel';
+import { IInsertSheetActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 export function InsertSheetApply(spreadsheetModel: SpreadsheetModel, data: IInsertSheetActionData) {

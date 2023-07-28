@@ -11,7 +11,7 @@ import {
     IColorStyle,
     IBorderData,
     Nullable,
-    DocumentModelSimple,
+    DocumentSimple,
 } from '@univerjs/core';
 import { Canvas } from '../Canvas';
 import { BaseObject } from '../BaseObject';
@@ -96,7 +96,7 @@ export class RichText extends BaseObject {
 
         this._context = context;
 
-        const docModel = new DocumentModelSimple(this._documentData);
+        const docModel = new DocumentSimple(this._documentData);
 
         this._documentSkeleton = DocumentSkeleton.create(docModel, this._context);
 

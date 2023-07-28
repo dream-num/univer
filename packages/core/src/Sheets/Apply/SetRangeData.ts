@@ -1,5 +1,5 @@
 import { ObjectMatrix } from '../../Shared/ObjectMatrix';
-import { ISetRangeDataActionData } from '../../Types/Interfaces/IActionModel';
+import { ISetRangeDataActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 import { ICellData } from '../../Types/Interfaces/ICellData';
 import { Tools } from '../../Shared/Tools';

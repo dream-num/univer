@@ -1,5 +1,6 @@
 // @index('./*.ts', f => `export * from '${f.path}'`)
-export * from './ACTION_NAMES';
+export * from './SHEET_ACTION_NAMES';
+export * from './DOC_ACTION_NAMES';
 export * from './CONST';
 export * from './EXTENSION_NAMES';
 export * from './KEYBOARD_KEYS';

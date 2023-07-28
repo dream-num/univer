@@ -1,5 +1,5 @@
 import { BooleanNumber } from '../../Types/Enum';
-import { ISetHiddenGridlinesActionData } from '../../Types/Interfaces/IActionModel';
+import { ISetHiddenGridlinesActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 export function SetHiddenGridlinesApply(spreadsheetModel: SpreadsheetModel, data: ISetHiddenGridlinesActionData) {

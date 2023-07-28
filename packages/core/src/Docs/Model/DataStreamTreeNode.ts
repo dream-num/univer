@@ -1,6 +1,6 @@
 import { deleteContent, horizontalLineSegmentsSubtraction, insertTextToContent } from '../../Shared/Common';
 import { Nullable } from '../../Shared/Types';
-import { DataStreamTreeNodeType } from './Types';
+import { DataStreamTreeNodeType } from '../Domain/Types';
 
 export class DataStreamTreeNode {
     children: DataStreamTreeNode[] = [];

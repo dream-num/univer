@@ -1,4 +1,4 @@
-import { ISetSheetOrderActionData } from '../../Types/Interfaces/IActionModel';
+import { ISetSheetOrderActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 export function SetSheetOrderApply(spreadsheetModel: SpreadsheetModel, data: ISetSheetOrderActionData): number {

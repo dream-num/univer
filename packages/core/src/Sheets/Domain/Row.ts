@@ -1,6 +1,6 @@
 import { CommandManager } from '../../Command/CommandManager';
-import { ACTION_NAMES } from '../../Types/Const';
-import { ISetRowHeightActionData } from '../../Types/Interfaces/IActionModel';
+import { SHEET_ACTION_NAMES } from '../../Types/Const';
+import { ISetRowHeightActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 import { SpreadsheetCommand } from './SpreadsheetCommand';
 
@@ -16,7 +16,7 @@ export class Row {
     setRowHeight(rowIndex: number, rowHeight: number[], sheetId: string) {
         const setRowHeightAction: ISetRowHeightActionData = {
             sheetId,
-            actionName: ACTION_NAMES.SET_ROW_HEIGHT_ACTION,
+            actionName: SHEET_ACTION_NAMES.SET_ROW_HEIGHT_ACTION,
             rowIndex,
             rowHeight,
         };

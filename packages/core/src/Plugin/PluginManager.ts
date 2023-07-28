@@ -19,6 +19,7 @@ export class PluginManager {
     install(plugin: BasePlugin) {
         const { _plugins } = this;
         _plugins.push(plugin);
+        plugin.onMounted();
     }
 
     uninstall(name: string) {

@@ -1,4 +1,4 @@
-import { ISetRightToLeftActionData } from '../../Types/Interfaces/IActionModel';
+import { ISetRightToLeftActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 export function SetRightToLeftApply(spreadsheetModel: SpreadsheetModel, data: ISetRightToLeftActionData) {

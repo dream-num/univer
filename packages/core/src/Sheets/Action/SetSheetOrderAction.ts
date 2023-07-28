@@ -1,7 +1,7 @@
 import { ActionObservers, ActionType } from '../../Command/ActionBase';
 import { CommandModel } from '../../Command/CommandModel';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ISetSheetOrderActionData } from '../../Types/Interfaces/IActionModel';
+import { ISetSheetOrderActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SetSheetOrderApply } from '../Apply/SetSheetOrder';
 
 export class SetSheetOrderAction extends SheetActionBase<ISetSheetOrderActionData, ISetSheetOrderActionData> {

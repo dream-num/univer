@@ -1,6 +1,6 @@
 import { CommandModel } from '../../Command/CommandModel';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ISetRowHideActionData, ISetRowShowActionData } from '../../Types/Interfaces/IActionModel';
+import { ISetRowHideActionData, ISetRowShowActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { ActionObservers, ActionType } from '../../Command/ActionBase';
 import { SetRowHideApply } from '../Apply/SetRowHide';
 import { SetRowShowApply } from '../Apply/SetRowShow';

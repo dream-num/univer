@@ -1,8 +1,8 @@
 import { Tools } from './Tools';
-import { Nullable } from '.';
 import { ICellInfo, ISelection, ICellData, IColorStyle, IDocumentData, IStyleData } from '../Types/Interfaces';
-import { ColorBuilder } from '../Sheets/Domain';
 import { BaselineOffset, TextDirection, HorizontalAlign, VerticalAlign, WrapStrategy, BorderStyleTypes } from '../Types/Enum';
+import { Nullable } from './Types';
+import { ColorBuilder } from './Color';
 
 export function makeCellToSelection(cellInfo: Nullable<ICellInfo>): Nullable<ISelection> {
     if (!cellInfo) {

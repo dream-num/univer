@@ -1,7 +1,7 @@
 import { SetColumnHideApply } from '../Apply/SetColumnHide';
 import { SetColumnShowApply } from '../Apply/SetColumnShow';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ISetColumnShowActionData } from '../../Types/Interfaces/IActionModel';
+import { ISetColumnShowActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { ActionObservers, ActionType } from '../../Command/ActionBase';
 import { CommandModel } from '../../Command/CommandModel';
 

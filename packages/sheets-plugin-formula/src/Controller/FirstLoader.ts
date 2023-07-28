@@ -1,4 +1,4 @@
-import { ActionOperation, ACTION_NAMES, ISetRangeDataActionData, Command, ObjectMatrix, ICellData } from '@univerjs/core';
+import { ActionOperation, SHEET_ACTION_NAMES, ISetRangeDataActionData, Command, ObjectMatrix, ICellData } from '@univerjs/core';
 import { FormulaController } from './FormulaController';
 
 export function firstLoader(formulaController: FormulaController) {
@@ -28,7 +28,7 @@ export function firstLoader(formulaController: FormulaController) {
             const cellData: ObjectMatrix<ICellData> = sheetData[sheetId];
             cellData.forValue((row, column, mainCell) => {
                 const action = {
-                    actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+                    actionName: SHEET_ACTION_NAMES.SET_RANGE_DATA_ACTION,
                     sheetId,
                     cellValue: {
                         [row]: {

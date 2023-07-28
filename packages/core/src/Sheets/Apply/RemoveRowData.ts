@@ -1,4 +1,4 @@
-import { IRemoveRowDataActionData } from '../../Types/Interfaces/IActionModel';
+import { IRemoveRowDataActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 export function RemoveRowDataApply(spreadsheetModel: SpreadsheetModel, data: IRemoveRowDataActionData) {

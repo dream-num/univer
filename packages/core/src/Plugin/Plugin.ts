@@ -15,6 +15,8 @@ export interface BasePlugin {
      * save data
      */
     save(): object;
+
+    onMounted(): void;
     /**
      * load data
      */

@@ -1,7 +1,7 @@
 import { IDocActionData } from '../../Command/DocActionBase';
-import { IDocumentBody } from '../../Types/Interfaces/IDocumentData';
-import { Nullable } from '../../Shared';
+import { IDocumentBody } from './IDocumentData';
 import { UpdateDocsAttributeType } from '../../Shared/CommandEnum';
+import { Nullable } from '../../Shared/Types';
 
 export enum UpdateAttributeType {
     TEXT_RUN,
@@ -15,6 +15,7 @@ export interface IDeleteActionData extends IDocActionData {
     len: number;
     line: number;
     segmentId?: string;
+    cursor: number;
 }
 
 export interface IInsertActionData extends IDocActionData {
@@ -22,6 +23,7 @@ export interface IInsertActionData extends IDocActionData {
     len: number;
     line: number;
     segmentId?: string; //The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body.
+    cursor: number;
 }
 
 export interface IRetainActionData extends IDocActionData {
@@ -29,6 +31,7 @@ export interface IRetainActionData extends IDocActionData {
     len: number;
     coverType: UpdateDocsAttributeType;
     segmentId?: string;
+    cursor: number;
 }
 
 export interface IUpdateDocumentActionData extends IDocActionData {

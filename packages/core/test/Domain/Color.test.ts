@@ -1,6 +1,5 @@
 import { ThemeColorType } from '../../src/Types/Enum';
-import { Color, RgbColor, ThemeColor } from '../../src/Sheets/Domain/Color';
-import { ColorBuilder } from '../../src/Sheets/Domain/ColorBuilder';
+import { Color, RgbColor, ThemeColor, ColorBuilder } from '../../src/Shared/Color';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 

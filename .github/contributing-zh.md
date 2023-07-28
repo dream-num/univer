@@ -915,7 +915,7 @@ export class AlternatingColorsPlugin extends Plugin {
 
 一个简单的设置 worksheet 切换按钮 color 的 API [setTabColor](../packages/core/src/Sheets/Domain/Worksheet.ts) 的案例
 
-1.  在[ACTION_NAMES](../packages/core/src/Types/Const/ACTION_NAMES.ts)中预先定义一个`Action`名称 `SET_TAB_COLOR_ACTION`
+1.  在[SHEET_ACTION_NAMES](../packages/core/src/Types/Const/SHEET_ACTION_NAMES.ts)中预先定义一个`Action`名称 `SET_TAB_COLOR_ACTION`
 
 2.  将 `Action` 注册到[CommandManager](../packages/core/src/Command/RegisterAction.ts)
 
@@ -934,7 +934,7 @@ export class AlternatingColorsPlugin extends Plugin {
 
     ```ts
     this._oldActionData = {
-        actionName: ACTION_NAMES.SET_TAB_COLOR_ACTION,
+        actionName: SHEET_ACTION_NAMES.SET_TAB_COLOR_ACTION,
         sheetId: actionData.sheetId,
         color: this.do(),
     };
@@ -957,7 +957,7 @@ export class AlternatingColorsPlugin extends Plugin {
         const { _context, _commandManager } = this;
         let setTabColor: ISetTabColorActionData = {
             sheetId: this._sheetId,
-            actionName: ACTION_NAMES.SET_TAB_COLOR_ACTION,
+            actionName: SHEET_ACTION_NAMES.SET_TAB_COLOR_ACTION,
             color: color,
         };
         let command = new Command(_context.getWorkBook(), setTabColor);

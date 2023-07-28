@@ -1,4 +1,4 @@
-import { ISetWorkSheetNameActionData } from '../../Types/Interfaces/IActionModel';
+import { ISetWorkSheetNameActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 /**

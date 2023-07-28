@@ -2,7 +2,7 @@ import { ObjectMatrix } from '../../Shared/ObjectMatrix';
 import { Tools } from '../../Shared/Tools';
 import { ICellData } from '../../Types/Interfaces';
 
-import { IClearRangeActionData } from '../../Types/Interfaces/IActionModel';
+import { IClearRangeActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 export function ClearRangeApply(spreadsheetModel: SpreadsheetModel, data: IClearRangeActionData) {

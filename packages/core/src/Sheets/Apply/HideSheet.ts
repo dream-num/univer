@@ -1,5 +1,5 @@
 import { BooleanNumber } from '../../Types/Enum';
-import { ISetWorkSheetHideActionData } from '../../Types/Interfaces/IActionModel';
+import { ISetWorkSheetHideActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 export function SetWorkSheetHideServiceApply(spreadsheetModel: SpreadsheetModel, data: ISetWorkSheetHideActionData) {

@@ -1,4 +1,4 @@
-import { IAddMergeActionData } from '../../Types/Interfaces/IActionModel';
+import { IAddMergeActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { IRangeData } from '../../Types/Interfaces/IRangeData';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 

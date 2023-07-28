@@ -1,4 +1,4 @@
-import { ISetZoomRatioActionData } from '../../Types/Interfaces/IActionModel';
+import { ISetZoomRatioActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 
 export function SetZoomRatio(spreadsheetModel: SpreadsheetModel, data: ISetZoomRatioActionData): number {

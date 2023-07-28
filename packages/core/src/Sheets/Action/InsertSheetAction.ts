@@ -1,7 +1,7 @@
 import { InsertSheetApply } from '../Apply/InsertSheet';
 import { RemoveSheetApply } from '../Apply/RemoveSheet';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { IInsertSheetActionData, IRemoveSheetActionData } from '../../Types/Interfaces/IActionModel';
+import { IInsertSheetActionData, IRemoveSheetActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { CommandModel } from '../../Command/CommandModel';
 import { ActionObservers, ActionType } from '../../Command/ActionBase';
 

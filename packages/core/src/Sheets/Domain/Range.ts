@@ -1,8 +1,8 @@
 import { CommandManager } from '../../Command/CommandManager';
 import { Nullable, ObjectMatrix, ObjectMatrixPrimitiveType } from '../../Shared';
-import { ACTION_NAMES } from '../../Types/Const';
+import { SHEET_ACTION_NAMES } from '../../Types/Const';
 import { ICellData, ICellV, IOptionData, IRangeData } from '../../Types/Interfaces';
-import { IClearRangeActionData, ISetRangeDataActionData } from '../../Types/Interfaces/IActionModel';
+import { IClearRangeActionData, ISetRangeDataActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SpreadsheetModel } from '../Model/SpreadsheetModel';
 import { SpreadsheetCommand } from './SpreadsheetCommand';
 
@@ -39,7 +39,7 @@ export class Range {
      */
     setMatrixData(matrixData: ObjectMatrixPrimitiveType<ICellData>, sheetId: string) {
         const setRangeDataAction: ISetRangeDataActionData = {
-            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+            actionName: SHEET_ACTION_NAMES.SET_RANGE_DATA_ACTION,
             sheetId,
             cellValue: matrixData,
         };
@@ -50,7 +50,7 @@ export class Range {
 
     clear(options: IOptionData, rangeData: IRangeData, sheetId: string) {
         const clearDataAction: IClearRangeActionData = {
-            actionName: ACTION_NAMES.CLEAR_RANGE_ACTION,
+            actionName: SHEET_ACTION_NAMES.CLEAR_RANGE_ACTION,
             sheetId,
             options,
             rangeData,

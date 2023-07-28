@@ -1,7 +1,7 @@
 import { ActionObservers, ActionType } from '../../Command/ActionBase';
 import { CommandModel } from '../../Command/CommandModel';
 import { SheetActionBase } from '../../Command/SheetActionBase';
-import { ISetZoomRatioActionData } from '../../Types/Interfaces/IActionModel';
+import { ISetZoomRatioActionData } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SetZoomRatio } from '../Apply/SetZoomRatio';
 
 export class SetZoomRatioAction extends SheetActionBase<ISetZoomRatioActionData, ISetZoomRatioActionData> {

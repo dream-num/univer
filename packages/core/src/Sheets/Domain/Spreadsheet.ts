@@ -13,8 +13,8 @@ import {
     ISetRowHideActionData,
     ISetRowShowActionData,
     ISetWorkSheetActivateActionData,
-} from '../../Types/Interfaces/IActionModel';
-import { ACTION_NAMES } from '../../Types/Const';
+} from '../../Types/Interfaces/ISheetActionInterfaces';
+import { SHEET_ACTION_NAMES } from '../../Types/Const';
 import { BooleanNumber } from '../../Types/Enum';
 import { Nullable } from '../../Shared';
 import { Style } from './Style';
@@ -44,7 +44,7 @@ export class Spreadsheet {
         this.style = new Style(this.model);
     }
 
-    getModel(){
+    getModel() {
         return this.model;
     }
 
@@ -54,7 +54,7 @@ export class Spreadsheet {
         switch (parameter.length) {
             case 0: {
                 const insertSheetAction: IInsertSheetActionData = {
-                    actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
+                    actionName: SHEET_ACTION_NAMES.INSERT_SHEET_ACTION,
                     index: -1,
                     sheetId: '',
                 };
@@ -66,7 +66,7 @@ export class Spreadsheet {
                 const index: number = parameter[0];
 
                 const insertSheetAction: IInsertSheetActionData = {
-                    actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
+                    actionName: SHEET_ACTION_NAMES.INSERT_SHEET_ACTION,
                     index,
                     sheetId: '',
                 };
@@ -92,7 +92,7 @@ export class Spreadsheet {
 
     setActiveSheet(sheetId: string): void {
         const insertSheetAction: ISetWorkSheetActivateActionData = {
-            actionName: ACTION_NAMES.INSERT_SHEET_ACTION,
+            actionName: SHEET_ACTION_NAMES.INSERT_SHEET_ACTION,
             sheetId,
             status: BooleanNumber.TRUE,
         };
@@ -102,7 +102,7 @@ export class Spreadsheet {
 
     removeSheetById(sheetId: string): void {
         const removeSheetAction: IRemoveSheetActionData = {
-            actionName: ACTION_NAMES.REMOVE_SHEET_ACTION,
+            actionName: SHEET_ACTION_NAMES.REMOVE_SHEET_ACTION,
             sheetId,
         };
         const command = new SpreadsheetCommand(this.model, removeSheetAction);
@@ -117,7 +117,7 @@ export class Spreadsheet {
      */
     hideColumns(columnIndex: number, columnCount: number, sheetId: string): string {
         const hideColumnAction: ISetColumnHideActionData = {
-            actionName: ACTION_NAMES.SET_COLUMN_HIDE_ACTION,
+            actionName: SHEET_ACTION_NAMES.SET_COLUMN_HIDE_ACTION,
             columnCount,
             columnIndex,
             sheetId,
@@ -135,7 +135,7 @@ export class Spreadsheet {
      */
     showColumns(columnIndex: number, columnCount: number, sheetId: string): string {
         const showColumnAction: ISetColumnShowActionData = {
-            actionName: ACTION_NAMES.SET_COLUMN_SHOW_ACTION,
+            actionName: SHEET_ACTION_NAMES.SET_COLUMN_SHOW_ACTION,
             sheetId,
             columnCount,
             columnIndex,
@@ -153,7 +153,7 @@ export class Spreadsheet {
      */
     hideRows(rowIndex: number, rowCount: number, sheetId: string): string {
         const hideRowAction: ISetRowHideActionData = {
-            actionName: ACTION_NAMES.SET_ROW_HIDE_ACTION,
+            actionName: SHEET_ACTION_NAMES.SET_ROW_HIDE_ACTION,
             sheetId,
             rowCount,
             rowIndex,
@@ -171,7 +171,7 @@ export class Spreadsheet {
      */
     showRows(rowIndex: number, rowCount: number, sheetId: string): string {
         const showRowAction: ISetRowShowActionData = {
-            actionName: ACTION_NAMES.SET_ROW_SHOW_ACTION,
+            actionName: SHEET_ACTION_NAMES.SET_ROW_SHOW_ACTION,
             sheetId,
             rowCount,
             rowIndex,

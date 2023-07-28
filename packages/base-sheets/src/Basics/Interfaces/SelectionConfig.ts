@@ -1,4 +1,4 @@
-import { IRangeCellData, IRangeData } from '@univerjs/core';
+import { ICellInfo, IRangeCellData, IRangeData, ISelection, ISheetActionData, Nullable } from '@univerjs/core';
 
 export interface ISelectionConfig {
     selection: IRangeData;
@@ -7,4 +7,13 @@ export interface ISelectionConfig {
 
 export interface ISelectionsConfig {
     [worksheetId: string]: ISelectionConfig[];
+}
+
+export interface ISelectionModelValue {
+    selection: ISelection;
+    cell: Nullable<ICellInfo>;
+}
+
+export interface ISetSelectionValueActionData extends ISheetActionData {
+    selections: ISelectionModelValue[];
 }

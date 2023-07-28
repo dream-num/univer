@@ -1,19 +1,8 @@
-import { SheetActionBase, ActionObservers, ActionType, ISheetActionData, ICellInfo, ISelection, Nullable, CommandManager, CommandModel } from '@univerjs/core';
-import { ACTION_NAMES } from '../../Basics';
-import { SetSelectionValue } from '../Apply/SetSelectionValue';
-
-export interface ISelectionModelValue {
-    selection: ISelection;
-    cell: Nullable<ICellInfo>;
-}
-
-export interface ISetSelectionValueActionData extends ISheetActionData {
-    selections: ISelectionModelValue[];
-}
+import { SheetActionBase, ActionObservers, ActionType, CommandModel } from '@univerjs/core';
+import { ACTION_NAMES, ISelectionModelValue, ISetSelectionValueActionData } from '../../Basics';
+import { SetSelectionValueApply } from '../Apply/SetSelectionValue';
 
 export class SetSelectionValueAction extends SheetActionBase<ISetSelectionValueActionData, ISetSelectionValueActionData, ISelectionModelValue[]> {
-    static NAME = 'SetSelectionValueAction';
-
     constructor(actionData: ISetSelectionValueActionData, commandModel: CommandModel, observers: ActionObservers) {
         super(actionData, commandModel, observers);
 
@@ -32,10 +21,9 @@ export class SetSelectionValueAction extends SheetActionBase<ISetSelectionValueA
     }
 
     do(): ISelectionModelValue[] {
-        const { selections } = this._doActionData;
-        const worksheet = this.getWorkSheet();
+        const spreadsheetModel = this.getSpreadsheetModel();
 
-        const result = SetSelectionValue(worksheet, selections);
+        const result = SetSelectionValueApply(spreadsheetModel, this._doActionData);
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -58,14 +46,14 @@ export class SetSelectionValueAction extends SheetActionBase<ISetSelectionValueA
     }
 
     undo(): void {
-        const { selections, sheetId } = this._oldActionData;
-        const worksheet = this.getWorkSheet();
+        const { sheetId } = this._oldActionData;
+        const spreadsheetModel = this.getSpreadsheetModel();
 
         // update current data
         this._doActionData = {
             actionName: ACTION_NAMES.SET_SELECTION_VALUE_ACTION,
             sheetId,
-            selections: SetSelectionValue(worksheet, selections),
+            selections: SetSelectionValueApply(spreadsheetModel, this._oldActionData),
         };
 
         this._observers.notifyObservers({
@@ -79,5 +67,3 @@ export class SetSelectionValueAction extends SheetActionBase<ISetSelectionValueA
         return false;
     }
 }
-
-CommandManager.register(SetSelectionValueAction.NAME, SetSelectionValueAction);

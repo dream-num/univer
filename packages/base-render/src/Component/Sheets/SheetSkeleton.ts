@@ -27,7 +27,7 @@ import {
     Nullable,
     getColorStyle,
     IDocumentRenderConfig,
-    DocumentModelSimple,
+    DocumentSimple,
     Tools,
 } from '@univerjs/core';
 import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../Basics/Const';
@@ -702,7 +702,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         const content = cell.m || cell.v;
 
-        let documentModel: Nullable<DocumentModelSimple>;
+        let documentModel: Nullable<DocumentSimple>;
         let fontString = 'document';
         const cellOtherConfig = this._getOtherStyle(style) as CellOtherConfig;
         // const {
@@ -790,7 +790,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             paragraph.paragraphStyle.horizontalAlign = horizontalAlign;
         }
 
-        return new DocumentModelSimple(document);
+        return new DocumentSimple(document);
     }
 
     private _getDocumentDataByStyle(content: string, textStyle: ITextStyle, config: CellOtherConfig) {
@@ -858,7 +858,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             },
         };
 
-        return new DocumentModelSimple(documentData);
+        return new DocumentSimple(documentData);
     }
 
     private ___setBorderProps(r: number, c: number, type: BORDER_TYPE, style: IStyleData, cache: IStylesCache) {

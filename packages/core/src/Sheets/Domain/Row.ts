@@ -13,12 +13,16 @@ export class Row {
      * @param rowHeight row height array
      * @returns
      */
-    setRowHeight(rowIndex: number, rowHeight: number[], sheetId: string) {
+    setRowHeight(rowIndex: number, rowCount: number, rowHeight: number, sheetId: string) {
+        const height = [];
+        for (let i = 0; i < rowCount; i++) {
+            height.push(rowHeight);
+        }
         const setRowHeightAction: ISetRowHeightActionData = {
             sheetId,
             actionName: SHEET_ACTION_NAMES.SET_ROW_HEIGHT_ACTION,
             rowIndex,
-            rowHeight,
+            rowHeight: height,
         };
         const command = new SpreadsheetCommand(this.spreadsheetModel, setRowHeightAction);
         this.commandManager.invoke(command);

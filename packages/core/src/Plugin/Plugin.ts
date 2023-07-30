@@ -1,4 +1,6 @@
+import { Ctor } from '@wendellhu/redi';
 import { ContextBase } from '../Basics/ContextBase';
+
 import { Context } from '../Basics/Context';
 import { Observable } from '../Observer';
 import { Locale, Nullable, PropsFrom } from '../Shared';
@@ -128,5 +130,47 @@ export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase> imp
         names.forEach((name) => {
             manager.removeObserver(name, this._name);
         });
+    }
+}
+
+interface IPluginRegistryItem {
+    plugin: typeof Plugin;
+    options: any;
+}
+
+/**
+ * Store plugin instances.
+ */
+export class PluginStore {
+    private readonly plugins: Plugin[] = [];
+
+    addPlugin(plugin: Plugin): void {
+        this.plugins.push(plugin);
+    }
+
+    removePlugins(): Plugin[] {
+        const plugins = this.plugins.slice();
+        this.plugins.length = 0;
+        return plugins;
+    }
+}
+
+/**
+ * Store plugin registry items.
+ */
+export class PluginRegistry {
+    private readonly pluginsRegisteredByBusiness = new Map<PluginType, [IPluginRegistryItem]>();
+
+    registerPlugin(pluginCtor: PluginCtor<any>, options: any) {
+        const type = pluginCtor.type;
+        if (!this.pluginsRegisteredByBusiness.has(type)) {
+            this.pluginsRegisteredByBusiness.set(type, [] as unknown[] as [IPluginRegistryItem]);
+        }
+
+        this.pluginsRegisteredByBusiness.get(type)!.push({ plugin: pluginCtor, options });
+    }
+
+    getRegisterPlugins(type: PluginType): [IPluginRegistryItem] {
+        return this.pluginsRegisteredByBusiness.get(type) || ([] as unknown[] as [IPluginRegistryItem]);
     }
 }

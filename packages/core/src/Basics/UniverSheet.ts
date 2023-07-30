@@ -1,7 +1,7 @@
 import { Ctor, Injector, Optional, Disposable } from '@wendellhu/redi';
 import { Workbook, ColorBuilder } from '../Sheets/Domain';
 import { IWorkbookConfig } from '../Types/Interfaces';
-import { BasePlugin, Plugin, PluginCtor } from '../Plugin';
+import { BasePlugin, Plugin, PluginCtor, PluginStore } from '../Plugin';
 import { IOHttp, IOHttpConfig, Logger } from '../Shared';
 import { SheetContext } from './SheetContext';
 import { VersionCode, VersionEnv } from './Version';
@@ -10,20 +10,6 @@ interface IComposedConfig {
     [key: string]: any;
 
     workbookConfig: IWorkbookConfig;
-}
-
-class PluginStore {
-    private readonly plugins: Plugin[] = [];
-
-    addPlugin(plugin: Plugin): void {
-        this.plugins.push(plugin);
-    }
-
-    removePlugins(): Plugin[] {
-        const plugins = this.plugins.slice();
-        this.plugins.length = 0;
-        return plugins;
-    }
 }
 
 /**
@@ -132,7 +118,11 @@ export class UniverSheet implements Disposable {
 
     /**
      * Add a plugin into UniverSheet. UniverSheet should add dependencies exposed from this plugin to its DI system.
+     *
      * @param plugin constructor of the plugin class
+     * @param options options to this plugin
+     *
+     * @internal
      */
     addPlugin<T extends Plugin>(plugin: PluginCtor<T>, options: any): void {
         const pluginInstance: Plugin = this._sheetInjector.createInstance(plugin as unknown as Ctor<any>, options);
@@ -141,12 +131,16 @@ export class UniverSheet implements Disposable {
         pluginInstance.onCreate(this._context);
 
         this._pluginStore.addPlugin(pluginInstance);
+
+        // FIXME: this is temporary. Will be removed in the future.
+        this._context.getPluginManager().install(pluginInstance);
     }
 
     /**
      * install plugin
      *
      * @param plugin - install plugin
+     * @deprecated Use addPlugin instead
      */
     installPlugin(plugin: Plugin): void {
         this._context.getPluginManager().install(plugin);

@@ -5,45 +5,9 @@ import { UniverDoc } from './UniverDoc';
 import { UniverSlide } from './UniverSlide';
 import { Nullable } from '../Shared';
 import { Context } from './Context';
-import { Plugin, PluginCtor, PluginType } from '../Plugin';
+import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../Plugin';
 import { IUniverData, IWorkbookConfig } from '../Types/Interfaces';
 import { UniverObserverImpl } from './UniverObserverImpl';
-
-interface IPluginRegistryItem {
-    plugin: typeof Plugin;
-    options: any;
-}
-
-class PluginRegistry {
-    private readonly pluginsRegisteredByBusiness = new Map<PluginType, [IPluginRegistryItem]>();
-
-    registerPlugin(pluginCtor: PluginCtor<any>, options: any) {
-        const type = pluginCtor.type;
-        if (!this.pluginsRegisteredByBusiness.has(type)) {
-            this.pluginsRegisteredByBusiness.set(type, [] as unknown[] as [IPluginRegistryItem]);
-        }
-
-        this.pluginsRegisteredByBusiness.get(type)!.push({ plugin: pluginCtor, options });
-    }
-
-    getRegisterPlugins(type: PluginType): [IPluginRegistryItem] {
-        return this.pluginsRegisteredByBusiness.get(type) || ([] as unknown[] as [IPluginRegistryItem]);
-    }
-}
-
-class PluginStore {
-    private readonly plugins: Plugin[] = [];
-
-    addPlugin(plugin: Plugin): void {
-        this.plugins.push(plugin);
-    }
-
-    removePlugins(): Plugin[] {
-        const plugins = this.plugins.slice();
-        this.plugins.length = 0;
-        return plugins;
-    }
-}
 
 /**
  * Univer.

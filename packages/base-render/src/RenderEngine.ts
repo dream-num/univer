@@ -14,7 +14,7 @@ export class RenderEngine extends Plugin {
 
         this._engine = new Engine();
 
-        this._injector?.add(IRenderingEngine, { useFactory: () => this._engine });
+        this._injector?.add([IRenderingEngine, { useFactory: () => this._engine }]);
     }
 
     static create() {

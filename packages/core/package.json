@@ -56,7 +56,7 @@
         "url": "https://github.com/dream-num/univer.git"
     },
     "dependencies": {
-        "@wendellhu/redi": "^0.8.0",
+        "@wendellhu/redi": "^0.10.0",
         "dayjs": "^1.11.5",
         "es6-proxy-polyfill": "^2.1.1",
         "nanoid": "4.0.0",

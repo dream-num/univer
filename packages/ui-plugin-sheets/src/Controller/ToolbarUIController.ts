@@ -1,5 +1,6 @@
-import { BorderInfo, SheetPlugin } from '@univerjs/base-sheets';
-import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren, CustomComponent } from '@univerjs/base-ui';
+import { Inject } from '@wendellhu/redi';
+import { BorderInfo, ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
+import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren, ComponentManager, CustomComponent } from '@univerjs/base-ui';
 import {
     BorderType,
     CommandManager,
@@ -7,7 +8,6 @@ import {
     HorizontalAlign,
     IKeyValue,
     ISheetActionData,
-    PLUGIN_NAMES,
     SheetActionBase,
     Tools,
     UIObserver,
@@ -17,8 +17,9 @@ import {
     FontWeight,
     FontItalic,
     ITextRotation,
+    ICurrentUniverService,
+    ObserverManager,
 } from '@univerjs/core';
-import { SheetUIPlugin } from '..';
 import { DefaultToolbarConfig, SheetToolbarConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
 import {
@@ -55,10 +56,6 @@ export interface IToolbarItemProps extends BaseToolbarSelectProps {
 }
 
 export class ToolbarUIController {
-    private _plugin: SheetUIPlugin;
-
-    private _sheetPlugin: SheetPlugin;
-
     private _toolbar: Toolbar;
 
     private _toolList: IToolbarItemProps[];
@@ -84,10 +81,14 @@ export class ToolbarUIController {
     }; //存储边框信息
 
     // eslint-disable-next-line max-lines-per-function
-    constructor(plugin: SheetUIPlugin, config?: SheetToolbarConfig) {
-        this._plugin = plugin;
-
-        this._sheetPlugin = plugin.getContext().getUniver().getCurrentUniverSheetInstance().context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+    constructor(
+        config: SheetToolbarConfig | undefined,
+        @ISelectionManager private readonly _selectionManager: SelectionManager,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+    ) {
+        // TODO@huwenzhao: 看到这个真的是要哭了
 
         this._config = Tools.deepMerge({}, DefaultToolbarConfig, config);
 
@@ -478,7 +479,7 @@ export class ToolbarUIController {
     }
 
     setUIObserve<T>(msg: UIObserver<T>) {
-        this._plugin.getContext().getObserverManager().requiredObserver<UIObserver<T>>('onUIChangeObservable', 'core').notifyObservers(msg);
+        this._observerManager.requiredObserver<UIObserver<T>>('onUIChangeObservable', 'core').notifyObservers(msg);
     }
 
     changeColor(color: string) {
@@ -629,7 +630,7 @@ export class ToolbarUIController {
 
     // eslint-disable-next-line max-lines-per-function
     private _changeToolbarState(range: Range): void {
-        const workbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         const worksheet = workbook.getActiveSheet();
         if (worksheet) {
             const isBold = range.getFontWeight();
@@ -732,16 +733,17 @@ export class ToolbarUIController {
     }
 
     private _initialize() {
-        this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + ColorSelect.name, ColorSelect);
-        this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
-        this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + LineColor.name, LineColor);
-        this._plugin.getComponentManager().register(SHEET_UI_PLUGIN_NAME + LineBold.name, LineBold);
+        const componentManager = this._componentManager;
+        componentManager.register(SHEET_UI_PLUGIN_NAME + ColorSelect.name, ColorSelect);
+        componentManager.register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
+        componentManager.register(SHEET_UI_PLUGIN_NAME + LineColor.name, LineColor);
+        componentManager.register(SHEET_UI_PLUGIN_NAME + LineBold.name, LineBold);
 
         CommandManager.getCommandObservers().add(({ actions }) => {
             if (!actions || actions.length === 0) return;
             const action = actions[0] as SheetActionBase<ISheetActionData, ISheetActionData, void>;
 
-            const currentUnitId = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getUnitId();
+            const currentUnitId = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getUnitId();
 
             // TODO not use try catch
             try {
@@ -758,8 +760,8 @@ export class ToolbarUIController {
             // 不同的环境下的 UI 需要全部重新写一遍？
             // UI 没有可扩展性
             // 这里有点问题的…… 每次都去全量获取状态？
-            const manager = this._sheetPlugin.getSelectionManager();
-            const range = manager?.getCurrentCell();
+            const manager = this._selectionManager;
+            const range = manager.getCurrentCell();
             if (range) {
                 this._changeToolbarState(range);
             }

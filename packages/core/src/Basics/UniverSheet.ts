@@ -1,10 +1,11 @@
-import { Ctor, Injector, Optional, Disposable } from '@wendellhu/redi';
+import { Ctor, Injector, Optional, Disposable, Dependency } from '@wendellhu/redi';
 import { Workbook, ColorBuilder } from '../Sheets/Domain';
 import { IWorkbookConfig } from '../Types/Interfaces';
 import { BasePlugin, Plugin, PluginCtor, PluginStore } from '../Plugin';
 import { IOHttp, IOHttpConfig, Logger } from '../Shared';
 import { SheetContext } from './SheetContext';
 import { VersionCode, VersionEnv } from './Version';
+import { Observer, ObserverManager } from 'src/Observer';
 
 interface IComposedConfig {
     [key: string]: any;
@@ -22,11 +23,17 @@ export class UniverSheet implements Disposable {
 
     private readonly _pluginStore = new PluginStore();
 
+    /**
+     * @deprecated this is a temporary solution, migrate modules to `sheetInjector`
+     */
     private _context: SheetContext;
 
     constructor(univerSheetData: Partial<IWorkbookConfig> = {}, @Optional(Injector) parentInjector?: Injector) {
         this.univerSheetConfig = univerSheetData;
+
         this._context = new SheetContext(univerSheetData);
+
+        // Initialize injector after constructoring context
         this._sheetInjector = this.initializeInjector(parentInjector);
     }
 
@@ -169,6 +176,7 @@ export class UniverSheet implements Disposable {
     }
 
     private initializeInjector(parentInjector?: Injector): Injector {
-        return parentInjector ? parentInjector.createChild() : new Injector();
+        const dependencies: Dependency[] = [[ObserverManager, { useValue: this.context.getObserverManager() }]];
+        return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
     }
 }

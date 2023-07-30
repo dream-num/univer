@@ -1,4 +1,4 @@
-import { IKeyValue, Plugin } from '@univerjs/core';
+import { IKeyValue } from '@univerjs/core';
 import { BaseCopyExtension, BaseCopyExtensionFactory } from './CopyExtensionFactory';
 import { CopyExtensionRegister } from './CopyExtensionRegister';
 import { Clipboard } from '../../Shared/Clipboard';
@@ -9,7 +9,7 @@ export class CopyExtensionManager {
     // mounted on the instance
     private _register: CopyExtensionRegister;
 
-    constructor(private _plugin: Plugin) {
+    constructor() {
         this._register = new CopyExtensionRegister();
     }
 
@@ -19,7 +19,6 @@ export class CopyExtensionManager {
 
     /**
      * inject all actions
-     * @param command
      */
     handle() {
         const clipboardExtensionFactoryList = this._register?.copyExtensionFactoryList;
@@ -50,7 +49,6 @@ export class CopyExtensionManager {
 
     /**
      * Execute when the action is matched
-     * @param command
      * @returns
      */
     private _checkExtension() {

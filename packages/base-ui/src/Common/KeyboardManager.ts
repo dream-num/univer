@@ -1,4 +1,5 @@
-import { Observable, ObserverManager, Plugin } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
+import { Observable, ObserverManager } from '@univerjs/core';
 
 export type KeyboardObserver = {
     onKeyDownObservable: Observable<KeyboardEvent>;
@@ -12,10 +13,7 @@ export type KeyboardObserver = {
 };
 
 export class KeyboardManager {
-    private _observerManager: ObserverManager;
-
-    constructor(private _plugin: Plugin) {
-        this._observerManager = this._plugin.getContext().getObserverManager();
+    constructor(@Inject(ObserverManager) private readonly _observerManager: ObserverManager) {
         this._installObserver();
     }
 

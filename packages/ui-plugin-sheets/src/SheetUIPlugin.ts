@@ -24,7 +24,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
 
     private _componentManager: ComponentManager;
 
-    constructor(config: ISheetUIPluginConfig, @Inject(Injector) private readonly _injector: Injector) {
+    constructor(config: ISheetUIPluginConfig, @Inject(Injector) private readonly _sheetInjector: Injector) {
         super(SHEET_UI_PLUGIN_NAME);
 
         this._config = Tools.deepMerge({}, DefaultSheetUIConfig, config);
@@ -49,55 +49,36 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
             zh,
             en,
         });
-        // const locale = this.getGlobalContext().getLocale().getCurrentLocale();
-        // console.info(`./Locale/${locale}`);
-        // if (locale === LocaleType.ZH) {
-        //     import(`./Locale/zh`).then((module) => {
-        //         this.loadLocale(locale, module);
-        //     });
-        // } else if (locale === LocaleType.EN) {
-        //     import(`./Locale/en`).then((module) => {
-        //         this.loadLocale(locale, module);
-        //     });
-        // }
 
-        this._componentManager = new ComponentManager();
-        this._zIndexManager = new ZIndexManager();
-        this._keyboardManager = new KeyboardManager(this);
-        this._registerManager = new RegisterManager(this);
-        this._appUIController = new AppUIController(this);
+        this.initializeDependencies();
+
         // AppUIController initializes the DOM as an asynchronous rendering process, and must wait for the UI rendering to complete before starting to render the canvas
         this.UIDidMount(() => {
             this.initRender();
         });
     }
 
-    // loadLocale(locale: LocaleType, module: IKeyValue) {
-    //     // import(`./Locale/${locale}`).then((module) => {
-    //     // Do something with the module.
-    //     const localObject: IKeyValue = {};
-    //     localObject[locale] = module.default;
+    initializeDependencies(): void {
+        this._sheetInjector.add([KeyboardManager]);
+        this._sheetInjector.add([RegisterManager]);
+        this._sheetInjector.add([ComponentManager]);
+        this._sheetInjector.add([AppUIController]); // TODO: remove plugin
+        this._sheetInjector.add([ZIndexManager]);
 
-    //     console.log('localObject===', locale, localObject);
-
-    //     this.getLocale().load(localObject);
-
-    //     this._componentManager = new ComponentManager();
-    //     this._keyboardManager = new KeyboardManager(this);
-    //     this._registerManager = new RegisterManager(this);
-    //     this._appUIController = new AppUIController(this);
-    //     // AppUIController initializes the DOM as an asynchronous rendering process, and must wait for the UI rendering to complete before starting to render the canvas
-    //     this.UIDidMount(() => {
-    //         this.initRender();
-    //     });
-    // }
+        // TODO: maybe we don't have to instantiate these dependencies manually
+        this._componentManager = this._sheetInjector.get(ComponentManager);
+        this._keyboardManager = this._sheetInjector.get(KeyboardManager);
+        this._zIndexManager = this._sheetInjector.get(ZIndexManager);
+        this._registerManager = this._sheetInjector.get(RegisterManager);
+        this._appUIController = this._sheetInjector.get(AppUIController);
+    }
 
     getConfig() {
         return this._config;
     }
 
     initRender() {
-        const engine = this._injector.get(IRenderingEngine);
+        const engine = this._sheetInjector.get(IRenderingEngine);
         let container = getRefElement(this._appUIController.getSheetContainerController().getContentRef());
 
         // mount canvas to DOM container

@@ -1,10 +1,10 @@
-import { Plugin, PLUGIN_NAMES, Univer, Context } from '@univerjs/core';
+import { Plugin, PLUGIN_NAMES, Univer, SheetContext } from '@univerjs/core';
 
 export interface IUIPluginConfig {}
 
 const DEFAULT_SLIDE_PLUGIN_DATA = {};
 
-export class UIPlugin extends Plugin<any, Context> {
+export class UIPlugin extends Plugin<any, SheetContext> {
     private _config: IUIPluginConfig;
 
     constructor(config: Partial<IUIPluginConfig> = {}) {
@@ -21,7 +21,7 @@ export class UIPlugin extends Plugin<any, Context> {
         univerInstance.install(this);
     }
 
-    initialize(context: Context): void {
+    initialize(context: SheetContext): void {
         this.context = context;
     }
 
@@ -29,7 +29,7 @@ export class UIPlugin extends Plugin<any, Context> {
         return this._config;
     }
 
-    onMounted(ctx: Context): void {
+    onMounted(ctx: SheetContext): void {
         this.initialize(ctx);
     }
 }

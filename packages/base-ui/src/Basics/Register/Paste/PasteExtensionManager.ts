@@ -1,4 +1,5 @@
-import { Command, IActionData, Plugin } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
+import { Command, CommandManager, IActionData, ICurrentUniverService } from '@univerjs/core';
 import { IPasteData } from '../../Interfaces';
 import { PasteType } from '../../Interfaces/PasteType';
 import { BasePasteExtension, BasePasteExtensionFactory } from './PasteExtensionFactory';
@@ -11,7 +12,7 @@ export class PasteExtensionManager {
     // mounted on the instance
     private _register: PasteExtensionRegister;
 
-    constructor(private _plugin: Plugin) {
+    constructor(@Inject(CommandManager) private readonly _commandManager: CommandManager, @ICurrentUniverService private readonly _currentUniver: ICurrentUniverService) {
         this._register = new PasteExtensionRegister();
     }
 
@@ -21,7 +22,6 @@ export class PasteExtensionManager {
 
     /**
      * inject all actions
-     * @param command
      */
     handle(data: IPasteData) {
         const clipboardExtensionFactoryList = this._register?.pasteExtensionFactoryList;
@@ -64,9 +64,25 @@ export class PasteExtensionManager {
         });
     }
 
+    protected _invokeAction(actionDataList: IActionData[]) {
+        // FIXME: this file is inside base-ui but it knows about current univer "sheet"? That is incorrect.
+        const workbook = this._currentUniver.getCurrentUniverSheetInstance().getWorkBook()!;
+
+        const command = new Command(
+            {
+                WorkBookUnit: workbook,
+            },
+            ...actionDataList
+        );
+
+        this._commandManager.invoke(command);
+    }
+
     /**
      * Execute when the action is matched
-     * @param command
+     *
+     * @param data
+     *
      * @returns
      */
     private _checkExtension(data: IPasteData) {
@@ -82,19 +98,5 @@ export class PasteExtensionManager {
             }
         }
         this._invokeAction(actionDataList);
-    }
-
-    private _invokeAction(actionDataList: IActionData[]) {
-        const _commandManager = this._plugin.getGlobalContext().getCommandManager();
-        const workBook = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook();
-
-        const command = new Command(
-            {
-                WorkBookUnit: workBook,
-            },
-            ...actionDataList
-        );
-
-        _commandManager.invoke(command);
     }
 }

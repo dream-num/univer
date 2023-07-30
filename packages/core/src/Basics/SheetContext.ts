@@ -35,9 +35,7 @@ export class SheetContext extends ContextBase {
         this._workbook.onUniver(univer);
     }
 
-    getContextObserver<Key extends keyof WorkBookObserver>(
-        value: Key
-    ): Observable<PropsFrom<WorkBookObserver[Key]>> {
+    getContextObserver<Key extends keyof WorkBookObserver>(value: Key): Observable<PropsFrom<WorkBookObserver[Key]>> {
         return this.getObserverManager().requiredObserver(value, 'core');
     }
 

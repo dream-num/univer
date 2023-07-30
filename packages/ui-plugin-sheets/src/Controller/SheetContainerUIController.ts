@@ -1,5 +1,6 @@
 import { DragManager, getRefElement, Prompt, SlotManager, ZIndexManager } from '@univerjs/base-ui';
 import { LocaleType } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 import { ISheetUIPluginConfig } from '../Basics';
 import { SheetUIPlugin } from '../SheetUIPlugin';
 import { SheetContainer } from '../View';
@@ -41,7 +42,7 @@ export class SheetContainerUIController {
 
     private _dragManager: DragManager;
 
-    constructor(plugin: SheetUIPlugin) {
+    constructor(plugin: SheetUIPlugin, @Inject(Injector) private readonly _injector: Injector) {
         this._plugin = plugin;
 
         this._config = this._plugin.getConfig();
@@ -50,7 +51,7 @@ export class SheetContainerUIController {
 
         this._slotController = new SlotController();
         this._slotManager = new SlotManager();
-        this._toolbarController = new ToolbarUIController(this._plugin, this._config.layout?.toolbarConfig);
+        this._toolbarController = this._injector.createInstance(ToolbarUIController, this._config.layout?.toolbarConfig);
         this._cellEditorUIController = new CellEditorUIController(this._plugin);
         this._formulaBarUIController = new FormulaBarUIController(this._plugin);
         this._infoBarController = new InfoBarUIController(this._plugin);

@@ -1,4 +1,5 @@
-import { Plugin } from '@univerjs/core';
+import { CommandManager, ICurrentUniverService, ObserverManager } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
 import { IPasteData, IDragAndDropData } from '../Basics/Interfaces';
 import { PasteExtensionManager, DragAndDropExtensionManager, CopyExtensionManager } from '../Basics/Register';
 
@@ -9,7 +10,11 @@ export class RegisterManager {
 
     private _dragAndDropExtensionManager: DragAndDropExtensionManager;
 
-    constructor(private _plugin: Plugin) {
+    constructor(
+        @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
+        @Inject(CommandManager) private readonly _comandManager: CommandManager,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+    ) {
         this.initialize();
     }
 
@@ -19,10 +24,10 @@ export class RegisterManager {
     }
 
     setClipboardExtensionManager() {
-        this._pasteExtensionManager = new PasteExtensionManager(this._plugin);
-        this._copyExtensionManager = new CopyExtensionManager(this._plugin);
-        const onKeyPasteObservable = this._plugin.getGlobalContext().getObserverManager().getObserver<ClipboardEvent>('onKeyPasteObservable', 'core');
-        const onKeyCopyObservable = this._plugin.getGlobalContext().getObserverManager().getObserver<ClipboardEvent>('onKeyCopyObservable', 'core');
+        this._pasteExtensionManager = new PasteExtensionManager(this._comandManager, this._currentUniverService);
+        this._copyExtensionManager = new CopyExtensionManager();
+        const onKeyPasteObservable = this._globalObserverManager.getObserver<ClipboardEvent>('onKeyPasteObservable', 'core');
+        const onKeyCopyObservable = this._globalObserverManager.getObserver<ClipboardEvent>('onKeyCopyObservable', 'core');
 
         if (onKeyPasteObservable && !onKeyPasteObservable.hasObservers()) {
             onKeyPasteObservable.add((evt: ClipboardEvent) => {
@@ -41,7 +46,7 @@ export class RegisterManager {
     setDragAndDropExtensionManager() {
         this._dragAndDropExtensionManager = new DragAndDropExtensionManager();
 
-        const onDropObservable = this._plugin.getGlobalContext().getObserverManager().getObserver<DragEvent>('onDropObservable', 'core');
+        const onDropObservable = this._globalObserverManager.getObserver<DragEvent>('onDropObservable', 'core');
 
         if (onDropObservable && !onDropObservable.hasObservers()) {
             onDropObservable.add((evt: DragEvent) => {

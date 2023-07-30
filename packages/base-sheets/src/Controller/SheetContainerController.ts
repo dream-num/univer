@@ -4,7 +4,6 @@ import { Inject } from '@wendellhu/redi';
 import { ISelectionManager, ISheetContext } from '../Services/tokens';
 import { SelectionManager } from './Selection';
 import { CanvasView } from '../View';
-import { warn } from 'console';
 // All skins' less file
 
 export class SheetContainerController {

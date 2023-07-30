@@ -8,6 +8,9 @@ import { Context } from './Context';
 import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../Plugin';
 import { IUniverData, IWorkbookConfig } from '../Types/Interfaces';
 import { UniverObserverImpl } from './UniverObserverImpl';
+import { ObserverManager } from '../Observer';
+import { CurrentUniverService, ICurrentUniverService } from '../Service/Current.service';
+import { CommandManager } from 'src/Command';
 
 /**
  * Univer.
@@ -19,31 +22,25 @@ export class Univer {
 
     private readonly _univerPluginRegistry = new PluginRegistry();
 
-    private _univerSheets: UniverSheet[];
-
-    private _univerDocs: UniverDoc[];
-
-    private _univerSlides: UniverSlide[];
-
     /**
      * @deprecated
      */
     private _context: Context;
 
     constructor(univerData: Partial<IUniverData> = {}) {
-        this._univerSheets = [];
-        this._univerDocs = [];
-        this._univerSlides = [];
-
         this._context = new Context(univerData);
         this._setObserver();
         this._context.onUniver(this);
 
-        this._univerInjector = this.initializeInjector();
+        this._univerInjector = this.initializeDependencies();
+    }
+
+    private get _currentUniverService(): ICurrentUniverService {
+        return this._univerInjector.get(ICurrentUniverService);
     }
 
     /** Register a plugin into univer. */
-    registerPlugin<T extends Ctor<Plugin> & { type: PluginType }>(plugin: T, configs?: any): void {
+    registerPlugin<T extends Plugin>(plugin: PluginCtor<T>, configs?: any): void {
         // TODO: type of `configs` could be optimized here using typescript infer
 
         if (plugin.type === PluginType.Univer) {
@@ -59,35 +56,35 @@ export class Univer {
     createUniverSheet(config: Partial<IWorkbookConfig>): UniverSheet {
         const sheet = this._univerInjector.createInstance(UniverSheet, config);
         sheet.context.onUniver(this);
-        this._univerSheets.push(sheet);
 
         this.initializePluginsForSheet(sheet);
-        // TODO: initialize pligins for sheet
+        this._currentUniverService.addSheet(sheet);
 
         return sheet;
     }
 
     addUniverSheet(univerSheet: UniverSheet): void {
         univerSheet.context.onUniver(this);
-        this._univerSheets.push(univerSheet);
+
+        this._currentUniverService.addSheet(univerSheet);
     }
 
     addUniverDoc(univerDoc: UniverDoc): void {
         univerDoc.context.onUniver(this);
-        this._univerDocs.push(univerDoc);
+        this._currentUniverService.addDoc(univerDoc);
     }
 
     addUniverSlide(univerSlide: UniverSlide): void {
         univerSlide.context.onUniver(this);
-        this._univerSlides.push(univerSlide);
+        this._currentUniverService.addSlide(univerSlide);
     }
 
     getUniverSheetInstance(id: string): Nullable<UniverSheet> {
-        return this._univerSheets.find((sheet) => sheet.getUnitId() === id);
+        return this._currentUniverService.getUniverSheetInstance(id);
     }
 
     getUniverDocInstance(id: string): Nullable<UniverDoc> {
-        return this._univerDocs.find((doc) => doc.getUnitId() === id);
+        return this._currentUniverService.getUniverDocInstance(id);
     }
 
     getUniverSlideInstance(id: string): Nullable<UniverSheet> {
@@ -95,15 +92,15 @@ export class Univer {
     }
 
     getAllUniverSheetsInstance() {
-        return this._univerSheets;
+        return this._currentUniverService.getAllUniverSheetsInstance();
     }
 
     getAllUniverDocsInstance() {
-        return this._univerDocs;
+        return this._currentUniverService.getAllUniverDocsInstance();
     }
 
     getAllUniverSlidesInstance() {
-        return this._univerSlides;
+        return this._currentUniverService.getAllUniverSlidesInstance();
     }
 
     /**
@@ -111,17 +108,20 @@ export class Univer {
      * @returns
      */
     getCurrentUniverSheetInstance() {
-        return this._univerSheets[0];
+        return this._currentUniverService.getCurrentUniverSheetInstance();
     }
 
     getCurrentUniverDocInstance() {
-        return this._univerDocs[0];
+        return this._currentUniverService.getCurrentUniverDocInstance();
     }
 
     getCurrentUniverSlideInstance() {
-        return this._univerSlides[0];
+        return this._currentUniverService.getCurrentUniverSlideInstance();
     }
 
+    /**
+     * @deprecated
+     */
     getGlobalContext() {
         return this._context;
     }
@@ -149,8 +149,12 @@ export class Univer {
         new UniverObserverImpl().install(manager);
     }
 
-    private initializeInjector(): Injector {
-        return new Injector();
+    private initializeDependencies(): Injector {
+        return new Injector([
+            [ObserverManager, { useFactory: () => this._context.getObserverManager() }],
+            [ICurrentUniverService, { useClass: CurrentUniverService }],
+            [CommandManager, { useFactory: () => this._context.getCommandManager() }],
+        ]);
     }
 
     private registerUniverPlugin<T extends Plugin>(plugin: PluginCtor<T>, options?: any): void {
@@ -166,8 +170,9 @@ export class Univer {
 
     private registerSheetPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
         // Add plugins to the plugin registration. And for each initialized UniverSheet, instantiate these dependencies immediately.
-        if (this._univerSheets.length) {
-            this._univerSheets.forEach((sheet) => {
+        const sheets = this._currentUniverService.getAllUniverSheetsInstance();
+        if (sheets.length) {
+            sheets.forEach((sheet) => {
                 sheet.addPlugin(pluginCtor, options);
             });
         } else {

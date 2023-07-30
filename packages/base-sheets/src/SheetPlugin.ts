@@ -87,6 +87,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
             zh,
         });
         install(this);
+
         this.initConfig();
         this.initController();
         this.initCanvasView();
@@ -308,11 +309,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         ];
 
         dependencies.forEach((d) => {
-            if (d.length === 1) {
-                sheetInjector.add(d[0]);
-            } else {
-                sheetInjector.add(d);
-            }
+            sheetInjector.add(d);
         });
     }
 }

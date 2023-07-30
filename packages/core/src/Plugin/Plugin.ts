@@ -6,7 +6,7 @@ import { Observable } from '../Observer';
 import { Locale, Nullable, PropsFrom } from '../Shared';
 import { Univer } from '../Basics';
 
-export type PluginCtor<T> = Ctor<T> & { type: PluginType };
+export type PluginCtor<T extends Plugin> = Ctor<T> & { type: PluginType };
 
 /** Plugin types for different kinds of business. */
 export enum PluginType {
@@ -80,8 +80,14 @@ export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase> imp
         return Object();
     }
 
+    /**
+     * @deprecated
+     */
     onMounted(context: O): void {}
 
+    /**
+     * @deprecated
+     */
     onDestroy(): void {
         this.deleteObserve(...this._observeNames);
     }

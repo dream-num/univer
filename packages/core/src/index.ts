@@ -27,4 +27,6 @@ export * from './Server';
 export * from './Shared';
 export * from './Sheets';
 export * from './Slides/Domain';
+
 export { ICurrentUniverService } from './Service/Current.service';
+export { IGlobalContext } from './Service/Context.service';

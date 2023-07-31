@@ -1,14 +1,18 @@
-import { SheetPlugin } from '@univerjs/base-sheets';
-import { RangeList, Plugin, Tools, PLUGIN_NAMES, CommandManager, SheetActionBase, SetZoomRatioAction, UIObserver } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
+
+import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
+import { RangeList, Tools, CommandManager, SheetActionBase, SetZoomRatioAction, UIObserver, ICurrentUniverService, ObserverManager } from '@univerjs/core';
+
 import { CountBar } from '../View/CountBar';
 
 export class CountBarUIController {
     protected _countBar: CountBar;
 
-    protected _plugin: Plugin;
-
-    constructor(plugin: Plugin) {
-        this._plugin = plugin;
+    constructor(
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @ISelectionManager private readonly _selectionManager: SelectionManager,
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
+    ) {
         CommandManager.getActionObservers().add((event) => {
             const action = event.action as SheetActionBase<any>;
             const data = event.data;
@@ -22,7 +26,7 @@ export class CountBarUIController {
             }
             const workbook = action.getWorkBook();
             const unitId = workbook.getUnitId();
-            const currentWorkbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
+            const currentWorkbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
             const currentUnitId = currentWorkbook.getUnitId();
             if (unitId === currentUnitId) {
                 switch (data.actionName) {
@@ -33,15 +37,9 @@ export class CountBarUIController {
                 }
             }
         });
-        const manager = plugin
-            .getContext()
-            .getUniver()
-            .getCurrentUniverSheetInstance()
-            .context.getPluginManager()
-            .getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)
-            .getSelectionManager();
-        plugin.getObserver('onChangeSelectionObserver')?.add(() => {
-            const rangeList = manager.getActiveRangeList();
+
+        this._observerManager.getObserver('onChangeSelectionObserver')?.add(() => {
+            const rangeList = this._selectionManager.getActiveRangeList();
             if (rangeList && this._countBar) {
                 this._totalRangeList(rangeList);
             }
@@ -69,8 +67,7 @@ export class CountBarUIController {
     protected _totalRangeList(rangeList: RangeList): void {
         let rectList = rangeList.getRangeList();
         let recList: string[] = [];
-        let plugin = this._plugin;
-        let workbook = plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
+        let workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         let worksheet = workbook.getActiveSheet();
         let cellMatrix = worksheet.getCellMatrix();
         let avg = 0;
@@ -111,6 +108,6 @@ export class CountBarUIController {
     }
 
     protected _setUIObserve<T>(type: string, msg: UIObserver<T>) {
-        this._plugin.getContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core').notifyObservers(msg);
+        this._observerManager.requiredObserver<UIObserver<T>>(type, 'core').notifyObservers(msg);
     }
 }

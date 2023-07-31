@@ -9,6 +9,7 @@ import { ISheetContext } from '../Services/tokens';
 
 // workbook
 export class CanvasView {
+    // TODO: rename to SheetCanvasView
     private _scene: Scene;
 
     private _views: BaseView[] = []; // worksheet

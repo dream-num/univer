@@ -1,5 +1,6 @@
+import { ICurrentUniverService } from '@univerjs/core';
+
 import { InfoBarModel } from '../Model/InfoBarModel';
-import { SheetUIPlugin } from '../SheetUIPlugin';
 import { InfoBar } from '../View/InfoBar';
 
 type IProps = {
@@ -20,12 +21,9 @@ export class InfoBarUIController {
 
     private _infoBar: InfoBar;
 
-    private _plugin: SheetUIPlugin;
-
     private _infoList: BaseInfoBarProps;
 
-    constructor(plugin: SheetUIPlugin) {
-        this._plugin = plugin;
+    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
     }
 
     getComponent = (ref: InfoBar) => {
@@ -45,7 +43,7 @@ export class InfoBarUIController {
     }
 
     private _refreshComponent(): void {
-        const name = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook().getConfig().name;
+        const name = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getConfig().name;
         this._infoBarModel = new InfoBarModel(name);
         this._infoList = {
             back: {

@@ -1,5 +1,6 @@
 import { Injector, Ctor } from '@wendellhu/redi';
 
+import { CommandManager } from 'src/Command';
 import { UniverSheet } from './UniverSheet';
 import { UniverDoc } from './UniverDoc';
 import { UniverSlide } from './UniverSlide';
@@ -10,7 +11,7 @@ import { IUniverData, IWorkbookConfig } from '../Types/Interfaces';
 import { UniverObserverImpl } from './UniverObserverImpl';
 import { ObserverManager } from '../Observer';
 import { CurrentUniverService, ICurrentUniverService } from '../Service/Current.service';
-import { CommandManager } from 'src/Command';
+import { IGlobalContext } from '../Service/Context.service';
 
 /**
  * Univer.
@@ -154,6 +155,7 @@ export class Univer {
             [ObserverManager, { useFactory: () => this._context.getObserverManager() }],
             [ICurrentUniverService, { useClass: CurrentUniverService }],
             [CommandManager, { useFactory: () => this._context.getCommandManager() }],
+            [IGlobalContext, { useFactory: () => this._context }],
         ]);
     }
 
@@ -182,8 +184,9 @@ export class Univer {
 
     private initializePluginsForSheet(sheet: UniverSheet): void {
         const plugins = this._univerPluginRegistry.getRegisterPlugins(PluginType.Sheet);
+        const sheetInjector = sheet._sheetInjector;
         plugins.forEach((p) => {
-            const pluginInstance: Plugin = this._univerInjector.createInstance(p.plugin as unknown as Ctor<any>, p.options);
+            const pluginInstance: Plugin = sheetInjector.createInstance(p.plugin as unknown as Ctor<any>, p.options);
             sheet.installPlugin(pluginInstance);
         });
     }

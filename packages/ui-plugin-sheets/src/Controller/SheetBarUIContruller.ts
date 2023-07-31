@@ -1,7 +1,6 @@
-import { BaseMenuItem, BaseUlProps, ColorPicker, CustomComponent } from '@univerjs/base-ui';
+import { BaseMenuItem, BaseUlProps, ColorPicker, ComponentManager, CustomComponent } from '@univerjs/base-ui';
 import {
     Nullable,
-    Plugin,
     CommandManager,
     SheetActionBase,
     UIObserver,
@@ -13,11 +12,14 @@ import {
     SetWorkSheetActivateAction,
     SetWorkSheetStatusAction,
     RemoveSheetAction,
+    ICurrentUniverService,
+    ObserverManager,
 } from '@univerjs/core';
-import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '..';
+import { Inject } from '@wendellhu/redi';
 import { SheetBar } from '../View/SheetBar';
 import styles from '../View/SheetBar/index.module.less';
 import { SheetBarMenuItem } from '../View/SheetBar/SheetBarMenu';
+import { SHEET_UI_PLUGIN_NAME } from '../Basics';
 
 interface SheetUl extends BaseMenuItem {
     label?: CustomComponent | string;
@@ -33,8 +35,6 @@ export interface SheetUlProps extends BaseUlProps {
 export class SheetBarUIController {
     protected _sheetBar: SheetBar;
 
-    protected _plugin: Plugin;
-
     protected _sheetUl: SheetUl[];
 
     protected _dataId: string;
@@ -45,9 +45,14 @@ export class SheetBarUIController {
 
     protected _menuList: SheetBarMenuItem[];
 
-    constructor(plugin: Plugin) {
-        let that = this;
-        this._plugin = plugin;
+    // eslint-disable-next-line max-lines-per-function
+    constructor(
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
+    ) {
+        const that = this;
+
         this._sheetUl = [
             {
                 label: 'sheetConfig.delete',
@@ -74,7 +79,7 @@ export class SheetBarUIController {
                 children: [
                     {
                         label: {
-                            name: this._plugin.getPluginName() + ColorPicker.name,
+                            name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
                             props: {
                                 onClick: (color: string) => {
                                     this.setUIObserve('onUIChangeObservable', {
@@ -105,10 +110,9 @@ export class SheetBarUIController {
                 },
             },
         ];
-        this._plugin
-            .getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
-            ?.getComponentManager()
-            .register(this._plugin.getPluginName() + ColorPicker.name, ColorPicker);
+
+        this._componentManager.register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
+
         CommandManager.getActionObservers().add((event) => {
             const action = event.action as SheetActionBase<any>;
             const data = event.data;
@@ -123,7 +127,7 @@ export class SheetBarUIController {
 
             const workbook = action.getWorkBook();
             const unitId = workbook.getUnitId();
-            const currentWorkbook = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook();
+            const currentWorkbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
             const currentUnitId = currentWorkbook.getUnitId();
             if (unitId === currentUnitId) {
                 switch (data.actionName) {
@@ -144,10 +148,8 @@ export class SheetBarUIController {
                 }
             }
         });
-        this._plugin
-            .getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
-            ?.getComponentManager()
-            .register(this._plugin.getPluginName() + ColorPicker.name, ColorPicker);
+
+        this._componentManager.register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
     }
 
     getComponent = (ref: SheetBar) => {
@@ -156,7 +158,7 @@ export class SheetBarUIController {
     };
 
     setUIObserve<T>(type: string, msg: UIObserver<T>) {
-        this._plugin.getContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core').notifyObservers(msg);
+        this._observerManager.requiredObserver<UIObserver<T>>(type, 'core').notifyObservers(msg);
     }
 
     getSheetBar(): SheetBar {
@@ -229,7 +231,7 @@ export class SheetBarUIController {
         });
         list.forEach((ele, index) => {
             if (ele.sheetId === sheetId) {
-                this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook().setSheetOrder(ele.sheetId, index);
+                this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().setSheetOrder(ele.sheetId, index);
             }
         });
     };
@@ -241,7 +243,7 @@ export class SheetBarUIController {
             menuList: this._menuList,
             selectSheet: (event: Event, data: { item: SheetUlProps }) => {
                 this._dataId = data.item.sheetId;
-                const sheet = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(this._dataId);
+                const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(this._dataId);
                 if (sheet) {
                     sheet.activate();
                 }
@@ -259,7 +261,7 @@ export class SheetBarUIController {
     }
 
     protected _refreshSheetData(): void {
-        const workbook = this._plugin.getUniver().getCurrentUniverSheetInstance().getWorkBook();
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         const sheets = workbook.getSheets();
         this._menuList = sheets.map((sheet, index) => ({
             label: sheet.getName(),

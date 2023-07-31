@@ -1,24 +1,18 @@
-import { SheetPlugin, SelectionControl } from '@univerjs/base-sheets';
+import { Inject } from '@wendellhu/redi';
+
+import { SelectionControl } from '@univerjs/base-render/src/Component/Sheets/Selection/SelectionControl';
 import { CellInputExtensionManager } from '@univerjs/base-ui';
-import { INamedRange, PLUGIN_NAMES } from '@univerjs/core';
-import { SheetUIPlugin } from '..';
+import { ICurrentUniverService, INamedRange, ObserverManager } from '@univerjs/core';
 import { FormulaBar } from '../View/FormulaBar';
 
 export class FormulaBarUIController {
     private _formulaBar: FormulaBar;
 
-    private _plugin: SheetUIPlugin;
-
-    private _sheetPlugin: SheetPlugin;
-
     private _cellInputExtensionManager: CellInputExtensionManager;
 
     private _namedRanges: INamedRange[];
 
-    constructor(plugin: SheetUIPlugin) {
-        this._plugin = plugin;
-        this._sheetPlugin = plugin.getUniver().getCurrentUniverSheetInstance().context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
-
+    constructor(@Inject(ObserverManager) private readonly _observerManager: ObserverManager, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
         this._initialize();
     }
 
@@ -34,7 +28,7 @@ export class FormulaBarUIController {
     }
 
     private _initialize() {
-        this._sheetPlugin.getObserver('onChangeSelectionObserver')?.add((selectionControl: SelectionControl) => {
+        this._observerManager.getObserver<SelectionControl>('onChangeSelectionObserver')?.add((selectionControl: SelectionControl) => {
             const currentCell = selectionControl.model.currentCell;
 
             if (currentCell) {
@@ -59,7 +53,12 @@ export class FormulaBarUIController {
                     };
                 }
 
-                const cellData = this._sheetPlugin.getWorkbook().getActiveSheet().getRange(currentRangeData).getObjectValue({ isIncludeStyle: true });
+                const cellData = this._currentUniverService
+                    .getCurrentUniverSheetInstance()
+                    .getWorkBook()
+                    .getActiveSheet()
+                    .getRange(currentRangeData)
+                    .getObjectValue({ isIncludeStyle: true });
 
                 if (cellData) {
                     let cellValue = String(cellData.m || cellData.v || '');
@@ -90,7 +89,7 @@ export class FormulaBarUIController {
 
     private setFormulaBar() {
         // update named ranges data
-        this._namedRanges = this._sheetPlugin.getContext().getWorkBook().getConfig().namedRanges;
+        this._namedRanges = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getConfig().namedRanges;
 
         const list = this._namedRanges.map((namedRange) => ({
             value: namedRange.name,

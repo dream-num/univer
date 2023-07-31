@@ -1,8 +1,9 @@
-import { DragManager, getRefElement, Prompt, SlotManager, ZIndexManager } from '@univerjs/base-ui';
-import { LocaleType } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
-import { ISheetUIPluginConfig } from '../Basics';
-import { SheetUIPlugin } from '../SheetUIPlugin';
+import { Inject, Injector, Self, SkipSelf } from '@wendellhu/redi';
+
+import { ComponentManager, DragManager, getRefElement, Prompt, SlotManager } from '@univerjs/base-ui';
+import { Context, LocaleType, IGlobalContext, ObserverManager } from '@univerjs/core';
+
+import { ISheetUIPluginConfig } from '../Basics/Interfaces/ComponentConfig/ISheetUIPluginConfig';
 import { SheetContainer } from '../View';
 import { CellEditorUIController } from './CellEditorUIController';
 import { CountBarUIController } from './CountBarUIController';
@@ -13,9 +14,8 @@ import { SheetBarUIController } from './SheetBarUIContruller';
 import { SlotController } from './SlotController';
 import { ToolbarUIController } from './ToolbarUIController';
 
+// NOTE: is this class necessary? Could be merged to AppUIConrainer
 export class SheetContainerUIController {
-    protected _plugin: SheetUIPlugin;
-
     private _sheetContainer: SheetContainer;
 
     private _toolbarController: ToolbarUIController;
@@ -23,8 +23,6 @@ export class SheetContainerUIController {
     private _slotController: SlotController;
 
     private _slotManager: SlotManager;
-
-    private _zIndexManager: ZIndexManager;
 
     private _cellEditorUIController: CellEditorUIController;
 
@@ -42,24 +40,29 @@ export class SheetContainerUIController {
 
     private _dragManager: DragManager;
 
-    constructor(plugin: SheetUIPlugin, @Inject(Injector) private readonly _injector: Injector) {
-        this._plugin = plugin;
-
-        this._config = this._plugin.getConfig();
-
-        this._initialize();
+    constructor(
+        config: ISheetUIPluginConfig,
+        @IGlobalContext private readonly _globalContext: Context,
+        @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
+        @Self() @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+    ) {
+        this._config = config;
 
         this._slotController = new SlotController();
         this._slotManager = new SlotManager();
         this._toolbarController = this._injector.createInstance(ToolbarUIController, this._config.layout?.toolbarConfig);
-        this._cellEditorUIController = new CellEditorUIController(this._plugin);
-        this._formulaBarUIController = new FormulaBarUIController(this._plugin);
-        this._infoBarController = new InfoBarUIController(this._plugin);
-        this._rightMenuController = new RightMenuUIController(this._plugin, this._config.layout?.rightMenuConfig);
-        this._countBarController = new CountBarUIController(this._plugin);
-        this._sheetBarController = new SheetBarUIController(this._plugin);
+        this._cellEditorUIController = this._injector.createInstance(CellEditorUIController, () => this.getContentRef());
+        this._formulaBarUIController = this._injector.createInstance(FormulaBarUIController);
+        this._infoBarController = this._injector.createInstance(InfoBarUIController);
+        this._rightMenuController = this._injector.createInstance(RightMenuUIController, this._config.layout?.rightMenuConfig);
+        this._countBarController = this._injector.createInstance(CountBarUIController);
+        this._sheetBarController = this._injector.createInstance(SheetBarUIController);
+        this._dragManager = this._injector.createInstance(DragManager);
+
         // 插入prompt组件
-        this._plugin.getComponentManager().register(Prompt.name, Prompt);
+        this._componentManager.register(Prompt.name, Prompt);
         this._slotManager.setSlotComponent('main', {
             name: Prompt.name,
             component: {
@@ -70,7 +73,7 @@ export class SheetContainerUIController {
 
     getUIConfig() {
         const config = {
-            context: this._plugin.getGlobalContext(),
+            context: this._globalContext,
             config: this._config,
             changeLocale: this.changeLocale,
             getComponent: this.getComponent,
@@ -115,9 +118,9 @@ export class SheetContainerUIController {
     // 获取SheetContainer组件
     getComponent = (ref: SheetContainer) => {
         this._sheetContainer = ref;
-        this._plugin.getObserver('onUIDidMount')?.notifyObservers(this._sheetContainer);
 
-        this._plugin.getGlobalContext().getObserverManager().requiredObserver<boolean>('onUIDidMountObservable', 'core').notifyObservers(true);
+        this._observerManager.getObserver<SheetContainer>('onUIDidMount')?.notifyObservers(this._sheetContainer);
+        this._globalObserverManager.requiredObserver<boolean>('onUIDidMountObservable', 'core').notifyObservers(true);
 
         this.setSheetContainer();
     };
@@ -136,7 +139,7 @@ export class SheetContainerUIController {
             .change(locale as LocaleType);
 
         // publish
-        this._plugin.getGlobalContext().getObserverManager().requiredObserver('onAfterChangeUILocaleObservable', 'core')!.notifyObservers();
+        this._globalObserverManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')!.notifyObservers();
     };
 
     getContentRef() {
@@ -166,11 +169,7 @@ export class SheetContainerUIController {
     UIDidMount(cb: Function) {
         if (this._sheetContainer) return cb(this._sheetContainer);
 
-        this._plugin.getObserver('onUIDidMount')?.add(() => cb(this._sheetContainer));
-    }
-
-    private _initialize() {
-        this._dragManager = new DragManager(this._plugin);
+        this._observerManager.getObserver('onUIDidMount')?.add(() => cb(this._sheetContainer));
     }
 
     private setSheetContainer() {

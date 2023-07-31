@@ -1,28 +1,35 @@
-import { LocaleType } from '@univerjs/core';
-import { SheetUIPlugin } from '../SheetUIPlugin';
+import { Context, LocaleType, ObserverManager } from '@univerjs/core';
+import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
+import { IGlobalContext } from '@univerjs/base-sheets';
+import { ComponentManager, ZIndexManager } from '@univerjs/base-ui';
 import { UI } from '../View';
 import { SheetContainerUIController } from './SheetContainerUIController';
+import { ISheetUIPluginConfig } from '../Basics';
 
 export class AppUIController {
-    protected _plugin: SheetUIPlugin;
-
     private _sheetContainerController: SheetContainerUIController;
 
-    constructor(plugin: SheetUIPlugin) {
-        this._plugin = plugin;
-
-        this._sheetContainerController = new SheetContainerUIController(this._plugin);
+    constructor(
+        config: ISheetUIPluginConfig,
+        @IGlobalContext private readonly _globalContext: Context,
+        @Inject(Injector) private readonly _injector: Injector,
+        @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(ZIndexManager) private readonly _zIndexManager: ZIndexManager
+    ) {
+        this._sheetContainerController = this._injector.createInstance(SheetContainerUIController, config);
+        this._injector.add([SheetContainerUIController, { useValue: this._sheetContainerController }]);
 
         const UIConfig = this._sheetContainerController.getUIConfig();
 
         UI.create({
-            context: this._plugin.getGlobalContext(),
-            locale: this._plugin.getGlobalContext().getLocale().getCurrentLocale(),
-            componentManager: this._plugin.getComponentManager(),
-            zIndexManager: this._plugin.getZIndexManager(),
+            context: this._globalContext,
+            locale: this._globalContext.getLocale().getCurrentLocale(),
+            componentManager: this._componentManager,
+            zIndexManager: this._zIndexManager,
             changeLocale: this.changeLocale,
             UIConfig,
-            container: this._plugin.getConfig().container,
+            container: config.container,
         });
     }
 
@@ -34,13 +41,10 @@ export class AppUIController {
      *
      */
     changeLocale = (locale: string) => {
-        this._plugin
-            .getGlobalContext()
-            .getLocale()
-            .change(locale as LocaleType);
+        this._globalContext.getLocale().change(locale as LocaleType);
 
         // publish
-        this._plugin.getGlobalContext().getObserverManager().requiredObserver('onAfterChangeUILocaleObservable', 'core')!.notifyObservers();
+        this._globalObserverManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')!.notifyObservers();
     };
 
     getSheetContainerController() {

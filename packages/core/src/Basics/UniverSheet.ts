@@ -1,11 +1,11 @@
 import { Ctor, Injector, Optional, Disposable, Dependency } from '@wendellhu/redi';
+import { ObserverManager } from 'src/Observer';
 import { Workbook, ColorBuilder } from '../Sheets/Domain';
 import { IWorkbookConfig } from '../Types/Interfaces';
 import { BasePlugin, Plugin, PluginCtor, PluginStore } from '../Plugin';
 import { IOHttp, IOHttpConfig, Logger } from '../Shared';
 import { SheetContext } from './SheetContext';
 import { VersionCode, VersionEnv } from './Version';
-import { Observer, ObserverManager } from 'src/Observer';
 
 interface IComposedConfig {
     [key: string]: any;
@@ -19,7 +19,7 @@ interface IComposedConfig {
 export class UniverSheet implements Disposable {
     univerSheetConfig: Partial<IWorkbookConfig>;
 
-    private readonly _sheetInjector: Injector;
+    readonly _sheetInjector: Injector;
 
     private readonly _pluginStore = new PluginStore();
 

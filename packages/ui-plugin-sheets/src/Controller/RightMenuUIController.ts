@@ -1,8 +1,8 @@
 import { IMouseEvent, IPointerEvent } from '@univerjs/base-render';
-import { SheetPlugin } from '@univerjs/base-sheets';
-import { BaseMenuItem, BaseSelectChildrenProps, ComponentChildren } from '@univerjs/base-ui';
-import { PLUGIN_NAMES, Tools, UIObserver } from '@univerjs/core';
-import { SheetUIPlugin } from '..';
+import { BaseMenuItem, BaseSelectChildrenProps, ComponentChildren, ComponentManager } from '@univerjs/base-ui';
+import { ICurrentUniverService, ObserverManager, Tools, UIObserver } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
+import { CanvasView } from '@univerjs/base-sheets';
 import { DefaultRightMenuConfig, SheetRightMenuConfig } from '../Basics';
 import { RightMenu, RightMenuInput, RightMenuItem } from '../View';
 import styles from '../View/RightMenu/index.module.less';
@@ -29,21 +29,20 @@ export interface RightMenuProps extends BaseMenuItem {
 }
 
 export class RightMenuUIController {
-    private _plugin: SheetUIPlugin;
-
-    private _sheetPlugin: SheetPlugin;
-
     private _rightMenu: RightMenu;
 
     private _menuList: RightMenuProps[];
 
     private _config: SheetRightMenuConfig;
 
-    constructor(plugin: SheetUIPlugin, config?: SheetRightMenuConfig) {
-        this._plugin = plugin;
-
-        this._sheetPlugin = plugin.getUniver().getCurrentUniverSheetInstance().context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
-
+    // eslint-disable-next-line max-lines-per-function
+    constructor(
+        config: SheetRightMenuConfig | undefined,
+        @Inject(CanvasView) private readonly _sheetCanvasView: CanvasView,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+    ) {
         this._config = Tools.deepMerge({}, DefaultRightMenuConfig, config);
 
         this._menuList = [
@@ -303,7 +302,7 @@ export class RightMenuUIController {
     }
 
     setUIObserve<T>(msg: UIObserver<T>) {
-        this._plugin.getContext().getObserverManager().requiredObserver<UIObserver<T>>('onUIChangeObservable', 'core').notifyObservers(msg);
+        this._observerManager.requiredObserver<UIObserver<T>>('onUIChangeObservable', 'core').notifyObservers(msg);
     }
 
     insertRow() {
@@ -342,8 +341,9 @@ export class RightMenuUIController {
     }
 
     setRowHeight(e: Event) {
-        console.dir(this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getConfig());
-        console.dir(this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getStyles());
+        const univerSheet = this._currentUniverService.getCurrentUniverSheetInstance();
+        console.dir(univerSheet.getWorkBook().getActiveSheet().getConfig());
+        console.dir(univerSheet.getWorkBook().getStyles());
 
         if ((e as KeyboardEvent).key !== 'Enter') {
             return;
@@ -390,14 +390,19 @@ export class RightMenuUIController {
     }
 
     private _initialize() {
-        this._plugin.getComponentManager().register(RightMenuInput.name, RightMenuInput);
-        this._plugin.getComponentManager().register(RightMenuItem.name, RightMenuItem);
+        const componentManager = this._componentManager;
+        componentManager.register(RightMenuInput.name, RightMenuInput);
+        componentManager.register(RightMenuItem.name, RightMenuItem);
 
-        this._sheetPlugin.getMainComponent().onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            if (evt.button === 2) {
-                evt.preventDefault();
-                this._rightMenu.handleContextMenu(evt);
-            }
-        });
+        // TODO: export MainComponent as a public module of base-sheets
+        this._sheetCanvasView
+            .getSheetView()
+            .getSpreadsheet()
+            .onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+                if (evt.button === 2) {
+                    evt.preventDefault();
+                    this._rightMenu.handleContextMenu(evt);
+                }
+            });
     }
 }

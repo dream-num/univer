@@ -10,7 +10,7 @@ import { IToolbarItemProps } from './Controller/ToolbarUIController';
 import { zh, en } from './Locale';
 
 export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
-    static override type = PluginType.Univer;
+    static override type = PluginType.Sheet;
 
     private _appUIController: AppUIController;
 
@@ -62,7 +62,6 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
         this._sheetInjector.add([KeyboardManager]);
         this._sheetInjector.add([RegisterManager]);
         this._sheetInjector.add([ComponentManager]);
-        this._sheetInjector.add([AppUIController]); // TODO: remove plugin
         this._sheetInjector.add([ZIndexManager]);
 
         // TODO: maybe we don't have to instantiate these dependencies manually
@@ -70,11 +69,8 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
         this._keyboardManager = this._sheetInjector.get(KeyboardManager);
         this._zIndexManager = this._sheetInjector.get(ZIndexManager);
         this._registerManager = this._sheetInjector.get(RegisterManager);
-        this._appUIController = this._sheetInjector.get(AppUIController);
-    }
 
-    getConfig() {
-        return this._config;
+        this._appUIController = this._sheetInjector.createInstance(AppUIController, this._config);
     }
 
     initRender() {

@@ -1,4 +1,4 @@
-import { Inject } from '@wendellhu/redi';
+import { Inject, SkipSelf } from '@wendellhu/redi';
 import { BorderInfo, ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
 import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren, ComponentManager, CustomComponent } from '@univerjs/base-ui';
 import {
@@ -85,6 +85,7 @@ export class ToolbarUIController {
         config: SheetToolbarConfig | undefined,
         @ISelectionManager private readonly _selectionManager: SelectionManager,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
@@ -479,7 +480,7 @@ export class ToolbarUIController {
     }
 
     setUIObserve<T>(msg: UIObserver<T>) {
-        this._observerManager.requiredObserver<UIObserver<T>>('onUIChangeObservable', 'core').notifyObservers(msg);
+        this._globalObserverManager.requiredObserver<UIObserver<T>>('onUIChangeObservable', 'core').notifyObservers(msg);
     }
 
     changeColor(color: string) {

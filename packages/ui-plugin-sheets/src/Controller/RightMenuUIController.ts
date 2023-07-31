@@ -1,7 +1,7 @@
 import { IMouseEvent, IPointerEvent } from '@univerjs/base-render';
 import { BaseMenuItem, BaseSelectChildrenProps, ComponentChildren, ComponentManager } from '@univerjs/base-ui';
 import { ICurrentUniverService, ObserverManager, Tools, UIObserver } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Inject, SkipSelf } from '@wendellhu/redi';
 import { CanvasView } from '@univerjs/base-sheets';
 import { DefaultRightMenuConfig, SheetRightMenuConfig } from '../Basics';
 import { RightMenu, RightMenuInput, RightMenuItem } from '../View';
@@ -40,6 +40,7 @@ export class RightMenuUIController {
         config: SheetRightMenuConfig | undefined,
         @Inject(CanvasView) private readonly _sheetCanvasView: CanvasView,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {
@@ -302,7 +303,7 @@ export class RightMenuUIController {
     }
 
     setUIObserve<T>(msg: UIObserver<T>) {
-        this._observerManager.requiredObserver<UIObserver<T>>('onUIChangeObservable', 'core').notifyObservers(msg);
+        this._globalObserverManager.requiredObserver<UIObserver<T>>('onUIChangeObservable', 'core').notifyObservers(msg);
     }
 
     insertRow() {

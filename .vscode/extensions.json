@@ -5,6 +5,7 @@
     "esbenp.prettier-vscode",
     "gruntfuggly.todo-tree",
     "intellsmi.comment-translate",
-    "streetsidesoftware.code-spell-checker"
+    "streetsidesoftware.code-spell-checker",
+    "tldraw-org.tldraw-vscode"
   ]
 }

@@ -20,7 +20,7 @@ import { DEFAULT_SPREADSHEET_PLUGIN_DATA, install, ISheetPluginConfig } from './
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeActionExtension';
 import { en, zh } from './Locale';
-import { ISelectionManager, ISheetPlugin } from './Services/tokens';
+import { ISelectionManager } from './Services/tokens';
 import { DragLineController } from './Controller/Selection/DragLineController';
 import { ColumnTitleController } from './Controller/Selection/ColumnTitleController';
 import { RowTitleController } from './Controller/Selection/RowTitleController';
@@ -261,15 +261,9 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
     }
 
     private initializeDependencies(sheetInjector: Injector) {
-        const self = this;
-
         const dependencies: Dependency[] = [
-            [ISheetPlugin, { useValue: self }],
-
-            // Rendering Module
             [CanvasView],
 
-            // #region Controllers
             [CellEditorController],
             [SheetContainerController],
             [FormulaBarController],
@@ -283,7 +277,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
             [
                 ISelectionManager,
                 {
-                    useFactory: (injector: Injector, canvasView: CanvasView) => injector.createInstance(SelectionManager, canvasView.getSheetView()),
+                    useFactory: (injector: Injector, canvasView: CanvasView) => injector.createInstance(SelectionManager, canvasView.getSheetView(), this._config),
                     deps: [Injector, CanvasView],
                 },
             ],
@@ -292,9 +286,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
             [DragLineController],
             [HideColumnController],
 
-            // RulerManager
             [ColumnRulerManager],
-            // #endregion Controllers
         ];
 
         dependencies.forEach((d) => {

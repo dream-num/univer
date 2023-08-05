@@ -1,37 +1,18 @@
-import { IMouseEvent, IPointerEvent, Rect, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, ScrollTimer } from '@univerjs/base-render';
+import { IMouseEvent, IPointerEvent, Rect, ScrollTimer, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle } from '@univerjs/base-render';
 import {
-    Nullable,
-    Observer,
-    Worksheet,
-    ISelection,
-    makeCellToSelection,
-    IRangeData,
-    RangeList,
-    Range,
-    IRangeCellData,
-    ICellInfo,
-    Command,
-    Direction,
-    ActionOperation,
-    ISelectionData,
-    DEFAULT_SELECTION,
-    DEFAULT_CELL,
-    IGridRange,
-    ObserverManager,
-    ICurrentUniverService,
+  ActionOperation, Command, DEFAULT_CELL, DEFAULT_SELECTION, Direction, ICellInfo, ICurrentUniverService, IGridRange, IRangeCellData, IRangeData, ISelection, ISelectionData, makeCellToSelection, Nullable,
+  Observer, ObserverManager, Range, RangeList, Worksheet
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { ACTION_NAMES, ISelectionsConfig } from '../../Basics';
+import { ACTION_NAMES, ISelectionsConfig, ISheetPluginConfig } from '../../Basics';
 import { ISelectionModelValue, ISetSelectionValueActionData, SetSelectionValueAction } from '../../Model/Action/SetSelectionValueAction';
 import { SelectionModel } from '../../Model/SelectionModel';
-import { SheetPlugin } from '../../SheetPlugin';
 import { SheetView } from '../../View/Views/SheetView';
 import { ColumnTitleController } from './ColumnTitleController';
 import { DragLineController } from './DragLineController';
 import { RowTitleController } from './RowTitleController';
 import { SelectionController, SELECTION_TYPE } from './SelectionController';
-import { ISheetPlugin } from '../../Services/tokens';
 
 /**
  * TODO 注册selection拦截，可能在有公式ArrayObject时，fx公式栏显示不同
@@ -70,11 +51,11 @@ export class SelectionManager {
     constructor(
         /** @deprecated this should be divided into smaller pieces */
         private readonly _sheetView: SheetView,
+        private readonly _config: ISheetPluginConfig,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         /** @deprecated this should be divided into smaller pieces */
-        @Inject(ISheetPlugin) private readonly _plugin: SheetPlugin,
         @Inject(DragLineController) private readonly _dragLineController: DragLineController,
         @Inject(ColumnTitleController) private readonly _columnTitleController: ColumnTitleController,
         @Inject(RowTitleController) private readonly _rowTitleController: RowTitleController
@@ -226,10 +207,6 @@ export class SelectionManager {
 
             command && this.setSelectionModel();
         }
-    }
-
-    getPlugin() {
-        return this._plugin;
     }
 
     /**
@@ -577,7 +554,7 @@ export class SelectionManager {
 
         if (oldStartColumn !== finalStartColumn || oldStartRow !== finalStartRow || oldEndColumn !== finalEndColumn || oldEndRow !== finalEndRow) {
             selectionControl && selectionControl.update(newSelectionRange);
-            selectionControl && this._plugin.getObserver('onChangeSelectionObserver')?.notifyObservers(selectionControl);
+            selectionControl && this._observerManager.getObserver('onChangeSelectionObserver')?.notifyObservers(selectionControl);
         }
 
         if (setModel) {
@@ -892,7 +869,7 @@ export class SelectionManager {
             }
 
             // Notification toolbar updates button state and value
-            this._plugin.getObserver('onChangeSelectionObserver')?.notifyObservers(selectionControl);
+            this._observerManager.getObserver('onChangeSelectionObserver')?.notifyObservers(selectionControl);
 
             this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
                 this.moving(moveEvt, selectionControl);
@@ -949,7 +926,7 @@ export class SelectionManager {
      * @param selections
      */
     private _initModels() {
-        const selections: ISelectionsConfig = this._plugin.getConfig().selections;
+        const selections: ISelectionsConfig = this._config.selections;
 
         Object.keys(selections).forEach((worksheetId) => {
             const selectionsList = selections[worksheetId];
@@ -1010,7 +987,7 @@ export class SelectionManager {
      * @param selections
      */
     private _initControls() {
-        const selections: ISelectionsConfig = this._plugin.getConfig().selections;
+        const selections: ISelectionsConfig = this._config.selections;
         Object.keys(selections).forEach((worksheetId) => {
             const selectionsList = selections[worksheetId];
             const currentControls: SelectionController[] = [];

@@ -1,11 +1,11 @@
 import {
     ColumnSeparatorType,
-    ContextBase,
     DocumentModelOrSimple,
     GridType,
     HorizontalAlign,
     ISectionBreak,
     ISectionColumnProperties,
+    LocaleService,
     Observable,
     PageOrientType,
     SectionType,
@@ -48,13 +48,13 @@ export class DocumentSkeleton extends Skeleton {
 
     private _renderedBlockIdMap = new Map<string, boolean>();
 
-    constructor(docModel: DocumentModelOrSimple, context: ContextBase) {
-        super(context);
+    constructor(docModel: DocumentModelOrSimple, localeService: LocaleService) {
+        super(localeService);
         this._docModel = docModel;
     }
 
-    static create(docModel: DocumentModelOrSimple, context: ContextBase) {
-        return new DocumentSkeleton(docModel, context);
+    static create(docModel: DocumentModelOrSimple, localeService: LocaleService) {
+        return new DocumentSkeleton(docModel, localeService);
     }
 
     getModel() {
@@ -283,9 +283,9 @@ export class DocumentSkeleton extends Skeleton {
             } else {
                 curSkeletonPage = createSkeletonPage(sectionBreakConfig, skeletonResourceReference, curSkeletonPage?.pageNumber);
             }
+
             // 计算页内布局，block结构
-            const context = this.getContext();
-            const blockInfo = dealWithSections(bodyModel, sectionNode, curSkeletonPage, sectionBreakConfig, skeletonResourceReference, this._renderedBlockIdMap, context);
+            const blockInfo = dealWithSections(bodyModel, sectionNode, curSkeletonPage, sectionBreakConfig, skeletonResourceReference, this._renderedBlockIdMap);
 
             // todo: 当本节有多个列，且下一节为连续节类型的时候，需要按照列数分割，重新计算lines
             if (sectionTypeNext === SectionType.CONTINUOUS && columnProperties.length > 0) {

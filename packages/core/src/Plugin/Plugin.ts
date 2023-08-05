@@ -96,6 +96,7 @@ export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase> imp
         return this._name;
     }
 
+    /** @deprecated */
     getContext(): O {
         return this.context;
     }

@@ -1,16 +1,14 @@
-import { ContextBase } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
 import { en, zh } from '../Locale';
 import { IFontLocale } from '../Basics/Interfaces';
 
 export class Skeleton {
-    private _context: ContextBase;
-
     private _fontLocale: IFontLocale;
 
     private _dirty = true;
 
-    constructor(context: ContextBase) {
-        this._context = context;
+    constructor(@Inject(LocaleService) protected readonly _localService: LocaleService) {
         this._localeInitial();
     }
 
@@ -22,20 +20,12 @@ export class Skeleton {
         return this._fontLocale;
     }
 
-    getContext() {
-        return this._context;
-    }
-
     makeDirty(state: boolean) {
         this._dirty = state;
     }
 
     private _localeInitial() {
-        if (!this._context) {
-            return;
-        }
-
-        const locale = this._context.getUniver().getGlobalContext().getLocale();
+        const locale = this._localService.getLocale();
         const renderFont = locale.getObject('renderFont');
         if (!renderFont) {
             locale.load({

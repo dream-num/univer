@@ -1,5 +1,5 @@
 import { Engine, IRenderingEngine } from '@univerjs/base-render';
-import { SheetContext, Plugin, PLUGIN_NAMES, DEFAULT_SELECTION, UniverSheet, UIObserver, PluginType } from '@univerjs/core';
+import { Plugin, PLUGIN_NAMES, DEFAULT_SELECTION, UniverSheet, PluginType, CommandManager, ICurrentUniverService, LocaleService } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
@@ -30,7 +30,7 @@ import { HideColumnRulerFactory } from './Basics/Register/HideColumnRuler';
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
  */
-export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
+export class SheetPlugin extends Plugin<SheetPluginObserve> {
     static override type = PluginType.Sheet;
 
     private _config: ISheetPluginConfig;
@@ -63,29 +63,30 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     private _hideColumnRulerFactory: HideColumnRulerFactory;
 
-    constructor(config: Partial<ISheetPluginConfig>, @Inject(Injector) private readonly sheetInjector: Injector) {
+    constructor(
+        config: Partial<ISheetPluginConfig>,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(Injector) private readonly _sheetInjector: Injector,
+        @Inject(CommandManager) private readonly _commandManager: CommandManager
+    ) {
         super(PLUGIN_NAMES.SPREADSHEET);
 
         this._config = Object.assign(DEFAULT_SPREADSHEET_PLUGIN_DATA, config);
 
-        this.initializeDependencies(sheetInjector);
-    }
-
-    static create(config?: Partial<ISheetPluginConfig>) {
-        return new SheetPlugin(config || {}, new Injector()); // TODO: change this
+        this.initializeDependencies(_sheetInjector);
     }
 
     installTo(universheetInstance: UniverSheet) {
         universheetInstance.installPlugin(this);
     }
 
-    initialize(context: SheetContext): void {
-        this.context = context;
-
-        this.getGlobalContext().getLocale().load({
+    initialize(): void {
+        this._localeService.getLocale().load({
             en,
             zh,
         });
+
         install(this);
 
         this.initConfig();
@@ -102,7 +103,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     initConfig() {
         const config = this._config;
         if (!config.selections) {
-            const worksheetId = this.getContext().getWorkBook().getActiveSheet().getSheetId();
+            const worksheetId = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
             config.selections = {
                 [worksheetId]: [
                     {
@@ -115,30 +116,30 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     // TODO@huwenzhao: We don't need to init controllers manually
     initController() {
-        this._sheetContainerController = this.sheetInjector.get(SheetContainerController);
-        this._cellEditorController = this.sheetInjector.get(CellEditorController);
-        this._formulaBarController = this.sheetInjector.get(FormulaBarController);
-        this._editTooltipsController = this.sheetInjector.get(EditTooltipsController);
-        this._sheetBarController = this.sheetInjector.get(SheetBarController);
-        this._toolbarController = this.sheetInjector.get(ToolbarController);
-        this._rightMenuController = this.sheetInjector.get(RightMenuController);
-        this._countBarController = this.sheetInjector.get(CountBarController);
-        this._hideColumnController = this.sheetInjector.get(HideColumnController);
+        this._sheetContainerController = this._sheetInjector.get(SheetContainerController);
+        this._cellEditorController = this._sheetInjector.get(CellEditorController);
+        this._formulaBarController = this._sheetInjector.get(FormulaBarController);
+        this._editTooltipsController = this._sheetInjector.get(EditTooltipsController);
+        this._sheetBarController = this._sheetInjector.get(SheetBarController);
+        this._toolbarController = this._sheetInjector.get(ToolbarController);
+        this._rightMenuController = this._sheetInjector.get(RightMenuController);
+        this._countBarController = this._sheetInjector.get(CountBarController);
+        this._hideColumnController = this._sheetInjector.get(HideColumnController);
     }
 
     initCanvasView() {
-        this._canvasEngine = this.sheetInjector.get(IRenderingEngine);
+        this._canvasEngine = this._sheetInjector.get(IRenderingEngine);
     }
 
-    override onMounted(ctx: SheetContext): void {
-        this.initialize(ctx);
+    override onMounted(): void {
+        this.initialize();
     }
 
     override onDestroy(): void {
         super.onDestroy();
         uninstall(this);
 
-        const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
+        const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
         actionRegister.delete(this._namedRangeActionExtensionFactory);
 
         const rulerRegister = this._columnRulerManager.getRegister();
@@ -146,11 +147,11 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     }
 
     registerExtension() {
-        const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
+        const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
         this._namedRangeActionExtensionFactory = new NamedRangeActionExtensionFactory(this);
         actionRegister.add(this._namedRangeActionExtensionFactory);
 
-        this._columnRulerManager = this.sheetInjector.get(ColumnRulerManager);
+        this._columnRulerManager = this._sheetInjector.get(ColumnRulerManager);
         const rulerRegister = this._columnRulerManager.getRegister();
         this._hideColumnRulerFactory = new HideColumnRulerFactory(this);
         rulerRegister.add(this._hideColumnRulerFactory);
@@ -176,7 +177,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     /** @deprecated DI */
     getCanvasView() {
-        return this.sheetInjector.get(CanvasView);
+        return this._sheetInjector.get(CanvasView);
     }
 
     /** @deprecated DI */
@@ -191,7 +192,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
     /** @deprecated DI */
     getSelectionManager() {
-        return this.sheetInjector.get(ISelectionManager);
+        return this._sheetInjector.get(ISelectionManager);
     }
 
     /** @deprecated DI */
@@ -230,11 +231,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     }
 
     /** @deprecated DI */
-    getWorkbook() {
-        return this.context.getWorkBook();
-    }
-
-    /** @deprecated DI */
     getRightMenuControl() {
         return this._rightMenuController;
     }
@@ -262,10 +258,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     /** @deprecated DI */
     getHideColumnController() {
         return this._hideColumnController;
-    }
-
-    protected _getCoreObserver<T>(type: string) {
-        return this.getGlobalContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core');
     }
 
     private initializeDependencies(sheetInjector: Injector) {

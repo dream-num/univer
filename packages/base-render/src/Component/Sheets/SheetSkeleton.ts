@@ -1,6 +1,5 @@
 import {
     BooleanNumber,
-    SheetContext,
     HorizontalAlign,
     IBorderStyleData,
     ICellData,
@@ -29,6 +28,7 @@ import {
     IDocumentRenderConfig,
     DocumentModelSimple,
     Tools,
+    LocaleService,
 } from '@univerjs/core';
 import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../Basics/Const';
 import { IStylesCache, BorderCache } from './Interfaces';
@@ -104,8 +104,9 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     private _showGridlines: BooleanNumber;
 
-    constructor(private _config: IWorksheetConfig, private _cellData: ObjectMatrix<ICellData>, private _styles: Styles, context: SheetContext) {
-        super(context);
+    constructor(private _config: IWorksheetConfig, private _cellData: ObjectMatrix<ICellData>, private _styles: Styles, _localeService: LocaleService) {
+        super(_localeService);
+
         this.updateLayout();
         this.updateDataMerge();
     }
@@ -158,8 +159,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._dataMergeCacheAll;
     }
 
-    static create(config: IWorksheetConfig, cellData: ObjectMatrix<ICellData>, styles: Styles, context: SheetContext) {
-        return new SpreadsheetSkeleton(config, cellData, styles, context);
+    static create(config: IWorksheetConfig, cellData: ObjectMatrix<ICellData>, styles: Styles, LocaleService: LocaleService) {
+        return new SpreadsheetSkeleton(config, cellData, styles, LocaleService);
     }
 
     getWorksheetConfig() {
@@ -750,7 +751,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             angle = 90;
         }
         if (documentModel) {
-            const documentSkeleton = DocumentSkeleton.create(documentModel, this.getContext());
+            const documentSkeleton = DocumentSkeleton.create(documentModel, this._localService);
             if (angle === 0 || wrapStrategy !== WrapStrategy.WRAP) {
                 documentSkeleton.calculate();
                 // console.log(cell.v, documentSkeleton);

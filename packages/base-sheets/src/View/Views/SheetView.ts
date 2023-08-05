@@ -1,6 +1,6 @@
 import { getColor, Rect, Scene, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, SpreadsheetSkeleton } from '@univerjs/base-render';
-import { Worksheet } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import { ICurrentUniverService, LocaleService, Worksheet } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from '../BaseView';
 
 export enum SHEET_VIEW_KEY {
@@ -22,6 +22,10 @@ export class SheetView extends BaseView {
     private _spreadsheetColumnTitle: SpreadsheetColumnTitle;
 
     private _spreadsheetLeftTopPlaceholder: Rect;
+
+    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @Inject(LocaleService) private readonly _localeService: LocaleService) {
+        super();
+    }
 
     getSpreadsheetSkeleton() {
         return this._spreadsheetSkeleton;
@@ -68,8 +72,7 @@ export class SheetView extends BaseView {
 
     protected override _initialize() {
         const scene = this.getScene();
-        const context = this.getContext();
-        const workbook = context.getWorkBook();
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         let worksheet = workbook.getActiveSheet();
         if (!worksheet) {
             worksheet = workbook.getSheets()[0];
@@ -143,12 +146,9 @@ export class SheetView extends BaseView {
     }
 
     private _buildSkeleton(worksheet: Worksheet) {
-        const context = this.getContext();
-        const workbook = context.getWorkBook();
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         const config = worksheet.getConfig();
-        // const { rowTitle, columnTitle } = config;
-        const spreadsheetSkeleton = SpreadsheetSkeleton.create(config, worksheet.getCellMatrix(), workbook.getStyles(), context);
-
+        const spreadsheetSkeleton = SpreadsheetSkeleton.create(config, worksheet.getCellMatrix(), workbook.getStyles(), this._localeService);
         return spreadsheetSkeleton;
     }
 
@@ -173,8 +173,9 @@ export class SheetViewFactory {
      * @returns
      */
     create(scene: Scene, injector: Injector): SheetView {
-        // TODO@wzhudev: should be created from DI system and remove the initialize method
-        return new SheetView().initialize(scene, injector);
+        const sheetView = injector.createInstance(SheetView);
+        sheetView.initialize(scene);
+        return sheetView;
     }
 }
 

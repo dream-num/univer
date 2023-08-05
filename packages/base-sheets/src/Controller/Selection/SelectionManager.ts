@@ -94,11 +94,6 @@ export class SelectionManager {
     }
 
     /** @deprecated */
-    getContext() {
-        return this._sheetView.getContext();
-    }
-
-    /** @deprecated */
     getMainComponent() {
         return this._mainComponent;
     }
@@ -235,10 +230,6 @@ export class SelectionManager {
 
     getPlugin() {
         return this._plugin;
-    }
-
-    getWorksheetId() {
-        return this._worksheet?.getSheetId();
     }
 
     /**
@@ -757,7 +748,7 @@ export class SelectionManager {
 
         this._leftTopEventInitial();
 
-        this._worksheet = this.getContext().getWorkBook().getActiveSheet();
+        this._worksheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
 
         this._initModels();
 
@@ -1072,5 +1063,9 @@ export class SelectionManager {
         this._observerManager.requiredObserver('onSheetRenderDidMountObservable', 'core').add(() => {
             this.renderCurrentControls();
         });
+    }
+
+    private getWorksheetId(): string {
+        return this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
     }
 }

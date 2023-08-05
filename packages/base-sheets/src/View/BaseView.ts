@@ -1,5 +1,6 @@
 import { Scene } from '@univerjs/base-render';
-import { Registry, Worksheet, Injector } from '@univerjs/core';
+import { Registry, Worksheet } from '@univerjs/core';
+import { Injector } from '@wendellhu/redi';
 
 export class BaseView {
     viewKey = '';
@@ -14,8 +15,7 @@ export class BaseView {
 
     updateToSheet(worksheet: Worksheet) {}
 
-    initialize(scene: Scene, injector: Injector) {
-        this._injector = injector;
+    initialize(scene: Scene) {
         this._scene = scene;
         this._initialize();
         return this;

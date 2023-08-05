@@ -1,25 +1,25 @@
-import { Command, ISetColumnHideActionData, ISetColumnShowActionData, SetColumnHideAction, SetColumnShowAction, SheetContext } from '@univerjs/core';
-import { ISheetContext } from '../../../Services/tokens';
+import { Command, CommandManager, ICurrentUniverService, ISetColumnHideActionData, ISetColumnShowActionData, SetColumnHideAction, SetColumnShowAction } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
 import { BaseColumnRulerFactory } from './ColumnRulerFactory';
 import { ColumnRulerRegister } from './ColumnRulerRegister';
 
 /**
  *  ColumnRulerManager
-   
+
     Features that affect column state: grouping, hiding columns, etc.
 
-    Idea: 
+    Idea:
     Set: plugin update => RulerManager setHidden => RulerList result => worksheet column data update
 
     Get: Whether to support copy, get worksheet column data to determine whether a column is hidden
- * 
+ *
  */
 export class ColumnRulerManager {
     private _register: ColumnRulerRegister;
 
     private _columnRulerFactoryList: BaseColumnRulerFactory[];
 
-    constructor(@ISheetContext private readonly _sheetContext: SheetContext) {
+    constructor(@Inject(CommandManager) private readonly _commandManager: CommandManager, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
         this._register = new ColumnRulerRegister();
     }
 
@@ -81,15 +81,14 @@ export class ColumnRulerManager {
         }
 
         if (actionDataList.length > 0) {
-            const _commandManager = this._sheetContext.getCommandManager();
-            const _workBook = this._sheetContext.getWorkBook();
+            const _workBook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
             const command = new Command(
                 {
                     WorkBookUnit: _workBook,
                 },
                 ...actionDataList
             );
-            _commandManager.invoke(command);
+            this._commandManager.invoke(command);
         }
     }
 }

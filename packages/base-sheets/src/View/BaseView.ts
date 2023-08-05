@@ -1,6 +1,5 @@
 import { Scene } from '@univerjs/base-render';
-import { Registry, SheetContext, Worksheet, Injector } from '@univerjs/core';
-import { ISheetContext } from '../Services/tokens';
+import { Registry, Worksheet, Injector } from '@univerjs/core';
 
 export class BaseView {
     viewKey = '';
@@ -9,21 +8,14 @@ export class BaseView {
 
     private _scene: Scene;
 
-    private _context: SheetContext;
-
     getScene() {
         return this._scene;
-    }
-
-    getContext() {
-        return this._context;
     }
 
     updateToSheet(worksheet: Worksheet) {}
 
     initialize(scene: Scene, injector: Injector) {
         this._injector = injector;
-        this._context = injector.get(ISheetContext);
         this._scene = scene;
         this._initialize();
         return this;

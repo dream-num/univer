@@ -1,8 +1,7 @@
-import { CommandManager, SetWorkSheetActivateAction, SheetContext } from '@univerjs/core';
+import { CommandManager, ICurrentUniverService, SetWorkSheetActivateAction } from '@univerjs/core';
 import { Engine, IRenderingEngine, Layer } from '@univerjs/base-render';
 
 import { EditTooltips, EditTooltipsProps } from '../View/Views';
-import { ISheetContext } from '../Services/tokens';
 import { CANVAS_VIEW_KEY } from '../View';
 
 export class EditTooltipsController {
@@ -10,7 +9,7 @@ export class EditTooltipsController {
 
     _layer: Layer;
 
-    constructor(@IRenderingEngine private readonly _engine: Engine, @ISheetContext private readonly _sheetContext: SheetContext) {
+    constructor(@IRenderingEngine private readonly _engine: Engine, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
         this._editTooltipsPage = new Map();
         CommandManager.getActionObservers().add((event) => {
             const data = event.data;
@@ -61,7 +60,7 @@ export class EditTooltipsController {
     }
 
     setRowColumn(key: string, sheetId: string, row: number, column: number): void {
-        const sheet = this._sheetContext.getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(sheetId);
+        const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(sheetId);
         const editTooltips = this.createIfEditTooltips(key, sheetId);
         if (sheet) {
             let merges = sheet.getMerges().getByRowColumn(row, column);
@@ -107,7 +106,7 @@ export class EditTooltipsController {
     }
 
     refreshEditTooltips(): void {
-        const sheet = this._sheetContext.getUniver().getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+        const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
         const sheetPage = this._editTooltipsPage.get(sheet.getSheetId());
         const scene = this._engine.getScene(CANVAS_VIEW_KEY.MAIN_SCENE);
         if (scene) {

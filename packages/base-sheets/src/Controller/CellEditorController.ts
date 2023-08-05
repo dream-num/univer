@@ -1,5 +1,5 @@
-import { Direction, IDocumentData, IRangeData, IStyleData, Nullable, ICellData, handleJsonToDom, SheetContext } from '@univerjs/core';
-import { ISelectionManager, ISheetContext } from '../Services/tokens';
+import { Direction, IDocumentData, IRangeData, IStyleData, Nullable, ICellData, handleJsonToDom, ICurrentUniverService } from '@univerjs/core';
+import { ISelectionManager } from '../Services/tokens';
 import { SelectionManager } from './Selection';
 
 /**
@@ -11,7 +11,7 @@ export class CellEditorController {
     // current edit cell
     currentEditRangeData: IRangeData;
 
-    constructor(@ISelectionManager private readonly _selectionManager: SelectionManager, @ISheetContext private readonly _sheetContext: SheetContext) {}
+    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @ISelectionManager private readonly _selectionManager: SelectionManager) {}
 
     setEditMode(value: boolean) {
         this.isEditMode = value;
@@ -52,7 +52,7 @@ export class CellEditorController {
     setCurrentEditRangeValue(cell: ICellData) {
         // only one selection
         const { startRow, startColumn, endRow, endColumn } = this.currentEditRangeData;
-        const range = this._sheetContext.getWorkBook().getActiveSheet().getRange(startRow, startColumn, endRow, endColumn);
+        const range = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getRange(startRow, startColumn, endRow, endColumn);
 
         range.setRangeData(cell);
     }

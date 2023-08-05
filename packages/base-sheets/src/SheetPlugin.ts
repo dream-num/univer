@@ -20,7 +20,7 @@ import { DEFAULT_SPREADSHEET_PLUGIN_DATA, install, ISheetPluginConfig } from './
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeActionExtension';
 import { en, zh } from './Locale';
-import { ISelectionManager, ISheetContext, ISheetPlugin } from './Services/tokens';
+import { ISelectionManager, ISheetPlugin } from './Services/tokens';
 import { DragLineController } from './Controller/Selection/DragLineController';
 import { ColumnTitleController } from './Controller/Selection/ColumnTitleController';
 import { RowTitleController } from './Controller/Selection/RowTitleController';
@@ -272,7 +272,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         const self = this;
 
         const dependencies: Dependency[] = [
-            [ISheetContext, { useFactory: () => this.getContext() }],
             [ISheetPlugin, { useValue: self }],
 
             // Rendering Module
@@ -292,9 +291,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
             [
                 ISelectionManager,
                 {
-                    useFactory: (injector: Injector, canvasView: CanvasView, gLC: DragLineController, cTC: ColumnTitleController, rTC: RowTitleController, context: SheetContext) =>
-                        new SelectionManager(canvasView.getSheetView(), injector, self, gLC, cTC, rTC, context),
-                    deps: [Injector, CanvasView, DragLineController, ColumnTitleController, RowTitleController, ISheetContext],
+                    useFactory: (injector: Injector, canvasView: CanvasView) => injector.createInstance(SelectionManager, canvasView.getSheetView()),
+                    deps: [Injector, CanvasView],
                 },
             ],
             [RowTitleController],

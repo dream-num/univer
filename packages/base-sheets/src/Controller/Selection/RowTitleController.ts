@@ -1,9 +1,8 @@
 import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect } from '@univerjs/base-render';
-import { Nullable, SheetContext } from '@univerjs/core';
+import { ICurrentUniverService, Nullable } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { DragLineController, DragLineDirection } from './DragLineController';
 import { CanvasView } from '../../View';
-import { ISheetContext } from '../../Services/tokens';
 import { IColumnTitleControllerHandlers } from './Shared';
 
 export class RowTitleController {
@@ -26,7 +25,7 @@ export class RowTitleController {
     private handlers: IColumnTitleControllerHandlers | null = null;
 
     constructor(
-        @ISheetContext private readonly _sheetContext: SheetContext,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(CanvasView) private readonly _canvasView: CanvasView,
         @Inject(DragLineController) private readonly _dragLineController: DragLineController
     ) {

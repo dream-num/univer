@@ -1,5 +1,6 @@
 import { getColor, Rect, Scene, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, SpreadsheetSkeleton } from '@univerjs/base-render';
-import { Worksheet, Injector } from '@univerjs/core';
+import { Worksheet } from '@univerjs/core';
+import { Injector } from '@wendellhu/redi';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from '../BaseView';
 
 export enum SHEET_VIEW_KEY {
@@ -167,11 +168,12 @@ export class SheetView extends BaseView {
 export class SheetViewFactory {
     /**
      * Generate SheetView Instance
+     * @param scene
      * @param injector
      * @returns
      */
     create(scene: Scene, injector: Injector): SheetView {
-        // TODO@huwenzhao: should be created from DI system and remove the initialize method
+        // TODO@wzhudev: should be created from DI system and remove the initialize method
         return new SheetView().initialize(scene, injector);
     }
 }

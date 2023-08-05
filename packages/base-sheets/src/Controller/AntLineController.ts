@@ -1,9 +1,8 @@
 import { Inject } from '@wendellhu/redi';
-import { SheetContext, Workbook } from '@univerjs/core';
-
+import { ICurrentUniverService, ObserverManager } from '@univerjs/core';
 import { Rect, Scene } from '@univerjs/base-render';
+
 import { AntLine, AntLineModel, IAntLineRange } from '../Model/AntLineModel';
-import { ISheetContext } from '../Services/tokens';
 import { CanvasView } from '../View';
 
 enum ANT_LINE_MANAGER_KEY {
@@ -21,15 +20,19 @@ export class AntLineControl {
     /**
      * Create AntLineController
      */
-    constructor(@ISheetContext private readonly _sheetContext: SheetContext, @Inject(CanvasView) private readonly _canvasView: CanvasView) {
+    constructor(
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
+        @ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
+        @Inject(CanvasView) private readonly _canvasView: CanvasView
+    ) {
         this._antLineModelList = [];
 
-        this._sheetContext.getContextObserver('onAfterChangeActiveSheetObservable').add(() => {
-            this._activeSheetId = this._sheetContext.getWorkBook().getActiveSheet().getSheetId();
+        this._observerManager.requiredObserver('onAfterChangeActiveSheetObservable', 'core').add(() => {
+            this._activeSheetId = this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
             this._makeUpdateSceneAntLineRect();
         });
-        this._sheetContext.getContextObserver('onSheetRenderDidMountObservable').add(() => {
-            this._activeSheetId = this._sheetContext.getWorkBook().getActiveSheet().getSheetId();
+        this._observerManager.requiredObserver('onSheetRenderDidMountObservable', 'core').add(() => {
+            this._activeSheetId = this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
             this._makeUpdateSceneAntLineRect();
         });
     }
@@ -53,14 +56,6 @@ export class AntLineControl {
         antLineModel.addAntLine(new AntLine(range));
         this._saveOrUpdateAntLineModel(antLineModel);
         this._makeUpdateSceneAntLineRect();
-    }
-
-    /**
-     * Return WorkBook
-     * @returns Workbook
-     */
-    private getWorkBook(): Workbook {
-        return this._sheetContext.getWorkBook();
     }
 
     /**
@@ -113,7 +108,7 @@ export class AntLineControl {
      * @param range
      */
     private _createAntLineRectBySheetIdAndRange(sheetId: string, range: IAntLineRange): Rect {
-        let workbook = this.getWorkBook();
+        let workbook = this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook();
         let worksheet = workbook.getSheetBySheetId(sheetId);
 
         if (worksheet == null) {

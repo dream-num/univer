@@ -1,11 +1,10 @@
 import { Inject, Injector } from '@wendellhu/redi';
-import { EventState, SheetContext, Worksheet } from '@univerjs/core';
+import { EventState, ICurrentUniverService, ObserverManager, Worksheet } from '@univerjs/core';
 
 import { Engine, EVENT_TYPE, IRenderingEngine, IScrollObserverParam, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univerjs/base-render';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from './BaseView';
 import { SheetView } from './Views/SheetView';
 import './Views';
-import { ISheetContext } from '../Services/tokens';
 
 // workbook
 export class CanvasView {
@@ -15,8 +14,9 @@ export class CanvasView {
     private _views: BaseView[] = []; // worksheet
 
     constructor(
+        @ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(Injector) private readonly _injector: Injector,
-        @ISheetContext private readonly _sheetContext: SheetContext,
         @IRenderingEngine private readonly _engine: Engine
     ) {
         this._initialize();
@@ -40,10 +40,10 @@ export class CanvasView {
         }
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initialize() {
         const engine = this._engine;
-        const context = this._sheetContext;
-        const workbook = context.getWorkBook();
+        const workbook = this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook();
         let worksheet = workbook.getActiveSheet();
         if (!worksheet) {
             worksheet = workbook.getSheets()[0];
@@ -107,7 +107,7 @@ export class CanvasView {
         });
 
         // sheet zoom [0 ~ 1]
-        context.getContextObserver('onZoomRatioSheetObservable').add((value) => {
+        this._observerManager.requiredObserver<{ zoomRatio: number }>('onZoomRatioSheetObservable').add((value) => {
             this._scene.scale(value.zoomRatio, value.zoomRatio);
         });
 
@@ -124,7 +124,7 @@ export class CanvasView {
                     ratioDelta /= 2;
                 }
 
-                const sheet = context.getWorkBook().getActiveSheet();
+                const sheet = this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
                 const currentRatio = sheet.getZoomRatio();
                 let nextRatio = +parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
                 nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;

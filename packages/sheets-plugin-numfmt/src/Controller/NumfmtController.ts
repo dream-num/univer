@@ -35,6 +35,7 @@ export class NumfmtController {
 
     protected _render: BaseComponentRender;
 
+    // eslint-disable-next-line max-lines-per-function
     constructor(@ISheetContext private readonly sheetContext: SheetContext, plugin: NumfmtPlugin) {
         this._sheetUIPlugin = plugin.getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
         this._model = new NumfmtModel();

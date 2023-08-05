@@ -17,7 +17,8 @@ import {
     DEFAULT_SELECTION,
     DEFAULT_CELL,
     IGridRange,
-    SheetContext,
+    ObserverManager,
+    ICurrentUniverService,
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -30,7 +31,7 @@ import { ColumnTitleController } from './ColumnTitleController';
 import { DragLineController } from './DragLineController';
 import { RowTitleController } from './RowTitleController';
 import { SelectionController, SELECTION_TYPE } from './SelectionController';
-import { ISheetContext, ISheetPlugin } from '../../Services/tokens';
+import { ISheetPlugin } from '../../Services/tokens';
 
 /**
  * TODO 注册selection拦截，可能在有公式ArrayObject时，fx公式栏显示不同
@@ -69,13 +70,14 @@ export class SelectionManager {
     constructor(
         /** @deprecated this should be divided into smaller pieces */
         private readonly _sheetView: SheetView,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(Injector) private readonly _injector: Injector,
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         /** @deprecated this should be divided into smaller pieces */
         @Inject(ISheetPlugin) private readonly _plugin: SheetPlugin,
         @Inject(DragLineController) private readonly _dragLineController: DragLineController,
         @Inject(ColumnTitleController) private readonly _columnTitleController: ColumnTitleController,
-        @Inject(RowTitleController) private readonly _rowTitleController: RowTitleController,
-        @ISheetContext private readonly _sheetContext: SheetContext
+        @Inject(RowTitleController) private readonly _rowTitleController: RowTitleController
     ) {
         this._initialize();
         this._initializeObserver();
@@ -394,6 +396,7 @@ export class SelectionManager {
      * @param direction
      * @returns
      */
+    // eslint-disable-next-line max-lines-per-function
     move(direction: Direction): void {
         const currentCell = this.getCurrentCellModel();
 
@@ -495,7 +498,7 @@ export class SelectionManager {
         if (sheetId !== currentSheetId) {
             const sheetIndex = this._worksheet?.getIndex();
             if (sheetIndex == null) return;
-            this._sheetContext.getWorkBook().activateSheetByIndex(sheetIndex);
+            this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().activateSheetByIndex(sheetIndex);
         }
 
         const cellInfo = this._mainComponent.getCellByIndex(row, column);
@@ -768,8 +771,10 @@ export class SelectionManager {
         this._rowTitleController.setHandlers(handler);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _mainEventInitial() {
         const main = this._mainComponent;
+        // eslint-disable-next-line max-lines-per-function
         main.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
             const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
             this._startOffsetX = evtOffsetX;
@@ -1060,11 +1065,11 @@ export class SelectionManager {
      * Initialize the observer
      */
     private _initializeObserver() {
-        this._sheetContext.getContextObserver('onAfterChangeActiveSheetObservable').add(() => {
+        this._observerManager.requiredObserver('onAfterChangeActiveSheetObservable', 'core').add(() => {
             this.renderCurrentControls();
         });
 
-        this._sheetContext.getContextObserver('onSheetRenderDidMountObservable').add(() => {
+        this._observerManager.requiredObserver('onSheetRenderDidMountObservable', 'core').add(() => {
             this.renderCurrentControls();
         });
     }

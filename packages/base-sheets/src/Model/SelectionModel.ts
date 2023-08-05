@@ -1,6 +1,6 @@
-import { ICellInfo, ISelection, Nullable, SheetContext, makeCellToSelection } from '@univerjs/core';
+import { ICellInfo, ICurrentUniverService, ISelection, Nullable, makeCellToSelection } from '@univerjs/core';
+
 import { SELECTION_TYPE } from '../Controller/Selection/SelectionController';
-import { ISheetContext } from '../Services/tokens';
 
 export class SelectionModel implements ISelection {
     private _startColumn: number;
@@ -23,7 +23,7 @@ export class SelectionModel implements ISelection {
 
     private _currentCell: Nullable<ICellInfo>;
 
-    constructor(type: SELECTION_TYPE = SELECTION_TYPE.NORMAL, @ISheetContext private readonly _sheetContext: SheetContext) {
+    constructor(type: SELECTION_TYPE = SELECTION_TYPE.NORMAL, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
         this._type = type;
     }
 
@@ -162,7 +162,7 @@ export class SelectionModel implements ISelection {
      * Determine the type type based on the data
      */
     setTypeByData() {
-        const workbook = this._sheetContext.getWorkBook();
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         const rowCount = workbook.getActiveSheet().getConfig().rowCount;
         const columnCount = workbook.getActiveSheet().getConfig().columnCount;
 

@@ -1,7 +1,7 @@
-import { CommandManager, ISheetActionData, SheetActionBase, SheetContext } from '@univerjs/core';
+import { CommandManager, ICurrentUniverService, ISheetActionData, SheetActionBase } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { ISelectionManager, ISheetContext } from '../Services/tokens';
+import { ISelectionManager } from '../Services/tokens';
 import { SelectionManager } from './Selection';
 import { CanvasView } from '../View';
 // All skins' less file
@@ -10,7 +10,7 @@ export class SheetContainerController {
     constructor(
         @ISelectionManager private readonly _selectionManager: SelectionManager,
         @Inject(CanvasView) private readonly canvasView: CanvasView,
-        @ISheetContext private readonly sheetContext: SheetContext
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {
         this._initialize();
     }
@@ -22,7 +22,7 @@ export class SheetContainerController {
 
             const action = actions[0] as SheetActionBase<ISheetActionData, ISheetActionData, void>;
 
-            const currentUnitId = this.sheetContext.getWorkBook().getUnitId();
+            const currentUnitId = this._currentUniverService.getCurrentUniverSheetInstance().getUnitId();
             // TODO not use try catch
             try {
                 action.getWorkBook();

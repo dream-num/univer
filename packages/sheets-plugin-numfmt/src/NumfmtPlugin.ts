@@ -1,6 +1,6 @@
 import { IRenderingEngine, RenderEngine } from '@univerjs/base-render';
 import { ISheetContext } from '@univerjs/base-sheets';
-import { IGlobalContext, IRangeData, ObjectMatrixPrimitiveType, Plugin, PLUGIN_NAMES, SheetContext } from '@univerjs/core';
+import { IRangeData, ObjectMatrixPrimitiveType, Plugin, PLUGIN_NAMES, SheetContext } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { NUMFMT_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { install, NumfmtPluginObserve } from './Basics/Observer';
@@ -65,7 +65,6 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
 
     private initializeDependencies(): void {
         this._injector = new Injector([
-            [IGlobalContext, { useFactory: () => this.getGlobalContext() }],
             [ISheetContext, { useFactory: () => this.getContext() }],
             [IRenderingEngine, { useFactory: () => this.getGlobalContext().getPluginManager().getRequirePluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER).getEngine() }],
             [NumfmtController],

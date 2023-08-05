@@ -1,14 +1,17 @@
-import { IGlobalContext, Context, SheetContext, UIObserver } from '@univerjs/core';
-import { ISheetContext } from '../Services/tokens';
+import { Inject, SkipSelf } from '@wendellhu/redi';
+import { UIObserver, ObserverManager, ICurrentUniverService } from '@univerjs/core';
 
 export class CountBarController {
-    constructor(@ISheetContext private readonly _sheetContext: SheetContext, @IGlobalContext private readonly _globalContext: Context) {}
+    constructor(
+        @SkipSelf() @Inject(ObserverManager) private _globalObserverManager: ObserverManager,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+    ) {}
 
     listenEventManager(): void {
         this._getCoreObserver<number>('onUIChangeObservable').add(({ name, value }) => {
             switch (name) {
                 case 'changeZoom': {
-                    const workbook = this._sheetContext.getWorkBook();
+                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
                     if (workbook) {
                         workbook.getActiveSheet().setZoomRatio(value!);
                     }
@@ -19,6 +22,6 @@ export class CountBarController {
     }
 
     protected _getCoreObserver<T>(type: string) {
-        return this._globalContext.getObserverManager().requiredObserver<UIObserver<T>>(type, 'core');
+        return this._globalObserverManager.requiredObserver<UIObserver<T>>(type, 'core');
     }
 }

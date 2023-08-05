@@ -1,5 +1,5 @@
 import { AppContext, BaseComponentProps, Component, ComponentManager, ZIndexManager } from '@univerjs/base-ui';
-import { LocaleType } from '@univerjs/core';
+import { LocaleService, LocaleType } from '@univerjs/core';
 import { BaseSheetContainerProps, SheetContainer } from './SheetContainer';
 
 export interface BaseUIProps extends BaseComponentProps {
@@ -31,13 +31,15 @@ export class App extends Component<BaseUIProps, IState> {
     }
 
     render() {
-        const { context, UIConfig, componentManager, zIndexManager } = this.props;
+        const { injector, UIConfig, componentManager, zIndexManager } = this.props;
         const { locale } = this.state;
+        const localeService = injector.get(LocaleService);
 
         return (
             <AppContext.Provider
                 value={{
-                    context, // TODO: remove context here
+                    injector,
+                    localeService,
                     locale,
                     componentManager,
                     zIndexManager,

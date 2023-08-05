@@ -3,7 +3,7 @@ import { ObserverManager } from 'src/Observer';
 import { Workbook, ColorBuilder } from '../Sheets/Domain';
 import { IWorkbookConfig } from '../Types/Interfaces';
 import { BasePlugin, Plugin, PluginCtor, PluginStore } from '../Plugin';
-import { IOHttp, IOHttpConfig, Logger } from '../Shared';
+import { GenName, IOHttp, IOHttpConfig, Logger } from '../Shared';
 import { SheetContext } from './SheetContext';
 import { VersionCode, VersionEnv } from './Version';
 
@@ -176,7 +176,10 @@ export class UniverSheet implements Disposable {
     }
 
     private initializeInjector(parentInjector?: Injector): Injector {
-        const dependencies: Dependency[] = [[ObserverManager, { useValue: this.context.getObserverManager() }]];
+        const dependencies: Dependency[] = [
+            [ObserverManager, { useValue: this.context.getObserverManager() }],
+            [GenName, { useValue: this.context.getGenName() }],
+        ];
         return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
     }
 }

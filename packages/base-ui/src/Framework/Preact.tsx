@@ -1,4 +1,4 @@
-import { Context } from '@univerjs/core';
+import { Context, LocaleService } from '@univerjs/core';
 import {
     cloneElement,
     Component as PreactComponent,
@@ -29,14 +29,9 @@ abstract class Component<P = {}, S = {}> extends PreactComponent<P, S> {
         this.initialize(props);
     }
 
-    /** @deprecated do not directly depend on Context, inject services instead */
-    getContext(): Context {
-        return this.context.context;
-    }
-
     getLocale(name?: string) {
         if (!name) return;
-        return this.getContext().getLocale().get(name);
+        return this.context.localeService.t(name);
     }
 
     getLabel(label: string | CustomComponent | ComponentChildren) {
@@ -69,12 +64,8 @@ abstract class PureComponent<P = {}, S = {}> extends PreactPureComponent<P, S> {
         this.initialize(props);
     }
 
-    getContext(): Context {
-        return this.context.context;
-    }
-
     getLocale(name: string) {
-        return this.getContext().getLocale().get(name);
+        return this.context.localeService.t(name);
     }
 
     getLabel(label: string | CustomComponent | ComponentChildren) {

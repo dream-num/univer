@@ -100,7 +100,7 @@ export class ColumnTitleController {
     }
 
     setColumnWidth(width: Nullable<number>) {
-        const sheet = this._sheetContext.getWorkBook().getActiveSheet();
+        const sheet = this._currentUniverService.getCurrentUniverSheetInstance()?.getWorkBook().getActiveSheet();
         if (width === null) {
             sheet.setColumnWidth(this._index, 1, 5);
         } else {
@@ -115,7 +115,7 @@ export class ColumnTitleController {
 
     highlightColumn() {
         this.handlers?.clearSelectionControls();
-        const sheet = this._sheetContext.getWorkBook().getActiveSheet();
+        const sheet = this._currentUniverService.getCurrentUniverSheetInstance()?.getWorkBook().getActiveSheet();
         this.handlers?.addControlToCurrentByRangeData(
             {
                 startRow: 0,

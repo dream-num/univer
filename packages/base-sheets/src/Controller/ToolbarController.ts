@@ -1,10 +1,10 @@
-import { IGlobalContext, BorderType, Context, HorizontalAlign, SheetContext, UIObserver, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { BorderType, HorizontalAlign, UIObserver, VerticalAlign, WrapStrategy, ObserverManager, ICurrentUniverService, CommandManager } from '@univerjs/core';
+import { Inject, SkipSelf } from '@wendellhu/redi';
 
 import { SelectionController } from './Selection/SelectionController';
 
 import { SelectionModel } from '../Model';
-import { ISelectionManager, ISheetContext } from '../Services/tokens';
+import { ISelectionManager } from '../Services/tokens';
 import { CellEditorController } from './CellEditorController';
 import { SelectionManager } from './Selection';
 
@@ -14,14 +14,12 @@ export interface BorderInfo {
     style: number;
 }
 
-/**
- *
- */
 export class ToolbarController {
     constructor(
+        @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
+        @Inject(CommandManager) private readonly _commandManager: CommandManager,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @ISelectionManager private readonly _selectionManager: SelectionManager,
-        @IGlobalContext private readonly _globalContext: Context,
-        @ISheetContext private readonly _sheetContext: SheetContext,
         @Inject(CellEditorController) private readonly _cellEditorController: CellEditorController
     ) {
         this._initialize();
@@ -29,97 +27,82 @@ export class ToolbarController {
 
     listenEventManager() {
         const cellEditorController = this._cellEditorController;
-        this._globalContext
-            .getObserverManager()
-            .requiredObserver<UIObserver<number>>('onUIChangeObservable', 'core')
-            .add((msg) => {
-                switch (msg.name) {
-                    case 'undo':
-                        this.setUndo();
-                        break;
-                    case 'redo':
-                        this.setRedo();
-                        break;
-                }
-            });
+        this._globalObserverManager.requiredObserver<UIObserver<number>>('onUIChangeObservable', 'core').add((msg) => {
+            switch (msg.name) {
+                case 'undo':
+                    this.setUndo();
+                    break;
+                case 'redo':
+                    this.setRedo();
+                    break;
+            }
+        });
 
-        this._globalContext
-            .getObserverManager()
-            .requiredObserver<UIObserver<number>>('onUIChangeObservable', 'core')
-            .add((msg) => {
-                if (cellEditorController.getEditMode()) return;
-                switch (msg.name) {
-                    case 'fontSize':
-                        this.setFontSize(msg.value!);
-                        break;
-                    case 'textRotation':
-                        this.setTextRotation(msg.value!);
-                        break;
-                    case 'wrapStrategy':
-                        this.setWrapStrategy(msg.value!);
-                        break;
-                    case 'verticalAlignment':
-                        this.setVerticalAlignment(msg.value!);
-                        break;
-                    case 'horizontalAlignment':
-                        this.setHorizontalAlignment(msg.value!);
-                        break;
-                }
-            });
+        this._globalObserverManager.requiredObserver<UIObserver<number>>('onUIChangeObservable', 'core').add((msg) => {
+            if (cellEditorController.getEditMode()) return;
+            switch (msg.name) {
+                case 'fontSize':
+                    this.setFontSize(msg.value!);
+                    break;
+                case 'textRotation':
+                    this.setTextRotation(msg.value!);
+                    break;
+                case 'wrapStrategy':
+                    this.setWrapStrategy(msg.value!);
+                    break;
+                case 'verticalAlignment':
+                    this.setVerticalAlignment(msg.value!);
+                    break;
+                case 'horizontalAlignment':
+                    this.setHorizontalAlignment(msg.value!);
+                    break;
+            }
+        });
 
-        this._globalContext
-            .getObserverManager()
-            .requiredObserver<UIObserver<BorderInfo>>('onUIChangeObservable', 'core')
-            .add((msg) => {
-                if (cellEditorController.getEditMode()) return;
-                switch (msg.name) {
-                    case 'borderInfo':
-                        this.setBorder(msg.value!);
-                        break;
-                }
-            });
+        this._globalObserverManager.requiredObserver<UIObserver<BorderInfo>>('onUIChangeObservable', 'core').add((msg) => {
+            if (cellEditorController.getEditMode()) return;
+            switch (msg.name) {
+                case 'borderInfo':
+                    this.setBorder(msg.value!);
+                    break;
+            }
+        });
 
-        this._globalContext
-            .getObserverManager()
-            .requiredObserver<UIObserver<string>>('onUIChangeObservable', 'core')
-            .add((msg) => {
-                if (cellEditorController.getEditMode()) return;
-                switch (msg.name) {
-                    case 'fontFamily':
-                        this.setFontFamily(msg.value!);
-                        break;
-                    case 'fontColor':
-                        this.setFontColor(msg.value!);
-                        break;
-                    case 'background':
-                        this.setBackground(msg.value!);
-                        break;
-                    case 'merge':
-                        this.setMerge(msg.value!);
-                        break;
-                }
-            });
+        this._globalObserverManager.requiredObserver<UIObserver<string>>('onUIChangeObservable', 'core').add((msg) => {
+            if (cellEditorController.getEditMode()) return;
+            switch (msg.name) {
+                case 'fontFamily':
+                    this.setFontFamily(msg.value!);
+                    break;
+                case 'fontColor':
+                    this.setFontColor(msg.value!);
+                    break;
+                case 'background':
+                    this.setBackground(msg.value!);
+                    break;
+                case 'merge':
+                    this.setMerge(msg.value!);
+                    break;
+            }
+        });
 
-        this._globalContext
-            .getObserverManager()
-            .requiredObserver<UIObserver<boolean>>('onUIChangeObservable', 'core')
-            .add((msg) => {
-                if (cellEditorController.getEditMode()) return;
-                switch (msg.name) {
-                    case 'fontWeight':
-                        this.setFontWeight(msg.value!);
-                        break;
-                    case 'fontStyle':
-                        this.setFontStyle(msg.value!);
-                        break;
-                    case 'strikeThrough':
-                        this.setStrikeThrough(msg.value!);
-                        break;
-                    case 'underLine':
-                        this.setUnderline(msg.value!);
-                        break;
-                }
-            });
+        this._globalObserverManager.requiredObserver<UIObserver<boolean>>('onUIChangeObservable', 'core').add((msg) => {
+            if (cellEditorController.getEditMode()) return;
+            switch (msg.name) {
+                case 'fontWeight':
+                    this.setFontWeight(msg.value!);
+                    break;
+                case 'fontStyle':
+                    this.setFontStyle(msg.value!);
+                    break;
+                case 'strikeThrough':
+                    this.setStrikeThrough(msg.value!);
+                    break;
+                case 'underLine':
+                    this.setUnderline(msg.value!);
+                    break;
+            }
+        });
     }
 
     _initialize() {
@@ -144,11 +127,11 @@ export class ToolbarController {
     }
 
     setRedo() {
-        this._sheetContext.getCommandManager().redo();
+        this._commandManager.redo();
     }
 
     setUndo() {
-        this._sheetContext.getCommandManager().undo();
+        this._commandManager.undo();
     }
 
     setFontColor(value: string) {
@@ -241,7 +224,7 @@ export class ToolbarController {
                     endColumn: model.endColumn,
                 };
 
-                this._sheetContext.getWorkBook().getActiveSheet().getRange(range).setBorderByType(info.type, info.color, info.style);
+                this._currentUniverService.getCurrentUniverSheetInstance()?.getWorkBook().getActiveSheet().getRange(range).setBorderByType(info.type, info.color, info.style);
             });
         }
     }

@@ -5,6 +5,7 @@ import { SheetPlugin } from '../SheetPlugin';
 import { SelectionManager } from '../Controller';
 import { CanvasView } from '../View';
 
+/** @deprecated this is a temp solution */
 export const ISheetContext = createIdentifier<SheetContext>('univer.sheet.context');
 
 /** @deprecated temp solution */

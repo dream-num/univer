@@ -7,6 +7,7 @@ import { ContextBase } from './ContextBase';
  * univer context
  */
 export class Context extends ContextBase {
+    /** @deprecated get LocaleService from DI system instead */
     protected _locale: Locale;
 
     private _univerId: string;
@@ -26,6 +27,7 @@ export class Context extends ContextBase {
         }
     }
 
+    /** @deprecated get LocaleService from DI system instead */
     getLocale(): Locale {
         return this._locale;
     }

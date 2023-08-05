@@ -1,15 +1,18 @@
 /**
  * Use createContext to provide global language and skin settings
  */
-import { ContextBase } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { createContext } from 'preact';
+import { Injector } from '@wendellhu/redi';
+
 import { LocaleType } from '../Enum';
 import { ComponentManager } from './ComponentManager';
 import { ZIndexManager } from './ZIndexManager';
 
 export type AppContextValues = {
-    context: ContextBase;
+    injector: Injector;
     locale: LocaleType;
+    localeService: LocaleService;
     componentManager: ComponentManager;
     zIndexManager: ZIndexManager;
 };

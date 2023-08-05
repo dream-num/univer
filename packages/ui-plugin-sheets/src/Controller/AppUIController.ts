@@ -1,4 +1,4 @@
-import { IGlobalContext, Context, LocaleType, ObserverManager } from '@univerjs/core';
+import { LocaleType, ObserverManager, LocaleService } from '@univerjs/core';
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 import { ComponentManager, ZIndexManager } from '@univerjs/base-ui';
 import { UI } from '../View';
@@ -10,8 +10,8 @@ export class AppUIController {
 
     constructor(
         config: ISheetUIPluginConfig,
-        @IGlobalContext private readonly _globalContext: Context,
         @Inject(Injector) private readonly _injector: Injector,
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @Inject(ZIndexManager) private readonly _zIndexManager: ZIndexManager
@@ -22,8 +22,8 @@ export class AppUIController {
         const UIConfig = this._sheetContainerController.getUIConfig();
 
         UI.create({
-            // context: this._globalContext,
-            locale: this._globalContext.getLocale().getCurrentLocale(),
+            injector: this._injector,
+            locale: this._localeService.getLocale().getCurrentLocale(),
             componentManager: this._componentManager,
             zIndexManager: this._zIndexManager,
             changeLocale: this.changeLocale,
@@ -40,7 +40,7 @@ export class AppUIController {
      *
      */
     changeLocale = (locale: string) => {
-        this._globalContext.getLocale().change(locale as LocaleType);
+        this._localeService.getLocale().change(locale as LocaleType);
 
         // publish
         this._globalObserverManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')!.notifyObservers();

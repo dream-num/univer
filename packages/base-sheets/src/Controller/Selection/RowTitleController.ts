@@ -104,7 +104,7 @@ export class RowTitleController {
     }
 
     setRowHeight(height: Nullable<number>) {
-        const sheet = this._sheetContext.getWorkBook().getActiveSheet();
+        const sheet = this._currentUniverService.getCurrentUniverSheetInstance()?.getWorkBook().getActiveSheet();
         if (height === null) {
             sheet.setRowHeights(this._index, 1, 5);
         } else {
@@ -115,7 +115,7 @@ export class RowTitleController {
 
     highlightRow() {
         this.handlers?.clearSelectionControls();
-        const sheet = this._sheetContext.getWorkBook().getActiveSheet();
+        const sheet = this._currentUniverService.getCurrentUniverSheetInstance()?.getWorkBook().getActiveSheet();
         this.handlers?.addControlToCurrentByRangeData(
             {
                 startRow: this._index,

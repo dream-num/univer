@@ -1,6 +1,7 @@
 import { Injector, Ctor } from '@wendellhu/redi';
 
 import { CommandManager } from 'src/Command';
+import { LocaleService } from 'src/Service/Locale.service';
 import { UniverSheet } from './UniverSheet';
 import { UniverDoc } from './UniverDoc';
 import { UniverSlide } from './UniverSlide';
@@ -11,7 +12,6 @@ import { IUniverData, IWorkbookConfig } from '../Types/Interfaces';
 import { UniverObserverImpl } from './UniverObserverImpl';
 import { ObserverManager } from '../Observer';
 import { CurrentUniverService, ICurrentUniverService } from '../Service/Current.service';
-import { IGlobalContext } from '../Service/Context.service';
 
 /**
  * Univer.
@@ -34,6 +34,12 @@ export class Univer {
         this._context.onUniver(this);
 
         this._univerInjector = this.initializeDependencies();
+
+        // initialize localization info
+        const { locale } = univerData;
+        if (locale) {
+            this._univerInjector.get(LocaleService).setLocale(locale);
+        }
     }
 
     private get _currentUniverService(): ICurrentUniverService {
@@ -155,7 +161,7 @@ export class Univer {
             [ObserverManager, { useFactory: () => this._context.getObserverManager() }],
             [ICurrentUniverService, { useClass: CurrentUniverService }],
             [CommandManager, { useFactory: () => this._context.getCommandManager() }],
-            [IGlobalContext, { useFactory: () => this._context }],
+            [LocaleService],
         ]);
     }
 

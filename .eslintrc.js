@@ -41,9 +41,6 @@ module.exports = {
                 ignore: ['\\.less$', '^@'],
             },
         ],
-        '@typescript-eslint/naming-convention': 'off',
-        '@typescript-eslint/no-use-before-define': 'off',
-        '@typescript-eslint/no-shadow': 'off',
         'import/no-cycle': 2,
         'no-param-reassign': 'off',
         'no-bitwise': 'off',
@@ -58,7 +55,11 @@ module.exports = {
         'no-return-assign': 'off',
         'no-continue': 'off',
         'no-loop-func': 'off',
+        '@typescript-eslint/naming-convention': 'off',
+        '@typescript-eslint/no-use-before-define': 'off',
+        '@typescript-eslint/no-shadow': 'off',
         '@typescript-eslint/no-loop-func': 'off',
+        '@typescript-eslint/no-unused-expressions': 'off',
         'guard-for-in': 'off',
         'no-prototype-builtins': 'off',
         'no-lonely-if': 'off',
@@ -67,18 +68,17 @@ module.exports = {
         'no-nested-ternary': 'off',
         'no-new': 'off',
         'no-unused-expressions': 'off',
-        '@typescript-eslint/no-unused-expressions': 'off',
         'no-console': 'off',
         'no-multi-assign': 'off',
         'no-restricted-properties': 'off',
         'no-control-regex': 'off',
+        'no-await-in-loop': 'off',
         '@typescript-eslint/array-type': [
             'error',
             {
                 default: 'array-simple',
             },
         ],
-        'no-await-in-loop': 'off',
         '@typescript-eslint/explicit-member-accessibility': [
             'error',
             {
@@ -108,10 +108,8 @@ module.exports = {
         '@typescript-eslint/default-param-last': 'off',
         'grouped-accessor-pairs': 'off',
         '@typescript-eslint/member-ordering': 'error',
-        // '@typescript-eslint/member-ordering': [
-        //     'error',
-        //     { default: ['private-field', 'protected-field', 'public-field', 'constructor', 'private-method', 'protected-method', 'public-method'] },
-        // ],
+        '@typescript-eslint/no-explicit-any': 'warn',
+        '@typescript-eslint/no-unsafe-return': 'error'
     },
     // https://www.npmjs.com/package/eslint-import-resolver-typescript
     settings: {

@@ -1,5 +1,6 @@
 import { BaseCountBarProps, Button, Component, CountBarComponent, createRef, Icon, JSXComponent, Slider } from '@univerjs/base-ui';
-import { PLUGIN_NAMES } from '@univerjs/core';
+import { ObserverManager, PLUGIN_NAMES } from '@univerjs/core';
+import { Injector } from '@wendellhu/redi';
 import styles from './index.module.less';
 
 interface CountState {
@@ -18,7 +19,7 @@ export class CountBar extends Component<CountBarProps, CountState> {
 
     ref = createRef();
 
-    initialize(props: CountBarProps) {
+    override initialize(props: CountBarProps) {
         this.state = {
             zoom: 100,
             content: '',
@@ -77,8 +78,8 @@ export class CountBar extends Component<CountBarProps, CountState> {
         this.ref.current.changeInputValue(0, value);
     };
 
-    componentDidMount() {
-        this.getContext().getObserverManager().getObserver<CountBar>('onCountBarDidMountObservable', PLUGIN_NAMES.SPREADSHEET)?.notifyObservers(this);
+    override componentDidMount() {
+        (this.context.injector as Injector).get(ObserverManager).getObserver<CountBar>('onCountBarDidMountObservable', PLUGIN_NAMES.SPREADSHEET)?.notifyObservers(this);
     }
 
     render(props: BaseCountBarProps, state: CountState) {

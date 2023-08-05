@@ -1,5 +1,5 @@
 import { Inject, Injector } from '@wendellhu/redi';
-import { Plugin, Tools, Context, Univer, PluginType } from '@univerjs/core';
+import { Plugin, Tools, Univer, PluginType } from '@univerjs/core';
 import { ComponentManager, getRefElement, RegisterManager, KeyboardManager, SlotComponent, ZIndexManager } from '@univerjs/base-ui';
 import { IRenderingEngine } from '@univerjs/base-render';
 import { DefaultSheetUIConfig, installObserver, ISheetUIPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';
@@ -9,7 +9,7 @@ import { SlotComponentProps } from './Controller/SlotController';
 import { IToolbarItemProps } from './Controller/ToolbarUIController';
 import { zh, en } from './Locale';
 
-export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
+export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
     static override type = PluginType.Sheet;
 
     private _appUIController: AppUIController;
@@ -38,7 +38,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
         univerInstance.install(this);
     }
 
-    initialize(ctx: Context): void {
+    initialize(): void {
         installObserver(this);
         /**
          * load more Locale object
@@ -92,8 +92,8 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve, Context> {
 
     initUI() {}
 
-    override onMounted(ctx: Context): void {
-        this.initialize(ctx);
+    override onMounted(): void {
+        this.initialize();
     }
 
     override onDestroy(): void {}

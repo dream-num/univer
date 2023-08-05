@@ -1,5 +1,6 @@
 import { BasePlugin } from '@univerjs/core';
 import { Context } from '@univerjs/core/src/Basics/Context';
+import { Injector } from '@wendellhu/redi';
 import { ComponentClass, ForwardFn } from './Framework';
 import { Description } from './Interfaces';
 
@@ -11,6 +12,8 @@ export interface BaseComponentSheet extends BasePlugin {
     getComponentFactory(): BaseComponentFactory;
 }
 export interface BaseComponentProps {
+    injector: Injector;
+
     getComponent?: (ref: any) => void; //获取自身组件
     id?: string; // 组件id
 

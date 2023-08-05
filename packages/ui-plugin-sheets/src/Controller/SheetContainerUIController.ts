@@ -1,7 +1,7 @@
 import { Inject, Injector, Self, SkipSelf } from '@wendellhu/redi';
 
 import { ComponentManager, DragManager, getRefElement, Prompt, SlotManager } from '@univerjs/base-ui';
-import { Context, LocaleType, IGlobalContext, ObserverManager } from '@univerjs/core';
+import { LocaleService, LocaleType, ObserverManager } from '@univerjs/core';
 
 import { ISheetUIPluginConfig } from '../Basics/Interfaces/ComponentConfig/ISheetUIPluginConfig';
 import { SheetContainer } from '../View';
@@ -42,8 +42,8 @@ export class SheetContainerUIController {
 
     constructor(
         config: ISheetUIPluginConfig,
-        @IGlobalContext private readonly _globalContext: Context,
         @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Self() @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
@@ -73,7 +73,7 @@ export class SheetContainerUIController {
 
     getUIConfig() {
         const config = {
-            context: this._globalContext,
+            injector: this._injector,
             config: this._config,
             changeLocale: this.changeLocale,
             getComponent: this.getComponent,
@@ -133,10 +133,7 @@ export class SheetContainerUIController {
      *
      */
     changeLocale = (locale: string) => {
-        this._plugin
-            .getContext()
-            .getLocale()
-            .change(locale as LocaleType);
+        this._localeService.getLocale().change(locale as LocaleType);
 
         // publish
         this._globalObserverManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')!.notifyObservers();

@@ -22,13 +22,14 @@ import { AppContext, AppContextValues, CustomComponent } from '../Common';
  * Wrap the framework for easy switching of the underlying framework
  */
 abstract class Component<P = {}, S = {}> extends PreactComponent<P, S> {
-    static contextType: PreactContext<Partial<AppContextValues>> = AppContext;
+    static override contextType: PreactContext<Partial<AppContextValues>> = AppContext;
 
     constructor(props?: P) {
         super(props);
         this.initialize(props);
     }
 
+    /** @deprecated do not directly depend on Context, inject services instead */
     getContext(): Context {
         return this.context.context;
     }
@@ -61,7 +62,7 @@ abstract class Component<P = {}, S = {}> extends PreactComponent<P, S> {
 }
 
 abstract class PureComponent<P = {}, S = {}> extends PreactPureComponent<P, S> {
-    static contextType: PreactContext<Partial<AppContextValues>> = AppContext;
+    static override contextType: PreactContext<Partial<AppContextValues>> = AppContext;
 
     constructor(props?: P) {
         super(props);

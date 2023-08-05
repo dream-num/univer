@@ -1,10 +1,10 @@
-import { BorderType, Context, HorizontalAlign, SheetContext, UIObserver, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { IGlobalContext, BorderType, Context, HorizontalAlign, SheetContext, UIObserver, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { SelectionController } from './Selection/SelectionController';
 
 import { SelectionModel } from '../Model';
-import { IGlobalContext, ISelectionManager, ISheetContext } from '../Services/tokens';
+import { ISelectionManager, ISheetContext } from '../Services/tokens';
 import { CellEditorController } from './CellEditorController';
 import { SelectionManager } from './Selection';
 

@@ -1,8 +1,8 @@
 import { Inject } from '@wendellhu/redi';
-import { Context, SheetContext, UIObserver } from '@univerjs/core';
+import { Context, SheetContext, UIObserver, IGlobalContext } from '@univerjs/core';
 import { SelectionController } from './Selection/SelectionController';
 import { SelectionModel } from '../Model/SelectionModel';
-import { IGlobalContext, ISelectionManager, ISheetContext } from '../Services/tokens';
+import { ISelectionManager, ISheetContext } from '../Services/tokens';
 import { SelectionManager } from './Selection';
 import { HideColumnController } from './HideColumnController';
 

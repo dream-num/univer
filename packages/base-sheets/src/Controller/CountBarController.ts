@@ -1,5 +1,5 @@
-import { Context, SheetContext, UIObserver } from '@univerjs/core';
-import { IGlobalContext, ISheetContext } from '../Services/tokens';
+import { IGlobalContext, Context, SheetContext, UIObserver } from '@univerjs/core';
+import { ISheetContext } from '../Services/tokens';
 
 export class CountBarController {
     constructor(@ISheetContext private readonly _sheetContext: SheetContext, @IGlobalContext private readonly _globalContext: Context) {}

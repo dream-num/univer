@@ -1,6 +1,6 @@
-import { Context, SheetContext, UIObserver } from '@univerjs/core';
+import { IGlobalContext, Context, SheetContext, UIObserver } from '@univerjs/core';
 
-import { IGlobalContext, ISheetContext } from '../Services/tokens';
+import { ISheetContext } from '../Services/tokens';
 
 export class SheetBarController {
     constructor(@IGlobalContext private readonly _globalContext: Context, @ISheetContext private readonly _context: SheetContext) {}

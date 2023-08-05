@@ -1,6 +1,5 @@
-import { Context, LocaleType, ObserverManager } from '@univerjs/core';
+import { IGlobalContext, Context, LocaleType, ObserverManager } from '@univerjs/core';
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
-import { IGlobalContext } from '@univerjs/base-sheets';
 import { ComponentManager, ZIndexManager } from '@univerjs/base-ui';
 import { UI } from '../View';
 import { SheetContainerUIController } from './SheetContainerUIController';
@@ -23,7 +22,7 @@ export class AppUIController {
         const UIConfig = this._sheetContainerController.getUIConfig();
 
         UI.create({
-            context: this._globalContext,
+            // context: this._globalContext,
             locale: this._globalContext.getLocale().getCurrentLocale(),
             componentManager: this._componentManager,
             zIndexManager: this._zIndexManager,

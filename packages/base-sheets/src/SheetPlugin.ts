@@ -20,7 +20,7 @@ import { DEFAULT_SPREADSHEET_PLUGIN_DATA, install, ISheetPluginConfig } from './
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeActionExtension';
 import { en, zh } from './Locale';
-import { IGlobalContext, ISelectionManager, ISheetContext, ISheetPlugin } from './Services/tokens';
+import { ISelectionManager, ISheetContext, ISheetPlugin } from './Services/tokens';
 import { DragLineController } from './Controller/Selection/DragLineController';
 import { ColumnTitleController } from './Controller/Selection/ColumnTitleController';
 import { RowTitleController } from './Controller/Selection/RowTitleController';
@@ -272,7 +272,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         const self = this;
 
         const dependencies: Dependency[] = [
-            [IGlobalContext, { useFactory: () => this.getGlobalContext() }],
             [ISheetContext, { useFactory: () => this.getContext() }],
             [ISheetPlugin, { useValue: self }],
 

@@ -37,7 +37,7 @@ export class App extends Component<BaseUIProps, IState> {
         return (
             <AppContext.Provider
                 value={{
-                    context,
+                    context, // TODO: remove context here
                     locale,
                     componentManager,
                     zIndexManager,

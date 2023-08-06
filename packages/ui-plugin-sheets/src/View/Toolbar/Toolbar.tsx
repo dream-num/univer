@@ -1,8 +1,7 @@
 import { AppContext, AppContextValues, BaseComponentProps, Button, Component, Container, createRef, debounce, PreactContext, Select, Tooltip } from '@univerjs/base-ui';
-import { SheetUIPlugin } from '../..';
-import { SHEET_UI_PLUGIN_NAME } from '../../Basics';
 import { IToolbarItemProps } from '../../Controller';
 import styles from './index.module.less';
+import { AppUIController } from '../../Controller/AppUIController';
 
 interface IProps extends BaseComponentProps {
     style?: JSX.CSSProperties;
@@ -156,12 +155,7 @@ export class Toolbar extends Component<IProps, IState> {
     };
 
     resetUl = () => {
-        const wrapper = this.getContext()
-            .getPluginManager()
-            .getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
-            ?.getAppUIController()
-            .getSheetContainerController()
-            .getContentRef().current!;
+        const wrapper = this.context.injector.get(AppUIController).getSheetContainerController().getContentRef().current!;
         const height = `${(wrapper as HTMLDivElement).offsetHeight}px`;
         const ul = this.toolbarRef.current.querySelectorAll('ul');
         for (let i = 0; i < ul.length; i++) {
@@ -169,12 +163,12 @@ export class Toolbar extends Component<IProps, IState> {
         }
     };
 
-    componentDidMount() {
+    override componentDidMount() {
         this.props.getComponent?.(this);
         window.addEventListener('resize', this.debounceSetToolbarListWidth);
     }
 
-    componentWillUnmount() {
+    override componentWillUnmount() {
         window.removeEventListener('resize', this.debounceSetToolbarListWidth);
     }
 

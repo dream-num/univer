@@ -1,5 +1,6 @@
 import { SheetActionBase, ActionObservers, ActionType, ISheetActionData, ICellInfo, ISelection, Nullable, CommandUnit, CommandManager } from '@univerjs/core';
-import { ACTION_NAMES } from '../../Basics';
+
+import { ACTION_NAMES } from '../../Basics/Enum/ACTION_NAMES';
 import { SetSelectionValue } from '../Apply/SetSelectionValue';
 
 export interface ISelectionModelValue {

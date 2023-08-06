@@ -15,20 +15,12 @@ export interface ISheetActionData extends IActionData {
  * TODO: SlideAction/DocAction
  * @beta
  */
-export abstract class SheetActionBase<
-    D extends ISheetActionData,
-    O extends ISheetActionData = D,
-    R = void
-> extends ActionBase<D, O, R> {
+export abstract class SheetActionBase<D extends ISheetActionData, O extends ISheetActionData = D, R = void> extends ActionBase<D, O, R> {
     protected _commandUnit: CommandUnit;
 
     protected _workbook: Workbook;
 
-    protected constructor(
-        actionData: D,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
+    protected constructor(actionData: D, commandUnit: CommandUnit, observers: ActionObservers) {
         super(actionData, observers);
         if (commandUnit.WorkBookUnit == null) {
             throw new Error('action workbook domain can not be null!');

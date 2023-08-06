@@ -37,7 +37,7 @@ export class Toolbar extends Component<IProps, IState> {
         this.setToolbarListWidth();
     }, 50);
 
-    initialize() {
+    override initialize() {
         this.state = {
             // Button contains main button and drop down arrow, translation file contains main and right
             showMore: false,
@@ -165,12 +165,12 @@ export class Toolbar extends Component<IProps, IState> {
         }
     };
 
-    componentDidMount() {
+    override componentDidMount() {
         this.props.getComponent?.(this);
         window.addEventListener('resize', this.debounceSetToolbarListWidth);
     }
 
-    componentWillUnmount() {
+    override componentWillUnmount() {
         window.removeEventListener('resize', this.debounceSetToolbarListWidth);
     }
 

@@ -3,7 +3,6 @@ import { Plugin, PLUGIN_NAMES, DEFAULT_SELECTION, UniverSheet, PluginType, Comma
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
-import { CANVAS_VIEW_KEY } from './View/BaseView';
 import { CanvasView } from './View/CanvasView';
 import {
     RightMenuController,
@@ -137,6 +136,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
 
     override onDestroy(): void {
         super.onDestroy();
+
         uninstall(this);
 
         const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
@@ -149,7 +149,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
     registerExtension() {
         const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
         this._namedRangeActionExtensionFactory = new NamedRangeActionExtensionFactory(this);
-        actionRegister.add(this._namedRangeActionExtensionFactory);
+        actionRegister.add(this._namedRangeActionExtensionFactory); // TODO: this should return a disposable function
 
         this._columnRulerManager = this._sheetInjector.get(ColumnRulerManager);
         const rulerRegister = this._columnRulerManager.getRegister();
@@ -158,106 +158,16 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
     }
 
     listenEventManager() {
-        // TODO: move to toolbarcontroller
+        // TODO: move these init to controllers not here
         this._countBarController.listenEventManager();
         this._sheetBarController.listenEventManager();
         this._toolbarController.listenEventManager();
         this._rightMenuController.listenEventManager();
     }
 
-    /** @deprecated DI */
-    getEditTooltipsController(): EditTooltipsController {
-        return this._editTooltipsController;
-    }
-
-    /** @deprecated DI */
-    getCanvasEngine() {
-        return this._canvasEngine;
-    }
-
-    /** @deprecated DI */
-    getCanvasView() {
-        return this._sheetInjector.get(CanvasView);
-    }
-
-    /** @deprecated DI */
-    getMainScene() {
-        return this._canvasEngine.getScene(CANVAS_VIEW_KEY.MAIN_SCENE);
-    }
-
-    /** @deprecated DI */
-    getSheetView() {
-        return this.getCanvasView().getSheetView();
-    }
-
-    /** @deprecated DI */
+    /** @deprecated move to DI system */
     getSelectionManager() {
         return this._sheetInjector.get(ISelectionManager);
-    }
-
-    /** @deprecated DI */
-    getCurrentControls() {
-        return this.getSelectionManager()?.getCurrentControls();
-    }
-
-    /** @deprecated DI */
-    getSelectionShape() {
-        return this._canvasEngine;
-    }
-
-    /** @deprecated DI */
-    getMainComponent() {
-        return this.getSheetView().getSpreadsheet();
-    }
-
-    /** @deprecated DI */
-    getLeftTopComponent() {
-        return this.getSheetView().getSpreadsheetLeftTopPlaceholder();
-    }
-
-    /** @deprecated DI */
-    getRowComponent() {
-        return this.getSheetView().getSpreadsheetRowTitle();
-    }
-
-    /** @deprecated DI */
-    getColumnComponent() {
-        return this.getSheetView().getSpreadsheetColumnTitle();
-    }
-
-    /** @deprecated DI */
-    getSpreadsheetSkeleton() {
-        return this.getSheetView().getSpreadsheetSkeleton();
-    }
-
-    /** @deprecated DI */
-    getRightMenuControl() {
-        return this._rightMenuController;
-    }
-
-    /** @deprecated DI */
-    getToolbarControl() {
-        return this._toolbarController;
-    }
-
-    /** @deprecated DI */
-    getSheetBarControl() {
-        return this._sheetBarController;
-    }
-
-    /** @deprecated DI */
-    getCellEditorController() {
-        return this._cellEditorController;
-    }
-
-    /** @deprecated DI */
-    getCountBarController() {
-        return this._countBarController;
-    }
-
-    /** @deprecated DI */
-    getHideColumnController() {
-        return this._hideColumnController;
     }
 
     private initializeDependencies(sheetInjector: Injector) {

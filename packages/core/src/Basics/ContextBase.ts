@@ -33,6 +33,13 @@ export abstract class ContextBase {
         this._initialize();
     }
 
+    /**
+     * This is a temporary hack before we completely remove Context.
+     */
+    UNSAFE_setObserverManager(observerManager: ObserverManager): void {
+        this._observerManager = observerManager;
+    }
+
     onUniver(univer: Univer): void {
         const globalContext = univer.getGlobalContext();
         this._univer = univer;

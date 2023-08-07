@@ -31,10 +31,12 @@ export class UniverSheet implements Disposable {
     constructor(univerSheetData: Partial<IWorkbookConfig> = {}, @Optional(Injector) parentInjector?: Injector) {
         this.univerSheetConfig = univerSheetData;
 
-        this._context = new SheetContext(univerSheetData);
-
         // Initialize injector after constructoring context
         this._sheetInjector = this.initializeInjector(parentInjector);
+        this._context = new SheetContext(univerSheetData, this._sheetInjector);
+        this._context.UNSAFE_setObserverManager(this._sheetInjector.get(ObserverManager));
+        this._context.UNSAFE_setGenName(this._sheetInjector.get(GenName));
+        this._context.TEMP_setObserver();
     }
 
     /**
@@ -171,15 +173,8 @@ export class UniverSheet implements Disposable {
         return this._context.getWorkBook();
     }
 
-    refreshWorkbook(univerSheetData: Partial<IWorkbookConfig> = {}) {
-        this._context.refreshWorkbook(univerSheetData);
-    }
-
     private initializeInjector(parentInjector?: Injector): Injector {
-        const dependencies: Dependency[] = [
-            [ObserverManager, { useValue: this.context.getObserverManager() }],
-            [GenName, { useValue: this.context.getGenName() }],
-        ];
+        const dependencies: Dependency[] = [[ObserverManager], [GenName]];
         return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
     }
 }

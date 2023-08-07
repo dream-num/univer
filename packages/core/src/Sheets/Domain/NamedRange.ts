@@ -1,14 +1,9 @@
-import { SheetContext } from '../../Basics';
-import { CommandManager, Command } from '../../Command';
-import {
-    IAddNamedRangeActionData,
-    IDeleteNamedRangeActionData,
-    ISetNamedRangeActionData,
-    AddNamedRangeAction,
-} from '../Action';
+import { Command } from '../../Command';
+import { IAddNamedRangeActionData, IDeleteNamedRangeActionData, ISetNamedRangeActionData, AddNamedRangeAction } from '../Action';
 import { ACTION_NAMES } from '../../Types/Const';
-import { Workbook } from './index';
 import { INamedRange } from '../../Types/Interfaces';
+
+// TODO: @Dushudir: the purpose of this class is prettry suspicious...
 
 /**
  * Create, access and modify named ranges in a spreadsheet. Named ranges are ranges that have associated string aliases.
@@ -16,20 +11,12 @@ import { INamedRange } from '../../Types/Interfaces';
  * Reference: https://developers.google.com/apps-script/reference/spreadsheet/named-range
  */
 export class NamedRange {
-    private _workbook: Workbook;
-
-    private _commandManager: CommandManager;
-
-    private _context: SheetContext;
-
     // private _name: string;
     // private _range: Range;
     // private _namedRangeId: string;
 
-    constructor(workbook: Workbook) {
-        this._workbook = workbook;
+    constructor() {
         this._commandManager = this._workbook.getCommandManager();
-        this._context = this._workbook.getContext();
 
         // this._name = name;
         // this._range = range;
@@ -38,7 +25,7 @@ export class NamedRange {
     }
 
     addNamedRange(namedRange: INamedRange) {
-        const { _workbook, _context, _commandManager } = this;
+        const { _workbook, _commandManager } = this;
 
         // const namedRange: INamedRange = {
         //     namedRangeId: this._namedRangeId,
@@ -69,7 +56,7 @@ export class NamedRange {
     }
 
     setNamedRange(namedRange: INamedRange) {
-        const { _workbook, _commandManager } = this;
+        const { _commandManager } = this;
 
         // const namedRange: INamedRange = {
         //     namedRangeId: this._namedRangeId,

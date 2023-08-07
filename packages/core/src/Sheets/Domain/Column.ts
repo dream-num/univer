@@ -13,12 +13,17 @@ export class Column {
      * @param columnWidth column width Array
      * @returns
      */
-    setColumnWidth(columnIndex: number, columnWidth: number[], sheetId: string): void {
+    setColumnWidth(columnIndex: number, columnCount: number, columnWidth: number, sheetId: string): void {
+        const width = [];
+        for (let i = 0; i < columnCount; i++) {
+            width.push(columnWidth);
+        }
+
         const setColumnWidthAction: ISetColumnWidthActionData = {
             sheetId,
             actionName: SHEET_ACTION_NAMES.SET_COLUMN_WIDTH_ACTION,
             columnIndex,
-            columnWidth,
+            columnWidth: width,
         };
         const command = new SpreadsheetCommand(this.spreadsheetModel, setColumnWidthAction);
         this.commandManager.invoke(command);

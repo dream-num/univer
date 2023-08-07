@@ -16,10 +16,9 @@ import {
     SelectionManager,
     HideColumnController,
 } from './Controller';
-import { DEFAULT_SPREADSHEET_PLUGIN_DATA, install, ISheetPluginConfig } from './Basics';
+import { DEFAULT_SPREADSHEET_PLUGIN_DATA, ISheetPluginConfig } from './Basics';
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeActionExtension';
-import { en, zh } from './Locale';
 import { IGlobalContext, IRenderingEngine, ISelectionManager, ISheetContext, ISheetPlugin } from './Services/tokens';
 import { DragLineController } from './Controller/Selection/DragLineController';
 import { ColumnTitleController } from './Controller/Selection/ColumnTitleController';
@@ -68,7 +67,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
 
         this._config = Object.assign(DEFAULT_SPREADSHEET_PLUGIN_DATA, config);
 
-        this.initializeDependencies();
+        // this.initializeDependencies();
     }
 
     static create(config?: Partial<ISheetPluginConfig>) {
@@ -82,16 +81,16 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
     initialize(context: SheetContext): void {
         this.context = context;
 
-        this.getGlobalContext().getLocale().load({
-            en,
-            zh,
-        });
-        install(this);
-        this.initConfig();
-        this.initController();
-        this.initCanvasView();
-        this.registerExtension();
-        this.listenEventManager();
+        // this.getGlobalContext().getLocale().load({
+        //     en,
+        //     zh,
+        // });
+        // install(this);
+        // this.initConfig();
+        // this.initController();
+        // this.initCanvasView();
+        // this.registerExtension();
+        // this.listenEventManager();
     }
 
     getConfig() {
@@ -125,8 +124,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve, SheetContext> {
         this._hideColumnController = this._injector.get(HideColumnController);
     }
 
-    initCanvasView() {
-        const engine = this.getGlobalContext().getPluginManager().getRequirePluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER).getEngine();
+    initCanvasView(renderEngine: RenderEngine) {
+        const engine = renderEngine.getEngine();
         this._canvasEngine = engine;
     }
 

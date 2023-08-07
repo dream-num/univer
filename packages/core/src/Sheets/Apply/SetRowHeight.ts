@@ -6,7 +6,6 @@ import { SpreadsheetModel } from '../Model/SpreadsheetModel';
  *
  * @param rowIndex
  * @param rowHeight
- * @param rowManager
  * @returns
  *
  * @internal

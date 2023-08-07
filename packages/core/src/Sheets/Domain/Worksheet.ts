@@ -1,4 +1,4 @@
-import { SheetContext } from '../../Basics';
+import { Inject } from '@wendellhu/redi';
 import {
     IInsertColumnDataActionData,
     BorderStyleData,
@@ -43,26 +43,17 @@ import {
 } from '../Action';
 import { DEFAULT_WORKSHEET } from '../../Types/Const';
 import { Direction, BooleanNumber, SheetTypes } from '../../Types/Enum';
-import {
-    IBorderStyleData,
-    ICellData,
-    IOptionData,
-    IRangeData,
-    IRangeStringData,
-    IRangeType,
-    ISelectionData,
-    IStyleData,
-    IWorksheetConfig,
-} from '../../Types/Interfaces';
+import { IBorderStyleData, ICellData, IOptionData, IRangeData, IRangeStringData, IRangeType, ISelectionData, IStyleData, IWorksheetConfig } from '../../Types/Interfaces';
 import { Nullable, ObjectMatrix, Tools, Tuples } from '../../Shared';
 import { ColumnManager } from './ColumnManager';
 import { Merges } from './Merges';
 import { Range } from './Range';
 import { RangeList } from './RangeList';
 import { RowManager } from './RowManager';
-import { Workbook } from './Workbook';
 import { Selection } from './Selection';
 import { Command, CommandManager, ISheetActionData } from '../../Command';
+import { ObserverManager } from '../../Observer';
+import { ICurrentUniverService } from '../../Service/Current.service';
 
 /**
  * Access and modify spreadsheet sheets.
@@ -77,15 +68,11 @@ import { Command, CommandManager, ISheetActionData } from '../../Command';
 export class Worksheet {
     protected _selection: Selection;
 
-    protected _context: SheetContext;
-
     protected _config: IWorksheetConfig;
 
     protected _initialized: boolean;
 
     protected _merges: Merges;
-
-    // protected _borderStyles: BorderStyles;
 
     protected _sheetId: string;
 
@@ -93,88 +80,45 @@ export class Worksheet {
 
     protected _rowManager: RowManager;
 
-    // protected _protection: Protection;
-
     protected _columnManager: ColumnManager;
 
-    // protected _rowStatusGroup: StructGroup;
+    constructor(
+        customConfig: Partial<IWorksheetConfig>,
+        @Inject(CommandManager) private readonly _commandManager: CommandManager,
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+    ) {
+        const config: IWorksheetConfig = {
+            ...DEFAULT_WORKSHEET,
+            mergeData: [],
+            hideRow: [],
+            hideColumn: [],
+            cellData: {},
+            rowData: {},
+            columnData: {},
+            rowTitle: {
+                width: 46,
+                hidden: BooleanNumber.FALSE,
+            },
+            columnTitle: {
+                height: 20,
+                hidden: BooleanNumber.FALSE,
+            },
+            selections: ['A1'],
+            rightToLeft: BooleanNumber.FALSE,
+            pluginMeta: {},
+            ...customConfig,
+        };
 
-    // protected _columnStatusGroup: StructGroup;
+        this._config = config;
 
-    constructor(context: SheetContext);
-    constructor(context: SheetContext, config: Partial<IWorksheetConfig>);
-    // TODO: fix max lines
-    // eslint-disable-next-line max-lines-per-function
-    constructor(...argument: any) {
-        if (Tools.hasLength(argument, 1)) {
-            const context = argument[0];
-            const config = {
-                ...DEFAULT_WORKSHEET,
-                mergeData: [],
-                hideRow: [],
-                hideColumn: [],
-                cellData: {},
-                rowData: {},
-                columnData: {},
-                rowTitle: {
-                    width: 46,
-                    hidden: BooleanNumber.FALSE,
-                },
-                columnTitle: {
-                    height: 20,
-                    hidden: BooleanNumber.FALSE,
-                },
-                selections: ['A1'],
-                rightToLeft: BooleanNumber.FALSE,
-                pluginMeta: {},
-            };
-            // const config = Tools.deepMerge({}, DEFAULT_WORKSHEET);
-            argument = [context, config];
-        }
-        if (Tools.hasLength(argument, 2)) {
-            this._context = argument[0];
-            // this._config = argument[1];
-
-            this._config = Object.assign(argument[1], {
-                ...DEFAULT_WORKSHEET,
-                mergeData: [],
-                hideRow: [],
-                hideColumn: [],
-                cellData: {},
-                rowData: {},
-                columnData: {},
-                rowTitle: {
-                    width: 46,
-                    hidden: BooleanNumber.FALSE,
-                },
-                columnTitle: {
-                    height: 20,
-                    hidden: BooleanNumber.FALSE,
-                },
-                selections: ['A1'],
-                rightToLeft: BooleanNumber.FALSE,
-                pluginMeta: {},
-                ...argument[1],
-            });
-            // this._config = Tools.deepMerge({}, DEFAULT_WORKSHEET, argument[1]);
-
-            const { columnData, rowData, cellData } = this._config;
-            this._sheetId = this._config.id ?? Tools.generateRandomId(6);
-            this._initialized = false;
-            // this._selection = new Selection(this);
-            // this._borderStyles = new BorderStyles(this);
-            this._cellData = new ObjectMatrix<ICellData>(cellData);
-            // this._protection = new Protection();
-            // this._selection.setWorkSheet(this);
-            this._rowManager = new RowManager(this, rowData);
-            this._columnManager = new ColumnManager(this, columnData);
-            // banding TODO init Banding instance from config.bandedRanges
-            // this._bandings = new Array<Banding>();
-            // group
-            // this._rowStatusGroup = new StructGroup();
-            // this._columnStatusGroup = new StructGroup();
-            this._initialize();
-        }
+        const { columnData, rowData, cellData } = this._config;
+        this._sheetId = this._config.id ?? Tools.generateRandomId(6);
+        this._initialized = false;
+        this._cellData = new ObjectMatrix<ICellData>(cellData);
+        this._rowManager = new RowManager(this, rowData);
+        this._columnManager = new ColumnManager(this, columnData);
+        this._initialize();
     }
 
     /**
@@ -193,22 +137,18 @@ export class Worksheet {
         if (this._config.status === BooleanNumber.TRUE) {
             return this;
         }
-        const { _context } = this;
-        const _commandManager = this.getCommandManager();
-        const before = _context.getContextObserver(
-            'onBeforeChangeActiveSheetObservable'
-        );
-        const after = _context.getContextObserver(
-            'onAfterChangeActiveSheetObservable'
-        );
+        const _commandManager = this._commandManager;
+        const before = this._observerManager.requiredObserver<{ sheet: Worksheet }>('onBeforeChangeActiveSheetObservable', 'core');
+        const after = this._observerManager.requiredObserver<{ sheet: Worksheet }>('onAfterChangeActiveSheetObservable', 'core');
         const setActive: ISetWorkSheetActivateActionData = {
             sheetId: this._sheetId,
             actionName: SetWorkSheetActivateAction.NAME,
             status: BooleanNumber.TRUE,
         };
+
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setActive
         );
@@ -268,21 +208,16 @@ export class Worksheet {
      * @alpha
      */
     setName(name: string): Worksheet {
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
-        const before = _context.getContextObserver(
-            'onBeforeChangeSheetNameObservable'
-        );
-        const after = _context.getContextObserver(
-            'onAfterChangeSheetNameObservable'
-        );
+        const { _sheetId } = this;
+        const before = this._observerManager.getObserver('onBeforeChangeSheetNameObservable', 'core')!;
+        const after = this._observerManager.getObserver<{ name: string; sheet: Worksheet }>('onAfterChangeSheetNameObservable', 'core')!;
         const configure = {
             actionName: SetWorkSheetNameAction.NAME,
             sheetName: name,
             sheetId: _sheetId,
         };
 
-        const workbook = _context.getWorkBook();
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         const sheets = workbook.getSheets();
         for (let i = 0; i < sheets.length; i++) {
             const sheet = sheets[i];
@@ -295,11 +230,11 @@ export class Worksheet {
         before.notifyObservers();
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: workbook,
             },
             configure
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
         after.notifyObservers({ name, sheet: this });
         return this;
     }
@@ -317,17 +252,9 @@ export class Worksheet {
      * @returns WorkSheet Clone Object
      */
     clone(): Worksheet {
-        const { _config, _context } = this;
+        const { _config } = this;
         const copy = Tools.deepClone(_config);
-        return new Worksheet(_context, copy);
-    }
-
-    /**
-     * Returns Application Global SheetContext
-     * @returns Global SheetContext
-     */
-    getContext(): SheetContext {
-        return this._context;
+        return new Worksheet(copy, this._commandManager, this._observerManager, this._currentUniverService);
     }
 
     /**
@@ -337,14 +264,6 @@ export class Worksheet {
      */
     getMerges(): Merges {
         return this._merges;
-    }
-
-    /**
-     * Returns WorkSheet Command Manager
-     * @returns
-     */
-    getCommandManager(): CommandManager {
-        return this._context.getCommandManager();
     }
 
     /**
@@ -388,12 +307,7 @@ export class Worksheet {
      * @param numColumns column count
      * @returns range instance
      */
-    getRange(
-        row: number,
-        column: number,
-        numRows: number,
-        numColumns: number
-    ): Range;
+    getRange(row: number, column: number, numRows: number, numColumns: number): Range;
     /**
      * Returns User Selection Range
      * @param a1Notation One of the range types
@@ -462,20 +376,20 @@ export class Worksheet {
      * @returns WorkSheet Instance
      */
     setStatus(status: BooleanNumber): Worksheet {
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const configure: ISetWorkSheetStatusActionData = {
             actionName: SetWorkSheetStatusAction.NAME,
             sheetId: _sheetId,
             sheetStatus: status,
         };
+
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             configure
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
         return this;
     }
 
@@ -492,8 +406,7 @@ export class Worksheet {
      * @param zoomRatio
      */
     setZoomRatio(zoomRatio: number): void {
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const zoomRation = {
             actionName: SetZoomRatioAction.NAME,
             zoom: zoomRatio,
@@ -502,16 +415,16 @@ export class Worksheet {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             zoomRation
         );
 
         // DEPT: notifyObservers should come before invoking command, and that is ambiguous
-        const observer = _context.getContextObserver('onZoomRatioSheetObservable');
+        const observer = this._observerManager.getObserver<{ zoomRatio: number }>('onZoomRatioSheetObservable', 'core')!;
         observer.notifyObservers({ zoomRatio });
 
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
     }
 
     /**
@@ -544,12 +457,11 @@ export class Worksheet {
      * @returns Copy WorkSheet
      */
     copy(name: string): Worksheet {
-        const { _config, _context } = this;
-        const copy = Tools.deepClone(_config);
-        copy.name = name;
-        copy.status = BooleanNumber.FALSE;
-        copy.id = Tools.generateRandomId();
-        return new Worksheet(_context, copy);
+        const duplicatedConfig = Tools.deepClone(this._config);
+        duplicatedConfig.name = name;
+        duplicatedConfig.status = BooleanNumber.FALSE;
+        duplicatedConfig.id = Tools.generateRandomId();
+        return new Worksheet(duplicatedConfig, this._commandManager, this._observerManager, this._currentUniverService);
     }
 
     /**
@@ -563,50 +475,33 @@ export class Worksheet {
     /**
      * Inserts a blank row in a sheet at the specified location.
      * @param rowPosition row index
+     * @param numberRows numder of inserted rows
      * @returns WorkSheet Instance
      */
-    insertRows(rowPosition: number): Worksheet;
-    /**
-     * Inserts a blank row in a sheet at the specified location.
-     * @param rowPosition row index
-     * @param numberRows row count
-     * @returns WorkSheet Instance
-     */
-    insertRows(rowPosition: number, numberRows: number): Worksheet;
-    insertRows(...argument: any): Worksheet {
-        let rowIndex: number = 0;
-        let numRows: number = 1;
+    insertRows(rowPosition: number, numberRows: number = 1): Worksheet {
+        const { _sheetId } = this;
 
-        if (Tools.hasLength(argument, 1)) {
-            rowIndex = argument[0];
-        }
-        if (Tools.hasLength(argument, 2)) {
-            rowIndex = argument[0];
-            numRows = argument[1];
-        }
-
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        // TODO: @wzhudev: the two parameters are pretty same, so really not necessary
         const insertRowData: IInsertRowDataActionData = {
             actionName: InsertRowDataAction.NAME,
             sheetId: _sheetId,
-            rowIndex,
-            rowData: ObjectMatrix.MakeObjectMatrixSize<ICellData>(numRows).toJSON(),
+            rowIndex: rowPosition,
+            rowData: ObjectMatrix.MakeObjectMatrixSize<ICellData>(numberRows).toJSON(),
         };
         const insertRow: IInsertRowActionData = {
             actionName: InsertRowAction.NAME,
             sheetId: _sheetId,
-            rowIndex,
-            rowCount: numRows,
+            rowIndex: rowPosition,
+            rowCount: numberRows,
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             insertRowData,
             insertRow
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
         return this;
     }
 
@@ -635,8 +530,7 @@ export class Worksheet {
             numRows = argument[1];
         }
 
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const insertRowData = {
             actionName: InsertRowDataAction.NAME,
             sheetId: _sheetId,
@@ -652,12 +546,12 @@ export class Worksheet {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             insertRowData,
             insertRow
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
         return this;
     }
 
@@ -690,8 +584,7 @@ export class Worksheet {
             rowIndex = 0;
         }
 
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const insertRowData = {
             actionName: InsertRowDataAction.NAME,
             sheetId: _sheetId,
@@ -706,12 +599,12 @@ export class Worksheet {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             insertRowData,
             insertRow
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
         return this;
     }
 
@@ -740,8 +633,7 @@ export class Worksheet {
             numColumns = argument[1];
         }
 
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const columnData = new ObjectMatrix<ICellData>();
         this._cellData.forEach((index) => {
             for (let i = columnIndex; i < columnIndex + numColumns; i++) {
@@ -762,12 +654,12 @@ export class Worksheet {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             insertColumn,
             insertColumnData
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
 
         return this;
     }
@@ -801,8 +693,7 @@ export class Worksheet {
             columnIndex = 0;
         }
 
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const columnData = new ObjectMatrix<ICellData>();
         if (this._cellData.getLength()) {
             this._cellData.forEach((index) => {
@@ -832,12 +723,12 @@ export class Worksheet {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             insertColumn,
             insertColumnData
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
 
         return this;
     }
@@ -867,8 +758,7 @@ export class Worksheet {
             numColumns = argument[1];
         }
 
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const columnData = new ObjectMatrix<ICellData>();
         this._cellData.forEach((index) => {
             for (let i = columnIndex; i < columnIndex + numColumns; i++) {
@@ -889,12 +779,12 @@ export class Worksheet {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             insertColumnData,
             insertColumn
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
 
         return this;
     }
@@ -911,8 +801,6 @@ export class Worksheet {
      */
     clear(options: IOptionData): Worksheet;
     clear(...argument: any): Worksheet {
-        const { _context } = this;
-        const _commandManager = this.getCommandManager();
         // collect all cell as a Range
         const _range = {
             startRow: 0,
@@ -939,11 +827,11 @@ export class Worksheet {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setValue
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
         return this;
     }
 
@@ -953,11 +841,6 @@ export class Worksheet {
      * @returns WorkSheet This sheet, for chaining.
      */
     setTabColor(color: Nullable<string>): Worksheet {
-        const { _context } = this;
-        const _commandManager = this.getCommandManager();
-        const observer = _context.getContextObserver(
-            'onSheetTabColorChangeObservable'
-        );
         const setTabColor: ISetTabColorActionData = {
             sheetId: this._sheetId,
             actionName: SetTabColorAction.NAME,
@@ -965,12 +848,15 @@ export class Worksheet {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setTabColor
         );
-        _commandManager.invoke(command);
-        observer.notifyObservers();
+        this._commandManager.invoke(command);
+
+        const observer = this._observerManager.getObserver('onSheetTabColorChangeObservable', 'core');
+        observer?.notifyObservers();
+
         return this;
     }
 
@@ -979,11 +865,9 @@ export class Worksheet {
      * @returns Sheet — The current sheet.
      */
     hideSheet(): Worksheet {
-        const { _context } = this;
-        const _commandManager = this.getCommandManager();
-        const _workbook = _context.getWorkBook();
+        const _workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         if (!this._config.hidden) {
-            const observer = _context.getContextObserver('onHideSheetObservable');
+            const observer = this._observerManager.getObserver<{ sheet: Worksheet }>('onHideSheetObservable', 'core');
             const setHiddenAction: ISetWorkSheetHideActionData = {
                 hidden: BooleanNumber.TRUE,
                 sheetId: this._sheetId,
@@ -991,12 +875,12 @@ export class Worksheet {
             };
             const command = new Command(
                 {
-                    WorkBookUnit: _context.getWorkBook(),
+                    WorkBookUnit: _workbook,
                 },
                 setHiddenAction
             );
-            _commandManager.invoke(command);
-            observer.notifyObservers({ sheet: this });
+            this._commandManager.invoke(command);
+            observer!.notifyObservers({ sheet: this });
             const index = _workbook.getSheetIndex(this);
             if (index != null) {
                 _workbook.activateSheetByIndex(index);
@@ -1013,8 +897,6 @@ export class Worksheet {
         if (!this._config.hidden) {
             return this;
         }
-        const { _context } = this;
-        const _commandManager = this.getCommandManager();
         const setHidden: ISetWorkSheetHideActionData = {
             hidden: BooleanNumber.FALSE,
             sheetId: this._sheetId,
@@ -1022,14 +904,12 @@ export class Worksheet {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setHidden
         );
-        _commandManager.invoke(command);
-        _context
-            .getContextObserver('onShowSheetObservable')
-            .notifyObservers({ sheet: this });
+        this._commandManager.invoke(command);
+        this._observerManager.getObserver<{ sheet: Worksheet }>('onShowSheetObservable', 'core')?.notifyObservers({ sheet: this });
         return this;
     }
 
@@ -1054,9 +934,7 @@ export class Worksheet {
         const range = argument[0];
 
         // just send range, we will handle Range instance or range string in Selection class
-        return range
-            ? this._selection.setSelection({ selection: range })
-            : this._selection.setSelection();
+        return range ? this._selection.setSelection({ selection: range }) : this._selection.setSelection();
     }
 
     /**
@@ -1156,8 +1034,7 @@ export class Worksheet {
      * @returns WorkSheet Instance
      */
     deleteColumn(columnPosition: number): Worksheet {
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const deleteColumnData: IRemoveColumnDataAction = {
             actionName: RemoveColumnDataAction.NAME,
             sheetId: _sheetId,
@@ -1172,12 +1049,12 @@ export class Worksheet {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             deleteColumnData,
             deleteColumn
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
 
         return this;
     }
@@ -1189,8 +1066,7 @@ export class Worksheet {
      * @returns WorkSheet Instance
      */
     deleteColumns(columnPosition: number, howMany: number): Worksheet {
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const deleteColumnData: IRemoveColumnDataAction = {
             actionName: RemoveColumnDataAction.NAME,
             sheetId: _sheetId,
@@ -1205,12 +1081,12 @@ export class Worksheet {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             deleteColumnData,
             deleteColumn
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
 
         return this;
     }
@@ -1221,8 +1097,7 @@ export class Worksheet {
      * @returns WorkSheet Instance
      */
     deleteRow(rowPosition: number): Worksheet {
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const dataRowDelete: IRemoveRowDataActionData = {
             actionName: RemoveRowDataAction.NAME,
             sheetId: _sheetId,
@@ -1238,12 +1113,12 @@ export class Worksheet {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             dataRowDelete,
             rowDelete
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
 
         return this;
     }
@@ -1255,8 +1130,7 @@ export class Worksheet {
      * @returns WorkSheet Instance
      */
     deleteRows(rowPosition: number, howMany: number): Worksheet {
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const dataRowDelete: IRemoveRowDataActionData = {
             actionName: RemoveRowDataAction.NAME,
             sheetId: _sheetId,
@@ -1271,12 +1145,12 @@ export class Worksheet {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             dataRowDelete,
             rowDelete
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
 
         return this;
     }
@@ -1313,17 +1187,11 @@ export class Worksheet {
      */
     // TODO: fix
     // eslint-disable-next-line max-lines-per-function
-    setBorderStyle(
-        rangeData: IRangeData,
-        style: IBorderStyleData,
-        directions: Direction[]
-    ) {
+    setBorderStyle(rangeData: IRangeData, style: IBorderStyleData, directions: Direction[]) {
         const { _sheetId } = this;
 
-        const _commandManager = this.getCommandManager();
-        const context = this.getContext();
         const matrix = this.getCellMatrix();
-        const workbook = context.getWorkBook();
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         const styles = workbook.getStyles();
 
         const tr = this.getRange({
@@ -1461,7 +1329,8 @@ export class Worksheet {
             },
             ...actions
         );
-        _commandManager.invoke(commandCC);
+
+        this._commandManager.invoke(commandCC);
 
         return this;
     }
@@ -1491,105 +1360,6 @@ export class Worksheet {
         return this.getSelection().getActiveRange();
     }
 
-    // /**
-    //  * Returns Array OverGridImage
-    //  * @returns Array OverGridImage
-    //  */
-    // getOverGridImages(): OverGridImage[] {
-    //     return this._overGridImages;
-    // }
-
-    // /**
-    //  * Returns all the bandings that are applied to any cells in this range.
-    //  */
-    // getBandings(): Array<Banding> {
-    //     return this._bandings;
-    // }
-
-    // /**
-    //  * get banding by range
-    //  * @param range
-    //  * @returns
-    //  */
-    // getBandingByRange(range: IRangeData): Nullable<Banding> {
-    //     return this._bandings.find((banding: Banding, i) =>
-    //         Tools.diffValue(banding.getRange().getRangeData(), range)
-    //     );
-    // }
-    // /**
-    //  * get banding by bandedRangeId
-    //  * @param bandedRangeId
-    //  * @returns
-    //  */
-    // getBandingById(bandedRangeId: string): Nullable<Banding> {
-    //     return (
-    //         this._bandings.find(
-    //             (banding: Banding, i) =>
-    //                 banding.getBandedRange().bandedRangeId === bandedRangeId
-    //         ) || null
-    //     );
-    // }
-
-    // /**
-    //  * remove a banding in this sheet.
-    //  * @param range
-    //  */
-    // removeBandingByRangeData(range: IRangeData): void {
-    //     // remove from list
-    //     const removedBanding = this._bandings.find((banding: Banding, i) => {
-    //         if (Tools.diffValue(banding.getRange().getRangeData(), range)) {
-    //             return banding;
-    //         }
-    //     });
-    //     if (!removedBanding) {
-    //         console.warn('Banding does not exist');
-    //         return;
-    //     }
-
-    //     // remove from plugin meta
-    //     removedBanding.remove();
-    // }
-
-    // /**
-    //  * Applies a default column banding theme to the range. By default, the banding has header and no footer color.
-    //  * @param range range to be set
-    //  */
-    // addBanding(range: IRangeType): Nullable<Banding>;
-    // /**
-    //  * Applies a specified column banding theme to the range. By default, the banding has header and no footer color.
-    //  * @param range range to be set
-    //  * @param bandingTheme A color theme to apply to the columns in the range,or custom color setting.
-    //  */
-    // addBanding(
-    //     range: IRangeType,
-    //     bandingTheme: BandingTheme | IBandingProperties
-    // ): Nullable<Banding>;
-    // /**
-    //  * Applies a specified column banding theme to the range with specified header and footer settings.
-    //  * @param range range to be set
-    //  * @param bandingTheme A color theme to apply to the columns in the range,or custom color setting.
-    //  * @param showHeader If true, the banding theme header color is applied to the first column.
-    //  * @param showFooter If true, the banding theme footer color is applied to the last column.
-    //  */
-    // addBanding(
-    //     range: IRangeType,
-    //     bandingTheme: BandingTheme | IBandingProperties,
-    //     showHeader: boolean,
-    //     showFooter: boolean
-    // ): Nullable<Banding>;
-    // addBanding(...argument: any): Nullable<Banding> {
-    //     const rangeData: IRangeType = argument[0],
-    //         bandingTheme: BandingTheme = argument[1] || BandingTheme.LIGHT_GRAY,
-    //         showHeader: boolean = argument[2] || true,
-    //         showFooter: boolean = argument[3] || false;
-
-    //     return this.getRange(rangeData).applyRowBanding(
-    //         bandingTheme,
-    //         showHeader,
-    //         showFooter
-    //     );
-    // }
-
     /**
      * Returns the list of active ranges in the active sheet
      * @returns the list of active ranges in the active sheet
@@ -1603,20 +1373,14 @@ export class Worksheet {
      * @returns Gets the position of the sheet in its parent spreadsheet. Starts at 1.
      */
     getIndex(): Nullable<number> {
-        const worksheets = this._context.getWorkBook().getSheets();
-        const index = worksheets.findIndex(
-            (sheet) => sheet && sheet.getSheetId() === this._sheetId
-        );
-        if (index > -1) return index + 1;
-        return null;
-    }
+        const worksheets = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheets();
+        const index = worksheets.findIndex((sheet) => sheet && sheet.getSheetId() === this._sheetId);
 
-    /**
-     * Returns the Sheets that contains this sheet.
-     * @returns the Sheets that contains this sheet.
-     */
-    getParent(): Workbook {
-        return this._context.getWorkBook();
+        if (index > -1) {
+            return index + 1;
+        }
+
+        return null;
     }
 
     /**
@@ -1656,8 +1420,7 @@ export class Worksheet {
         const range = row.getRangeData();
         const index = range.startRow;
         const count = range.endRow - range.startRow + 1;
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const hideRow: ISetRowHideActionData = {
             actionName: SetRowHideAction.NAME,
             sheetId: _sheetId,
@@ -1666,13 +1429,15 @@ export class Worksheet {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             hideRow
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
         return this;
     }
+
+    // TODO: @Dushudir unnecessary function overload here
 
     /**
      * Hides one or more consecutive rows starting at the given index.
@@ -1693,8 +1458,7 @@ export class Worksheet {
         if (argument[1]) {
             count = argument[1];
         }
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const hideRow: ISetRowHideActionData = {
             actionName: SetRowHideAction.NAME,
             sheetId: _sheetId,
@@ -1703,11 +1467,11 @@ export class Worksheet {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             hideRow
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
         return this;
     }
 
@@ -1720,8 +1484,7 @@ export class Worksheet {
         const range = column.getRangeData();
         const index = range.startColumn;
         const count = range.endColumn - range.startColumn + 1;
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const hideColumn: ISetColumnHideActionData = {
             actionName: SetColumnHideAction.NAME,
             sheetId: _sheetId,
@@ -1730,11 +1493,11 @@ export class Worksheet {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             hideColumn
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
         return this;
     }
 
@@ -1757,8 +1520,7 @@ export class Worksheet {
         if (argument[1]) {
             count = argument[1];
         }
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const hideColumn: ISetColumnHideActionData = {
             actionName: SetColumnHideAction.NAME,
             sheetId: _sheetId,
@@ -1767,11 +1529,11 @@ export class Worksheet {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             hideColumn
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
         return this;
     }
 
@@ -1784,8 +1546,7 @@ export class Worksheet {
         const range = row.getRangeData();
         const index = range.startRow;
         const count = range.endRow - range.startRow + 1;
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const unhideRow: ISetRowShowActionData = {
             actionName: SetRowShowAction.NAME,
             rowCount: count,
@@ -1794,11 +1555,11 @@ export class Worksheet {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             unhideRow
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
         return this;
     }
 
@@ -1811,8 +1572,7 @@ export class Worksheet {
         const range = column.getRangeData();
         const index = range.startColumn;
         const count = range.endColumn - range.startColumn + 1;
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const unhideColumn: ISetColumnShowActionData = {
             actionName: SetColumnShowAction.NAME,
             sheetId: _sheetId,
@@ -1821,11 +1581,11 @@ export class Worksheet {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             unhideColumn
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
         return this;
     }
 
@@ -1848,8 +1608,7 @@ export class Worksheet {
         if (argument[1]) {
             count = argument[1];
         }
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const showColumn: ISetColumnShowActionData = {
             actionName: SetColumnShowAction.NAME,
             sheetId: _sheetId,
@@ -1858,11 +1617,11 @@ export class Worksheet {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             showColumn
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
         return this;
     }
 
@@ -1885,8 +1644,7 @@ export class Worksheet {
         if (argument[1]) {
             count = argument[1];
         }
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const showRow: ISetRowShowActionData = {
             actionName: SetRowShowAction.NAME,
             sheetId: _sheetId,
@@ -1895,11 +1653,11 @@ export class Worksheet {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             showRow
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
         return this;
     }
 
@@ -1958,11 +1716,7 @@ export class Worksheet {
      * @param width column width
      * @returns WorkSheet Instance
      */
-    setColumnWidth(
-        startColumn: number,
-        numColumns: number,
-        width: number
-    ): Worksheet;
+    setColumnWidth(startColumn: number, numColumns: number, width: number): Worksheet;
     setColumnWidth(...argument: any): Worksheet {
         let columnIndex;
         let columnWidth: number[] = [];
@@ -2014,8 +1768,7 @@ export class Worksheet {
      * @returns WorkSheet Instance
      */
     setHiddenGridlines(hideGridlines: boolean): Worksheet {
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const configure = {
             actionName: SetHiddenGridlinesAction.NAME,
             hideGridlines,
@@ -2023,11 +1776,11 @@ export class Worksheet {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             configure
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
         return this;
     }
 
@@ -2067,8 +1820,7 @@ export class Worksheet {
      * @returns WorkSheet Instance
      */
     setRightToLeft(rightToLeft: BooleanNumber): Worksheet {
-        const { _context, _sheetId } = this;
-        const _commandManager = this.getCommandManager();
+        const { _sheetId } = this;
         const configure = {
             actionName: SetRightToLeftAction.NAME,
             rightToLeft,
@@ -2076,62 +1828,14 @@ export class Worksheet {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             configure
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
         return this;
     }
 
-    // /**
-    //  *  Adds developer metadata with the specified key and value to the sheet.
-    //  */
-    // addDeveloperMetadata(key: string): WorkSheet;
-    // addDeveloperMetadata(
-    //     key: string,
-    //     visibility: DeveloperMetadataVisibility
-    // ): WorkSheet;
-    // addDeveloperMetadata(key: string, value: string): WorkSheet;
-    // addDeveloperMetadata(
-    //     key: string,
-    //     value: string,
-    //     visibility: DeveloperMetadataVisibility
-    // ): WorkSheet;
-    // addDeveloperMetadata(...argument: any): WorkSheet {
-    //     if (argument.length == 1) {
-    //         this._config.metaData.push({
-    //             metadataKey: argument[0],
-    //         });
-    //     } else if (argument.length == 2) {
-    //         if (typeof argument[1] == 'string') {
-    //             this._config.metaData.push({
-    //                 metadataKey: argument[0],
-    //                 metadataValue: argument[1],
-    //             });
-    //         } else {
-    //             this._config.metaData.push({
-    //                 metadataKey: argument[0],
-    //                 visibility: argument[1],
-    //             });
-    //         }
-    //     } else if (argument.length == 3) {
-    //         this._config.metaData.push({
-    //             metadataKey: argument[0],
-    //             metadataValue: argument[1],
-    //             visibility: argument[2],
-    //         });
-    //     }
-
-    //     return this;
-    // }
-    // /**
-    //  *  Get all developer metadata
-    //  */
-    // getDeveloperMetadata() {
-    //     const { metaData } = this._config;
-    //     return metaData;
-    // }
     /**
      * @typeParam T - plugin data structure
      * @param name - plugin name
@@ -2157,8 +1861,9 @@ export class Worksheet {
      * @returns WorkSheet Instance
      */
     copyTo(sheetIndex: number): Worksheet {
-        const worksheet = this._context.getWorkBook().getSheets()[sheetIndex];
+        const worksheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheets()[sheetIndex];
         if (!worksheet) return this;
+
         const config = Tools.deepClone(this._config);
         config.sheetId = worksheet.getConfig().id;
         worksheet.setConfig(config);
@@ -2189,12 +1894,7 @@ export class Worksheet {
      * @param numColumns column count
      * @returns the rectangular grid of values for this range starting at the given coordinates. A -1 value given as the row or column position is equivalent to getting the very last row or column that has data in the sheet.
      */
-    getSheetValues(
-        startRow: number,
-        startColumn: number,
-        numRows: number,
-        numColumns: number
-    ): Array<Array<Nullable<ICellData>>> {
+    getSheetValues(startRow: number, startColumn: number, numRows: number, numColumns: number): Array<Array<Nullable<ICellData>>> {
         const range = new Range(this, {
             startRow,
             startColumn,
@@ -2241,165 +1941,15 @@ export class Worksheet {
         return this;
     }
 
-    setCommandManager(commandManager: CommandManager): void {
-        throw new Error(
-            'This method is deprecated. The method is here to prevent ts errors!'
-        );
+    /**
+     * @deprecated the method here is just to prevent ts errors
+     */
+    setCommandManager(_commandManager: CommandManager): void {
+        throw new Error('This method is deprecated. The method is here to prevent ts errors!');
     }
 
     private _initialize(): void {
         // this._selection = new Selection(this);
         this._merges = new Merges(this, this._config.mergeData);
     }
-
-    // /**
-    //  *  Collapse All Row
-    //  * @returns WorkSheet Instance
-    //  */
-    // collapseAllRowGroups(): WorkSheet {
-    //     const { _context, _commandManager, _sheetId } = this;
-    //     const collapseAllRowGroupsData: ISetCollapseAllRowGroupsData = {
-    //         actionName: ACTION_NAMES.SET_COLLAPSE_ALL_ROW_GROUPS_ACTION,
-    //         sheetId: _sheetId,
-    //     };
-    //     const command = new Command(
-    //         _context.getWorkBook(),
-    //         collapseAllRowGroupsData
-    //     );
-    //     _commandManager.invoke(command);
-    //     return this;
-    // }
-
-    // /**
-    //  * Collapse All Column
-    //  * @returns WorkSheet Instance
-    //  */
-    // collapseAllColumnGroups(): WorkSheet {
-    //     const { _context, _commandManager, _sheetId } = this;
-    //     const collapseAllRowGroupsData: ISetCollapseAllColumnGroupsData = {
-    //         actionName: ACTION_NAMES.SET_COLLAPSE_ALL_COLUMN_GROUPS_ACTION,
-    //         sheetId: _sheetId,
-    //     };
-    //     const command = new Command(
-    //         _context.getWorkBook(),
-    //         collapseAllRowGroupsData
-    //     );
-    //     _commandManager.invoke(command);
-    //     return this;
-    // }
 }
-
-// /**
-//  * Set the top, bottom, left and right borders
-//  */
-// export class BorderStyles {
-//     private _workSheet: WorkSheet;
-
-//     constructor(workSheet: WorkSheet) {
-//         this._workSheet = workSheet;
-//     }
-
-//     setLStyle(row: number, column: number, style: IBorderStyleData): void {
-//         const workSheet = this._workSheet;
-//         const context = workSheet.getGlobalContext();
-//         const workBook = context.getWorkBook();
-//         const styles = workBook.getStyles();
-//         const cellMatrix = workSheet.getCellMatrix();
-//         const last = cellMatrix.getValue(row, column - 1);
-//         const next = cellMatrix.getValue(row, column);
-//         if (last) {
-//             const lastStyle = styles.get(last.s);
-//             if (lastStyle) {
-//                 if (lastStyle.bd) {
-//                     const copy = Tools.deepClone(style);
-//                     delete copy.r;
-//                     last.s = styles.add(copy);
-//                 }
-//             }
-//         }
-//         if (next) {
-//             next.s = styles.add({ bd: { l: style } });
-//             return;
-//         }
-//         const create = { s: styles.add({ bd: { l: style } }) };
-//         cellMatrix.setValue(row, column, create);
-//     }
-
-//     setTStyle(row: number, column: number, style: IBorderStyleData): void {
-//         const workSheet = this._workSheet;
-//         const context = workSheet.getGlobalContext();
-//         const workBook = context.getWorkBook();
-//         const styles = workBook.getStyles();
-//         const cellMatrix = workSheet.getCellMatrix();
-//         const last = cellMatrix.getValue(row - 1, column);
-//         const next = cellMatrix.getValue(row, column);
-//         if (last) {
-//             const lastStyle = styles.get(last.s);
-//             if (lastStyle) {
-//                 if (lastStyle.bd) {
-//                     const copy = Tools.deepClone(style);
-//                     delete copy.b;
-//                     last.s = styles.add(copy);
-//                 }
-//             }
-//         }
-//         if (next) {
-//             next.s = styles.add({ bd: { t: style } });
-//             return;
-//         }
-//         const create = { s: styles.add({ bd: { t: style } }) };
-//         cellMatrix.setValue(row, column, create);
-//     }
-
-//     setRStyle(row: number, column: number, style: IBorderStyleData): void {
-//         const workSheet = this._workSheet;
-//         const context = workSheet.getGlobalContext();
-//         const workBook = context.getWorkBook();
-//         const styles = workBook.getStyles();
-//         const cellMatrix = workSheet.getCellMatrix();
-//         const last = cellMatrix.getValue(row, column + 1);
-//         const next = cellMatrix.getValue(row, column);
-//         if (last) {
-//             const lastStyle = styles.get(last.s);
-//             if (lastStyle) {
-//                 if (lastStyle.bd) {
-//                     const copy = Tools.deepClone(style);
-//                     delete copy.l;
-//                     last.s = styles.add(copy);
-//                 }
-//             }
-//         }
-//         if (next) {
-//             next.s = styles.add({ bd: { r: style } });
-//             return;
-//         }
-//         const create = { s: styles.add({ bd: { r: style } }) };
-//         cellMatrix.setValue(row, column, create);
-//     }
-
-//     setBStyle(row: number, column: number, style: IBorderStyleData): void {
-//         const workSheet = this._workSheet;
-//         const context = workSheet.getGlobalContext();
-//         const workBook = context.getWorkBook();
-//         const styles = workBook.getStyles();
-//         const cellMatrix = workSheet.getCellMatrix();
-//         const last = cellMatrix.getValue(row + 1, column);
-//         const next = cellMatrix.getValue(row, column);
-//         if (last) {
-//             const lastStyle = styles.get(last.s);
-//             if (lastStyle) {
-//                 if (lastStyle.bd) {
-//                     const copy = Tools.deepClone(style);
-//                     delete copy.t;
-//                     last.s = styles.add(copy);
-//                 }
-//             }
-//         }
-//         if (next) {
-//             next.s = styles.add({ bd: { b: style } });
-//             return;
-//         }
-//         const create = { s: styles.add({ bd: { b: style } }) };
-//         cellMatrix.setValue(row, column, create);
-//     }
-// }

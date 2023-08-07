@@ -1,20 +1,9 @@
-import {
-    DEFAULT_RANGE_ARRAY,
-    DEFAULT_WORKBOOK,
-    DEFAULT_WORKSHEET,
-} from '../../Types/Const';
+import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../../Types/Const';
 
 import { BooleanNumber } from '../../Types/Enum';
 import { SheetContext, Univer } from '../../Basics';
 
-import {
-    InsertSheetAction,
-    ISetSheetOrderActionData,
-    RemoveSheetAction,
-    SetSheetOrderAction,
-    IInsertSheetActionData,
-    IRemoveSheetActionData,
-} from '../Action';
+import { InsertSheetAction, ISetSheetOrderActionData, RemoveSheetAction, SetSheetOrderAction, IInsertSheetActionData, IRemoveSheetActionData } from '../Action';
 
 import {
     IColumnStartEndData,
@@ -92,16 +81,14 @@ export class Workbook {
     static rangeDataToRangeStringData(rangeData: IRangeData) {
         const { startRow, endRow, startColumn, endColumn } = rangeData;
 
-        return `${Tools.chatAtABC(startColumn) + (startRow + 1)}:${Tools.chatAtABC(
-            endColumn
-        )}${endRow + 1}`;
+        return `${Tools.chatAtABC(startColumn) + (startRow + 1)}:${Tools.chatAtABC(endColumn)}${endRow + 1}`;
     }
 
     static isIRangeType(range: IRangeType | IRangeType[]): Boolean {
         return typeof range === 'string' || 'startRow' in range || 'row' in range;
     }
 
-    onUniver(univer: Univer) {
+    onUniver() {
         this._getDefaultWorkSheet();
     }
 
@@ -136,9 +123,7 @@ export class Workbook {
                     }
                 }
             }
-            const worksheet = this._worksheets.get(
-                sheetOrder[sheetOrder.length - 1]
-            );
+            const worksheet = this._worksheets.get(sheetOrder[sheetOrder.length - 1]);
             if (worksheet) {
                 worksheet.activate();
             }
@@ -448,10 +433,7 @@ export class Workbook {
             const { _context } = this;
             const name = argument[0];
             const conf = { ...DEFAULT_WORKSHEET, name };
-            const worksheet = new Worksheet(
-                _context,
-                conf as Partial<IWorksheetConfig>
-            );
+            const worksheet = new Worksheet(_context, conf as Partial<IWorksheetConfig>);
             this.insertSheet(worksheet);
             return worksheet;
         }
@@ -461,10 +443,7 @@ export class Workbook {
             const rowCount = argument[1];
             const columnCount = argument[2];
             const conf = { ...DEFAULT_WORKSHEET, name, rowCount, columnCount };
-            const worksheet = new Worksheet(
-                _context,
-                conf as Partial<IWorksheetConfig>
-            );
+            const worksheet = new Worksheet(_context, conf as Partial<IWorksheetConfig>);
             this.insertSheet(worksheet);
             return worksheet;
         }
@@ -599,9 +578,7 @@ export class Workbook {
 
     getSheets(): Worksheet[] {
         const { sheetOrder } = this._config;
-        return sheetOrder.map((sheetId) =>
-            this._worksheets.get(sheetId)
-        ) as Worksheet[];
+        return sheetOrder.map((sheetId) => this._worksheets.get(sheetId)) as Worksheet[];
     }
 
     getSheetIndex(sheet: Worksheet): number {
@@ -622,12 +599,8 @@ export class Workbook {
 
         if (sheetOrder.length > 1 && sheet != null) {
             const index = this.getSheetIndex(sheet);
-            const before = this.getContext().getContextObserver(
-                'onBeforeRemoveSheetObservable'
-            );
-            const aftert = this.getContext().getContextObserver(
-                'onAfterRemoveSheetObservable'
-            );
+            const before = this.getContext().getContextObserver('onBeforeRemoveSheetObservable');
+            const aftert = this.getContext().getContextObserver('onAfterRemoveSheetObservable');
             before.notifyObservers({
                 index,
             });
@@ -865,10 +838,7 @@ export class Workbook {
             sheetTxt = val[0];
             rangeTxt = val[1];
             sheetTxt = sheetTxt.replace(/\\'/g, "'").replace(/''/g, "'");
-            if (
-                sheetTxt.substring(0, 1) === "'" &&
-                sheetTxt.substring(sheetTxt.length - 1, 1) === "'"
-            ) {
+            if (sheetTxt.substring(0, 1) === "'" && sheetTxt.substring(sheetTxt.length - 1, 1) === "'") {
                 sheetTxt = sheetTxt.substring(1, sheetTxt.length - 1);
             }
         } else {
@@ -896,12 +866,8 @@ export class Workbook {
 
         const row: IRowStartEndData = [0, 0];
         const col: IColumnStartEndData = [0, 0];
-        const maxRow =
-            this.getSheetBySheetName(sheetTxt)?.getMaxRows() ||
-            this.getActiveSheet()?.getMaxRows();
-        const maxCol =
-            this.getSheetBySheetName(sheetTxt)?.getMaxColumns() ||
-            this.getActiveSheet()?.getMaxColumns();
+        const maxRow = this.getSheetBySheetName(sheetTxt)?.getMaxRows() || this.getActiveSheet()?.getMaxRows();
+        const maxCol = this.getSheetBySheetName(sheetTxt)?.getMaxColumns() || this.getActiveSheet()?.getMaxColumns();
         row[0] = parseInt(rangeTxt[0].replace(/[^0-9]/g, ''), 10) - 1;
         row[1] = parseInt(rangeTxt[1].replace(/[^0-9]/g, ''), 10) - 1;
 

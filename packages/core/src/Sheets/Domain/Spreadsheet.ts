@@ -15,25 +15,25 @@ import {
     ISetWorkSheetActivateActionData,
 } from '../../Types/Interfaces/ISheetActionInterfaces';
 import { SHEET_ACTION_NAMES } from '../../Types/Const';
-import { BooleanNumber } from '../../Types/Enum';
-import { Nullable } from '../../Shared';
 import { Style } from './Style';
+import { BooleanNumber } from '../../Types/Enum';
+import { Nullable, Tools } from '../../Shared';
 import { ISpreadsheetConfig } from '../../Types/Interfaces/ISpreadsheetData';
 
 export class Spreadsheet {
     private range: Range;
 
-    private model: SpreadsheetModel;
-
     private merge: Merge;
-
-    private spreadsheetModel: SpreadsheetModel;
-
-    private column: Column;
 
     private row: Row;
 
+    private column: Column;
+
     private style: Style;
+
+    private model: SpreadsheetModel;
+
+    private spreadsheetModel: SpreadsheetModel;
 
     constructor(private snapshot: Partial<ISpreadsheetConfig>, private commandManager: CommandManager) {
         this.model = new SpreadsheetModel(snapshot);
@@ -56,7 +56,7 @@ export class Spreadsheet {
                 const insertSheetAction: IInsertSheetActionData = {
                     actionName: SHEET_ACTION_NAMES.INSERT_SHEET_ACTION,
                     index: -1,
-                    sheetId: '',
+                    sheetId: Tools.generateRandomId(6),
                 };
                 const command = new SpreadsheetCommand(this.model, insertSheetAction);
                 this.commandManager.invoke(command);

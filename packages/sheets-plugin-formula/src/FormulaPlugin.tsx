@@ -1,7 +1,8 @@
-import { SheetContext, UniverSheet, Plugin } from '@univerjs/core';
-import { FormulaEnginePlugin } from '@univerjs/base-formula-engine';
-import { CellEditExtensionManager, CellInputExtensionManager, Icon } from '@univerjs/base-ui';
-import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
+import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import { Plugin, CommandManager, PluginType } from '@univerjs/core';
+import { FormulaEngineService } from '@univerjs/base-formula-engine';
+import { CellEditExtensionManager, CellInputExtensionManager, ComponentManager, Icon } from '@univerjs/base-ui';
+import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { zh, en } from './Locale';
 
 import { IFormulaConfig } from './Basics/Interfaces/IFormula';
@@ -15,7 +16,9 @@ import { FormulaPluginObserve, install } from './Basics/Observer';
 import { SearchFormulaController } from './Controller/SearchFormulaModalController';
 import { FormulaPromptController } from './Controller/FormulaPromptController';
 
-export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
+export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
+    static override type = PluginType.Sheet;
+    
     protected _formulaActionExtensionFactory: FormulaActionExtensionFactory;
 
     private _formulaController: FormulaController;
@@ -24,46 +27,11 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
 
     private _formulaPromptController: FormulaPromptController;
 
-    constructor(private _config?: IFormulaConfig) {
+    constructor(private _config: IFormulaConfig, @Inject(Injector) private readonly _sheetInjector: Injector, @Inject(CommandManager) private readonly _commandManager: CommandManager) {
         super(FORMULA_PLUGIN_NAME);
     }
 
-    static create(config?: IFormulaConfig) {
-        return new FormulaPlugin(config);
-    }
-
-    installTo(universheetInstance: UniverSheet) {
-        universheetInstance.installPlugin(this);
-
-        const context = this.getContext();
-        let formulaEngine = context.getPluginManager().getPluginByName<FormulaEnginePlugin>('formulaEngine');
-        if (!formulaEngine) {
-            formulaEngine = new FormulaEnginePlugin();
-            universheetInstance.installPlugin(formulaEngine);
-        }
-
-        let sheetPlugin = context.getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
-        sheetPlugin?.UIDidMount(() => {
-            this._formulaController = new FormulaController(this, this._config);
-            this._searchFormulaController = new SearchFormulaController(this);
-            this._formulaPromptController = new FormulaPromptController(this);
-
-            this._formulaController.setFormulaEngine(formulaEngine as FormulaEnginePlugin);
-
-            firstLoader(this._formulaController);
-            sheetPlugin.getComponentManager().register('FxIcon', Icon.Math.FxIcon);
-
-            sheetPlugin.setFx({
-                onClick: () => {
-                    this._searchFormulaController.showFormulaModal('SearchFormula', true);
-                },
-                icon: 'FxIcon',
-            });
-        });
-    }
-
-    initialize(context: SheetContext): void {
-        this.context = context;
+    initialize(): void {
         /**
          * load more Locale object
          */
@@ -73,6 +41,28 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
         });
 
         this.registerExtension();
+
+        this._sheetInjector.add([FormulaEngineService]);
+        let formulaEngineService = this._sheetInjector.get(FormulaEngineService);
+        const sheetContainerUIController = this._sheetInjector.get(SheetContainerUIController);
+        const formulaBar = sheetContainerUIController.getFormulaBarUIController().getFormulaBar();
+        const componentManager = this._sheetInjector.get(ComponentManager);
+
+        sheetContainerUIController.UIDidMount(() => {
+            this.initializeDependencies(this._sheetInjector)
+
+            this._formulaController.setFormulaEngine(formulaEngineService);
+
+            firstLoader(this._formulaController);
+            componentManager.register('FxIcon', Icon.Math.FxIcon);
+
+            formulaBar.setFx({
+                onClick: () => {
+                    this._searchFormulaController.showFormulaModal('SearchFormula', true);
+                },
+                icon: 'FxIcon',
+            });
+        });
 
         // this._arrayFormLineControl.addArrayFormLineToSheet(
         //     {
@@ -103,14 +93,14 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
         // );
     }
 
-    onMounted(context: SheetContext): void {
+    override onMounted(): void {
         install(this);
 
-        this.initialize(context);
+        this.initialize();
     }
 
-    onDestroy(): void {
-        const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
+    override onDestroy(): void {
+        const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
         actionRegister.delete(this._formulaActionExtensionFactory);
     }
 
@@ -121,7 +111,7 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
         const cellInputRegister = CellInputExtensionManager.create();
         cellInputRegister.add(new FormulaCellInputExtensionFactory(this));
 
-        const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
+        const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
         this._formulaActionExtensionFactory = new FormulaActionExtensionFactory(this);
         actionRegister.add(this._formulaActionExtensionFactory);
     }
@@ -140,5 +130,21 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve, SheetContext> {
 
     getFormulaPromptController() {
         return this._formulaPromptController;
+    }
+
+    private initializeDependencies(sheetInjector: Injector){
+        const dependencies: Dependency[] = [
+            [SearchFormulaController],
+            [FormulaPromptController],
+        ];
+
+        dependencies.forEach((d) => {
+            sheetInjector.add(d);
+        });
+
+        this._searchFormulaController = this._sheetInjector.get(SearchFormulaController);
+        this._formulaPromptController = this._sheetInjector.get(FormulaPromptController);
+        this._formulaController = sheetInjector.createInstance(FormulaController, this._config);
+        sheetInjector.add([FormulaController, { useValue: this._formulaController }]);
     }
 }

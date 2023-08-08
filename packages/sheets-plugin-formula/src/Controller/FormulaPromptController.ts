@@ -1,11 +1,12 @@
 import { $$, getRefElement } from '@univerjs/base-ui';
 import { SheetPlugin } from '@univerjs/base-sheets';
-import { KeyCode, PLUGIN_NAMES, SheetContext } from '@univerjs/core';
-import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
+import { KeyCode, ObserverManager, PLUGIN_NAMES, SheetContext } from '@univerjs/core';
+import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { FORMULA_PLUGIN_NAME, FunList } from '../Basics';
 import { FormulaPlugin } from '../FormulaPlugin';
 import { HelpFunction, SearchFunction } from '../View/UI/FormulaPrompt';
 import { CellInputHandler } from './CellInputHandler';
+import { Inject } from '@wendellhu/redi';
 
 export class FormulaPromptController {
     cellInputHandler: CellInputHandler;
@@ -14,31 +15,18 @@ export class FormulaPromptController {
 
     richTextEditEle: HTMLElement;
 
-    private _context: SheetContext;
-
-    private _sheetPlugin: SheetPlugin;
-
-    private _sheetUIPlugin: SheetUIPlugin;
-
     private _searchFunction: SearchFunction;
 
     private _helpFunction: HelpFunction;
 
-    constructor(private _plugin: FormulaPlugin) {
-        this._context = this._plugin.getContext();
-
-        this._sheetPlugin = this._plugin.getContext().getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
-
-        this._sheetUIPlugin = this._plugin.getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
+    constructor(@Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,@Inject(ObserverManager) private readonly _observerManager: ObserverManager) {
 
         this._initRegisterComponent();
         this._initialize();
     }
 
     private _initRegisterComponent() {
-        this._sheetUIPlugin
-            .getAppUIController()
-            .getSheetContainerController()
+        this._sheetContainerUIController
             .getMainSlotController()
             .addSlot(
                 FORMULA_PLUGIN_NAME + SearchFunction.name,
@@ -46,18 +34,14 @@ export class FormulaPromptController {
                     component: SearchFunction,
                 },
                 () => {
-                    const searchFunction = this._sheetUIPlugin
-                        .getAppUIController()
-                        .getSheetContainerController()
+                    const searchFunction = this._sheetContainerUIController
                         .getMainSlotController()
                         .getSlot(FORMULA_PLUGIN_NAME + SearchFunction.name);
                     this._searchFunction = searchFunction;
                 }
             );
 
-        this._sheetUIPlugin
-            .getAppUIController()
-            .getSheetContainerController()
+            this._sheetContainerUIController
             .getMainSlotController()
             .addSlot(
                 FORMULA_PLUGIN_NAME + HelpFunction.name,
@@ -65,9 +49,7 @@ export class FormulaPromptController {
                     component: HelpFunction,
                 },
                 () => {
-                    const helpFunction = this._sheetUIPlugin
-                        .getAppUIController()
-                        .getSheetContainerController()
+                    const helpFunction = this._sheetContainerUIController
                         .getMainSlotController()
                         .getSlot(FORMULA_PLUGIN_NAME + HelpFunction.name);
                     this._helpFunction = helpFunction;
@@ -76,8 +58,8 @@ export class FormulaPromptController {
     }
 
     private _initialize() {
-        this._sheetUIPlugin.UIDidMount(() => {
-            const richTextEle = this._sheetUIPlugin.getAppUIController().getSheetContainerController().getCellEditorUIController()._richTextEle;
+        this._sheetContainerUIController.UIDidMount(() => {
+            const richTextEle =  this._sheetContainerUIController.getCellEditorUIController()._richTextEle;
 
             this.richTextEle = richTextEle;
             this.richTextEditEle = $$('div', this.richTextEle);
@@ -86,7 +68,7 @@ export class FormulaPromptController {
             this.cellInputHandler = new CellInputHandler(this.richTextEditEle);
         });
 
-        this._sheetUIPlugin.getObserver('onRichTextKeyDownObservable')?.add((event: KeyboardEvent) => {
+        this._observerManager.getObserver<KeyboardEvent>('onRichTextKeyDownObservable')?.add((event: KeyboardEvent) => {
             let ctrlKey = event.ctrlKey;
             let altKey = event.altKey;
             let shiftKey = event.shiftKey;
@@ -110,7 +92,7 @@ export class FormulaPromptController {
                 this.cellInputHandler.functionInputHandler(this.richTextEditEle, kcode);
             }
         });
-        this._sheetUIPlugin.getObserver('onRichTextKeyUpObservable')?.add((event: KeyboardEvent) => {
+        this._observerManager.getObserver<KeyboardEvent>('onRichTextKeyUpObservable')?.add((event: KeyboardEvent) => {
             let kcode = event.keyCode;
 
             // stop edit
@@ -142,7 +124,7 @@ export class FormulaPromptController {
                 let top = parseInt(this.richTextEle.style.top) + height;
 
                 // Get the viewport width/height of the Main SheetContainer
-                const sheetContainer = getRefElement(this._sheetUIPlugin.getAppUIController().getSheetContainerController().getContentRef());
+                const sheetContainer = getRefElement( this._sheetContainerUIController.getContentRef());
                 const screenW = sheetContainer.offsetWidth;
                 const screenH = sheetContainer.offsetHeight;
 

@@ -1,41 +1,26 @@
-import { FormulaEnginePlugin, IInterpreterDatasetConfig, SheetDataType, UnitDataType, SheetNameMapType, ArrayFormulaDataType } from '@univerjs/base-formula-engine';
-import { SheetPlugin } from '@univerjs/base-sheets';
-import { PLUGIN_NAMES, SheetContext } from '@univerjs/core';
-import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
-import { FORMULA_PLUGIN_NAME } from '../Basics';
+import { IInterpreterDatasetConfig, SheetDataType, UnitDataType, SheetNameMapType, ArrayFormulaDataType, FormulaEngineService } from '@univerjs/base-formula-engine';
+import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
+import { CommandManager, ICurrentUniverService } from '@univerjs/core';
 import { IFormulaConfig } from '../Basics/Interfaces/IFormula';
-import { FormulaPlugin } from '../FormulaPlugin';
 import { FormulaDataModel } from '../Model/FormulaDataModel';
-import { FormulaLabel } from '../View/UI/FormulaLabel';
 import { ArrayFormulaLineControl } from './ArrayFormulaLineController';
+import { Inject, Injector } from '@wendellhu/redi';
 
 export class FormulaController {
     private _formulaDataModel: FormulaDataModel;
 
-    private _formulaEngine: FormulaEnginePlugin;
-
-    private _context: SheetContext;
+    private _formulaEngine: FormulaEngineService;
 
     private _interpreterCalculatePropsCache: IInterpreterDatasetConfig;
-
-    private _sheetPlugin: SheetPlugin;
-
-    private _sheetUIPlugin: SheetUIPlugin;
 
     private _activeSheetId: string;
 
     private _arrayFormulaLineControls: ArrayFormulaLineControl[] = [];
 
-    constructor(private _plugin: FormulaPlugin, config?: IFormulaConfig) {
+    constructor(config: IFormulaConfig,@ISelectionManager private readonly _selectionManager: SelectionManager,@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,@Inject(CommandManager) private readonly _commandManager: CommandManager, @Inject(Injector) private readonly _sheetInjector: Injector) {
         this._formulaDataModel = new FormulaDataModel(config);
 
-        this._context = this._plugin.getContext();
-
-        this._sheetPlugin = this._plugin.getContext().getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
-
-        this._sheetUIPlugin = this._plugin.getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
-
-        this._activeSheetId = this._sheetPlugin.getWorkbook().getActiveSheet().getSheetId();
+        this._activeSheetId = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
 
         // this._initRegisterComponent();
 
@@ -88,8 +73,8 @@ export class FormulaController {
         return this._formulaDataModel;
     }
 
-    setFormulaEngine(formulaEngine: FormulaEnginePlugin) {
-        this._formulaEngine = formulaEngine;
+    setFormulaEngine(formulaEngineService:FormulaEngineService) {
+        this._formulaEngine = formulaEngineService;
     }
 
     getFormulaEngine() {
@@ -105,11 +90,11 @@ export class FormulaController {
     }
 
     getCommandManager() {
-        return this._context.getCommandManager();
+        return this._commandManager;
     }
 
     getWorkbook() {
-        return this._context.getWorkBook();
+        return this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
     }
 
     getUnitId() {
@@ -139,37 +124,38 @@ export class FormulaController {
         const arrayFormula = arrayFormulaData[this._activeSheetId];
         if (!arrayFormula) return;
 
-        const currentCellData = this._sheetPlugin.getSelectionManager().getCurrentCellData();
+        const currentCellData = this._selectionManager.getCurrentCellData();
 
         arrayFormula.forValue((r, c, v) => {
             const { startRow, startColumn, endRow, endColumn } = v;
             if (currentCellData) {
                 const { startRow: row, startColumn: column } = currentCellData;
                 if (row >= startRow && row < endRow && column >= startColumn && column < endColumn) {
-                    this._arrayFormulaLineControls.push(new ArrayFormulaLineControl(this._plugin, this._activeSheetId, v));
+                    const arrayFormulaLineControl = this._sheetInjector.createInstance(ArrayFormulaLineControl,this._activeSheetId, v);
+                    this._arrayFormulaLineControls.push(arrayFormulaLineControl);
                 }
             }
         });
     }
 
-    private _initRegisterComponent() {
-        // this._sheetPlugin.registerComponent(FORMULA_PLUGIN_NAME + FormulaLabel.name, FormulaLabel);
-        this._plugin
-            .getContext()
-            .getUniver()
-            .getGlobalContext()
-            .getPluginManager()
-            .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
-            .getAppUIController()
-            .getSheetContainerController()
-            .getMainSlotController()
-            .addSlot(FORMULA_PLUGIN_NAME + FormulaLabel.name, {
-                component: FormulaLabel,
-            });
-    }
+    // private _initRegisterComponent() {
+    //     // this._sheetPlugin.registerComponent(FORMULA_PLUGIN_NAME + FormulaLabel.name, FormulaLabel);
+    //     this._plugin
+    //         .getContext()
+    //         .getUniver()
+    //         .getGlobalContext()
+    //         .getPluginManager()
+    //         .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
+    //         .getAppUIController()
+    //         .getSheetContainerController()
+    //         .getMainSlotController()
+    //         .addSlot(FORMULA_PLUGIN_NAME + FormulaLabel.name, {
+    //             component: FormulaLabel,
+    //         });
+    // }
 
     private _toInterpreterCalculateProps(): IInterpreterDatasetConfig {
-        const workbook = this._context.getWorkBook();
+        const workbook = this.getWorkbook();
         const sheets = workbook.getSheets();
         const sheetData: SheetDataType = {};
         const unitData: UnitDataType = {};

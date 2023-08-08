@@ -1,11 +1,13 @@
-import { IActionData } from './index';
-import { Plugin } from '../Plugin';
+import type { Plugin } from '../Plugin';
+import type { IActionData } from './ActionBase';
+
+// TODO: @wzhudev remove `_plugin` as constructor parameter after we refactor all up level plugins
 
 /**
  * Manipulate the list of actions in a command
  */
 export class BaseActionExtension<T extends Plugin = Plugin> {
-    constructor(protected actionDataList: IActionData[], protected _plugin: T) {}
+    constructor(protected actionDataList: IActionData[], /** @deprecated would be removed in the future */ protected _plugin: T) {}
 
     getActionDataList(): IActionData[] {
         return this.actionDataList;

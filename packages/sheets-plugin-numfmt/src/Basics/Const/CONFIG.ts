@@ -1,3 +1,3 @@
-export const NumftmConfig = {
+export const NumfmtConfig = {
     show: true,
 };

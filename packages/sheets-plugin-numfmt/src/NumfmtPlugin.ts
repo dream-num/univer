@@ -1,49 +1,49 @@
 import { IRenderingEngine, RenderEngine } from '@univerjs/base-render';
-import { ISheetContext } from '@univerjs/base-sheets';
-import { IRangeData, ObjectMatrixPrimitiveType, Plugin, PLUGIN_NAMES, SheetContext } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import { CommandManager, IRangeData, LocaleService, ObjectMatrixPrimitiveType, Plugin, PLUGIN_NAMES, PluginType, SheetContext } from '@univerjs/core';
 import { NUMFMT_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { install, NumfmtPluginObserve } from './Basics/Observer';
-import { NumfmtActionExtensionFactory } from './Basics/Register/NumfmtActionExtension';
-import { NumfmtController } from './Controller/NumfmtController';
-import { NumfmtModalController } from './Controller/NumfmtModalController';
 import en from './Locale/en';
 import zh from './Locale/zh';
+import { NumfmtController } from './Controller/NumfmtController';
+import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import { NumfmtActionExtensionFactory } from './Basics/Register/NumfmtActionExtension';
+import { NumfmtModalController } from './Controller/NumfmtModalController';
+import { AppUIController, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 
 export interface INumfmtPluginConfig {}
 
 export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
+    static override type = PluginType.Sheet;
+
     private _numfmtController: NumfmtController;
 
     private _numfmtModalController: NumfmtModalController;
 
-    private _injector: Injector;
-
     private _numfmtActionExtensionFactory: NumfmtActionExtensionFactory;
 
-    constructor(config?: INumfmtPluginConfig) {
+    constructor(
+        config: Partial<INumfmtPluginConfig>,
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(Injector) private readonly _sheetInjector: Injector,
+        @Inject(CommandManager) private readonly _commandManager: CommandManager,
+    ) {
         super(NUMFMT_PLUGIN_NAME);
-        this.initializeDependencies();
+        this.initializeDependencies(_sheetInjector);
     }
 
-    static create(config?: INumfmtPluginConfig): NumfmtPlugin {
-        return new NumfmtPlugin(config);
-    }
-
-    onMounted(context: SheetContext): void {
+    override onMounted(): void {
         install(this);
-        console.log('NumfmtPlugin onMounted');
-        this.getLocale().load({ en, zh });
+        this._localeService.getLocale().load({ en, zh });
         this._numfmtActionExtensionFactory = new NumfmtActionExtensionFactory(this);
-        this._numfmtController = this._injector.get(NumfmtController);
-        this._numfmtModalController = this._injector.get(NumfmtModalController);
-        const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
+        this._numfmtController = this._sheetInjector.get(NumfmtController);
+        this._numfmtModalController = this._sheetInjector.get(NumfmtModalController);
+        const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
         actionRegister.add(this._numfmtActionExtensionFactory);
     }
 
-    onDestroy(): void {
+    override onDestroy(): void {
         super.onDestroy();
-        const actionRegister = this.context.getCommandManager().getActionExtensionManager().getRegister();
+        const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
         actionRegister.delete(this._numfmtActionExtensionFactory);
     }
 
@@ -63,12 +63,18 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
         return this._numfmtModalController;
     }
 
-    private initializeDependencies(): void {
-        this._injector = new Injector([
-            [ISheetContext, { useFactory: () => this.getContext() }],
-            [IRenderingEngine, { useFactory: () => this.getGlobalContext().getPluginManager().getRequirePluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER).getEngine() }],
+    private initializeDependencies(sheetInjector: Injector): void {
+        // this._injector = new Injector([
+        //     [IRenderingEngine, { useFactory: () => this.getGlobalContext().getPluginManager().getRequirePluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER).getEngine() }],
+        //     [NumfmtController],
+        //     [NumfmtModalController],
+        // ]);
+        const dependencies: Dependency[] = [
             [NumfmtController],
             [NumfmtModalController],
-        ]);
+        ];
+        dependencies.forEach((d) => {
+            sheetInjector.add(d);
+        });
     }
 }

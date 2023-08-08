@@ -1,110 +1,105 @@
 import {
-    PLUGIN_NAMES,
     ObjectMatrixPrimitiveType,
     Command,
     ObjectMatrix,
     IRangeData,
     Range,
     ACTION_NAMES as CORE_ACTION_NAME,
-    ICellData,
-    ActionOperation,
-    ISetRangeDataActionData,
-    SheetContext,
+    CommandManager,
+    ICurrentUniverService
 } from '@univerjs/core';
 import { BaseComponentRender } from '@univerjs/base-ui';
-import { ISheetContext, SheetPlugin } from '@univerjs/base-sheets';
-import { numfmt } from '@univerjs/base-numfmt-engine';
-import { IToolbarItemProps, SHEET_UI_PLUGIN_NAME, SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
-import { ACTION_NAMES } from '../Basics/Enum';
-import { NumfmtPlugin } from '../NumfmtPlugin';
-import { DEFAULT_DATA, NUMFMT_PLUGIN_NAME, NumftmConfig } from '../Basics/Const';
-import { NumfmtModel } from '../Model/NumfmtModel';
-
+import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
+import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import styles from '../View/UI/index.module.less';
+import { NumfmtPlugin } from '../NumfmtPlugin';
+import { DEFAULT_DATA, NUMFMT_PLUGIN_NAME, NumfmtConfig } from '../Basics/Const';
+import { NumfmtModel } from '../Model/NumfmtModel';
+import { Inject, Injector } from '@wendellhu/redi';
+import { NumfmtModalController } from './NumfmtModalController';
 
 export class NumfmtController {
-    protected _sheetPlugin: SheetPlugin;
-
     protected _numfmtList: IToolbarItemProps;
 
     protected _model: NumfmtModel;
 
-    protected _plugin: NumfmtPlugin;
-
-    protected _sheetUIPlugin: SheetUIPlugin;
-
     protected _render: BaseComponentRender;
 
     // eslint-disable-next-line max-lines-per-function
-    constructor(@ISheetContext private readonly sheetContext: SheetContext, plugin: NumfmtPlugin) {
-        this._sheetUIPlugin = plugin.getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
+    constructor(
+        plugin: NumfmtPlugin,
+        @Inject(ISelectionManager) private readonly _selectionManager: SelectionManager,
+        @Inject(CommandManager) private readonly _commandManager: CommandManager,
+        @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
+        @Inject(Injector) private readonly _numfmtInjector: Injector,
+        @Inject(ICurrentUniverService) private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(NumfmtModalController) private readonly _numfmtModalController: NumfmtModalController
+    ) {
         this._model = new NumfmtModel();
-        this._plugin = plugin;
-        this._sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
-        const executeFormatter = (type: string): void => {
-            const manager = this._sheetPlugin.getSelectionManager();
-            const workbook = this._plugin.getContext().getWorkBook();
-            const activeSheet = workbook.getActiveSheet();
-            const activeRange = manager.getActiveRangeList();
-            const cellMatrix = activeSheet.getCellMatrix();
-            if (activeRange == null) {
-                return;
-            }
-            // update cell data
-            activeRange.getRangeList().forEach((range) => {
-                let matrix = new ObjectMatrix<ICellData>();
-                Range.foreach(range, (row, col) => {
-                    const cell = cellMatrix.getValue(row, col);
-                    if (cell) {
-                        const formatter = numfmt(type);
-                        matrix.setValue(row, col, { v: cell.v, m: formatter(cell.v) });
-                    }
-                });
-                const setRangeDataAction: ISetRangeDataActionData = {
-                    sheetId: activeSheet.getSheetId(),
-                    cellValue: matrix.getData(),
-                    actionName: CORE_ACTION_NAME.SET_RANGE_DATA_ACTION,
-                };
-                const newSetRangeDataAction = ActionOperation.make<ISetRangeDataActionData>(setRangeDataAction).removeExtension().getAction();
-                const cmd = new Command({ WorkBookUnit: workbook }, newSetRangeDataAction);
-                workbook.getCommandManager().invoke(cmd);
-            });
-            // update numfmt data
-            activeRange.getRangeList().forEach((range) => {
-                let matrix = new ObjectMatrix();
-                Range.foreach(range, (row, col) => {
-                    matrix.setValue(row, col, type);
-                });
-                const setNumfmtRangeDataAction = {
-                    sheetId: activeSheet.getSheetId(),
-                    actionName: ACTION_NAMES.SET_NUMFMT_RANGE_DATA_ACTION,
-                    numfmtMatrix: matrix.getData(),
-                };
-                const cmd = new Command({ WorkBookUnit: workbook }, setNumfmtRangeDataAction);
-                cmd.invoke();
-            });
-        };
+        // const executeFormatter = (type: string): void => {
+        //     const manager = this._sheetPlugin.getSelectionManager();
+        //     const workbook = this._plugin.getContext().getWorkBook();
+        //     const activeSheet = workbook.getActiveSheet();
+        //     const activeRange = manager.getActiveRangeList();
+        //     const cellMatrix = activeSheet.getCellMatrix();
+        //     if (activeRange == null) {
+        //         return;
+        //     }
+        //     // update cell data
+        //     activeRange.getRangeList().forEach((range) => {
+        //         let matrix = new ObjectMatrix<ICellData>();
+        //         Range.foreach(range, (row, col) => {
+        //             const cell = cellMatrix.getValue(row, col);
+        //             if (cell) {
+        //                 const formatter = numfmt(type);
+        //                 matrix.setValue(row, col, { v: cell.v, m: formatter(cell.v) });
+        //             }
+        //         });
+        //         const setRangeDataAction: ISetRangeDataActionData = {
+        //             sheetId: activeSheet.getSheetId(),
+        //             cellValue: matrix.getData(),
+        //             actionName: CORE_ACTION_NAME.SET_RANGE_DATA_ACTION,
+        //         };
+        //         const newSetRangeDataAction = ActionOperation.make<ISetRangeDataActionData>(setRangeDataAction).removeExtension().getAction();
+        //         const cmd = new Command({ WorkBookUnit: workbook }, newSetRangeDataAction);
+        //         workbook.getCommandManager().invoke(cmd);
+        //     });
+        //     // update numfmt data
+        //     activeRange.getRangeList().forEach((range) => {
+        //         let matrix = new ObjectMatrix();
+        //         Range.foreach(range, (row, col) => {
+        //             matrix.setValue(row, col, type);
+        //         });
+        //         const setNumfmtRangeDataAction = {
+        //             sheetId: activeSheet.getSheetId(),
+        //             actionName: ACTION_NAMES.SET_NUMFMT_RANGE_DATA_ACTION,
+        //             numfmtMatrix: matrix.getData(),
+        //         };
+        //         const cmd = new Command({ WorkBookUnit: workbook }, setNumfmtRangeDataAction);
+        //         cmd.invoke();
+        //     });
+        // };
         const CHILDREN_DATA = DEFAULT_DATA.map((item, index) => ({
             onClick: () => {
                 switch (index) {
                     case 0: {
-                        executeFormatter('G');
+                        //executeFormatter('G');
                         break;
                     }
                     case 1: {
-                        executeFormatter('@');
+                        //executeFormatter('@');
                         break;
                     }
                     case 2: {
-                        executeFormatter('#.##');
+                        //executeFormatter('#.##');
                         break;
                     }
                     case 3: {
-                        executeFormatter('#.##%');
+                        //executeFormatter('#.##%');
                         break;
                     }
                     case 4: {
-                        executeFormatter('#.##E+');
+                        //executeFormatter('#.##E+');
                         break;
                     }
                     case 5: {
@@ -112,7 +107,7 @@ export class NumfmtController {
                         break;
                     }
                     case 6: {
-                        executeFormatter('¥#.##');
+                        //executeFormatter('¥#.##');
                         break;
                     }
                     case 7: {
@@ -120,23 +115,23 @@ export class NumfmtController {
                         break;
                     }
                     case 8: {
-                        executeFormatter('yyyy-mm-dd');
+                        //executeFormatter('yyyy-mm-dd');
                         break;
                     }
                     case 9: {
-                        executeFormatter('h:mm AM/PM');
+                        //executeFormatter('h:mm AM/PM');
                         break;
                     }
                     case 10: {
-                        executeFormatter('h:mm');
+                        //executeFormatter('h:mm');
                         break;
                     }
                     case 11: {
-                        executeFormatter('yyyy-mm-dd h:mm AM/PM');
+                        //executeFormatter('yyyy-mm-dd h:mm AM/PM');
                         break;
                     }
                     case 12: {
-                        executeFormatter('yyyy-mm-dd h:mm');
+                        //executeFormatter('yyyy-mm-dd h:mm');
                         break;
                     }
                     case 13: {
@@ -151,7 +146,7 @@ export class NumfmtController {
             type: 0,
             label: 'toolbar.moreFormats',
             className: styles.customFormat,
-            show: NumftmConfig.show,
+            show: NumfmtConfig.show,
             border: true,
             children: [
                 ...CHILDREN_DATA,
@@ -163,26 +158,26 @@ export class NumfmtController {
                         {
                             label: 'format.moreCurrency',
                             onClick: () => {
-                                this._plugin.getNumfmtModalController().showModal('currency', true);
+                                this._numfmtModalController.showModal('currency', true);
                             },
                         },
                         {
                             label: 'format.moreDateTime',
                             onClick: () => {
-                                this._plugin.getNumfmtModalController().showModal('date', true);
+                                this._numfmtModalController.showModal('date', true);
                             },
                         },
                         {
                             label: 'format.moreNumber',
                             onClick: () => {
-                                this._plugin.getNumfmtModalController().showModal('number', true);
+                                this._numfmtModalController.showModal('number', true);
                             },
                         },
                     ],
                 },
             ],
         };
-        this._sheetUIPlugin.addToolButton(this._numfmtList);
+        this._sheetContainerUIController.getToolbarController().addToolbarConfig(this._numfmtList);
     }
 
     getNumfmtBySheetIdConfig(sheetId: string): ObjectMatrixPrimitiveType<string> {
@@ -194,8 +189,7 @@ export class NumfmtController {
         Range.foreach(numfmtRange, (row, column) => {
             numfmtMatrix.setValue(row, column, numfmtValue);
         });
-        const pluginContext = this._plugin.getContext();
-        const commandManager = pluginContext.getCommandManager();
+        const commandManager = this._commandManager;
         const config = {
             actionName: CORE_ACTION_NAME.SET_RANGE_DATA_ACTION,
             sheetId,
@@ -204,7 +198,7 @@ export class NumfmtController {
         };
         const command = new Command(
             {
-                WorkBookUnit: pluginContext.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             config
         );
@@ -215,8 +209,7 @@ export class NumfmtController {
         const numfmtMatrix = new ObjectMatrix<string>();
         numfmtMatrix.setValue(row, column, numfmt);
         const numfmtRange: IRangeData = { startRow: row, startColumn: column, endRow: row, endColumn: column };
-        const pluginContext = this._plugin.getContext();
-        const commandManager = pluginContext.getCommandManager();
+        const commandManager = this._commandManager;
         const config = {
             actionName: CORE_ACTION_NAME.SET_RANGE_DATA_ACTION,
             sheetId,
@@ -225,7 +218,7 @@ export class NumfmtController {
         };
         const command = new Command(
             {
-                WorkBookUnit: pluginContext.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             config
         );

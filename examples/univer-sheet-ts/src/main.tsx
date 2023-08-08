@@ -4,6 +4,7 @@ import { SheetPlugin } from '@univerjs/base-sheets';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
 import { DEFAULT_FORMULA_DATA_DEMO, FormulaPlugin } from '@univerjs/sheets-plugin-formula';
+import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
 
 // TODO: @huwenzhao: change the following to new API
 
@@ -33,6 +34,7 @@ univer.registerPlugin(SheetUIPlugin, {
         },
     },
 });
+univer.registerPlugin(NumfmtPlugin);
 
 // base-sheet
 univer.registerPlugin(FormulaPlugin,DEFAULT_FORMULA_DATA_DEMO)

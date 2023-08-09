@@ -84,7 +84,7 @@ export class RangeList {
      * @returns The list of active ranges, for chaining.
      */
     activate(): RangeList {
-        const { _context, _commandManager } = this;
+        const { _commandManager } = this;
         // The user entered an invalid range
         if (this._rangeList[0].startRow === -1) {
             console.error('Invalid range,default set startRow -1');
@@ -134,7 +134,7 @@ export class RangeList {
 
         let command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook(),
             },
             ...setList
         );
@@ -157,7 +157,7 @@ export class RangeList {
      */
     clear(options: IOptionData): RangeList;
     clear(...argument: any): RangeList {
-        const { _context, _worksheet, _commandManager, _rangeList } = this;
+        const { _worksheet, _commandManager, _rangeList } = this;
 
         // default options
         let options = {

@@ -1,3 +1,7 @@
+import { ICurrentUniverService } from 'src/Service/Current.service';
+
+// TODO@wzhudev: here we still have some
+
 import {
     IInsertRangeActionData,
     IClearRangeActionData,
@@ -9,11 +13,8 @@ import {
     ISetRangeFormattedValueActionData,
     SetRangeStyleAction,
 } from '../Action';
-
 import { CommandManager, ISheetActionData, Command } from '../../Command';
-
 import { DEFAULT_RANGE, DEFAULT_STYLES, ACTION_NAMES } from '../../Types/Const';
-
 import {
     BooleanNumber,
     BorderStyleTypes,
@@ -28,7 +29,6 @@ import {
     WrapStrategy,
     CopyPasteType,
 } from '../../Types/Enum';
-
 import {
     IBorderData,
     IBorderStyleData,
@@ -42,11 +42,8 @@ import {
     IStyleData,
     ITextDecoration,
 } from '../../Types/Interfaces';
-
 import { Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, Tools, Tuples } from '../../Shared';
-
-import type { Worksheet } from './Worksheet';
-import { ICurrentUniverService } from 'src/Service/Current.service';
+import { Worksheet } from './Worksheet';
 
 /**
  * getObjectValues options type
@@ -75,9 +72,9 @@ export class Range {
 
     private _worksheet: Worksheet;
 
-    constructor(workSheet: Worksheet, range: IRangeType, @ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService) {
+    constructor(workSheet: Worksheet, range: IRangeType, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
         // Convert the range passed in by the user into a standard format
-        this._rangeData = this._context.getWorkBook().transformRangeType(range).rangeData;
+        this._rangeData = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().transformRangeType(range).rangeData;
         this._worksheet = workSheet;
 
         // The user entered an invalid range
@@ -247,9 +244,9 @@ export class Range {
      * @returns  — A two-dimensional array of color codes of the backgrounds.
      */
     getBackgrounds(): string[][] {
+        const styles = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getStyles();
         return this.getValues().map((row) =>
             row.map((cell: Nullable<ICellData>) => {
-                const styles = this._context.getWorkBook().getStyles();
                 let rgbColor: string = DEFAULT_STYLES.bg?.rgb!;
                 rgbColor = styles.getStyleByCell(cell)?.bg?.rgb!;
                 return rgbColor;
@@ -273,7 +270,7 @@ export class Range {
             endColumn: startColumn + column,
         };
 
-        return new Range(this._worksheet, cell);
+        return new Range(this._worksheet, cell, this._currentUniverService);
     }
 
     /**
@@ -305,7 +302,7 @@ export class Range {
         const values = this._worksheet.getCellMatrix().getFragments(startRow, endRow, startColumn, endColumn).getData();
 
         if (options.isIncludeStyle) {
-            const style = this._context.getWorkBook().getStyles();
+            const style = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getStyles();
             for (let r = 0; r <= endRow - startRow; r++) {
                 for (let c = 0; c <= endColumn - startColumn; c++) {
                     // handle null
@@ -345,9 +342,9 @@ export class Range {
      * Returns the font colors of the cells in the range in CSS notation (such as '#ffffff' or 'white').
      */
     getFontColors(): Array<Array<Nullable<string>>> {
+        const styles = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getStyles();
         return this.getValues().map((row) =>
             row.map((cell: Nullable<ICellData>) => {
-                const styles = this._context.getWorkBook().getStyles();
                 const cellStyle = styles.getStyleByCell(cell);
                 return cellStyle?.cl?.rgb || DEFAULT_STYLES.cl?.rgb;
             })
@@ -538,7 +535,7 @@ export class Range {
         return this._worksheet
             .getMerges()
             .getMergedRanges({ startRow, endRow, startColumn, endColumn })
-            .map((rangeData) => new Range(this._worksheet, rangeData));
+            .map((rangeData) => new Range(this._worksheet, rangeData, this._currentUniverService));
     }
 
     /**
@@ -699,12 +696,8 @@ export class Range {
      * Returns the text styles for the cells in the range.
      */
     getTextStyles(): Array<Array<Nullable<IStyleData>>> {
-        return this.getValues().map((row) =>
-            row.map((cell: Nullable<ICellData>) => {
-                const styles = this._context.getWorkBook().getStyles();
-                return styles.getStyleByCell(cell);
-            })
-        );
+        const styles = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getStyles();
+        return this.getValues().map((row) => row.map((cell: Nullable<ICellData>) => styles.getStyleByCell(cell)));
     }
 
     /**
@@ -795,7 +788,7 @@ export class Range {
      * @returns This range, for chaining.
      */
     setBackground(color: string): Range {
-        const { _context, _worksheet, _commandManager } = this;
+        const { _worksheet, _commandManager } = this;
 
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
 
@@ -818,7 +811,7 @@ export class Range {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setStyle
         );
@@ -833,7 +826,7 @@ export class Range {
      * @returns This range, for chaining.
      */
     setBackgrounds(color: string[][]): Range {
-        const { _context, _worksheet, _commandManager } = this;
+        const { _worksheet, _commandManager } = this;
 
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
 
@@ -856,7 +849,7 @@ export class Range {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setStyle
         );
@@ -873,7 +866,7 @@ export class Range {
      * @returns This range, for chaining.
      */
     setBackgroundRGB(red: number, green: number, blue: number): Range {
-        const { _context, _worksheet, _commandManager } = this;
+        const { _worksheet, _commandManager } = this;
 
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
 
@@ -897,7 +890,7 @@ export class Range {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setStyle
         );
@@ -912,7 +905,7 @@ export class Range {
      * @returns This range, for chaining.
      */
     setFontColors(colors: string[][]): Range {
-        const { _context, _worksheet, _commandManager } = this;
+        const { _worksheet, _commandManager } = this;
 
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
 
@@ -931,7 +924,7 @@ export class Range {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setStyle
         );
@@ -1103,7 +1096,7 @@ export class Range {
     //         cellNote: cellValue.getData(),
     //         rangeData: this._rangeData,
     //     };
-    //     const command = new Command(_context.getWorkBook(), setValue);
+    //     const command = new Command(this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook(), setValue);
     //     _commandManager.invoke(command);
 
     //     return this;
@@ -1133,7 +1126,7 @@ export class Range {
     //         cellNote: cellValue.getData(),
     //         rangeData: this._rangeData,
     //     };
-    //     const command = new Command(_context.getWorkBook(), setValue);
+    //     const command = new Command(this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook(), setValue);
     //     _commandManager.invoke(command);
 
     //     return this;
@@ -1167,7 +1160,7 @@ export class Range {
     //         cellFormat: cellValue.getData(),
     //         rangeData: this._rangeData,
     //     };
-    //     const command = new Command(_context.getWorkBook(), setValue);
+    //     const command = new Command(this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook(), setValue);
     //     _commandManager.invoke(command);
 
     //     return this;
@@ -1201,7 +1194,7 @@ export class Range {
     //         cellFormat: cellValue.getData(),
     //         rangeData: this._rangeData,
     //     };
-    //     const command = new Command(_context.getWorkBook(), setValue);
+    //     const command = new Command(this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook(), setValue);
     //     _commandManager.invoke(command);
 
     //     return this;
@@ -1229,7 +1222,7 @@ export class Range {
      * @returns This range, for chaining.
      */
     setTextRotation(degrees: Nullable<number>): Range {
-        const { _context, _worksheet, _commandManager } = this;
+        const { _worksheet, _commandManager } = this;
 
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
 
@@ -1252,7 +1245,7 @@ export class Range {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setStyle
         );
@@ -1267,7 +1260,7 @@ export class Range {
      * @returns This range, for chaining.
      */
     setTextRotations(rotations: number[][]): Range {
-        const { _context, _worksheet, _commandManager } = this;
+        const { _worksheet, _commandManager } = this;
 
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
 
@@ -1292,7 +1285,7 @@ export class Range {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setStyle
         );
@@ -1307,7 +1300,7 @@ export class Range {
      * @returns This range, for chaining.
      */
     setTextStyle(style: Nullable<IStyleData>): Range {
-        const { _context, _worksheet, _commandManager } = this;
+        const { _worksheet, _commandManager } = this;
 
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
 
@@ -1325,7 +1318,7 @@ export class Range {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setStyle
         );
@@ -1340,7 +1333,7 @@ export class Range {
      * @returns This range, for chaining.
      */
     setTextStyles(styles: Array<Array<Nullable<IStyleData>>>): Range {
-        const { _context, _worksheet, _commandManager } = this;
+        const { _worksheet, _commandManager } = this;
 
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
 
@@ -1359,7 +1352,7 @@ export class Range {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setStyle
         );
@@ -1384,7 +1377,7 @@ export class Range {
      * @returns
      */
     setVerticalText(isVertical: BooleanNumber): Range {
-        const { _context, _worksheet, _commandManager } = this;
+        const { _worksheet, _commandManager } = this;
 
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
 
@@ -1407,7 +1400,7 @@ export class Range {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setStyle
         );
@@ -1557,7 +1550,7 @@ export class Range {
     //     };
     //     const command = new Command(
     //         {
-    //             WorkBookUnit: _context.getWorkBook(),
+    //             WorkBookUnit: this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook(),
     //         },
     //         setValue
     //     );
@@ -1580,6 +1573,7 @@ export class Range {
      * @returns This range, for chaining.
      */
     getDataRegion(dimension: Dimension): Range;
+    // eslint-disable-next-line max-lines-per-function
     getDataRegion(...argument: any): Range {
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
         let numRows: number;
@@ -1690,7 +1684,7 @@ export class Range {
      * @returns This range, for chaining.
      */
     trimWhitespace(): Range {
-        const { _context, _worksheet, _commandManager } = this;
+        const { _worksheet, _commandManager } = this;
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
         const sheetMatrix = this._worksheet.getCellMatrix();
         const regx = /\s+/g;
@@ -1711,7 +1705,7 @@ export class Range {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setValue
         );
@@ -1728,7 +1722,7 @@ export class Range {
      * @internal
      */
     activate(): Range {
-        // const { _context, _commandManager } = this;
+        // const { _commandManager } = this;
         // The user entered an invalid range
         if (this._rangeData?.startRow === -1) {
             console.error('Invalid range,default set startRow -1');
@@ -1791,7 +1785,7 @@ export class Range {
      * @returns
      */
     setFontColor(color: string): Range {
-        const { _context, _worksheet, _commandManager } = this;
+        const { _worksheet, _commandManager } = this;
 
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
 
@@ -1814,7 +1808,7 @@ export class Range {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setStyle
         );
@@ -1845,8 +1839,9 @@ export class Range {
      * @param options A JavaScript object that specifies advanced parameters, as listed below.
      */
     copyTo(destination: Range, options: IOptionData): void;
+    // eslint-disable-next-line max-lines-per-function
     copyTo(...argument: any): void {
-        const { _context, _worksheet, _commandManager } = this;
+        const { _worksheet, _commandManager } = this;
         const destination = argument[0];
         const [value, range] = this._handleCopyRange(this, destination);
         const { startRow, startColumn, endRow, endColumn } = range;
@@ -1871,13 +1866,13 @@ export class Range {
                 };
                 const command = new Command(
                     {
-                        WorkBookUnit: _context.getWorkBook(),
+                        WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
                     },
                     setValue
                 );
                 _commandManager.invoke(command);
             } else if (copyPasteType === CopyPasteType.PASTE_FORMAT) {
-                const styles = _context.getWorkBook().getStyles();
+                const styles = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getStyles();
 
                 const stylesMatrix = new ObjectMatrix<IStyleData>();
                 const stylesArray = value.map((row, r) =>
@@ -1896,7 +1891,7 @@ export class Range {
                 };
                 const command = new Command(
                     {
-                        WorkBookUnit: _context.getWorkBook(),
+                        WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
                     },
                     setStyle
                 );
@@ -1918,7 +1913,7 @@ export class Range {
                 };
                 const command = new Command(
                     {
-                        WorkBookUnit: _context.getWorkBook(),
+                        WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
                     },
                     setValue
                 );
@@ -1949,7 +1944,7 @@ export class Range {
             };
             const command = new Command(
                 {
-                    WorkBookUnit: _context.getWorkBook(),
+                    WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
                 },
                 setValue
             );
@@ -1970,7 +1965,7 @@ export class Range {
             };
             const command = new Command(
                 {
-                    WorkBookUnit: _context.getWorkBook(),
+                    WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
                 },
                 setValue
             );
@@ -1999,7 +1994,7 @@ export class Range {
      */
     copyFormatToRange(sheet: Worksheet, startRow: number, endRow: number, startColumn: number, endColumn: number): void;
     copyFormatToRange(...argument: any): void {
-        const { _context, _commandManager } = this;
+        const { _commandManager } = this;
 
         const startRow = argument[1];
         const endRow = argument[2];
@@ -2015,7 +2010,7 @@ export class Range {
             endColumn,
         });
 
-        const styles = _context.getWorkBook().getStyles();
+        const styles = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getStyles();
 
         const stylesMatrix = new ObjectMatrix<IStyleData>();
         value.map((row, r) =>
@@ -2035,7 +2030,7 @@ export class Range {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setStyle
         );
@@ -2063,7 +2058,7 @@ export class Range {
      */
     copyValuesToRange(sheet: Worksheet, startRow: number, endRow: number, startColumn: number, endColumn: number): void;
     copyValuesToRange(...argument: any): void {
-        const { _context, _commandManager } = this;
+        const { _commandManager } = this;
 
         const startRow = argument[1];
         const endRow = argument[2];
@@ -2095,7 +2090,7 @@ export class Range {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setValue
         );
@@ -2108,7 +2103,7 @@ export class Range {
      * @returns
      */
     moveTo(target: Range): void {
-        const { _context, _worksheet, _commandManager, _rangeData } = this;
+        const { _worksheet, _commandManager, _rangeData } = this;
 
         // clear current range
         const options = {
@@ -2146,7 +2141,7 @@ export class Range {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             clearValue,
             setValue
@@ -2202,7 +2197,7 @@ export class Range {
             offset.endColumn = offset.endColumn + numColumns - 1;
         }
 
-        return new Range(this._worksheet, offset);
+        return new Range(this._worksheet, offset, this._currentUniverService);
     }
 
     /**
@@ -2236,6 +2231,7 @@ export class Range {
         color: string,
         style: BorderStyleTypes
     ): Range;
+    // eslint-disable-next-line max-lines-per-function
     setBorder(...argument: any): Range {
         const top = argument[0];
         const left = argument[1];
@@ -2248,8 +2244,8 @@ export class Range {
         const color = argument[6] ? argument[6] : 'black';
         const style = argument[7] ? argument[7] : BorderStyleTypes.DASH_DOT;
 
-        const { _context, _worksheet, _commandManager } = this;
-        const _workbook = _context.getWorkBook();
+        const { _worksheet, _commandManager } = this;
+        const _workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
 
         const rangeData = this._rangeData;
         const _sheetId = _worksheet.getSheetId();
@@ -2312,14 +2308,14 @@ export class Range {
             endColumn: rangeData.endColumn,
         };
 
-        const tr = new Range(_worksheet, topRangeOut);
-        const lr = new Range(_worksheet, leftRangeOut);
-        const br = new Range(_worksheet, bottomRangeOut);
-        const rr = new Range(_worksheet, rightRangeOut);
-        const t = new Range(_worksheet, topRange);
-        const l = new Range(_worksheet, leftRange);
-        const b = new Range(_worksheet, bottomRange);
-        const r = new Range(_worksheet, rightRange);
+        const tr = new Range(_worksheet, topRangeOut, this._currentUniverService);
+        const lr = new Range(_worksheet, leftRangeOut, this._currentUniverService);
+        const br = new Range(_worksheet, bottomRangeOut, this._currentUniverService);
+        const rr = new Range(_worksheet, rightRangeOut, this._currentUniverService);
+        const t = new Range(_worksheet, topRange, this._currentUniverService);
+        const l = new Range(_worksheet, leftRange, this._currentUniverService);
+        const b = new Range(_worksheet, bottomRange, this._currentUniverService);
+        const r = new Range(_worksheet, rightRange, this._currentUniverService);
 
         const mtr = new ObjectMatrix<IStyleData>();
         const mlr = new ObjectMatrix<IStyleData>();
@@ -2633,7 +2629,7 @@ export class Range {
      * @returns
      */
     setFontFamily(fontFamily: Nullable<string>): Range {
-        const { _context, _worksheet, _commandManager } = this;
+        const { _worksheet, _commandManager } = this;
 
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
 
@@ -2650,7 +2646,7 @@ export class Range {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setStyle
         );
@@ -2665,7 +2661,7 @@ export class Range {
      * @returns
      */
     setFontSize(size: number): Range {
-        const { _context, _worksheet, _commandManager } = this;
+        const { _worksheet, _commandManager } = this;
 
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
 
@@ -2682,7 +2678,7 @@ export class Range {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setStyle
         );
@@ -2697,7 +2693,7 @@ export class Range {
      * @returns
      */
     setHorizontalAlignment(alignment: Nullable<HorizontalAlign>): Range {
-        const { _context, _worksheet, _commandManager } = this;
+        const { _worksheet, _commandManager } = this;
 
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
 
@@ -2714,7 +2710,7 @@ export class Range {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setStyle
         );
@@ -2729,7 +2725,7 @@ export class Range {
      * @returns
      */
     setVerticalAlignment(alignment: Nullable<VerticalAlign>): Range {
-        const { _context, _worksheet, _commandManager } = this;
+        const { _worksheet, _commandManager } = this;
 
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
 
@@ -2746,7 +2742,7 @@ export class Range {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setStyle
         );
@@ -2761,7 +2757,7 @@ export class Range {
      * @returns
      */
     setTextDirection(direction: Nullable<TextDirection>): Range {
-        const { _context, _worksheet, _commandManager } = this;
+        const { _worksheet, _commandManager } = this;
 
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
 
@@ -2778,7 +2774,7 @@ export class Range {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setStyle
         );
@@ -2793,7 +2789,7 @@ export class Range {
      * @returns
      */
     setWrapStrategy(strategy: WrapStrategy): Range {
-        const { _context, _worksheet, _commandManager } = this;
+        const { _worksheet, _commandManager } = this;
 
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
 
@@ -2810,7 +2806,7 @@ export class Range {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setStyle
         );
@@ -2824,7 +2820,7 @@ export class Range {
      * @returns  This range, for chaining.
      */
     setValue(value: ICellV): Range {
-        const { _rangeData, _context, _commandManager, _worksheet } = this;
+        const { _rangeData, _commandManager, _worksheet } = this;
         const { startRow, startColumn, endRow, endColumn } = _rangeData;
         const cellValue = new ObjectMatrix<ICellV>();
         for (let r = startRow; r <= endRow; r++) {
@@ -2840,7 +2836,7 @@ export class Range {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setValue
         );
@@ -2857,7 +2853,7 @@ export class Range {
     setValues(values: ICellV[][]): Range;
     setValues(values: ObjectMatrix<ICellV>): Range;
     setValues(...argument: any): Range {
-        const { _rangeData, _context, _commandManager, _worksheet } = this;
+        const { _rangeData, _commandManager, _worksheet } = this;
         const values = argument[0];
 
         if (Tuples.checkup(argument, Array)) {
@@ -2878,7 +2874,7 @@ export class Range {
             };
             const command = new Command(
                 {
-                    WorkBookUnit: _context.getWorkBook(),
+                    WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
                 },
                 setValue
             );
@@ -2892,7 +2888,7 @@ export class Range {
             };
             const command = new Command(
                 {
-                    WorkBookUnit: _context.getWorkBook(),
+                    WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
                 },
                 setValue
             );
@@ -2908,7 +2904,7 @@ export class Range {
      * @returns
      */
     setRangeData(value: ICellData): Range {
-        const { _rangeData, _context, _commandManager, _worksheet } = this;
+        const { _rangeData, _commandManager, _worksheet } = this;
         const { startRow, startColumn } = _rangeData;
         const setValue: ISetRangeDataActionData = {
             sheetId: _worksheet.getSheetId(),
@@ -2921,7 +2917,7 @@ export class Range {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setValue
         );
@@ -2938,7 +2934,7 @@ export class Range {
     setRangeDatas(values: ICellData[][]): Range;
     setRangeDatas(values: ObjectMatrixPrimitiveType<ICellData>): Range;
     setRangeDatas(...argument: any): Range {
-        const { _rangeData, _context, _commandManager, _worksheet } = this;
+        const { _rangeData, _commandManager, _worksheet } = this;
         const values = argument[0];
 
         if (Tuples.checkup(argument, Array)) {
@@ -2958,7 +2954,7 @@ export class Range {
             };
             const command = new Command(
                 {
-                    WorkBookUnit: _context.getWorkBook(),
+                    WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
                 },
                 setValue
             );
@@ -2971,7 +2967,7 @@ export class Range {
             };
             const command = new Command(
                 {
-                    WorkBookUnit: _context.getWorkBook(),
+                    WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
                 },
                 setValue
             );
@@ -2993,7 +2989,7 @@ export class Range {
      */
     clear(options: IOptionData): Range;
     clear(...argument: any): Range {
-        const { _context, _worksheet, _commandManager, _rangeData } = this;
+        const { _worksheet, _commandManager, _rangeData } = this;
 
         // default options
         let options = {
@@ -3012,7 +3008,7 @@ export class Range {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setValue
         );
@@ -3049,7 +3045,7 @@ export class Range {
      * @returns void
      */
     deleteCells(shiftDimension: Dimension): void {
-        const { _rangeData, _context, _commandManager, _worksheet } = this;
+        const { _rangeData, _commandManager, _worksheet } = this;
 
         const setValue: IDeleteRangeActionData = {
             sheetId: _worksheet.getSheetId(),
@@ -3059,7 +3055,7 @@ export class Range {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setValue
         );
@@ -3076,7 +3072,7 @@ export class Range {
     insertCells(...argument: any): Range {
         const shiftDimension = argument[0];
         const destination: Range = argument[1];
-        const { _rangeData, _context, _commandManager, _worksheet } = this;
+        const { _commandManager, _worksheet } = this;
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
 
         let rangeData = this._rangeData;
@@ -3114,7 +3110,7 @@ export class Range {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             insertValue
         );
@@ -3141,8 +3137,6 @@ export class Range {
      */
     mergeAcross(): Range {
         const { _worksheet } = this;
-        const _commandManager = _worksheet.getCommandManager();
-        const _context = _worksheet.getContext();
         const _sheetId = _worksheet.getSheetId();
 
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
@@ -3164,11 +3158,11 @@ export class Range {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             dataRowInsert
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
 
         return this;
     }
@@ -3180,8 +3174,6 @@ export class Range {
      */
     mergeVertically(): Range {
         const { _worksheet } = this;
-        const _commandManager = _worksheet.getCommandManager();
-        const _context = _worksheet.getContext();
         const _sheetId = _worksheet.getSheetId();
 
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
@@ -3203,11 +3195,11 @@ export class Range {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             dataRowInsert
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
 
         return this;
     }
@@ -3222,8 +3214,6 @@ export class Range {
     breakApart(): Range {
         // 您必须选中某个合并范围内的所有单元格才能执行合并或撤消合并。
         const { _worksheet } = this;
-        const _commandManager = _worksheet.getCommandManager();
-        const _context = _worksheet.getContext();
         const _sheetId = _worksheet.getSheetId();
 
         const rectangles = this._worksheet.getMerges().getMergedRanges(this._rangeData);
@@ -3235,11 +3225,11 @@ export class Range {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             dataRowInsert
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
 
         return this;
     }
@@ -3258,7 +3248,7 @@ export class Range {
      */
     removeDuplicates(columnsToCompare: number[]): Range;
     removeDuplicates(...argument: any): Range {
-        const { _rangeData, _context, _commandManager, _worksheet } = this;
+        const { _rangeData, _commandManager, _worksheet } = this;
         let columnsToCompare = [];
         // set columns
         if (Array.isArray(argument[0])) {
@@ -3305,7 +3295,7 @@ export class Range {
         ];
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             ...removeDatas
         );
@@ -3363,7 +3353,7 @@ export class Range {
      * @returns
      */
     randomize() {
-        const { _context, _worksheet, _commandManager, _rangeData } = this;
+        const { _worksheet, _commandManager, _rangeData } = this;
         const { startRow, startColumn } = _rangeData;
         const cellValue = new ObjectMatrix<ICellData>();
 
@@ -3383,7 +3373,7 @@ export class Range {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setValue
         );
@@ -3503,10 +3493,9 @@ export class Range {
      * @returns style value
      */
     private _getStyles<K>(arg: keyof IStyleData): Array<Array<IStyleData[keyof IStyleData]>> {
+        const styles = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getStyles();
         return this.getValues().map((row) =>
             row.map((cell: Nullable<ICellData>) => {
-                const styles = this._context.getWorkBook().getStyles();
-
                 // const style = getStyle(styles, cell);
                 const style = styles && styles.getStyleByCell(cell);
                 return (style && style[arg]) || DEFAULT_STYLES[arg];
@@ -3518,7 +3507,7 @@ export class Range {
     // isStartRowBounded() {}
 
     private _setStyle(value: Nullable<string | number | ITextDecoration>, type: string) {
-        const { _context, _worksheet, _commandManager } = this;
+        const { _worksheet, _commandManager } = this;
 
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
 
@@ -3536,7 +3525,7 @@ export class Range {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setStyle
         );
@@ -3545,7 +3534,7 @@ export class Range {
     }
 
     private _setStyles(values: Array<Array<Nullable<string | number | ITextDecoration>>>, type: string) {
-        const { _context, _worksheet, _commandManager } = this;
+        const { _worksheet, _commandManager } = this;
 
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
 
@@ -3564,7 +3553,7 @@ export class Range {
 
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setStyle
         );
@@ -3605,7 +3594,7 @@ export class Range {
     //         showFooter:argument[2] || false,
     //     }
 
-    //     const { _context, _commandManager } = this;
+    //     const { _commandManager } = this;
     //     // Check whether the incoming range has been set to alternate colors
     //     const bandings = this.getSheet().getBandings();
     //     const isIntersection =
@@ -3632,7 +3621,7 @@ export class Range {
     //     };
 
     //     // Execute action
-    //     const command = new Command(_context.getWorkBook(), actionData);
+    //     const command = new Command(this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook(), actionData);
     //     _commandManager.invoke(command);
 
     //     return this.getSheet().getBandingById(bandedRangeId)

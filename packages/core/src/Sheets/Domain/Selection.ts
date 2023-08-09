@@ -192,7 +192,7 @@ export class Selection {
             }
         }
 
-        const { _context, _workSheet, _commandManager } = this;
+        const { _workSheet, _commandManager } = this;
         const setSelection: ISetSelectionActivateActionData = {
             sheetId: _workSheet.getSheetId(),
             actionName: SetSelectionActivateAction.NAME,
@@ -312,7 +312,7 @@ export class Selection {
         //     this._activeRangeList = this._workSheet.getRangeList([range]);
         // }
 
-        const { _context, _workSheet, _commandManager } = this;
+        const { _workSheet, _commandManager } = this;
         const setSelection: ISetSelectionActivateActionData = {
             sheetId: _workSheet.getSheetId(),
             actionName: SetSelectionActivateAction.NAME,

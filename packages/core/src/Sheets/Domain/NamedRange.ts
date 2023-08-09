@@ -141,7 +141,7 @@ export class NamedRange {
      * Deletes this named range.
      */
     remove(namedRangeId: string): void {
-        const { _context, _workbook, _commandManager } = this;
+        const { _workbook, _commandManager } = this;
 
         // Organize action data
         const actionData: IDeleteNamedRangeActionData = {

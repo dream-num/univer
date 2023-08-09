@@ -17,7 +17,7 @@ export class Freeze {
     }
 
     setFrozenColumns(columns: number): Worksheet {
-        const { _context, _commandManager } = this;
+        const { _commandManager } = this;
         const configure = {
             actionName: ACTION_NAMES.SET_FROZEN_COLUMNS_ACTION,
             sheetId: this._worksheet.getSheetId(),
@@ -35,7 +35,7 @@ export class Freeze {
     }
 
     setFrozenRows(rows: number): Worksheet {
-        const { _context, _commandManager } = this;
+        const { _commandManager } = this;
         const configure = {
             actionName: ACTION_NAMES.SET_FROZEN_ROWS_ACTION,
             sheetId: this._worksheet.getSheetId(),

@@ -317,25 +317,37 @@ export class Worksheet {
     getRange(a1Notation: IRangeStringData): Range;
     getRange(...argument: any): Nullable<Range> {
         if (Tools.hasLength(argument, 1)) {
-            return new Range(this, argument[0]);
+            return new Range(this, argument[0], this._currentUniverService);
         }
         if (Tools.hasLength(argument, 2)) {
-            return new Range(this, {
-                row: [argument[0], argument[0]],
-                column: [argument[1], argument[1]],
-            });
+            return new Range(
+                this,
+                {
+                    row: [argument[0], argument[0]],
+                    column: [argument[1], argument[1]],
+                },
+                this._currentUniverService
+            );
         }
         if (Tools.hasLength(argument, 3)) {
-            return new Range(this, {
-                row: [argument[0], argument[2]],
-                column: [argument[1], argument[1]],
-            });
+            return new Range(
+                this,
+                {
+                    row: [argument[0], argument[2]],
+                    column: [argument[1], argument[1]],
+                },
+                this._currentUniverService
+            );
         }
         if (Tools.hasLength(argument, 4)) {
-            return new Range(this, {
-                row: [argument[0], argument[2]],
-                column: [argument[1], argument[3]],
-            });
+            return new Range(
+                this,
+                {
+                    row: [argument[0], argument[2]],
+                    column: [argument[1], argument[3]],
+                },
+                this._currentUniverService
+            );
         }
     }
 
@@ -1895,12 +1907,16 @@ export class Worksheet {
      * @returns the rectangular grid of values for this range starting at the given coordinates. A -1 value given as the row or column position is equivalent to getting the very last row or column that has data in the sheet.
      */
     getSheetValues(startRow: number, startColumn: number, numRows: number, numColumns: number): Array<Array<Nullable<ICellData>>> {
-        const range = new Range(this, {
-            startRow,
-            startColumn,
-            endRow: startRow + numRows - 1,
-            endColumn: startColumn + numColumns - 1,
-        });
+        const range = new Range(
+            this,
+            {
+                startRow,
+                startColumn,
+                endRow: startRow + numRows - 1,
+                endColumn: startColumn + numColumns - 1,
+            },
+            this._currentUniverService
+        );
         return range.getValues();
     }
 
@@ -1909,7 +1925,7 @@ export class Worksheet {
      * @returns a Range corresponding to the dimensions in which data is present.
      */
     getDataRange(): Range {
-        const range = new Range(this, this._cellData.getRange());
+        const range = new Range(this, this._cellData.getRange(), this._currentUniverService);
         return range;
     }
 

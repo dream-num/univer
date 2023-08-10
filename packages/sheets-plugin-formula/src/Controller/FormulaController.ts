@@ -1,10 +1,10 @@
 import { IInterpreterDatasetConfig, SheetDataType, UnitDataType, SheetNameMapType, ArrayFormulaDataType, FormulaEngineService } from '@univerjs/base-formula-engine';
 import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
 import { CommandManager, ICurrentUniverService } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 import { IFormulaConfig } from '../Basics/Interfaces/IFormula';
 import { FormulaDataModel } from '../Model/FormulaDataModel';
 import { ArrayFormulaLineControl } from './ArrayFormulaLineController';
-import { Inject, Injector } from '@wendellhu/redi';
 
 export class FormulaController {
     private _formulaDataModel: FormulaDataModel;
@@ -17,7 +17,13 @@ export class FormulaController {
 
     private _arrayFormulaLineControls: ArrayFormulaLineControl[] = [];
 
-    constructor(config: IFormulaConfig,@ISelectionManager private readonly _selectionManager: SelectionManager,@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,@Inject(CommandManager) private readonly _commandManager: CommandManager, @Inject(Injector) private readonly _sheetInjector: Injector) {
+    constructor(
+        config: IFormulaConfig,
+        @ISelectionManager private readonly _selectionManager: SelectionManager,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(CommandManager) private readonly _commandManager: CommandManager,
+        @Inject(Injector) private readonly _sheetInjector: Injector
+    ) {
         this._formulaDataModel = new FormulaDataModel(config);
 
         this._activeSheetId = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
@@ -73,7 +79,7 @@ export class FormulaController {
         return this._formulaDataModel;
     }
 
-    setFormulaEngine(formulaEngineService:FormulaEngineService) {
+    setFormulaEngine(formulaEngineService: FormulaEngineService) {
         this._formulaEngine = formulaEngineService;
     }
 
@@ -131,7 +137,7 @@ export class FormulaController {
             if (currentCellData) {
                 const { startRow: row, startColumn: column } = currentCellData;
                 if (row >= startRow && row < endRow && column >= startColumn && column < endColumn) {
-                    const arrayFormulaLineControl = this._sheetInjector.createInstance(ArrayFormulaLineControl,this._activeSheetId, v);
+                    const arrayFormulaLineControl = this._sheetInjector.createInstance(ArrayFormulaLineControl, this._activeSheetId, v);
                     this._arrayFormulaLineControls.push(arrayFormulaLineControl);
                 }
             }

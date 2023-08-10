@@ -1,14 +1,12 @@
-import { SelectionControl } from './../../../base-render/src/Component/Sheets/Selection/SelectionControl';
 import { ComponentChildren, ComponentManager } from '@univerjs/base-ui';
-import { SheetPlugin } from '@univerjs/base-sheets';
-import { ObserverManager, PLUGIN_NAMES } from '@univerjs/core';
-import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
+import { ObserverManager } from '@univerjs/core';
+import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
+import { Inject } from '@wendellhu/redi';
+import { SelectionControl } from '@univerjs/base-render/src/Component/Sheets/Selection/SelectionControl';
 import { FormulaType, FORMULA_PLUGIN_NAME, FunList, SelectCategoryType } from '../Basics';
-import { FormulaPlugin } from '../FormulaPlugin';
 import { SearchFormulaContent } from '../View/UI/SearchFormulaModal/SearchFormulaContent';
 import { SearchFormulaModal } from '../View/UI/SearchFormulaModal/SearchFormulaModal';
 import { SearchItem } from '../View/UI/SearchFormulaModal/SearchItem';
-import { Inject } from '@wendellhu/redi';
 
 export interface Label {
     type?: string;
@@ -59,7 +57,6 @@ export interface SearchFormulaModalData {
 }
 
 export class SearchFormulaController {
-
     private _modalData: SearchFormulaModalData[];
 
     private _formulaModal: SearchFormulaModal;
@@ -70,8 +67,11 @@ export class SearchFormulaController {
 
     private _cellRangeModalData: SearchFormulaModalData;
 
-    constructor(@Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,@Inject(ComponentManager) private readonly _componentManager: ComponentManager,@Inject(ObserverManager) private readonly _observerManager: ObserverManager) {
-
+    constructor(
+        @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
+    ) {
         this._funParams = {
             funParams: {},
         };

@@ -1,12 +1,10 @@
 import { $$, getRefElement } from '@univerjs/base-ui';
-import { SheetPlugin } from '@univerjs/base-sheets';
-import { KeyCode, ObserverManager, PLUGIN_NAMES, SheetContext } from '@univerjs/core';
-import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
+import { KeyCode, ObserverManager } from '@univerjs/core';
+import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
+import { Inject } from '@wendellhu/redi';
 import { FORMULA_PLUGIN_NAME, FunList } from '../Basics';
-import { FormulaPlugin } from '../FormulaPlugin';
 import { HelpFunction, SearchFunction } from '../View/UI/FormulaPrompt';
 import { CellInputHandler } from './CellInputHandler';
-import { Inject } from '@wendellhu/redi';
 
 export class FormulaPromptController {
     cellInputHandler: CellInputHandler;
@@ -19,47 +17,47 @@ export class FormulaPromptController {
 
     private _helpFunction: HelpFunction;
 
-    constructor(@Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,@Inject(ObserverManager) private readonly _observerManager: ObserverManager) {
-
+    constructor(
+        @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
+    ) {
         this._initRegisterComponent();
         this._initialize();
     }
 
     private _initRegisterComponent() {
-        this._sheetContainerUIController
-            .getMainSlotController()
-            .addSlot(
-                FORMULA_PLUGIN_NAME + SearchFunction.name,
-                {
-                    component: SearchFunction,
-                },
-                () => {
-                    const searchFunction = this._sheetContainerUIController
-                        .getMainSlotController()
-                        .getSlot(FORMULA_PLUGIN_NAME + SearchFunction.name);
-                    this._searchFunction = searchFunction;
-                }
-            );
+        this._sheetContainerUIController.getMainSlotController().addSlot(
+            FORMULA_PLUGIN_NAME + SearchFunction.name,
+            {
+                component: SearchFunction,
+            },
+            () => {
+                const searchFunction = this._sheetContainerUIController.getMainSlotController().getSlot(FORMULA_PLUGIN_NAME + SearchFunction.name);
+                this._searchFunction = searchFunction;
+            }
+        );
 
-            this._sheetContainerUIController
-            .getMainSlotController()
-            .addSlot(
-                FORMULA_PLUGIN_NAME + HelpFunction.name,
-                {
-                    component: HelpFunction,
-                },
-                () => {
-                    const helpFunction = this._sheetContainerUIController
-                        .getMainSlotController()
-                        .getSlot(FORMULA_PLUGIN_NAME + HelpFunction.name);
-                    this._helpFunction = helpFunction;
-                }
-            );
+        this._sheetContainerUIController.getMainSlotController().addSlot(
+            FORMULA_PLUGIN_NAME + HelpFunction.name,
+            {
+                component: HelpFunction,
+            },
+            () => {
+                const helpFunction = this._sheetContainerUIController.getMainSlotController().getSlot(FORMULA_PLUGIN_NAME + HelpFunction.name);
+                this._helpFunction = helpFunction;
+            }
+        );
     }
 
     private _initialize() {
+        this._mount();
+        this._onRichTextKeyDownObservable();
+        this._onRichTextKeyUpObservable();
+    }
+
+    private _mount() {
         this._sheetContainerUIController.UIDidMount(() => {
-            const richTextEle =  this._sheetContainerUIController.getCellEditorUIController()._richTextEle;
+            const richTextEle = this._sheetContainerUIController.getCellEditorUIController()._richTextEle;
 
             this.richTextEle = richTextEle;
             this.richTextEditEle = $$('div', this.richTextEle);
@@ -67,7 +65,9 @@ export class FormulaPromptController {
             // Register cell input formula support
             this.cellInputHandler = new CellInputHandler(this.richTextEditEle);
         });
+    }
 
+    private _onRichTextKeyDownObservable() {
         this._observerManager.getObserver<KeyboardEvent>('onRichTextKeyDownObservable')?.add((event: KeyboardEvent) => {
             let ctrlKey = event.ctrlKey;
             let altKey = event.altKey;
@@ -92,10 +92,11 @@ export class FormulaPromptController {
                 this.cellInputHandler.functionInputHandler(this.richTextEditEle, kcode);
             }
         });
+    }
+
+    private _onRichTextKeyUpObservable() {
         this._observerManager.getObserver<KeyboardEvent>('onRichTextKeyUpObservable')?.add((event: KeyboardEvent) => {
             let kcode = event.keyCode;
-
-            // stop edit
             if (kcode === KeyCode.ENTER) {
                 this._searchFunction.updateState(false);
                 this._helpFunction.updateState(false);
@@ -117,46 +118,27 @@ export class FormulaPromptController {
                 this.cellInputHandler.searchFunction(this.richTextEditEle);
                 const formula = this.cellInputHandler.getFormula();
                 let helpFormula = this.cellInputHandler.getHelpFormula();
-
                 let height = parseInt(this.richTextEle.style.minHeight);
                 let width = parseInt(this.richTextEle.style.minWidth);
                 let left = parseInt(this.richTextEle.style.left);
                 let top = parseInt(this.richTextEle.style.top) + height;
-
-                // Get the viewport width/height of the Main SheetContainer
-                const sheetContainer = getRefElement( this._sheetContainerUIController.getContentRef());
+                const sheetContainer = getRefElement(this._sheetContainerUIController.getContentRef());
                 const screenW = sheetContainer.offsetWidth;
                 const screenH = sheetContainer.offsetHeight;
-
-                // Parse out a reasonable display position, and the list cannot be hidden
-                const position = {
-                    left,
-                    top,
-                };
-
+                const position = { left, top };
                 const getPosition = (component: SearchFunction | HelpFunction) => {
-                    // Get the width/height of the list
                     const searchFunctionEle = getRefElement(component.getContentRef());
                     const rootW = searchFunctionEle.offsetWidth;
-                    // const rootW = this._searchFunction?.base?.offsetWidth;
                     const rootH = searchFunctionEle.offsetHeight;
-
-                    // right is true, indicating that the width from the lower left corner of the cell to the right border of the browser can hold the SearchFunction. Otherwise, the component is placed on the left.
-                    // bottom is true, indicating that the height from the lower left corner of the cell to the lower border of the browser can place the SearchFunction. Otherwise, the component is put on top.
                     const right = screenW - left > rootW;
                     const bottom = screenH - top > rootH;
-
                     if (!right) {
                         left -= rootW - width;
                     }
                     if (!bottom) {
                         top -= rootH + height;
                     }
-
-                    return {
-                        left,
-                        top,
-                    };
+                    return { left, top };
                 };
 
                 if (formula[0]) {
@@ -184,7 +166,6 @@ export class FormulaPromptController {
                     event.preventDefault();
                     event.stopPropagation();
                     const searchFunctionState = this._searchFunction.getState();
-                    // Select the formula when the search formula box is open, and execute the formula when it is closed
                     if (searchFunctionState.searchActive) {
                         const func = searchFunctionState.formula[searchFunctionState.selectIndex] as any;
                         this.cellInputHandler.searchFunctionEnter(func.n);

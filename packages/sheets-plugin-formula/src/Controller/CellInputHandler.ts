@@ -57,7 +57,7 @@ export class CellInputHandler {
 
     // inputValue: string;
 
-    formula: any;
+    formula: IKeyValue[];
 
     functionlistPosition: object;
 
@@ -186,6 +186,8 @@ export class CellInputHandler {
         }, 1);
     }
 
+    // from luckysheet
+    // eslint-disable-next-line max-lines-per-function
     findrangeindex(v: string, vp: string) {
         let _this = this;
 
@@ -395,6 +397,8 @@ export class CellInputHandler {
         return `<span dir="auto" class="universheet-formula-text-color">=</span>${_this.functionHTML(txt)}`;
     }
 
+    // from luckysheet
+    // eslint-disable-next-line max-lines-per-function
     functionHTML(txt: string) {
         let _this = this;
 

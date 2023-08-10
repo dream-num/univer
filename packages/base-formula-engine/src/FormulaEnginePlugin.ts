@@ -1,16 +1,13 @@
 import { Injector, Inject } from '@wendellhu/redi';
 import { SheetContext, Plugin } from '@univerjs/core';
 
-
 import { FormulaEnginePluginObserver } from './Analysis/LexerNode';
-import { FormulaEngineService } from './Service/FormulaEngine.service';
 
 interface IFormulaEnginePlugin {}
 
 export class FormulaEnginePlugin extends Plugin<FormulaEnginePluginObserver> {
-    constructor(config: IFormulaEnginePlugin,@Inject(Injector) private readonly _sheetInjector: Injector) {
+    constructor(config: IFormulaEnginePlugin, @Inject(Injector) private readonly _sheetInjector: Injector) {
         super('formulaEngine');
-       
     }
 
     initialize(): void {}

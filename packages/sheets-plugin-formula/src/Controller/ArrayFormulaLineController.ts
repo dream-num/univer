@@ -1,8 +1,7 @@
-import { ICurrentUniverService, IRangeData, PLUGIN_NAMES, Workbook } from '@univerjs/core';
+import { ICurrentUniverService, IRangeData, Workbook } from '@univerjs/core';
 import { Rect, Scene } from '@univerjs/base-render';
-import { CanvasView, SheetPlugin, SheetView } from '@univerjs/base-sheets';
+import { CanvasView, SheetView } from '@univerjs/base-sheets';
 
-import { FormulaPlugin } from '../FormulaPlugin';
 import { Inject } from '@wendellhu/redi';
 
 enum ARRAY_FORMULA_LINE_MANAGER_KEY {
@@ -18,7 +17,6 @@ const LINE_COLOR = '#3969b9';
  * Ant Line Controller
  */
 export class ArrayFormulaLineControl {
-
     private _leftControl: Rect;
 
     private _rightControl: Rect;
@@ -33,8 +31,12 @@ export class ArrayFormulaLineControl {
      * Create ArrayFormLineController
      * @param plugin
      */
-    constructor(private _sheetId: string, private _range: IRangeData,@ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,@Inject(CanvasView) private readonly _canvasView: CanvasView) {
-
+    constructor(
+        private _sheetId: string,
+        private _range: IRangeData,
+        @ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
+        @Inject(CanvasView) private readonly _canvasView: CanvasView
+    ) {
         this._initialize();
     }
 

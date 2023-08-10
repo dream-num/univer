@@ -1,4 +1,5 @@
 import { BaseComponentProps, Component, createRef } from '@univerjs/base-ui';
+import { IKeyValue } from '@univerjs/core';
 import styles from './index.module.less';
 
 interface IProps extends BaseComponentProps {}
@@ -7,7 +8,7 @@ interface IState {
     lang: string;
     locale: [];
     formulaValue: string;
-    formula: [];
+    formula: IKeyValue[];
     functionList: any;
     selectIndex: number;
     searchActive: boolean;
@@ -52,7 +53,7 @@ export class SearchFunction extends Component<IProps, IState> {
      * @param formula
      * @param selectIndex
      */
-    updateState(searchActive: boolean, formula: [] = [], selectIndex: number = 0, position = { left: 0, top: 0 }, cb?: () => void) {
+    updateState(searchActive: boolean, formula: IKeyValue[] = [], selectIndex: number = 0, position = { left: 0, top: 0 }, cb?: () => void) {
         this.setState({ searchActive, formula, selectIndex, position }, cb);
     }
 

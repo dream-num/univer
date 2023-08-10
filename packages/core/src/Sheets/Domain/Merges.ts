@@ -1,9 +1,5 @@
-import {
-    CommandManager,
-    Command,
-    SheetActionBase,
-    ISheetActionData,
-} from '../../Command';
+import { Inject } from '@wendellhu/redi';
+import { CommandManager, Command, SheetActionBase, ISheetActionData } from '../../Command';
 import {
     DeleteRangeAction,
     IAddMergeActionData,
@@ -18,6 +14,7 @@ import {
 import { Nullable, Tools, Rectangle, Tuples } from '../../Shared';
 import { Worksheet } from './Worksheet';
 import { IRangeData } from '../../Types/Interfaces';
+import { ICurrentUniverService } from '../../Service/Current.service';
 
 /**
  * Manage merged cells
@@ -27,17 +24,20 @@ export class Merges {
 
     private _worksheet: Worksheet;
 
-    constructor(worksheet: Worksheet, mergeData: any) {
+    // eslint-disable-next-line max-lines-per-function
+    constructor(
+        worksheet: Worksheet,
+        mergeData: any,
+        @Inject(CommandManager) private readonly _commandManager: CommandManager,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+    ) {
         this._worksheet = worksheet;
         this._rectangleList = mergeData ?? [];
+        // eslint-disable-next-line max-lines-per-function
         CommandManager.getCommandObservers().add(({ actions }) => {
             if (!actions || actions.length === 0) return;
 
-            const action = actions[0] as SheetActionBase<
-                ISheetActionData,
-                ISheetActionData,
-                void
-            >;
+            const action = actions[0] as SheetActionBase<ISheetActionData, ISheetActionData, void>;
 
             // TODO not use try catch
             try {
@@ -45,25 +45,15 @@ export class Merges {
             } catch (error) {
                 return;
             }
-            const currentUnitId = worksheet.getContext().getWorkBook().getUnitId();
+            const currentUnitId = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getUnitId();
             const actionUnitId = action.getWorkBook().getUnitId();
             if (currentUnitId !== actionUnitId) return;
 
-            let insertRowAction = actions.find(
-                (action) => action instanceof InsertRowAction
-            ) as InsertRowAction;
-            let insertColumnAction = actions.find(
-                (action) => action instanceof InsertColumnAction
-            ) as InsertColumnAction;
-            let deleteRowAction = actions.find(
-                (action) => action instanceof RemoveRowAction
-            ) as RemoveRowAction;
-            let deleteColumnAction = actions.find(
-                (action) => action instanceof RemoveColumnAction
-            ) as RemoveColumnAction;
-            let deleteRangeAction = actions.find(
-                (action) => action instanceof DeleteRangeAction
-            ) as DeleteRangeAction;
+            const insertRowAction = actions.find((action) => action instanceof InsertRowAction) as InsertRowAction;
+            const insertColumnAction = actions.find((action) => action instanceof InsertColumnAction) as InsertColumnAction;
+            const deleteRowAction = actions.find((action) => action instanceof RemoveRowAction) as RemoveRowAction;
+            const deleteColumnAction = actions.find((action) => action instanceof RemoveColumnAction) as RemoveColumnAction;
+            const deleteRangeAction = actions.find((action) => action instanceof DeleteRangeAction) as DeleteRangeAction;
 
             if (insertRowAction) {
                 const data = insertRowAction.getDoActionData();
@@ -74,10 +64,7 @@ export class Merges {
                         const count = data.rowCount;
                         if (data.rowIndex > merge.endRow) {
                             continue;
-                        } else if (
-                            data.rowIndex >= merge.startRow &&
-                            data.rowIndex <= merge.endRow
-                        ) {
+                        } else if (data.rowIndex >= merge.startRow && data.rowIndex <= merge.endRow) {
                             merge.endRow += count;
                         } else {
                             merge.startRow += count;
@@ -96,10 +83,7 @@ export class Merges {
                         const count = data.columnCount;
                         if (data.columnIndex > merge.endColumn) {
                             continue;
-                        } else if (
-                            data.columnIndex >= merge.startColumn &&
-                            data.columnIndex <= merge.endColumn
-                        ) {
+                        } else if (data.columnIndex >= merge.startColumn && data.columnIndex <= merge.endColumn) {
                             merge.endColumn += count;
                         } else {
                             merge.startColumn += count;
@@ -118,10 +102,7 @@ export class Merges {
                         const count = data.rowCount;
                         if (data.rowIndex > merge.endRow) {
                             continue;
-                        } else if (
-                            data.rowIndex >= merge.startRow &&
-                            data.rowIndex <= merge.endRow
-                        ) {
+                        } else if (data.rowIndex >= merge.startRow && data.rowIndex <= merge.endRow) {
                             merge.endRow -= count;
                         } else {
                             merge.startRow -= count;
@@ -140,10 +121,7 @@ export class Merges {
                         const count = data.columnCount;
                         if (data.columnIndex > merge.endColumn) {
                             continue;
-                        } else if (
-                            data.columnIndex >= merge.startColumn &&
-                            data.columnIndex <= merge.endColumn
-                        ) {
+                        } else if (data.columnIndex >= merge.startColumn && data.columnIndex <= merge.endColumn) {
                             merge.endColumn -= count;
                         } else {
                             merge.startColumn -= count;
@@ -157,12 +135,7 @@ export class Merges {
                 const data = deleteRangeAction.getDoActionData();
                 if (data.sheetId === this._worksheet.getSheetId()) {
                     const rectangleList = Tools.deepClone(this._rectangleList);
-                    const hasMerge = this.getByRowColumn(
-                        data.rangeData.startRow,
-                        data.rangeData.endRow,
-                        data.rangeData.startColumn,
-                        data.rangeData.endColumn
-                    );
+                    const hasMerge = this.getByRowColumn(data.rangeData.startRow, data.rangeData.endRow, data.rangeData.startColumn, data.rangeData.endColumn);
                     if (hasMerge) {
                         hasMerge.forEach((item) => {
                             const target = new Rectangle(item);
@@ -181,18 +154,10 @@ export class Merges {
                             if (merge.endRow >= data.rangeData.startRow) {
                                 if (merge.endColumn < data.rangeData.startColumn) {
                                     continue;
-                                } else if (
-                                    merge.startColumn > data.rangeData.endColumn
-                                ) {
+                                } else if (merge.startColumn > data.rangeData.endColumn) {
                                     continue;
-                                } else if (
-                                    merge.startColumn >=
-                                        data.rangeData.startColumn &&
-                                    merge.endColumn <= data.rangeData.endColumn
-                                ) {
-                                    const count =
-                                        data.rangeData.endRow -
-                                        data.rangeData.startRow;
+                                } else if (merge.startColumn >= data.rangeData.startColumn && merge.endColumn <= data.rangeData.endColumn) {
+                                    const count = data.rangeData.endRow - data.rangeData.startRow;
 
                                     merge.startRow -= count;
                                     merge.endRow -= count;
@@ -210,13 +175,8 @@ export class Merges {
                                     continue;
                                 } else if (merge.startRow > data.rangeData.endRow) {
                                     continue;
-                                } else if (
-                                    merge.startRow >= data.rangeData.startRow &&
-                                    merge.endRow <= data.rangeData.endRow
-                                ) {
-                                    const count =
-                                        data.rangeData.endColumn -
-                                        data.rangeData.startColumn;
+                                } else if (merge.startRow >= data.rangeData.startRow && merge.endRow <= data.rangeData.endRow) {
+                                    const count = data.rangeData.endColumn - data.rangeData.startColumn;
 
                                     merge.startColumn -= count;
                                     merge.endColumn -= count;
@@ -237,40 +197,15 @@ export class Merges {
         return this._rectangleList;
     }
 
-    getByRowColumn(
-        startRow: number,
-        endRow: number,
-        startColumn: number,
-        endColumn: number
-    ): Nullable<IRangeData[]>;
+    getByRowColumn(startRow: number, endRow: number, startColumn: number, endColumn: number): Nullable<IRangeData[]>;
     getByRowColumn(row: number, column: number): Nullable<IRangeData[]>;
     getByRowColumn(...argument: any): Nullable<IRangeData[]> {
         const { _rectangleList } = this;
         let target: Rectangle;
-        if (
-            Tuples.checkup(
-                argument,
-                Tuples.NUMBER_TYPE,
-                Tuples.NUMBER_TYPE,
-                Tuples.NUMBER_TYPE,
-                Tuples.NUMBER_TYPE
-            )
-        ) {
-            target = new Rectangle(
-                argument[0],
-                argument[2],
-                argument[1],
-                argument[3]
-            );
-        } else if (
-            Tuples.checkup(argument, Tuples.NUMBER_TYPE, Tuples.NUMBER_TYPE)
-        ) {
-            target = new Rectangle(
-                argument[0],
-                argument[1],
-                argument[0],
-                argument[1]
-            );
+        if (Tuples.checkup(argument, Tuples.NUMBER_TYPE, Tuples.NUMBER_TYPE, Tuples.NUMBER_TYPE, Tuples.NUMBER_TYPE)) {
+            target = new Rectangle(argument[0], argument[2], argument[1], argument[3]);
+        } else if (Tuples.checkup(argument, Tuples.NUMBER_TYPE, Tuples.NUMBER_TYPE)) {
+            target = new Rectangle(argument[0], argument[1], argument[0], argument[1]);
         }
         const rectList = [];
         for (let i = 0; i < _rectangleList.length; i++) {
@@ -285,21 +220,19 @@ export class Merges {
     }
 
     remove(rectangle: IRangeData): void {
-        let commandManager = this._worksheet.getCommandManager();
-        let context = this._worksheet.getContext();
-        let removeAction: IRemoveMergeActionData = {
+        const removeAction: IRemoveMergeActionData = {
             actionName: RemoveMergeAction.NAME,
             sheetId: this._worksheet.getSheetId(),
             rectangles: [rectangle],
         };
 
-        let command = new Command(
+        const command = new Command(
             {
-                WorkBookUnit: context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             removeAction
         );
-        commandManager.invoke(command);
+        this._commandManager.invoke(command);
     }
 
     size() {
@@ -307,26 +240,24 @@ export class Merges {
     }
 
     add(rectangle: IRangeData): void {
-        let commandManager = this._worksheet.getCommandManager();
-        let context = this._worksheet.getContext();
-        let removeAction: IRemoveMergeActionData = {
+        const removeAction: IRemoveMergeActionData = {
             actionName: RemoveMergeAction.NAME,
             sheetId: this._worksheet.getSheetId(),
             rectangles: [rectangle],
         };
-        let appendAction: IAddMergeActionData = {
+        const appendAction: IAddMergeActionData = {
             actionName: AddMergeAction.NAME,
             sheetId: this._worksheet.getSheetId(),
             rectangles: [rectangle],
         };
-        let command = new Command(
+        const command = new Command(
             {
-                WorkBookUnit: context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             removeAction,
             appendAction
         );
-        commandManager.invoke(command);
+        this._commandManager.invoke(command);
     }
 
     union(rectangle: IRangeData): IRangeData {
@@ -355,25 +286,23 @@ export class Merges {
     }
 
     modifyMerge(originMerge: IRangeData[], currentMerge: IRangeData[]) {
-        let commandManager = this._worksheet.getCommandManager();
-        let context = this._worksheet.getContext();
-        let removeAction: IRemoveMergeActionData = {
+        const removeAction: IRemoveMergeActionData = {
             actionName: RemoveMergeAction.NAME,
             sheetId: this._worksheet.getSheetId(),
             rectangles: [...originMerge],
         };
-        let appendAction: IAddMergeActionData = {
+        const appendAction: IAddMergeActionData = {
             actionName: AddMergeAction.NAME,
             sheetId: this._worksheet.getSheetId(),
             rectangles: [...currentMerge],
         };
-        let command = new Command(
+        const command = new Command(
             {
-                WorkBookUnit: context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             removeAction,
             appendAction
         );
-        commandManager.invoke(command);
+        this._commandManager.invoke(command);
     }
 }

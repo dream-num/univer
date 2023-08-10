@@ -11,13 +11,7 @@ export class Styles {
         this._styles = styles;
     }
 
-    each(
-        callback: (
-            value: [string, Nullable<IStyleData>],
-            index: number,
-            array: Array<[string, Nullable<IStyleData>]>
-        ) => void
-    ) {
+    each(callback: (value: [string, Nullable<IStyleData>], index: number, array: Array<[string, Nullable<IStyleData>]>) => void) {
         Object.entries(this._styles).forEach(callback);
         return this;
     }

@@ -1,21 +1,9 @@
-import {
-    DEFAULT_RANGE_ARRAY,
-    DEFAULT_WORKBOOK,
-    DEFAULT_WORKSHEET,
-} from '../../Types/Const';
+import { Inject, forwardRef } from '@wendellhu/redi';
 
+import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../../Types/Const';
+import { Command, CommandManager } from '../../Command';
 import { BooleanNumber } from '../../Types/Enum';
-import { SheetContext, Univer } from '../../Basics';
-
-import {
-    InsertSheetAction,
-    ISetSheetOrderActionData,
-    RemoveSheetAction,
-    SetSheetOrderAction,
-    IInsertSheetActionData,
-    IRemoveSheetActionData,
-} from '../Action';
-
+import { InsertSheetAction, ISetSheetOrderActionData, RemoveSheetAction, SetSheetOrderAction, IInsertSheetActionData, IRemoveSheetActionData } from '../Action';
 import {
     IColumnStartEndData,
     IGridRange,
@@ -27,16 +15,15 @@ import {
     IWorkbookConfig,
     IWorksheetConfig,
 } from '../../Types/Interfaces';
-
-import { Nullable, Tools, Tuples } from '../../Shared';
+import { GenName, Nullable, Tools, Tuples } from '../../Shared';
 import { RangeList } from './RangeList';
 import { Selection } from './Selection';
 import { Styles } from './Styles';
 import { Worksheet } from './Worksheet';
 import { Range } from './Range';
-
 import { NamedRange } from './NamedRange';
-import { Command, CommandManager } from '../../Command';
+import { ObserverManager } from '../../Observer';
+import { ICurrentUniverService } from '../../Service/Current.service';
 
 /**
  * Access and create Univer Sheets files
@@ -64,24 +51,23 @@ export class Workbook {
 
     private _unitId: string;
 
-    private _context: SheetContext;
-
-    private _namedRange: NamedRange;
-
-    constructor(workbookData: Partial<IWorkbookConfig> = {}, context: SheetContext) {
+    constructor(
+        workbookData: Partial<IWorkbookConfig> = {},
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(forwardRef(() => GenName)) private readonly _genName: GenName,
+        @Inject(CommandManager) private readonly _commandManager: CommandManager,
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
+    ) {
         this._config = Tools.commonExtend(DEFAULT_WORKBOOK, workbookData);
-        this._context = context;
 
         const { styles } = this._config;
         if (this._config.id == null || this._config.id.length === 0) {
             this._config.id = Tools.generateRandomId(6);
         }
+
         this._unitId = this._config.id;
         this._styles = new Styles(styles);
         this._worksheets = new Map<string, Worksheet>();
-        // this._formatManage = new FormatManager();
-        // namedRange
-        this._namedRange = new NamedRange(this);
     }
 
     /**
@@ -92,16 +78,14 @@ export class Workbook {
     static rangeDataToRangeStringData(rangeData: IRangeData) {
         const { startRow, endRow, startColumn, endColumn } = rangeData;
 
-        return `${Tools.chatAtABC(startColumn) + (startRow + 1)}:${Tools.chatAtABC(
-            endColumn
-        )}${endRow + 1}`;
+        return `${Tools.chatAtABC(startColumn) + (startRow + 1)}:${Tools.chatAtABC(endColumn)}${endRow + 1}`;
     }
 
     static isIRangeType(range: IRangeType | IRangeType[]): Boolean {
         return typeof range === 'string' || 'startRow' in range || 'row' in range;
     }
 
-    onUniver(univer: Univer) {
+    onUniver() {
         this._getDefaultWorkSheet();
     }
 
@@ -111,10 +95,6 @@ export class Workbook {
 
     getWorksheets(): Map<string, Worksheet> {
         return this._worksheets;
-    }
-
-    getNamedRang(): NamedRange {
-        return this._namedRange;
     }
 
     activateSheetByIndex(index: number): Nullable<Worksheet> {
@@ -136,9 +116,7 @@ export class Workbook {
                     }
                 }
             }
-            const worksheet = this._worksheets.get(
-                sheetOrder[sheetOrder.length - 1]
-            );
+            const worksheet = this._worksheets.get(sheetOrder[sheetOrder.length - 1]);
             if (worksheet) {
                 worksheet.activate();
             }
@@ -146,9 +124,7 @@ export class Workbook {
         }
     }
 
-    setContext(context: SheetContext): void {
-        this._context = context;
-    }
+    // TODO: @Dushusir: this function has too many function overloads
 
     insertSheet(): Nullable<string>;
     insertSheet(index: number): Nullable<string>;
@@ -158,12 +134,13 @@ export class Workbook {
     insertSheet(name: string, index: number): Nullable<string>;
     insertSheet(index: number, data: Partial<IWorksheetConfig>): Nullable<string>;
     insertSheet(index: number, sheet: Worksheet): Nullable<string>;
+    // eslint-disable-next-line max-lines-per-function
     insertSheet(...argument: any[]): Nullable<string> {
-        const { _context } = this;
-        const genname = _context.getGenName();
-        const commandManager = this.getCommandManager();
-        const before = _context.getContextObserver('onBeforeInsertSheetObservable');
-        const after = _context.getContextObserver('onAfterInsertSheetObservable');
+        const genname = this._genName;
+        const commandManager = this._commandManager;
+        const before = this._observerManager.getObserver<{ index: number; sheetId: string }>('onBeforeInsertSheetObservable', 'core')!;
+        const after = this._observerManager.getObserver<{ index: number; sheetId: string }>('onAfterInsertSheetObservable', 'core')!;
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
 
         // insert empty sheet
         if (Tools.hasLength(argument, 0)) {
@@ -180,7 +157,7 @@ export class Workbook {
             commandManager.invoke(
                 new Command(
                     {
-                        WorkBookUnit: _context.getWorkBook(),
+                        WorkBookUnit: workbook,
                     },
                     {
                         actionName: InsertSheetAction.NAME,
@@ -211,7 +188,7 @@ export class Workbook {
                 commandManager.invoke(
                     new Command(
                         {
-                            WorkBookUnit: _context.getWorkBook(),
+                            WorkBookUnit: workbook,
                         },
                         {
                             actionName: InsertSheetAction.NAME,
@@ -243,7 +220,7 @@ export class Workbook {
                 commandManager.invoke(
                     new Command(
                         {
-                            WorkBookUnit: _context.getWorkBook(),
+                            WorkBookUnit: workbook,
                         },
                         {
                             actionName: InsertSheetAction.NAME,
@@ -276,7 +253,7 @@ export class Workbook {
                 commandManager.invoke(
                     new Command(
                         {
-                            WorkBookUnit: _context.getWorkBook(),
+                            WorkBookUnit: workbook,
                         },
                         {
                             actionName: InsertSheetAction.NAME,
@@ -304,7 +281,7 @@ export class Workbook {
                 commandManager.invoke(
                     new Command(
                         {
-                            WorkBookUnit: _context.getWorkBook(),
+                            WorkBookUnit: workbook,
                         },
                         {
                             actionName: InsertSheetAction.NAME,
@@ -339,7 +316,7 @@ export class Workbook {
                 commandManager.invoke(
                     new Command(
                         {
-                            WorkBookUnit: _context.getWorkBook(),
+                            WorkBookUnit: workbook,
                         },
                         {
                             actionName: InsertSheetAction.NAME,
@@ -369,7 +346,7 @@ export class Workbook {
                     commandManager.invoke(
                         new Command(
                             {
-                                WorkBookUnit: _context.getWorkBook(),
+                                WorkBookUnit: workbook,
                             },
                             {
                                 actionName: InsertSheetAction.NAME,
@@ -395,7 +372,7 @@ export class Workbook {
                     commandManager.invoke(
                         new Command(
                             {
-                                WorkBookUnit: _context.getWorkBook(),
+                                WorkBookUnit: workbook,
                             },
                             {
                                 actionName: InsertSheetAction.NAME,
@@ -423,10 +400,6 @@ export class Workbook {
         return this._styles;
     }
 
-    getContext(): SheetContext {
-        return this._context;
-    }
-
     getConfig(): IWorkbookConfig {
         // const { _config } = this;
         // const sheets = {};
@@ -445,26 +418,18 @@ export class Workbook {
     create(name: string): Worksheet;
     create(...argument: unknown[]): unknown {
         if (Tools.hasLength(argument, 1)) {
-            const { _context } = this;
             const name = argument[0];
             const conf = { ...DEFAULT_WORKSHEET, name };
-            const worksheet = new Worksheet(
-                _context,
-                conf as Partial<IWorksheetConfig>
-            );
+            const worksheet = new Worksheet(conf as Partial<IWorksheetConfig>, this._commandManager, this._observerManager, this._currentUniverService);
             this.insertSheet(worksheet);
             return worksheet;
         }
         if (Tools.hasLength(argument, 3)) {
-            const { _context } = this;
             const name = argument[0];
             const rowCount = argument[1];
             const columnCount = argument[2];
             const conf = { ...DEFAULT_WORKSHEET, name, rowCount, columnCount };
-            const worksheet = new Worksheet(
-                _context,
-                conf as Partial<IWorksheetConfig>
-            );
+            const worksheet = new Worksheet(conf as Partial<IWorksheetConfig>, this._commandManager, this._observerManager, this._currentUniverService);
             this.insertSheet(worksheet);
             return worksheet;
         }
@@ -579,9 +544,7 @@ export class Workbook {
         // const exclude = _sheetOrder.filter((currentId) => currentId !== sheetId);
         // exclude.splice(order, 0, sheetId);
         // this._sheetOrder = exclude;
-        const { _context } = this;
-        const commandManager = this.getCommandManager();
-        const observer = _context.getContextObserver('onSheetOrderObservable');
+        const observer = this._observerManager.getObserver('onSheetOrderObservable', 'core')!;
         const config: ISetSheetOrderActionData = {
             actionName: SetSheetOrderAction.NAME,
             sheetId,
@@ -589,19 +552,17 @@ export class Workbook {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             config
         );
-        commandManager.invoke(command);
+        this._commandManager.invoke(command);
         observer.notifyObservers();
     }
 
     getSheets(): Worksheet[] {
         const { sheetOrder } = this._config;
-        return sheetOrder.map((sheetId) =>
-            this._worksheets.get(sheetId)
-        ) as Worksheet[];
+        return sheetOrder.map((sheetId) => this._worksheets.get(sheetId)) as Worksheet[];
     }
 
     getSheetIndex(sheet: Worksheet): number {
@@ -622,12 +583,8 @@ export class Workbook {
 
         if (sheetOrder.length > 1 && sheet != null) {
             const index = this.getSheetIndex(sheet);
-            const before = this.getContext().getContextObserver(
-                'onBeforeRemoveSheetObservable'
-            );
-            const aftert = this.getContext().getContextObserver(
-                'onAfterRemoveSheetObservable'
-            );
+            const before = this._observerManager.getObserver<{ index: number }>('onBeforeRemoveSheetObservable', 'core')!;
+            const aftert = this._observerManager.getObserver<{ index: number; sheetId: string }>('onAfterRemoveSheetObservable', 'core')!;
             before.notifyObservers({
                 index,
             });
@@ -692,14 +649,6 @@ export class Workbook {
         }
 
         return worksheet;
-    }
-
-    // getFormatManager(): FormatManager {
-    //     return this._formatManage;
-    // }
-
-    getCommandManager(): CommandManager {
-        return this._context.getCommandManager();
     }
 
     getPluginMeta<T>(name: string): T {
@@ -801,9 +750,8 @@ export class Workbook {
      * @private
      */
     private _getDefaultWorkSheet(): void {
-        const { _context, _config, _worksheets } = this;
+        const { _config, _worksheets } = this;
         const { sheets, sheetOrder } = _config;
-        const genname = _context.getGenName();
 
         // One worksheet by default
         if (Tools.isEmptyObject(sheets)) {
@@ -816,8 +764,8 @@ export class Workbook {
 
         for (let sheetId in sheets) {
             let config = sheets[sheetId];
-            config.name = genname.sheetName(config.name);
-            const worksheet = new Worksheet(_context, config);
+            config.name = this._genName.sheetName(config.name);
+            const worksheet = new Worksheet(config, this._commandManager, this._observerManager, this._currentUniverService);
             _worksheets.set(sheetId, worksheet);
             if (!sheetOrder.includes(sheetId)) {
                 sheetOrder.push(sheetId);
@@ -865,10 +813,7 @@ export class Workbook {
             sheetTxt = val[0];
             rangeTxt = val[1];
             sheetTxt = sheetTxt.replace(/\\'/g, "'").replace(/''/g, "'");
-            if (
-                sheetTxt.substring(0, 1) === "'" &&
-                sheetTxt.substring(sheetTxt.length - 1, 1) === "'"
-            ) {
+            if (sheetTxt.substring(0, 1) === "'" && sheetTxt.substring(sheetTxt.length - 1, 1) === "'") {
                 sheetTxt = sheetTxt.substring(1, sheetTxt.length - 1);
             }
         } else {
@@ -896,12 +841,8 @@ export class Workbook {
 
         const row: IRowStartEndData = [0, 0];
         const col: IColumnStartEndData = [0, 0];
-        const maxRow =
-            this.getSheetBySheetName(sheetTxt)?.getMaxRows() ||
-            this.getActiveSheet()?.getMaxRows();
-        const maxCol =
-            this.getSheetBySheetName(sheetTxt)?.getMaxColumns() ||
-            this.getActiveSheet()?.getMaxColumns();
+        const maxRow = this.getSheetBySheetName(sheetTxt)?.getMaxRows() || this.getActiveSheet()?.getMaxRows();
+        const maxCol = this.getSheetBySheetName(sheetTxt)?.getMaxColumns() || this.getActiveSheet()?.getMaxColumns();
         row[0] = parseInt(rangeTxt[0].replace(/[^0-9]/g, ''), 10) - 1;
         row[1] = parseInt(rangeTxt[1].replace(/[^0-9]/g, ''), 10) - 1;
 

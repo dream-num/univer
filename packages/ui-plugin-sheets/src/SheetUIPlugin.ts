@@ -1,5 +1,5 @@
 import { Inject, Injector } from '@wendellhu/redi';
-import { Plugin, Tools, Univer, PluginType } from '@univerjs/core';
+import { Plugin, Tools, Univer, PluginType, LocaleService } from '@univerjs/core';
 import { ComponentManager, getRefElement, RegisterManager, KeyboardManager, SlotComponent, ZIndexManager, SlotManager } from '@univerjs/base-ui';
 import { IRenderingEngine } from '@univerjs/base-render';
 import { DefaultSheetUIConfig, installObserver, ISheetUIPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';
@@ -24,14 +24,10 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
 
     private _componentManager: ComponentManager;
 
-    constructor(config: ISheetUIPluginConfig, @Inject(Injector) private readonly _sheetInjector: Injector) {
+    constructor(config: ISheetUIPluginConfig, @Inject(Injector) override readonly _injector: Injector, @Inject(LocaleService) private readonly _localeService: LocaleService) {
         super(SHEET_UI_PLUGIN_NAME);
 
         this._config = Tools.deepMerge({}, DefaultSheetUIConfig, config);
-    }
-
-    static create(config?: ISheetUIPluginConfig) {
-        return new SheetUIPlugin(config || {}, new Injector());
     }
 
     installTo(univerInstance: Univer) {
@@ -45,7 +41,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
          *
          * TODO 异步加载
          */
-        this.getLocale().load({
+        this._localeService.getLocale().load({
             zh,
             en,
         });
@@ -59,24 +55,24 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
     }
 
     initializeDependencies(): void {
-        this._sheetInjector.add([KeyboardManager]);
-        this._sheetInjector.add([RegisterManager]);
-        this._sheetInjector.add([ComponentManager]);
-        this._sheetInjector.add([ZIndexManager]);
-        this._sheetInjector.add([SlotManager]);
+        this._injector.add([KeyboardManager]);
+        this._injector.add([RegisterManager]);
+        this._injector.add([ComponentManager]);
+        this._injector.add([ZIndexManager]);
+        this._injector.add([SlotManager]);
 
         // TODO: maybe we don't have to instantiate these dependencies manually
-        this._componentManager = this._sheetInjector.get(ComponentManager);
-        this._keyboardManager = this._sheetInjector.get(KeyboardManager);
-        this._zIndexManager = this._sheetInjector.get(ZIndexManager);
-        this._registerManager = this._sheetInjector.get(RegisterManager);
+        this._componentManager = this._injector.get(ComponentManager);
+        this._keyboardManager = this._injector.get(KeyboardManager);
+        this._zIndexManager = this._injector.get(ZIndexManager);
+        this._registerManager = this._injector.get(RegisterManager);
 
-        this._appUIController = this._sheetInjector.createInstance(AppUIController, this._config);
+        this._appUIController = this._injector.createInstance(AppUIController, this._config);
     }
 
     initRender() {
-        const engine = this._sheetInjector.get(IRenderingEngine);
-        let container = getRefElement(this._appUIController.getSheetContainerController().getContentRef());
+        const engine = this._injector.get(IRenderingEngine);
+        const container = getRefElement(this._appUIController.getSheetContainerController().getContentRef());
 
         // mount canvas to DOM container
         engine.setContainer(container);
@@ -91,13 +87,13 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
         }, 0);
     }
 
-    initUI() { }
+    initUI() {}
 
     override onMounted(): void {
         this.initialize();
     }
 
-    override onDestroy(): void { }
+    override onDestroy(): void {}
 
     getAppUIController() {
         return this._appUIController;

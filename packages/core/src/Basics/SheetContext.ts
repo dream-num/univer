@@ -1,3 +1,5 @@
+import { Inject, Injector } from '@wendellhu/redi';
+
 import { Workbook } from '../Sheets/Domain';
 import { WorkBookObserverImpl } from './WorkBookObserverImpl';
 import { ContextBase } from './ContextBase';
@@ -15,11 +17,13 @@ export class SheetContext extends ContextBase {
 
     protected _genname: GenName;
 
-    constructor(univerSheetData: Partial<IWorkbookConfig> = {}) {
+    constructor(univerSheetData: Partial<IWorkbookConfig> = {}, @Inject(Injector) private readonly _sheetInjector: Injector) {
         super();
-        this._setObserver();
-        this._genname = new GenName();
-        this._workbook = new Workbook(univerSheetData, this);
+        this._workbook = this._sheetInjector.createInstance(Workbook, univerSheetData);
+    }
+
+    UNSAFE_setGenName(genName: GenName): void {
+        this._genname = genName;
     }
 
     getWorkBook(): Workbook {
@@ -30,17 +34,18 @@ export class SheetContext extends ContextBase {
         return this._genname;
     }
 
-    onUniver(univer: Univer) {
+    override onUniver(univer: Univer) {
         super.onUniver(univer);
-        this._workbook.onUniver(univer);
+
+        this._workbook.onUniver();
     }
 
     getContextObserver<Key extends keyof WorkBookObserver>(value: Key): Observable<PropsFrom<WorkBookObserver[Key]>> {
         return this.getObserverManager().requiredObserver(value, 'core');
     }
 
-    refreshWorkbook(univerSheetData: Partial<IWorkbookConfig> = {}) {
-        this._workbook = new Workbook(univerSheetData, this);
+    TEMP_setObserver(): void {
+        this._setObserver();
     }
 
     protected _setObserver(): void {
@@ -48,7 +53,7 @@ export class SheetContext extends ContextBase {
         new WorkBookObserverImpl().install(manager);
     }
 
-    protected _initialize(): void {
+    protected override _initialize(): void {
         // EMPTY Context Initialize
     }
 }

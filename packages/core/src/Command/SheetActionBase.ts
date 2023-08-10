@@ -1,3 +1,4 @@
+import { Injector } from '@wendellhu/redi';
 import { Workbook, Worksheet } from '../Sheets/Domain';
 import { ActionBase, IActionData, ActionObservers, CommandUnit } from './index';
 
@@ -7,6 +8,7 @@ import { ActionBase, IActionData, ActionObservers, CommandUnit } from './index';
 export interface ISheetActionData extends IActionData {
     sheetId: string;
     rangeRef?: string;
+    injector?: Injector;
 }
 
 /**

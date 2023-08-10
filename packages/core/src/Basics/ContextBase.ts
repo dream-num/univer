@@ -33,9 +33,18 @@ export abstract class ContextBase {
         this._initialize();
     }
 
+    /**
+     * This is a temporary hack before we completely remove Context.
+     */
+    UNSAFE_setObserverManager(observerManager: ObserverManager): void {
+        this._observerManager = observerManager;
+    }
+
     onUniver(univer: Univer): void {
         const globalContext = univer.getGlobalContext();
         this._univer = univer;
+
+        // TODO: huwenzhao: 这里的意思其实就是业务 Context 里面要复用上层的 undoManager 和 CommandManager
         this._undoManager = globalContext.getUndoManager();
         this._commandManager = globalContext.getCommandManager();
     }

@@ -9,16 +9,12 @@ export class RenderEngine extends Plugin {
 
     private _engine: Engine;
 
-    constructor(@Optional(Injector) private readonly _injector?: Injector) {
+    constructor(@Optional(Injector) override readonly _injector: Injector) {
         super(PLUGIN_NAMES.BASE_RENDER);
 
         this._engine = new Engine();
 
         this._injector?.add([IRenderingEngine, { useFactory: () => this._engine }]);
-    }
-
-    static create() {
-        return new RenderEngine();
     }
 
     installTo(univerInstance: Univer) {

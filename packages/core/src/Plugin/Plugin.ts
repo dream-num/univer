@@ -1,10 +1,7 @@
 import { Ctor, Injector } from '@wendellhu/redi';
-import { ContextBase } from '../Basics/ContextBase';
 
-import { Context } from '../Basics/Context';
-import { Observable, Observer, ObserverManager } from '../Observer';
-import { Locale, Nullable, PropsFrom } from '../Shared';
-import { Univer } from '../Basics';
+import { Observable, ObserverManager } from '../Observer';
+import { Nullable } from '../Shared';
 
 export type PluginCtor<T extends Plugin> = Ctor<T> & { type: PluginType };
 
@@ -20,48 +17,33 @@ export enum PluginType {
  * Basics function of plugin
  */
 export interface BasePlugin {
-    context: ContextBase;
-    getContext(): ContextBase;
-    getGlobalContext(): Context;
-    getLocale(): Locale;
     getPluginName(): string;
 
     /**
      * Could register dependencies at this lifecycle stage.
      */
-    onCreate(context: ContextBase): void;
+    onCreate(): void;
 
     /**
      * Could setup initialization works at this lifecycle stage.
      */
-    onMounted(context: ContextBase): void;
+    onMounted(): void;
 
     /**
      * Could do some initialization works at this lifecycle stage.
      */
     onDestroy(): void;
 
-    deleteObserve(...names: string[]): void;
     getPluginByName<T extends BasePlugin>(name: string): Nullable<T>;
-    /**
-     * save data
-     */
-    save(): object;
-    /**
-     * load data
-     */
-    load<T>(data: T): void;
 }
 
 /**
  * Plug-in base class, all plug-ins must inherit from this base class. Provide basic methods.
  */
-export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase> implements BasePlugin {
+export abstract class Plugin<Obs = any> implements BasePlugin {
     static type: PluginType;
 
     _injector: Injector;
-
-    context: O;
 
     private _name: string;
 
@@ -72,24 +54,14 @@ export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase> imp
         this._observeNames = [];
     }
 
-    onCreate(context: O): void {
-        this.context = context;
+    getPluginByName<T extends BasePlugin>(name: string): Nullable<T> {
+        throw new Error('Method not implemented.');
     }
 
-    load<T>(data: T): void {}
+    onCreate(): void {}
 
-    save(): object {
-        return Object();
-    }
+    onMounted(): void {}
 
-    /**
-     * @deprecated
-     */
-    onMounted(context: O): void {}
-
-    /**
-     * @deprecated
-     */
     onDestroy(): void {
         this.deleteObserve(...this._observeNames);
     }
@@ -98,32 +70,8 @@ export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase> imp
         return this._name;
     }
 
+    // TODO@huwenzhao: remove this in the future
     /** @deprecated */
-    getContext(): O {
-        return this.context;
-    }
-
-    getGlobalContext(): Context {
-        return this.context.getUniver().getGlobalContext();
-    }
-
-    getLocale(): Locale {
-        return this.getGlobalContext().getLocale();
-    }
-
-    getUniver(): Univer {
-        return this.context.getUniver();
-    }
-
-    getObserver<K extends keyof Obs & string>(name: K): Nullable<Observable<PropsFrom<Obs[K]>>> {
-        const manager = this.context.getObserverManager();
-        return manager.getObserver(name, this._name);
-    }
-
-    getPluginByName<T extends BasePlugin>(name: string): Nullable<T> {
-        return this.context.getPluginManager().getPluginByName<T>(name);
-    }
-
     pushToObserve<K extends keyof Obs & string>(...names: K[]): void {
         const manager = (this._injector as Injector).get(ObserverManager);
         names.forEach((name) => {
@@ -134,12 +82,8 @@ export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase> imp
         });
     }
 
-    deleteObserve<K extends keyof Obs & string>(...names: K[]): void {
-        const manager = this.context.getObserverManager();
-        names.forEach((name) => {
-            manager.removeObserver(name, this._name);
-        });
-    }
+    /** @deprecated */
+    deleteObserve<K extends keyof Obs & string>(...names: K[]): void {}
 }
 
 interface IPluginRegistryItem {

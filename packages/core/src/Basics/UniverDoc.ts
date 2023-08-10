@@ -1,8 +1,8 @@
 import { IDocumentData } from '../Types/Interfaces';
 import { Plugin } from '../Plugin';
 import { IOHttp, IOHttpConfig, Logger } from '../Shared';
-import { DocContext } from './DocContext';
 import { VersionCode, VersionEnv } from './Version';
+
 
 /**
  * Externally provided UniverDoc root instance

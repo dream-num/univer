@@ -1,10 +1,7 @@
 // @index('./*.ts', f => `export * from '${f.path}'`)
-export * from './ContextBase';
-export * from './Context';
 export * from './DocContext';
 export * from './Environment';
 export * from './Registry';
-export * from './SheetContext';
 export * from './SlideContext';
 export * from './UniverDoc';
 export * from './UniverSheet';

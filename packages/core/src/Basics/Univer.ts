@@ -1,12 +1,11 @@
 import { Injector, Ctor } from '@wendellhu/redi';
 
-import { CommandManager } from 'src/Command';
+import { CommandManager, UndoManager } from 'src/Command';
 import { LocaleService } from 'src/Service/Locale.service';
 import { UniverSheet } from './UniverSheet';
 import { UniverDoc } from './UniverDoc';
 import { UniverSlide } from './UniverSlide';
 import { Nullable } from '../Shared';
-import { Context } from './Context';
 import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../Plugin';
 import { IUniverData, IWorkbookConfig } from '../Types/Interfaces';
 import { UniverObserverImpl } from './UniverObserverImpl';
@@ -23,17 +22,9 @@ export class Univer {
 
     private readonly _univerPluginRegistry = new PluginRegistry();
 
-    /**
-     * @deprecated
-     */
-    private _context: Context;
-
     constructor(univerData: Partial<IUniverData> = {}) {
-        this._context = new Context(univerData);
-        this._setObserver();
-        this._context.onUniver(this);
-
         this._univerInjector = this.initializeDependencies();
+        this._setObserver();
 
         // initialize localization info
         const { locale } = univerData;
@@ -126,43 +117,12 @@ export class Univer {
         return this._currentUniverService.getCurrentUniverSlideInstance();
     }
 
-    /**
-     * @deprecated
-     */
-    getGlobalContext() {
-        return this._context;
-    }
-
-    /**
-     * install plugin
-     *
-     * @param plugin - install plugin
-     */
-    install(plugin: Plugin): void {
-        this._context.getPluginManager().install(plugin);
-    }
-
-    /**
-     * uninstall plugin
-     *
-     * @param name - plugin name
-     */
-    uninstall(name: string): void {
-        this._context.getPluginManager().uninstall(name);
-    }
-
     protected _setObserver(): void {
-        const manager = this._context.getObserverManager();
-        new UniverObserverImpl().install(manager);
+        new UniverObserverImpl().install(this._univerInjector.get(ObserverManager));
     }
 
     private initializeDependencies(): Injector {
-        return new Injector([
-            [ObserverManager, { useFactory: () => this._context.getObserverManager() }],
-            [ICurrentUniverService, { useClass: CurrentUniverService }],
-            [CommandManager, { useFactory: () => this._context.getCommandManager() }],
-            [LocaleService],
-        ]);
+        return new Injector([[ObserverManager], [ICurrentUniverService, { useClass: CurrentUniverService }], [CommandManager], [LocaleService], [UndoManager]]);
     }
 
     private registerUniverPlugin<T extends Plugin>(plugin: PluginCtor<T>, options?: any): void {
@@ -170,8 +130,7 @@ export class Univer {
         const pluginInstance: Plugin = this._univerInjector.createInstance(plugin as unknown as Ctor<any>, options);
 
         // TODO: remove these two lines later
-        pluginInstance.onCreate(this._context);
-        this._context.getPluginManager().install(pluginInstance);
+        pluginInstance.onCreate();
 
         this._univerPluginStore.addPlugin(pluginInstance);
     }

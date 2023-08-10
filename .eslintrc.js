@@ -41,7 +41,7 @@ module.exports = {
                 ignore: ['\\.less$', '^@'],
             },
         ],
-        'import/no-cycle': 2,
+        'import/no-cycle': 'warn',
         'no-param-reassign': 'off',
         'no-bitwise': 'off',
         'default-case': 'off',

@@ -57,9 +57,8 @@ export class UniverSheet implements Disposable {
     addPlugin<T extends Plugin>(plugin: PluginCtor<T>, options: any): void {
         const pluginInstance: Plugin = this._sheetInjector.createInstance(plugin as unknown as Ctor<any>, options);
 
-        // TODO: remove context passed in here
-        pluginInstance.onCreate({} as any);
-        pluginInstance.onMounted({} as any);
+        pluginInstance.onCreate();
+        pluginInstance.onMounted();
         this._pluginStore.addPlugin(pluginInstance);
     }
 

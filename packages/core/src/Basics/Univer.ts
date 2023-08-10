@@ -1,7 +1,7 @@
 import { Injector, Ctor } from '@wendellhu/redi';
 
-import { CommandManager, UndoManager } from 'src/Command';
-import { LocaleService } from 'src/Service/Locale.service';
+import { CommandManager, UndoManager } from '../Command';
+import { LocaleService } from '../Service/Locale.service';
 import { UniverSheet } from './UniverSheet';
 import { UniverDoc } from './UniverDoc';
 import { UniverSlide } from './UniverSlide';

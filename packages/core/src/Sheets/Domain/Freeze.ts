@@ -2,17 +2,17 @@ import { SheetContext } from '../../Basics';
 import { Command, CommandManager } from '../../Command';
 import { Worksheet } from './Worksheet';
 import { ACTION_NAMES } from '../../Types/Const';
+import { Inject } from '@wendellhu/redi';
+import { ICurrentUniverService } from 'src/Service/Current.service';
 
 export class Freeze {
-    private _commandManager: CommandManager;
-
-    private _context: SheetContext;
-
     private _worksheet: Worksheet;
 
-    constructor(workSheet: Worksheet) {
-        this._context = workSheet.getContext();
-        this._commandManager = this._context.getCommandManager();
+    constructor(
+        workSheet: Worksheet,
+        @Inject(CommandManager) private readonly _commandManager: CommandManager,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+    ) {
         this._worksheet = workSheet;
     }
 
@@ -25,7 +25,7 @@ export class Freeze {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             configure
         );
@@ -43,7 +43,7 @@ export class Freeze {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             configure
         );

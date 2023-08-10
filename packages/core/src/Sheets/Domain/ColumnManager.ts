@@ -1,4 +1,7 @@
-import { Command } from '../../Command';
+import { Inject } from '@wendellhu/redi';
+
+import { CurrentUniverService, ICurrentUniverService } from '../../Service/Current.service';
+import { Command, CommandManager } from '../../Command';
 import { ISetColumnWidthActionData } from '../Action';
 import { ACTION_NAMES } from '../../Types/Const';
 import { BooleanNumber } from '../../Types/Enum';
@@ -15,7 +18,12 @@ export class ColumnManager {
 
     private _workSheet: Worksheet;
 
-    constructor(workSheet: Worksheet, data: ObjectArrayType<Partial<IColumnData>>) {
+    constructor(
+        workSheet: Worksheet,
+        data: ObjectArrayType<Partial<IColumnData>>,
+        @ICurrentUniverService private readonly _currentUniverSheet: CurrentUniverService,
+        @Inject(CommandManager) private readonly _commandManager: CommandManager
+    ) {
         this._workSheet = workSheet;
         this._columnData = Tools.createObjectArray(data) as ObjectArray<IColumnData>;
     }
@@ -89,8 +97,6 @@ export class ColumnManager {
      * @returns
      */
     setColumnWidth(columnIndex: number, columnWidth: number[]): void {
-        const _context = this._workSheet.getContext();
-        const _commandManager = this._workSheet.getCommandManager();
         const setColumnWidth: ISetColumnWidthActionData = {
             sheetId: this._workSheet.getSheetId(),
             actionName: ACTION_NAMES.SET_COLUMN_WIDTH_ACTION,
@@ -99,11 +105,11 @@ export class ColumnManager {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setColumnWidth
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
     }
 
     /**

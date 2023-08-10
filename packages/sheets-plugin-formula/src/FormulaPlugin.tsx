@@ -1,5 +1,5 @@
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
-import { Plugin, CommandManager, PluginType } from '@univerjs/core';
+import { Plugin, CommandManager, PluginType, LocaleService } from '@univerjs/core';
 import { FormulaEngineService } from '@univerjs/base-formula-engine';
 import { CellEditExtensionManager, CellInputExtensionManager, ComponentManager, Icon } from '@univerjs/base-ui';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
@@ -18,7 +18,7 @@ import { FormulaPromptController } from './Controller/FormulaPromptController';
 
 export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
     static override type = PluginType.Sheet;
-    
+
     protected _formulaActionExtensionFactory: FormulaActionExtensionFactory;
 
     private _formulaController: FormulaController;
@@ -27,7 +27,12 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
 
     private _formulaPromptController: FormulaPromptController;
 
-    constructor(private _config: IFormulaConfig, @Inject(Injector) private readonly _sheetInjector: Injector, @Inject(CommandManager) private readonly _commandManager: CommandManager) {
+    constructor(
+        private _config: IFormulaConfig,
+        @Inject(Injector) override readonly _injector: Injector,
+        @Inject(CommandManager) private readonly _commandManager: CommandManager,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
+    ) {
         super(FORMULA_PLUGIN_NAME);
     }
 
@@ -35,27 +40,24 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
         /**
          * load more Locale object
          */
-        this.getLocale().load({
+        this._localeService.getLocale().load({
             en,
             zh,
         });
 
-        
-        
-        const sheetContainerUIController = this._sheetInjector.get(SheetContainerUIController);
+        const sheetContainerUIController = this._injector.get(SheetContainerUIController);
         const formulaBar = sheetContainerUIController.getFormulaBarUIController().getFormulaBar();
-        
 
         sheetContainerUIController.UIDidMount(() => {
-            this.initializeDependencies(this._sheetInjector);
+            this.initializeDependencies(this._injector);
             this.registerExtension();
 
-            let formulaEngineService = this._sheetInjector.get(FormulaEngineService);
+            const formulaEngineService = this._injector.get(FormulaEngineService);
             this._formulaController.setFormulaEngine(formulaEngineService);
 
             firstLoader(this._formulaController);
 
-            const componentManager = this._sheetInjector.get(ComponentManager);
+            const componentManager = this._injector.get(ComponentManager);
             componentManager.register('FxIcon', Icon.Math.FxIcon);
 
             formulaBar.setFx({
@@ -108,17 +110,17 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
 
     registerExtension() {
         const cellEditRegister = CellEditExtensionManager.create();
-        const formulaCellEditExtensionFactory = this._sheetInjector.createInstance(FormulaCellEditExtensionFactory, this);
-        this._sheetInjector.add([FormulaCellEditExtensionFactory, { useValue: formulaCellEditExtensionFactory }]);
+        const formulaCellEditExtensionFactory = this._injector.createInstance(FormulaCellEditExtensionFactory, this);
+        this._injector.add([FormulaCellEditExtensionFactory, { useValue: formulaCellEditExtensionFactory }]);
         cellEditRegister.add(formulaCellEditExtensionFactory);
 
         const cellInputRegister = CellInputExtensionManager.create();
-        const formulaCellInputExtensionFactory = this._sheetInjector.createInstance(FormulaCellInputExtensionFactory, this);
-        this._sheetInjector.add([FormulaCellInputExtensionFactory, { useValue: formulaCellInputExtensionFactory }]);
+        const formulaCellInputExtensionFactory = this._injector.createInstance(FormulaCellInputExtensionFactory, this);
+        this._injector.add([FormulaCellInputExtensionFactory, { useValue: formulaCellInputExtensionFactory }]);
         cellInputRegister.add(formulaCellInputExtensionFactory);
 
         const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
-        this._formulaActionExtensionFactory = new FormulaActionExtensionFactory(this,this._sheetInjector);
+        this._formulaActionExtensionFactory = new FormulaActionExtensionFactory(this, this._injector);
         actionRegister.add(this._formulaActionExtensionFactory);
     }
 
@@ -138,18 +140,15 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
         return this._formulaPromptController;
     }
 
-    private initializeDependencies(sheetInjector: Injector){
-        const dependencies: Dependency[] = [
-            [SearchFormulaController],
-            [FormulaPromptController],
-        ];
+    private initializeDependencies(sheetInjector: Injector) {
+        const dependencies: Dependency[] = [[SearchFormulaController], [FormulaPromptController]];
 
         dependencies.forEach((d) => {
             sheetInjector.add(d);
         });
 
-        this._searchFormulaController = this._sheetInjector.get(SearchFormulaController);
-        this._formulaPromptController = this._sheetInjector.get(FormulaPromptController);
+        this._searchFormulaController = this._injector.get(SearchFormulaController);
+        this._formulaPromptController = this._injector.get(FormulaPromptController);
         this._formulaController = sheetInjector.createInstance(FormulaController, this._config);
         sheetInjector.add([FormulaController, { useValue: this._formulaController }]);
         sheetInjector.add([FormulaEngineService]);

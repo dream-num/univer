@@ -62,7 +62,9 @@ export class Univer {
     /** Create a univer sheet instance with internal dependency injection. */
     createUniverSheet(config: Partial<IWorkbookConfig>): UniverSheet {
         const sheet = this._univerInjector.createInstance(UniverSheet, config);
-        sheet.context.onUniver(this);
+
+        // TODO@wzhudev: clean this
+        sheet.getWorkBook().onUniver();
 
         this.initializePluginsForSheet(sheet);
         this._currentUniverService.addSheet(sheet);
@@ -71,8 +73,6 @@ export class Univer {
     }
 
     addUniverSheet(univerSheet: UniverSheet): void {
-        univerSheet.context.onUniver(this);
-
         this._currentUniverService.addSheet(univerSheet);
     }
 
@@ -190,10 +190,8 @@ export class Univer {
 
     private initializePluginsForSheet(sheet: UniverSheet): void {
         const plugins = this._univerPluginRegistry.getRegisterPlugins(PluginType.Sheet);
-        const sheetInjector = sheet._sheetInjector;
         plugins.forEach((p) => {
-            const pluginInstance: Plugin = sheetInjector.createInstance(p.plugin as unknown as Ctor<any>, p.options);
-            sheet.installPlugin(pluginInstance);
+            sheet.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options);
         });
     }
 }

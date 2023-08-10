@@ -116,7 +116,7 @@ export class Worksheet {
         this._sheetId = this._config.id ?? Tools.generateRandomId(6);
         this._initialized = false;
         this._cellData = new ObjectMatrix<ICellData>(cellData);
-        this._rowManager = new RowManager(this, rowData);
+        this._rowManager = new RowManager(this, rowData, this._currentUniverService, this._commandManager);
         this._columnManager = new ColumnManager(this, columnData);
         this._initialize();
     }

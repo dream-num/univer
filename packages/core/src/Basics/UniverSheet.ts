@@ -1,17 +1,12 @@
 import { Ctor, Injector, Optional, Disposable, Dependency } from '@wendellhu/redi';
-import { ObserverManager } from 'src/Observer';
-import { Workbook, ColorBuilder } from '../Sheets/Domain';
+
+import { ObserverManager } from '../Observer';
+import { Workbook } from '../Sheets/Domain';
 import { IWorkbookConfig } from '../Types/Interfaces';
-import { BasePlugin, Plugin, PluginCtor, PluginStore } from '../Plugin';
-import { GenName, IOHttp, IOHttpConfig, Logger } from '../Shared';
-import { SheetContext } from './SheetContext';
+import { Plugin, PluginCtor, PluginStore } from '../Plugin';
+import { GenName, Logger } from '../Shared';
 import { VersionCode, VersionEnv } from './Version';
-
-interface IComposedConfig {
-    [key: string]: any;
-
-    workbookConfig: IWorkbookConfig;
-}
+import { WorkBookObserverImpl } from './WorkBookObserverImpl';
 
 /**
  * Externally provided UniverSheet root instance
@@ -19,31 +14,18 @@ interface IComposedConfig {
 export class UniverSheet implements Disposable {
     univerSheetConfig: Partial<IWorkbookConfig>;
 
-    readonly _sheetInjector: Injector;
+    private readonly _sheetInjector: Injector;
+
+    private readonly _workbook: Workbook;
 
     private readonly _pluginStore = new PluginStore();
-
-    /**
-     * @deprecated this is a temporary solution, migrate modules to `sheetInjector`
-     */
-    private _context: SheetContext;
 
     constructor(univerSheetData: Partial<IWorkbookConfig> = {}, @Optional(Injector) parentInjector?: Injector) {
         this.univerSheetConfig = univerSheetData;
 
-        // Initialize injector after constructoring context
         this._sheetInjector = this.initializeInjector(parentInjector);
-        this._context = new SheetContext(univerSheetData, this._sheetInjector);
-        this._context.UNSAFE_setObserverManager(this._sheetInjector.get(ObserverManager));
-        this._context.UNSAFE_setGenName(this._sheetInjector.get(GenName));
-        this._context.TEMP_setObserver();
-    }
-
-    /**
-     * get SheetContext
-     */
-    get context() {
-        return this._context;
+        this.setObserver();
+        this._workbook = this._sheetInjector.createInstance(Workbook, univerSheetData);
     }
 
     static newInstance(univerSheetData: Partial<IWorkbookConfig> = {}): UniverSheet {
@@ -52,78 +34,17 @@ export class UniverSheet implements Disposable {
     }
 
     /**
-     *
-     * Request data
-     *
-     * @example
-     * Get data for all tables, including core and plugin data
-     *
-     * @param config
-     */
-    static get<T = void>(config: Omit<IOHttpConfig, 'type'>): Promise<T> {
-        return IOHttp({ ...config, type: 'GET' });
-    }
-
-    /**
-     * Submit data
-     * @param config
-     */
-    static post<T = void>(config: Omit<IOHttpConfig, 'type'>): Promise<T> {
-        return IOHttp({ ...config, type: 'POST' });
-    }
-
-    /**
-     * Load data
-     *
-     * @example
-     * UniverSheet.get gets all the core and plug-in data, UniverSheet.load(univerSheetInstance,data) internally calls the load API of each plug-in to centrally load the core and plug-in data
-     *
-     * @param sheet
-     * @param data
-     */
-    static load<T extends IComposedConfig>(sheet: UniverSheet, data: T) {
-        sheet.getWorkBook().load(data.workbookConfig);
-        sheet.context
-            .getPluginManager()
-            .getPlugins()
-            .forEach((plugin: BasePlugin) => {
-                plugin.load(data[`${plugin.getPluginName()}Config`]);
-            });
-    }
-
-    static newColor(): ColorBuilder {
-        return new ColorBuilder();
-    }
-
-    /**
-     * Save data
-     *
-     * @example
-     * get all the core and plug-in data
-     *
-     * @param univerSheet
-     */
-    static toJson(univerSheet: UniverSheet): IComposedConfig {
-        const workbookConfig = univerSheet.getWorkBook().save();
-        const pluginConfig: Partial<IComposedConfig> = {};
-        univerSheet.context
-            .getPluginManager()
-            .getPlugins()
-            .forEach((plugin: BasePlugin) => {
-                pluginConfig[`${plugin.getPluginName()}Config`] = plugin.save();
-            });
-
-        return { workbookConfig, ...pluginConfig };
-    }
-
-    dispose(): void {}
-
-    /**
      * get unit id
      */
     getUnitId(): string {
         return this.getWorkBook().getUnitId();
     }
+
+    getWorkBook(): Workbook {
+        return this._workbook;
+    }
+
+    dispose(): void {}
 
     /**
      * Add a plugin into UniverSheet. UniverSheet should add dependencies exposed from this plugin to its DI system.
@@ -137,44 +58,17 @@ export class UniverSheet implements Disposable {
         const pluginInstance: Plugin = this._sheetInjector.createInstance(plugin as unknown as Ctor<any>, options);
 
         // TODO: remove context passed in here
-        pluginInstance.onCreate(this._context);
-
+        pluginInstance.onCreate({} as any);
+        pluginInstance.onMounted({} as any);
         this._pluginStore.addPlugin(pluginInstance);
-
-        // FIXME: this is temporary. Will be removed in the future.
-        this._context.getPluginManager().install(pluginInstance);
-    }
-
-    /**
-     * install plugin
-     *
-     * @param plugin - install plugin
-     * @deprecated Use addPlugin instead
-     */
-    installPlugin(plugin: Plugin): void {
-        this._context.getPluginManager().install(plugin);
-    }
-
-    /**
-     * uninstall plugin
-     *
-     * @param name - plugin name
-     */
-    uninstallPlugin(name: string): void {
-        this._context.getPluginManager().uninstall(name);
-    }
-
-    /**
-     * get WorkBook
-     *
-     * @returns Workbook
-     */
-    getWorkBook(): Workbook {
-        return this._context.getWorkBook();
     }
 
     private initializeInjector(parentInjector?: Injector): Injector {
         const dependencies: Dependency[] = [[ObserverManager], [GenName]];
         return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
+    }
+
+    private setObserver(): void {
+        new WorkBookObserverImpl().install(this._sheetInjector.get(ObserverManager));
     }
 }

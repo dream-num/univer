@@ -1,9 +1,11 @@
-import { Command } from '../../Command';
+import { Command, CommandManager } from '../../Command';
 import { ISetRowHeightActionData, SetRowHeightAction } from '../Action';
 import { BooleanNumber } from '../../Types/Enum';
 import { IRowData } from '../../Types/Interfaces';
 import { Nullable, ObjectArray, ObjectArrayType, Tools } from '../../Shared';
 import { Worksheet } from './Worksheet';
+import { Inject } from '@wendellhu/redi';
+import { ICurrentUniverService } from 'src/Service/Current.service';
 
 /**
  * Manage configuration information of all rows, get row height, row length, set row height, etc.
@@ -13,7 +15,12 @@ export class RowManager {
 
     private _workSheet: Worksheet;
 
-    constructor(workSheet: Worksheet, data: ObjectArrayType<Partial<IRowData>>) {
+    constructor(
+        workSheet: Worksheet,
+        data: ObjectArrayType<Partial<IRowData>>,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(CommandManager) private readonly _commandManager: CommandManager,
+    ) {
         this._workSheet = workSheet;
         this._rowData = Tools.createObjectArray(data) as ObjectArray<IRowData>;
     }
@@ -79,8 +86,6 @@ export class RowManager {
      * @returns
      */
     setRowHeight(rowIndex: number, rowHeight: number[]) {
-        const _context = this._workSheet.getContext();
-        const _commandManager = this._workSheet.getCommandManager();
         const setRowHeight: ISetRowHeightActionData = {
             sheetId: this._workSheet.getSheetId(),
             actionName: SetRowHeightAction.NAME,
@@ -89,11 +94,11 @@ export class RowManager {
         };
         const command = new Command(
             {
-                WorkBookUnit: _context.getWorkBook(),
+                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
             setRowHeight
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
     }
 
     /**

@@ -22,19 +22,19 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
     constructor(
         config: Partial<INumfmtPluginConfig>,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(Injector) private readonly _sheetInjector: Injector,
+        @Inject(Injector) override readonly _injector: Injector,
         @Inject(CommandManager) private readonly _commandManager: CommandManager
     ) {
         super(NUMFMT_PLUGIN_NAME);
-        this.initializeDependencies(_sheetInjector);
+        this.initializeDependencies(_injector);
     }
 
     override onMounted(): void {
         install(this);
         this._localeService.getLocale().load({ en, zh });
         this._numfmtActionExtensionFactory = new NumfmtActionExtensionFactory(this);
-        this._numfmtController = this._sheetInjector.get(NumfmtController);
-        this._numfmtModalController = this._sheetInjector.get(NumfmtModalController);
+        this._numfmtController = this._injector.get(NumfmtController);
+        this._numfmtModalController = this._injector.get(NumfmtModalController);
         const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
         actionRegister.add(this._numfmtActionExtensionFactory);
     }

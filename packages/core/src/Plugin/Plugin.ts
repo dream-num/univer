@@ -1,8 +1,8 @@
-import { Ctor } from '@wendellhu/redi';
+import { Ctor, Injector } from '@wendellhu/redi';
 import { ContextBase } from '../Basics/ContextBase';
 
 import { Context } from '../Basics/Context';
-import { Observable } from '../Observer';
+import { Observable, Observer, ObserverManager } from '../Observer';
 import { Locale, Nullable, PropsFrom } from '../Shared';
 import { Univer } from '../Basics';
 
@@ -59,6 +59,8 @@ export interface BasePlugin {
 export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase> implements BasePlugin {
     static type: PluginType;
 
+    _injector: Injector;
+
     context: O;
 
     private _name: string;
@@ -74,7 +76,7 @@ export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase> imp
         this.context = context;
     }
 
-    load<T>(data: T): void { }
+    load<T>(data: T): void {}
 
     save(): object {
         return Object();
@@ -83,7 +85,7 @@ export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase> imp
     /**
      * @deprecated
      */
-    onMounted(context: O): void { }
+    onMounted(context: O): void {}
 
     /**
      * @deprecated
@@ -123,7 +125,7 @@ export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase> imp
     }
 
     pushToObserve<K extends keyof Obs & string>(...names: K[]): void {
-        const manager = this.context.getObserverManager();
+        const manager = (this._injector as Injector).get(ObserverManager);
         names.forEach((name) => {
             if (!this._observeNames.includes(name)) {
                 this._observeNames.push(name);

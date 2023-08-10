@@ -1,5 +1,6 @@
-import { Plugin, SheetContext, UniverSheet } from '@univerjs/core';
-import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
+import { Inject, Injector } from '@wendellhu/redi';
+import { Plugin, PluginType, UniverSheet } from '@univerjs/core';
+import { RegisterManager } from '@univerjs/base-ui';
 import { zh, en } from './Locale';
 import { IMPORT_XLSX_PLUGIN_NAME } from './Basics';
 import { ImportXlsxController } from './Controller/ImportXlsxController';
@@ -7,12 +8,18 @@ import { DragAndDropExtensionFactory } from './Basics/Register/DragAndDropExtens
 
 export interface IImportXlsxPluginConfig {}
 
-export class ImportXlsxPlugin extends Plugin<any, SheetContext> {
+export class ImportXlsxPlugin extends Plugin<any> {
+    static override type = PluginType.Sheet;
+
     private _importXlsxController: ImportXlsxController;
 
     private _dragAndDropExtensionFactory: DragAndDropExtensionFactory;
 
-    constructor(config?: IImportXlsxPluginConfig) {
+    constructor(
+        config: IImportXlsxPluginConfig,
+        @Inject(Injector) private readonly _sheetInjector: Injector,
+        @Inject(RegisterManager) private readonly _registerManager: RegisterManager
+    ) {
         super(IMPORT_XLSX_PLUGIN_NAME);
     }
 
@@ -25,43 +32,34 @@ export class ImportXlsxPlugin extends Plugin<any, SheetContext> {
     }
 
     initialize(): void {
-        const context = this.getGlobalContext();
-
         /**
          * load more Locale object
          */
-        context.getLocale().load({
+        this.getLocale().load({
             en,
             zh,
         });
 
-        this._importXlsxController = new ImportXlsxController(this);
+        // this._importXlsxController = new ImportXlsxController(this);
+        this._importXlsxController = this._sheetInjector.createInstance(ImportXlsxController);
+        this._sheetInjector.add([ImportXlsxController, { useValue: this._importXlsxController }]);
+
         this.registerExtension();
     }
 
     registerExtension() {
-        const dragAndDropRegister = this.getGlobalContext()
-            .getPluginManager()
-            .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
-            .getRegisterManager()
-            .getDragAndDropExtensionManager()
-            .getRegister();
+        const dragAndDropRegister = this._registerManager.getDragAndDropExtensionManager().getRegister();
 
         this._dragAndDropExtensionFactory = new DragAndDropExtensionFactory(this);
         dragAndDropRegister.add(this._dragAndDropExtensionFactory);
     }
 
-    onMounted(): void {
+    override onMounted(): void {
         this.initialize();
     }
 
-    onDestroy(): void {
-        const dragAndDropRegister = this.getGlobalContext()
-            .getPluginManager()
-            .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
-            .getRegisterManager()
-            .getDragAndDropExtensionManager()
-            .getRegister();
+    override onDestroy(): void {
+        const dragAndDropRegister = this._registerManager.getDragAndDropExtensionManager().getRegister();
         dragAndDropRegister.delete(this._dragAndDropExtensionFactory);
     }
 

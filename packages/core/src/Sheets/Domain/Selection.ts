@@ -1,10 +1,7 @@
 import { SheetContext } from '../../Basics';
 import { Command, CommandManager } from '../../Command';
 
-import {
-    ISetSelectionActivateActionData,
-    SetSelectionActivateAction,
-} from '../Action';
+import { ISetSelectionActivateActionData, SetSelectionActivateAction } from '../Action';
 
 import { DEFAULT_SELECTION } from '../../Types/Const';
 import { Direction } from '../../Types/Enum';
@@ -65,17 +62,9 @@ export class Selection {
      * @param cell
      * @returns
      */
-    static cellInRange(
-        rangeList: IRangeData[],
-        cell: IRangeData
-    ): Nullable<IRangeData> {
+    static cellInRange(rangeList: IRangeData[], cell: IRangeData): Nullable<IRangeData> {
         for (const item of rangeList) {
-            if (
-                item.startRow <= cell.startRow &&
-                cell.endRow <= item.endRow &&
-                item.startColumn <= cell.startColumn &&
-                cell.endColumn <= item.endColumn
-            ) {
+            if (item.startRow <= cell.startRow && cell.endRow <= item.endRow && item.startColumn <= cell.startColumn && cell.endColumn <= item.endColumn) {
                 return item;
             }
         }
@@ -151,8 +140,7 @@ export class Selection {
             // Convert the selection passed in by the user into a standard format
             activeRangeList = selection.map((item: IRangeType) => {
                 // item = new TransformTool(this._workbook).transformRangeType(item);
-                const itemData: IRangeData =
-                    this._workbook.transformRangeType(item).rangeData;
+                const itemData: IRangeData = this._workbook.transformRangeType(item).rangeData;
                 // The user entered an invalid range
                 if (itemData.startRow === -1) {
                     console.error('Invalid selection, default set startRow -1');
@@ -180,10 +168,7 @@ export class Selection {
         if (cell) {
             // currentCell = new TransformTool(this._workbook).transformRangeType(cell);
             currentCell = this._workbook.transformRangeType(cell).rangeData;
-            const activeRangeData: Nullable<IRangeData> = Selection.cellInRange(
-                activeRangeList,
-                currentCell
-            );
+            const activeRangeData: Nullable<IRangeData> = Selection.cellInRange(activeRangeList, currentCell);
 
             // if cell not in range, reset new active range and active range list based on current cell
             if (!activeRangeData) {
@@ -210,13 +195,8 @@ export class Selection {
         _commandManager.invoke(command);
 
         // 设置后获取范围(以A1:B10形式)
-        const text = `${
-            Tools.chatAtABC(activeRange.startColumn) + (activeRange.startRow + 1)
-        }:${Tools.chatAtABC(activeRange.endColumn)}${activeRange.endRow + 1}`;
-        this._context
-            .getObserverManager()
-            .getObserver<string>('onAfterSetSelectionObservable')
-            ?.notifyObservers(text);
+        const text = `${Tools.chatAtABC(activeRange.startColumn) + (activeRange.startRow + 1)}:${Tools.chatAtABC(activeRange.endColumn)}${activeRange.endRow + 1}`;
+        this._context.getObserverManager().getObserver<string>('onAfterSetSelectionObservable')?.notifyObservers(text);
         return this._activeRange;
     }
 
@@ -286,12 +266,7 @@ export class Selection {
             return this;
         }
 
-        if (
-            !(
-                range.startRow === range.endRow &&
-                range.startColumn === range.endColumn
-            )
-        ) {
+        if (!(range.startRow === range.endRow && range.startColumn === range.endColumn)) {
             console.error('Exception: Range must have a single cell.');
             return this;
         }
@@ -339,16 +314,10 @@ export class Selection {
      * @param currentCell current cell range
      * @returns
      */
-    setRanges(
-        activeRangeList: IRangeData | IRangeData[],
-        activeRange: IRangeData,
-        currentCell: IRangeData
-    ): void {
+    setRanges(activeRangeList: IRangeData | IRangeData[], activeRange: IRangeData, currentCell: IRangeData): void {
         // Construct selection instance
 
-        this._activeRangeList = this._workSheet.getRangeList(
-            activeRangeList as IRangeType[]
-        );
+        this._activeRangeList = this._workSheet.getRangeList(activeRangeList as IRangeType[]);
         this._activeRange = this._workSheet.getRange(activeRange);
         this._currentCell = this._workSheet.getRange(currentCell);
     }
@@ -383,9 +352,7 @@ export class Selection {
 
         if (direction === Direction.RIGHT) {
             if (currentCell.startColumn === range.startColumn) {
-                const cellValue = this._workSheet
-                    .getCellMatrix()
-                    .getValue(currentCell.startRow, range.endColumn);
+                const cellValue = this._workSheet.getCellMatrix().getValue(currentCell.startRow, range.endColumn);
                 let endColumn;
                 if (cellValue && cellValue.v === undefined) {
                     for (let i = range.endColumn + 1; i <= lastColumn; i++) {
@@ -393,9 +360,7 @@ export class Selection {
                             endColumn = lastColumn;
                             break;
                         }
-                        const curCellValue = this._workSheet
-                            .getCellMatrix()
-                            .getValue(currentCell.startRow, i);
+                        const curCellValue = this._workSheet.getCellMatrix().getValue(currentCell.startRow, i);
                         if (curCellValue && curCellValue.v !== undefined) {
                             endColumn = i;
                             break;
@@ -407,13 +372,9 @@ export class Selection {
                             endColumn = lastColumn;
                             break;
                         }
-                        const curCellValue = this._workSheet
-                            .getCellMatrix()
-                            .getValue(currentCell.startRow, i);
+                        const curCellValue = this._workSheet.getCellMatrix().getValue(currentCell.startRow, i);
                         if (curCellValue && curCellValue.v === undefined) {
-                            const prevCellValue = this._workSheet
-                                .getCellMatrix()
-                                .getValue(currentCell.startRow, i - 1);
+                            const prevCellValue = this._workSheet.getCellMatrix().getValue(currentCell.startRow, i - 1);
                             if (prevCellValue && prevCellValue.v !== undefined) {
                                 endColumn = i - 1;
                                 break;
@@ -428,45 +389,29 @@ export class Selection {
                     endColumn: endColumn !== undefined ? endColumn : range.endColumn,
                 };
             } else {
-                const cellValue = this._workSheet
-                    .getCellMatrix()
-                    .getValue(currentCell.startRow, range.startColumn);
+                const cellValue = this._workSheet.getCellMatrix().getValue(currentCell.startRow, range.startColumn);
                 let startColumn;
                 if (cellValue && cellValue.v === undefined) {
-                    for (
-                        let i = range.startColumn + 1;
-                        i <= currentCell.startColumn;
-                        i++
-                    ) {
+                    for (let i = range.startColumn + 1; i <= currentCell.startColumn; i++) {
                         if (i === currentCell.startColumn) {
                             startColumn = currentCell.startColumn;
                             break;
                         }
-                        const curCellValue = this._workSheet
-                            .getCellMatrix()
-                            .getValue(currentCell.startRow, i);
+                        const curCellValue = this._workSheet.getCellMatrix().getValue(currentCell.startRow, i);
                         if (curCellValue && curCellValue.v !== undefined) {
                             startColumn = i;
                             break;
                         }
                     }
                 } else {
-                    for (
-                        let i = range.startColumn + 1;
-                        i <= currentCell.startColumn;
-                        i++
-                    ) {
+                    for (let i = range.startColumn + 1; i <= currentCell.startColumn; i++) {
                         if (i === currentCell.startColumn) {
                             startColumn = currentCell.startColumn;
                             break;
                         }
-                        const curCellValue = this._workSheet
-                            .getCellMatrix()
-                            .getValue(currentCell.startRow, i);
+                        const curCellValue = this._workSheet.getCellMatrix().getValue(currentCell.startRow, i);
                         if (curCellValue && curCellValue.v === undefined) {
-                            const prevCellValue = this._workSheet
-                                .getCellMatrix()
-                                .getValue(currentCell.startRow, i - 1);
+                            const prevCellValue = this._workSheet.getCellMatrix().getValue(currentCell.startRow, i - 1);
                             if (prevCellValue && prevCellValue.v !== undefined) {
                                 startColumn = i - 1;
                                 break;
@@ -486,18 +431,14 @@ export class Selection {
             let startColumn;
             let endColumn;
             if (currentCell.endColumn === range.endColumn) {
-                const cellValue = this._workSheet
-                    .getCellMatrix()
-                    .getValue(currentCell.startRow, range.startColumn);
+                const cellValue = this._workSheet.getCellMatrix().getValue(currentCell.startRow, range.startColumn);
                 if (cellValue && cellValue.v === undefined) {
                     for (let i = range.startColumn - 1; i >= 0; i--) {
                         if (i === 0) {
                             startColumn = 0;
                             break;
                         }
-                        const curCellValue = this._workSheet
-                            .getCellMatrix()
-                            .getValue(currentCell.startRow, i);
+                        const curCellValue = this._workSheet.getCellMatrix().getValue(currentCell.startRow, i);
                         if (curCellValue && curCellValue.v !== undefined) {
                             startColumn = i;
                             break;
@@ -509,13 +450,9 @@ export class Selection {
                             startColumn = 0;
                             break;
                         }
-                        const curCellValue = this._workSheet
-                            .getCellMatrix()
-                            .getValue(currentCell.startRow, i);
+                        const curCellValue = this._workSheet.getCellMatrix().getValue(currentCell.startRow, i);
                         if (curCellValue && curCellValue.v === undefined) {
-                            const prevCellValue = this._workSheet
-                                .getCellMatrix()
-                                .getValue(currentCell.startRow, i - 1);
+                            const prevCellValue = this._workSheet.getCellMatrix().getValue(currentCell.startRow, i - 1);
                             if (prevCellValue && prevCellValue.v !== undefined) {
                                 startColumn = i - 1;
                                 break;
@@ -524,44 +461,28 @@ export class Selection {
                     }
                 }
             } else {
-                const cellValue = this._workSheet
-                    .getCellMatrix()
-                    .getValue(currentCell.startRow, range.endColumn);
+                const cellValue = this._workSheet.getCellMatrix().getValue(currentCell.startRow, range.endColumn);
                 if (cellValue && cellValue.v === undefined) {
-                    for (
-                        let i = range.endColumn - 1;
-                        i >= currentCell.startColumn;
-                        i--
-                    ) {
+                    for (let i = range.endColumn - 1; i >= currentCell.startColumn; i--) {
                         if (i === currentCell.startColumn) {
                             endColumn = i;
                             break;
                         }
-                        const curCellValue = this._workSheet
-                            .getCellMatrix()
-                            .getValue(currentCell.startRow, i);
+                        const curCellValue = this._workSheet.getCellMatrix().getValue(currentCell.startRow, i);
                         if (curCellValue && curCellValue.v !== undefined) {
                             endColumn = i;
                             break;
                         }
                     }
                 } else {
-                    for (
-                        let i = range.endColumn - 1;
-                        i >= currentCell.startColumn;
-                        i--
-                    ) {
+                    for (let i = range.endColumn - 1; i >= currentCell.startColumn; i--) {
                         if (i === currentCell.startColumn) {
                             endColumn = i;
                             break;
                         }
-                        const curCellValue = this._workSheet
-                            .getCellMatrix()
-                            .getValue(currentCell.startRow, i);
+                        const curCellValue = this._workSheet.getCellMatrix().getValue(currentCell.startRow, i);
                         if (curCellValue && curCellValue.v === undefined) {
-                            const prevCellValue = this._workSheet
-                                .getCellMatrix()
-                                .getValue(currentCell.startRow, i - 1);
+                            const prevCellValue = this._workSheet.getCellMatrix().getValue(currentCell.startRow, i - 1);
                             if (prevCellValue && prevCellValue.v !== undefined) {
                                 endColumn = i - 1;
                                 break;
@@ -573,8 +494,7 @@ export class Selection {
             expandRangeData = {
                 startRow: range.startRow,
                 endRow: range.endRow,
-                startColumn:
-                    startColumn !== undefined ? startColumn : range.startColumn,
+                startColumn: startColumn !== undefined ? startColumn : range.startColumn,
                 endColumn: endColumn !== undefined ? endColumn : range.endColumn,
             };
         }
@@ -582,18 +502,11 @@ export class Selection {
             let startRow;
             let endRow;
             if (currentCell.endRow === range.endRow) {
-                const cellValue = this._workSheet
-                    .getCellMatrix()
-                    .getValue(range.startRow, currentCell.startColumn);
+                const cellValue = this._workSheet.getCellMatrix().getValue(range.startRow, currentCell.startColumn);
                 if (cellValue && cellValue.v === undefined) {
                     for (let i = range.endRow - 1; i >= 0; i--) {
-                        const curCellValue = this._workSheet
-                            .getCellMatrix()
-                            .getValue(i, currentCell.startColumn);
-                        if (
-                            (curCellValue && curCellValue.v !== undefined) ||
-                            i === 0
-                        ) {
+                        const curCellValue = this._workSheet.getCellMatrix().getValue(i, currentCell.startColumn);
+                        if ((curCellValue && curCellValue.v !== undefined) || i === 0) {
                             startRow = i;
                             break;
                         }
@@ -604,13 +517,9 @@ export class Selection {
                             startRow = 0;
                             break;
                         }
-                        const curCellValue = this._workSheet
-                            .getCellMatrix()
-                            .getValue(i, currentCell.startColumn);
+                        const curCellValue = this._workSheet.getCellMatrix().getValue(i, currentCell.startColumn);
                         if (curCellValue && curCellValue.v === undefined) {
-                            const prevCellValue = this._workSheet
-                                .getCellMatrix()
-                                .getValue(i - 1, currentCell.startColumn);
+                            const prevCellValue = this._workSheet.getCellMatrix().getValue(i - 1, currentCell.startColumn);
                             if (prevCellValue && prevCellValue.v !== undefined) {
                                 startRow = i - 1;
                                 break;
@@ -619,18 +528,14 @@ export class Selection {
                     }
                 }
             } else {
-                const cellValue = this._workSheet
-                    .getCellMatrix()
-                    .getValue(range.endRow, currentCell.startColumn);
+                const cellValue = this._workSheet.getCellMatrix().getValue(range.endRow, currentCell.startColumn);
                 if (cellValue && cellValue.v === undefined) {
                     for (let i = range.endRow - 1; i >= currentCell.startRow; i--) {
                         if (i === currentCell.startRow) {
                             endRow = currentCell.startRow;
                             break;
                         }
-                        const curCellValue = this._workSheet
-                            .getCellMatrix()
-                            .getValue(i, currentCell.startColumn);
+                        const curCellValue = this._workSheet.getCellMatrix().getValue(i, currentCell.startColumn);
                         // if (i <= range.startRow) {
                         //     endRow = range.startRow;
                         //     if (i == 0) {
@@ -651,21 +556,13 @@ export class Selection {
                     }
                 } else {
                     for (let i = range.endRow - 1; i >= currentCell.startRow; i--) {
-                        const curCellValue = this._workSheet
-                            .getCellMatrix()
-                            .getValue(i, currentCell.startColumn);
+                        const curCellValue = this._workSheet.getCellMatrix().getValue(i, currentCell.startColumn);
 
                         if (i === currentCell.startRow) {
                             endRow = currentCell.startRow;
                             break;
-                        } else if (
-                            curCellValue &&
-                            curCellValue.v === undefined &&
-                            i !== range.endRow - 1
-                        ) {
-                            const nextCellValue = this._workSheet
-                                .getCellMatrix()
-                                .getValue(i + 1, currentCell.startColumn);
+                        } else if (curCellValue && curCellValue.v === undefined && i !== range.endRow - 1) {
+                            const nextCellValue = this._workSheet.getCellMatrix().getValue(i + 1, currentCell.startColumn);
                             if (nextCellValue && nextCellValue.v !== undefined) {
                                 endRow = i + 1;
                                 break;
@@ -685,18 +582,14 @@ export class Selection {
             let startRow;
             let endRow;
             if (currentCell.startRow === range.startRow) {
-                const cellValue = this._workSheet
-                    .getCellMatrix()
-                    .getValue(range.endRow, currentCell.startColumn);
+                const cellValue = this._workSheet.getCellMatrix().getValue(range.endRow, currentCell.startColumn);
                 if (cellValue && cellValue.v === undefined) {
                     for (let i = range.endRow + 1; i <= lastRow; i++) {
                         if (i === lastRow) {
                             endRow = lastRow;
                             break;
                         }
-                        const curCellValue = this._workSheet
-                            .getCellMatrix()
-                            .getValue(i, currentCell.startColumn);
+                        const curCellValue = this._workSheet.getCellMatrix().getValue(i, currentCell.startColumn);
                         if (curCellValue && curCellValue.v !== undefined) {
                             endRow = i;
                             break;
@@ -708,13 +601,9 @@ export class Selection {
                             endRow = lastRow;
                             break;
                         }
-                        const curCellValue = this._workSheet
-                            .getCellMatrix()
-                            .getValue(i, currentCell.startColumn);
+                        const curCellValue = this._workSheet.getCellMatrix().getValue(i, currentCell.startColumn);
                         if (curCellValue && curCellValue.v === undefined) {
-                            const nextCellValue = this._workSheet
-                                .getCellMatrix()
-                                .getValue(i + 1, currentCell.startColumn);
+                            const nextCellValue = this._workSheet.getCellMatrix().getValue(i + 1, currentCell.startColumn);
                             if (nextCellValue && nextCellValue.v !== undefined) {
                                 endRow = i + 1;
                                 break;
@@ -723,48 +612,28 @@ export class Selection {
                     }
                 }
             } else {
-                const cellValue = this._workSheet
-                    .getCellMatrix()
-                    .getValue(range.startRow + 1, currentCell.startColumn);
+                const cellValue = this._workSheet.getCellMatrix().getValue(range.startRow + 1, currentCell.startColumn);
                 if (cellValue && cellValue.v === undefined) {
-                    for (
-                        let i = range.startRow + 1;
-                        i <= currentCell.startRow;
-                        i++
-                    ) {
+                    for (let i = range.startRow + 1; i <= currentCell.startRow; i++) {
                         if (i === currentCell.startRow) {
                             startRow = currentCell.startRow;
                             break;
                         }
-                        const curCellValue = this._workSheet
-                            .getCellMatrix()
-                            .getValue(i, currentCell.startColumn);
+                        const curCellValue = this._workSheet.getCellMatrix().getValue(i, currentCell.startColumn);
                         if (curCellValue && curCellValue.v !== undefined) {
                             startRow = i;
                             break;
                         }
                     }
                 } else {
-                    for (
-                        let i = range.startRow + 1;
-                        i <= currentCell.startRow;
-                        i++
-                    ) {
+                    for (let i = range.startRow + 1; i <= currentCell.startRow; i++) {
                         if (i === currentCell.startRow) {
                             startRow = currentCell.startRow;
                             break;
                         }
-                        const curCellValue = this._workSheet
-                            .getCellMatrix()
-                            .getValue(i, currentCell.startColumn);
-                        if (
-                            curCellValue &&
-                            curCellValue.v === undefined &&
-                            i !== range.startRow + 1
-                        ) {
-                            const prevCellValue = this._workSheet
-                                .getCellMatrix()
-                                .getValue(i - 1, currentCell.startColumn);
+                        const curCellValue = this._workSheet.getCellMatrix().getValue(i, currentCell.startColumn);
+                        if (curCellValue && curCellValue.v === undefined && i !== range.startRow + 1) {
+                            const prevCellValue = this._workSheet.getCellMatrix().getValue(i - 1, currentCell.startColumn);
                             if (prevCellValue && prevCellValue.v !== undefined) {
                                 startRow = i - 1;
                                 break;

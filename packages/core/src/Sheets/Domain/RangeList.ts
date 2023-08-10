@@ -86,12 +86,12 @@ export class RangeList {
      * @returns This range list, for chaining.
      */
     setValue(value: string | number | boolean): RangeList {
-        let { _rangeList, _commandManager, _worksheet } = this;
+        const { _rangeList, _commandManager, _worksheet } = this;
 
         // collect action list
         const setList = _rangeList.map((range) => {
-            let { startRow, startColumn, endRow, endColumn } = range;
-            let cellValue = new ObjectMatrix<ICellData>();
+            const { startRow, startColumn, endRow, endColumn } = range;
+            const cellValue = new ObjectMatrix<ICellData>();
             for (let r = startRow; r <= endRow; r++) {
                 for (let c = startColumn; c <= endColumn; c++) {
                     cellValue.setValue(startRow, startColumn, {
@@ -101,7 +101,7 @@ export class RangeList {
                 }
             }
 
-            let setValue: ISetRangeDataActionData = {
+            const setValue: ISetRangeDataActionData = {
                 sheetId: _worksheet.getSheetId(),
                 actionName: SetRangeDataAction.NAME,
                 cellValue: cellValue.getData(),
@@ -109,7 +109,7 @@ export class RangeList {
             return setValue;
         });
 
-        let command = new Command(
+        const command = new Command(
             {
                 WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
@@ -147,7 +147,7 @@ export class RangeList {
 
         // collect action list
         const clearList = _rangeList.map((range) => {
-            let clearRange: IClearRangeActionData = {
+            const clearRange: IClearRangeActionData = {
                 sheetId: _worksheet.getSheetId(),
                 actionName: ClearRangeAction.NAME,
                 options,
@@ -156,7 +156,7 @@ export class RangeList {
             return clearRange;
         });
 
-        let command = new Command(
+        const command = new Command(
             {
                 WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
@@ -193,10 +193,10 @@ export class RangeList {
      * @returns This range list, for chaining.
      */
     setBackground(color: Nullable<string>): RangeList {
-        let { _rangeList, _commandManager, _worksheet } = this;
+        const { _rangeList, _commandManager, _worksheet } = this;
 
         const setList = _rangeList.map((range) => {
-            let { startRow, startColumn, endRow, endColumn } = range;
+            const { startRow, startColumn, endRow, endColumn } = range;
 
             // string converted to a two-dimensional array
             const styleObj = {
@@ -217,7 +217,7 @@ export class RangeList {
             return setStyle;
         });
 
-        let command = new Command(
+        const command = new Command(
             {
                 WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
@@ -238,9 +238,9 @@ export class RangeList {
     setBackgroundRGB(red: number, green: number, blue: number): RangeList {
         const rgbString = `RGB(${red},${green},${blue})`;
 
-        let { _rangeList, _commandManager, _worksheet } = this;
+        const { _rangeList, _commandManager, _worksheet } = this;
         const setList = _rangeList.map((range) => {
-            let { startRow, startColumn, endRow, endColumn } = range;
+            const { startRow, startColumn, endRow, endColumn } = range;
 
             // string converted to a two-dimensional array
             const styleObj = {
@@ -261,7 +261,7 @@ export class RangeList {
             return setStyle;
         });
 
-        let command = new Command(
+        const command = new Command(
             {
                 WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
@@ -282,10 +282,10 @@ export class RangeList {
      * @returns This range list, for chaining.
      */
     setFontColor(color: Nullable<string>): RangeList {
-        let { _rangeList, _commandManager, _worksheet } = this;
+        const { _rangeList, _commandManager, _worksheet } = this;
 
         const setList = _rangeList.map((range) => {
-            let { startRow, startColumn, endRow, endColumn } = range;
+            const { startRow, startColumn, endRow, endColumn } = range;
 
             // string converted to a two-dimensional array
             const styleObj = {
@@ -306,7 +306,7 @@ export class RangeList {
             return setStyle;
         });
 
-        let command = new Command(
+        const command = new Command(
             {
                 WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
@@ -503,10 +503,10 @@ export class RangeList {
      * @returns This range list, for chaining.
      */
     setTextRotation(degrees: number): RangeList {
-        let { _rangeList, _commandManager, _worksheet } = this;
+        const { _rangeList, _commandManager, _worksheet } = this;
 
         const setList = _rangeList.map((range) => {
-            let { startRow, startColumn, endRow, endColumn } = range;
+            const { startRow, startColumn, endRow, endColumn } = range;
 
             const styleObj = {
                 tr: {
@@ -527,7 +527,7 @@ export class RangeList {
             return setStyle;
         });
 
-        let command = new Command(
+        const command = new Command(
             {
                 WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
@@ -555,10 +555,10 @@ export class RangeList {
      * @returns This range list, for chaining.
      */
     setVerticalText(isVertical: BooleanNumber): RangeList {
-        let { _rangeList, _commandManager, _worksheet } = this;
+        const { _rangeList, _commandManager, _worksheet } = this;
 
         const setList = _rangeList.map((range) => {
-            let { startRow, startColumn, endRow, endColumn } = range;
+            const { startRow, startColumn, endRow, endColumn } = range;
 
             const styleObj = {
                 tr: {
@@ -579,7 +579,7 @@ export class RangeList {
             return setStyle;
         });
 
-        let command = new Command(
+        const command = new Command(
             {
                 WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
@@ -615,23 +615,23 @@ export class RangeList {
      * @returns This range list, for chaining.
      */
     trimWhitespace(): RangeList {
-        let { _rangeList, _commandManager, _worksheet } = this;
+        const { _rangeList, _commandManager, _worksheet } = this;
 
         const setList = _rangeList.map((range) => {
-            let { startRow, startColumn, endRow, endColumn } = range;
+            const { startRow, startColumn, endRow, endColumn } = range;
 
             const sheetMatrix = this._worksheet.getCellMatrix();
             const regx = /\s+/g;
-            let cellValue = new ObjectMatrix<ICellV>();
+            const cellValue = new ObjectMatrix<ICellV>();
             for (let r = startRow; r < endRow + 1; r++) {
                 for (let c = startColumn; c < endColumn + 1; c++) {
-                    let m = sheetMatrix.getValue(r, c)!.m!;
+                    const m = sheetMatrix.getValue(r, c)!.m!;
                     const value = m.replace(regx, '');
                     cellValue.setValue(r, c, value || '');
                 }
             }
 
-            let setValue: ISetRangeFormattedValueActionData = {
+            const setValue: ISetRangeFormattedValueActionData = {
                 sheetId: _worksheet.getSheetId(),
                 actionName: ACTION_NAMES.SET_RANGE_FORMATTED_VALUE_ACTION,
                 cellValue: cellValue.getData(),
@@ -641,7 +641,7 @@ export class RangeList {
             return setValue;
         });
 
-        let command = new Command(
+        const command = new Command(
             {
                 WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },
@@ -660,10 +660,10 @@ export class RangeList {
      * @internal @preapproved
      */
     private _setStyle(value: Nullable<number | string | ITextDecoration | BooleanNumber>, type: string) {
-        let { _rangeList, _commandManager, _worksheet } = this;
+        const { _rangeList, _commandManager, _worksheet } = this;
 
         const setList = _rangeList.map((range) => {
-            let { startRow, startColumn, endRow, endColumn } = range;
+            const { startRow, startColumn, endRow, endColumn } = range;
 
             // string converted to a two-dimensional array
             const styleObj: IStyleData = { [type]: value };
@@ -680,7 +680,7 @@ export class RangeList {
             return setStyle;
         });
 
-        let command = new Command(
+        const command = new Command(
             {
                 WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
             },

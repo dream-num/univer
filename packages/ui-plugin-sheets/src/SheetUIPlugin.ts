@@ -1,6 +1,6 @@
 import { Inject, Injector } from '@wendellhu/redi';
 import { Plugin, Tools, Univer, PluginType } from '@univerjs/core';
-import { ComponentManager, getRefElement, RegisterManager, KeyboardManager, SlotComponent, ZIndexManager } from '@univerjs/base-ui';
+import { ComponentManager, getRefElement, RegisterManager, KeyboardManager, SlotComponent, ZIndexManager, SlotManager } from '@univerjs/base-ui';
 import { IRenderingEngine } from '@univerjs/base-render';
 import { DefaultSheetUIConfig, installObserver, ISheetUIPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';
 import { AppUIController } from './Controller/AppUIController';
@@ -63,6 +63,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
         this._sheetInjector.add([RegisterManager]);
         this._sheetInjector.add([ComponentManager]);
         this._sheetInjector.add([ZIndexManager]);
+        this._sheetInjector.add([SlotManager]);
 
         // TODO: maybe we don't have to instantiate these dependencies manually
         this._componentManager = this._sheetInjector.get(ComponentManager);
@@ -90,13 +91,13 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
         }, 0);
     }
 
-    initUI() {}
+    initUI() { }
 
     override onMounted(): void {
         this.initialize();
     }
 
-    override onDestroy(): void {}
+    override onDestroy(): void { }
 
     getAppUIController() {
         return this._appUIController;

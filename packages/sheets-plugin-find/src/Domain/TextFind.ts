@@ -1,13 +1,10 @@
-import { Range, FormatType, IGridRange, ObjectMatrix, ICellData, Nullable, Worksheet } from '@univerjs/core';
-import { SheetPlugin } from '@univerjs/base-sheets';
+import { Range, FormatType, IGridRange, ObjectMatrix, ICellData, Nullable, Worksheet, ICurrentUniverService } from '@univerjs/core';
+import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
 import { getRegExpStr } from '../Util/util';
 import { FindType } from '../IData';
 import { SelectSearch } from '../View/UI/FindModal';
-import { FindPlugin } from '../FindPlugin';
 
 export class TextFinder {
-    private _plugin: FindPlugin;
-
     private _text: string | FormatType;
 
     private _type: FindType = 'text'; // 查找类型
@@ -30,9 +27,7 @@ export class TextFinder {
 
     private _startRange: Nullable<Range>; // 从这个位置后开始找
 
-    constructor(plugin: FindPlugin) {
-        this._plugin = plugin;
-    }
+    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @ISelectionManager private readonly _selectionManager: SelectionManager) { }
 
     /**
      * Returns all cells matching the search criteria.
@@ -117,10 +112,10 @@ export class TextFinder {
 
         let count = 0;
         let sheetId = this._range[0].sheetId;
-        let sheet = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(sheetId);
+        let sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(sheetId);
         for (let i = 0; i < this._range.length; i++) {
             if (sheetId !== this._range[i].sheetId) {
-                sheet = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(this._range[i].sheetId);
+                sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(this._range[i].sheetId);
             }
             const range = this._range[i];
             if (!sheet) continue;
@@ -140,7 +135,7 @@ export class TextFinder {
     replaceWith(replaceText: string): number {
         if (!this._range.length) return 0;
         const range = this._range[this._index];
-        const sheet = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(range.sheetId);
+        const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(range.sheetId);
         if (!sheet) return 0;
 
         this._replaceText(sheet, range, replaceText);
@@ -185,7 +180,7 @@ export class TextFinder {
 
     private _getRange(searchRange: SelectSearch) {
         if (searchRange === SelectSearch.CurrentSheet) {
-            const sheet = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+            const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
             const sheetId = sheet.getSheetId();
             const rangeList: IGridRange = {
                 sheetId,
@@ -239,7 +234,7 @@ export class TextFinder {
     private _mathTxt(): IGridRange[] {
         const range: IGridRange[] = [];
         for (let i = 0; i < this._rangeData.length; i++) {
-            const sheet = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(this._rangeData[i].sheetId);
+            const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(this._rangeData[i].sheetId);
             if (!sheet) return [];
             let matrix: ObjectMatrix<ICellData> = new ObjectMatrix<ICellData>();
             if (this._matchFormula) {
@@ -302,16 +297,7 @@ export class TextFinder {
     // 高亮匹配单元格
     private _highlightCell(range: IGridRange) {
         if (!range) return;
-        this._plugin
-            .getContext()
-            .getUniver()
-            .getCurrentUniverSheetInstance()
-            .getWorkBook()
-            .getContext()
-            .getPluginManager()
-            .getPluginByName<SheetPlugin>('spreadsheet')
-            ?.getSelectionManager()
-            .setCurrentCell(range);
+        this._selectionManager.setCurrentCell(range);
     }
 
     private _replaceText(sheet: Worksheet, range: IGridRange, text: string) {

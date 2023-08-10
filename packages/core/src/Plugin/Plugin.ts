@@ -74,7 +74,7 @@ export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase> imp
         this.context = context;
     }
 
-    load<T>(data: T): void {}
+    load<T>(data: T): void { }
 
     save(): object {
         return Object();
@@ -83,7 +83,7 @@ export abstract class Plugin<Obs = any, O extends ContextBase = ContextBase> imp
     /**
      * @deprecated
      */
-    onMounted(context: O): void {}
+    onMounted(context: O): void { }
 
     /**
      * @deprecated

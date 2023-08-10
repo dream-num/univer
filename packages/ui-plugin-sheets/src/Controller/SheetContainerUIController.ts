@@ -22,7 +22,7 @@ export class SheetContainerUIController {
 
     private _slotController: SlotController;
 
-    private _slotManager: SlotManager;
+    // private _slotManager: SlotManager;
 
     private _cellEditorUIController: CellEditorUIController;
 
@@ -46,12 +46,13 @@ export class SheetContainerUIController {
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Self() @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(SlotManager) private readonly _slotManager: SlotManager
     ) {
         this._config = config;
 
         this._slotController = new SlotController();
-        this._slotManager = new SlotManager();
+        // this._slotManager = new SlotManager();
         this._toolbarController = this._injector.createInstance(ToolbarUIController, this._config.layout?.toolbarConfig);
         this._cellEditorUIController = this._injector.createInstance(CellEditorUIController, () => this.getContentRef());
         this._formulaBarUIController = this._injector.createInstance(FormulaBarUIController);

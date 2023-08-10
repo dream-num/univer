@@ -1,20 +1,17 @@
-import { Nullable } from '@univerjs/core';
-import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
+import { ComponentManager, SlotManager } from '@univerjs/base-ui';
+import { SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
+import { Inject } from '@wendellhu/redi';
 import { TextFinder } from '../Domain';
-import { FindPlugin } from '../FindPlugin';
 import { FindModal } from '../View/UI/FindModal';
 
 export class FindModalController {
-    private _plugin: FindPlugin;
-
     private _findModal: FindModal;
 
-    private _textFinder: Nullable<TextFinder>;
-
-    constructor(plugin: FindPlugin) {
-        this._plugin = plugin;
-        this._textFinder = plugin.getTextFinder();
-
+    constructor(
+        @Inject(TextFinder) private _textFinder: TextFinder,
+        @Inject(ComponentManager) private _componentManager: ComponentManager,
+        @Inject(SlotManager) private readonly _slotManager: SlotManager
+    ) {
         this._initialize();
     }
 
@@ -27,15 +24,15 @@ export class FindModalController {
     }
 
     findNext(text: string) {
-        this._textFinder = this._plugin.getTextFinder().searchText(text);
-        if (!this._textFinder) return { count: 0, current: 0 };
+        const res = this._textFinder.searchText(text);
+        if (!res) return { count: 0, current: 0 };
         this._textFinder.findNext();
         return this._getCountInfo();
     }
 
     findPrevious(text: string) {
-        this._textFinder = this._plugin.getTextFinder().searchText(text);
-        if (!this._textFinder) return { count: 0, current: 0 };
+        const res = this._textFinder.searchText(text);
+        if (!res) return { count: 0, current: 0 };
         this._textFinder.findPrevious();
         return this._getCountInfo();
     }
@@ -78,10 +75,8 @@ export class FindModalController {
     }
 
     private _initialize() {
-        const sheetUIPlugin = this._plugin.getContext().getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
-        const componentManager = sheetUIPlugin.getComponentManager();
-        componentManager.register(FindModal.name, FindModal);
-        sheetUIPlugin.setSlot('main', {
+        this._componentManager.register(FindModal.name, FindModal);
+        this._slotManager.setSlotComponent('main', {
             name: SHEET_UI_PLUGIN_NAME + FindModal.name,
             component: {
                 name: FindModal.name,

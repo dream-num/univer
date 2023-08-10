@@ -1,14 +1,12 @@
-import { IRenderingEngine, RenderEngine } from '@univerjs/base-render';
-import { CommandManager, IRangeData, LocaleService, ObjectMatrixPrimitiveType, Plugin, PLUGIN_NAMES, PluginType, SheetContext } from '@univerjs/core';
+import { CommandManager, IRangeData, LocaleService, ObjectMatrixPrimitiveType, Plugin, PluginType, SheetContext } from '@univerjs/core';
+import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { NUMFMT_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { install, NumfmtPluginObserve } from './Basics/Observer';
 import en from './Locale/en';
 import zh from './Locale/zh';
 import { NumfmtController } from './Controller/NumfmtController';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { NumfmtActionExtensionFactory } from './Basics/Register/NumfmtActionExtension';
 import { NumfmtModalController } from './Controller/NumfmtModalController';
-import { AppUIController, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 
 export interface INumfmtPluginConfig {}
 
@@ -25,7 +23,7 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
         config: Partial<INumfmtPluginConfig>,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) private readonly _sheetInjector: Injector,
-        @Inject(CommandManager) private readonly _commandManager: CommandManager,
+        @Inject(CommandManager) private readonly _commandManager: CommandManager
     ) {
         super(NUMFMT_PLUGIN_NAME);
         this.initializeDependencies(_sheetInjector);
@@ -69,10 +67,7 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
         //     [NumfmtController],
         //     [NumfmtModalController],
         // ]);
-        const dependencies: Dependency[] = [
-            [NumfmtController],
-            [NumfmtModalController],
-        ];
+        const dependencies: Dependency[] = [[NumfmtController], [NumfmtModalController]];
         dependencies.forEach((d) => {
             sheetInjector.add(d);
         });

@@ -1,6 +1,6 @@
 import { ComponentChildren, ComponentManager } from '@univerjs/base-ui';
 import { SheetPlugin } from '@univerjs/base-sheets';
-import { LocaleService } from '@univerjs/core';
+import { LocaleService, ObserverManager } from '@univerjs/core';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
 import { NumfmtPlugin } from '../NumfmtPlugin';
@@ -41,8 +41,9 @@ export class NumfmtModalController {
     protected _modalData: ModalDataProps[];
 
     constructor(
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         this._modalData = [
             {
@@ -52,15 +53,11 @@ export class NumfmtModalController {
                     {
                         locale: 'button.confirm',
                         type: 'primary',
-                        onClick: () => {
-
-                        },
+                        onClick: () => {},
                     },
                     {
                         locale: 'button.cancel',
-                        onClick: () => {
-
-                        },
+                        onClick: () => {},
                     },
                 ],
                 show: false,
@@ -128,10 +125,10 @@ export class NumfmtModalController {
         ];
         this._componentManager.register(NUMFMT_PLUGIN_NAME + FormatContent.name, FormatContent);
         this._componentManager.register(NUMFMT_PLUGIN_NAME + NumfmtModal.name, NumfmtModal);
-        // this._numfmtPlugin.getObserver('onNumfmtModalDidMountObservable')!.add((component): void => {
-        //     this._numfmtModal = component;
-        //     this.resetModalData();
-        // });
+        this._observerManager.getObserver<NumfmtModal>('onNumfmtModalDidMountObservable')!.add((component): void => {
+            this._numfmtModal = component;
+            this.resetModalData();
+        });
     }
 
     resetContentData(data: any[]): any[] {

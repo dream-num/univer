@@ -63,7 +63,6 @@ module.exports = {
         'guard-for-in': 'off',
         'no-prototype-builtins': 'off',
         'no-lonely-if': 'off',
-        'prefer-const': 'off',
         radix: 'off',
         'no-nested-ternary': 'off',
         'no-new': 'off',
@@ -109,7 +108,7 @@ module.exports = {
         'grouped-accessor-pairs': 'off',
         '@typescript-eslint/member-ordering': 'error',
         '@typescript-eslint/no-explicit-any': 'warn',
-        '@typescript-eslint/no-unsafe-return': 'error'
+        '@typescript-eslint/no-unsafe-return': 'error',
     },
     // https://www.npmjs.com/package/eslint-import-resolver-typescript
     settings: {

@@ -1,7 +1,25 @@
 import { IMouseEvent, IPointerEvent, Rect, ScrollTimer, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle } from '@univerjs/base-render';
 import {
-  ActionOperation, Command, DEFAULT_CELL, DEFAULT_SELECTION, Direction, ICellInfo, ICurrentUniverService, IGridRange, IRangeCellData, IRangeData, ISelection, ISelectionData, makeCellToSelection, Nullable,
-  Observer, ObserverManager, Range, RangeList, Worksheet
+    ActionOperation,
+    Command,
+    CommandManager,
+    DEFAULT_CELL,
+    DEFAULT_SELECTION,
+    Direction,
+    ICellInfo,
+    ICurrentUniverService,
+    IGridRange,
+    IRangeCellData,
+    IRangeData,
+    ISelection,
+    ISelectionData,
+    makeCellToSelection,
+    Nullable,
+    Observer,
+    ObserverManager,
+    Range,
+    RangeList,
+    Worksheet,
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -53,6 +71,7 @@ export class SelectionManager {
         private readonly _sheetView: SheetView,
         private readonly _config: ISheetPluginConfig,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         /** @deprecated this should be divided into smaller pieces */
@@ -283,15 +302,16 @@ export class SelectionManager {
             models = this._selectionControls.map((control) => control.model.getValue());
         }
 
-        const workbook = this._worksheet.getContext().getWorkBook();
-        const commandManager = workbook.getCommandManager();
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
 
         let action: ISetSelectionValueActionData = {
             sheetId: this._worksheet.getSheetId(),
             actionName: SetSelectionValueAction.NAME,
             selections: models,
+            injector: this._injector,
         };
 
+        // TODO@wzhudev: this design is bad, leaking implementation details to its users. Will redesign command system and refactor this.
         action = ActionOperation.make<ISetSelectionValueActionData>(action).removeUndo().getAction();
 
         const command = new Command(
@@ -300,7 +320,7 @@ export class SelectionManager {
             },
             action
         );
-        commandManager.invoke(command);
+        this._commandManager.invoke(command);
     }
 
     /**
@@ -322,8 +342,7 @@ export class SelectionManager {
             }
         });
 
-        const workbook = this._worksheet.getContext().getWorkBook();
-        const commandManager = workbook.getCommandManager();
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
 
         let action: ISetSelectionValueActionData = {
             sheetId: this._worksheet.getSheetId(),
@@ -339,7 +358,7 @@ export class SelectionManager {
             },
             action
         );
-        commandManager.invoke(command);
+        this._commandManager.invoke(command);
     }
 
     setModels(selections: ISelectionModelValue[]) {

@@ -2,6 +2,7 @@ import { SheetActionBase, ActionObservers, ActionType, ISheetActionData, ICellIn
 
 import { ACTION_NAMES } from '../../Basics/Enum/ACTION_NAMES';
 import { SetSelectionValue } from '../Apply/SetSelectionValue';
+import { ISelectionManager } from '../../Services/tokens';
 
 export interface ISelectionModelValue {
     selection: ISelection;
@@ -33,10 +34,10 @@ export class SetSelectionValueAction extends SheetActionBase<ISetSelectionValueA
     }
 
     do(): ISelectionModelValue[] {
-        const { selections } = this._doActionData;
+        const { selections, injector } = this._doActionData;
         const worksheet = this.getWorkSheet();
 
-        const result = SetSelectionValue(worksheet, selections);
+        const result = SetSelectionValue(worksheet, selections, injector!.get(ISelectionManager));
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -59,14 +60,14 @@ export class SetSelectionValueAction extends SheetActionBase<ISetSelectionValueA
     }
 
     undo(): void {
-        const { selections, sheetId } = this._oldActionData;
+        const { selections, sheetId, injector } = this._oldActionData;
         const worksheet = this.getWorkSheet();
 
         // update current data
         this._doActionData = {
             actionName: ACTION_NAMES.SET_SELECTION_VALUE_ACTION,
             sheetId,
-            selections: SetSelectionValue(worksheet, selections),
+            selections: SetSelectionValue(worksheet, selections, injector!.get(ISelectionManager)),
         };
 
         this._observers.notifyObservers({

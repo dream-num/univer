@@ -317,7 +317,7 @@ export class Worksheet {
     getRange(a1Notation: IRangeStringData): Range;
     getRange(...argument: any): Nullable<Range> {
         if (Tools.hasLength(argument, 1)) {
-            return new Range(this, argument[0], this._currentUniverService);
+            return new Range(this, argument[0], this._currentUniverService, this._commandManager);
         }
         if (Tools.hasLength(argument, 2)) {
             return new Range(
@@ -326,7 +326,8 @@ export class Worksheet {
                     row: [argument[0], argument[0]],
                     column: [argument[1], argument[1]],
                 },
-                this._currentUniverService
+                this._currentUniverService,
+                this._commandManager
             );
         }
         if (Tools.hasLength(argument, 3)) {
@@ -336,7 +337,8 @@ export class Worksheet {
                     row: [argument[0], argument[2]],
                     column: [argument[1], argument[1]],
                 },
-                this._currentUniverService
+                this._currentUniverService,
+                this._commandManager
             );
         }
         if (Tools.hasLength(argument, 4)) {
@@ -346,7 +348,8 @@ export class Worksheet {
                     row: [argument[0], argument[2]],
                     column: [argument[1], argument[3]],
                 },
-                this._currentUniverService
+                this._currentUniverService,
+                this._commandManager
             );
         }
     }
@@ -362,7 +365,7 @@ export class Worksheet {
          * const range = universheet.getRange('A1:B2')
          * range.activate() // Activate the current range as the current selection
          */
-        return new RangeList(this, rangeList);
+        return new RangeList(this, rangeList, this._commandManager, this._currentUniverService);
     }
 
     /**
@@ -1915,7 +1918,8 @@ export class Worksheet {
                 endRow: startRow + numRows - 1,
                 endColumn: startColumn + numColumns - 1,
             },
-            this._currentUniverService
+            this._currentUniverService,
+            this._commandManager
         );
         return range.getValues();
     }
@@ -1925,7 +1929,7 @@ export class Worksheet {
      * @returns a Range corresponding to the dimensions in which data is present.
      */
     getDataRange(): Range {
-        const range = new Range(this, this._cellData.getRange(), this._currentUniverService);
+        const range = new Range(this, this._cellData.getRange(), this._currentUniverService, this._commandManager);
         return range;
     }
 
@@ -1966,6 +1970,6 @@ export class Worksheet {
 
     private _initialize(): void {
         // this._selection = new Selection(this);
-        this._merges = new Merges(this, this._config.mergeData);
+        this._merges = new Merges(this, this._config.mergeData, this._commandManager, this._currentUniverService);
     }
 }

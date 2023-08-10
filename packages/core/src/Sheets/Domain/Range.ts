@@ -2,6 +2,7 @@ import { ICurrentUniverService } from 'src/Service/Current.service';
 
 // TODO@wzhudev: here we still have some
 
+import { Inject } from '@wendellhu/redi';
 import {
     IInsertRangeActionData,
     IClearRangeActionData,
@@ -66,13 +67,16 @@ type IValueOptionsType = {
  * @beta
  */
 export class Range {
-    private _commandManager: CommandManager;
-
     private _rangeData: IRangeData;
 
     private _worksheet: Worksheet;
 
-    constructor(workSheet: Worksheet, range: IRangeType, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
+    constructor(
+        workSheet: Worksheet,
+        range: IRangeType,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(CommandManager) private readonly _commandManager: CommandManager
+    ) {
         // Convert the range passed in by the user into a standard format
         this._rangeData = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().transformRangeType(range).rangeData;
         this._worksheet = workSheet;
@@ -2197,7 +2201,7 @@ export class Range {
             offset.endColumn = offset.endColumn + numColumns - 1;
         }
 
-        return new Range(this._worksheet, offset, this._currentUniverService);
+        return new Range(this._worksheet, offset, this._currentUniverService, this._commandManager);
     }
 
     /**
@@ -2308,14 +2312,14 @@ export class Range {
             endColumn: rangeData.endColumn,
         };
 
-        const tr = new Range(_worksheet, topRangeOut, this._currentUniverService);
-        const lr = new Range(_worksheet, leftRangeOut, this._currentUniverService);
-        const br = new Range(_worksheet, bottomRangeOut, this._currentUniverService);
-        const rr = new Range(_worksheet, rightRangeOut, this._currentUniverService);
-        const t = new Range(_worksheet, topRange, this._currentUniverService);
-        const l = new Range(_worksheet, leftRange, this._currentUniverService);
-        const b = new Range(_worksheet, bottomRange, this._currentUniverService);
-        const r = new Range(_worksheet, rightRange, this._currentUniverService);
+        const tr = new Range(_worksheet, topRangeOut, this._currentUniverService, this._commandManager);
+        const lr = new Range(_worksheet, leftRangeOut, this._currentUniverService, this._commandManager);
+        const br = new Range(_worksheet, bottomRangeOut, this._currentUniverService, this._commandManager);
+        const rr = new Range(_worksheet, rightRangeOut, this._currentUniverService, this._commandManager);
+        const t = new Range(_worksheet, topRange, this._currentUniverService, this._commandManager);
+        const l = new Range(_worksheet, leftRange, this._currentUniverService, this._commandManager);
+        const b = new Range(_worksheet, bottomRange, this._currentUniverService, this._commandManager);
+        const r = new Range(_worksheet, rightRange, this._currentUniverService, this._commandManager);
 
         const mtr = new ObjectMatrix<IStyleData>();
         const mlr = new ObjectMatrix<IStyleData>();
@@ -3440,6 +3444,7 @@ export class Range {
 
         const cellData = originRange._worksheet.getCellMatrix();
         const { startRow, endRow, startColumn, endColumn } = originRange.getRangeData();
+        // eslint-disable-next-line prefer-const
         let { startRow: dStartRow, endRow: dEndRow, startColumn: dStartColumn, endColumn: dEndColumn } = destinationRange;
 
         const originRows = endRow - startRow + 1;

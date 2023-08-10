@@ -1,7 +1,8 @@
-import { ComponentChildren } from '@univerjs/base-ui';
+import { ComponentChildren, ComponentManager } from '@univerjs/base-ui';
 import { SheetPlugin } from '@univerjs/base-sheets';
-import { Locale, PLUGIN_NAMES } from '@univerjs/core';
-import { SHEET_UI_PLUGIN_NAME, SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
+import { LocaleService, ObserverManager } from '@univerjs/core';
+import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
+import { Inject } from '@wendellhu/redi';
 import { NumfmtPlugin } from '../NumfmtPlugin';
 import { FormatContent } from '../View/UI/FormatContent';
 import { NumfmtModal } from '../View/UI/NumfmtModal';
@@ -39,9 +40,11 @@ export class NumfmtModalController {
 
     protected _modalData: ModalDataProps[];
 
-    constructor(numfmtPlugin: NumfmtPlugin) {
-        const locale: Locale = numfmtPlugin.getGlobalContext().getLocale();
-        this._numfmtPlugin = numfmtPlugin;
+    constructor(
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+    ) {
         this._modalData = [
             {
                 locale: 'toolbar.currencyFormat',
@@ -62,8 +65,8 @@ export class NumfmtModalController {
                     name: NUMFMT_PLUGIN_NAME + FormatContent.name,
                     props: {
                         data: this.resetContentData(CURRENCYDETAIL),
+                        input: this._localeService.getLocale().get('format.decimalPlaces'),
                         onClick: (value: string) => console.dir(value),
-                        input: locale.get('format.decimalPlaces'),
                         onChange: (value: string) => console.dir(value),
                     },
                 },
@@ -120,18 +123,16 @@ export class NumfmtModalController {
                 },
             },
         ];
-        this._sheetPlugin = numfmtPlugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
-        this._sheetUIPlugin = numfmtPlugin.getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
-        this._sheetUIPlugin.getComponentManager().register(NUMFMT_PLUGIN_NAME + FormatContent.name, FormatContent);
-        this._sheetUIPlugin.getComponentManager().register(NUMFMT_PLUGIN_NAME + NumfmtModal.name, NumfmtModal);
-        this._numfmtPlugin.getObserver('onNumfmtModalDidMountObservable')!.add((component): void => {
+        this._componentManager.register(NUMFMT_PLUGIN_NAME + FormatContent.name, FormatContent);
+        this._componentManager.register(NUMFMT_PLUGIN_NAME + NumfmtModal.name, NumfmtModal);
+        this._observerManager.getObserver<NumfmtModal>('onNumfmtModalDidMountObservable')!.add((component): void => {
             this._numfmtModal = component;
             this.resetModalData();
         });
     }
 
     resetContentData(data: any[]): any[] {
-        const locale = this._numfmtPlugin.getGlobalContext().getLocale();
+        const locale = this._localeService.getLocale();
         for (let i = 0; i < data.length; i++) {
             if (data[i].locale) {
                 data[i].label = locale.get(data[i].locale);
@@ -142,7 +143,7 @@ export class NumfmtModalController {
 
     // 渲染所需数据
     resetModalData(): void {
-        const locale: Locale = this._numfmtPlugin.getGlobalContext().getLocale();
+        const locale = this._localeService.getLocale();
         this._modalData.forEach((item) => {
             item.title = locale.get(item.locale);
             if (item.group && item.group.length) {

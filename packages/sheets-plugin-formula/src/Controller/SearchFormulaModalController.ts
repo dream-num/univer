@@ -1,9 +1,9 @@
-import { ComponentChildren } from '@univerjs/base-ui';
-import { SheetPlugin } from '@univerjs/base-sheets';
-import { PLUGIN_NAMES } from '@univerjs/core';
-import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
+import { ComponentChildren, ComponentManager } from '@univerjs/base-ui';
+import { ObserverManager } from '@univerjs/core';
+import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
+import { Inject } from '@wendellhu/redi';
+import { SelectionControl } from '@univerjs/base-render/src/Component/Sheets/Selection/SelectionControl';
 import { FormulaType, FORMULA_PLUGIN_NAME, FunList, SelectCategoryType } from '../Basics';
-import { FormulaPlugin } from '../FormulaPlugin';
 import { SearchFormulaContent } from '../View/UI/SearchFormulaModal/SearchFormulaContent';
 import { SearchFormulaModal } from '../View/UI/SearchFormulaModal/SearchFormulaModal';
 import { SearchItem } from '../View/UI/SearchFormulaModal/SearchItem';
@@ -57,8 +57,6 @@ export interface SearchFormulaModalData {
 }
 
 export class SearchFormulaController {
-    private _plugin: FormulaPlugin;
-
     private _modalData: SearchFormulaModalData[];
 
     private _formulaModal: SearchFormulaModal;
@@ -69,9 +67,11 @@ export class SearchFormulaController {
 
     private _cellRangeModalData: SearchFormulaModalData;
 
-    constructor(plugin: FormulaPlugin) {
-        this._plugin = plugin;
-
+    constructor(
+        @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
+    ) {
         this._funParams = {
             funParams: {},
         };
@@ -165,7 +165,7 @@ export class SearchFormulaController {
 
     showCellRangeModal(show: boolean) {
         this._cellRangeModalData.show = show;
-        const sheetPlugin = this._plugin.getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
+        // const sheetPlugin = this._plugin.getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
         // const cellRangeModal = sheetPlugin?.getModalGroupControl().getModal(CellRangeModal.name);
         // cellRangeModal.setModal(this._cellRangeModalData);
         this.showFormulaModal('SearchItem', false);
@@ -179,17 +179,14 @@ export class SearchFormulaController {
     private _initialize() {
         this._initRegisterComponent();
 
-        const sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
-        sheetPlugin.getObserver('onChangeSelectionObserver')?.add((selection) => {
+        this._observerManager.getObserver<SelectionControl>('onChangeSelectionObserver')?.add((selection) => {
             const info = selection.getCurrentCellInfo();
             // this._searchItem.changeRange(info?.startColumn.toString() ?? '');
         });
     }
 
     private _initRegisterComponent() {
-        const sheetUIPlugin = this._plugin.getContext().getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
-        const ComponentManager = sheetUIPlugin.getComponentManager();
-        sheetUIPlugin.addSlot(FORMULA_PLUGIN_NAME + SearchFormulaModal.name, {
+        this._sheetContainerUIController.getMainSlotController().addSlot(FORMULA_PLUGIN_NAME + SearchFormulaModal.name, {
             component: SearchFormulaModal,
             props: {
                 getComponent: (ref: SearchFormulaModal) => {
@@ -197,7 +194,7 @@ export class SearchFormulaController {
                 },
             },
         });
-        ComponentManager.register(FORMULA_PLUGIN_NAME + SearchItem.name, SearchItem);
-        ComponentManager.register(FORMULA_PLUGIN_NAME + SearchFormulaContent.name, SearchFormulaContent);
+        this._componentManager.register(FORMULA_PLUGIN_NAME + SearchItem.name, SearchItem);
+        this._componentManager.register(FORMULA_PLUGIN_NAME + SearchFormulaContent.name, SearchFormulaContent);
     }
 }

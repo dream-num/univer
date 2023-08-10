@@ -1,29 +1,40 @@
 import { IFormulaData } from '@univerjs/base-formula-engine';
 import { BaseCellInputExtension, BaseCellInputExtensionFactory, ICell } from '@univerjs/base-ui';
-import { IRangeData, Nullable, ObjectArray } from '@univerjs/core';
+import { ICurrentUniverService, IRangeData, Nullable, ObjectArray } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 import { FormulaPlugin } from '../../FormulaPlugin';
+import { FormulaController } from '../../Controller/FormulaController';
 
 export class FormulaCellInputExtension extends BaseCellInputExtension {
-    setValue(value: string) {
+    override setValue(value: string) {
         this._cell.value = value;
     }
 
-    execute() {
+    override execute() {
         this.setValue(this._value);
     }
 }
 
 export class FormulaCellInputExtensionFactory extends BaseCellInputExtensionFactory<FormulaPlugin> {
-    get zIndex(): number {
+    constructor(
+        _plugin: FormulaPlugin,
+        @Inject(Injector) private readonly _sheetInjector: Injector,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(FormulaController) private readonly _formulaController: FormulaController
+    ) {
+        super(_plugin);
+    }
+
+    override get zIndex(): number {
         return 0;
     }
 
-    create(cell: ICell, value: string): FormulaCellInputExtension {
-        return new FormulaCellInputExtension(cell, value);
+    override create(cell: ICell, value: string): FormulaCellInputExtension {
+        return this._sheetInjector.createInstance(FormulaCellInputExtension, cell, value);
     }
 
-    check(cell: ICell) {
-        const unitId = this._plugin.getContext().getWorkBook().getUnitId();
+    override check(cell: ICell) {
+        const unitId = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getUnitId();
         let formula = this.checkFormulaValue(cell) || this.checkArrayFormValue(cell, unitId);
 
         if (!formula) {
@@ -36,7 +47,7 @@ export class FormulaCellInputExtensionFactory extends BaseCellInputExtensionFact
     checkFormulaValue(cell: ICell): Nullable<string> {
         const { row, column } = cell;
         let formula;
-        const formulaData = this._plugin.getFormulaController().getDataModel().getFormulaData();
+        const formulaData = this._formulaController.getDataModel().getFormulaData();
 
         Object.keys(formulaData).forEach((unitId) => {
             const sheetData = formulaData[unitId];
@@ -71,8 +82,8 @@ export class FormulaCellInputExtensionFactory extends BaseCellInputExtensionFact
     checkArrayFormValue(cell: ICell, unitId: string): Nullable<string> {
         const { row, column } = cell;
         let formula;
-        const formulaData = this._plugin.getFormulaController().getDataModel().getFormulaData();
-        const arrayFormulaData = this._plugin.getFormulaController().getDataModel().getArrayFormulaData();
+        const formulaData = this._formulaController.getDataModel().getFormulaData();
+        const arrayFormulaData = this._formulaController.getDataModel().getArrayFormulaData();
 
         if (!arrayFormulaData) return null;
 

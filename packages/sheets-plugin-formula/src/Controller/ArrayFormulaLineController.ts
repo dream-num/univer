@@ -1,8 +1,8 @@
-import { IRangeData, PLUGIN_NAMES, Workbook } from '@univerjs/core';
+import { ICurrentUniverService, IRangeData, Workbook } from '@univerjs/core';
 import { Rect, Scene } from '@univerjs/base-render';
-import { SheetPlugin, SheetView } from '@univerjs/base-sheets';
+import { CanvasView, SheetView } from '@univerjs/base-sheets';
 
-import { FormulaPlugin } from '../FormulaPlugin';
+import { Inject } from '@wendellhu/redi';
 
 enum ARRAY_FORMULA_LINE_MANAGER_KEY {
     top = '__ArrayFormulaLineTopControl__',
@@ -17,8 +17,6 @@ const LINE_COLOR = '#3969b9';
  * Ant Line Controller
  */
 export class ArrayFormulaLineControl {
-    private _sheetPlugin: SheetPlugin;
-
     private _leftControl: Rect;
 
     private _rightControl: Rect;
@@ -33,9 +31,12 @@ export class ArrayFormulaLineControl {
      * Create ArrayFormLineController
      * @param plugin
      */
-    constructor(private _plugin: FormulaPlugin, private _sheetId: string, private _range: IRangeData) {
-        this._sheetPlugin = this._plugin.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
-
+    constructor(
+        private _sheetId: string,
+        private _range: IRangeData,
+        @ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
+        @Inject(CanvasView) private readonly _canvasView: CanvasView
+    ) {
         this._initialize();
     }
 
@@ -44,7 +45,7 @@ export class ArrayFormulaLineControl {
      * @returns
      */
     getSheetView(): SheetView {
-        return this._sheetPlugin.getCanvasView().getSheetView();
+        return this._canvasView.getSheetView();
     }
 
     /**
@@ -52,7 +53,7 @@ export class ArrayFormulaLineControl {
      * @returns Workbook
      */
     getWorkBook(): Workbook {
-        return this._sheetPlugin.getWorkbook();
+        return this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook();
     }
 
     /**
@@ -60,7 +61,7 @@ export class ArrayFormulaLineControl {
      * @returns
      */
     getSheetViewScene(): Scene {
-        return this._sheetPlugin.getCanvasView().getSheetView().getScene();
+        return this.getSheetView().getScene();
     }
 
     dispose() {

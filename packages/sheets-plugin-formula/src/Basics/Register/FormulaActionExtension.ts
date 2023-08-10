@@ -12,18 +12,35 @@ import {
     Nullable,
     ObjectMatrix,
     Tools,
+    ICurrentUniverService,
+    IActionData,
+    CommandManager,
 } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
+import { FormulaDataType, FormulaEngineService } from '@univerjs/base-formula-engine';
 import { FormulaPlugin } from '../../FormulaPlugin';
 import { ACTION_NAMES as PLUGIN_ACTION_NAMES } from '../Enum';
+import { FormulaController } from '../../Controller/FormulaController';
 
+//
 export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
-    execute() {
-        const engine = this._plugin.getFormulaEngine();
-        const formulaController = this._plugin.getFormulaController();
+    constructor(
+        actionDataList: IActionData[],
+        _plugin: FormulaPlugin,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(FormulaController) private readonly _formulaController: FormulaController,
+        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
+        @Inject(CommandManager) private readonly _commandManager: CommandManager
+    ) {
+        super(actionDataList, _plugin);
+    }
+
+    override execute() {
+        const formulaController = this._formulaController;
         const formulaDataModel = formulaController.getDataModel();
         // The purpose of deep copy is to trigger the modification of formulaData through Command instead of reference relationship
         const formulaData = Tools.deepClone(formulaDataModel.getFormulaData());
-        const unitId = this._plugin.getContext().getWorkBook().getUnitId();
+        const unitId = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getUnitId();
         const actionDataList = this.actionDataList as ISetRangeDataActionData[];
 
         const unitRange: IUnitRange[] = [];
@@ -31,13 +48,8 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
 
         // handle each action
         actionDataList.forEach((actionData) => {
-            if (actionData.operation != null && !ActionOperation.hasExtension(actionData)) {
-                return false;
-            }
-
-            if (actionData.actionName !== ACTION_NAMES.SET_RANGE_DATA_ACTION) {
-                return false;
-            }
+            if (actionData.operation != null && !ActionOperation.hasExtension(actionData)) return false;
+            if (actionData.actionName !== ACTION_NAMES.SET_RANGE_DATA_ACTION) return false;
 
             // Filter out Actions that contain formulas, inject setRangeDataAction
             const { sheetId, cellValue } = actionData;
@@ -49,9 +61,7 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
             }
             const cellData = new ObjectMatrix(formulaData[unitId][sheetId]);
 
-            if (cellValue == null) {
-                return;
-            }
+            if (cellValue == null) return;
 
             const rangeMatrix = new ObjectMatrix(cellValue);
 
@@ -65,11 +75,7 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
                     isArrayForm = true;
                     isCalculate = true;
 
-                    unitRange.push({
-                        unitId,
-                        sheetId,
-                        rangeData: arrayFormCellRangeData,
-                    });
+                    unitRange.push({ unitId, sheetId, rangeData: arrayFormCellRangeData });
                 } else if (Tools.isStringNumber(formulaString)) {
                     isCalculate = true;
 
@@ -80,26 +86,22 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
                     }
                 } else if (isFormulaString(formulaString)) {
                     isCalculate = true;
-                    cellData.setValue(r, c, {
-                        formula: formulaString,
-                        row: r,
-                        column: c,
-                        sheetId,
-                    });
+                    cellData.setValue(r, c, { formula: formulaString, row: r, column: c, sheetId });
                 }
             });
 
             if (!isArrayForm) {
-                unitRange.push({
-                    unitId,
-                    sheetId,
-                    rangeData: rangeMatrix.getDataRange(),
-                });
+                unitRange.push({ unitId, sheetId, rangeData: rangeMatrix.getDataRange() });
             }
         });
 
         if (unitRange.length === 0 || !isCalculate) return;
 
+        this.executeFormula(unitId, formulaData, formulaController, unitRange, actionDataList);
+    }
+
+    executeFormula(unitId: string, formulaData: FormulaDataType, formulaController: FormulaController, unitRange: IUnitRange[], actionDataList: ISetRangeDataActionData[]) {
+        const engine = this._formulaEngineService;
         // Add command after calculating the formula
         engine.execute(unitId, formulaData, formulaController.toInterpreterCalculateProps(), false, unitRange).then((data) => {
             const { sheetData, arrayFormulaData } = data;
@@ -110,7 +112,7 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
             }
 
             if (arrayFormulaData) {
-                this._plugin.getFormulaController().addArrayFormulaData(arrayFormulaData);
+                this._formulaController.addArrayFormulaData(arrayFormulaData);
             }
 
             const sheetIds = Object.keys(sheetData);
@@ -152,16 +154,16 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
                 sheetId: actionDataList[0].sheetId, // Any sheetId can be passed in, it has no practical effect
                 formulaData,
             };
-            const workBook = this._plugin.getContext().getWorkBook();
-            const commandManager = this._plugin.getContext().getCommandManager();
+            const workBook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+            const commandManager = this._commandManager;
             const command = new Command({ WorkBookUnit: workBook }, ...actionDatas, setFormulaDataAction);
             commandManager.invoke(command);
         });
     }
 
     checkArrayFormValue(row: number, column: number): Nullable<IRangeData> {
-        let formula;
-        const arrayFormulaData = this._plugin.getFormulaController().getDataModel().getArrayFormulaData();
+        let formula: Nullable<IRangeData>;
+        const arrayFormulaData = this._formulaController.getDataModel().getArrayFormulaData();
 
         if (!arrayFormulaData) return null;
 
@@ -187,11 +189,15 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
 }
 
 export class FormulaActionExtensionFactory extends BaseActionExtensionFactory<FormulaPlugin> {
-    get zIndex(): number {
+    constructor(_plugin: FormulaPlugin, @Inject(Injector) private readonly _sheetInjector: Injector) {
+        super(_plugin);
+    }
+
+    override get zIndex(): number {
         return 1;
     }
 
-    create(actionDataList: ISheetActionData[]): BaseActionExtension<FormulaPlugin> {
-        return new FormulaActionExtension(actionDataList, this._plugin);
+    override create(actionDataList: ISheetActionData[]): BaseActionExtension<FormulaPlugin> {
+        return this._sheetInjector.createInstance(FormulaActionExtension, actionDataList, this._plugin);
     }
 }

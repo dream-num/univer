@@ -3,6 +3,9 @@ import { RenderEngine } from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
+import { DEFAULT_FORMULA_DATA_DEMO, FormulaPlugin } from '@univerjs/sheets-plugin-formula';
+import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
+import { FindPlugin } from '@univerjs/sheets-plugin-find';
 
 // TODO: @huwenzhao: change the following to new API
 
@@ -32,10 +35,12 @@ univer.registerPlugin(SheetUIPlugin, {
         },
     },
 });
+univer.registerPlugin(NumfmtPlugin);
+
+univer.registerPlugin(FindPlugin);
 
 // base-sheet
-
-// FormulaPlugin.create(DEFAULT_FORMULA_DATA_DEMO).installTo(universheet);
+univer.registerPlugin(FormulaPlugin,DEFAULT_FORMULA_DATA_DEMO)
 // FindPlugin.create().installTo(universheet);
 // universheet.installPlugin(new OperationPlugin());
 // universheet.installPlugin(new ImportXlsxPlugin());

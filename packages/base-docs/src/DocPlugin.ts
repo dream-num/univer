@@ -1,4 +1,4 @@
-import { DocContext, Plugin, PLUGIN_NAMES, UIObserver, UniverSheet } from '@univerjs/core';
+import { DocContext, Plugin, PluginType, PLUGIN_NAMES, UIObserver, UniverSheet } from '@univerjs/core';
 import { Engine, RenderEngine } from '@univerjs/base-render';
 import { zh, en } from './Locale';
 import { DocPluginObserve, install } from './Basics/Observer';
@@ -14,7 +14,9 @@ export interface IDocPluginConfig extends IDocPluginConfigBase {}
 
 const DEFAULT_DOCUMENT_PLUGIN_DATA = {};
 
-export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
+export class DocPlugin extends Plugin<DocPluginObserve> {
+    static override type = PluginType.Doc;
+
     private _config: IDocPluginConfig;
 
     private _infoBarControl: InfoBarController;
@@ -41,9 +43,7 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
         universheetInstance.installPlugin(this);
     }
 
-    initialize(ctx: DocContext): void {
-        this.context = ctx;
-
+    initialize(): void {
         this.getGlobalContext().getLocale().load({
             en,
             zh,
@@ -121,8 +121,8 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
         return this._infoBarControl;
     }
 
-    onMounted(ctx: DocContext): void {
-        this.initialize(ctx);
+    onMounted(): void {
+        this.initialize();
     }
 
     onDestroy(): void {}

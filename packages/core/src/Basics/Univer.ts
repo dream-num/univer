@@ -4,10 +4,9 @@ import { CommandManager, UndoManager } from '../Command';
 import { LocaleService } from '../Service/Locale.service';
 import { UniverSheet } from './UniverSheet';
 import { UniverDoc } from './UniverDoc';
-import { UniverSlide } from './UniverSlide';
 import { Nullable } from '../Shared';
 import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../Plugin';
-import { IUniverData, IWorkbookConfig } from '../Types/Interfaces';
+import { IDocumentData, IUniverData, IWorkbookConfig } from '../Types/Interfaces';
 import { UniverObserverImpl } from './UniverObserverImpl';
 import { ObserverManager } from '../Observer';
 import { CurrentUniverService, ICurrentUniverService } from '../Service/Current.service';
@@ -45,6 +44,8 @@ export class Univer {
             this.registerUniverPlugin(plugin, configs);
         } else if (plugin.type === PluginType.Sheet) {
             this.registerSheetPlugin(plugin, configs);
+        } else if (plugin.type === PluginType.Doc) {
+            this.registerDocPlugin(plugin, configs);
         } else {
             throw new Error(`Unimplemented plugin system for business: "${plugin.type}".`);
         }
@@ -63,18 +64,13 @@ export class Univer {
         return sheet;
     }
 
-    addUniverSheet(univerSheet: UniverSheet): void {
-        this._currentUniverService.addSheet(univerSheet);
-    }
+    createUniverDoc(config: Partial<IDocumentData>): UniverDoc {
+        const doc = this._univerInjector.createInstance(UniverDoc, config);
 
-    addUniverDoc(univerDoc: UniverDoc): void {
-        univerDoc.context.onUniver(this);
-        this._currentUniverService.addDoc(univerDoc);
-    }
+        this.initializePluginsForDoc(doc);
+        this._currentUniverService.addDoc(doc);
 
-    addUniverSlide(univerSlide: UniverSlide): void {
-        univerSlide.context.onUniver(this);
-        this._currentUniverService.addSlide(univerSlide);
+        return doc;
     }
 
     getUniverSheetInstance(id: string): Nullable<UniverSheet> {
@@ -136,14 +132,23 @@ export class Univer {
     }
 
     private registerSheetPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
+        this._univerPluginRegistry.registerPlugin(pluginCtor, options);
         // Add plugins to the plugin registration. And for each initialized UniverSheet, instantiate these dependencies immediately.
         const sheets = this._currentUniverService.getAllUniverSheetsInstance();
         if (sheets.length) {
             sheets.forEach((sheet) => {
                 sheet.addPlugin(pluginCtor, options);
             });
-        } else {
-            this._univerPluginRegistry.registerPlugin(pluginCtor, options);
+        }
+    }
+
+    private registerDocPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
+        this._univerPluginRegistry.registerPlugin(pluginCtor, options);
+        const docs = this._currentUniverService.getAllUniverSheetsInstance();
+        if (docs.length) {
+            docs.forEach((doc) => {
+                doc.addPlugin(pluginCtor, options);
+            });
         }
     }
 
@@ -151,6 +156,13 @@ export class Univer {
         const plugins = this._univerPluginRegistry.getRegisterPlugins(PluginType.Sheet);
         plugins.forEach((p) => {
             sheet.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options);
+        });
+    }
+
+    private initializePluginsForDoc(doc: UniverDoc): void {
+        const plugins = this._univerPluginRegistry.getRegisterPlugins(PluginType.Doc);
+        plugins.forEach((p) => {
+            doc.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options);
         });
     }
 }

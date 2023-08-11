@@ -1,4 +1,4 @@
-import { Plugin, Context, PLUGIN_NAMES, Tools, Univer } from '@univerjs/core';
+import { Plugin, Context, PLUGIN_NAMES, Tools, Univer, PluginType } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 import { ComponentManager, RegisterManager } from '@univerjs/base-ui';
 import { zh, en } from './Locale';
@@ -6,7 +6,9 @@ import { DOC_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { DefaultDocUiConfig, IDocUIPluginConfig } from './Basics';
 import { AppUIController } from './Controller';
 
-export class DocUIPlugin extends Plugin<any, Context> {
+export class DocUIPlugin extends Plugin<any> {
+    static override type = PluginType.Doc;
+
     private _appUIController: AppUIController;
 
     private _config: IDocUIPluginConfig;
@@ -28,7 +30,7 @@ export class DocUIPlugin extends Plugin<any, Context> {
         univerInstance.install(this);
     }
 
-    initialize(ctx: Context): void {
+    initialize(): void {
         /**
          * load more Locale object
          */
@@ -86,8 +88,8 @@ export class DocUIPlugin extends Plugin<any, Context> {
         this._appUIController.getDocContainerController().UIDidMount(cb);
     }
 
-    onMounted(ctx: Context): void {
-        this.initialize(ctx);
+    onMounted(): void {
+        this.initialize();
     }
 
     onDestroy(): void {}

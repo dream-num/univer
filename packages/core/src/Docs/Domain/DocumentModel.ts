@@ -118,7 +118,7 @@ export class DocumentModel extends DocumentModelSimple {
 
     private _unitId: string;
 
-    constructor(snapshot: Partial<IDocumentData>, context: DocContext) {
+    constructor(snapshot: Partial<IDocumentData>) {
         super(snapshot);
         this._context = context;
         this._unitId = this.snapshot.id ?? Tools.generateRandomId(6);

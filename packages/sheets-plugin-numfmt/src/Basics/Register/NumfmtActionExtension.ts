@@ -1,10 +1,32 @@
-import { BaseActionExtension, BaseActionExtensionFactory, ISetRangeDataActionData, ObjectMatrix, ISheetActionData, ACTION_NAMES, ActionOperation } from '@univerjs/core';
+import {
+    BaseActionExtension,
+    ObjectMatrix,
+    ISheetActionData,
+    ACTION_NAMES,
+    ActionOperation,
+    IActionData,
+    BaseActionExtensionFactory,
+    CommandManager,
+    ISetRangeDataActionData,
+    ICurrentUniverService,
+} from '@univerjs/core';
 import { numfmt } from '@univerjs/base-numfmt-engine';
+import { Inject, Injector } from '@wendellhu/redi';
 import { ACTION_NAMES as PLUGIN_ACTION_NAMES } from '../Enum';
 import { NumfmtPlugin } from '../../NumfmtPlugin';
 
 export class NumfmtActionExtension extends BaseActionExtension<NumfmtPlugin> {
-    execute() {
+    constructor(
+        actionDataList: IActionData[],
+        _plugin: NumfmtPlugin,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(Injector) private readonly _sheetInjector: Injector,
+        @Inject(CommandManager) private readonly _commandManager: CommandManager
+    ) {
+        super(actionDataList, _plugin);
+    }
+
+    override execute() {
         const numfmtMatrix = new ObjectMatrix<string>();
         const actionDataList = this.actionDataList as ISetRangeDataActionData[];
 
@@ -17,7 +39,7 @@ export class NumfmtActionExtension extends BaseActionExtension<NumfmtPlugin> {
                 return false;
             }
 
-            let { cellValue, sheetId } = actionData;
+            const { cellValue, sheetId } = actionData;
             const numfmtConfig = this._plugin.getNumfmtBySheetIdConfig(sheetId);
             const currSheetNumfmtMatrix = new ObjectMatrix(numfmtConfig);
             const rangeMatrix = new ObjectMatrix(cellValue);
@@ -43,6 +65,7 @@ export class NumfmtActionExtension extends BaseActionExtension<NumfmtPlugin> {
                 actionName: PLUGIN_ACTION_NAMES.SET_NUMFMT_RANGE_DATA_ACTION,
                 sheetId,
                 cellValue: numfmtMatrix.toJSON(),
+                injector: this._sheetInjector,
             };
             this.push(setNumfmtRangeDataAction);
         });
@@ -50,11 +73,15 @@ export class NumfmtActionExtension extends BaseActionExtension<NumfmtPlugin> {
 }
 
 export class NumfmtActionExtensionFactory extends BaseActionExtensionFactory<NumfmtPlugin> {
-    get zIndex(): number {
+    constructor(_plugin: NumfmtPlugin, @Inject(Injector) private readonly _sheetInjector: Injector) {
+        super(_plugin);
+    }
+
+    override get zIndex(): number {
         return 2;
     }
 
-    create(actionDataList: ISheetActionData[]): BaseActionExtension<NumfmtPlugin> {
-        return new NumfmtActionExtension(actionDataList, this._plugin);
+    override create(actionDataList: ISheetActionData[]): BaseActionExtension<NumfmtPlugin> {
+        return this._sheetInjector.createInstance(NumfmtActionExtension, actionDataList, this._plugin);
     }
 }

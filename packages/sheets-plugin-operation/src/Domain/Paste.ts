@@ -1,7 +1,5 @@
-import { SelectionControl, ISetSelectionValueActionData, SelectionModel, SetSelectionValueAction, SheetPlugin } from '@univerjs/base-sheets';
+import { ISetSelectionValueActionData, SelectionModel, SetSelectionValueAction, ISelectionManager, SelectionManager, SelectionController } from '@univerjs/base-sheets';
 import {
-    SheetContext,
-    PLUGIN_NAMES,
     Nullable,
     IRemoveMergeActionData,
     RemoveMergeAction,
@@ -18,9 +16,9 @@ import {
     SetRowHeightAction,
     DEFAULT_SELECTION,
     DEFAULT_CELL,
+    ICurrentUniverService,
 } from '@univerjs/core';
-import { handleTableMergeData, Prompt } from '@univerjs/base-ui';
-import { RightMenuProps, SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
+import { handleTableMergeData } from '@univerjs/base-ui';
 
 export interface PasteType {
     type: string;
@@ -34,21 +32,13 @@ export interface PasteInfo {
 }
 
 export abstract class Paste {
-    private _context: SheetContext;
+    // constructor(pasteList: RightMenuProps[]) { }
 
-    constructor(context: SheetContext, pasteList: RightMenuProps[]) {
-        this._context = context;
-    }
-
-    getContext() {
-        return this._context;
-    }
-
-    paste(e: Event) {}
+    paste(e: Event) { }
 }
 
 export class UniverPaste extends Paste {
-    constructor(context: SheetContext) {
+    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @ISelectionManager private readonly _selectionManager: SelectionManager) {
         const pasteList = [
             {
                 label: 'rightClick.paste',
@@ -57,7 +47,8 @@ export class UniverPaste extends Paste {
                 },
             },
         ];
-        super(context, pasteList);
+        // super(pasteList);
+        super();
     }
 
     pasteTo(info: PasteInfo): IActionData[] {
@@ -65,17 +56,12 @@ export class UniverPaste extends Paste {
         const { data, colInfo, rowInfo } = info;
         // const data = await this.pasteResolver(e);
         // if (data.length === 0) return;
-
         if (!data || !data.length) return [];
-        const sheet = this.getContext().getWorkBook().getActiveSheet();
+        const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
         if (!sheet) return [];
         const sheetId = sheet.getSheetId();
-        const SheetPlugin = this.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
-        if (!SheetPlugin) return [];
-        const spreadsheet = SheetPlugin?.getMainComponent();
-        if (!spreadsheet) return [];
-        const controls = SheetPlugin?.getSelectionManager().getCurrentControls();
-        const selections: any = controls?.map((control: SelectionControl) => {
+        const controls = this._selectionManager.getCurrentControls();
+        const selections: any = controls?.map((control: SelectionController) => {
             const model: SelectionModel = control.model;
             return {
                 startRow: model.startRow,
@@ -95,24 +81,24 @@ export class UniverPaste extends Paste {
 
         const selection = selections[0];
 
-        let copyH = data.length;
-        let copyC = data[0].length;
+        const copyH = data.length;
+        const copyC = data[0].length;
 
-        let minH = selection.startRow; //应用范围首尾行
-        let maxH = minH + copyH - 1;
-        let minC = selection.startColumn; //应用范围首尾列
-        let maxC = minC + copyC - 1;
+        const minH = selection.startRow; //应用范围首尾行
+        const maxH = minH + copyH - 1;
+        const minC = selection.startColumn; //应用范围首尾列
+        const maxC = minC + copyC - 1;
         const isMerge = sheet.getMerges().getByRowColumn(minH, maxH, minC, maxC);
         if (isMerge) {
-            const prompt = this.getContext()
-                .getUniver()
-                .getGlobalContext()
-                .getPluginManager()
-                .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
-                .getSlot(SHEET_UI_PLUGIN_NAME + Prompt.name);
-            prompt.props.title = 'info.tooltip';
-            prompt.props.content = 'info.notChangeMerge';
-            prompt.showModal(true);
+            // const prompt = this.getContext()
+            //     .getUniver()
+            //     .getGlobalContext()
+            //     .getPluginManager()
+            //     .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
+            //     .getSlot(SHEET_UI_PLUGIN_NAME + Prompt.name);
+            // prompt.props.title = 'info.tooltip';
+            // prompt.props.content = 'info.notChangeMerge';
+            // prompt.showModal(true);
 
             return [];
         }
@@ -144,12 +130,12 @@ export class UniverPaste extends Paste {
     }
 
     private _getMergeActionData(sheetId: string, mergeData: IRangeData) {
-        let removeAction: IRemoveMergeActionData = {
+        const removeAction: IRemoveMergeActionData = {
             actionName: RemoveMergeAction.NAME,
             sheetId,
             rectangles: [mergeData],
         };
-        let appendAction: IAddMergeActionData = {
+        const appendAction: IAddMergeActionData = {
             actionName: AddMergeAction.NAME,
             sheetId,
             rectangles: [mergeData],
@@ -175,7 +161,7 @@ export class UniverPaste extends Paste {
     }
 
     private _getColumnWidthActionData(sheetId: string, colInfo: Nullable<number[]>, minC: number) {
-        const actionDataList = [];
+        const actionDataList: ISetColumnWidthActionData[] = [];
         if (colInfo && colInfo.length) {
             for (let i = 0; i < colInfo.length; i++) {
                 const columnIndex = minC + i;
@@ -195,7 +181,7 @@ export class UniverPaste extends Paste {
     }
 
     private _getRowHeightActionData(sheetId: string, rowInfo: Nullable<number[]>, minH: number) {
-        const actionDataList = [];
+        const actionDataList: ISetRowHeightActionData[] = [];
 
         if (rowInfo && rowInfo.length) {
             for (let i = 0; i < rowInfo.length; i++) {
@@ -215,17 +201,15 @@ export class UniverPaste extends Paste {
     }
 
     private _getSelectionActionData(sheetId: string) {
-        const selectionManager = this.getContext().getPluginManager().getRequirePluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET).getSelectionManager();
-
         // TODO 从粘贴的表格中解析出来 @tony
         const selectionRange = DEFAULT_SELECTION;
         const curCellRange = DEFAULT_CELL;
-        selectionManager.clearSelectionControls();
-        const models = selectionManager.addControlToCurrentByRangeData(selectionRange, curCellRange, false);
-        selectionManager.updatePreviousSelection();
+        this._selectionManager.clearSelectionControls();
+        const models = this._selectionManager.addControlToCurrentByRangeData(selectionRange, curCellRange, false);
+        this._selectionManager.updatePreviousSelection();
         if (!models) return;
 
-        let actionData: ISetSelectionValueActionData = {
+        const actionData: ISetSelectionValueActionData = {
             sheetId,
             actionName: SetSelectionValueAction.NAME,
             selections: models,

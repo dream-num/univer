@@ -7,6 +7,7 @@ import { DEFAULT_FORMULA_DATA_DEMO, FormulaPlugin } from '@univerjs/sheets-plugi
 import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
 import { FindPlugin } from '@univerjs/sheets-plugin-find';
 import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
+import { OperationPlugin } from '@univerjs/sheets-plugin-operation';
 
 // TODO: @huwenzhao: change the following to new API
 
@@ -43,6 +44,7 @@ univer.registerPlugin(FindPlugin);
 // base-sheet
 univer.registerPlugin(FormulaPlugin, DEFAULT_FORMULA_DATA_DEMO);
 univer.registerPlugin(ImportXlsxPlugin);
+univer.registerPlugin(OperationPlugin);
 // FindPlugin.create().installTo(universheet);
 // universheet.installPlugin(new OperationPlugin());
 // universheet.installPlugin(new ImportXlsxPlugin());

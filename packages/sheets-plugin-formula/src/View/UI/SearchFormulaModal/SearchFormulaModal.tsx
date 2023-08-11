@@ -1,5 +1,4 @@
 import { BaseComponentProps, Component, Modal } from '@univerjs/base-ui';
-import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
 import { SearchFormulaModalData } from '../../../Controller/SearchFormulaModalController';
 
 interface IProps extends BaseComponentProps {}
@@ -9,18 +8,18 @@ interface IState {
 }
 
 export class SearchFormulaModal extends Component<IProps, IState> {
-    initialize() {
+    override initialize() {
         this.state = {
             modalData: [],
         };
     }
 
-    componentDidMount() {
+    override componentDidMount() {
         this.props.getComponent?.(this);
     }
 
     setModal(modalData: SearchFormulaModalData[]) {
-        const componentManager = this.getContext().getPluginManager().getPluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)?.getComponentManager();
+        const componentManager = this.context.componentManager;
 
         modalData.forEach((item) => {
             const Label = componentManager?.get(item.children.name!);

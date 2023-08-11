@@ -201,6 +201,6 @@ export class FormulaActionExtensionFactory extends BaseActionExtensionFactory<Fo
     }
 
     override create(actionDataList: ISheetActionData[]): BaseActionExtension<FormulaPlugin> {
-        return this._sheetInjector.createInstance(FormulaActionExtension, actionDataList, this._plugin, this._sheetInjector);
+        return this._sheetInjector.createInstance(FormulaActionExtension, actionDataList, this._plugin);
     }
 }

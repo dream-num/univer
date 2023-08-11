@@ -1,4 +1,5 @@
 import { SheetContext } from '@univerjs/core';
+import { BaseComponentProps } from '@univerjs/base-ui/src/BaseComponent';
 import { FilterPlugin } from './FilterPlugin';
 
 export type IConfig = {
@@ -6,4 +7,7 @@ export type IConfig = {
 };
 
 // Types for props
-export type IProps = { config: IConfig; super: FilterPlugin };
+export interface IProps extends BaseComponentProps {
+    config: IConfig;
+    super: FilterPlugin;
+}

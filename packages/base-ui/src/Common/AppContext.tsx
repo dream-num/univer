@@ -1,7 +1,7 @@
 /**
  * Use createContext to provide global language and skin settings
  */
-import { LocaleService } from '@univerjs/core';
+import { LocaleService, ObserverManager } from '@univerjs/core';
 import { createContext } from 'preact';
 import { Injector } from '@wendellhu/redi';
 
@@ -15,6 +15,7 @@ export type AppContextValues = {
     localeService: LocaleService;
     componentManager: ComponentManager;
     zIndexManager: ZIndexManager;
+    observerManager: ObserverManager;
 };
 
 const AppContext = createContext<Partial<AppContextValues>>({});

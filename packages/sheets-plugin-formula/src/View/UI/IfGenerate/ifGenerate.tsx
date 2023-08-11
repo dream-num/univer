@@ -1,4 +1,4 @@
-import { BaseButtonProps, BaseComponentSheet, BaseModalProps, BaseSelectProps, Component, FunctionComponent } from '@univerjs/base-ui';
+import { BaseButtonProps, BaseModalProps, BaseSelectProps, Component, FunctionComponent, Button, Modal, Select } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { IConfig } from '../../../Basics/Interfaces/IFormula';
 import styles from './index.module.less';
@@ -27,11 +27,7 @@ class IfGenerate extends Component<IProps, IState> {
 
     constructor(props: IProps) {
         super(props);
-        const component = this.props.config.context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        const render = component.getComponentRender();
-        this.Button = render.renderFunction('Button');
-        this.Modal = render.renderFunction('Modal');
-        this.Select = render.renderFunction('Select');
+
         // super(props);
         this.state = {
             option: [
@@ -47,31 +43,27 @@ class IfGenerate extends Component<IProps, IState> {
     /**
      * init
      */
-    componentWillMount() {
+    override componentWillMount() {
         this.setLocale();
-        this._localeObserver = this.getContext()
-            .getObserverManager()
-            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
-            ?.add(() => {
-                this.setLocale();
-            });
+        this._localeObserver = this.context.observerManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')?.add(() => {
+            this.setLocale();
+        });
     }
 
     /**
      * destory
      */
-    componentWillUnmount() {
-        // this._context.getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+    override componentWillUnmount() {
+        this.context.observerManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')?.remove(this._localeObserver);
     }
 
     setLocale() {
-        const locale = this.getContext().getLocale().get('formula');
+        const locale = this.context.localeService.getLocale().get('formula');
 
         this.setState({ locale });
     }
 
     render() {
-        const { Modal, Select, Button } = this;
         const { locale } = this.state;
         return (
             <Modal title={locale.formula.if} width={320} isDrag={true} footer={false} visible={this.props.visible} onCancel={this.props.onCancel}>
@@ -128,7 +120,7 @@ class IfGenerate extends Component<IProps, IState> {
                         </div>
                     </div>
                     <div className={styles.btnGroup}>
-                        <Button className={`${styles.cenelBtn} ${styles.btn}`}>{locale.cancel}</Button>
+                        <Button className={`${styles.cancelBtn} ${styles.btn}`}>{locale.cancel}</Button>
                         <Button className={`${styles.cleanBtn} ${styles.btn}`}>{locale.ClearValidation}</Button>
                         <Button className={`${styles.okBtn} ${styles.btn}`}>{locale.ok}</Button>
                     </div>

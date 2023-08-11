@@ -37,7 +37,9 @@ export class SearchFunction extends Component<IProps, IState> {
         };
     }
 
-    componentDidMount() {}
+    componentDidMount() {
+        this.props.getComponent?.(this);
+    }
 
     componentWillUpdate(nextProps: any) {}
 

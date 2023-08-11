@@ -35,7 +35,9 @@ export class HelpFunction extends Component<IProps, IState> {
 
     componentWillMount() {}
 
-    componentDidMount() {}
+    componentDidMount() {
+        this.props.getComponent?.(this);
+    }
 
     updateState(helpFormulaActive: boolean, activeIndex: number = 0, functionInfo: FormulaType = {}, position = { left: 0, top: 0 }, cb?: () => void) {
         this.setState(

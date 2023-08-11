@@ -1,3 +1,4 @@
+import { ISetFormulaRangeActionData } from './../../Model/Action/SetFormulaRangeDataAction';
 import {
     ActionOperation,
     ACTION_NAMES,
@@ -27,6 +28,7 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
     constructor(
         actionDataList: IActionData[],
         _plugin: FormulaPlugin,
+        @Inject(Injector) private readonly _sheetInjector: Injector,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(FormulaController) private readonly _formulaController: FormulaController,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
@@ -149,10 +151,11 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
                 });
             });
 
-            const setFormulaDataAction = {
+            const setFormulaDataAction: ISetFormulaRangeActionData = {
                 actionName: PLUGIN_ACTION_NAMES.SET_FORMULA_RANGE_DATA_ACTION,
                 sheetId: actionDataList[0].sheetId, // Any sheetId can be passed in, it has no practical effect
                 formulaData,
+                injector: this._sheetInjector,
             };
             const workBook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
             const commandManager = this._commandManager;
@@ -198,6 +201,6 @@ export class FormulaActionExtensionFactory extends BaseActionExtensionFactory<Fo
     }
 
     override create(actionDataList: ISheetActionData[]): BaseActionExtension<FormulaPlugin> {
-        return this._sheetInjector.createInstance(FormulaActionExtension, actionDataList, this._plugin);
+        return this._sheetInjector.createInstance(FormulaActionExtension, actionDataList, this._plugin, this._sheetInjector);
     }
 }

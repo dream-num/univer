@@ -1,5 +1,5 @@
 import { Inject, Injector } from '@wendellhu/redi';
-import { Plugin, PluginType, UniverSheet } from '@univerjs/core';
+import { LocaleService, Plugin, PluginType, UniverSheet } from '@univerjs/core';
 import { RegisterManager } from '@univerjs/base-ui';
 import { zh, en } from './Locale';
 import { IMPORT_XLSX_PLUGIN_NAME } from './Basics';
@@ -18,7 +18,8 @@ export class ImportXlsxPlugin extends Plugin<any> {
     constructor(
         config: IImportXlsxPluginConfig,
         @Inject(Injector) private readonly _sheetInjector: Injector,
-        @Inject(RegisterManager) private readonly _registerManager: RegisterManager
+        @Inject(RegisterManager) private readonly _registerManager: RegisterManager,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super(IMPORT_XLSX_PLUGIN_NAME);
     }
@@ -35,7 +36,7 @@ export class ImportXlsxPlugin extends Plugin<any> {
         /**
          * load more Locale object
          */
-        this.getLocale().load({
+        this._localeService.getLocale().load({
             en,
             zh,
         });

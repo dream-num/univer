@@ -1,6 +1,7 @@
 import { FormulaDataType } from '@univerjs/base-formula-engine';
 import { SheetActionBase, ActionObservers, ISheetActionData, CommandUnit } from '@univerjs/core';
 import { SetFormulaRangeData } from '../Apply/SetFormulaRangeData';
+import { FormulaController } from '../../Controller/FormulaController';
 
 export interface ISetFormulaRangeActionData extends ISheetActionData {
     formulaData: FormulaDataType;
@@ -24,14 +25,14 @@ export class SetFormulaRangeDataAction extends SheetActionBase<ISetFormulaRangeA
 
     redo(): FormulaDataType {
         const { _workbook } = this;
-        const { formulaData } = this._doActionData;
-        return SetFormulaRangeData(_workbook, formulaData);
+        const { formulaData, injector } = this._doActionData;
+        return SetFormulaRangeData(_workbook, formulaData, injector!.get(FormulaController));
     }
 
     undo(): void {
         const { _workbook } = this;
-        const { formulaData } = this._oldActionData;
-        SetFormulaRangeData(_workbook, formulaData);
+        const { formulaData, injector } = this._oldActionData;
+        SetFormulaRangeData(_workbook, formulaData, injector!.get(FormulaController));
     }
 
     validate(): boolean {

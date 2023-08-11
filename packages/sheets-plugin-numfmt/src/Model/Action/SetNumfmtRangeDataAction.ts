@@ -1,5 +1,6 @@
 import { SheetActionBase, ActionObservers, ISheetActionData, ObjectMatrixPrimitiveType, CommandUnit } from '@univerjs/core';
 import { SetNumfmtRangeData } from '../Apply/SetNumfmtRangeData';
+import { NumfmtController } from '../../Controller/NumfmtController';
 
 export interface ISetNumfmtRangeActionData extends ISheetActionData {
     numfmtMatrix: ObjectMatrixPrimitiveType<string>;
@@ -22,11 +23,13 @@ export class SetNumfmtRangeDataAction extends SheetActionBase<ISetNumfmtRangeAct
     }
 
     redo(): ObjectMatrixPrimitiveType<string> {
-        return SetNumfmtRangeData(this.getWorkBook(), this._doActionData.sheetId, this._doActionData.numfmtMatrix);
+        const { injector } = this._doActionData;
+        return SetNumfmtRangeData(this.getWorkBook(), this._doActionData.sheetId, this._doActionData.numfmtMatrix, injector!.get(NumfmtController));
     }
 
     undo(): void {
-        SetNumfmtRangeData(this.getWorkBook(), this._oldActionData.sheetId, this._oldActionData.numfmtMatrix);
+        const { injector } = this._oldActionData;
+        SetNumfmtRangeData(this.getWorkBook(), this._oldActionData.sheetId, this._oldActionData.numfmtMatrix, injector!.get(NumfmtController));
     }
 
     validate(): boolean {

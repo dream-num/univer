@@ -1,10 +1,6 @@
-import { DocContext } from '../../Basics';
-import { Command } from '../../Command';
-import {
-    CommonParameterAttribute,
-    IDocumentBody,
-    IDocumentData,
-} from '../../Types/Interfaces/IDocumentData';
+import { Inject } from '@wendellhu/redi';
+import { Command, CommandManager } from '../../Command';
+import { CommonParameterAttribute, IDocumentBody, IDocumentData } from '../../Types/Interfaces/IDocumentData';
 import { ITextSelectionRange } from '../../Types/Interfaces/ISelectionData';
 import { DOC_ACTION_NAMES } from '../../Types/Const/DOC_ACTION_NAMES';
 import { Tools, getTextIndexByCursor } from '../../Shared';
@@ -30,7 +26,6 @@ export class DocumentModelSimple {
     bodyModel: DocumentBodyModel;
 
     constructor(snapshot: Partial<IDocumentData>) {
-        // this.snapshot = snapshot;
         this.snapshot = { ...DEFAULT_DOC, ...snapshot };
 
         if (this.snapshot.body != null) {
@@ -114,13 +109,10 @@ export class DocumentModelSimple {
 }
 
 export class DocumentModel extends DocumentModelSimple {
-    private _context: DocContext;
-
     private _unitId: string;
 
-    constructor(snapshot: Partial<IDocumentData>) {
+    constructor(snapshot: Partial<IDocumentData>, @Inject(CommandManager) private readonly _commandManager: CommandManager) {
         super(snapshot);
-        this._context = context;
         this._unitId = this.snapshot.id ?? Tools.generateRandomId(6);
 
         this.initializeRowColTree();
@@ -130,13 +122,7 @@ export class DocumentModel extends DocumentModelSimple {
         return this._unitId;
     }
 
-    insert(
-        body: IDocumentBody,
-        range: ITextSelectionRange,
-        segmentId?: string
-    ): DocumentModel {
-        const commandManager = this._context.getCommandManager();
-
+    insert(body: IDocumentBody, range: ITextSelectionRange, segmentId?: string): DocumentModel {
         const { cursorStart, cursorEnd, isEndBack, isStartBack, isCollapse } = range;
 
         const textStart = getTextIndexByCursor(cursorStart, isStartBack);
@@ -167,13 +153,11 @@ export class DocumentModel extends DocumentModelSimple {
             },
             ...actionList
         );
-        commandManager.invoke(command);
+        this._commandManager.invoke(command);
         return this;
     }
 
     delete(range: ITextSelectionRange, segmentId?: string): DocumentModel {
-        const commandManager = this._context.getCommandManager();
-
         const deleteActionList = this._getDeleteAction(range, segmentId);
 
         const command = new Command(
@@ -182,17 +166,11 @@ export class DocumentModel extends DocumentModelSimple {
             },
             ...deleteActionList
         );
-        commandManager.invoke(command);
+        this._commandManager.invoke(command);
         return this;
     }
 
-    update(
-        attribute: CommonParameterAttribute,
-        range: ITextSelectionRange,
-        segmentId?: string
-    ) {
-        const commandManager = this._context.getCommandManager();
-
+    update(attribute: CommonParameterAttribute, range: ITextSelectionRange, segmentId?: string) {
         const { cursorStart, cursorEnd, isEndBack, isStartBack } = range;
         const actionList = [];
 
@@ -219,18 +197,11 @@ export class DocumentModel extends DocumentModelSimple {
             },
             ...actionList
         );
-        commandManager.invoke(command);
+        this._commandManager.invoke(command);
         return this;
     }
 
-    IMEInput(
-        newText: string,
-        oldTextLen: number,
-        start: number,
-        segmentId?: string
-    ) {
-        const _commandManager = this._context.getCommandManager();
-
+    IMEInput(newText: string, oldTextLen: number, start: number, segmentId?: string) {
         const actionList = [];
 
         actionList.push({
@@ -262,7 +233,7 @@ export class DocumentModel extends DocumentModelSimple {
             },
             ...actionList
         );
-        _commandManager.invoke(command);
+        this._commandManager.invoke(command);
         return this;
     }
 
@@ -275,20 +246,14 @@ export class DocumentModel extends DocumentModelSimple {
         if (headers) {
             for (let headerId in headers) {
                 const header = headers[headerId];
-                this.headerTreeMap.set(
-                    headerId,
-                    DocumentBodyModel.create(header.body)
-                );
+                this.headerTreeMap.set(headerId, DocumentBodyModel.create(header.body));
             }
         }
 
         if (footers) {
             for (let footerId in footers) {
                 const footer = footers[footerId];
-                this.footerTreeMap.set(
-                    footerId,
-                    DocumentBodyModel.create(footer.body)
-                );
+                this.footerTreeMap.set(footerId, DocumentBodyModel.create(footer.body));
             }
         }
     }

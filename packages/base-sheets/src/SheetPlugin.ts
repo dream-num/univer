@@ -73,11 +73,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
 
         this._config = Object.assign(DEFAULT_SPREADSHEET_PLUGIN_DATA, config);
 
-        this.initializeDependencies(_injector);
-    }
-
-    installTo(universheetInstance: UniverSheet) {
-        universheetInstance.installPlugin(this);
+        this._initializeDependencies(_injector);
     }
 
     initialize(): void {
@@ -170,7 +166,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
         return this._injector.get(ISelectionManager);
     }
 
-    private initializeDependencies(sheetInjector: Injector) {
+    private _initializeDependencies(sheetInjector: Injector) {
         const dependencies: Dependency[] = [
             [CanvasView],
 

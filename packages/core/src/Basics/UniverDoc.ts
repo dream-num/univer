@@ -1,9 +1,8 @@
+import { Ctor, Dependency, Injector, Optional } from '@wendellhu/redi';
+
 import { DocumentModel } from '../Docs';
 import { IDocumentData } from '../Types/Interfaces';
 import { Plugin, PluginCtor, PluginStore } from '../Plugin';
-import { Logger } from '../Shared';
-import { VersionCode, VersionEnv } from './Version';
-import { Ctor, Injector, Optional } from '@wendellhu/redi';
 
 /**
  * Externally provided UniverDoc root instance
@@ -15,14 +14,12 @@ export class UniverDoc {
 
     private readonly _pluginStore = new PluginStore();
 
-    constructor(docData: Partial<IDocumentData> = {}, @Optional(Injector) private readonly _injector: Injector) {
-        this.univerDocConfig = docData;
-        this._document = new DocumentModel(docData);
-    }
+    private readonly _injector: Injector;
 
-    static newInstance(UniverDocData: Partial<IDocumentData> = {}): UniverDoc {
-        Logger.capsule(VersionEnv, VersionCode, 'powered by :: UniverDoc :: ');
-        return new UniverDoc(UniverDocData);
+    constructor(docData: Partial<IDocumentData> = {}, @Optional(Injector) _injector: Injector) {
+        this.univerDocConfig = docData;
+        this._injector = this._initializeDependencies(_injector);
+        this._document = this._injector.createInstance(DocumentModel, docData);
     }
 
     /**
@@ -38,5 +35,10 @@ export class UniverDoc {
         pluginInstance.onCreate();
         pluginInstance.onMounted();
         this._pluginStore.addPlugin(pluginInstance);
+    }
+
+    private _initializeDependencies(parentInjector?: Injector): Injector {
+        const dependencies: Dependency[] = [];
+        return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
     }
 }

@@ -1,4 +1,4 @@
-import { Engine, EVENT_TYPE, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univerjs/base-render';
+import { Engine, EVENT_TYPE, IRenderingEngine, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univerjs/base-render';
 import { EventState, sortRules } from '@univerjs/core';
 import { BaseView, CanvasViewRegistry, CANVAS_VIEW_KEY } from './BaseView';
 import { DocPlugin } from '../../DocPlugin';
@@ -9,12 +9,12 @@ export class CanvasView {
 
     private _views: BaseView[] = [];
 
-    constructor(private _engine: Engine, private _plugin: DocPlugin) {
+    constructor(@IRenderingEngine private readonly _engine: Engine) {
         this._initialize();
     }
 
     getView(key: string) {
-        for (let view of this._views) {
+        for (const view of this._views) {
             if (view.viewKey === key) {
                 return view;
             }
@@ -27,12 +27,12 @@ export class CanvasView {
 
     private _initialize() {
         const engine = this._engine;
-        const context = this._plugin.getContext();
 
         const scene = new Scene(CANVAS_VIEW_KEY.MAIN_SCENE, engine, {
             width: 1200,
             height: 2000,
         });
+
         this._scene = scene;
         const viewMain = new Viewport(CANVAS_VIEW_KEY.DOCS_VIEW, scene, {
             left: 0,
@@ -72,7 +72,7 @@ export class CanvasView {
 
         scene.addLayer(Layer.create(scene, [], 0), Layer.create(scene, [], 2));
 
-        this._viewLoader(scene, this._plugin);
+        this._viewLoader(scene);
 
         engine.runRenderLoop(() => {
             scene.render();

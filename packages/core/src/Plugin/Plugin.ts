@@ -54,6 +54,7 @@ export abstract class Plugin<Obs = any> implements BasePlugin {
         this._observeNames = [];
     }
 
+    /** @deprecated this plugin will be removed */
     getPluginByName<T extends BasePlugin>(name: string): Nullable<T> {
         throw new Error('Method not implemented.');
     }

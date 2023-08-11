@@ -1,16 +1,16 @@
 import { Documents, IDocumentSkeletonSpan, SpanType, TextSelection } from '@univerjs/base-render';
 import { KeyboardKeyType, Nullable } from '@univerjs/core';
-import { DocPlugin } from '../DocPlugin';
 
 export class InputController {
     private _previousIMEContent: string = '';
 
     private _previousIMEStart: number;
 
-    constructor(private _plugin: DocPlugin) {
+    constructor() {
         this._initialize();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initialize() {
         const events = this._plugin.getInputEvent();
         if (!events) {
@@ -18,11 +18,9 @@ export class InputController {
         }
         const { onInputObservable, onCompositionstartObservable, onCompositionupdateObservable, onCompositionendObservable, onKeydownObservable } = events;
 
-        const docsModel = this._plugin.context.getDocument();
-
         onKeydownObservable.add((config) => {
             const { event, document, activeSelection, selectionList } = config;
-            let e = event as KeyboardEvent;
+            const e = event as KeyboardEvent;
 
             const activeRange = activeSelection?.getRange();
 

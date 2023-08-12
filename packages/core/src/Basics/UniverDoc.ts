@@ -22,6 +22,10 @@ export class UniverDoc {
         this._document = this._injector.createInstance(DocumentModel, docData);
     }
 
+    getDocument(): DocumentModel {
+        return this._document;
+    }
+
     /**
      * get unit id
      */

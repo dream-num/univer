@@ -1,19 +1,18 @@
-import { Documents, BaseObject, Picture, Liquid } from '@univerjs/base-render';
+import { Documents, BaseObject, Picture, Liquid, Scene } from '@univerjs/base-render';
+import { Injector } from '@wendellhu/redi';
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 import { DOCS_VIEW_KEY } from './DocsView';
 
 const DRAWINGS_VIEW_BACKGROUND = 'drawings_view_background';
 
 export class DrawingsView extends BaseView {
-    zIndex = 3;
-
-    viewKey = DRAWINGS_VIEW_BACKGROUND;
+    override viewKey = DRAWINGS_VIEW_BACKGROUND;
 
     private _liquid = new Liquid();
 
-    protected _initialize() {
+    // eslint-disable-next-line max-lines-per-function
+    protected override _initialize() {
         const scene = this.getScene();
-        const context = this.getContext();
 
         const documents = scene.getObject(DOCS_VIEW_KEY.MAIN) as Documents;
 
@@ -31,8 +30,8 @@ export class DrawingsView extends BaseView {
         const objectList: BaseObject[] = [];
         const pageMarginCache = new Map<string, { marginLeft: number; marginTop: number }>();
 
-        let cumPageLeft = 0;
-        let cumPageTop = 0;
+        const cumPageLeft = 0;
+        const cumPageTop = 0;
 
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
@@ -100,4 +99,12 @@ export class DrawingsView extends BaseView {
     }
 }
 
-CanvasViewRegistry.add(new DrawingsView());
+class DrawingsViewFactory {
+    zIndex = 3;
+
+    create(_scene: Scene, injector: Injector) {
+        return injector.createInstance(DrawingsView);
+    }
+}
+
+CanvasViewRegistry.add(new DrawingsViewFactory());

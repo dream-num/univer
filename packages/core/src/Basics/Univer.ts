@@ -144,7 +144,7 @@ export class Univer {
 
     private registerDocPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
         this._univerPluginRegistry.registerPlugin(pluginCtor, options);
-        const docs = this._currentUniverService.getAllUniverSheetsInstance();
+        const docs = this._currentUniverService.getAllUniverDocsInstance();
         if (docs.length) {
             docs.forEach((doc) => {
                 doc.addPlugin(pluginCtor, options);

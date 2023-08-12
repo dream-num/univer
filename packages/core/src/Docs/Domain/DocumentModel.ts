@@ -244,14 +244,14 @@ export class DocumentModel extends DocumentModelSimple {
         const { headers, footers } = this.snapshot;
 
         if (headers) {
-            for (let headerId in headers) {
+            for (const headerId in headers) {
                 const header = headers[headerId];
                 this.headerTreeMap.set(headerId, DocumentBodyModel.create(header.body));
             }
         }
 
         if (footers) {
-            for (let footerId in footers) {
+            for (const footerId in footers) {
                 const footer = footers[footerId];
                 this.footerTreeMap.set(footerId, DocumentBodyModel.create(footer.body));
             }

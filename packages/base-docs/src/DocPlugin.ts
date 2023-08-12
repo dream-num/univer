@@ -33,13 +33,13 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
     constructor(
         config: Partial<IDocPluginConfig> = {},
         @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
-        @Inject(Injector) _docInjector: Injector,
+        @Inject(Injector) override _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super(PLUGIN_NAMES.DOCUMENT);
 
         this._config = Object.assign(DEFAULT_DOCUMENT_PLUGIN_DATA, config);
-        this._initializeDependencies(_docInjector);
+        this._initializeDependencies(_injector);
     }
 
     initialize(): void {
@@ -59,7 +59,6 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
     }
 
     initController() {
-        // TODO: @wzhudev: refactor these controllers
         this._toolbarControl = new ToolbarController();
         this._infoBarControl = new InfoBarController();
         this._documentController = new DocumentController();

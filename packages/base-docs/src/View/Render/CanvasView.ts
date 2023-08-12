@@ -1,7 +1,8 @@
+import { Inject, Injector } from '@wendellhu/redi';
 import { Engine, EVENT_TYPE, IRenderingEngine, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univerjs/base-render';
 import { EventState, sortRules } from '@univerjs/core';
+
 import { BaseView, CanvasViewRegistry, CANVAS_VIEW_KEY } from './BaseView';
-import { DocPlugin } from '../../DocPlugin';
 import './Views';
 
 export class CanvasView {
@@ -9,7 +10,7 @@ export class CanvasView {
 
     private _views: BaseView[] = [];
 
-    constructor(@IRenderingEngine private readonly _engine: Engine) {
+    constructor(@IRenderingEngine private readonly _engine: Engine, @Inject(Injector) private readonly _injector: Injector) {
         this._initialize();
     }
 
@@ -83,11 +84,11 @@ export class CanvasView {
         });
     }
 
-    private _viewLoader(scene: Scene, plugin: DocPlugin) {
+    private _viewLoader(scene: Scene) {
         CanvasViewRegistry.getData()
             .sort(sortRules)
-            .forEach((view) => {
-                this._views.push(view.initialize(scene, plugin));
+            .forEach((viewFactory) => {
+                this._views.push(viewFactory.create(scene, this._injector));
             });
     }
 }

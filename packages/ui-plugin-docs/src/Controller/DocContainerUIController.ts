@@ -1,37 +1,37 @@
+import { Engine, IRenderingEngine } from '@univerjs/base-render';
 import { getRefElement } from '@univerjs/base-ui';
-import { LocaleType } from '@univerjs/core';
+import { LocaleService, LocaleType, ObserverManager } from '@univerjs/core';
+import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
+
 import { IDocUIPluginConfig } from '../Basics';
-import { DocUIPlugin } from '../DocUIPlugin';
 import { DocContainer } from '../View';
 import { InfoBarUIController } from './InfoBarUIController';
 import { ToolbarUIController } from './ToolbarUIController';
 
 export class DocContainerUIController {
-    protected _plugin: DocUIPlugin;
-
     private _docContainer: DocContainer;
 
     private _toolbarController: ToolbarUIController;
 
     private _infoBarController: InfoBarUIController;
 
-    private _config: IDocUIPluginConfig;
-
-    constructor(plugin: DocUIPlugin) {
-        this._plugin = plugin;
-
-        this._config = this._plugin.getConfig();
-
+    constructor(
+        private readonly _config: IDocUIPluginConfig,
+        @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
+        @IRenderingEngine private readonly _renderingEngine: Engine
+    ) {
         this._initialize();
 
-        this._toolbarController = new ToolbarUIController(this._plugin, this._config.layout?.toolbarConfig);
-
-        this._infoBarController = new InfoBarUIController(this._plugin);
+        this._toolbarController = this._injector.createInstance(ToolbarUIController, this._config.layout?.toolbarConfig || {});
+        this._infoBarController = new InfoBarUIController();
     }
 
     getUIConfig() {
         const config = {
-            context: this._plugin.getContext(),
+            injector: this._injector,
             config: this._config,
             changeLocale: this.changeLocale,
             getComponent: this.getComponent,
@@ -53,11 +53,21 @@ export class DocContainerUIController {
     getComponent = (ref: DocContainer) => {
         this._docContainer = ref;
 
-        let container = getRefElement(ref.getContentRef());
-        this._plugin.initRender(container);
-        this._plugin.getObserver('onUIDidMount')?.notifyObservers(this._docContainer);
+        const container = getRefElement(ref.getContentRef());
 
-        this._plugin.getGlobalContext().getObserverManager().requiredObserver<boolean>('onUIDidMountObservable', 'core').notifyObservers(true);
+        const engine = this._renderingEngine;
+        engine.setContainer(container);
+
+        window.addEventListener('resize', () => {
+            engine.resize();
+        })
+
+        setTimeout(() => {
+            engine.resize();
+        });
+
+        this._observerManager.requiredObserver<DocContainer>('onUIDidMount')?.notifyObservers(this._docContainer);
+        this._globalObserverManager.requiredObserver<boolean>('onUIDidMountObservable', 'core').notifyObservers(true);
 
         this._initDocContainer();
     };
@@ -70,13 +80,8 @@ export class DocContainerUIController {
      *
      */
     changeLocale = (locale: string) => {
-        this._plugin
-            .getContext()
-            .getLocale()
-            .change(locale as LocaleType);
-
-        // publish
-        this._plugin.getGlobalContext().getObserverManager().requiredObserver('onAfterChangeUILocaleObservable', 'core')!.notifyObservers();
+        this._localeService.getLocale().change(locale as LocaleType);
+        this._globalObserverManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')!.notifyObservers();
     };
 
     getContentRef() {
@@ -88,7 +93,9 @@ export class DocContainerUIController {
     }
 
     UIDidMount(cb: Function) {
-        if (this._docContainer) return cb(this._docContainer);
+        if (this._docContainer) {
+            return cb(this._docContainer);
+        }
 
         this._plugin.getObserver('onUIDidMount')?.add(() => cb(this._docContainer));
     }

@@ -1,9 +1,11 @@
-import { Plugin, Context, PLUGIN_NAMES, Tools, Univer, PluginType } from '@univerjs/core';
+import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import { Plugin, PLUGIN_NAMES, Tools, PluginType, LocaleService, CommandManager } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 import { ComponentManager, RegisterManager } from '@univerjs/base-ui';
+
 import { zh, en } from './Locale';
 import { DOC_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
-import { DefaultDocUiConfig, IDocUIPluginConfig } from './Basics';
+import { DefaultDocUiConfig, IDocUIPluginConfig, installObserver } from './Basics';
 import { AppUIController } from './Controller';
 
 export class DocUIPlugin extends Plugin<any> {
@@ -11,64 +13,44 @@ export class DocUIPlugin extends Plugin<any> {
 
     private _appUIController: AppUIController;
 
-    private _config: IDocUIPluginConfig;
-
     private _registerManager: RegisterManager;
 
     private _componentManager: ComponentManager;
 
-    constructor(config?: IDocUIPluginConfig) {
+    constructor(
+        private readonly _config: IDocUIPluginConfig,
+        @Inject(Injector) override _injector: Injector,
+        @Inject(LocaleService) private readonly _localService: LocaleService
+    ) {
         super(DOC_UI_PLUGIN_NAME);
-        this._config = Tools.deepMerge({}, DefaultDocUiConfig, config);
-    }
 
-    static create(config?: IDocUIPluginConfig) {
-        return new DocUIPlugin(config);
-    }
-
-    installTo(univerInstance: Univer) {
-        univerInstance.install(this);
+        this._config = Tools.deepMerge({}, DefaultDocUiConfig, this._config);
     }
 
     initialize(): void {
-        /**
-         * load more Locale object
-         */
-        this.getLocale().load({
+        this._localService.getLocale().load({
             en,
             zh,
         });
 
-        this._componentManager = new ComponentManager();
-        this._appUIController = new AppUIController(this);
-    }
+        const dependencies: Dependency[] = [
+            [ComponentManager],
+            [
+                AppUIController,
+                {
+                    useFactory: () => this._injector.createInstance(AppUIController, this._config),
+                },
+            ],
+        ];
 
-    getConfig() {
-        return this._config;
-    }
+        installObserver(this);
 
-    initRender(container: HTMLElement) {
-        const engine = this.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
-
-        // mount canvas to DOM container
-        engine.setContainer(container);
-
-        window.addEventListener('resize', () => {
-            engine.resize();
+        dependencies.forEach((d) => {
+            this._injector.add(d);
         });
 
-        // should be clear
-        setTimeout(() => {
-            engine.resize();
-        }, 0);
-    }
-
-    getAppUIController() {
-        return this._appUIController;
-    }
-
-    getComponentManager() {
-        return this._componentManager;
+        this._componentManager = this._injector.get(ComponentManager);
+        this._appUIController = this._injector.get(AppUIController);
     }
 
     /**
@@ -88,9 +70,10 @@ export class DocUIPlugin extends Plugin<any> {
         this._appUIController.getDocContainerController().UIDidMount(cb);
     }
 
-    onMounted(): void {
+    override onMounted(): void {
         this.initialize();
     }
 
-    onDestroy(): void {}
+    override onDestroy(): void {}
+
 }

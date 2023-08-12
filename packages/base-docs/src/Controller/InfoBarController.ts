@@ -1,5 +1,3 @@
-import { DocPlugin } from '../DocPlugin';
-
 type IProps = {
     locale?: string;
     label?: string;
@@ -15,9 +13,4 @@ export interface BaseInfoBarProps {
 }
 
 export class InfoBarController {
-    private _plugin: DocPlugin;
-
-    constructor(plugin: DocPlugin) {
-        this._plugin = plugin;
-    }
 }

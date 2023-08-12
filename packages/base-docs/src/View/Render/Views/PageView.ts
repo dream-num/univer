@@ -1,17 +1,17 @@
-import { Rect, Documents, IPageRenderConfig } from '@univerjs/base-render';
+import { Rect, Documents, IPageRenderConfig, Scene } from '@univerjs/base-render';
+import { Injector } from '@wendellhu/redi';
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 import { DOCS_VIEW_KEY } from './DocsView';
 
 const PAGE_VIEW_BACKGROUND = 'page_view_background';
 
 export class PageView extends BaseView {
-    zIndex = 2;
+    override zIndex = 2;
 
-    viewKey = PAGE_VIEW_BACKGROUND;
+    override viewKey = PAGE_VIEW_BACKGROUND;
 
-    protected _initialize() {
+    protected override _initialize() {
         const scene = this.getScene();
-        const context = this.getContext();
 
         const documents = scene.getObject(DOCS_VIEW_KEY.MAIN) as Documents;
 
@@ -37,4 +37,10 @@ export class PageView extends BaseView {
     }
 }
 
-CanvasViewRegistry.add(new PageView());
+class PageViewFactory {
+    create(scene: Scene, injector: Injector) {
+        injector.createInstance(PageView);
+    }
+}
+
+CanvasViewRegistry.add(new PageViewFactory());

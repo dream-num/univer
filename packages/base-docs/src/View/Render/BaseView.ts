@@ -1,6 +1,5 @@
 import { Scene } from '@univerjs/base-render';
 import { Registry } from '@univerjs/core';
-import { DocPlugin } from '../../DocPlugin';
 
 export class BaseView {
     zIndex = 0;
@@ -8,8 +7,6 @@ export class BaseView {
     viewKey = '';
 
     private _scene: Scene;
-
-    private _plugin: DocPlugin;
 
     // constructor(private _scene: Scene, private _plugin: Plugin) {
     //     this._initialize();
@@ -19,19 +16,10 @@ export class BaseView {
         return this._scene;
     }
 
-    getPlugin() {
-        return this._plugin;
-    }
-
-    getContext() {
-        return this._plugin.getContext();
-    }
-
     updateToSheet() {}
 
-    initialize(scene: Scene, plugin: DocPlugin) {
+    initialize(scene: Scene) {
         this._scene = scene;
-        this._plugin = plugin;
         this._initialize();
         return this;
     }

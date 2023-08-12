@@ -1,5 +1,6 @@
-import { Documents, DocumentSkeleton, IDocumentSkeletonDrawing, Picture } from '@univerjs/base-render';
-import { DocumentModel, IDocumentData } from '@univerjs/core';
+import { Documents, DocumentSkeleton, IDocumentSkeletonDrawing, Picture, Scene } from '@univerjs/base-render';
+import { CommandManager, DocumentModel, ICurrentUniverService, IDocumentData, LocaleService } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 import { BaseView, CanvasViewRegistry, CANVAS_VIEW_KEY } from '../BaseView';
 
 export enum DOCS_VIEW_KEY {
@@ -7,13 +8,21 @@ export enum DOCS_VIEW_KEY {
 }
 
 export class DocsView extends BaseView {
-    zIndex = 1;
+    override zIndex = 1;
 
-    viewKey = CANVAS_VIEW_KEY.DOCS_VIEW;
+    override viewKey = CANVAS_VIEW_KEY.DOCS_VIEW;
 
     private _documentSkeleton: DocumentSkeleton;
 
     private _documents: Documents;
+
+    constructor(
+        @Inject(CommandManager) private readonly _commandManager: CommandManager,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
+    ) {
+        super();
+    }
 
     getDocumentSkeleton() {
         return this._documentSkeleton;
@@ -24,11 +33,11 @@ export class DocsView extends BaseView {
     }
 
     scrollToCenter() {
-        let { docsLeft, docsTop } = this._documents.calculatePagePosition();
-        let pages = this._documentSkeleton.getSkeletonData().pages;
+        const { docsLeft, docsTop } = this._documents.calculatePagePosition();
+        const pages = this._documentSkeleton.getSkeletonData().pages;
         for (let i = 0; i < pages.length; i++) {
             const page = pages[i];
-            for (let k of page.skeDrawings.keys()) {
+            for (const k of page.skeDrawings.keys()) {
                 const obj = this.getScene().getObject(k);
                 if (obj) {
                     const drawing = page.skeDrawings.get(k) as IDocumentSkeletonDrawing;
@@ -43,11 +52,10 @@ export class DocsView extends BaseView {
         }
     }
 
-    protected _initialize() {
+    protected override _initialize() {
         const scene = this.getScene();
-        const context = this.getContext();
 
-        const docsModel = context.getDocument();
+        const docsModel = this._currentUniverService.getCurrentUniverDocInstance().getDocument();
 
         const documentSkeleton = this._buildSkeleton(docsModel.getSnapshot());
 
@@ -100,7 +108,7 @@ export class DocsView extends BaseView {
         const { pageMarginLeft, pageMarginTop, docsLeft, docsTop } = documents.calculatePagePosition();
 
         for (let i = 0; i < pages.length; i++) {
-            for (let k of pages[i].skeDrawings.keys()) {
+            for (const k of pages[i].skeDrawings.keys()) {
                 const obj = this.getScene().getObject(k);
                 obj?.translate(obj.left + docsLeft - pageMarginLeft, obj.top + docsTop - pageMarginTop);
             }
@@ -110,12 +118,21 @@ export class DocsView extends BaseView {
     }
 
     private _buildSkeleton(snapshot: IDocumentData) {
-        const context = this.getContext();
-        const docModel = new DocumentModel(snapshot, context);
-        const docsSkeleton = DocumentSkeleton.create(docModel, context);
+        const docModel = new DocumentModel(snapshot, this._commandManager);
+        const docsSkeleton = DocumentSkeleton.create(docModel, this._localeService);
 
         return docsSkeleton;
     }
 }
 
-CanvasViewRegistry.add(new DocsView());
+export class DocsViewFactory {
+    readonly zIndex = 0;
+
+    create(scene: Scene, injector: Injector): DocsView {
+        const docsView = injector.createInstance(DocsView);
+        docsView.initialize(scene);
+        return docsView;
+    }
+}
+
+CanvasViewRegistry.add(new DocsViewFactory());

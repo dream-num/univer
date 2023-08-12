@@ -1,7 +1,5 @@
 import { ISlideData } from '../Types/Interfaces';
-import { Plugin } from '../Plugin';
 import { IOHttp, IOHttpConfig, Logger } from '../Shared';
-import { SlideContext } from './SlideContext';
 import { VersionCode, VersionEnv } from './Version';
 import { ColorBuilder } from '../Sheets/Domain/ColorBuilder';
 
@@ -11,18 +9,8 @@ import { ColorBuilder } from '../Sheets/Domain/ColorBuilder';
 export class UniverSlide {
     UniverSlideConfig: Partial<ISlideData>;
 
-    private _context: SlideContext;
-
     constructor(UniverSlideData: Partial<ISlideData> = {}) {
         this.UniverSlideConfig = UniverSlideData;
-        this._context = new SlideContext(UniverSlideData);
-    }
-
-    /**
-     * get SlideContext
-     */
-    get context() {
-        return this._context;
     }
 
     static newInstance(UniverSlideData: Partial<ISlideData> = {}): UniverSlide {
@@ -53,23 +41,5 @@ export class UniverSlide {
 
     static newColor(): ColorBuilder {
         return new ColorBuilder();
-    }
-
-    /**
-     * install plugin
-     *
-     * @param plugin - install plugin
-     */
-    installPlugin(plugin: Plugin): void {
-        this._context.getPluginManager().install(plugin);
-    }
-
-    /**
-     * uninstall plugin
-     *
-     * @param name - plugin name
-     */
-    uninstallPlugin(name: string): void {
-        this._context.getPluginManager().uninstall(name);
     }
 }

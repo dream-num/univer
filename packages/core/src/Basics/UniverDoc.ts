@@ -1,8 +1,8 @@
-import { IDocumentData } from '../Types/Interfaces';
-import { Plugin } from '../Plugin';
-import { IOHttp, IOHttpConfig, Logger } from '../Shared';
-import { VersionCode, VersionEnv } from './Version';
+import { Ctor, Dependency, Injector, Optional } from '@wendellhu/redi';
 
+import { DocumentModel } from '../Docs';
+import { IDocumentData } from '../Types/Interfaces';
+import { Plugin, PluginCtor, PluginStore } from '../Plugin';
 
 /**
  * Externally provided UniverDoc root instance
@@ -10,68 +10,39 @@ import { VersionCode, VersionEnv } from './Version';
 export class UniverDoc {
     univerDocConfig: Partial<IDocumentData>;
 
-    private _context: DocContext;
+    private readonly _document: DocumentModel;
 
-    constructor(UniverDocData: Partial<IDocumentData> = {}) {
-        this.univerDocConfig = UniverDocData;
-        this._context = new DocContext(UniverDocData);
+    private readonly _pluginStore = new PluginStore();
+
+    private readonly _injector: Injector;
+
+    constructor(docData: Partial<IDocumentData> = {}, @Optional(Injector) _injector: Injector) {
+        this.univerDocConfig = docData;
+        this._injector = this._initializeDependencies(_injector);
+        this._document = this._injector.createInstance(DocumentModel, docData);
     }
 
-    /**
-     * get DocContext
-     */
-    get context() {
-        return this._context;
-    }
-
-    static newInstance(UniverDocData: Partial<IDocumentData> = {}): UniverDoc {
-        Logger.capsule(VersionEnv, VersionCode, 'powered by :: UniverDoc :: ');
-        return new UniverDoc(UniverDocData);
-    }
-
-    /**
-     *
-     * Request data
-     *
-     * @example
-     * Get data for all tables, including core and plugin data
-     *
-     * @param config
-     */
-    static get<T = void>(config: Omit<IOHttpConfig, 'type'>): Promise<T> {
-        return IOHttp({ ...config, type: 'GET' });
-    }
-
-    /**
-     * Submit data
-     * @param config
-     */
-    static post<T = void>(config: Omit<IOHttpConfig, 'type'>): Promise<T> {
-        return IOHttp({ ...config, type: 'POST' });
+    getDocument(): DocumentModel {
+        return this._document;
     }
 
     /**
      * get unit id
      */
     getUnitId(): string {
-        return this._context.getDocument().getUnitId();
+        return this._document.getUnitId();
     }
 
-    /**
-     * install plugin
-     *
-     * @param plugin - install plugin
-     */
-    installPlugin(plugin: Plugin): void {
-        this._context.getPluginManager().install(plugin);
+    addPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options: any): void {
+        const pluginInstance: Plugin = this._injector.createInstance(pluginCtor as unknown as Ctor<any>, options);
+
+        pluginInstance.onCreate();
+        pluginInstance.onMounted();
+        this._pluginStore.addPlugin(pluginInstance);
     }
 
-    /**
-     * uninstall plugin
-     *
-     * @param name - plugin name
-     */
-    uninstallPlugin(name: string): void {
-        this._context.getPluginManager().uninstall(name);
+    private _initializeDependencies(parentInjector?: Injector): Injector {
+        const dependencies: Dependency[] = [];
+        return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
     }
 }

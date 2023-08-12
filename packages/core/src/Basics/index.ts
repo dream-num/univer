@@ -1,6 +1,5 @@
 export * from './Environment';
 export * from './Registry';
-export * from './SlideContext';
 export * from './UniverDoc';
 export * from './UniverSheet';
 export * from './UniverSlide';

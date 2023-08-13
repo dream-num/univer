@@ -109,6 +109,7 @@ module.exports = {
         '@typescript-eslint/member-ordering': 'error',
         '@typescript-eslint/no-explicit-any': 'warn',
         '@typescript-eslint/no-unsafe-return': 'error',
+        '@typescript-eslint/no-redeclare': 'off', // dependency interface and dependency token share the same name
     },
     // https://www.npmjs.com/package/eslint-import-resolver-typescript
     settings: {

@@ -10,6 +10,7 @@ import { IDocumentData, IUniverData, IWorkbookConfig } from '../Types/Interfaces
 import { UniverObserverImpl } from './UniverObserverImpl';
 import { ObserverManager } from '../Observer';
 import { CurrentUniverService, ICurrentUniverService } from '../Service/Current.service';
+import { CommandService, ICommandService } from '../Service/Command/Command.service';
 
 /**
  * Univer.
@@ -118,7 +119,14 @@ export class Univer {
     }
 
     private initializeDependencies(): Injector {
-        return new Injector([[ObserverManager], [ICurrentUniverService, { useClass: CurrentUniverService }], [CommandManager], [LocaleService], [UndoManager]]);
+        return new Injector([
+            [ObserverManager],
+            [ICurrentUniverService, { useClass: CurrentUniverService }],
+            [CommandManager],
+            [LocaleService],
+            [UndoManager],
+            [ICommandService, { useClass: CommandService, lazy: true }],
+        ]);
     }
 
     private registerUniverPlugin<T extends Plugin>(plugin: PluginCtor<T>, options?: any): void {

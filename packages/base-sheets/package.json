@@ -66,6 +66,6 @@
     "dependencies": {
         "@univerjs/base-render": "workspace:^0.0.1",
         "@univerjs/core": "workspace:^0.0.1",
-        "@wendellhu/redi": "^0.10.0"
+        "@wendellhu/redi": "^0.12.0"
     }
 }

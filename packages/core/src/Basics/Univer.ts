@@ -137,7 +137,7 @@ export class Univer {
             [CommandManager],
             [LocaleService],
             [UndoManager],
-            [ICommandService, { useClass: CommandService, lazy: true }],
+            [ICommandService, { useClass: CommandService }],
         ]);
     }
 

@@ -30,3 +30,4 @@ export * from './Slides/Domain';
 
 export { ICurrentUniverService } from './Service/Current.service';
 export { LocaleService } from './Service/Locale.service';
+export { ICommandService, ICommand, CommandType } from './Service/Command/Command.service';

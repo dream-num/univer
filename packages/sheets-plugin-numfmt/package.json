@@ -64,7 +64,7 @@
         "@univerjs/common-plugin-data": "workspace:^0.0.1",
         "@univerjs/core": "workspace:^0.0.1",
         "@univerjs/ui-plugin-sheets": "workspace:^0.0.1",
-        "@wendellhu/redi": "^0.10.0",
+        "@wendellhu/redi": "^0.12.0",
         "preact": "^10.12.1"
     }
 }

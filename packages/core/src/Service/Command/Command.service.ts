@@ -73,7 +73,7 @@ export class CommandService implements ICommandService {
     private readonly _commandRegistry: CommandRegistry;
     private readonly _listenerRegistry: CommandListener[] = [];
 
-    constructor(@Optional(CommandService) @SkipSelf() private readonly _parentCommandService: CommandService, @Inject(Injector) private readonly _injector: Injector) {
+    constructor(@SkipSelf() @Optional(CommandService) private readonly _parentCommandService: CommandService, @Inject(Injector) private readonly _injector: Injector) {
         this._commandRegistry = new CommandRegistry();
     }
 
@@ -112,10 +112,12 @@ export class CommandService implements ICommandService {
             const commandInfo: ICommandInfo = {
                 id: command.id,
                 type: command.type,
-                args: [...args] as unknown[] as (number | string | null)[], // TODO@huwenzhao: move strict args control of serialization
+                args: [...args] as unknown[] as (number | string | null)[], // TODO: @wzhudev move strict args control of serialization
             };
 
             this._listenerRegistry.forEach((l) => l(commandInfo));
+
+            return true;
         }
 
         throw new Error();

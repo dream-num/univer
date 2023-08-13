@@ -25,6 +25,7 @@ import { ColumnTitleController } from './Controller/Selection/ColumnTitleControl
 import { RowTitleController } from './Controller/Selection/RowTitleController';
 import { ColumnRulerManager } from './Basics/Register/ColumnRegister';
 import { HideColumnRulerFactory } from './Basics/Register/HideColumnRuler';
+import { BasicWorksheetController } from './Controller/BasicWorksheet.controller';
 
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
@@ -120,6 +121,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
         this._rightMenuController = this._injector.get(RightMenuController);
         this._countBarController = this._injector.get(CountBarController);
         this._hideColumnController = this._injector.get(HideColumnController);
+
+        this._injector.get(BasicWorksheetController);
     }
 
     initCanvasView() {
@@ -193,6 +196,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
             [HideColumnController],
 
             [ColumnRulerManager],
+
+            [BasicWorksheetController],
         ];
 
         dependencies.forEach((d) => {

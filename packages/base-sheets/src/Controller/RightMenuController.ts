@@ -1,5 +1,5 @@
 import { Inject, SkipSelf } from '@wendellhu/redi';
-import { ICurrentUniverService, ObserverManager, UIObserver } from '@univerjs/core';
+import { ICommand, ICommandService, ICurrentUniverService, ObserverManager, UIObserver } from '@univerjs/core';
 import { SelectionController } from './Selection/SelectionController';
 import { SelectionModel } from '../Model/SelectionModel';
 import { ISelectionManager } from '../Services/tokens';
@@ -11,7 +11,8 @@ export class RightMenuController {
         @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
         @ISelectionManager private readonly _selectionManager: SelectionManager,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @Inject(HideColumnController) private readonly _hideColumnController: HideColumnController
+        @Inject(HideColumnController) private readonly _hideColumnController: HideColumnController,
+        @ICommandService private readonly _commandService: ICommandService,
     ) {}
 
     listenEventManager() {
@@ -92,11 +93,7 @@ export class RightMenuController {
     };
 
     clearContent = () => {
-        const selections = this._getSelections();
-        if (selections?.length === 1) {
-            const sheet = this._currentUniverService.getCurrentUniverSheetInstance()?.getWorkBook().getActiveSheet();
-            sheet.getRange(selections[0]).clear();
-        }
+        this._commandService.executeCommand('sheet.clear-selection-content');
     };
 
     deleteCellLeft = () => {

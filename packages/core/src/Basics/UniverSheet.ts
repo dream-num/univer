@@ -71,7 +71,6 @@ export class UniverSheet implements Disposable {
                 ICommandService,
                 {
                     useClass: CommandService,
-                    lazy: true,
                 },
             ],
         ];

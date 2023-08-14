@@ -1,5 +1,5 @@
 import { Inject } from '@wendellhu/redi';
-import { ICurrentUniverService, Nullable } from '@univerjs/core';
+import { ICurrentUniverService, IDCurrentUniverService, Nullable } from '@univerjs/core';
 import { CURSOR_TYPE, Group, IMouseEvent, IPointerEvent, Rect } from '@univerjs/base-render';
 import { DragLineController, DragLineDirection } from './DragLineController';
 import { CanvasView } from '../../View';
@@ -27,7 +27,7 @@ export class ColumnTitleController {
     constructor(
         @Inject(CanvasView) private readonly _canvasView: CanvasView,
         @Inject(DragLineController) private readonly _dragLineController: DragLineController,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {
         const sheetView = this._canvasView.getSheetView();
         this._leftTopWidth = sheetView.getSpreadsheetLeftTopPlaceholder().getState().width;

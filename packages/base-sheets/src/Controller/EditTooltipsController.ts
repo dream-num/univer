@@ -1,4 +1,4 @@
-import { CommandManager, ICurrentUniverService, SetWorkSheetActivateAction } from '@univerjs/core';
+import { CommandManager, ICurrentUniverService, IDCurrentUniverService, SetWorkSheetActivateAction } from '@univerjs/core';
 import { Engine, IRenderingEngine, Layer } from '@univerjs/base-render';
 
 import { EditTooltips, EditTooltipsProps } from '../View/Views';
@@ -9,7 +9,7 @@ export class EditTooltipsController {
 
     _layer: Layer;
 
-    constructor(@IRenderingEngine private readonly _engine: Engine, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
+    constructor(@IRenderingEngine private readonly _engine: Engine, @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
         this._editTooltipsPage = new Map();
         CommandManager.getActionObservers().add((event) => {
             const data = event.data;
@@ -24,6 +24,7 @@ export class EditTooltipsController {
             for (const editTooltips of sheetPage[1]) {
                 if (editTooltips[0] === key) {
                     sheetPage[1].delete(key);
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                     return editTooltips[1];
                 }
             }
@@ -63,15 +64,15 @@ export class EditTooltipsController {
         const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(sheetId);
         const editTooltips = this.createIfEditTooltips(key, sheetId);
         if (sheet) {
-            let merges = sheet.getMerges().getByRowColumn(row, column);
-            let rowTitle = sheet.getConfig().rowTitle;
-            let columnTitle = sheet.getConfig().columnTitle;
+            const merges = sheet.getMerges().getByRowColumn(row, column);
+            const rowTitle = sheet.getConfig().rowTitle;
+            const columnTitle = sheet.getConfig().columnTitle;
             let left = rowTitle.width ?? 0;
             let top = columnTitle.height ?? 0;
             let height = 0;
             let width = 0;
             if (merges) {
-                let merge = merges[0];
+                const merge = merges[0];
                 for (let i = merge.startColumn; i <= merge.endColumn; i++) {
                     width += sheet.getColumnWidth(i);
                 }

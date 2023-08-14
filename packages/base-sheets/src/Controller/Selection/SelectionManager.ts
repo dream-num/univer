@@ -8,6 +8,7 @@ import {
     Direction,
     ICellInfo,
     ICurrentUniverService,
+    IDCurrentUniverService,
     IGridRange,
     IRangeCellData,
     IRangeData,
@@ -70,7 +71,7 @@ export class SelectionManager {
         /** @deprecated this should be divided into smaller pieces */
         private readonly _sheetView: SheetView,
         private readonly _config: ISheetPluginConfig,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
@@ -169,9 +170,10 @@ export class SelectionManager {
             return [];
         }
         const selectionModelsValue = [];
-        for (let model of models) {
+        for (const model of models) {
             selectionModelsValue.push(model.getValue());
         }
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return selectionModelsValue;
     }
 
@@ -184,7 +186,7 @@ export class SelectionManager {
         if (worksheetId) {
             if (this._selectionControls) {
                 // clear old controls
-                for (let control of this._selectionControls) {
+                for (const control of this._selectionControls) {
                     control.dispose();
                 }
             }
@@ -280,10 +282,10 @@ export class SelectionManager {
     }
 
     clearSelectionControls() {
-        let curControls = this.getCurrentControls();
+        const curControls = this.getCurrentControls();
 
         if (curControls.length > 0) {
-            for (let control of curControls) {
+            for (const control of curControls) {
                 control.dispose();
             }
 
@@ -460,13 +462,13 @@ export class SelectionManager {
 
         const { startRow: finalStartRow, startColumn: finalStartColumn, endRow: finalEndRow, endColumn: finalEndColumn } = newBounding;
 
-        let rangeData: IRangeData = {
+        const rangeData: IRangeData = {
             startRow: finalStartRow,
             endRow: finalEndRow,
             startColumn: finalStartColumn,
             endColumn: finalEndColumn,
         };
-        let currentCellData: IRangeCellData = {
+        const currentCellData: IRangeCellData = {
             row: startRow,
             column: startColumn,
         };
@@ -505,13 +507,13 @@ export class SelectionManager {
 
         const { startRow: finalStartRow, startColumn: finalStartColumn, endRow: finalEndRow, endColumn: finalEndColumn } = newBounding;
 
-        let rangeData: IRangeData = {
+        const rangeData: IRangeData = {
             startRow: finalStartRow,
             endRow: finalEndRow,
             startColumn: finalStartColumn,
             endColumn: finalEndColumn,
         };
-        let currentCellData: IRangeCellData = {
+        const currentCellData: IRangeCellData = {
             row: startRow,
             column: startColumn,
         };
@@ -617,7 +619,7 @@ export class SelectionManager {
     }
 
     updatePreviousSelection() {
-        let selectionControl: Nullable<SelectionController> = this.getCurrentControl();
+        const selectionControl: Nullable<SelectionController> = this.getCurrentControl();
 
         if (!selectionControl) return;
 
@@ -664,7 +666,7 @@ export class SelectionManager {
      */
     getActiveRangeList(): Nullable<RangeList> {
         const rangeListData = this.getActiveRangeListData();
-        return rangeListData && this._worksheet?.getRangeList(rangeListData);
+        return rangeListData && (this._worksheet?.getRangeList(rangeListData) as Nullable<RangeList>);
     }
 
     /**
@@ -693,7 +695,7 @@ export class SelectionManager {
      */
     getActiveRange(): Nullable<Range> {
         const rangeData = this.getActiveRangeData();
-        return rangeData && this._worksheet?.getRange(rangeData);
+        return rangeData && (this._worksheet?.getRange(rangeData) as Nullable<Range>);
     }
 
     /**
@@ -723,7 +725,7 @@ export class SelectionManager {
      */
     getCurrentCell(): Nullable<Range> {
         const rangeData = this.getCurrentCellData();
-        return rangeData && this._worksheet?.getRange(rangeData);
+        return rangeData && (this._worksheet?.getRange(rangeData) as Nullable<Range>);
     }
 
     getDragLineControl() {
@@ -790,13 +792,13 @@ export class SelectionManager {
 
             let selectionControl: Nullable<SelectionController> = this.getCurrentControl();
 
-            let curControls = this.getCurrentControls();
+            const curControls = this.getCurrentControls();
 
             if (!curControls) {
                 return false;
             }
 
-            for (let control of curControls) {
+            for (const control of curControls) {
                 // right click
                 if (evt.button === 2 && control.model.isInclude(startSelectionRange)) {
                     selectionControl = control;
@@ -816,7 +818,7 @@ export class SelectionManager {
 
             // In addition to pressing the ctrl or shift key, we must clear the previous selection
             if (curControls.length > 0 && !evt.ctrlKey && !evt.shiftKey) {
-                for (let control of curControls) {
+                for (const control of curControls) {
                     control.dispose();
                 }
 

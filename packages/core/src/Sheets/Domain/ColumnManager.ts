@@ -1,6 +1,6 @@
 import { Inject } from '@wendellhu/redi';
 
-import { CurrentUniverService, ICurrentUniverService } from '../../Service/Current.service';
+import { CurrentUniverService, IDCurrentUniverService } from '../../Service/Current.service';
 import { Command, CommandManager } from '../../Command';
 import { ISetColumnWidthActionData } from '../Action';
 import { ACTION_NAMES } from '../../Types/Const';
@@ -21,7 +21,7 @@ export class ColumnManager {
     constructor(
         workSheet: Worksheet,
         data: ObjectArrayType<Partial<IColumnData>>,
-        @ICurrentUniverService private readonly _currentUniverSheet: CurrentUniverService,
+        @IDCurrentUniverService private readonly _currentUniverSheet: CurrentUniverService,
         @Inject(CommandManager) private readonly _commandManager: CommandManager
     ) {
         this._workSheet = workSheet;

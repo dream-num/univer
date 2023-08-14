@@ -1,5 +1,5 @@
 import { Inject } from '@wendellhu/redi';
-import { Command, CommandManager, IActionData, ICurrentUniverService } from '@univerjs/core';
+import { Command, CommandManager, IActionData, ICurrentUniverService, IDCurrentUniverService } from '@univerjs/core';
 import { IPasteData } from '../../Interfaces';
 import { PasteType } from '../../Interfaces/PasteType';
 import { BasePasteExtension, BasePasteExtensionFactory } from './PasteExtensionFactory';
@@ -12,7 +12,7 @@ export class PasteExtensionManager {
     // mounted on the instance
     private _register: PasteExtensionRegister;
 
-    constructor(@Inject(CommandManager) private readonly _commandManager: CommandManager, @ICurrentUniverService private readonly _currentUniver: ICurrentUniverService) {
+    constructor(@Inject(CommandManager) private readonly _commandManager: CommandManager, @IDCurrentUniverService private readonly _currentUniver: ICurrentUniverService) {
         this._register = new PasteExtensionRegister();
     }
 

@@ -1,4 +1,14 @@
-import { BorderType, HorizontalAlign, UIObserver, VerticalAlign, WrapStrategy, ObserverManager, ICurrentUniverService, CommandManager } from '@univerjs/core';
+import {
+    BorderType,
+    HorizontalAlign,
+    UIObserver,
+    VerticalAlign,
+    WrapStrategy,
+    ObserverManager,
+    ICurrentUniverService,
+    IDCurrentUniverService,
+    CommandManager,
+} from '@univerjs/core';
 import { Inject, SkipSelf } from '@wendellhu/redi';
 
 import { SelectionController } from './Selection/SelectionController';
@@ -18,7 +28,7 @@ export class ToolbarController {
     constructor(
         @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @ISelectionManager private readonly _selectionManager: SelectionManager,
         @Inject(CellEditorController) private readonly _cellEditorController: CellEditorController
     ) {

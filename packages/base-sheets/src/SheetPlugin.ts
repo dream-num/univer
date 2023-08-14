@@ -1,5 +1,5 @@
 import { Engine, IRenderingEngine } from '@univerjs/base-render';
-import { Plugin, PLUGIN_NAMES, DEFAULT_SELECTION, UniverSheet, PluginType, CommandManager, ICurrentUniverService, LocaleService, ObserverManager } from '@univerjs/core';
+import { Plugin, PLUGIN_NAMES, DEFAULT_SELECTION, PluginType, CommandManager, ICurrentUniverService, IDCurrentUniverService, LocaleService } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
@@ -64,7 +64,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
 
     constructor(
         config: Partial<ISheetPluginConfig>,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(CommandManager) private readonly _commandManager: CommandManager

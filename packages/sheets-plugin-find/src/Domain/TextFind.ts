@@ -1,4 +1,4 @@
-import { Range, FormatType, IGridRange, ObjectMatrix, ICellData, Nullable, Worksheet, ICurrentUniverService } from '@univerjs/core';
+import { Range, FormatType, IGridRange, ObjectMatrix, ICellData, Nullable, Worksheet, ICurrentUniverService, IDCurrentUniverService } from '@univerjs/core';
 import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
 import { getRegExpStr } from '../Util/util';
 import { FindType } from '../IData';
@@ -27,7 +27,7 @@ export class TextFinder {
 
     private _startRange: Nullable<Range>; // 从这个位置后开始找
 
-    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @ISelectionManager private readonly _selectionManager: SelectionManager) { }
+    constructor(@IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @ISelectionManager private readonly _selectionManager: SelectionManager) {}
 
     /**
      * Returns all cells matching the search criteria.
@@ -111,7 +111,7 @@ export class TextFinder {
         if (!this._range.length) return 0;
 
         let count = 0;
-        let sheetId = this._range[0].sheetId;
+        const sheetId = this._range[0].sheetId;
         let sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(sheetId);
         for (let i = 0; i < this._range.length; i++) {
             if (sheetId !== this._range[i].sheetId) {
@@ -272,7 +272,7 @@ export class TextFinder {
             //     }
             // }
             else {
-                let reg = new RegExp(getRegExpStr(this._text as string), this._matchCase ? 'g' : 'ig');
+                const reg = new RegExp(getRegExpStr(this._text as string), this._matchCase ? 'g' : 'ig');
 
                 matrix.forValue((row, col, value) => {
                     if (!value.m) return;
@@ -309,7 +309,7 @@ export class TextFinder {
             if (this._matchCase) {
                 match = 'g';
             }
-            let reg = new RegExp(getRegExpStr(this._text as string), match);
+            const reg = new RegExp(getRegExpStr(this._text as string), match);
             sheet.getRange(range.rangeData).setValue(value.m.replace(reg, text));
         } else {
             sheet.getRange(range.rangeData).setValue(text);

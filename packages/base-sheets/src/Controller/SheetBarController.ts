@@ -1,10 +1,10 @@
-import { UIObserver, ObserverManager, LocaleService, ICurrentUniverService, GenName } from '@univerjs/core';
+import { UIObserver, ObserverManager, LocaleService, ICurrentUniverService, IDCurrentUniverService, GenName } from '@univerjs/core';
 import { Inject, SkipSelf } from '@wendellhu/redi';
 
 export class SheetBarController {
     constructor(
         @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(GenName) private _genName: GenName
     ) {}

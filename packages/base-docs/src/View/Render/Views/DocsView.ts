@@ -1,5 +1,5 @@
 import { Documents, DocumentSkeleton, IDocumentSkeletonDrawing, Picture, Scene } from '@univerjs/base-render';
-import { CommandManager, DocumentModel, ICurrentUniverService, IDocumentData, LocaleService } from '@univerjs/core';
+import { CommandManager, DocumentModel, ICurrentUniverService, IDCurrentUniverService, IDocumentData, LocaleService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { BaseView, CanvasViewRegistry, CANVAS_VIEW_KEY } from '../BaseView';
 
@@ -18,7 +18,7 @@ export class DocsView extends BaseView {
 
     constructor(
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();

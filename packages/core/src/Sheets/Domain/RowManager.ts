@@ -1,11 +1,12 @@
+// eslint-disable-next-line import/no-unresolved
+import { Inject } from '@wendellhu/redi';
+import { IDCurrentUniverService, ICurrentUniverService } from '../../Service/Current.service';
 import { Command, CommandManager } from '../../Command';
 import { ISetRowHeightActionData, SetRowHeightAction } from '../Action';
 import { BooleanNumber } from '../../Types/Enum';
 import { IRowData } from '../../Types/Interfaces';
 import { Nullable, ObjectArray, ObjectArrayType, Tools } from '../../Shared';
 import { Worksheet } from './Worksheet';
-import { Inject } from '@wendellhu/redi';
-import { ICurrentUniverService } from 'src/Service/Current.service';
 
 /**
  * Manage configuration information of all rows, get row height, row length, set row height, etc.
@@ -18,8 +19,8 @@ export class RowManager {
     constructor(
         workSheet: Worksheet,
         data: ObjectArrayType<Partial<IRowData>>,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @Inject(CommandManager) private readonly _commandManager: CommandManager,
+        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(CommandManager) private readonly _commandManager: CommandManager
     ) {
         this._workSheet = workSheet;
         this._rowData = Tools.createObjectArray(data) as ObjectArray<IRowData>;

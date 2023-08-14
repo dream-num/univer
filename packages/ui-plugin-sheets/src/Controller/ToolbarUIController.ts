@@ -18,6 +18,7 @@ import {
     FontItalic,
     ITextRotation,
     ICurrentUniverService,
+    IDCurrentUniverService,
     ObserverManager,
 } from '@univerjs/core';
 import { DefaultToolbarConfig, SheetToolbarConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
@@ -84,7 +85,7 @@ export class ToolbarUIController {
     constructor(
         config: SheetToolbarConfig | undefined,
         @ISelectionManager private readonly _selectionManager: SelectionManager,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager

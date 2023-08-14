@@ -1,9 +1,9 @@
-import { SheetContext } from '../../Basics';
+// eslint-disable-next-line import/no-unresolved
+import { ICurrentUniverService, IDCurrentUniverService } from 'src/Service/Current.service';
+import { Inject } from '@wendellhu/redi';
 import { Command, CommandManager } from '../../Command';
 import { Worksheet } from './Worksheet';
 import { ACTION_NAMES } from '../../Types/Const';
-import { Inject } from '@wendellhu/redi';
-import { ICurrentUniverService } from 'src/Service/Current.service';
 
 export class Freeze {
     private _worksheet: Worksheet;
@@ -11,7 +11,7 @@ export class Freeze {
     constructor(
         workSheet: Worksheet,
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {
         this._worksheet = workSheet;
     }

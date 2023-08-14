@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/member-ordering */
 import { Inject } from '@wendellhu/redi';
 import {
     IInsertColumnDataActionData,
@@ -53,7 +54,7 @@ import { RowManager } from './RowManager';
 import { Selection } from './Selection';
 import { Command, CommandManager, ISheetActionData } from '../../Command';
 import { ObserverManager } from '../../Observer';
-import { ICurrentUniverService } from '../../Service/Current.service';
+import { IDCurrentUniverService, ICurrentUniverService } from '../../Service/Current.service';
 
 /**
  * Access and modify spreadsheet sheets.
@@ -66,6 +67,10 @@ import { ICurrentUniverService } from '../../Service/Current.service';
  * @beta
  */
 export class Worksheet {
+    getContext() {
+        throw new Error('Method not implemented.');
+    }
+
     protected _selection: Selection;
 
     protected _config: IWorksheetConfig;
@@ -86,7 +91,7 @@ export class Worksheet {
         customConfig: Partial<IWorksheetConfig>,
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {
         const config: IWorksheetConfig = {
             ...DEFAULT_WORKSHEET,
@@ -1857,6 +1862,7 @@ export class Worksheet {
      * @returns information stored by the plugin
      */
     getPluginMeta<T>(name: string): T {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return this._config.pluginMeta[name];
     }
 

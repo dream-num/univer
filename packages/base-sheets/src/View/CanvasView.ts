@@ -1,5 +1,5 @@
 import { Inject, Injector } from '@wendellhu/redi';
-import { EventState, ICurrentUniverService, ObserverManager, Worksheet } from '@univerjs/core';
+import { EventState, ICurrentUniverService, IDCurrentUniverService, ObserverManager, Worksheet } from '@univerjs/core';
 
 import { Engine, EVENT_TYPE, IRenderingEngine, IScrollObserverParam, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univerjs/base-render';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from './BaseView';
@@ -14,7 +14,7 @@ export class CanvasView {
     private _views: BaseView[] = []; // worksheet
 
     constructor(
-        @ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
+        @IDCurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(Injector) private readonly _injector: Injector,
         @IRenderingEngine private readonly _engine: Engine

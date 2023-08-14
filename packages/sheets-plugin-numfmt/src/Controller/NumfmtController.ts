@@ -6,16 +6,17 @@ import {
     Range,
     ACTION_NAMES as CORE_ACTION_NAME,
     CommandManager,
-    ICurrentUniverService
+    ICurrentUniverService,
+    IDCurrentUniverService,
 } from '@univerjs/core';
 import { BaseComponentRender } from '@univerjs/base-ui';
 import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
 import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
+import { Inject, Injector } from '@wendellhu/redi';
 import styles from '../View/UI/index.module.less';
 import { NumfmtPlugin } from '../NumfmtPlugin';
 import { DEFAULT_DATA, NUMFMT_PLUGIN_NAME, NumfmtConfig } from '../Basics/Const';
 import { NumfmtModel } from '../Model/NumfmtModel';
-import { Inject, Injector } from '@wendellhu/redi';
 import { NumfmtModalController } from './NumfmtModalController';
 
 export class NumfmtController {
@@ -32,7 +33,7 @@ export class NumfmtController {
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
         @Inject(Injector) private readonly _numfmtInjector: Injector,
-        @Inject(ICurrentUniverService) private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(IDCurrentUniverService) private readonly _currentUniverService: ICurrentUniverService,
         @Inject(NumfmtModalController) private readonly _numfmtModalController: NumfmtModalController
     ) {
         this._model = new NumfmtModel();

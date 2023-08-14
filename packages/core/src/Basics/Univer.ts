@@ -9,7 +9,7 @@ import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../
 import { IDocumentData, IUniverData, IWorkbookConfig } from '../Types/Interfaces';
 import { UniverObserverImpl } from './UniverObserverImpl';
 import { ObserverManager } from '../Observer';
-import { CurrentUniverService, ICurrentUniverService } from '../Service/Current.service';
+import { CurrentUniverService, IDCurrentUniverService, ICurrentUniverService } from '../Service/Current.service';
 
 /**
  * Univer.
@@ -33,7 +33,7 @@ export class Univer {
     }
 
     private get _currentUniverService(): ICurrentUniverService {
-        return this._univerInjector.get(ICurrentUniverService);
+        return this._univerInjector.get(IDCurrentUniverService);
     }
 
     /** Register a plugin into univer. */
@@ -118,7 +118,7 @@ export class Univer {
     }
 
     private initializeDependencies(): Injector {
-        return new Injector([[ObserverManager], [ICurrentUniverService, { useClass: CurrentUniverService }], [CommandManager], [LocaleService], [UndoManager]]);
+        return new Injector([[ObserverManager], [IDCurrentUniverService, { useClass: CurrentUniverService }], [CommandManager], [LocaleService], [UndoManager]]);
     }
 
     private registerUniverPlugin<T extends Plugin>(plugin: PluginCtor<T>, options?: any): void {

@@ -13,6 +13,7 @@ import {
     SetWorkSheetStatusAction,
     RemoveSheetAction,
     ICurrentUniverService,
+    IDCurrentUniverService,
     ObserverManager,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
@@ -47,7 +48,7 @@ export class SheetBarUIController {
 
     // eslint-disable-next-line max-lines-per-function
     constructor(
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager
     ) {
@@ -221,8 +222,8 @@ export class SheetBarUIController {
     }
 
     dragEnd = (element: HTMLDivElement[]): void => {
-        let list: SheetUlProps[] = [];
-        let sheetId = this._dataId;
+        const list: SheetUlProps[] = [];
+        const sheetId = this._dataId;
         Array.from(element).forEach((node: any) => {
             const item = this._sheetList.find((ele) => ele.sheetId === node.dataset.id);
             if (item) {

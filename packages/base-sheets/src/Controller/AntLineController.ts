@@ -1,5 +1,5 @@
 import { Inject } from '@wendellhu/redi';
-import { ICurrentUniverService, ObserverManager } from '@univerjs/core';
+import { ICurrentUniverService, IDCurrentUniverService, ObserverManager } from '@univerjs/core';
 import { Rect, Scene } from '@univerjs/base-render';
 
 import { AntLine, AntLineModel, IAntLineRange } from '../Model/AntLineModel';
@@ -22,7 +22,7 @@ export class AntLineControl {
      */
     constructor(
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
-        @ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
+        @IDCurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
         @Inject(CanvasView) private readonly _canvasView: CanvasView
     ) {
         this._antLineModelList = [];
@@ -108,18 +108,18 @@ export class AntLineControl {
      * @param range
      */
     private _createAntLineRectBySheetIdAndRange(sheetId: string, range: IAntLineRange): Rect {
-        let workbook = this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook();
-        let worksheet = workbook.getSheetBySheetId(sheetId);
+        const workbook = this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook();
+        const worksheet = workbook.getSheetBySheetId(sheetId);
 
         if (worksheet == null) {
             throw new Error(`not found sheet from id: ${sheetId}`);
         }
 
-        let rowTitleWidth = worksheet.getConfig().rowTitle.width;
-        let columnTitleHeight = worksheet.getConfig().columnTitle.height;
+        const rowTitleWidth = worksheet.getConfig().rowTitle.width;
+        const columnTitleHeight = worksheet.getConfig().columnTitle.height;
 
-        let rowManager = worksheet.getRowManager();
-        let columnManager = worksheet.getColumnManager();
+        const rowManager = worksheet.getRowManager();
+        const columnManager = worksheet.getColumnManager();
 
         let totalHeight = 0;
         let totalWidth = 0;
@@ -156,11 +156,11 @@ export class AntLineControl {
      */
     private _deleteSceneAllAntLineRect(): void {
         for (let i = 0; i < this._antLineModelList.length; i++) {
-            let antLineModel = this._antLineModelList[i];
-            let antLineList = antLineModel.getAntLineList();
+            const antLineModel = this._antLineModelList[i];
+            const antLineList = antLineModel.getAntLineList();
             for (let j = 0; j < antLineList.length; j++) {
-                let antLine = antLineList[j];
-                let antRect = antLine.getRect();
+                const antLine = antLineList[j];
+                const antRect = antLine.getRect();
                 if (antRect) {
                     this.getSheetViewScene().removeObject(antRect);
                 }
@@ -174,14 +174,14 @@ export class AntLineControl {
     private _makeUpdateSceneAntLineRect(): void {
         this._deleteSceneAllAntLineRect();
         for (let i = 0; i < this._antLineModelList.length; i++) {
-            let antLineModel = this._antLineModelList[i];
-            let antLineList = antLineModel.getAntLineList();
+            const antLineModel = this._antLineModelList[i];
+            const antLineList = antLineModel.getAntLineList();
             if (antLineModel.getSheetId() !== this._activeSheetId) {
                 continue;
             }
             for (let j = 0; j < antLineList.length; j++) {
-                let antLine = antLineList[j];
-                let antRect = this._createAntLineRectBySheetIdAndRange(antLineModel.getSheetId(), antLine.getRange());
+                const antLine = antLineList[j];
+                const antRect = this._createAntLineRectBySheetIdAndRange(antLineModel.getSheetId(), antLine.getRange());
                 antLine.setRect(antRect);
                 console.log(antRect);
                 this.getSheetViewScene().addObject(antRect);

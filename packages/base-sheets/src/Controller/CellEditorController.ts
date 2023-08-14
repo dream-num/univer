@@ -1,4 +1,4 @@
-import { Direction, IDocumentData, IRangeData, IStyleData, Nullable, ICellData, handleJsonToDom, ICurrentUniverService } from '@univerjs/core';
+import { Direction, IDocumentData, IRangeData, IStyleData, Nullable, ICellData, handleJsonToDom, ICurrentUniverService, IDCurrentUniverService } from '@univerjs/core';
 import { ISelectionManager } from '../Services/tokens';
 import { SelectionManager } from './Selection';
 
@@ -11,7 +11,7 @@ export class CellEditorController {
     // current edit cell
     currentEditRangeData: IRangeData;
 
-    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @ISelectionManager private readonly _selectionManager: SelectionManager) {}
+    constructor(@IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @ISelectionManager private readonly _selectionManager: SelectionManager) {}
 
     setEditMode(value: boolean) {
         this.isEditMode = value;
@@ -72,6 +72,7 @@ export class CellEditorController {
     }
 
     getSelectionStyle(): Nullable<IStyleData> {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return this._selectionManager.getActiveRange()?.getTextStyle();
     }
 

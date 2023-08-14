@@ -21,14 +21,15 @@ import { Selection } from './Selection';
 import { Styles } from './Styles';
 import { Worksheet } from './Worksheet';
 import { Range } from './Range';
-import { NamedRange } from './NamedRange';
 import { ObserverManager } from '../../Observer';
-import { ICurrentUniverService } from '../../Service/Current.service';
+import { IDCurrentUniverService, ICurrentUniverService } from '../../Service/Current.service';
 
 /**
  * Access and create Univer Sheets files
  */
 export class Workbook {
+    [x: string]: any;
+
     /**
      * sheets list
      * @private
@@ -53,7 +54,7 @@ export class Workbook {
 
     constructor(
         workbookData: Partial<IWorkbookConfig> = {},
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(forwardRef(() => GenName)) private readonly _genName: GenName,
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager
@@ -652,6 +653,7 @@ export class Workbook {
     }
 
     getPluginMeta<T>(name: string): T {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return this._config.pluginMeta[name];
     }
 
@@ -762,8 +764,8 @@ export class Workbook {
 
         let firstWorksheet = null;
 
-        for (let sheetId in sheets) {
-            let config = sheets[sheetId];
+        for (const sheetId in sheets) {
+            const config = sheets[sheetId];
             config.name = this._genName.sheetName(config.name);
             const worksheet = new Worksheet(config, this._commandManager, this._observerManager, this._currentUniverService);
             _worksheets.set(sheetId, worksheet);

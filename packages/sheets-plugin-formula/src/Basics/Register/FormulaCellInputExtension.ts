@@ -1,6 +1,6 @@
 import { IFormulaData } from '@univerjs/base-formula-engine';
 import { BaseCellInputExtension, BaseCellInputExtensionFactory, ICell } from '@univerjs/base-ui';
-import { ICurrentUniverService, IRangeData, Nullable, ObjectArray } from '@univerjs/core';
+import { ICurrentUniverService, IDCurrentUniverService, IRangeData, Nullable, ObjectArray } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { FormulaPlugin } from '../../FormulaPlugin';
 import { FormulaController } from '../../Controller/FormulaController';
@@ -19,7 +19,7 @@ export class FormulaCellInputExtensionFactory extends BaseCellInputExtensionFact
     constructor(
         _plugin: FormulaPlugin,
         @Inject(Injector) private readonly _sheetInjector: Injector,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(FormulaController) private readonly _formulaController: FormulaController
     ) {
         super(_plugin);
@@ -35,7 +35,7 @@ export class FormulaCellInputExtensionFactory extends BaseCellInputExtensionFact
 
     override check(cell: ICell) {
         const unitId = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getUnitId();
-        let formula = this.checkFormulaValue(cell) || this.checkArrayFormValue(cell, unitId);
+        const formula = this.checkFormulaValue(cell) || this.checkArrayFormValue(cell, unitId);
 
         if (!formula) {
             return false;
@@ -76,7 +76,7 @@ export class FormulaCellInputExtensionFactory extends BaseCellInputExtensionFact
             }
         });
 
-        return formula;
+        return formula as Nullable<string>;
     }
 
     checkArrayFormValue(cell: ICell, unitId: string): Nullable<string> {
@@ -101,6 +101,6 @@ export class FormulaCellInputExtensionFactory extends BaseCellInputExtensionFact
             });
         });
 
-        return formula;
+        return formula as Nullable<string>;
     }
 }

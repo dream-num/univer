@@ -1,7 +1,7 @@
 import { Inject } from '@wendellhu/redi';
 
 import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
-import { RangeList, Tools, CommandManager, SheetActionBase, SetZoomRatioAction, UIObserver, ICurrentUniverService, ObserverManager } from '@univerjs/core';
+import { RangeList, Tools, CommandManager, SheetActionBase, SetZoomRatioAction, UIObserver, ICurrentUniverService, IDCurrentUniverService, ObserverManager } from '@univerjs/core';
 
 import { CountBar } from '../View/CountBar';
 
@@ -9,7 +9,7 @@ export class CountBarUIController {
     protected _countBar: CountBar;
 
     constructor(
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @ISelectionManager private readonly _selectionManager: SelectionManager,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager
     ) {
@@ -65,16 +65,16 @@ export class CountBarUIController {
     };
 
     protected _totalRangeList(rangeList: RangeList): void {
-        let rectList = rangeList.getRangeList();
-        let recList: string[] = [];
-        let workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-        let worksheet = workbook.getActiveSheet();
-        let cellMatrix = worksheet.getCellMatrix();
+        const rectList = rangeList.getRangeList();
+        const recList: string[] = [];
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const worksheet = workbook.getActiveSheet();
+        const cellMatrix = worksheet.getCellMatrix();
         let avg = 0;
         let total = 0;
         let count = 0;
         for (let i = 0; i < rectList.length; i++) {
-            let rect = rectList[i];
+            const rect = rectList[i];
             for (let r = rect.startRow; r <= rect.endRow; r++) {
                 for (let c = rect.startColumn; c <= rect.endColumn; c++) {
                     if (recList.includes(`${r}${c}`)) {
@@ -82,7 +82,7 @@ export class CountBarUIController {
                     }
                     const cell = cellMatrix.getValue(r, c);
                     if (cell) {
-                        let value = parseFloat(cell.v as string);
+                        const value = parseFloat(cell.v as string);
                         // eslint-disable-next-line no-restricted-globals
                         if (!isNaN(value)) {
                             count += 1;

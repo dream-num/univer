@@ -28,5 +28,6 @@ export * from './Shared';
 export * from './Sheets';
 export * from './Slides/Domain';
 
-export { ICurrentUniverService } from './Service/Current.service';
+export * from './Service/Current.service';
+
 export { LocaleService } from './Service/Locale.service';

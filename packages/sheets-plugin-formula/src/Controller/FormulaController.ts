@@ -1,6 +1,6 @@
 import { IInterpreterDatasetConfig, SheetDataType, UnitDataType, SheetNameMapType, ArrayFormulaDataType, FormulaEngineService } from '@univerjs/base-formula-engine';
 import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
-import { CommandManager, ICurrentUniverService } from '@univerjs/core';
+import { CommandManager, ICurrentUniverService, IDCurrentUniverService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { IFormulaConfig } from '../Basics/Interfaces/IFormula';
 import { FormulaDataModel } from '../Model/FormulaDataModel';
@@ -20,7 +20,7 @@ export class FormulaController {
     constructor(
         config: IFormulaConfig,
         @ISelectionManager private readonly _selectionManager: SelectionManager,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @Inject(Injector) private readonly _sheetInjector: Injector
     ) {
@@ -117,7 +117,7 @@ export class FormulaController {
     clearArrayFormulaLineControl() {
         const arrayFormulaLineControls = this._arrayFormulaLineControls;
         if (arrayFormulaLineControls.length > 0) {
-            for (let control of arrayFormulaLineControls) {
+            for (const control of arrayFormulaLineControls) {
                 control.dispose();
             }
         }
@@ -169,7 +169,7 @@ export class FormulaController {
 
         const currentUnitId = workbook.getUnitId();
 
-        for (let sheet of sheets) {
+        for (const sheet of sheets) {
             sheetData[sheet.getSheetId()] = sheet.getCellMatrix();
             sheetNameMap[sheet.getName()] = sheet.getSheetId();
         }

@@ -1,4 +1,4 @@
-import { CommandManager, ICurrentUniverService, ObserverManager } from '@univerjs/core';
+import { CommandManager, ICurrentUniverService, IDCurrentUniverService, ObserverManager } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { IPasteData, IDragAndDropData } from '../Basics/Interfaces';
 import { PasteExtensionManager, DragAndDropExtensionManager, CopyExtensionManager } from '../Basics/Register';
@@ -13,7 +13,7 @@ export class RegisterManager {
     constructor(
         @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
         @Inject(CommandManager) private readonly _comandManager: CommandManager,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {
         this.initialize();
     }

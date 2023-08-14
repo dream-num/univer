@@ -1,7 +1,8 @@
-import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren, CustomComponent } from '@univerjs/base-ui';
-import { DEFAULT_STYLES, HorizontalAlign, Tools, UIObserver, VerticalAlign, WrapStrategy, Range, FontWeight, FontItalic, ITextRotation } from '@univerjs/core';
+import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren, ComponentManager, CustomComponent } from '@univerjs/base-ui';
+import { DEFAULT_STYLES, HorizontalAlign, ObserverManager, Tools, UIObserver, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
+
 import { DefaultToolbarConfig, DocToolbarConfig, DOC_UI_PLUGIN_NAME } from '../Basics';
-import { DocUIPlugin } from '../DocUIPlugin';
 import { Toolbar } from '../View';
 import { ColorSelect } from '../View/Common';
 import { FONT_FAMILY_CHILDREN, FONT_SIZE_CHILDREN, HORIZONTAL_ALIGN_CHILDREN, VERTICAL_ALIGN_CHILDREN, TEXT_WRAP_CHILDREN, TEXT_ROTATE_CHILDREN } from '../View/Toolbar/Const';
@@ -28,8 +29,6 @@ export interface IToolbarItemProps extends BaseToolbarSelectProps {
 }
 
 export class ToolbarUIController {
-    private _plugin: DocUIPlugin;
-
     private _toolbar: Toolbar;
 
     private _toolList: IToolbarItemProps[];
@@ -44,9 +43,12 @@ export class ToolbarUIController {
 
     private _background: string = '#fff';
 
-    constructor(plugin: DocUIPlugin, config?: DocToolbarConfig) {
-        this._plugin = plugin;
-
+    // eslint-disable-next-line max-lines-per-function
+    constructor(
+        config: DocToolbarConfig,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
+    ) {
         this._config = Tools.deepMerge({}, DefaultToolbarConfig, config);
 
         this._toolList = [
@@ -347,7 +349,7 @@ export class ToolbarUIController {
     }
 
     setUIObserve<T>(msg: UIObserver<T>) {
-        this._plugin.getContext().getObserverManager().requiredObserver<UIObserver<T>>('onUIChangeObservable', 'core').notifyObservers(msg);
+        this._observerManager.requiredObserver<UIObserver<T>>('onUIChangeObservable', 'core').notifyObservers(msg);
     }
 
     changeColor(color: string) {
@@ -480,109 +482,8 @@ export class ToolbarUIController {
         });
     }
 
-    private _changeToolbarState(range: Range): void {
-        const workbook = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook();
-        const worksheet = workbook.getActiveSheet();
-        if (worksheet) {
-            const isBold = range.getFontWeight();
-            const IsItalic = range.getFontStyle();
-            const strikeThrough = range.getStrikeThrough();
-            const fontSize = range.getFontSize();
-            const fontWeight = range.getFontWeight();
-            const fontName = range.getFontFamily();
-            const fontItalic = range.getFontStyle();
-            // const fontColor = range.getFontColor();
-            // const background = range.getBackground();
-            const underline = range.getUnderline();
-            const horizontalAlign = range.getHorizontalAlignment() ?? HorizontalAlign.LEFT;
-            const verticalAlign = range.getVerticalAlignment() ?? VerticalAlign.BOTTOM;
-            const rotation = range.getTextRotation();
-            const warp = range.getWrapStrategy() ?? WrapStrategy.CLIP;
-
-            const bold = this._toolList.find((item) => item.name === 'bold');
-            const italic = this._toolList.find((item) => item.name === 'italic');
-            const textRotateModeItem = this._toolList.find((item) => item.name === 'textRotateMode');
-            const fontSizeItem = this._toolList.find((item) => item.name === 'fontSize');
-            const fontNameItem = this._toolList.find((item) => item.name === 'font');
-            const fontBoldItem = this._toolList.find((item) => item.name === 'bold');
-            const fontItalicItem = this._toolList.find((item) => item.name === 'italic');
-            // const textColor = this._toolList.find((item) => item.name === 'textColor')
-            // const fillColor = this._toolList.find((item) => item.name === 'fillColor')
-            const strikethroughItem = this._toolList.find((item) => item.name === 'strikethrough');
-            const underlineItem = this._toolList.find((item) => item.name === 'underline');
-            const horizontalAlignModeItem = this._toolList.find((item) => item.name === 'horizontalAlignMode');
-            const verticalAlignModeItem = this._toolList.find((item) => item.name === 'verticalAlignMode');
-            const textWrapMode = this._toolList.find((item) => item.name === 'textWrapMode');
-
-            if (bold) {
-                bold.active = isBold === FontWeight.BOLD;
-            }
-
-            if (italic) {
-                italic.active = IsItalic === FontItalic.ITALIC;
-            }
-
-            if (strikethroughItem) {
-                strikethroughItem.active = !!(strikeThrough && strikeThrough.s);
-            }
-            if (fontNameItem) {
-                fontNameItem.children?.forEach((item) => {
-                    item.selected = fontName === item.value;
-                });
-            }
-            if (fontSizeItem) {
-                fontSizeItem.label = fontSize.toString();
-            }
-            if (fontBoldItem) {
-                fontBoldItem.active = !!fontWeight;
-            }
-            if (fontItalicItem) {
-                fontItalicItem.active = !!fontItalic;
-            }
-            if (underlineItem) {
-                underlineItem.active = !!(underline && underline.s);
-            }
-            if (horizontalAlignModeItem) {
-                horizontalAlignModeItem.children?.forEach((item) => {
-                    item.selected = horizontalAlign === item.value;
-                });
-            }
-            if (textRotateModeItem) {
-                textRotateModeItem.children?.forEach((item) => {
-                    if ((rotation as ITextRotation).v) {
-                        item.selected = item.value === 'v';
-                    } else {
-                        item.selected = (rotation as ITextRotation).a === item.value;
-                    }
-                });
-            }
-            if (verticalAlignModeItem) {
-                verticalAlignModeItem.children?.forEach((item) => {
-                    item.selected = verticalAlign === item.value;
-                });
-            }
-            if (textWrapMode) {
-                textWrapMode.children?.forEach((item) => {
-                    item.selected = warp === item.value;
-                });
-            }
-
-            this.setToolbar();
-        }
-    }
-
     private _initialize() {
-        this._plugin.getComponentManager().register(DOC_UI_PLUGIN_NAME + ColorSelect.name, ColorSelect);
-        this._plugin.getComponentManager().register(DOC_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
-
-        // CommandManager.getCommandObservers().add(({ actions }) => {
-        //     if (!actions || actions.length === 0) return;
-        //     const action = actions[0] as SheetActionBase<ISheetActionData, ISheetActionData, void>;
-
-        //     const currentUnitId = this._plugin.getContext().getUniver().getCurrentUniverSheetInstance().getWorkBook().getUnitId();
-        //     const actionUnitId = action.getWorkBook().getUnitId();
-
-        //     if (currentUnitId !== actionUnitId) return null;
-        // });
+        this._componentManager.register(DOC_UI_PLUGIN_NAME + ColorSelect.name, ColorSelect);
+        this._componentManager.register(DOC_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
     }
 }

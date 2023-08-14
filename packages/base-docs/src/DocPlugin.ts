@@ -1,5 +1,6 @@
-import { DocContext, Plugin, PLUGIN_NAMES, UIObserver, UniverSheet } from '@univerjs/core';
-import { Engine, RenderEngine } from '@univerjs/base-render';
+import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import { LocaleService, ObserverManager, Plugin, PluginType, PLUGIN_NAMES, UIObserver } from '@univerjs/core';
+import { Engine } from '@univerjs/base-render';
 import { zh, en } from './Locale';
 import { DocPluginObserve, install } from './Basics/Observer';
 import { ToolbarController } from './Controller/ToolbarController';
@@ -14,7 +15,9 @@ export interface IDocPluginConfig extends IDocPluginConfigBase {}
 
 const DEFAULT_DOCUMENT_PLUGIN_DATA = {};
 
-export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
+export class DocPlugin extends Plugin<DocPluginObserve> {
+    static override type = PluginType.Doc;
+
     private _config: IDocPluginConfig;
 
     private _infoBarControl: InfoBarController;
@@ -27,24 +30,20 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
 
     private _documentController: DocumentController;
 
-    constructor(config: Partial<IDocPluginConfig> = {}) {
+    constructor(
+        config: Partial<IDocPluginConfig> = {},
+        @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
+        @Inject(Injector) override _injector: Injector,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
+    ) {
         super(PLUGIN_NAMES.DOCUMENT);
 
         this._config = Object.assign(DEFAULT_DOCUMENT_PLUGIN_DATA, config);
+        this._initializeDependencies(_injector);
     }
 
-    static create(config?: IDocPluginConfig) {
-        return new DocPlugin(config);
-    }
-
-    installTo(universheetInstance: UniverSheet) {
-        universheetInstance.installPlugin(this);
-    }
-
-    initialize(ctx: DocContext): void {
-        this.context = ctx;
-
-        this.getGlobalContext().getLocale().load({
+    initialize(): void {
+        this._localeService.getLocale().load({
             en,
             zh,
         });
@@ -60,23 +59,17 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
     }
 
     initController() {
-        this._toolbarControl = new ToolbarController(this);
-        this._infoBarControl = new InfoBarController(this);
-        this._documentController = new DocumentController(this, this._config);
+        this._toolbarControl = new ToolbarController();
+        this._infoBarControl = new InfoBarController();
+        this._documentController = new DocumentController();
     }
 
     initCanvasView() {
-        const engine = this.getContext().getUniver().getGlobalContext().getPluginManager().getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
-
-        this._canvasEngine = engine;
-
-        if (this._canvasView == null) {
-            this._canvasView = new CanvasView(engine, this);
-        }
+        this._canvasView = this._injector.get(CanvasView);
     }
 
     listenEventManager() {
-        this._getCoreObserver<boolean>('onUIDidMountObservable').add(({ name, value }) => {
+        this._getCoreObserver<boolean>('onUIDidMountObservable').add(() => {
             this.initializeAfterUI();
         });
     }
@@ -121,13 +114,22 @@ export class DocPlugin extends Plugin<DocPluginObserve, DocContext> {
         return this._infoBarControl;
     }
 
-    onMounted(ctx: DocContext): void {
-        this.initialize(ctx);
+    override onMounted(): void {
+        this.initialize();
     }
 
-    onDestroy(): void {}
+    override onDestroy(): void {}
 
+    /** @deprecated This will be removed. Modules should inject `ObserverManager` instead of getting it from plugin. */
     protected _getCoreObserver<T>(type: string) {
-        return this.getGlobalContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core');
+        return this._globalObserverManager.requiredObserver<UIObserver<T>>(type, 'core');
+    }
+
+    private _initializeDependencies(docInjector: Injector) {
+        const dependencies: Dependency[] = [[CanvasView]];
+
+        dependencies.forEach((d) => {
+            docInjector.add(d);
+        });
     }
 }

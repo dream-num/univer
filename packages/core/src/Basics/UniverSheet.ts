@@ -23,7 +23,7 @@ export class UniverSheet implements Disposable {
     constructor(univerSheetData: Partial<IWorkbookConfig> = {}, @Optional(Injector) parentInjector?: Injector) {
         this.univerSheetConfig = univerSheetData;
 
-        this._sheetInjector = this.initializeInjector(parentInjector);
+        this._sheetInjector = this._initializeDependencies(parentInjector);
         this.setObserver();
         this._workbook = this._sheetInjector.createInstance(Workbook, univerSheetData);
     }
@@ -57,13 +57,12 @@ export class UniverSheet implements Disposable {
     addPlugin<T extends Plugin>(plugin: PluginCtor<T>, options: any): void {
         const pluginInstance: Plugin = this._sheetInjector.createInstance(plugin as unknown as Ctor<any>, options);
 
-        // TODO: remove context passed in here
-        pluginInstance.onCreate({} as any);
-        pluginInstance.onMounted({} as any);
+        pluginInstance.onCreate();
+        pluginInstance.onMounted();
         this._pluginStore.addPlugin(pluginInstance);
     }
 
-    private initializeInjector(parentInjector?: Injector): Injector {
+    private _initializeDependencies(parentInjector?: Injector): Injector {
         const dependencies: Dependency[] = [[ObserverManager], [GenName]];
         return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
     }

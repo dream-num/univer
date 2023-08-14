@@ -23,7 +23,7 @@ export class CanvasView {
     }
 
     getView(key: string) {
-        for (let view of this._views) {
+        for (const view of this._views) {
             if (view.viewKey === key) {
                 return view;
             }
@@ -35,7 +35,7 @@ export class CanvasView {
     }
 
     updateToSheet(worksheet: Worksheet) {
-        for (let view of this._views) {
+        for (const view of this._views) {
             view.updateToSheet(worksheet);
         }
     }
@@ -153,7 +153,6 @@ export class CanvasView {
     }
 
     private _viewLoader(scene: Scene) {
-        // FIXME: need a plugin here
         CanvasViewRegistry.getData().forEach((viewFactory) => {
             this._views.push(viewFactory.create(scene, this._injector));
         });

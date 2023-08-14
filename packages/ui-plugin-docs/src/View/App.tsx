@@ -1,9 +1,10 @@
 import { AppContext, BaseComponentProps, Component, ComponentManager } from '@univerjs/base-ui';
-import { LocaleType } from '@univerjs/core';
+import { LocaleService, LocaleType } from '@univerjs/core';
 import { BaseDocContainerProps, DocContainer } from './DocContainer';
 
 export interface BaseUIProps extends BaseComponentProps {
     locale: LocaleType;
+    localeService: LocaleService,
     UIConfig: BaseDocContainerProps;
     componentManager: ComponentManager;
     changeLocale: (locale: string) => void;
@@ -30,15 +31,16 @@ export class App extends Component<BaseUIProps, IState> {
     }
 
     render() {
-        const { context, UIConfig, componentManager } = this.props;
+        const { localeService, injector, UIConfig, componentManager } = this.props;
         const { locale } = this.state;
 
         return (
             <AppContext.Provider
                 value={{
-                    context,
                     locale,
                     componentManager,
+                    localeService,
+                    injector,
                 }}
             >
                 <div

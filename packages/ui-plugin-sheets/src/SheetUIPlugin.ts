@@ -54,22 +54,6 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
         });
     }
 
-    initializeDependencies(): void {
-        this._injector.add([KeyboardManager]);
-        this._injector.add([RegisterManager]);
-        this._injector.add([ComponentManager]);
-        this._injector.add([ZIndexManager]);
-        this._injector.add([SlotManager]);
-
-        // TODO: maybe we don't have to instantiate these dependencies manually
-        this._componentManager = this._injector.get(ComponentManager);
-        this._keyboardManager = this._injector.get(KeyboardManager);
-        this._zIndexManager = this._injector.get(ZIndexManager);
-        this._registerManager = this._injector.get(RegisterManager);
-
-        this._appUIController = this._injector.createInstance(AppUIController, this._config);
-    }
-
     initRender() {
         const engine = this._injector.get(IRenderingEngine);
         const container = getRefElement(this._appUIController.getSheetContainerController().getContentRef());
@@ -162,5 +146,21 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
 
     deleteToolButton(name: string) {
         this._appUIController.getSheetContainerController().getToolbarController().deleteToolbarConfig(name);
+    }
+
+    private initializeDependencies(): void {
+        this._injector.add([KeyboardManager]);
+        this._injector.add([RegisterManager]);
+        this._injector.add([ComponentManager]);
+        this._injector.add([ZIndexManager]);
+        this._injector.add([SlotManager]);
+
+        // TODO: maybe we don't have to instantiate these dependencies manually
+        this._componentManager = this._injector.get(ComponentManager);
+        this._keyboardManager = this._injector.get(KeyboardManager);
+        this._zIndexManager = this._injector.get(ZIndexManager);
+        this._registerManager = this._injector.get(RegisterManager);
+
+        this._appUIController = this._injector.createInstance(AppUIController, this._config);
     }
 }

@@ -1,5 +1,5 @@
-import { LocaleType } from "src/Types/Enum";
-import { Locale } from "../Shared/Locale";
+import { LocaleType } from 'src/Types/Enum';
+import { Locale } from '../Shared/Locale';
 
 /**
  * This service provides i18n and timezone / location features to other modules.

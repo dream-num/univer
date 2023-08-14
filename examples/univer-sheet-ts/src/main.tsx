@@ -17,13 +17,11 @@ const univer = new Univer({
 });
 
 // create univer sheet instance
-const universheet = univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
+univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
 
-// base-render
-univer.registerPlugin(RenderEngine);
 // register plugins
+univer.registerPlugin(RenderEngine);
 univer.registerPlugin(SheetPlugin);
-// ui-plugin-sheets
 univer.registerPlugin(SheetUIPlugin, {
     container: 'universheet',
     layout: {
@@ -38,18 +36,11 @@ univer.registerPlugin(SheetUIPlugin, {
     },
 });
 univer.registerPlugin(NumfmtPlugin);
-
 univer.registerPlugin(FindPlugin);
-
-// base-sheet
 univer.registerPlugin(FormulaPlugin, DEFAULT_FORMULA_DATA_DEMO);
 univer.registerPlugin(ImportXlsxPlugin);
 univer.registerPlugin(OperationPlugin);
-// FindPlugin.create().installTo(universheet);
-// universheet.installPlugin(new OperationPlugin());
-// universheet.installPlugin(new ImportXlsxPlugin());
 // universheet.installPlugin(new OverGridImagePlugin());
-// universheet.installPlugin(new NumfmtPlugin());
 
 // use for console test
 declare global {

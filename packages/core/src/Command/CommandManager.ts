@@ -7,6 +7,7 @@ import { CommandInjectorObservers } from './CommandInjectorObservers';
 import { UndoManager } from './UndoManager';
 import { ActionExtensionManager } from './ActionExtensionManager';
 import { Command } from './Command';
+import { Inject } from '@wendellhu/redi';
 
 /**
  * Manage command
@@ -20,12 +21,9 @@ export class CommandManager {
 
     private static _commandInjectorObservers: CommandInjectorObservers;
 
-    private _undoManager: UndoManager;
-
     private _actionExtensionManager: ActionExtensionManager;
 
-    constructor(context: ContextBase) {
-        this._undoManager = context.getUndoManager();
+    constructor(@Inject(UndoManager) private readonly _undoManager: UndoManager) {
         this._actionExtensionManager = new ActionExtensionManager();
     }
 

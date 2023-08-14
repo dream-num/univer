@@ -20,13 +20,7 @@ export class InfoBarUIController {
 
     private _infoBar: InfoBar;
 
-    private _plugin: DocUIPlugin;
-
     private _infoList: BaseInfoBarProps;
-
-    constructor(plugin: DocUIPlugin) {
-        this._plugin = plugin;
-    }
 
     getComponent = (ref: InfoBar) => {
         this._infoBar = ref;
@@ -46,7 +40,6 @@ export class InfoBarUIController {
 
     private _refreshComponent(): void {
         const name = 'UniverDoc';
-        // const name = this._plugin.getContext().getUniver().getCurrentUniverDocInstance().getWorkBook().getConfig().name;
         this._infoBarModel = new InfoBarModel(name);
         this._infoList = {
             back: {

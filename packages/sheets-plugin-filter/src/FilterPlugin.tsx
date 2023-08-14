@@ -20,7 +20,7 @@ export class FilterPlugin extends Plugin {
         universheetInstance.installPlugin(this);
     }
 
-    onMounted(context: SheetContext): void {
+    override onMounted(context: SheetContext): void {
         // const config: IConfig = {
         //     context,
         // };

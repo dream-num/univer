@@ -15,7 +15,7 @@ interface IState {
 }
 
 export class SearchItem extends Component<IProps, IState> {
-    initialize() {
+    override initialize() {
         this.state = {
             description: {},
             rangeList: [],
@@ -23,7 +23,7 @@ export class SearchItem extends Component<IProps, IState> {
         };
     }
 
-    componentDidMount() {
+    override componentDidMount() {
         const { funParams } = this.props;
         const description = funParams?.funParams.p?.[0];
         this.setState({

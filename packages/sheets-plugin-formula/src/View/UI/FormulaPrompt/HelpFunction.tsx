@@ -1,9 +1,9 @@
-import { Component, createRef } from '@univerjs/base-ui';
+import { BaseComponentProps, Component, createRef } from '@univerjs/base-ui';
 import { IKeyValue } from '@univerjs/core';
 import { FormulaParamType, FormulaType } from '../../../Basics';
 import styles from './index.module.less';
 
-interface IProps {
+interface IProps extends BaseComponentProps {
     funName: any;
     paramIndex: number;
 }
@@ -21,7 +21,7 @@ interface IState {
 export class HelpFunction extends Component<IProps, IState> {
     contentRef = createRef<HTMLDivElement>();
 
-    initialize() {
+    override initialize() {
         this.state = {
             activeIndex: 0,
             functionInfo: {},
@@ -33,9 +33,11 @@ export class HelpFunction extends Component<IProps, IState> {
         };
     }
 
-    componentWillMount() {}
+    override componentWillMount() {}
 
-    componentDidMount() {}
+    override componentDidMount() {
+        this.props.getComponent?.(this);
+    }
 
     updateState(helpFormulaActive: boolean, activeIndex: number = 0, functionInfo: FormulaType = {}, position = { left: 0, top: 0 }, cb?: () => void) {
         this.setState(

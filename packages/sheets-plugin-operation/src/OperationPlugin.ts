@@ -1,5 +1,6 @@
-import { SheetContext, Plugin, UniverSheet } from '@univerjs/core';
-import { SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
+import { LocaleService, Plugin, PluginType, UniverSheet } from '@univerjs/core';
+import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import { RegisterManager } from '@univerjs/base-ui';
 import { en, zh } from './Locale';
 import { OPERATION_PLUGIN } from './Const';
 import { Copy, Paste, UniverCopy, UniverPaste } from './Domain';
@@ -21,7 +22,9 @@ interface PasteResolver {
     resolver: Paste;
 }
 
-export class OperationPlugin extends Plugin<any, SheetContext> {
+export class OperationPlugin extends Plugin {
+    static override type = PluginType.Sheet;
+
     private _config: IOperationPluginConfig;
 
     private _copyResolvers: CopyResolver[] = [];
@@ -42,13 +45,15 @@ export class OperationPlugin extends Plugin<any, SheetContext> {
 
     private _copyImageExtensionFactory: CopyImageExtensionFactory;
 
-    constructor(config?: Partial<IOperationPluginConfig>) {
+    constructor(
+        config: Partial<IOperationPluginConfig>,
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(Injector) override readonly _injector: Injector,
+        @Inject(RegisterManager) private readonly _registerManager: RegisterManager
+    ) {
         super(OPERATION_PLUGIN);
         this._config = Object.assign(DEFAULT_OPERATION_PLUGIN_DATA, config);
-    }
-
-    static create(config?: Partial<IOperationPluginConfig>) {
-        return new OperationPlugin(config);
+        this.initializeDependencies(_injector);
     }
 
     getConfig(): IOperationPluginConfig {
@@ -56,16 +61,18 @@ export class OperationPlugin extends Plugin<any, SheetContext> {
     }
 
     initialize() {
+        this._localeService.getLocale().load({
+            en,
+            zh,
+        });
+
         this.registerExtension();
+        this._univerPaste = this._injector.get(UniverPaste);
+        this._univerCopy = this._injector.get(UniverCopy);
     }
 
     registerExtension() {
-        const pasteRegister = this.getGlobalContext()
-            .getPluginManager()
-            .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
-            .getRegisterManager()
-            .getPasteExtensionManager()
-            .getRegister();
+        const pasteRegister = this._registerManager.getPasteExtensionManager().getRegister();
 
         this._pasteExtensionFactory = new PasteExtensionFactory(this);
         pasteRegister.add(this._pasteExtensionFactory);
@@ -75,12 +82,7 @@ export class OperationPlugin extends Plugin<any, SheetContext> {
         this._pasteImageExtensionFactory = new PasteImageExtensionFactory(this);
         pasteRegister.add(this._pasteImageExtensionFactory);
 
-        const copyRegister = this.getGlobalContext()
-            .getPluginManager()
-            .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
-            .getRegisterManager()
-            .getCopyExtensionManager()
-            .getRegister();
+        const copyRegister = this._registerManager.getCopyExtensionManager().getRegister();
 
         this._copyExtensionFactory = new CopyExtensionFactory(this);
         copyRegister.add(this._copyExtensionFactory);
@@ -93,38 +95,19 @@ export class OperationPlugin extends Plugin<any, SheetContext> {
         universheetInstance.installPlugin(this);
     }
 
-    onDestroy(): void {
-        const pasteRegister = this.getContext()
-            .getPluginManager()
-            .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
-            .getRegisterManager()
-            .getPasteExtensionManager()
-            .getRegister();
+    override onDestroy(): void {
+        const pasteRegister = this._registerManager.getPasteExtensionManager().getRegister();
         pasteRegister.delete(this._pasteExtensionFactory);
         pasteRegister.delete(this._pasteOfficeExtensionFactory);
         pasteRegister.delete(this._pasteImageExtensionFactory);
 
-        const copyRegister = this.getGlobalContext()
-            .getPluginManager()
-            .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
-            .getRegisterManager()
-            .getCopyExtensionManager()
-            .getRegister();
+        const copyRegister = this._registerManager.getCopyExtensionManager().getRegister();
 
         copyRegister.delete(this._copyExtensionFactory);
         copyRegister.delete(this._copyImageExtensionFactory);
     }
 
-    onMounted(context: SheetContext): void {
-        super.onMounted(context);
-        this.getLocale().load({
-            en,
-            zh,
-        });
-        // this.installPasteResolver({ name: 'univerPaste', resolver: new UniverPaste(context) });
-        this._univerPaste = new UniverPaste(context);
-        this._univerCopy = new UniverCopy(context);
-        // this.installCopyResolver({ name: 'univerCopy', resolver: new UniverCopy(context) });
+    override onMounted(): void {
         this.initialize();
     }
 
@@ -134,6 +117,14 @@ export class OperationPlugin extends Plugin<any, SheetContext> {
 
     getUniverCopy() {
         return this._univerCopy;
+    }
+
+    initializeDependencies(injector: Injector) {
+        const dependencies: Dependency[] = [[UniverPaste], [UniverCopy]];
+
+        dependencies.forEach((d) => {
+            injector.add(d);
+        });
     }
 
     // installCopyResolver(resolver: CopyResolver) {

@@ -6,6 +6,8 @@ import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
 import { DEFAULT_FORMULA_DATA_DEMO, FormulaPlugin } from '@univerjs/sheets-plugin-formula';
 import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
 import { FindPlugin } from '@univerjs/sheets-plugin-find';
+import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
+import { OperationPlugin } from '@univerjs/sheets-plugin-operation';
 
 // TODO: @huwenzhao: change the following to new API
 
@@ -36,12 +38,9 @@ univer.registerPlugin(SheetUIPlugin, {
 univer.registerPlugin(NumfmtPlugin);
 univer.registerPlugin(FindPlugin);
 univer.registerPlugin(FormulaPlugin, DEFAULT_FORMULA_DATA_DEMO);
-
-// FindPlugin.create().installTo(universheet);
-// universheet.installPlugin(new OperationPlugin());
-// universheet.installPlugin(new ImportXlsxPlugin());
+univer.registerPlugin(ImportXlsxPlugin);
+univer.registerPlugin(OperationPlugin);
 // universheet.installPlugin(new OverGridImagePlugin());
-// universheet.installPlugin(new NumfmtPlugin());
 
 // use for console test
 declare global {

@@ -12,7 +12,7 @@ interface IState {
 export class FilterButton extends Component<IProps, IState> {
     protected _localeObserver: Nullable<Observer<Workbook>>;
 
-    initialize(props: IProps) {
+    override initialize(props: IProps) {
         this.state = {
             filter: {
                 locale: 'filter',
@@ -38,35 +38,36 @@ export class FilterButton extends Component<IProps, IState> {
         };
     }
 
+    override componentDidMount() {
+        this.props.getComponent?.(this);
+    }
+
     /**
      * init
      */
-    componentWillMount() {
+    override componentWillMount() {
         this.setLocale();
 
         // subscribe Locale change event
-        this._localeObserver = this.getContext()
-            .getObserverManager()
-            .getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')
-            ?.add(() => {
-                this.setLocale();
-            });
+        this._localeObserver = this.context.observerManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')?.add(() => {
+            this.setLocale();
+        });
     }
 
     /**
      * destory
      */
-    componentWillUnmount() {
-        // this.getGlobalContext().getObserverManager().getObserver<Workbook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
+    override componentWillUnmount() {
+        this.context.observerManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')?.remove(this._localeObserver);
     }
 
     /**
      * set text by config setting and Locale message
      */
     setLocale() {
-        const locale = this._context.getLocale();
+        const locale = this.context.localeService.getLocale();
         this.setState((prevState: IState) => {
-            let item = prevState.filter;
+            const item = prevState.filter;
             // set current Locale string for tooltip
             item.tooltip = locale.get(`${item.locale}Label`);
 

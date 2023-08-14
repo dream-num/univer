@@ -1,9 +1,6 @@
-import { SheetContext } from '@univerjs/core';
 import { FormulaDataType } from '@univerjs/base-formula-engine';
 
-export type IConfig = {
-    context: SheetContext;
-};
+export type IConfig = {};
 
 // Types for props
 export type IProps = { config: IConfig };

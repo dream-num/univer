@@ -7,7 +7,7 @@ interface IProps {
 export class FormulaLabel extends Component<IProps> {
     // private _render: BaseComponentRender;
 
-    initialize() {
+    override initialize() {
         // super();
         // const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         // this._render = component.getComponentRender();

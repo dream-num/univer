@@ -18,7 +18,8 @@ Univer 是一个开源的协作解决方案，旨在将协作能力赋能所有�
 
 ### 环境
 
-[Node.js](https://nodejs.org/en/) Version >= 14.19
+- [node.js](https://nodejs.org) version 16.20.0
+- [pnpm](https://pnpm.io) version 8.6.2
 
 ### 安装
 
@@ -26,7 +27,6 @@ Univer 是一个开源的协作解决方案，旨在将协作能力赋能所有�
 git clone http://github.com/dream-num/univer
 cd univer
 npm i -g pnpm # MacOS : sudo npm i -g pnpm
-npx playwright install
 pnpm i
 ```
 
@@ -35,22 +35,20 @@ pnpm i
 启动 sheets
 
 ```
-npm run dev:sheet
+npm run start:sheet
 ```
 
 启动 docs
 
 ```
-npm run dev:doc
+npm run start:doc
 ```
 
 启动 slides
 
 ```
-npm run dev:slide
+npm run start:slide
 ```
-
-更多开发教程请参考 [贡献指南](./.github/contributing-zh.md)。
 
 ## 问题反馈
 

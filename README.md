@@ -18,7 +18,8 @@ We provide javascript part of code in the repository, including a canvas-based f
 
 ### Requirements
 
-[Node.js](https://nodejs.org/en/) Version >= 14.19
+- [node.js](https://nodejs.org) version 16.20.0
+- [pnpm](https://pnpm.io) version 8.6.2
 
 ### Installation
 
@@ -26,7 +27,6 @@ We provide javascript part of code in the repository, including a canvas-based f
 git clone http://github.com/dream-num/univer
 cd univer
 npm i -g pnpm # MacOS : sudo npm i -g pnpm
-npx playwright install
 pnpm i
 ```
 
@@ -35,19 +35,19 @@ pnpm i
 Start sheets
 
 ```
-npm run dev:sheet
+npm run start:sheet
 ```
 
 Start docs
 
 ```
-npm run dev:doc
+npm run start:doc
 ```
 
 Start slides
 
 ```
-npm run dev:slide
+npm run start:slide
 ```
 
 For more development tutorials, please refer to [Contribution Guide](./.github/contributing.md).

@@ -21,7 +21,7 @@ interface IState {
 export class SearchFunction extends Component<IProps, IState> {
     contentRef = createRef<HTMLUListElement>();
 
-    initialize() {
+    override initialize() {
         this.state = {
             lang: '',
             locale: [],
@@ -37,9 +37,11 @@ export class SearchFunction extends Component<IProps, IState> {
         };
     }
 
-    componentDidMount() {}
+    override componentDidMount() {
+        this.props.getComponent?.(this);
+    }
 
-    componentWillUpdate(nextProps: any) {}
+    override componentWillUpdate(nextProps: any) {}
 
     onKeyDown(event: Event) {}
 

@@ -1,23 +1,18 @@
-import { SheetContext, PLUGIN_NAMES, Tools, handleJsonToDom, handleStyleToString, IKeyValue } from '@univerjs/core';
-import { SheetPlugin, SelectionModel, SelectionControl } from '@univerjs/base-sheets';
-import { RightMenuProps, RightMenuItem } from '@univerjs/ui-plugin-sheets';
+/* eslint-disable max-lines-per-function */
+import { Tools, handleJsonToDom, handleStyleToString, IKeyValue, ICurrentUniverService, IDCurrentUniverService } from '@univerjs/core';
+import { SelectionModel, SelectionController, ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
+import { RightMenuItem } from '@univerjs/ui-plugin-sheets';
 import { Clipboard } from '@univerjs/base-ui';
 // import { ClipboardInput } from '../UI/ClipboardInput';
 
 export abstract class Copy {
-    private _context: SheetContext;
+    // constructor(copyList: RightMenuProps[]) {
+    //     this._context = context;
+    //     const SheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
 
-    constructor(context: SheetContext, copyList: RightMenuProps[]) {
-        this._context = context;
-        const SheetPlugin = this._context.getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
-
-        // this._initRegisterComponent(componentList);
-        // SheetPlugin?.addRightMenu(copyList);
-    }
-
-    getContext() {
-        return this._context;
-    }
+    //     // this._initRegisterComponent(componentList);
+    //     // SheetPlugin?.addRightMenu(copyList);
+    // }
 
     copy(e: Event) {
         e.preventDefault();
@@ -25,92 +20,45 @@ export abstract class Copy {
 }
 
 export class UniverCopy extends Copy {
-    constructor(context: SheetContext) {
+    constructor(@IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @ISelectionManager private readonly _selectionManager: SelectionManager) {
         const copyList = [
             {
-                locale: 'rightClick.copy',
+                label: 'rightClick.copy',
                 onClick: () => this.copyTo(),
             },
             {
                 customLabel: {
                     name: RightMenuItem.name,
                     props: {
-                        locale: 'rightClick.copyAs',
+                        label: 'rightClick.copyAs',
                     },
                 },
                 children: [
                     {
-                        locale: ['Json', 'rightClick.firstLineTitle'],
+                        label: ['Json', 'rightClick.firstLineTitle'],
                         onClick: () => this.copyJsonHead(),
                     },
                     {
-                        locale: ['Json', 'rightClick.untitled'],
+                        label: ['Json', 'rightClick.untitled'],
                         onClick: () => this.copyJsonNoHead(),
                     },
                     {
-                        locale: ['rightClick.array1'],
+                        label: ['rightClick.array1'],
                         onClick: () => this.copyArray1(),
                     },
                     {
-                        locale: ['rightClick.array2'],
+                        label: ['rightClick.array2'],
                         onClick: () => this.copyArray2(),
                     },
-                    {
-                        // customLabel: {
-                        //     name: OPERATION_PLUGIN + ClipboardInput.name,
-                        //     props: {
-                        //         prefixLocale: 'rightClick.array3',
-                        //         placeholder1Locale: 'rightClick.row',
-                        //         suffixLocale: 'rightClick.column',
-                        //         placeholder2Locale: 'rightClick.column',
-                        //     },
-                        // },
-                        // locale: [
-                        //     'rightClick.array3',
-                        //     {
-                        //         type: 'input',
-                        //         min: 1,
-                        //         format: 'number',
-                        //         placeholder: 'rightClick.row',
-                        //         locale: 'rightClick.row',
-                        //         onKeyUp: (e: KeyboardEvent) => this.copyArrayMore(e),
-                        //     },
-                        //     '×',
-                        //     {
-                        //         type: 'input',
-                        //         format: 'number',
-                        //         min: 1,
-                        //         placeholder: 'rightClick.column',
-                        //         locale: 'rightClick.column',
-                        //         onKeyUp: (e: KeyboardEvent) => this.copyArrayMore(e),
-                        //     },
-                        // ],
-                        // onKeyUp: (...arg: any) => {
-                        //     if (arg[0].key !== 'Enter') return;
-                        //     arg[1].ref.hideSelect();
-                        //     arg[1].ref.getParent().hideSelect();
-                        // },
-                    },
-                    // {
-                    //     locale: ['rightClick.diagonal'],
-                    // },
-                    // {
-                    //     locale: ['rightClick.antiDiagonal'],
-                    // },
-                    // {
-                    //     locale: ['rightClick.diagonalOffset', { type: 'input', format: 'number' }, 'rightClick.column'],
-                    // },
-                    // {
-                    //     locale: ['rightClick.boolean'],
-                    // },
                 ],
             },
         ];
-        super(context, copyList);
+        // super(context, copyList);
+        super();
         // super(context, copyList, [ClipboardInput]);
     }
 
-    async copy(e: ClipboardEvent) {
+    override async copy(e: ClipboardEvent) {
         const table = this.getCopyContent();
         if (table) {
             Clipboard.write(
@@ -137,9 +85,9 @@ export class UniverCopy extends Copy {
         if (!Range) return;
         const { range, rangeData } = Range;
 
-        let arr = [];
+        const arr = [];
         if (rangeData.length === 1) {
-            let obj: IKeyValue = {};
+            const obj: IKeyValue = {};
             for (let i = 0; i < rangeData[0].length; i++) {
                 const value = range.getValues()[0][i]?.v;
                 if (typeof value === 'string' || typeof value === 'number') {
@@ -151,7 +99,7 @@ export class UniverCopy extends Copy {
             arr.push(obj);
         } else {
             for (let r = 1; r < rangeData.length; r++) {
-                let obj: IKeyValue = {};
+                const obj: IKeyValue = {};
                 for (let c = 0; c < rangeData[0].length; c++) {
                     const title = range.getValues()[0][c]?.v;
                     const value = range.getValues()[r][c]?.v;
@@ -174,9 +122,9 @@ export class UniverCopy extends Copy {
         if (!Range) return;
         const { range, rangeData } = Range;
 
-        let arr = [];
+        const arr = [];
         for (let r = 0; r < rangeData.length; r++) {
-            let obj: IKeyValue = {};
+            const obj: IKeyValue = {};
             for (let c = 0; c < rangeData[0].length; c++) {
                 const value = range.getValues()[r][c]?.v;
                 obj[Tools.chatAtABC(c + range.getRangeData().startColumn)] = value;
@@ -193,7 +141,7 @@ export class UniverCopy extends Copy {
         if (!Range) return;
         const { range, rangeData } = Range;
 
-        let arr = [];
+        const arr = [];
         for (let r = 0; r < rangeData.length; r++) {
             for (let c = 0; c < rangeData[0].length; c++) {
                 const value = range.getValues()[r][c]?.v;
@@ -210,7 +158,7 @@ export class UniverCopy extends Copy {
         if (!Range) return;
         const { range, rangeData } = Range;
 
-        let arr = [];
+        const arr = [];
         for (let r = 0; r < rangeData.length; r++) {
             for (let c = 0; c < rangeData[0].length; c++) {
                 const value = range.getValues()[r][c]?.v;
@@ -228,7 +176,7 @@ export class UniverCopy extends Copy {
         if (!Range) return;
         const { range, rangeData } = Range;
 
-        let arr = [];
+        const arr = [];
         for (let r = 0; r < rangeData.length; r++) {
             for (let c = 0; c < rangeData[0].length; c++) {
                 arr.push(rangeData[r][c]);
@@ -271,11 +219,11 @@ export class UniverCopy extends Copy {
             return;
         }
 
-        let arrLen = arr.length;
+        const arrLen = arr.length;
         let i = 0;
-        let ret = [];
+        const ret = [];
         for (let r = 0; r < +row; r++) {
-            let a = [];
+            const a = [];
             for (let c = 0; c < +column; c++) {
                 a.push(arr[i++]);
                 if (i >= arrLen) {
@@ -299,16 +247,16 @@ export class UniverCopy extends Copy {
 
         const rowManager = sheet.getRowManager().getRowData();
         const colManager = sheet.getColumnManager().getColumnData();
-        let rowIndexArr: number[] = [];
-        let colIndexArr: number[] = [];
+        const rowIndexArr: number[] = [];
+        const colIndexArr: number[] = [];
 
         for (let s = 0; s < selections.length; s++) {
-            let range = selections[s];
+            const range = selections[s];
 
-            let r1 = range.startRow;
-            let r2 = range.endRow;
-            let c1 = range.startColumn;
-            let c2 = range.endColumn;
+            const r1 = range.startRow;
+            const r2 = range.endRow;
+            const c1 = range.startColumn;
+            const c2 = range.endColumn;
 
             for (let copyR = r1; copyR <= r2; copyR++) {
                 const rowItem = rowManager.get(copyR);
@@ -338,13 +286,13 @@ export class UniverCopy extends Copy {
         let colGroup = '<colgroup>';
 
         for (let i = 0; i < rowIndexArr.length; i++) {
-            let r = rowIndexArr[i];
+            const r = rowIndexArr[i];
             cpData += '<tr>';
 
             for (let j = 0; j < colIndexArr.length; j++) {
-                let c = colIndexArr[j];
+                const c = colIndexArr[j];
 
-                let cellValue = sheet.getRange(r, c).getValue();
+                const cellValue = sheet.getRange(r, c).getValue();
                 let column = '';
                 let style = '';
                 let span = '';
@@ -373,7 +321,7 @@ export class UniverCopy extends Copy {
                 // }
 
                 if (cellValue && cellValue.s) {
-                    const cellStyle = this.getContext().getWorkBook().getStyles().getStyleByCell(cellValue);
+                    const cellStyle = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getStyles().getStyleByCell(cellValue);
                     // const cellStyle = this.getContext().getWorkBook().getStyles().get(cellValue.s);
                     if (cellStyle) {
                         style += handleStyleToString(cellStyle);
@@ -383,8 +331,8 @@ export class UniverCopy extends Copy {
                 const cellInfo = spreadsheet?.getCellByIndex(r, c);
                 if (cellInfo?.isMerged || (!cellInfo?.isMerged && cellInfo?.isMergedMainCell)) {
                     if (cellInfo.isMergedMainCell) {
-                        span = `rowSpan="${cellInfo.mergeInfo.endRow - cellInfo.mergeInfo.startRow + 1}" colSpan="${
-                            cellInfo.mergeInfo.endColumn - cellInfo.mergeInfo.startColumn + 1
+                        // eslint-disable-next-line prettier/prettier
+                        span = `rowSpan="${cellInfo.mergeInfo.endRow - cellInfo.mergeInfo.startRow + 1}" colSpan="${cellInfo.mergeInfo.endColumn - cellInfo.mergeInfo.startColumn + 1
                         }"`;
                     } else {
                         continue;
@@ -392,7 +340,7 @@ export class UniverCopy extends Copy {
                 }
 
                 if (style.includes('data-rotate')) {
-                    let rotate = style.split(';').find((item) => item.includes('data-rotate'));
+                    const rotate = style.split(';').find((item) => item.includes('data-rotate'));
                     const match = rotate?.match(/\d+/g);
                     let angle = 0;
                     let ver = 0;
@@ -429,16 +377,14 @@ export class UniverCopy extends Copy {
             cpData += '</tr>';
         }
         colGroup += '</colgroup>';
-        let cpTable = `<table data-type="universheet_copy_action_table">${colGroup}${cpData}</table>`;
+        const cpTable = `<table data-type="universheet_copy_action_table">${colGroup}${cpData}</table>`;
         return cpTable;
     }
 
     private _getSheetInfo() {
-        const sheet = this.getContext().getWorkBook().getActiveSheet();
-        const SheetPlugin = this.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET);
-        const spreadsheet = SheetPlugin?.getMainComponent();
-        const controls = SheetPlugin?.getSelectionManager().getCurrentControls();
-        const selections: any = controls?.map((control: SelectionControl) => {
+        const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+        const controls = this._selectionManager.getCurrentControls();
+        const selections: any = controls?.map((control: SelectionController) => {
             const model: SelectionModel = control.model;
             return {
                 startRow: model.startRow,
@@ -447,7 +393,7 @@ export class UniverCopy extends Copy {
                 endColumn: model.endColumn,
             };
         });
-        return { sheet, spreadsheet, selections };
+        return { sheet, selections };
     }
 
     private _getRangeInfo() {

@@ -1,4 +1,4 @@
-import { $$, getRefElement } from '@univerjs/base-ui';
+import { $$, ComponentManager, SlotManager, getRefElement } from '@univerjs/base-ui';
 import { KeyCode, ObserverManager } from '@univerjs/core';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
@@ -19,40 +19,49 @@ export class FormulaPromptController {
 
     constructor(
         @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
+        @Inject(ComponentManager) private _componentManager: ComponentManager,
+        @Inject(SlotManager) private readonly _slotManager: SlotManager
     ) {
-        this._initRegisterComponent();
         this._initialize();
     }
 
-    private _initRegisterComponent() {
-        this._sheetContainerUIController.getMainSlotController().addSlot(
-            FORMULA_PLUGIN_NAME + SearchFunction.name,
-            {
-                component: SearchFunction,
-            },
-            () => {
-                const searchFunction = this._sheetContainerUIController.getMainSlotController().getSlot(FORMULA_PLUGIN_NAME + SearchFunction.name);
-                this._searchFunction = searchFunction;
-            }
-        );
+    getSearchComponent(ref: SearchFunction) {
+        this._searchFunction = ref;
+    }
 
-        this._sheetContainerUIController.getMainSlotController().addSlot(
-            FORMULA_PLUGIN_NAME + HelpFunction.name,
-            {
-                component: HelpFunction,
-            },
-            () => {
-                const helpFunction = this._sheetContainerUIController.getMainSlotController().getSlot(FORMULA_PLUGIN_NAME + HelpFunction.name);
-                this._helpFunction = helpFunction;
-            }
-        );
+    getHelpComponent(ref: HelpFunction) {
+        this._helpFunction = ref;
     }
 
     private _initialize() {
+        this._initRegisterComponent();
         this._mount();
         this._onRichTextKeyDownObservable();
         this._onRichTextKeyUpObservable();
+    }
+
+    private _initRegisterComponent() {
+        this._componentManager.register(SearchFunction.name, SearchFunction);
+        this._slotManager.setSlotComponent('main', {
+            name: FORMULA_PLUGIN_NAME + SearchFunction.name,
+            component: {
+                name: SearchFunction.name,
+                props: {
+                    getComponent: this.getSearchComponent.bind(this),
+                },
+            },
+        });
+        this._componentManager.register(HelpFunction.name, HelpFunction);
+        this._slotManager.setSlotComponent('main', {
+            name: FORMULA_PLUGIN_NAME + HelpFunction.name,
+            component: {
+                name: HelpFunction.name,
+                props: {
+                    getComponent: this.getHelpComponent.bind(this),
+                },
+            },
+        });
     }
 
     private _mount() {
@@ -69,10 +78,10 @@ export class FormulaPromptController {
 
     private _onRichTextKeyDownObservable() {
         this._observerManager.getObserver<KeyboardEvent>('onRichTextKeyDownObservable')?.add((event: KeyboardEvent) => {
-            let ctrlKey = event.ctrlKey;
-            let altKey = event.altKey;
-            let shiftKey = event.shiftKey;
-            let kcode = event.keyCode;
+            const ctrlKey = event.ctrlKey;
+            const altKey = event.altKey;
+            const shiftKey = event.shiftKey;
+            const kcode = event.keyCode;
             if (
                 !(
                     (kcode >= 112 && kcode <= 123) ||
@@ -96,7 +105,7 @@ export class FormulaPromptController {
 
     private _onRichTextKeyUpObservable() {
         this._observerManager.getObserver<KeyboardEvent>('onRichTextKeyUpObservable')?.add((event: KeyboardEvent) => {
-            let kcode = event.keyCode;
+            const kcode = event.keyCode;
             if (kcode === KeyCode.ENTER) {
                 this._searchFunction.updateState(false);
                 this._helpFunction.updateState(false);
@@ -117,9 +126,9 @@ export class FormulaPromptController {
             ) {
                 this.cellInputHandler.searchFunction(this.richTextEditEle);
                 const formula = this.cellInputHandler.getFormula();
-                let helpFormula = this.cellInputHandler.getHelpFormula();
-                let height = parseInt(this.richTextEle.style.minHeight);
-                let width = parseInt(this.richTextEle.style.minWidth);
+                const helpFormula = this.cellInputHandler.getHelpFormula();
+                const height = parseInt(this.richTextEle.style.minHeight);
+                const width = parseInt(this.richTextEle.style.minWidth);
                 let left = parseInt(this.richTextEle.style.left);
                 let top = parseInt(this.richTextEle.style.top) + height;
                 const sheetContainer = getRefElement(this._sheetContainerUIController.getContentRef());

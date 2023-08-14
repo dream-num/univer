@@ -1,24 +1,20 @@
-import { IKeyValue, migrate, Tools } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
+import { ICurrentUniverService, IDCurrentUniverService, IKeyValue, migrate, Tools } from '@univerjs/core';
 import { BaseComponentRender } from '@univerjs/base-ui';
-import { IToolbarItemProps, SheetUIPlugin, SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
+import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 
 import * as LuckyExcel from 'luckyexcel';
 import { IMPORT_XLSX_PLUGIN_NAME } from '../Basics/Const';
-import { ImportXlsxPlugin } from '../ImportXlsxPlugin';
 
 export class ImportXlsxController {
-    protected _sheetUIPlugin: SheetUIPlugin;
-
     protected _toolButton: IToolbarItemProps;
-
-    protected _plugin: ImportXlsxPlugin;
 
     protected _render: BaseComponentRender;
 
-    constructor(plugin: ImportXlsxPlugin) {
-        this._plugin = plugin;
-        this._sheetUIPlugin = this._plugin.getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
-
+    constructor(
+        @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
+        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+    ) {
         this._toolButton = {
             name: IMPORT_XLSX_PLUGIN_NAME,
             toolbarType: 1,
@@ -29,7 +25,7 @@ export class ImportXlsxController {
                 this.upload();
             },
         };
-        this._sheetUIPlugin.addToolButton(this._toolButton);
+        this._sheetContainerUIController.getToolbarController().addToolbarConfig(this._toolButton);
     }
 
     upload() {
@@ -51,9 +47,9 @@ export class ImportXlsxController {
             return;
         }
 
-        let name = files[0].name;
-        let suffixArr = name.split('.');
-        let suffix = suffixArr[suffixArr.length - 1];
+        const name = files[0].name;
+        const suffixArr = name.split('.');
+        const suffix = suffixArr[suffixArr.length - 1];
         if (suffix !== 'xlsx') {
             console.error('Currently only supports the import of xlsx files');
             return;
@@ -79,7 +75,7 @@ export class ImportXlsxController {
                 return console.error('No content');
             }
 
-            const workbook = this._plugin.getContext().getWorkBook();
+            const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
 
             const order = Tools.deepClone(workbook.getConfig().sheetOrder);
 

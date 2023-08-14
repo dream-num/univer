@@ -1,5 +1,6 @@
 import { CommandManager, IRangeData, LocaleService, ObjectMatrixPrimitiveType, Plugin, PluginType, SheetContext } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { NUMFMT_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { install, NumfmtPluginObserve } from './Basics/Observer';
 import en from './Locale/en';
@@ -26,13 +27,16 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
         @Inject(CommandManager) private readonly _commandManager: CommandManager
     ) {
         super(NUMFMT_PLUGIN_NAME);
-        this.initializeDependencies(_injector);
+        const sheetContainerUIController = this._injector.get(SheetContainerUIController);
+        sheetContainerUIController.UIDidMount(() => {
+            this.initializeDependencies(_injector);
+            this.registerExtension();
+        });
     }
 
     override onMounted(): void {
         install(this);
         this._localeService.getLocale().load({ en, zh });
-        this._numfmtActionExtensionFactory = new NumfmtActionExtensionFactory(this);
         this._numfmtController = this._injector.get(NumfmtController);
         this._numfmtModalController = this._injector.get(NumfmtModalController);
         const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
@@ -43,6 +47,12 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
         super.onDestroy();
         const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
         actionRegister.delete(this._numfmtActionExtensionFactory);
+    }
+
+    registerExtension(): void {
+        const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
+        this._numfmtActionExtensionFactory = new NumfmtActionExtensionFactory(this, this._injector);
+        actionRegister.add(this._numfmtActionExtensionFactory);
     }
 
     getNumfmtBySheetIdConfig(sheetId: string): ObjectMatrixPrimitiveType<string> {

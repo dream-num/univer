@@ -137,6 +137,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
     }
 
     getSlot(name: string) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return this._appUIController.getSheetContainerController().getMainSlotController().getSlot(name);
     }
 

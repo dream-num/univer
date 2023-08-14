@@ -88,7 +88,7 @@ export class FindModal extends Component<IProps, IState> {
         ];
     }
 
-    componentDidMount() {
+    override componentDidMount() {
         this.props.getComponent?.(this);
     }
 
@@ -100,7 +100,7 @@ export class FindModal extends Component<IProps, IState> {
 
     // 国际化checkbox
     getMatchGroup() {
-        const arr = JSON.parse(JSON.stringify(this._matchGroup));
+        const arr: BaseCheckboxGroupOptions[] = JSON.parse(JSON.stringify(this._matchGroup));
         arr.forEach((element: BaseCheckboxGroupOptions) => {
             element.label = this.getLocale(element.label as string);
         });
@@ -109,7 +109,7 @@ export class FindModal extends Component<IProps, IState> {
 
     // 国际化Select
     getSelect() {
-        const arr = JSON.parse(JSON.stringify(this._select));
+        const arr: BaseItemProps[] = JSON.parse(JSON.stringify(this._select));
         arr.forEach((element: BaseCheckboxGroupOptions) => {
             element.label = this.getLocale(element.label as string);
         });

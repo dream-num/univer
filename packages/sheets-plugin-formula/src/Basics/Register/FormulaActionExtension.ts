@@ -19,6 +19,7 @@ import {
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { FormulaDataType, FormulaEngineService } from '@univerjs/base-formula-engine';
+import { ISetFormulaRangeActionData } from '../../Model/Action/SetFormulaRangeDataAction';
 import { FormulaPlugin } from '../../FormulaPlugin';
 import { ACTION_NAMES as PLUGIN_ACTION_NAMES } from '../Enum';
 import { FormulaController } from '../../Controller/FormulaController';
@@ -150,10 +151,11 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
                 });
             });
 
-            const setFormulaDataAction = {
+            const setFormulaDataAction: ISetFormulaRangeActionData = {
                 actionName: PLUGIN_ACTION_NAMES.SET_FORMULA_RANGE_DATA_ACTION,
                 sheetId: actionDataList[0].sheetId, // Any sheetId can be passed in, it has no practical effect
                 formulaData,
+                injector: this._sheetInjector,
             };
             const workBook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
             const commandManager = this._commandManager;

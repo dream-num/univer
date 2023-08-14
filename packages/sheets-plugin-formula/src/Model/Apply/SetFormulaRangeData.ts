@@ -1,10 +1,9 @@
 import { Tools, Workbook } from '@univerjs/core';
 import { FormulaDataType } from '@univerjs/base-formula-engine';
-import { FORMULA_PLUGIN_NAME } from '../../Basics';
-import { FormulaPlugin } from '../../FormulaPlugin';
+import { FormulaController } from '../../Controller/FormulaController';
 
-export function SetFormulaRangeData(workbook: Workbook, formulaData: FormulaDataType): FormulaDataType {
-    const formulaDataModel = workbook.getContext().getPluginManager().getRequirePluginByName<FormulaPlugin>(FORMULA_PLUGIN_NAME).getFormulaController().getDataModel();
+export function SetFormulaRangeData(workbook: Workbook, formulaData: FormulaDataType, _formulaController: FormulaController): FormulaDataType {
+    const formulaDataModel = _formulaController.getDataModel();
 
     // store old result
     const result = Tools.deepClone(formulaDataModel.getFormulaData());
@@ -12,5 +11,5 @@ export function SetFormulaRangeData(workbook: Workbook, formulaData: FormulaData
     // update
     formulaDataModel.setFormulaData(formulaData);
 
-    return result;
+    return result as FormulaDataType;
 }

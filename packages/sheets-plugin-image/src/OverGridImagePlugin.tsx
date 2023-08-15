@@ -1,86 +1,10 @@
-import { Command, Plugin, Nullable, Worksheet, UniverSheet } from '@univerjs/core';
-import { IPictureProps } from '@univerjs/base-render';
-import { ACTION_NAMES } from './Const';
-import { ImagePluginObserve, install, uninstall } from './Basics/Observer';
-import { OVER_GRID_IMAGE_PLUGIN_NAME } from './Const/PLUGIN_NAME';
+import { Plugin, PluginType, CommandManager, LocaleService } from '@univerjs/core';
+import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { OverImageRender } from './View/OverImageRender';
-import './Command/RegisterAction';
-import { OverGridImageController } from './Controller/OverGridImageController';
-
-export enum OverGridImageBorderType {
-    DASHED,
-    SOLID,
-    DOUBLE,
-}
-
-export interface OverGridImageProperty extends IPictureProps {
-    id: string;
-    sheetId: string;
-    radius: number;
-    url: string;
-    borderType: OverGridImageBorderType;
-    width: number;
-    height: number;
-    row: number;
-    column: number;
-    borderColor: string;
-    borderWidth: number;
-}
-
-export interface IOverGridImagePluginConfig {
-    value: OverGridImageProperty[];
-}
-
-export class OverGridImage {
-    protected readonly _property: OverGridImageProperty;
-
-    protected readonly _plugin: Plugin;
-
-    constructor(plugin: Plugin, property: OverGridImageProperty) {
-        this._plugin = plugin;
-        this._property = property;
-    }
-
-    getAltTextDescription(): string {
-        return '';
-    }
-
-    getHeight(): number {
-        return this._property.height;
-    }
-
-    getAltTextTitle(): string {
-        return '';
-    }
-
-    getProperty(): OverGridImageProperty {
-        return this._property;
-    }
-
-    getPlugin(): Plugin {
-        return this._plugin;
-    }
-
-    getSheet(): Nullable<Worksheet> {
-        return this.getPlugin().getUniver().getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(this._property.sheetId);
-    }
-
-    setHeight(height: number): void {
-        const manager = this.getPlugin().getContext().getCommandManager();
-        const workbook = this.getPlugin().getUniver().getCurrentUniverSheetInstance().getWorkBook();
-        const configure = {
-            actionName: ACTION_NAMES.SET_IMAGE_TYPE_ACTION,
-            sheetId: this._property.sheetId,
-        };
-        const command = new Command(
-            {
-                WorkBookUnit: workbook,
-            },
-            configure
-        );
-        manager.invoke(command);
-    }
-}
+import { OVER_GRID_IMAGE_PLUGIN_NAME } from './Const/PLUGIN_NAME';
+import { OverGridImageController, CellImageController } from './Controller';
+import { IOverGridImagePluginConfig } from './Interfaces';
 
 /**
  * TODO: 考虑加入单元格图片的情况，
@@ -88,34 +12,26 @@ export class OverGridImage {
  * 如果工具栏的“插入单元格图片”“插入浮动图片”是在一个按钮的下拉列表里，那么UI部分是重叠的，所以这里应该叫 ImagePlugin，下面再细分 OverGridImage 和 CellImage
  *
  */
-export class OverGridImagePlugin extends Plugin<ImagePluginObserve> {
-    protected _config: IOverGridImagePluginConfig;
-
-    protected _render: OverImageRender;
+export class ImagePlugin extends Plugin {
+    static override type = PluginType.Sheet;
 
     protected _overGridImageController: OverGridImageController;
 
-    constructor(config: IOverGridImagePluginConfig = { value: [] }) {
+    protected _overImageRender: OverImageRender;
+
+    protected _cellImageController: CellImageController;
+
+    constructor(
+        private _config: IOverGridImagePluginConfig,
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(Inject) override readonly _injector: Injector,
+        @Inject(CommandManager) private readonly _commandManager: CommandManager
+    ) {
         super(OVER_GRID_IMAGE_PLUGIN_NAME);
-        this._config = config;
-    }
-
-    static create(config: IOverGridImagePluginConfig): OverGridImagePlugin {
-        return new OverGridImagePlugin(config);
-    }
-
-    installTo(univerSheetInstance: UniverSheet): void {
-        univerSheetInstance.installPlugin(this);
-    }
-
-    onMounted(): void {
-        install(this);
-        this._overGridImageController = new OverGridImageController(this);
-        this._render = new OverImageRender(this);
-    }
-
-    onDestroy(): void {
-        uninstall(this);
+        const sheetContainerUIController = this._injector.get(SheetContainerUIController);
+        sheetContainerUIController.UIDidMount(() => {
+            this.initializeDependencies(_injector);
+        });
     }
 
     hideOverImagePanel(): void {
@@ -128,11 +44,13 @@ export class OverGridImagePlugin extends Plugin<ImagePluginObserve> {
         // plugin.showSiderByName(OVER_GRID_IMAGE_PLUGIN_NAME, true);
     }
 
-    getConfig(): IOverGridImagePluginConfig {
-        return this._config;
-    }
-
-    getOverGridImages(): OverGridImage[] {
-        return this._config.value.map((element) => new OverGridImage(this, element));
+    private initializeDependencies(sheetInjector: Injector) {
+        const dependencies: Dependency[] = [[OverGridImageController], [CellImageController], [OverImageRender]];
+        dependencies.forEach((d) => {
+            sheetInjector.add(d);
+        });
+        this._cellImageController = sheetInjector.createInstance(CellImageController);
+        this._overImageRender = sheetInjector.createInstance(OverImageRender);
+        this._overGridImageController = sheetInjector.createInstance(OverGridImageController);
     }
 }

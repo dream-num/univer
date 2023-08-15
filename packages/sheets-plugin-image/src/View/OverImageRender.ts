@@ -1,7 +1,6 @@
-import { RenderEngine, EVENT_TYPE, Scene } from '@univerjs/base-render';
-import { PLUGIN_NAMES } from '@univerjs/core';
-import { SHEET_UI_PLUGIN_NAME, SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
-import { OverGridImagePlugin, OverGridImageProperty } from '../OverGridImagePlugin';
+import { RenderEngine, EVENT_TYPE, Scene, IRenderingEngine } from '@univerjs/base-render';
+import { Inject } from '@wendellhu/redi';
+import { ObserverManager } from '@univerjs/core';
 import { OverImageShape } from './OverImageShape';
 
 export class OverImageRender {
@@ -9,16 +8,14 @@ export class OverImageRender {
 
     private _mainScene: Scene;
 
-    private _plugin: OverGridImagePlugin;
-
     private _activeShape: OverImageShape;
 
-    constructor(plugin: OverGridImagePlugin) {
-        const sheetPlugin = plugin.getUniver().getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
-        const engine = sheetPlugin.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
-        this._plugin = plugin;
-        this._mainScene = engine.getScene('mainScene')!;
-        plugin.getObserver('onAddImage')!.add((eventData: OverGridImageProperty) => {
+    constructor(@Inject(IRenderingEngine) renderEngine: RenderEngine, @Inject(ObserverManager) observerManager: ObserverManager) {
+        this._mainScene = renderEngine.getEngine().getScene('mainScene') as Scene;
+        if (this._mainScene == null) {
+            throw new Error('this._mainScene');
+        }
+        observerManager.getObserver('onAddImage').add((eventData: OverGridImageProperty) => {
             eventData.autoWidth = true;
             eventData.autoHeight = true;
             this.addOverImage(eventData);
@@ -38,8 +35,8 @@ export class OverImageRender {
     removeOverImage(id: string): void {
         const layer = this._mainScene.getLayer(OverImageRender.LAYER_Z_INDEX);
         if (layer != null) {
-            let readyRemove = [];
-            let layerObject = layer.getObjects();
+            const readyRemove = [];
+            const layerObject = layer.getObjects();
             for (let i = 0; i < layerObject.length; i++) {
                 const shape = layerObject[i] as OverImageShape;
                 if (shape.getProperty().id === id) {

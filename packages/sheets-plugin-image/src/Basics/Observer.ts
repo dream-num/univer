@@ -1,4 +1,4 @@
-import { Observable } from '@univerjs/core';
+import { Observable, ObserverManager } from '@univerjs/core';
 import { OverGridImagePlugin, OverGridImageProperty } from '../OverGridImagePlugin';
 
 export type ImagePluginObserve = {
@@ -17,7 +17,7 @@ export function uninstall(plugin: OverGridImagePlugin) {
     plugin.deleteObserve('onActiveImage');
 }
 
-export function install(plugin: OverGridImagePlugin) {
+export function install(plugin: ObserverManager) {
     plugin.pushToObserve('onChangeImageSize');
     plugin.pushToObserve('onAddImage');
     plugin.pushToObserve('onRemoveImage');

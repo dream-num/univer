@@ -3,7 +3,6 @@
 import {
     IDocumentData,
     IKeyValue,
-    ContextBase,
     ITransformState,
     IStyleBase,
     BooleanNumber,
@@ -12,6 +11,7 @@ import {
     IBorderData,
     Nullable,
     DocumentModelSimple,
+    LocaleService,
 } from '@univerjs/core';
 import { Canvas } from '../Canvas';
 import { BaseObject } from '../BaseObject';
@@ -37,8 +37,6 @@ export const RICHTEXT_OBJECT_ARRAY = ['text', 'richText'];
 
 export class RichText extends BaseObject {
     private _documentData: IDocumentData;
-
-    private _context: ContextBase;
 
     private _allowCache: boolean = false;
 
@@ -68,7 +66,7 @@ export class RichText extends BaseObject {
 
     private _cl?: IColorStyle;
 
-    constructor(context: ContextBase, key?: string, props?: IRichTextProps) {
+    constructor(private _localeService: LocaleService, key?: string, props?: IRichTextProps) {
         super(key);
         if (props?.richText) {
             this._documentData = props.richText;
@@ -94,11 +92,9 @@ export class RichText extends BaseObject {
             });
         }
 
-        this._context = context;
-
         const docModel = new DocumentModelSimple(this._documentData);
 
-        this._documentSkeleton = DocumentSkeleton.create(docModel, this._context);
+        this._documentSkeleton = DocumentSkeleton.create(docModel, this._localeService);
 
         this._documents = new Documents(`${this.oKey}_DOCUMENTS`, this._documentSkeleton, {
             pageMarginLeft: 0,
@@ -196,10 +192,6 @@ export class RichText extends BaseObject {
         mainCtx.restore();
         this.makeDirty(false);
         return this;
-    }
-
-    getContext() {
-        return this._context;
     }
 
     override toJson() {

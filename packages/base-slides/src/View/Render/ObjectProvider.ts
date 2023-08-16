@@ -1,18 +1,14 @@
 import { BaseObject, Scene } from '@univerjs/base-render';
 import { IPageElement, sortRules } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from './Adaptor';
 import './Adaptors';
-import { Inject, Injector } from '@wendellhu/redi';
 
 export class ObjectProvider {
     private _adaptors: ObjectAdaptor[] = [];
 
     constructor(@Inject(Injector) private readonly _injector: Injector) {
         this._adaptorLoader();
-    }
-
-    static create() {
-        return new ObjectProvider();
     }
 
     convertToRenderObjects(pageElements: { [elementId: string]: IPageElement }, mainScene: Scene) {

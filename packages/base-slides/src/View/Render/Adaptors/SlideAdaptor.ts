@@ -77,7 +77,7 @@ export class SlideAdaptor extends ObjectAdaptor {
     }
 
     private _createScene(pageId: string, parent: Engine | Slide, page: ISlidePage, mainScene: Scene, model: SlideModel, context?: ContextBase) {
-        let { width, height } = parent;
+        const { width, height } = parent;
 
         const scene = new Scene(pageId, parent, {
             width,

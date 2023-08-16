@@ -1,6 +1,6 @@
 import { Engine, EVENT_TYPE, IRenderingEngine, IWheelEvent, Rect, Scene, ScrollBar, Slide, Viewport } from '@univerjs/base-render';
 import { EventState, getColorStyle, IColorStyle, ICurrentUniverService, ISlidePage, Nullable, ObserverManager } from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import { ObjectProvider } from './ObjectProvider';
 
 export enum SLIDE_KEY {
@@ -312,10 +312,6 @@ export class CanvasView {
     }
 
     private _initializeDependencies(slideInjector: Injector) {
-        const dependencies: Dependency[] = [[ObjectProvider]];
-
-        dependencies.forEach((d) => {
-            slideInjector.add(d);
-        });
+        this._ObjectProvider = slideInjector.createInstance(ObjectProvider);
     }
 }

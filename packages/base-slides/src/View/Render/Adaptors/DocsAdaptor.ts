@@ -14,7 +14,7 @@ import {
     Viewport,
 } from '@univerjs/base-render';
 import { CommandManager, DocumentModel, EventState, IPageElement, LocaleService, PageElementType } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 
 export enum DOCS_VIEW_KEY {
@@ -25,22 +25,24 @@ export enum DOCS_VIEW_KEY {
 }
 
 export class DocsAdaptor extends ObjectAdaptor {
-    zIndex = 5;
+    override zIndex = 5;
 
-    viewKey = PageElementType.DOCUMENT;
+    override viewKey = PageElementType.DOCUMENT;
 
     private _liquid = new Liquid();
 
-    constructor(@Inject(CommandManager) private readonly _commandManager: CommandManager, @Inject(LocaleService) private readonly _localeService: LocaleService) {}
+    constructor(@Inject(CommandManager) private readonly _commandManager: CommandManager, @Inject(LocaleService) private readonly _localeService: LocaleService) {
+        super();
+    }
 
-    check(type: PageElementType) {
+    override check(type: PageElementType) {
         if (type !== this.viewKey) {
             return;
         }
         return this;
     }
 
-    convert(pageElement: IPageElement, mainScene: Scene) {
+    override convert(pageElement: IPageElement, mainScene: Scene) {
         const { id, zIndex, left = 0, top = 0, width, height, angle, scaleX, scaleY, skewX, skewY, flipX, flipY, title, description, document: documentData } = pageElement;
         if (documentData == null) {
             return;

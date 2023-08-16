@@ -10,7 +10,6 @@ export class OverGridImageController {
     protected _toolButton: IToolbarItemProps;
 
     constructor(@Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController) {
-        debugger;
         this._toolButton = {
             name: OVER_GRID_IMAGE_PLUGIN_NAME,
             label: '图片',

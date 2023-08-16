@@ -1,7 +1,8 @@
-import { RenderEngine, EVENT_TYPE, Scene, IRenderingEngine } from '@univerjs/base-render';
-import { Inject } from '@wendellhu/redi';
+import { EVENT_TYPE, Scene, IRenderingEngine } from '@univerjs/base-render';
 import { ObserverManager } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 import { OverImageShape } from './OverImageShape';
+import { IOverGridImageProperty } from '../Interfaces';
 
 export class OverImageRender {
     static LAYER_Z_INDEX: number = 1000;
@@ -10,24 +11,25 @@ export class OverImageRender {
 
     private _activeShape: OverImageShape;
 
-    constructor(@Inject(IRenderingEngine) renderEngine: RenderEngine, @Inject(ObserverManager) observerManager: ObserverManager) {
-        this._mainScene = renderEngine.getEngine().getScene('mainScene') as Scene;
+    constructor(@Inject(Injector) readonly _injector: Injector, @Inject(ObserverManager) private _observerManager: ObserverManager) {
+        const engine = _injector.get(IRenderingEngine);
+        this._mainScene = engine.getScene('mainScene') as Scene;
         if (this._mainScene == null) {
             throw new Error('this._mainScene');
         }
-        observerManager.getObserver('onAddImage').add((eventData: OverGridImageProperty) => {
+        _observerManager.getObserver<IOverGridImageProperty>('onAddImage')!.add((eventData) => {
             eventData.autoWidth = true;
             eventData.autoHeight = true;
             this.addOverImage(eventData);
         });
     }
 
-    addOverImage(property: OverGridImageProperty): void {
+    addOverImage(property: IOverGridImageProperty): void {
         const shape = new OverImageShape(property);
         shape.on(EVENT_TYPE.PointerDown, () => {
             this._activeShape = shape;
             this._plugin.showOverImagePanel();
-            this._plugin.getObserver('onActiveImage')!.notifyObservers(shape.getProperty());
+            this._observerManager.getObserver('onActiveImage')!.notifyObservers(shape.getProperty());
         });
         this._mainScene.addObject(shape, OverImageRender.LAYER_Z_INDEX);
     }

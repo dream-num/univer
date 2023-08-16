@@ -1,8 +1,10 @@
 import { Plugin, PluginType, CommandManager, LocaleService } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import { uninstall } from '@univerjs/base-sheets';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { OverImageRender } from './View/OverImageRender';
 import { OVER_GRID_IMAGE_PLUGIN_NAME } from './Const/PLUGIN_NAME';
+import { install } from './Basics/Observer';
 import { OverGridImageController, CellImageController } from './Controller';
 import { IOverGridImagePluginConfig } from './Interfaces';
 
@@ -23,15 +25,23 @@ export class ImagePlugin extends Plugin {
 
     constructor(
         private _config: IOverGridImagePluginConfig,
+        @Inject(Injector) override readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(Inject) override readonly _injector: Injector,
         @Inject(CommandManager) private readonly _commandManager: CommandManager
     ) {
         super(OVER_GRID_IMAGE_PLUGIN_NAME);
+    }
+
+    override onMounted(): void {
+        install(this);
         const sheetContainerUIController = this._injector.get(SheetContainerUIController);
         sheetContainerUIController.UIDidMount(() => {
-            this.initializeDependencies(_injector);
+            this.initializeDependencies(this._injector);
         });
+    }
+
+    override onDestroy(): void {
+        uninstall(this);
     }
 
     hideOverImagePanel(): void {
@@ -49,8 +59,8 @@ export class ImagePlugin extends Plugin {
         dependencies.forEach((d) => {
             sheetInjector.add(d);
         });
-        this._cellImageController = sheetInjector.createInstance(CellImageController);
         this._overImageRender = sheetInjector.createInstance(OverImageRender);
+        this._cellImageController = sheetInjector.createInstance(CellImageController);
         this._overGridImageController = sheetInjector.createInstance(OverGridImageController);
     }
 }

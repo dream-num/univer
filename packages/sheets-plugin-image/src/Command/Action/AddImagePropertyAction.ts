@@ -1,9 +1,9 @@
 import { SheetActionBase, ActionObservers, ISheetActionData, Workbook } from '@univerjs/core';
 import { ACTION_NAMES } from '../../Const';
-import { OverGridImageBorderType, OverGridImagePlugin } from '../../OverGridImagePlugin';
 import { AddImageProperty } from '../../Apply/AddImageProperty';
-import { RemoveImageProperty } from '../../Apply/RemoveImageProperty';
 import { OVER_GRID_IMAGE_PLUGIN_NAME } from '../../Const/PLUGIN_NAME';
+import { OverGridImageBorderType } from '../../Interfaces';
+import { RemoveImageProperty } from '../../Apply/RemoveImageProperty';
 
 export interface IAddImageProperty extends ISheetActionData {
     id?: string;
@@ -40,8 +40,6 @@ export class AddImagePropertyAction extends SheetActionBase<IAddImageProperty, I
 
     do(): string {
         const worksheet = this.getWorkSheet();
-        const context = worksheet.getContext();
-        const manager = context.getPluginManager();
         const plugin = manager.getPluginByName(OVER_GRID_IMAGE_PLUGIN_NAME) as OverGridImagePlugin;
         return AddImageProperty(plugin, {
             id: this._doActionData.id!,
@@ -64,8 +62,6 @@ export class AddImagePropertyAction extends SheetActionBase<IAddImageProperty, I
 
     undo(): void {
         const worksheet = this.getWorkSheet();
-        const context = worksheet.getContext();
-        const manager = context.getPluginManager();
         const plugin = manager.getPluginByName(OVER_GRID_IMAGE_PLUGIN_NAME) as OverGridImagePlugin;
         RemoveImageProperty(plugin, this._oldActionData.id!);
     }

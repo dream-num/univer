@@ -4,7 +4,7 @@ import { NormalType } from '../../Enum/NormalType';
 import { OVER_GRID_IMAGE_PLUGIN_NAME } from '../../Const/PLUGIN_NAME';
 
 import Style from './ImagePanelUI.module.less';
-import { OverGridImagePlugin } from '../../OverGridImagePlugin';
+import { OverGridImagePlugin } from '../../ImagePlugin';
 
 export interface ImagePanelUIProps {
     normal: NormalType;

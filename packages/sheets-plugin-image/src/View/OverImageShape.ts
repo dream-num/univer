@@ -1,10 +1,10 @@
 import { Picture } from '@univerjs/base-render';
-import { OverGridImageBorderType, OverGridImageProperty } from '../OverGridImagePlugin';
+import { OverGridImageBorderType, IOverGridImageProperty } from '../Interfaces';
 
 export class OverImageShape extends Picture {
-    protected _property: OverGridImageProperty;
+    protected _property: IOverGridImageProperty;
 
-    constructor(property: OverGridImageProperty) {
+    constructor(property: IOverGridImageProperty) {
         super(property.id, property);
         this._property = property;
     }
@@ -69,7 +69,7 @@ export class OverImageShape extends Picture {
         ctx.stroke();
     }
 
-    static drawWith(ctx: CanvasRenderingContext2D, shape: OverImageShape): void {
+    static override drawWith(ctx: CanvasRenderingContext2D, shape: OverImageShape): void {
         const { borderType } = shape.getProperty();
         switch (borderType) {
             case OverGridImageBorderType.SOLID: {
@@ -87,11 +87,11 @@ export class OverImageShape extends Picture {
         }
     }
 
-    getProperty(): OverGridImageProperty {
+    getProperty(): IOverGridImageProperty {
         return this._property;
     }
 
-    protected _draw(ctx: CanvasRenderingContext2D) {
+    protected override _draw(ctx: CanvasRenderingContext2D) {
         OverImageShape.drawWith(ctx, this);
         super._draw(ctx);
     }

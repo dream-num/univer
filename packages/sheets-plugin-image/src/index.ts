@@ -1,1 +1,1 @@
-export { OverGridImagePlugin } from './OverGridImagePlugin';
+export { ImagePlugin } from './ImagePlugin';

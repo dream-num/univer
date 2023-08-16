@@ -8,6 +8,7 @@ import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
 import { FindPlugin } from '@univerjs/sheets-plugin-find';
 import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
 import { OperationPlugin } from '@univerjs/sheets-plugin-operation';
+import { ImagePlugin } from '@univerjs/sheets-plugin-image';
 
 // TODO: @huwenzhao: change the following to new API
 
@@ -39,6 +40,7 @@ univer.registerPlugin(NumfmtPlugin);
 univer.registerPlugin(FindPlugin);
 univer.registerPlugin(FormulaPlugin, DEFAULT_FORMULA_DATA_DEMO);
 univer.registerPlugin(ImportXlsxPlugin);
+univer.registerPlugin(ImagePlugin);
 univer.registerPlugin(OperationPlugin);
 // universheet.installPlugin(new OverGridImagePlugin());
 

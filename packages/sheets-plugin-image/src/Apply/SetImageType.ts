@@ -1,4 +1,4 @@
-import { OverGridImagePlugin } from '../OverGridImagePlugin';
+import { OverGridImagePlugin } from '../ImagePlugin';
 
 export function SetImageType(plugin: OverGridImagePlugin, sheetId: string, id: string, type: string): string {
     let options = plugin.getConfig();

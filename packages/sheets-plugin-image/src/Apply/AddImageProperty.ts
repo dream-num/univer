@@ -1,7 +1,8 @@
-import { OverGridImagePlugin, OverGridImageProperty } from '../OverGridImagePlugin';
+import { ImagePlugin } from '../ImagePlugin';
+import { IOverGridImageProperty } from '../Interfaces';
 
-export function AddImageProperty(plugin: OverGridImagePlugin, property: OverGridImageProperty): string {
-    let options = plugin.getConfig();
+export function AddImageProperty(plugin: ImagePlugin, property: IOverGridImageProperty): string {
+    const options = plugin.getConfig();
     if (property.id) {
         property.id = Date.now().toString();
     }

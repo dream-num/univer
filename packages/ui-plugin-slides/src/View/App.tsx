@@ -1,5 +1,5 @@
 import { AppContext, BaseComponentProps, Component, ComponentManager } from '@univerjs/base-ui';
-import { LocaleType } from '@univerjs/core';
+import { LocaleService, LocaleType } from '@univerjs/core';
 import { BaseSlideContainerProps, SlideContainer } from './SlideContainer';
 
 export interface BaseUIProps extends BaseComponentProps {
@@ -30,13 +30,14 @@ export class App extends Component<BaseUIProps, IState> {
     }
 
     render() {
-        const { context, UIConfig, componentManager } = this.props;
+        const { UIConfig, componentManager, injector } = this.props;
         const { locale } = this.state;
+        const localeService = injector.get(LocaleService);
 
         return (
             <AppContext.Provider
                 value={{
-                    context,
+                    localeService,
                     locale,
                     componentManager,
                 }}

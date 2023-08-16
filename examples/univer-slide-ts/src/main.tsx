@@ -1,29 +1,34 @@
-import { Univer, UniverSlide } from '@univerjs/core';
+import { LocaleType, Univer } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 
 import { SlidePlugin } from '@univerjs/base-slides';
 import { DEFAULT_SLIDE_DATA } from '@univerjs/common-plugin-data';
 import { SlideUIPlugin } from '@univerjs/ui-plugin-slides';
-import { UIPlugin } from '@univerjs/base-ui';
 
 // univer
-const univer = new Univer();
+const univer = new Univer({
+    locale: LocaleType.EN,
+});
+
+univer.createUniverSlide(DEFAULT_SLIDE_DATA);
 
 // base-render
-univer.install(new RenderEngine());
-
-// universlide instance
-const universlide = UniverSlide.newInstance(DEFAULT_SLIDE_DATA);
-univer.addUniverSlide(universlide);
-
-universlide.installPlugin(new SlidePlugin());
-univer.install(
-    new SlideUIPlugin({
-        container: 'universlide',
-        layout: {
-            slideContainerConfig: {
-                innerLeft: true,
-            },
+univer.registerPlugin(RenderEngine);
+univer.registerPlugin(SlidePlugin);
+univer.registerPlugin(SlideUIPlugin, {
+    container: 'universlide',
+    layout: {
+        slideContainerConfig: {
+            innerLeft: true,
         },
-    })
-);
+    },
+});
+
+// use for console test
+declare global {
+    interface Window {
+        univer?: any;
+    }
+}
+
+window.univer = univer;

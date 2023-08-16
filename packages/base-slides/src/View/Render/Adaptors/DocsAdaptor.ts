@@ -134,8 +134,8 @@ export class DocsAdaptor extends ObjectAdaptor {
         const objectList: BaseObject[] = [];
         const pageMarginCache = new Map<string, { marginLeft: number; marginTop: number }>();
 
-        let cumPageLeft = 0;
-        let cumPageTop = 0;
+        const cumPageLeft = 0;
+        const cumPageTop = 0;
 
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];

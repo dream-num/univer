@@ -1,6 +1,6 @@
 import { Engine, EVENT_TYPE, IRenderingEngine, IWheelEvent, Rect, Scene, ScrollBar, Slide, Viewport } from '@univerjs/base-render';
 import { EventState, getColorStyle, IColorStyle, ICurrentUniverService, ISlidePage, Nullable, ObserverManager } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { ObjectProvider } from './ObjectProvider';
 
 export enum SLIDE_KEY {
@@ -16,7 +16,7 @@ export class CanvasView {
 
     private _slide: Slide;
 
-    private _ObjectProvider = new ObjectProvider();
+    private _ObjectProvider: ObjectProvider;
 
     private _activePageId: string;
 
@@ -27,6 +27,7 @@ export class CanvasView {
         @IRenderingEngine private readonly _engine: Engine
     ) {
         this._initialize();
+        this._initializeDependencies(_injector);
     }
 
     getSlide() {
@@ -308,5 +309,13 @@ export class CanvasView {
         this._slide.addPage(scene);
 
         return scene;
+    }
+
+    private _initializeDependencies(slideInjector: Injector) {
+        const dependencies: Dependency[] = [[ObjectProvider]];
+
+        dependencies.forEach((d) => {
+            slideInjector.add(d);
+        });
     }
 }

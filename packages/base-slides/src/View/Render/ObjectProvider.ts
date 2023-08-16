@@ -1,12 +1,13 @@
 import { BaseObject, Scene } from '@univerjs/base-render';
 import { IPageElement, sortRules } from '@univerjs/core';
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from './Adaptor';
-// import './Adaptors';
+import './Adaptors';
+import { Inject, Injector } from '@wendellhu/redi';
 
 export class ObjectProvider {
     private _adaptors: ObjectAdaptor[] = [];
 
-    constructor() {
+    constructor(@Inject(Injector) private readonly _injector: Injector) {
         this._adaptorLoader();
     }
 
@@ -41,8 +42,8 @@ export class ObjectProvider {
     private _adaptorLoader() {
         CanvasObjectProviderRegistry.getData()
             .sort(sortRules)
-            .forEach((adaptor: ObjectAdaptor) => {
-                this._adaptors.push(adaptor);
+            .forEach((adaptorFactory: ObjectAdaptor) => {
+                this._adaptors.push(adaptorFactory.create(this._injector));
             });
     }
 }

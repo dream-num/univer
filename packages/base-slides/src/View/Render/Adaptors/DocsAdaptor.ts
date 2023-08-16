@@ -13,7 +13,8 @@ import {
     ScrollBar,
     Viewport,
 } from '@univerjs/base-render';
-import { ContextBase, DocContext, DocumentModel, EventState, IPageElement, PageElementType } from '@univerjs/core';
+import { CommandManager, DocumentModel, EventState, IPageElement, LocaleService, PageElementType } from '@univerjs/core';
+import { Injector } from '@wendellhu/redi';
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 
 export enum DOCS_VIEW_KEY {
@@ -30,6 +31,8 @@ export class DocsAdaptor extends ObjectAdaptor {
 
     private _liquid = new Liquid();
 
+    constructor(@Inject(CommandManager) private readonly _commandManager: CommandManager, @Inject(LocaleService) private readonly _localeService: LocaleService) {}
+
     check(type: PageElementType) {
         if (type !== this.viewKey) {
             return;
@@ -37,13 +40,13 @@ export class DocsAdaptor extends ObjectAdaptor {
         return this;
     }
 
-    convert(pageElement: IPageElement, mainScene: Scene, context?: ContextBase) {
+    convert(pageElement: IPageElement, mainScene: Scene) {
         const { id, zIndex, left = 0, top = 0, width, height, angle, scaleX, scaleY, skewX, skewY, flipX, flipY, title, description, document: documentData } = pageElement;
         if (documentData == null) {
             return;
         }
 
-        const documentSkeleton = DocumentSkeleton.create(new DocumentModel(documentData, context as DocContext), context as DocContext);
+        const documentSkeleton = DocumentSkeleton.create(new DocumentModel(documentData, this._commandManager), this._localeService);
 
         const documents = new Documents(DOCS_VIEW_KEY.MAIN, documentSkeleton);
 
@@ -199,4 +202,13 @@ export class DocsAdaptor extends ObjectAdaptor {
     }
 }
 
-CanvasObjectProviderRegistry.add(new DocsAdaptor());
+export class DocsAdaptorFactory {
+    readonly zIndex = 0;
+
+    create(injector: Injector): DocsAdaptor {
+        const docsAdaptor = injector.createInstance(DocsAdaptor);
+        return docsAdaptor;
+    }
+}
+
+CanvasObjectProviderRegistry.add(new DocsAdaptorFactory());

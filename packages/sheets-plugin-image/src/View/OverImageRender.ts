@@ -15,7 +15,7 @@ export class OverImageRender {
         const engine = _injector.get(IRenderingEngine);
         this._mainScene = engine.getScene('mainScene') as Scene;
         if (this._mainScene == null) {
-            throw new Error('this._mainScene');
+            throw new Error('main scene is null !!');
         }
         _observerManager.getObserver<IOverGridImageProperty>('onAddImage')!.add((eventData) => {
             eventData.autoWidth = true;
@@ -28,8 +28,7 @@ export class OverImageRender {
         const shape = new OverImageShape(property);
         shape.on(EVENT_TYPE.PointerDown, () => {
             this._activeShape = shape;
-            this._plugin.showOverImagePanel();
-            this._observerManager.getObserver('onActiveImage')!.notifyObservers(shape.getProperty());
+            this._observerManager.getObserver<IOverGridImageProperty>('onActiveImage')!.notifyObservers(shape.getProperty());
         });
         this._mainScene.addObject(shape, OverImageRender.LAYER_Z_INDEX);
     }

@@ -205,7 +205,7 @@ export class DocsAdaptor extends ObjectAdaptor {
 }
 
 export class DocsAdaptorFactory {
-    readonly zIndex = 0;
+    readonly zIndex = 5;
 
     create(injector: Injector): DocsAdaptor {
         const docsAdaptor = injector.createInstance(DocsAdaptor);

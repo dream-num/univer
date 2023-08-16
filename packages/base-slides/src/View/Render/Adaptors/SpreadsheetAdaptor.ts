@@ -13,7 +13,7 @@ import {
     SpreadsheetSkeleton,
     Viewport,
 } from '@univerjs/base-render';
-import { ContextBase, EventState, ICellData, IPageElement, ObjectMatrix, PageElementType, SheetContext, Styles } from '@univerjs/core';
+import { EventState, ICellData, IPageElement, ObjectMatrix, PageElementType, Styles, Injector, LocaleService } from '@univerjs/core';
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 
 enum SHEET_VIEW_KEY {
@@ -30,21 +30,23 @@ enum SHEET_VIEW_KEY {
 }
 
 export class SpreadsheetAdaptor extends ObjectAdaptor {
-    zIndex = 4;
+    override zIndex = 4;
 
-    viewKey = PageElementType.SPREADSHEET;
+    override viewKey = PageElementType.SPREADSHEET;
 
-    check(type: PageElementType) {
+    constructor(@Inject(LocaleService) private readonly _localeService: LocaleService) {}
+
+    override check(type: PageElementType) {
         if (type !== this.viewKey) {
             return;
         }
         return this;
     }
 
-    convert(pageElement: IPageElement, mainScene: Scene, context?: ContextBase) {
+    override convert(pageElement: IPageElement, mainScene: Scene) {
         const { id, zIndex, left = 0, top = 0, width, height, angle, scaleX, scaleY, skewX, skewY, flipX, flipY, title, description, spreadsheet: spreadsheetModel } = pageElement;
 
-        if (spreadsheetModel == null || context == null) {
+        if (spreadsheetModel == null) {
             return;
         }
 
@@ -54,7 +56,7 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
 
         const cellDataMatrix = new ObjectMatrix<ICellData>(cellData);
 
-        const spreadsheetSkeleton = SpreadsheetSkeleton.create(worksheet, cellDataMatrix, new Styles(styles), context as SheetContext);
+        const spreadsheetSkeleton = SpreadsheetSkeleton.create(worksheet, cellDataMatrix, new Styles(styles), this._localeService);
 
         const { rowTotalHeight, columnTotalWidth, rowTitleWidth, columnTitleHeight } = spreadsheetSkeleton;
 
@@ -193,4 +195,13 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
     }
 }
 
-CanvasObjectProviderRegistry.add(new SpreadsheetAdaptor());
+export class SpreadsheetAdaptorFactory {
+    readonly zIndex = 4;
+
+    create(injector: Injector): SpreadsheetAdaptor {
+        const spreadsheetAdaptor = injector.createInstance(SpreadsheetAdaptor);
+        return spreadsheetAdaptor;
+    }
+}
+
+CanvasObjectProviderRegistry.add(new SpreadsheetAdaptorFactory());

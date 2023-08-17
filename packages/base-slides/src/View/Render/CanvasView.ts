@@ -312,8 +312,6 @@ export class CanvasView {
     }
 
     private _initializeDependencies(slideInjector: Injector) {
-        slideInjector.add([ObjectProvider]);
-        this._ObjectProvider = slideInjector.get(ObjectProvider);
-        // this._ObjectProvider = slideInjector.createInstance(ObjectProvider);
+        this._ObjectProvider = slideInjector.createInstance(ObjectProvider);
     }
 }

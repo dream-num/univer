@@ -1,15 +1,6 @@
 import { IAccessor, IDisposable } from '@wendellhu/redi';
-import {
-    ICommand,
-    CommandType,
-    ICommandService,
-    ICurrentUniverService,
-    IOptionData,
-    IClearRangeActionData,
-    ClearRangeAction,
-    Command,
-    CommandManager,
-} from '@univerjs/core';
+import { ICommand, CommandType, ICommandService, ICurrentUniverService, IOptionData, IClearRangeActionData, ClearRangeAction, Command, CommandManager } from '@univerjs/core';
+
 import { ISelectionManager } from '../Services/tokens';
 import { SelectionController } from './Selection/SelectionController';
 import { SelectionModel } from '../Model/SelectionModel';
@@ -52,12 +43,10 @@ export const ClearSelectionContentCommand: ICommand = {
         }
 
         const range = selections[0];
-
-        let options = {
+        const options = {
             formatOnly: true,
             contentsOnly: true,
         };
-
         const setValue: IClearRangeActionData = {
             sheetId: worksheet.getSheetId(),
             actionName: ClearRangeAction.NAME,

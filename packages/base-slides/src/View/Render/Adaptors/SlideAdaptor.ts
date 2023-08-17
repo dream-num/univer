@@ -1,7 +1,7 @@
 import { Engine, Rect, Scene, Slide, Viewport } from '@univerjs/base-render';
 import { SlideModel, getColorStyle, IColorStyle, IPageElement, ISlidePage, PageElementType } from '@univerjs/core';
 
-import { Injector } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 import { ObjectProvider } from '../ObjectProvider';
 // import { DocsAdaptor, ImageAdaptor, RichTextAdaptor, ShapeAdaptor  } from './';
@@ -14,20 +14,24 @@ export enum SLIDE_VIEW_KEY {
 }
 
 export class SlideAdaptor extends ObjectAdaptor {
-    zIndex = 6;
+    override zIndex = 6;
 
-    viewKey = PageElementType.SLIDE;
+    override viewKey = PageElementType.SLIDE;
 
     private _ObjectProvider: ObjectProvider;
 
-    check(type: PageElementType) {
+    constructor(@Inject(Injector) private _injector: Injector) {
+        super();
+    }
+
+    override check(type: PageElementType) {
         if (type !== this.viewKey) {
             return;
         }
         return this;
     }
 
-    convert(pageElement: IPageElement, mainScene: Scene) {
+    override convert(pageElement: IPageElement, mainScene: Scene) {
         const { id, zIndex, left = 0, top = 0, width, height, angle, scaleX, scaleY, skewX, skewY, flipX, flipY, title, description, slide: slideData } = pageElement;
         if (slideData == null) {
             return;
@@ -64,7 +68,7 @@ export class SlideAdaptor extends ObjectAdaptor {
             return slideComponent;
         }
 
-        this._ObjectProvider = new ObjectProvider();
+        this._ObjectProvider = new ObjectProvider(this._injector);
 
         for (let i = 0, len = pageOrder.length; i < len; i++) {
             const page = pages[pageOrder[i]];

@@ -26,8 +26,8 @@ export class CanvasView {
         @Inject(Injector) private readonly _injector: Injector,
         @IRenderingEngine private readonly _engine: Engine
     ) {
+        this._initializeDependencies(this._injector);
         this._initialize();
-        this._initializeDependencies(_injector);
     }
 
     getSlide() {
@@ -312,6 +312,8 @@ export class CanvasView {
     }
 
     private _initializeDependencies(slideInjector: Injector) {
-        this._ObjectProvider = slideInjector.createInstance(ObjectProvider);
+        slideInjector.add([ObjectProvider]);
+        this._ObjectProvider = slideInjector.get(ObjectProvider);
+        // this._ObjectProvider = slideInjector.createInstance(ObjectProvider);
     }
 }

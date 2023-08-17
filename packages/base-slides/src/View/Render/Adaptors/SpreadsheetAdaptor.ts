@@ -14,6 +14,7 @@ import {
     Viewport,
 } from '@univerjs/base-render';
 import { EventState, ICellData, IPageElement, ObjectMatrix, PageElementType, Styles, Injector, LocaleService } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 
 enum SHEET_VIEW_KEY {
@@ -34,7 +35,9 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
 
     override viewKey = PageElementType.SPREADSHEET;
 
-    constructor(@Inject(LocaleService) private readonly _localeService: LocaleService) {}
+    constructor(@Inject(LocaleService) private readonly _localeService: LocaleService) {
+        super();
+    }
 
     override check(type: PageElementType) {
         if (type !== this.viewKey) {

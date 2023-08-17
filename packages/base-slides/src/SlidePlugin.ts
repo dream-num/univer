@@ -90,11 +90,11 @@ export class SlidePlugin extends Plugin<SlidePluginObserve> {
     //     return this.getGlobalContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core');
     // }
 
-    private _initializeDependencies(docInjector: Injector) {
+    private _initializeDependencies(slideInjector: Injector) {
         const dependencies: Dependency[] = [[CanvasView], [ToolbarController]];
 
         dependencies.forEach((d) => {
-            docInjector.add(d);
+            slideInjector.add(d);
         });
     }
 }

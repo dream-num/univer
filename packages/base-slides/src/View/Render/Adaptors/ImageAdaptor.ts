@@ -1,5 +1,6 @@
 import { Picture } from '@univerjs/base-render';
 import { IPageElement, PageElementType } from '@univerjs/core';
+import { Injector } from '@wendellhu/redi';
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 
 export class ImageAdaptor extends ObjectAdaptor {
@@ -40,4 +41,13 @@ export class ImageAdaptor extends ObjectAdaptor {
     }
 }
 
-CanvasObjectProviderRegistry.add(new ImageAdaptor());
+export class ImageAdaptorFactory {
+    readonly zIndex = 4;
+
+    create(injector: Injector): ImageAdaptor {
+        const imageAdaptor = injector.createInstance(ImageAdaptor);
+        return imageAdaptor;
+    }
+}
+
+CanvasObjectProviderRegistry.add(new ImageAdaptorFactory());

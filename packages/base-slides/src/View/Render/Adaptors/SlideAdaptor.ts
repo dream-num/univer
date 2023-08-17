@@ -1,6 +1,7 @@
 import { Engine, Rect, Scene, Slide, Viewport } from '@univerjs/base-render';
-import { ContextBase, SlideModel, getColorStyle, IColorStyle, IPageElement, ISlidePage, PageElementType, SlideContext } from '@univerjs/core';
+import { SlideModel, getColorStyle, IColorStyle, IPageElement, ISlidePage, PageElementType } from '@univerjs/core';
 
+import { Inject, Injector } from '@wendellhu/redi';
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 import { ObjectProvider } from '../ObjectProvider';
 // import { DocsAdaptor, ImageAdaptor, RichTextAdaptor, ShapeAdaptor  } from './';
@@ -13,26 +14,30 @@ export enum SLIDE_VIEW_KEY {
 }
 
 export class SlideAdaptor extends ObjectAdaptor {
-    zIndex = 6;
+    override zIndex = 6;
 
-    viewKey = PageElementType.SLIDE;
+    override viewKey = PageElementType.SLIDE;
 
     private _ObjectProvider: ObjectProvider;
 
-    check(type: PageElementType) {
+    constructor(@Inject(Injector) private _injector: Injector) {
+        super();
+    }
+
+    override check(type: PageElementType) {
         if (type !== this.viewKey) {
             return;
         }
         return this;
     }
 
-    convert(pageElement: IPageElement, mainScene: Scene, context?: ContextBase) {
+    override convert(pageElement: IPageElement, mainScene: Scene) {
         const { id, zIndex, left = 0, top = 0, width, height, angle, scaleX, scaleY, skewX, skewY, flipX, flipY, title, description, slide: slideData } = pageElement;
         if (slideData == null) {
             return;
         }
 
-        const model = new SlideModel(slideData, context as SlideContext);
+        const model = new SlideModel(slideData);
 
         const slideComponent = new Slide(SLIDE_VIEW_KEY.MAIN + id, {
             top,
@@ -63,12 +68,12 @@ export class SlideAdaptor extends ObjectAdaptor {
             return slideComponent;
         }
 
-        this._ObjectProvider = new ObjectProvider();
+        this._ObjectProvider = new ObjectProvider(this._injector);
 
         for (let i = 0, len = pageOrder.length; i < len; i++) {
             const page = pages[pageOrder[i]];
             const { id } = page;
-            slideComponent.addPage(this._createScene(id, slideComponent, page, mainScene, model, context));
+            slideComponent.addPage(this._createScene(id, slideComponent, page, mainScene, model));
         }
 
         slideComponent.activeFirstPage();
@@ -76,8 +81,8 @@ export class SlideAdaptor extends ObjectAdaptor {
         return slideComponent;
     }
 
-    private _createScene(pageId: string, parent: Engine | Slide, page: ISlidePage, mainScene: Scene, model: SlideModel, context?: ContextBase) {
-        let { width, height } = parent;
+    private _createScene(pageId: string, parent: Engine | Slide, page: ISlidePage, mainScene: Scene, model: SlideModel) {
+        const { width, height } = parent;
 
         const scene = new Scene(pageId, parent, {
             width,
@@ -97,7 +102,7 @@ export class SlideAdaptor extends ObjectAdaptor {
 
         const { pageElements, pageBackgroundFill } = page;
 
-        const objects = this._ObjectProvider.convertToRenderObjects(pageElements, mainScene, context as SlideContext);
+        const objects = this._ObjectProvider.convertToRenderObjects(pageElements, mainScene);
 
         scene.openTransformer();
 
@@ -128,4 +133,13 @@ export class SlideAdaptor extends ObjectAdaptor {
     }
 }
 
-CanvasObjectProviderRegistry.add(new SlideAdaptor());
+export class SlideAdaptorFactory {
+    readonly zIndex = 6;
+
+    create(injector: Injector): SlideAdaptor {
+        const slideAdaptor = injector.createInstance(SlideAdaptor);
+        return slideAdaptor;
+    }
+}
+
+CanvasObjectProviderRegistry.add(new SlideAdaptorFactory());

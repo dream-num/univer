@@ -1,24 +1,26 @@
 import { IRichTextProps, RichText, Scene } from '@univerjs/base-render';
-import { ContextBase, IPageElement, PageElementType } from '@univerjs/core';
+import { IPageElement, LocaleService, PageElementType } from '@univerjs/core';
 
+import { Inject, Injector } from '@wendellhu/redi';
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 
 export class RichTextAdaptor extends ObjectAdaptor {
-    zIndex = 2;
+    override zIndex = 2;
 
-    viewKey = PageElementType.TEXT;
+    override viewKey = PageElementType.TEXT;
 
-    check(type: PageElementType) {
+    constructor(@Inject(LocaleService) private readonly _localeService: LocaleService) {
+        super();
+    }
+
+    override check(type: PageElementType) {
         if (type !== this.viewKey) {
             return;
         }
         return this;
     }
 
-    convert(pageElement: IPageElement, mainScene: Scene, context?: ContextBase) {
-        if (context == null) {
-            return;
-        }
+    override convert(pageElement: IPageElement, mainScene: Scene) {
         const { id, zIndex, left = 0, top = 0, width, height, angle, scaleX, scaleY, skewX, skewY, flipX, flipY, title, description, richText = {} } = pageElement;
         const { text, ff, fs, it, bl, ul, st, ol, bg, bd, cl, rich } = richText;
         let config: IRichTextProps = {
@@ -49,8 +51,17 @@ export class RichTextAdaptor extends ObjectAdaptor {
         if (isNotNull === false) {
             return;
         }
-        return new RichText(context, id, config);
+        return new RichText(this._localeService, id, config);
     }
 }
 
-CanvasObjectProviderRegistry.add(new RichTextAdaptor());
+export class RichTextAdaptorFactory {
+    readonly zIndex = 0;
+
+    create(injector: Injector): RichTextAdaptor {
+        const richTextAdaptor = injector.createInstance(RichTextAdaptor);
+        return richTextAdaptor;
+    }
+}
+
+CanvasObjectProviderRegistry.add(new RichTextAdaptorFactory());

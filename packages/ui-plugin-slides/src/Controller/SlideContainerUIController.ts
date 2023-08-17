@@ -1,15 +1,13 @@
-import { DragManager, getRefElement } from '@univerjs/base-ui';
-import { LocaleType } from '@univerjs/core';
+import { ComponentManager, DragManager, getRefElement } from '@univerjs/base-ui';
+import { LocaleService, LocaleType, ObserverManager } from '@univerjs/core';
+import { Inject, Injector, Self, SkipSelf } from '@wendellhu/redi';
 import { ISlideUIPluginConfig } from '../Basics';
-import { SlideUIPlugin } from '../SlideUIPlugin';
 import { SlideContainer } from '../View';
 import { InfoBarUIController } from './InfoBarUIController';
 import { SlideBarUIController } from './SlideBarUIController';
 import { ToolbarUIController } from './ToolbarUIController';
 
 export class SlideContainerUIController {
-    protected _plugin: SlideUIPlugin;
-
     private _slideContainer: SlideContainer;
 
     private _toolbarController: ToolbarUIController;
@@ -22,23 +20,24 @@ export class SlideContainerUIController {
 
     private _dragManager: DragManager;
 
-    constructor(plugin: SlideUIPlugin) {
-        this._plugin = plugin;
-
-        this._config = this._plugin.getConfig();
-
-        this._initialize();
-
-        this._toolbarController = new ToolbarUIController(this._plugin, this._config.layout?.toolbarConfig);
-
-        this._infoBarController = new InfoBarUIController(this._plugin);
-
-        this._slideBarController = new SlideBarUIController(this._plugin);
+    constructor(
+        config: ISlideUIPluginConfig,
+        @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Self() @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+    ) {
+        this._config = config;
+        this._toolbarController = this._injector.createInstance(ToolbarUIController, this._config.layout?.toolbarConfig);
+        this._infoBarController = this._injector.createInstance(InfoBarUIController);
+        this._slideBarController = this._injector.createInstance(SlideBarUIController);
+        this._dragManager = this._injector.createInstance(DragManager);
     }
 
     getUIConfig() {
         const config = {
-            context: this._plugin.getContext(),
+            injector: this._injector,
             config: this._config,
             changeLocale: this.changeLocale,
             getComponent: this.getComponent,
@@ -64,8 +63,8 @@ export class SlideContainerUIController {
     // 获取SlideContainer组件
     getComponent = (ref: SlideContainer) => {
         this._slideContainer = ref;
-        this._plugin.getObserver('onUIDidMount')?.notifyObservers(this._slideContainer);
-        this._plugin.getGlobalContext().getObserverManager().requiredObserver<boolean>('onUIDidMountObservable', 'core').notifyObservers(true);
+        this._observerManager.getObserver<SlideContainer>('onUIDidMount')?.notifyObservers(this._slideContainer);
+        this._globalObserverManager.requiredObserver<boolean>('onUIDidMountObservable', 'core').notifyObservers(true);
 
         this.setSlideContainer();
     };
@@ -78,13 +77,10 @@ export class SlideContainerUIController {
      *
      */
     changeLocale = (locale: string) => {
-        this._plugin
-            .getContext()
-            .getLocale()
-            .change(locale as LocaleType);
+        this._localeService.getLocale().change(locale as LocaleType);
 
         // publish
-        this._plugin.getGlobalContext().getObserverManager().requiredObserver('onAfterChangeUILocaleObservable', 'core')!.notifyObservers();
+        this._globalObserverManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')!.notifyObservers();
     };
 
     getContentRef() {
@@ -98,11 +94,7 @@ export class SlideContainerUIController {
     UIDidMount(cb: Function) {
         if (this._slideContainer) return cb(this._slideContainer);
 
-        this._plugin.getObserver('onUIDidMount')?.add(() => cb(this._slideContainer));
-    }
-
-    private _initialize() {
-        this._dragManager = new DragManager(this._plugin);
+        this._observerManager.getObserver('onUIDidMount')?.add(() => cb(this._slideContainer));
     }
 
     private setSlideContainer() {

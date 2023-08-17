@@ -1,20 +1,21 @@
 import { Picture } from '@univerjs/base-render';
 import { IPageElement, PageElementType } from '@univerjs/core';
+import { Injector } from '@wendellhu/redi';
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 
 export class ImageAdaptor extends ObjectAdaptor {
-    zIndex = 1;
+    override zIndex = 1;
 
-    viewKey = PageElementType.IMAGE;
+    override viewKey = PageElementType.IMAGE;
 
-    check(type: PageElementType) {
+    override check(type: PageElementType) {
         if (type !== this.viewKey) {
             return;
         }
         return this;
     }
 
-    convert(pageElement: IPageElement) {
+    override convert(pageElement: IPageElement) {
         const { id, zIndex, left = 0, top = 0, width, height, angle, scaleX, scaleY, skewX, skewY, flipX, flipY, title, description, image = {} } = pageElement;
         const { imageProperties, placeholder, link } = image;
 
@@ -40,4 +41,13 @@ export class ImageAdaptor extends ObjectAdaptor {
     }
 }
 
-CanvasObjectProviderRegistry.add(new ImageAdaptor());
+export class ImageAdaptorFactory {
+    readonly zIndex = 4;
+
+    create(injector: Injector): ImageAdaptor {
+        const imageAdaptor = injector.createInstance(ImageAdaptor);
+        return imageAdaptor;
+    }
+}
+
+CanvasObjectProviderRegistry.add(new ImageAdaptorFactory());

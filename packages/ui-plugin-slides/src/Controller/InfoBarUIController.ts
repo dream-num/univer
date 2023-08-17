@@ -1,5 +1,4 @@
 import { InfoBarModel } from '../Model/InfoBarModel';
-import { SlideUIPlugin } from '../SlideUIPlugin';
 import { InfoBar } from '../View/InfoBar';
 
 type IProps = {
@@ -20,13 +19,9 @@ export class InfoBarUIController {
 
     private _infoBar: InfoBar;
 
-    private _plugin: SlideUIPlugin;
-
     private _infoList: BaseInfoBarProps;
 
-    constructor(plugin: SlideUIPlugin) {
-        this._plugin = plugin;
-    }
+    // constructor() { }
 
     getComponent = (ref: InfoBar) => {
         this._infoBar = ref;

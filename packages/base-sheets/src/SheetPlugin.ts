@@ -1,5 +1,5 @@
 import { Engine, IRenderingEngine } from '@univerjs/base-render';
-import { Plugin, PLUGIN_NAMES, DEFAULT_SELECTION, UniverSheet, PluginType, CommandManager, ICurrentUniverService, LocaleService, ObserverManager } from '@univerjs/core';
+import { Plugin, PLUGIN_NAMES, DEFAULT_SELECTION, PluginType, CommandManager, ICurrentUniverService, LocaleService } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { SheetPluginObserve, uninstall } from './Basics/Observer';

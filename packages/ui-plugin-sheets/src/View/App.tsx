@@ -44,7 +44,7 @@ export class App extends Component<BaseUIProps, IState> {
                     locale,
                     componentManager,
                     zIndexManager,
-                    observerManager
+                    observerManager,
                 }}
             >
                 <div

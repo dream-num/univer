@@ -21,7 +21,7 @@ cover: ''
 | forwardRef | preact refs 引用      | `RefObject<HTMLDivElement>` | -                          |
 | func       | 回调挂载              | `object`                    | `{ addButton: Function; }` |
 
-`IShowToolbarConfig`包含以下配置，默认都为 `true`，可以指定想隐藏的工具栏按钮为`false`
+
 
 ```json
 {

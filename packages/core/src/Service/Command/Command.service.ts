@@ -20,7 +20,7 @@ export interface ICommand {
 export interface ICommandInfo {
     id: string;
     type: CommandType;
-    args: (number | string | null)[];
+    args: Array<number | string | null>;
 }
 
 export type CommandListener = (commandInfo: ICommandInfo) => void;
@@ -44,6 +44,7 @@ export function toDisposable(callback: () => void): IDisposable {
  */
 class CommandRegistry {
     private readonly commands = new Map<string, ICommand>();
+
     private readonly commandInjector = new Map<string, Injector>();
 
     registerCommand(command: ICommand, injector: Injector): IDisposable {
@@ -112,7 +113,7 @@ export class CommandService implements ICommandService {
             const commandInfo: ICommandInfo = {
                 id: command.id,
                 type: command.type,
-                args: [...args] as unknown[] as (number | string | null)[], // TODO: @wzhudev move strict args control of serialization
+                args: [...args] as unknown[] as Array<number | string | null>, // TODO: @wzhudev move strict args control of serialization
             };
 
             this._listenerRegistry.forEach((l) => l(commandInfo));

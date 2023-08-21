@@ -12,10 +12,10 @@ import {
 } from '@univerjs/core';
 import { numfmt } from '@univerjs/base-numfmt-engine';
 import { Inject, Injector } from '@wendellhu/redi';
-import { ACTION_NAMES as PLUGIN_ACTION_NAMES } from '../Enum';
 import { NumfmtPlugin } from '../../NumfmtPlugin';
 import { INumfmtPluginData } from '../../Symbol';
-import { NumfmtModel } from '../../Model/NumfmtModel';
+import { NumfmtModel } from '../../Model';
+import { ACTION_NAMES as PLUGIN_ACTION_NAMES } from '../Enum';
 
 export class NumfmtActionExtension extends BaseActionExtension {
     constructor(

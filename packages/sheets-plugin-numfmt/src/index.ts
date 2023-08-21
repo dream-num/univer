@@ -1,3 +1,3 @@
-import './Model/RegisterAction';
+import './RegisterAction';
 
 export * from './NumfmtPlugin';

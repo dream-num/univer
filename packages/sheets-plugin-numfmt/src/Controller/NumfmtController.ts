@@ -4,10 +4,10 @@ import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
 import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import styles from '../View/UI/index.module.less';
-import { DEFAULT_DATA, NUMFMT_PLUGIN_NAME, NumfmtConfig } from '../Basics/Const';
+import { DEFAULT_DATA, NUMFMT_PLUGIN_NAME, NumfmtConfig } from '../Basics';
 import { NumfmtModalController } from './NumfmtModalController';
 import { INumfmtPluginData } from '../Symbol';
-import { NumfmtModel } from '../Model/NumfmtModel';
+import { NumfmtModel } from '../Model';
 
 export class NumfmtController {
     protected _numfmtList: IToolbarItemProps;

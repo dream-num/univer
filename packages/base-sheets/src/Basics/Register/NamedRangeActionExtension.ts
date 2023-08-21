@@ -12,14 +12,12 @@ import {
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import type { SheetPlugin } from '../../SheetPlugin';
-
 /**
  * TODO insertColumn/insertRange/insertRange/deleteRange
  */
-export class NamedRangeActionExtension extends BaseActionExtension<SheetPlugin> {
-    constructor(actionDataList: IActionData[], _plugin: SheetPlugin, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
-        super(actionDataList, _plugin);
+export class NamedRangeActionExtension extends BaseActionExtension {
+    constructor(actionDataList: IActionData[], @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
+        super(actionDataList);
     }
 
     override execute() {
@@ -57,16 +55,16 @@ export class NamedRangeActionExtension extends BaseActionExtension<SheetPlugin> 
     }
 }
 
-export class NamedRangeActionExtensionFactory extends BaseActionExtensionFactory<SheetPlugin> {
-    constructor(_plugin: SheetPlugin, @Inject(Injector) private readonly _sheetInjector: Injector) {
-        super(_plugin);
+export class NamedRangeActionExtensionFactory extends BaseActionExtensionFactory {
+    constructor(@Inject(Injector) private readonly _sheetInjector: Injector) {
+        super();
     }
 
     override get zIndex(): number {
         return 3;
     }
 
-    override create(actionDataList: ISheetActionData[]): BaseActionExtension<SheetPlugin> {
-        return this._sheetInjector.createInstance(NamedRangeActionExtension, actionDataList, this._plugin);
+    override create(actionDataList: ISheetActionData[]): BaseActionExtension {
+        return this._sheetInjector.createInstance(NamedRangeActionExtension, actionDataList);
     }
 }

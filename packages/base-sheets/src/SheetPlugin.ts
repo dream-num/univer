@@ -144,7 +144,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
 
     registerExtension() {
         const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
-        this._namedRangeActionExtensionFactory = new NamedRangeActionExtensionFactory(this, this._injector);
+        this._namedRangeActionExtensionFactory = new NamedRangeActionExtensionFactory(this._injector);
         actionRegister.add(this._namedRangeActionExtensionFactory); // TODO: this should return a disposable function
 
         this._columnRulerManager = this._injector.get(ColumnRulerManager);

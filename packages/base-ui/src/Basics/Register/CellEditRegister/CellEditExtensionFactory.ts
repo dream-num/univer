@@ -1,4 +1,3 @@
-import { Plugin } from '@univerjs/core';
 import { ICell } from '../../Interfaces/Cell';
 
 /**
@@ -27,9 +26,7 @@ export class BaseCellEditExtension {
 /**
  * Determine whether to intercept and create BaseCellEditExtension
  */
-export class BaseCellEditExtensionFactory<T extends Plugin = Plugin> {
-    constructor(protected _plugin: T) {}
-
+export class BaseCellEditExtensionFactory {
     get zIndex() {
         return 0;
     }

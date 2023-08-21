@@ -83,8 +83,8 @@ export class CellInputHandler {
     }
 
     covertOperatorjson() {
-        let arr = this.operator.split('|');
-        let op: IKeyValue = {};
+        const arr = this.operator.split('|');
+        const op: IKeyValue = {};
 
         for (let i = 0; i < arr.length; i++) {
             op[arr[i].toString()] = 1;
@@ -124,34 +124,34 @@ export class CellInputHandler {
      * @param kcode
      */
     functionInputHandler($input: HTMLElement, kcode: number) {
-        let _this = this;
+        const _this = this;
 
-        let $editer = $input;
+        const $editer = $input;
         let value1 = $editer.innerHTML;
-        let value1txt = $editer.textContent || '';
+        const value1txt = $editer.textContent || '';
 
         // You must use setTimeout to get the current input value
         setTimeout(() => {
             let value = $editer.textContent || '';
-            let valuetxt = value;
+            const valuetxt = value;
             value = xssDeal(value);
             _this.funcName = null;
             if (value.length > 0 && value.substr(0, 1) === '=' && (kcode !== 229 || value.length === 1)) {
                 // _this.inputValue = value;
                 value = _this.functionHTMLGenerate(value);
                 value1 = _this.functionHTMLGenerate(value1txt);
-                let currSelection = window.getSelection();
+                const currSelection = window.getSelection();
                 if (currSelection) {
                     // all browsers, except IE before version 9
                     if (currSelection?.anchorNode instanceof HTMLElement && currSelection.anchorNode?.matches('div')) {
-                        let editorlen = $$('span', $editer).length;
+                        const editorlen = $$('span', $editer).length;
                         _this.functionRangeIndex = [editorlen - 1, $$('span', $editer)[editorlen - 1].textContent.length];
                     } else {
                         _this.functionRangeIndex = [getNodeindex(currSelection.anchorNode?.parentNode), currSelection.anchorOffset];
                     }
                 } else {
                     // Internet Explorer before version 9
-                    let textRange = (document as any).selection.createRange();
+                    const textRange = (document as any).selection.createRange();
                     _this.functionRangeIndex = textRange;
                 }
 
@@ -189,28 +189,28 @@ export class CellInputHandler {
     // from luckysheet
     // eslint-disable-next-line max-lines-per-function
     findrangeindex(v: string, vp: string) {
-        let _this = this;
+        const _this = this;
 
-        let re = /<span.*?>/g;
-        let v_a_string = v.replace(re, '');
-        let vp_a_string = vp.replace(re, '');
-        let v_a = v_a_string.split('</span>');
-        let vp_a = vp_a_string.split('</span>');
+        const re = /<span.*?>/g;
+        const v_a_string = v.replace(re, '');
+        const vp_a_string = vp.replace(re, '');
+        const v_a = v_a_string.split('</span>');
+        const vp_a = vp_a_string.split('</span>');
         v_a.pop();
         vp_a.pop();
 
         let pfri: IKeyValue = _this.functionRangeIndex;
         // let i = 0;
-        let spanlen = vp_a.length > v_a.length ? v_a.length : vp_a.length;
+        const spanlen = vp_a.length > v_a.length ? v_a.length : vp_a.length;
 
-        let vplen = vp_a.length;
-        let vlen = v_a.length;
+        const vplen = vp_a.length;
+        const vlen = v_a.length;
 
         // 不增加元素输入
         if (vplen === vlen) {
-            let i = pfri[0];
-            let p = vp_a[i];
-            let n = v_a[i];
+            const i = pfri[0];
+            const p = vp_a[i];
+            const n = v_a[i];
 
             if (p == null) {
                 if (vp_a.length <= i) {
@@ -247,14 +247,14 @@ export class CellInputHandler {
         }
         // 减少元素输入
         else if (vplen > vlen) {
-            let i = pfri[0];
-            let p = vp_a[i];
-            let n = v_a[i];
+            const i = pfri[0];
+            const p = vp_a[i];
+            const n = v_a[i];
 
             if (n == null) {
                 if (v_a[i - 1].indexOf('{') > -1) {
                     pfri[0] -= 1;
-                    let start = v_a[i - 1].search('{');
+                    const start = v_a[i - 1].search('{');
                     pfri[1] += start;
                 } else {
                     pfri[0] = 0;
@@ -292,9 +292,9 @@ export class CellInputHandler {
         }
         // 增加元素输入
         else if (vplen < vlen) {
-            let i = pfri[0];
-            let p = vp_a[i];
-            let n = v_a[i];
+            const i = pfri[0];
+            const p = vp_a[i];
+            const n = v_a[i];
 
             if (p == null) {
                 pfri[0] = v_a.length - 1;
@@ -354,9 +354,9 @@ export class CellInputHandler {
 
     setCaretPosition(textDom: HTMLElement, children: number, pos: number) {
         try {
-            let el = textDom;
-            let range = document.createRange();
-            let sel = window.getSelection();
+            const el = textDom;
+            const range = document.createRange();
+            const sel = window.getSelection();
             range.setStart(el.childNodes[children], pos);
             range.collapse(true);
             sel?.removeAllRanges();
@@ -368,25 +368,25 @@ export class CellInputHandler {
     }
 
     functionRange(obj: HTMLElement, v: string, vp: string) {
-        let _this = this;
+        const _this = this;
 
         // ie11 10 9 ff safari
-        let currSelection = window.getSelection();
-        let fri = _this.findrangeindex(v, vp);
+        const currSelection = window.getSelection();
+        const fri = _this.findrangeindex(v, vp);
 
         // FIX: set position
         if (fri == null && currSelection) {
             currSelection.selectAllChildren((obj as IKeyValue)[0]);
             currSelection.collapseToEnd();
         } else if (fri != null) {
-            let span = $$('span', obj);
+            const span = $$('span', obj);
 
             _this.setCaretPosition(Array.isArray(span) ? span[fri[0]] : span, 0, fri[1]);
         }
     }
 
     functionHTMLGenerate(txt: string) {
-        let _this = this;
+        const _this = this;
 
         if (txt.length === 0 || txt.substr(0, 1) !== '=') {
             return txt;
@@ -400,11 +400,11 @@ export class CellInputHandler {
     // from luckysheet
     // eslint-disable-next-line max-lines-per-function
     functionHTML(txt: string) {
-        let _this = this;
+        const _this = this;
 
         if (_this.operatorjson == null) {
-            let arr = _this.operator.split('|');
-            let op: IKeyValue = {};
+            const arr = _this.operator.split('|');
+            const op: IKeyValue = {};
 
             for (let i = 0; i < arr.length; i++) {
                 op[arr[i].toString()] = 1;
@@ -417,12 +417,12 @@ export class CellInputHandler {
             txt = txt.substr(1);
         }
 
-        let funcstack = txt.split('');
+        const funcstack = txt.split('');
         let i = 0;
         let str = '';
         let function_str = '';
-        let ispassby = true;
-        let matchConfig = {
+        const ispassby = true;
+        const matchConfig = {
             bracket: 0,
             comma: 0,
             squote: 0,
@@ -431,7 +431,7 @@ export class CellInputHandler {
         };
 
         while (i < funcstack.length) {
-            let s = funcstack[i];
+            const s = funcstack[i];
 
             if (s === '(' && matchConfig.squote === 0 && matchConfig.dquote === 0 && matchConfig.braces === 0) {
                 matchConfig.bracket += 1;
@@ -535,11 +535,11 @@ export class CellInputHandler {
                 } else if (matchConfig.dquote > 0) {
                     function_str += `${str}</span>`;
                 } else if (str.indexOf('</span>') === -1 && str.length > 0) {
-                    let regx = /{.*?}/;
+                    const regx = /{.*?}/;
 
                     if (regx.test(str.trim())) {
-                        let arraytxt = regx.exec(str)![0];
-                        let arraystart = str.search(regx);
+                        const arraytxt = regx.exec(str)![0];
+                        const arraystart = str.search(regx);
                         let alltxt = '';
 
                         if (arraystart > 0) {
@@ -574,7 +574,7 @@ export class CellInputHandler {
 
     iscelldata(txt: string) {
         // 判断是否为单元格格式
-        let val = txt.split('!');
+        const val = txt.split('!');
         let rangetxt;
 
         if (val.length > 1) {
@@ -583,12 +583,12 @@ export class CellInputHandler {
             rangetxt = val[0];
         }
 
-        let reg_cell = /^(([a-zA-Z]+)|([$][a-zA-Z]+))(([0-9]+)|([$][0-9]+))$/g; // 增加正则判断单元格为字母+数字的格式：如 A1:B3
+        const reg_cell = /^(([a-zA-Z]+)|([$][a-zA-Z]+))(([0-9]+)|([$][0-9]+))$/g; // 增加正则判断单元格为字母+数字的格式：如 A1:B3
         let reg_cellRange = /^(((([a-zA-Z]+)|([$][a-zA-Z]+))(([0-9]+)|([$][0-9]+)))|((([a-zA-Z]+)|([$][a-zA-Z]+))))$/g; // 增加正则判断单元格为字母+数字或字母的格式：如 A1:B3，A:A
 
         if (rangetxt.indexOf(':') === -1) {
-            let row = parseInt(rangetxt.replace(/[^0-9]/g, '')) - 1;
-            let col = Tools.ABCatNum(rangetxt.replace(/[^A-Za-z]/g, ''));
+            const row = parseInt(rangetxt.replace(/[^0-9]/g, '')) - 1;
+            const col = Tools.ABCatNum(rangetxt.replace(/[^A-Za-z]/g, ''));
 
             if (!Number.isNaN(row) && !Number.isNaN(col) && rangetxt.toString().match(reg_cell)) {
                 return true;
@@ -605,8 +605,8 @@ export class CellInputHandler {
 
         rangetxt = rangetxt.split(':');
 
-        let row = [];
-        let col = [];
+        const row = [];
+        const col = [];
         row[0] = parseInt(rangetxt[0].replace(/[^0-9]/g, '')) - 1;
         row[1] = parseInt(rangetxt[1].replace(/[^0-9]/g, '')) - 1;
         if (row[0] > row[1]) {
@@ -626,16 +626,16 @@ export class CellInputHandler {
     }
 
     getrangeseleciton() {
-        let currSelection = window.getSelection()!;
-        let anchor = currSelection.anchorNode!;
-        let anchorOffset = currSelection.anchorOffset;
-        let anchorLength = anchor?.parentElement!.querySelectorAll('span');
+        const currSelection = window.getSelection()!;
+        const anchor = currSelection.anchorNode!;
+        const anchorOffset = currSelection.anchorOffset;
+        const anchorLength = anchor?.parentElement!.querySelectorAll('span');
         if (anchor?.parentNode?.nodeName === 'SPAN' && anchorOffset !== 0) {
             let txt = anchor.textContent!.trim();
             let lasttxt = '';
 
             if (txt.length === 0 && anchor.parentNode.previousSibling) {
-                let ahr = anchor.parentNode.previousSibling!;
+                const ahr = anchor.parentNode.previousSibling!;
                 txt = ahr.textContent!.trim();
                 lasttxt = txt.substring(txt.length - 1, 1);
                 return ahr;
@@ -649,7 +649,7 @@ export class CellInputHandler {
             let txt = anchor.textContent?.trim()!;
 
             if (txt.length === 0 && anchor!.parentElement!.querySelectorAll('span').length > 1) {
-                let ahr = anchor?.parentElement!.querySelectorAll('span')!;
+                const ahr = anchor?.parentElement!.querySelectorAll('span')!;
                 const textContent = ahr[`${ahr.length - 2}`].textContent;
                 txt = (textContent && textContent.trim()) || '';
                 return ahr[anchorLength.length - 1];
@@ -700,13 +700,13 @@ export class CellInputHandler {
     }
 
     searchFunction($editer: HTMLElement) {
-        let _this = this;
+        const _this = this;
         // const locale = 'zh';
         this.formula = [];
 
         // let functionlist = lang[`${locale}`];
 
-        let $cell = _this.getrangeseleciton();
+        const $cell = _this.getrangeseleciton();
 
         _this.searchFunctionCell = $cell;
 
@@ -715,14 +715,14 @@ export class CellInputHandler {
         }
 
         // Use innerText instead of innerHTML because rich text styles will appear"<span dir="auto" class="univer-formula-text-color">=</span><span dir="auto" class="univer-formula -text-color ">su</span>", resulting in inaccurate judgment of inputContent.substr(0, 1)
-        let inputContent = $editer.innerText;
-        let searchtxt = $cell.textContent!.toUpperCase();
-        let reg = /^[a-zA-Z]|[a-zA-Z_]+$/;
+        const inputContent = $editer.innerText;
+        const searchtxt = $cell.textContent!.toUpperCase();
+        const reg = /^[a-zA-Z]|[a-zA-Z_]+$/;
         if (!reg.test(searchtxt) || inputContent.substr(0, 1) !== '=') {
             return;
         }
         // return;
-        let result: any = {
+        const result: any = {
             f: [],
             s: [],
             t: [],
@@ -730,8 +730,8 @@ export class CellInputHandler {
         let result_i = 0;
 
         for (let i = 0; i < FunList.length; i++) {
-            let item = FunList[i];
-            let n = item.n;
+            const item = FunList[i];
+            const n = item.n;
 
             if (!n) continue;
 
@@ -751,7 +751,7 @@ export class CellInputHandler {
             }
         }
 
-        let list = result.t.concat(result.s.concat(result.f));
+        const list = result.t.concat(result.s.concat(result.f));
 
         this.formula = list;
         // if (list.length <= 0) {
@@ -759,7 +759,7 @@ export class CellInputHandler {
     }
 
     helpFunctionExe($editer: HTMLElement, currSelection: HTMLSpanElement) {
-        let _this = this;
+        const _this = this;
         if (document.querySelectorAll('#universheet-formula-help-c').length === 0) {
             for (let i = 0; i < FunList.length; i++) {
                 const n = FunList[i].n;
@@ -771,9 +771,9 @@ export class CellInputHandler {
             return;
         }
 
-        let $prev = currSelection;
-        let $span = $editer.querySelectorAll('span');
-        let currentIndex = [].indexOf.call(currSelection.parentNode!.querySelectorAll(currSelection.tagName), currSelection as never);
+        const $prev = currSelection;
+        const $span = $editer.querySelectorAll('span');
+        const currentIndex = [].indexOf.call(currSelection.parentNode!.querySelectorAll(currSelection.tagName), currSelection as never);
         // currentIndex = currSelection.parentNode.childNodes.length - 1,
         let i = currentIndex;
 
@@ -834,11 +834,11 @@ export class CellInputHandler {
     }
 
     searchFunctionEnter(funcName: string) {
-        let _this = this;
+        const _this = this;
 
-        let functxt = funcName;
+        const functxt = funcName;
 
-        let searchFunctionCell = _this.searchFunctionCell;
+        const searchFunctionCell = _this.searchFunctionCell;
 
         searchFunctionCell.innerText = functxt;
         const span = document.createElement('span');
@@ -852,7 +852,7 @@ export class CellInputHandler {
 }
 
 function insertAfter(newElement: any, targetElement: { parentNode: any; nextSibling: any }) {
-    let parent = targetElement.parentNode;
+    const parent = targetElement.parentNode;
     if (parent.lastChild === targetElement) {
         parent.appendChild(newElement);
     } else {

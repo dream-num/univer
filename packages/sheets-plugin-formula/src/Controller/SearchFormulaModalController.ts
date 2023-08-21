@@ -75,7 +75,6 @@ export class SearchFormulaController {
         this._funParams = {
             funParams: {},
         };
-
         this._modalData = [
             {
                 name: 'SearchFormula',
@@ -146,7 +145,6 @@ export class SearchFormulaController {
                 },
             },
         };
-
         this._initialize();
     }
 

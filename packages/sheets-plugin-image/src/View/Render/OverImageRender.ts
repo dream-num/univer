@@ -1,15 +1,14 @@
-import { EVENT_TYPE, Scene, IRenderingEngine } from '@univerjs/base-render';
-import { ObserverManager } from '@univerjs/core';
+import { Scene, IRenderingEngine } from '@univerjs/base-render';
+import { CommandManager, ObserverManager } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { OverImageShape } from './OverImageShape';
-import { IOverGridImageProperty } from '../Interfaces';
+import { IOverGridImageProperty } from '../../Basics';
+import { AddImagePropertyAction, IAddImagePropertyData, IRemoveImagePropertyData, RemoveImagePropertyAction } from '../../Model';
 
 export class OverImageRender {
     static LAYER_Z_INDEX: number = 1000;
 
     private _mainScene: Scene;
-
-    private _activeShape: OverImageShape;
 
     constructor(@Inject(Injector) readonly _injector: Injector, @Inject(ObserverManager) private _observerManager: ObserverManager) {
         const engine = _injector.get(IRenderingEngine);
@@ -17,19 +16,24 @@ export class OverImageRender {
         if (this._mainScene == null) {
             throw new Error('main scene is null !!');
         }
-        _observerManager.getObserver<IOverGridImageProperty>('onAddImage')!.add((eventData) => {
-            eventData.autoWidth = true;
-            eventData.autoHeight = true;
-            this.addOverImage(eventData);
+        CommandManager.getActionObservers().add((event) => {
+            switch (event.data.actionName) {
+                case AddImagePropertyAction.NAME: {
+                    const data = event.data as IAddImagePropertyData;
+                    this.addOverImage(data);
+                    break;
+                }
+                case RemoveImagePropertyAction.NAME: {
+                    const data = event.data as IRemoveImagePropertyData;
+                    this.removeOverImage(data.id);
+                    break;
+                }
+            }
         });
     }
 
     addOverImage(property: IOverGridImageProperty): void {
         const shape = new OverImageShape(property);
-        shape.on(EVENT_TYPE.PointerDown, () => {
-            this._activeShape = shape;
-            this._observerManager.getObserver<IOverGridImageProperty>('onActiveImage')!.notifyObservers(shape.getProperty());
-        });
         this._mainScene.addObject(shape, OverImageRender.LAYER_Z_INDEX);
     }
 

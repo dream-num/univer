@@ -1,8 +1,6 @@
-import { SheetActionBase, ActionObservers, ISheetActionData, Workbook } from '@univerjs/core';
-import { SetImageType } from '../../Apply';
-import { OverGridImagePlugin } from '../../ImagePlugin';
-import { ACTION_NAMES } from '../../Const';
-import { OVER_GRID_IMAGE_PLUGIN_NAME } from '../../Const/PLUGIN_NAME';
+import { SheetActionBase, ActionObservers, ISheetActionData, CommandUnit } from '@univerjs/core';
+import { SetImageType } from '../Apply';
+import { ACTION_NAMES, OVER_GRID_IMAGE_PLUGIN_NAME } from '../../Basics';
 
 export interface ISetImageTypeData extends ISheetActionData {
     id: string;
@@ -10,8 +8,10 @@ export interface ISetImageTypeData extends ISheetActionData {
 }
 
 export class SetImageTypeAction extends SheetActionBase<ISetImageTypeData, ISetImageTypeData> {
-    constructor(actionData: ISetImageTypeData, workbook: Workbook, observers: ActionObservers) {
-        super(actionData, workbook, observers);
+    static NAME = 'SetImageTypeAction';
+
+    constructor(actionData: ISetImageTypeData, commandUnit: CommandUnit, observers: ActionObservers) {
+        super(actionData, commandUnit, observers);
         this._oldActionData = {
             actionName: ACTION_NAMES.SET_IMAGE_TYPE_ACTION,
             id: actionData.id,

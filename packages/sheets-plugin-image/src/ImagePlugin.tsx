@@ -2,11 +2,10 @@ import { Plugin, PluginType, CommandManager, LocaleService } from '@univerjs/cor
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { uninstall } from '@univerjs/base-sheets';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
-import { OverImageRender } from './View/OverImageRender';
-import { OVER_GRID_IMAGE_PLUGIN_NAME } from './Const/PLUGIN_NAME';
-import { install } from './Basics/Observer';
+import { OverImageRender } from './View/Render';
+import { IImagePluginData } from './Symbol';
+import { OVER_GRID_IMAGE_PLUGIN_NAME, IOverGridImagePluginConfig, IOverGridImageProperty, install } from './Basics';
 import { OverGridImageController, CellImageController } from './Controller';
-import { IOverGridImagePluginConfig } from './Interfaces';
 
 /**
  * TODO: 考虑加入单元格图片的情况，
@@ -21,6 +20,8 @@ export class ImagePlugin extends Plugin {
 
     protected _overImageRender: OverImageRender;
 
+    protected _imagePluginData: Map<string, IOverGridImageProperty>;
+
     protected _cellImageController: CellImageController;
 
     constructor(
@@ -30,13 +31,15 @@ export class ImagePlugin extends Plugin {
         @Inject(CommandManager) private readonly _commandManager: CommandManager
     ) {
         super(OVER_GRID_IMAGE_PLUGIN_NAME);
+        this._imagePluginData = new Map<string, IOverGridImageProperty>();
+        this._injector.add([IImagePluginData, { useFactory: () => this._imagePluginData }]);
     }
 
     override onMounted(): void {
         install(this);
         const sheetContainerUIController = this._injector.get(SheetContainerUIController);
         sheetContainerUIController.UIDidMount(() => {
-            this.initializeDependencies(this._injector);
+            this._initializeDependencies(this._injector);
         });
     }
 
@@ -44,17 +47,7 @@ export class ImagePlugin extends Plugin {
         uninstall(this);
     }
 
-    hideOverImagePanel(): void {
-        // const plugin: SheetPlugin = this.getPluginByName(PLUGIN_NAMES.SPREADSHEET)!;
-        // plugin.showSiderByName(OVER_GRID_IMAGE_PLUGIN_NAME, false);
-    }
-
-    showOverImagePanel(): void {
-        // const plugin: SheetPlugin = this.getPluginByName(PLUGIN_NAMES.SPREADSHEET)!;
-        // plugin.showSiderByName(OVER_GRID_IMAGE_PLUGIN_NAME, true);
-    }
-
-    private initializeDependencies(sheetInjector: Injector) {
+    private _initializeDependencies(sheetInjector: Injector) {
         const dependencies: Dependency[] = [[OverGridImageController], [CellImageController], [OverImageRender]];
         dependencies.forEach((d) => {
             sheetInjector.add(d);

@@ -1,11 +1,11 @@
 import { BaseComponentRender } from '@univerjs/base-ui';
 import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
-import { Inject } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
-import { ICurrentUniverService, ObserverManager } from '@univerjs/core';
-import { FileSelected } from '../Library/FileSelected';
-import { OVER_GRID_IMAGE_PLUGIN_NAME } from '../Const/PLUGIN_NAME';
-import { IOverGridImageProperty, OverGridImageBorderType } from '../Interfaces';
+import { Command, CommandManager, ICurrentUniverService, ObserverManager, Tools } from '@univerjs/core';
+import { FileSelected, IOverGridImageProperty, OVER_GRID_IMAGE_PLUGIN_NAME, OverGridImageBorderType } from '../Basics';
+import { AddImagePropertyAction, IAddImagePropertyData } from '../Model';
+import { IImagePluginData } from '../Symbol';
 
 export class OverGridImageController {
     protected _render: BaseComponentRender;
@@ -13,7 +13,10 @@ export class OverGridImageController {
     protected _toolButton: IToolbarItemProps;
 
     constructor(
+        @Inject(Injector) readonly _injector: Injector,
+        @Inject(IImagePluginData) _imagePluginData: Map<string, IOverGridImageProperty>,
         @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
+        @Inject(CommandManager) private _commandManager: CommandManager,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(ObserverManager) private _observerManager: ObserverManager,
         @ISelectionManager private readonly _selectionManager: SelectionManager
@@ -27,7 +30,7 @@ export class OverGridImageController {
             onClick: () => {
                 const rowIndex = _selectionManager.getActiveRange()?.getRowIndex();
                 const columnIndex = _selectionManager.getActiveRange()?.getColumn();
-                const sheetId = _currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+                const workbook = _currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
                 FileSelected.chooseImage().then((file) => {
                     const reader = new FileReader();
                     const img = new Image();
@@ -36,19 +39,23 @@ export class OverGridImageController {
                         img.src = reader.result as string;
                     };
                     img.onload = () => {
-                        _observerManager.getObserver<IOverGridImageProperty>('onAddImage')?.notifyObservers({
-                            id: '1',
+                        const action: IAddImagePropertyData = {
+                            actionName: AddImagePropertyAction.NAME,
+                            id: Tools.generateRandomId(),
                             borderType: OverGridImageBorderType.SOLID,
-                            radius: 0,
                             row: rowIndex || 1,
                             column: columnIndex || 1,
-                            sheetId,
                             url: img.src,
+                            radius: 0,
                             width: img.width,
                             height: img.height,
                             borderColor: '#000000',
                             borderWidth: 1,
-                        });
+                            sheetId: workbook.getActiveSheet().getSheetId(),
+                            injector: _injector,
+                        };
+                        const command = new Command({ WorkBookUnit: workbook }, action);
+                        this._commandManager.invoke(command);
                     };
                 });
             },

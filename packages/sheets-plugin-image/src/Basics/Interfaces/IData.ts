@@ -1,5 +1,4 @@
-import { BorderType } from './Enum/BorderType';
-import { NormalType } from './Enum/NormalType';
+import { BorderType, NormalType } from '../Enum';
 
 export type IProps = {
     normal: NormalType;

@@ -1,10 +1,6 @@
 import { ColorPickerCircleButton, Component, SiderModal, VNode } from '@univerjs/base-ui';
-import { BorderType } from '../../Enum/BorderType';
-import { NormalType } from '../../Enum/NormalType';
-import { OVER_GRID_IMAGE_PLUGIN_NAME } from '../../Const/PLUGIN_NAME';
-
+import { BorderType, NormalType } from '../../../Basics';
 import Style from './ImagePanelUI.module.less';
-import { OverGridImagePlugin } from '../../ImagePlugin';
 
 export interface ImagePanelUIProps {
     normal: NormalType;

@@ -1,6 +1,6 @@
 import { Observable } from '@univerjs/core';
 import { ImagePlugin } from '../ImagePlugin';
-import { IOverGridImageProperty } from '../Interfaces';
+import { IOverGridImageProperty } from './Interfaces';
 
 export type ImagePluginObserve = {
     onChangeImageSize: Observable<IOverGridImageProperty>;

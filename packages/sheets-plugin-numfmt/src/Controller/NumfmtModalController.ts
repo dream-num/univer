@@ -1,12 +1,10 @@
 import { ComponentChildren, ComponentManager } from '@univerjs/base-ui';
-import { SheetPlugin } from '@univerjs/base-sheets';
 import { LocaleService, ObserverManager } from '@univerjs/core';
-import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
-import { NumfmtPlugin } from '../NumfmtPlugin';
 import { FormatContent } from '../View/UI/FormatContent';
 import { NumfmtModal } from '../View/UI/NumfmtModal';
 import { NUMBERFORMAT, NUMFMT_PLUGIN_NAME, CURRENCYDETAIL, DATEFMTLISG } from '../Basics/Const';
+import { INumfmtPluginData } from '../Symbol';
 
 interface GroupProps {
     locale: string;
@@ -30,17 +28,10 @@ export interface ModalDataProps {
 }
 
 export class NumfmtModalController {
-    protected _sheetUIPlugin: SheetUIPlugin;
-
-    protected _sheetPlugin: SheetPlugin;
-
-    protected _numfmtModal: NumfmtModal;
-
-    protected _numfmtPlugin: NumfmtPlugin;
-
     protected _modalData: ModalDataProps[];
 
     constructor(
+        @Inject(INumfmtPluginData) private _numfmtPluginData: NumfmtModel,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
@@ -152,7 +143,7 @@ export class NumfmtModalController {
                 });
             }
         });
-        this._numfmtModal.setModal(this._modalData);
+        this._numfmtPluginData.setModal(this._modalData);
     }
 
     showModal(name: string, show: boolean): void {

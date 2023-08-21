@@ -1,41 +1,28 @@
-import {
-    ObjectMatrixPrimitiveType,
-    Command,
-    ObjectMatrix,
-    IRangeData,
-    Range,
-    ACTION_NAMES as CORE_ACTION_NAME,
-    CommandManager,
-    ICurrentUniverService
-} from '@univerjs/core';
+import { ObjectMatrixPrimitiveType, Command, ObjectMatrix, IRangeData, Range, ACTION_NAMES as CORE_ACTION_NAME, CommandManager, ICurrentUniverService } from '@univerjs/core';
 import { BaseComponentRender } from '@univerjs/base-ui';
 import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
 import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
-import styles from '../View/UI/index.module.less';
-import { NumfmtPlugin } from '../NumfmtPlugin';
-import { DEFAULT_DATA, NUMFMT_PLUGIN_NAME, NumfmtConfig } from '../Basics/Const';
-import { NumfmtModel } from '../Model/NumfmtModel';
 import { Inject, Injector } from '@wendellhu/redi';
+import styles from '../View/UI/index.module.less';
+import { DEFAULT_DATA, NUMFMT_PLUGIN_NAME, NumfmtConfig } from '../Basics/Const';
 import { NumfmtModalController } from './NumfmtModalController';
+import { INumfmtPluginData } from '../Symbol';
+import { NumfmtModel } from '../Model/NumfmtModel';
 
 export class NumfmtController {
     protected _numfmtList: IToolbarItemProps;
 
-    protected _model: NumfmtModel;
-
     protected _render: BaseComponentRender;
 
-    // eslint-disable-next-line max-lines-per-function
     constructor(
-        plugin: NumfmtPlugin,
         @Inject(ISelectionManager) private readonly _selectionManager: SelectionManager,
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
         @Inject(Injector) private readonly _numfmtInjector: Injector,
+        @Inject(INumfmtPluginData) private _numfmtPluginData: NumfmtModel,
         @Inject(ICurrentUniverService) private readonly _currentUniverService: ICurrentUniverService,
         @Inject(NumfmtModalController) private readonly _numfmtModalController: NumfmtModalController
     ) {
-        this._model = new NumfmtModel();
         // const executeFormatter = (type: string): void => {
         //     const manager = this._sheetPlugin.getSelectionManager();
         //     const workbook = this._plugin.getContext().getWorkBook();
@@ -181,7 +168,7 @@ export class NumfmtController {
     }
 
     getNumfmtBySheetIdConfig(sheetId: string): ObjectMatrixPrimitiveType<string> {
-        return this._model.getNumfmtBySheetIdConfig(sheetId);
+        return this._numfmtPluginData.getNumfmtBySheetIdConfig(sheetId);
     }
 
     setNumfmtByRange(sheetId: string, numfmtRange: IRangeData, numfmtValue: string): void {

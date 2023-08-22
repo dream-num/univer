@@ -1,7 +1,7 @@
 import { IImagePluginData } from '../../Symbol';
-import { IAddImagePropertyData } from '../Action/AddImagePropertyAction';
+import { IAddImagePropertyData } from '../Action/AddOverGridImageAction';
 
-export function AddImageProperty(property: IAddImagePropertyData): string {
+export function AddOverGridImageApply(property: IAddImagePropertyData): string {
     const injector = property.injector;
     if (injector == null) {
         throw new Error('Error injector is null');

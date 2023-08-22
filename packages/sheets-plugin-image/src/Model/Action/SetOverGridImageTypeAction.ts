@@ -1,5 +1,5 @@
 import { SheetActionBase, ActionObservers, ISheetActionData, CommandUnit } from '@univerjs/core';
-import { SetImageType } from '../Apply';
+import { SetOverGridImageTypeApply } from '../Apply';
 import { ACTION_NAMES, OVER_GRID_IMAGE_PLUGIN_NAME } from '../../Basics';
 
 export interface ISetImageTypeData extends ISheetActionData {
@@ -29,7 +29,7 @@ export class SetImageTypeAction extends SheetActionBase<ISetImageTypeData, ISetI
         const context = worksheet.getContext();
         const manager = context.getPluginManager();
         const plugin = manager.getPluginByName(OVER_GRID_IMAGE_PLUGIN_NAME) as OverGridImagePlugin;
-        return SetImageType(plugin, this._doActionData.sheetId, this._doActionData.id, this._doActionData.type);
+        return SetOverGridImageTypeApply(plugin, this._doActionData.sheetId, this._doActionData.id, this._doActionData.type);
     }
 
     undo(): void {
@@ -37,7 +37,7 @@ export class SetImageTypeAction extends SheetActionBase<ISetImageTypeData, ISetI
         const context = worksheet.getContext();
         const manager = context.getPluginManager();
         const plugin = manager.getPluginByName(OVER_GRID_IMAGE_PLUGIN_NAME) as OverGridImagePlugin;
-        SetImageType(plugin, this._oldActionData.sheetId, this._oldActionData.id, this._oldActionData.type);
+        SetOverGridImageTypeApply(plugin, this._oldActionData.sheetId, this._oldActionData.id, this._oldActionData.type);
     }
 
     validate(): boolean {

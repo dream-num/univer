@@ -4,8 +4,8 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
 import { Command, CommandManager, ICurrentUniverService, ObserverManager, Tools } from '@univerjs/core';
 import { FileSelected, IOverGridImageProperty, OVER_GRID_IMAGE_PLUGIN_NAME, OverGridImageBorderType } from '../Basics';
-import { AddImagePropertyAction, IAddImagePropertyData } from '../Model';
 import { IImagePluginData } from '../Symbol';
+import { AddOverGridImageAction, IAddOverGridImageActionData } from '../Model';
 
 export class OverGridImageController {
     protected _render: BaseComponentRender;
@@ -39,8 +39,8 @@ export class OverGridImageController {
                         img.src = reader.result as string;
                     };
                     img.onload = () => {
-                        const action: IAddImagePropertyData = {
-                            actionName: AddImagePropertyAction.NAME,
+                        const action: IAddOverGridImageActionData = {
+                            actionName: AddOverGridImageAction.NAME,
                             id: Tools.generateRandomId(),
                             borderType: OverGridImageBorderType.SOLID,
                             row: rowIndex || 1,

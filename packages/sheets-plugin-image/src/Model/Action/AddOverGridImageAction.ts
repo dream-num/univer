@@ -1,9 +1,9 @@
 import { SheetActionBase, ActionObservers, ISheetActionData, CommandUnit, ActionType } from '@univerjs/core';
 import { ACTION_NAMES, OverGridImageBorderType } from '../../Basics';
-import { AddImageProperty, RemoveImageProperty } from '../Apply';
-import { IRemoveImagePropertyData } from './RemoveImagePropertyAction';
+import { AddOverGridImageApply, RemoveOverGridImageApply } from '../Apply';
+import { IRemoveOverGridImageActionData } from './RemoveOverGridImageAction';
 
-export interface IAddImagePropertyData extends ISheetActionData {
+export interface IAddOverGridImageActionData extends ISheetActionData {
     id: string;
     sheetId: string;
     radius: number;
@@ -17,10 +17,10 @@ export interface IAddImagePropertyData extends ISheetActionData {
     borderWidth: number;
 }
 
-export class AddImagePropertyAction extends SheetActionBase<IAddImagePropertyData, IRemoveImagePropertyData> {
+export class AddOverGridImageAction extends SheetActionBase<IAddOverGridImageActionData, IRemoveOverGridImageActionData> {
     static NAME = 'AddImagePropertyAction';
 
-    constructor(actionData: IAddImagePropertyData, commandUnit: CommandUnit, observers: ActionObservers) {
+    constructor(actionData: IAddOverGridImageActionData, commandUnit: CommandUnit, observers: ActionObservers) {
         super(actionData, commandUnit, observers);
         this._oldActionData = {
             actionName: ACTION_NAMES.SET_IMAGE_TYPE_ACTION,
@@ -31,7 +31,7 @@ export class AddImagePropertyAction extends SheetActionBase<IAddImagePropertyDat
     }
 
     do(): string {
-        const result = AddImageProperty(this._doActionData);
+        const result = AddOverGridImageApply(this._doActionData);
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,
@@ -45,7 +45,7 @@ export class AddImagePropertyAction extends SheetActionBase<IAddImagePropertyDat
     }
 
     undo(): void {
-        RemoveImageProperty(this._oldActionData);
+        RemoveOverGridImageApply(this._oldActionData);
         this._observers.notifyObservers({
             type: ActionType.UNDO,
             data: this._oldActionData,

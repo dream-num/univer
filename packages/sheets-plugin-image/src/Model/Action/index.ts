@@ -1,3 +1,3 @@
-export * from './SetImageTypeAction';
-export * from './AddImagePropertyAction';
-export * from './RemoveImagePropertyAction';
+export * from './SetOverGridImageTypeAction';
+export * from './AddOverGridImageAction';
+export * from './RemoveOverGridImageAction';

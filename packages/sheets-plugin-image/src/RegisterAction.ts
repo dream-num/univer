@@ -1,6 +1,6 @@
 import { CommandManager } from '@univerjs/core';
-import { SetImageTypeAction } from './Model/Action';
-import { AddImagePropertyAction } from './Model/Action/AddImagePropertyAction';
+import { AddOverGridImageAction, RemoveOverGridImageAction, SetImageTypeAction } from './Model';
 
 CommandManager.register(SetImageTypeAction.NAME, SetImageTypeAction);
-CommandManager.register(AddImagePropertyAction.NAME, AddImagePropertyAction);
+CommandManager.register(AddOverGridImageAction.NAME, AddOverGridImageAction);
+CommandManager.register(RemoveOverGridImageAction.NAME, RemoveOverGridImageAction);

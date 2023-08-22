@@ -6,6 +6,11 @@ export type ClipboardType = {
     data: string;
 };
 
+type ReadResultType = {
+    type: string;
+    result: string;
+};
+
 export class Clipboard {
     static clipboard = window.navigator.clipboard;
 
@@ -58,7 +63,7 @@ export class Clipboard {
 
     static async read(e?: ClipboardEvent): Promise<Array<PasteType | null> | null | string> {
         if (e) {
-            const result = [];
+            const result: ReadResultType[] = [];
             const clipboardData = e?.clipboardData;
             const types = clipboardData?.types;
             if (!types) return null;

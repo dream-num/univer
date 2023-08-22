@@ -330,8 +330,9 @@ export class UniverCopy extends Copy {
                 const cellInfo = spreadsheet?.getCellByIndex(r, c);
                 if (cellInfo?.isMerged || (!cellInfo?.isMerged && cellInfo?.isMergedMainCell)) {
                     if (cellInfo.isMergedMainCell) {
-                        span = `rowSpan="${cellInfo.mergeInfo.endRow - cellInfo.mergeInfo.startRow + 1}" colSpan="${cellInfo.mergeInfo.endColumn - cellInfo.mergeInfo.startColumn + 1
-                            }"`;
+                        span = `rowSpan="${cellInfo.mergeInfo.endRow - cellInfo.mergeInfo.startRow + 1}" colSpan="${
+                            cellInfo.mergeInfo.endColumn - cellInfo.mergeInfo.startColumn + 1
+                        }"`;
                     } else {
                         continue;
                     }

@@ -1,5 +1,5 @@
 import { Plugin, Tools, LocaleService, PluginType } from '@univerjs/core';
-import { RegisterManager, ComponentManager, getRefElement } from '@univerjs/base-ui';
+import { RegisterManager, ComponentManager, getRefElement, DragManager } from '@univerjs/base-ui';
 import { IRenderingEngine } from '@univerjs/base-render';
 import { Inject, Injector } from '@wendellhu/redi';
 import { zh, en } from './Locale';
@@ -17,6 +17,8 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve> {
 
     private _config: ISlideUIPluginConfig;
 
+    private _dragManager: DragManager;
+    
     private _componentManager: ComponentManager;
 
     constructor(
@@ -109,10 +111,12 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve> {
     }
 
     private initializeDependencies(): void {
+        this._injector.add([DragManager]);
         this._injector.add([RegisterManager]);
         this._injector.add([ComponentManager]);
 
         // TODO: maybe we don't have to instantiate these dependencies manually
+        this._dragManager = this._injector.get(DragManager);
         this._componentManager = this._injector.get(ComponentManager);
         this._registerManager = this._injector.get(RegisterManager);
 

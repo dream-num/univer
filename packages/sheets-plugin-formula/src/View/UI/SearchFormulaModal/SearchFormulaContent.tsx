@@ -1,6 +1,5 @@
 import { BaseComponentProps, Component, createRef, debounce, Input, Select } from '@univerjs/base-ui';
-import { FormulaType } from '../../../Basics';
-import { FunListILabel, Label } from '../../../Controller/SearchFormulaModalController';
+import { FormulaType, FunListILabel, Label } from '../../../Basics';
 import styles from './index.module.less';
 
 interface IProps extends BaseComponentProps {
@@ -16,7 +15,7 @@ interface IState {
 export class SearchFormulaContent extends Component<IProps, IState> {
     functionListRef = createRef();
 
-    initialize() {
+    override initialize() {
         this.state = {
             functionList: undefined,
             type: 0,
@@ -25,7 +24,8 @@ export class SearchFormulaContent extends Component<IProps, IState> {
 
     changeInput(e: Event) {
         const value = (e.target as HTMLInputElement).value;
-        let { functionList, type } = this.state;
+        let { functionList } = this.state;
+        const { type } = this.state;
         if (value) {
             functionList = functionList?.filter((item) => {
                 if (item.n?.includes(value) || item.d?.includes(value)) {
@@ -56,7 +56,7 @@ export class SearchFormulaContent extends Component<IProps, IState> {
         );
     }
 
-    componentDidMount() {
+    override componentDidMount() {
         const functionList = this.getFunctionList(this.props.funList.children?.filter((item) => item.t === 0) ?? []);
         this.setState(
             {
@@ -87,9 +87,9 @@ export class SearchFormulaContent extends Component<IProps, IState> {
     /**
      * 国际化
      */
-    getSelect() {
+    getSelect(): Array<{ label: string }> {
         const { select } = this.props;
-        const arr = [];
+        const arr: Array<{ label: string }> = [];
         for (let i = 0; i < select.length; i++) {
             arr.push({
                 label: this.getLocale(select[i].label),
@@ -101,7 +101,7 @@ export class SearchFormulaContent extends Component<IProps, IState> {
     getFunctionList(list: FormulaType[]) {
         const functionList = JSON.parse(JSON.stringify(list));
         for (let i = 0; i < functionList.length; i++) {
-            for (let k in functionList[i]) {
+            for (const k in functionList[i]) {
                 if (functionList[i][k] instanceof Array) {
                     functionList[i][k] = this.getFunctionList(functionList[i][k]);
                 } else if (typeof functionList[i][k] === 'string') {
@@ -109,7 +109,7 @@ export class SearchFormulaContent extends Component<IProps, IState> {
                 }
             }
         }
-        return functionList;
+        return functionList as FormulaType[];
     }
 
     render() {

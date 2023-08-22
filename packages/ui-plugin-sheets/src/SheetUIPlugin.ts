@@ -1,6 +1,6 @@
 import { Inject, Injector } from '@wendellhu/redi';
 import { Plugin, Tools, Univer, PluginType, LocaleService } from '@univerjs/core';
-import { ComponentManager, getRefElement, RegisterManager, KeyboardManager, SlotComponent, ZIndexManager, SlotManager } from '@univerjs/base-ui';
+import { ComponentManager, getRefElement, RegisterManager, KeyboardManager, SlotComponent, ZIndexManager, SlotManager, DragManager } from '@univerjs/base-ui';
 import { IRenderingEngine } from '@univerjs/base-render';
 import { DefaultSheetUIConfig, installObserver, ISheetUIPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';
 import { AppUIController } from './Controller/AppUIController';
@@ -21,6 +21,8 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
     private _config: ISheetUIPluginConfig;
 
     private _zIndexManager: ZIndexManager;
+
+    private _dragManager: DragManager;
 
     private _componentManager: ComponentManager;
 
@@ -71,13 +73,13 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
         }, 0);
     }
 
-    initUI() { }
+    initUI() {}
 
     override onMounted(): void {
         this.initialize();
     }
 
-    override onDestroy(): void { }
+    override onDestroy(): void {}
 
     getAppUIController() {
         return this._appUIController;
@@ -149,6 +151,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
     }
 
     private initializeDependencies(): void {
+        this._injector.add([DragManager]);
         this._injector.add([KeyboardManager]);
         this._injector.add([RegisterManager]);
         this._injector.add([ComponentManager]);
@@ -156,6 +159,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
         this._injector.add([SlotManager]);
 
         // TODO: maybe we don't have to instantiate these dependencies manually
+        this._dragManager = this._injector.get(DragManager);
         this._componentManager = this._injector.get(ComponentManager);
         this._keyboardManager = this._injector.get(KeyboardManager);
         this._zIndexManager = this._injector.get(ZIndexManager);

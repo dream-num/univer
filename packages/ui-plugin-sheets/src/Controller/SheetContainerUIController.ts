@@ -38,8 +38,6 @@ export class SheetContainerUIController {
 
     private _config: ISheetUIPluginConfig;
 
-    private _dragManager: DragManager;
-
     constructor(
         config: ISheetUIPluginConfig,
         @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
@@ -47,7 +45,8 @@ export class SheetContainerUIController {
         @Self() @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @Inject(SlotManager) private readonly _slotManager: SlotManager
+        @Inject(SlotManager) private readonly _slotManager: SlotManager,
+        @Inject(DragManager) private readonly _dragManager: DragManager
     ) {
         this._config = config;
 
@@ -60,7 +59,7 @@ export class SheetContainerUIController {
         this._rightMenuController = this._injector.createInstance(RightMenuUIController, this._config.layout?.rightMenuConfig);
         this._countBarController = this._injector.createInstance(CountBarUIController);
         this._sheetBarController = this._injector.createInstance(SheetBarUIController);
-        this._dragManager = this._injector.createInstance(DragManager);
+        // this._dragManager = this._injector.createInstance(DragManager);
 
         // 插入prompt组件
         this._componentManager.register(Prompt.name, Prompt);

@@ -3,7 +3,7 @@ import { CommandManager, ObserverManager } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { OverImageShape } from './OverImageShape';
 import { IOverGridImageProperty } from '../../Basics';
-import { AddImagePropertyAction, IAddImagePropertyData, IRemoveImagePropertyData, RemoveImagePropertyAction } from '../../Model';
+import { AddOverGridImageAction, IAddOverGridImageActionData, IRemoveOverGridImageActionData, RemoveOverGridImageAction } from '../../Model';
 
 export class OverImageRender {
     static LAYER_Z_INDEX: number = 1000;
@@ -18,13 +18,13 @@ export class OverImageRender {
         }
         CommandManager.getActionObservers().add((event) => {
             switch (event.data.actionName) {
-                case AddImagePropertyAction.NAME: {
-                    const data = event.data as IAddImagePropertyData;
+                case AddOverGridImageAction.NAME: {
+                    const data = event.data as IAddOverGridImageActionData;
                     this.addOverImage(data);
                     break;
                 }
-                case RemoveImagePropertyAction.NAME: {
-                    const data = event.data as IRemoveImagePropertyData;
+                case RemoveOverGridImageAction.NAME: {
+                    const data = event.data as IRemoveOverGridImageActionData;
                     this.removeOverImage(data.id);
                     break;
                 }

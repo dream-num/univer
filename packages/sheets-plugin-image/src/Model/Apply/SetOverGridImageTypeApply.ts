@@ -1,1 +1,1 @@
-export function SetOverGridImageTypeApply(plugin: OverGridImagePlugin, sheetId: string, id: string, type: string): string {}
+export function SetOverGridImageTypeApply(sheetId: string, id: string, type: string): string {}

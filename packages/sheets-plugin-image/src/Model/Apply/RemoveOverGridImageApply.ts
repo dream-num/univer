@@ -1,7 +1,7 @@
 import { IImagePluginData } from '../../Symbol';
-import { IRemoveImagePropertyData } from '../Action/RemoveOverGridImageAction';
+import { IRemoveOverGridImageActionData } from '../Action';
 
-export function RemoveOverGridImageApply(property: IRemoveImagePropertyData): void {
+export function RemoveOverGridImageApply(property: IRemoveOverGridImageActionData): void {
     const injector = property.injector;
     if (injector == null) {
         throw new Error('Error injector is null');

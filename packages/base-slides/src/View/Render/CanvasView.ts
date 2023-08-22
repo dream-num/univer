@@ -1,6 +1,6 @@
-import { Engine, EVENT_TYPE, IWheelEvent, Rect, Scene, ScrollBar, Slide, Viewport } from '@univerjs/base-render';
-import { EventState, getColorStyle, IColorStyle, ISlidePage, Nullable } from '@univerjs/core';
-import { SlidePlugin } from '../../SlidePlugin';
+import { Engine, EVENT_TYPE, IRenderingEngine, IWheelEvent, Rect, Scene, ScrollBar, Slide, Viewport } from '@univerjs/base-render';
+import { EventState, getColorStyle, IColorStyle, ICurrentUniverService, ISlidePage, Nullable, ObserverManager } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 import { ObjectProvider } from './ObjectProvider';
 
 export enum SLIDE_KEY {
@@ -16,11 +16,17 @@ export class CanvasView {
 
     private _slide: Slide;
 
-    private _ObjectProvider = new ObjectProvider();
+    private _ObjectProvider: ObjectProvider;
 
     private _activePageId: string;
 
-    constructor(private _engine: Engine, private _plugin: SlidePlugin) {
+    constructor(
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
+        @Inject(Injector) private readonly _injector: Injector,
+        @IRenderingEngine private readonly _engine: Engine
+    ) {
+        this._initializeDependencies(this._injector);
         this._initialize();
     }
 
@@ -67,7 +73,7 @@ export class CanvasView {
     }
 
     activePage(pageId?: string) {
-        const model = this._plugin.context.getSlide();
+        const model = this._currentUniverService.getCurrentUniverSlideInstance().getSlideModel();
         let page: Nullable<ISlidePage>;
         if (pageId) {
             page = model.getPage(pageId);
@@ -178,7 +184,7 @@ export class CanvasView {
     }
 
     private _createSlide() {
-        const model = this._plugin.context.getSlide();
+        const model = this._currentUniverService.getCurrentUniverSlideInstance().getSlideModel();
         const mainScene = this._scene;
 
         const { width: sceneWidth, height: sceneHeight } = mainScene;
@@ -205,7 +211,7 @@ export class CanvasView {
     }
 
     private _addBackgroundRect(scene: Scene, fill: IColorStyle) {
-        const model = this._plugin.context.getSlide();
+        const model = this._currentUniverService.getCurrentUniverSlideInstance().getSlideModel();
 
         const pageSize = model.getPageSize();
 
@@ -262,7 +268,7 @@ export class CanvasView {
     }
 
     private _createScene(pageId: string, parent: Engine | Slide, page: ISlidePage) {
-        let { width, height } = parent;
+        const { width, height } = parent;
 
         const scene = new Scene(pageId, parent, {
             width,
@@ -282,7 +288,7 @@ export class CanvasView {
 
         const { pageElements, pageBackgroundFill } = page;
 
-        const objects = this._ObjectProvider.convertToRenderObjects(pageElements, this._scene, this._plugin.context);
+        const objects = this._ObjectProvider.convertToRenderObjects(pageElements, this._scene);
 
         scene.openTransformer();
 
@@ -303,5 +309,9 @@ export class CanvasView {
         this._slide.addPage(scene);
 
         return scene;
+    }
+
+    private _initializeDependencies(slideInjector: Injector) {
+        this._ObjectProvider = slideInjector.createInstance(ObjectProvider);
     }
 }

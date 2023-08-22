@@ -71,13 +71,13 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
         }, 0);
     }
 
-    initUI() {}
+    initUI() { }
 
     override onMounted(): void {
         this.initialize();
     }
 
-    override onDestroy(): void {}
+    override onDestroy(): void { }
 
     getAppUIController() {
         return this._appUIController;
@@ -137,8 +137,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
     }
 
     getSlot(name: string) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return this._appUIController.getSheetContainerController().getMainSlotController().getSlot(name);
+        // return this._appUIController.getSheetContainerController().getMainSlotController().getSlot(name);
     }
 
     addToolButton(config: IToolbarItemProps) {

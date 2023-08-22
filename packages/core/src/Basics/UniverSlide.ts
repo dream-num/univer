@@ -1,7 +1,11 @@
+import { Ctor, Dependency, Injector, Optional } from '@wendellhu/redi';
 import { ISlideData } from '../Types/Interfaces';
-import { IOHttp, IOHttpConfig, Logger } from '../Shared';
+import { IOHttp, IOHttpConfig, Logger, GenName } from '../Shared';
 import { VersionCode, VersionEnv } from './Version';
 import { ColorBuilder } from '../Sheets/Domain/ColorBuilder';
+import { SlideModel } from '../Slides/Domain';
+import { ObserverManager } from '../Observer';
+import { PluginCtor, PluginStore, Plugin } from '../Plugin';
 
 /**
  * Externally provided UniverSlide root instance
@@ -9,8 +13,18 @@ import { ColorBuilder } from '../Sheets/Domain/ColorBuilder';
 export class UniverSlide {
     UniverSlideConfig: Partial<ISlideData>;
 
-    constructor(UniverSlideData: Partial<ISlideData> = {}) {
+    private readonly _slideInjector: Injector;
+
+    private readonly _slideModel: SlideModel;
+
+    private readonly _pluginStore = new PluginStore();
+
+    constructor(UniverSlideData: Partial<ISlideData> = {}, @Optional(Injector) parentInjector?: Injector) {
         this.UniverSlideConfig = UniverSlideData;
+
+        this._slideInjector = this._initializeDependencies(parentInjector);
+
+        this._slideModel = this._slideInjector.createInstance(SlideModel, UniverSlideData);
     }
 
     static newInstance(UniverSlideData: Partial<ISlideData> = {}): UniverSlide {
@@ -41,5 +55,30 @@ export class UniverSlide {
 
     static newColor(): ColorBuilder {
         return new ColorBuilder();
+    }
+
+    /**
+     * Add a plugin into UniverSlide. UniverSlide should add dependencies exposed from this plugin to its DI system.
+     *
+     * @param plugin constructor of the plugin class
+     * @param options options to this plugin
+     *
+     * @internal
+     */
+    addPlugin<T extends Plugin>(plugin: PluginCtor<T>, options: any): void {
+        const pluginInstance: Plugin = this._slideInjector.createInstance(plugin as unknown as Ctor<any>, options);
+
+        pluginInstance.onCreate();
+        pluginInstance.onMounted();
+        this._pluginStore.addPlugin(pluginInstance);
+    }
+
+    getSlideModel() {
+        return this._slideModel;
+    }
+
+    private _initializeDependencies(parentInjector?: Injector): Injector {
+        const dependencies: Dependency[] = [[ObserverManager], [GenName]];
+        return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
     }
 }

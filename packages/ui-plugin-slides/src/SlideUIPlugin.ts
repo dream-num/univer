@@ -1,14 +1,16 @@
-import { Plugin, Context, Tools, PLUGIN_NAMES, Univer } from '@univerjs/core';
+import { Plugin, Tools, LocaleService, PluginType } from '@univerjs/core';
 import { RegisterManager, ComponentManager, getRefElement } from '@univerjs/base-ui';
-import { RenderEngine } from '@univerjs/base-render';
-import { SlidePlugin } from '@univerjs/base-slides';
+import { IRenderingEngine } from '@univerjs/base-render';
+import { Inject, Injector } from '@wendellhu/redi';
 import { zh, en } from './Locale';
 import { SLIDE_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { AppUIController } from './Controller/AppUIController';
 import { DefaultSlideUIConfig, installObserver, ISlideUIPluginConfig, SlideUIPluginObserve } from './Basics';
 import { IToolbarItemProps } from './Controller';
 
-export class SlideUIPlugin extends Plugin<SlideUIPluginObserve, Context> {
+export class SlideUIPlugin extends Plugin<SlideUIPluginObserve> {
+    static override type = PluginType.Slide;
+
     private _appUIController: AppUIController;
 
     private _registerManager: RegisterManager;
@@ -17,32 +19,27 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve, Context> {
 
     private _componentManager: ComponentManager;
 
-    constructor(config?: ISlideUIPluginConfig) {
+    constructor(
+        config: Partial<ISlideUIPluginConfig> = {},
+        @Inject(Injector) override readonly _injector: Injector,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
+    ) {
         super(SLIDE_UI_PLUGIN_NAME);
         this._config = Tools.deepMerge({}, DefaultSlideUIConfig, config);
+
+        this.initializeDependencies();
     }
 
-    static create(config?: ISlideUIPluginConfig) {
-        return new SlideUIPlugin(config);
-    }
-
-    installTo(univerInstance: Univer) {
-        univerInstance.install(this);
-    }
-
-    initialize(ctx: Context): void {
+    initialize(): void {
         installObserver(this);
         /**
          * load more Locale object
          */
-        this.getLocale().load({
-            en,
+        this._localeService.getLocale().load({
             zh,
+            en,
         });
 
-        this._componentManager = new ComponentManager();
-        this._registerManager = new RegisterManager(this);
-        this._appUIController = new AppUIController(this);
         // AppUIController initializes the DOM as an asynchronous rendering process, and must wait for the UI rendering to complete before starting to render the canvas
         this.UIDidMount(() => {
             this.initRender();
@@ -54,8 +51,8 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve, Context> {
     }
 
     initRender() {
-        const engine = this.getPluginByName<RenderEngine>(PLUGIN_NAMES.BASE_RENDER)?.getEngine()!;
-        let container = getRefElement(this._appUIController.getSlideContainerController().getContentRef());
+        const engine = this._injector.get(IRenderingEngine);
+        const container = getRefElement(this._appUIController.getSlideContainerController().getContentRef());
 
         // mount canvas to DOM container
         engine.setContainer(container);
@@ -67,17 +64,16 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve, Context> {
         // should be clear
         setTimeout(() => {
             engine.resize();
-            this.getUniver().getCurrentUniverSlideInstance().context.getPluginManager().getRequirePluginByName<SlidePlugin>(PLUGIN_NAMES.SLIDE).getCanvasView().scrollToCenter();
         }, 0);
     }
 
-    initUI() {}
+    initUI() { }
 
-    onMounted(ctx: Context): void {
-        this.initialize(ctx);
+    override onMounted(): void {
+        this.initialize();
     }
 
-    onDestroy(): void {}
+    override onDestroy(): void { }
 
     getAppUIController() {
         return this._appUIController;
@@ -110,5 +106,16 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve, Context> {
 
     deleteToolButton(name: string) {
         this._appUIController.getSlideContainerController().getToolbarController().deleteToolbarConfig(name);
+    }
+
+    private initializeDependencies(): void {
+        this._injector.add([RegisterManager]);
+        this._injector.add([ComponentManager]);
+
+        // TODO: maybe we don't have to instantiate these dependencies manually
+        this._componentManager = this._injector.get(ComponentManager);
+        this._registerManager = this._injector.get(RegisterManager);
+
+        this._appUIController = this._injector.createInstance(AppUIController, this._config);
     }
 }

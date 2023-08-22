@@ -1,22 +1,14 @@
-import { SlidePlugin } from '@univerjs/base-slides';
-import { ISlidePage, PLUGIN_NAMES } from '@univerjs/core';
-import { SlideUIPlugin } from '../SlideUIPlugin';
+import { ICurrentUniverService, ISlidePage } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
+import { CanvasView } from '@univerjs/base-slides';
 import { SlideBar } from '../View/SlideBar/SlideBar';
 
 export class SlideBarUIController {
-    private _plugin: SlideUIPlugin;
-
-    private _slidePlugin: SlidePlugin;
-
     private _slideBar: SlideBar;
 
     private _pages: ISlidePage[] = [];
 
-    constructor(plugin: SlideUIPlugin) {
-        this._plugin = plugin;
-
-        this._slidePlugin = plugin.getUniver().getCurrentUniverSlideInstance().context.getPluginManager().getRequirePluginByName<SlidePlugin>(PLUGIN_NAMES.SLIDE);
-
+    constructor(@Inject(CanvasView) private readonly _canvasView: CanvasView, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
         this._initialize();
     }
 
@@ -49,7 +41,7 @@ export class SlideBarUIController {
      * Arrow functions must be used to bind `this`, otherwise `this` will be lost when the DOM component triggers the callback
      */
     addSlide = () => {
-        const model = this._slidePlugin.getContext().getSlide();
+        const model = this._currentUniverService.getCurrentUniverSlideInstance().getSlideModel();
         const canvasView = this._getCanvasView();
         const newPage = model.addPage();
         this._pages.push(newPage);
@@ -71,18 +63,18 @@ export class SlideBarUIController {
     }
 
     private _getCanvasView() {
-        return this._slidePlugin.getCanvasView();
+        return this._canvasView;
     }
 
     private _generateModel() {
-        const model = this._slidePlugin.getContext().getSlide();
+        const model = this._currentUniverService.getCurrentUniverSlideInstance().getSlideModel();
         const pages = model.getPages();
         const pageOrder = model.getPageOrder();
         if (!pages || !pageOrder) {
             return;
         }
 
-        pageOrder.forEach((pageKey) => {
+        pageOrder.forEach((pageKey: string) => {
             this._pages.push(pages[pageKey]);
         });
     }

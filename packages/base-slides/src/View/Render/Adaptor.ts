@@ -1,5 +1,6 @@
 import { Scene } from '@univerjs/base-render';
-import { ContextBase, IPageElement, PageElementType, Registry } from '@univerjs/core';
+import { IPageElement, PageElementType, Registry } from '@univerjs/core';
+import { Injector } from '@wendellhu/redi';
 
 export class ObjectAdaptor {
     zIndex = 0;
@@ -13,7 +14,8 @@ export class ObjectAdaptor {
         return this;
     }
 
-    convert(pageElement: IPageElement, mainScene: Scene, context?: ContextBase) {}
+    convert(pageElement: IPageElement, mainScene: Scene) { }
+    create(injector: Injector){}
 }
 
 export const CanvasObjectProviderRegistry = Registry.create();

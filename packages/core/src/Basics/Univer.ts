@@ -6,10 +6,11 @@ import { UniverSheet } from './UniverSheet';
 import { UniverDoc } from './UniverDoc';
 import { Nullable } from '../Shared';
 import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../Plugin';
-import { IDocumentData, IUniverData, IWorkbookConfig } from '../Types/Interfaces';
+import { IDocumentData, ISlideData, IUniverData, IWorkbookConfig } from '../Types/Interfaces';
 import { UniverObserverImpl } from './UniverObserverImpl';
 import { ObserverManager } from '../Observer';
-import { CurrentUniverService, IDCurrentUniverService, ICurrentUniverService } from '../Service/Current.service';
+import { CurrentUniverService, ICurrentUniverService } from '../Service/Current.service';
+import { UniverSlide } from './UniverSlide';
 
 /**
  * Univer.
@@ -33,7 +34,7 @@ export class Univer {
     }
 
     private get _currentUniverService(): ICurrentUniverService {
-        return this._univerInjector.get(IDCurrentUniverService);
+        return this._univerInjector.get(ICurrentUniverService);
     }
 
     /** Register a plugin into univer. */
@@ -46,6 +47,8 @@ export class Univer {
             this.registerSheetPlugin(plugin, configs);
         } else if (plugin.type === PluginType.Doc) {
             this.registerDocPlugin(plugin, configs);
+        } else if (plugin.type === PluginType.Slide) {
+            this.registerSlidePlugin(plugin, configs);
         } else {
             throw new Error(`Unimplemented plugin system for business: "${plugin.type}".`);
         }
@@ -71,6 +74,15 @@ export class Univer {
         this._currentUniverService.addDoc(doc);
 
         return doc;
+    }
+
+    createUniverSlide(config: Partial<ISlideData>): UniverSlide {
+        const slide = this._univerInjector.createInstance(UniverSlide, config);
+
+        this.initializePluginsForSlide(slide);
+        this._currentUniverService.addSlide(slide);
+
+        return slide;
     }
 
     getUniverSheetInstance(id: string): Nullable<UniverSheet> {
@@ -118,7 +130,7 @@ export class Univer {
     }
 
     private initializeDependencies(): Injector {
-        return new Injector([[ObserverManager], [IDCurrentUniverService, { useClass: CurrentUniverService }], [CommandManager], [LocaleService], [UndoManager]]);
+        return new Injector([[ObserverManager], [ICurrentUniverService, { useClass: CurrentUniverService }], [CommandManager], [LocaleService], [UndoManager]]);
     }
 
     private registerUniverPlugin<T extends Plugin>(plugin: PluginCtor<T>, options?: any): void {
@@ -152,6 +164,16 @@ export class Univer {
         }
     }
 
+    private registerSlidePlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
+        this._univerPluginRegistry.registerPlugin(pluginCtor, options);
+        const slides = this._currentUniverService.getAllUniverSlidesInstance();
+        if (slides.length) {
+            slides.forEach((slide) => {
+                slide.addPlugin(pluginCtor, options);
+            });
+        }
+    }
+
     private initializePluginsForSheet(sheet: UniverSheet): void {
         const plugins = this._univerPluginRegistry.getRegisterPlugins(PluginType.Sheet);
         plugins.forEach((p) => {
@@ -163,6 +185,13 @@ export class Univer {
         const plugins = this._univerPluginRegistry.getRegisterPlugins(PluginType.Doc);
         plugins.forEach((p) => {
             doc.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options);
+        });
+    }
+
+    private initializePluginsForSlide(slide: UniverSlide): void {
+        const plugins = this._univerPluginRegistry.getRegisterPlugins(PluginType.Slide);
+        plugins.forEach((p) => {
+            slide.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options);
         });
     }
 }

@@ -1,27 +1,31 @@
-import { LocaleType } from '@univerjs/core';
-import { SlideUIPlugin } from '../SlideUIPlugin';
+import { LocaleService, LocaleType, ObserverManager } from '@univerjs/core';
+import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
+import { ComponentManager } from '@univerjs/base-ui';
 import { UI } from '../View';
 import { SlideContainerUIController } from './SlideContainerUIController';
+import { ISlideUIPluginConfig } from '../Basics';
 
 export class AppUIController {
-    protected _plugin: SlideUIPlugin;
+    private _slideContainerUIController: SlideContainerUIController;
 
-    private _slideContainerController: SlideContainerUIController;
-
-    constructor(plugin: SlideUIPlugin) {
-        this._plugin = plugin;
-
-        this._slideContainerController = new SlideContainerUIController(this._plugin);
-
-        const UIConfig = this._slideContainerController.getUIConfig();
+    constructor(
+        config: ISlideUIPluginConfig,
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+    ) {
+        this._slideContainerUIController = this._injector.createInstance(SlideContainerUIController, config);
+        this._injector.add([SlideContainerUIController, { useValue: this._slideContainerUIController }]);
+        const UIConfig = this._slideContainerUIController.getUIConfig();
 
         UI.create({
-            context: this._plugin.getGlobalContext(),
-            locale: this._plugin.getGlobalContext().getLocale().getCurrentLocale(),
-            componentManager: this._plugin.getComponentManager(),
+            injector: this._injector,
+            locale: this._localeService.getLocale().getCurrentLocale(),
+            componentManager: this._componentManager,
             changeLocale: this.changeLocale,
             UIConfig,
-            container: this._plugin.getConfig().container,
+            container: config.container,
         });
     }
 
@@ -33,16 +37,13 @@ export class AppUIController {
      *
      */
     changeLocale = (locale: string) => {
-        this._plugin
-            .getGlobalContext()
-            .getLocale()
-            .change(locale as LocaleType);
+        this._localeService.getLocale().change(locale as LocaleType);
 
         // publish
-        this._plugin.getGlobalContext().getObserverManager().requiredObserver('onAfterChangeUILocaleObservable', 'core')!.notifyObservers();
+        this._globalObserverManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')!.notifyObservers();
     };
 
     getSlideContainerController() {
-        return this._slideContainerController;
+        return this._slideContainerUIController;
     }
 }

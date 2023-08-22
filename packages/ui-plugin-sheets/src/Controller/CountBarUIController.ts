@@ -1,7 +1,7 @@
 import { Inject } from '@wendellhu/redi';
 
 import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
-import { RangeList, Tools, CommandManager, SheetActionBase, SetZoomRatioAction, UIObserver, ICurrentUniverService, IDCurrentUniverService, ObserverManager } from '@univerjs/core';
+import { RangeList, Tools, CommandManager, SheetActionBase, SetZoomRatioAction, UIObserver, ICurrentUniverService, ObserverManager } from '@univerjs/core';
 
 import { CountBar } from '../View/CountBar';
 
@@ -9,7 +9,7 @@ export class CountBarUIController {
     protected _countBar: CountBar;
 
     constructor(
-        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @ISelectionManager private readonly _selectionManager: SelectionManager,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager
     ) {

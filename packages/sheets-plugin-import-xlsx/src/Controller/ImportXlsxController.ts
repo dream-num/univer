@@ -1,5 +1,5 @@
 import { Inject } from '@wendellhu/redi';
-import { ICurrentUniverService, IDCurrentUniverService, IKeyValue, migrate, Tools } from '@univerjs/core';
+import { ICurrentUniverService, IKeyValue, migrate, Tools } from '@univerjs/core';
 import { BaseComponentRender } from '@univerjs/base-ui';
 import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 
@@ -13,7 +13,7 @@ export class ImportXlsxController {
 
     constructor(
         @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
-        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {
         this._toolButton = {
             name: IMPORT_XLSX_PLUGIN_NAME,

@@ -1,14 +1,4 @@
-import {
-    ObjectMatrixPrimitiveType,
-    Command,
-    ObjectMatrix,
-    IRangeData,
-    Range,
-    ACTION_NAMES as CORE_ACTION_NAME,
-    CommandManager,
-    ICurrentUniverService,
-    IDCurrentUniverService,
-} from '@univerjs/core';
+import { ObjectMatrixPrimitiveType, Command, ObjectMatrix, IRangeData, Range, ACTION_NAMES as CORE_ACTION_NAME, CommandManager, ICurrentUniverService } from '@univerjs/core';
 import { BaseComponentRender } from '@univerjs/base-ui';
 import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
 import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
@@ -33,7 +23,7 @@ export class NumfmtController {
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
         @Inject(Injector) private readonly _numfmtInjector: Injector,
-        @Inject(IDCurrentUniverService) private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(ICurrentUniverService) private readonly _currentUniverService: ICurrentUniverService,
         @Inject(NumfmtModalController) private readonly _numfmtModalController: NumfmtModalController
     ) {
         this._model = new NumfmtModel();

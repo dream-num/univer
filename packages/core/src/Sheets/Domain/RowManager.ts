@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-unresolved
 import { Inject } from '@wendellhu/redi';
-import { IDCurrentUniverService, ICurrentUniverService } from '../../Service/Current.service';
+import { ICurrentUniverService } from '../../Service/Current.service';
 import { Command, CommandManager } from '../../Command';
 import { ISetRowHeightActionData, SetRowHeightAction } from '../Action';
 import { BooleanNumber } from '../../Types/Enum';
@@ -19,7 +19,7 @@ export class RowManager {
     constructor(
         workSheet: Worksheet,
         data: ObjectArrayType<Partial<IRowData>>,
-        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(CommandManager) private readonly _commandManager: CommandManager
     ) {
         this._workSheet = workSheet;

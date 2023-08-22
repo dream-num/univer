@@ -14,7 +14,7 @@ import {
 import { Nullable, Tools, Rectangle, Tuples } from '../../Shared';
 import { Worksheet } from './Worksheet';
 import { IRangeData } from '../../Types/Interfaces';
-import { ICurrentUniverService, IDCurrentUniverService } from '../../Service/Current.service';
+import { ICurrentUniverService } from '../../Service/Current.service';
 
 /**
  * Manage merged cells
@@ -29,7 +29,7 @@ export class Merges {
         worksheet: Worksheet,
         mergeData: any,
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
-        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {
         this._worksheet = worksheet;
         this._rectangleList = mergeData ?? [];

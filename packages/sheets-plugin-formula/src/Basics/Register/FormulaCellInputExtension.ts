@@ -1,6 +1,6 @@
 import { IFormulaData } from '@univerjs/base-formula-engine';
 import { BaseCellInputExtension, BaseCellInputExtensionFactory, ICell } from '@univerjs/base-ui';
-import { ICurrentUniverService, IDCurrentUniverService, IRangeData, Nullable, ObjectArray } from '@univerjs/core';
+import { ICurrentUniverService, IRangeData, Nullable, ObjectArray } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { FormulaPlugin } from '../../FormulaPlugin';
 import { FormulaController } from '../../Controller/FormulaController';
@@ -19,7 +19,7 @@ export class FormulaCellInputExtensionFactory extends BaseCellInputExtensionFact
     constructor(
         _plugin: FormulaPlugin,
         @Inject(Injector) private readonly _sheetInjector: Injector,
-        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(FormulaController) private readonly _formulaController: FormulaController
     ) {
         super(_plugin);

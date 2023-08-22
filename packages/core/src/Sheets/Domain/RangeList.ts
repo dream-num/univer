@@ -14,7 +14,7 @@ import {
     SetRangeDataAction,
     SetRangeStyleAction,
 } from '../Action';
-import { IDCurrentUniverService, ICurrentUniverService } from '../../Service/Current.service';
+import { ICurrentUniverService } from '../../Service/Current.service';
 
 /**
  * A collection of one or more Range instances in the same sheet.
@@ -32,7 +32,7 @@ export class RangeList {
         private readonly _worksheet: Worksheet,
         rangeList: IRangeType[],
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
-        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         this._rangeList = [];

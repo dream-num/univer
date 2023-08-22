@@ -1,13 +1,4 @@
-import {
-    Command,
-    CommandManager,
-    ICurrentUniverService,
-    IDCurrentUniverService,
-    ISetColumnHideActionData,
-    ISetColumnShowActionData,
-    SetColumnHideAction,
-    SetColumnShowAction,
-} from '@univerjs/core';
+import { Command, CommandManager, ICurrentUniverService, ISetColumnHideActionData, ISetColumnShowActionData, SetColumnHideAction, SetColumnShowAction } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { BaseColumnRulerFactory } from './ColumnRulerFactory';
 import { ColumnRulerRegister } from './ColumnRulerRegister';
@@ -28,7 +19,7 @@ export class ColumnRulerManager {
 
     private _columnRulerFactoryList: BaseColumnRulerFactory[];
 
-    constructor(@Inject(CommandManager) private readonly _commandManager: CommandManager, @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
+    constructor(@Inject(CommandManager) private readonly _commandManager: CommandManager, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
         this._register = new ColumnRulerRegister();
     }
 

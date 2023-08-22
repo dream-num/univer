@@ -1,5 +1,5 @@
 import { Inject } from '@wendellhu/redi';
-import { ICurrentUniverService, IDCurrentUniverService, ObserverManager } from '@univerjs/core';
+import { ICurrentUniverService, ObserverManager } from '@univerjs/core';
 import { Rect, Scene } from '@univerjs/base-render';
 
 import { AntLine, AntLineModel, IAntLineRange } from '../Model/AntLineModel';
@@ -22,7 +22,7 @@ export class AntLineControl {
      */
     constructor(
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
-        @IDCurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
+        @ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
         @Inject(CanvasView) private readonly _canvasView: CanvasView
     ) {
         this._antLineModelList = [];

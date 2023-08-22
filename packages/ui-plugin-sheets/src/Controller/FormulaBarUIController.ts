@@ -2,7 +2,7 @@ import { Inject } from '@wendellhu/redi';
 
 import { SelectionControl } from '@univerjs/base-render/src/Component/Sheets/Selection/SelectionControl';
 import { CellInputExtensionManager } from '@univerjs/base-ui';
-import { ICurrentUniverService, IDCurrentUniverService, INamedRange, ObserverManager } from '@univerjs/core';
+import { ICurrentUniverService, INamedRange, ObserverManager } from '@univerjs/core';
 import { FormulaBar } from '../View/FormulaBar';
 
 export class FormulaBarUIController {
@@ -14,7 +14,7 @@ export class FormulaBarUIController {
 
     constructor(
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
-        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {
         this._initialize();
     }

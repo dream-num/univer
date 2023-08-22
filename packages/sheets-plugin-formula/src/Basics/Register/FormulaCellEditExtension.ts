@@ -1,5 +1,5 @@
 import { BaseCellEditExtension, BaseCellEditExtensionFactory, ICell } from '@univerjs/base-ui';
-import { ICurrentUniverService, IDCurrentUniverService, IRangeData, Nullable } from '@univerjs/core';
+import { ICurrentUniverService, IRangeData, Nullable } from '@univerjs/core';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { FormulaPlugin } from '../../FormulaPlugin';
@@ -20,7 +20,7 @@ export class FormulaCellEditExtensionFactory extends BaseCellEditExtensionFactor
     constructor(
         _plugin: FormulaPlugin,
         @Inject(Injector) private readonly _sheetInjector: Injector,
-        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(FormulaController) private readonly _formulaController: FormulaController,
         @Inject(FormulaPromptController) private readonly _formulaPromptController: FormulaPromptController,
         @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController

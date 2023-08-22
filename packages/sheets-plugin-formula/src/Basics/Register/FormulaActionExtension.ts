@@ -13,7 +13,6 @@ import {
     ObjectMatrix,
     Tools,
     ICurrentUniverService,
-    IDCurrentUniverService,
     IActionData,
     CommandManager,
 } from '@univerjs/core';
@@ -29,7 +28,7 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
     constructor(
         actionDataList: IActionData[],
         _plugin: FormulaPlugin,
-        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(FormulaController) private readonly _formulaController: FormulaController,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
         @Inject(CommandManager) private readonly _commandManager: CommandManager

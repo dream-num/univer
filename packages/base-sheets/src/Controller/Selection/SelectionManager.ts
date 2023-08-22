@@ -8,7 +8,6 @@ import {
     Direction,
     ICellInfo,
     ICurrentUniverService,
-    IDCurrentUniverService,
     IGridRange,
     IRangeCellData,
     IRangeData,
@@ -71,7 +70,7 @@ export class SelectionManager {
         /** @deprecated this should be divided into smaller pieces */
         private readonly _sheetView: SheetView,
         private readonly _config: ISheetPluginConfig,
-        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
@@ -173,7 +172,6 @@ export class SelectionManager {
         for (const model of models) {
             selectionModelsValue.push(model.getValue());
         }
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return selectionModelsValue;
     }
 

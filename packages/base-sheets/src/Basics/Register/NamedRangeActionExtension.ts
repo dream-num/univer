@@ -8,7 +8,6 @@ import {
     Tools,
     IInsertRowActionData,
     ICurrentUniverService,
-    IDCurrentUniverService,
     IActionData,
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -19,7 +18,7 @@ import type { SheetPlugin } from '../../SheetPlugin';
  * TODO insertColumn/insertRange/insertRange/deleteRange
  */
 export class NamedRangeActionExtension extends BaseActionExtension<SheetPlugin> {
-    constructor(actionDataList: IActionData[], _plugin: SheetPlugin, @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
+    constructor(actionDataList: IActionData[], _plugin: SheetPlugin, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
         super(actionDataList, _plugin);
     }
 

@@ -9,7 +9,6 @@ import {
     CommandManager,
     ISetRangeDataActionData,
     ICurrentUniverService,
-    IDCurrentUniverService,
 } from '@univerjs/core';
 import { numfmt } from '@univerjs/base-numfmt-engine';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -20,7 +19,7 @@ export class NumfmtActionExtension extends BaseActionExtension<NumfmtPlugin> {
     constructor(
         actionDataList: IActionData[],
         _plugin: NumfmtPlugin,
-        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(Injector) private readonly _sheetInjector: Injector,
         @Inject(CommandManager) private readonly _commandManager: CommandManager
     ) {

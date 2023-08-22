@@ -1,5 +1,4 @@
 import { DataStreamTreeNodeType, ContextBase, DataStreamTreeNode, DocumentBodyModel } from '@univerjs/core';
-// eslint-disable-next-line import/no-cycle
 import { dealWidthParagraph } from './Paragraph';
 import { dealWithBlockError } from './BlockError';
 import { IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../Basics/IDocumentSkeletonCached';

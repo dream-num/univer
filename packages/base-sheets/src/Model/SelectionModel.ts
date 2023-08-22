@@ -1,4 +1,4 @@
-import { ICellInfo, ICurrentUniverService, IDCurrentUniverService, ISelection, Nullable, makeCellToSelection } from '@univerjs/core';
+import { ICellInfo, ICurrentUniverService, ISelection, Nullable, makeCellToSelection } from '@univerjs/core';
 
 import { SELECTION_TYPE } from '../Controller/Selection/SelectionController';
 
@@ -23,7 +23,7 @@ export class SelectionModel implements ISelection {
 
     private _currentCell: Nullable<ICellInfo>;
 
-    constructor(type: SELECTION_TYPE = SELECTION_TYPE.NORMAL, @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
+    constructor(type: SELECTION_TYPE = SELECTION_TYPE.NORMAL, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
         this._type = type;
     }
 

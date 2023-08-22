@@ -1,10 +1,10 @@
 import { Inject, SkipSelf } from '@wendellhu/redi';
-import { UIObserver, ObserverManager, ICurrentUniverService, IDCurrentUniverService } from '@univerjs/core';
+import { UIObserver, ObserverManager, ICurrentUniverService } from '@univerjs/core';
 
 export class CountBarController {
     constructor(
         @SkipSelf() @Inject(ObserverManager) private _globalObserverManager: ObserverManager,
-        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {}
 
     listenEventManager(): void {

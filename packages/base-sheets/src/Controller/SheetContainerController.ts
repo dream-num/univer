@@ -1,4 +1,4 @@
-import { CommandManager, ICurrentUniverService, IDCurrentUniverService, ISheetActionData, SheetActionBase } from '@univerjs/core';
+import { CommandManager, ICurrentUniverService, ISheetActionData, SheetActionBase } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { ISelectionManager } from '../Services/tokens';
@@ -10,7 +10,7 @@ export class SheetContainerController {
     constructor(
         @ISelectionManager private readonly _selectionManager: SelectionManager,
         @Inject(CanvasView) private readonly canvasView: CanvasView,
-        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {
         this._initialize();
     }

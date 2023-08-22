@@ -1,6 +1,6 @@
 import { IMouseEvent, IPointerEvent } from '@univerjs/base-render';
 import { BaseMenuItem, BaseSelectChildrenProps, ComponentChildren, ComponentManager } from '@univerjs/base-ui';
-import { ICurrentUniverService, IDCurrentUniverService, ObserverManager, Tools, UIObserver } from '@univerjs/core';
+import { ICurrentUniverService, ObserverManager, Tools, UIObserver } from '@univerjs/core';
 import { Inject, SkipSelf } from '@wendellhu/redi';
 import { CanvasView } from '@univerjs/base-sheets';
 import { DefaultRightMenuConfig, SheetRightMenuConfig } from '../Basics';
@@ -42,7 +42,7 @@ export class RightMenuUIController {
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
-        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {
         this._config = Tools.deepMerge({}, DefaultRightMenuConfig, config);
 

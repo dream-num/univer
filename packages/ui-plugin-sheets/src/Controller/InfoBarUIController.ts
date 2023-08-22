@@ -1,4 +1,4 @@
-import { ICurrentUniverService, IDCurrentUniverService } from '@univerjs/core';
+import { ICurrentUniverService } from '@univerjs/core';
 
 import { InfoBarModel } from '../Model/InfoBarModel';
 import { InfoBar } from '../View/InfoBar';
@@ -23,7 +23,7 @@ export class InfoBarUIController {
 
     private _infoList: BaseInfoBarProps;
 
-    constructor(@IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {}
+    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {}
 
     getComponent = (ref: InfoBar) => {
         this._infoBar = ref;

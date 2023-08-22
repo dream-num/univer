@@ -1,5 +1,5 @@
 /* eslint-disable max-lines-per-function */
-import { Tools, handleJsonToDom, handleStyleToString, IKeyValue, ICurrentUniverService, IDCurrentUniverService } from '@univerjs/core';
+import { Tools, handleJsonToDom, handleStyleToString, IKeyValue, ICurrentUniverService } from '@univerjs/core';
 import { SelectionModel, SelectionController, ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
 import { RightMenuItem } from '@univerjs/ui-plugin-sheets';
 import { Clipboard } from '@univerjs/base-ui';
@@ -20,7 +20,7 @@ export abstract class Copy {
 }
 
 export class UniverCopy extends Copy {
-    constructor(@IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @ISelectionManager private readonly _selectionManager: SelectionManager) {
+    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @ISelectionManager private readonly _selectionManager: SelectionManager) {
         const copyList = [
             {
                 label: 'rightClick.copy',

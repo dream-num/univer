@@ -54,7 +54,7 @@ import { RowManager } from './RowManager';
 import { Selection } from './Selection';
 import { Command, CommandManager, ISheetActionData } from '../../Command';
 import { ObserverManager } from '../../Observer';
-import { IDCurrentUniverService, ICurrentUniverService } from '../../Service/Current.service';
+import { ICurrentUniverService } from '../../Service/Current.service';
 
 /**
  * Access and modify spreadsheet sheets.
@@ -91,7 +91,7 @@ export class Worksheet {
         customConfig: Partial<IWorksheetConfig>,
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
-        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {
         const config: IWorksheetConfig = {
             ...DEFAULT_WORKSHEET,
@@ -1862,7 +1862,6 @@ export class Worksheet {
      * @returns information stored by the plugin
      */
     getPluginMeta<T>(name: string): T {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return this._config.pluginMeta[name];
     }
 

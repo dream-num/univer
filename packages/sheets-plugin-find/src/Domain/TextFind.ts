@@ -1,4 +1,4 @@
-import { Range, FormatType, IGridRange, ObjectMatrix, ICellData, Nullable, Worksheet, ICurrentUniverService, IDCurrentUniverService } from '@univerjs/core';
+import { Range, FormatType, IGridRange, ObjectMatrix, ICellData, Nullable, Worksheet, ICurrentUniverService } from '@univerjs/core';
 import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
 import { getRegExpStr } from '../Util/util';
 import { FindType } from '../IData';
@@ -27,7 +27,7 @@ export class TextFinder {
 
     private _startRange: Nullable<Range>; // 从这个位置后开始找
 
-    constructor(@IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @ISelectionManager private readonly _selectionManager: SelectionManager) {}
+    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @ISelectionManager private readonly _selectionManager: SelectionManager) {}
 
     /**
      * Returns all cells matching the search criteria.

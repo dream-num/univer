@@ -1,4 +1,4 @@
-import { ICurrentUniverService, IDCurrentUniverService, IRangeData, Workbook } from '@univerjs/core';
+import { ICurrentUniverService, IRangeData, Workbook } from '@univerjs/core';
 import { Rect, Scene } from '@univerjs/base-render';
 import { CanvasView, SheetView } from '@univerjs/base-sheets';
 
@@ -34,7 +34,7 @@ export class ArrayFormulaLineControl {
     constructor(
         private _sheetId: string,
         private _range: IRangeData,
-        @IDCurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
+        @ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
         @Inject(CanvasView) private readonly _canvasView: CanvasView
     ) {
         this._initialize();

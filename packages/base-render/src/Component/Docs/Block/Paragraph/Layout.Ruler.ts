@@ -17,7 +17,6 @@ import {
     isBlankPage,
     isColumnFull,
 } from '../../Common/Tools';
-// eslint-disable-next-line import/no-cycle
 import { createSkeletonPage } from '../../Common/Page';
 import { addSpanToDivide, calculateLineTopByDrawings, createAndUpdateBlockAnchor, createSkeletonLine, setDivideFullState } from '../../Common/Line';
 import { createSkeletonBulletSpan, setSpanGroupLeft } from '../../Common/Span';

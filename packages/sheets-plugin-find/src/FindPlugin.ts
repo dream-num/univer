@@ -1,4 +1,4 @@
-import { CommandManager, ICurrentUniverService, IDCurrentUniverService, LocaleService, Plugin, PluginType, UniverSheet } from '@univerjs/core';
+import { CommandManager, ICurrentUniverService, LocaleService, Plugin, PluginType, UniverSheet } from '@univerjs/core';
 // import { TextFinder } from './Domain/TextFind';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { FIND_PLUGIN_NAME } from './Const/PLUGIN_NAME';
@@ -24,7 +24,7 @@ export class FindPlugin extends Plugin<FindPluginObserve> {
 
     constructor(
         config: Partial<IFindPluginConfig>,
-        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) private readonly _sheetInjector: Injector,
         @Inject(CommandManager) private readonly _commandManager: CommandManager

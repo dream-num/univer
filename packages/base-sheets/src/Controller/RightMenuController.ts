@@ -1,5 +1,5 @@
 import { Inject, SkipSelf } from '@wendellhu/redi';
-import { ICurrentUniverService, IDCurrentUniverService, ObserverManager, UIObserver } from '@univerjs/core';
+import { ICurrentUniverService, ObserverManager, UIObserver } from '@univerjs/core';
 import { SelectionController } from './Selection/SelectionController';
 import { SelectionModel } from '../Model/SelectionModel';
 import { ISelectionManager } from '../Services/tokens';
@@ -10,7 +10,7 @@ export class RightMenuController {
     constructor(
         @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
         @ISelectionManager private readonly _selectionManager: SelectionManager,
-        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(HideColumnController) private readonly _hideColumnController: HideColumnController
     ) {}
 

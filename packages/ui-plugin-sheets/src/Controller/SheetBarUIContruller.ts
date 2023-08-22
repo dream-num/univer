@@ -13,7 +13,6 @@ import {
     SetWorkSheetStatusAction,
     RemoveSheetAction,
     ICurrentUniverService,
-    IDCurrentUniverService,
     ObserverManager,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
@@ -48,7 +47,7 @@ export class SheetBarUIController {
 
     // eslint-disable-next-line max-lines-per-function
     constructor(
-        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager
     ) {

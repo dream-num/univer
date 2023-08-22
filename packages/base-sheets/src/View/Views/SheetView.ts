@@ -1,5 +1,5 @@
 import { getColor, Rect, Scene, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, SpreadsheetSkeleton } from '@univerjs/base-render';
-import { IDCurrentUniverService, ICurrentUniverService, LocaleService, Worksheet } from '@univerjs/core';
+import { ICurrentUniverService, LocaleService, Worksheet } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from '../BaseView';
 
@@ -23,7 +23,7 @@ export class SheetView extends BaseView {
 
     private _spreadsheetLeftTopPlaceholder: Rect;
 
-    constructor(@IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @Inject(LocaleService) private readonly _localeService: LocaleService) {
+    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @Inject(LocaleService) private readonly _localeService: LocaleService) {
         super();
     }
 

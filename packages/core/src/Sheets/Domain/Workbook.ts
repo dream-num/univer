@@ -22,7 +22,7 @@ import { Styles } from './Styles';
 import { Worksheet } from './Worksheet';
 import { Range } from './Range';
 import { ObserverManager } from '../../Observer';
-import { IDCurrentUniverService, ICurrentUniverService } from '../../Service/Current.service';
+import { ICurrentUniverService } from '../../Service/Current.service';
 
 /**
  * Access and create Univer Sheets files
@@ -54,7 +54,7 @@ export class Workbook {
 
     constructor(
         workbookData: Partial<IWorkbookConfig> = {},
-        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(forwardRef(() => GenName)) private readonly _genName: GenName,
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager
@@ -653,7 +653,6 @@ export class Workbook {
     }
 
     getPluginMeta<T>(name: string): T {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return this._config.pluginMeta[name];
     }
 

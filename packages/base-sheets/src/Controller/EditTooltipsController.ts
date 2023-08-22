@@ -1,4 +1,4 @@
-import { CommandManager, ICurrentUniverService, IDCurrentUniverService, SetWorkSheetActivateAction } from '@univerjs/core';
+import { CommandManager, ICurrentUniverService, SetWorkSheetActivateAction } from '@univerjs/core';
 import { Engine, IRenderingEngine, Layer } from '@univerjs/base-render';
 
 import { EditTooltips, EditTooltipsProps } from '../View/Views';
@@ -9,7 +9,7 @@ export class EditTooltipsController {
 
     _layer: Layer;
 
-    constructor(@IRenderingEngine private readonly _engine: Engine, @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
+    constructor(@IRenderingEngine private readonly _engine: Engine, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
         this._editTooltipsPage = new Map();
         CommandManager.getActionObservers().add((event) => {
             const data = event.data;
@@ -24,7 +24,6 @@ export class EditTooltipsController {
             for (const editTooltips of sheetPage[1]) {
                 if (editTooltips[0] === key) {
                     sheetPage[1].delete(key);
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                     return editTooltips[1];
                 }
             }

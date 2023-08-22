@@ -1,7 +1,5 @@
 import { createIdentifier } from '@wendellhu/redi';
-// eslint-disable-next-line import/no-cycle
 import { Nullable } from '../Shared';
-// eslint-disable-next-line import/no-cycle
 import { UniverDoc } from '../Basics/UniverDoc';
 import { UniverSheet } from '../Basics/UniverSheet';
 import { UniverSlide } from '../Basics/UniverSlide';
@@ -21,7 +19,7 @@ export interface ICurrentUniverService {
     getAllUniverSlidesInstance(): UniverSlide[];
 }
 
-export const IDCurrentUniverService = createIdentifier<ICurrentUniverService>('univer.current');
+export const ICurrentUniverService = createIdentifier<ICurrentUniverService>('univer.current');
 
 /**
  * Manager instances inside Univer. Also it manages focus on univer instances.

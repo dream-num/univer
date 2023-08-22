@@ -17,7 +17,6 @@ import {
     DEFAULT_SELECTION,
     DEFAULT_CELL,
     ICurrentUniverService,
-    IDCurrentUniverService,
 } from '@univerjs/core';
 import { handleTableMergeData } from '@univerjs/base-ui';
 
@@ -39,7 +38,7 @@ export abstract class Paste {
 }
 
 export class UniverPaste extends Paste {
-    constructor(@IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @ISelectionManager private readonly _selectionManager: SelectionManager) {
+    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @ISelectionManager private readonly _selectionManager: SelectionManager) {
         const pasteList = [
             {
                 label: 'rightClick.paste',

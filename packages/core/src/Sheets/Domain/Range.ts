@@ -1,9 +1,8 @@
 import { Inject } from '@wendellhu/redi';
-import { IDCurrentUniverService, ICurrentUniverService } from '../../Service/Current.service';
+import { ICurrentUniverService } from '../../Service/Current.service';
 
 // TODO@wzhudev: here we still have some
 
-// eslint-disable-next-line import/no-cycle
 import {
     IInsertRangeActionData,
     IClearRangeActionData,
@@ -75,7 +74,7 @@ export class Range {
     constructor(
         workSheet: Worksheet,
         range: IRangeType,
-        @IDCurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(CommandManager) private readonly _commandManager: CommandManager
     ) {
         // Convert the range passed in by the user into a standard format
@@ -347,12 +346,9 @@ export class Range {
      */
     getFontColors(): Array<Array<Nullable<string>>> {
         const styles = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getStyles();
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return this.getValues().map((row) =>
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
             row.map((cell: Nullable<ICellData>) => {
                 const cellStyle = styles.getStyleByCell(cell);
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return cellStyle?.cl?.rgb || DEFAULT_STYLES.cl?.rgb;
             })
         );
@@ -645,7 +641,6 @@ export class Range {
      * Returns the Rich Text values for the cells in the range.
      */
     getRichTextValues(): Array<Array<Nullable<IDocumentData | ''>>> {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return this.getValues().map((row) => row.map((cell: Nullable<ICellData>) => cell?.p || ''));
     }
 
@@ -705,7 +700,6 @@ export class Range {
      */
     getTextStyles(): Array<Array<Nullable<IStyleData>>> {
         const styles = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getStyles();
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return this.getValues().map((row) => row.map((cell: Nullable<ICellData>) => styles.getStyleByCell(cell)));
     }
 
@@ -2023,11 +2017,9 @@ export class Range {
 
         const stylesMatrix = new ObjectMatrix<IStyleData>();
         value.map((row, r) =>
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
             row.map((cell, c) => {
                 cell = cell as ICellData;
                 stylesMatrix.setValue(r, c, styles.getStyleByCell(cell) || {});
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return styles.getStyleByCell(cell) || {};
             })
         );
@@ -3506,13 +3498,10 @@ export class Range {
      */
     private _getStyles<K>(arg: keyof IStyleData): Array<Array<IStyleData[keyof IStyleData]>> {
         const styles = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getStyles();
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return this.getValues().map((row) =>
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
             row.map((cell: Nullable<ICellData>) => {
                 // const style = getStyle(styles, cell);
                 const style = styles && styles.getStyleByCell(cell);
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return (style && style[arg]) || DEFAULT_STYLES[arg];
             })
         );

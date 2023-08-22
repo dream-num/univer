@@ -1,4 +1,4 @@
-import { SheetContext, IRangeData, UniverSheet, Plugin } from '@univerjs/core';
+import { IRangeData, Plugin } from '@univerjs/core';
 import { FILTER_PLUGIN_NAME } from './Const';
 import { Filter, FilterList, IFilterPluginConfig } from './Domain';
 
@@ -12,15 +12,7 @@ export class FilterPlugin extends Plugin {
         this._filterList = FilterList.fromSequence(config || {});
     }
 
-    static create(config?: IFilterPluginConfig) {
-        return new FilterPlugin(config);
-    }
-
-    installTo(universheetInstance: UniverSheet): void {
-        universheetInstance.installPlugin(this);
-    }
-
-    override onMounted(context: SheetContext): void {
+    override onMounted(): void {
         // const config: IConfig = {
         //     context,
         // };

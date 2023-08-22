@@ -1,19 +1,9 @@
-import { Command, SheetContext, IRangeData, GroupModel, Nullable, Sequence, Serializer } from '@univerjs/core';
-import { ACTION_NAMES } from '../Const';
+import { IRangeData, GroupModel, Nullable, Serializer } from '@univerjs/core';
 import { FilterCriteria } from './FilterCriteria';
-import { FilterCriteriaColumn, IFilterCriteriaColumn } from './FilterCriteriaColumn';
-
-export interface IFilter extends Sequence {
-    range: IRangeData;
-    sheetId: string;
-    criteriaColumns: {
-        [column: number]: IFilterCriteriaColumn;
-    };
-}
+import { FilterCriteriaColumn } from './FilterCriteriaColumn';
+import { IFilter, IFilterCriteriaColumn } from '../IData/FilterType';
 
 export class Filter extends Serializer implements GroupModel<{ [column: number]: FilterCriteriaColumn }> {
-    private _context: SheetContext;
-
     private _range: IRangeData;
 
     private _sheetId: string;
@@ -32,20 +22,11 @@ export class Filter extends Serializer implements GroupModel<{ [column: number]:
     static newInstance(sequence: IFilter): Filter {
         const filter = new Filter(sequence.sheetId, sequence.range);
         const criteriaColumns: any = {};
-        for (let column in sequence.criteriaColumns) {
+        for (const column in sequence.criteriaColumns) {
             criteriaColumns[column] = FilterCriteriaColumn.fromSequence(sequence.criteriaColumns[column]);
         }
         filter._criteriaColumns = criteriaColumns;
         return filter;
-    }
-
-    withContext(context: SheetContext): Filter {
-        this._context = context;
-        return this;
-    }
-
-    getContext(): SheetContext {
-        return this._context;
     }
 
     getColumnFilterCriteria(columnPosition: number): Nullable<FilterCriteria> {
@@ -60,34 +41,34 @@ export class Filter extends Serializer implements GroupModel<{ [column: number]:
         return this._criteriaColumns;
     }
 
-    setColumnFilterCriteria(columnPosition: number, criteriaColumn: FilterCriteriaColumn): void {
-        const context = this.getContext();
-        const commandManager = context.getCommandManager();
-        const workbook = context.getWorkBook();
-        const worksheet = workbook.getActiveSheet();
-        if (worksheet) {
-            const configure = {
-                actionName: ACTION_NAMES.ADD_FILTER_CRITERIA_ACTION,
-                sheetId: worksheet.getSheetId(),
-                columnPosition,
-                criteriaColumn: criteriaColumn.toSequence(),
-            };
-            const command = new Command(
-                {
-                    WorkBookUnit: workbook,
-                },
-                configure
-            );
-            commandManager.invoke(command);
-        }
-    }
+    // setColumnFilterCriteria(columnPosition: number, criteriaColumn: FilterCriteriaColumn): void {
+    //     const context = this.getContext();
+    //     const commandManager = context.getCommandManager();
+    //     const workbook = context.getWorkBook();
+    //     const worksheet = workbook.getActiveSheet();
+    //     if (worksheet) {
+    //         const configure = {
+    //             actionName: ACTION_NAMES.ADD_FILTER_CRITERIA_ACTION,
+    //             sheetId: worksheet.getSheetId(),
+    //             columnPosition,
+    //             criteriaColumn: criteriaColumn.toSequence(),
+    //         };
+    //         const command = new Command(
+    //             {
+    //                 WorkBookUnit: workbook,
+    //             },
+    //             configure
+    //         );
+    //         commandManager.invoke(command);
+    //     }
+    // }
 
-    toSequence(): IFilter {
+    override toSequence(): IFilter {
         const criteriaColumns: {
             [column: number]: IFilterCriteriaColumn;
         } = {};
 
-        for (let column in this._criteriaColumns) {
+        for (const column in this._criteriaColumns) {
             criteriaColumns[column] = this._criteriaColumns[column].toSequence();
         }
 

@@ -141,7 +141,7 @@ export function joinClassNames(...args: any) {
     return result;
 }
 
-export const getNodeindex = (elm: any) => [...elm.parentNode.children].indexOf(elm);
+export const getNodeIndex = (elm: any) => [...elm.parentNode.children].indexOf(elm);
 
 // 防抖
 export function debounce(fn: Function, time: number) {

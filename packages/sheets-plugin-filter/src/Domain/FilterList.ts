@@ -1,5 +1,6 @@
 import { GroupModel, Sequence, Serializer, Tools } from '@univerjs/core';
-import { Filter, IFilter } from './Filter';
+import { Filter } from './Filter';
+import { IFilter } from '../IData/FilterType';
 
 export interface IFilterPluginConfig extends Sequence {
     filters?: {
@@ -20,7 +21,7 @@ export class FilterList extends Serializer implements GroupModel<{ [sheetId: str
     static newInstance(sequence: IFilterPluginConfig): FilterList {
         const listModel = new FilterList();
         const filters = sequence.filters ?? {};
-        for (let key in filters) {
+        for (const key in filters) {
             listModel._filters[key] = Filter.fromSequence(filters[key]);
         }
         return listModel;
@@ -42,12 +43,12 @@ export class FilterList extends Serializer implements GroupModel<{ [sheetId: str
         return this._filters;
     }
 
-    toSequence(): IFilterPluginConfig {
-        let filters: {
+    override toSequence(): IFilterPluginConfig {
+        const filters: {
             [sheetId: string]: IFilter;
         } = {};
 
-        for (let key in this._filters) {
+        for (const key in this._filters) {
             filters[key] = this._filters[key].toSequence();
         }
 

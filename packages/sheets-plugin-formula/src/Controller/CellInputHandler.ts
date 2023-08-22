@@ -1,4 +1,4 @@
-import { $$, getNodeindex, xssDeal } from '@univerjs/base-ui';
+import { $$, getNodeIndex, xssDeal } from '@univerjs/base-ui';
 import { IKeyValue, Nullable, Tools } from '@univerjs/core';
 import { FunList } from '../Basics';
 
@@ -147,7 +147,7 @@ export class CellInputHandler {
                         const editorlen = $$('span', $editer).length;
                         _this.functionRangeIndex = [editorlen - 1, $$('span', $editer)[editorlen - 1].textContent.length];
                     } else {
-                        _this.functionRangeIndex = [getNodeindex(currSelection.anchorNode?.parentNode), currSelection.anchorOffset];
+                        _this.functionRangeIndex = [getNodeIndex(currSelection.anchorNode?.parentNode), currSelection.anchorOffset];
                     }
                 } else {
                     // Internet Explorer before version 9

@@ -1,6 +1,5 @@
 // @index('./*.ts', f => `export * from '${f.path}'`)
 export * from './AutoFillSeries';
-export * from './BooleanCriteria';
 export * from './BorderStyleTypes';
 export * from './ColorType';
 export * from './CommonHideTypes';

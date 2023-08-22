@@ -1,4 +1,4 @@
-import { BaseSelectProps, Component, Icon } from '@univerjs/base-ui';
+import { BaseSelectProps, Component, Icon, Select } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { IProps } from '../IData';
 import { FilterPlugin } from '../FilterPlugin';
@@ -92,7 +92,6 @@ export class FilterButton extends Component<IProps, IState> {
      */
     render(props: IProps, state: IState) {
         const { filter } = state;
-        const Select = this.getComponentRender().renderFunction('Select');
         return <Select tooltip={filter.tooltip} key={filter.locale} children={filter.children as BaseSelectProps[]} label={filter.label} icon={filter.icon} />;
     }
 }

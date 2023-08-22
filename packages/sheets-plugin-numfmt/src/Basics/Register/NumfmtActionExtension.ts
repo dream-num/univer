@@ -12,18 +12,20 @@ import {
 } from '@univerjs/core';
 import { numfmt } from '@univerjs/base-numfmt-engine';
 import { Inject, Injector } from '@wendellhu/redi';
-import { ACTION_NAMES as PLUGIN_ACTION_NAMES } from '../Enum';
 import { NumfmtPlugin } from '../../NumfmtPlugin';
+import { INumfmtPluginData } from '../../Symbol';
+import { NumfmtModel } from '../../Model';
+import { ACTION_NAMES as PLUGIN_ACTION_NAMES } from '../Enum';
 
-export class NumfmtActionExtension extends BaseActionExtension<NumfmtPlugin> {
+export class NumfmtActionExtension extends BaseActionExtension {
     constructor(
         actionDataList: IActionData[],
-        _plugin: NumfmtPlugin,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(INumfmtPluginData) private _numfmtPluginData: NumfmtModel,
         @Inject(Injector) private readonly _sheetInjector: Injector,
         @Inject(CommandManager) private readonly _commandManager: CommandManager
     ) {
-        super(actionDataList, _plugin);
+        super(actionDataList);
     }
 
     override execute() {
@@ -40,7 +42,7 @@ export class NumfmtActionExtension extends BaseActionExtension<NumfmtPlugin> {
             }
 
             const { cellValue, sheetId } = actionData;
-            const numfmtConfig = this._plugin.getNumfmtBySheetIdConfig(sheetId);
+            const numfmtConfig = this._numfmtPluginData.getNumfmtBySheetIdConfig(sheetId);
             const currSheetNumfmtMatrix = new ObjectMatrix(numfmtConfig);
             const rangeMatrix = new ObjectMatrix(cellValue);
 
@@ -72,7 +74,7 @@ export class NumfmtActionExtension extends BaseActionExtension<NumfmtPlugin> {
     }
 }
 
-export class NumfmtActionExtensionFactory extends BaseActionExtensionFactory<NumfmtPlugin> {
+export class NumfmtActionExtensionFactory extends BaseActionExtensionFactory {
     constructor(_plugin: NumfmtPlugin, @Inject(Injector) private readonly _sheetInjector: Injector) {
         super(_plugin);
     }
@@ -81,7 +83,7 @@ export class NumfmtActionExtensionFactory extends BaseActionExtensionFactory<Num
         return 2;
     }
 
-    override create(actionDataList: ISheetActionData[]): BaseActionExtension<NumfmtPlugin> {
-        return this._sheetInjector.createInstance(NumfmtActionExtension, actionDataList, this._plugin);
+    override create(actionDataList: ISheetActionData[]): BaseActionExtension {
+        return this._sheetInjector.createInstance(NumfmtActionExtension, actionDataList);
     }
 }

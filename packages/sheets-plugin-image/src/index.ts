@@ -1,1 +1,3 @@
-export { OverGridImagePlugin } from './OverGridImagePlugin';
+import './RegisterAction';
+
+export { ImagePlugin } from './ImagePlugin';

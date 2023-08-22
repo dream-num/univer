@@ -1,6 +1,6 @@
 import { SheetActionBase, ActionObservers, ISheetActionData, ObjectMatrixPrimitiveType, CommandUnit } from '@univerjs/core';
-import { SetNumfmtRangeData } from '../Apply/SetNumfmtRangeData';
-import { NumfmtController } from '../../Controller/NumfmtController';
+import { SetNumfmtRangeData } from '../Apply';
+import { NumfmtController } from '../../Controller';
 
 export interface ISetNumfmtRangeActionData extends ISheetActionData {
     numfmtMatrix: ObjectMatrixPrimitiveType<string>;

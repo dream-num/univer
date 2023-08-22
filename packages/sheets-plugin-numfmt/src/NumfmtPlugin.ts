@@ -1,22 +1,23 @@
-import { CommandManager, IRangeData, LocaleService, ObjectMatrixPrimitiveType, Plugin, PluginType, SheetContext } from '@univerjs/core';
+import { CommandManager, IRangeData, LocaleService, ObjectMatrixPrimitiveType, Plugin, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
-import { NUMFMT_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
-import { install, NumfmtPluginObserve } from './Basics/Observer';
+import { NUMFMT_PLUGIN_NAME, install, NumfmtPluginObserve, NumfmtActionExtensionFactory } from './Basics';
+import { INumfmtPluginData } from './Symbol';
+import { INumfmtPluginConfig } from './Interfaces';
+import { NumfmtModalController, NumfmtController } from './Controller';
+import { NumfmtModel } from './Model';
+
 import en from './Locale/en';
 import zh from './Locale/zh';
-import { NumfmtController } from './Controller/NumfmtController';
-import { NumfmtActionExtensionFactory } from './Basics/Register/NumfmtActionExtension';
-import { NumfmtModalController } from './Controller/NumfmtModalController';
 
-export interface INumfmtPluginConfig {}
-
-export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
+export class NumfmtPlugin extends Plugin<NumfmtPluginObserve> {
     static override type = PluginType.Sheet;
+
+    private _numfmtModalController: NumfmtModalController;
 
     private _numfmtController: NumfmtController;
 
-    private _numfmtModalController: NumfmtModalController;
+    private _numfmtPluginData: NumfmtModel;
 
     private _numfmtActionExtensionFactory: NumfmtActionExtensionFactory;
 
@@ -27,6 +28,10 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve, SheetContext> {
         @Inject(CommandManager) private readonly _commandManager: CommandManager
     ) {
         super(NUMFMT_PLUGIN_NAME);
+
+        this._numfmtPluginData = new NumfmtModel();
+        this._injector.add([INumfmtPluginData, { useFactory: () => this._numfmtPluginData }]);
+
         const sheetContainerUIController = this._injector.get(SheetContainerUIController);
         sheetContainerUIController.UIDidMount(() => {
             this.initializeDependencies(_injector);

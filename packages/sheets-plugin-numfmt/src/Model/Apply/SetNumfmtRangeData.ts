@@ -1,5 +1,5 @@
 import { ObjectMatrix, ObjectMatrixPrimitiveType, Workbook } from '@univerjs/core';
-import { NumfmtController } from '../../Controller/NumfmtController';
+import { NumfmtController } from '../../Controller';
 
 export function SetNumfmtRangeData(
     workbook: Workbook,

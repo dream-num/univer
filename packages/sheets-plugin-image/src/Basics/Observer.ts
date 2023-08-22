@@ -1,15 +1,16 @@
 import { Observable } from '@univerjs/core';
-import { OverGridImagePlugin, OverGridImageProperty } from '../OverGridImagePlugin';
+import { ImagePlugin } from '../ImagePlugin';
+import { IOverGridImageProperty } from './Interfaces';
 
 export type ImagePluginObserve = {
-    onChangeImageSize: Observable<OverGridImageProperty>;
-    onAddImage: Observable<OverGridImageProperty>;
-    onRemoveImage: Observable<OverGridImageProperty>;
-    onUpdateImage: Observable<OverGridImageProperty>;
-    onActiveImage: Observable<OverGridImageProperty>;
+    onChangeImageSize: Observable<IOverGridImageProperty>;
+    onAddImage: Observable<IOverGridImageProperty>;
+    onRemoveImage: Observable<IOverGridImageProperty>;
+    onUpdateImage: Observable<IOverGridImageProperty>;
+    onActiveImage: Observable<IOverGridImageProperty>;
 };
 
-export function uninstall(plugin: OverGridImagePlugin) {
+export function uninstall(plugin: ImagePlugin) {
     plugin.deleteObserve('onChangeImageSize');
     plugin.deleteObserve('onAddImage');
     plugin.deleteObserve('onRemoveImage');
@@ -17,7 +18,7 @@ export function uninstall(plugin: OverGridImagePlugin) {
     plugin.deleteObserve('onActiveImage');
 }
 
-export function install(plugin: OverGridImagePlugin) {
+export function install(plugin: ImagePlugin) {
     plugin.pushToObserve('onChangeImageSize');
     plugin.pushToObserve('onAddImage');
     plugin.pushToObserve('onRemoveImage');

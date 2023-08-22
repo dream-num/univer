@@ -1,32 +1,65 @@
 import { BaseComponentRender } from '@univerjs/base-ui';
-import { IToolbarItemProps, SHEET_UI_PLUGIN_NAME, SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
-import { OverGridImagePlugin } from '../OverGridImagePlugin';
-import { OVER_GRID_IMAGE_PLUGIN_NAME } from '../Const/PLUGIN_NAME';
-import { FileSelected } from '../Library/FileSelected';
+import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
+import { Inject, Injector } from '@wendellhu/redi';
+import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
+import { Command, CommandManager, ICurrentUniverService, ObserverManager, Tools } from '@univerjs/core';
+import { FileSelected, IOverGridImageProperty, OVER_GRID_IMAGE_PLUGIN_NAME, OverGridImageBorderType } from '../Basics';
+import { IImagePluginData } from '../Symbol';
+import { AddOverGridImageAction, IAddOverGridImageActionData } from '../Model';
 
 export class OverGridImageController {
-    protected _sheetUIPlugin: SheetUIPlugin;
-
-    protected _plugin: OverGridImagePlugin;
-
     protected _render: BaseComponentRender;
 
     protected _toolButton: IToolbarItemProps;
 
-    constructor(plugin: OverGridImagePlugin) {
-        this._plugin = plugin;
-        this._sheetUIPlugin = plugin.getGlobalContext().getPluginManager().getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME);
-
+    constructor(
+        @Inject(Injector) readonly _injector: Injector,
+        @Inject(IImagePluginData) _imagePluginData: Map<string, IOverGridImageProperty>,
+        @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
+        @Inject(CommandManager) private _commandManager: CommandManager,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(ObserverManager) private _observerManager: ObserverManager,
+        @ISelectionManager private readonly _selectionManager: SelectionManager
+    ) {
         this._toolButton = {
             name: OVER_GRID_IMAGE_PLUGIN_NAME,
-            toolbarType: 1,
-            tooltip: '导入图片',
-            show: true,
             label: '图片',
+            toolbarType: 1,
+            show: true,
+            tooltip: '导入图片',
             onClick: () => {
-                FileSelected.chooseImage().then((img) => {});
+                const rowIndex = _selectionManager.getActiveRange()?.getRowIndex();
+                const columnIndex = _selectionManager.getActiveRange()?.getColumn();
+                const workbook = _currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+                FileSelected.chooseImage().then((file) => {
+                    const reader = new FileReader();
+                    const img = new Image();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => {
+                        img.src = reader.result as string;
+                    };
+                    img.onload = () => {
+                        const action: IAddOverGridImageActionData = {
+                            actionName: AddOverGridImageAction.NAME,
+                            id: Tools.generateRandomId(),
+                            borderType: OverGridImageBorderType.SOLID,
+                            row: rowIndex || 1,
+                            column: columnIndex || 1,
+                            url: img.src,
+                            radius: 0,
+                            width: img.width,
+                            height: img.height,
+                            borderColor: '#000000',
+                            borderWidth: 1,
+                            sheetId: workbook.getActiveSheet().getSheetId(),
+                            injector: _injector,
+                        };
+                        const command = new Command({ WorkBookUnit: workbook }, action);
+                        this._commandManager.invoke(command);
+                    };
+                });
             },
         };
-        this._sheetUIPlugin.addToolButton(this._toolButton);
+        this._sheetContainerUIController.getToolbarController().addToolbarConfig(this._toolButton);
     }
 }

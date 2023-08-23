@@ -1,83 +1,8 @@
-import { BooleanCriteria, Color, SheetContext, RelativeDate, Sequence, Serializer, Tools } from '@univerjs/core';
-import { FilterCriteriaBuilder } from './FilterCriteriaBuilder';
-
-export interface IFilterCriteria extends Sequence {
-    whenNumberGreaterThanOrEqualTo: number;
-
-    criteriaType: BooleanCriteria;
-
-    criteriaValues: ConditionValue[];
-
-    hiddenValues: string[];
-
-    visibleValues: string[];
-
-    visibleForegroundColor: Color;
-
-    visibleBackgroundColor: Color;
-
-    whenNumberEqualToAny: number[];
-
-    whenNumberGreaterThan: number;
-
-    whenNumberBetweenEnd: number;
-
-    whenNumberEqualTo: number;
-
-    whenDateEqualToAny: Date[];
-
-    whenDateNotEqualTo: Date;
-
-    whenFormulaSatisfied: string;
-
-    whenDateNotEqualToAny: Date[];
-
-    whenNumberBetweenStart: number;
-
-    whenDateAfter: Date;
-
-    whenNumberNotBetweenStart: number;
-
-    whenNumberNotBetweenEnd: number;
-
-    whenNumberNotEqualTo: number;
-
-    whenNumberNotEqualToAny: number[];
-
-    whenTextContains: string;
-
-    whenTextDoesNotContain: string;
-
-    whenTextEndsWith: string;
-
-    whenTextEqualTo: string;
-
-    whenTextEqualToAny: string[];
-
-    whenTextNotEqualTo: string;
-
-    whenTextNotEqualToAny: string[];
-
-    whenTextStartsWith: string;
-
-    whenDateAfterRelativeDate: RelativeDate;
-
-    whenDateBefore: Date;
-
-    whenDateBeforeRelativeDate: RelativeDate;
-
-    whenDateEqualToDate: Date;
-
-    whenDateEqualToRelativeDate: RelativeDate;
-
-    whenNumberLessThan: number;
-
-    whenNumberLessThanOrEqualTo: number;
-}
+import { Color, RelativeDate, Serializer, Tools } from '@univerjs/core';
+import { ConditionValue, IFilterCriteriaData } from '../IData/FilterType';
+import { BooleanCriteria } from '../Enum/BooleanCriteria';
 
 export class FilterCriteria extends Serializer {
-    private _context: SheetContext;
-
     private _whenNumberGreaterThanOrEqualTo: number;
 
     private _criteriaType: BooleanCriteria;
@@ -150,7 +75,7 @@ export class FilterCriteria extends Serializer {
 
     private _whenNumberLessThanOrEqualTo: number;
 
-    static newInstance(sequence: IFilterCriteria): FilterCriteria {
+    static newInstance(sequence: IFilterCriteriaData): FilterCriteria {
         const criteria = new FilterCriteria();
         criteria._criteriaType = sequence.criteriaType;
         criteria._whenNumberGreaterThanOrEqualTo = sequence.whenNumberGreaterThanOrEqualTo;
@@ -191,11 +116,11 @@ export class FilterCriteria extends Serializer {
         return criteria;
     }
 
-    copy(): FilterCriteriaBuilder {
-        return FilterCriteriaBuilder.newInstance(this.toSequence());
+    copy(): FilterCriteria {
+        return FilterCriteria.newInstance(this.toSequence());
     }
 
-    toSequence(): IFilterCriteria {
+    override toSequence(): IFilterCriteriaData {
         return {
             className: Tools.getClassName(this),
             visibleForegroundColor: this._visibleForegroundColor,
@@ -235,15 +160,6 @@ export class FilterCriteria extends Serializer {
             whenNumberLessThan: this._whenNumberLessThan,
             whenNumberLessThanOrEqualTo: this._whenNumberLessThanOrEqualTo,
         };
-    }
-
-    withContext(context: SheetContext): FilterCriteria {
-        this._context = context;
-        return this;
-    }
-
-    getContext(): SheetContext {
-        return this._context;
     }
 
     getWhenNumberGreaterThanOrEqualTo(): number {

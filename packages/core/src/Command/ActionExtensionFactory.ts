@@ -1,13 +1,10 @@
-import type { Plugin } from '../Plugin';
 import type { IActionData } from './ActionBase';
-
-// TODO: @wzhudev remove `_plugin` as constructor parameter after we refactor all up level plugins
 
 /**
  * Manipulate the list of actions in a command
  */
-export class BaseActionExtension<T extends Plugin = Plugin> {
-    constructor(protected actionDataList: IActionData[], /** @deprecated would be removed in the future */ protected _plugin: T) {}
+export class BaseActionExtension {
+    constructor(protected actionDataList: IActionData[]) {}
 
     getActionDataList(): IActionData[] {
         return this.actionDataList;
@@ -35,9 +32,7 @@ export class BaseActionExtension<T extends Plugin = Plugin> {
 /**
  * Determine whether to intercept and create BaseActionExtension
  */
-export class BaseActionExtensionFactory<T extends Plugin = Plugin> {
-    constructor(protected _plugin: T) {}
-
+export class BaseActionExtensionFactory {
     get zIndex() {
         return 0;
     }
@@ -47,15 +42,15 @@ export class BaseActionExtensionFactory<T extends Plugin = Plugin> {
      * @param actionDataList
      * @returns
      */
-    create(actionDataList: IActionData[]): BaseActionExtension<T> {
-        return new BaseActionExtension(actionDataList, this._plugin);
+    create(actionDataList: IActionData[]): BaseActionExtension {
+        return new BaseActionExtension(actionDataList);
     }
 
     /**
      * Intercept actionDataList
      * @returns
      */
-    check(actionDataList: IActionData[]): false | BaseActionExtension<T> {
+    check(actionDataList: IActionData[]): false | BaseActionExtension {
         return this.create(actionDataList);
     }
 }

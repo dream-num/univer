@@ -1,12 +1,7 @@
-import { SheetActionBase, ActionObservers, ISheetActionData, Nullable, Workbook } from '@univerjs/core';
+import { SheetActionBase, ActionObservers, Nullable, Workbook } from '@univerjs/core';
 import { AddFilterCriteria, RemoveFilterCriteria } from '../Apply';
-import { ACTION_NAMES, FILTER_PLUGIN_NAME } from '../Const';
-import { IFilterCriteriaColumn } from '../Domain';
-import { IAddFilterCriteriaActionData } from './AddFilterCriteriaAction';
-
-export interface IRemoveFilterCriteriaAction extends ISheetActionData {
-    columnPosition: number;
-}
+import { ACTION_NAMES } from '../Const';
+import { IAddFilterCriteriaActionData, IFilterCriteriaColumn, IRemoveFilterCriteriaAction } from '../IData/FilterType';
 
 export class RemoveFilterCriteriaAction extends SheetActionBase<IRemoveFilterCriteriaAction, IAddFilterCriteriaActionData> {
     constructor(actionData: IRemoveFilterCriteriaAction, workbook: Workbook, observers: ActionObservers) {
@@ -34,17 +29,11 @@ export class RemoveFilterCriteriaAction extends SheetActionBase<IRemoveFilterCri
     }
 
     redo(): Nullable<IFilterCriteriaColumn> {
-        const worksheet = this.getWorkSheet();
-        const context = worksheet.getContext();
-        const manager = context.getPluginManager();
-        return RemoveFilterCriteria(manager.getRequirePluginByName(FILTER_PLUGIN_NAME), this._oldActionData.sheetId, this._doActionData.columnPosition);
+        return RemoveFilterCriteria(this._oldActionData.sheetId, this._doActionData.columnPosition);
     }
 
     undo(): void {
-        const worksheet = this.getWorkSheet();
-        const context = worksheet.getContext();
-        const manager = context.getPluginManager();
-        AddFilterCriteria(manager.getRequirePluginByName(FILTER_PLUGIN_NAME), this._doActionData.sheetId, this._oldActionData.criteriaColumn);
+        AddFilterCriteria(this._doActionData.sheetId, this._oldActionData.criteriaColumn);
     }
 
     validate(): boolean {

@@ -110,17 +110,17 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
 
     registerExtension() {
         const cellEditRegister = CellEditExtensionManager.create();
-        const formulaCellEditExtensionFactory = this._injector.createInstance(FormulaCellEditExtensionFactory, this);
+        const formulaCellEditExtensionFactory = this._injector.createInstance(FormulaCellEditExtensionFactory);
         this._injector.add([FormulaCellEditExtensionFactory, { useValue: formulaCellEditExtensionFactory }]);
         cellEditRegister.add(formulaCellEditExtensionFactory);
 
         const cellInputRegister = CellInputExtensionManager.create();
-        const formulaCellInputExtensionFactory = this._injector.createInstance(FormulaCellInputExtensionFactory, this);
+        const formulaCellInputExtensionFactory = this._injector.createInstance(FormulaCellInputExtensionFactory);
         this._injector.add([FormulaCellInputExtensionFactory, { useValue: formulaCellInputExtensionFactory }]);
         cellInputRegister.add(formulaCellInputExtensionFactory);
 
         const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
-        this._formulaActionExtensionFactory = new FormulaActionExtensionFactory(this, this._injector);
+        this._formulaActionExtensionFactory = new FormulaActionExtensionFactory(this._injector);
         actionRegister.add(this._formulaActionExtensionFactory);
     }
 

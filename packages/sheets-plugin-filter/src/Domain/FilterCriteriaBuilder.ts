@@ -1,10 +1,9 @@
-import { BooleanCriteria, Color, SheetContext, RelativeDate, Serializer, Tools, Tuples } from '@univerjs/core';
-import { ConditionValue } from '@univerjs/sheets-plugin-conditional-format';
-import { FilterCriteria, IFilterCriteria } from './FilterCriteria';
+import { Color, RelativeDate, Serializer, Tools, Tuples } from '@univerjs/core';
+import { FilterCriteria } from './FilterCriteria';
+import { ConditionValue, IFilterCriteriaData } from '../IData/FilterType';
+import { BooleanCriteria } from '../Enum/BooleanCriteria';
 
 export class FilterCriteriaBuilder extends Serializer {
-    private _context: SheetContext;
-
     private _whenNumberGreaterThanOrEqualTo: number;
 
     private _criteriaType: BooleanCriteria;
@@ -77,7 +76,7 @@ export class FilterCriteriaBuilder extends Serializer {
 
     private _whenNumberLessThanOrEqualTo: number;
 
-    static newInstance(sequence: IFilterCriteria): FilterCriteriaBuilder {
+    static newInstance(sequence: IFilterCriteriaData): FilterCriteriaBuilder {
         const builder = new FilterCriteriaBuilder();
         builder._criteriaType = sequence.criteriaType;
         builder._whenNumberGreaterThanOrEqualTo = sequence.whenNumberGreaterThanOrEqualTo;
@@ -120,20 +119,15 @@ export class FilterCriteriaBuilder extends Serializer {
 
     // Constructs a filter criteria from the settings supplied to the builder.
     build(): FilterCriteria {
-        return FilterCriteria.newInstance(this.toSequence()).withContext(this._context);
+        return FilterCriteria.newInstance(this.toSequence());
     }
 
     // Creates a builder for a filter criteria based on this filter criteria's settings.
     copy(): FilterCriteriaBuilder {
-        return FilterCriteriaBuilder.newInstance(this.toSequence()).withContext(this._context);
+        return FilterCriteriaBuilder.newInstance(this.toSequence());
     }
 
-    withContext(context: SheetContext): FilterCriteriaBuilder {
-        this._context = context;
-        return this;
-    }
-
-    toSequence(): IFilterCriteria {
+    override toSequence(): IFilterCriteriaData {
         return {
             className: Tools.getClassName(this),
             visibleForegroundColor: this._visibleForegroundColor,
@@ -173,10 +167,6 @@ export class FilterCriteriaBuilder extends Serializer {
             whenNumberLessThan: this._whenNumberLessThan,
             whenNumberLessThanOrEqualTo: this._whenNumberLessThanOrEqualTo,
         };
-    }
-
-    getContext(): SheetContext {
-        return this._context;
     }
 
     getWhenNumberGreaterThanOrEqualTo(): number {

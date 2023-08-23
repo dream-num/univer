@@ -21,7 +21,7 @@ export const isDOM =
  */
 export function $$(selector: string, context?: HTMLElement | Document) {
     context = context || document;
-    let elements = context.querySelectorAll(selector);
+    const elements = context.querySelectorAll(selector);
 
     return elements.length === 1 ? Array.prototype.slice.call(elements)[0] : Array.prototype.slice.call(elements);
 }
@@ -39,7 +39,7 @@ export function addClass(className: string, selector: HTMLElement | string, cont
     }
 
     context = context || document;
-    let elements = Array.prototype.slice.call(context.querySelectorAll(selector));
+    const elements = Array.prototype.slice.call(context.querySelectorAll(selector));
 
     elements.forEach((ele) => {
         ele.classList.add(className);
@@ -58,7 +58,7 @@ export function removeClass(className: string, selector: HTMLElement | string, c
     }
 
     context = context || document;
-    let elements = Array.prototype.slice.call(context.querySelectorAll(selector));
+    const elements = Array.prototype.slice.call(context.querySelectorAll(selector));
 
     elements.forEach((ele) => {
         ele.classList.remove(className);
@@ -103,14 +103,14 @@ export function randomId(prefix: string) {
  * @returns
  */
 export function getFirstChildren(obj: HTMLElement) {
-    let objChild = [];
-    let objs = obj.getElementsByTagName('*');
+    const objChild = [];
+    const objs = obj.getElementsByTagName('*');
     for (let i = 0, j = objs.length; i < j; ++i) {
         if (objs[i].nodeType !== 1) {
             // alert(objs[i].nodeType);
             continue;
         }
-        let temp: HTMLElement | any = objs[i].parentNode;
+        const temp: HTMLElement | any = objs[i].parentNode;
         if (temp && temp.nodeType === 1) {
             if (temp === obj) {
                 objChild[objChild.length] = objs[i];
@@ -129,7 +129,7 @@ export function joinClassNames(...args: any) {
     let result = '';
     args.forEach((item: any) => {
         if (item instanceof Object) {
-            for (let k in item) {
+            for (const k in item) {
                 if (item[k]) {
                     result += ` ${k}`;
                 }
@@ -141,7 +141,7 @@ export function joinClassNames(...args: any) {
     return result;
 }
 
-export const getNodeindex = (elm: any) => [...elm.parentNode.children].indexOf(elm);
+export const getNodeIndex = (elm: any) => [...elm.parentNode.children].indexOf(elm);
 
 // 防抖
 export function debounce(fn: Function, time: number) {
@@ -157,8 +157,8 @@ export function debounce(fn: Function, time: number) {
 export function selectTextContent(ele: Node) {
     if (window.getSelection) {
         // all browsers, except IE before version 9
-        let range = document.createRange();
-        let content = ele.firstChild;
+        const range = document.createRange();
+        const content = ele.firstChild;
         if (content) {
             range.setStart(content, 0);
             range.setEnd(content, (content as Text).length);
@@ -172,9 +172,9 @@ export function selectTextContent(ele: Node) {
 
 export function selectTextContentCross(sEle: Node, eEle: Node) {
     if (window.getSelection) {
-        let range = document.createRange();
-        let sContent = sEle.firstChild;
-        let eContent = eEle.firstChild;
+        const range = document.createRange();
+        const sContent = sEle.firstChild;
+        const eContent = eEle.firstChild;
         if (sContent && eContent) {
             range.setStart(sContent, 0);
             range.setEnd(eContent, (eContent as Text).length);
@@ -202,7 +202,7 @@ export function getRefElement(ref: RefObject<HTMLElement | Component> | Componen
     if (isDOM((ref as RefObject<HTMLElement>).current)) {
         return (ref as RefObject<HTMLElement>).current as HTMLElement;
     }
-    let refCurrent = (ref as RefObject<Component>).current as Component<{}, {}>;
+    const refCurrent = (ref as RefObject<Component>).current as Component<{}, {}>;
 
     if (refCurrent) {
         return refCurrent?.base as HTMLElement;
@@ -211,7 +211,7 @@ export function getRefElement(ref: RefObject<HTMLElement | Component> | Componen
 }
 
 export function printableCharacter(keycode: number) {
-    let valid =
+    const valid =
         (keycode > 47 && keycode < 58) || // number keys
         keycode === 32 ||
         keycode === 13 || // spacebar & return key(s) (if you want to allow carriage returns)

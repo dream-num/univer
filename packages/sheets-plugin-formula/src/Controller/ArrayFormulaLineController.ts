@@ -76,18 +76,18 @@ export class ArrayFormulaLineControl {
         const { startRow, startColumn, endRow, endColumn } = this._range;
         const sheetId = this._sheetId;
 
-        let workbook = this.getWorkBook();
-        let worksheet = workbook.getSheetBySheetId(sheetId);
+        const workbook = this.getWorkBook();
+        const worksheet = workbook.getSheetBySheetId(sheetId);
 
         if (worksheet == null) {
             throw new Error(`not found sheet from id: ${sheetId}`);
         }
 
-        let rowTitleWidth = worksheet.getConfig().rowTitle.width;
-        let columnTitleHeight = worksheet.getConfig().columnTitle.height;
+        const rowTitleWidth = worksheet.getConfig().rowTitle.width;
+        const columnTitleHeight = worksheet.getConfig().columnTitle.height;
 
-        let rowManager = worksheet.getRowManager();
-        let columnManager = worksheet.getColumnManager();
+        const rowManager = worksheet.getRowManager();
+        const columnManager = worksheet.getColumnManager();
 
         let totalHeight = 0;
         let totalWidth = 0;

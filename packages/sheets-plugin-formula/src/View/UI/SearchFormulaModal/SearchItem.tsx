@@ -1,6 +1,5 @@
 import { BaseComponentProps, CellRange, Component } from '@univerjs/base-ui';
-import { FormulaParamType } from '../../../Basics';
-import { FunParams } from '../../../Controller/SearchFormulaModalController';
+import { FormulaParamType, FunParams } from '../../../Basics';
 import styles from './index.module.less';
 
 interface IProps extends BaseComponentProps {

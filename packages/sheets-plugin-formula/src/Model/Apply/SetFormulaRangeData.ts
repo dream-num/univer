@@ -11,5 +11,5 @@ export function SetFormulaRangeData(workbook: Workbook, formulaData: FormulaData
     // update
     formulaDataModel.setFormulaData(formulaData);
 
-    return result;
+    return result as FormulaDataType;
 }

@@ -1,5 +1,5 @@
 import { AppContext, AppContextValues, BaseComponentProps, Button, Component, Container, createRef, debounce, PreactContext, Select, Tooltip } from '@univerjs/base-ui';
-import { IToolbarItemProps } from '../../Controller';
+import { IToolbarItemProps, SheetContainerUIController } from '../../Controller';
 import styles from './index.module.less';
 import { AppUIController } from '../../Controller/AppUIController';
 
@@ -155,7 +155,7 @@ export class Toolbar extends Component<IProps, IState> {
     };
 
     resetUl = () => {
-        const wrapper = this.context.injector.get(AppUIController).getSheetContainerController().getContentRef().current!;
+        const wrapper = this.context.injector.get(SheetContainerUIController).getContentRef().current!;
         const height = `${(wrapper as HTMLDivElement).offsetHeight}px`;
         const ul = this.toolbarRef.current.querySelectorAll('ul');
         for (let i = 0; i < ul.length; i++) {

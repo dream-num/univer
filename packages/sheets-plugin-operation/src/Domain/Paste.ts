@@ -34,7 +34,7 @@ export interface PasteInfo {
 export abstract class Paste {
     // constructor(pasteList: RightMenuProps[]) { }
 
-    paste(e: Event) { }
+    paste(e: Event) {}
 }
 
 export class UniverPaste extends Paste {

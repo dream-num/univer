@@ -2,7 +2,6 @@ import { BaseCellEditExtension, BaseCellEditExtensionFactory, ICell } from '@uni
 import { ICurrentUniverService, IRangeData, Nullable } from '@univerjs/core';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject, Injector } from '@wendellhu/redi';
-import { FormulaPlugin } from '../../FormulaPlugin';
 import { FormulaController } from '../../Controller/FormulaController';
 import { FormulaPromptController } from '../../Controller/FormulaPromptController';
 
@@ -16,16 +15,15 @@ export class FormulaCellEditExtension extends BaseCellEditExtension {
     }
 }
 
-export class FormulaCellEditExtensionFactory extends BaseCellEditExtensionFactory<FormulaPlugin> {
+export class FormulaCellEditExtensionFactory extends BaseCellEditExtensionFactory {
     constructor(
-        _plugin: FormulaPlugin,
         @Inject(Injector) private readonly _sheetInjector: Injector,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(FormulaController) private readonly _formulaController: FormulaController,
         @Inject(FormulaPromptController) private readonly _formulaPromptController: FormulaPromptController,
         @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController
     ) {
-        super(_plugin);
+        super();
     }
 
     override get zIndex(): number {
@@ -38,7 +36,7 @@ export class FormulaCellEditExtensionFactory extends BaseCellEditExtensionFactor
 
     override check(cell: ICell) {
         const unitId = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getUnitId();
-        let formula = this.checkFormulaValue(cell) || this.checkArrayFormValue(cell, unitId);
+        const formula = this.checkFormulaValue(cell) || this.checkArrayFormValue(cell, unitId);
 
         if (formula !== '' && !formula) {
             return false;

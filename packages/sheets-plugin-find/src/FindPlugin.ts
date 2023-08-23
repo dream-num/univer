@@ -1,4 +1,4 @@
-import { CommandManager, ICurrentUniverService, LocaleService, Plugin, PluginType, UniverSheet } from '@univerjs/core';
+import { CommandManager, ICurrentUniverService, LocaleService, Plugin, PluginType } from '@univerjs/core';
 // import { TextFinder } from './Domain/TextFind';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { FIND_PLUGIN_NAME } from './Const/PLUGIN_NAME';
@@ -11,7 +11,7 @@ import { FindModalController } from './Controller/FindModalController';
 // import { FindModalController } from './Controller/FindModalController';
 // import { TextFinder } from './Domain';
 
-export interface IFindPluginConfig { }
+export interface IFindPluginConfig {}
 
 export class FindPlugin extends Plugin<FindPluginObserve> {
     static override type = PluginType.Sheet;
@@ -34,9 +34,9 @@ export class FindPlugin extends Plugin<FindPluginObserve> {
         this.initializeDependencies(_sheetInjector);
     }
 
-    installTo(universheetInstance: UniverSheet) {
-        universheetInstance.installPlugin(this);
-    }
+    // installTo(universheetInstance: UniverSheet) {
+    //     universheetInstance.installPlugin(this);
+    // }
 
     // installTo(universheetInstance: UniverSheet) {
     //     universheetInstance.installPlugin(this);

@@ -1,12 +1,7 @@
-import { SheetActionBase, ActionObservers, ISheetActionData, Nullable, Workbook } from '@univerjs/core';
-import { IFilter } from '../Domain';
-import { ACTION_NAMES, FILTER_PLUGIN_NAME } from '../Const';
+import { SheetActionBase, ActionObservers, Workbook } from '@univerjs/core';
+import { ACTION_NAMES } from '../Const';
 import { AddFilter, RemoveFilter } from '../Apply';
-import { IRemoveFilterActionData } from './RemoveFilterAction';
-
-export interface IAddFilterActionData extends ISheetActionData {
-    filter: Nullable<IFilter>;
-}
+import { IAddFilterActionData, IRemoveFilterActionData } from '../IData/FilterType';
 
 export class AddFilterAction extends SheetActionBase<IAddFilterActionData, IRemoveFilterActionData> {
     constructor(actionData: IAddFilterActionData, workbook: Workbook, observers: ActionObservers) {
@@ -29,17 +24,11 @@ export class AddFilterAction extends SheetActionBase<IAddFilterActionData, IRemo
     }
 
     redo(): void {
-        const worksheet = this.getWorkSheet();
-        const context = worksheet.getContext();
-        const manager = context.getPluginManager();
-        AddFilter(manager.getRequirePluginByName(FILTER_PLUGIN_NAME), this._doActionData.sheetId, this._doActionData.filter);
+        AddFilter(this._doActionData.sheetId, this._doActionData.filter);
     }
 
     undo(): void {
-        const worksheet = this.getWorkSheet();
-        const context = worksheet.getContext();
-        const manager = context.getPluginManager();
-        RemoveFilter(manager.getRequirePluginByName(FILTER_PLUGIN_NAME), this._oldActionData.sheetId);
+        RemoveFilter(this._oldActionData.sheetId);
     }
 
     do(): void {

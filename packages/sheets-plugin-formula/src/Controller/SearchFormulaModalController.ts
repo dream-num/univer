@@ -1,60 +1,12 @@
-import { ComponentChildren, ComponentManager } from '@univerjs/base-ui';
+import { ComponentManager } from '@univerjs/base-ui';
 import { ObserverManager } from '@univerjs/core';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
 import { SelectionControl } from '@univerjs/base-render/src/Component/Sheets/Selection/SelectionControl';
-import { FormulaType, FORMULA_PLUGIN_NAME, FunList, SelectCategoryType } from '../Basics';
+import { FormulaType, FORMULA_PLUGIN_NAME, FunList, SelectCategoryType, FunParams, SearchFormulaModalData } from '../Basics';
 import { SearchFormulaContent } from '../View/UI/SearchFormulaModal/SearchFormulaContent';
 import { SearchFormulaModal } from '../View/UI/SearchFormulaModal/SearchFormulaModal';
 import { SearchItem } from '../View/UI/SearchFormulaModal/SearchItem';
-
-export interface Label {
-    type?: string;
-    locale?: string;
-    label?: string;
-    placeholderLocale?: string;
-    placeholder?: string;
-}
-
-export interface ILabel extends Label {
-    children?: Label[];
-    onClick?: () => void;
-}
-
-export interface FunListILabel extends Label {
-    children?: FormulaType[];
-    onClick: (value: FormulaType) => void;
-}
-
-export interface FunParams {
-    funParams: FormulaType;
-}
-
-interface CustomComponent {
-    name?: string;
-    props: {
-        select?: Label[];
-        funList?: FunListILabel;
-        funParams?: FunParams;
-        calcLocale?: string;
-        range?: string;
-        placeholderLocale?: string;
-        titleLocale?: string;
-        confirmTextLocale?: string;
-    };
-}
-
-export interface SearchFormulaModalData {
-    name: string;
-    label?: FunParams;
-    show?: boolean;
-    mask?: boolean;
-    group: ILabel[];
-    titleLocale?: string;
-    onCancel?: () => void;
-    children: CustomComponent;
-    modal?: ComponentChildren; // 渲染的组件
-}
 
 export class SearchFormulaController {
     private _modalData: SearchFormulaModalData[];
@@ -75,7 +27,6 @@ export class SearchFormulaController {
         this._funParams = {
             funParams: {},
         };
-
         this._modalData = [
             {
                 name: 'SearchFormula',
@@ -146,7 +97,6 @@ export class SearchFormulaController {
                 },
             },
         };
-
         this._initialize();
     }
 

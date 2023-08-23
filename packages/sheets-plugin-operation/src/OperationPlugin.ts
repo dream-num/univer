@@ -1,4 +1,4 @@
-import { LocaleService, Plugin, PluginType, UniverSheet } from '@univerjs/core';
+import { LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { RegisterManager } from '@univerjs/base-ui';
 import { en, zh } from './Locale';
@@ -91,9 +91,9 @@ export class OperationPlugin extends Plugin {
         copyRegister.add(this._copyImageExtensionFactory);
     }
 
-    installTo(universheetInstance: UniverSheet) {
-        universheetInstance.installPlugin(this);
-    }
+    // installTo(universheetInstance: UniverSheet) {
+    //     universheetInstance.installPlugin(this);
+    // }
 
     override onDestroy(): void {
         const pasteRegister = this._registerManager.getPasteExtensionManager().getRegister();

@@ -1,12 +1,11 @@
-import { Plugin } from '@univerjs/core';
 import { IDragAndDropData } from '../../Interfaces';
 
 /**
  * 转化table html/json为json
  */
-export class BaseDragAndDropExtension<T extends Plugin = Plugin> {
+export class BaseDragAndDropExtension {
     // protected _json: IKeyValue;
-    constructor(protected _data: File[], protected _plugin: T) {}
+    constructor(protected _data: File[]) {}
 
     /**
      * Execute the core logic after the check is successful
@@ -17,9 +16,7 @@ export class BaseDragAndDropExtension<T extends Plugin = Plugin> {
 /**
  * Determine whether to intercept and create BaseDragAndDropExtension
  */
-export class BaseDragAndDropExtensionFactory<T extends Plugin = Plugin> {
-    constructor(protected _plugin: T) {}
-
+export class BaseDragAndDropExtensionFactory {
     get zIndex() {
         return 0;
     }
@@ -30,7 +27,7 @@ export class BaseDragAndDropExtensionFactory<T extends Plugin = Plugin> {
      * @returns
      */
     create(data: File[]): BaseDragAndDropExtension {
-        return new BaseDragAndDropExtension(data, this._plugin);
+        return new BaseDragAndDropExtension(data);
     }
 
     /**

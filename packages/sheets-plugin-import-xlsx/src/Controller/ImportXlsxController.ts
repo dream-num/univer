@@ -47,9 +47,9 @@ export class ImportXlsxController {
             return;
         }
 
-        let name = files[0].name;
-        let suffixArr = name.split('.');
-        let suffix = suffixArr[suffixArr.length - 1];
+        const name = files[0].name;
+        const suffixArr = name.split('.');
+        const suffix = suffixArr[suffixArr.length - 1];
         if (suffix !== 'xlsx') {
             console.error('Currently only supports the import of xlsx files');
             return;

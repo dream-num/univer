@@ -10,7 +10,7 @@ interface IProps {
 export class ClipboardInput extends Component<IProps> {
     private _render: BaseComponentRender;
 
-    initialize() {}
+    override initialize() {}
 
     render() {
         const { prefix, placeholder1, suffix, placeholder2 } = this.props;

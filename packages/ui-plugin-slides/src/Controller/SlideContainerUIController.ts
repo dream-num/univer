@@ -18,21 +18,20 @@ export class SlideContainerUIController {
 
     private _config: ISlideUIPluginConfig;
 
-    private _dragManager: DragManager;
-
     constructor(
         config: ISlideUIPluginConfig,
         @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Self() @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(DragManager) private readonly _dragManager: DragManager
     ) {
         this._config = config;
         this._toolbarController = this._injector.createInstance(ToolbarUIController, this._config.layout?.toolbarConfig);
         this._infoBarController = this._injector.createInstance(InfoBarUIController);
         this._slideBarController = this._injector.createInstance(SlideBarUIController);
-        this._dragManager = this._injector.createInstance(DragManager);
+        // this._dragManager = this._injector.createInstance(DragManager);
     }
 
     getUIConfig() {

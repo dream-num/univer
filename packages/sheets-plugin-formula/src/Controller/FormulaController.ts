@@ -117,7 +117,7 @@ export class FormulaController {
     clearArrayFormulaLineControl() {
         const arrayFormulaLineControls = this._arrayFormulaLineControls;
         if (arrayFormulaLineControls.length > 0) {
-            for (let control of arrayFormulaLineControls) {
+            for (const control of arrayFormulaLineControls) {
                 control.dispose();
             }
         }
@@ -169,7 +169,7 @@ export class FormulaController {
 
         const currentUnitId = workbook.getUnitId();
 
-        for (let sheet of sheets) {
+        for (const sheet of sheets) {
             sheetData[sheet.getSheetId()] = sheet.getCellMatrix();
             sheetNameMap[sheet.getName()] = sheet.getSheetId();
         }

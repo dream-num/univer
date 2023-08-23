@@ -1,4 +1,3 @@
-import { ISetFormulaRangeActionData } from './../../Model/Action/SetFormulaRangeDataAction';
 import {
     ActionOperation,
     ACTION_NAMES,
@@ -19,22 +18,21 @@ import {
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { FormulaDataType, FormulaEngineService } from '@univerjs/base-formula-engine';
-import { FormulaPlugin } from '../../FormulaPlugin';
+import { ISetFormulaRangeActionData } from '../../Model/Action/SetFormulaRangeDataAction';
 import { ACTION_NAMES as PLUGIN_ACTION_NAMES } from '../Enum';
 import { FormulaController } from '../../Controller/FormulaController';
 
 //
-export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
+export class FormulaActionExtension extends BaseActionExtension {
     constructor(
         actionDataList: IActionData[],
-        _plugin: FormulaPlugin,
         @Inject(Injector) private readonly _sheetInjector: Injector,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(FormulaController) private readonly _formulaController: FormulaController,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
         @Inject(CommandManager) private readonly _commandManager: CommandManager
     ) {
-        super(actionDataList, _plugin);
+        super(actionDataList);
     }
 
     override execute() {
@@ -191,16 +189,16 @@ export class FormulaActionExtension extends BaseActionExtension<FormulaPlugin> {
     }
 }
 
-export class FormulaActionExtensionFactory extends BaseActionExtensionFactory<FormulaPlugin> {
-    constructor(_plugin: FormulaPlugin, @Inject(Injector) private readonly _sheetInjector: Injector) {
-        super(_plugin);
+export class FormulaActionExtensionFactory extends BaseActionExtensionFactory {
+    constructor(@Inject(Injector) private readonly _sheetInjector: Injector) {
+        super();
     }
 
     override get zIndex(): number {
         return 1;
     }
 
-    override create(actionDataList: ISheetActionData[]): BaseActionExtension<FormulaPlugin> {
-        return this._sheetInjector.createInstance(FormulaActionExtension, actionDataList, this._plugin);
+    override create(actionDataList: ISheetActionData[]): BaseActionExtension {
+        return this._sheetInjector.createInstance(FormulaActionExtension, actionDataList);
     }
 }

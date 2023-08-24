@@ -1,4 +1,4 @@
-import { Inject, forwardRef } from '@wendellhu/redi';
+import { Inject, Injector, forwardRef } from '@wendellhu/redi';
 
 import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../../Types/Const';
 import { Command, CommandManager } from '../../Command';
@@ -54,7 +54,8 @@ export class Workbook {
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(forwardRef(() => GenName)) private readonly _genName: GenName,
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
+        @Inject(Injector) readonly _injector: Injector,
     ) {
         this._config = Tools.commonExtend(DEFAULT_WORKBOOK, workbookData);
 
@@ -162,6 +163,7 @@ export class Workbook {
                         sheetId: worksheetConfig.id,
                         index,
                         sheet: worksheetConfig as IWorksheetConfig,
+                        injector: this._injector
                     } as IInsertSheetActionData
                 )
             );

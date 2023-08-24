@@ -8,6 +8,7 @@ import { createCoreTestContainer } from '../ContainerStartUp';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
+// // TODO等Command系统建设好就可以开始改造Action
 test('Test Create MergeCell', () => {
     const container = createCoreTestContainer();
     const context = container.get<SheetContext>('Context');

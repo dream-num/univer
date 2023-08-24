@@ -30,7 +30,6 @@ export * from './SetRightToLeftAction';
 export * from './SetRowHeightAction';
 export * from './SetRowHideAction';
 export * from './SetRowShowAction';
-export * from './SetSelectionActivateAction';
 export * from './SetSheetOrderAction';
 export * from './SetTabColorAction';
 export * from './SetWorkSheetActivateAction';

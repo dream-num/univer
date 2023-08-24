@@ -1,29 +1,12 @@
 import { Workbook, Worksheet } from '../Domain';
 import { IWorksheetConfig } from '../../Types/Interfaces';
-import { CommandUnit } from '../../Command';
+import { CommandManager, CommandUnit } from '../../Command';
 import { IInsertSheetActionData } from '../Action';
+import { ObserverManager } from '../../Observer';
+import { ICurrentUniverService } from '../../Service/Current.service';
 
-export function InsertSheet(
-    workbook: Workbook,
-    index: number,
-    worksheetConfig: IWorksheetConfig
-): string {
-    const iSheets = workbook.getWorksheets();
-    const config = workbook.getConfig();
-    const { sheets, sheetOrder } = config;
-    if (sheets[worksheetConfig.id]) {
-        throw new Error(`Insert Sheet fail ${worksheetConfig.id} is already exist`);
-    }
-    sheets[worksheetConfig.id] = worksheetConfig;
-    sheetOrder.splice(index, 0, worksheetConfig.id);
-    iSheets.set(
-        worksheetConfig.id,
-        new Worksheet(workbook.getContext(), worksheetConfig)
-    );
-    return worksheetConfig.id;
-}
 
-export function InsertSheetApply(unit: CommandUnit, data: IInsertSheetActionData) {
+export function InsertSheetApply(unit: CommandUnit, data: IInsertSheetActionData, commandManager: CommandManager, observerManager: ObserverManager, currentUniverService: ICurrentUniverService) {
     const worksheet = unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
     const index = data.index;
     const worksheetConfig = data.sheet;
@@ -38,7 +21,7 @@ export function InsertSheetApply(unit: CommandUnit, data: IInsertSheetActionData
     sheetOrder.splice(index, 0, worksheetConfig.id);
     iSheets.set(
         worksheetConfig.id,
-        new Worksheet(unit.WorkBookUnit!.getContext(), worksheetConfig)
+        new Worksheet(worksheetConfig,commandManager, observerManager, currentUniverService)
     );
     return worksheetConfig.id;
 }

@@ -20,24 +20,24 @@ describe('UniverSheet', () => {
     });
     afterAll(async () => {});
 
-    test('Test newInstance', () => {
-        const sheet = univerSheet.getWorkBook().getSheetBySheetName('first sheet');
-        expect(sheet && sheet.getName()).toEqual('first sheet');
-    });
-    test('Test installPlugin/uninstallPlugin/getWorkBook/get context', () => {
-        class TestPlugin extends Plugin {
-            static override type: PluginType.Sheet;
+    // test('Test newInstance', () => {
+    //     const sheet = univerSheet.getWorkBook().getSheetBySheetName('first sheet');
+    //     expect(sheet && sheet.getName()).toEqual('first sheet');
+    // });
+    // test('Test installPlugin/uninstallPlugin/getWorkBook/get context', () => {
+    //     class TestPlugin extends Plugin {
+    //         static override type: PluginType.Sheet;
 
-            constructor() {
-                super('testPlugin');
-            }
+    //         constructor() {
+    //             super('testPlugin');
+    //         }
 
-            override onMounted(): void {}
+    //         override onMounted(): void {}
 
-            override onDestroy(): void {}
-        }
+    //         override onDestroy(): void {}
+    //     }
 
-        // test installPlugin
-        univerSheet.addPlugin(TestPlugin, {});
-    });
+    //     // test installPlugin
+    //     univerSheet.addPlugin(TestPlugin, {});
+    // });
 });

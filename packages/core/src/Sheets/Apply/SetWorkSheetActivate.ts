@@ -1,6 +1,7 @@
 import { Worksheet } from '../Domain/Worksheet';
 import { BooleanNumber } from '../../Types/Enum';
 import { ISheetStatus } from '../Action';
+import { ICurrentUniverService } from '../../Service/Current.service';
 
 /**
  *
@@ -12,11 +13,12 @@ import { ISheetStatus } from '../Action';
  */
 export function SetWorkSheetActivate(
     worksheet: Worksheet,
-    status: BooleanNumber
+    status: BooleanNumber,
+    currentUniverService: ICurrentUniverService
 ): ISheetStatus {
     // store old status
 
-    const oldSheet = worksheet.getContext().getWorkBook().getActiveSheet();
+    const oldSheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
     let oldSheetId = '';
     const oldStatus = BooleanNumber.FALSE;
     if (oldSheet) {
@@ -24,7 +26,7 @@ export function SetWorkSheetActivate(
         // oldSheet.getStatus();
     }
 
-    const sheets = worksheet.getContext().getWorkBook().getSheets();
+    const sheets = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheets();
     const currentSheetId = worksheet.getSheetId();
 
     sheets.forEach((sheet) => {

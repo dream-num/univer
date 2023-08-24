@@ -30,7 +30,6 @@ export * from './SetRangeStyle';
 export * from './SetRangeFormattedValue';
 export * from './SetRightToLeft';
 export * from './SetRowHeight';
-export * from './SetSelectionActivate';
 export * from './SetSheetOrder';
 export * from './SetShowRow';
 export * from './SetTabColor';

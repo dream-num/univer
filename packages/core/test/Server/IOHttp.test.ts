@@ -29,14 +29,10 @@ describe('IOHttp', () => {
     afterAll(async () => {
         // stop http server
         if (osType() === 'windows') {
-            child_process.exec(
-                'for /f "tokens=5" %a in (\'netstat -aon ^| find "0.0.0.0:3998" ^| find "LISTENING"\') do taskkill /f /pid %a'
-            );
+            child_process.exec('for /f "tokens=5" %a in (\'netstat -aon ^| find "0.0.0.0:3998" ^| find "LISTENING"\') do taskkill /f /pid %a');
         } else if (osType() === 'mac') {
             // https://stackoverflow.com/a/36917850
-            child_process.exec(
-                "kill -9 `lsof -i TCP:3998 | awk '/LISTEN/{print $2}'`"
-            );
+            child_process.exec("kill -9 `lsof -i TCP:3998 | awk '/LISTEN/{print $2}'`");
         }
     });
 

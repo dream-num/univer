@@ -57,11 +57,12 @@ export class Command {
     }
 
     invoke(): void {
+        this._commonParameter.reset();
         this.actionDataList.forEach((data) => {
             const ActionClass = CommandManager.getAction(data.actionName);
             if (!ActionClass) return;
             const observers = CommandManager.getActionObservers();
-            const action = new ActionClass(data, this.unit, observers, this._commonParameter.reset());
+            const action = new ActionClass(data, this.unit, observers, this._commonParameter);
 
             this.actionList.push(action);
         });

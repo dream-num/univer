@@ -1,15 +1,27 @@
-import { IDocumentBody } from '../../Interfaces/IDocumentData';
 import { DocumentModel } from '../Domain/DocumentModel';
-import { getDocsUpdateBody, horizontalLineSegmentsSubtraction } from '../../Shared/Common';
+import { getDocsUpdateBody } from '../../Shared/Common';
 import { UpdateDocsAttributeType } from '../../Shared/CommandEnum';
 import { Nullable } from '../../Shared/Types';
+import {
+    deleteCustomBlocks,
+    deleteCustomRanges,
+    deleteParagraphs,
+    deleteSectionBreaks,
+    deleteTables,
+    deleteTextRuns,
+    insertCustomBlocks,
+    insertParagraphs,
+    insertTables,
+    insertTextRuns,
+} from './Common';
+import { ICustomBlock, ICustomRange, IDocumentBody, IParagraph, ISectionBreak, ITable, ITextRun } from '../../Interfaces/IDocumentData';
 
 export function UpdateAttributeApply(
     document: DocumentModel,
     updateBody: Nullable<IDocumentBody>,
     textLength: number,
     currentIndex: number,
-    coverType: UpdateDocsAttributeType,
+    coverType = UpdateDocsAttributeType.COVER,
     segmentId?: string
 ) {
     if (updateBody == null) {
@@ -30,78 +42,330 @@ export function UpdateAttributeApply(
 function updateAttribute(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType): IDocumentBody {
     const removeTextRuns = updateTextRuns(body, updateBody, textLength, currentIndex, coverType);
 
+    const removeParagraphs = updateParagraphs(body, updateBody, textLength, currentIndex, coverType);
+
+    const removeSectionBreaks = updateSectionBreaks(body, updateBody, textLength, currentIndex, coverType);
+
+    const removeCustomBlocks = updateCustomBlocks(body, updateBody, textLength, currentIndex, coverType);
+
+    const removeTables = updateTables(body, updateBody, textLength, currentIndex, coverType);
+
+    const removeCustomRanges = updateCustomRanges(body, updateBody, textLength, currentIndex, coverType);
+
     return {
         dataStream: '',
         textRuns: removeTextRuns,
-        // paragraphs: removeParagraphs,
-        // sectionBreaks: removeSectionBreaks,
-        // customBlocks: removeCustomBlocks,
-        // tables: removeTables,
-        // customRanges: removeCustomRanges,
+        paragraphs: removeParagraphs,
+        sectionBreaks: removeSectionBreaks,
+        customBlocks: removeCustomBlocks,
+        tables: removeTables,
+        customRanges: removeCustomRanges,
     };
 }
 
 function updateTextRuns(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType) {
     const { textRuns } = body;
 
-    const { textRuns: updateTextRuns } = updateBody;
+    let { textRuns: updateDataTextRuns } = updateBody;
 
-    if (textRuns == null || updateTextRuns == null) {
+    if (textRuns == null || updateDataTextRuns == null) {
         return;
     }
 
-    const startIndex = currentIndex;
-
-    const endIndex = currentIndex + textLength - 1;
-
-    const removeTextRuns = [];
-    for (let i = 0, len = textRuns.length; i < len; i++) {
-        const textRun = textRuns[i];
-        const { st, ed } = textRun;
-
-        if (startIndex <= st && endIndex >= ed) {
-            removeTextRuns.push({
-                ...textRun,
-                st: st - currentIndex,
-                ed: ed - currentIndex,
-            });
-
-            for (let updateTextRun of updateTextRuns) {
-                const { st: updateSt, ed: updateEd } = updateTextRun;
-            }
-
-            continue;
-        } else if (st <= startIndex && ed >= endIndex) {
-            const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
-
-            if (segments.length > 2) {
-                const seg1 = segments[0];
-                const seg2 = segments[1];
-                textRun.st = seg1[0];
-                textRun.ed = seg1[1] + seg2[1] - seg2[0] + 1;
-            } else {
-                textRun.st = segments[0][0];
-                textRun.ed = segments[0][1];
-            }
-        } else if (startIndex >= st && startIndex <= ed) {
-            removeTextRuns.push({
-                ...textRun,
-                st: startIndex - currentIndex,
-                ed: ed - currentIndex,
-            });
-            textRun.ed = startIndex - 1;
-        } else if (endIndex >= st && endIndex <= ed) {
-            removeTextRuns.push({
-                ...textRun,
-                st: st - currentIndex,
-                ed: endIndex - currentIndex,
-            });
-            textRun.st = endIndex + 1;
-        } else if (st > endIndex) {
-            textRun.st -= textLength;
-            textRun.ed -= textLength;
-        }
+    const removeTextRuns = deleteTextRuns(body, textLength, currentIndex);
+    if (coverType !== UpdateDocsAttributeType.REPLACE) {
+        const newUpdateTextRun = coverTextRun(updateDataTextRuns, removeTextRuns, coverType);
+        updateBody.textRuns = newUpdateTextRun;
     }
+    insertTextRuns(body, updateBody, textLength, currentIndex);
 
     return removeTextRuns;
+}
+
+function coverTextRun(updateDataTextRuns: ITextRun[], removeTextRuns: ITextRun[], coverType: UpdateDocsAttributeType) {
+    const newUpdateTextRun: ITextRun[] = [];
+    for (let updateTextRun of updateDataTextRuns) {
+        let { st: updateSt, ed: updateEd, ts: updateStyle } = updateTextRun;
+        let splitUpdateTextRuns: ITextRun[] = [];
+        for (let removeTextRun of removeTextRuns) {
+            const { st: removeSt, ed: removeEd, ts: removeStyle, sId } = removeTextRun;
+            let newTs;
+            if (coverType === UpdateDocsAttributeType.COVER) {
+                newTs = { ...removeStyle, ...updateStyle };
+            } else {
+                newTs = { ...updateStyle, ...removeStyle };
+            }
+            if (updateSt >= removeSt && updateEd <= removeEd) {
+                splitUpdateTextRuns.push({
+                    st: updateSt,
+                    ed: updateEd,
+                    ts: newTs,
+                    sId,
+                });
+                continue;
+            } else if (updateSt <= removeSt && updateEd >= removeEd) {
+                if (updateSt <= removeSt - 1) {
+                    splitUpdateTextRuns.push({
+                        st: updateSt,
+                        ed: removeSt - 1,
+                        ts: newTs,
+                        sId,
+                    });
+                }
+                splitUpdateTextRuns.push({
+                    st: removeSt,
+                    ed: removeEd,
+                    ts: newTs,
+                    sId,
+                });
+                splitUpdateTextRuns.push({
+                    st: removeEd + 1,
+                    ed: updateEd,
+                    ts: newTs,
+                    sId,
+                });
+
+                updateSt = removeEd + 1;
+            } else if (updateSt >= removeSt && updateSt <= removeEd) {
+                splitUpdateTextRuns.push({
+                    st: updateSt,
+                    ed: removeEd,
+                    ts: newTs,
+                    sId,
+                });
+                splitUpdateTextRuns.push({
+                    st: removeEd + 1,
+                    ed: updateEd,
+                    ts: newTs,
+                    sId,
+                });
+                updateSt = removeEd + 1;
+            } else if (updateEd >= removeSt && updateEd <= removeEd) {
+                splitUpdateTextRuns.push({
+                    st: removeSt,
+                    ed: updateEd,
+                    ts: newTs,
+                    sId,
+                });
+            }
+        }
+        newUpdateTextRun.push(...splitUpdateTextRuns);
+        splitUpdateTextRuns = [];
+    }
+    return newUpdateTextRun;
+}
+
+function updateParagraphs(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType) {
+    const { paragraphs } = body;
+
+    let { paragraphs: updateDataParagraphs } = updateBody;
+
+    if (paragraphs == null || updateDataParagraphs == null) {
+        return;
+    }
+
+    const removeParagraphs = deleteParagraphs(body, textLength, currentIndex);
+    if (coverType !== UpdateDocsAttributeType.REPLACE) {
+        const newUpdateParagraphs: IParagraph[] = [];
+        for (let updateParagraph of updateDataParagraphs) {
+            let { startIndex: updateStartIndex, paragraphStyle: updateParagraphStyle, bullet: updateBullet } = updateParagraph;
+            let splitUpdateParagraphs: IParagraph[] = [];
+            for (let removeParagraph of removeParagraphs) {
+                const { startIndex: removeStartIndex, paragraphStyle: removeParagraphStyle, bullet: removeBullet } = removeParagraph;
+                let newParagraphStyle;
+                let newBullet;
+                if (coverType === UpdateDocsAttributeType.COVER) {
+                    newParagraphStyle = { ...removeParagraphStyle, ...updateParagraphStyle };
+                    newBullet = { listId: '', nestingLevel: 0, textStyle: {}, ...removeBullet, ...updateBullet };
+                } else {
+                    newParagraphStyle = { ...updateParagraphStyle, ...removeParagraphStyle };
+                    newBullet = { listId: '', nestingLevel: 0, textStyle: {}, ...updateBullet, ...removeBullet };
+                }
+
+                if (updateStartIndex === removeStartIndex) {
+                    splitUpdateParagraphs.push({
+                        startIndex: updateStartIndex,
+                        paragraphStyle: newParagraphStyle,
+                        bullet: newBullet,
+                    });
+                    break;
+                }
+            }
+            newUpdateParagraphs.push(...splitUpdateParagraphs);
+            splitUpdateParagraphs = [];
+        }
+
+        updateBody.paragraphs = newUpdateParagraphs;
+    }
+    insertParagraphs(body, updateBody, textLength, currentIndex);
+
+    return removeParagraphs;
+}
+
+function updateSectionBreaks(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType) {
+    const { sectionBreaks } = body;
+
+    let { sectionBreaks: updateDataSectionBreaks } = updateBody;
+
+    if (sectionBreaks == null || updateDataSectionBreaks == null) {
+        return;
+    }
+
+    const removeSectionBreaks = deleteSectionBreaks(body, textLength, currentIndex);
+    if (coverType !== UpdateDocsAttributeType.REPLACE) {
+        const newUpdateSectionBreaks: ISectionBreak[] = [];
+        for (let updateSectionBreak of updateDataSectionBreaks) {
+            let { startIndex: updateStartIndex } = updateSectionBreak;
+            let splitUpdateSectionBreaks: ISectionBreak[] = [];
+            for (let removeSectionBreak of removeSectionBreaks) {
+                const { startIndex: removeStartIndex } = removeSectionBreak;
+                if (updateStartIndex === removeStartIndex) {
+                    if (coverType === UpdateDocsAttributeType.COVER) {
+                        splitUpdateSectionBreaks.push({
+                            ...removeSectionBreak,
+                            ...updateSectionBreak,
+                        });
+                    } else {
+                        splitUpdateSectionBreaks.push({
+                            ...updateSectionBreak,
+                            ...removeSectionBreak,
+                        });
+                    }
+                    break;
+                }
+            }
+            newUpdateSectionBreaks.push(...splitUpdateSectionBreaks);
+            splitUpdateSectionBreaks = [];
+        }
+        updateBody.sectionBreaks = newUpdateSectionBreaks;
+    }
+    insertParagraphs(body, updateBody, textLength, currentIndex);
+
+    return removeSectionBreaks;
+}
+
+function updateCustomBlocks(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType) {
+    const { customBlocks } = body;
+
+    let { customBlocks: updateDataCustomBlocks } = updateBody;
+
+    if (customBlocks == null || updateDataCustomBlocks == null) {
+        return;
+    }
+
+    const removeCustomBlocks = deleteCustomBlocks(body, textLength, currentIndex);
+    if (coverType !== UpdateDocsAttributeType.REPLACE) {
+        const newUpdateCustomBlocks: ICustomBlock[] = [];
+        for (let updateCustomBlock of updateDataCustomBlocks) {
+            let { startIndex: updateStartIndex } = updateCustomBlock;
+            let splitUpdateCustomBlocks: ICustomBlock[] = [];
+            for (let removeCustomBlock of removeCustomBlocks) {
+                const { startIndex: removeStartIndex } = removeCustomBlock;
+                if (updateStartIndex === removeStartIndex) {
+                    if (coverType === UpdateDocsAttributeType.COVER) {
+                        splitUpdateCustomBlocks.push({
+                            ...removeCustomBlock,
+                            ...updateCustomBlock,
+                        });
+                    } else {
+                        splitUpdateCustomBlocks.push({
+                            ...updateCustomBlock,
+                            ...removeCustomBlock,
+                        });
+                    }
+                    break;
+                }
+            }
+            newUpdateCustomBlocks.push(...splitUpdateCustomBlocks);
+            splitUpdateCustomBlocks = [];
+        }
+        updateBody.customBlocks = newUpdateCustomBlocks;
+    }
+    insertCustomBlocks(body, updateBody, textLength, currentIndex);
+
+    return removeCustomBlocks;
+}
+
+function updateTables(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType) {
+    const { tables } = body;
+
+    let { tables: updateDataTables } = updateBody;
+
+    if (tables == null || updateDataTables == null) {
+        return;
+    }
+
+    const removeTables = deleteTables(body, textLength, currentIndex);
+    if (coverType !== UpdateDocsAttributeType.REPLACE) {
+        const newUpdateTables: ITable[] = [];
+        for (let updateTable of updateDataTables) {
+            let { startIndex: updateStartIndex, endIndex: updateEndIndex } = updateTable;
+            let splitUpdateTables: ITable[] = [];
+            for (let removeTable of removeTables) {
+                const { startIndex: removeStartIndex, endIndex: removeEndIndex } = removeTable;
+                if (removeStartIndex >= updateStartIndex && removeEndIndex <= updateEndIndex) {
+                    if (coverType === UpdateDocsAttributeType.COVER) {
+                        splitUpdateTables.push({
+                            ...removeTable,
+                            ...updateTable,
+                        });
+                    } else {
+                        splitUpdateTables.push({
+                            ...updateTable,
+                            ...removeTable,
+                        });
+                    }
+                    break;
+                }
+            }
+            newUpdateTables.push(...splitUpdateTables);
+            splitUpdateTables = [];
+        }
+        updateBody.tables = newUpdateTables;
+    }
+    insertTables(body, updateBody, textLength, currentIndex);
+
+    return removeTables;
+}
+
+function updateCustomRanges(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType) {
+    const { customRanges } = body;
+
+    let { tables: updateDataCustomRanges } = updateBody;
+
+    if (customRanges == null || updateDataCustomRanges == null) {
+        return;
+    }
+
+    const removeCustomRanges = deleteCustomRanges(body, textLength, currentIndex);
+    if (coverType !== UpdateDocsAttributeType.REPLACE) {
+        const newUpdateCustomRanges: ICustomRange[] = [];
+        for (let updateCustomRange of updateDataCustomRanges) {
+            let { startIndex: updateStartIndex, endIndex: updateEndIndex } = updateCustomRange;
+            let splitUpdateCustomRanges: ICustomRange[] = [];
+            for (let removeCustomRange of removeCustomRanges) {
+                const { startIndex: removeStartIndex, endIndex: removeEndIndex } = removeCustomRange;
+                if (removeStartIndex >= updateStartIndex && removeEndIndex <= updateEndIndex) {
+                    if (coverType === UpdateDocsAttributeType.COVER) {
+                        splitUpdateCustomRanges.push({
+                            ...removeCustomRange,
+                            ...updateCustomRange,
+                        });
+                    } else {
+                        splitUpdateCustomRanges.push({
+                            ...updateCustomRange,
+                            ...removeCustomRange,
+                        });
+                    }
+                    break;
+                }
+            }
+            newUpdateCustomRanges.push(...splitUpdateCustomRanges);
+            splitUpdateCustomRanges = [];
+        }
+        updateBody.customRanges = newUpdateCustomRanges;
+    }
+    insertTables(body, updateBody, textLength, currentIndex);
+
+    return removeCustomRanges;
 }

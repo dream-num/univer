@@ -10,8 +10,6 @@ import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
 import { OperationPlugin } from '@univerjs/sheets-plugin-operation';
 import { ImagePlugin } from '@univerjs/sheets-plugin-image';
 
-// TODO: @huwenzhao: change the following to new API
-
 // univer
 const univer = new Univer({
     locale: LocaleType.EN,
@@ -42,7 +40,6 @@ univer.registerPlugin(FormulaPlugin, DEFAULT_FORMULA_DATA_DEMO);
 univer.registerPlugin(ImportXlsxPlugin);
 univer.registerPlugin(ImagePlugin);
 univer.registerPlugin(OperationPlugin);
-// universheet.installPlugin(new OverGridImagePlugin());
 
 // use for console test
 declare global {

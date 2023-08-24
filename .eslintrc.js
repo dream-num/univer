@@ -84,13 +84,6 @@ module.exports = {
                 accessibility: 'no-public',
             },
         ],
-        '@typescript-eslint/consistent-type-assertions': [
-            'error',
-            {
-                assertionStyle: 'as',
-                objectLiteralTypeAssertions: 'allow-as-parameter',
-            },
-        ],
         'spaced-comment': 'off',
         eqeqeq: [
             'error',
@@ -108,6 +101,7 @@ module.exports = {
         'grouped-accessor-pairs': 'off',
         '@typescript-eslint/member-ordering': 'error',
         '@typescript-eslint/no-explicit-any': 'warn',
+        '@typescript-eslint/consistent-type-assertions': 'off',
         '@typescript-eslint/no-unsafe-return': 'error',
         '@typescript-eslint/no-redeclare': 'off', // dependency interface and dependency token share the same name
     },

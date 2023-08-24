@@ -1,4 +1,4 @@
-import { CommandManager, ICurrentUniverService, ISheetActionData, SheetActionBase } from '@univerjs/core';
+import { CommandManager, Disposable, ICommandService, ICurrentUniverService, ISheetActionData, SheetActionBase } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { ISelectionManager } from '../Services/tokens';
@@ -6,16 +6,25 @@ import { SelectionManager } from './Selection';
 import { CanvasView } from '../View';
 // All skins' less file
 
-export class SheetContainerController {
+export class SheetContainerController extends Disposable {
     constructor(
         @ISelectionManager private readonly _selectionManager: SelectionManager,
         @Inject(CanvasView) private readonly canvasView: CanvasView,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
+        super();
+
         this._initialize();
     }
 
     private _initialize() {
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted(() => {
+                this.canvasView.getSheetView().getSpreadsheet().makeDirty(true);
+            })
+        );
+
         // Monitor all command changes and automatically trigger the refresh of the canvas
         CommandManager.getCommandObservers().add(({ actions }) => {
             if (!actions || actions.length === 0) return;

@@ -20,17 +20,10 @@ export interface IInsertRowDataActionData extends ISheetActionData {
  *
  * @internal
  */
-export class InsertRowDataAction extends SheetActionBase<
-    IInsertRowDataActionData,
-    IRemoveRowDataActionData
-> {
+export class InsertRowDataAction extends SheetActionBase<IInsertRowDataActionData, IRemoveRowDataActionData> {
     static NAME = 'InsertRowDataAction';
 
-    constructor(
-        actionData: IInsertRowDataActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
+    constructor(actionData: IInsertRowDataActionData, commandUnit: CommandUnit, observers: ActionObservers) {
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,

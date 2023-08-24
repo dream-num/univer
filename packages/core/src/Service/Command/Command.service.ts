@@ -1,43 +1,91 @@
-import { createIdentifier, IDisposable, Inject, Injector, Optional, SkipSelf } from '@wendellhu/redi';
-
-interface DependencyGetter {
-    get: Injector['get'];
-}
+import { createIdentifier, IAccessor, IDisposable, Inject, Injector, Optional, SkipSelf } from '@wendellhu/redi';
+import { ActionType, CommandManager, IActionData } from '../../Command';
+import { toDisposable } from '../../Shared/Lifecycle';
 
 export const enum CommandType {
-    /**  */
-    OPERATION = 0,
-    MUTATION = 1,
+    /** Command could generate some operations or mutations. */
+    COMMAND = 0,
+    /** An operation that do not require conflict resolve.  */
+    OPERATION = 1,
+    /** An operation that need to be resolved before applicated on peer client. */
+    MUTATION = 2,
 }
 
-export interface ICommand {
+export interface ICommand<P extends object = object, R = boolean> {
+    /**
+     * ${businessName}.${type}.${name}
+     */
     id: string;
+
     type: CommandType;
 
-    handler(dependencyGetter: DependencyGetter, ...args: unknown[]): Promise<boolean>;
+    handler(accessor: IAccessor, params: P): Promise<R>;
 }
 
-export interface ICommandInfo {
+/**
+ * Mutation would change the model of Univer applications.
+ */
+export interface IMutation<P extends object = object, R = boolean> extends ICommand<P, R> {
+    type: CommandType.MUTATION;
+}
+
+/**
+ * Operation would change the state of Univer applications. State should only be in memory and does not
+ * require data confliction.
+ */
+export interface IOperation<P extends object = object> extends ICommand<P> {
+    type: CommandType.OPERATION;
+}
+
+/**
+ * The command info, only a command id and responsible params
+ */
+export interface ICommandInfo<T extends object = object> {
+    // TODO: change object to serializable interface type
     id: string;
-    type: CommandType;
-    args: Array<number | string | null>;
+
+    /**
+     * Args should be serializable.
+     */
+    params?: T;
 }
 
-export type CommandListener = (commandInfo: ICommandInfo) => void;
+export interface IExecutionOptions {
+    silent?: boolean;
+}
+
+export type CommandListener = (commandInfo: Readonly<ICommandInfo>) => void;
 
 export interface ICommandService {
-    registerCommand(command: ICommand): IDisposable;
-    executeCommand(id: string, ...args: unknown[]): Promise<boolean> | boolean;
+    registerCommand<P extends object>(command: ICommand<P>): IDisposable;
+    executeCommand(id: string, params?: object, options?: IExecutionOptions): Promise<boolean> | boolean;
+
+    /**
+     * Register a hook that will be triggered when the
+     *
+     * @param id the command that will be fired.
+     * @param callback the callback function that would be called
+     */
+    onCommandWillExecute<P extends object = object>(id: string, callback: (params?: P) => ICommandInfo[][]): IDisposable;
+
+    /**
+     * The method that would be trigger when a command is executing. Gather all interceptors and middlewares.
+     * Should return a series of mutations or operations that would be executed as well.
+     *
+     * @param id ID of the command that would be fired
+     * @param params Command parameters
+     *
+     * @returns redo and undo mutations / operations
+     */
+    triggerCommandWillFire<P extends object = object>(id: string, params: P): ICommandInfo[][];
+
+    /**
+     * Register a callback function that will be executed when a command is executed.
+     */
     onCommandExecuted(listener: CommandListener): IDisposable;
 }
 
 export const ICommandService = createIdentifier<ICommandService>('anywhere.command-service');
-
-export function toDisposable(callback: () => void): IDisposable {
-    return {
-        dispose: callback,
-    };
-}
 
 /**
  * The registry of commands.
@@ -72,7 +120,10 @@ class CommandRegistry {
 
 export class CommandService implements ICommandService {
     private readonly _commandRegistry: CommandRegistry;
-    private readonly _listenerRegistry: CommandListener[] = [];
+
+    private readonly _commandWillExecuteRegistry: Map<string, Set<(params?: object) => ICommandInfo[][]>> = new Map();
+
+    private readonly _commandExecutedListeners: CommandListener[] = [];
 
     constructor(@SkipSelf() @Optional(CommandService) private readonly _parentCommandService: CommandService, @Inject(Injector) private readonly _injector: Injector) {
         this._commandRegistry = new CommandRegistry();
@@ -82,25 +133,63 @@ export class CommandService implements ICommandService {
         return this._registerCommand(command, this._injector);
     }
 
+    onCommandWillExecute<P extends object = object>(id: string, callback: (params?: P) => ICommandInfo[][]): IDisposable {
+        if (this._parentCommandService) {
+            return this._parentCommandService.onCommandWillExecute(id, callback);
+        }
+
+        const set = !this._commandWillExecuteRegistry.has(id)
+            ? (() => {
+                  const newSet = new Set<(params?: P) => ICommandInfo[][]>();
+                  this._commandWillExecuteRegistry.set(id, newSet as Set<(params?: object) => ICommandInfo[][]>);
+                  return newSet;
+              })()
+            : this._commandWillExecuteRegistry.get(id)!;
+
+        set.add(callback);
+
+        return toDisposable(() => {
+            set.delete(callback);
+            if (set.size === 0) {
+                this._commandWillExecuteRegistry.delete(id);
+            }
+        });
+    }
+
+    triggerCommandWillFire<P extends object = object>(id: string, params: P): ICommandInfo[][] {
+        if (this._parentCommandService) {
+            return this._parentCommandService.triggerCommandWillFire(id, params);
+        }
+
+        if (!this._commandWillExecuteRegistry.has(id)) {
+            return [];
+        }
+
+        // TODO: @wzhudev: it may be better to wrapp all undo & redos.
+        return Array.from(this._commandWillExecuteRegistry.get(id)!)
+            .map((interceptor) => interceptor(params))
+            .flat();
+    }
+
     onCommandExecuted(listener: (commandInfo: ICommandInfo) => void): IDisposable {
         if (this._parentCommandService) {
             return this._parentCommandService.onCommandExecuted(listener);
         }
 
-        if (this._listenerRegistry.indexOf(listener) === -1) {
-            this._listenerRegistry.push(listener);
+        if (this._commandExecutedListeners.indexOf(listener) === -1) {
+            this._commandExecutedListeners.push(listener);
             return toDisposable(() => {
-                const index = this._listenerRegistry.indexOf(listener);
-                this._listenerRegistry.splice(index, 1);
+                const index = this._commandExecutedListeners.indexOf(listener);
+                this._commandExecutedListeners.splice(index, 1);
             });
         }
 
-        throw new Error();
+        throw new Error('Could not add a listener twice.');
     }
 
-    async executeCommand(id: string, ...args: unknown[]): Promise<boolean> {
+    async executeCommand(id: string, params?: object): Promise<boolean> {
         if (this._parentCommandService) {
-            return this._parentCommandService.executeCommand(id, ...args);
+            return this._parentCommandService.executeCommand(id, params);
         }
 
         const item = this._commandRegistry.getCommand(id);
@@ -108,23 +197,23 @@ export class CommandService implements ICommandService {
             const command = item[0];
             const injector = item[1];
 
-            await this._execute(command, injector, ...args);
+            await this._execute(command, injector, params);
 
             const commandInfo: ICommandInfo = {
                 id: command.id,
-                type: command.type,
-                args: [...args] as unknown[] as Array<number | string | null>, // TODO: @wzhudev move strict args control of serialization
+                params,
             };
 
-            this._listenerRegistry.forEach((l) => l(commandInfo));
+            // emit command execution info
+            this._commandExecutedListeners.forEach((l) => l(commandInfo));
 
             return true;
         }
 
-        throw new Error();
+        throw new Error(`Command "${id}" is not registered.`);
     }
 
-    private _registerCommand(command: ICommand, injector: Injector): IDisposable {
+    private _registerCommand<P extends object>(command: ICommand<P>, injector: Injector): IDisposable {
         if (this._parentCommandService) {
             return this._parentCommandService._registerCommand(command, injector);
         }
@@ -132,8 +221,19 @@ export class CommandService implements ICommandService {
         return this._commandRegistry.registerCommand(command, injector);
     }
 
-    private _execute(command: ICommand, injector: Injector, ...args: unknown[]): Promise<boolean> {
-        // TODO@wzhudev: emit command executed info
-        return injector.invoke(command.handler, ...args);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private async _execute(command: ICommand<any>, injector: Injector, params?: object): Promise<boolean> {
+        const result = await injector.invoke(command.handler, params);
+
+        // MOTE: remove from old command manager
+        if (command.type === CommandType.MUTATION) {
+            CommandManager.getActionObservers().notifyObservers({
+                type: ActionType.REDO,
+                data: result as unknown as IActionData,
+                action: null as any,
+            });
+        }
+
+        return result;
     }
 }

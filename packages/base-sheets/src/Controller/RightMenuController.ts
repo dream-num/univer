@@ -1,10 +1,11 @@
 import { Inject, SkipSelf } from '@wendellhu/redi';
-import { ICommand, ICommandService, ICurrentUniverService, ObserverManager, UIObserver } from '@univerjs/core';
+import { ICommandService, ICurrentUniverService, ObserverManager, UIObserver } from '@univerjs/core';
 import { SelectionController } from './Selection/SelectionController';
 import { SelectionModel } from '../Model/SelectionModel';
 import { ISelectionManager } from '../Services/tokens';
 import { SelectionManager } from './Selection';
 import { HideColumnController } from './HideColumnController';
+import { ClearSelectionContentCommand } from '../Commands/Commands/clear-selection-content.command';
 
 export class RightMenuController {
     constructor(
@@ -12,7 +13,7 @@ export class RightMenuController {
         @ISelectionManager private readonly _selectionManager: SelectionManager,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(HideColumnController) private readonly _hideColumnController: HideColumnController,
-        @ICommandService private readonly _commandService: ICommandService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {}
 
     listenEventManager() {
@@ -93,7 +94,9 @@ export class RightMenuController {
     };
 
     clearContent = () => {
-        this._commandService.executeCommand('sheet.clear-selection-content');
+        // TODO: @wzhudev: should not call a command directly. Instead, it should invoke a method on XXXController and the controller would trigger a command.
+        // Only command should be resonsible for triggering commands.
+        this._commandService.executeCommand(ClearSelectionContentCommand.id);
     };
 
     deleteCellLeft = () => {

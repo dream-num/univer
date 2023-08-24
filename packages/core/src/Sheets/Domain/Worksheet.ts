@@ -125,6 +125,7 @@ export class Worksheet {
      * Returns WorkSheet Cell Data Matrix
      * @returns
      */
+    // TODO: change its name to getWorksheetMatrix?
     getCellMatrix(): ObjectMatrix<ICellData> {
         return this._cellData;
     }
@@ -497,6 +498,7 @@ export class Worksheet {
         const { _sheetId } = this;
 
         // TODO: @wzhudev: the two parameters are pretty same, so really not necessary
+        // TODO: @wzhudev: is `insertRowData` really necessary? could it replaced by `setRangeData`?
         const insertRowData: IInsertRowDataActionData = {
             actionName: InsertRowDataAction.NAME,
             sheetId: _sheetId,
@@ -519,6 +521,8 @@ export class Worksheet {
         this._commandManager.invoke(command);
         return this;
     }
+
+    // TODO: @wzhudev: the following method would completely be unnecessary
 
     /**
      * Inserts a number of rows after the given row position.

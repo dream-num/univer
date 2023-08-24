@@ -3,10 +3,7 @@ const http = require('http');
 const server = http.createServer();
 server.on('request', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader(
-        'Access-Control-Allow-Headers',
-        'Content-Type,Content-Length, Authorization, Accept,X-Requested-With'
-    );
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Content-Length, Authorization, Accept,X-Requested-With');
     res.setHeader('Access-Control-Allow-Methods', 'PUT,POST,GET,DELETE,OPTIONS');
     if (req.url === '/') {
         const responseBody = {
@@ -43,6 +40,7 @@ server.listen(3998, () => {
 
 const JSONize = (str) =>
     // https://stackoverflow.com/questions/14432165/uncaught-syntaxerror-unexpected-token-with-json-parse/50730876
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     str
         .replace(/\\n/g, '\\n')
         .replace(/\\'/g, "\\'")

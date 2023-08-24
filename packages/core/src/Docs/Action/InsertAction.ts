@@ -49,7 +49,7 @@ export class InsertAction extends DocActionBase<IInsertActionData, IDeleteAction
 
         DeleteApply(document, len, commonParameter.cursor, segmentId);
 
-        commonParameter.moveCursor(len);
+        // commonParameter.moveCursor(len);
         // DeleteTextApply(document, { ...actionData });
 
         this._observers.notifyObservers({

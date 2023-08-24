@@ -25,12 +25,14 @@ export interface IInsertActionData extends IDocActionData {
 }
 
 export interface IRetainActionData extends IDocActionData {
-    body: Nullable<IDocumentBody>;
+    body?: Nullable<IDocumentBody>;
     len: number;
-    coverType: UpdateDocsAttributeType;
+    coverType?: UpdateDocsAttributeType;
     segmentId?: string;
 }
 
 export interface IUpdateDocumentActionData extends IDocActionData {
     text: string;
 }
+
+export type DocActionType = IDeleteActionData | IInsertActionData | IRetainActionData;

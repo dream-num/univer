@@ -1,0 +1,76 @@
+import { IParagraph } from '../Types/Interfaces/IDocumentData';
+
+export function horizontalLineSegmentsSubtraction(A1: number, A2: number, B1: number, B2: number) {
+    // 确保A1 < A2, B1 < B2
+    if (A1 > A2) {
+        [A1, A2] = [A2, A1];
+    }
+    if (B1 > B2) {
+        [B1, B2] = [B2, B1];
+    }
+
+    if (A2 < B1 || B2 < A1) {
+        return [A1, A2]; // 无重叠，返回原线段A
+    }
+
+    if (B1 < A1) {
+        B1 = A1;
+    }
+
+    if (B2 > A2) {
+        B2 = A2;
+    }
+
+    const subLength = B2 - B1 + 1;
+    let result: number[] = [];
+    if (A1 === B1) {
+        // Subtract the start segment
+        result = [B2 + 1 - subLength, A2 - subLength];
+    } else if (A2 === B2) {
+        // Subtract the end segment
+        result = [A1, B1 - 1];
+    } else {
+        // Subtract the middle segment
+        result = [A1, A2 - subLength];
+    }
+
+    return result;
+}
+
+export function checkParagraphHasBullet(paragraph: IParagraph) {
+    if (paragraph == null) {
+        return false;
+    }
+    const bullet = paragraph.bullet;
+
+    return bullet?.listId != null;
+}
+
+export function checkParagraphHasIndent(paragraph: IParagraph) {
+    if (paragraph == null) {
+        return false;
+    }
+    const paragraphStyle = paragraph.paragraphStyle;
+
+    if (paragraphStyle?.indentStart == null || paragraphStyle?.indentStart === 0) {
+        return false;
+    }
+
+    return true;
+}
+
+export function insertTextToContent(content: string, start: number, text: string) {
+    return content.slice(0, start) + text + content.slice(start);
+}
+
+export function deleteContent(content: string, start: number, end: number) {
+    if (start > end) {
+        return content;
+    }
+
+    // if (start === end) {
+    //     start -= 1;
+    // }
+
+    return content.slice(0, start) + content.slice(end);
+}

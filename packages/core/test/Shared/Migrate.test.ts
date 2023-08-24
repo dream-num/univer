@@ -2,6 +2,7 @@ import { migrate } from '../../src/Shared';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
+// eslint-disable-next-line max-lines-per-function
 test('migrate', () => {
     // univer 2.0 config
     const sheetCell = {

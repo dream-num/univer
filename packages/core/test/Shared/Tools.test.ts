@@ -23,7 +23,7 @@ test('sheet Utils deleteBlank', () => {
     expect(Tools.deleteBlank()).toEqual(undefined);
 });
 
-test('sheet Utils getSystemType', () => {
+test('sheet Utils getSystemType1', () => {
     Object.defineProperty(global.navigator, 'platform', {
         value: 'Mac68K',
         configurable: true,
@@ -52,6 +52,9 @@ test('sheet Utils getSystemType', () => {
         value: 'Win32',
         configurable: true,
     });
+});
+
+test('sheet Utils getSystemType2', () => {
     Object.defineProperty(global.navigator, 'userAgent', {
         value: 'Windows XP',
         configurable: true,
@@ -247,24 +250,13 @@ test('sheet Utils diffValue', () => {
     expect(Tools.diffValue(1, 1)).toBeTruthy();
     expect(Tools.diffValue(/s/, /s/)).toBeTruthy();
     expect(Tools.diffValue('s', 's')).toBeTruthy();
-    expect(
-        Tools.diffValue(new Date('2020/11/11'), new Date('2020/11/11'))
-    ).toBeTruthy();
+    expect(Tools.diffValue(new Date('2020/11/11'), new Date('2020/11/11'))).toBeTruthy();
     expect(Tools.diffValue({ a: 1 }, { a: 1 })).toBeTruthy();
-    expect(
-        Tools.diffValue({ a: { b: 2, c: [1, 2, 3] } }, { a: { b: 2, c: [1, 2, 3] } })
-    ).toBeTruthy();
-    expect(
-        Tools.diffValue({ a: { b: 2, c: [1, 2, 3] } }, { a: { b: 2, c: [1, 2, 4] } })
-    ).toBeFalsy();
+    expect(Tools.diffValue({ a: { b: 2, c: [1, 2, 3] } }, { a: { b: 2, c: [1, 2, 3] } })).toBeTruthy();
+    expect(Tools.diffValue({ a: { b: 2, c: [1, 2, 3] } }, { a: { b: 2, c: [1, 2, 4] } })).toBeFalsy();
     expect(Tools.diffValue([1, 2, 3, 5], [1, 2, 3, 5])).toBeTruthy();
     expect(Tools.diffValue([1, 2, 3, 5], [1, 2, 8, 5])).toBeFalsy();
-    expect(
-        Tools.diffValue(
-            [1, { b: 2, c: [1, 2, 3] }, 3, 5],
-            [1, { b: 2, c: [1, 2, 3] }, 3, 5]
-        )
-    ).toBeTruthy();
+    expect(Tools.diffValue([1, { b: 2, c: [1, 2, 3] }, 3, 5], [1, { b: 2, c: [1, 2, 3] }, 3, 5])).toBeTruthy();
 });
 
 test('sheet Utils isBoolean', () => {

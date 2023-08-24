@@ -3,7 +3,7 @@ import { ObjectArray } from '../../src/Shared/ObjectArray';
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
 test('object array create', () => {
-    const array = new ObjectArray({ 1: 'UniverSheet1' });
+    const array = new ObjectArray<{}>({ 1: 'UniverSheet1' });
     expect(array.getLength()).toEqual(2);
     array.push({ 2: 'UniverSheet2' });
     array.push({ 3: 'UniverSheet3' });
@@ -112,7 +112,7 @@ test('object array splice', () => {
     expect(array.getLength()).toEqual(9);
     expect(splice1.getLength()).toEqual(2);
 
-    let splice2 = array.splice(2, 3);
+    const splice2 = array.splice(2, 3);
     expect(array.get(0)).toEqual('univerSheet2');
     expect(array.get(1)).toEqual('univerSheet3');
     expect(array.get(2)).toEqual('univerSheet7');
@@ -202,7 +202,7 @@ test('object array slice', () => {
         4: 'univerSheet4',
         5: 'univerSheet5',
     });
-    let slice = array.slice(1, 4);
+    const slice = array.slice(1, 4);
     expect(slice.get(0)).toEqual('univerSheet1');
     expect(slice.get(1)).toEqual('univerSheet2');
     expect(slice.get(2)).toEqual('univerSheet3');
@@ -307,7 +307,7 @@ test('object array iterator', () => {
         2: 'univerSheet2',
         3: 'univerSheet3',
     });
-    for (let item of array) {
+    for (const item of array) {
         console.log(item);
     }
 });
@@ -403,9 +403,7 @@ test('object array clone', () => {
         10: 'univerSheet10',
     });
     expect(array.clone()).toEqual(array);
-    expect(
-        array.clone((v) => (v === 'univerSheet0' ? 'univerSheet100' : v)).get(0)
-    ).toEqual('univerSheet100');
+    expect(array.clone((v) => (v === 'univerSheet0' ? 'univerSheet100' : v)).get(0)).toEqual('univerSheet100');
 });
 
 test('object array clear', () => {
@@ -442,7 +440,7 @@ test('object array forOf', () => {
         10: 'univerSheet10',
     });
     const iterator = array[Symbol.iterator]()[Symbol.iterator]();
-    for (let val of array) {
+    for (const val of array) {
         console.log(val);
     }
 });

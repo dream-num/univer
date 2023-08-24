@@ -1,4 +1,3 @@
-import { ICurrentUniverService } from 'src/Service/Current.service';
 
 // TODO@wzhudev: here we still have some
 
@@ -45,6 +44,7 @@ import {
 } from '../../Types/Interfaces';
 import { Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, Tools, Tuples } from '../../Shared';
 import { Worksheet } from './Worksheet';
+import { ICurrentUniverService } from '../../Service/Current.service';
 
 /**
  * getObjectValues options type
@@ -274,7 +274,7 @@ export class Range {
             endColumn: startColumn + column,
         };
 
-        return new Range(this._worksheet, cell, this._currentUniverService);
+        return new Range(this._worksheet, cell, this._currentUniverService, this._commandManager);
     }
 
     /**
@@ -539,7 +539,7 @@ export class Range {
         return this._worksheet
             .getMerges()
             .getMergedRanges({ startRow, endRow, startColumn, endColumn })
-            .map((rangeData) => new Range(this._worksheet, rangeData, this._currentUniverService));
+            .map((rangeData) => new Range(this._worksheet, rangeData, this._currentUniverService, this._commandManager));
     }
 
     /**
@@ -1718,42 +1718,6 @@ export class Range {
         return this;
     }
     // uncheck
-
-    /**
-     * Sets the specified range as the active range, with the top left cell in the range as the current cell.
-     *
-     * @returns This range, for chaining.
-     * @internal
-     */
-    activate(): Range {
-        // const { _commandManager } = this;
-        // The user entered an invalid range
-        if (this._rangeData?.startRow === -1) {
-            console.error('Invalid range,default set startRow -1');
-            return this;
-        }
-
-        this._worksheet.getSelection().setSelection({ selection: this });
-
-        // This range, for chaining
-        return this;
-    }
-
-    /**
-     * Sets the specified cell as the current cell.
-     *
-     * If the specified cell is present in an existing range, then that range becomes the active range with the cell as the current cell.
-     *
-     * If the specified cell is not present in any existing range, then the existing selection is removed and the cell becomes the current cell and the active range.
-     *
-     * Note: The specified Range must consist of one cell, otherwise it throws an exception.
-     *
-     * @returns This range, for chaining.
-     */
-    activateAsCurrentCell(): Range {
-        this._worksheet.getSelection().setCurrentCell(this);
-        return this;
-    }
 
     /**
      * Whether the current range and the incoming range have an intersection

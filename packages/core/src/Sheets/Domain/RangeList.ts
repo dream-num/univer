@@ -56,24 +56,6 @@ export class RangeList {
     }
 
     /**
-     * Selects the list of Range instances.
-     *
-     * @returns The list of active ranges, for chaining.
-     */
-    activate(): RangeList {
-        const { _commandManager } = this;
-        // The user entered an invalid range
-        if (this._rangeList[0].startRow === -1) {
-            console.error('Invalid range,default set startRow -1');
-            return this;
-        }
-
-        this._worksheet.getSelection().setSelection({ selection: this._rangeList });
-
-        return this;
-    }
-
-    /**
      * Break all horizontally- or vertically-merged cells contained within the range list into individual cells again.
      */
     // TODO

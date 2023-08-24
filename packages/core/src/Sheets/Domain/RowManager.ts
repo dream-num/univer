@@ -5,7 +5,7 @@ import { IRowData } from '../../Types/Interfaces';
 import { Nullable, ObjectArray, ObjectArrayType, Tools } from '../../Shared';
 import { Worksheet } from './Worksheet';
 import { Inject } from '@wendellhu/redi';
-import { ICurrentUniverService } from 'src/Service/Current.service';
+import { ICurrentUniverService } from '../../Service/Current.service';
 
 /**
  * Manage configuration information of all rows, get row height, row length, set row height, etc.

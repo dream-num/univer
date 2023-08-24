@@ -21,7 +21,7 @@ export class ColumnManager {
     constructor(
         workSheet: Worksheet,
         data: ObjectArrayType<Partial<IColumnData>>,
-        @ICurrentUniverService private readonly _currentUniverSheet: CurrentUniverService,
+        @ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
         @Inject(CommandManager) private readonly _commandManager: CommandManager
     ) {
         this._workSheet = workSheet;

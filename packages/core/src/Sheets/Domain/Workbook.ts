@@ -17,11 +17,9 @@ import {
 } from '../../Types/Interfaces';
 import { GenName, Nullable, Tools, Tuples } from '../../Shared';
 import { RangeList } from './RangeList';
-import { Selection } from './Selection';
 import { Styles } from './Styles';
 import { Worksheet } from './Worksheet';
 import { Range } from './Range';
-import { NamedRange } from './NamedRange';
 import { ObserverManager } from '../../Observer';
 import { ICurrentUniverService } from '../../Service/Current.service';
 
@@ -468,66 +466,8 @@ export class Workbook {
         });
     }
 
-    getActiveRange(): Nullable<Range> {
-        const workSheet = this.getActiveSheet();
-        if (workSheet) {
-            const selection = workSheet.getSelection();
-            return selection.getActiveRange();
-        }
-        return null;
-    }
-
-    setActiveRange(range: Range): Nullable<Range> {
-        const workSheet = this.getActiveSheet();
-        if (workSheet) {
-            return workSheet.setActiveSelection(range);
-        }
-        return null;
-    }
-
-    setActiveRangeList(rangeList: IRangeType[]): Nullable<IRangeData[]> {
-        const workSheet = this.getActiveSheet();
-        if (workSheet) {
-            const activeRangeList = workSheet.getRangeList(rangeList);
-            activeRangeList.activate();
-            return activeRangeList.getRangeList();
-        }
-        return null;
-    }
-
-    getActiveRangeList(): Nullable<RangeList> {
-        const workSheet = this.getActiveSheet();
-        if (workSheet) {
-            const selection = workSheet.getSelection();
-            return selection.getActiveRangeList();
-        }
-        return null;
-    }
-
-    getSelection(): Nullable<Selection> {
-        const workSheet = this.getActiveSheet();
-        if (workSheet) {
-            return workSheet.getSelection();
-        }
-    }
-
-    getCurrentCell(): Nullable<Range> {
-        const selection = this.getSelection();
-        if (selection) {
-            return selection.getCurrentCell();
-        }
-    }
-
     getSheetSize(): number {
         return this._config.sheetOrder.length;
-    }
-
-    /**
-     * Sets the specified cell as the current cell.
-     * @param cell
-     */
-    setCurrentCell(cell: Range): Range {
-        return cell.activateAsCurrentCell();
     }
 
     /**
@@ -578,7 +518,7 @@ export class Workbook {
     removeSheetBySheetId(sheetId: string): void {
         const { _config } = this;
         const { sheetOrder } = _config;
-        const commandManager = this.getCommandManager();
+        const commandManager = this._commandManager;
         const sheet = this.getSheetBySheetId(sheetId);
 
         if (sheetOrder.length > 1 && sheet != null) {
@@ -644,9 +584,9 @@ export class Workbook {
         worksheet.activate();
 
         // restore selection
-        if (restoreSelection) {
-            worksheet.setActiveSelection();
-        }
+        // if (restoreSelection) {
+        //     worksheet.setActiveSelection();
+        // }
 
         return worksheet;
     }

@@ -75,11 +75,7 @@ export function demo() {
         status: 1,
     };
     // const worksheet = new WorkSheet(context, configure);
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.getInstance<Worksheet>('WorkSheet', context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
@@ -869,27 +865,14 @@ test('Test setBorder', () => {
         status: 1,
     };
 
-    const worksheet = container.getInstance<Worksheet>(
-        'WorkSheet',
-        context,
-        configure
-    );
+    const worksheet = container.getInstance<Worksheet>('WorkSheet', context, configure);
     workbook.insertSheet(worksheet);
     worksheet.setCommandManager(commandManager);
 
     const range = worksheet.getRange('A1');
 
     // set border
-    range.setBorder(
-        true,
-        true,
-        true,
-        true,
-        false,
-        false,
-        'red',
-        BorderStyleTypes.DASH_DOT
-    );
+    range.setBorder(true, true, true, true, false, false, 'red', BorderStyleTypes.DASH_DOT);
     // dashDot
     const currentCell = worksheet.getCellMatrix().getValue(0, 0);
     const currentStyle = workbook.getStyles().get(currentCell && currentCell.s);
@@ -3144,15 +3127,9 @@ test('Test getFontLines', () => {
     const overline = range.getOverlines();
     const strikethroughs = range.getStrikeThroughs();
 
-    expect(underlines).toEqual([
-        [{ s: BooleanNumber.TRUE }, { s: BooleanNumber.TRUE }],
-    ]);
-    expect(overline).toEqual([
-        [{ s: BooleanNumber.TRUE }, { s: BooleanNumber.TRUE }],
-    ]);
-    expect(strikethroughs).toEqual([
-        [{ s: BooleanNumber.TRUE }, { s: BooleanNumber.TRUE }],
-    ]);
+    expect(underlines).toEqual([[{ s: BooleanNumber.TRUE }, { s: BooleanNumber.TRUE }]]);
+    expect(overline).toEqual([[{ s: BooleanNumber.TRUE }, { s: BooleanNumber.TRUE }]]);
+    expect(strikethroughs).toEqual([[{ s: BooleanNumber.TRUE }, { s: BooleanNumber.TRUE }]]);
 });
 
 test('Test getFontLine', () => {
@@ -4954,7 +4931,7 @@ test('Test isPartOfMerge', () => {
 });
 
 test('Test getLastRow', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1:C5');
 
@@ -4964,7 +4941,7 @@ test('Test getLastRow', () => {
 });
 
 test('Test setFontSizes', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1:B1');
 
@@ -4997,7 +4974,7 @@ test('Test setFontSizes', () => {
 });
 
 test('Test setTextDirections', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1:B1');
 
@@ -5032,7 +5009,7 @@ test('Test setTextDirections', () => {
 });
 
 test('Test setFontWeights', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1:B1');
 
@@ -5067,7 +5044,7 @@ test('Test setFontWeights', () => {
 });
 
 test('Test setFontWeight', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1');
 
@@ -5094,7 +5071,7 @@ test('Test setFontWeight', () => {
 });
 
 test('Test setFontStyles', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1:B1');
 
@@ -5133,7 +5110,7 @@ test('Test setFontStyles', () => {
     });
 });
 test('Test setFontStyle', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1');
 
@@ -5159,7 +5136,7 @@ test('Test setFontStyle', () => {
     });
 });
 test('Test setVerticalAlignments', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1:B1');
 
@@ -5199,7 +5176,7 @@ test('Test setVerticalAlignments', () => {
 });
 
 test('Test setTextRotations', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1:B1');
 
@@ -5234,7 +5211,7 @@ test('Test setTextRotations', () => {
 });
 
 test('Test setTextRotation', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1:B1');
 
@@ -5264,7 +5241,7 @@ test('Test setTextRotation', () => {
 });
 
 test('Test setTextStyle', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1');
 
@@ -5296,7 +5273,7 @@ test('Test setTextStyle', () => {
 });
 
 test('Test setTextStyles', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1:B1');
 
@@ -5337,7 +5314,7 @@ test('Test setTextStyles', () => {
 });
 
 test('Test setVerticalText', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1');
 
@@ -5367,7 +5344,7 @@ test('Test setVerticalText', () => {
 });
 
 test('Test setWrap', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1');
 
@@ -5394,7 +5371,7 @@ test('Test setWrap', () => {
 });
 
 test('Test setWraps', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1');
 
@@ -5421,7 +5398,7 @@ test('Test setWraps', () => {
 });
 
 test('Test activate Range', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1:B1');
 
@@ -5433,7 +5410,7 @@ test('Test activate Range', () => {
 });
 
 test('Test activateAsCurrentCell', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('B1');
 
@@ -5445,7 +5422,7 @@ test('Test activateAsCurrentCell', () => {
 });
 
 test('Test isIntersection', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const currentRange = worksheet.getRange('A1:C5');
 
@@ -5456,7 +5433,7 @@ test('Test isIntersection', () => {
     expect(isInter).toEqual(true);
 });
 test('Test clearContent', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1:B1');
     range.clearContent();
@@ -5479,7 +5456,7 @@ test('Test clearContent', () => {
 });
 
 test('Test clearNote', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1:B1');
     range.clearNote();
@@ -5699,7 +5676,7 @@ test('Test isBlank', () => {
 });
 
 test('Test getA1Notation', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange(0, 0, 1, 4);
 
@@ -5875,7 +5852,7 @@ test('Test getA1Notation', () => {
 // });
 
 test('Test getGridId', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange(1, 1, 2, 5);
 
@@ -5978,7 +5955,7 @@ test('Test getGridId', () => {
 // });
 
 test('Test getHeight', () => {
-    let { worksheet } = demo();
+    const { worksheet } = demo();
 
     const range = worksheet.getRange('A1:B2');
 
@@ -5989,7 +5966,7 @@ test('Test getHeight', () => {
 });
 
 test('Test getWidth', () => {
-    let { worksheet } = demo();
+    const { worksheet } = demo();
 
     const range = worksheet.getRange('A1:B2');
 
@@ -6044,7 +6021,7 @@ test('Test trimWhitespace', () => {
 });
 
 test('Test getNextDataCell', () => {
-    let { worksheet } = demo();
+    const { worksheet } = demo();
 
     const range = worksheet.getRange('C3:D3');
 
@@ -6062,7 +6039,7 @@ test('Test getNextDataCell', () => {
 });
 
 test('Test getDataRegion', () => {
-    let { worksheet } = demo();
+    const { worksheet } = demo();
 
     const range = worksheet.getRange('C3:D3');
 
@@ -6077,7 +6054,7 @@ test('Test getDataRegion', () => {
 });
 
 test('Test getRichTextValues/getRichTextValue', () => {
-    let { worksheet } = demo();
+    const { worksheet } = demo();
 
     const ranges = worksheet.getRange('A1:B1');
     const cells = ranges.getRichTextValues();
@@ -6089,7 +6066,7 @@ test('Test getRichTextValues/getRichTextValue', () => {
 });
 
 test('Test setRangeData', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1:B1');
 
@@ -6283,7 +6260,7 @@ test('Test setRangeData', () => {
 // });
 
 test('Test randomize', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1:B5');
 
@@ -6292,7 +6269,7 @@ test('Test randomize', () => {
 });
 
 test('Test getMergedRanges', () => {
-    let { worksheet } = demo();
+    const { worksheet } = demo();
 
     const range = worksheet.getRange('A1:B3');
 
@@ -6306,7 +6283,7 @@ test('Test getMergedRanges', () => {
 });
 
 test('Test mergeAcross', () => {
-    let { worksheet } = demo();
+    const { worksheet } = demo();
 
     const range = worksheet.getRange('A1:B3');
 
@@ -6318,7 +6295,7 @@ test('Test mergeAcross', () => {
 });
 
 test('Test mergeVertically', () => {
-    let { worksheet, workbook } = demo();
+    const { worksheet, workbook } = demo();
 
     const range = worksheet.getRange('A1:B3');
 

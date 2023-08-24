@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { SheetContext,  UniverSheet, Plugin } from '../../src';
+import { UniverSheet, Plugin, PluginType } from '../../src';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
@@ -21,68 +21,23 @@ describe('UniverSheet', () => {
     afterAll(async () => {});
 
     test('Test newInstance', () => {
-        let sheet = univerSheet.getWorkBook().getSheetBySheetName('first sheet');
+        const sheet = univerSheet.getWorkBook().getSheetBySheetName('first sheet');
         expect(sheet && sheet.getName()).toEqual('first sheet');
     });
     test('Test installPlugin/uninstallPlugin/getWorkBook/get context', () => {
         class TestPlugin extends Plugin {
-            context: SheetContext;
+            static override type: PluginType.Sheet;
 
             constructor() {
                 super('testPlugin');
             }
 
-            initialize(context: SheetContext): void {
-                this.context = context;
-            }
+            override onMounted(): void {}
 
-
-
-            onMounted(ctx: SheetContext): void {
-                this.initialize(ctx);
-            }
-
-            onDestroy(): void {}
+            override onDestroy(): void {}
         }
 
         // test installPlugin
-        univerSheet.installPlugin(new TestPlugin());
-
-        // test getWorkBook
-        let plugin = univerSheet
-            .getWorkBook()
-            .getContext()
-            .getPluginManager()
-            .getPluginByName<TestPlugin>('testPlugin');
-
-        plugin?.getPluginByName<TestPlugin>('testPlugin');
-        expect(plugin && plugin.getPluginName()).toEqual('testPlugin');
-
-        // test uninstallPlugin
-        univerSheet.uninstallPlugin('testPlugin');
-
-        let uninstalledPlugin = univerSheet
-            .getWorkBook()
-            .getContext()
-            .getPluginManager()
-            .getPluginByName<TestPlugin>('testPlugin');
-        expect(uninstalledPlugin).toEqual(undefined);
-    });
-
-    test('Test SheetContext', () => {
-        // test get context
-        let context = univerSheet.context;
-
-        let undoManager = context.getUndoManager();
-        let observerManager = context.getObserverManager();
-        let locale = context.getLocale();
-        let pluginManager = context.getPluginManager();
-        let hooksManager = context.getHooksManager();
-
-        expect(undoManager).not.toBeNull();
-        expect(observerManager).not.toBeNull();
-        expect(locale).not.toBeNull();
-        expect(pluginManager).not.toBeNull();
-        expect(hooksManager).not.toBeNull();
+        univerSheet.addPlugin(TestPlugin, {});
     });
 });

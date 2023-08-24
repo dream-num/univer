@@ -1,4 +1,4 @@
-import { SheetContext, Environment } from '../src/Basics';
+import { Environment } from '../src/Basics';
 import { CommandManager, UndoManager } from '../src/Command';
 import { Workbook, Worksheet } from '../src/Sheets/Domain';
 import { BooleanNumber } from '../src/Types/Enum';
@@ -12,8 +12,6 @@ import {
     ServerSocket,
 } from '../src/Server';
 import { Locale } from '../src/Shared';
-import { Injector } from '../src';
-
 export function createCoreTestContainer(
     workbookConfig?: Partial<IWorkbookConfig>
 ): Injector {

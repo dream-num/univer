@@ -3,6 +3,7 @@ import { demo } from './Range.test';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
+// TODO等Command系统建设好就可以开始改造API
 test('Test Merges getByRowColumn', () => {
     const { worksheet } = demo();
     const merges = new Merges(worksheet, [

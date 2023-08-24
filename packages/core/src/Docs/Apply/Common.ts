@@ -1,5 +1,6 @@
-import { IDocumentBody } from '../../Interfaces/IDocumentData';
-import { horizontalLineSegmentsSubtraction } from '../../Shared/Common';
+import { ICustomBlock, ICustomRange, IDocumentBody, IParagraph, ISectionBreak, ITable, ITextRun } from '../../Types/Interfaces/IDocumentData';
+import { Nullable } from '../../Shared/Types';
+import { checkParagraphHasBullet, horizontalLineSegmentsSubtraction } from '../../Shared/DocTool';
 import { isSameStyleTextRun } from '../../Shared/Compare';
 import { sortRulesFactory } from '../../Shared/SortRules';
 
@@ -76,19 +77,28 @@ export function insertParagraphs(body: IDocumentBody, insertBody: IDocumentBody,
     if (paragraphs == null) {
         return;
     }
+    const paragraphIndexList = [];
     for (let i = 0, len = paragraphs.length; i < len; i++) {
         const paragraph = paragraphs[i];
         const { startIndex } = paragraph;
         if (startIndex > currentIndex) {
             paragraph.startIndex += textLength;
         }
+        paragraphIndexList.push(paragraph.startIndex);
     }
 
     const insertParagraphs = insertBody.paragraphs;
+    let deleteReptIndex = -1;
     if (insertParagraphs) {
         for (let i = 0, len = insertParagraphs.length; i < len; i++) {
             const insertTextRun = insertParagraphs[i];
             insertTextRun.startIndex += currentIndex;
+            const insertIndex = insertTextRun.startIndex;
+            deleteReptIndex = paragraphIndexList.indexOf(insertIndex);
+        }
+
+        if (deleteReptIndex !== -1) {
+            paragraphs.splice(deleteReptIndex, 1);
         }
 
         paragraphs.push(...insertParagraphs);
@@ -218,7 +228,7 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
     const startIndex = currentIndex;
 
     const endIndex = currentIndex + textLength - 1;
-    const removeTextRuns = [];
+    const removeTextRuns: ITextRun[] = [];
     if (textRuns) {
         const newTextRuns = [];
         for (let i = 0, len = textRuns.length; i < len; i++) {
@@ -235,15 +245,8 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
             } else if (st <= startIndex && ed >= endIndex) {
                 const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
 
-                if (segments.length > 2) {
-                    const seg1 = segments[0];
-                    const seg2 = segments[1];
-                    textRun.st = seg1[0];
-                    textRun.ed = seg1[1] + seg2[1] - seg2[0] + 1;
-                } else {
-                    textRun.st = segments[0][0];
-                    textRun.ed = segments[0][1];
-                }
+                textRun.st = segments[0];
+                textRun.ed = segments[1];
             } else if (startIndex >= st && startIndex <= ed) {
                 removeTextRuns.push({
                     ...textRun,
@@ -257,7 +260,8 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
                     st: st - currentIndex,
                     ed: endIndex - currentIndex,
                 });
-                textRun.st = endIndex + 1;
+                textRun.st = endIndex - textLength + 1;
+                textRun.ed -= textLength;
             } else if (st > endIndex) {
                 textRun.st -= textLength;
                 textRun.ed -= textLength;
@@ -276,23 +280,53 @@ export function deleteParagraphs(body: IDocumentBody, textLength: number, curren
     const startIndex = currentIndex;
 
     const endIndex = currentIndex + textLength - 1;
-    const removeParagraphs = [];
+    const removeParagraphs: IParagraph[] = [];
+    let removeAfterFirstNew: Nullable<IParagraph> = null;
+    let isRemove = false;
     if (paragraphs) {
         const newParagraphs = [];
         for (let i = 0, len = paragraphs.length; i < len; i++) {
             const paragraph = paragraphs[i];
             const { startIndex: index } = paragraph;
-            if (index >= startIndex && index <= endIndex) {
+            if (startIndex === endIndex && endIndex === index) {
+                const nextParagraph = paragraphs[i + 1];
+                const isBullet = checkParagraphHasBullet(nextParagraph);
+                if (isBullet && nextParagraph != null) {
+                    delete nextParagraph.bullet;
+                    delete nextParagraph.paragraphStyle?.hanging;
+                    delete nextParagraph.paragraphStyle?.indentStart;
+                }
+            } else if (index >= startIndex && index <= endIndex) {
                 removeParagraphs.push({
                     ...paragraph,
                     startIndex: index - currentIndex,
                 });
+                isRemove = true;
                 continue;
             } else if (index > endIndex) {
                 paragraph.startIndex -= textLength;
             }
 
             newParagraphs.push(paragraph);
+
+            if (removeAfterFirstNew == null && isRemove) {
+                removeAfterFirstNew = paragraph;
+            }
+        }
+        if (removeAfterFirstNew != null) {
+            // When deleting a paragraph, the configuration of the paragraph
+            // in the beginning range should be retained. Due to the label design,
+            // the paragraph mark is located after the content, so when deleting,
+            // it will surround the configuration of the end range. A position update is required,
+            // and the undo time should also be considered Restoration of position
+            const removeFirst = removeParagraphs[0];
+            if (removeFirst) {
+                const newInsert = { ...removeFirst };
+                removeParagraphs.push(removeAfterFirstNew);
+                newParagraphs.splice(newParagraphs.indexOf(removeAfterFirstNew), 1, newInsert);
+                newInsert.startIndex = removeAfterFirstNew.startIndex;
+                removeAfterFirstNew.startIndex += textLength - currentIndex;
+            }
         }
         body.paragraphs = newParagraphs;
     }
@@ -305,7 +339,7 @@ export function deleteSectionBreaks(body: IDocumentBody, textLength: number, cur
     const startIndex = currentIndex;
 
     const endIndex = currentIndex + textLength - 1;
-    const removeSectionBreaks = [];
+    const removeSectionBreaks: ISectionBreak[] = [];
     if (sectionBreaks) {
         const newSectionBreaks = [];
         for (let i = 0, len = sectionBreaks.length; i < len; i++) {
@@ -334,7 +368,7 @@ export function deleteCustomBlocks(body: IDocumentBody, textLength: number, curr
     const startIndex = currentIndex;
 
     const endIndex = currentIndex + textLength - 1;
-    const removeCustomBlocks = [];
+    const removeCustomBlocks: ICustomBlock[] = [];
     if (customBlocks) {
         const newCustomBlocks = [];
         for (let i = 0, len = customBlocks.length; i < len; i++) {
@@ -363,7 +397,7 @@ export function deleteTables(body: IDocumentBody, textLength: number, currentInd
     const startIndex = currentIndex;
 
     const endIndex = currentIndex + textLength - 1;
-    const removeTables = [];
+    const removeTables: ITable[] = [];
     if (tables) {
         const newTables = [];
         for (let i = 0, len = tables.length; i < len; i++) {
@@ -372,22 +406,15 @@ export function deleteTables(body: IDocumentBody, textLength: number, currentInd
             if (startIndex <= st && endIndex >= ed) {
                 removeTables.push({
                     ...table,
-                    st: st - currentIndex,
-                    ed: ed - currentIndex,
+                    startIndex: st - currentIndex,
+                    endIndex: ed - currentIndex,
                 });
                 continue;
             } else if (st <= startIndex && ed >= endIndex) {
                 const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
 
-                if (segments.length > 2) {
-                    const seg1 = segments[0];
-                    const seg2 = segments[1];
-                    table.startIndex = seg1[0];
-                    table.endIndex = seg1[1] + seg2[1] - seg2[0] + 1;
-                } else {
-                    table.startIndex = segments[0][0];
-                    table.endIndex = segments[0][1];
-                }
+                table.startIndex = segments[0];
+                table.endIndex = segments[1];
             } else if (endIndex < st) {
                 table.startIndex -= textLength;
                 table.endIndex -= textLength;
@@ -405,7 +432,7 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
     const startIndex = currentIndex;
 
     const endIndex = currentIndex + textLength - 1;
-    const removeCustomRanges = [];
+    const removeCustomRanges: ICustomRange[] = [];
     if (customRanges) {
         const newCustomRanges = [];
         for (let i = 0, len = customRanges.length; i < len; i++) {
@@ -414,22 +441,15 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
             if (startIndex <= st && endIndex >= ed) {
                 removeCustomRanges.push({
                     ...customRange,
-                    st: st - currentIndex,
-                    ed: ed - currentIndex,
+                    startIndex: st - currentIndex,
+                    endIndex: ed - currentIndex,
                 });
                 continue;
             } else if (st <= startIndex && ed >= endIndex) {
                 const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
 
-                if (segments.length > 2) {
-                    const seg1 = segments[0];
-                    const seg2 = segments[1];
-                    customRange.startIndex = seg1[0];
-                    customRange.endIndex = seg1[1] + seg2[1] - seg2[0] + 1;
-                } else {
-                    customRange.startIndex = segments[0][0];
-                    customRange.endIndex = segments[0][1];
-                }
+                customRange.startIndex = segments[0];
+                customRange.endIndex = segments[1];
             } else if (endIndex < st) {
                 customRange.startIndex -= textLength;
                 customRange.endIndex -= textLength;

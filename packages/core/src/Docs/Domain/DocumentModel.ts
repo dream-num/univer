@@ -1,11 +1,13 @@
 import { Inject } from '@wendellhu/redi';
 import { Command, CommandManager } from '../../Command';
-import { CommonParameterAttribute, IDocumentBody, IDocumentData } from '../../Types/Interfaces/IDocumentData';
+import { IDocumentBody, IDocumentData } from '../../Types/Interfaces/IDocumentData';
 import { ITextSelectionRange } from '../../Types/Interfaces/ISelectionData';
 import { DOC_ACTION_NAMES } from '../../Types/Const/DOC_ACTION_NAMES';
 import { Tools, getTextIndexByCursor } from '../../Shared';
 import { DocumentBodyModel } from './DocumentBodyModel';
 import { DEFAULT_DOC } from '../../Types/Const';
+import { UpdateDocsAttributeType } from '../../Shared/CommandEnum';
+import { DocActionType } from '../Action/ActionDataInterface';
 
 interface IDrawingUpdateConfig {
     left: number;
@@ -170,7 +172,7 @@ export class DocumentModel extends DocumentModelSimple {
         return this;
     }
 
-    update(attribute: CommonParameterAttribute, range: ITextSelectionRange, segmentId?: string) {
+    update(body: IDocumentBody, range: ITextSelectionRange, coverType = UpdateDocsAttributeType.COVER, segmentId?: string) {
         const { cursorStart, cursorEnd, isEndBack, isStartBack } = range;
         const actionList = [];
 
@@ -187,7 +189,8 @@ export class DocumentModel extends DocumentModelSimple {
         actionList.push({
             actionName: DOC_ACTION_NAMES.RETAIN_ACTION_NAME,
             len: textEnd - textStart + 1,
-            attribute,
+            coverType,
+            body,
             segmentId,
         });
 
@@ -259,10 +262,10 @@ export class DocumentModel extends DocumentModelSimple {
     }
 
     private _getDeleteAction(range: ITextSelectionRange, segmentId?: string) {
-        const { cursorStart, cursorEnd, isEndBack, isStartBack } = range;
-        const actionList = [];
+        const { cursorStart, cursorEnd, isEndBack, isStartBack, isCollapse } = range;
+        const actionList: DocActionType[] = [];
 
-        const textStart = getTextIndexByCursor(cursorStart, isStartBack);
+        const textStart = getTextIndexByCursor(cursorStart, isStartBack) + (isCollapse ? 0 : 1);
 
         const textEnd = getTextIndexByCursor(cursorEnd, isEndBack);
 

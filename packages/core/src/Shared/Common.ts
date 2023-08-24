@@ -1,30 +1,18 @@
 import { Tools } from './Tools';
-import { Nullable } from '.';
-import {
-    ICellInfo,
-    ISelection,
-    ICellData,
-    IColorStyle,
-    IDocumentData,
-    IStyleData,
-} from '../Types/Interfaces';
+import { Nullable } from './Types';
+import { IDocumentData } from '../Types/Interfaces/IDocumentData';
+import { ICellData } from '../Types/Interfaces/ICellData';
+import { IColorStyle, IStyleData } from '../Types/Interfaces/IStyleData';
+import { ICellInfo, ISelection } from '../Types/Interfaces/ISelectionData';
 import { ColorBuilder } from '../Sheets/Domain';
-import {
-    BaselineOffset,
-    TextDirection,
-    HorizontalAlign,
-    VerticalAlign,
-    WrapStrategy,
-    BorderStyleTypes,
-} from '../Types/Enum';
+import { BaselineOffset, TextDirection, HorizontalAlign, VerticalAlign, WrapStrategy, BorderStyleTypes } from '../Types/Enum';
 
-export function makeCellToSelection(
-    cellInfo: Nullable<ICellInfo>
-): Nullable<ISelection> {
+export function makeCellToSelection(cellInfo: Nullable<ICellInfo>): Nullable<ISelection> {
     if (!cellInfo) {
         return;
     }
-    let { row, column, startY, endY, startX, endX, isMerged, mergeInfo } = cellInfo;
+    const { row, column, isMerged, mergeInfo } = cellInfo;
+    let { startY, endY, startX, endX } = cellInfo;
     let startRow = row;
     let startColumn = column;
     let endRow = row;
@@ -80,11 +68,7 @@ export function getColorStyle(color: Nullable<IColorStyle>): Nullable<string> {
             return color.rgb;
         }
         if (color.th) {
-            return new ColorBuilder()
-                .setThemeColor(color.th)
-                .asThemeColor()
-                .asRgbColor()
-                .getCssString();
+            return new ColorBuilder().setThemeColor(color.th).asThemeColor().asRgbColor().getCssString();
         }
     }
     return null;
@@ -159,6 +143,7 @@ export function handleJsonToDom(p: IDocumentData): string {
  * @param style
  * @returns
  */
+// eslint-disable-next-line max-lines-per-function
 export function handleStyleToString(style: IStyleData, isCell: boolean = false) {
     let str = '';
     const styleMap = new Map([
@@ -213,17 +198,12 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
                 if (style.ul?.s) {
                     // If there are existing lines, add new lines
                     if (str.indexOf('text-decoration-line') > -1) {
-                        str = str.replace(
-                            /(?<=text-decoration-line:.*)\b(?=;)/g,
-                            ' underline'
-                        );
+                        str = str.replace(/(?<=text-decoration-line:.*)\b(?=;)/g, ' underline');
                     } else {
                         str += `text-decoration-line: underline; `;
                     }
                     if (style.ul.cl && str.indexOf('text-decoration-color') === -1) {
-                        str += `text-decoration-color: ${getColorStyle(
-                            style.ul.cl
-                        )}; `;
+                        str += `text-decoration-color: ${getColorStyle(style.ul.cl)}; `;
                     }
                     if (style.ul.t && str.indexOf('text-decoration-style') === -1) {
                         str += `text-decoration-style: ${style.ul.t} `;
@@ -236,17 +216,12 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             () => {
                 if (style.st?.s) {
                     if (str.indexOf('text-decoration-line') > -1) {
-                        str = str.replace(
-                            /(?<=text-decoration-line:.*)\b(?=;)/g,
-                            ' line-through'
-                        );
+                        str = str.replace(/(?<=text-decoration-line:.*)\b(?=;)/g, ' line-through');
                     } else {
                         str += `text-decoration-line: line-through; `;
                     }
                     if (style.st.cl && str.indexOf('text-decoration-color') === -1) {
-                        str += `text-decoration-color: ${getColorStyle(
-                            style.st.cl
-                        )}; `;
+                        str += `text-decoration-color: ${getColorStyle(style.st.cl)}; `;
                     }
                     if (style.st.t && str.indexOf('text-decoration-style') === -1) {
                         str += `text-decoration-style: ${style.st.t} `;
@@ -259,17 +234,12 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             () => {
                 if (style.ol?.s) {
                     if (str.indexOf('text-decoration-line') > -1) {
-                        str = str.replace(
-                            /(?<=text-decoration-line:.*)\b(?=;)/g,
-                            ' overline'
-                        );
+                        str = str.replace(/(?<=text-decoration-line:.*)\b(?=;)/g, ' overline');
                     } else {
                         str += `text-decoration-line: overline; `;
                     }
                     if (style.ol.cl && str.indexOf('text-decoration-color') === -1) {
-                        str += `text-decoration-color: ${getColorStyle(
-                            style.ol.cl
-                        )}; `;
+                        str += `text-decoration-color: ${getColorStyle(style.ol.cl)}; `;
                     }
                     if (style.ol.t && str.indexOf('text-decoration-style') === -1) {
                         str += `text-decoration-style: ${style.ol.t} `;
@@ -287,24 +257,16 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             'bd',
             () => {
                 if (style.bd?.b) {
-                    str += `border-bottom: ${getBorderStyle(style.bd?.b.s)} ${
-                        getColorStyle(style.bd.b.cl) ?? ''
-                    }; `;
+                    str += `border-bottom: ${getBorderStyle(style.bd?.b.s)} ${getColorStyle(style.bd.b.cl) ?? ''}; `;
                 }
                 if (style.bd?.t) {
-                    str += `border-top: ${getBorderStyle(style.bd?.t.s)} ${
-                        getColorStyle(style.bd.t.cl) ?? ''
-                    }; `;
+                    str += `border-top: ${getBorderStyle(style.bd?.t.s)} ${getColorStyle(style.bd.t.cl) ?? ''}; `;
                 }
                 if (style.bd?.r) {
-                    str += `border-right: ${getBorderStyle(style.bd?.r.s)} ${
-                        getColorStyle(style.bd.r.cl) ?? ''
-                    }; `;
+                    str += `border-right: ${getBorderStyle(style.bd?.r.s)} ${getColorStyle(style.bd.r.cl) ?? ''}; `;
                 }
                 if (style.bd?.l) {
-                    str += `border-left: ${getBorderStyle(style.bd?.l.s)} ${
-                        getColorStyle(style.bd.l.cl) ?? ''
-                    }; `;
+                    str += `border-left: ${getBorderStyle(style.bd?.l.s)} ${getColorStyle(style.bd.l.cl) ?? ''}; `;
                 }
             },
         ],
@@ -341,9 +303,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
         [
             'tr',
             () => {
-                str += `data-rotate: (${style.tr?.a}deg${
-                    style.tr?.v ? ` ,${style.tr?.v}` : ''
-                });`;
+                str += `data-rotate: (${style.tr?.a}deg${style.tr?.v ? ` ,${style.tr?.v}` : ''});`;
             },
         ],
         [
@@ -402,10 +362,10 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
                 //     l = `${pxToPt(style.pd?.l || 0)}pt`;
                 //     r = `${pxToPt(style.pd?.r || 0)}pt`;
                 // } else {
-                let b = `${style.pd?.b}pt`;
-                let t = `${style.pd?.t}pt`;
-                let l = `${style.pd?.l}pt`;
-                let r = `${style.pd?.r}pt`;
+                const b = `${style.pd?.b}pt`;
+                const t = `${style.pd?.t}pt`;
+                const l = `${style.pd?.l}pt`;
+                const r = `${style.pd?.r}pt`;
                 // }
                 if (style.pd?.b) {
                     str += `padding-bottom: ${b}; `;
@@ -423,7 +383,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
         ],
     ]);
     const cellSkip = ['bd', 'tr', 'tb'];
-    for (let k in style) {
+    for (const k in style) {
         if (isCell && cellSkip.includes(k)) continue; // Cell styles to skip when entering edit mode
         styleMap.get(k)?.();
     }
@@ -495,22 +455,6 @@ export function getTextIndexByCursor(index: number, isBack: boolean = false) {
     return isBack ? index - 1 : index;
 }
 
-export function insertTextToContent(content: string, start: number, text: string) {
-    return content.slice(0, start) + text + content.slice(start);
-}
-
-export function deleteContent(content: string, start: number, end: number) {
-    if (start > end) {
-        return content;
-    }
-
-    if (start === end) {
-        start -= 1;
-    }
-
-    return content.slice(0, start) + content.slice(end);
-}
-
 export function getDocsUpdateBody(model: IDocumentData, segmentId?: string) {
     let body = model.body;
 
@@ -524,41 +468,4 @@ export function getDocsUpdateBody(model: IDocumentData, segmentId?: string) {
     }
 
     return body;
-}
-
-export function horizontalLineSegmentsSubtraction(
-    A1: number,
-    A2: number,
-    B1: number,
-    B2: number
-) {
-    // 确保A1 < A2, B1 < B2
-    if (A1 > A2) {
-        [A1, A2] = [A2, A1];
-    }
-    if (B1 > B2) {
-        [B1, B2] = [B2, B1];
-    }
-
-    // 检查线段是否重叠
-    if (A2 < B1 || B2 < A1) {
-        return [[A1, A2]]; // 无重叠，返回原线段A
-    }
-
-    const overlapStart = Math.max(A1, B1);
-    const overlapEnd = Math.min(A2, B2);
-
-    const result = [];
-
-    // 添加重叠之前的线段
-    if (overlapStart > A1) {
-        result.push([A1, overlapStart]);
-    }
-
-    // 添加重叠之后的线段
-    if (overlapEnd < A2) {
-        result.push([overlapEnd, A2]);
-    }
-
-    return result;
 }

@@ -15,7 +15,11 @@ export function DeleteApply(document: DocumentModel, textLength: number, current
 
     bodyModel.delete(currentIndex, textLength);
 
-    return updateAttributeByDelete(body, textLength, currentIndex);
+    const deleBody = updateAttributeByDelete(body, textLength, currentIndex);
+
+    console.log('删除的model打印', bodyModel, body, deleBody);
+
+    return deleBody;
 }
 
 function updateAttributeByDelete(body: IDocumentBody, textLength: number, currentIndex: number): IDocumentBody {

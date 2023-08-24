@@ -45,17 +45,17 @@ export class InputController {
                     cursor += 1;
                 }
 
-                const selectionRemain = document.remainActiveSelection();
+                const selectionRemain = document.remainActiveSelection() as TextSelection | undefined;
 
                 // const content = document.findNodeByCharIndex(cursor - 1)?.content || '';
 
-                docsModel.deleteText(activeRange, segmentId);
+                docsModel.delete(activeRange, segmentId);
 
                 skeleton.calculate();
 
                 const span = document.findNodeByCharIndex(cursor - 1);
 
-                this._adjustSelection(document, selectionRemain, span);
+                this._adjustSelection(document as Documents, selectionRemain, span);
 
                 this._resetIME();
             }
@@ -83,15 +83,15 @@ export class InputController {
                     cursor += 1;
                 }
 
-                const selectionRemain = document.remainActiveSelection();
+                const selectionRemain = document.remainActiveSelection() as TextSelection | undefined;
 
-                docsModel.insertText(content, activeRange, segmentId);
+                docsModel.insert({ dataStream: content }, activeRange, segmentId);
 
                 skeleton.calculate();
 
                 const span = document.findNodeByCharIndex(cursor + content.length - 1);
 
-                this._adjustSelection(document, selectionRemain, span);
+                this._adjustSelection(document as Documents, selectionRemain, span);
             }
         });
 
@@ -117,11 +117,13 @@ export class InputController {
         });
 
         onCompositionupdateObservable.add((config) => {
-            const { event, document } = config;
+            const { event, document, activeSelection } = config;
 
             let cursor = this._previousIMEStart - 1;
 
             const skeleton = document.getSkeleton();
+
+            const segmentId = activeSelection?.segmentId;
 
             if (!skeleton) {
                 return;
@@ -135,19 +137,19 @@ export class InputController {
                 return;
             }
 
-            const selectionRemain = document.remainActiveSelection();
+            const selectionRemain = document.remainActiveSelection() as TextSelection | undefined;
 
             // const increaseText = this._getIncreaseText(content, this._previousIMEContent);
 
             // docsModel.insertText(increaseText, cursor);
 
-            docsModel.updateText(content, this._previousIMEContent, cursor);
+            docsModel.IMEInput(content, this._previousIMEContent.length, cursor, segmentId);
 
             skeleton.calculate();
 
             const span = document.findNodeByCharIndex(cursor + content.length);
 
-            this._adjustSelection(document, selectionRemain, span);
+            this._adjustSelection(document as Documents, selectionRemain, span);
 
             console.log(
                 'Compositionupdate',

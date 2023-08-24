@@ -84,10 +84,109 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
 
     getFirstViewport() {}
 
-    findPositionBySpan(span: IDocumentSkeletonSpan): Nullable<INodeSearch> {}
+    remainActiveSelection() {}
+
+    findPositionBySpan(span: IDocumentSkeletonSpan): Nullable<INodeSearch> {
+        const divide = span.parent;
+
+        const line = divide?.parent;
+
+        const column = line?.parent;
+
+        const section = column?.parent;
+
+        const page = section?.parent;
+
+        const skeletonData = this.getSkeleton()?.getSkeletonData();
+
+        if (!divide || !column || !section || !page || !skeletonData) {
+            return;
+        }
+
+        let spanIndex = divide.spanGroup.indexOf(span);
+
+        const divideIndex = line.divides.indexOf(divide);
+
+        const lineIndex = column.lines.indexOf(line);
+
+        const columnIndex = section.columns.indexOf(column);
+
+        const sectionIndex = page.sections.indexOf(section);
+
+        const pageIndex = skeletonData.pages.indexOf(page);
+
+        return {
+            span: spanIndex,
+            divide: divideIndex,
+            line: lineIndex,
+            column: columnIndex,
+            section: sectionIndex,
+            page: pageIndex,
+        };
+    }
 
     findNodeByCoord(offsetX: number, offsetY: number): false | INodeInfo {
         return false;
+    }
+
+    findNodeByCharIndex(charIndex: number): Nullable<IDocumentSkeletonSpan> {
+        const skeleton = this.getSkeleton();
+
+        if (!skeleton) {
+            return;
+        }
+
+        const skeletonData = skeleton.getSkeletonData();
+
+        const pages = skeletonData.pages;
+
+        for (let page of pages) {
+            const { sections, st, ed } = page;
+
+            if (charIndex < st || charIndex > ed) {
+                continue;
+            }
+
+            for (let section of sections) {
+                const { columns, st, ed } = section;
+
+                if (charIndex < st || charIndex > ed) {
+                    continue;
+                }
+
+                for (let column of columns) {
+                    const { lines, st, ed } = column;
+
+                    if (charIndex < st || charIndex > ed) {
+                        continue;
+                    }
+
+                    for (let line of lines) {
+                        const { divides, lineHeight, st, ed } = line;
+                        const divideLength = divides.length;
+
+                        if (charIndex < st || charIndex > ed) {
+                            continue;
+                        }
+
+                        for (let i = 0; i < divideLength; i++) {
+                            const divide = divides[i];
+                            const { spanGroup, st, ed } = divide;
+
+                            if (charIndex < st || charIndex > ed) {
+                                continue;
+                            }
+
+                            const span = spanGroup[charIndex - st];
+
+                            if (span) {
+                                return span;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     getActiveViewportByCoord(offsetX: number, offsetY: number) {}

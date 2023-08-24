@@ -1,10 +1,6 @@
-import {
-    deleteContent,
-    horizontalLineSegmentsSubtraction,
-    insertTextToContent,
-} from '../../Shared/Common';
+import { horizontalLineSegmentsSubtraction, deleteContent, insertTextToContent } from '../../Shared/DocTool';
 import { Nullable } from '../../Shared/Types';
-import { DataStreamTreeNodeType } from './Types';
+import { DataStreamTreeNodeType, DataStreamTreeTokenType } from './Types';
 
 export class DataStreamTreeNode {
     children: DataStreamTreeNode[] = [];
@@ -14,6 +10,8 @@ export class DataStreamTreeNode {
     startIndex: number;
 
     endIndex: number;
+
+    isBullet: boolean = false;
 
     blocks: number[] = [];
 
@@ -45,11 +43,7 @@ export class DataStreamTreeNode {
     }
 
     insertText(text: string, insertIndex: number) {
-        this.content = insertTextToContent(
-            this.content || '',
-            insertIndex - this.startIndex + 1,
-            text
-        );
+        this.content = insertTextToContent(this.content || '', insertIndex - this.startIndex + 1, text);
     }
 
     exclude(index: number) {
@@ -59,17 +53,16 @@ export class DataStreamTreeNode {
     plus(len: number) {
         this.startIndex += len;
         this.endIndex += len;
+        this.addIndexForBlock(len);
+    }
+
+    selfPlus(len: number, index: number) {
+        this.endIndex += len;
+        this.addIndexForBlock(len, index);
     }
 
     split(index: number) {
-        const {
-            children,
-            parent,
-            startIndex,
-            endIndex,
-            nodeType,
-            content = '',
-        } = this.getProps();
+        const { children, parent, startIndex, endIndex, nodeType, content = '' } = this.getProps();
 
         if (this.exclude(index)) {
             return;
@@ -102,7 +95,7 @@ export class DataStreamTreeNode {
         const firstChildNodes: DataStreamTreeNode[] = [];
         const lastChildNodes: DataStreamTreeNode[] = [];
 
-        for (let node of children) {
+        for (const node of children) {
             const { startIndex: childStartIndex } = node;
             if (node.exclude(index)) {
                 if (index < childStartIndex) {
@@ -126,6 +119,10 @@ export class DataStreamTreeNode {
 
         lastNode.children = lastChildNodes;
 
+        firstNode.resetBlocks();
+
+        lastNode.resetBlocks();
+
         return {
             firstNode,
             lastNode,
@@ -133,7 +130,11 @@ export class DataStreamTreeNode {
     }
 
     getPositionInParent() {
-        return this.parent?.children.indexOf(this) || -1;
+        const index = this.parent?.children.indexOf(this) as number;
+        if (index == null) {
+            return -1;
+        }
+        return index;
     }
 
     remove() {
@@ -146,30 +147,55 @@ export class DataStreamTreeNode {
     }
 
     minus(startIndex: number, endIndex: number) {
-        const segments = horizontalLineSegmentsSubtraction(
-            this.startIndex,
-            this.endIndex,
-            startIndex,
-            endIndex
-        );
+        const segments = horizontalLineSegmentsSubtraction(this.startIndex, this.endIndex, startIndex, endIndex);
 
-        if (segments.length > 2) {
-            const seg1 = segments[0];
-            const seg2 = segments[1];
-            this.startIndex = seg1[0];
-            this.endIndex = seg1[1] + seg2[1] - seg2[0] + 1;
-        } else {
-            this.startIndex = segments[0][0];
-            this.endIndex = segments[0][1];
+        if (segments.length === 0) {
+            return;
         }
 
-        this.content = deleteContent(this.content || '', startIndex, endIndex);
+        const originStartIndex = this.startIndex;
+
+        this.startIndex = segments[0];
+        this.endIndex = segments[1];
+
+        if (this.content != null) {
+            this.content = deleteContent(this.content || '', startIndex - originStartIndex, endIndex - originStartIndex + 1);
+        }
     }
 
     merge(node: DataStreamTreeNode) {
-        const { endIndex, children } = node;
-        this.endIndex = endIndex;
+        const { startIndex, endIndex, children } = node;
+        this.endIndex += endIndex - startIndex + 1;
         this.children.push(...children);
+        this.content += node.content || '';
         node.remove();
+    }
+
+    private addIndexForBlock(addLen: number, index: number = -Infinity) {
+        for (let i = 0, len = this.blocks.length; i < len; i++) {
+            const block = this.blocks[i];
+            if (block >= index) {
+                this.blocks[i] = block + addLen;
+            }
+        }
+    }
+
+    private resetBlocks() {
+        if (this.nodeType !== DataStreamTreeNodeType.PARAGRAPH) {
+            return;
+        }
+        if (this.content == null) {
+            return;
+        }
+        if (this.content.length === 0) {
+            return;
+        }
+        this.blocks = [];
+        for (let i = 0, len = this.content.length; i < len; i++) {
+            const char = this.content[i];
+            if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
+                this.blocks.push(this.startIndex + i);
+            }
+        }
     }
 }

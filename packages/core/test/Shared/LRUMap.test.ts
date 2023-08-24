@@ -3,13 +3,13 @@ import { LRUMap } from '../../src/Shared';
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
 test('LRU Test Key', () => {
-    let c = new LRUMap(4, [
+    const c = new LRUMap(4, [
         ['adam', 29],
         ['john', 26],
         ['angela', 24],
         ['bob', 48],
     ]);
-    let kit = c.keys();
+    const kit = c.keys();
     expect(kit.next().value).toEqual('adam');
     expect(kit.next().value).toEqual('john');
     expect(kit.next().value).toEqual('angela');
@@ -18,13 +18,13 @@ test('LRU Test Key', () => {
 });
 
 test('LRU Test Value', () => {
-    let c = new LRUMap(4, [
+    const c = new LRUMap(4, [
         ['adam', 29],
         ['john', 26],
         ['angela', 24],
         ['bob', 48],
     ]);
-    let kit = c.values();
+    const kit = c.values();
     expect(kit.next().value).toEqual(29);
     expect(kit.next().value).toEqual(26);
     expect(kit.next().value).toEqual(24);
@@ -33,7 +33,7 @@ test('LRU Test Value', () => {
 });
 
 test('LRU Test Clear', () => {
-    let c = new LRUMap(4);
+    const c = new LRUMap(4);
     c.set('adam', 29);
     c.set('john', 26);
     expect(c.size).toEqual(2);
@@ -44,7 +44,7 @@ test('LRU Test Clear', () => {
 });
 
 test('LRU Test Delete', () => {
-    let c = new LRUMap([
+    const c = new LRUMap([
         ['adam', 29],
         ['john', 26],
         ['angela', 24],
@@ -66,7 +66,7 @@ test('LRU Test Delete', () => {
 });
 
 test('LRU Test Set', () => {
-    let c = new LRUMap(4);
+    const c = new LRUMap(4);
     c.set('a', 1);
     c.set('a', 2);
     c.set('a', 3);
@@ -94,7 +94,7 @@ test('LRU Test Set', () => {
 });
 
 test('LRU Set And Get', () => {
-    let c = new LRUMap(4);
+    const c = new LRUMap(4);
     expect(c.size).toEqual(0);
     expect(c.limit).toEqual(4);
     expect(c.oldest).toEqual(undefined);
@@ -122,13 +122,13 @@ test('LRU Set And Get', () => {
     expect(c.toString()).toEqual('bob:48 < angela:24 < ygwie:81 < john:11');
     expect(c.get('john')).toEqual(11);
 
-    let expectedKeys = ['bob', 'angela', 'ygwie', 'john'];
+    const expectedKeys = ['bob', 'angela', 'ygwie', 'john'];
     c.forEach((v, k) => {
         //sys.sets(k+': '+v);
         expect(k).toEqual(expectedKeys.shift());
     });
 
-    let currentSize = c.size;
+    const currentSize = c.size;
     expect(c.delete('john') !== undefined).toBeTruthy();
     expect(currentSize - 1).toEqual(c.size);
 });

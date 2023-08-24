@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { LocaleType, UniverSheet } from '../../src';
+import { Locale, LocaleType } from '../../src';
 
 jest.mock('nanoid', () => ({ nanoid: () => '12345678' }));
 
@@ -15,17 +15,7 @@ const en = {
 };
 
 test('Test Locale', () => {
-    const univerSheet = UniverSheet.newInstance({
-        id: 'workbook-01',
-        sheets: [
-            {
-                name: 'first sheet',
-            },
-        ],
-        locale: LocaleType.ZH,
-    });
-
-    const locale = univerSheet.context.getLocale();
+    const locale = new Locale();
 
     locale.load({ zh, en });
 

@@ -61,7 +61,7 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
     initController() {
         this._toolbarControl = new ToolbarController();
         this._infoBarControl = new InfoBarController();
-        this._documentController = new DocumentController();
+        this._documentController = new DocumentController(this._injector);
     }
 
     initCanvasView() {

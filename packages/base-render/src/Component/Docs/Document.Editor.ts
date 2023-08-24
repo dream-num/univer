@@ -92,7 +92,7 @@ export class DocsEditor {
 
     getActiveTextSelection() {
         const list = this._textSelectionList;
-        for (let textSelection of list) {
+        for (const textSelection of list) {
             if (textSelection.isActive()) {
                 return textSelection;
             }

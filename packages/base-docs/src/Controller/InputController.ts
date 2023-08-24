@@ -1,18 +1,25 @@
 import { Documents, IDocumentSkeletonSpan, SpanType, TextSelection } from '@univerjs/base-render';
-import { KeyboardKeyType, Nullable } from '@univerjs/core';
+import { ICurrentUniverService, KeyboardKeyType, Nullable } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
+import { CanvasView } from '../View/Render/CanvasView';
+import { DocsView } from '../View/Render/Views';
 
 export class InputController {
     private _previousIMEContent: string = '';
 
     private _previousIMEStart: number;
 
-    constructor() {
+    constructor(@Inject(CanvasView) private readonly _CanvasView: CanvasView, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
         this._initialize();
     }
 
     // eslint-disable-next-line max-lines-per-function
     private _initialize() {
-        const events = this._plugin.getInputEvent();
+        const docsView = this._CanvasView.getDocsView() as DocsView;
+        const events = docsView.getDocs().getEditorInputEvent();
+
+        const docsModel = this._currentUniverService.getCurrentUniverDocInstance().getDocument();
+
         if (!events) {
             return;
         }
@@ -119,7 +126,7 @@ export class InputController {
         onCompositionupdateObservable.add((config) => {
             const { event, document, activeSelection } = config;
 
-            let cursor = this._previousIMEStart - 1;
+            const cursor = this._previousIMEStart - 1;
 
             const skeleton = document.getSkeleton();
 

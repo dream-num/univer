@@ -1,6 +1,7 @@
 import { IDocumentBody } from '../../Types/Interfaces/IDocumentData';
 import { DocumentModel } from '../Domain/DocumentModel';
-import { getDocsUpdateBody, insertTextToContent } from '../../Shared/Common';
+import { getDocsUpdateBody } from '../../Shared/Common';
+import { insertTextToContent } from '../../Shared/DocTool';
 import { insertCustomBlocks, insertCustomRanges, insertParagraphs, insertSectionBreaks, insertTables, insertTextRuns } from './Common';
 
 export function InsertApply(document: DocumentModel, insertBody: IDocumentBody, textLength: number, currentIndex: number, segmentId?: string) {

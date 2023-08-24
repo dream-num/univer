@@ -38,8 +38,12 @@ export class PageView extends BaseView {
 }
 
 class PageViewFactory {
+    readonly zIndex = 1;
+
     create(scene: Scene, injector: Injector) {
-        injector.createInstance(PageView);
+        const pageView = injector.createInstance(PageView) as PageView;
+        pageView.initialize(scene);
+        return pageView;
     }
 }
 

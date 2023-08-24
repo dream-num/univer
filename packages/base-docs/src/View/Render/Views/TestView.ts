@@ -4,13 +4,12 @@ import { BaseView, CanvasViewRegistry } from '../BaseView';
 const PAGE_VIEW_BACKGROUND = 'page_view_background';
 
 export class PageView extends BaseView {
-    zIndex = 3;
+    override zIndex = 3;
 
-    viewKey = PAGE_VIEW_BACKGROUND;
+    override viewKey = PAGE_VIEW_BACKGROUND;
 
-    protected _initialize() {
+    protected override _initialize() {
         const scene = this.getScene();
-        const context = this.getContext();
 
         const polygon = new RegularPolygon('TEXT_POLYGON_KEY_PREFIX_TEST', {
             pointsGroup: [

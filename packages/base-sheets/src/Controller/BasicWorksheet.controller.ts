@@ -1,5 +1,5 @@
 import { IDisposable } from '@wendellhu/redi';
-import { ICommandService } from '@univerjs/core';
+import { Disposable, ICommandService } from '@univerjs/core';
 
 import { ClearSelectionContentCommand } from '../Commands/Commands/clear-selection-content.command';
 import { SetRangeValuesMutation } from '../Commands/Mutations/set-range-values.mutation';
@@ -7,13 +7,13 @@ import { SetRangeValuesMutation } from '../Commands/Mutations/set-range-values.m
 /**
  * The controller to provide the most basic sheet CRUD methods to other modules of sheet modules.
  */
-export class BasicWorksheetController implements IDisposable {
+export class BasicWorksheetController extends Disposable implements IDisposable {
     constructor(@ICommandService private readonly _commandService: ICommandService) {
-        _commandService.registerCommand(ClearSelectionContentCommand);
-        _commandService.registerCommand(SetRangeValuesMutation);
-    }
+        super();
 
-    dispose(): void {}
+        this.disposeWithMe(_commandService.registerCommand(ClearSelectionContentCommand));
+        this.disposeWithMe(_commandService.registerCommand(SetRangeValuesMutation));
+    }
 
     onInitialize() {}
 

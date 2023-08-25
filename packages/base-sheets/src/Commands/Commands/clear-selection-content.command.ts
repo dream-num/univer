@@ -4,7 +4,7 @@ import { IAccessor } from '@wendellhu/redi';
 import { ISelectionManager } from '../../Services/tokens';
 import { SelectionController } from '../../Controller/Selection/SelectionController';
 import { SelectionModel } from '../../Model/SelectionModel';
-import { ISetRangeValuesMutationParams, SetRangeValuesMutation } from '../Mutations/set-range-values.mutation';
+import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
 
 /**
  * The command to clear content in current selected ranges.
@@ -44,7 +44,7 @@ export const ClearSelectionContentCommand: ICommand = {
             rangeData: range,
             worksheetId: worksheet.getSheetId(),
         };
-        const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFectory(accessor, clearMutationParams);
+        const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(accessor, clearMutationParams);
 
         // execute do mutations and add undo mutations to undo stack if completed
         const result = commandService.executeCommand(SetRangeValuesMutation.id, clearMutationParams);

@@ -2,6 +2,7 @@ import { Injector } from '@wendellhu/redi';
 import { Workbook, Worksheet } from '../Sheets/Domain';
 import { ActionBase, IActionData, ActionObservers, CommandUnit } from './index';
 
+// TODO: @wzhudev: rename this interface to ISheetMutationData
 /**
  * Format of action data param
  */
@@ -9,6 +10,9 @@ export interface ISheetActionData extends IActionData {
     sheetId: string;
     rangeRef?: string;
     injector?: Injector;
+    actionName: string;
+    memberId?: string;
+    operation?: ActionOperationType;
 }
 
 /**

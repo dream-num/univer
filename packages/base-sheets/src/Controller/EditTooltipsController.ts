@@ -63,15 +63,15 @@ export class EditTooltipsController {
         const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(sheetId);
         const editTooltips = this.createIfEditTooltips(key, sheetId);
         if (sheet) {
-            let merges = sheet.getMerges().getByRowColumn(row, column);
-            let rowTitle = sheet.getConfig().rowTitle;
-            let columnTitle = sheet.getConfig().columnTitle;
+            const merges = sheet.getMerges().getByRowColumn(row, column);
+            const rowTitle = sheet.getConfig().rowTitle;
+            const columnTitle = sheet.getConfig().columnTitle;
             let left = rowTitle.width ?? 0;
             let top = columnTitle.height ?? 0;
             let height = 0;
             let width = 0;
             if (merges) {
-                let merge = merges[0];
+                const merge = merges[0];
                 for (let i = merge.startColumn; i <= merge.endColumn; i++) {
                     width += sheet.getColumnWidth(i);
                 }

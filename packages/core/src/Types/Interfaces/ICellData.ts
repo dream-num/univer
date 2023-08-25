@@ -68,12 +68,7 @@ export interface IFormatData {
 /**
  * Cell data type
  */
-export type ICellDataType =
-    | Nullable<ICellData>
-    | Nullable<IStyleData>
-    | string
-    | number
-    | boolean;
+export type ICellDataType = Nullable<ICellData> | Nullable<IStyleData> | string | number | boolean;
 
 /**
  * Cell data matrix type

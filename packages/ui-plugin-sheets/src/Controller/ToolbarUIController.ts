@@ -89,11 +89,9 @@ export class ToolbarUIController {
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
-        // TODO@huwenzhao: 看到这个真的是要哭了
-
         this._config = Tools.deepMerge({}, DefaultToolbarConfig, config);
 
-        // TODO@huwenzhao: toolbar config
+        // TODO: @wzhudev: toolbar configurations should be moved to command system
         this._toolList = [
             {
                 toolbarType: 1,

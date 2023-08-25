@@ -166,5 +166,6 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
         this._registerManager = this._injector.get(RegisterManager);
 
         this._appUIController = this._injector.createInstance(AppUIController, this._config);
+        this._injector.add([AppUIController, { useValue: this._appUIController }]);
     }
 }

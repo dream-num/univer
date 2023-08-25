@@ -11,19 +11,12 @@ import { IInsertRowDataActionData } from '../Action';
  *
  * @internal
  */
-export function InsertDataRow(
-    rowIndex: number,
-    rowData: ObjectMatrixPrimitiveType<ICellData>,
-    primitiveData: ObjectMatrixPrimitiveType<ICellData>
-) {
+export function InsertDataRow(rowIndex: number, rowData: ObjectMatrixPrimitiveType<ICellData>, primitiveData: ObjectMatrixPrimitiveType<ICellData>) {
     const wrapper = new ObjectMatrix(primitiveData);
     wrapper.insertRows(rowIndex, new ObjectMatrix(rowData));
 }
 
-export function InsertDataRowApply(
-    unit: CommandUnit,
-    data: IInsertRowDataActionData
-) {
+export function InsertDataRowApply(unit: CommandUnit, data: IInsertRowDataActionData) {
     const worksheet = unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
     const primitiveData = worksheet!.getCellMatrix().toJSON();
 

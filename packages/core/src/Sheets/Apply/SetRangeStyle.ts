@@ -2,13 +2,7 @@ import { ITextStyle } from '../../Types/Interfaces/IDocumentData';
 import { Styles } from '../Domain';
 import { IRangeData, ICellData, IDocumentData } from '../../Types/Interfaces';
 import { IBorderData, IStyleData } from '../../Types/Interfaces/IStyleData';
-import {
-    IKeyValue,
-    Nullable,
-    ObjectMatrix,
-    ObjectMatrixPrimitiveType,
-    Tools,
-} from '../../Shared';
+import { IKeyValue, Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '../../Shared';
 
 /**
  * Set the style. The style sent by the user will be merged into the original style object. If you want to delete a style, you need to explicitly set it to null
@@ -40,10 +34,7 @@ export function SetRangeStyle(
             }
 
             // set style
-            const merge = mergeStyle(
-                old,
-                value[r - startRow][c - startColumn] as Nullable<IStyleData>
-            );
+            const merge = mergeStyle(old, value[r - startRow][c - startColumn] as Nullable<IStyleData>);
 
             // then remove null
             merge && Tools.removeNull(merge);
@@ -57,23 +48,13 @@ export function SetRangeStyle(
             // When the rich text sets the cell style, you need to modify the style of all rich text
             // TODO redo/undo use setRangeData to undo rich text setting
             if (cell.p) {
-                mergeRichTextStyle(
-                    cell.p,
-                    value[r - startRow][c - startColumn] as Nullable<IStyleData>
-                );
+                mergeRichTextStyle(cell.p, value[r - startRow][c - startColumn] as Nullable<IStyleData>);
             }
 
             cellMatrix.setValue(r, c, cell);
 
             // store old data
-            result.setValue(
-                r - startRow,
-                c - startColumn,
-                transformStyle(
-                    old,
-                    value[r - startRow][c - startColumn] as Nullable<IStyleData>
-                )
-            );
+            result.setValue(r - startRow, c - startColumn, transformStyle(old, value[r - startRow][c - startColumn] as Nullable<IStyleData>));
         }
 
         // result.push(rowResult);
@@ -85,10 +66,7 @@ export function SetRangeStyle(
  * Convert old style data for storage
  * @param style
  */
-export function transformStyle(
-    oldStyle: Nullable<IStyleData>,
-    newStyle: Nullable<IStyleData>
-): Nullable<IStyleData> {
+export function transformStyle(oldStyle: Nullable<IStyleData>, newStyle: Nullable<IStyleData>): Nullable<IStyleData> {
     const backupStyle = transformNormalKey(oldStyle, newStyle);
     return backupStyle;
 }
@@ -97,10 +75,7 @@ export function transformStyle(
  *
  * @param style
  */
-export function transformNormalKey(
-    oldStyle: Nullable<IStyleData>,
-    newStyle: Nullable<IStyleData>
-): Nullable<IStyleData> {
+export function transformNormalKey(oldStyle: Nullable<IStyleData>, newStyle: Nullable<IStyleData>): Nullable<IStyleData> {
     // If there is no newly set style, directly store the historical style
     if (!newStyle || !Object.keys(newStyle).length) {
         return oldStyle;
@@ -125,10 +100,7 @@ export function transformNormalKey(
 
  * @param style
  */
-export function transformBorders(
-    oldBorders: IBorderData,
-    newBorders: Nullable<IBorderData>
-): IBorderData {
+export function transformBorders(oldBorders: IBorderData, newBorders: Nullable<IBorderData>): IBorderData {
     // If there is no newly set border, directly store the historical border
     if (!newBorders || !Object.keys(newBorders).length) {
         return oldBorders;
@@ -151,11 +123,7 @@ export function transformBorders(
  * @param oldStyle
  * @param newStyle
  */
-export function mergeStyle(
-    oldStyle: Nullable<IStyleData>,
-    newStyle: Nullable<IStyleData>,
-    isRichText: boolean = false
-): Nullable<IStyleData> {
+export function mergeStyle(oldStyle: Nullable<IStyleData>, newStyle: Nullable<IStyleData>, isRichText: boolean = false): Nullable<IStyleData> {
     // clear style
     if (newStyle === null) return newStyle;
     // don't operate
@@ -189,10 +157,7 @@ export function mergeStyle(
  * @param p
  * @param newStyle
  */
-export function mergeRichTextStyle(
-    p: IDocumentData,
-    newStyle: Nullable<IStyleData>
-) {
+export function mergeRichTextStyle(p: IDocumentData, newStyle: Nullable<IStyleData>) {
     // p.body?.blockElements.forEach((blockElement) => {
     //     if (blockElement.blockType === 0) {
     //         const paragraph = blockElement.paragraph;

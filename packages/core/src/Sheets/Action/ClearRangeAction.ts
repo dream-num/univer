@@ -8,6 +8,7 @@ import { CommandManager, CommandUnit } from '../../Command';
 
 /**
  * @internal
+ * @deprecated
  */
 export interface IClearRangeActionData extends ISheetActionData {
     options: IOptionData;
@@ -17,20 +18,13 @@ export interface IClearRangeActionData extends ISheetActionData {
 /**
  * Clearly specify a range of styles, content, comments, validation, filtering
  *
+ * @deprecated
  * @internal
  */
-export class ClearRangeAction extends SheetActionBase<
-    IClearRangeActionData,
-    ISetRangeDataActionData,
-    ObjectMatrixPrimitiveType<ICellData>
-> {
+export class ClearRangeAction extends SheetActionBase<IClearRangeActionData, ISetRangeDataActionData, ObjectMatrixPrimitiveType<ICellData>> {
     static NAME = 'ClearRangeAction';
 
-    constructor(
-        actionData: IClearRangeActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
+    constructor(actionData: IClearRangeActionData, commandUnit: CommandUnit, observers: ActionObservers) {
         super(actionData, commandUnit, observers);
 
         this._doActionData = {
@@ -45,6 +39,8 @@ export class ClearRangeAction extends SheetActionBase<
 
     do(): ObjectMatrixPrimitiveType<ICellData> {
         const result = ClearRangeApply(this._commandUnit, this._doActionData);
+
+        // action 不应该跟 undo redo 耦合在一起，因为 action 可能被发送到协同端去
         this._observers.notifyObservers({
             type: ActionType.REDO,
             data: this._doActionData,

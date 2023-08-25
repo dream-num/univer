@@ -11,6 +11,8 @@ import { UniverObserverImpl } from './UniverObserverImpl';
 import { ObserverManager } from '../Observer';
 import { CurrentUniverService, ICurrentUniverService } from '../Service/Current.service';
 import { UniverSlide } from './UniverSlide';
+import { CommandService, ICommandService } from '../Service/Command/Command.service';
+import { IUndoRedoService, LocalUndoRedoService } from '../Service/UndoRedo/undoRedo.service';
 
 /**
  * Univer.
@@ -130,7 +132,15 @@ export class Univer {
     }
 
     private initializeDependencies(): Injector {
-        return new Injector([[ObserverManager], [ICurrentUniverService, { useClass: CurrentUniverService }], [CommandManager], [LocaleService], [UndoManager]]);
+        return new Injector([
+            [ObserverManager],
+            [ICurrentUniverService, { useClass: CurrentUniverService }],
+            [CommandManager],
+            [LocaleService],
+            [UndoManager],
+            [ICommandService, { useClass: CommandService }],
+            [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],
+        ]);
     }
 
     private registerUniverPlugin<T extends Plugin>(plugin: PluginCtor<T>, options?: any): void {

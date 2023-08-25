@@ -29,15 +29,15 @@ export type ObjectArrayType<T> = ObjectArray<T> | ObjectArrayPrimitiveType<T>;
 const define = <T>(value?: T): value is T => value !== undefined && value !== null;
 
 const likeArr = (value: object): number => {
-    let keys: string[] = Object.keys(value);
-    let regexp = /^\d+$/;
+    const keys: string[] = Object.keys(value);
+    const regexp = /^\d+$/;
     let maxKey = 0;
     for (let i = 0; i < keys.length; i++) {
-        let key = keys[i];
+        const key = keys[i];
         if (!regexp.test(key)) {
             return -1;
         }
-        let seq = parseInt(key) + 1;
+        const seq = parseInt(key) + 1;
         if (seq > maxKey) {
             maxKey = seq;
         }
@@ -78,9 +78,7 @@ export class ObjectArray<T> {
                     this._length = length;
                     return;
                 }
-                throw new Error(
-                    `create object array error ${JSON.stringify(argument[0])}`
-                );
+                throw new Error(`create object array error ${JSON.stringify(argument[0])}`);
             }
             case 2: {
                 if (likeArr(argument[0]) > -1) {
@@ -88,9 +86,7 @@ export class ObjectArray<T> {
                     this._length = argument[1];
                     return;
                 }
-                throw new Error(
-                    `create object array error ${JSON.stringify(argument[0])}`
-                );
+                throw new Error(`create object array error ${JSON.stringify(argument[0])}`);
             }
         }
     }

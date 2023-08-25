@@ -7,6 +7,7 @@ import { Plugin, PluginCtor, PluginStore } from '../Plugin';
 import { GenName, Logger } from '../Shared';
 import { VersionCode, VersionEnv } from './Version';
 import { WorkBookObserverImpl } from './WorkBookObserverImpl';
+import { CommandService, ICommandService } from '../Service/Command/Command.service';
 
 /**
  * Externally provided UniverSheet root instance
@@ -63,7 +64,16 @@ export class UniverSheet implements Disposable {
     }
 
     private _initializeDependencies(parentInjector?: Injector): Injector {
-        const dependencies: Dependency[] = [[ObserverManager], [GenName]];
+        const dependencies: Dependency[] = [
+            [ObserverManager],
+            [GenName],
+            [
+                ICommandService,
+                {
+                    useClass: CommandService,
+                },
+            ],
+        ];
         return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
     }
 

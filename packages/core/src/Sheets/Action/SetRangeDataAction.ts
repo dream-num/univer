@@ -1,13 +1,6 @@
 import { SetRangeDataApply } from '../Apply';
 import { ObjectMatrixPrimitiveType } from '../../Shared';
-import {
-    SheetActionBase,
-    ISheetActionData,
-    ActionObservers,
-    ActionType,
-    CommandUnit,
-    CommandManager,
-} from '../../Command';
+import { SheetActionBase, ISheetActionData, ActionObservers, ActionType, CommandUnit, CommandManager, ActionOperationType } from '../../Command';
 import { ICopyToOptionsData, ICellData } from '../../Types/Interfaces';
 
 /**
@@ -29,6 +22,9 @@ export interface ISetRangeDataActionData extends ISheetActionData {
     cellValue: ObjectMatrixPrimitiveType<ICellData>;
     options?: ICopyToOptionsData;
     type?: SetRangeDataType;
+    actionName: string;
+    memberId?: string;
+    operation?: ActionOperationType;
 }
 
 /**
@@ -36,18 +32,10 @@ export interface ISetRangeDataActionData extends ISheetActionData {
  *
  * @internal
  */
-export class SetRangeDataAction extends SheetActionBase<
-    ISetRangeDataActionData,
-    ISetRangeDataActionData,
-    ObjectMatrixPrimitiveType<ICellData>
-> {
+export class SetRangeDataAction extends SheetActionBase<ISetRangeDataActionData, ISetRangeDataActionData, ObjectMatrixPrimitiveType<ICellData>> {
     static NAME = 'SetRangeDataAction';
 
-    constructor(
-        actionData: ISetRangeDataActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
+    constructor(actionData: ISetRangeDataActionData, commandUnit: CommandUnit, observers: ActionObservers) {
         super(actionData, commandUnit, observers);
 
         this._doActionData = {

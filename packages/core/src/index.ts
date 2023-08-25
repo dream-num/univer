@@ -25,8 +25,12 @@ export * from './Observer';
 export * from './Plugin';
 export * from './Server';
 export * from './Shared';
+export { IRowColIter, createRowColIter } from './Shared/RowColIter';
+export { DisposableCollection, Disposable, toDisposable } from './Shared/Lifecycle';
 export * from './Sheets';
 export * from './Slides/Domain';
 
 export { ICurrentUniverService } from './Service/Current.service';
 export { LocaleService } from './Service/Locale.service';
+export { ICommandService, ICommand, CommandType, IMutation } from './Service/Command/Command.service';
+export { IUndoRedoService, LocalUndoRedoService, UndoCommand, RedoCommand } from './Service/UndoRedo/undoRedo.service';

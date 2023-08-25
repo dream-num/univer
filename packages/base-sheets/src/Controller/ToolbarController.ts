@@ -29,7 +29,6 @@ export interface BorderInfo {
 export class ToolbarController {
     constructor(
         @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
-        @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @ICommandService private readonly _commandService: ICommandService,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @ISelectionManager private readonly _selectionManager: SelectionManager,
@@ -139,47 +138,47 @@ export class ToolbarController {
         // });
     }
 
-    setRedo() {
+    private setRedo() {
         this._commandService.executeCommand(RedoCommand.id);
     }
 
-    setUndo() {
+    private setUndo() {
         this._commandService.executeCommand(UndoCommand.id);
     }
 
-    setFontColor(value: string) {
+    private setFontColor(value: string) {
         this._selectionManager.getActiveRangeList()?.setFontColor(value);
     }
 
-    setBackground(value: string) {
+    private setBackground(value: string) {
         this._selectionManager.getActiveRangeList()?.setBackground(value);
     }
 
-    setFontSize(value: number) {
+    private setFontSize(value: number) {
         this._selectionManager.getActiveRangeList()?.setFontSize(value);
     }
 
-    setFontFamily(value: string) {
+    private setFontFamily(value: string) {
         this._selectionManager.getActiveRangeList()?.setFontFamily(value);
     }
 
-    setFontWeight(value: boolean) {
+    private setFontWeight(value: boolean) {
         this._selectionManager.getActiveRangeList()?.setFontWeight(value);
     }
 
-    setFontStyle(value: boolean) {
+    private setFontStyle(value: boolean) {
         this._selectionManager.getActiveRangeList()?.setFontStyle(value);
     }
 
-    setStrikeThrough(value: boolean) {
+    private setStrikeThrough(value: boolean) {
         this._selectionManager.getActiveRangeList()?.setStrikeThrough(value);
     }
 
-    setUnderline(value: boolean) {
+    private setUnderline(value: boolean) {
         this._selectionManager.getActiveRangeList()?.setUnderline(value);
     }
 
-    setMerge(value: string) {
+    private setMerge(value: string) {
         const currentRange = this._selectionManager.getActiveRange();
 
         switch (value) {
@@ -204,19 +203,19 @@ export class ToolbarController {
         }
     }
 
-    setHorizontalAlignment(value: HorizontalAlign) {
+    private setHorizontalAlignment(value: HorizontalAlign) {
         this._selectionManager.getActiveRangeList()?.setHorizontalAlignment(value);
     }
 
-    setVerticalAlignment(value: VerticalAlign) {
+    private setVerticalAlignment(value: VerticalAlign) {
         this._selectionManager.getActiveRangeList()?.setVerticalAlignment(value);
     }
 
-    setWrapStrategy(value: WrapStrategy) {
+    private setWrapStrategy(value: WrapStrategy) {
         this._selectionManager.getActiveRangeList()?.setWrapStrategy(value);
     }
 
-    setTextRotation(value: number | string) {
+    private setTextRotation(value: number | string) {
         if (value === 'v') {
             this._selectionManager.getActiveRangeList()?.setVerticalText(1);
         } else {
@@ -224,7 +223,7 @@ export class ToolbarController {
         }
     }
 
-    setBorder(info: BorderInfo) {
+    private setBorder(info: BorderInfo) {
         const controls = this._selectionManager.getCurrentControls();
 
         if (controls && controls.length > 0) {

@@ -4,6 +4,7 @@ import { BaseComponentRender } from '@univerjs/base-ui';
 import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 
 import * as LuckyExcel from 'luckyexcel';
+import { BasicWorkbookController } from '@univerjs/base-sheets';
 import { IMPORT_XLSX_PLUGIN_NAME } from '../Basics/Const';
 
 export class ImportXlsxController {
@@ -13,7 +14,8 @@ export class ImportXlsxController {
 
     constructor(
         @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(BasicWorkbookController) private readonly _basicWorkbookController: BasicWorkbookController
     ) {
         this._toolButton = {
             name: IMPORT_XLSX_PLUGIN_NAME,
@@ -76,18 +78,22 @@ export class ImportXlsxController {
             }
 
             const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-
+            const workbookId = workbook.getUnitId();
             const order = Tools.deepClone(workbook.getConfig().sheetOrder);
 
             // add new sheets
-            Object.keys(sheets).forEach((sheetId) => {
+            Object.keys(sheets).forEach((sheetId, i) => {
                 const sheetData = sheets[sheetId];
-                workbook.insertSheet(sheetData);
+                // workbook.insertSheet(sheetData);
+                const index = order.length - 1 + i;
+                this._basicWorkbookController.insertSheet(index, sheetData, workbookId);
             });
 
             // remove other sheets
             order.forEach((sheetId: string) => {
-                workbook.removeSheetBySheetId(sheetId);
+                // workbook.removeSheetBySheetId(sheetId);
+                // workbook.removeSheetBySheetId(sheetId);
+                this._basicWorkbookController.removeSheet(sheetId, workbookId);
             });
         });
     }

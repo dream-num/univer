@@ -9,4 +9,6 @@ export * from './SheetContainerController';
 export * from './ToolbarController';
 export * from './EditTooltipsController';
 export * from './HideColumnController';
+export * from './BasicWorksheet.controller';
+export * from './BasicWorkbook.controller';
 // @endindex

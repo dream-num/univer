@@ -14,6 +14,8 @@ import {
     RemoveSheetAction,
     ICurrentUniverService,
     ObserverManager,
+    Disposable,
+    ICommandService,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { SheetBar } from '../View/SheetBar';
@@ -32,7 +34,9 @@ export interface SheetUlProps extends BaseUlProps {
     sheetId: string;
 }
 
-export class SheetBarUIController {
+const mutationList = ['sheet.mutation.insert-sheet', 'sheet.mutation.remove-sheet'];
+
+export class SheetBarUIController extends Disposable {
     protected _sheetBar: SheetBar;
 
     protected _sheetUl: SheetUl[];
@@ -49,8 +53,10 @@ export class SheetBarUIController {
     constructor(
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
+        super();
         const that = this;
 
         this._sheetUl = [
@@ -112,6 +118,18 @@ export class SheetBarUIController {
         ];
 
         this._componentManager.register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((params) => {
+                const { id } = params;
+                if (mutationList.includes(id)) {
+                    // update data;
+                    this._refreshSheetData();
+                    // set ui bar sheetList;
+                    this._refreshSheetBarUI();
+                }
+            })
+        );
 
         CommandManager.getActionObservers().add((event) => {
             const action = event.action as SheetActionBase<any>;
@@ -221,8 +239,8 @@ export class SheetBarUIController {
     }
 
     dragEnd = (element: HTMLDivElement[]): void => {
-        let list: SheetUlProps[] = [];
-        let sheetId = this._dataId;
+        const list: SheetUlProps[] = [];
+        const sheetId = this._dataId;
         Array.from(element).forEach((node: any) => {
             const item = this._sheetList.find((ele) => ele.sheetId === node.dataset.id);
             if (item) {

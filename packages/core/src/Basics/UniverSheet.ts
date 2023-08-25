@@ -25,7 +25,7 @@ export class UniverSheet implements Disposable {
 
         this._sheetInjector = this._initializeDependencies(parentInjector);
         this.setObserver();
-        this._workbook = this._sheetInjector.createInstance(Workbook, univerSheetData,this._sheetInjector);
+        this._workbook = this._sheetInjector.createInstance(Workbook, univerSheetData);
     }
 
     static newInstance(univerSheetData: Partial<IWorkbookConfig> = {}): UniverSheet {

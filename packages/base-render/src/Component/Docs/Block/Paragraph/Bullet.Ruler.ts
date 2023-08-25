@@ -1,10 +1,10 @@
-import { ContextBase, GlyphType, numberToListABC } from '@univerjs/core';
-import { dealWidthCustomBulletOrderedSymbol } from '../../../../Custom/UseCustom';
+import { GlyphType, numberToListABC } from '@univerjs/core';
+// import { dealWidthCustomBulletOrderedSymbol } from '../../../../Custom/UseCustom';
 
-export function getBulletOrderedSymbol(startIndex: number, startNumber: number, glyphType: GlyphType | string, context?: ContextBase) {
-    if (!(glyphType in GlyphType)) {
-        return dealWidthCustomBulletOrderedSymbol(startIndex, startNumber, glyphType as string, context); // 插件定义更多类型的bullet
-    }
+export function getBulletOrderedSymbol(startIndex: number, startNumber: number, glyphType: GlyphType | string) {
+    // if (!(glyphType in GlyphType)) {
+    //     return dealWidthCustomBulletOrderedSymbol(startIndex, startNumber, glyphType as string); // 插件定义更多类型的bullet
+    // }
 
     return generateOrderedSymbol(startIndex, startNumber, glyphType as GlyphType);
 }

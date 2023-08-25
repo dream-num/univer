@@ -1,5 +1,5 @@
+import { Inject } from '@wendellhu/redi';
 import { Class } from '../Shared/Types';
-import { ContextBase } from '../Basics/ContextBase';
 import { ActionBase, IActionData } from './ActionBase';
 import { CommandObservers } from './CommandObservers';
 import { ActionObservers } from './ActionObservers';
@@ -7,7 +7,6 @@ import { CommandInjectorObservers } from './CommandInjectorObservers';
 import { UndoManager } from './UndoManager';
 import { ActionExtensionManager } from './ActionExtensionManager';
 import { Command } from './Command';
-import { Inject } from '@wendellhu/redi';
 
 /**
  * Manage command

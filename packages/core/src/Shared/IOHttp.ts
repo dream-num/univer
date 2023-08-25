@@ -31,11 +31,7 @@ function objectToUrlSearch(object: IKeyValue) {
     if (unDef(object)) return '';
     let str = '';
     for (const key in object) {
-        if (
-            object.hasOwnProperty(key) &&
-            object[key] !== undefined &&
-            object[key] !== null
-        ) {
+        if (object.hasOwnProperty(key) && object[key] !== undefined && object[key] !== null) {
             str += `${key}=${object[key]}&`;
         }
     }
@@ -74,9 +70,7 @@ function isString(value?: any): value is string {
 }
 
 function ispPlain(value: any): value is {} {
-    return value
-        ? Object.getPrototypeOf(value) === Object.getPrototypeOf({})
-        : false;
+    return value ? Object.getPrototypeOf(value) === Object.getPrototypeOf({}) : false;
 }
 
 function isArray(value: any): value is [] {
@@ -205,13 +199,7 @@ export function IOHttp<T = void>(config: IOHttpConfig): Promise<T> {
         request.addEventListener('timeout', (event) => {
             setting.error(event);
         });
-        request.open(
-            setting.type,
-            setting.url,
-            setting.async,
-            setting.username,
-            setting.password
-        );
+        request.open(setting.type, setting.url, setting.async, setting.username, setting.password);
 
         Object.keys(setting.header).forEach((key) => {
             const value = setting.header[key];
@@ -260,11 +248,7 @@ export function IOHttp<T = void>(config: IOHttpConfig): Promise<T> {
  * @param data The data to be sent as the request body
  * @param success Successful callback
  */
-export function Post<T = void>(
-    url: string,
-    data: object = {},
-    success: Function = noop
-): Promise<T> {
+export function Post<T = void>(url: string, data: object = {}, success: Function = noop): Promise<T> {
     return IOHttp({ url, type: IOHttpRequestType.POST, data, success });
 }
 
@@ -275,11 +259,7 @@ export function Post<T = void>(
  * @param data  The data to be sent as the request body
  * @param success Successful callback
  */
-export function Get<T = void>(
-    url: string,
-    data: object = {},
-    success: Function = noop
-): Promise<T> {
+export function Get<T = void>(url: string, data: object = {}, success: Function = noop): Promise<T> {
     url += objectToUrlSearch(data);
     return IOHttp({ url, type: IOHttpRequestType.GET, success });
 }

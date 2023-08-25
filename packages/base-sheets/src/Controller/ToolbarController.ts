@@ -1,4 +1,16 @@
-import { BorderType, HorizontalAlign, UIObserver, VerticalAlign, WrapStrategy, ObserverManager, ICurrentUniverService, CommandManager } from '@univerjs/core';
+import {
+    BorderType,
+    HorizontalAlign,
+    UIObserver,
+    VerticalAlign,
+    WrapStrategy,
+    ObserverManager,
+    ICurrentUniverService,
+    CommandManager,
+    ICommandService,
+    UndoCommand,
+    RedoCommand,
+} from '@univerjs/core';
 import { Inject, SkipSelf } from '@wendellhu/redi';
 
 import { SelectionController } from './Selection/SelectionController';
@@ -18,6 +30,7 @@ export class ToolbarController {
     constructor(
         @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
+        @ICommandService private readonly _commandService: ICommandService,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @ISelectionManager private readonly _selectionManager: SelectionManager,
         @Inject(CellEditorController) private readonly _cellEditorController: CellEditorController
@@ -127,11 +140,11 @@ export class ToolbarController {
     }
 
     setRedo() {
-        this._commandManager.redo();
+        this._commandService.executeCommand(RedoCommand.id);
     }
 
     setUndo() {
-        this._commandManager.undo();
+        this._commandService.executeCommand(UndoCommand.id);
     }
 
     setFontColor(value: string) {

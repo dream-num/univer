@@ -1557,7 +1557,7 @@ export class Worksheet {
     }
 
     /**
-     * Unhides the row in the given range.
+     * Unhide the row in the given range.
      * @param row row range
      * @return WorkSheet Instance
      */

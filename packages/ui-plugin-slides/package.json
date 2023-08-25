@@ -60,6 +60,6 @@
         "@univerjs/core": "workspace:^0.0.1",
         "css-vars-ponyfill": "^2.4.6",
         "preact": "^10.12.1",
-        "@wendellhu/redi": "^0.12.2"
+        "@wendellhu/redi": "^0.12.6"
     }
 }

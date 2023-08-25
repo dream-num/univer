@@ -12,6 +12,7 @@ import { ObserverManager } from '../Observer';
 import { CurrentUniverService, ICurrentUniverService } from '../Service/Current.service';
 import { UniverSlide } from './UniverSlide';
 import { CommandService, ICommandService } from '../Service/Command/Command.service';
+import { IUndoRedoService, LocalUndoRedoService } from '../Service/UndoRedo/undoRedo.service';
 
 /**
  * Univer.
@@ -138,6 +139,7 @@ export class Univer {
             [LocaleService],
             [UndoManager],
             [ICommandService, { useClass: CommandService }],
+            [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],
         ]);
     }
 

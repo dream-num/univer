@@ -46,7 +46,7 @@ export const SetRangeValuesUndoMutationFactory = (accessor: IAccessor, params: I
     return {
         ...Tools.deepClone(params),
         options: {},
-        cellValue: undoData,
+        cellValue: undoData.getData(),
     } as ISetRangeValuesMutationParams;
 };
 
@@ -105,36 +105,6 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                 cellMatrix.setValue(row, col, oldVal);
             }
         });
-
-        return true;
-    },
-};
-
-// FIXME: this is actually ClearRangeValue mutation and it could be removed
-export const _SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, boolean> = {
-    id: 'sheet.set-range-values-action',
-    type: CommandType.MUTATION,
-    handler: async (accessor: IAccessor, params: ISetRangeValuesMutationParams) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(params.worksheetId);
-        const cellMatrix = worksheet?.getCellMatrix();
-        const { startRow, endRow, startColumn, endColumn } = params.rangeData;
-
-        for (let r = startRow; r <= endRow; r++) {
-            for (let c = startColumn; c <= endColumn; c++) {
-                const value = cellMatrix?.getValue(r, c);
-                if (value) {
-                    if (params.options?.formatOnly) {
-                        delete value.s;
-                    }
-                    if (params.options?.contentsOnly) {
-                        value.v = '';
-                        value.m = '';
-                    }
-                    cellMatrix?.setValue(r, c, Tools.deepClone(value as ICellData));
-                }
-            }
-        }
 
         return true;
     },

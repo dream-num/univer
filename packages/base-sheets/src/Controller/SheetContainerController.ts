@@ -4,7 +4,6 @@ import { Inject } from '@wendellhu/redi';
 import { ISelectionManager } from '../Services/tokens';
 import { SelectionManager } from './Selection';
 import { CanvasView } from '../View';
-// All skins' less file
 
 export class SheetContainerController extends Disposable {
     constructor(

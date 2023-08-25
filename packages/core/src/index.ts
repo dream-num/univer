@@ -33,4 +33,4 @@ export * from './Slides/Domain';
 export { ICurrentUniverService } from './Service/Current.service';
 export { LocaleService } from './Service/Locale.service';
 export { ICommandService, ICommand, CommandType, IMutation } from './Service/Command/Command.service';
-export { IUndoRedoService, LocalUndoRedoService } from './Service/UndoRedo/undoRedo.service';
+export { IUndoRedoService, LocalUndoRedoService, UndoCommand, RedoCommand } from './Service/UndoRedo/undoRedo.service';

@@ -15,9 +15,9 @@ export interface ICommand<P extends object = object, R = boolean> {
     /**
      * ${businessName}.${type}.${name}
      */
-    id: string;
+    readonly id: string;
 
-    type: CommandType;
+    readonly type: CommandType;
 
     handler(accessor: IAccessor, params: P): Promise<R>;
 }
@@ -125,7 +125,7 @@ export class CommandService implements ICommandService {
 
     private readonly _commandExecutedListeners: CommandListener[] = [];
 
-    constructor(@SkipSelf() @Optional(CommandService) private readonly _parentCommandService: CommandService, @Inject(Injector) private readonly _injector: Injector) {
+    constructor(@SkipSelf() @Optional(ICommandService) private readonly _parentCommandService: CommandService, @Inject(Injector) private readonly _injector: Injector) {
         this._commandRegistry = new CommandRegistry();
     }
 

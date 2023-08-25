@@ -67,7 +67,7 @@
     "dependencies": {
         "@univerjs/base-render": "workspace:^0.0.1",
         "@univerjs/core": "workspace:^0.0.1",
-        "@wendellhu/redi": "^0.12.2",
+        "@wendellhu/redi": "^0.12.6",
         "preact": "^10.12.1",
         "react-colorful": "^5.3.0"
     }

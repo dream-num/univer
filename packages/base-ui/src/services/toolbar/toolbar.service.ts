@@ -6,6 +6,4 @@ export interface IToolbarService {}
 
 export const IToolbarService = createIdentifier<IToolbarService>('univer.toolbar-service');
 
-export class DesktopToolbarService implements IToolbarService {
-
-}
+export class DesktopToolbarService implements IToolbarService {}

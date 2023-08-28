@@ -36,18 +36,7 @@ export const RemoveSheetMutation: IMutation<IRemoveSheetMutationParams, boolean>
             return false;
         }
 
-        const iSheets = workbook.getWorksheets();
-        const config = workbook.getConfig();
-
-        const { sheets } = config;
-        if (sheets[sheetId] == null) {
-            throw new Error(`Remove Sheet fail ${sheetId} is not exist`);
-        }
-        const findIndex = config.sheetOrder.findIndex((id) => id === sheetId);
-        delete sheets[sheetId];
-
-        config.sheetOrder.splice(findIndex, 1);
-        iSheets.delete(sheetId);
+        workbook.removeSheetBySheetId(sheetId);
 
         return true;
     },

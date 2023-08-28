@@ -18,10 +18,11 @@ import {
     ICommandService,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
+import { InsertSheetMutation, RemoveSheetMutation } from '@univerjs/base-sheets';
 import { SheetBar } from '../View/SheetBar';
 import styles from '../View/SheetBar/index.module.less';
 import { SheetBarMenuItem } from '../View/SheetBar/SheetBarMenu';
-import { SHEET_UI_PLUGIN_NAME } from '../Basics';
+import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const';
 
 interface SheetUl extends BaseMenuItem {
     label?: CustomComponent | string;
@@ -33,8 +34,6 @@ export interface SheetUlProps extends BaseUlProps {
     color?: Nullable<string>;
     sheetId: string;
 }
-
-const mutationList = ['sheet.mutation.insert-sheet', 'sheet.mutation.remove-sheet'];
 
 export class SheetBarUIController extends Disposable {
     protected _sheetBar: SheetBar;
@@ -122,11 +121,18 @@ export class SheetBarUIController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((params) => {
                 const { id } = params;
-                if (mutationList.includes(id)) {
-                    // update data;
-                    this._refreshSheetData();
-                    // set ui bar sheetList;
-                    this._refreshSheetBarUI();
+                switch (id) {
+                    case InsertSheetMutation.id:
+                    case RemoveSheetMutation.id:
+                        // update data;
+                        this._refreshSheetData();
+                        // set ui bar sheetList;
+                        this._refreshSheetBarUI();
+
+                        break;
+
+                    default:
+                        break;
                 }
             })
         );

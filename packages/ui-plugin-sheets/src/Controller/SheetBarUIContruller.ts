@@ -15,7 +15,7 @@ import {
     ICurrentUniverService,
     ObserverManager,
 } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Inject, SkipSelf } from '@wendellhu/redi';
 import { SheetBar } from '../View/SheetBar';
 import styles from '../View/SheetBar/index.module.less';
 import { SheetBarMenuItem } from '../View/SheetBar/SheetBarMenu';
@@ -49,10 +49,9 @@ export class SheetBarUIController {
     constructor(
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
+        @SkipSelf() @Inject(ObserverManager) private readonly _observerManager: ObserverManager
     ) {
         const that = this;
-
         this._sheetUl = [
             {
                 label: 'sheetConfig.delete',

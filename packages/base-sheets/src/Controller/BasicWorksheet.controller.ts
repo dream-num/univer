@@ -3,6 +3,8 @@ import { Disposable, ICommandService } from '@univerjs/core';
 
 import { ClearSelectionContentCommand } from '../Commands/Commands/clear-selection-content.command';
 import { SetRangeValuesMutation } from '../Commands/Mutations/set-range-values.mutation';
+import { SetWorksheetNameCommand } from '../Commands/Commands/set-worksheet-name.command';
+import { SetWorksheetNameMutation } from '../Commands/Mutations/set-worksheet-name.mutation';
 
 /**
  * The controller to provide the most basic sheet CRUD methods to other modules of sheet modules.
@@ -13,6 +15,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
 
         this.disposeWithMe(_commandService.registerCommand(ClearSelectionContentCommand));
         this.disposeWithMe(_commandService.registerCommand(SetRangeValuesMutation));
+        this.disposeWithMe(_commandService.registerCommand(SetWorksheetNameCommand));
+        this.disposeWithMe(_commandService.registerCommand(SetWorksheetNameMutation));
     }
 
     onInitialize() {}
@@ -24,5 +28,14 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
      */
     async clearSelectionContent(): Promise<boolean> {
         return this._commandService.executeCommand(ClearSelectionContentCommand.id);
+    }
+
+    /**
+     * Sets Worksheet name
+     * @param name
+     * @returns boolean
+     */
+    async setWorkbookName(name: string): Promise<boolean> {
+        return this._commandService.executeCommand(SetWorksheetNameCommand.id, { name });
     }
 }

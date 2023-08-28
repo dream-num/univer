@@ -224,6 +224,8 @@ export const SetFontFamilyCommand: ICommand<ISetFontFamilyCommandParams> = {
 
         return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
     },
+    // all subsequent mutations should succeed inorder to make the whole process succeed
+    // Promise.all([]).then(() => true),
 };
 
 export interface ISetFontSizeCommandParams {

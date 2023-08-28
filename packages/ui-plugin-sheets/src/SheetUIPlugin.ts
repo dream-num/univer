@@ -14,6 +14,8 @@ import {
     SharedController,
     IPlatformService,
     DesktopPlatformService,
+    IMenuService,
+    DesktopMenuService,
 } from '@univerjs/base-ui';
 import { IRenderingEngine } from '@univerjs/base-render';
 import { DefaultSheetUIConfig, installObserver, ISheetUIPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';
@@ -172,6 +174,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
             [IShortcutService, { useClass: DesktopShortcutService }],
             [IPlatformService, { useClass: DesktopPlatformService }],
             [SharedController],
+            [IMenuService, { useClass: DesktopMenuService }],
         ];
         dependencies.forEach((d) => this._injector.add(d));
 

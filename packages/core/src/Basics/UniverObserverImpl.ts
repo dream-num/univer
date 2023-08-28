@@ -5,16 +5,8 @@ export class UniverObserverImpl {
         // Event = > UIChange
         manager.addObserver('onUIChangeObservable', 'core', new Observable());
         manager.addObserver('onUIDidMountObservable', 'core', new Observable());
-        manager.addObserver(
-            'onAfterChangeUISkinObservable',
-            'core',
-            new Observable()
-        );
-        manager.addObserver(
-            'onAfterChangeUILocaleObservable',
-            'core',
-            new Observable()
-        );
+        manager.addObserver('onAfterChangeUISkinObservable', 'core', new Observable());
+        manager.addObserver('onAfterChangeUILocaleObservable', 'core', new Observable());
         manager.addObserver('onViewComponentFocusChange', 'core', new Observable());
 
         // SheetBar

@@ -93,12 +93,6 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
 
     private deriveBindingFromEvent(e: KeyboardEvent): number | null {
         const { shiftKey, metaKey, altKey, keyCode } = e;
-        const macCtrl = e.ctrlKey;
-        let { ctrlKey } = e;
-
-        if (this._platformService.isMac) {
-            ctrlKey = metaKey;
-        }
 
         let binding = keyCode;
 
@@ -106,16 +100,17 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
             binding |= MetaKeys.SHIFT;
         }
 
+        if (altKey) {
+            binding |= MetaKeys.ALT;
+        }
+
+        const ctrlKey = this._platformService.isMac ? metaKey : e.ctrlKey;
         if (ctrlKey) {
             binding |= MetaKeys.CTRL_COMMAND;
         }
 
-        if (this._platformService.isMac && macCtrl) {
+        if (this._platformService.isMac && e.ctrlKey) {
             binding |= MetaKeys.MAC_CTRL;
-        }
-
-        if (altKey) {
-            binding |= MetaKeys.ALT;
         }
 
         return binding;

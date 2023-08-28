@@ -165,7 +165,7 @@ export class CommandService implements ICommandService {
             return [];
         }
 
-        // TODO: @wzhudev: it may be better to wrapp all undo & redos.
+        // TODO: @wzhudev: it may be better to wrap all undo & redos.
         return Array.from(this._commandWillExecuteRegistry.get(id)!)
             .map((interceptor) => interceptor(params))
             .flat();

@@ -13,14 +13,14 @@ export const IPlatformService = createIdentifier<IPlatformService>('univer.platf
 
 export class DesktopPlatformService implements IPlatformService {
     get isMac(): boolean {
-        return true;
+        return /Mac/.test(navigator.appVersion);
     }
 
     get isWindows(): boolean {
-        return false;
+        return /Windows/.test(navigator.appVersion);
     }
 
     get isLinux(): boolean {
-        return false;
+        return /Linux/.test(navigator.appVersion);
     }
 }

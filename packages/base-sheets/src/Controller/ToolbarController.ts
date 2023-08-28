@@ -18,12 +18,16 @@ import { SelectionModel } from '../Model';
 import { ISelectionManager } from '../Services/tokens';
 import { CellEditorController } from './CellEditorController';
 import { SelectionManager } from './Selection';
-import { BasicWorksheetController } from './BasicWorksheet.controller';
+import { BasicWorksheetController, IStyleTypeValue } from './BasicWorksheet.controller';
 
 export interface BorderInfo {
     type: BorderType;
     color: string;
     style: number;
+}
+
+interface backgroundStyleValue {
+    rgb: string;
 }
 
 export class ToolbarController {
@@ -154,7 +158,15 @@ export class ToolbarController {
     private setBackground(value: string) {
         const range = this._selectionManager.getActiveRangeData();
         if (!range) return;
-        this._basicWorksheetController.setBackground(value, range);
+        const workbookId = this._currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const style: IStyleTypeValue<backgroundStyleValue> = {
+            type: 'bg',
+            value: {
+                rgb: value,
+            },
+        };
+        this._basicWorksheetController.setStyle(workbookId, worksheetId, style, [range]);
     }
 
     private setFontSize(value: number) {

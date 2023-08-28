@@ -17,8 +17,9 @@ import {
 import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetRangeStyleMutationParams {
+    workbookId: string;
     worksheetId: string;
-    rangeData: IRangeData;
+    range: IRangeData[];
     value: ObjectMatrixPrimitiveType<IStyleData>;
 }
 
@@ -34,17 +35,20 @@ export const SetRangeStyleUndoMutationFactory = (accessor: IAccessor, params: IS
     const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
     const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(params.worksheetId);
     const cellMatrix = worksheet?.getCellMatrix();
-    const { startRow, endRow, startColumn, endColumn } = params.rangeData;
     const styles = workbook.getStyles();
 
     const undoData = new ObjectMatrix<IStyleData>();
-    for (let r = startRow; r <= endRow; r++) {
-        for (let c = startColumn; c <= endColumn; c++) {
-            const cell = cellMatrix?.getValue(r, c) || {};
-            const old = styles.getStyleByCell(cell);
-            undoData.setValue(r - startRow, c - startColumn, transformStyle(old, params.value[r - startRow][c - startColumn] as Nullable<IStyleData>));
+    for (let i = 0; i < params.range.length; i++) {
+        const { startRow, endRow, startColumn, endColumn } = params.range[i];
+        for (let r = startRow; r <= endRow; r++) {
+            for (let c = startColumn; c <= endColumn; c++) {
+                const cell = cellMatrix?.getValue(r, c) || {};
+                const old = styles.getStyleByCell(cell);
+                undoData.setValue(r - startRow, c - startColumn, transformStyle(old, params.value[r - startRow][c - startColumn] as Nullable<IStyleData>));
+            }
         }
     }
+
     return {
         ...Tools.deepClone(params),
         value: undoData.getData(),
@@ -56,47 +60,50 @@ export const SetRangeStyleMutation: IMutation<ISetRangeStyleMutationParams, bool
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId)?.getWorkBook();
+        if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId);
-        if (!worksheet) {
-            return false;
-        }
+        if (!worksheet) return false;
 
         const cellMatrix = worksheet.getCellMatrix();
-        const { startRow, endRow, startColumn, endColumn } = params.rangeData;
         const styles = workbook.getStyles();
-        for (let r = startRow; r <= endRow; r++) {
-            for (let c = startColumn; c <= endColumn; c++) {
-                const cell = cellMatrix.getValue(r, c) || {};
-                // use null to clear style
-                const old = styles.getStyleByCell(cell);
 
-                if (old == null) {
-                    // clear
-                    delete cell.s;
+        for (let i = 0; i < params.range.length; i++) {
+            const { startRow, endRow, startColumn, endColumn } = params.range[i];
+            for (let r = startRow; r <= endRow; r++) {
+                for (let c = startColumn; c <= endColumn; c++) {
+                    const cell = cellMatrix.getValue(r, c) || {};
+                    // use null to clear style
+                    const old = styles.getStyleByCell(cell);
+
+                    if (old == null) {
+                        // clear
+                        delete cell.s;
+                    }
+
+                    // set style
+                    const merge = mergeStyle(old, params.value[r - startRow][c - startColumn] as Nullable<IStyleData>);
+
+                    // then remove null
+                    merge && Tools.removeNull(merge);
+
+                    if (Tools.isEmptyObject(merge)) {
+                        delete cell.s;
+                    } else {
+                        cell.s = styles.setValue(merge);
+                    }
+
+                    // When the rich text sets the cell style, you need to modify the style of all rich text
+                    // TODO redo/undo use setRangeData to undo rich text setting
+                    if (cell.p) {
+                        mergeRichTextStyle(cell.p, params.value[r - startRow][c - startColumn] as Nullable<IStyleData>);
+                    }
+
+                    cellMatrix.setValue(r, c, cell);
                 }
-
-                // set style
-                const merge = mergeStyle(old, params.value[r - startRow][c - startColumn] as Nullable<IStyleData>);
-
-                // then remove null
-                merge && Tools.removeNull(merge);
-
-                if (Tools.isEmptyObject(merge)) {
-                    delete cell.s;
-                } else {
-                    cell.s = styles.setValue(merge);
-                }
-
-                // When the rich text sets the cell style, you need to modify the style of all rich text
-                // TODO redo/undo use setRangeData to undo rich text setting
-                if (cell.p) {
-                    mergeRichTextStyle(cell.p, params.value[r - startRow][c - startColumn] as Nullable<IStyleData>);
-                }
-
-                cellMatrix.setValue(r, c, cell);
             }
         }
+
         return true;
     },
 };

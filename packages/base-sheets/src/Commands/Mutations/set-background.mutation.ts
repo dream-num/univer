@@ -1,7 +1,9 @@
 import {
     CommandType,
     IMutation,
+    IRangeData,
     IStyleData,
+    ObjectMatrixPrimitiveType,
     ICurrentUniverService,
     ObjectMatrix,
     Tools,
@@ -10,14 +12,13 @@ import {
     IKeyValue,
     IDocumentData,
     ITextStyle,
-    IRangeData,
-    ObjectMatrixPrimitiveType,
 } from '@univerjs/core';
 
 import { IAccessor } from '@wendellhu/redi';
 
-export interface ISetRangeStyleMutationParams {
+export interface ISetBackgroundMutationParams {
     worksheetId: string;
+    workbookId: string;
     rangeData: IRangeData;
     value: ObjectMatrixPrimitiveType<IStyleData>;
 }
@@ -26,10 +27,10 @@ export interface ISetRangeStyleMutationParams {
  * Generate undo mutation of a `SetRangeValuesMutation`
  *
  * @param {IAccessor} accessor - injector accessor
- * @param {ISetRangeStyleMutationParams} params - do mutation params
- * @returns {ISetRangeStyleMutationParams} undo mutation params
+ * @param {ISetBackgroundMutationParams} params - do mutation params
+ * @returns {ISetBackgroundMutationParams} undo mutation params
  */
-export const SetRangeStyleUndoMutationFactory = (accessor: IAccessor, params: ISetRangeStyleMutationParams): ISetRangeStyleMutationParams => {
+export const SetBackgroundUndoMutationFactory = (accessor: IAccessor, params: ISetBackgroundMutationParams): ISetBackgroundMutationParams => {
     const currentUniverService = accessor.get(ICurrentUniverService);
     const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
     const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(params.worksheetId);
@@ -41,18 +42,21 @@ export const SetRangeStyleUndoMutationFactory = (accessor: IAccessor, params: IS
     for (let r = startRow; r <= endRow; r++) {
         for (let c = startColumn; c <= endColumn; c++) {
             const cell = cellMatrix?.getValue(r, c) || {};
+            // use null to clear style
             const old = styles.getStyleByCell(cell);
             undoData.setValue(r - startRow, c - startColumn, transformStyle(old, params.value[r - startRow][c - startColumn] as Nullable<IStyleData>));
         }
+
+        // result.push(rowResult);
     }
     return {
         ...Tools.deepClone(params),
         value: undoData.getData(),
-    } as ISetRangeStyleMutationParams;
+    } as ISetBackgroundMutationParams;
 };
 
-export const SetRangeStyleMutation: IMutation<ISetRangeStyleMutationParams, boolean> = {
-    id: 'sheet.mutation.set-range-style',
+export const SetBackgroundMutation: IMutation<ISetBackgroundMutationParams, boolean> = {
+    id: 'sheet.mutation.set-background',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
         const currentUniverService = accessor.get(ICurrentUniverService);

@@ -128,7 +128,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         );
     };
 
-    componentDidUpdate() {
+    override componentDidUpdate() {
         if (this.slideTabBar) {
             this.slideTabBar.destroy();
         }
@@ -147,7 +147,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         });
     }
 
-    componentDidMount() {
+    override componentDidMount() {
         this.props.getComponent?.(this);
     }
 

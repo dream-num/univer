@@ -1,12 +1,14 @@
-import { UIObserver, ObserverManager, LocaleService, ICurrentUniverService, GenName } from '@univerjs/core';
+import { UIObserver, ObserverManager, LocaleService, ICurrentUniverService, GenName, ICommandService } from '@univerjs/core';
 import { Inject, SkipSelf } from '@wendellhu/redi';
+import { SetWorksheetNameCommand } from '../Commands/Commands/set-worksheet-name.command';
 
 export class SheetBarController {
     constructor(
         @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(GenName) private _genName: GenName
+        @Inject(GenName) private _genName: GenName,
+        @ICommandService private readonly _commandService: ICommandService
     ) {}
 
     listenEventManager(): void {
@@ -31,10 +33,10 @@ export class SheetBarController {
                 }
                 case 'renameSheet': {
                     const { sheetId, sheetName } = value as { sheetId: string; sheetName: string };
-                    const worksheet = workbook.getSheetBySheetId(sheetId);
-                    if (worksheet && sheetName !== worksheet.getName()) {
-                        worksheet.setName(sheetName);
-                    }
+                    this._commandService.executeCommand(SetWorksheetNameCommand.id, {
+                        name: sheetName,
+                        worksheetId: sheetId,
+                    });
                     break;
                 }
                 case 'addSheet': {

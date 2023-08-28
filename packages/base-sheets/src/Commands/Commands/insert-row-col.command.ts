@@ -15,17 +15,14 @@ export const InsertRowCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-row',
 
-    handler: async (accessor: IAccessor, params: InsertRowCommandParams) => {
+    handler: async (accessor: IAccessor, params: InsertRowCommandParams) =>
         // all subsequent mutations should succeed inorder to make the whole process succeed
-        return Promise.all([]).then(() => true);
-    },
+        Promise.all([]).then(() => true),
 };
 
 export const InsertColCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-col',
 
-    handler: async (accessor, params) => {
-        return true;
-    },
+    handler: async (accessor, params) => true,
 };

@@ -17,8 +17,8 @@ import {
     Disposable,
     ICommandService,
 } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
 import { InsertSheetMutation, RemoveSheetMutation } from '@univerjs/base-sheets';
+import { Inject, SkipSelf } from '@wendellhu/redi';
 import { SheetBar } from '../View/SheetBar';
 import styles from '../View/SheetBar/index.module.less';
 import { SheetBarMenuItem } from '../View/SheetBar/SheetBarMenu';
@@ -52,12 +52,11 @@ export class SheetBarUIController extends Disposable {
     constructor(
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
+        @SkipSelf() @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
         const that = this;
-
         this._sheetUl = [
             {
                 label: 'sheetConfig.delete',

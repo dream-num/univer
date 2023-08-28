@@ -34,6 +34,7 @@ export class SheetBarController {
                 case 'renameSheet': {
                     const { sheetId, sheetName } = value as { sheetId: string; sheetName: string };
                     this._commandService.executeCommand(SetWorksheetNameCommand.id, {
+                        workbookId: workbook.getUnitId(),
                         name: sheetName,
                         worksheetId: sheetId,
                     });

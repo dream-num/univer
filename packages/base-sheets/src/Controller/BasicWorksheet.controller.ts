@@ -5,6 +5,8 @@ import { ClearSelectionContentCommand } from '../Commands/Commands/clear-selecti
 import { SetRangeValuesMutation } from '../Commands/Mutations/set-range-values.mutation';
 import { SetWorksheetNameCommand } from '../Commands/Commands/set-worksheet-name.command';
 import { SetWorksheetNameMutation } from '../Commands/Mutations/set-worksheet-name.mutation';
+import { SetWorksheetActivateCommand } from '../Commands/Commands/set-worksheet-activate.command';
+import { SetWorksheetActivateMutation } from '../Commands/Mutations/set-worksheet-activate.mutation';
 
 /**
  * The controller to provide the most basic sheet CRUD methods to other modules of sheet modules.
@@ -17,6 +19,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
         this.disposeWithMe(_commandService.registerCommand(SetRangeValuesMutation));
         this.disposeWithMe(_commandService.registerCommand(SetWorksheetNameCommand));
         this.disposeWithMe(_commandService.registerCommand(SetWorksheetNameMutation));
+        this.disposeWithMe(_commandService.registerCommand(SetWorksheetActivateCommand));
+        this.disposeWithMe(_commandService.registerCommand(SetWorksheetActivateMutation));
     }
 
     onInitialize() {}

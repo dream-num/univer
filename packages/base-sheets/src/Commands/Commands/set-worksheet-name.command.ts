@@ -22,6 +22,7 @@ export const SetWorksheetNameCommand: ICommand = {
         const setWorksheetNameMutationParams: ISetWorksheetNameMutationParams = {
             worksheetId: params.worksheetId,
             name: params.name,
+            workbookId: params.workbookId,
         };
         const undoClearMutationParams: ISetWorksheetNameMutationParams = SetWorksheetNameMutationFactory(accessor, setWorksheetNameMutationParams);
         const result = commandService.executeCommand(SetWorksheetNameMutation.id, setWorksheetNameMutationParams);

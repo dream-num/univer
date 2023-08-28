@@ -1,27 +1,27 @@
-import { CommandType, ICurrentUniverService, IMutation } from '@univerjs/core';
+import { BooleanNumber, CommandType, ICurrentUniverService, IMutation } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-export interface ISetWorksheetNameMutationParams {
-    name: string;
+export interface ISetWorksheetHiddenMutationParams {
+    hidden: BooleanNumber;
     workbookId: string;
     worksheetId: string;
 }
 
-export const SetWorksheetNameMutationFactory = (accessor: IAccessor, params: ISetWorksheetNameMutationParams): ISetWorksheetNameMutationParams => {
+export const SetWorksheetHiddenMutationFactory = (accessor: IAccessor, params: ISetWorksheetHiddenMutationParams): ISetWorksheetHiddenMutationParams => {
     const universheet = accessor.get(ICurrentUniverService).getCurrentUniverSheetInstance();
     const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
     if (worksheet == null) {
         throw new Error('worksheet is null error!');
     }
     return {
+        hidden: worksheet.isSheetHidden(),
         workbookId: params.workbookId,
-        name: worksheet.getName(),
         worksheetId: worksheet.getSheetId(),
     };
 };
 
-export const SetWorksheetNameMutation: IMutation<ISetWorksheetNameMutationParams> = {
-    id: 'sheet.mutation.set-worksheet-name',
+export const SetWorksheetHiddenMutation: IMutation<ISetWorksheetHiddenMutationParams> = {
+    id: 'sheet.mutation.set-worksheet-hidden',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
         const universheet = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId);
@@ -36,7 +36,7 @@ export const SetWorksheetNameMutation: IMutation<ISetWorksheetNameMutationParams
             return false;
         }
 
-        worksheet.setName(params.name);
+        worksheet.getConfig().hidden = params.hidden;
         return true;
     },
 };

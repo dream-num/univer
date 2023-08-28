@@ -18,9 +18,6 @@ export class WorkBookObserverImpl {
         manager.addObserver('onBeforeInsertSheetObservable', 'core', new Observable());
         manager.addObserver('onAfterInsertSheetObservable', 'core', new Observable());
 
-        manager.addObserver('onBeforeRemoveSheetObservable', 'core', new Observable());
-        manager.addObserver('onAfterRemoveSheetObservable', 'core', new Observable());
-
         manager.addObserver('onBeforeChangeSheetColorObservable', 'core', new Observable());
         manager.addObserver('onAfterChangeSheetColorObservable', 'core', new Observable());
 

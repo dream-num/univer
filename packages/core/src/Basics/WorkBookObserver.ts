@@ -32,7 +32,4 @@ export type WorkBookObserver = {
 
     onBeforeChangeSheetNameObservable: Observable<void>;
     onAfterChangeSheetNameObservable: Observable<{ name: string; sheet: Worksheet }>;
-
-    onBeforeRemoveSheetObservable: Observable<{ index: number }>;
-    onAfterRemoveSheetObservable: Observable<{ index: number; sheetId: string }>;
 };

@@ -43,4 +43,6 @@ export class BasicWorkbookController extends Disposable implements IDisposable {
         };
         return this._commandService.executeCommand(RemoveSheetCommand.id, options);
     }
+
+    // TODO@Dushusir setDefaultActiveSheet(use worksheet set status)  activateSheetByIndex(use worksheet activate)
 }

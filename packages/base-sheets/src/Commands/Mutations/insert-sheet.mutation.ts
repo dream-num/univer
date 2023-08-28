@@ -1,4 +1,4 @@
-import { IMutation, CommandType, ICurrentUniverService, Worksheet, CommandManager, ObserverManager } from '@univerjs/core';
+import { IMutation, CommandType, ICurrentUniverService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Basics/Interfaces/MutationInterface';
 
@@ -26,17 +26,8 @@ export const InsertSheetMutation: IMutation<IInsertSheetMutationParams, boolean>
             return false;
         }
 
-        const iSheets = workbook.getWorksheets();
-        const config = workbook.getConfig();
-        const { sheets, sheetOrder } = config;
-        if (sheets[sheet.id]) {
-            throw new Error(`Insert Sheet fail ${sheet.id} is already exist`);
-        }
-        sheets[sheet.id] = sheet;
-        sheetOrder.splice(index, 0, sheet.id);
-        const commandManager = accessor.get(CommandManager);
-        const observerManager = accessor.get(ObserverManager);
-        iSheets.set(sheet.id, new Worksheet(sheet, commandManager, observerManager, currentUniverService));
+        workbook.insertSheetByIndexSheet(index, sheet);
+        // TODO activate next sheet
 
         return true;
     },

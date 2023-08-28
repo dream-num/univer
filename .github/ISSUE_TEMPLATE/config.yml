@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Github Discussions
+    url: https://github.com/dream-num/univer/discussions
+    about: Use github issues for bug reports and feature requests. For questions please use discussions.

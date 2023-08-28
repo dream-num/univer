@@ -13,7 +13,7 @@ export class RightMenuController {
         @ISelectionManager private readonly _selectionManager: SelectionManager,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(HideColumnController) private readonly _hideColumnController: HideColumnController,
-        @ICommandService private readonly _commandService: ICommandService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {}
 
     listenEventManager() {

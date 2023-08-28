@@ -29,13 +29,4 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
     async clearSelectionContent(): Promise<boolean> {
         return this._commandService.executeCommand(ClearSelectionContentCommand.id);
     }
-
-    /**
-     * Sets Worksheet name
-     * @param name
-     * @returns boolean
-     */
-    async setWorkbookName(name: string): Promise<boolean> {
-        return this._commandService.executeCommand(SetWorksheetNameCommand.id, { name });
-    }
 }

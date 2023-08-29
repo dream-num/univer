@@ -50,6 +50,10 @@ npm run start:doc
 npm run start:slide
 ```
 
+## 社区
+
+欢迎加入我们的 [Discord 社区](https://discord.gg/w2f6VUKw)。
+
 ## 问题反馈
 
 请到 [Issues](http://github.com/dream-num/univer/issues) 提交问题。
@@ -81,7 +85,7 @@ Univer sheet, document, slide 采用同一套渲染引擎架构，把应用抽�
 Univer 自研公式引擎，支持异步计算, lambda 函数及范围命名
 
 ![image](./docs/source/Formula%20Engine.png)
-<!-- 
+<!--
 ## 开发计划
 
 ### Sheets

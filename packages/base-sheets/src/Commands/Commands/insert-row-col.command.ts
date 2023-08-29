@@ -2,23 +2,25 @@ import { CommandType, ICommand } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export interface InsertRowCommandParams {
-    worksheetId: string;
+    rowIndex: number;
+    rowCount: number;
     workbookId: string;
-    fromIndex?: number;
-    count?: number;
+    worksheetId: string;
 }
 
-/**
- * The command to insert a row into a worksheet.
- */
 export const InsertRowCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-row',
 
-    handler: async (accessor: IAccessor, params: InsertRowCommandParams) =>
-        // all subsequent mutations should succeed inorder to make the whole process succeed
-        Promise.all([]).then(() => true),
+    handler: async (accessor: IAccessor, params: InsertRowCommandParams) => true,
 };
+
+export interface InsertColCommandParams {
+    colIndex: number;
+    colCount: number;
+    workbookId: string;
+    worksheetId: string;
+}
 
 export const InsertColCommand: ICommand = {
     type: CommandType.COMMAND,

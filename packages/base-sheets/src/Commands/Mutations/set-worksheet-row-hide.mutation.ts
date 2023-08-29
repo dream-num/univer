@@ -1,14 +1,31 @@
 import { CommandType, ICurrentUniverService, IMutation } from '@univerjs/core';
+import { IAccessor } from '@wendellhu/redi';
 
-export interface ISetWorksheetRowHiddenMutationParams {
+export interface ISetWorksheetRowHideMutationParams {
     workbookId: string;
     worksheetId: string;
     rowIndex: number;
     rowCount: number;
 }
 
-export const SetWorksheetRowHiddenMutation: IMutation<ISetWorksheetRowHiddenMutationParams> = {
-    id: 'sheet.mutation.set-worksheet-row-hidden',
+export const SetWorksheetRowHideMutationFactory = (accessor: IAccessor, params: ISetWorksheetRowHideMutationParams) => {
+    const currentUniverService = accessor.get(ICurrentUniverService);
+    const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
+
+    if (universheet == null) {
+        throw new Error('universheet is null error!');
+    }
+
+    return {
+        workbookId: params.workbookId,
+        worksheetId: params.worksheetId,
+        rowIndex: params.rowIndex,
+        rowCount: params.rowCount,
+    };
+};
+
+export const SetWorksheetRowHideMutation: IMutation<ISetWorksheetRowHideMutationParams> = {
+    id: 'sheet.mutation.set-worksheet-row-hide',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
         const currentUniverService = accessor.get(ICurrentUniverService);
@@ -25,7 +42,6 @@ export const SetWorksheetRowHiddenMutation: IMutation<ISetWorksheetRowHiddenMuta
                 row.hd = 1;
             }
         }
-
         return true;
     },
 };

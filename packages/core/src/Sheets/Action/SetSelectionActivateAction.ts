@@ -25,18 +25,10 @@ export interface ISetSelectionActivateServiceData {
 /**
  * @internal
  */
-export class SetSelectionActivateAction extends SheetActionBase<
-    ISetSelectionActivateActionData,
-    ISetSelectionActivateActionData,
-    ISetSelectionActivateServiceData
-> {
+export class SetSelectionActivateAction extends SheetActionBase<ISetSelectionActivateActionData, ISetSelectionActivateActionData, ISetSelectionActivateServiceData> {
     static NAME = 'SetSelectionActivateAction';
 
-    constructor(
-        actionData: ISetSelectionActivateActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
+    constructor(actionData: ISetSelectionActivateActionData, commandUnit: CommandUnit, observers: ActionObservers) {
         super(actionData, commandUnit, observers);
 
         this._doActionData = {
@@ -59,12 +51,7 @@ export class SetSelectionActivateAction extends SheetActionBase<
         const { activeRangeList, activeRange, currentCell } = this._doActionData;
         const worksheet = this.getWorkSheet();
 
-        const result = SetSelectionActivate(
-            worksheet,
-            activeRangeList,
-            activeRange,
-            currentCell
-        );
+        const result = SetSelectionActivate(worksheet, activeRangeList, activeRange, currentCell);
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -90,16 +77,10 @@ export class SetSelectionActivateAction extends SheetActionBase<
     }
 
     undo(): void {
-        const { activeRangeList, activeRange, currentCell, sheetId } =
-            this._oldActionData;
+        const { activeRangeList, activeRange, currentCell, sheetId } = this._oldActionData;
         const worksheet = this.getWorkSheet();
 
-        const doData = SetSelectionActivate(
-            worksheet,
-            activeRangeList,
-            activeRange,
-            currentCell
-        );
+        const doData = SetSelectionActivate(worksheet, activeRangeList, activeRange, currentCell);
         // update current data
         this._doActionData = {
             // actionName: ACTION_NAMES.SET_SELECTION_ACTION,

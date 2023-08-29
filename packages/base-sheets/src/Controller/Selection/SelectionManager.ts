@@ -1,3 +1,4 @@
+import { SetSelectionsOperation } from '@Commands/Operations/selection.operation';
 import { IMouseEvent, IPointerEvent, Rect, ScrollTimer, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle } from '@univerjs/base-render';
 import {
     ActionOperation,
@@ -7,6 +8,7 @@ import {
     DEFAULT_SELECTION,
     Direction,
     ICellInfo,
+    ICommandService,
     ICurrentUniverService,
     IGridRange,
     IRangeCellData,
@@ -71,7 +73,9 @@ export class SelectionManager {
         private readonly _sheetView: SheetView,
         private readonly _config: ISheetPluginConfig,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        /** @deprecated use ICommandService instead */
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
+        @ICommandService private readonly _commandService: ICommandService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         /** @deprecated this should be divided into smaller pieces */
@@ -81,6 +85,8 @@ export class SelectionManager {
     ) {
         this._initialize();
         this._initializeObserver();
+
+        this._commandService.registerCommand(SetSelectionsOperation);
     }
 
     /** @deprecated */
@@ -295,32 +301,19 @@ export class SelectionManager {
      * update all current controls data in model
      */
     setSelectionModel(models?: ISelectionModelValue[]) {
-        if (!this._worksheet) return;
+        if (!this._worksheet) {
+            return;
+        }
 
-        // get models from current control
         if (!models) {
             models = this._selectionControls.map((control) => control.model.getValue());
         }
 
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-
-        let action: ISetSelectionValueActionData = {
+        this._commandService.executeCommand(SetSelectionsOperation.id, {
+            workbookId: this._currentUniverService.getCurrentUniverSheetInstance().getUnitId(),
             sheetId: this._worksheet.getSheetId(),
-            actionName: SetSelectionValueAction.NAME,
             selections: models,
-            injector: this._injector,
-        };
-
-        // TODO@wzhudev: this design is bad, leaking implementation details to its users. Will redesign command system and refactor this.
-        action = ActionOperation.make<ISetSelectionValueActionData>(action).removeUndo().getAction();
-
-        const command = new Command(
-            {
-                WorkBookUnit: workbook,
-            },
-            action
-        );
-        this._commandManager.invoke(command);
+        });
     }
 
     /**

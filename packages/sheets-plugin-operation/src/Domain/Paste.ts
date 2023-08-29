@@ -1,4 +1,4 @@
-import { ISetSelectionValueActionData, SelectionModel, SetSelectionValueAction, ISelectionManager, SelectionManager, SelectionController } from '@univerjs/base-sheets';
+import { SelectionModel, ISelectionManager, SelectionManager, SelectionController } from '@univerjs/base-sheets';
 import {
     Nullable,
     IRemoveMergeActionData,
@@ -14,8 +14,6 @@ import {
     ISetColumnWidthActionData,
     ISetRowHeightActionData,
     SetRowHeightAction,
-    DEFAULT_SELECTION,
-    DEFAULT_CELL,
     ICurrentUniverService,
 } from '@univerjs/core';
 import { handleTableMergeData } from '@univerjs/base-ui';
@@ -198,23 +196,5 @@ export class UniverPaste extends Paste {
         }
 
         return actionDataList;
-    }
-
-    private _getSelectionActionData(sheetId: string) {
-        // TODO 从粘贴的表格中解析出来 @tony
-        const selectionRange = DEFAULT_SELECTION;
-        const curCellRange = DEFAULT_CELL;
-        this._selectionManager.clearSelectionControls();
-        const models = this._selectionManager.addControlToCurrentByRangeData(selectionRange, curCellRange, false);
-        this._selectionManager.updatePreviousSelection();
-        if (!models) return;
-
-        const actionData: ISetSelectionValueActionData = {
-            sheetId,
-            actionName: SetSelectionValueAction.NAME,
-            selections: models,
-        };
-
-        return actionData;
     }
 }

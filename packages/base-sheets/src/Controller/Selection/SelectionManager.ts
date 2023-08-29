@@ -117,6 +117,18 @@ export class SelectionManager {
         return this._selectionControls;
     }
 
+    getCurrentSelections() {
+        return this._selectionControls.map((control) => {
+            const model = control.model;
+            return {
+                startRow: model.startRow,
+                startColumn: model.startColumn,
+                endRow: model.endRow,
+                endColumn: model.endColumn,
+            };
+        });
+    }
+
     getCurrentControl() {
         const controls = this.getCurrentControls();
         if (controls && controls.length > 0) {
@@ -716,6 +728,7 @@ export class SelectionManager {
         const main = this._mainComponent;
         // eslint-disable-next-line max-lines-per-function
         main.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            // NOTE: handle mousedown event to update selections
             const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
             this._startOffsetX = evtOffsetX;
             this._startOffsetY = evtOffsetY;
@@ -860,15 +873,6 @@ export class SelectionManager {
 
                 scrollTimer.stopScroll();
             });
-
-            // document.addEventListener('pointerup', () => {
-            //     this.up();
-            //     scene.onPointerMoveObserver.remove(this._moveObserver);
-            //     scene.onPointerUpObserver.remove(this._upObserver);
-            //     scene.enableEvent();
-
-            //     scrollTimer.stopScroll();
-            // });
         });
     }
 
@@ -1005,6 +1009,8 @@ export class SelectionManager {
      * Initialize the observer
      */
     private _initializeObserver() {
+        // NOTE: on these circumstances should re-render selections controlls
+        // kind of verbose to me though
         this._observerManager.requiredObserver('onAfterChangeActiveSheetObservable', 'core').add(() => {
             this.renderCurrentControls();
         });

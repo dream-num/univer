@@ -78,16 +78,17 @@ export class SelectionControlDragAndDrop {
         // TODO ...
     }
 
+    // eslint-disable-next-line max-lines-per-function
     dragDown(evt: IPointerEvent | IMouseEvent, direction: Direction) {
         const main = this._canvasView.getSheetView().getSpreadsheet();
 
         // reset model
         const selection = this._model.getValue().selection;
         this._model = this._injector.createInstance(SelectionModel, SELECTION_TYPE.NORMAL);
-        this._model.setValue(selection);
+        // this._model.setValue(selection);
 
         // update control
-        this._updateControl();
+        // this._updateControl();
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
         this._startOffsetX = evtOffsetX;
@@ -226,7 +227,7 @@ export class SelectionControlDragAndDrop {
 
             this._model.setValue(newSelectionPosition);
 
-            this._updateControl();
+            // this._updateControl();
         }
     }
 

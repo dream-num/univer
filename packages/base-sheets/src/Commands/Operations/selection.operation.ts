@@ -19,6 +19,7 @@ export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> =
     handler: async (accessor, params) => {
         const selectionManager = accessor.get(ISelectionManager);
         selectionManager.setModels(params.selections);
+        selectionManager.renderCurrentControls(false);
         return true;
     },
 };

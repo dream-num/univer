@@ -552,14 +552,14 @@ export class Range {
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
         const maxRow = _worksheet.getMaxRows();
         const maxColumn = _worksheet.getMaxColumns();
-        if (direction === Direction.BOTTOM) {
+        if (direction === Direction.DOWN) {
             for (let i = 0; i < maxRow - startColumn; i++) {
                 const value = this._worksheet.getCellMatrix().getValue(startRow + i, startColumn);
                 if (value) _worksheet.getRange(startRow + i, startColumn, startRow + i, startColumn);
             }
             return _worksheet.getRange(maxRow, startColumn, maxRow, startColumn);
         }
-        if (direction === Direction.TOP) {
+        if (direction === Direction.UP) {
             for (let i = 0; i < startRow; i++) {
                 const value = this._worksheet.getCellMatrix().getValue(startRow - i, startColumn);
                 if (value) _worksheet.getRange(startRow - i, startColumn, startRow - i, startRow);

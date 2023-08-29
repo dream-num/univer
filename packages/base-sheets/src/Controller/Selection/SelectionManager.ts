@@ -1,8 +1,6 @@
 import { SetSelectionsOperation } from '@Commands/Operations/selection.operation';
 import { IMouseEvent, IPointerEvent, Rect, ScrollTimer, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle } from '@univerjs/base-render';
 import {
-    ActionOperation,
-    Command,
     CommandManager,
     DEFAULT_CELL,
     DEFAULT_SELECTION,
@@ -25,8 +23,8 @@ import {
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { ACTION_NAMES, ISelectionsConfig, ISheetPluginConfig } from '../../Basics';
-import { ISelectionModelValue, ISetSelectionValueActionData, SetSelectionValueAction } from '../../Model/Action/SetSelectionValueAction';
+import { ISelectionsConfig, ISheetPluginConfig } from '../../Basics';
+import { ISelectionModelValue } from '../../Model/Action/SetSelectionValueAction';
 import { SelectionModel } from '../../Model/SelectionModel';
 import { SheetView } from '../../View/Views/SheetView';
 import { ColumnTitleController } from './ColumnTitleController';
@@ -175,7 +173,7 @@ export class SelectionManager {
             return [];
         }
         const selectionModelsValue = [];
-        for (let model of models) {
+        for (const model of models) {
             selectionModelsValue.push(model.getValue());
         }
         return selectionModelsValue;
@@ -190,7 +188,7 @@ export class SelectionManager {
         if (worksheetId) {
             if (this._selectionControls) {
                 // clear old controls
-                for (let control of this._selectionControls) {
+                for (const control of this._selectionControls) {
                     control.dispose();
                 }
             }
@@ -286,10 +284,10 @@ export class SelectionManager {
     }
 
     clearSelectionControls() {
-        let curControls = this.getCurrentControls();
+        const curControls = this.getCurrentControls();
 
         if (curControls.length > 0) {
-            for (let control of curControls) {
+            for (const control of curControls) {
                 control.dispose();
             }
 
@@ -298,7 +296,7 @@ export class SelectionManager {
     }
 
     /**
-     * update all current controls data in model
+     * Update all current controls data in model
      */
     setSelectionModel(models?: ISelectionModelValue[]) {
         if (!this._worksheet) {
@@ -314,44 +312,6 @@ export class SelectionManager {
             sheetId: this._worksheet.getSheetId(),
             selections: models,
         });
-    }
-
-    /**
-     * update current control in model
-     */
-    updateSelectionModel(selection: ISelection, cell: Nullable<ICellInfo>, index: number) {
-        const worksheetId = this.getWorksheetId();
-
-        if (!this._worksheet || !worksheetId) return;
-
-        // Collect constituency data for the entire current sheet
-        const selectionModels = this._selectionModels.get(worksheetId);
-        const selectionModelsValue: ISelectionModelValue[] = [];
-        selectionModels?.forEach((model, i) => {
-            if (i === index) {
-                selectionModelsValue.push({ selection, cell });
-            } else {
-                selectionModelsValue.push(model.getValue());
-            }
-        });
-
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-
-        let action: ISetSelectionValueActionData = {
-            sheetId: this._worksheet.getSheetId(),
-            actionName: ACTION_NAMES.SET_SELECTION_VALUE_ACTION,
-            selections: selectionModelsValue,
-        };
-
-        action = ActionOperation.make<ISetSelectionValueActionData>(action).removeUndo().getAction();
-
-        const command = new Command(
-            {
-                WorkBookUnit: workbook,
-            },
-            action
-        );
-        this._commandManager.invoke(command);
     }
 
     setModels(selections: ISelectionModelValue[]) {
@@ -388,7 +348,7 @@ export class SelectionManager {
         const rowCount = this._worksheet?.getRowCount() || 1000;
         const columnCount = this._worksheet?.getColumnCount() || 50;
         switch (direction) {
-            case Direction.TOP:
+            case Direction.UP:
                 if (currentCell.isMerged || currentCell.isMergedMainCell) {
                     row = --mergeStartRow;
                 } else {
@@ -398,7 +358,7 @@ export class SelectionManager {
                     row = 0;
                 }
                 break;
-            case Direction.BOTTOM:
+            case Direction.DOWN:
                 if (currentCell.isMerged || currentCell.isMergedMainCell) {
                     row = ++mergeEndRow;
                 } else {
@@ -453,13 +413,13 @@ export class SelectionManager {
 
         const { startRow: finalStartRow, startColumn: finalStartColumn, endRow: finalEndRow, endColumn: finalEndColumn } = newBounding;
 
-        let rangeData: IRangeData = {
+        const rangeData: IRangeData = {
             startRow: finalStartRow,
             endRow: finalEndRow,
             startColumn: finalStartColumn,
             endColumn: finalEndColumn,
         };
-        let currentCellData: IRangeCellData = {
+        const currentCellData: IRangeCellData = {
             row: startRow,
             column: startColumn,
         };
@@ -498,13 +458,13 @@ export class SelectionManager {
 
         const { startRow: finalStartRow, startColumn: finalStartColumn, endRow: finalEndRow, endColumn: finalEndColumn } = newBounding;
 
-        let rangeData: IRangeData = {
+        const rangeData: IRangeData = {
             startRow: finalStartRow,
             endRow: finalEndRow,
             startColumn: finalStartColumn,
             endColumn: finalEndColumn,
         };
-        let currentCellData: IRangeCellData = {
+        const currentCellData: IRangeCellData = {
             row: startRow,
             column: startColumn,
         };
@@ -610,7 +570,7 @@ export class SelectionManager {
     }
 
     updatePreviousSelection() {
-        let selectionControl: Nullable<SelectionController> = this.getCurrentControl();
+        const selectionControl: Nullable<SelectionController> = this.getCurrentControl();
 
         if (!selectionControl) return;
 
@@ -783,13 +743,13 @@ export class SelectionManager {
 
             let selectionControl: Nullable<SelectionController> = this.getCurrentControl();
 
-            let curControls = this.getCurrentControls();
+            const curControls = this.getCurrentControls();
 
             if (!curControls) {
                 return false;
             }
 
-            for (let control of curControls) {
+            for (const control of curControls) {
                 // right click
                 if (evt.button === 2 && control.model.isInclude(startSelectionRange)) {
                     selectionControl = control;
@@ -809,7 +769,7 @@ export class SelectionManager {
 
             // In addition to pressing the ctrl or shift key, we must clear the previous selection
             if (curControls.length > 0 && !evt.ctrlKey && !evt.shiftKey) {
-                for (let control of curControls) {
+                for (const control of curControls) {
                     control.dispose();
                 }
 

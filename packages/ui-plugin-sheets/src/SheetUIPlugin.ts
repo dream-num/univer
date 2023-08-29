@@ -24,6 +24,7 @@ import { Fx } from './View/FormulaBar';
 import { SlotComponentProps } from './Controller/SlotController';
 import { IToolbarItemProps } from './Controller/ToolbarUIController';
 import { zh, en } from './Locale';
+import { DesktopSheetShortcutController } from './Controller/shortcut.controller';
 
 export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
     static override type = PluginType.Sheet;
@@ -175,6 +176,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
             [IPlatformService, { useClass: DesktopPlatformService }],
             [SharedController],
             [IMenuService, { useClass: DesktopMenuService }],
+            [DesktopSheetShortcutController],
         ];
         dependencies.forEach((d) => this._injector.add(d));
 
@@ -189,5 +191,6 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
 
         this._injector.get(IUndoRedoService);
         this._injector.get(SharedController);
+        this._injector.get(DesktopSheetShortcutController);
     }
 }

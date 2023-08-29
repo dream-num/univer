@@ -1,8 +1,12 @@
 // This file provide operations to change selecction of sheets.
 
 import { ISelectionManager } from '@Services/tokens';
-import { CommandType, IOperation } from '@univerjs/core';
-import { ISelectionModelValue } from '../../Model';
+import { CommandType, ICellInfo, IOperation, ISelection, Nullable } from '@univerjs/core';
+
+export interface ISelectionModelValue {
+    selection: ISelection;
+    cell: Nullable<ICellInfo>;
+}
 
 export interface ISetSelectionsOperationParams {
     sheetId: string;

@@ -100,13 +100,13 @@ export class SelectionControlDragAndDrop {
             case Direction.LEFT:
                 cellInfo = main.calculateCellIndexByPosition(evtOffsetX + DEFAULT_SELECTION_CONFIG.strokeWidth, evtOffsetY, scrollXY);
                 break;
-            case Direction.TOP:
+            case Direction.UP:
                 cellInfo = main.calculateCellIndexByPosition(evtOffsetX, evtOffsetY + DEFAULT_SELECTION_CONFIG.strokeWidth, scrollXY);
                 break;
             case Direction.RIGHT:
                 cellInfo = main.calculateCellIndexByPosition(evtOffsetX - DEFAULT_SELECTION_CONFIG.strokeWidth, evtOffsetY, scrollXY);
                 break;
-            case Direction.BOTTOM:
+            case Direction.DOWN:
                 cellInfo = main.calculateCellIndexByPosition(evtOffsetX, evtOffsetY - DEFAULT_SELECTION_CONFIG.strokeWidth, scrollXY);
                 break;
 
@@ -326,7 +326,7 @@ export class SelectionControlDragAndDrop {
         });
 
         bottomControl.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this.dragDown(evt, Direction.BOTTOM);
+            this.dragDown(evt, Direction.DOWN);
         });
 
         bottomControl.onPointerUpObserver.add((evt: IPointerEvent | IMouseEvent) => {

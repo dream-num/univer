@@ -8,7 +8,7 @@ export interface ISetWorksheetRowHeightMutationParams {
     rowHeight: number[];
 }
 
-export const SetWorksheetRowHeightMutationFactory = (accessor: IAccessor, params: ISetWorksheetRowHeightMutationParams) => {
+export const SetWorksheetRowHeightMutationFactory = (accessor: IAccessor, params: ISetWorksheetRowHeightMutationParams): ISetWorksheetRowHeightMutationParams => {
     const currentUniverService = accessor.get(ICurrentUniverService);
     const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
 

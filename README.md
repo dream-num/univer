@@ -4,7 +4,7 @@ English | [简体中文](./README-zh.md)
 
 ## Introduction
 
-Univer is an open source collabrative solution,  which aims to empower the collaboration capability into all systems. With Univer, users can synchronously edit the file content, making files flowing smoothly within different types of systems and avoid downloading and uploading Microsoft Office files anymore. 
+Univer is an open source collabrative solution,  which aims to empower the collaboration capability into all systems. With Univer, users can synchronously edit the file content, making files flowing smoothly within different types of systems and avoid downloading and uploading Microsoft Office files anymore.
 
 We provide javascript part of code in the repository, including a canvas-based framework for building documents, spreadsheets, slides.
 
@@ -52,6 +52,11 @@ npm run start:slide
 
 For more development tutorials, please refer to [Contribution Guide](./.github/contributing.md).
 
+## Community
+
+Welcome to join our [Discord community](https://discord.gg/w2f6VUKw).
+
+
 ## Issues
 
 Please file an issue at [Issues](http://github.com/dream-num/univer/issues).
@@ -83,7 +88,7 @@ Univer sheet, document, and slide adopt the same rendering engine architecture, 
 Univer formula engine, supports asynchronous calculation, lambda function and range naming
 
 ![image](./docs/source/Formula%20Engine.png)
-<!-- 
+<!--
 ## Development Plan
 
 ### Sheets

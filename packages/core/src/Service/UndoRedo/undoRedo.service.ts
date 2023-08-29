@@ -1,6 +1,7 @@
 import { createIdentifier, IAccessor, IDisposable } from '@wendellhu/redi';
-import { Disposable } from '../../Shared/Lifecycle';
+import { BehaviorSubject, Observable } from 'rxjs';
 
+import { Disposable, toDisposable } from '../../Shared/Lifecycle';
 import { CommandService, CommandType, ICommand, ICommandService } from '../Command/Command.service';
 
 // TODO:: an undo redo element may be mergable to another undo redo element
@@ -14,6 +15,8 @@ interface IUndoRedoItem {
 }
 
 export interface IUndoRedoService {
+    undoRedoStatus$: Observable<IUndoRedoStatus>;
+
     pushUndoRedo(item: IUndoRedoItem): void;
 
     pitchTopUndoElement(): IUndoRedoItem | null;
@@ -25,10 +28,19 @@ export interface IUndoRedoService {
 
 export const IUndoRedoService = createIdentifier<IUndoRedoService>('univer.undo-redo.service');
 
+export interface IUndoRedoStatus {
+    undos: number;
+    redos: number;
+}
+
 /**
  * This UndoRedoService is local.
  */
 export class LocalUndoRedoService extends Disposable implements IUndoRedoService {
+    readonly undoRedoStatus$: Observable<IUndoRedoStatus>;
+
+    private readonly _undoRedoStatus$ = new BehaviorSubject<{ undos: number; redos: number }>({ undos: 0, redos: 0 });
+
     private readonly _undoStack: IUndoRedoItem[] = [];
 
     private readonly _redoStack: IUndoRedoItem[] = [];
@@ -36,8 +48,15 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
     constructor(@ICommandService private readonly _commandService: CommandService) {
         super();
 
+        this.undoRedoStatus$ = this._undoRedoStatus$.asObservable();
+
         this.disposeWithMe(this._commandService.registerCommand(UndoCommand));
         this.disposeWithMe(this._commandService.registerCommand(RedoCommand));
+        this.disposeWithMe(
+            toDisposable(() => {
+                this._undoRedoStatus$.complete();
+            })
+        );
     }
 
     pushUndoRedo(item: IUndoRedoItem): void {
@@ -50,6 +69,8 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         if (this._undoStack.length > 20) {
             this._undoStack.splice(0, 1);
         }
+
+        this.updateStatus();
     }
 
     pitchTopUndoElement(): IUndoRedoItem | null {
@@ -72,6 +93,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         const element = this._undoStack.pop();
         if (element) {
             this._redoStack.push(element);
+            this.updateStatus();
         }
     }
 
@@ -79,7 +101,15 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         const element = this._redoStack.pop();
         if (element) {
             this._undoStack.push(element);
+            this.updateStatus();
         }
+    }
+
+    private updateStatus(): void {
+        this._undoRedoStatus$.next({
+            undos: this._undoStack.length,
+            redos: this._redoStack.length,
+        });
     }
 }
 

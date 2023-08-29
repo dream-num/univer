@@ -1,0 +1,108 @@
+name: 🐛 Bug report
+description: Create a report to help us improve.
+labels: bug
+title: '[Bug]'
+
+body:
+  - type: checkboxes
+    id: initial-checklist
+    attributes:
+      label: Initial checklist
+      options:
+        - label: Is this really a problem?
+          required: true
+        - label: I have searched the Github Issues for similar issues, but did not find anything.
+          required: true
+
+  - type: input
+    id: affected-versions
+    attributes:
+      label: Affected packages and versions
+      description: Please test using the latest version of the relevant packages to make sure your issue has not already been fixed.
+    validations:
+      required: true
+
+#   - type: input
+#     id: runnable-example
+#     attributes:
+#       label: Link to runnable example
+#       description: |
+#         Link to repository or sandbox with runnable example of the issue.
+
+#         Alternatively, use the next section *Steps to reproduce*.
+#     validations:
+#       required: false
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce
+      description: How did this happen? Please provide a [minimal, reproducible example](https://stackoverflow.com/help/minimal-reproducible-example).
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: What should happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual behavior
+      description: What happens instead?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: javascript-runtime
+    attributes:
+      label: Runtime
+      description: |
+        What Browser are you using to run the editor?
+      multiple: true
+      options:
+        - Chrome
+        - Safari
+        - Firefox
+        - Electron
+        - Other (please specify in steps to reproduce)
+    validations:
+      required: false
+
+  - type: dropdown
+    id: operating-system
+    attributes:
+      label: OS
+      description: What operating system are you using?
+      multiple: true
+      options:
+        - Windows
+        - Linux
+        - macOS
+        - Other (please specify in steps to reproduce)
+    validations:
+      required: false
+
+  - type: dropdown
+    id: build-tools
+    attributes:
+      label: Build and bundle tools
+      description: What, if any, tools are used to build or bundle the project?
+      multiple: true
+      options:
+        - Webpack
+        - Rollup
+        - esbuild
+        - Parcel
+        - Create React App
+        - Gatsby
+        - Next.js
+        - Remix
+        - Vite
+        - Other (please specify in steps to reproduce)
+    validations:
+      required: false

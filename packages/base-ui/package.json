@@ -10,7 +10,6 @@
     "license": "MIT",
     "main": "./src/index.ts",
     "module": "./src/index.ts",
-    "types": "./src/Types/index.d.ts",
     "publishConfig": {
         "main": "./lib/univer-base-ui.cjs.js",
         "module": "./lib/univer-base-ui.js",
@@ -69,6 +68,7 @@
         "@univerjs/core": "workspace:^0.0.1",
         "@wendellhu/redi": "^0.12.6",
         "preact": "^10.12.1",
-        "react-colorful": "^5.3.0"
+        "react-colorful": "^5.3.0",
+        "rxjs": "^7.8.1"
     }
 }

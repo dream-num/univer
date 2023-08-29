@@ -1303,7 +1303,7 @@ export class Worksheet {
 
         const actions: ISheetActionData[] = [];
 
-        if (directions.includes(Direction.TOP)) {
+        if (directions.includes(Direction.UP)) {
             const setBottomData: BorderStyleData = {
                 sheetId: _sheetId,
                 actionName: SetBorderAction.NAME,
@@ -1311,7 +1311,7 @@ export class Worksheet {
             };
             actions.push(setBottomData);
         }
-        if (directions.includes(Direction.BOTTOM)) {
+        if (directions.includes(Direction.DOWN)) {
             const setTopData: BorderStyleData = {
                 sheetId: _sheetId,
                 actionName: SetBorderAction.NAME,

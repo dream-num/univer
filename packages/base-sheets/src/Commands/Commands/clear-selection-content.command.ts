@@ -18,22 +18,11 @@ export const ClearSelectionContentCommand: ICommand = {
         const selectionManager = accessor.get(ISelectionManager);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        // TODO: this is to verbose to get a serializable range
-        // a range should have worksheet id as well
+        // TODO: this is to verbose to get a serializable range, a range should have worksheet id as well
         const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         const worksheet = workbook.getActiveSheet();
-        const controls = selectionManager.getCurrentControls();
-        const selections = controls?.map((control: SelectionController) => {
-            const model: SelectionModel = control.model;
-            return {
-                startRow: model.startRow,
-                startColumn: model.startColumn,
-                endRow: model.endRow,
-                endColumn: model.endColumn,
-            };
-        });
-
-        if (!selections) {
+        const selections = selectionManager.getCurrentSelections();
+        if (!selections.length) {
             return false;
         }
 

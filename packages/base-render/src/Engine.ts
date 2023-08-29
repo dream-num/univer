@@ -215,7 +215,7 @@ export class Engine extends ThinEngine<Scene> {
 
     _renderFrame() {
         for (let index = 0; index < this._activeRenderLoops.length; index++) {
-            let renderFunction = this._activeRenderLoops[index];
+            const renderFunction = this._activeRenderLoops[index];
 
             renderFunction();
         }
@@ -251,7 +251,7 @@ export class Engine extends ThinEngine<Scene> {
 
     private _handleKeyboardAction() {
         const keyboardDownEvent = (evt: any) => {
-            let deviceEvent = evt as IKeyboardEvent;
+            const deviceEvent = evt as IKeyboardEvent;
             deviceEvent.deviceType = DeviceType.Keyboard;
             deviceEvent.inputIndex = evt.keyCode;
             deviceEvent.previousState = 0;
@@ -261,7 +261,7 @@ export class Engine extends ThinEngine<Scene> {
         };
 
         const keyboardUpEvent = (evt: any) => {
-            let deviceEvent = evt as IKeyboardEvent;
+            const deviceEvent = evt as IKeyboardEvent;
             deviceEvent.deviceType = DeviceType.Keyboard;
             deviceEvent.inputIndex = evt.keyCode;
             deviceEvent.previousState = 1;
@@ -291,7 +291,7 @@ export class Engine extends ThinEngine<Scene> {
             this.pointer[PointerInput.DeltaHorizontal] = evt.movementX;
             this.pointer[PointerInput.DeltaVertical] = evt.movementY;
             // console.log('pointerMoveEvent_1', previousHorizontal, evt.clientX, previousVertical, evt.clientY, this.__pointer);
-            let deviceEvent = evt as IPointerEvent;
+            const deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
 
             if (previousHorizontal !== evt.clientX) {
@@ -365,7 +365,7 @@ export class Engine extends ThinEngine<Scene> {
             this.pointer[PointerInput.Vertical] = evt.clientY;
             this.pointer[evt.button + 2] = 1;
 
-            let deviceEvent = evt as IPointerEvent;
+            const deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
 
             if (previousHorizontal !== evt.clientX) {
@@ -404,7 +404,7 @@ export class Engine extends ThinEngine<Scene> {
             this.pointer[PointerInput.Vertical] = evt.clientY;
             this.pointer[evt.button + 2] = 0;
 
-            let deviceEvent = evt as IPointerEvent;
+            const deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
 
             if (previousHorizontal !== evt.clientX) {
@@ -452,15 +452,15 @@ export class Engine extends ThinEngine<Scene> {
         this._pointerWheelEvent = (evt: any) => {
             const deviceType = DeviceType.Mouse;
             // Store previous values for event
-            let previousWheelScrollX = this.pointer[PointerInput.MouseWheelX];
-            let previousWheelScrollY = this.pointer[PointerInput.MouseWheelY];
-            let previousWheelScrollZ = this.pointer[PointerInput.MouseWheelZ];
+            const previousWheelScrollX = this.pointer[PointerInput.MouseWheelX];
+            const previousWheelScrollY = this.pointer[PointerInput.MouseWheelY];
+            const previousWheelScrollZ = this.pointer[PointerInput.MouseWheelZ];
 
             this.pointer[PointerInput.MouseWheelX] = evt.deltaX || 0;
             this.pointer[PointerInput.MouseWheelY] = evt.deltaY || evt.wheelDelta || 0;
             this.pointer[PointerInput.MouseWheelZ] = evt.deltaZ || 0;
 
-            let deviceEvent = evt as IPointerEvent;
+            const deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
 
             if (this.pointer[PointerInput.MouseWheelX] !== 0) {
@@ -491,7 +491,7 @@ export class Engine extends ThinEngine<Scene> {
     }
 
     private _getWheelEventName(): string {
-        let wheelEventName =
+        const wheelEventName =
             'onwheel' in document.createElement('div')
                 ? 'wheel' // Modern browsers support "wheel"
                 : (document as any).onmousewheel !== undefined

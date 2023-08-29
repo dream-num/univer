@@ -10,7 +10,7 @@ export interface ISetWorksheetHiddenCommandParams {
 
 export const SetWorksheetHiddenCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.set-worksheet-activate',
+    id: 'sheet.command.set-worksheet-hidden',
 
     handler: async (accessor: IAccessor, params: ISetWorksheetHiddenCommandParams) => {
         const commandService = accessor.get(ICommandService);

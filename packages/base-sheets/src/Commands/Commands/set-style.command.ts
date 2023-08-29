@@ -43,7 +43,7 @@ export interface ISetStyleParams<T> {
  * The command to set cell style.
  * Set style to a bunch of ranges.
  */
-export const SetStyleCommand: ICommand = {
+export const SetStyleCommand: ICommand<ISetStyleParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-style',
 

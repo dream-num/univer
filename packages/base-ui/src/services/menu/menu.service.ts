@@ -1,9 +1,9 @@
 import { Disposable, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
+import { ComponentChildren } from 'preact';
 import { IShortcutService } from '../shortcut/shorcut.service';
 import { ICustomLabelType } from '../../Interfaces/CustomLabel';
-import { ComponentChildren } from 'preact';
 
 export type OneOrMany<T> = T | T[];
 

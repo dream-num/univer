@@ -101,8 +101,8 @@ module.exports = {
         'grouped-accessor-pairs': 'off',
         '@typescript-eslint/member-ordering': 'error',
         '@typescript-eslint/no-explicit-any': 'warn',
+        'no-unsafe-optional-chaining': 'off',
         '@typescript-eslint/consistent-type-assertions': 'off',
-        '@typescript-eslint/no-unsafe-return': 'error',
         '@typescript-eslint/no-redeclare': 'off', // dependency interface and dependency token share the same name
     },
     // https://www.npmjs.com/package/eslint-import-resolver-typescript

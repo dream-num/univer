@@ -8,7 +8,7 @@ export interface ISetWorksheetColWidthMutationParams {
     colWidth: number[];
 }
 
-export const SetWorksheetColWidthMutationFactory = (accessor: IAccessor, params: ISetWorksheetColWidthMutationParams) => {
+export const SetWorksheetColWidthMutationFactory = (accessor: IAccessor, params: ISetWorksheetColWidthMutationParams): ISetWorksheetColWidthMutationParams => {
     const currentUniverService = accessor.get(ICurrentUniverService);
     const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
 

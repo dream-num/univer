@@ -1,10 +1,11 @@
 import { $$, ComponentManager, SlotManager, getRefElement } from '@univerjs/base-ui';
-import { KeyCode, ObserverManager } from '@univerjs/core';
+import { ObserverManager } from '@univerjs/core';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
 import { FORMULA_PLUGIN_NAME, FunList } from '../Basics';
 import { HelpFunction, SearchFunction } from '../View/UI/FormulaPrompt';
 import { CellInputHandler } from './CellInputHandler';
+import { KeyCode } from './keyCode';
 
 export class FormulaPromptController {
     cellInputHandler: CellInputHandler;

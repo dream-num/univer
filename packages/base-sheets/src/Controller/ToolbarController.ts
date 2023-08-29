@@ -6,7 +6,6 @@ import {
     WrapStrategy,
     ObserverManager,
     ICurrentUniverService,
-    CommandManager,
     ICommandService,
     UndoCommand,
     RedoCommand,

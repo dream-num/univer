@@ -10,7 +10,6 @@ export * from './Dimension';
 export * from './Direction';
 export * from './FormatType';
 export * from './InterpolationPointType';
-export * from './KeyCode';
 export * from './LocaleType';
 export * from './ProtectionType';
 export * from './RelativeDate';

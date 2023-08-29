@@ -1,6 +1,22 @@
-import { Inject, Injector } from '@wendellhu/redi';
-import { Plugin, Tools, Univer, PluginType, LocaleService } from '@univerjs/core';
-import { ComponentManager, getRefElement, RegisterManager, KeyboardManager, SlotComponent, ZIndexManager, SlotManager, DragManager } from '@univerjs/base-ui';
+import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import { Plugin, Tools, PluginType, LocaleService, IUndoRedoService } from '@univerjs/core';
+import {
+    ComponentManager,
+    getRefElement,
+    RegisterManager,
+    KeyboardManager,
+    SlotComponent,
+    ZIndexManager,
+    SlotManager,
+    DragManager,
+    IShortcutService,
+    DesktopShortcutService,
+    SharedController,
+    IPlatformService,
+    DesktopPlatformService,
+    IMenuService,
+    DesktopMenuService,
+} from '@univerjs/base-ui';
 import { IRenderingEngine } from '@univerjs/base-render';
 import { DefaultSheetUIConfig, installObserver, ISheetUIPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';
 import { AppUIController } from './Controller/AppUIController';
@@ -32,12 +48,9 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
         this._config = Tools.deepMerge({}, DefaultSheetUIConfig, config);
     }
 
-    installTo(univerInstance: Univer) {
-        univerInstance.install(this);
-    }
-
     initialize(): void {
         installObserver(this);
+
         /**
          * load more Locale object
          *
@@ -151,14 +164,20 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
     }
 
     private initializeDependencies(): void {
-        this._injector.add([DragManager]);
-        this._injector.add([KeyboardManager]);
-        this._injector.add([RegisterManager]);
-        this._injector.add([ComponentManager]);
-        this._injector.add([ZIndexManager]);
-        this._injector.add([SlotManager]);
+        const dependencies: Dependency[] = [
+            [DragManager],
+            [KeyboardManager],
+            [RegisterManager],
+            [ComponentManager],
+            [ZIndexManager],
+            [SlotManager],
+            [IShortcutService, { useClass: DesktopShortcutService }],
+            [IPlatformService, { useClass: DesktopPlatformService }],
+            [SharedController],
+            [IMenuService, { useClass: DesktopMenuService }],
+        ];
+        dependencies.forEach((d) => this._injector.add(d));
 
-        // TODO: maybe we don't have to instantiate these dependencies manually
         this._dragManager = this._injector.get(DragManager);
         this._componentManager = this._injector.get(ComponentManager);
         this._keyboardManager = this._injector.get(KeyboardManager);
@@ -167,5 +186,8 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
 
         this._appUIController = this._injector.createInstance(AppUIController, this._config);
         this._injector.add([AppUIController, { useValue: this._appUIController }]);
+
+        this._injector.get(IUndoRedoService);
+        this._injector.get(SharedController);
     }
 }

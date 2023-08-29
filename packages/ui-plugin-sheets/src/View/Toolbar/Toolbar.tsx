@@ -1,7 +1,7 @@
-import { AppContext, AppContextValues, BaseComponentProps, Button, Component, Container, createRef, debounce, PreactContext, Select, Tooltip } from '@univerjs/base-ui';
+import { AppContext, AppContextValues, BaseComponentProps, Button, Component, Container, createRef, debounce, IMenuItem, PreactContext, Select, Tooltip } from '@univerjs/base-ui';
 import { IToolbarItemProps, SheetContainerUIController } from '../../Controller';
 import styles from './index.module.less';
-import { AppUIController } from '../../Controller/AppUIController';
+import { ToolbarItem } from './ToolbarItem';
 
 interface IProps extends BaseComponentProps {
     style?: JSX.CSSProperties;
@@ -14,6 +14,7 @@ interface IState {
     defaultToolList: IToolbarItemProps[];
     showMore: boolean;
     toolbarListWidths: number[];
+    menuItems: IMenuItem[];
 }
 
 export class Toolbar extends Component<IProps, IState> {
@@ -44,6 +45,7 @@ export class Toolbar extends Component<IProps, IState> {
             defaultToolList: [],
             moreToolList: [],
             toolbarListWidths: [],
+            menuItems: [],
         };
     }
 
@@ -53,7 +55,7 @@ export class Toolbar extends Component<IProps, IState> {
      * TODO : 点击其他地方需要隐藏more buttons
      */
     showMore = () => {
-        let showMore = this.state.showMore;
+        const showMore = this.state.showMore;
         this.setState({ showMore: !showMore });
 
         if (!showMore) {
@@ -142,6 +144,18 @@ export class Toolbar extends Component<IProps, IState> {
         }
     };
 
+    setToolbarNeo = (menuItems: IMenuItem[]) => {
+        this.setState(
+            {
+                menuItems,
+            },
+            () => {
+                this.setToolbarListWidth();
+            }
+        );
+    };
+
+    /** @deprecated */
     setToolbar = (toolList: any[]) => {
         this.setState(
             {
@@ -164,7 +178,7 @@ export class Toolbar extends Component<IProps, IState> {
     };
 
     override componentDidMount() {
-        this.props.getComponent?.(this);
+        this.props.getComponent?.(this); // pass the UI to the controller, which is not good...
         window.addEventListener('resize', this.debounceSetToolbarListWidth);
     }
 
@@ -172,8 +186,15 @@ export class Toolbar extends Component<IProps, IState> {
         window.removeEventListener('resize', this.debounceSetToolbarListWidth);
     }
 
-    // 渲染dom
-    getToolbarList(list: IToolbarItemProps[]) {
+    neoRenderToolbarList() {
+        return this.state.menuItems.map((item) => <ToolbarItem key={item.id} {...item} />);
+    }
+
+    // 渲染 dom
+    /**
+     * @deprecated
+     */
+    renderToolbarList(list: IToolbarItemProps[]) {
         return list.map((item) => {
             if (item.toolbarType) {
                 if (item.show) {
@@ -215,7 +236,8 @@ export class Toolbar extends Component<IProps, IState> {
         return (
             <Container style={{ position: 'relative' }}>
                 <div className={`${styles.toolbarWarp} ${styles.toolbar}`} ref={this.toolbarRef}>
-                    {this.getToolbarList(defaultToolList)}
+                    {this.neoRenderToolbarList()}
+                    {this.renderToolbarList(defaultToolList)}
 
                     <div ref={this.moreBtnRef} className={styles.moreButton} style={{ visibility: moreToolList.length ? 'visible' : 'hidden' }}>
                         <Tooltip title={'toolbar.toolMoreTip'} placement={'bottom'}>
@@ -226,9 +248,10 @@ export class Toolbar extends Component<IProps, IState> {
                     </div>
                 </div>
 
+                {/* FIXME: moreToolList will become unnecessary after we implemented new architecture. */}
                 {moreToolList.length ? (
                     <div style={{ visibility: showMore ? 'visible' : 'hidden' }} className={`${styles.moreTool} ${styles.toolbar}`} ref={this.moreToolRef}>
-                        {this.getToolbarList(moreToolList)}
+                        {this.renderToolbarList(moreToolList)}
                     </div>
                 ) : (
                     ''

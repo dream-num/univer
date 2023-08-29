@@ -1,7 +1,8 @@
 import { Component, createRef } from '../../Framework';
 import { BaseTooltipProps } from '../../Interfaces';
-import style from './index.module.less';
 import { joinClassNames } from '../../Utils';
+
+import style from './index.module.less';
 
 // interface TooltipProps {
 //     title: string;
@@ -30,7 +31,7 @@ const placementClassNames: { [index: string]: string } = {
 export class Tooltip extends Component<BaseTooltipProps, TooltipState> {
     tooltip = createRef<HTMLDivElement>();
 
-    initialize(props: BaseTooltipProps) {
+    override initialize(props: BaseTooltipProps) {
         this.state = {
             placement: props.placement || 'top',
             placementClassName: joinClassNames(style.tooltipTitle, placementClassNames[props.placement || 'top']),
@@ -42,9 +43,9 @@ export class Tooltip extends Component<BaseTooltipProps, TooltipState> {
 
     handleMouseOver() {
         if (this.tooltip && this.tooltip.current) {
-            let tooltipInfo = this.tooltip.current.getBoundingClientRect();
-            let top = tooltipInfo.height;
-            let left = tooltipInfo.width;
+            const tooltipInfo = this.tooltip.current.getBoundingClientRect();
+            const top = tooltipInfo.height;
+            const left = tooltipInfo.width;
 
             if (this.state.placement === 'bottom') {
                 this.setState({

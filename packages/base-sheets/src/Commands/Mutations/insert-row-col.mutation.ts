@@ -42,7 +42,7 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
     },
 };
 
-export const IInsertColMutationFactory = (accessor: IAccessor, params: IInsertColMutationParams): IRemoveColMutationParams => {
+export const InsertColMutationFactory = (accessor: IAccessor, params: IInsertColMutationParams): IRemoveColMutationParams => {
     const currentUniverService = accessor.get(ICurrentUniverService);
     const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
 
@@ -58,7 +58,7 @@ export const IInsertColMutationFactory = (accessor: IAccessor, params: IInsertCo
     };
 };
 
-export const IInsertColMutation: IMutation<IInsertColMutationParams> = {
+export const InsertColMutation: IMutation<IInsertColMutationParams> = {
     id: 'sheet.mutation.insert-col',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {

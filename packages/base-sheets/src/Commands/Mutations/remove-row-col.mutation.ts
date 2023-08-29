@@ -2,7 +2,7 @@ import { CommandType, ICurrentUniverService, IMutation, ObjectArray, ObjectMatri
 import { IAccessor } from '@wendellhu/redi';
 import { IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowMutationParams } from '../../Basics/Interfaces/MutationInterface';
 
-export const InsertRowMutationFactory = (accessor: IAccessor, params: IInsertRowMutationParams): IRemoveRowMutationParams => {
+export const IRemoveRowMutationFactory = (accessor: IAccessor, params: IRemoveRowMutationParams): IInsertRowMutationParams => {
     const currentUniverService = accessor.get(ICurrentUniverService);
     const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
 
@@ -10,16 +10,19 @@ export const InsertRowMutationFactory = (accessor: IAccessor, params: IInsertRow
         throw new Error('universheet is null error!');
     }
 
+    const rowPrimitive = universheet.getWorkBook().getSheetBySheetId(params.worksheetId)!.getCellMatrix().toJSON();
+    const rowWrapper = new ObjectMatrix(rowPrimitive);
     return {
         workbookId: params.workbookId,
         worksheetId: params.worksheetId,
         rowIndex: params.rowIndex,
         rowCount: params.rowCount,
+        insertRowData: rowWrapper.sliceRows(params.rowIndex, params.rowCount).toJSON(),
     };
 };
 
-export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
-    id: 'sheet.mutation.insert-row',
+export const RemoveRowMutation: IMutation<IRemoveRowMutationParams> = {
+    id: 'sheet.mutation.remove-row',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
         const currentUniverService = accessor.get(ICurrentUniverService);
@@ -29,20 +32,19 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
             throw new Error('universheet is null error!');
         }
 
-        const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
-        const manager = worksheet!.getRowManager();
+        const manager = universheet.getWorkBook().getSheetBySheetId(params.worksheetId)!.getRowManager();
         const rowPrimitive = manager.getRowData().toJSON();
         const rowWrapper = new ObjectArray(rowPrimitive);
-        rowWrapper.inserts(params.rowIndex, new ObjectArray(params.rowCount));
+        rowWrapper.splice(params.rowIndex, params.rowCount);
 
-        const cellPrimitive = worksheet!.getCellMatrix().toJSON();
-        const cellWrapper = new ObjectMatrix(cellPrimitive);
-        cellWrapper.insertRows(params.rowIndex, new ObjectMatrix(params.insertRowData));
+        const cellPrimitive = universheet.getWorkBook().getSheetBySheetId(params.worksheetId)!.getCellMatrix().toJSON();
+        const wrapper = new ObjectMatrix(cellPrimitive);
+        wrapper.spliceRows(params.rowIndex, params.rowCount);
         return true;
     },
 };
 
-export const IInsertColMutationFactory = (accessor: IAccessor, params: IInsertColMutationParams): IRemoveColMutationParams => {
+export const IRemoveColMutationFactory = (accessor: IAccessor, params: IRemoveColMutationParams): IInsertColMutationParams => {
     const currentUniverService = accessor.get(ICurrentUniverService);
     const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
 
@@ -50,16 +52,19 @@ export const IInsertColMutationFactory = (accessor: IAccessor, params: IInsertCo
         throw new Error('universheet is null error!');
     }
 
+    const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
+    const cellPrimitive = worksheet!.getCellMatrix().toJSON();
     return {
         workbookId: params.workbookId,
         worksheetId: params.worksheetId,
         colIndex: params.colIndex,
         colCount: params.colCount,
+        insertColData: new ObjectMatrix(cellPrimitive).sliceColumns(params.colIndex, params.colCount).toJSON(),
     };
 };
 
-export const IInsertColMutation: IMutation<IInsertColMutationParams> = {
-    id: 'sheet.mutation.insert-col',
+export const RemoveColMutation: IMutation<IRemoveColMutationParams> = {
+    id: 'sheet.mutation.remove-col',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
         const currentUniverService = accessor.get(ICurrentUniverService);
@@ -69,15 +74,16 @@ export const IInsertColMutation: IMutation<IInsertColMutationParams> = {
             throw new Error('universheet is null error!');
         }
 
-        const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
-        const manager = worksheet!.getColumnManager();
+        const manager = universheet.getWorkBook().getSheetBySheetId(params.worksheetId)!.getColumnManager();
         const columnPrimitive = manager.getColumnData().toJSON();
         const columnWrapper = new ObjectArray(columnPrimitive);
-        columnWrapper.inserts(params.colIndex, new ObjectArray(params.colCount));
+        const start = params.colIndex;
+        const end = params.colIndex + params.colCount;
+        for (let i = start; i < end; i++) columnWrapper.splice(params.colIndex, 1);
 
-        const cellPrimitive = worksheet!.getCellMatrix().toJSON();
+        const cellPrimitive = universheet.getWorkBook().getSheetBySheetId(params.worksheetId)!.getCellMatrix().toJSON();
         const cellWrapper = new ObjectMatrix(cellPrimitive);
-        cellWrapper.insertColumns(params.colIndex, new ObjectMatrix(params.insertColData));
+        cellWrapper.spliceColumns(params.colIndex, params.colCount).toJSON();
         return true;
     },
 };

@@ -73,16 +73,16 @@ export class ObjectMatrix<T> {
     }
 
     getRow(rowIndex: number): Nullable<ObjectArray<T>> {
-        let element = this._option.get(rowIndex);
+        const element = this._option.get(rowIndex);
         if (element) {
             return new ObjectArray(element);
         }
     }
 
     getRowOrCreate(rowIndex: number): ObjectArray<T> {
-        let row = this.getRow(rowIndex);
+        const row = this.getRow(rowIndex);
         if (row == null) {
-            let row = {};
+            const row = {};
             this._option.set(rowIndex, row as ObjectArrayPrimitiveType<T>);
             return new ObjectArray(row);
         }
@@ -128,6 +128,11 @@ export class ObjectMatrix<T> {
         return new ObjectMatrix(splice.toJSON() as ObjectMatrixPrimitiveType<T>);
     }
 
+    sliceRows(start: number, count: number): ObjectMatrix<T> {
+        const slice = this._option.slice(start, count);
+        return new ObjectMatrix(slice.toJSON() as ObjectMatrixPrimitiveType<T>);
+    }
+
     pushRow(row: ObjectArray<T>): void {
         this._option.push(row.toJSON() as ObjectArrayPrimitiveType<T>);
     }
@@ -147,12 +152,21 @@ export class ObjectMatrix<T> {
             for (let i = start; i < start + count; i++) {
                 columnData.setValue(index, i - start, this.getValue(index, i));
             }
-            let row = this._option.get(index);
+            const row = this._option.get(index);
             if (row) {
                 new ObjectArray(row).splice(start, count);
             }
         });
+        return columnData;
+    }
 
+    sliceColumns(start: number, count: number): ObjectMatrix<T> {
+        const columnData = new ObjectMatrix<T>();
+        this._option.forEach((index, value) => {
+            for (let i = start; i < start + count; i++) {
+                columnData.setValue(index, i - start, this.getValue(index, i));
+            }
+        });
         return columnData;
     }
 

@@ -18,7 +18,6 @@ export const SetStyleCommand: ICommand = {
     id: 'sheet.command.set-style',
 
     handler: async (accessor: IAccessor, params: ISetStyleParams) => {
-        // const currentUniverService = accessor.get(ICurrentUniverService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
@@ -51,6 +50,4 @@ export const SetStyleCommand: ICommand = {
 
         return false;
     },
-    // all subsequent mutations should succeed inorder to make the whole process succeed
-    // Promise.all([]).then(() => true),
 };

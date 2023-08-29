@@ -5,15 +5,19 @@ import { fromDocumentEvent } from '../../Common/lifecycle';
 import { IPlatformService } from '../platform/platform.service';
 import { MetaKeys } from './keycode';
 
-export interface IShortcutItem {
+export interface IShortcutItem<P extends object = object> {
     /** This should reuse the corresponding command's id. */
     id: string;
+    description?: string;
 
+    /** A command can be bound to several bindings, with different static parameters perhaps. */
     binding: number;
-
     mac?: number;
     win?: number;
     linux?: number;
+
+    /** Static parameters of this shortcut. Would be send to `CommandService.executeCommand`. */
+    staticParameters?: P;
 }
 
 export interface IShortcutService {
@@ -71,7 +75,8 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
             return false;
         }
 
-        this._commandService.executeCommand(shortcut.id);
+        // shortcut could support static parameters
+        this._commandService.executeCommand(shortcut.id, shortcut.staticParameters);
         return true;
     }
 

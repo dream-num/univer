@@ -1,5 +1,5 @@
 import { IDisposable } from '@wendellhu/redi';
-import { Disposable, ICommandService } from '@univerjs/core';
+import { Disposable, ICommandService, IRangeData, IStyleData, ObjectMatrix, Tools } from '@univerjs/core';
 
 import { ClearSelectionContentCommand } from '../Commands/Commands/clear-selection-content.command';
 import { SetRangeValuesMutation } from '../Commands/Mutations/set-range-values.mutation';
@@ -7,6 +7,15 @@ import { SetWorksheetNameCommand } from '../Commands/Commands/set-worksheet-name
 import { SetWorksheetNameMutation } from '../Commands/Mutations/set-worksheet-name.mutation';
 import { SetWorksheetActivateCommand } from '../Commands/Commands/set-worksheet-activate.command';
 import { SetWorksheetActivateMutation } from '../Commands/Mutations/set-worksheet-activate.mutation';
+import { SetStyleCommand } from '../Commands/Commands/set-style.command';
+import { SetRangeStyleMutation } from '../Commands/Mutations/set-range-styles.mutation';
+import { SetWorksheetHiddenCommand } from '../Commands/Commands/set-worksheet-hidden.command';
+import { SetWorksheetHiddenMutation } from '../Commands/Mutations/set-worksheet-hidden.mutation';
+
+export interface IStyleTypeValue<T> {
+    type: keyof IStyleData;
+    value: T | T[][];
+}
 
 /**
  * The controller to provide the most basic sheet CRUD methods to other modules of sheet modules.
@@ -21,6 +30,10 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
         this.disposeWithMe(_commandService.registerCommand(SetWorksheetNameMutation));
         this.disposeWithMe(_commandService.registerCommand(SetWorksheetActivateCommand));
         this.disposeWithMe(_commandService.registerCommand(SetWorksheetActivateMutation));
+        this.disposeWithMe(_commandService.registerCommand(SetStyleCommand));
+        this.disposeWithMe(_commandService.registerCommand(SetRangeStyleMutation));
+        this.disposeWithMe(_commandService.registerCommand(SetWorksheetHiddenCommand));
+        this.disposeWithMe(_commandService.registerCommand(SetWorksheetHiddenMutation));
     }
 
     onInitialize() {}
@@ -32,5 +45,37 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
      */
     async clearSelectionContent(): Promise<boolean> {
         return this._commandService.executeCommand(ClearSelectionContentCommand.id);
+    }
+
+    async setStyle<T>(workbookId: string, worksheetId: string, style: IStyleTypeValue<T>, range: IRangeData[]): Promise<boolean> {
+        // let value: ObjectMatrixPrimitiveType<IStyleData> = new ObjectMatrix<IStyleData>();
+        let value: any = new ObjectMatrix<IStyleData>();
+        for (let i = 0; i < range.length; i++) {
+            const { startRow, endRow, startColumn, endColumn } = range[i];
+            if (style.value instanceof Array) {
+                const matrix = new ObjectMatrix<IStyleData>();
+                for (let r = 0; r < endRow - startRow + 1; r++) {
+                    for (let c = 0; c < endColumn - startColumn + 1; c++) {
+                        matrix.setValue(r, c, {
+                            [style.type]: style.value[r][c],
+                        });
+                    }
+                }
+                value = matrix.getData();
+            } else {
+                const colorObj: IStyleData = {
+                    [style.type]: style.value,
+                };
+                value = Tools.fillObjectMatrix(endRow - startRow + 1, endColumn - startColumn + 1, colorObj);
+            }
+        }
+
+        const options = {
+            workbookId,
+            worksheetId,
+            value,
+            range,
+        };
+        return this._commandService.executeCommand(SetStyleCommand.id, options);
     }
 }

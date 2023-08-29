@@ -1,43 +1,56 @@
 import { IAccessor } from '@wendellhu/redi';
-import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
+import { CommandType, ICommand, ICommandService, IRangeData, IStyleData, IUndoRedoService, ObjectMatrixPrimitiveType } from '@univerjs/core';
 
-import { ISelectionManager } from '../../Services/tokens';
-import { SelectionController } from '../../Controller/Selection/SelectionController';
-import { SelectionModel } from '../../Model/SelectionModel';
+import { ISetRangeStyleMutationParams, SetRangeStyleMutation, SetRangeStyleUndoMutationFactory } from '../Mutations/set-range-styles.mutation';
 
-export interface ISetFontFamilyParams {
-    fontFamily: string;
+export interface ISetStyleParams {
+    range: IRangeData[];
+    value: ObjectMatrixPrimitiveType<IStyleData>;
+    workbookId: string;
+    worksheetId: string;
 }
 
 /**
- * Set new font family for currently selected cells
+ * The command to insert a row into a worksheet.
  */
-export const SetFontFamilyCommand: ICommand<ISetFontFamilyParams> = {
-    id: 'sheet.command.set-font-family',
+export const SetStyleCommand: ICommand = {
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
+    id: 'sheet.command.set-style',
+
+    handler: async (accessor: IAccessor, params: ISetStyleParams) => {
+        // const currentUniverService = accessor.get(ICurrentUniverService);
         const commandService = accessor.get(ICommandService);
-        const selectionManager = accessor.gett(ISelectionManager);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-        const worksheet = workbook.getActiveSheet();
-        const controls = selectionManager.getCurrentControls();
-        const selections = controls?.map((control: SelectionController) => {
-            const model: SelectionModel = control.model;
-            return {
-                startRow: model.startRow,
-                startColumn: model.startColumn,
-                endRow: model.endRow,
-                endColumn: model.endColumn,
-            };
-        });
+        const setRangeStyleMutationParams: ISetRangeStyleMutationParams = {
+            range: params.range,
+            worksheetId: params.worksheetId,
+            workbookId: params.workbookId,
+            value: params.value,
+        };
 
-        const
+        const undoSetRangeStyleMutationParams: ISetRangeStyleMutationParams = SetRangeStyleUndoMutationFactory(accessor, setRangeStyleMutationParams);
 
-        // FIXME: 为什么之前有些 command 支持的多 selection 有的不支持？
+        // execute do mutations and add undo mutations to undo stack if completed
+        const result = commandService.executeCommand(SetRangeStyleMutation.id, setRangeStyleMutationParams);
+        if (result) {
+            undoRedoService.pushUndoRedo({
+                // 如果有多个 mutation 构成一个封装项目，那么要封装在同一个 undo redo element 里面
+                // 通过勾子可以 hook 外部 controller 的代码来增加新的 action
+                URI: 'sheet', // TODO: this URI is fake
+                undo() {
+                    return commandService.executeCommand(SetRangeStyleMutation.id, undoSetRangeStyleMutationParams);
+                },
+                redo() {
+                    return commandService.executeCommand(SetRangeStyleMutation.id, setRangeStyleMutationParams);
+                },
+            });
 
-        return true;
+            return true;
+        }
+
+        return false;
     },
+    // all subsequent mutations should succeed inorder to make the whole process succeed
+    // Promise.all([]).then(() => true),
 };

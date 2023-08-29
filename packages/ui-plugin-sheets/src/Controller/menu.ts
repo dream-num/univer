@@ -24,7 +24,16 @@ export function RedoMenuItemFactory(accessor: IAccessor): IMenuItem {
         title: 'Redo',
         menu: [MenuPosition.TOOLBAR],
         disabled$: undoRedoService.undoRedoStatus$.pipe(map((v) => v.redos <= 0)),
-    }
+    };
+}
+
+export function BoldMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: SetBoldCommand.id,
+        icon: 'BoldIcon',
+        title: 'Set bold',
+        menu: [MenuPosition.TOOLBAR],
+    };
 }
 
 // export function FontSelectorMenuItemFactory(accessor: IAccessor): IMenuItem {

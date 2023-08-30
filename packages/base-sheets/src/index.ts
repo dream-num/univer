@@ -31,3 +31,4 @@ export {
 } from './Commands/Commands/set-style.command';
 export { ClearSelectionContentCommand } from './Commands/Commands/clear-selection-content.command';
 export { InsertRowCommand, InsertColCommand } from './Commands/Commands/insert-row-col.command';
+export { SetWorksheetActivateCommand } from './Commands/Commands/set-worksheet-activate.command';

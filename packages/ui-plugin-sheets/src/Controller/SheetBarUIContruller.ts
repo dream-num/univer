@@ -17,7 +17,7 @@ import {
     Disposable,
     ICommandService,
 } from '@univerjs/core';
-import { InsertSheetMutation, RemoveSheetMutation } from '@univerjs/base-sheets';
+import { InsertSheetMutation, RemoveSheetMutation, SetWorksheetActivateCommand } from '@univerjs/base-sheets';
 import { Inject, SkipSelf } from '@wendellhu/redi';
 import { SheetBar } from '../View/SheetBar';
 import styles from '../View/SheetBar/index.module.less';
@@ -286,6 +286,7 @@ export class SheetBarUIController extends Disposable {
     protected _refreshSheetData(): void {
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         const sheets = workbook.getSheets();
+
         this._menuList = sheets.map((sheet, index) => ({
             label: sheet.getName(),
             index: String(index),
@@ -301,6 +302,7 @@ export class SheetBarUIController extends Disposable {
                 }
             },
         }));
+
         this._sheetList = sheets
             .filter((sheet) => !sheet.isSheetHidden())
             .map((sheet, index) => ({
@@ -316,8 +318,11 @@ export class SheetBarUIController extends Disposable {
                 onClick: (e: MouseEvent) => {
                     const target = e.currentTarget as HTMLDivElement;
                     this._dataId = target.dataset.id as string;
-
-                    sheet.activate();
+                    // sheet.activate();
+                    this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                        workbookId: workbook.getUnitId(),
+                        worksheetId: sheet.getSheetId(),
+                    });
                 },
             }));
         this._sheetIndex = sheets.findIndex((sheet) => sheet.getStatus() === 1);

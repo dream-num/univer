@@ -1,5 +1,23 @@
 import { IAccessor } from '@wendellhu/redi';
-import { CommandType, ICommand, ICommandService, ICurrentUniverService, IRangeData, IStyleData, IUndoRedoService, ObjectMatrix, Tools } from '@univerjs/core';
+import {
+    BooleanNumber,
+    CommandType,
+    HorizontalAlign,
+    IBorderData,
+    IColorStyle,
+    ICommand,
+    ICommandService,
+    ICurrentUniverService,
+    IRangeData,
+    IStyleData,
+    ITextRotation,
+    IUndoRedoService,
+    ObjectMatrix,
+    ObjectMatrixPrimitiveType,
+    Tools,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
 
 import { ISetRangeStyleMutationParams, SetRangeStyleMutation, SetRangeStyleUndoMutationFactory } from '../Mutations/set-range-styles.mutation';
 import { ISelectionManager } from '../../Services/tokens';
@@ -10,11 +28,14 @@ export interface IStyleTypeValue<T> {
 }
 
 export interface ISetStyleParams<T> {
-    range: IRangeData[];
     style: IStyleTypeValue<T>;
-    workbookId: string;
-    worksheetId: string;
+
+    ranges?: IRangeData[];
+    workbookId?: string;
+    worksheetId?: string;
 }
+
+// TODO: @wzhudev: move parameters logic from BasicWorksheetController to here. 30th Aug.
 
 /**
  * The command to set cell style.
@@ -27,12 +48,21 @@ export const SetStyleCommand: ICommand = {
     handler: async <T>(accessor: IAccessor, params: ISetStyleParams<T>) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const { range, workbookId, worksheetId, style } = params;
+        const selectionManager = accessor.get(ISelectionManager);
+        const currentUniverService = accessor.get(ICurrentUniverService);
 
-        // let value: ObjectMatrixPrimitiveType<IStyleData> = new ObjectMatrix<IStyleData>();
-        let value: any = new ObjectMatrix<IStyleData>();
-        for (let i = 0; i < range.length; i++) {
-            const { startRow, endRow, startColumn, endColumn } = range[i];
+        const ranges = params.ranges || selectionManager.getCurrentSelections();
+        if (!ranges) {
+            return false;
+        }
+
+        const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const style = params.style;
+
+        let value: ObjectMatrixPrimitiveType<IStyleData>;
+        for (let i = 0; i < ranges.length; i++) {
+            const { startRow, endRow, startColumn, endColumn } = ranges[i];
             if (Tools.isArray(style.value)) {
                 const matrix = new ObjectMatrix<IStyleData>();
                 for (let r = 0; r < endRow - startRow + 1; r++) {
@@ -52,21 +82,18 @@ export const SetStyleCommand: ICommand = {
         }
 
         const setRangeStyleMutationParams: ISetRangeStyleMutationParams = {
-            range,
+            range: ranges,
             worksheetId,
             workbookId,
-            value,
+            value: value!,
         };
 
         const undoSetRangeStyleMutationParams: ISetRangeStyleMutationParams = SetRangeStyleUndoMutationFactory(accessor, setRangeStyleMutationParams);
 
-        // execute do mutations and add undo mutations to undo stack if completed
         const result = commandService.executeCommand(SetRangeStyleMutation.id, setRangeStyleMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
-                // 如果有多个 mutation 构成一个封装项目，那么要封装在同一个 undo redo element 里面
-                // 通过勾子可以 hook 外部 controller 的代码来增加新的 action
-                URI: 'sheet', // TODO: this URI is fake
+                URI: 'sheet', // TODO: this URI is fake: would be replace with Univer business instance id
                 undo() {
                     return commandService.executeCommand(SetRangeStyleMutation.id, undoSetRangeStyleMutationParams);
                 },
@@ -88,18 +115,13 @@ export const SetStyleCommand: ICommand = {
 export const SetBoldCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-bold',
-    handler: async (accessor) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const selectionManager = accessor.get(ISelectionManager);
+    handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
-        const selections = selectionManager.getCurrentSelections();
-        const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-
-        const setStyleParams: ISetStyleParams<'fw'> = {
-            workbookId: workbook.getUnitId(),
-            worksheetId: workbook.getActiveSheet().getSheetId(),
-            range: selections,
-            value: {}, // TODO@wzhudev: change this value to bold style or unset bold style
+        const setStyleParams: ISetStyleParams<BooleanNumber> = {
+            style: {
+                type: 'bl',
+                value: BooleanNumber.TRUE,
+            },
         };
 
         return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
@@ -112,7 +134,17 @@ export const SetBoldCommand: ICommand = {
 export const SetItalicCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-italic',
-    handler: async (accessor, params) => true,
+    handler: async (accessor, params) => {
+        const commandService = accessor.get(ICommandService);
+        const setStyleParams: ISetStyleParams<BooleanNumber> = {
+            style: {
+                type: 'it',
+                value: BooleanNumber.TRUE,
+            },
+        };
+
+        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+    },
 };
 
 /**
@@ -121,7 +153,17 @@ export const SetItalicCommand: ICommand = {
 export const SetUnderlineCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-underline',
-    handler: async (accessor, params) => true,
+    handler: async (accessor, params) => {
+        const commandService = accessor.get(ICommandService);
+        const setStyleParams: ISetStyleParams<BooleanNumber> = {
+            style: {
+                type: 'ul',
+                value: BooleanNumber.TRUE,
+            },
+        };
+
+        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+    },
 };
 
 /**
@@ -130,65 +172,233 @@ export const SetUnderlineCommand: ICommand = {
 export const SetStrikeThroughCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-stroke',
-    handler: async (accessor) => true,
+    handler: async (accessor, params) => {
+        const commandService = accessor.get(ICommandService);
+        const setStyleParams: ISetStyleParams<BooleanNumber> = {
+            style: {
+                type: 'st',
+                value: BooleanNumber.TRUE,
+            },
+        };
+
+        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+    },
 };
 
-export const SetFontFamilyCommand: ICommand = {
+export interface ISetFontFamilyCommandParams {
+    fontFamily: string;
+}
+
+export const SetFontFamilyCommand: ICommand<ISetFontFamilyCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-font-family',
-    handler: async (accessor) => true,
+    handler: async (accessor, params) => {
+        if (!params) {
+            return false;
+        }
+
+        const commandService = accessor.get(ICommandService);
+        const setStyleParams: ISetStyleParams<string> = {
+            style: {
+                type: 'ff',
+                value: params.fontFamily,
+            },
+        };
+
+        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+    },
 };
 
-export const SetFontSizeCommand: ICommand = {
+export interface ISetFontSizeCommandParams {
+    fontSize: number;
+}
+
+export const SetFontSizeCommand: ICommand<ISetFontSizeCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-font-family',
-    handler: async (accessor) => true,
+    handler: async (accessor, params) => {
+        if (!params) {
+            return false;
+        }
+
+        const commandService = accessor.get(ICommandService);
+        const setStyleParams: ISetStyleParams<number> = {
+            style: {
+                type: 'fs',
+                value: params.fontSize,
+            },
+        };
+
+        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+    },
 };
 
-export const SetTextColorCommand: ICommand = {
+export interface ISetColorCommandParams {
+    color: IColorStyle;
+}
+
+export const SetTextColorCommand: ICommand<ISetColorCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-font-family',
-    handler: async (accessor) => true,
+    handler: async (accessor, params) => {
+        if (!params) {
+            return false;
+        }
+
+        const commandService = accessor.get(ICommandService);
+        const setStyleParams: ISetStyleParams<IColorStyle> = {
+            style: {
+                type: 'cl',
+                value: params.color,
+            },
+        };
+
+        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+    },
 };
 
-export const SetBackgroundColorCommand: ICommand = {
+export const SetBackgroundColorCommand: ICommand<ISetColorCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-background-color',
-    handler: async (accessor) => true,
+    handler: async (accessor, params) => {
+        if (!params) {
+            return false;
+        }
+
+        const commandService = accessor.get(ICommandService);
+        const setStyleParams: ISetStyleParams<IColorStyle> = {
+            style: {
+                type: 'bg',
+                value: params.color,
+            },
+        };
+
+        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+    },
 };
 
-export const SetCellBorderCommand: ICommand = {
+export interface ISetCellBorderCommandParams {
+    border: IBorderData;
+}
+
+export const SetCellBorderCommand: ICommand<ISetCellBorderCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-cell-border',
-    handler: async (accessor) => true,
+    handler: async (accessor, params) => {
+        if (!params) {
+            return false;
+        }
+
+        const commandService = accessor.get(ICommandService);
+        const setStyleParams: ISetStyleParams<IBorderData> = {
+            style: {
+                type: 'bd',
+                value: params.border,
+            },
+        };
+
+        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+    },
+};
+
+export interface ISetVerticalTextAlignCommandParams {
+    align: VerticalAlign;
+}
+
+export const SetVerticalTextAlignCommand: ICommand<ISetVerticalTextAlignCommandParams> = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-vertical-text-align',
+    handler: async (accessor, params) => {
+        if (!params) {
+            return false;
+        }
+
+        const commandService = accessor.get(ICommandService);
+        const setStyleParams: ISetStyleParams<VerticalAlign> = {
+            style: {
+                type: 'vt',
+                value: params.align,
+            },
+        };
+
+        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+    },
+};
+
+export interface ISetHorizontalTextAlignCommandParams {
+    align: HorizontalAlign;
+}
+
+export const SetHorizontalTextAlignCommand: ICommand<ISetHorizontalTextAlignCommandParams> = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-horizontal-text-align',
+    handler: async (accessor, params) => {
+        if (!params) {
+            return false;
+        }
+
+        const commandService = accessor.get(ICommandService);
+        const setStyleParams: ISetStyleParams<HorizontalAlign> = {
+            style: {
+                type: 'ht',
+                value: params.align,
+            },
+        };
+
+        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+    },
+};
+
+export interface ISetTextWrapCommandParams {
+    wrap: WrapStrategy;
+}
+
+export const SetTextWrapCommand: ICommand<ISetTextWrapCommandParams> = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-text-wrap',
+    handler: async (accessor, params) => {
+        if (!params) {
+            return false;
+        }
+
+        const commandService = accessor.get(ICommandService);
+        const setStyleParams: ISetStyleParams<WrapStrategy> = {
+            style: {
+                type: 'tb',
+                value: params.wrap,
+            },
+        };
+
+        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+    },
+};
+
+export interface ISetTextRotationCommandParams {
+    rotation: ITextRotation;
+}
+
+export const SetTextRotationCommand: ICommand<ISetTextRotationCommandParams> = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-text-rotation',
+    handler: async (accessor, params) => {
+        if (!params) {
+            return false;
+        }
+
+        const commandService = accessor.get(ICommandService);
+        const setStyleParams: ISetStyleParams<ITextRotation> = {
+            style: {
+                type: 'tr',
+                value: params.rotation,
+            },
+        };
+
+        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+    },
 };
 
 export const SetSpanCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-span',
-    handler: async (params) => true,
-};
-
-export const SetVerticalTextAlignCommand: ICommand = {
-    type: CommandType.COMMAND,
-    id: 'sheet.command.set-vertical-text-align',
-    handler: async (params) => true,
-};
-
-export const SetHorizontalTextAlignCommand: ICommand = {
-    type: CommandType.COMMAND,
-    id: 'sheet.command.set-horizontal-text-align',
-    handler: async (params) => true,
-};
-
-export const SetTextWrapCommand: ICommand = {
-    type: CommandType.COMMAND,
-    id: 'sheet.command.set-text-wrap',
-    handler: async (params) => true,
-};
-
-export const SetTextRotationCommand: ICommand = {
-    type: CommandType.COMMAND,
-    id: 'sheet.command.set-text-rotation',
-    handler: async (params) => true,
+    handler: async (accessor, params) => true,
 };

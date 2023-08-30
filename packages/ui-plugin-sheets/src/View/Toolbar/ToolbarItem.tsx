@@ -17,7 +17,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem, IToolbarItemStatus>
         super();
 
         this.state = {
-            disabled: true,
+            disabled: false,
         };
     }
 

@@ -101,7 +101,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             workbookId,
             worksheetId,
             style,
-            range,
+            ranges: range,
         };
         return this._commandService.executeCommand(SetStyleCommand.id, options);
     }

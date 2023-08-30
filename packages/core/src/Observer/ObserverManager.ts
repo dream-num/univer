@@ -21,6 +21,8 @@ export class PathObservable<T = any> {
 
 /**
  * Manage a set of PathObservables, Get, remove, add WorkBookObserver
+ *
+ * @deprecated ObserverManager is not necessary. Each service should manage its own observables.
  */
 export class ObserverManager {
     private _observableArray: PathObservable[] = [];

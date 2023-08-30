@@ -141,6 +141,10 @@ export class ObjectMatrix<T> {
         this._option.insert(rowIndex, row.toJSON() as ObjectArrayPrimitiveType<T>);
     }
 
+    insertRowCount(rowIndex: number, rowCount: number): void {
+        this._option.inserts(rowIndex, new ObjectArray(rowCount));
+    }
+
     insertRows(rowIndex: number, matrix: ObjectMatrix<T>) {
         this._option.inserts(rowIndex, matrix._option);
         console.dir(this._option);
@@ -179,12 +183,17 @@ export class ObjectMatrix<T> {
                 return false;
             }
         });
-
         this.forEach((index, value) => {
             for (let i = columnIndex; i < columnIndex + count; i++) {
                 const data = columnData.getRow(index)?.get(i - columnIndex);
                 value.insert(i, columnData.getRow(index)?.get(i - columnIndex) as T);
             }
+        });
+    }
+
+    insertColumnCount(columnIndex: number, columnCount: number) {
+        this.forEach((index, value) => {
+            value.inserts(columnIndex, new ObjectArray<T>(columnCount));
         });
     }
 

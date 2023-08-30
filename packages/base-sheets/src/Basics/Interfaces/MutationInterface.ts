@@ -1,4 +1,4 @@
-import { Dimension, ICellData, IRangeData, IWorksheetConfig, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import { Dimension, ICellData, IRangeData, IWorksheetConfig, Nullable, ObjectMatrixPrimitiveType } from '@univerjs/core';
 
 /** Params of `RemoveSheetMutation` */
 export interface IRemoveSheetMutationParams {
@@ -19,7 +19,7 @@ export interface IInsertRowMutationParams {
     worksheetId: string;
     rowIndex: number;
     rowCount: number;
-    insertRowData: ObjectMatrixPrimitiveType<ICellData>;
+    insertRowData: Nullable<ObjectMatrixPrimitiveType<ICellData>>;
 }
 
 /** Params of InsertColMutation */
@@ -28,7 +28,7 @@ export interface IInsertColMutationParams {
     worksheetId: string;
     colIndex: number;
     colCount: number;
-    insertColData: ObjectMatrixPrimitiveType<ICellData>;
+    insertColData: Nullable<ObjectMatrixPrimitiveType<ICellData>>;
 }
 
 /** Params of InsertRowMutation */

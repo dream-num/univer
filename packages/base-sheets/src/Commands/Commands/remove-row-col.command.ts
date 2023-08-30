@@ -1,8 +1,9 @@
-import { CommandType, ICommand, ICommandService, IUndoRedoService } from '@univerjs/core';
+import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 import { IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowMutationParams } from '../../Basics/Interfaces/MutationInterface';
 import { InsertColMutation, InsertRowMutation } from '../Mutations/insert-row-col.mutation';
 import { IRemoveColMutationFactory, IRemoveRowMutationFactory, RemoveColMutation, RemoveRowMutation } from '../Mutations/remove-row-col.mutation';
+import { ISelectionManager } from '../../Services/tokens';
 
 export interface RemoveRowCommandParams {
     rowIndex: number;
@@ -14,16 +15,34 @@ export interface RemoveRowCommandParams {
 export const RemoveRowCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.remove-row',
-    handler: async (accessor: IAccessor, params: RemoveRowCommandParams) => {
+    handler: async (accessor: IAccessor, params?: RemoveRowCommandParams) => {
+        const selectionManager = accessor.get(ISelectionManager);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const redoMutationParams: IRemoveRowMutationParams = {
-            workbookId: params.workbookId,
-            worksheetId: params.worksheetId,
-            rowIndex: params.rowIndex,
-            rowCount: params.rowCount,
-        };
+        let redoMutationParams: IRemoveRowMutationParams;
+        if (params == null) {
+            const selections = selectionManager.getCurrentSelections();
+            const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+            if (!selections.length) {
+                return false;
+            }
+            const range = selections[0];
+            redoMutationParams = {
+                workbookId: workbook.getUnitId(),
+                worksheetId: workbook.getActiveSheet().getSheetId(),
+                rowIndex: range.startRow,
+                rowCount: range.endRow - range.startRow,
+            };
+        } else {
+            redoMutationParams = {
+                workbookId: params.workbookId,
+                worksheetId: params.worksheetId,
+                rowIndex: params.rowIndex,
+                rowCount: params.rowCount,
+            };
+        }
 
         const undoMutationParams: IInsertRowMutationParams = IRemoveRowMutationFactory(accessor, redoMutationParams);
         const result = commandService.executeCommand(RemoveRowMutation.id, redoMutationParams);
@@ -53,16 +72,34 @@ export interface RemoveColCommandParams {
 export const RemoveColCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.remove-col',
-    handler: async (accessor: IAccessor, params: RemoveColCommandParams) => {
+    handler: async (accessor: IAccessor, params?: RemoveColCommandParams) => {
+        const selectionManager = accessor.get(ISelectionManager);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const redoMutationParams: IRemoveColMutationParams = {
-            workbookId: params.workbookId,
-            worksheetId: params.worksheetId,
-            colIndex: params.colIndex,
-            colCount: params.colCount,
-        };
+        let redoMutationParams: IRemoveColMutationParams;
+        if (params == null) {
+            const selections = selectionManager.getCurrentSelections();
+            const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+            if (!selections.length) {
+                return false;
+            }
+            const range = selections[0];
+            redoMutationParams = {
+                workbookId: workbook.getUnitId(),
+                worksheetId: workbook.getActiveSheet().getSheetId(),
+                colIndex: range.startColumn,
+                colCount: range.endColumn - range.startColumn,
+            };
+        } else {
+            redoMutationParams = {
+                workbookId: params.workbookId,
+                worksheetId: params.worksheetId,
+                colIndex: params.colIndex,
+                colCount: params.colCount,
+            };
+        }
         const undoMutationParams: IRemoveColMutationParams = IRemoveColMutationFactory(accessor, redoMutationParams);
         const result = commandService.executeCommand(RemoveColMutation.id, redoMutationParams);
         if (result) {

@@ -37,7 +37,11 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
 
         const cellPrimitive = worksheet!.getCellMatrix().toJSON();
         const cellWrapper = new ObjectMatrix(cellPrimitive);
-        cellWrapper.insertRows(params.rowIndex, new ObjectMatrix(params.insertRowData));
+        if (params.insertRowData == null) {
+            cellWrapper.insertRowCount(params.rowIndex, params.rowCount);
+        } else {
+            cellWrapper.insertRows(params.rowIndex, new ObjectMatrix(params.insertRowData));
+        }
         return true;
     },
 };
@@ -77,7 +81,11 @@ export const InsertColMutation: IMutation<IInsertColMutationParams> = {
 
         const cellPrimitive = worksheet!.getCellMatrix().toJSON();
         const cellWrapper = new ObjectMatrix(cellPrimitive);
-        cellWrapper.insertColumns(params.colIndex, new ObjectMatrix(params.insertColData));
+        if (params.insertColData == null) {
+            cellWrapper.insertColumnCount(params.colIndex, params.colCount);
+        } else {
+            cellWrapper.insertColumns(params.colIndex, new ObjectMatrix(params.insertColData));
+        }
         return true;
     },
 };

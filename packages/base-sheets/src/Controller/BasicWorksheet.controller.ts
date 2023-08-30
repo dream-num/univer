@@ -1,5 +1,5 @@
 import { IDisposable } from '@wendellhu/redi';
-import { Dimension, Disposable, ICellData, ICellV, ICommandService, IRangeData, IStyleData, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import { Disposable, ICellData, ICellV, ICommandService, IRangeData, IStyleData, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univerjs/core';
 
 import { ClearSelectionContentCommand } from '../Commands/Commands/clear-selection-content.command';
 import { SetRangeValuesMutation } from '../Commands/Mutations/set-range-values.mutation';
@@ -10,8 +10,6 @@ import { SetWorksheetActivateMutation } from '../Commands/Mutations/set-workshee
 import { ISetStyleParams, SetStyleCommand } from '../Commands/Commands/set-style.command';
 import { SetRangeStyleMutation } from '../Commands/Mutations/set-range-styles.mutation';
 import { ISetRangeFormattedValueParams, SetRangeFormattedValueCommand } from '../Commands/Commands/set-range-formatted-value.command';
-import { DeleteRangeCommand, IDeleteRangeParams } from '../Commands/Commands/delete-range.command';
-import { IInsertRangeParams, InsertRangeCommand } from '../Commands/Commands/insert-range.command';
 import { TrimWhitespaceCommand } from '../Commands/Commands/trim-whitespace.command';
 import { ISetRangeValuesCommandParams, SetRangeValuesCommand } from '../Commands/Commands/set-range-values.command';
 import { SetWorksheetHideCommand } from '../Commands/Commands/set-worksheet-hide.command';
@@ -31,6 +29,10 @@ import { SetWorksheetRowShowMutation } from '../Commands/Mutations/set-worksheet
 import { InsertRangeMutation } from '../Commands/Mutations/insert-range.mutation';
 import { DeleteRangeMutation } from '../Commands/Mutations/delete-range.mutation';
 import { SetRangeFormattedValueMutation } from '../Commands/Mutations/set-range-formatted-value.mutation';
+import { IInsertRangeMoveRightParams, InsertRangeMoveRightCommand } from '../Commands/Commands/insert-range-move-right.command';
+import { DeleteRangeMoveLeftCommand, IDeleteRangeMoveLeftParams } from '../Commands/Commands/delete-range-move-left.command';
+import { DeleteRangeMoveTopCommand, IDeleteRangeMoveTopParams } from '../Commands/Commands/delete-range-move-top.command';
+import { IInsertRangeMoveBottomParams, InsertRangeMoveBottomCommand } from '../Commands/Commands/insert-range-move-bottom.command';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -76,9 +78,11 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
 
             SetRangeValuesCommand,
             TrimWhitespaceCommand,
-            InsertRangeCommand,
+            InsertRangeMoveRightCommand,
+            InsertRangeMoveBottomCommand,
             InsertRangeMutation,
-            DeleteRangeCommand,
+            DeleteRangeMoveLeftCommand,
+            DeleteRangeMoveTopCommand,
             DeleteRangeMutation,
             SetRangeFormattedValueCommand,
             SetRangeFormattedValueMutation,
@@ -145,31 +149,46 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
      * Deletes this range of cells. Existing data in the sheet along the provided dimension is shifted towards the deleted range.
      *
      * solution: Clear the range to be deleted, and then set the new value of the cell content at the bottom using setValue
-     * @param  {Dimension} shiftDimension The dimension along which to shift existing data.
      */
-    async deleteRange(workbookId: string, worksheetId: string, shiftDimension: Dimension, range: IRangeData): Promise<boolean> {
-        const options: IDeleteRangeParams = {
+    async deleteRangeMoveLeft(workbookId: string, worksheetId: string, range: IRangeData): Promise<boolean> {
+        const options: IDeleteRangeMoveLeftParams = {
             workbookId,
             worksheetId,
-            shiftDimension,
             range,
         };
-        return this._commandService.executeCommand(DeleteRangeCommand.id, options);
+        return this._commandService.executeCommand(DeleteRangeMoveLeftCommand.id, options);
+    }
+
+    async deleteRangeMoveTop(workbookId: string, worksheetId: string, range: IRangeData): Promise<boolean> {
+        const options: IDeleteRangeMoveTopParams = {
+            workbookId,
+            worksheetId,
+            range,
+        };
+        return this._commandService.executeCommand(DeleteRangeMoveTopCommand.id, options);
     }
 
     /**
      * Inserts empty cells into this range. The new cells retain any formatting present in the cells previously occupying this range. Existing data in the sheet along the provided dimension is shifted away from the inserted range.
-     * @param  {Dimension} shiftDimension The dimension along which to shift existing data.
      */
-    async insertRange(workbookId: string, worksheetId: string, shiftDimension: Dimension, range: IRangeData, destination?: IRangeData): Promise<boolean> {
-        const options: IInsertRangeParams = {
+    async insertRangeMoveRight(workbookId: string, worksheetId: string, range: IRangeData, destination?: IRangeData): Promise<boolean> {
+        const options: IInsertRangeMoveRightParams = {
             workbookId,
             worksheetId,
-            shiftDimension,
             range,
             destination,
         };
-        return this._commandService.executeCommand(SetRangeFormattedValueCommand.id, options);
+        return this._commandService.executeCommand(InsertRangeMoveRightCommand.id, options);
+    }
+
+    async insertRangeMoveBottom(workbookId: string, worksheetId: string, range: IRangeData, destination?: IRangeData): Promise<boolean> {
+        const options: IInsertRangeMoveBottomParams = {
+            workbookId,
+            worksheetId,
+            range,
+            destination,
+        };
+        return this._commandService.executeCommand(InsertRangeMoveBottomCommand.id, options);
     }
 
     /**

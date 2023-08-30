@@ -95,7 +95,7 @@ export const SetBoldCommand: ICommand = {
         const selections = selectionManager.getCurrentSelections();
         const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
 
-        const setStyleParams: ISetStyleParams = {
+        const setStyleParams: ISetStyleParams<'fw'> = {
             workbookId: workbook.getUnitId(),
             worksheetId: workbook.getActiveSheet().getSheetId(),
             range: selections,

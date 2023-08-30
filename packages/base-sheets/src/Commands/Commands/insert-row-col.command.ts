@@ -17,7 +17,6 @@ export const InsertRowCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-row',
     handler: async (accessor: IAccessor, params?: InsertRowCommandParams) => {
-        debugger;
         const selectionManager = accessor.get(ISelectionManager);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -73,7 +72,7 @@ export interface InsertColCommandParams {
     insertColData: ObjectMatrixPrimitiveType<ICellData>;
 }
 
-export const InsertColCommand: ICommand = {
+export const InsertColCommand: ICommand<InsertColCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-col',
     handler: async (accessor: IAccessor, params?: InsertColCommandParams) => {

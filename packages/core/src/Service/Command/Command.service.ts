@@ -17,10 +17,9 @@ export interface ICommand<P extends object = object, R = boolean> {
      * ${businessName}.${type}.${name}
      */
     readonly id: string;
-
     readonly type: CommandType;
 
-    handler(accessor: IAccessor, params: P | undefined): Promise<R>;
+    handler(accessor: IAccessor, params?: P): Promise<R>;
 }
 
 /**
@@ -32,9 +31,9 @@ export interface IMutation<P extends object = object, R = boolean> extends IComm
 
 /**
  * Operation would change the state of Univer applications. State should only be in memory and does not
- * require data confliction.
+ * require data conflicting.
  */
-export interface IOperation<P extends object = object> extends ICommand<P> {
+export interface IOperation<P extends object = object, R = boolean> extends ICommand<P, R> {
     type: CommandType.OPERATION;
 }
 
@@ -58,7 +57,8 @@ export interface IExecutionOptions {
 export type CommandListener = (commandInfo: Readonly<ICommandInfo>) => void;
 
 export interface ICommandService {
-    registerCommand<P extends object>(command: ICommand<P>): IDisposable;
+    registerCommand(command: ICommand): IDisposable;
+
     executeCommand(id: string, params?: object, options?: IExecutionOptions): Promise<boolean> | boolean;
 
     /**
@@ -92,6 +92,7 @@ export const ICommandService = createIdentifier<ICommandService>('anywhere.comma
  * The registry of commands.
  */
 class CommandRegistry {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private readonly commands = new Map<string, ICommand>();
 
     private readonly commandInjector = new Map<string, Injector>();
@@ -220,7 +221,7 @@ export class CommandService implements ICommandService {
         throw new Error(`Command "${id}" is not registered.`);
     }
 
-    private _registerCommand<P extends object>(command: ICommand<P>, injector: Injector): IDisposable {
+    private _registerCommand(command: ICommand, injector: Injector): IDisposable {
         if (this._parentCommandService) {
             return this._parentCommandService._registerCommand(command, injector);
         }
@@ -229,18 +230,19 @@ export class CommandService implements ICommandService {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private async _execute(command: ICommand<any>, injector: Injector, params?: object): Promise<boolean> {
+    private async _execute(command: ICommand, injector: Injector, params?: object): Promise<boolean> {
         this._log.log(`${' | '.repeat(this._commandExecutingLevel)}[ICommandService]: executing command "${command.id}".`);
 
         this._commandExecutingLevel++;
         const result = await injector.invoke(command.handler, params);
         this._commandExecutingLevel--;
 
-        // MOTE: remove from old command manager
+        // TODO: remove from old command manager
         if (command.type === CommandType.MUTATION) {
             CommandManager.getActionObservers().notifyObservers({
                 type: ActionType.REDO,
                 data: result as unknown as IActionData,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 action: null as any,
             });
         }

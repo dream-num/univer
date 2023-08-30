@@ -1,3 +1,4 @@
+import { ClearSelectionContentCommand, InsertColCommand, InsertRowCommand } from '@univerjs/base-sheets';
 import { IMenuItem, MenuPosition } from '@univerjs/base-ui';
 import { IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
@@ -10,7 +11,7 @@ export function UndoMenuItemFactory(accessor: IAccessor): IMenuItem {
         id: UndoCommand.id,
         icon: 'ForwardIcon',
         title: 'Undo',
-        menu: [MenuPosition.TOOLBAR, MenuPosition.CONTEXT_MENU],
+        menu: [MenuPosition.TOOLBAR],
         disabled$: undoRedoService.undoRedoStatus$.pipe(map((v) => v.undos <= 0)),
     };
 }
@@ -27,15 +28,39 @@ export function RedoMenuItemFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
-export function BoldMenuItemFactory(accessor: IAccessor): IMenuItem {
-    return {
-        id: SetBoldCommand.id,
-        icon: 'BoldIcon',
-        title: 'Set bold',
-        menu: [MenuPosition.TOOLBAR],
-    };
-}
+// export function BoldMenuItemFactory(accessor: IAccessor): IMenuItem {
+//     return {
+//         id: SetBoldCommand.id,
+//         icon: 'BoldIcon',
+//         title: 'Set bold',
+//         menu: [MenuPosition.TOOLBAR],
+//     };
+// }
 
 // export function FontSelectorMenuItemFactory(accessor: IAccessor): IMenuItem {
 //
 // }
+
+export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: ClearSelectionContentCommand.id,
+        title: 'rightClick.clearContent',
+        menu: [MenuPosition.CONTEXT_MENU],
+    };
+}
+
+export function InsertRowMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: InsertRowCommand.id,
+        menu: [MenuPosition.CONTEXT_MENU],
+        title: 'rightClick.insertRow',
+    };
+}
+
+export function InsertColMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: InsertColCommand.id,
+        menu: [MenuPosition.CONTEXT_MENU],
+        title: 'rightClick.insertColumn',
+    };
+}

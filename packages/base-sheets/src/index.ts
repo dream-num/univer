@@ -13,3 +13,5 @@ export { InsertRowMutation, InsertColMutation, InsertRowMutationFactory, InsertC
 // commands
 export { ChangeSelectionCommand, IChangeSelectionCommandParams, ExpandSelectionCommand, IExpandSelectionCommandParams } from './Commands/Commands/set-selections.command';
 export { SetBoldCommand, SetItalicCommand, SetStrokeCommand, SetStyleCommand, SetUnderlineCommand } from './Commands/Commands/set-style.command';
+export { ClearSelectionContentCommand } from './Commands/Commands/clear-selection-content.command';
+export { InsertRowCommand, InsertColCommand } from './Commands/Commands/insert-row-col.command';

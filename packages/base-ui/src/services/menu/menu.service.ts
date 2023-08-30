@@ -21,17 +21,15 @@ export interface IMenuItemState {
 export interface IMenuItem {
     id: string;
     menu: OneOrMany<MenuPosition>;
-    title: string;
+    subMenus?: string[];
 
+    title: string;
     icon?: string;
     tooltip?: string;
     description?: string;
 
     activated$?: Observable<boolean>;
     disabled$?: Observable<boolean>;
-    hidden?: Observable<boolean>;
-
-    handler?: () => void;
 }
 
 export interface IDisplayMenuItem extends IMenuItem {

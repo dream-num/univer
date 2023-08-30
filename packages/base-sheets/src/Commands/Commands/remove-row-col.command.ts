@@ -24,7 +24,9 @@ export const RemoveRowCommand: ICommand = {
             rowIndex: params.rowIndex,
             rowCount: params.rowCount,
         };
+
         const undoClearMutationParams: IInsertRowMutationParams = IRemoveRowMutationFactory(accessor, removeRowMutationParams);
+
         const result = commandService.executeCommand(RemoveRowMutation.id, removeRowMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({

@@ -4,4 +4,12 @@ export * from './Controller';
 export * from './Basics';
 export * from './View';
 export { ICanvasView, ISelectionManager } from './Services/tokens';
-export * from './Commands/Mutations';
+
+// mutations
+export { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from './Commands/Mutations/remove-sheet.mutation';
+export { InsertSheetMutation, InsertSheetUndoMutationFactory } from './Commands/Mutations/insert-sheet.mutation';
+export { InsertRowMutation, InsertColMutation, InsertRowMutationFactory, InsertColMutationFactory } from './Commands/Mutations/insert-row-col.mutation';
+
+// commands
+export { ChangeSelectionCommand, IChangeSelectionCommandParams, ExpandSelectionCommand, IExpandSelectionCommandParams } from './Commands/Commands/set-selections.command';
+export { SetBoldCommand, SetItalicCommand, SetStrokeCommand, SetStyleCommand, SetUnderlineCommand } from './Commands/Commands/set-style.command';

@@ -21,7 +21,6 @@ import { columnIterator } from '../Docs/Common/Tools';
 import { DocumentSkeleton } from '../Docs/DocSkeleton';
 import { IDocumentSkeletonColumn } from '../../Basics/IDocumentSkeletonCached';
 import { getRotateOffsetAndFarthestHypotenuse, getRotateOrientation } from '../../Basics/Draw';
-import { SelectionManager } from './Selection/SelectionManager';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 
@@ -43,8 +42,6 @@ export class Spreadsheet extends SheetComponent {
     private _cacheOffsetY = 0;
 
     private _hasSelection = false;
-
-    private _selection: SelectionManager;
 
     private _documents: Documents = new Documents(OBJECT_KEY, undefined, {
         pageMarginLeft: 0,
@@ -364,12 +361,10 @@ export class Spreadsheet extends SheetComponent {
         if (this._hasSelection) {
             return;
         }
-        this._selection = SelectionManager.create(this);
         this._hasSelection = true;
     }
 
     disableSelection() {
-        this._selection?.dispose();
         this._hasSelection = false;
     }
 

@@ -60,7 +60,8 @@
         "dayjs": "^1.11.5",
         "es6-proxy-polyfill": "^2.1.1",
         "nanoid": "4.0.0",
-        "numeral": "^2.0.6"
+        "numeral": "^2.0.6",
+        "rxjs": "^7.8.1"
     },
     "devDependencies": {
         "@types/jest": "^28.1.8",

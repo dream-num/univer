@@ -255,19 +255,4 @@ export class ToolbarController {
             });
         }
     }
-
-    private getCurrentSelectionRange() {
-        const controls = this._selectionManager.getCurrentControls();
-        const selections = controls?.map((control: SelectionController) => {
-            const model: SelectionModel = control.model;
-            return {
-                startRow: model.startRow,
-                startColumn: model.startColumn,
-                endRow: model.endRow,
-                endColumn: model.endColumn,
-            };
-        });
-        if (!selections) return;
-        return selections[0];
-    }
 }

@@ -2,6 +2,7 @@ import { BaseButtonProps } from '../../BaseComponent';
 import { Component } from '../../Framework';
 import { joinClassNames } from '../../Utils';
 import { LoadingIcon } from '../Icon';
+
 import styles from './Style/index.module.less';
 
 // const ButtonTypes: string[] = ['default', 'primary'];

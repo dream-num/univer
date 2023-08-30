@@ -1,7 +1,7 @@
 {
     "name": "univer",
     "version": "1.0.0-pre-alpha",
-    "description": "Univer,Luckysheet 2.0 upgrade version",
+    "description": "Univer, Luckysheet 2.0 upgrade version",
     "private": true,
     "scripts": {
         "test": "node scripts/test",

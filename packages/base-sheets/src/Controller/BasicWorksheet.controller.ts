@@ -1,12 +1,27 @@
 import { IDisposable } from '@wendellhu/redi';
 import { Disposable, ICommandService, IRangeData, IStyleData, ObjectMatrix, Tools } from '@univerjs/core';
-
 import { ClearSelectionContentCommand } from '../Commands/Commands/clear-selection-content.command';
 import { SetRangeValuesMutation } from '../Commands/Mutations/set-range-values.mutation';
 import { SetWorksheetNameCommand } from '../Commands/Commands/set-worksheet-name.command';
 import { SetWorksheetNameMutation } from '../Commands/Mutations/set-worksheet-name.mutation';
+import { SetWorksheetActivateCommand } from '../Commands/Commands/set-worksheet-activate.command';
+import { SetWorksheetActivateMutation } from '../Commands/Mutations/set-worksheet-activate.mutation';
 import { SetStyleCommand } from '../Commands/Commands/set-style.command';
 import { SetRangeStyleMutation } from '../Commands/Mutations/set-range-styles.mutation';
+import { InsertColCommand, InsertRowCommand } from '../Commands/Commands/insert-row-col.command';
+import { RemoveColCommand, RemoveRowCommand } from '../Commands/Commands/remove-row-col.command';
+import { SetWorksheetHideCommand } from '../Commands/Commands/set-worksheet-hide.command';
+import { SetWorksheetHideMutation } from '../Commands/Mutations/set-worksheet-hide.mutation';
+import { SetWorksheetColWidthCommand } from '../Commands/Commands/set-worksheet-col-width.command';
+import { SetWorksheetRowHeightCommand } from '../Commands/Commands/set-worksheet-row-height.command';
+import { SetWorksheetRowHideCommand } from '../Commands/Commands/set-worksheet-row-hide.command';
+import { SetWorksheetRowShowCommand } from '../Commands/Commands/set-worksheet-row-show.command';
+import { InsertColMutation, InsertRowMutation } from '../Commands/Mutations/insert-row-col.mutation';
+import { RemoveColMutation, RemoveRowMutation } from '../Commands/Mutations/remove-row-col.mutation';
+import { SetWorksheetColWidthMutation } from '../Commands/Mutations/set-worksheet-col-width.mutation';
+import { SetWorksheetRowHeightMutation } from '../Commands/Mutations/set-worksheet-row-height.mutation';
+import { SetWorksheetRowHideMutation } from '../Commands/Mutations/set-worksheet-row-hide.mutation';
+import { SetWorksheetRowShowMutation } from '../Commands/Mutations/set-worksheet-row-show.mutation';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -24,8 +39,30 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
         this.disposeWithMe(_commandService.registerCommand(SetRangeValuesMutation));
         this.disposeWithMe(_commandService.registerCommand(SetWorksheetNameCommand));
         this.disposeWithMe(_commandService.registerCommand(SetWorksheetNameMutation));
+        this.disposeWithMe(_commandService.registerCommand(SetWorksheetActivateCommand));
+        this.disposeWithMe(_commandService.registerCommand(SetWorksheetActivateMutation));
         this.disposeWithMe(_commandService.registerCommand(SetStyleCommand));
         this.disposeWithMe(_commandService.registerCommand(SetRangeStyleMutation));
+        this.disposeWithMe(_commandService.registerCommand(SetWorksheetHideCommand));
+        this.disposeWithMe(_commandService.registerCommand(SetWorksheetHideMutation));
+
+        this.disposeWithMe(_commandService.registerCommand(InsertRowCommand));
+        this.disposeWithMe(_commandService.registerCommand(InsertRowMutation));
+        this.disposeWithMe(_commandService.registerCommand(RemoveRowCommand));
+        this.disposeWithMe(_commandService.registerCommand(RemoveRowMutation));
+        this.disposeWithMe(_commandService.registerCommand(InsertColCommand));
+        this.disposeWithMe(_commandService.registerCommand(InsertColMutation));
+        this.disposeWithMe(_commandService.registerCommand(RemoveColCommand));
+        this.disposeWithMe(_commandService.registerCommand(RemoveColMutation));
+
+        this.disposeWithMe(_commandService.registerCommand(SetWorksheetColWidthCommand));
+        this.disposeWithMe(_commandService.registerCommand(SetWorksheetColWidthMutation));
+        this.disposeWithMe(_commandService.registerCommand(SetWorksheetRowHeightCommand));
+        this.disposeWithMe(_commandService.registerCommand(SetWorksheetRowHeightMutation));
+        this.disposeWithMe(_commandService.registerCommand(SetWorksheetRowHideCommand));
+        this.disposeWithMe(_commandService.registerCommand(SetWorksheetRowHideMutation));
+        this.disposeWithMe(_commandService.registerCommand(SetWorksheetRowShowCommand));
+        this.disposeWithMe(_commandService.registerCommand(SetWorksheetRowShowMutation));
     }
 
     onInitialize() {}

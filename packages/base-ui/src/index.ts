@@ -8,3 +8,10 @@ export * from './Components';
 export * from './BaseComponent';
 export * from './Framework';
 export * from './UIPlugin';
+
+export { IMenuService, IMenuItem, MenuPosition, DesktopMenuService } from './services/menu/menu.service';
+export { KeyCode, MetaKeys } from './services/shortcut/keycode';
+export { IShortcutService, IShortcutItem, DesktopShortcutService } from './services/shortcut/shorcut.service';
+export { IPlatformService, DesktopPlatformService } from './services/platform/platform.service';
+
+export { SharedController } from './controllers/shared-shortcut.controller';

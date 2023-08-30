@@ -11,11 +11,7 @@ import { IRemoveColumnAction } from '../Action';
  *
  * @internal
  */
-export function RemoveColumn(
-    columnIndex: number,
-    columnCount: number,
-    primitiveData: ObjectArrayPrimitiveType<IColumnData>
-): number {
+export function RemoveColumn(columnIndex: number, columnCount: number, primitiveData: ObjectArrayPrimitiveType<IColumnData>): number {
     const wrapper = new ObjectArray(primitiveData);
     const result = new ObjectArray<IColumnData>();
     const start = columnIndex;

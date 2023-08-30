@@ -1,6 +1,6 @@
-import { Inject, SkipSelf } from '@wendellhu/redi';
+import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 import { BorderInfo, ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
-import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren, ComponentManager, CustomComponent } from '@univerjs/base-ui';
+import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren, ComponentManager, CustomComponent, IMenuService, MenuPosition } from '@univerjs/base-ui';
 import {
     BorderType,
     CommandManager,
@@ -19,6 +19,7 @@ import {
     ITextRotation,
     ICurrentUniverService,
     ObserverManager,
+    Disposable,
 } from '@univerjs/core';
 import { DefaultToolbarConfig, SheetToolbarConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
@@ -35,6 +36,7 @@ import {
 } from '../View/Toolbar/Const';
 
 import styles from '../View/Toolbar/index.module.less';
+import { RedoMenuItemFactory, UndoMenuItemFactory } from './menu';
 
 export interface BaseToolbarSelectProps extends BaseSelectProps {
     children?: BaseSelectChildrenProps[];
@@ -55,9 +57,12 @@ export interface IToolbarItemProps extends BaseToolbarSelectProps {
     suffix?: ComponentChildren;
 }
 
-export class ToolbarUIController {
+export class ToolbarUIController extends Disposable {
     private _toolbar: Toolbar;
 
+    /**
+     * @deprecated
+     */
     private _toolList: IToolbarItemProps[];
 
     private _config: SheetToolbarConfig;
@@ -83,42 +88,19 @@ export class ToolbarUIController {
     // eslint-disable-next-line max-lines-per-function
     constructor(
         config: SheetToolbarConfig | undefined,
+        @Inject(Injector) private readonly _injector: Injector,
         @ISelectionManager private readonly _selectionManager: SelectionManager,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @IMenuService private readonly _menuService: IMenuService
     ) {
+        super();
+
         this._config = Tools.deepMerge({}, DefaultToolbarConfig, config);
 
         // TODO: @wzhudev: toolbar configurations should be moved to command system
         this._toolList = [
-            {
-                toolbarType: 1,
-                tooltip: 'toolbar.undo',
-                name: 'undo',
-                label: {
-                    name: 'ForwardIcon',
-                },
-                show: this._config.undo,
-                onClick: () => {
-                    this.setUndo();
-                    this.hideTooltip();
-                },
-            },
-            {
-                toolbarType: 1,
-                tooltip: 'toolbar.redo',
-                label: {
-                    name: 'BackIcon',
-                },
-                name: 'redo',
-                show: this._config.redo,
-                onClick: () => {
-                    this.setRedo();
-                    this.hideTooltip();
-                },
-            },
             {
                 type: 0,
                 tooltip: 'toolbar.font',
@@ -454,10 +436,15 @@ export class ToolbarUIController {
     // 获取Toolbar组件
     getComponent = (ref: Toolbar) => {
         this._toolbar = ref;
+
+        this._initializeToolbar();
         this.setToolbar();
     };
 
     // 增加toolbar配置
+    /**
+     * @deprecated
+     */
     addToolbarConfig(config: IToolbarItemProps) {
         const index = this._toolList.findIndex((item) => item.name === config.name);
         if (index > -1) return;
@@ -465,6 +452,9 @@ export class ToolbarUIController {
     }
 
     // 删除toolbar配置
+    /**
+     * @deprecated
+     */
     deleteToolbarConfig(name: string) {
         const index = this._toolList.findIndex((item) => item.name === name);
         if (index > -1) {
@@ -472,9 +462,10 @@ export class ToolbarUIController {
         }
     }
 
-    // 刷新toolbar
+    // 刷新 toolbar 数据从 controller 层移动到 view 层
     setToolbar() {
         this._toolbar?.setToolbar(this._toolList);
+        this._toolbar?.setToolbarNeo(this._menuService.getMenuItems(MenuPosition.TOOLBAR));
     }
 
     setUIObserve<T>(msg: UIObserver<T>) {
@@ -729,6 +720,12 @@ export class ToolbarUIController {
 
             this.setToolbar();
         }
+    }
+
+    private _initializeToolbar(): void {
+        [UndoMenuItemFactory, RedoMenuItemFactory].forEach((factory) => {
+            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
+        });
     }
 
     private _initialize() {

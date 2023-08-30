@@ -9,6 +9,7 @@ import {
     ICommandService,
     UndoCommand,
     RedoCommand,
+    IColorStyle,
 } from '@univerjs/core';
 import { Inject, SkipSelf } from '@wendellhu/redi';
 
@@ -24,10 +25,6 @@ export interface BorderInfo {
     type: BorderType;
     color: string;
     style: number;
-}
-
-interface backgroundStyleValue {
-    rgb: string;
 }
 
 export class ToolbarController {
@@ -160,7 +157,7 @@ export class ToolbarController {
         if (!range) return;
         const workbookId = this._currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
-        const style: IStyleTypeValue<backgroundStyleValue> = {
+        const style: IStyleTypeValue<IColorStyle> = {
             type: 'bg',
             value: {
                 rgb: value,
@@ -170,7 +167,16 @@ export class ToolbarController {
     }
 
     private setFontSize(value: number) {
-        this._selectionManager.getActiveRangeList()?.setFontSize(value);
+        const range = this._selectionManager.getActiveRangeData();
+        if (!range) return;
+        const workbookId = this._currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        // const style: IStyleTypeValue<number> = {
+        //     type: 'fs',
+        //     value,
+        // };
+        // this._basicWorksheetController.setStyle(workbookId, worksheetId, style, [range]);
+        this._basicWorksheetController.trimWhitespace(workbookId, worksheetId, [range]);
     }
 
     private setFontFamily(value: string) {

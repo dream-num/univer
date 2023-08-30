@@ -96,10 +96,7 @@ export function DeleteRange(
     return result.getData();
 }
 
-export function DeleteRangeApply(
-    unit: CommandUnit,
-    data: IDeleteRangeActionData
-): ObjectMatrixPrimitiveType<ICellData> {
+export function DeleteRangeApply(unit: CommandUnit, data: IDeleteRangeActionData): ObjectMatrixPrimitiveType<ICellData> {
     const worksheet = unit.WorkBookUnit?.getSheetBySheetId(data.sheetId);
     const cellMatrix = worksheet?.getCellMatrix();
     const count = {

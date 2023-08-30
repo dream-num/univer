@@ -22,17 +22,10 @@ export interface IInsertRangeActionData extends ISheetActionData {
  *
  * @internal
  */
-export class InsertRangeAction extends SheetActionBase<
-    IInsertRangeActionData,
-    IDeleteRangeActionData
-> {
+export class InsertRangeAction extends SheetActionBase<IInsertRangeActionData, IDeleteRangeActionData> {
     static NAME = 'InsertRangeAction';
 
-    constructor(
-        actionData: IInsertRangeActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
+    constructor(actionData: IInsertRangeActionData, commandUnit: CommandUnit, observers: ActionObservers) {
         super(actionData, commandUnit, observers);
         this._doActionData = {
             ...actionData,

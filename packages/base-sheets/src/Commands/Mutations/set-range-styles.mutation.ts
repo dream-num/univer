@@ -24,7 +24,7 @@ export interface ISetRangeStyleMutationParams {
 }
 
 /**
- * Generate undo mutation of a `SetRangeValuesMutation`
+ * Generate undo mutation of a `SetRangeStyleMutation`
  *
  * @param {IAccessor} accessor - injector accessor
  * @param {ISetRangeStyleMutationParams} params - do mutation params

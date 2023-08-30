@@ -17,18 +17,10 @@ export interface ISetRangeFormattedValueActionData extends ISheetActionData {
 /**
  *
  */
-export class SetRangeFormattedValueAction extends SheetActionBase<
-    ISetRangeFormattedValueActionData,
-    ISetRangeFormattedValueActionData,
-    ObjectMatrixPrimitiveType<ICellV>
-> {
+export class SetRangeFormattedValueAction extends SheetActionBase<ISetRangeFormattedValueActionData, ISetRangeFormattedValueActionData, ObjectMatrixPrimitiveType<ICellV>> {
     static NAME = 'SetRangeFormattedValueAction';
 
-    constructor(
-        actionData: ISetRangeFormattedValueActionData,
-        commandUnit: CommandUnit,
-        observers: ActionObservers
-    ) {
+    constructor(actionData: ISetRangeFormattedValueActionData, commandUnit: CommandUnit, observers: ActionObservers) {
         super(actionData, commandUnit, observers);
 
         this._doActionData = {
@@ -45,11 +37,7 @@ export class SetRangeFormattedValueAction extends SheetActionBase<
     do(): ObjectMatrixPrimitiveType<ICellV> {
         const worksheet = this.getWorkSheet();
 
-        const result = SetRangeFormattedValue(
-            worksheet.getCellMatrix(),
-            this._doActionData.cellValue,
-            this._doActionData.rangeData
-        );
+        const result = SetRangeFormattedValue(worksheet.getCellMatrix(), this._doActionData.cellValue, this._doActionData.rangeData);
 
         this._observers.notifyObservers({
             type: ActionType.REDO,
@@ -81,11 +69,7 @@ export class SetRangeFormattedValueAction extends SheetActionBase<
                 // actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
                 actionName: SetRangeDataAction.NAME,
                 sheetId,
-                cellValue: SetRangeFormattedValue(
-                    worksheet.getCellMatrix(),
-                    cellValue,
-                    rangeData
-                ),
+                cellValue: SetRangeFormattedValue(worksheet.getCellMatrix(), cellValue, rangeData),
                 rangeData,
             };
 
@@ -102,7 +86,4 @@ export class SetRangeFormattedValueAction extends SheetActionBase<
     }
 }
 
-CommandManager.register(
-    SetRangeFormattedValueAction.NAME,
-    SetRangeFormattedValueAction
-);
+CommandManager.register(SetRangeFormattedValueAction.NAME, SetRangeFormattedValueAction);

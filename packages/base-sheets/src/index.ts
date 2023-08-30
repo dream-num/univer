@@ -31,3 +31,4 @@ export {
 } from './Commands/Commands/set-style.command';
 export { ClearSelectionContentCommand } from './Commands/Commands/clear-selection-content.command';
 export { InsertRowCommand, InsertColCommand } from './Commands/Commands/insert-row-col.command';
+export { RemoveRowCommand, RemoveColCommand } from './Commands/Commands/remove-row-col.command';

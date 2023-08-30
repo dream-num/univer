@@ -6,6 +6,8 @@ import {
     SetItalicCommand,
     SetStrikeThroughCommand,
     SetUnderlineCommand,
+    RemoveColCommand,
+    RemoveRowCommand
 } from '@univerjs/base-sheets';
 import { IMenuItem, MenuPosition } from '@univerjs/base-ui';
 import { IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
@@ -120,5 +122,21 @@ export function InsertColMenuItemFactory(accessor: IAccessor): IMenuItem {
         id: InsertColCommand.id,
         menu: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.insertColumn',
+    };
+}
+
+export function RemoveRowMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: RemoveRowCommand.id,
+        menu: [MenuPosition.CONTEXT_MENU],
+        title: 'rightClick.deleteSelectedRow',
+    };
+}
+
+export function RemoveColMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: RemoveColCommand.id,
+        menu: [MenuPosition.CONTEXT_MENU],
+        title: 'rightClick.deleteSelectedColumn',
     };
 }

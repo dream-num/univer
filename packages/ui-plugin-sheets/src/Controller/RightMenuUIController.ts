@@ -6,7 +6,7 @@ import { CanvasView } from '@univerjs/base-sheets';
 import { DefaultRightMenuConfig, SheetRightMenuConfig } from '../Basics';
 import { RightMenu, RightMenuInput, RightMenuItem } from '../View';
 import styles from '../View/RightMenu/index.module.less';
-import { ClearSelectionMenuItemFactory, InsertColMenuItemFactory, InsertRowMenuItemFactory } from './menu';
+import { ClearSelectionMenuItemFactory, InsertColMenuItemFactory, InsertRowMenuItemFactory, RemoveColMenuItemFactory, RemoveRowMenuItemFactory } from './menu';
 
 interface CustomLabelProps {
     prefix?: string[] | string;
@@ -306,7 +306,7 @@ export class RightMenuUIController extends Disposable {
     }
 
     private _initializeContextMenu() {
-        [ClearSelectionMenuItemFactory, InsertRowMenuItemFactory, InsertColMenuItemFactory].forEach((factory) => {
+        [ClearSelectionMenuItemFactory, InsertRowMenuItemFactory, InsertColMenuItemFactory, RemoveRowMenuItemFactory, RemoveColMenuItemFactory].forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
     }

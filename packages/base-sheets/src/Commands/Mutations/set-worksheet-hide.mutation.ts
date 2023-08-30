@@ -1,13 +1,13 @@
 import { BooleanNumber, CommandType, ICurrentUniverService, IMutation } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-export interface ISetWorksheetHiddenMutationParams {
+export interface ISetWorksheetHideMutationParams {
     hidden: BooleanNumber;
     workbookId: string;
     worksheetId: string;
 }
 
-export const SetWorksheetHiddenMutationFactory = (accessor: IAccessor, params: ISetWorksheetHiddenMutationParams): ISetWorksheetHiddenMutationParams => {
+export const SetWorksheetHideMutationFactory = (accessor: IAccessor, params: ISetWorksheetHideMutationParams): ISetWorksheetHiddenMutationParams => {
     const universheet = accessor.get(ICurrentUniverService).getCurrentUniverSheetInstance();
     const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
     if (worksheet == null) {
@@ -20,7 +20,7 @@ export const SetWorksheetHiddenMutationFactory = (accessor: IAccessor, params: I
     };
 };
 
-export const SetWorksheetHiddenMutation: IMutation<ISetWorksheetHiddenMutationParams> = {
+export const SetWorksheetHideMutation: IMutation<ISetWorksheetHideMutationParams> = {
     id: 'sheet.mutation.set-worksheet-hidden',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {

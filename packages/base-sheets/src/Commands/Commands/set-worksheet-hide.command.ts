@@ -1,6 +1,6 @@
 import { BooleanNumber, CommandType, ICommand, ICommandService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
-import { ISetWorksheetHiddenMutationParams, SetWorksheetHiddenMutation, SetWorksheetHiddenMutationFactory } from '../Mutations/set-worksheet-hidden.mutation';
+import { ISetWorksheetHideMutationParams, SetWorksheetHideMutation, SetWorksheetHideMutationFactory } from '../Mutations/set-worksheet-hide.mutation';
 
 export interface ISetWorksheetHiddenCommandParams {
     hidden: BooleanNumber;
@@ -8,7 +8,7 @@ export interface ISetWorksheetHiddenCommandParams {
     worksheetId: string;
 }
 
-export const SetWorksheetHiddenCommand: ICommand = {
+export const SetWorksheetHideCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-hidden',
 
@@ -16,23 +16,23 @@ export const SetWorksheetHiddenCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const setWorksheetHiddenMutationParams: ISetWorksheetHiddenMutationParams = {
+        const redoMutationParams: ISetWorksheetHideMutationParams = {
             hidden: params.hidden,
             workbookId: params.workbookId,
             worksheetId: params.worksheetId,
         };
 
-        const undoSetWorksheetHiddenMutationFactoryParams = SetWorksheetHiddenMutationFactory(accessor, setWorksheetHiddenMutationParams);
-        const result = commandService.executeCommand(SetWorksheetHiddenMutation.id, setWorksheetHiddenMutationParams);
+        const undoMutationParams = SetWorksheetHideMutationFactory(accessor, redoMutationParams);
+        const result = commandService.executeCommand(SetWorksheetHideMutation.id, redoMutationParams);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: 'sheet',
                 undo() {
-                    return commandService.executeCommand(SetWorksheetHiddenMutation.id, undoSetWorksheetHiddenMutationFactoryParams);
+                    return commandService.executeCommand(SetWorksheetHideMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetWorksheetHiddenMutation.id, setWorksheetHiddenMutationParams);
+                    return commandService.executeCommand(SetWorksheetHideMutation.id, redoMutationParams);
                 },
             });
             return true;

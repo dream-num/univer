@@ -12,10 +12,10 @@ import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Ba
 export const RemoveSheetUndoMutationFactory = (accessor: IAccessor, params: IRemoveSheetMutationParams): IInsertSheetMutationParams => {
     const currentUniverService = accessor.get(ICurrentUniverService);
     const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-    const { sheetId, workbookId } = params;
-    const sheet = workbook.getSheetBySheetId(sheetId)!.getConfig();
+    const { worksheetId, workbookId } = params;
+    const sheet = workbook.getSheetBySheetId(worksheetId)!.getConfig();
     const config = workbook!.getConfig();
-    const index = config.sheetOrder.findIndex((id) => id === sheetId);
+    const index = config.sheetOrder.findIndex((id) => id === worksheetId);
 
     return {
         index,
@@ -29,14 +29,14 @@ export const RemoveSheetMutation: IMutation<IRemoveSheetMutationParams, boolean>
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const { sheetId, workbookId } = params;
+        const { worksheetId, workbookId } = params;
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
 
         if (!workbook) {
             return false;
         }
 
-        workbook.removeSheetBySheetId(sheetId);
+        workbook.removeSheetBySheetId(worksheetId);
 
         return true;
     },

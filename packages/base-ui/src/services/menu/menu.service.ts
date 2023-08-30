@@ -21,17 +21,20 @@ export interface IMenuItemState {
 export interface IMenuItem {
     id: string;
     menu: OneOrMany<MenuPosition>;
-    title: string;
+    subMenus?: string[];
 
+    title: string;
     icon?: string;
     tooltip?: string;
     description?: string;
 
+    activated$?: Observable<boolean>;
     disabled$?: Observable<boolean>;
-    hidden?: Observable<boolean>;
-    checked?: Observable<boolean>; // TODO: @wzhudev: maybe we should add a `data` property here instead of `checked` property?
+}
 
-    handler?: () => void;
+export interface IDisplayMenuItem extends IMenuItem {
+    /** MenuService should get responsible shortcut and display on the UI. */
+    shortcut?: string;
 }
 
 export const IMenuService = createIdentifier<IMenuService>('univer.menu-service');
@@ -74,12 +77,13 @@ export class DesktopMenuService extends Disposable implements IMenuService {
         });
     }
 
-    getMenuItems(positions: MenuPosition): IMenuItem[] {
+    getMenuItems(positions: MenuPosition): IDisplayMenuItem[] {
+        // TODO: @wzhudev: compose shortcut to returned menu items.
         if (this._menuByPositions.has(positions)) {
             return [...this._menuByPositions.get(positions)!.values()];
         }
 
-        return [] as IMenuItem[];
+        return [] as IDisplayMenuItem[];
     }
 
     getMenuItem(id: string): IMenuItem | null {

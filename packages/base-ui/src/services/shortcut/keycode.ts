@@ -10,10 +10,11 @@ export const enum KeyCode {
     TAB = 17,
     ESC = 27,
     SPACE = 32,
-    LEFT = 37,
-    UP = 38,
-    RIGHT = 39,
-    DOWN = 40,
+
+    ARROW_LEFT = 37,
+    ARROW_UP = 38,
+    ARROW_RIGHT = 39,
+    ARROW_DOWN = 40,
     INSERT = 45,
 
     Digit0 = 48,

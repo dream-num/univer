@@ -1,5 +1,5 @@
 import { IDisposable } from '@wendellhu/redi';
-import { Dimension, Disposable, ICellData, ICellV, ICommandService, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import { Dimension, Disposable, ICellData, ICellV, ICommandService, IRangeData, IStyleData, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univerjs/core';
 
 import { ClearSelectionContentCommand } from '../Commands/Commands/clear-selection-content.command';
 import { SetRangeValuesMutation } from '../Commands/Mutations/set-range-values.mutation';
@@ -7,18 +7,35 @@ import { SetWorksheetNameCommand } from '../Commands/Commands/set-worksheet-name
 import { SetWorksheetNameMutation } from '../Commands/Mutations/set-worksheet-name.mutation';
 import { SetWorksheetActivateCommand } from '../Commands/Commands/set-worksheet-activate.command';
 import { SetWorksheetActivateMutation } from '../Commands/Mutations/set-worksheet-activate.mutation';
-import { ISetStyleParams, IStyleTypeValue, SetStyleCommand } from '../Commands/Commands/set-style.command';
+import { ISetStyleParams, SetStyleCommand } from '../Commands/Commands/set-style.command';
 import { SetRangeStyleMutation } from '../Commands/Mutations/set-range-styles.mutation';
-import { SetWorksheetHiddenCommand } from '../Commands/Commands/set-worksheet-hidden.command';
-import { SetWorksheetHiddenMutation } from '../Commands/Mutations/set-worksheet-hidden.mutation';
-import { SetRangeFormattedValueMutation } from '../Commands/Mutations/set-range-formatted-value.mutation';
 import { ISetRangeFormattedValueParams, SetRangeFormattedValueCommand } from '../Commands/Commands/set-range-formatted-value.command';
 import { DeleteRangeCommand, IDeleteRangeParams } from '../Commands/Commands/delete-range.command';
-import { DeleteRangeMutation } from '../Commands/Mutations/delete-range.mutation';
 import { IInsertRangeParams, InsertRangeCommand } from '../Commands/Commands/insert-range.command';
-import { InsertRangeMutation } from '../Commands/Mutations/insert-range.mutation';
 import { TrimWhitespaceCommand } from '../Commands/Commands/trim-whitespace.command';
 import { ISetRangeValuesCommandParams, SetRangeValuesCommand } from '../Commands/Commands/set-range-values.command';
+import { SetWorksheetHideCommand } from '../Commands/Commands/set-worksheet-hide.command';
+import { SetWorksheetHideMutation } from '../Commands/Mutations/set-worksheet-hide.mutation';
+import { InsertColCommand, InsertRowCommand } from '../Commands/Commands/insert-row-col.command';
+import { InsertColMutation, InsertRowMutation } from '../Commands/Mutations/insert-row-col.mutation';
+import { RemoveColCommand, RemoveRowCommand } from '../Commands/Commands/remove-row-col.command';
+import { RemoveColMutation, RemoveRowMutation } from '../Commands/Mutations/remove-row-col.mutation';
+import { SetWorksheetColWidthCommand } from '../Commands/Commands/set-worksheet-col-width.command';
+import { SetWorksheetColWidthMutation } from '../Commands/Mutations/set-worksheet-col-width.mutation';
+import { SetWorksheetRowHeightCommand } from '../Commands/Commands/set-worksheet-row-height.command';
+import { SetWorksheetRowHeightMutation } from '../Commands/Mutations/set-worksheet-row-height.mutation';
+import { SetWorksheetRowHideCommand } from '../Commands/Commands/set-worksheet-row-hide.command';
+import { SetWorksheetRowHideMutation } from '../Commands/Mutations/set-worksheet-row-hide.mutation';
+import { SetWorksheetRowShowCommand } from '../Commands/Commands/set-worksheet-row-show.command';
+import { SetWorksheetRowShowMutation } from '../Commands/Mutations/set-worksheet-row-show.mutation';
+import { InsertRangeMutation } from '../Commands/Mutations/insert-range.mutation';
+import { DeleteRangeMutation } from '../Commands/Mutations/delete-range.mutation';
+import { SetRangeFormattedValueMutation } from '../Commands/Mutations/set-range-formatted-value.mutation';
+
+export interface IStyleTypeValue<T> {
+    type: keyof IStyleData;
+    value: T | T[][];
+}
 
 /**
  * The controller to provide the most basic sheet CRUD methods to other modules of sheet modules.
@@ -27,29 +44,46 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
     constructor(@ICommandService private readonly _commandService: ICommandService) {
         super();
 
-        this.disposeWithMe(_commandService.registerCommand(ClearSelectionContentCommand));
-        this.disposeWithMe(_commandService.registerCommand(SetRangeValuesMutation));
-        this.disposeWithMe(_commandService.registerCommand(SetWorksheetNameCommand));
-        this.disposeWithMe(_commandService.registerCommand(SetWorksheetNameMutation));
-        this.disposeWithMe(_commandService.registerCommand(SetWorksheetActivateCommand));
-        this.disposeWithMe(_commandService.registerCommand(SetWorksheetActivateMutation));
-        this.disposeWithMe(_commandService.registerCommand(SetStyleCommand));
-        this.disposeWithMe(_commandService.registerCommand(SetRangeStyleMutation));
-        this.disposeWithMe(_commandService.registerCommand(SetWorksheetHiddenCommand));
-        this.disposeWithMe(_commandService.registerCommand(SetWorksheetHiddenMutation));
-        this.disposeWithMe(_commandService.registerCommand(SetRangeFormattedValueCommand));
-        this.disposeWithMe(_commandService.registerCommand(SetRangeFormattedValueMutation));
-        this.disposeWithMe(_commandService.registerCommand(DeleteRangeCommand));
-        this.disposeWithMe(_commandService.registerCommand(DeleteRangeMutation));
-        this.disposeWithMe(_commandService.registerCommand(InsertRangeCommand));
-        this.disposeWithMe(_commandService.registerCommand(InsertRangeMutation));
-        this.disposeWithMe(_commandService.registerCommand(TrimWhitespaceCommand));
-        this.disposeWithMe(_commandService.registerCommand(SetRangeValuesCommand));
+        [
+            ClearSelectionContentCommand,
+            SetRangeValuesMutation,
+            SetWorksheetNameCommand,
+            SetWorksheetNameMutation,
+            SetWorksheetActivateCommand,
+            SetWorksheetActivateMutation,
+            SetStyleCommand,
+            SetRangeStyleMutation,
+            SetWorksheetHideCommand,
+            SetWorksheetHideMutation,
+
+            InsertRowCommand,
+            InsertRowMutation,
+            RemoveRowCommand,
+            RemoveRowMutation,
+            InsertColCommand,
+            InsertColMutation,
+            RemoveColCommand,
+            RemoveColMutation,
+
+            SetWorksheetColWidthCommand,
+            SetWorksheetColWidthMutation,
+            SetWorksheetRowHeightCommand,
+            SetWorksheetRowHeightMutation,
+            SetWorksheetRowHideCommand,
+            SetWorksheetRowHideMutation,
+            SetWorksheetRowShowCommand,
+            SetWorksheetRowShowMutation,
+
+            SetRangeValuesCommand,
+            TrimWhitespaceCommand,
+            InsertRangeCommand,
+            InsertRangeMutation,
+            DeleteRangeCommand,
+            DeleteRangeMutation,
+            SetRangeFormattedValueCommand,
+            SetRangeFormattedValueMutation,
+        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
-
-    onInitialize() {}
-
-    // TODO: @Dushusir: add other basic mutation methods here.
 
     /**
      * Clear contents in the current selected ranges.
@@ -153,4 +187,3 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
     //     return this._commandService.executeCommand(SetRangeFormattedValueCommand.id, options);
     // }
 }
-export { IStyleTypeValue };

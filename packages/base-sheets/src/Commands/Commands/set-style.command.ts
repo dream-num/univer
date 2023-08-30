@@ -1,7 +1,8 @@
 import { IAccessor } from '@wendellhu/redi';
-import { CommandType, ICommand, ICommandService, IRangeData, IStyleData, IUndoRedoService, ObjectMatrix, Tools } from '@univerjs/core';
+import { CommandType, ICommand, ICommandService, ICurrentUniverService, IRangeData, IStyleData, IUndoRedoService, ObjectMatrix, Tools } from '@univerjs/core';
 
 import { ISetRangeStyleMutationParams, SetRangeStyleMutation, SetRangeStyleUndoMutationFactory } from '../Mutations/set-range-styles.mutation';
+import { ISelectionManager } from '../../Services/tokens';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -17,6 +18,7 @@ export interface ISetStyleParams<T> {
 
 /**
  * The command to set cell style.
+ * Set style to a bunch of ranges.
  */
 export const SetStyleCommand: ICommand = {
     type: CommandType.COMMAND,
@@ -78,6 +80,55 @@ export const SetStyleCommand: ICommand = {
 
         return false;
     },
-    // all subsequent mutations should succeed inorder to make the whole process succeed
-    // Promise.all([]).then(() => true),
+};
+
+/**
+ * Set bold font style to currently selected ranges. If the cell is already bold then it will cancel the bold style.
+ */
+export const SetBoldCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-bold',
+    handler: async (accessor) => {
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        const selectionManager = accessor.get(ISelectionManager);
+        const commandService = accessor.get(ICommandService);
+        const selections = selectionManager.getCurrentSelections();
+        const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+
+        const setStyleParams: ISetStyleParams = {
+            workbookId: workbook.getUnitId(),
+            worksheetId: workbook.getActiveSheet().getSheetId(),
+            range: selections,
+            value: {}, // TODO@wzhudev: change this value to bold style or unset bold style
+        };
+
+        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+    },
+};
+
+/**
+ * Set italic font style to currently selected ranges. If the cell is already italic then it will cancel the italic style.
+ */
+export const SetItalicCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-italic',
+    handler: async (accessor, params) => true,
+};
+
+/**
+ * Set underline font style to currently selected ranges. If the cell is already underline then it will cancel the underline style.
+ */
+export const SetUnderlineCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-underline',
+    handler: async (accessor, params) => true,
+};
+
+/**
+ * Set strike through font style to currently selected ranges. If the cell is already stroke then it will cancel the stroke style.
+ */
+export const SetStrikeThroughCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-stroke',
+    handler: async (accessor) => true,
 };

@@ -723,6 +723,7 @@ export class ToolbarUIController extends Disposable {
     }
 
     private _initializeToolbar(): void {
+        // TODO@wzhudev: these factory would not be registered here
         [UndoMenuItemFactory, RedoMenuItemFactory].forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });

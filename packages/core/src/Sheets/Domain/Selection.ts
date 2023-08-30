@@ -498,7 +498,7 @@ export class Selection {
                 endColumn: endColumn !== undefined ? endColumn : range.endColumn,
             };
         }
-        if (direction === Direction.TOP) {
+        if (direction === Direction.UP) {
             let startRow;
             let endRow;
             if (currentCell.endRow === range.endRow) {
@@ -578,7 +578,7 @@ export class Selection {
                 endColumn: range.endColumn,
             };
         }
-        if (direction === Direction.BOTTOM) {
+        if (direction === Direction.DOWN) {
             let startRow;
             let endRow;
             if (currentCell.startRow === range.startRow) {

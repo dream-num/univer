@@ -2,7 +2,7 @@ import { Dimension, ICellData, IRangeData, IWorksheetConfig, ObjectMatrixPrimiti
 
 /** Params of `RemoveSheetMutation` */
 export interface IRemoveSheetMutationParams {
-    sheetId: string;
+    worksheetId: string;
     workbookId: string;
 }
 
@@ -62,4 +62,18 @@ export interface IInsertRangeMutationParams {
     range: IRangeData;
     shiftDimension: Dimension;
     cellValue: ObjectMatrixPrimitiveType<ICellData>;
+}
+
+/** Params of RemoveWorksheetMergeMutation */
+export interface IRemoveWorksheetMergeMutationParams {
+    workbookId: string;
+    worksheetId: string;
+    rectangles: IRangeData[];
+}
+
+/** Params of AddWorksheetMergeMutation */
+export interface IAddWorksheetMergeMutationParams {
+    workbookId: string;
+    worksheetId: string;
+    rectangles: IRangeData[];
 }

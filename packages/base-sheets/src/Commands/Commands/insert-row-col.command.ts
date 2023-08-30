@@ -77,7 +77,7 @@ export const InsertColCommand: ICommand<InsertColCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-col',
 
-    handler: async (accessor, params) => {
+    handler: async (accessor, params: InsertColCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 

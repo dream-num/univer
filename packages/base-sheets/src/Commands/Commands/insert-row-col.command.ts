@@ -73,11 +73,11 @@ export interface InsertColCommandParams {
     insertColData: ObjectMatrixPrimitiveType<ICellData>;
 }
 
-export const InsertColCommand: ICommand = {
+export const InsertColCommand: ICommand<InsertColCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-col',
 
-    handler: async (accessor: IAccessor, params: InsertColCommandParams) => {
+    handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 

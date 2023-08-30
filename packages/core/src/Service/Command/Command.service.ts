@@ -12,29 +12,28 @@ export const enum CommandType {
     MUTATION = 2,
 }
 
-export interface ICommand<P extends object = object, R = boolean> {
+export interface ICommand<P extends object | undefined = undefined, R = boolean> {
     /**
      * ${businessName}.${type}.${name}
      */
     readonly id: string;
-
     readonly type: CommandType;
 
-    handler(accessor: IAccessor, params: P | undefined): Promise<R>;
+    handler(accessor: IAccessor, params: P): Promise<R>;
 }
 
 /**
  * Mutation would change the model of Univer applications.
  */
-export interface IMutation<P extends object = object, R = boolean> extends ICommand<P, R> {
+export interface IMutation<P extends object | undefined = undefined, R = boolean> extends ICommand<P, R> {
     type: CommandType.MUTATION;
 }
 
 /**
  * Operation would change the state of Univer applications. State should only be in memory and does not
- * require data confliction.
+ * require data conflicting.
  */
-export interface IOperation<P extends object = object> extends ICommand<P> {
+export interface IOperation<P extends object | undefined = undefined> extends ICommand<P> {
     type: CommandType.OPERATION;
 }
 
@@ -58,7 +57,8 @@ export interface IExecutionOptions {
 export type CommandListener = (commandInfo: Readonly<ICommandInfo>) => void;
 
 export interface ICommandService {
-    registerCommand<P extends object>(command: ICommand<P>): IDisposable;
+    registerCommand<P extends object | undefined>(command: ICommand<P>): IDisposable;
+
     executeCommand(id: string, params?: object, options?: IExecutionOptions): Promise<boolean> | boolean;
 
     /**
@@ -92,11 +92,12 @@ export const ICommandService = createIdentifier<ICommandService>('anywhere.comma
  * The registry of commands.
  */
 class CommandRegistry {
-    private readonly commands = new Map<string, ICommand>();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private readonly commands = new Map<string, ICommand<any, any>>();
 
     private readonly commandInjector = new Map<string, Injector>();
 
-    registerCommand(command: ICommand, injector: Injector): IDisposable {
+    registerCommand<P extends object | undefined>(command: ICommand<P>, injector: Injector): IDisposable {
         if (this.commands.has(command.id) || this.commandInjector.has(command.id)) {
             throw new Error(`Command ${command.id} has registered before!`);
         }
@@ -136,7 +137,7 @@ export class CommandService implements ICommandService {
         this._commandRegistry = new CommandRegistry();
     }
 
-    registerCommand(command: ICommand): IDisposable {
+    registerCommand<P extends object | undefined>(command: ICommand<P>): IDisposable {
         return this._registerCommand(command, this._injector);
     }
 
@@ -220,7 +221,7 @@ export class CommandService implements ICommandService {
         throw new Error(`Command "${id}" is not registered.`);
     }
 
-    private _registerCommand<P extends object>(command: ICommand<P>, injector: Injector): IDisposable {
+    private _registerCommand<P extends undefined | object>(command: ICommand<P>, injector: Injector): IDisposable {
         if (this._parentCommandService) {
             return this._parentCommandService._registerCommand(command, injector);
         }
@@ -236,11 +237,12 @@ export class CommandService implements ICommandService {
         const result = await injector.invoke(command.handler, params);
         this._commandExecutingLevel--;
 
-        // MOTE: remove from old command manager
+        // TODO: remove from old command manager
         if (command.type === CommandType.MUTATION) {
             CommandManager.getActionObservers().notifyObservers({
                 type: ActionType.REDO,
                 data: result as unknown as IActionData,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 action: null as any,
             });
         }

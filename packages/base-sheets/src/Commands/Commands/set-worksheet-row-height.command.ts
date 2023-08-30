@@ -16,22 +16,22 @@ export const SetWorksheetRowHeightCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const setWorksheetNameMutationParams: ISetWorksheetRowHeightMutationParams = {
+        const redoMutationParams: ISetWorksheetRowHeightMutationParams = {
             worksheetId: params.worksheetId,
             workbookId: params.workbookId,
             rowIndex: params.rowIndex,
             rowHeight: params.rowHeight,
         };
-        const undoClearMutationParams: ISetWorksheetRowHeightMutationParams = SetWorksheetRowHeightMutationFactory(accessor, setWorksheetNameMutationParams);
-        const result = commandService.executeCommand(SetWorksheetRowHeightMutation.id, setWorksheetNameMutationParams);
+        const undoMutationParams: ISetWorksheetRowHeightMutationParams = SetWorksheetRowHeightMutationFactory(accessor, redoMutationParams);
+        const result = commandService.executeCommand(SetWorksheetRowHeightMutation.id, redoMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: 'sheet',
                 undo() {
-                    return commandService.executeCommand(SetWorksheetRowHeightMutation.id, undoClearMutationParams);
+                    return commandService.executeCommand(SetWorksheetRowHeightMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetWorksheetRowHeightMutation.id, setWorksheetNameMutationParams);
+                    return commandService.executeCommand(SetWorksheetRowHeightMutation.id, redoMutationParams);
                 },
             });
 

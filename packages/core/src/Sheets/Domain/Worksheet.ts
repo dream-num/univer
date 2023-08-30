@@ -1199,6 +1199,7 @@ export class Worksheet {
     // }
 
     /**
+     * @deprecated
      * Sets the BorderStyles
      * @param rangeData
      * @param style

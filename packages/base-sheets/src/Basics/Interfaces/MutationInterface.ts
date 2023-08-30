@@ -1,4 +1,4 @@
-import { ICellData, IWorksheetConfig, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import { ICellData, IRangeData, IWorksheetConfig, ObjectMatrixPrimitiveType } from '@univerjs/core';
 
 /** Params of `RemoveSheetMutation` */
 export interface IRemoveSheetMutationParams {
@@ -45,4 +45,18 @@ export interface IRemoveColMutationParams {
     worksheetId: string;
     colIndex: number;
     colCount: number;
+}
+
+/** Params of RemoveWorksheetMergeMutation */
+export interface IRemoveWorksheetMergeMutationParams {
+    workbookId: string;
+    worksheetId: string;
+    rectangles: IRangeData[];
+}
+
+/** Params of AddWorksheetMergeMutation */
+export interface IAddWorksheetMergeMutationParams {
+    workbookId: string;
+    worksheetId: string;
+    rectangles: IRangeData[];
 }

@@ -16,22 +16,22 @@ export const SetWorksheetColWidthCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const setWorksheetNameMutationParams: ISetWorksheetColWidthMutationParams = {
+        const redoMutationParams: ISetWorksheetColWidthMutationParams = {
             worksheetId: params.worksheetId,
             workbookId: params.workbookId,
             colIndex: params.colIndex,
             colWidth: params.colWidth,
         };
-        const undoClearMutationParams: ISetWorksheetColWidthMutationParams = SetWorksheetColWidthMutationFactory(accessor, setWorksheetNameMutationParams);
-        const result = commandService.executeCommand(SetWorksheetColWidthMutation.id, setWorksheetNameMutationParams);
+        const undoMutationParams: ISetWorksheetColWidthMutationParams = SetWorksheetColWidthMutationFactory(accessor, redoMutationParams);
+        const result = commandService.executeCommand(SetWorksheetColWidthMutation.id, redoMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: 'sheet',
                 undo() {
-                    return commandService.executeCommand(SetWorksheetColWidthMutation.id, undoClearMutationParams);
+                    return commandService.executeCommand(SetWorksheetColWidthMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetWorksheetColWidthMutation.id, setWorksheetNameMutationParams);
+                    return commandService.executeCommand(SetWorksheetColWidthMutation.id, redoMutationParams);
                 },
             });
 

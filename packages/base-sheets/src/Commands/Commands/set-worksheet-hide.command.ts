@@ -16,23 +16,23 @@ export const SetWorksheetHideCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const setWorksheetHiddenMutationParams: ISetWorksheetHideMutationParams = {
+        const redoMutationParams: ISetWorksheetHideMutationParams = {
             hidden: params.hidden,
             workbookId: params.workbookId,
             worksheetId: params.worksheetId,
         };
 
-        const undoSetWorksheetHiddenMutationFactoryParams = SetWorksheetHideMutationFactory(accessor, setWorksheetHiddenMutationParams);
-        const result = commandService.executeCommand(SetWorksheetHideMutation.id, setWorksheetHiddenMutationParams);
+        const undoMutationParams = SetWorksheetHideMutationFactory(accessor, redoMutationParams);
+        const result = commandService.executeCommand(SetWorksheetHideMutation.id, redoMutationParams);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: 'sheet',
                 undo() {
-                    return commandService.executeCommand(SetWorksheetHideMutation.id, undoSetWorksheetHiddenMutationFactoryParams);
+                    return commandService.executeCommand(SetWorksheetHideMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetWorksheetHideMutation.id, setWorksheetHiddenMutationParams);
+                    return commandService.executeCommand(SetWorksheetHideMutation.id, redoMutationParams);
                 },
             });
             return true;

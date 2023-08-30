@@ -15,28 +15,27 @@ export interface InsertRowCommandParams {
 export const InsertRowCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-row',
-
     handler: async (accessor: IAccessor, params: InsertRowCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const insertRowMutationParams: IInsertRowMutationParams = {
+        const redoMutationParams: IInsertRowMutationParams = {
             workbookId: params.workbookId,
             worksheetId: params.worksheetId,
             rowIndex: params.rowIndex,
             rowCount: params.rowCount,
             insertRowData: params.insertRowData,
         };
-        const undoClearMutationParams: IRemoveRowMutationParams = InsertRowMutationFactory(accessor, insertRowMutationParams);
-        const result = commandService.executeCommand(InsertRowMutation.id, insertRowMutationParams);
+        const undoMutationParams: IRemoveRowMutationParams = InsertRowMutationFactory(accessor, redoMutationParams);
+        const result = commandService.executeCommand(InsertRowMutation.id, redoMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: 'sheet',
                 undo() {
-                    return commandService.executeCommand(RemoveRowMutation.id, undoClearMutationParams);
+                    return commandService.executeCommand(RemoveRowMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(InsertRowMutation.id, insertRowMutationParams);
+                    return commandService.executeCommand(InsertRowMutation.id, redoMutationParams);
                 },
             });
             return true;

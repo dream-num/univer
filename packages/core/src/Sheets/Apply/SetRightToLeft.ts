@@ -11,10 +11,7 @@ import { ISetRightToLeftActionData } from '../Action';
  *
  * @internal
  */
-export function SetRightToLeft(
-    worksheet: Worksheet,
-    rightToLeft: BooleanNumber
-): BooleanNumber {
+export function SetRightToLeft(worksheet: Worksheet, rightToLeft: BooleanNumber): BooleanNumber {
     // get config
     const config = worksheet.getConfig();
 
@@ -28,10 +25,7 @@ export function SetRightToLeft(
     return oldState;
 }
 
-export function SetRightToLeftApply(
-    unit: CommandUnit,
-    data: ISetRightToLeftActionData
-) {
+export function SetRightToLeftApply(unit: CommandUnit, data: ISetRightToLeftActionData) {
     const workbook = unit.WorkBookUnit;
     const worksheet = workbook!.getSheetBySheetId(data.sheetId)!;
     const rightToLeft = data.rightToLeft;

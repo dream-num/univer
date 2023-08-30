@@ -18,22 +18,22 @@ export const RemoveRowCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const removeRowMutationParams: IRemoveRowMutationParams = {
+        const redoMutationParams: IRemoveRowMutationParams = {
             workbookId: params.workbookId,
             worksheetId: params.worksheetId,
             rowIndex: params.rowIndex,
             rowCount: params.rowCount,
         };
-        const undoClearMutationParams: IInsertRowMutationParams = IRemoveRowMutationFactory(accessor, removeRowMutationParams);
-        const result = commandService.executeCommand(RemoveRowMutation.id, removeRowMutationParams);
+        const undoMutationParams: IInsertRowMutationParams = IRemoveRowMutationFactory(accessor, redoMutationParams);
+        const result = commandService.executeCommand(RemoveRowMutation.id, redoMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: 'sheet',
                 undo() {
-                    return commandService.executeCommand(InsertRowMutation.id, undoClearMutationParams);
+                    return commandService.executeCommand(InsertRowMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(RemoveRowMutation.id, removeRowMutationParams);
+                    return commandService.executeCommand(RemoveRowMutation.id, redoMutationParams);
                 },
             });
             return true;
@@ -56,22 +56,22 @@ export const RemoveColCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const removeColMutationParams: IRemoveColMutationParams = {
+        const redoMutationParams: IRemoveColMutationParams = {
             workbookId: params.workbookId,
             worksheetId: params.worksheetId,
             colIndex: params.colIndex,
             colCount: params.colCount,
         };
-        const undoClearMutationParams: IRemoveColMutationParams = IRemoveColMutationFactory(accessor, removeColMutationParams);
-        const result = commandService.executeCommand(RemoveColMutation.id, removeColMutationParams);
+        const undoMutationParams: IRemoveColMutationParams = IRemoveColMutationFactory(accessor, redoMutationParams);
+        const result = commandService.executeCommand(RemoveColMutation.id, redoMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: 'sheet',
                 undo() {
-                    return commandService.executeCommand(InsertColMutation.id, undoClearMutationParams);
+                    return commandService.executeCommand(InsertColMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(RemoveColMutation.id, removeColMutationParams);
+                    return commandService.executeCommand(RemoveColMutation.id, redoMutationParams);
                 },
             });
 

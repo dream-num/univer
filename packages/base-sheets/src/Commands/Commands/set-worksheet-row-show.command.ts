@@ -17,24 +17,24 @@ export const SetWorksheetRowShowCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const setWorksheetHiddenMutationParams: ISetWorksheetRowShowMutationParams = {
+        const redoMutationParams: ISetWorksheetRowShowMutationParams = {
             workbookId: params.workbookId,
             worksheetId: params.worksheetId,
             rowIndex: params.rowIndex,
             rowCount: params.rowCount,
         };
 
-        const undoSetWorksheetHiddenMutationFactoryParams = SetWorksheetRowShowMutationFactory(accessor, setWorksheetHiddenMutationParams);
-        const result = commandService.executeCommand(SetWorksheetRowShowMutation.id, setWorksheetHiddenMutationParams);
+        const undoMutationParams = SetWorksheetRowShowMutationFactory(accessor, redoMutationParams);
+        const result = commandService.executeCommand(SetWorksheetRowShowMutation.id, redoMutationParams);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: 'sheet',
                 undo() {
-                    return commandService.executeCommand(SetWorksheetRowHideMutation.id, undoSetWorksheetHiddenMutationFactoryParams);
+                    return commandService.executeCommand(SetWorksheetRowHideMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetWorksheetRowShowMutation.id, setWorksheetHiddenMutationParams);
+                    return commandService.executeCommand(SetWorksheetRowShowMutation.id, redoMutationParams);
                 },
             });
             return true;

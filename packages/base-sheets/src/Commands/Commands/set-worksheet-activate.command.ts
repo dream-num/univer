@@ -15,22 +15,20 @@ export const SetWorksheetActivateCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const setWorksheetActivateMutationParams: ISetWorksheetActivateMutationParams = {
+        const redoMutationParams: ISetWorksheetActivateMutationParams = {
             workbookId: params.workbookId,
             worksheetId: params.worksheetId,
         };
-
-        const undoSetWorksheetActivateMutationParams = SetWorksheetActivateMutationFactory(accessor, setWorksheetActivateMutationParams);
-        const result = commandService.executeCommand(SetWorksheetActivateMutation.id, setWorksheetActivateMutationParams);
-
+        const undoMutationParams = SetWorksheetActivateMutationFactory(accessor, redoMutationParams);
+        const result = commandService.executeCommand(SetWorksheetActivateMutation.id, redoMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: 'sheet',
                 undo() {
-                    return commandService.executeCommand(SetWorksheetActivateMutation.id, undoSetWorksheetActivateMutationParams);
+                    return commandService.executeCommand(SetWorksheetActivateMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetWorksheetActivateMutation.id, setWorksheetActivateMutationParams);
+                    return commandService.executeCommand(SetWorksheetActivateMutation.id, redoMutationParams);
                 },
             });
             return true;

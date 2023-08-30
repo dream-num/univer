@@ -2,7 +2,7 @@ import { IWorksheetConfig } from '@univerjs/core';
 
 /** Params of `RemoveSheetMutation` */
 export interface IRemoveSheetMutationParams {
-    sheetId: string;
+    worksheetId: string;
     workbookId: string;
 }
 

@@ -10,7 +10,7 @@ import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Ba
  * @returns {IRemoveSheetMutationParams} undo mutation params
  */
 export const InsertSheetUndoMutationFactory = (accessor: IAccessor, params: IInsertSheetMutationParams): IRemoveSheetMutationParams => ({
-    sheetId: params.sheet.id,
+    worksheetId: params.sheet.id,
     workbookId: params.workbookId,
 });
 

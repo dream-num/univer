@@ -1,6 +1,7 @@
 import { createIdentifier, IAccessor, IDisposable, Inject, Injector, Optional, SkipSelf } from '@wendellhu/redi';
 import { ActionType, CommandManager, IActionData } from '../../Command';
 import { toDisposable } from '../../Shared/Lifecycle';
+import { ILogService } from '../log/log.service';
 
 export const enum CommandType {
     /** Command could generate some operations or mutations. */
@@ -97,7 +98,7 @@ class CommandRegistry {
 
     registerCommand(command: ICommand, injector: Injector): IDisposable {
         if (this.commands.has(command.id) || this.commandInjector.has(command.id)) {
-            throw new Error();
+            throw new Error(`Command ${command.id} has registered before!`);
         }
 
         this.commands.set(command.id, command);
@@ -125,7 +126,13 @@ export class CommandService implements ICommandService {
 
     private readonly _commandExecutedListeners: CommandListener[] = [];
 
-    constructor(@SkipSelf() @Optional(ICommandService) private readonly _parentCommandService: CommandService, @Inject(Injector) private readonly _injector: Injector) {
+    private _commandExecutingLevel = 0;
+
+    constructor(
+        @SkipSelf() @Optional(ICommandService) private readonly _parentCommandService: CommandService,
+        @Inject(Injector) private readonly _injector: Injector,
+        @ILogService private readonly _log: ILogService
+    ) {
         this._commandRegistry = new CommandRegistry();
     }
 
@@ -223,7 +230,11 @@ export class CommandService implements ICommandService {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private async _execute(command: ICommand<any>, injector: Injector, params?: object): Promise<boolean> {
+        this._log.log(`${' | '.repeat(this._commandExecutingLevel)}[ICommandService]: executing command "${command.id}".`);
+
+        this._commandExecutingLevel++;
         const result = await injector.invoke(command.handler, params);
+        this._commandExecutingLevel--;
 
         // MOTE: remove from old command manager
         if (command.type === CommandType.MUTATION) {

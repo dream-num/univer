@@ -35,39 +35,37 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
     constructor(@ICommandService private readonly _commandService: ICommandService) {
         super();
 
-        this.disposeWithMe(_commandService.registerCommand(ClearSelectionContentCommand));
-        this.disposeWithMe(_commandService.registerCommand(SetRangeValuesMutation));
-        this.disposeWithMe(_commandService.registerCommand(SetWorksheetNameCommand));
-        this.disposeWithMe(_commandService.registerCommand(SetWorksheetNameMutation));
-        this.disposeWithMe(_commandService.registerCommand(SetWorksheetActivateCommand));
-        this.disposeWithMe(_commandService.registerCommand(SetWorksheetActivateMutation));
-        this.disposeWithMe(_commandService.registerCommand(SetStyleCommand));
-        this.disposeWithMe(_commandService.registerCommand(SetRangeStyleMutation));
-        this.disposeWithMe(_commandService.registerCommand(SetWorksheetHideCommand));
-        this.disposeWithMe(_commandService.registerCommand(SetWorksheetHideMutation));
+        [
+            ClearSelectionContentCommand,
+            SetRangeValuesMutation,
+            SetWorksheetNameCommand,
+            SetWorksheetNameMutation,
+            SetWorksheetActivateCommand,
+            SetWorksheetActivateMutation,
+            SetStyleCommand,
+            SetRangeStyleMutation,
+            SetWorksheetHideCommand,
+            SetWorksheetHideMutation,
 
-        this.disposeWithMe(_commandService.registerCommand(InsertRowCommand));
-        this.disposeWithMe(_commandService.registerCommand(InsertRowMutation));
-        this.disposeWithMe(_commandService.registerCommand(RemoveRowCommand));
-        this.disposeWithMe(_commandService.registerCommand(RemoveRowMutation));
-        this.disposeWithMe(_commandService.registerCommand(InsertColCommand));
-        this.disposeWithMe(_commandService.registerCommand(InsertColMutation));
-        this.disposeWithMe(_commandService.registerCommand(RemoveColCommand));
-        this.disposeWithMe(_commandService.registerCommand(RemoveColMutation));
+            InsertRowCommand,
+            InsertRowMutation,
+            RemoveRowCommand,
+            RemoveRowMutation,
+            InsertColCommand,
+            InsertColMutation,
+            RemoveColCommand,
+            RemoveColMutation,
 
-        this.disposeWithMe(_commandService.registerCommand(SetWorksheetColWidthCommand));
-        this.disposeWithMe(_commandService.registerCommand(SetWorksheetColWidthMutation));
-        this.disposeWithMe(_commandService.registerCommand(SetWorksheetRowHeightCommand));
-        this.disposeWithMe(_commandService.registerCommand(SetWorksheetRowHeightMutation));
-        this.disposeWithMe(_commandService.registerCommand(SetWorksheetRowHideCommand));
-        this.disposeWithMe(_commandService.registerCommand(SetWorksheetRowHideMutation));
-        this.disposeWithMe(_commandService.registerCommand(SetWorksheetRowShowCommand));
-        this.disposeWithMe(_commandService.registerCommand(SetWorksheetRowShowMutation));
+            SetWorksheetColWidthCommand,
+            SetWorksheetColWidthMutation,
+            SetWorksheetRowHeightCommand,
+            SetWorksheetRowHeightMutation,
+            SetWorksheetRowHideCommand,
+            SetWorksheetRowHideMutation,
+            SetWorksheetRowShowCommand,
+            SetWorksheetRowShowMutation,
+        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
-
-    onInitialize() {}
-
-    // TODO: @Dushusir: add other basic mutation methods here.
 
     /**
      * Clear contents in the current selected ranges.

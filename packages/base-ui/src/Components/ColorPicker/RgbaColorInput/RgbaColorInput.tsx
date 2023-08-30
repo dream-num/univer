@@ -1,5 +1,5 @@
 import { Color, Nullable } from '@univerjs/core';
-import { useRef } from '../../../Framework';
+import { useRef } from 'preact/hooks';
 import { Input } from '../../Input';
 
 interface IProps {
@@ -22,7 +22,7 @@ export const RgbaColorInput = (props: IProps) => {
         rgba.push('1');
     }
 
-    let inputRef = useRef<HTMLInputElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
     const onChange = () => {
         props.onChange((inputRef.current! as any).base.value);
     };

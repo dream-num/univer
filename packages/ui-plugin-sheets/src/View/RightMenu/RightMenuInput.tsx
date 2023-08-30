@@ -1,4 +1,5 @@
-import { Component, Input } from '@univerjs/base-ui';
+import { CustomLabel, Input } from '@univerjs/base-ui';
+import { Component } from 'preact';
 
 interface IProps {
     prefix: string;
@@ -20,9 +21,9 @@ export class RightMenuInput extends Component<IProps> {
         const { prefix, suffix } = this.props;
         return (
             <div>
-                {this.getLabel(prefix)}
+                <CustomLabel label={prefix} />
                 <Input onPressEnter={this.handleKeyUp.bind(this)} type="number" placeholder="1" onClick={this.handleClick}></Input>
-                {this.getLabel(suffix)}
+                <CustomLabel label={suffix} />
             </div>
         );
     }

@@ -1,4 +1,5 @@
-import { ColorPickerCircleButton, Component, SiderModal, VNode } from '@univerjs/base-ui';
+import { ColorPickerCircleButton, SiderModal } from '@univerjs/base-ui';
+import { Component, VNode } from 'preact';
 import { BorderType, NormalType } from '../../../Basics';
 import Style from './ImagePanelUI.module.less';
 
@@ -17,6 +18,11 @@ export class ImagePanelUI extends Component<ImagePanelUIProps> {
     private _height: number;
 
     private _radius: number;
+
+    constructor(props: ImagePanelUIProps) {
+        super(props);
+        this.initialize(props);
+    }
 
     initialize(props: ImagePanelUIProps) {
         const imagePlugin = this.getContext().getPluginManager().getPluginByName<OverGridImagePlugin>(OVER_GRID_IMAGE_PLUGIN_NAME)!;
@@ -108,18 +114,5 @@ export class ImagePanelUI extends Component<ImagePanelUIProps> {
                 </div>
             </SiderModal>
         );
-    }
-
-    closed() {
-        // const plugin: SheetPlugin = this.getPluginByName(PLUGIN_NAMES.SPREADSHEET)!;
-        // plugin.showSiderByName(OVER_GRID_IMAGE_PLUGIN_NAME, false);
-    }
-
-    componentWillMount() {
-        console.log('componentWillMount');
-    }
-
-    componentWillUnmount() {
-        console.log('componentWillUnmount');
     }
 }

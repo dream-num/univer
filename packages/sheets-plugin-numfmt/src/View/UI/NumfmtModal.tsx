@@ -1,4 +1,5 @@
-import { BaseComponentProps, BaseComponentRender, BaseComponentSheet, Component } from '@univerjs/base-ui';
+import { BaseComponentProps, BaseComponentRender, BaseComponentSheet } from '@univerjs/base-ui';
+import { Component } from 'preact';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { PLUGIN_NAMES } from '@univerjs/core';
 import { NUMFMT_PLUGIN_NAME } from '../../Basics/Const';
@@ -14,6 +15,11 @@ interface IState {
 export class NumfmtModal extends Component<IProps, IState> {
     private _render: BaseComponentRender;
 
+    constructor(props: IProps) {
+        super(props);
+        this.initialize(props);
+    }
+
     initialize(props: IProps): void {
         const component = this.getContext().getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
         this._render = component.getComponentRender();
@@ -23,7 +29,7 @@ export class NumfmtModal extends Component<IProps, IState> {
         };
     }
 
-    componentDidMount(): void {
+    override componentDidMount(): void {
         const plugin = this.getContext().getPluginManager().getPluginByName<NumfmtPlugin>(NUMFMT_PLUGIN_NAME)!;
         plugin.getObserver('onNumfmtModalDidMountObservable')!.notifyObservers(this);
     }

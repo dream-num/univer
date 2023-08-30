@@ -1,5 +1,6 @@
+import { JSX, toChildArray } from 'preact';
+import { PureComponent } from 'preact/compat';
 import { JSXComponent } from '../../BaseComponent';
-import { JSX, PureComponent, toChildArray } from '../../Framework';
 import { BaseTabProps, BaseTabPaneProps, TabComponent, TabPaneComponent } from '../../Interfaces';
 import { randomId, joinClassNames } from '../../Utils';
 import styles from './index.module.less';

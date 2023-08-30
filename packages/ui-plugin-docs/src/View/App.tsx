@@ -1,10 +1,11 @@
-import { AppContext, BaseComponentProps, Component, ComponentManager } from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps, ComponentManager } from '@univerjs/base-ui';
+import { Component } from 'preact';
 import { LocaleService, LocaleType } from '@univerjs/core';
 import { BaseDocContainerProps, DocContainer } from './DocContainer';
 
 export interface BaseUIProps extends BaseComponentProps {
     locale: LocaleType;
-    localeService: LocaleService,
+    localeService: LocaleService;
     UIConfig: BaseDocContainerProps;
     componentManager: ComponentManager;
     changeLocale: (locale: string) => void;

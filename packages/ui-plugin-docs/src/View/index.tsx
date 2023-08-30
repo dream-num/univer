@@ -1,4 +1,5 @@
-import { isElement, render } from '@univerjs/base-ui';
+import { isElement } from '@univerjs/base-ui';
+import { render } from 'preact';
 import { App, BaseUIProps } from './App';
 
 interface BaseDicUIConfig extends BaseUIProps {

@@ -1,5 +1,5 @@
+import { useState } from 'preact/hooks';
 import { JSXComponent } from '../../BaseComponent';
-import { useState } from '../../Framework';
 import { BasePanelProps, BaseCollapseProps, CollapseComponent, PanelComponent } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
 import { Icon } from '../index';
@@ -16,10 +16,10 @@ import Style from './index.module.less';
 
 const Panel = (props: BasePanelProps) => {
     const { header, children } = props;
-    let [panelBodyClassName, setPanelBodyClassName] = useState(joinClassNames(Style.panelBody));
+    const [panelBodyClassName, setPanelBodyClassName] = useState(joinClassNames(Style.panelBody));
 
     const handelClick = () => {
-        let classname: string | undefined = panelBodyClassName;
+        const classname: string | undefined = panelBodyClassName;
         if ((classname as string).includes('active')) {
             setPanelBodyClassName(joinClassNames(Style.panelBody));
         } else {

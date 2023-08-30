@@ -1,9 +1,10 @@
-import { Component } from '../../Framework';
+import { Component } from 'preact';
 import { JSXComponent } from '../../BaseComponent';
 import { BaseModalProps, ModalComponent } from '../../Interfaces';
 import { Button } from '../Button';
 import { Drag } from '../Drag';
 import * as Icon from '../Icon';
+import { CustomLabel } from '../CustomLabel';
 import styles from './index.module.less';
 
 interface IState {
@@ -11,6 +12,11 @@ interface IState {
 }
 
 class Modal extends Component<BaseModalProps, IState> {
+    constructor(props: BaseModalProps) {
+        super(props);
+        this.initialize();
+    }
+
     initialize() {
         this.state = {
             visible: this.props.visible ?? false,
@@ -28,7 +34,7 @@ class Modal extends Component<BaseModalProps, IState> {
         }));
     };
 
-    componentWillReceiveProps(props: BaseModalProps) {
+    override componentWillReceiveProps(props: BaseModalProps) {
         if (props.visible !== this.state.visible) {
             this.setState({
                 visible: props.visible,
@@ -91,7 +97,7 @@ class Modal extends Component<BaseModalProps, IState> {
                                     <div className={styles.modalFooter}>
                                         {group.map((item) => (
                                             <Button type={item.type} onClick={() => this.handleClick(item.onClick)}>
-                                                {this.getLocale(item.label)}
+                                                <CustomLabel label={item.label} />
                                             </Button>
                                         ))}
                                     </div>

@@ -1,4 +1,5 @@
-import { Component, createRef, forwardRef, Ref } from '../../Framework';
+import { Component, createRef, Ref } from 'preact';
+import { forwardRef } from 'preact/compat';
 import { BaseLayoutProps } from '../../Interfaces';
 import { getFirstChildren } from '../../Utils';
 import styles from './index.module.less';
@@ -25,7 +26,7 @@ export class Layout extends Component<BaseLayoutProps, IState> {
     // If the first child element contains the `aside` component, the layout needs to be changed to horizontal arrangement
     componentDidMount() {
         if (this.ref.current) {
-            let children = getFirstChildren(this.ref.current);
+            const children = getFirstChildren(this.ref.current);
             const childrens = children instanceof Array ? children : [children];
 
             for (const ele of childrens) {

@@ -1,4 +1,4 @@
-import { Component, VNode, cloneElement } from '../../Framework';
+import { Component, VNode, cloneElement } from 'preact';
 import { JSXComponent } from '../../BaseComponent';
 import { BaseRadioGroupProps, BaseRadioIProps, RadioComponent } from '../../Interfaces';
 import styles from './index.module.less';
@@ -29,11 +29,11 @@ class RadioGroup extends Component<BaseRadioGroupProps, IState> {
         return (
             <div className={`${vertical ? styles.radioGroup : ''} ${className || ''}`}>
                 {this.props.children.map((item: VNode<BaseRadioIProps>) => {
-                    let isActive = this.props.active === item.props.value;
+                    const isActive = this.props.active === item.props.value;
                     /**
-                     * 
+                     *
                      * Use item as VNode
-                     * 
+                     *
                      * fix : No overload matches this call.
                                 Overload 1 of 2, '(vnode: VNode<any>, props?: any, ...children: ComponentChildren[]): VNode<any>', gave the following error.
                                 Argument of type 'Radio & ComponentChildren' is not assignable to parameter of type 'VNode<any>'.

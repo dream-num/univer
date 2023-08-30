@@ -1,4 +1,5 @@
-import { Button, Component } from '@univerjs/base-ui';
+import { Button } from '@univerjs/base-ui';
+import { Component } from 'preact';
 
 interface IProps {
     label: string;

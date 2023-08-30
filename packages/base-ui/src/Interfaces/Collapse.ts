@@ -1,5 +1,5 @@
+import { ComponentChildren } from 'preact';
 import { BaseComponent, JSXComponent } from '../BaseComponent';
-import { ComponentChildren } from '../Framework';
 
 export interface BasePanelProps {
     children: ComponentChildren;

@@ -1,10 +1,12 @@
+import { ComponentChildren, createRef, RefObject } from 'preact';
+import { PureComponent } from 'preact/compat';
 import { Icon } from '..';
 import { CustomComponent } from '../../Common';
-import { ComponentChildren, createRef, RefObject, PureComponent } from '../../Framework';
 import { BaseMenuItem } from '../../Interfaces';
 import { Dropdown } from '../Dropdown';
 import { Input } from '../Input';
 import { BaseItemProps, Item } from '../Item/Item';
+import { CustomLabel } from '../CustomLabel';
 import styles from './index.module.less';
 
 export enum SelectTypes {
@@ -59,6 +61,11 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
     onClick: (...arg: any) => void;
 
     onPressEnter: (...arg: any[]) => void;
+
+    constructor(props: BaseSelectProps) {
+        super(props);
+        this.initialize();
+    }
 
     initialize() {
         const { children = [], hideSelectedIcon } = this.props;
@@ -140,8 +147,8 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
             const getLabel = (label: ComponentChildren) => {
                 if (label !== null) {
                     if (label === '') return;
-                    let index = children.findIndex((item) => label === item.label);
-                    let list = this.handleSelected(index < 0 ? null : index);
+                    const index = children.findIndex((item) => label === item.label);
+                    const list = this.handleSelected(index < 0 ? null : index);
                     this.setState({
                         content: label,
                         menu: list,
@@ -149,7 +156,7 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
                 } else {
                     let index = children.findIndex((item) => item.selected);
                     if (index < 0) index = 0;
-                    let list = this.handleSelected(index);
+                    const list = this.handleSelected(index);
                     const item = children[index];
 
                     this.setState({
@@ -271,7 +278,9 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
         return (
             <div className={`${styles.selectSingle} ${className}`}>
                 <Dropdown onMainClick={onMainClick} tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
-                    <div>{this.getLabel(content)}</div>
+                    <div>
+                        <CustomLabel label={content} />
+                    </div>
                 </Dropdown>
             </div>
         );
@@ -304,7 +313,9 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
         return (
             <div className={`${styles.selectDouble} ${className}`}>
                 <Dropdown onClick={onClick} tooltip={tooltip} menu={{ menu, onClick: this.onClick }} icon={<Icon.NextIcon />}>
-                    <div className={styles.selectLabel}>{this.getLabel(content)}</div>
+                    <div className={styles.selectLabel}>
+                        <CustomLabel label={content} />
+                    </div>
                 </Dropdown>
             </div>
         );
@@ -317,7 +328,9 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
         return (
             <div className={`${styles.selectDouble} ${className}`}>
                 <Dropdown tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
-                    <div className={styles.selectLabel}>{this.getLabel(label)}</div>
+                    <div className={styles.selectLabel}>
+                        <CustomLabel label={content} />
+                    </div>
                 </Dropdown>
             </div>
         );
@@ -329,7 +342,9 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
         return (
             <div className={`${styles.selectDouble} ${className}`}>
                 <Dropdown tooltip={tooltip} onClick={onClick} menu={{ menu, onClick: this.onClick }} icon={<Icon.NextIcon />}>
-                    <div className={styles.selectLabel}>{this.getLabel(label)}</div>
+                    <div className={styles.selectLabel}>
+                        <CustomLabel label={label} />
+                    </div>
                 </Dropdown>
             </div>
         );

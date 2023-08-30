@@ -1,5 +1,5 @@
 // import { JSXComponent } from '../../BaseComponent';
-// import { Component, createRef } from '../../Framework';
+// import { Component, createRef } from 'preact';
 // import { BaseFilterSelectProps, FilterSelectComponent } from '../../Interfaces';
 // import { ColorPicker, Icon, Ul } from '../index';
 // import styles from './index.module.less';

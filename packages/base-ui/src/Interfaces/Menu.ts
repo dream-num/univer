@@ -1,5 +1,5 @@
+import { ComponentChildren, JSX } from 'preact';
 import { BaseComponent, JSXComponent } from '../BaseComponent';
-import { ComponentChildren, JSX } from '../Framework';
 
 export interface BaseMenuItem {
     className?: string;

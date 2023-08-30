@@ -6,6 +6,7 @@ import { Collapse, Panel } from './Collapse';
 import { ColorPicker } from './ColorPicker';
 import { ColorPickerCircleButton } from './ColorPickerCircleButton';
 import { Container } from './Container';
+import { CustomLabel } from './CustomLabel';
 // import { FormatModal } from './FormatModal';
 import * as Icon from './Icon/index';
 import { Input } from './Input';
@@ -43,6 +44,7 @@ export {
     Header,
     Footer,
     Content,
+    CustomLabel,
     Sider,
     Tooltip,
     Icon,

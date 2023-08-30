@@ -1,5 +1,6 @@
 import { IMouseEvent } from '@univerjs/base-render';
-import { BaseRightMenuProps, Component, createRef, Menu } from '@univerjs/base-ui';
+import { BaseRightMenuProps, Menu } from '@univerjs/base-ui';
+import { Component, createRef } from 'preact';
 import { RightMenuProps } from '../../Controller';
 import Style from './index.module.less';
 
@@ -14,6 +15,11 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
     ulRef = createRef();
 
     root = createRef();
+
+    constructor(props: BaseRightMenuProps) {
+        super(props);
+        this.initialize();
+    }
 
     initialize() {
         this.state = {
@@ -31,13 +37,13 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
     }
 
     // TODO:添加到具体的元素
-    componentDidMount() {
+    override componentDidMount() {
         this.props.getComponent?.(this);
         // 添加右键点击、点击事件监听
         document.addEventListener('click', this.handleClick);
     }
 
-    componentWillUnmount() {
+    override componentWillUnmount() {
         // 移除事件监听
         document.removeEventListener('click', this.handleClick);
     }

@@ -1,5 +1,6 @@
 import { BorderInfo } from '@univerjs/base-slides';
-import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren, ComponentManager } from '@univerjs/base-ui';
+import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentManager } from '@univerjs/base-ui';
+import { ComponentChildren } from 'preact';
 import { BorderType, CommandManager, HorizontalAlign, ICurrentUniverService, IKeyValue, ObserverManager, Tools, UIObserver, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { Inject, SkipSelf } from '@wendellhu/redi';
 import { DefaultToolbarConfig, SlideToolbarConfig, SLIDE_UI_PLUGIN_NAME } from '../Basics';

@@ -1,4 +1,5 @@
-import { BaseComponentProps, Component } from '@univerjs/base-ui';
+import { BaseComponentProps } from '@univerjs/base-ui';
+import { Component } from 'preact';
 import { SlotGroupProps } from '../../Controller/SlotController';
 
 interface IState {
@@ -12,13 +13,18 @@ interface IProps extends BaseComponentProps {
 export class Slot extends Component<IProps, IState> {
     refMap = new Map();
 
+    constructor(props: IProps) {
+        super(props);
+        this.initialize();
+    }
+
     initialize() {
         this.state = {
             slotGroup: new Map(),
         };
     }
 
-    componentDidMount(): void {
+    override componentDidMount(): void {
         this.props.getComponent?.(this);
     }
 

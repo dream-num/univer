@@ -1,5 +1,5 @@
+import { Component } from 'preact';
 import { BaseButtonProps } from '../../BaseComponent';
-import { Component } from '../../Framework';
 import { joinClassNames } from '../../Utils';
 import { LoadingIcon } from '../Icon';
 

@@ -1,4 +1,5 @@
-import { BaseComponentProps, Component, createRef } from '@univerjs/base-ui';
+import { BaseComponentProps, CustomLabel } from '@univerjs/base-ui';
+import { Component, createRef } from 'preact';
 import { IKeyValue } from '@univerjs/core';
 import styles from './index.module.less';
 
@@ -21,7 +22,12 @@ interface IState {
 export class SearchFunction extends Component<IProps, IState> {
     contentRef = createRef<HTMLUListElement>();
 
-    override initialize() {
+    constructor(props: IProps) {
+        super(props);
+        this.initialize();
+    }
+
+    initialize() {
         this.state = {
             lang: '',
             locale: [],
@@ -75,7 +81,9 @@ export class SearchFunction extends Component<IProps, IState> {
                 {formula.map((item: any, i: number) => (
                     <li className={selectIndex === i ? styles.searchFunctionActive : ''}>
                         <div className={styles.formulaName}>{item.n}</div>
-                        <div className={styles.formulaDetail}>{this.getLocale(item.d)}</div>
+                        <div className={styles.formulaDetail}>
+                            <CustomLabel label={item.d} />
+                        </div>
                     </li>
                 ))}
             </ul>

@@ -1,4 +1,4 @@
-import { Component, createRef } from '../../Framework';
+import { Component, createRef } from 'preact';
 import { JSXComponent } from '../../BaseComponent';
 import { BaseDragProps, DragComponent } from '../../Interfaces';
 import styles from './index.module.less';
@@ -7,8 +7,6 @@ interface IState {}
 
 class Drag extends Component<BaseDragProps, IState> {
     root = createRef();
-
-    initialize() {}
 
     initDragDialog() {
         // Drag and drop function (mainly to trigger three events: onpointerdown\onpointermove\onpointerup)

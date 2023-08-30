@@ -40,7 +40,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
 
     setMenuListNeo = (menuItems: IDisplayMenuItem[]) => {
         this.setState({
-            menuItems:this.buildMenuTree(menuItems),
+            menuItems: this.buildMenuTree(menuItems),
         });
     };
 

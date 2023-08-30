@@ -110,8 +110,6 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
         const { className = '', style = '', menu, menuItems, deep = 0 } = this.props;
         const { show, posStyle } = this.state;
 
-        console.log('debug', menuItems);
-
         return (
             <ul className={joinClassNames(styles.colsMenu, className)} style={{ ...style, ...posStyle, display: show ? 'block' : 'none' }} ref={this._MenuRef}>
                 {/* NOTE: this will be dropped after we complete migrating to new UI system. */}

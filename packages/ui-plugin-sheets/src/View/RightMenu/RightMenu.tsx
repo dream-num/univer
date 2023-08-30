@@ -1,5 +1,5 @@
 import { IMouseEvent } from '@univerjs/base-render';
-import { BaseRightMenuProps, Component, createRef, Menu } from '@univerjs/base-ui';
+import { BaseRightMenuProps, Component, createRef, IMenuItem, Menu } from '@univerjs/base-ui';
 import { RightMenuProps } from '../../Controller';
 import Style from './index.module.less';
 
@@ -8,6 +8,7 @@ interface IState {
     srcElement: any;
     eventType: string | null;
     children: RightMenuProps[];
+    menuItems: IMenuItem[];
 }
 
 export class RightMenu extends Component<BaseRightMenuProps, IState> {
@@ -15,12 +16,13 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
 
     root = createRef();
 
-    initialize() {
+    override initialize() {
         this.state = {
             visible: false,
             srcElement: null,
             eventType: null,
             children: [],
+            menuItems: [],
         };
     }
 
@@ -30,14 +32,20 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
         });
     }
 
+    setMenuListNeo = (menuItems: IMenuItem[]) => {
+        this.setState({
+            menuItems,
+        });
+    };
+
     // TODO:添加到具体的元素
-    componentDidMount() {
+    override componentDidMount() {
         this.props.getComponent?.(this);
         // 添加右键点击、点击事件监听
         document.addEventListener('click', this.handleClick);
     }
 
-    componentWillUnmount() {
+    override componentWillUnmount() {
         // 移除事件监听
         document.removeEventListener('click', this.handleClick);
     }
@@ -128,7 +136,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
                         e.preventDefault();
                     }}
                 >
-                    <Menu ref={this.ulRef} menu={this.state.children} onClick={this.handleClick}></Menu>
+                    <Menu ref={this.ulRef} menuItems={this.state.menuItems} menu={this.state.children} onClick={this.handleClick}></Menu>
                 </div>
             )
         );

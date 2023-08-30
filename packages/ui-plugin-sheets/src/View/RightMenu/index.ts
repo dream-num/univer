@@ -2,4 +2,5 @@ export * from './RightMenu';
 export * from './RightMenuButton';
 export * from './RightMenuInput';
 export * from './RightMenuItem';
-// export * from './RightMenuSelect';
+
+// TODO: RightMenu should be renamed to ContextMenu. RightMenu is not a common name.

@@ -7,7 +7,7 @@ import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Ba
 
 export interface RemoveSheetCommandParams {
     workbookId: string;
-    sheetId: string;
+    worksheetId: string;
 }
 
 /**
@@ -20,10 +20,10 @@ export const RemoveSheetCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const { sheetId, workbookId } = params;
+        const { worksheetId, workbookId } = params;
         // prepare do mutations
         const RemoveSheetMutationParams: IRemoveSheetMutationParams = {
-            sheetId,
+            worksheetId,
             workbookId,
         };
         const InsertSheetMutationParams: IInsertSheetMutationParams = RemoveSheetUndoMutationFactory(accessor, RemoveSheetMutationParams);

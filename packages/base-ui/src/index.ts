@@ -14,4 +14,4 @@ export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { IShortcutService, IShortcutItem, DesktopShortcutService } from './services/shortcut/shorcut.service';
 export { IPlatformService, DesktopPlatformService } from './services/platform/platform.service';
 
-export { SharedController } from './controllers/shared.controller';
+export { SharedController } from './controllers/shared-shortcut.controller';

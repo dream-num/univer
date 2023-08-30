@@ -2,8 +2,6 @@ import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRed
 import { IAccessor } from '@wendellhu/redi';
 
 import { ISelectionManager } from '../../Services/tokens';
-import { SelectionController } from '../../Controller/Selection/SelectionController';
-import { SelectionModel } from '../../Model/SelectionModel';
 import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
 
 /**
@@ -26,8 +24,6 @@ export const ClearSelectionContentCommand: ICommand = {
             return false;
         }
 
-        // prepare do mutations
-
         const range = selections[0];
         const clearMutationParams: ISetRangeValuesMutationParams = {
             rangeData: range,
@@ -35,7 +31,6 @@ export const ClearSelectionContentCommand: ICommand = {
         };
         const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(accessor, clearMutationParams);
 
-        // execute do mutations and add undo mutations to undo stack if completed
         const result = commandService.executeCommand(SetRangeValuesMutation.id, clearMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({

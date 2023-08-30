@@ -1,7 +1,12 @@
+import { ComponentChild } from 'preact';
+import { Subscription } from 'rxjs';
+import { ICommandService } from '@univerjs/core';
 import { Component, createRef } from '../../Framework';
 import { BaseMenuProps, BaseMenuState, BaseMenuItem, BaseMenuStyle } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
+
 import styles from './index.module.less';
+import { IMenuItem } from '../../services/menu/menu.service';
 
 export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     private _MenuRef = createRef<HTMLUListElement>();
@@ -44,7 +49,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     getStyle = () => {
         const current = this._MenuRef.current;
         if (!current) return;
-        let style: BaseMenuStyle = {};
+        const style: BaseMenuStyle = {};
         const curPosition = current.getBoundingClientRect();
         let docPosition;
         const { dom, parent } = this.props;
@@ -63,7 +68,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
         if (parent) {
             current.style.position = 'fixed';
             // 获取固定定位后 父元素正确的位置信息
-            let parPosition = current.parentElement?.getBoundingClientRect();
+            const parPosition = current.parentElement?.getBoundingClientRect();
             if (!parPosition) return;
             if (parPosition.right + curPosition.width > docPosition.right) {
                 style.left = `${parPosition.left - curPosition.width}px`;
@@ -97,11 +102,14 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     };
 
     render() {
-        const { className = '', style = '', menu, deep = 0 } = this.props;
+        const { className = '', style = '', menu, menuItems, deep = 0 } = this.props;
         const { show, posStyle } = this.state;
+
+        console.log('debug', menuItems);
 
         return (
             <ul className={joinClassNames(styles.colsMenu, className)} style={{ ...style, ...posStyle, display: show ? 'block' : 'none' }} ref={this._MenuRef}>
+                {/* NOTE: this will be dropped after we complete migrating to new UI system. */}
                 {menu?.map((item: BaseMenuItem, index: number) => {
                     if (item.show === false) return;
                     return (
@@ -136,14 +144,57 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
                         </>
                     );
                 })}
+                {menuItems?.map((item, index) => (
+                    <MenuItem menuItem={item} onClick={() => this.showMenu(false)} />
+                ))}
             </ul>
         );
     }
 
-    protected initialize() {
+    protected override initialize() {
         this.state = {
             show: false,
             posStyle: {},
         };
+    }
+}
+
+export class MenuItem extends Component<{ menuItem: IMenuItem; onClick: () => void }, { disabled: boolean }> {
+    private disabledSubscription: Subscription | undefined;
+
+    constructor() {
+        super();
+
+        this.state = {
+            disabled: false,
+        };
+    }
+
+    override componentDidMount(): void {
+        this.disabledSubscription = this.props.menuItem.disabled$?.subscribe((disabled) => {
+            this.setState({ disabled });
+        });
+    }
+
+    override componentWillUnmount(): void {
+        this.disabledSubscription?.unsubscribe();
+    }
+
+    override render(): ComponentChild {
+        const { menuItem: item } = this.props;
+        const commandService: ICommandService = this.context.injector.get(ICommandService);
+        const { disabled } = this.state;
+
+        return (
+            <li
+                className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}
+                onClick={() => {
+                    this.props.onClick();
+                    commandService.executeCommand(item.id);
+                }}
+            >
+                {this.getLabel(item.title)}
+            </li>
+        );
     }
 }

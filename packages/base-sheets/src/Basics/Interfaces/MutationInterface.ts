@@ -2,7 +2,7 @@ import { ICellData, IRangeData, IWorksheetConfig, ObjectMatrixPrimitiveType } fr
 
 /** Params of `RemoveSheetMutation` */
 export interface IRemoveSheetMutationParams {
-    sheetId: string;
+    worksheetId: string;
     workbookId: string;
 }
 

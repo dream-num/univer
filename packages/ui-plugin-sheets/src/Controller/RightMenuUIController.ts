@@ -1,11 +1,12 @@
 import { IMouseEvent, IPointerEvent } from '@univerjs/base-render';
-import { BaseMenuItem, BaseSelectChildrenProps, ComponentChildren, ComponentManager } from '@univerjs/base-ui';
-import { ICurrentUniverService, ObserverManager, Tools, UIObserver } from '@univerjs/core';
-import { Inject, SkipSelf } from '@wendellhu/redi';
+import { BaseMenuItem, BaseSelectChildrenProps, ComponentChildren, ComponentManager, IMenuService, MenuPosition } from '@univerjs/base-ui';
+import { Disposable, ICurrentUniverService, ObserverManager, Tools, UIObserver } from '@univerjs/core';
+import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 import { CanvasView } from '@univerjs/base-sheets';
 import { DefaultRightMenuConfig, SheetRightMenuConfig } from '../Basics';
 import { RightMenu, RightMenuInput, RightMenuItem } from '../View';
 import styles from '../View/RightMenu/index.module.less';
+import { ClearSelectionMenuItemFactory, InsertColMenuItemFactory, InsertRowMenuItemFactory } from './menu';
 
 interface CustomLabelProps {
     prefix?: string[] | string;
@@ -28,7 +29,7 @@ export interface RightMenuProps extends BaseMenuItem {
     border?: boolean;
 }
 
-export class RightMenuUIController {
+export class RightMenuUIController extends Disposable {
     private _rightMenu: RightMenu;
 
     private _menuList: RightMenuProps[];
@@ -38,12 +39,16 @@ export class RightMenuUIController {
     // eslint-disable-next-line max-lines-per-function
     constructor(
         config: SheetRightMenuConfig | undefined,
+        @Inject(Injector) private readonly _injector: Injector,
         @Inject(CanvasView) private readonly _sheetCanvasView: CanvasView,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IMenuService private readonly _menuService: IMenuService
     ) {
+        super();
+
         this._config = Tools.deepMerge({}, DefaultRightMenuConfig, config);
 
         this._menuList = [
@@ -171,124 +176,16 @@ export class RightMenuUIController {
                     },
                 ],
             },
-            {
-                label: 'rightClick.clearContent',
-                onClick: () => this.clearContent(),
-                border: true,
-                show: this._config.ClearContent,
-            },
             // {
-            //     show: this._config.hideMatrix,
-            //     label: {
-            //         name: RightMenuItem.name,
-            //         props: {
-            //             label: 'rightClick.matrix',
-            //         },
-            //     },
-            //     children: [
-            //         {
-            //             label: {
-            //                 name: RightMenuButton.name,
-            //                 props: {
-            //                     label: 'rightClick.flip',
-            //                     children: [
-            //                         {
-            //                             label: 'rightClick.upAndDown',
-            //                         },
-            //                         {
-            //                             label: 'rightClick.leftAndRight',
-            //                         },
-            //                     ],
-            //                 },
-            //             },
-            //         },
-            //         {
-            //             label: {
-            //                 name: RightMenuButton.name,
-            //                 props: {
-            //                     label: 'rightClick.flip',
-            //                     children: [
-            //                         {
-            //                             label: 'rightClick.clockwise',
-            //                         },
-            //                         {
-            //                             label: 'rightClick.counterclockwise',
-            //                         },
-            //                     ],
-            //                 },
-            //             },
-            //         },
-            //         {
-            //             label: ['rightClick.transpose'],
-            //         },
-            //         {
-            //             label: {
-            //                 name: RightMenuSelect.name,
-            //                 props: {
-            //                     label: 'rightClick.matrixCalculation',
-            //                     options: [
-            //                         {
-            //                             label: 'rightClick.plus',
-            //                         },
-            //                         {
-            //                             label: 'rightClick.minus',
-            //                         },
-            //                         {
-            //                             label: 'rightClick.multiply',
-            //                         },
-            //                         {
-            //                             label: 'rightClick.divided',
-            //                         },
-            //                         {
-            //                             label: 'rightClick.power',
-            //                         },
-            //                         {
-            //                             label: 'rightClick.root',
-            //                         },
-            //                         {
-            //                             label: 'rightClick.log',
-            //                         },
-            //                     ],
-            //                 },
-            //             },
-            //         },
-            //         {
-            //             label: {
-            //                 name: RightMenuButton.name,
-            //                 props: {
-            //                     label: 'rightClick.delete0',
-            //                     children: [
-            //                         {
-            //                             label: 'rightClick.byRow',
-            //                         },
-            //                         {
-            //                             label: 'rightClick.byCol',
-            //                         },
-            //                     ],
-            //                 },
-            //             },
-            //         },
-            //         {
-            //             label: {
-            //                 name: RightMenuButton.name,
-            //                 props: {
-            //                     label: 'rightClick.removeDuplicate',
-            //                     children: [
-            //                         {
-            //                             label: 'rightClick.byRow',
-            //                         },
-            //                         {
-            //                             label: 'rightClick.byCol',
-            //                         },
-            //                     ],
-            //                 },
-            //             },
-            //         },
-            //     ],
+            //     label: 'rightClick.clearContent',
+            //     onClick: () => this.clearContent(),
+            //     border: true,
+            //     show: this._config.ClearContent,
             // },
         ];
 
         this._initialize();
+        this._initializeContextMenu();
     }
 
     // 获取RightMenu组件
@@ -300,6 +197,7 @@ export class RightMenuUIController {
     // 刷新
     setMenuList() {
         this._rightMenu?.setMenuList(this._menuList);
+        this._rightMenu?.setMenuListNeo(this._menuService.getMenuItems(MenuPosition.CONTEXT_MENU));
     }
 
     setUIObserve<T>(msg: UIObserver<T>) {
@@ -405,5 +303,11 @@ export class RightMenuUIController {
                     this._rightMenu.handleContextMenu(evt);
                 }
             });
+    }
+
+    private _initializeContextMenu() {
+        [ClearSelectionMenuItemFactory, InsertRowMenuItemFactory, InsertColMenuItemFactory].forEach((factory) => {
+            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
+        });
     }
 }

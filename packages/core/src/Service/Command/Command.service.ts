@@ -19,7 +19,7 @@ export interface ICommand<P extends object = object, R = boolean> {
 
     readonly type: CommandType;
 
-    handler(accessor: IAccessor, params: P): Promise<R>;
+    handler(accessor: IAccessor, params: P | undefined): Promise<R>;
 }
 
 /**

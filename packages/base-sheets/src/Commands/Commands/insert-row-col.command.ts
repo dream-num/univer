@@ -1,8 +1,9 @@
-import { CommandType, ICellData, ICommand, ICommandService, IUndoRedoService, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import { CommandType, ICellData, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, ObjectMatrixPrimitiveType } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 import { IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowMutationParams } from '../../Basics/Interfaces/MutationInterface';
 import { InsertColMutation, InsertColMutationFactory, InsertRowMutation, InsertRowMutationFactory } from '../Mutations/insert-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../Mutations/remove-row-col.mutation';
+import { ISelectionManager } from '../../Services/tokens';
 
 export interface InsertRowCommandParams {
     rowIndex: number;
@@ -15,17 +16,36 @@ export interface InsertRowCommandParams {
 export const InsertRowCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-row',
-    handler: async (accessor: IAccessor, params: InsertRowCommandParams) => {
+    handler: async (accessor: IAccessor, params?: InsertRowCommandParams) => {
+        const selectionManager = accessor.get(ISelectionManager);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const redoMutationParams: IInsertRowMutationParams = {
-            workbookId: params.workbookId,
-            worksheetId: params.worksheetId,
-            rowIndex: params.rowIndex,
-            rowCount: params.rowCount,
-            insertRowData: params.insertRowData,
-        };
+        let redoMutationParams: IInsertRowMutationParams;
+        if (params == null) {
+            const selections = selectionManager.getCurrentSelections();
+            const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+            if (selections.length) {
+                return false;
+            }
+            const range = selections[0];
+            redoMutationParams = {
+                workbookId: workbook.getUnitId(),
+                worksheetId: workbook.getActiveSheet().getSheetId(),
+                rowIndex: range.startRow,
+                rowCount: range.endRow - range.startRow,
+                insertRowData: [],
+            };
+        } else {
+            redoMutationParams = {
+                workbookId: params.workbookId,
+                worksheetId: params.worksheetId,
+                rowIndex: params.rowIndex,
+                rowCount: params.rowCount,
+                insertRowData: params.insertRowData,
+            };
+        }
         const undoMutationParams: IRemoveRowMutationParams = InsertRowMutationFactory(accessor, redoMutationParams);
         const result = commandService.executeCommand(InsertRowMutation.id, redoMutationParams);
         if (result) {

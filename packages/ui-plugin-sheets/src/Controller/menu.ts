@@ -28,14 +28,32 @@ export function RedoMenuItemFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
-// export function BoldMenuItemFactory(accessor: IAccessor): IMenuItem {
-//     return {
-//         id: SetBoldCommand.id,
-//         icon: 'BoldIcon',
-//         title: 'Set bold',
-//         menu: [MenuPosition.TOOLBAR],
-//     };
-// }
+export function BoldMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: 'TODO',
+        icon: 'BoldIcon',
+        title: 'Set bold',
+        menu: [MenuPosition.TOOLBAR],
+    };
+}
+
+export function ItalicMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: 'TODO',
+        icon: 'ItalicIcon',
+        title: 'Set italic',
+        menu: [MenuPosition.TOOLBAR],
+    };
+}
+
+export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: 'TODO',
+        icon: 'UnderlineIcon',
+        title: 'Set underline',
+        menu: [MenuPosition.TOOLBAR],
+    };
+}
 
 // export function FontSelectorMenuItemFactory(accessor: IAccessor): IMenuItem {
 //

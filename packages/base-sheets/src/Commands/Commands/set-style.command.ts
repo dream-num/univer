@@ -95,9 +95,9 @@ export const SetUnderlineCommand: ICommand = {
 };
 
 /**
- * Set stroke font style to currently selected ranges. If the cell is already stroke then it will cancel the stroke style.
+ * Set strike through font style to currently selected ranges. If the cell is already stroke then it will cancel the stroke style.
  */
-export const SetStrokeCommand: ICommand = {
+export const SetStrikeThroughCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-stroke',
     handler: async (accessor) => true,

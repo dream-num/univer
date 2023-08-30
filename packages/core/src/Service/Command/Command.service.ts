@@ -97,7 +97,7 @@ class CommandRegistry {
 
     registerCommand(command: ICommand, injector: Injector): IDisposable {
         if (this.commands.has(command.id) || this.commandInjector.has(command.id)) {
-            throw new Error();
+            throw new Error(`Command ${command.id} has registered before!`);
         }
 
         this.commands.set(command.id, command);

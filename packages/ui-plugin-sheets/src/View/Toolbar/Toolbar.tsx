@@ -1,4 +1,17 @@
-import { AppContext, AppContextValues, BaseComponentProps, Button, Component, Container, createRef, debounce, IMenuItem, PreactContext, Select, Tooltip } from '@univerjs/base-ui';
+import {
+    AppContext,
+    AppContextValues,
+    BaseComponentProps,
+    Button,
+    Component,
+    Container,
+    createRef,
+    debounce,
+    IDisplayMenuItem,
+    PreactContext,
+    Select,
+    Tooltip,
+} from '@univerjs/base-ui';
 import { IToolbarItemProps, SheetContainerUIController } from '../../Controller';
 import styles from './index.module.less';
 import { ToolbarItem } from './ToolbarItem';
@@ -14,7 +27,7 @@ interface IState {
     defaultToolList: IToolbarItemProps[];
     showMore: boolean;
     toolbarListWidths: number[];
-    menuItems: IMenuItem[];
+    menuItems: IDisplayMenuItem[];
 }
 
 export class Toolbar extends Component<IProps, IState> {
@@ -144,7 +157,7 @@ export class Toolbar extends Component<IProps, IState> {
         }
     };
 
-    setToolbarNeo = (menuItems: IMenuItem[]) => {
+    setToolbarNeo = (menuItems: IDisplayMenuItem[]) => {
         this.setState(
             {
                 menuItems,

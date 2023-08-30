@@ -1,7 +1,7 @@
 import { ComponentChild, ComponentChildren, isValidElement } from 'preact';
 import { Subscription } from 'rxjs';
 
-import { IMenuItem, Button, Tooltip, Component, CustomComponent } from '@univerjs/base-ui';
+import { Button, Tooltip, Component, CustomComponent, IDisplayMenuItem } from '@univerjs/base-ui';
 import { ICommandService } from '@univerjs/core';
 
 import styles from './index.module.less';
@@ -10,7 +10,7 @@ export interface IToolbarItemStatus {
     disabled: boolean;
 }
 
-export class ToolbarItem extends Component<IMenuItem, IToolbarItemStatus> {
+export class ToolbarItem extends Component<IDisplayMenuItem, IToolbarItemStatus> {
     private disabledSubscription: Subscription | undefined;
 
     constructor() {
@@ -37,7 +37,7 @@ export class ToolbarItem extends Component<IMenuItem, IToolbarItemStatus> {
         const { disabled } = this.state;
 
         return (
-            <Tooltip title={props.title} placement="bottom">
+            <Tooltip title={props.title + (props.shortcut ? ` (${props.shortcut})` : '')} placement="bottom">
                 <Button className={styles.textButton} type="text" disabled={disabled} onClick={() => commandService.executeCommand(props.id)}>
                     {this.getLabel({ name: props.icon })}
                 </Button>

@@ -6,7 +6,7 @@ import { BaseMenuProps, BaseMenuState, BaseMenuItem, BaseMenuStyle } from '../..
 import { joinClassNames } from '../../Utils';
 
 import styles from './index.module.less';
-import { IMenuItem } from '../../services/menu/menu.service';
+import { IDisplayMenuItem } from '../../services/menu/menu.service';
 
 export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     private _MenuRef = createRef<HTMLUListElement>();
@@ -157,7 +157,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     }
 }
 
-export class MenuItem extends Component<{ menuItem: IMenuItem; onClick: () => void }, { disabled: boolean }> {
+export class MenuItem extends Component<{ menuItem: IDisplayMenuItem; onClick: () => void }, { disabled: boolean }> {
     private disabledSubscription: Subscription | undefined;
 
     constructor() {
@@ -192,6 +192,7 @@ export class MenuItem extends Component<{ menuItem: IMenuItem; onClick: () => vo
                 }}
             >
                 {this.getLabel(item.title)}
+                {item.shortcut && ` (${item.shortcut})`}
             </li>
         );
     }

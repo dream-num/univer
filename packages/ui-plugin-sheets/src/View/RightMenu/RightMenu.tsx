@@ -1,5 +1,5 @@
 import { IMouseEvent } from '@univerjs/base-render';
-import { BaseRightMenuProps, Component, createRef, IMenuItem, Menu } from '@univerjs/base-ui';
+import { BaseRightMenuProps, Component, createRef, IDisplayMenuItem, Menu } from '@univerjs/base-ui';
 import { RightMenuProps } from '../../Controller';
 import Style from './index.module.less';
 
@@ -8,7 +8,7 @@ interface IState {
     srcElement: any;
     eventType: string | null;
     children: RightMenuProps[];
-    menuItems: IMenuItem[];
+    menuItems: IDisplayMenuItem[];
 }
 
 export class RightMenu extends Component<BaseRightMenuProps, IState> {
@@ -32,7 +32,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
         });
     }
 
-    setMenuListNeo = (menuItems: IMenuItem[]) => {
+    setMenuListNeo = (menuItems: IDisplayMenuItem[]) => {
         this.setState({
             menuItems,
         });

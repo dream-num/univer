@@ -23,7 +23,7 @@ export interface IShortcutItem<P extends object = object> {
 export interface IShortcutService {
     registerShortcut(shortcut: IShortcutItem): IDisposable;
 
-    getCommandShortcut(id: string): string;
+    getCommandShortcut(id: string): string | null;
 }
 
 export const IShortcutService = createIdentifier<IShortcutService>('univer.shortcut');
@@ -32,6 +32,8 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
     // TODO: @wzhudev: this should be a linked list to resolve different shortcut mapping to the same keybinding
 
     private readonly _shortCutMapping = new Map<number, IShortcutItem>();
+
+    private readonly _idToShortcut = new Map<string, number>();
 
     constructor(@ICommandService private readonly _commandService: ICommandService, @IPlatformService private readonly _platformService: IPlatformService) {
         super();
@@ -47,14 +49,29 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
         // first map shortcut to a number, so it could be converted and fetched quickly
         const binding = this.getBindingFromItem(shortcut);
         this._shortCutMapping.set(binding, shortcut);
+        this._idToShortcut.set(shortcut.id, binding);
 
         return toDisposable(() => {
+            this._idToShortcut.delete(shortcut.id);
             this._shortCutMapping.delete(binding);
         });
     }
 
-    getCommandShortcut(id: string): string {
-        return '';
+    getCommandShortcut(id: string): string | null {
+        const binding = this._idToShortcut.get(id);
+        if (!binding) {
+            return null;
+        }
+
+        const ctrlKey = binding & MetaKeys.CTRL_COMMAND;
+        const shiftKey = binding & MetaKeys.SHIFT;
+        const altKey = binding & MetaKeys.ALT;
+        const macCtrl = binding & MetaKeys.MAC_CTRL;
+
+        if (this._platformService.isMac) {
+            return `${ctrlKey ? '⌘' : ''}${shiftKey ? '⇧' : ''}${altKey ? '⌥' : ''}${macCtrl ? '⌃' : ''}${String.fromCharCode(binding & 0xff)}`;
+        }
+        return `${ctrlKey ? 'Ctrl+' : ''}${shiftKey ? 'Shift+' : ''}${altKey ? 'Alt+' : ''}${String.fromCharCode(binding & 0xff)}`;
     }
 
     private resolveMouseEvent(e: KeyboardEvent): void {

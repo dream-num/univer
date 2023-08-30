@@ -1,6 +1,7 @@
 import { Disposable, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
+import { IShortcutService } from '../shortcut/shorcut.service';
 
 export type OneOrMany<T> = T | T[];
 
@@ -52,6 +53,10 @@ export class DesktopMenuService extends Disposable implements IMenuService {
 
     private readonly _menuByPositions = new Map<MenuPosition, Map<string, IMenuItem>>();
 
+    constructor(@IShortcutService private readonly _shortcutService: IShortcutService) {
+        super();
+    }
+
     override dispose(): void {
         this._menuItemMap.clear();
     }
@@ -79,9 +84,8 @@ export class DesktopMenuService extends Disposable implements IMenuService {
     }
 
     getMenuItems(positions: MenuPosition): IDisplayMenuItem[] {
-        // TODO: @wzhudev: compose shortcut to returned menu items.
         if (this._menuByPositions.has(positions)) {
-            return [...this._menuByPositions.get(positions)!.values()];
+            return [...this._menuByPositions.get(positions)!.values()].map((menu) => this.getDisplayMenuItems(menu));
         }
 
         return [] as IDisplayMenuItem[];
@@ -93,6 +97,18 @@ export class DesktopMenuService extends Disposable implements IMenuService {
         }
 
         return null;
+    }
+
+    private getDisplayMenuItems(menuItem: IMenuItem): IDisplayMenuItem {
+        const shortcut = this._shortcutService.getCommandShortcut(menuItem.id);
+        if (!shortcut) {
+            return menuItem;
+        }
+
+        return {
+            ...menuItem,
+            shortcut,
+        };
     }
 
     private appendMenuToPosition(menu: IMenuItem, position: MenuPosition) {

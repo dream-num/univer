@@ -36,7 +36,7 @@ import {
 } from '../View/Toolbar/Const';
 
 import styles from '../View/Toolbar/index.module.less';
-import { RedoMenuItemFactory, UndoMenuItemFactory } from './menu';
+import { BoldMenuItemFactory, ItalicMenuItemFactory, RedoMenuItemFactory, StrikeThroughMenuItemFactory, UnderlineMenuItemFactory, UndoMenuItemFactory } from './menu';
 
 export interface BaseToolbarSelectProps extends BaseSelectProps {
     children?: BaseSelectChildrenProps[];
@@ -134,68 +134,7 @@ export class ToolbarUIController extends Disposable {
                 },
                 children: FONT_SIZE_CHILDREN,
             },
-            {
-                toolbarType: 1,
-                tooltip: 'toolbar.bold',
-                label: {
-                    name: 'BoldIcon',
-                },
-                unActive: false,
-                name: 'bold',
-                show: this._config.bold,
-                onClick: (e, isBold: boolean) => {
-                    this.setFontWeight(isBold);
-                    this.hideTooltip();
-                },
-            },
-            {
-                toolbarType: 1,
-                tooltip: 'toolbar.italic',
-                label: {
-                    name: 'ItalicIcon',
-                },
-                unActive: false,
-                name: 'italic',
-                show: this._config.italic,
-                onClick: (e, isItalic: boolean) => {
-                    this.setFontStyle(isItalic);
-                    this.hideTooltip();
-                },
-            },
-            {
-                toolbarType: 1,
-                tooltip: 'toolbar.strikethrough',
-                label: {
-                    name: 'DeleteLineIcon',
-                },
-                unActive: false,
-                name: 'strikethrough',
-                show: this._config.strikethrough,
-                onClick: (e, isStrikethrough: boolean) => {
-                    this.hideTooltip();
-                    const strikethroughItem = this._toolList.find((item) => item.name === 'strikethrough');
-                    if (!strikethroughItem) return;
-                    strikethroughItem.active = isStrikethrough;
-                    this.setStrikeThrough(isStrikethrough);
-                },
-            },
-            {
-                toolbarType: 1,
-                tooltip: 'toolbar.underline',
-                label: {
-                    name: 'UnderLineIcon',
-                },
-                unActive: false,
-                name: 'underline',
-                show: this._config.underline,
-                onClick: (e, isUnderLine: boolean) => {
-                    this.hideTooltip();
-                    const underlineItem = this._toolList.find((item) => item.name === 'underline');
-                    if (!underlineItem) return;
-                    underlineItem.active = isUnderLine; // huh? 如果是数据加载呢？
-                    this.setUnderline(isUnderLine);
-                },
-            },
+
             {
                 type: 5,
                 tooltip: 'toolbar.textColor.main',
@@ -723,8 +662,9 @@ export class ToolbarUIController extends Disposable {
     }
 
     private _initializeToolbar(): void {
-        // TODO@wzhudev: these factory would not be registered here
-        [UndoMenuItemFactory, RedoMenuItemFactory].forEach((factory) => {
+        // NOTE@wzhudev: now we register menu items that only display in the toolbar here. In fact we should register all commands and menu items and shortcuts
+        // in a single controller. I will do that layer.
+        [UndoMenuItemFactory, RedoMenuItemFactory, BoldMenuItemFactory, ItalicMenuItemFactory, UnderlineMenuItemFactory, StrikeThroughMenuItemFactory].forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
     }

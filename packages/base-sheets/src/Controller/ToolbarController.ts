@@ -27,10 +27,6 @@ export interface BorderInfo {
     style: number;
 }
 
-interface backgroundStyleValue {
-    rgb: string;
-}
-
 export class ToolbarController {
     constructor(
         @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,

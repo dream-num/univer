@@ -41,11 +41,6 @@ export interface IStyleTypeValue<T> {
     value: T | T[][];
 }
 
-export interface IStyleTypeValue<T> {
-    type: keyof IStyleData;
-    value: T | T[][];
-}
-
 /**
  * The controller to provide the most basic sheet CRUD methods to other modules of sheet modules.
  */

@@ -1,4 +1,4 @@
-import { CommandType, ICellData, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import { CommandType, ICellData, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 import { IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowMutationParams } from '../../Basics/Interfaces/MutationInterface';
 import { InsertColMutation, InsertColMutationFactory, InsertRowMutation, InsertRowMutationFactory } from '../Mutations/insert-row-col.mutation';
@@ -30,12 +30,13 @@ export const InsertRowCommand: ICommand = {
                 return false;
             }
             const range = selections[0];
+            const count = range.endRow - range.startRow;
             redoMutationParams = {
                 workbookId: workbook.getUnitId(),
                 worksheetId: workbook.getActiveSheet().getSheetId(),
                 rowIndex: range.startRow,
-                rowCount: range.endRow - range.startRow,
-                insertRowData: [],
+                rowCount: count,
+                insertRowData: ObjectMatrix.MakeObjectMatrixSize<ICellData>(count).toJSON(),
             };
         } else {
             redoMutationParams = {

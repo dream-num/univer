@@ -28,6 +28,7 @@ export interface IMenuItem {
     tooltip?: string;
     description?: string;
 
+    hidden$?: Observable<boolean>;
     activated$?: Observable<boolean>;
     disabled$?: Observable<boolean>;
 }

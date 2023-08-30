@@ -1,4 +1,12 @@
-import { ClearSelectionContentCommand, InsertColCommand, InsertRowCommand } from '@univerjs/base-sheets';
+import {
+    ClearSelectionContentCommand,
+    InsertColCommand,
+    InsertRowCommand,
+    SetBoldCommand,
+    SetItalicCommand,
+    SetStrikeThroughCommand,
+    SetUnderlineCommand,
+} from '@univerjs/base-sheets';
 import { IMenuItem, MenuPosition } from '@univerjs/base-ui';
 import { IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
@@ -30,7 +38,7 @@ export function RedoMenuItemFactory(accessor: IAccessor): IMenuItem {
 
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
-        id: 'TODO',
+        id: SetBoldCommand.id,
         icon: 'BoldIcon',
         title: 'Set bold',
         menu: [MenuPosition.TOOLBAR],
@@ -39,7 +47,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuItem {
 
 export function ItalicMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
-        id: 'TODO',
+        id: SetItalicCommand.id,
         icon: 'ItalicIcon',
         title: 'Set italic',
         menu: [MenuPosition.TOOLBAR],
@@ -48,16 +56,48 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuItem {
 
 export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
-        id: 'TODO',
-        icon: 'UnderlineIcon',
+        id: SetUnderlineCommand.id,
+        icon: 'UnderLineIcon',
         title: 'Set underline',
         menu: [MenuPosition.TOOLBAR],
     };
 }
 
-// export function FontSelectorMenuItemFactory(accessor: IAccessor): IMenuItem {
-//
-// }
+export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: SetStrikeThroughCommand.id,
+        icon: 'DeleteLineIcon',
+        title: 'Set strike through',
+        menu: [MenuPosition.TOOLBAR],
+    };
+}
+
+export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuItem {}
+
+export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuItem {}
+
+export function FontColorSelectorMenuItemFactory(accessor: IAccessor): IMenuItem {}
+
+export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuItem {}
+
+export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuItem {}
+
+export function MergeCellMenuItemFactory(accessor: IAccessor): IMenuItem {}
+
+export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuItem {}
+
+export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuItem {}
+
+export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuItem {}
+
+export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuItem {}
+
+export function NumberFormatMenuItemFactory(accessor: IAccessor): IMenuItem {}
+
+// NOTE: these menu icons should be registered by plugins not defined here.
+// export function SearchReplaceMenuItemFactory(accessor: IAccessor): IMenuItem {}
+// export function ImportMenuItemFactory(accessor: IAccessor): IMenuItem {}
+// export function ImageMenuItemFactory(accessor: IAccessor): IMenuItem {}
 
 export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {

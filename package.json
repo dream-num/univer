@@ -23,7 +23,6 @@
         "build:sheet": "pnpm run --filter univer-sheet-ts build:demo",
         "build:doc": "pnpm run --filter univer-doc-ts build:demo",
         "build:slide": "pnpm run --filter univer-slide-ts build:demo",
-        "link": "node scripts/link.js",
         "build:customd": "cd cli/src/templates/univer-custom-build && npm run build:d",
         "clean": "npm cache clean --force && node scripts/clean.js && pnpm install",
         "node-server": "node scripts/server.js",

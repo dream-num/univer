@@ -15,7 +15,6 @@
         "build": "tsc && vite build",
         "build:demo": "vite build -c vite.demo.config.ts",
         "watch": "vite build",
-        "link": "pnpm link ./",
         "serve": "vite preview",
         "start": "ts-node --transpile-only ./scripts/start.ts",
         "build:esbuild": "ts-node --transpile-only ./scripts/build.ts"

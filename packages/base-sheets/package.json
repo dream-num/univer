@@ -39,8 +39,7 @@
         "test": "jest",
         "test:play": "npx playwright test",
         "test:debug": "PWDEBUG=1 npx playwright test",
-        "esbuild": "node ./esbuild.config.js",
-        "link": "pnpm link ./"
+        "esbuild": "node ./esbuild.config.js"
     },
     "devDependencies": {
         "@testing-library/preact": "^2.0.1",

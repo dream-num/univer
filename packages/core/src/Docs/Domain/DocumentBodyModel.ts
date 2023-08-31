@@ -194,7 +194,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
             return;
         }
 
-        if (dataStream[dataStream.length - 1] === '\n') {
+        if (dataStream[dataStreamLen - 1] === DataStreamTreeTokenType.SECTION_BREAK) {
             const insertBodyModel = new DocumentBodyModelSimple(insertBody);
             dataStreamLen -= 1; // sectionBreak can not be inserted
 
@@ -235,6 +235,8 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
                     });
                 }
             });
+        } else if (dataStreamLen === 1 && dataStream[dataStreamLen - 1] === DataStreamTreeTokenType.PARAGRAPH) {
+            this._insertParagraph(insertedNode, insertIndex);
         } else {
             insertedNode.insertText(dataStream, insertIndex);
 
@@ -537,6 +539,52 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         const currentIndex = node.getPositionInParent();
         const children = node.parent?.children;
         return children?.[currentIndex + 1] as DataStreamTreeNode;
+    }
+
+    private _insertParagraph(insertedNode: DataStreamTreeNode, insertIndex = 0) {
+        const insertStartIndex = insertedNode.startIndex;
+
+        const insertEndIndex = insertedNode.endIndex;
+
+        const insertedNodeSplit = insertedNode.split(insertIndex);
+
+        if (insertedNodeSplit == null) {
+            return;
+        }
+
+        const { firstNode: insertedFirstNode, lastNode: insertedLastNode } = insertedNodeSplit;
+
+        insertedFirstNode.content += DataStreamTreeTokenType.PARAGRAPH;
+
+        insertedFirstNode.selfPlus(1);
+
+        insertedFirstNode.plus(insertStartIndex);
+
+        this.foreachDown(insertedLastNode, (newNode) => {
+            newNode.plus(insertStartIndex + 1);
+        });
+
+        insertedNode.parent?.children.splice(insertedNode.getPositionInParent(), 1, insertedFirstNode, insertedLastNode);
+
+        this.foreachTop(insertedNode.parent, (currentNode) => {
+            // currentNode.endIndex += dataStreamLen;
+            currentNode.selfPlus(1, currentNode.getPositionInParent());
+            const children = currentNode.children;
+            let isStartFix = false;
+            for (const node of children) {
+                if (node.startIndex >= insertEndIndex + 1) {
+                    isStartFix = true;
+                }
+
+                if (!isStartFix) {
+                    continue;
+                }
+
+                this.foreachDown(node, (newNode) => {
+                    newNode.plus(1);
+                });
+            }
+        });
     }
 
     private move() {}

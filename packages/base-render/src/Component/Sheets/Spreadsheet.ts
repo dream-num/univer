@@ -189,8 +189,9 @@ export class Spreadsheet extends SheetComponent {
             }
         }
 
-        // eslint-disable-next-line prefer-const
-        let { isMerged, startY, endY, startX, endX, mergeInfo, isMergedMainCell } = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, dataMergeCacheAll);
+        const cellInfo = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, dataMergeCacheAll);
+        const { isMerged, isMergedMainCell } = cellInfo;
+        let { startY, endY, startX, endX, mergeInfo } = cellInfo;
 
         startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
         endY = fixLineWidthByScale(endY + columnTitleHeight, scaleY);
@@ -227,8 +228,9 @@ export class Spreadsheet extends SheetComponent {
         const { scaleX = 1, scaleY = 1 } = this.getParentScale();
         const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight, dataMergeCacheAll } = spreadsheetSkeleton;
 
-        // eslint-disable-next-line prefer-const
-        let { isMerged, startY, endY, startX, endX, mergeInfo, isMergedMainCell } = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, dataMergeCacheAll);
+        const cellInfo = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, dataMergeCacheAll);
+        const { isMerged, isMergedMainCell } = cellInfo;
+        let { startY, endY, startX, endX, mergeInfo } = cellInfo;
 
         startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
         endY = fixLineWidthByScale(endY + columnTitleHeight, scaleY);
@@ -480,7 +482,7 @@ export class Spreadsheet extends SheetComponent {
         let parent: any = this.parent;
         while (parent) {
             if (parent.classType === RENDER_CLASS_TYPE.ENGINE || parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                return parent;
+                return parent as Nullable<Engine | SceneViewer>;
             }
             parent = parent?.getParent && parent?.getParent();
         }

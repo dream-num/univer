@@ -82,6 +82,10 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
         };
     }
 
+    scrollBySelection() {}
+
+    syncSelection() {}
+
     getFirstViewport() {}
 
     remainActiveSelection() {}
@@ -103,7 +107,7 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
             return;
         }
 
-        let spanIndex = divide.spanGroup.indexOf(span);
+        const spanIndex = divide.spanGroup.indexOf(span);
 
         const divideIndex = line.divides.indexOf(divide);
 
@@ -129,6 +133,8 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
         return false;
     }
 
+    findCoordByNode(span: IDocumentSkeletonSpan) {}
+
     findNodeByCharIndex(charIndex: number): Nullable<IDocumentSkeletonSpan> {
         const skeleton = this.getSkeleton();
 
@@ -140,28 +146,28 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
 
         const pages = skeletonData.pages;
 
-        for (let page of pages) {
+        for (const page of pages) {
             const { sections, st, ed } = page;
 
             if (charIndex < st || charIndex > ed) {
                 continue;
             }
 
-            for (let section of sections) {
+            for (const section of sections) {
                 const { columns, st, ed } = section;
 
                 if (charIndex < st || charIndex > ed) {
                     continue;
                 }
 
-                for (let column of columns) {
+                for (const column of columns) {
                     const { lines, st, ed } = column;
 
                     if (charIndex < st || charIndex > ed) {
                         continue;
                     }
 
-                    for (let line of lines) {
+                    for (const line of lines) {
                         const { divides, lineHeight, st, ed } = line;
                         const divideLength = divides.length;
 

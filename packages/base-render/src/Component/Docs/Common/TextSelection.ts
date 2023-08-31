@@ -101,7 +101,7 @@ export class TextSelection {
 
         const lastCursor = cursorList[cursorList.length - 1];
 
-        let isCollapse = cursorList.length === 1 && firstCursor.isCollapse;
+        const isCollapse = cursorList.length === 1 && firstCursor.isCollapse;
 
         return {
             cursorStart: firstCursor.cursorStart,
@@ -414,7 +414,7 @@ export class TextSelection {
 
     private _pushToPoints(position: IPosition) {
         const { startX, startY, endX, endY } = position;
-        const points = [];
+        const points: Array<{ x: number; y: number }> = [];
         points.push({
             x: startX,
             y: startY,
@@ -452,7 +452,7 @@ export class TextSelection {
 
         const keys = Object.keys(NodePositionMap);
 
-        for (let key of keys) {
+        for (const key of keys) {
             const startNodeValue = start[key as keyof INodePosition] as number;
             const endNodeValue = end[key as keyof INodePosition] as number;
 
@@ -563,9 +563,9 @@ export class TextSelection {
             const lastSpanLeft = lastSpan?.left || 0;
             const lastSpanWidth = lastSpan?.width || 0;
 
-            let isCurrentList = firstSpan?.spanType === SpanType.LIST;
+            const isCurrentList = firstSpan?.spanType === SpanType.LIST;
 
-            let hasList = spanGroup[0]?.spanType === SpanType.LIST;
+            const hasList = spanGroup[0]?.spanType === SpanType.LIST;
 
             let cursorStart = start_sp + st;
 

@@ -56,6 +56,8 @@ export function RedoMenuItemFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
+// TODO@wzhudev: in the future we will support add rich format value to in-cell texts. Then we would make some changes to how these menu items works.
+
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuItem {
     const commandService = accessor.get(ICommandService);
     const permissionService = accessor.get(IPermissionService);

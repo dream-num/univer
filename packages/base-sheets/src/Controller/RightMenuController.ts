@@ -7,6 +7,9 @@ import { SelectionManager } from './Selection';
 import { HideColumnController } from './HideColumnController';
 import { ClearSelectionContentCommand } from '../Commands/Commands/clear-selection-content.command';
 
+/**
+ * @deprecated this should be removed after we complete refactoring UI system
+ */
 export class RightMenuController {
     constructor(
         @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,

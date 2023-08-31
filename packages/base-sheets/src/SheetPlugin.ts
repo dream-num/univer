@@ -9,7 +9,6 @@ import {
     SheetBarController,
     CellEditorController,
     SheetContainerController,
-    ToolbarController,
     CountBarController,
     EditTooltipsController,
     SelectionManager,
@@ -41,8 +40,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
     // TODO: @wzhudev these controllers should be removed finally after we completely refactored base-sheet plugin
 
     private _rightMenuController: RightMenuController;
-
-    private _toolbarController: ToolbarController;
 
     private _editTooltipsController: EditTooltipsController;
 
@@ -118,7 +115,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
         this._formulaBarController = this._injector.get(FormulaBarController);
         this._editTooltipsController = this._injector.get(EditTooltipsController);
         this._sheetBarController = this._injector.get(SheetBarController);
-        this._toolbarController = this._injector.get(ToolbarController);
         this._rightMenuController = this._injector.get(RightMenuController);
         this._countBarController = this._injector.get(CountBarController);
         this._hideColumnController = this._injector.get(HideColumnController);
@@ -161,7 +157,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
         // TODO: move these init to controllers not here
         this._countBarController.listenEventManager();
         this._sheetBarController.listenEventManager();
-        this._toolbarController.listenEventManager();
         this._rightMenuController.listenEventManager();
     }
 
@@ -179,7 +174,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
             [FormulaBarController],
             [EditTooltipsController],
             [SheetBarController],
-            [ToolbarController],
             [RightMenuController],
             [CountBarController],
 

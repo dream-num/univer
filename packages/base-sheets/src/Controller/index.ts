@@ -6,7 +6,6 @@ export * from './RightMenuController';
 export * from './Selection/index';
 export * from './SheetBarController';
 export * from './SheetContainerController';
-export * from './ToolbarController';
 export * from './EditTooltipsController';
 export * from './HideColumnController';
 export * from './BasicWorksheet.controller';

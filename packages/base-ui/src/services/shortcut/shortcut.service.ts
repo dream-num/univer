@@ -10,6 +10,8 @@ export interface IShortcutItem<P extends object = object> {
     id: string;
     description?: string;
 
+    // TODO@wzhudev: add a precondition to check if the command should trigger
+
     /** A command can be bound to several bindings, with different static parameters perhaps. */
     binding: number;
     mac?: number;

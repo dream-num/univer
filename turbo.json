@@ -1,0 +1,11 @@
+{
+    "$schema": "https://turbo.build/schema.json",
+    "pipeline": {
+        "esbuild": {
+        },
+        "dev": {
+            "cache": false,
+            "persistent": true
+        }
+    }
+}

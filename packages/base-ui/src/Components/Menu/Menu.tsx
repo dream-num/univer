@@ -203,19 +203,27 @@ export class MenuItem extends Component<{ menuItem: IDisplayMenuItem; index: num
         this.disabledSubscription?.unsubscribe();
     }
 
+    handleClick = (e: MouseEvent, item: IDisplayMenuItem, index: number) => {
+        // item.onClick?.call(null, e, item.value, index, deep);
+        const commandService: ICommandService = this.context.injector.get(ICommandService);
+        this.props.onClick();
+        !(item.subMenuItems && item.subMenuItems.length > 0) && commandService.executeCommand(item.id);
+        // this.showMenu(false);
+    };
+
     override render(): ComponentChild {
         const { menuItem: item, index } = this.props;
-        const commandService: ICommandService = this.context.injector.get(ICommandService);
+        // const commandService: ICommandService = this.context.injector.get(ICommandService);
         const { disabled } = this.state;
 
         return (
             <li
                 className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}
-                // style={{ ...style }}
-                onClick={() => {
-                    this.props.onClick();
-                    commandService.executeCommand(item.id);
-                }}
+                // onClick={() => {
+                //     this.props.onClick();
+                //     commandService.executeCommand(item.id);
+                // }}
+                onClick={(e) => this.handleClick(e, item, index)}
                 onMouseEnter={(e) => {
                     this.mouseEnter(e, index);
                 }}

@@ -39,4 +39,6 @@ export { SetWorksheetOrderCommand } from './Commands/Commands/set-worksheet-orde
 export { SetWorksheetRowHeightCommand } from './Commands/Commands/set-worksheet-row-height.command';
 export { SetWorksheetColWidthCommand } from './Commands/Commands/set-worksheet-col-width.command';
 export { DeleteRangeCommand } from './Commands/Commands/delete-range.command';
+export { DeleteRangeMoveLeftCommand } from './Commands/Commands/delete-range-move-left.command';
+export { DeleteRangeMoveUpCommand } from './Commands/Commands/delete-range-move-up.command';
 export { RemoveRowCommand, RemoveColCommand } from './Commands/Commands/remove-row-col.command';

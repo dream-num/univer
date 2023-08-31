@@ -14,6 +14,8 @@ import {
     SetWorksheetRowHeightCommand,
     RemoveRowCommand,
     RemoveColCommand,
+    DeleteRangeMoveLeftCommand,
+    DeleteRangeMoveUpCommand,
 } from '@univerjs/base-sheets';
 import { IMenuItem, MenuPosition } from '@univerjs/base-ui';
 import { FontItalic, FontWeight, ICommandService, IPermissionService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
@@ -315,7 +317,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuItem {
             name: RightMenuInput.name,
             props: {
                 prefix: 'rightClick.columnWidth',
-                suffix: 'px',
+                suffix: 'px'
             },
         },
     };
@@ -323,26 +325,27 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuItem {
 
 export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
-        id: `${DeleteRangeCommand.id}.parent`,
-        menu: [MenuPosition.CONTEXT_MENU],
-        title: 'rightClick.deleteCell',
-        subMenus: [DeleteRangeCommand.id, `${DeleteRangeCommand.id}up`],
-    };
-}
-export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuItem {
-    return {
         id: DeleteRangeCommand.id,
         menu: [MenuPosition.CONTEXT_MENU],
+        title: 'rightClick.deleteCell',
+        subMenus: [DeleteRangeMoveLeftCommand.id, DeleteRangeMoveUpCommand.id],
+    };
+}
+
+export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: DeleteRangeMoveLeftCommand.id,
+        menu: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.moveLeft',
-        parentId: `${DeleteRangeCommand.id}.parent`,
+        parentId:  DeleteRangeCommand.id
     };
 }
 
 export function DeleteRangeMoveUpMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
-        id: `${DeleteRangeCommand.id}up`,
+        id: DeleteRangeMoveUpCommand.id,
         menu: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.moveUp',
-        parentId: `${DeleteRangeCommand.id}.parent`,
+        parentId:  DeleteRangeCommand.id,
     };
 }

@@ -106,6 +106,7 @@ export class DesktopMenuService extends Disposable implements IMenuService {
     }
 
     getMenuItems(positions: MenuPosition): IDisplayMenuItem[] {
+        // TODO: @wzhudev: compose shortcut to returned menu items.
         if (this._menuByPositions.has(positions)) {
             return [...this._menuByPositions.get(positions)!.values()].map((menu) => this.getDisplayMenuItems(menu));
         }

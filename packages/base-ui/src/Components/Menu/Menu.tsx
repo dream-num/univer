@@ -1,9 +1,11 @@
 import { Component, ComponentChild, createRef } from 'preact';
 import { Subscription } from 'rxjs';
 import { ICommandService } from '@univerjs/core';
-import { BaseMenuProps, BaseMenuState, BaseMenuItem, BaseMenuStyle } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
 import { CustomLabel } from '../CustomLabel';
+
+import { BaseMenuProps, BaseMenuState, BaseMenuItem, BaseMenuStyle } from '../../Interfaces';
+
 import styles from './index.module.less';
 import { IDisplayMenuItem } from '../../services/menu/menu.service';
 import AppContext from '../../Common/AppContext';
@@ -154,7 +156,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
         );
     }
 
-    protected initialize() {
+    protected override initialize() {
         this.state = {
             show: false,
             posStyle: {},

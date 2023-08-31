@@ -1,29 +1,26 @@
 import { IMouseEvent, IPointerEvent } from '@univerjs/base-render';
-import { BaseMenuItem, BaseSelectChildrenProps, ComponentChildren, ComponentManager, IMenuService, MenuPosition } from '@univerjs/base-ui';
+import { BaseMenuItem, BaseSelectChildrenProps, ComponentChildren, ComponentManager, CustomLabel, CustomLabelType, IMenuService, MenuPosition } from '@univerjs/base-ui';
 import { Disposable, ICurrentUniverService, ObserverManager, Tools, UIObserver } from '@univerjs/core';
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 import { CanvasView } from '@univerjs/base-sheets';
 import { DefaultRightMenuConfig, SheetRightMenuConfig } from '../Basics';
 import { RightMenu, RightMenuInput, RightMenuItem } from '../View';
 import styles from '../View/RightMenu/index.module.less';
-import { ClearSelectionMenuItemFactory, InsertColMenuItemFactory, InsertRowMenuItemFactory } from './menu';
-
-interface CustomLabelProps {
-    prefix?: string[] | string;
-    suffix?: string[] | string;
-    options?: BaseSelectChildrenProps[];
-    label?: string;
-    children?: CustomLabelProps[];
-    onKeyUp?: (e: Event) => void;
-}
-
-export interface CustomLabel {
-    name: string;
-    props?: CustomLabelProps;
-}
+import {
+    ClearSelectionMenuItemFactory,
+    DeleteRangeMenuItemFactory,
+    DeleteRangeMoveLeftMenuItemFactory,
+    DeleteRangeMoveUpMenuItemFactory,
+    InsertColMenuItemFactory,
+    InsertRowMenuItemFactory,
+    RemoveColMenuItemFactory,
+    RemoveRowMenuItemFactory,
+    SetColWidthMenuItemFactory,
+    SetRowHeightMenuItemFactory,
+} from './menu';
 
 export interface RightMenuProps extends BaseMenuItem {
-    label?: string | CustomLabel | ComponentChildren;
+    label?: string | CustomLabelType | ComponentChildren;
     children?: RightMenuProps[];
     suffix?: string;
     border?: boolean;
@@ -196,7 +193,7 @@ export class RightMenuUIController extends Disposable {
 
     // 刷新
     setMenuList() {
-        this._rightMenu?.setMenuList(this._menuList);
+        // this._rightMenu?.setMenuList(this._menuList);
         this._rightMenu?.setMenuListNeo(this._menuService.getMenuItems(MenuPosition.CONTEXT_MENU));
     }
 
@@ -306,7 +303,18 @@ export class RightMenuUIController extends Disposable {
     }
 
     private _initializeContextMenu() {
-        [ClearSelectionMenuItemFactory, InsertRowMenuItemFactory, InsertColMenuItemFactory].forEach((factory) => {
+        [
+            ClearSelectionMenuItemFactory,
+            InsertRowMenuItemFactory,
+            InsertColMenuItemFactory,
+            RemoveRowMenuItemFactory,
+            RemoveColMenuItemFactory,
+            SetRowHeightMenuItemFactory,
+            SetColWidthMenuItemFactory,
+            DeleteRangeMenuItemFactory,
+            DeleteRangeMoveLeftMenuItemFactory,
+            DeleteRangeMoveUpMenuItemFactory,
+        ].forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
     }

@@ -148,7 +148,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
                     );
                 })}
                 {menuItems?.map((item, index) => (
-                    <MenuItem menuItem={item} onClick={() => this.showMenu(false)} />
+                    <MenuItem menuItem={item} index={index} onClick={() => this.showMenu(false)} />
                 ))}
             </ul>
         );
@@ -162,10 +162,12 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     }
 }
 
-export class MenuItem extends Component<{ menuItem: IDisplayMenuItem; onClick: () => void }, { disabled: boolean }> {
+export class MenuItem extends Component<{ menuItem: IDisplayMenuItem; index: number; onClick: () => void }, { disabled: boolean }> {
     static override contextType = AppContext;
 
     private disabledSubscription: Subscription | undefined;
+
+    private _refs: Menu[] = [];
 
     constructor() {
         super();
@@ -185,8 +187,22 @@ export class MenuItem extends Component<{ menuItem: IDisplayMenuItem; onClick: (
         this.disabledSubscription?.unsubscribe();
     }
 
+    mouseEnter = (e: MouseEvent, index: number) => {
+        const { menuItem } = this.props;
+        if (menuItem.subMenus) {
+            this._refs[index].showMenu(true);
+        }
+    };
+
+    mouseLeave = (e: MouseEvent, index: number) => {
+        const { menuItem } = this.props;
+        if (menuItem.subMenus) {
+            this._refs[index].showMenu(false);
+        }
+    };
+
     override render(): ComponentChild {
-        const { menuItem: item } = this.props;
+        const { menuItem: item, index } = this.props;
         const commandService: ICommandService = this.context.injector.get(ICommandService);
         const { disabled } = this.state;
 
@@ -197,9 +213,20 @@ export class MenuItem extends Component<{ menuItem: IDisplayMenuItem; onClick: (
                     this.props.onClick();
                     commandService.executeCommand(item.id);
                 }}
+                onMouseEnter={(e) => {
+                    this.mouseEnter(e, index);
+                }}
+                onMouseLeave={(e) => {
+                    this.mouseLeave(e, index);
+                }}
             >
-                <CustomLabel label={item.title}></CustomLabel>
+                <CustomLabel label={item.label || item.title}></CustomLabel>
                 {item.shortcut && ` (${item.shortcut})`}
+                {item.subMenuItems && item.subMenuItems.length > 0 ? (
+                    <Menu ref={(ele: Menu) => (this._refs[index] = ele)} menuItems={item.subMenuItems} parent={this}></Menu>
+                ) : (
+                    <></>
+                )}
             </li>
         );
     }

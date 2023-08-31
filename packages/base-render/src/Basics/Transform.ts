@@ -57,8 +57,8 @@ export class Transform {
      */
     applyPoint(point: Vector2, ignoreOffset: boolean = false): Vector2 {
         const m = this._m;
-        let xNew = m[0] * point.x + m[2] * point.y;
-        let yNew = m[1] * point.x + m[3] * point.y;
+        const xNew = m[0] * point.x + m[2] * point.y;
+        const yNew = m[1] * point.x + m[3] * point.y;
         if (ignoreOffset) {
             return new Vector2(xNew, yNew);
         }
@@ -104,12 +104,12 @@ export class Transform {
      */
     rotate(deg: number) {
         const rad = degToRad(deg);
-        let c = Math.cos(rad);
-        let s = Math.sin(rad);
-        let m11 = this._m[0] * c + this._m[2] * s;
-        let m12 = this._m[1] * c + this._m[3] * s;
-        let m21 = this._m[0] * -s + this._m[2] * c;
-        let m22 = this._m[1] * -s + this._m[3] * c;
+        const c = Math.cos(rad);
+        const s = Math.sin(rad);
+        const m11 = this._m[0] * c + this._m[2] * s;
+        const m12 = this._m[1] * c + this._m[3] * s;
+        const m21 = this._m[0] * -s + this._m[2] * c;
+        const m22 = this._m[1] * -s + this._m[3] * c;
         this._m[0] = m11;
         this._m[1] = m12;
         this._m[2] = m21;
@@ -139,10 +139,10 @@ export class Transform {
      * @returns {UniverSheet.Transform}
      */
     skew(sx: number, sy: number) {
-        let m11 = this._m[0] + this._m[2] * sy;
-        let m12 = this._m[1] + this._m[3] * sy;
-        let m21 = this._m[2] + this._m[0] * sx;
-        let m22 = this._m[3] + this._m[1] * sx;
+        const m11 = this._m[0] + this._m[2] * sy;
+        const m12 = this._m[1] + this._m[3] * sy;
+        const m21 = this._m[2] + this._m[0] * sx;
+        const m22 = this._m[3] + this._m[1] * sx;
         this._m[0] = m11;
         this._m[1] = m12;
         this._m[2] = m21;
@@ -158,14 +158,14 @@ export class Transform {
      * @returns {UniverSheet.Transform}
      */
     multiply(matrix: Transform) {
-        let m11 = this._m[0] * matrix._m[0] + this._m[2] * matrix._m[1];
-        let m12 = this._m[1] * matrix._m[0] + this._m[3] * matrix._m[1];
+        const m11 = this._m[0] * matrix._m[0] + this._m[2] * matrix._m[1];
+        const m12 = this._m[1] * matrix._m[0] + this._m[3] * matrix._m[1];
 
-        let m21 = this._m[0] * matrix._m[2] + this._m[2] * matrix._m[3];
-        let m22 = this._m[1] * matrix._m[2] + this._m[3] * matrix._m[3];
+        const m21 = this._m[0] * matrix._m[2] + this._m[2] * matrix._m[3];
+        const m22 = this._m[1] * matrix._m[2] + this._m[3] * matrix._m[3];
 
-        let dx = this._m[0] * matrix._m[4] + this._m[2] * matrix._m[5] + this._m[4];
-        let dy = this._m[1] * matrix._m[4] + this._m[3] * matrix._m[5] + this._m[5];
+        const dx = this._m[0] * matrix._m[4] + this._m[2] * matrix._m[5] + this._m[4];
+        const dy = this._m[1] * matrix._m[4] + this._m[3] * matrix._m[5] + this._m[5];
 
         this._m[0] = m11;
         this._m[1] = m12;
@@ -183,13 +183,13 @@ export class Transform {
      * @returns {UniverSheet.Transform}
      */
     invert() {
-        let d = 1 / (this._m[0] * this._m[3] - this._m[1] * this._m[2]);
-        let m0 = this._m[3] * d;
-        let m1 = -this._m[1] * d;
-        let m2 = -this._m[2] * d;
-        let m3 = this._m[0] * d;
-        let m4 = d * (this._m[2] * this._m[5] - this._m[3] * this._m[4]);
-        let m5 = d * (this._m[1] * this._m[4] - this._m[0] * this._m[5]);
+        const d = 1 / (this._m[0] * this._m[3] - this._m[1] * this._m[2]);
+        const m0 = this._m[3] * d;
+        const m1 = -this._m[1] * d;
+        const m2 = -this._m[2] * d;
+        const m3 = this._m[0] * d;
+        const m4 = d * (this._m[2] * this._m[5] - this._m[3] * this._m[4]);
+        const m5 = d * (this._m[1] * this._m[4] - this._m[0] * this._m[5]);
         this._m[0] = m0;
         this._m[1] = m1;
         this._m[2] = m2;
@@ -224,14 +224,14 @@ export class Transform {
      * @returns {UniverSheet.Transform}
      */
     setAbsolutePosition(coord: Vector2) {
-        let m0 = this._m[0];
-        let m1 = this._m[1];
-        let m2 = this._m[2];
-        let m3 = this._m[3];
-        let m4 = this._m[4];
-        let m5 = this._m[5];
-        let yt = (m0 * (coord.y - m5) - m1 * (coord.x - m4)) / (m0 * m3 - m1 * m2);
-        let xt = (coord.x - m4 - m2 * yt) / m0;
+        const m0 = this._m[0];
+        const m1 = this._m[1];
+        const m2 = this._m[2];
+        const m3 = this._m[3];
+        const m4 = this._m[4];
+        const m5 = this._m[5];
+        const yt = (m0 * (coord.y - m5) - m1 * (coord.x - m4)) / (m0 * m3 - m1 * m2);
+        const xt = (coord.x - m4 - m2 * yt) / m0;
 
         return this.translate(xt, yt);
     }
@@ -243,16 +243,16 @@ export class Transform {
      * @returns {UniverSheet.Transform}
      */
     decompose() {
-        let a = this._m[0];
-        let b = this._m[1];
-        let c = this._m[2];
-        let d = this._m[3];
-        let e = this._m[4];
-        let f = this._m[5];
+        const a = this._m[0];
+        const b = this._m[1];
+        const c = this._m[2];
+        const d = this._m[3];
+        const e = this._m[4];
+        const f = this._m[5];
 
-        let delta = a * d - b * c;
+        const delta = a * d - b * c;
 
-        let result = {
+        const result = {
             x: e,
             y: f,
             angle: 0,
@@ -264,14 +264,14 @@ export class Transform {
 
         // Apply the QR-like decomposition.
         if (a !== 0 || b !== 0) {
-            let r = Math.sqrt(a * a + b * b);
+            const r = Math.sqrt(a * a + b * b);
             result.angle = b > 0 ? Math.acos(a / r) : -Math.acos(a / r);
             result.scaleX = r;
             result.scaleY = delta / r;
             result.skewX = (a * c + b * d) / delta;
             result.skewY = 0;
         } else if (c !== 0 || d !== 0) {
-            let s = Math.sqrt(c * c + d * d);
+            const s = Math.sqrt(c * c + d * d);
             result.angle = Math.PI / 2 - (d > 0 ? Math.acos(-c / s) : -Math.acos(c / s));
             result.scaleX = delta / s;
             result.scaleY = s;

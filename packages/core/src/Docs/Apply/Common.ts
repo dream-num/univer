@@ -3,6 +3,7 @@ import { Nullable } from '../../Shared/Types';
 import { checkParagraphHasBullet, horizontalLineSegmentsSubtraction } from '../../Shared/DocTool';
 import { isSameStyleTextRun } from '../../Shared/Compare';
 import { sortRulesFactory } from '../../Shared/SortRules';
+import { DataStreamTreeTokenType } from '../Domain/Types';
 
 export function insertTextRuns(body: IDocumentBody, insertBody: IDocumentBody, textLength: number, currentIndex: number) {
     const { textRuns } = body;
@@ -77,24 +78,46 @@ export function insertParagraphs(body: IDocumentBody, insertBody: IDocumentBody,
     if (paragraphs == null) {
         return;
     }
+
+    const { paragraphs: insertParagraphs, dataStream: insertDataStream } = insertBody;
+
     const paragraphIndexList = [];
+    let firstInsertParagraphNextIndex = -1;
     for (let i = 0, len = paragraphs.length; i < len; i++) {
         const paragraph = paragraphs[i];
         const { startIndex } = paragraph;
         if (startIndex > currentIndex) {
             paragraph.startIndex += textLength;
         }
+
+        if (firstInsertParagraphNextIndex === -1 && startIndex > currentIndex) {
+            firstInsertParagraphNextIndex = i;
+        }
+
         paragraphIndexList.push(paragraph.startIndex);
     }
 
-    const insertParagraphs = insertBody.paragraphs;
     let deleteReptIndex = -1;
     if (insertParagraphs) {
         for (let i = 0, len = insertParagraphs.length; i < len; i++) {
-            const insertTextRun = insertParagraphs[i];
-            insertTextRun.startIndex += currentIndex;
-            const insertIndex = insertTextRun.startIndex;
+            const insertParagraph = insertParagraphs[i];
+            insertParagraph.startIndex += currentIndex;
+            const insertIndex = insertParagraph.startIndex;
             deleteReptIndex = paragraphIndexList.indexOf(insertIndex);
+        }
+
+        if (insertDataStream === DataStreamTreeTokenType.PARAGRAPH && insertParagraphs.length === 1) {
+            const nextParagraph = paragraphs[firstInsertParagraphNextIndex];
+            const insertParagraph = insertParagraphs[0];
+
+            const nextParagraphStyle = nextParagraph.paragraphStyle;
+            const nextBullet = nextParagraph.bullet;
+
+            nextParagraph.paragraphStyle = insertParagraph.paragraphStyle;
+            nextParagraph.bullet = insertParagraph.bullet;
+
+            insertParagraph.paragraphStyle = nextParagraphStyle;
+            insertParagraph.bullet = nextBullet;
         }
 
         if (deleteReptIndex !== -1) {

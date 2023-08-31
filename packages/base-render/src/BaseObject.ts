@@ -165,12 +165,12 @@ export abstract class BaseObject {
     }
 
     get ancestorScaleX() {
-        let pScale: number = this.getParent()?.ancestorScaleX || 1;
+        const pScale: number = this.getParent()?.ancestorScaleX || 1;
         return this.scaleX * pScale;
     }
 
     get ancestorScaleY() {
-        let pScale: number = this.getParent()?.ancestorScaleY || 1;
+        const pScale: number = this.getParent()?.ancestorScaleY || 1;
         return this.scaleY * pScale;
     }
 
@@ -191,6 +191,7 @@ export abstract class BaseObject {
     }
 
     get parent() {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return this._parent;
     }
 
@@ -466,6 +467,7 @@ export abstract class BaseObject {
     }
 
     getParent() {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return this._parent;
     }
 
@@ -645,7 +647,7 @@ export abstract class BaseObject {
         return props;
     }
 
-    getScene() {
+    getScene(): any {
         let parent: any = this.parent;
 
         if (parent == null) {
@@ -673,7 +675,7 @@ export abstract class BaseObject {
         this.getScene()?.setCursor(val);
     }
 
-    getEngine() {
+    getEngine(): any {
         let parent: any = this.getParent();
         while (parent != null) {
             if (parent === RENDER_CLASS_TYPE.ENGINE) {

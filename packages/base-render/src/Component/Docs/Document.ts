@@ -1,6 +1,6 @@
 import { BooleanNumber, HorizontalAlign, Nullable, Observable, Observer, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DocComponent } from './DocComponent';
-import { IDocumentSkeletonCached, IDocumentSkeletonPage, LineType, PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
+import { IDocumentSkeletonCached, IDocumentSkeletonPage, IDocumentSkeletonSpan, LineType, PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';
 import { DocumentsSpanAndLineExtensionRegistry, IExtensionConfig } from '../Extension';
 import { DocumentSkeleton } from './DocSkeleton';
@@ -90,7 +90,7 @@ export class Documents extends DocComponent {
     calculatePagePosition() {
         const scene = this.getScene() as Scene;
 
-        let parent = scene?.getParent();
+        const parent = scene?.getParent();
         const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = this;
         if (parent == null) {
             return this;
@@ -159,8 +159,9 @@ export class Documents extends DocComponent {
         if (!this._hasEditor) {
             return;
         }
-        const { onInputObservable, onCompositionstartObservable, onCompositionupdateObservable, onCompositionendObservable, onKeydownObservable } = this._editor;
-        return { onInputObservable, onCompositionstartObservable, onCompositionupdateObservable, onCompositionendObservable, onKeydownObservable };
+        const { onInputObservable, onCompositionstartObservable, onCompositionupdateObservable, onCompositionendObservable, onKeydownObservable, onSelectionStartObservable } =
+            this._editor;
+        return { onInputObservable, onCompositionstartObservable, onCompositionupdateObservable, onCompositionendObservable, onKeydownObservable, onSelectionStartObservable };
     }
 
     override remainActiveSelection() {
@@ -177,12 +178,20 @@ export class Documents extends DocComponent {
         return this._editor.add(textSelection);
     }
 
-    syncSelection() {
+    override syncSelection() {
         if (!this._hasEditor) {
             return;
         }
 
         return this._editor.sync();
+    }
+
+    override scrollBySelection() {
+        if (this._hasEditor == null) {
+            return;
+        }
+
+        this._editor.scroll();
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -204,7 +213,7 @@ export class Documents extends DocComponent {
         const parentScale = this.getParentScale();
         const extensions = this.getExtensionsByOrder();
         const scale = getScale(parentScale);
-        for (let extension of extensions) {
+        for (const extension of extensions) {
             extension.clearCache();
         }
 
@@ -252,12 +261,12 @@ export class Documents extends DocComponent {
 
             this._startRotation(ctx, finalAngle);
 
-            for (let section of sections) {
+            for (const section of sections) {
                 const { columns } = section;
 
                 this._drawLiquid.translateSection(section);
 
-                for (let column of columns) {
+                for (const column of columns) {
                     const { lines, width: columnWidth } = column;
 
                     this._drawLiquid.translateColumn(column);
@@ -311,13 +320,13 @@ export class Documents extends DocComponent {
                             lineHeight = 0,
                         } = line;
 
-                        let maxLineAsc = asc;
+                        const maxLineAsc = asc;
 
                         const maxLineAscSin = maxLineAsc * Math.sin(centerAngle);
                         const maxLineAscCos = maxLineAsc * Math.cos(centerAngle);
 
                         if (type === LineType.BLOCK) {
-                            for (let extension of extensions) {
+                            for (const extension of extensions) {
                                 if (extension.type === DOCS_EXTENSION_TYPE.LINE) {
                                     extension.extensionOffset = {
                                         alignOffset,
@@ -339,7 +348,7 @@ export class Documents extends DocComponent {
                                 this._drawLiquid.translateSave();
 
                                 this._drawLiquid.translateDivide(divide);
-                                for (let span of spanGroup) {
+                                for (const span of spanGroup) {
                                     if (!span.content || span.content.length === 0) {
                                         continue;
                                     }
@@ -373,7 +382,7 @@ export class Documents extends DocComponent {
                                         renderConfig,
                                     };
 
-                                    for (let extension of extensions) {
+                                    for (const extension of extensions) {
                                         if (extension.type === DOCS_EXTENSION_TYPE.SPAN) {
                                             extension.extensionOffset = extensionOffset;
                                             extension.draw(ctx, parentScale, span);
@@ -413,7 +422,7 @@ export class Documents extends DocComponent {
         }
 
         const coord = this._getInverseCoord(originCoord);
-        let { x, y } = coord;
+        const { x, y } = coord;
         const skeleton = this.getSkeleton();
 
         if (!skeleton) {
@@ -439,7 +448,7 @@ export class Documents extends DocComponent {
             this._findLiquid.translatePagePadding(page);
 
             const sections = page.sections;
-            for (let section of sections) {
+            for (const section of sections) {
                 const { columns, height } = section;
 
                 this._findLiquid.translateSection(section);
@@ -450,7 +459,7 @@ export class Documents extends DocComponent {
                     continue;
                 }
 
-                for (let column of columns) {
+                for (const column of columns) {
                     const { lines, width: columnWidth } = column;
 
                     this._findLiquid.translateColumn(column);
@@ -499,7 +508,7 @@ export class Documents extends DocComponent {
                                     continue;
                                 }
 
-                                for (let span of spanGroup) {
+                                for (const span of spanGroup) {
                                     if (!span.content || span.content.length === 0) {
                                         continue;
                                     }
@@ -532,6 +541,41 @@ export class Documents extends DocComponent {
         }
 
         return false;
+    }
+
+    override findCoordByNode(span: IDocumentSkeletonSpan) {
+        const divide = span.parent;
+        const defaultCoordinate = {
+            x: -Infinity,
+            y: -Infinity,
+        };
+        if (divide == null) {
+            return defaultCoordinate;
+        }
+
+        const line = divide.parent;
+
+        if (line == null) {
+            return defaultCoordinate;
+        }
+
+        const column = line.parent;
+
+        if (column == null) {
+            return defaultCoordinate;
+        }
+
+        const section = column.parent;
+
+        if (section == null) {
+            return defaultCoordinate;
+        }
+
+        const page = section.parent;
+
+        if (page == null) {
+            return defaultCoordinate;
+        }
     }
 
     protected override _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
@@ -618,7 +662,7 @@ export class Documents extends DocComponent {
 
     private _getPageBoundingBox(page: IDocumentSkeletonPage) {
         const { pageWidth, pageHeight } = page;
-        let { x: startX, y: startY } = this._findLiquid;
+        const { x: startX, y: startY } = this._findLiquid;
 
         let endX = -1;
         let endY = -1;

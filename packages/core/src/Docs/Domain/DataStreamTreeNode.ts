@@ -43,7 +43,7 @@ export class DataStreamTreeNode {
     }
 
     insertText(text: string, insertIndex: number) {
-        this.content = insertTextToContent(this.content || '', insertIndex - this.startIndex + 1, text);
+        this.content = insertTextToContent(this.content || '', insertIndex - this.startIndex, text);
     }
 
     exclude(index: number) {
@@ -56,8 +56,11 @@ export class DataStreamTreeNode {
         this.addIndexForBlock(len);
     }
 
-    selfPlus(len: number, index: number) {
+    selfPlus(len: number, index?: number) {
         this.endIndex += len;
+        if (index == null) {
+            index = this.startIndex;
+        }
         this.addIndexForBlock(len, index);
     }
 
@@ -71,26 +74,19 @@ export class DataStreamTreeNode {
         const firstStartIndex = 0;
         const firstEndIndex = index - startIndex;
 
-        const lastStartIndex = index - startIndex + 1;
+        const lastStartIndex = firstEndIndex;
         const lastEndIndex = endIndex;
 
-        const firstNode = DataStreamTreeNode.create(
-            nodeType,
-
-            content.slice(firstStartIndex, firstEndIndex)
-        );
+        const firstNode = DataStreamTreeNode.create(nodeType, content.slice(firstStartIndex, firstEndIndex));
 
         firstNode.parent = parent;
-        firstNode.setIndexRange(firstStartIndex, firstEndIndex);
+        firstNode.setIndexRange(firstStartIndex, firstEndIndex - 1);
 
-        const lastNode = DataStreamTreeNode.create(
-            nodeType,
-
-            content.slice(lastStartIndex, lastEndIndex)
-        );
+        const lastNodeContent = content.slice(lastStartIndex, lastEndIndex);
+        const lastNode = DataStreamTreeNode.create(nodeType, lastNodeContent);
 
         lastNode.parent = parent;
-        lastNode.setIndexRange(lastStartIndex, lastEndIndex);
+        lastNode.setIndexRange(lastStartIndex, lastStartIndex + lastNodeContent.length - 1);
 
         const firstChildNodes: DataStreamTreeNode[] = [];
         const lastChildNodes: DataStreamTreeNode[] = [];

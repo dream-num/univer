@@ -134,7 +134,7 @@ export class DocumentModel extends DocumentModelSimple {
         if (isCollapse) {
             actionList.push({
                 actionName: DOC_ACTION_NAMES.RETAIN_ACTION_NAME,
-                len: textStart,
+                len: textStart + 1,
                 segmentId,
             });
         } else {
@@ -209,16 +209,18 @@ export class DocumentModel extends DocumentModelSimple {
 
         actionList.push({
             actionName: DOC_ACTION_NAMES.RETAIN_ACTION_NAME,
-            len: start,
+            len: start + 1,
             segmentId,
         });
 
-        actionList.push({
-            actionName: DOC_ACTION_NAMES.DELETE_ACTION_NAME,
-            len: oldTextLen,
-            line: 0,
-            segmentId,
-        });
+        if (oldTextLen > 0) {
+            actionList.push({
+                actionName: DOC_ACTION_NAMES.DELETE_ACTION_NAME,
+                len: oldTextLen,
+                line: 0,
+                segmentId,
+            });
+        }
 
         actionList.push({
             actionName: DOC_ACTION_NAMES.INSERT_ACTION_NAME,

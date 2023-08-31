@@ -270,31 +270,31 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
     // }
 
     let prePageStartIndex = start;
-    for (let page of pages) {
+    for (const page of pages) {
         const { sections } = page;
-        let pageStartIndex = prePageStartIndex;
-        let pageEndIndex = pageStartIndex;
+        const pageStartIndex = prePageStartIndex;
+        const pageEndIndex = pageStartIndex;
         let preSectionStartIndex = pageStartIndex;
         let maxPageWidth = -Infinity;
         let pageHeight = 0;
-        for (let section of sections) {
+        for (const section of sections) {
             const { columns } = section;
-            let sectionStartIndex = preSectionStartIndex;
-            let sectionEndIndex = pageStartIndex;
+            const sectionStartIndex = preSectionStartIndex;
+            const sectionEndIndex = pageStartIndex;
             let preColumnStartIndex = sectionStartIndex;
             let maxSectionHeight = -Infinity;
-            for (let column of columns) {
+            for (const column of columns) {
                 const { lines } = column;
-                let columStartIndex = preColumnStartIndex;
-                let columnEndIndex = columStartIndex;
+                const columStartIndex = preColumnStartIndex;
+                const columnEndIndex = columStartIndex;
                 let preLineStartIndex = columStartIndex;
                 let columnHeight = 0;
                 let maxColumnWidth = -Infinity;
                 let preLine: Nullable<IDocumentSkeletonLine> = null;
-                for (let line of lines) {
+                for (const line of lines) {
                     const { divides, lineHeight } = line;
-                    let lineStartIndex = preLineStartIndex;
-                    let lineEndIndex = lineStartIndex;
+                    const lineStartIndex = preLineStartIndex;
+                    const lineEndIndex = lineStartIndex;
                     let preDivideStartIndex = lineStartIndex;
                     let actualWidth = 0;
                     let maxLineAsc = 0;
@@ -308,9 +308,9 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                             continue;
                         }
 
-                        let divStartIndex = preDivideStartIndex;
+                        const divStartIndex = preDivideStartIndex;
                         let divEndIndex = divStartIndex;
-                        for (let span of spanGroup) {
+                        for (const span of spanGroup) {
                             const increaseValue = span.spanType === SpanType.LIST ? 0 : span.count || 1;
                             // pageEndIndex += increaseValue;
                             // sectionEndIndex += increaseValue;
@@ -384,23 +384,23 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
 }
 
 export function spanIterator(pages: IDocumentSkeletonPage[], iteratorFunction: (span: IDocumentSkeletonSpan) => void) {
-    for (let page of pages) {
+    for (const page of pages) {
         const { sections } = page;
 
-        for (let section of sections) {
+        for (const section of sections) {
             const { columns } = section;
 
-            for (let column of columns) {
+            for (const column of columns) {
                 const { lines } = column;
 
-                for (let line of lines) {
+                for (const line of lines) {
                     const { divides, lineHeight } = line;
                     const divideLength = divides.length;
                     for (let i = 0; i < divideLength; i++) {
                         const divide = divides[i];
                         const { spanGroup } = divide;
 
-                        for (let span of spanGroup) {
+                        for (const span of spanGroup) {
                             if (iteratorFunction && isFunction(iteratorFunction)) {
                                 iteratorFunction(span);
                             }
@@ -413,16 +413,16 @@ export function spanIterator(pages: IDocumentSkeletonPage[], iteratorFunction: (
 }
 
 export function lineIterator(pages: IDocumentSkeletonPage[], iteratorFunction: (line: IDocumentSkeletonLine) => void) {
-    for (let page of pages) {
+    for (const page of pages) {
         const { sections } = page;
 
-        for (let section of sections) {
+        for (const section of sections) {
             const { columns } = section;
 
-            for (let column of columns) {
+            for (const column of columns) {
                 const { lines } = column;
 
-                for (let line of lines) {
+                for (const line of lines) {
                     if (iteratorFunction && isFunction(iteratorFunction)) {
                         iteratorFunction(line);
                     }
@@ -433,13 +433,13 @@ export function lineIterator(pages: IDocumentSkeletonPage[], iteratorFunction: (
 }
 
 export function columnIterator(pages: IDocumentSkeletonPage[], iteratorFunction: (column: IDocumentSkeletonColumn) => void) {
-    for (let page of pages) {
+    for (const page of pages) {
         const { sections } = page;
 
-        for (let section of sections) {
+        for (const section of sections) {
             const { columns } = section;
 
-            for (let column of columns) {
+            for (const column of columns) {
                 if (iteratorFunction && isFunction(iteratorFunction)) {
                     iteratorFunction(column);
                 }
@@ -625,7 +625,7 @@ export function getPositionHorizonBySpan(positionH: ObjectPositionH, span: IDocu
 export function getSpanGroupWidth(divide: IDocumentSkeletonDivide) {
     const spanGroup = divide.spanGroup;
     let width = 0;
-    for (let span of spanGroup) {
+    for (const span of spanGroup) {
         width += span.width;
     }
     return width;

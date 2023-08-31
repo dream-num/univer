@@ -17,7 +17,7 @@ import {
     Disposable,
     ICommandService,
 } from '@univerjs/core';
-import { InsertSheetMutation, RemoveSheetMutation, SetWorksheetActivateCommand } from '@univerjs/base-sheets';
+import { InsertSheetMutation, RemoveSheetMutation, SetWorksheetActivateCommand, SetWorksheetOrderCommand } from '@univerjs/base-sheets';
 import { Inject, SkipSelf } from '@wendellhu/redi';
 import { SheetBar } from '../View/SheetBar';
 import styles from '../View/SheetBar/index.module.less';
@@ -246,6 +246,7 @@ export class SheetBarUIController extends Disposable {
     dragEnd = (element: HTMLDivElement[]): void => {
         const list: SheetUlProps[] = [];
         const sheetId = this._dataId;
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         Array.from(element).forEach((node: any) => {
             const item = this._sheetList.find((ele) => ele.sheetId === node.dataset.id);
             if (item) {
@@ -254,7 +255,11 @@ export class SheetBarUIController extends Disposable {
         });
         list.forEach((ele, index) => {
             if (ele.sheetId === sheetId) {
-                this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().setSheetOrder(ele.sheetId, index);
+                this._commandService.executeCommand(SetWorksheetOrderCommand.id, {
+                    workbookId: workbook.getUnitId(),
+                    worksheetId: ele.sheetId,
+                    order: index,
+                });
             }
         });
     };
@@ -266,9 +271,14 @@ export class SheetBarUIController extends Disposable {
             menuList: this._menuList,
             selectSheet: (event: Event, data: { item: SheetUlProps }) => {
                 this._dataId = data.item.sheetId;
-                const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(this._dataId);
+                const currentWorkbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+                const sheet = currentWorkbook.getSheetBySheetId(this._dataId);
                 if (sheet) {
-                    sheet.activate();
+                    // sheet.activate();
+                    this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                        workbookId: currentWorkbook.getUnitId(),
+                        worksheetId: sheet.getSheetId(),
+                    });
                 }
             },
             contextMenu: (e: MouseEvent) => {
@@ -298,7 +308,11 @@ export class SheetBarUIController extends Disposable {
                     const target = e.currentTarget as HTMLDivElement;
                     this._dataId = target.dataset.id as string;
                     sheet.showSheet();
-                    sheet.activate();
+                    // sheet.activate();
+                    this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                        workbookId: workbook.getUnitId(),
+                        worksheetId: sheet.getSheetId(),
+                    });
                 }
             },
         }));

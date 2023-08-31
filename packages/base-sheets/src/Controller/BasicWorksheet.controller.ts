@@ -31,6 +31,8 @@ import { SetWorksheetRowShowMutation } from '../Commands/Mutations/set-worksheet
 import { InsertRangeMutation } from '../Commands/Mutations/insert-range.mutation';
 import { DeleteRangeMutation } from '../Commands/Mutations/delete-range.mutation';
 import { SetRangeFormattedValueMutation } from '../Commands/Mutations/set-range-formatted-value.mutation';
+import { SetWorksheetOrderCommand } from '../Commands/Commands/set-worksheet-order.command';
+import { SetWorksheetOrderMutation } from '../Commands/Mutations/set-worksheet-order.mutation';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -73,6 +75,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetWorksheetRowHideMutation,
             SetWorksheetRowShowCommand,
             SetWorksheetRowShowMutation,
+            SetWorksheetOrderCommand,
+            SetWorksheetOrderMutation,
 
             SetRangeValuesCommand,
             TrimWhitespaceCommand,

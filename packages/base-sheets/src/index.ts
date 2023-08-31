@@ -29,6 +29,8 @@ export {
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
 } from './Commands/Commands/set-style.command';
+export { InsertSheetCommand } from './Commands/Commands/insert-sheet.command';
 export { ClearSelectionContentCommand } from './Commands/Commands/clear-selection-content.command';
 export { InsertRowCommand, InsertColCommand } from './Commands/Commands/insert-row-col.command';
 export { SetWorksheetActivateCommand } from './Commands/Commands/set-worksheet-activate.command';
+export { SetWorksheetOrderCommand } from './Commands/Commands/set-worksheet-order.command';

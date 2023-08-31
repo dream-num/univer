@@ -1,4 +1,5 @@
-import { BaseComponentProps, Component, Container, Content, createRef, Footer, Header, Layout, Sider, Slot, defaultSkin } from '@univerjs/base-ui';
+import { BaseComponentProps, Container, Content, Footer, Header, Layout, Sider, Slot, defaultSkin } from '@univerjs/base-ui';
+import { Component, createRef } from 'preact';
 import { Tools } from '@univerjs/core';
 import cssVars from 'css-vars-ponyfill';
 import style from './index.module.less';
@@ -100,7 +101,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
      */
     changeSkin(container: HTMLElement | string, skin: string) {
         // Collect all  skins
-        let root = document.documentElement;
+        const root = document.documentElement;
 
         const id = typeof container === 'string' ? container : container.id;
 
@@ -128,7 +129,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
             });
         } else {
             // set css variable
-            let sheet = getSkinStyleSheet(id);
+            const sheet = getSkinStyleSheet(id);
 
             /**
              *  covert object to style, remove " and replace , to ;

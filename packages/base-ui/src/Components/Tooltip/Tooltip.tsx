@@ -1,6 +1,9 @@
-import { Component, createRef } from '../../Framework';
+import { createRef } from 'preact';
+import { useState, useContext } from 'preact/hooks';
 import { BaseTooltipProps } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
+import { AppContext } from '../../Common';
+import { CustomLabel } from '../CustomLabel';
 
 import style from './index.module.less';
 
@@ -28,45 +31,47 @@ const placementClassNames: { [index: string]: string } = {
     right: style.right,
 };
 
-export class Tooltip extends Component<BaseTooltipProps, TooltipState> {
-    tooltip = createRef<HTMLDivElement>();
+export function Tooltip(props: BaseTooltipProps) {
+    const context = useContext(AppContext);
+    const tooltip = createRef<HTMLDivElement>();
+    const [state, setState] = useState<TooltipState>({
+        placement: props.placement || 'top',
+        placementClassName: joinClassNames(style.tooltipTitle, placementClassNames[props.placement || 'top']),
+        top: '',
+        left: '',
+        show: false,
+    });
 
-    override initialize(props: BaseTooltipProps) {
-        this.state = {
-            placement: props.placement || 'top',
-            placementClassName: joinClassNames(style.tooltipTitle, placementClassNames[props.placement || 'top']),
-            top: '',
-            left: '',
-            show: false,
-        };
-    }
-
-    handleMouseOver() {
-        if (this.tooltip && this.tooltip.current) {
-            const tooltipInfo = this.tooltip.current.getBoundingClientRect();
+    function handleMouseOver() {
+        if (tooltip?.current) {
+            const tooltipInfo = tooltip.current.getBoundingClientRect();
             const top = tooltipInfo.height;
             const left = tooltipInfo.width;
 
-            if (this.state.placement === 'bottom') {
-                this.setState({
+            if (state.placement === 'bottom') {
+                setState({
+                    ...state,
                     top: top + 10,
                     left: left / 2,
                     show: true,
                 });
-            } else if (this.state.placement === 'left') {
-                this.setState({
+            } else if (state.placement === 'left') {
+                setState({
+                    ...state,
                     top: top / 2,
                     left: left + 5,
                     show: true,
                 });
-            } else if (this.state.placement === 'right') {
-                this.setState({
+            } else if (state.placement === 'right') {
+                setState({
+                    ...state,
                     top: top / 2,
                     left: -left - 10,
                     show: true,
                 });
             } else {
-                this.setState({
+                setState({
+                    ...state,
                     top: -top - 20,
                     left: left / 2,
                     show: true,
@@ -75,33 +80,32 @@ export class Tooltip extends Component<BaseTooltipProps, TooltipState> {
         }
     }
 
-    handleMouseLeave() {
-        this.setState({
+    function handleMouseLeave() {
+        setState({
+            ...state,
             show: false,
         });
     }
 
-    render() {
-        return (
-            <div ref={this.tooltip} className={style.tooltipGroup} style={this.props.styles}>
-                <div className={style.tooltipBody} onMouseEnter={this.handleMouseOver.bind(this)} onMouseLeave={this.handleMouseLeave.bind(this)}>
-                    {this.props.children}
-                </div>
-
-                {this.props.title ? (
-                    <span
-                        className={this.state.placementClassName}
-                        style={{
-                            top: `${this.state.top}px`,
-                            left: `${this.state.left}px`,
-                            display: `${this.state.show ? 'block' : 'none'}`,
-                        }}
-                    >
-                        {this.getLabel(this.props.title)}
-                        <span className={style.tooltipTriangle}></span>
-                    </span>
-                ) : null}
+    return (
+        <div ref={tooltip} className={style.tooltipGroup} style={props.styles}>
+            <div className={style.tooltipBody} onMouseEnter={handleMouseOver} onMouseLeave={handleMouseLeave}>
+                {props.children}
             </div>
-        );
-    }
+
+            {props.title ? (
+                <span
+                    className={state.placementClassName}
+                    style={{
+                        top: `${state.top}px`,
+                        left: `${state.left}px`,
+                        display: `${state.show ? 'block' : 'none'}`,
+                    }}
+                >
+                    <CustomLabel label={props.title} />
+                    <span className={style.tooltipTriangle}></span>
+                </span>
+            ) : null}
+        </div>
+    );
 }

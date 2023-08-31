@@ -1,5 +1,5 @@
+import { Component } from 'preact';
 import { HexColorInput, RgbaStringColorPicker } from 'react-colorful';
-import { Component } from '../../../Framework';
 import { debounce } from '../../../Utils';
 
 import { RgbaColorInput } from '../RgbaColorInput';
@@ -16,6 +16,11 @@ interface IState {
 }
 
 class ColorPickerPanel extends Component<IProps, IState> {
+    constructor(props: IProps) {
+        super();
+        this.initialize(props);
+    }
+
     initialize(props: IProps) {
         this.state = {
             color: props.color || '#000',

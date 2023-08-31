@@ -1,4 +1,5 @@
-import { BaseCheckboxGroupOptions, BaseComponentProps, Button, CellRange, CheckboxGroup, Component, createRef, Icon, Input, Modal, Select } from '@univerjs/base-ui';
+import { BaseCheckboxGroupOptions, BaseComponentProps, Button, CellRange, CheckboxGroup, Icon, Input, Modal, Select, CustomLabel } from '@univerjs/base-ui';
+import { Component, createRef } from 'preact';
 import { BaseItemProps } from '@univerjs/base-ui/src/Components/Item/Item';
 import styles from './index.module.less';
 
@@ -102,7 +103,7 @@ export class FindModal extends Component<IProps, IState> {
     getMatchGroup() {
         const arr: BaseCheckboxGroupOptions[] = JSON.parse(JSON.stringify(this._matchGroup));
         arr.forEach((element: BaseCheckboxGroupOptions) => {
-            element.label = this.getLocale(element.label as string);
+            element.label = <CustomLabel label={element.label} />;
         });
         return arr;
     }
@@ -111,7 +112,7 @@ export class FindModal extends Component<IProps, IState> {
     getSelect() {
         const arr: BaseItemProps[] = JSON.parse(JSON.stringify(this._select));
         arr.forEach((element: BaseCheckboxGroupOptions) => {
-            element.label = this.getLocale(element.label as string);
+            element.label = <CustomLabel label={element.label} />;
         });
         return arr;
     }
@@ -192,11 +193,15 @@ export class FindModal extends Component<IProps, IState> {
                 isDrag
                 footer={false}
                 mask={false}
-                title={this.getLocale(hideAdvanced ? 'find.find' : 'find.findLabel')}
+                title={<CustomLabel label={hideAdvanced ? 'find.find' : 'find.findLabel'} />}
                 visible={show}
             >
                 <div className={styles.box}>
-                    {hideAdvanced ? null : <span>{this.getLocale('find.find')}</span>}
+                    {hideAdvanced ? null : (
+                        <span>
+                            <CustomLabel label="find.find" />
+                        </span>
+                    )}
                     <Input ref={this._searchRef} onPressEnter={this.findNext.bind(this)}></Input>
                     {count ? (
                         <div className={styles.count}>
@@ -212,17 +217,21 @@ export class FindModal extends Component<IProps, IState> {
                 </div>
                 {hideAdvanced ? (
                     <p style={{ display: hideAdvanced ? 'block' : 'none' }} onClick={() => this.handleHideAdvanced(false)}>
-                        {this.getLocale('find.replace')}/{this.getLocale('find.advanced')}
+                        <CustomLabel label="find.replace" />/<CustomLabel label="find.advanced" />
                         <Icon.Format.NextIcon />
                     </p>
                 ) : (
                     <>
                         <div className={styles.box}>
-                            <span>{this.getLocale('find.replaceWith')}</span>
+                            <span>
+                                <CustomLabel label="find.replaceWith" />
+                            </span>
                             <Input ref={this._replaceRef}></Input>
                         </div>
                         <div className={styles.box}>
-                            <span>{this.getLocale('find.search')}</span>
+                            <span>
+                                <CustomLabel label="find.search" />
+                            </span>
                             <Select onClick={this.selectSearch.bind(this)} type={0} children={this.getSelect()}></Select>
                             {showRange ? <CellRange /> : null}
                         </div>
@@ -231,10 +240,18 @@ export class FindModal extends Component<IProps, IState> {
                             <CheckboxGroup options={this.getMatchGroup()} onChange={this.handleChange.bind(this)}></CheckboxGroup>
                         </div>
                         <div className={styles.buttonGroup}>
-                            <Button type="primary">{this.getLocale('button.cancel')}</Button>
-                            <Button onClick={this.replaceAll.bind(this)}>{this.getLocale('find.allReplaceBtn')}</Button>
-                            <Button onClick={this.replaceText.bind(this)}>{this.getLocale('find.replace')}</Button>
-                            <Button onClick={this.findNext.bind(this)}>{this.getLocale('find.find')}</Button>
+                            <Button type="primary">
+                                <CustomLabel label="button.cancel" />
+                            </Button>
+                            <Button onClick={this.replaceAll.bind(this)}>
+                                <CustomLabel label="find.allReplaceBtn" />
+                            </Button>
+                            <Button onClick={this.replaceText.bind(this)}>
+                                <CustomLabel label="find.replace" />
+                            </Button>
+                            <Button onClick={this.findNext.bind(this)}>
+                                <CustomLabel label="find.find" />
+                            </Button>
                         </div>
                     </>
                 )}

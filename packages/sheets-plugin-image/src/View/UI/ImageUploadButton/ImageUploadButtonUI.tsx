@@ -1,10 +1,15 @@
-import { Component } from '@univerjs/base-ui';
+import { Component } from 'preact';
 
 export interface ImageUploadButtonUIProps {
     chooseCallback: (url: string, file: File) => void;
 }
 
 export class ImageUploadButtonUI extends Component<ImageUploadButtonUIProps> {
+    constructor(props: ImageUploadButtonUIProps) {
+        super(props);
+        this.initialize(props);
+    }
+
     initialize(props: ImageUploadButtonUIProps) {
         this.state = {};
     }

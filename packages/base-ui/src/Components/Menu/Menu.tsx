@@ -1,12 +1,18 @@
-import { Component, createRef } from '../../Framework';
+import { Component, createRef } from 'preact';
 import { BaseMenuProps, BaseMenuState, BaseMenuItem, BaseMenuStyle } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
+import { CustomLabel } from '../CustomLabel';
 import styles from './index.module.less';
 
 export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     private _MenuRef = createRef<HTMLUListElement>();
 
     private _refs: Menu[] = [];
+
+    constructor(props: BaseMenuProps) {
+        super(props);
+        this.initialize();
+    }
 
     getMenuRef = () => this._MenuRef;
 
@@ -44,7 +50,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     getStyle = () => {
         const current = this._MenuRef.current;
         if (!current) return;
-        let style: BaseMenuStyle = {};
+        const style: BaseMenuStyle = {};
         const curPosition = current.getBoundingClientRect();
         let docPosition;
         const { dom, parent } = this.props;
@@ -63,7 +69,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
         if (parent) {
             current.style.position = 'fixed';
             // 获取固定定位后 父元素正确的位置信息
-            let parPosition = current.parentElement?.getBoundingClientRect();
+            const parPosition = current.parentElement?.getBoundingClientRect();
             if (!parPosition) return;
             if (parPosition.right + curPosition.width > docPosition.right) {
                 style.left = `${parPosition.left - curPosition.width}px`;
@@ -117,7 +123,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
                                     this.mouseLeave(e, index);
                                 }}
                             >
-                                {this.getLabel(item.label)}
+                                <CustomLabel label={item.label} />
                                 {item.children ? (
                                     <Menu
                                         ref={(ele: Menu) => (this._refs[index] = ele)}

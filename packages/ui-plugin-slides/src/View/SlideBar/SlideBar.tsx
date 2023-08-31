@@ -1,4 +1,5 @@
-import { AppContext, AppContextValues, BaseComponentProps, Button, Component, createRef, PreactContext } from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps, Button } from '@univerjs/base-ui';
+import { Component, createRef } from 'preact';
 import { ISlidePage } from '@univerjs/core';
 import styles from './index.module.less';
 
@@ -13,9 +14,14 @@ interface IProps extends BaseComponentProps {
 }
 
 export class SlideBar extends Component<IProps, SlideBarState> {
-    static contextType: PreactContext<Partial<AppContextValues>> = AppContext;
+    static override contextType = AppContext;
 
     slideBarRef = createRef<HTMLDivElement>();
+
+    constructor(props: IProps) {
+        super(props);
+        this.initialize();
+    }
 
     initialize() {
         this.state = {
@@ -23,7 +29,7 @@ export class SlideBar extends Component<IProps, SlideBarState> {
         };
     }
 
-    componentDidMount() {
+    override componentDidMount() {
         this.props.getComponent?.(this);
     }
 

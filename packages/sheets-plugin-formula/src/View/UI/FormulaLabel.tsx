@@ -1,4 +1,5 @@
-import { Component, Icon } from '@univerjs/base-ui';
+import { Icon } from '@univerjs/base-ui';
+import { Component } from 'preact';
 
 interface IProps {
     label: string;
@@ -6,12 +7,6 @@ interface IProps {
 
 export class FormulaLabel extends Component<IProps> {
     // private _render: BaseComponentRender;
-
-    override initialize() {
-        // super();
-        // const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        // this._render = component.getComponentRender();
-    }
 
     render() {
         // const SumIcon = this._render.renderFunction('SumIcon');

@@ -1,5 +1,5 @@
 // import { Nullable, Observer, Workbook } from '@univerjs/core';
-// import { Component } from '../../Framework';
+// import { Component } from 'preact';
 // import { BaseFormatModalProps } from '../../Interfaces';
 // import { Modal, Ul } from '../index';
 // import styles from './index.module.less';

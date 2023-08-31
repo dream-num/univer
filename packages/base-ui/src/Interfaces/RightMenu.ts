@@ -1,5 +1,5 @@
+import { ComponentChildren } from 'preact';
 import { BaseComponent, BaseComponentProps, JSXComponent } from '../BaseComponent';
-import { ComponentChildren } from '../Framework';
 
 export interface List {
     content: ComponentChildren;

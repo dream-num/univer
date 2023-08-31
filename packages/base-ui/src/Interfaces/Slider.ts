@@ -1,5 +1,5 @@
+import { RefObject } from 'preact';
 import { BaseComponent, BaseComponentProps, JSXComponent } from '../BaseComponent';
-import { RefObject } from '../Framework';
 
 interface SliderBaseProps {
     min?: number;

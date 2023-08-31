@@ -1,4 +1,5 @@
-import { AppContext, BaseComponentProps, Component, ComponentManager } from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps, ComponentManager } from '@univerjs/base-ui';
+import { Component } from 'preact';
 import { LocaleService, LocaleType } from '@univerjs/core';
 import { BaseSlideContainerProps, SlideContainer } from './SlideContainer';
 

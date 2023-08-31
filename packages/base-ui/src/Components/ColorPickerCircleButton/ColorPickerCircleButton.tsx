@@ -1,5 +1,5 @@
+import { Component, createRef } from 'preact';
 import { JSXComponent } from '../../BaseComponent';
-import { Component, createRef } from '../../Framework';
 import { BaseColorPickerCircleButtonProps, ColorPickerCircleButtonComponent } from '../../Interfaces';
 import { NextIcon } from '../Icon';
 import { ColorPicker } from '../index';

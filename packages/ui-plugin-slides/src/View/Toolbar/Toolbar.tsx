@@ -1,4 +1,5 @@
-import { AppContext, AppContextValues, BaseComponentProps, Button, Component, Container, createRef, debounce, PreactContext, Select, Tooltip } from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps, Button, Container, debounce, Select, Tooltip, CustomLabel } from '@univerjs/base-ui';
+import { Component, createRef } from 'preact';
 import { SlideUIPlugin } from '../..';
 import { SLIDE_UI_PLUGIN_NAME } from '../../Basics';
 import { IToolbarItemProps } from '../../Controller';
@@ -18,7 +19,7 @@ interface IState {
 }
 
 export class Toolbar extends Component<IProps, IState> {
-    static contextType: PreactContext<Partial<AppContextValues>> = AppContext;
+    static override contextType = AppContext;
 
     toolbarRef = createRef();
 
@@ -37,6 +38,11 @@ export class Toolbar extends Component<IProps, IState> {
         this.setToolbarListWidth();
     }, 50);
 
+    constructor(props: IProps) {
+        super(props);
+        this.initialize();
+    }
+
     initialize() {
         this.state = {
             // Button contains main button and drop down arrow, translation file contains main and right
@@ -54,7 +60,7 @@ export class Toolbar extends Component<IProps, IState> {
      * TODO : 点击其他地方需要隐藏more buttons
      */
     showMore = () => {
-        let showMore = this.state.showMore;
+        const showMore = this.state.showMore;
         this.setState({ showMore: !showMore });
 
         if (!showMore) {
@@ -171,12 +177,12 @@ export class Toolbar extends Component<IProps, IState> {
         }
     };
 
-    componentDidMount() {
+    override componentDidMount() {
         this.props.getComponent?.(this);
         window.addEventListener('resize', this.debounceSetToolbarListWidth);
     }
 
-    componentWillUnmount() {
+    override componentWillUnmount() {
         window.removeEventListener('resize', this.debounceSetToolbarListWidth);
     }
 
@@ -188,7 +194,7 @@ export class Toolbar extends Component<IProps, IState> {
                     return (
                         <Tooltip title={item.tooltip} placement={'bottom'}>
                             <Button unActive={item.unActive} className={styles.textButton} type="text" active={item.active} onClick={item.onClick}>
-                                {this.getLabel(item.label)}
+                                <CustomLabel label={item.label} />
                             </Button>
                         </Tooltip>
                     );
@@ -226,9 +232,11 @@ export class Toolbar extends Component<IProps, IState> {
                     {this.getToolbarList(defaultToolList)}
 
                     <div ref={this.moreBtnRef} className={styles.moreButton} style={{ visibility: moreToolList.length ? 'visible' : 'hidden' }}>
-                        <Tooltip title={this.getLocale('toolbar.toolMoreTip')} placement={'bottom'}>
+                        <Tooltip title={(<CustomLabel label="toolbar.toolMoreTip" />) as unknown as string} placement={'bottom'}>
                             <Button type="text" onClick={this.showMore}>
-                                <div style={{ fontSize: '14px' }}>{this.getLocale('toolbar.toolMore')}</div>
+                                <div style={{ fontSize: '14px' }}>
+                                    <CustomLabel label="toolbar.toolMore" />
+                                </div>
                             </Button>
                         </Tooltip>
                     </div>

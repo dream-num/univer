@@ -1,4 +1,4 @@
-import { Component, createRef } from '../../Framework';
+import { Component, createRef } from 'preact';
 import { JSXComponent } from '../../BaseComponent';
 import { BaseDragProps, DragComponent } from '../../Interfaces';
 import styles from './index.module.less';
@@ -21,6 +21,11 @@ interface IState {
 
 class Drag extends Component<BaseDragProps, IState> {
     root = createRef();
+
+    constructor(props: BaseDragProps) {
+        super(props);
+        this.initialize();
+    }
 
     initialize() {
         this.state = {
@@ -45,8 +50,8 @@ class Drag extends Component<BaseDragProps, IState> {
     onMouseDown(e: MouseEvent) {
         // e.stopPropagation();
         // if (!((e.target as Element).className === styles.drag)) return;
-        let offsetX = e.offsetX;
-        let offsetY = e.offsetY;
+        const offsetX = e.offsetX;
+        const offsetY = e.offsetY;
         this.setState(
             {
                 offsetX,
@@ -60,16 +65,16 @@ class Drag extends Component<BaseDragProps, IState> {
 
     onMouseMove = (e: MouseEvent) => {
         // e.stopPropagation();
-        let offsetX = this.state.offsetX;
-        let offsetY = this.state.offsetY;
+        const offsetX = this.state.offsetX;
+        const offsetY = this.state.offsetY;
 
         // if (e.x === offsetX && e.y === offsetY) return;
 
-        let x = e.x;
-        let y = e.y;
+        const x = e.x;
+        const y = e.y;
 
-        let left = `${x - offsetX}px`;
-        let top = `${y - offsetY}px`;
+        const left = `${x - offsetX}px`;
+        const top = `${y - offsetY}px`;
         this.setState({
             top,
             left,

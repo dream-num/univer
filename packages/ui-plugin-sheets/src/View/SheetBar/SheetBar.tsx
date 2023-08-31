@@ -1,5 +1,6 @@
-import { BaseMenuItem, BaseSheetBarProps, Button, Component, createRef, Icon, Menu, RefObject } from '@univerjs/base-ui';
-import { SheetBarMenu, SheetBarMenuItem } from './SheetBarMenu';
+import { BaseMenuItem, BaseSheetBarProps, Button, CustomLabel, Icon, Menu } from '@univerjs/base-ui';
+import { RefObject, Component, createRef } from 'preact';
+import { SheetBarMenu, ISheetBarMenuItem } from './SheetBarMenu';
 import styles from './index.module.less';
 import { SlideTabBar } from '../../Basics/SlideTabBar/SlideTabBar';
 
@@ -36,6 +37,11 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     startClientX: number;
 
     private _renderKey: number = 1;
+
+    constructor(props: BaseSheetBarProps) {
+        super(props);
+        this.initialize(props);
+    }
 
     initialize(props: BaseSheetBarProps) {
         this.state = {
@@ -128,7 +134,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         );
     };
 
-    componentDidUpdate() {
+    override componentDidUpdate() {
         if (this.slideTabBar) {
             this.slideTabBar.destroy();
         }
@@ -147,7 +153,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         });
     }
 
-    componentDidMount() {
+    override componentDidMount() {
         this.props.getComponent?.(this);
     }
 
@@ -166,7 +172,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                     </Button>
                     <Button className={styles.sheetBarOptionsButton} onClick={(e: MouseEvent) => this.ref.current.showMenu(true)} type="text">
                         <Icon.MenuIcon style={{ fontSize: '20px' }} />
-                        <SheetBarMenu onClick={selectSheet} menu={menuList as SheetBarMenuItem[]} ref={this.ref}></SheetBarMenu>
+                        <SheetBarMenu onClick={selectSheet} menu={menuList as ISheetBarMenuItem[]} ref={this.ref}></SheetBarMenu>
                     </Button>
                 </div>
 
@@ -185,7 +191,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                                 <div className={`${styles.slideTabDivider}`}></div>
                                 <div className={`${styles.slideTabTitle}`}>
                                     <span className={`${styles.slideTabSpan}`} style={{ padding: '2px 5px 2px 5px' }}>
-                                        {this.getLabel(item.label)}
+                                        <CustomLabel label={item.label} />
                                     </span>
                                 </div>
                                 <div className={`${styles.slideTabIcon}`} data-slide-skip="true" style={{ lineHeight: 1 }} data-id={item.sheetId} onClick={this.contextMenu}>

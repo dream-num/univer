@@ -1,4 +1,5 @@
-import { BaseComponentRender, BaseComponentSheet, Component, createRef } from '@univerjs/base-ui';
+import { BaseComponentRender, BaseComponentSheet } from '@univerjs/base-ui';
+import { Component, createRef } from 'preact';
 import styles from './index.module.less';
 
 interface IProps {
@@ -14,6 +15,11 @@ export class FormatContent extends Component<IProps, IState> {
     private _render: BaseComponentRender;
 
     private _ref = createRef();
+
+    constructor(props: IProps) {
+        super(props);
+        this.initialize(props);
+    }
 
     initialize(props: IProps) {
         const component = this.getContext().getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;

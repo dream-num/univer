@@ -1,6 +1,7 @@
-import { ComponentChildren, Component } from '../../Framework';
+import { ComponentChildren, Component } from 'preact';
 import { BaseMenuItem } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
+import { CustomLabel } from '../CustomLabel';
 import styles from './index.module.less';
 import { Icon } from '..';
 
@@ -22,8 +23,16 @@ export class Item extends Component<BaseItemProps> {
                 ) : (
                     ''
                 )}
-                <span className={styles.selectItemContent}>{this.getLabel(label)}</span>
-                {suffix ? <span className={styles.selectItemSuffix}>{this.getLabel(suffix)}</span> : ''}
+                <span className={styles.selectItemContent}>
+                    <CustomLabel label={label} />
+                </span>
+                {suffix ? (
+                    <span className={styles.selectItemSuffix}>
+                        <CustomLabel label={suffix} />
+                    </span>
+                ) : (
+                    ''
+                )}
             </div>
         );
     }

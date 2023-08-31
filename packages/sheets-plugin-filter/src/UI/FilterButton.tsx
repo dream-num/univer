@@ -1,4 +1,5 @@
-import { BaseSelectProps, Component, Icon, Select } from '@univerjs/base-ui';
+import { BaseSelectProps, Icon, Select } from '@univerjs/base-ui';
+import { Component } from 'preact';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { IProps } from '../IData';
 import { FilterPlugin } from '../FilterPlugin';
@@ -12,7 +13,12 @@ interface IState {
 export class FilterButton extends Component<IProps, IState> {
     protected _localeObserver: Nullable<Observer<Workbook>>;
 
-    override initialize(props: IProps) {
+    constructor(props: IProps) {
+        super(props);
+        this.initialize(props);
+    }
+
+    initialize(props: IProps) {
         this.state = {
             filter: {
                 locale: 'filter',

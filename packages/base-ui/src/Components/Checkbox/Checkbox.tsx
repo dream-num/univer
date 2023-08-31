@@ -1,5 +1,5 @@
+import { Component } from 'preact';
 import { JSXComponent } from '../../BaseComponent';
-import { Component } from '../../Framework';
 import { BaseCheckboxProps, CheckboxComponent } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
 import styles from './index.module.less';
@@ -19,14 +19,14 @@ type CheckboxState = {
 };
 
 export class Checkbox extends Component<BaseCheckboxProps, CheckboxState> {
-    state = {
+    override state = {
         classes: this.props.className ? `${this.props.className} ${styles.checkBox}` : styles.checkBox,
         check: true,
     };
 
     handleStyle = (checked?: boolean, disabled?: boolean) => {
         // Decide whether to check or disable based on the checkbox style
-        let classGroup = joinClassNames(styles.checkBox, {
+        const classGroup = joinClassNames(styles.checkBox, {
             [`${styles.checkBox}-checked`]: checked,
             [`${styles.checkBox}-disabled`]: disabled,
         }) as string;
@@ -34,11 +34,11 @@ export class Checkbox extends Component<BaseCheckboxProps, CheckboxState> {
         this.setState((prevState) => ({ classes: classGroup, check: checked }));
     };
 
-    componentWillMount() {
+    override componentWillMount() {
         this.handleStyle(this.props.checked, this.props.disabled);
     }
 
-    componentWillReceiveProps(nextProps: BaseCheckboxProps) {
+    override componentWillReceiveProps(nextProps: BaseCheckboxProps) {
         this.handleStyle(nextProps.checked, nextProps.disabled);
     }
 

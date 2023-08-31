@@ -1,4 +1,4 @@
-import { Component } from '../../Framework';
+import { Component } from 'preact';
 import { BaseSiderModalProps } from '../../Interfaces';
 import { Icon } from '../index';
 import Style from './index.module.less';
@@ -9,6 +9,11 @@ type IState = {
 };
 
 class SiderModal extends Component<BaseSiderModalProps, IState> {
+    constructor(props: BaseSiderModalProps) {
+        super();
+        this.initialize(props);
+    }
+
     initialize(props: BaseSiderModalProps) {
         this.state = {
             zIndex: props.zIndex ?? 0,

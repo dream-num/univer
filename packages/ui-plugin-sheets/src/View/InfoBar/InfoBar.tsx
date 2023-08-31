@@ -1,4 +1,5 @@
-import { BaseComponentProps, Component, Container, Input, Tooltip } from '@univerjs/base-ui';
+import { BaseComponentProps, Container, CustomLabel, Input, Tooltip } from '@univerjs/base-ui';
+import { Component } from 'preact';
 import { Nullable } from '@univerjs/core';
 import { BaseInfoBarProps } from '../../Controller/InfoBarUIController';
 import styles from './index.module.less';
@@ -12,13 +13,18 @@ interface IProps extends BaseComponentProps {
 }
 
 export class InfoBar extends Component<IProps, IState> {
+    constructor(props: IProps) {
+        super(props);
+        this.initialize();
+    }
+
     initialize() {
         this.state = {
             infoList: null,
         };
     }
 
-    componentDidMount() {
+    override componentDidMount() {
         this.props.getComponent?.(this);
     }
 
@@ -49,8 +55,12 @@ export class InfoBar extends Component<IProps, IState> {
                         <Input bordered={false} value={sheet.label} onBlur={renameSheet} />
                     </Tooltip>
                 </div>
-                <div className={styles.infoDetailUpdate}>{this.getLabel(update.label)}</div>
-                <div className={styles.infoDetailSave}>{this.getLabel(save.label)}</div>
+                <div className={styles.infoDetailUpdate}>
+                    <CustomLabel label={update.label} />
+                </div>
+                <div className={styles.infoDetailSave}>
+                    <CustomLabel label={save.label} />
+                </div>
             </Container>
         );
     }

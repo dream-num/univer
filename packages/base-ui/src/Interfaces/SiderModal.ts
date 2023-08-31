@@ -1,5 +1,5 @@
+import { ComponentChildren, RefObject } from 'preact';
 import { BaseComponent, JSXComponent } from '../BaseComponent';
-import { ComponentChildren, RefObject } from '../Framework';
 
 export interface BaseSiderModalProps {
     name: string;

@@ -1,6 +1,7 @@
+import { createRef } from 'preact';
+import { PureComponent } from 'preact/compat';
 import { Icon } from '..';
 import { JSXComponent } from '../../BaseComponent';
-import { PureComponent, createRef } from '../../Framework';
 import { BaseDropdownProps, DropdownComponent } from '../../Interfaces';
 import { Menu } from '../Menu';
 import { Tooltip } from '../Tooltip';
@@ -16,6 +17,11 @@ export class Dropdown extends PureComponent<BaseDropdownProps, IState> {
     DropRef = createRef<HTMLDivElement>();
 
     IconRef = createRef<HTMLDivElement>();
+
+    constructor(props: BaseDropdownProps) {
+        super(props);
+        this.initialize();
+    }
 
     handleClick = (e: MouseEvent) => {
         this.props.onClick?.();
@@ -42,7 +48,7 @@ export class Dropdown extends PureComponent<BaseDropdownProps, IState> {
 
     componentDidMount() {
         const { placement } = this.props;
-        let style: Record<string, string | number> = { position: 'absolute' };
+        const style: Record<string, string | number> = { position: 'absolute' };
         if (!placement || placement === 'Bottom') {
             style.left = 0;
             style.top = '100%';

@@ -1,4 +1,5 @@
-import { AppContext, BaseComponentProps, Component, ComponentManager, ZIndexManager } from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps, ComponentManager, ZIndexManager } from '@univerjs/base-ui';
+import { Component } from 'preact';
 import { LocaleService, LocaleType, ObserverManager } from '@univerjs/core';
 import { BaseSheetContainerProps, SheetContainer } from './SheetContainer';
 

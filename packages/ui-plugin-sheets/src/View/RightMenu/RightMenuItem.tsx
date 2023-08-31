@@ -1,4 +1,5 @@
-import { Component, Icon } from '@univerjs/base-ui';
+import { CustomLabel, Icon } from '@univerjs/base-ui';
+import { Component } from 'preact';
 import styles from './index.module.less';
 
 interface IProps {
@@ -11,7 +12,7 @@ export class RightMenuItem extends Component<IProps> {
 
         return (
             <div className={styles.rightMenuItem}>
-                {this.getLabel(label)}
+                <CustomLabel label={label} />
                 <Icon.Format.RightIcon />
             </div>
         );

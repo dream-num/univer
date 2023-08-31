@@ -2,6 +2,8 @@ import { IAccessor } from '@wendellhu/redi';
 import {
     BooleanNumber,
     CommandType,
+    FontItalic,
+    FontWeight,
     HorizontalAlign,
     IBorderData,
     IColorStyle,
@@ -113,14 +115,18 @@ export const SetStyleCommand: ICommand = {
  * Set bold font style to currently selected ranges. If the cell is already bold then it will cancel the bold style.
  */
 export const SetBoldCommand: ICommand = {
+    // TODO@wzhudev: toggle bold command?
     type: CommandType.COMMAND,
     id: 'sheet.command.set-bold',
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
+        const selectionManager = accessor.get(ISelectionManager);
+        const currentlyBold = selectionManager.getCurrentCell()?.getFontWeight() === FontWeight.BOLD;
+
         const setStyleParams: ISetStyleParams<BooleanNumber> = {
             style: {
                 type: 'bl',
-                value: BooleanNumber.TRUE,
+                value: currentlyBold ? BooleanNumber.FALSE : BooleanNumber.TRUE,
             },
         };
 
@@ -136,10 +142,13 @@ export const SetItalicCommand: ICommand = {
     id: 'sheet.command.set-italic',
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
+        const selectionManager = accessor.get(ISelectionManager);
+        const currentlyItalic = selectionManager.getCurrentCell()?.getFontStyle() === FontItalic.ITALIC;
+
         const setStyleParams: ISetStyleParams<BooleanNumber> = {
             style: {
                 type: 'it',
-                value: BooleanNumber.TRUE,
+                value: currentlyItalic ? BooleanNumber.FALSE : BooleanNumber.TRUE,
             },
         };
 
@@ -155,10 +164,13 @@ export const SetUnderlineCommand: ICommand = {
     id: 'sheet.command.set-underline',
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
+        const selectionManager = accessor.get(ISelectionManager);
+        const currentlyUnderline = !!selectionManager.getCurrentCell()?.getUnderline().s;
+
         const setStyleParams: ISetStyleParams<BooleanNumber> = {
             style: {
                 type: 'ul',
-                value: BooleanNumber.TRUE,
+                value: currentlyUnderline ? BooleanNumber.FALSE : BooleanNumber.TRUE,
             },
         };
 
@@ -174,10 +186,13 @@ export const SetStrikeThroughCommand: ICommand = {
     id: 'sheet.command.set-stroke',
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
+        const selectionManager = accessor.get(ISelectionManager);
+        const currentlyStrokeThrough = !!selectionManager.getCurrentCell()?.getStrikeThrough().s;
+
         const setStyleParams: ISetStyleParams<BooleanNumber> = {
             style: {
                 type: 'st',
-                value: BooleanNumber.TRUE,
+                value: currentlyStrokeThrough ? BooleanNumber.FALSE : BooleanNumber.TRUE,
             },
         };
 

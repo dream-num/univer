@@ -2,6 +2,8 @@ import { Disposable, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 import { IShortcutService } from '../shortcut/shorcut.service';
+import { ICustomLabelType } from '../../Interfaces/CustomLabel';
+import { ComponentChildren } from 'preact';
 
 export type OneOrMany<T> = T | T[];
 
@@ -22,7 +24,9 @@ export interface IMenuItemState {
 export interface IMenuItem {
     id: string;
     menu: OneOrMany<MenuPosition>;
-    subMenus?: string[];
+    subMenus?: string[]; // submenu id list
+    parentId?: string; // if it is submenu
+    label?: string | ICustomLabelType | ComponentChildren;
 
     title: string;
     icon?: string;
@@ -37,6 +41,7 @@ export interface IMenuItem {
 export interface IDisplayMenuItem extends IMenuItem {
     /** MenuService should get responsible shortcut and display on the UI. */
     shortcut?: string;
+    subMenuItems?: IDisplayMenuItem[];
 }
 
 export const IMenuService = createIdentifier<IMenuService>('univer.menu-service');

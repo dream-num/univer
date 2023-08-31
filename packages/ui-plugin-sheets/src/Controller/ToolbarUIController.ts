@@ -1,6 +1,6 @@
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 import { BorderInfo, ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
-import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentManager, CustomComponent, IMenuService, MenuPosition } from '@univerjs/base-ui';
+import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentManager, ICustomComponent, IMenuService, MenuPosition } from '@univerjs/base-ui';
 import {
     BorderType,
     CommandManager,
@@ -153,8 +153,8 @@ export class ToolbarUIController extends Disposable {
                     this.hideTooltip();
                     const textColor = this._toolList.find((item) => item.name === 'textColor');
                     if (!textColor || !textColor.label) return;
-                    if (!(textColor.label as CustomComponent).props?.color) return;
-                    (textColor.label as CustomComponent).props!.color = this._textColor;
+                    if (!(textColor.label as ICustomComponent).props?.color) return;
+                    (textColor.label as ICustomComponent).props!.color = this._textColor;
                     this.changeColor(this._textColor);
                 },
                 hideSelectedIcon: true,
@@ -198,8 +198,8 @@ export class ToolbarUIController extends Disposable {
                     this.hideTooltip();
                     const fillColor = this._toolList.find((item) => item.name === 'fillColor');
                     if (!fillColor || !fillColor.label) return;
-                    if (!(fillColor.label as CustomComponent).props?.color) return;
-                    (fillColor.label as CustomComponent).props!.color = this._background;
+                    if (!(fillColor.label as ICustomComponent).props?.color) return;
+                    (fillColor.label as ICustomComponent).props!.color = this._background;
                     this.setBackground(this._background);
                 },
                 hideSelectedIcon: true,
@@ -263,8 +263,8 @@ export class ToolbarUIController extends Disposable {
                                             const borderItem = this._toolList.find((item) => item.name === 'border');
                                             const lineColor = borderItem?.children?.find((item) => item.name === 'borderColor');
                                             if (!lineColor || !lineColor.label) return;
-                                            if (!(lineColor.label as CustomComponent).props?.color) return;
-                                            (lineColor.label as CustomComponent).props!.color = color;
+                                            if (!(lineColor.label as ICustomComponent).props?.color) return;
+                                            (lineColor.label as ICustomComponent).props!.color = color;
                                         },
                                     },
                                 },

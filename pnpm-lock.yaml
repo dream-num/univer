@@ -146,14 +146,14 @@ importers:
         version: link:../../packages/ui-plugin-docs
       preact:
         specifier: ^10.12.1
-        version: 10.12.1
+        version: 10.17.1
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
-        version: 2.0.0(preact@10.12.1)(vite@2.4.4)
+        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
-        version: 2.0.1(preact@10.12.1)
+        version: 2.0.1(preact@10.17.1)
       '@types/jest':
         specifier: ^27.5.2
         version: 27.5.2
@@ -165,7 +165,7 @@ importers:
         version: 3.11.0
       enzyme-adapter-preact-pure:
         specifier: ^3.3.0
-        version: 3.3.0(enzyme@3.11.0)(preact@10.12.1)
+        version: 3.3.0(enzyme@3.11.0)(preact@10.17.1)
       identity-obj-proxy:
         specifier: ^3.0.0
         version: 3.0.0
@@ -246,14 +246,14 @@ importers:
         version: link:../../packages/ui-plugin-slides
       preact:
         specifier: ^10.12.1
-        version: 10.12.1
+        version: 10.17.1
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
-        version: 2.0.0(preact@10.12.1)(vite@2.4.4)
+        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
-        version: 2.0.1(preact@10.12.1)
+        version: 2.0.1(preact@10.17.1)
       '@types/jest':
         specifier: ^27.5.2
         version: 27.5.2
@@ -265,7 +265,7 @@ importers:
         version: 3.11.0
       enzyme-adapter-preact-pure:
         specifier: ^3.3.0
-        version: 3.3.0(enzyme@3.11.0)(preact@10.12.1)
+        version: 3.3.0(enzyme@3.11.0)(preact@10.17.1)
       identity-obj-proxy:
         specifier: ^3.0.0
         version: 3.0.0
@@ -337,17 +337,17 @@ importers:
         version: link:../../packages/ui-plugin-sheets
       preact:
         specifier: ^10.12.1
-        version: 10.12.1
+        version: 10.17.1
     devDependencies:
       '@playwright/test':
         specifier: ^1.18.1
         version: 1.18.1
       '@preact/preset-vite':
         specifier: 2.0.0
-        version: 2.0.0(preact@10.12.1)(vite@2.4.4)
+        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
-        version: 2.0.1(preact@10.12.1)
+        version: 2.0.1(preact@10.17.1)
       '@types/jest':
         specifier: ^27.5.2
         version: 27.5.2
@@ -359,7 +359,7 @@ importers:
         version: 3.11.0
       enzyme-adapter-preact-pure:
         specifier: ^3.3.0
-        version: 3.3.0(enzyme@3.11.0)(preact@10.12.1)
+        version: 3.3.0(enzyme@3.11.0)(preact@10.17.1)
       esbuild:
         specifier: ^0.17.10
         version: 0.17.10
@@ -419,14 +419,14 @@ importers:
         version: link:../../packages/ui-plugin-slides
       preact:
         specifier: ^10.12.1
-        version: 10.12.1
+        version: 10.17.1
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
-        version: 2.0.0(preact@10.12.1)(vite@2.4.4)
+        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
-        version: 2.0.1(preact@10.12.1)
+        version: 2.0.1(preact@10.17.1)
       '@types/jest':
         specifier: ^27.5.2
         version: 27.5.2
@@ -438,7 +438,7 @@ importers:
         version: 3.11.0
       enzyme-adapter-preact-pure:
         specifier: ^3.3.0
-        version: 3.3.0(enzyme@3.11.0)(preact@10.12.1)
+        version: 3.3.0(enzyme@3.11.0)(preact@10.17.1)
       identity-obj-proxy:
         specifier: ^3.0.0
         version: 3.0.0
@@ -513,14 +513,14 @@ importers:
         version: link:../../packages/ui-plugin-slides
       preact:
         specifier: ^10.12.1
-        version: 10.12.1
+        version: 10.17.1
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
-        version: 2.0.0(preact@10.12.1)(vite@2.4.4)
+        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
-        version: 2.0.1(preact@10.12.1)
+        version: 2.0.1(preact@10.17.1)
       '@types/jest':
         specifier: ^27.5.2
         version: 27.5.2
@@ -532,7 +532,7 @@ importers:
         version: 3.11.0
       enzyme-adapter-preact-pure:
         specifier: ^3.3.0
-        version: 3.3.0(enzyme@3.11.0)(preact@10.12.1)
+        version: 3.3.0(enzyme@3.11.0)(preact@10.17.1)
       esbuild:
         specifier: ^0.16.4
         version: 0.16.4
@@ -592,14 +592,14 @@ importers:
         version: 2.4.6
       preact:
         specifier: ^10.12.1
-        version: 10.12.1
+        version: 10.17.1
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
-        version: 2.0.0(preact@10.12.1)(vite@2.4.4)
+        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
-        version: 2.0.1(preact@10.12.1)
+        version: 2.0.1(preact@10.17.1)
       '@types/jest':
         specifier: ^27.0.1
         version: 27.0.3
@@ -635,14 +635,14 @@ importers:
         version: 0.12.6
       preact:
         specifier: ^10.12.1
-        version: 10.12.1
+        version: 10.17.1
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
-        version: 2.0.0(preact@10.12.1)(vite@2.4.4)
+        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
-        version: 2.0.1(preact@10.12.1)
+        version: 2.0.1(preact@10.17.1)
       '@types/jest':
         specifier: ^27.5.2
         version: 27.5.2
@@ -852,14 +852,14 @@ importers:
         version: 2.4.6
       preact:
         specifier: ^10.12.1
-        version: 10.12.1
+        version: 10.17.1
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
-        version: 2.0.0(preact@10.12.1)(vite@2.4.4)
+        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
-        version: 2.0.1(preact@10.12.1)
+        version: 2.0.1(preact@10.17.1)
       '@types/jest':
         specifier: ^27.0.1
         version: 27.0.3
@@ -898,7 +898,7 @@ importers:
         version: 0.12.6
       preact:
         specifier: ^10.12.1
-        version: 10.12.1
+        version: 10.17.1
       react-colorful:
         specifier: ^5.3.0
         version: 5.3.0(react-dom@18.2.0)(react@18.2.0)
@@ -908,10 +908,10 @@ importers:
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
-        version: 2.0.0(preact@10.12.1)(vite@2.4.4)
+        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
-        version: 2.0.1(preact@10.12.1)
+        version: 2.0.1(preact@10.17.1)
       '@types/jest':
         specifier: ^27.5.2
         version: 27.5.2
@@ -926,7 +926,7 @@ importers:
         version: 3.11.0
       enzyme-adapter-preact-pure:
         specifier: ^3.3.0
-        version: 3.3.0(enzyme@3.11.0)(preact@10.12.1)
+        version: 3.3.0(enzyme@3.11.0)(preact@10.17.1)
       identity-obj-proxy:
         specifier: ^3.0.0
         version: 3.0.0
@@ -977,14 +977,14 @@ importers:
         version: link:../core
       preact:
         specifier: ^10.12.1
-        version: 10.12.1
+        version: 10.17.1
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
-        version: 2.0.0(preact@10.12.1)(vite@2.4.4)
+        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
-        version: 2.0.1(preact@10.12.1)
+        version: 2.0.1(preact@10.17.1)
       '@types/jest':
         specifier: ^27.0.1
         version: 27.0.3
@@ -1124,14 +1124,14 @@ importers:
         version: link:../core
       preact:
         specifier: ^10.12.1
-        version: 10.12.1
+        version: 10.17.1
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
-        version: 2.0.0(preact@10.12.1)(vite@2.4.4)
+        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: 2.0.1
-        version: 2.0.1(preact@10.12.1)
+        version: 2.0.1(preact@10.17.1)
       '@types/jest':
         specifier: 27.0.3
         version: 27.0.3
@@ -1182,14 +1182,14 @@ importers:
         version: 0.12.6
       preact:
         specifier: ^10.12.1
-        version: 10.12.1
+        version: 10.17.1
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
-        version: 2.0.0(preact@10.12.1)(vite@2.4.4)
+        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
-        version: 2.0.1(preact@10.12.1)
+        version: 2.0.1(preact@10.17.1)
       '@types/jest':
         specifier: ^27.5.2
         version: 27.5.2
@@ -1252,14 +1252,14 @@ importers:
         version: 0.12.6
       preact:
         specifier: ^10.12.1
-        version: 10.12.1
+        version: 10.17.1
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
-        version: 2.0.0(preact@10.12.1)(vite@2.4.4)
+        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
-        version: 2.0.1(preact@10.12.1)
+        version: 2.0.1(preact@10.17.1)
       '@types/jest':
         specifier: ^27.5.2
         version: 27.5.2
@@ -1322,14 +1322,14 @@ importers:
         version: 0.12.6
       preact:
         specifier: ^10.12.1
-        version: 10.12.1
+        version: 10.17.1
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
-        version: 2.0.0(preact@10.12.1)(vite@2.4.4)
+        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
-        version: 2.0.1(preact@10.12.1)
+        version: 2.0.1(preact@10.17.1)
       '@types/jest':
         specifier: ^27.5.2
         version: 27.5.2
@@ -1395,14 +1395,14 @@ importers:
         version: 1.0.1
       preact:
         specifier: ^10.12.1
-        version: 10.12.1
+        version: 10.17.1
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
-        version: 2.0.0(preact@10.12.1)(vite@2.4.4)
+        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
-        version: 2.0.1(preact@10.12.1)
+        version: 2.0.1(preact@10.17.1)
       '@types/jest':
         specifier: ^27.0.1
         version: 27.0.3
@@ -1456,14 +1456,14 @@ importers:
         version: 0.12.6
       preact:
         specifier: ^10.12.1
-        version: 10.12.1
+        version: 10.17.1
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
-        version: 2.0.0(preact@10.12.1)(vite@2.4.4)
+        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
-        version: 2.0.1(preact@10.12.1)
+        version: 2.0.1(preact@10.17.1)
       '@types/jest':
         specifier: ^27.5.2
         version: 27.5.2
@@ -1526,14 +1526,14 @@ importers:
         version: 0.12.6
       preact:
         specifier: ^10.12.1
-        version: 10.12.1
+        version: 10.17.1
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
-        version: 2.0.0(preact@10.12.1)(vite@2.4.4)
+        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: 2.0.1
-        version: 2.0.1(preact@10.12.1)
+        version: 2.0.1(preact@10.17.1)
       '@types/jest':
         specifier: 27.0.3
         version: 27.0.3
@@ -1581,14 +1581,14 @@ importers:
         version: 2.4.6
       preact:
         specifier: ^10.12.1
-        version: 10.12.1
+        version: 10.17.1
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
-        version: 2.0.0(preact@10.12.1)(vite@2.4.4)
+        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
-        version: 2.0.1(preact@10.12.1)
+        version: 2.0.1(preact@10.17.1)
       '@types/jest':
         specifier: ^27.0.1
         version: 27.0.3
@@ -1639,17 +1639,17 @@ importers:
         version: 2.4.6
       preact:
         specifier: ^10.12.1
-        version: 10.12.1
+        version: 10.17.1
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
-        version: 2.0.0(preact@10.12.1)(vite@2.4.4)
+        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
-        version: 2.0.1(preact@10.12.1)
+        version: 2.0.1(preact@10.17.1)
       '@types/jest':
         specifier: ^27.0.1
         version: 27.0.3
@@ -1700,14 +1700,14 @@ importers:
         version: 2.4.6
       preact:
         specifier: ^10.12.1
-        version: 10.12.1
+        version: 10.17.1
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
-        version: 2.0.0(preact@10.12.1)(vite@2.4.4)
+        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
-        version: 2.0.1(preact@10.12.1)
+        version: 2.0.1(preact@10.17.1)
       '@types/jest':
         specifier: ^27.0.1
         version: 27.0.3
@@ -1774,7 +1774,7 @@ packages:
       '@babel/helper-compilation-targets': 7.22.10
       '@babel/helper-module-transforms': 7.22.9(@babel/core@7.22.11)
       '@babel/helpers': 7.22.11
-      '@babel/parser': 7.22.13
+      '@babel/parser': 7.22.14
       '@babel/template': 7.22.5
       '@babel/traverse': 7.22.11
       '@babel/types': 7.22.11
@@ -1961,8 +1961,8 @@ packages:
       js-tokens: 4.0.0
     dev: true
 
-  /@babel/parser@7.22.13:
-    resolution: {integrity: sha512-3l6+4YOvc9wx7VlCSw4yQfcBo01ECA8TicQfbnCPuCEpRQrf+gTUyGdxNw+pyTUyywp6JRD1w0YQs9TpBXYlkw==}
+  /@babel/parser@7.22.14:
+    resolution: {integrity: sha512-1KucTHgOvaw/LzCVrEOAyXkr9rQlp0A1HiHRYnSUE9dmb8PvPW7o5sscg+5169r54n3vGlbx6GevTE/Iw/P3AQ==}
     engines: {node: '>=6.0.0'}
     hasBin: true
     dependencies:
@@ -2296,8 +2296,8 @@ packages:
       regenerator-runtime: 0.14.0
     dev: true
 
-  /@babel/standalone@7.22.13:
-    resolution: {integrity: sha512-JoI61IOKM8jJv8V4yD0HprU/Lnx3Y29bGGULdIdJgvIUS7oCWcl43gtXoLY7nrYZhZerXYncYfDtmq4wUEofcg==}
+  /@babel/standalone@7.22.14:
+    resolution: {integrity: sha512-i61lDNe0nRm44nZj05g+1HNb0EVfDGaTI6PkoeUMUSel3GTG6T1OM3BdjZIXghnnFB8bSWbmfS1lkBQgNUdu5w==}
     engines: {node: '>=6.9.0'}
     dev: true
 
@@ -2306,7 +2306,7 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/code-frame': 7.22.13
-      '@babel/parser': 7.22.13
+      '@babel/parser': 7.22.14
       '@babel/types': 7.22.11
     dev: true
 
@@ -2320,7 +2320,7 @@ packages:
       '@babel/helper-function-name': 7.22.5
       '@babel/helper-hoist-variables': 7.22.5
       '@babel/helper-split-export-declaration': 7.22.6
-      '@babel/parser': 7.22.13
+      '@babel/parser': 7.22.14
       '@babel/types': 7.22.11
       debug: 4.3.4
       globals: 11.12.0
@@ -2406,7 +2406,7 @@ packages:
       meow: 6.1.1
       outdent: 0.5.0
       p-limit: 2.3.0
-      preferred-pm: 3.0.3
+      preferred-pm: 3.1.1
       resolve-from: 5.0.0
       semver: 5.7.2
       spawndamnit: 2.0.0
@@ -3345,8 +3345,8 @@ packages:
       '@hapi/hoek': 9.3.0
     dev: true
 
-  /@humanwhocodes/config-array@0.11.10:
-    resolution: {integrity: sha512-KVVjQmNUepDVGXNuoRRdmmEjruj0KfiGSbS8LVc12LMsWDQzRXJ0qdhN8L8uUigKpfEHRhlaQFY0ib1tnUbNeQ==}
+  /@humanwhocodes/config-array@0.11.11:
+    resolution: {integrity: sha512-N2brEuAadi0CcdeMXUkhbZB84eskAc8MEX1By6qEchoVywSgXPIjou4rYsl0V3Hj0ZnuGycGCjdNgockbzeWNA==}
     engines: {node: '>=10.10.0'}
     dependencies:
       '@humanwhocodes/object-schema': 1.2.1
@@ -3846,20 +3846,6 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@preact/preset-vite@2.0.0(preact@10.12.1)(vite@2.4.4):
-    resolution: {integrity: sha512-2Bf0NJyoWfbBpM6K1anEpjrofoZBRDcq2k1wuIUEcwkND6cSImqP5EZakpc0KatI7N+C6gWRbNR3caQPxyVRsA==}
-    peerDependencies:
-      vite: 2.x
-    dependencies:
-      '@prefresh/vite': 2.4.1(preact@10.12.1)(vite@2.4.4)
-      debug: 4.3.4
-      kolorist: 1.8.0
-      vite: 2.4.4
-    transitivePeerDependencies:
-      - preact
-      - supports-color
-    dev: true
-
   /@preact/preset-vite@2.0.0(preact@10.17.1)(vite@2.4.4):
     resolution: {integrity: sha512-2Bf0NJyoWfbBpM6K1anEpjrofoZBRDcq2k1wuIUEcwkND6cSImqP5EZakpc0KatI7N+C6gWRbNR3caQPxyVRsA==}
     peerDependencies:
@@ -3878,14 +3864,6 @@ packages:
     resolution: {integrity: sha512-joAwpkUDwo7ZqJnufXRGzUb+udk20RBgfA8oLPBh5aJH2LeStmV1luBfeJTztPdyCscC2j2SmZ/tVxFRMIxAEw==}
     dev: true
 
-  /@prefresh/core@1.5.1(preact@10.12.1):
-    resolution: {integrity: sha512-e0mB0Oxtog6ZpKPDBYbzFniFJDIktuKMzOHp7sguntU+ot0yi6dbhJRE9Css1qf0u16wdSZjpL2W2ODWuU05Cw==}
-    peerDependencies:
-      preact: ^10.0.0
-    dependencies:
-      preact: 10.12.1
-    dev: true
-
   /@prefresh/core@1.5.1(preact@10.17.1):
     resolution: {integrity: sha512-e0mB0Oxtog6ZpKPDBYbzFniFJDIktuKMzOHp7sguntU+ot0yi6dbhJRE9Css1qf0u16wdSZjpL2W2ODWuU05Cw==}
     peerDependencies:
@@ -3896,23 +3874,6 @@ packages:
 
   /@prefresh/utils@1.2.0:
     resolution: {integrity: sha512-KtC/fZw+oqtwOLUFM9UtiitB0JsVX0zLKNyRTA332sqREqSALIIQQxdUCS1P3xR/jT1e2e8/5rwH6gdcMLEmsQ==}
-    dev: true
-
-  /@prefresh/vite@2.4.1(preact@10.12.1)(vite@2.4.4):
-    resolution: {integrity: sha512-vthWmEqu8TZFeyrBNc9YE5SiC3DVSzPgsOCp/WQ7FqdHpOIJi7Z8XvCK06rBPOtG4914S52MjG9Ls22eVAiuqQ==}
-    peerDependencies:
-      preact: ^10.4.0
-      vite: '>=2.0.0'
-    dependencies:
-      '@babel/core': 7.22.11
-      '@prefresh/babel-plugin': 0.5.0
-      '@prefresh/core': 1.5.1(preact@10.12.1)
-      '@prefresh/utils': 1.2.0
-      '@rollup/pluginutils': 4.2.1
-      preact: 10.12.1
-      vite: 2.4.4
-    transitivePeerDependencies:
-      - supports-color
     dev: true
 
   /@prefresh/vite@2.4.1(preact@10.17.1)(vite@2.4.4):
@@ -4111,16 +4072,6 @@ packages:
       pretty-format: 26.6.2
     dev: true
 
-  /@testing-library/preact@2.0.1(preact@10.12.1):
-    resolution: {integrity: sha512-79kwVOY+3caoLgaPbiPzikjgY0Aya7Fc7TvGtR1upCnz2wrtmPDnN2t9vO7I7vDP2zoA+feSwOH5Q0BFErhaaQ==}
-    engines: {node: '>= 10'}
-    peerDependencies:
-      preact: '>=10 || ^10.0.0-alpha.0 || ^10.0.0-beta.0'
-    dependencies:
-      '@testing-library/dom': 7.31.2
-      preact: 10.12.1
-    dev: true
-
   /@testing-library/preact@2.0.1(preact@10.17.1):
     resolution: {integrity: sha512-79kwVOY+3caoLgaPbiPzikjgY0Aya7Fc7TvGtR1upCnz2wrtmPDnN2t9vO7I7vDP2zoA+feSwOH5Q0BFErhaaQ==}
     engines: {node: '>= 10'}
@@ -4163,7 +4114,7 @@ packages:
   /@types/babel__core@7.20.1:
     resolution: {integrity: sha512-aACu/U/omhdk15O4Nfb+fHgH/z3QsfQzpnvRZhYhThms83ZnAOZz7zZAWO7mn2yyNQaA4xTO8GLK3uqFU4bYYw==}
     dependencies:
-      '@babel/parser': 7.22.13
+      '@babel/parser': 7.22.14
       '@babel/types': 7.22.11
       '@types/babel__generator': 7.6.4
       '@types/babel__template': 7.4.1
@@ -4179,7 +4130,7 @@ packages:
   /@types/babel__template@7.4.1:
     resolution: {integrity: sha512-azBFKemX6kMg5Io+/rdGT0dkGreboUVR0Cdm3fz9QJWpaQGJRQXl7C+6hOTCZcMll7KFyEQpgbYI2lHdsS4U7g==}
     dependencies:
-      '@babel/parser': 7.22.13
+      '@babel/parser': 7.22.14
       '@babel/types': 7.22.11
     dev: true
 
@@ -4260,8 +4211,8 @@ packages:
       '@types/node': 18.14.0
     dev: true
 
-  /@types/less@3.0.3:
-    resolution: {integrity: sha512-1YXyYH83h6We1djyoUEqTlVyQtCfJAFXELSKW2ZRtjHD4hQ82CC4lvrv5D0l0FLcKBaiPbXyi3MpMsI9ZRgKsw==}
+  /@types/less@3.0.4:
+    resolution: {integrity: sha512-djlMpTdDF+tLaqVpK/0DWGNIr7BFjN8ykDLkgS0sQGYYLop51imRRE3foTjl+dMAH1zFE8bMZAG0VbYPEcSgsA==}
     dev: true
 
   /@types/minimist@1.2.2:
@@ -4493,7 +4444,7 @@ packages:
     peerDependencies:
       vite: ^2.0.0
     dependencies:
-      '@babel/standalone': 7.22.13
+      '@babel/standalone': 7.22.14
       core-js: 3.32.1
       magic-string: 0.25.9
       regenerator-runtime: 0.13.11
@@ -4702,8 +4653,8 @@ packages:
       is-string: 1.0.7
     dev: true
 
-  /array.prototype.findlastindex@1.2.2:
-    resolution: {integrity: sha512-tb5thFFlUcp7NdNF6/MpDk/1r/4awWG1FIz3YqDf+/zJSTezBb+/5WViH41obXULHVpDzoiCLpJ/ZO9YbJMsdw==}
+  /array.prototype.findlastindex@1.2.3:
+    resolution: {integrity: sha512-LzLoiOMAxvy+Gd3BAq3B7VeIgPdo+Q8hthvKtXybMvRV0jrXfJM/t8mw7nNlpEcVlVUnCnM2KSX4XU5HmpodOA==}
     engines: {node: '>= 0.4'}
     dependencies:
       call-bind: 1.0.2
@@ -4936,8 +4887,8 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
     dependencies:
-      caniuse-lite: 1.0.30001524
-      electron-to-chromium: 1.4.504
+      caniuse-lite: 1.0.30001525
+      electron-to-chromium: 1.4.506
       node-releases: 2.0.13
       update-browserslist-db: 1.0.11(browserslist@4.21.10)
     dev: true
@@ -5014,8 +4965,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /caniuse-lite@1.0.30001524:
-    resolution: {integrity: sha512-Jj917pJtYg9HSJBF95HVX3Cdr89JUyLT4IZ8SvM5aDRni95swKgYi3TgYLH5hnGfPE/U1dg6IfZ50UsIlLkwSA==}
+  /caniuse-lite@1.0.30001525:
+    resolution: {integrity: sha512-/3z+wB4icFt3r0USMwxujAqRvaD/B7rvGTsKhbhSQErVrJvkZCLhgNLJxU8MevahQVH6hCU9FsHdNUFbiwmE7Q==}
     dev: true
 
   /chalk@2.4.2:
@@ -5736,8 +5687,8 @@ packages:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
     dev: true
 
-  /electron-to-chromium@1.4.504:
-    resolution: {integrity: sha512-cSMwIAd8yUh54VwitVRVvHK66QqHWE39C3DRj8SWiXitEpVSY3wNPD9y1pxQtLIi4w3UdzF9klLsmuPshz09DQ==}
+  /electron-to-chromium@1.4.506:
+    resolution: {integrity: sha512-xxGct4GPAKSRlrLBtJxJFYy74W11zX6PO9GyHgl/U+2s3Dp0ZEwAklDfNHXOWcvH7zWMpsmgbR0ggEuaYAVvHA==}
     dev: true
 
   /emittery@0.13.1:
@@ -5778,17 +5729,6 @@ packages:
   /entities@4.5.0:
     resolution: {integrity: sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==}
     engines: {node: '>=0.12'}
-    dev: true
-
-  /enzyme-adapter-preact-pure@3.3.0(enzyme@3.11.0)(preact@10.12.1):
-    resolution: {integrity: sha512-+FNEZBEXwuDDsA8YOvC9p6gcvxQG5V6QnXKkUVJte/GKMWadOXDR+uw0w+QGwxreA8oMOlK/1+O8F7PzealpKA==}
-    peerDependencies:
-      enzyme: ^3.8.0
-      preact: ^10.0.0
-    dependencies:
-      array.prototype.flatmap: 1.3.1
-      enzyme: 3.11.0
-      preact: 10.12.1
     dev: true
 
   /enzyme-adapter-preact-pure@3.3.0(enzyme@3.11.0)(preact@10.17.1):
@@ -6075,12 +6015,12 @@ packages:
   /esbuild-style-plugin@1.6.1:
     resolution: {integrity: sha512-t5ZtQyGKNiM8DLedz+iwFH0LPWLnMmaEQ2RnnP1ppFHq35najxqJHAhUVVSbTFm5cR2ZumGdBMqnmuKBRBMvDw==}
     dependencies:
-      '@types/less': 3.0.3
+      '@types/less': 3.0.4
       '@types/sass': 1.45.0
       '@types/stylus': 0.48.39
       glob: 8.1.0
-      postcss: 8.4.28
-      postcss-modules: 4.3.1(postcss@8.4.28)
+      postcss: 8.4.29
+      postcss-modules: 4.3.1(postcss@8.4.29)
     dev: true
 
   /esbuild-sunos-64@0.14.54:
@@ -6402,7 +6342,7 @@ packages:
     dependencies:
       '@typescript-eslint/parser': 5.54.0(eslint@8.35.0)(typescript@4.7.2)
       array-includes: 3.1.6
-      array.prototype.findlastindex: 1.2.2
+      array.prototype.findlastindex: 1.2.3
       array.prototype.flat: 1.3.1
       array.prototype.flatmap: 1.3.1
       debug: 3.2.7(supports-color@5.5.0)
@@ -6505,7 +6445,7 @@ packages:
     dependencies:
       '@eslint/eslintrc': 2.1.2
       '@eslint/js': 8.35.0
-      '@humanwhocodes/config-array': 0.11.10
+      '@humanwhocodes/config-array': 0.11.11
       '@humanwhocodes/module-importer': 1.0.1
       '@nodelib/fs.walk': 1.2.8
       ajv: 6.12.6
@@ -7364,13 +7304,13 @@ packages:
     resolution: {integrity: sha512-chIaY3Vh2mh2Q3RGXttaDIzeiPvaVXJ+C4DAh/w3c37SKZ/U6PGMmuicR2EQQp9bKG8zLMCl7I+PtIoOOPp8Gg==}
     dev: true
 
-  /icss-utils@5.1.0(postcss@8.4.28):
+  /icss-utils@5.1.0(postcss@8.4.29):
     resolution: {integrity: sha512-soFhflCVWLfRNOPU3iv5Z9VUdT44xFRbzjLsEzSr5AQmgqPMTHdU3PMT1Cf1ssx8fLNJDA1juftYl+PUcv3MqA==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      postcss: 8.4.28
+      postcss: 8.4.29
     dev: true
 
   /identity-obj-proxy@3.0.0:
@@ -7769,7 +7709,7 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       '@babel/core': 7.22.11
-      '@babel/parser': 7.22.13
+      '@babel/parser': 7.22.14
       '@istanbuljs/schema': 0.1.3
       istanbul-lib-coverage: 3.2.0
       semver: 6.3.1
@@ -7782,7 +7722,7 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       '@babel/core': 7.22.11
-      '@babel/parser': 7.22.13
+      '@babel/parser': 7.22.14
       '@istanbuljs/schema': 0.1.3
       istanbul-lib-coverage: 3.2.0
       semver: 7.5.4
@@ -9643,48 +9583,48 @@ packages:
     hasBin: true
     dev: false
 
-  /postcss-modules-extract-imports@3.0.0(postcss@8.4.28):
+  /postcss-modules-extract-imports@3.0.0(postcss@8.4.29):
     resolution: {integrity: sha512-bdHleFnP3kZ4NYDhuGlVK+CMrQ/pqUm8bx/oGL93K6gVwiclvX5x0n76fYMKuIGKzlABOy13zsvqjb0f92TEXw==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      postcss: 8.4.28
+      postcss: 8.4.29
     dev: true
 
-  /postcss-modules-local-by-default@4.0.3(postcss@8.4.28):
+  /postcss-modules-local-by-default@4.0.3(postcss@8.4.29):
     resolution: {integrity: sha512-2/u2zraspoACtrbFRnTijMiQtb4GW4BvatjaG/bCjYQo8kLTdevCUlwuBHx2sCnSyrI3x3qj4ZK1j5LQBgzmwA==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      icss-utils: 5.1.0(postcss@8.4.28)
-      postcss: 8.4.28
+      icss-utils: 5.1.0(postcss@8.4.29)
+      postcss: 8.4.29
       postcss-selector-parser: 6.0.13
       postcss-value-parser: 4.2.0
     dev: true
 
-  /postcss-modules-scope@3.0.0(postcss@8.4.28):
+  /postcss-modules-scope@3.0.0(postcss@8.4.29):
     resolution: {integrity: sha512-hncihwFA2yPath8oZ15PZqvWGkWf+XUfQgUGamS4LqoP1anQLOsOJw0vr7J7IwLpoY9fatA2qiGUGmuZL0Iqlg==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      postcss: 8.4.28
+      postcss: 8.4.29
       postcss-selector-parser: 6.0.13
     dev: true
 
-  /postcss-modules-values@4.0.0(postcss@8.4.28):
+  /postcss-modules-values@4.0.0(postcss@8.4.29):
     resolution: {integrity: sha512-RDxHkAiEGI78gS2ofyvCsu7iycRv7oqw5xMWn9iMoR0N/7mf9D50ecQqUo5BZ9Zh2vH4bCUR/ktCqbB9m8vJjQ==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      icss-utils: 5.1.0(postcss@8.4.28)
-      postcss: 8.4.28
+      icss-utils: 5.1.0(postcss@8.4.29)
+      postcss: 8.4.29
     dev: true
 
-  /postcss-modules@4.3.1(postcss@8.4.28):
+  /postcss-modules@4.3.1(postcss@8.4.29):
     resolution: {integrity: sha512-ItUhSUxBBdNamkT3KzIZwYNNRFKmkJrofvC2nWab3CPKhYBQ1f27XXh1PAPE27Psx58jeelPsxWB/+og+KEH0Q==}
     peerDependencies:
       postcss: ^8.0.0
@@ -9692,11 +9632,11 @@ packages:
       generic-names: 4.0.0
       icss-replace-symbols: 1.1.0
       lodash.camelcase: 4.3.0
-      postcss: 8.4.28
-      postcss-modules-extract-imports: 3.0.0(postcss@8.4.28)
-      postcss-modules-local-by-default: 4.0.3(postcss@8.4.28)
-      postcss-modules-scope: 3.0.0(postcss@8.4.28)
-      postcss-modules-values: 4.0.0(postcss@8.4.28)
+      postcss: 8.4.29
+      postcss-modules-extract-imports: 3.0.0(postcss@8.4.29)
+      postcss-modules-local-by-default: 4.0.3(postcss@8.4.29)
+      postcss-modules-scope: 3.0.0(postcss@8.4.29)
+      postcss-modules-values: 4.0.0(postcss@8.4.29)
       string-hash: 1.1.3
     dev: true
 
@@ -9712,8 +9652,8 @@ packages:
     resolution: {integrity: sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==}
     dev: true
 
-  /postcss@8.4.28:
-    resolution: {integrity: sha512-Z7V5j0cq8oEKyejIKfpD8b4eBy9cwW2JWPk0+fB1HOAMsfHbnAXLLS+PfVWlzMSLQaWttKDt607I0XHmpE67Vw==}
+  /postcss@8.4.29:
+    resolution: {integrity: sha512-cbI+jaqIeu/VGqXEarWkRCCffhjgXc0qjBtXpqJhTBohMUjUQnbBr0xqX3vEKudc4iviTewcJo5ajcec5+wdJw==}
     engines: {node: ^10 || ^12 || >=14}
     dependencies:
       nanoid: 3.3.6
@@ -9721,15 +9661,11 @@ packages:
       source-map-js: 1.0.2
     dev: true
 
-  /preact@10.12.1:
-    resolution: {integrity: sha512-l8386ixSsBdbreOAkqtrwqHwdvR35ID8c3rKPa8lCWuO86dBi32QWHV4vfsZK1utLLFMvw+Z5Ad4XLkZzchscg==}
-
   /preact@10.17.1:
     resolution: {integrity: sha512-X9BODrvQ4Ekwv9GURm9AKAGaomqXmip7NQTZgY7gcNmr7XE83adOMJvd3N42id1tMFU7ojiynRsYnY6/BRFxLA==}
-    dev: true
 
-  /preferred-pm@3.0.3:
-    resolution: {integrity: sha512-+wZgbxNES/KlJs9q40F/1sfOd/j7f1O9JaHcW5Dsn3aUUOZg3L2bjpVUcKV2jvtElYfoTuQiNeMfQJ4kwUAhCQ==}
+  /preferred-pm@3.1.1:
+    resolution: {integrity: sha512-CsZgOVLKHifdoRu2y66P1s6oLb2WfT5Njkcgi80I/52FWTTVkWG6z0Z13vPkXC4hsT0nMrYXqX30buH8+D2eRQ==}
     engines: {node: '>=10'}
     dependencies:
       find-up: 5.0.0
@@ -9842,7 +9778,6 @@ packages:
 
   /prr@1.0.1:
     resolution: {integrity: sha512-yPw4Sng1gWghHQWj0B3ZggWUm4qVbPwPFcRG8KyxiU7J2OHFSoEHKS+EZ3fv5l1t9CyCiop6l/ZYeWbrgoQejw==}
-    requiresBuild: true
     dev: true
     optional: true
 
@@ -10281,7 +10216,6 @@ packages:
 
   /sax@1.2.4:
     resolution: {integrity: sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==}
-    requiresBuild: true
     dev: true
     optional: true
 
@@ -11368,7 +11302,7 @@ packages:
     hasBin: true
     dependencies:
       esbuild: 0.12.29
-      postcss: 8.4.28
+      postcss: 8.4.29
       resolve: 1.22.4
       rollup: 2.79.1
     optionalDependencies:
@@ -11396,7 +11330,7 @@ packages:
     dependencies:
       esbuild: 0.14.54
       less: 4.1.3
-      postcss: 8.4.28
+      postcss: 8.4.29
       resolve: 1.22.4
       rollup: 2.77.3
     optionalDependencies:

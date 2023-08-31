@@ -1,4 +1,4 @@
-import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren, ComponentManager, CustomComponent } from '@univerjs/base-ui';
+import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren, ComponentManager, ICustomComponent } from '@univerjs/base-ui';
 import { DEFAULT_STYLES, HorizontalAlign, ObserverManager, Tools, UIObserver, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
@@ -193,8 +193,8 @@ export class ToolbarUIController {
                     const textColor = this._toolList.find((item) => item.name === 'textColor');
                     if (!textColor) return;
                     if (!textColor.label) return;
-                    if (!(textColor.label as CustomComponent).props?.color) return;
-                    (textColor.label as CustomComponent).props!.color = this._textColor;
+                    if (!(textColor.label as ICustomComponent).props?.color) return;
+                    (textColor.label as ICustomComponent).props!.color = this._textColor;
                     this.changeColor(this._textColor);
                 },
                 hideSelectedIcon: true,
@@ -239,8 +239,8 @@ export class ToolbarUIController {
                     const fillColor = this._toolList.find((item) => item.name === 'fillColor');
                     if (!fillColor) return;
                     if (!fillColor.label) return;
-                    if (!(fillColor.label as CustomComponent).props?.color) return;
-                    (fillColor.label as CustomComponent).props!.color = this._background;
+                    if (!(fillColor.label as ICustomComponent).props?.color) return;
+                    (fillColor.label as ICustomComponent).props!.color = this._background;
                     this.setBackground(this._background);
                 },
                 hideSelectedIcon: true,

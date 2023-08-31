@@ -1,4 +1,4 @@
-import { BaseMenuItem, BaseUlProps, ColorPicker, ComponentManager, CustomComponent } from '@univerjs/base-ui';
+import { BaseMenuItem, BaseUlProps, ColorPicker, ComponentManager, ICustomComponent } from '@univerjs/base-ui';
 import {
     Nullable,
     CommandManager,
@@ -25,7 +25,7 @@ import { SheetBarMenuItem } from '../View/SheetBar/SheetBarMenu';
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const';
 
 interface SheetUl extends BaseMenuItem {
-    label?: CustomComponent | string;
+    label?: ICustomComponent | string;
     children?: SheetUl[];
 }
 

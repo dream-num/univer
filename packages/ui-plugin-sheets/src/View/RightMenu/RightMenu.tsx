@@ -1,5 +1,5 @@
 import { IMouseEvent } from '@univerjs/base-render';
-import { BaseRightMenuProps, IDisplayMenuItem, Menu } from '@univerjs/base-ui';
+import { BaseRightMenuProps, IDisplayMenuItem, IMenuItem, Menu } from '@univerjs/base-ui';
 import { Component, createRef } from 'preact';
 import { RightMenuProps } from '../../Controller';
 import Style from './index.module.less';
@@ -40,9 +40,25 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
 
     setMenuListNeo = (menuItems: IDisplayMenuItem[]) => {
         this.setState({
-            menuItems,
+            menuItems:this.buildMenuTree(menuItems),
         });
     };
+
+    buildMenuTree(items: IMenuItem[], parentId?: string): IDisplayMenuItem[] {
+        const tree: IDisplayMenuItem[] = [];
+
+        for (const item of items) {
+            if (item.parentId === parentId) {
+                const treeItem: IDisplayMenuItem = {
+                    ...item,
+                    subMenuItems: this.buildMenuTree(items, item.id),
+                };
+                tree.push(treeItem);
+            }
+        }
+
+        return tree;
+    }
 
     // TODO:添加到具体的元素
     override componentDidMount() {
@@ -125,9 +141,9 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
     }
 
     render() {
-        if (!this.state.children.length) {
-            return;
-        }
+        // if (!this.state.children.length) {
+        //     return;
+        // }
 
         const wrapStyles = { ...this.props.style };
         const { visible } = this.state;

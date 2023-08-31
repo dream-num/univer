@@ -1,7 +1,7 @@
 import { ComponentChildren, createRef, RefObject } from 'preact';
 import { PureComponent } from 'preact/compat';
 import { Icon } from '..';
-import { CustomComponent } from '../../Common';
+import { ICustomComponent } from '../../Common';
 import { BaseMenuItem } from '../../Interfaces';
 import { Dropdown } from '../Dropdown';
 import { Input } from '../Input';
@@ -27,8 +27,8 @@ export interface BaseSelectChildrenProps extends BaseItemProps {
     onPressEnter?: (...arg: any) => void;
     children?: BaseSelectChildrenProps[];
     unSelectable?: boolean; //选中后不生效事件
-    label?: CustomComponent | ComponentChildren | string;
-    suffix?: CustomComponent | ComponentChildren | string;
+    label?: ICustomComponent | ComponentChildren | string;
+    suffix?: ICustomComponent | ComponentChildren | string;
     name?: string;
 }
 

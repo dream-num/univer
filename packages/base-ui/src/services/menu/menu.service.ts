@@ -2,7 +2,7 @@ import { Disposable, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 import { IShortcutService } from '../shortcut/shorcut.service';
-import { CustomLabelType } from '../../Interfaces/CustomLabel';
+import { ICustomLabelType } from '../../Interfaces/CustomLabel';
 import { ComponentChildren } from 'preact';
 
 export type OneOrMany<T> = T | T[];
@@ -26,7 +26,7 @@ export interface IMenuItem {
     menu: OneOrMany<MenuPosition>;
     subMenus?: string[]; // submenu id list
     parentId?: string; // if it is submenu
-    label?: string | CustomLabelType | ComponentChildren;
+    label?: string | ICustomLabelType | ComponentChildren;
 
     title: string;
     icon?: string;

@@ -1,5 +1,5 @@
 import { IMouseEvent, IPointerEvent } from '@univerjs/base-render';
-import { BaseMenuItem, BaseSelectChildrenProps, ComponentChildren, ComponentManager, CustomLabel, CustomLabelType, IMenuService, MenuPosition } from '@univerjs/base-ui';
+import { BaseMenuItem, BaseSelectChildrenProps, ComponentChildren, ComponentManager, CustomLabel, ICustomLabelType, IMenuService, MenuPosition } from '@univerjs/base-ui';
 import { Disposable, ICurrentUniverService, ObserverManager, Tools, UIObserver } from '@univerjs/core';
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 import { CanvasView } from '@univerjs/base-sheets';
@@ -20,7 +20,7 @@ import {
 } from './menu';
 
 export interface RightMenuProps extends BaseMenuItem {
-    label?: string | CustomLabelType | ComponentChildren;
+    label?: string | ICustomLabelType | ComponentChildren;
     children?: RightMenuProps[];
     suffix?: string;
     border?: boolean;

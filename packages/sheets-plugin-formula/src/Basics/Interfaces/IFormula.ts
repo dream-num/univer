@@ -41,7 +41,7 @@ export interface FunParams {
     funParams: FormulaType;
 }
 
-export interface CustomComponent {
+export interface ICustomComponent {
     name?: string;
     props: {
         select?: Label[];
@@ -63,6 +63,6 @@ export interface SearchFormulaModalData {
     group: ILabel[];
     titleLocale?: string;
     onCancel?: () => void;
-    children: CustomComponent;
+    children: ICustomComponent;
     modal?: ComponentChildren; // 渲染的组件
 }

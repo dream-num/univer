@@ -1,26 +1,26 @@
 import { ComponentChildren } from 'preact';
 import { BaseComponent, JSXComponent } from '../BaseComponent';
-import { CustomComponent } from '../Common';
+import { ICustomComponent } from '../Common';
 import { BaseSelectChildrenProps } from '../Components/Select/Select';
 
-export interface CustomLabelProps {
+export interface ICustomLabelProps {
     prefix?: string[] | string;
     suffix?: string[] | string;
     options?: BaseSelectChildrenProps[];
     label?: string;
-    children?: CustomLabelProps[];
+    children?: ICustomLabelProps[];
     onKeyUp?: (e: Event) => void;
 }
 
-export interface CustomLabelType {
+export interface ICustomLabelType {
     name: string;
-    props?: CustomLabelProps;
+    props?: ICustomLabelProps;
 }
 
-export interface BaseCustomLabelProps {
-    label: string | CustomComponent | ComponentChildren;
+export interface IBaseCustomLabelProps {
+    label: string | ICustomComponent | ComponentChildren;
 }
 
-export interface CustomLabelComponent extends BaseComponent<BaseCustomLabelProps> {
-    render(): JSXComponent<BaseCustomLabelProps>;
+export interface CustomLabelComponent extends BaseComponent<IBaseCustomLabelProps> {
+    render(): JSXComponent<IBaseCustomLabelProps>;
 }

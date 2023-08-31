@@ -49,7 +49,7 @@ import {
     VerticalBorderIcon,
 } from '../Components/Icon';
 
-export interface CustomComponent {
+export interface ICustomComponent {
     name: string;
     props?: IKeyValue;
 }
@@ -107,7 +107,7 @@ export class ComponentManager {
             BorderThick,
         };
 
-        for (let k in iconList) {
+        for (const k in iconList) {
             this.register(k, iconList[k]);
         }
     }

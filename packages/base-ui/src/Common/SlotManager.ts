@@ -1,10 +1,10 @@
 import { Nullable } from '@univerjs/core';
 import { Slot } from '../Components/Slot/Slot';
-import { CustomComponent } from './ComponentManager';
+import { ICustomComponent } from './ComponentManager';
 
 export type SlotComponent = {
     name: string;
-    component: CustomComponent;
+    component: ICustomComponent;
 };
 
 export type SlotGroupProps = Map<string, Map<string, SlotComponent>>;

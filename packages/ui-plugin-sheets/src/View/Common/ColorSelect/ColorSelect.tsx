@@ -1,9 +1,9 @@
-import { BaseComponentProps, CustomComponent, CustomLabel } from '@univerjs/base-ui';
+import { BaseComponentProps, ICustomComponent, CustomLabel } from '@univerjs/base-ui';
 import { Component, ComponentChildren } from 'preact';
 import styles from './index.module.less';
 
 interface IProps extends BaseComponentProps {
-    label?: ComponentChildren | CustomComponent;
+    label?: ComponentChildren | ICustomComponent;
     id: string;
     color: string;
 }

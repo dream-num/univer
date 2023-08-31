@@ -14,8 +14,6 @@ import {
     VerticalAlign,
     WrapStrategy,
     Range,
-    FontWeight,
-    FontItalic,
     ITextRotation,
     ICurrentUniverService,
     ObserverManager,
@@ -559,50 +557,28 @@ export class ToolbarUIController extends Disposable {
 
     // eslint-disable-next-line max-lines-per-function
     private _changeToolbarState(range: Range): void {
+        // FIXME@wzhudev: this is anti-pattern too, it should not compose all the toolbar items here
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         const worksheet = workbook.getActiveSheet();
         if (worksheet) {
-            const isBold = range.getFontWeight();
-            const IsItalic = range.getFontStyle();
-            const strikeThrough = range.getStrikeThrough();
             const fontSize = range.getFontSize();
             const fontWeight = range.getFontWeight();
             const fontName = range.getFontFamily();
             const fontItalic = range.getFontStyle();
-            // const fontColor = range.getFontColor();
-            // const background = range.getBackground();
-            const underline = range.getUnderline();
             const horizontalAlign = range.getHorizontalAlignment() ?? HorizontalAlign.LEFT;
             const verticalAlign = range.getVerticalAlignment() ?? VerticalAlign.BOTTOM;
             const rotation = range.getTextRotation() as ITextRotation;
             const warp = range.getWrapStrategy() ?? WrapStrategy.CLIP;
 
-            const bold = this._toolList.find((item) => item.name === 'bold');
-            const italic = this._toolList.find((item) => item.name === 'italic');
             const textRotateModeItem = this._toolList.find((item) => item.name === 'textRotateMode');
             const fontSizeItem = this._toolList.find((item) => item.name === 'fontSize');
             const fontNameItem = this._toolList.find((item) => item.name === 'font');
             const fontBoldItem = this._toolList.find((item) => item.name === 'bold');
             const fontItalicItem = this._toolList.find((item) => item.name === 'italic');
-            // const textColor = this._toolList.find((item) => item.name === 'textColor')
-            // const fillColor = this._toolList.find((item) => item.name === 'fillColor')
-            const strikethroughItem = this._toolList.find((item) => item.name === 'strikethrough');
-            const underlineItem = this._toolList.find((item) => item.name === 'underline');
             const horizontalAlignModeItem = this._toolList.find((item) => item.name === 'horizontalAlignMode');
             const verticalAlignModeItem = this._toolList.find((item) => item.name === 'verticalAlignMode');
             const textWrapMode = this._toolList.find((item) => item.name === 'textWrapMode');
 
-            if (bold) {
-                bold.active = isBold === FontWeight.BOLD;
-            }
-
-            if (italic) {
-                italic.active = IsItalic === FontItalic.ITALIC;
-            }
-
-            if (strikethroughItem) {
-                strikethroughItem.active = !!(strikeThrough && strikeThrough.s);
-            }
             if (fontNameItem) {
                 fontNameItem.children?.forEach((item) => {
                     item.selected = fontName === item.value;
@@ -616,21 +592,6 @@ export class ToolbarUIController extends Disposable {
             }
             if (fontItalicItem) {
                 fontItalicItem.active = !!fontItalic;
-            }
-            // if (textColor) {
-            //     const label = textColor.label
-            //     if (label && label.props) {
-            //         label.props.color = fontColor
-            //     }
-            // }
-            // if (fillColor) {
-            //     const label = fillColor.label
-            //     if (label && label.props) {
-            //         label.props.color = background
-            //     }
-            // }
-            if (underlineItem) {
-                underlineItem.active = !!(underline && underline.s);
             }
             if (horizontalAlignModeItem) {
                 horizontalAlignModeItem.children?.forEach((item) => {
@@ -693,10 +654,6 @@ export class ToolbarUIController extends Disposable {
 
             if (currentUnitId !== actionUnitId) return;
 
-            // 所有功能的 UI 耦合在一起？
-            // 不同的环境下的 UI 需要全部重新写一遍？
-            // UI 没有可扩展性
-            // 这里有点问题的…… 每次都去全量获取状态？
             const manager = this._selectionManager;
             const range = manager.getCurrentCell();
             if (range) {

@@ -9,6 +9,10 @@ export { ICanvasView, ISelectionManager } from './Services/tokens';
 export { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from './Commands/Mutations/remove-sheet.mutation';
 export { InsertSheetMutation, InsertSheetUndoMutationFactory } from './Commands/Mutations/insert-sheet.mutation';
 export { InsertRowMutation, InsertColMutation, InsertRowMutationFactory, InsertColMutationFactory } from './Commands/Mutations/insert-row-col.mutation';
+export { ISetRangeStyleMutationParams, SetRangeStyleMutation } from './Commands/Mutations/set-range-styles.mutation';
+
+// operations
+export { SetSelectionsOperation } from './Commands/Operations/selection.operation';
 
 // commands
 export { ChangeSelectionCommand, IChangeSelectionCommandParams, ExpandSelectionCommand, IExpandSelectionCommandParams } from './Commands/Commands/set-selections.command';

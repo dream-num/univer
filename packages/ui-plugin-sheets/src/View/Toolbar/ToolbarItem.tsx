@@ -8,22 +8,30 @@ import styles from './index.module.less';
 
 export interface IToolbarItemStatus {
     disabled: boolean;
+    activated: boolean;
 }
 
 export class ToolbarItem extends Component<IDisplayMenuItem, IToolbarItemStatus> {
     private disabledSubscription: Subscription | undefined;
+
+    private activatedSubscription: Subscription | undefined;
 
     constructor() {
         super();
 
         this.state = {
             disabled: false,
+            activated: false,
         };
     }
 
     override componentDidMount() {
         this.disabledSubscription = this.props.disabled$?.subscribe((disabled) => {
             this.setState({ disabled });
+        });
+
+        this.activatedSubscription = this.props.activated$?.subscribe((activated) => {
+            this.setState({ activated });
         });
     }
 
@@ -34,11 +42,11 @@ export class ToolbarItem extends Component<IDisplayMenuItem, IToolbarItemStatus>
     render(): ComponentChild {
         const { props, context } = this;
         const commandService: ICommandService = context.injector.get(ICommandService);
-        const { disabled } = this.state;
+        const { disabled, activated } = this.state;
 
         return (
             <Tooltip title={props.title + (props.shortcut ? ` (${props.shortcut})` : '')} placement="bottom">
-                <Button className={styles.textButton} type="text" disabled={disabled} onClick={() => commandService.executeCommand(props.id)}>
+                <Button active={activated} className={styles.textButton} type="text" disabled={disabled} onClick={() => commandService.executeCommand(props.id)}>
                     {this.getLabel({ name: props.icon })}
                 </Button>
             </Tooltip>

@@ -2,7 +2,7 @@ import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRed
 import { IAccessor } from '@wendellhu/redi';
 import { IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowMutationParams } from '../../Basics/Interfaces/MutationInterface';
 import { InsertColMutation, InsertRowMutation } from '../Mutations/insert-row-col.mutation';
-import { IRemoveColMutationFactory, IRemoveRowMutationFactory, RemoveColMutation, RemoveRowMutation } from '../Mutations/remove-row-col.mutation';
+import { IRemoveColMutationFactory, RemoveRowMutationFactory, RemoveColMutation, RemoveRowMutation } from '../Mutations/remove-row-col.mutation';
 import { ISelectionManager } from '../../Services/tokens';
 
 export interface RemoveRowCommandParams {
@@ -44,7 +44,7 @@ export const RemoveRowCommand: ICommand = {
             };
         }
 
-        const undoMutationParams: IInsertRowMutationParams = IRemoveRowMutationFactory(accessor, redoMutationParams);
+        const undoMutationParams: IInsertRowMutationParams = RemoveRowMutationFactory(accessor, redoMutationParams);
         const result = commandService.executeCommand(RemoveRowMutation.id, redoMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({

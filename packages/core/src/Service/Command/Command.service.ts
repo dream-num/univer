@@ -27,6 +27,7 @@ export interface ICommand<P extends object = object, R = boolean> {
  */
 export interface IMutation<P extends object = object, R = boolean> extends ICommand<P, R> {
     type: CommandType.MUTATION;
+    handler(accessor: IAccessor, params: P): Promise<R>; // mutations must have params
 }
 
 /**
@@ -234,8 +235,14 @@ export class CommandService implements ICommandService {
         this._log.log(`%c${' | '.repeat(this._commandExecutingLevel)}[ICommandService]: executing command "${command.id}".`, 'color:cyan');
 
         this._commandExecutingLevel++;
-        const result = await injector.invoke(command.handler, params);
-        this._commandExecutingLevel--;
+        let result: boolean;
+        try {
+            result = await injector.invoke(command.handler, params);
+            this._commandExecutingLevel--;
+        } catch (e) {
+            result = false;
+            this._commandExecutingLevel = 0;
+        }
 
         // TODO: remove from old command manager
         if (command.type === CommandType.MUTATION) {

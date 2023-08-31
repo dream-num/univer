@@ -1,6 +1,31 @@
 {
     "compilerOptions": {
-        "experimentalDecorators": true
+        "lib": [
+            "ESNext",
+            "DOM",
+            "WebWorker",
+            "dom.iterable"
+        ],
+        "target": "ESNext",
+        "module": "ESNext",
+        "declaration": true,
+        "declarationDir": "./lib",
+        "declarationMap": true,
+        "experimentalDecorators": true,
+        "jsx": "react-jsx",
+        "jsxImportSource": "preact",
+        "sourceMap": true,
+        "resolveJsonModule": true,
+        "strict": true,
+        "noImplicitOverride": true,
+        "allowJs": true,
+        "skipLibCheck": true,
+        "types": [
+            "jest",
+            "node",
+            "@types/jest",
+            "esbuild-style-plugin"
+        ]
     },
     "include": [
         "packages/*/src",

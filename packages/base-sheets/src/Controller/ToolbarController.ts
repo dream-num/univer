@@ -9,6 +9,7 @@ import {
     ICommandService,
     UndoCommand,
     RedoCommand,
+    IColorStyle,
 } from '@univerjs/core';
 import { Inject, SkipSelf } from '@wendellhu/redi';
 
@@ -18,6 +19,7 @@ import { SelectionModel } from '../Model';
 import { ISelectionManager } from '../Services/tokens';
 import { CellEditorController } from './CellEditorController';
 import { SelectionManager } from './Selection';
+import { BasicWorksheetController, IStyleTypeValue } from './BasicWorksheet.controller';
 
 export interface BorderInfo {
     type: BorderType;
@@ -31,7 +33,8 @@ export class ToolbarController {
         @ICommandService private readonly _commandService: ICommandService,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @ISelectionManager private readonly _selectionManager: SelectionManager,
-        @Inject(CellEditorController) private readonly _cellEditorController: CellEditorController
+        @Inject(CellEditorController) private readonly _cellEditorController: CellEditorController,
+        @Inject(BasicWorksheetController) private readonly _basicWorksheetController: BasicWorksheetController
     ) {
         this._initialize();
     }
@@ -150,11 +153,30 @@ export class ToolbarController {
     }
 
     private setBackground(value: string) {
-        this._selectionManager.getActiveRangeList()?.setBackground(value);
+        const range = this._selectionManager.getActiveRangeData();
+        if (!range) return;
+        const workbookId = this._currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const style: IStyleTypeValue<IColorStyle> = {
+            type: 'bg',
+            value: {
+                rgb: value,
+            },
+        };
+        this._basicWorksheetController.setStyle(workbookId, worksheetId, style, [range]);
     }
 
     private setFontSize(value: number) {
-        this._selectionManager.getActiveRangeList()?.setFontSize(value);
+        const range = this._selectionManager.getActiveRangeData();
+        if (!range) return;
+        const workbookId = this._currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        // const style: IStyleTypeValue<number> = {
+        //     type: 'fs',
+        //     value,
+        // };
+        // this._basicWorksheetController.setStyle(workbookId, worksheetId, style, [range]);
+        this._basicWorksheetController.trimWhitespace(workbookId, worksheetId, [range]);
     }
 
     private setFontFamily(value: string) {

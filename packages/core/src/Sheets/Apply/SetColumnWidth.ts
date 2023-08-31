@@ -11,11 +11,7 @@ import { ISetColumnWidthActionData } from '../Action';
  *
  * @internal
  */
-export function SetColumnWidth(
-    columnIndex: number = 0,
-    columnWidth: number[],
-    columnManager: ColumnManager
-) {
+export function SetColumnWidth(columnIndex: number = 0, columnWidth: number[], columnManager: ColumnManager) {
     const result: number[] = [];
     for (let i = columnIndex; i < columnIndex + columnWidth.length; i++) {
         const column = columnManager.getColumnOrCreate(i);
@@ -25,10 +21,7 @@ export function SetColumnWidth(
     return result;
 }
 
-export function SetColumnWidthApply(
-    unit: CommandUnit,
-    data: ISetColumnWidthActionData
-) {
+export function SetColumnWidthApply(unit: CommandUnit, data: ISetColumnWidthActionData) {
     const workbook = unit.WorkBookUnit;
     const worksheet = workbook!.getSheetBySheetId(data.sheetId);
     const columnIndex = data.columnIndex;

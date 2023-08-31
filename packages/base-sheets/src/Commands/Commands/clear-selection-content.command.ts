@@ -2,8 +2,6 @@ import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRed
 import { IAccessor } from '@wendellhu/redi';
 
 import { ISelectionManager } from '../../Services/tokens';
-import { SelectionController } from '../../Controller/Selection/SelectionController';
-import { SelectionModel } from '../../Model/SelectionModel';
 import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
 
 /**
@@ -18,26 +16,13 @@ export const ClearSelectionContentCommand: ICommand = {
         const selectionManager = accessor.get(ISelectionManager);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        // TODO: this is to verbose to get a serializable range
-        // a range should have worksheet id as well
+        // TODO: this is to verbose to get a serializable range, a range should have worksheet id as well
         const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         const worksheet = workbook.getActiveSheet();
-        const controls = selectionManager.getCurrentControls();
-        const selections = controls?.map((control: SelectionController) => {
-            const model: SelectionModel = control.model;
-            return {
-                startRow: model.startRow,
-                startColumn: model.startColumn,
-                endRow: model.endRow,
-                endColumn: model.endColumn,
-            };
-        });
-
-        if (!selections) {
+        const selections = selectionManager.getCurrentSelections();
+        if (!selections.length) {
             return false;
         }
-
-        // prepare do mutations
 
         const range = selections[0];
         const clearMutationParams: ISetRangeValuesMutationParams = {
@@ -46,7 +31,6 @@ export const ClearSelectionContentCommand: ICommand = {
         };
         const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(accessor, clearMutationParams);
 
-        // execute do mutations and add undo mutations to undo stack if completed
         const result = commandService.executeCommand(SetRangeValuesMutation.id, clearMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({

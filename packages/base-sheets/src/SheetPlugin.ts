@@ -14,6 +14,7 @@ import {
     EditTooltipsController,
     SelectionManager,
     HideColumnController,
+    BasicWorkbookController,
 } from './Controller';
 import { DEFAULT_SPREADSHEET_PLUGIN_DATA, install, ISheetPluginConfig } from './Basics';
 import { FormulaBarController } from './Controller/FormulaBarController';
@@ -198,6 +199,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
             [ColumnRulerManager],
 
             [BasicWorksheetController],
+            [BasicWorkbookController],
         ];
 
         dependencies.forEach((d) => {

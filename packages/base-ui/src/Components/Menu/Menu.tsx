@@ -1,8 +1,11 @@
-import { Component, createRef } from 'preact';
+import { Component, ComponentChild, createRef } from 'preact';
+import { Subscription } from 'rxjs';
+import { ICommandService } from '@univerjs/core';
 import { BaseMenuProps, BaseMenuState, BaseMenuItem, BaseMenuStyle } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
 import { CustomLabel } from '../CustomLabel';
 import styles from './index.module.less';
+import { IDisplayMenuItem } from '../../services/menu/menu.service';
 
 export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     private _MenuRef = createRef<HTMLUListElement>();
@@ -103,11 +106,12 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     };
 
     render() {
-        const { className = '', style = '', menu, deep = 0 } = this.props;
+        const { className = '', style = '', menu, menuItems, deep = 0 } = this.props;
         const { show, posStyle } = this.state;
 
         return (
             <ul className={joinClassNames(styles.colsMenu, className)} style={{ ...style, ...posStyle, display: show ? 'block' : 'none' }} ref={this._MenuRef}>
+                {/* NOTE: this will be dropped after we complete migrating to new UI system. */}
                 {menu?.map((item: BaseMenuItem, index: number) => {
                     if (item.show === false) return;
                     return (
@@ -142,6 +146,9 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
                         </>
                     );
                 })}
+                {menuItems?.map((item, index) => (
+                    <MenuItem menuItem={item} onClick={() => this.showMenu(false)} />
+                ))}
             </ul>
         );
     }
@@ -151,5 +158,46 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
             show: false,
             posStyle: {},
         };
+    }
+}
+
+export class MenuItem extends Component<{ menuItem: IDisplayMenuItem; onClick: () => void }, { disabled: boolean }> {
+    private disabledSubscription: Subscription | undefined;
+
+    constructor() {
+        super();
+
+        this.state = {
+            disabled: false,
+        };
+    }
+
+    override componentDidMount(): void {
+        this.disabledSubscription = this.props.menuItem.disabled$?.subscribe((disabled) => {
+            this.setState({ disabled });
+        });
+    }
+
+    override componentWillUnmount(): void {
+        this.disabledSubscription?.unsubscribe();
+    }
+
+    override render(): ComponentChild {
+        const { menuItem: item } = this.props;
+        const commandService: ICommandService = this.context.injector.get(ICommandService);
+        const { disabled } = this.state;
+
+        return (
+            <li
+                className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}
+                onClick={() => {
+                    this.props.onClick();
+                    commandService.executeCommand(item.id);
+                }}
+            >
+                <CustomLabel label={item.title}></CustomLabel>
+                {item.shortcut && ` (${item.shortcut})`}
+            </li>
+        );
     }
 }

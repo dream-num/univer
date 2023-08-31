@@ -7,34 +7,7 @@ import { ObjectArray, ObjectArrayPrimitiveType } from './ObjectArray';
 const rmsPrefix = /^-ms-/;
 const rDashAlpha = /-([a-z])/g;
 
-const alphabets = [
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-    'F',
-    'G',
-    'H',
-    'I',
-    'J',
-    'K',
-    'L',
-    'M',
-    'N',
-    'O',
-    'P',
-    'Q',
-    'R',
-    'S',
-    'T',
-    'U',
-    'V',
-    'W',
-    'X',
-    'Y',
-    'Z',
-];
+const alphabets = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
 /**
  * Universal tool library
@@ -85,46 +58,27 @@ export class Tools {
 
     static getSystemType(): string {
         const sUserAgent = navigator.userAgent;
-        const isWin =
-            navigator.platform === 'Win32' || navigator.platform === 'Windows';
-        const isMac =
-            navigator.platform === 'Mac68K' ||
-            navigator.platform === 'MacPPC' ||
-            navigator.platform === 'Macintosh' ||
-            navigator.platform === 'MacIntel';
+        const isWin = navigator.platform === 'Win32' || navigator.platform === 'Windows';
+        const isMac = navigator.platform === 'Mac68K' || navigator.platform === 'MacPPC' || navigator.platform === 'Macintosh' || navigator.platform === 'MacIntel';
         if (isMac) return 'Mac';
         const isUnix = navigator.platform === 'X11' && !isWin && !isMac;
         if (isUnix) return 'Unix';
         const isLinux = String(navigator.platform).indexOf('Linux') > -1;
         if (isLinux) return 'Linux';
         if (isWin) {
-            const isWin2K =
-                sUserAgent.indexOf('Windows NT 5.0') > -1 ||
-                sUserAgent.indexOf('Windows 2000') > -1;
+            const isWin2K = sUserAgent.indexOf('Windows NT 5.0') > -1 || sUserAgent.indexOf('Windows 2000') > -1;
             if (isWin2K) return 'Windows 2000';
-            const isWinXP =
-                sUserAgent.indexOf('Windows NT 5.1') > -1 ||
-                sUserAgent.indexOf('Windows XP') > -1;
+            const isWinXP = sUserAgent.indexOf('Windows NT 5.1') > -1 || sUserAgent.indexOf('Windows XP') > -1;
             if (isWinXP) return 'Windows XP';
-            const isWin2003 =
-                sUserAgent.indexOf('Windows NT 5.2') > -1 ||
-                sUserAgent.indexOf('Windows 2003') > -1;
+            const isWin2003 = sUserAgent.indexOf('Windows NT 5.2') > -1 || sUserAgent.indexOf('Windows 2003') > -1;
             if (isWin2003) return 'Windows 2003';
-            const isWinVista =
-                sUserAgent.indexOf('Windows NT 6.0') > -1 ||
-                sUserAgent.indexOf('Windows Vista') > -1;
+            const isWinVista = sUserAgent.indexOf('Windows NT 6.0') > -1 || sUserAgent.indexOf('Windows Vista') > -1;
             if (isWinVista) return 'Windows Vista';
-            const isWin7 =
-                sUserAgent.indexOf('Windows NT 6.1') > -1 ||
-                sUserAgent.indexOf('Windows 7') > -1;
+            const isWin7 = sUserAgent.indexOf('Windows NT 6.1') > -1 || sUserAgent.indexOf('Windows 7') > -1;
             if (isWin7) return 'Windows 7';
-            const isWin10 =
-                sUserAgent.indexOf('Windows NT 10') > -1 ||
-                sUserAgent.indexOf('Windows 10') > -1;
+            const isWin10 = sUserAgent.indexOf('Windows NT 10') > -1 || sUserAgent.indexOf('Windows 10') > -1;
             if (isWin10) return 'Windows 10';
-            const isWin11 =
-                sUserAgent.indexOf('Windows NT 11') > -1 ||
-                sUserAgent.indexOf('Windows 11') > -1;
+            const isWin11 = sUserAgent.indexOf('Windows NT 11') > -1 || sUserAgent.indexOf('Windows 11') > -1;
             if (isWin11) return 'Windows 11';
         }
         return 'Unknown system';
@@ -133,18 +87,12 @@ export class Tools {
     static getBrowserType(): string {
         const userAgent = navigator.userAgent;
         const isOpera = userAgent.indexOf('Opera') > -1;
-        const isIE =
-            userAgent.indexOf('compatible') > -1 &&
-            userAgent.indexOf('MSIE') > -1 &&
-            !isOpera;
-        const isIE11 =
-            userAgent.indexOf('Trident') > -1 && userAgent.indexOf('rv:11.0') > -1;
+        const isIE = userAgent.indexOf('compatible') > -1 && userAgent.indexOf('MSIE') > -1 && !isOpera;
+        const isIE11 = userAgent.indexOf('Trident') > -1 && userAgent.indexOf('rv:11.0') > -1;
         const isEdge = userAgent.indexOf('Edge') > -1;
         const isFF = userAgent.indexOf('Firefox') > -1;
-        const isSafari =
-            userAgent.indexOf('Safari') > -1 && userAgent.indexOf('Chrome') === -1;
-        const isChrome =
-            userAgent.indexOf('Chrome') > -1 && userAgent.indexOf('Safari') > -1;
+        const isSafari = userAgent.indexOf('Safari') > -1 && userAgent.indexOf('Chrome') === -1;
+        const isChrome = userAgent.indexOf('Chrome') > -1 && userAgent.indexOf('Safari') > -1;
         if (isIE) {
             const reIE = new RegExp('MSIE (\\d+\\.\\d+);');
             reIE.test(userAgent);
@@ -275,10 +223,7 @@ export class Tools {
                 return (oneValue as Date).getTime() === towValue.getTime();
             }
             if (Tools.isRegExp(oneValue)) {
-                return (
-                    (oneValue as unknown as string).toString() ===
-                    towValue.toString()
-                );
+                return (oneValue as unknown as string).toString() === towValue.toString();
             }
             return oneValue === towValue;
         }
@@ -351,11 +296,7 @@ export class Tools {
     static getLanguage(): string {
         const defaultValue = 'en-US';
         if (globalThis.navigator) {
-            return (
-                (navigator.languages && navigator.languages[0]) ||
-                navigator.language ||
-                defaultValue
-            );
+            return (navigator.languages && navigator.languages[0]) || navigator.language || defaultValue;
         }
         return defaultValue;
     }
@@ -442,25 +383,16 @@ export class Tools {
         if (document.body.clientHeight) {
             clientHeight = document.body.clientHeight;
         }
-        return (
-            this.isAndroid() ||
-            this.isIPhone() ||
-            this.isTablet() ||
-            (clientWidth < 350 && clientHeight < 500)
-        );
+        return this.isAndroid() || this.isIPhone() || this.isTablet() || (clientWidth < 350 && clientHeight < 500);
     }
 
     static isTablet(): boolean {
-        return /ipad|android|android 3.0|xoom|sch-i800|playbook|tablet|kindle/i.test(
-            navigator.userAgent.toLowerCase()
-        );
+        return /ipad|android|android 3.0|xoom|sch-i800|playbook|tablet|kindle/i.test(navigator.userAgent.toLowerCase());
     }
 
     static isWeChat(): boolean {
         const userAgent = navigator.userAgent.toLowerCase();
-        return String(userAgent.match(/MicroMessenger/i)) === 'micromessenger'
-            ? !0
-            : !1;
+        return String(userAgent.match(/MicroMessenger/i)) === 'micromessenger' ? !0 : !1;
     }
 
     static isAndroid(): boolean {
@@ -538,14 +470,8 @@ export class Tools {
      * @param value value to be set
      * @returns
      */
-    static fillTwoDimensionalArray(
-        rows: number,
-        columns: number,
-        value: any
-    ): any[][] {
-        return new Array(rows)
-            .fill(value)
-            .map((item) => new Array(columns).fill(value));
+    static fillTwoDimensionalArray(rows: number, columns: number, value: any): any[][] {
+        return new Array(rows).fill(value).map((item) => new Array(columns).fill(value));
     }
 
     /**
@@ -555,11 +481,7 @@ export class Tools {
      * @param value value to be set
      * @returns
      */
-    static fillObjectMatrix<T>(
-        rows: number,
-        columns: number,
-        value: T
-    ): ObjectMatrixPrimitiveType<T> {
+    static fillObjectMatrix<T>(rows: number, columns: number, value: T): ObjectMatrixPrimitiveType<T> {
         const matrix = new ObjectMatrix<T>();
         for (let r = 0; r < rows; r++) {
             for (let c = 0; c < columns; c++) {
@@ -654,13 +576,13 @@ export class Tools {
      * @returns
      */
     static commonExtend<T>(originJson: IKeyValue, extendJson: IKeyValue): T {
-        let resultJsonObject: IKeyValue = {};
+        const resultJsonObject: IKeyValue = {};
 
-        for (let attr in originJson) {
+        for (const attr in originJson) {
             resultJsonObject[attr] = originJson[attr];
         }
 
-        for (let attr in extendJson) {
+        for (const attr in extendJson) {
             // undefined is equivalent to no setting
             if (extendJson[attr] == null) {
                 continue;
@@ -672,7 +594,7 @@ export class Tools {
     }
 
     static commonExtend1<T>(originJson: IKeyValue, extendJson: IKeyValue): T {
-        for (let attr in originJson) {
+        for (const attr in originJson) {
             if (extendJson[attr] == null) {
                 extendJson[attr] = originJson[attr];
             }
@@ -691,9 +613,7 @@ export class Tools {
         return obj;
     }
 
-    static createObjectArray<T>(
-        array: ObjectArrayPrimitiveType<T> | ObjectArray<T>
-    ): ObjectArray<T> {
+    static createObjectArray<T>(array: ObjectArrayPrimitiveType<T> | ObjectArray<T>): ObjectArray<T> {
         if (array instanceof ObjectArray) {
             return new ObjectArray<T>(array.toJSON());
         }

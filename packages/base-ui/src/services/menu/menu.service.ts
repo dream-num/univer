@@ -1,6 +1,7 @@
 import { Disposable, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
+import { IShortcutService } from '../shortcut/shorcut.service';
 
 export type OneOrMany<T> = T | T[];
 
@@ -21,17 +22,21 @@ export interface IMenuItemState {
 export interface IMenuItem {
     id: string;
     menu: OneOrMany<MenuPosition>;
-    title: string;
+    subMenus?: string[];
 
+    title: string;
     icon?: string;
     tooltip?: string;
     description?: string;
 
+    hidden$?: Observable<boolean>;
+    activated$?: Observable<boolean>;
     disabled$?: Observable<boolean>;
-    hidden?: Observable<boolean>;
-    checked?: Observable<boolean>; // TODO: @wzhudev: maybe we should add a `data` property here instead of `checked` property?
+}
 
-    handler?: () => void;
+export interface IDisplayMenuItem extends IMenuItem {
+    /** MenuService should get responsible shortcut and display on the UI. */
+    shortcut?: string;
 }
 
 export const IMenuService = createIdentifier<IMenuService>('univer.menu-service');
@@ -47,6 +52,10 @@ export class DesktopMenuService extends Disposable implements IMenuService {
     private readonly _menuItemMap = new Map<string, IMenuItem>();
 
     private readonly _menuByPositions = new Map<MenuPosition, Map<string, IMenuItem>>();
+
+    constructor(@IShortcutService private readonly _shortcutService: IShortcutService) {
+        super();
+    }
 
     override dispose(): void {
         this._menuItemMap.clear();
@@ -74,12 +83,12 @@ export class DesktopMenuService extends Disposable implements IMenuService {
         });
     }
 
-    getMenuItems(positions: MenuPosition): IMenuItem[] {
+    getMenuItems(positions: MenuPosition): IDisplayMenuItem[] {
         if (this._menuByPositions.has(positions)) {
-            return [...this._menuByPositions.get(positions)!.values()];
+            return [...this._menuByPositions.get(positions)!.values()].map((menu) => this.getDisplayMenuItems(menu));
         }
 
-        return [] as IMenuItem[];
+        return [] as IDisplayMenuItem[];
     }
 
     getMenuItem(id: string): IMenuItem | null {
@@ -88,6 +97,18 @@ export class DesktopMenuService extends Disposable implements IMenuService {
         }
 
         return null;
+    }
+
+    private getDisplayMenuItems(menuItem: IMenuItem): IDisplayMenuItem {
+        const shortcut = this._shortcutService.getCommandShortcut(menuItem.id);
+        if (!shortcut) {
+            return menuItem;
+        }
+
+        return {
+            ...menuItem,
+            shortcut,
+        };
     }
 
     private appendMenuToPosition(menu: IMenuItem, position: MenuPosition) {

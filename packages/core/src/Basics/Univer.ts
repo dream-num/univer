@@ -13,6 +13,8 @@ import { CurrentUniverService, ICurrentUniverService } from '../Service/Current.
 import { UniverSlide } from './UniverSlide';
 import { CommandService, ICommandService } from '../Service/Command/Command.service';
 import { IUndoRedoService, LocalUndoRedoService } from '../Service/UndoRedo/undoRedo.service';
+import { DesktopLogService, ILogService } from '../Service/log/log.service';
+import { DesktopPermissionService, IPermissionService } from '../Service/permission/perimission.service';
 
 /**
  * Univer.
@@ -138,8 +140,10 @@ export class Univer {
             [CommandManager],
             [LocaleService],
             [UndoManager],
-            [ICommandService, { useClass: CommandService }],
+            [ILogService, { useClass: DesktopLogService, lazy: true }],
+            [ICommandService, { useClass: CommandService, lazy: true }],
             [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],
+            [IPermissionService, { useClass: DesktopPermissionService }],
         ]);
     }
 

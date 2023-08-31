@@ -10,11 +10,7 @@ import { ISetRowHideActionData } from '../Action';
  *
  * @internal
  */
-export function SetHideRow(
-    rowIndex: number = 0,
-    rowCount: number,
-    rowManager: RowManager
-) {
+export function SetHideRow(rowIndex: number = 0, rowCount: number, rowManager: RowManager) {
     for (let i = rowIndex; i < rowIndex + rowCount; i++) {
         const row = rowManager.getRowOrCreate(i);
         if (row) {

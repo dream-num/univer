@@ -101,7 +101,7 @@ class Button extends Component<BaseButtonProps, IState> {
         );
     };
 
-    componentWillReceiveProps(props: BaseButtonProps) {
+    override componentWillReceiveProps(props: BaseButtonProps) {
         this.setState({
             isActive: props.active,
         });

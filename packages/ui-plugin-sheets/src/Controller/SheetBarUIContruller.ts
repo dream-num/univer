@@ -14,12 +14,15 @@ import {
     RemoveSheetAction,
     ICurrentUniverService,
     ObserverManager,
+    Disposable,
+    ICommandService,
 } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { InsertSheetMutation, RemoveSheetMutation, SetWorksheetActivateCommand, SetWorksheetOrderCommand } from '@univerjs/base-sheets';
+import { Inject, SkipSelf } from '@wendellhu/redi';
 import { SheetBar } from '../View/SheetBar';
 import styles from '../View/SheetBar/index.module.less';
 import { SheetBarMenuItem } from '../View/SheetBar/SheetBarMenu';
-import { SHEET_UI_PLUGIN_NAME } from '../Basics';
+import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const';
 
 interface SheetUl extends BaseMenuItem {
     label?: CustomComponent | string;
@@ -32,7 +35,7 @@ export interface SheetUlProps extends BaseUlProps {
     sheetId: string;
 }
 
-export class SheetBarUIController {
+export class SheetBarUIController extends Disposable {
     protected _sheetBar: SheetBar;
 
     protected _sheetUl: SheetUl[];
@@ -49,10 +52,11 @@ export class SheetBarUIController {
     constructor(
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
+        @SkipSelf() @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
+        super();
         const that = this;
-
         this._sheetUl = [
             {
                 label: 'sheetConfig.delete',
@@ -112,6 +116,25 @@ export class SheetBarUIController {
         ];
 
         this._componentManager.register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((params) => {
+                const { id } = params;
+                switch (id) {
+                    case InsertSheetMutation.id:
+                    case RemoveSheetMutation.id:
+                        // update data;
+                        this._refreshSheetData();
+                        // set ui bar sheetList;
+                        this._refreshSheetBarUI();
+
+                        break;
+
+                    default:
+                        break;
+                }
+            })
+        );
 
         CommandManager.getActionObservers().add((event) => {
             const action = event.action as SheetActionBase<any>;
@@ -221,8 +244,9 @@ export class SheetBarUIController {
     }
 
     dragEnd = (element: HTMLDivElement[]): void => {
-        let list: SheetUlProps[] = [];
-        let sheetId = this._dataId;
+        const list: SheetUlProps[] = [];
+        const sheetId = this._dataId;
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         Array.from(element).forEach((node: any) => {
             const item = this._sheetList.find((ele) => ele.sheetId === node.dataset.id);
             if (item) {
@@ -231,7 +255,11 @@ export class SheetBarUIController {
         });
         list.forEach((ele, index) => {
             if (ele.sheetId === sheetId) {
-                this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().setSheetOrder(ele.sheetId, index);
+                this._commandService.executeCommand(SetWorksheetOrderCommand.id, {
+                    workbookId: workbook.getUnitId(),
+                    worksheetId: ele.sheetId,
+                    order: index,
+                });
             }
         });
     };
@@ -243,9 +271,14 @@ export class SheetBarUIController {
             menuList: this._menuList,
             selectSheet: (event: Event, data: { item: SheetUlProps }) => {
                 this._dataId = data.item.sheetId;
-                const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(this._dataId);
+                const currentWorkbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+                const sheet = currentWorkbook.getSheetBySheetId(this._dataId);
                 if (sheet) {
-                    sheet.activate();
+                    // sheet.activate();
+                    this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                        workbookId: currentWorkbook.getUnitId(),
+                        worksheetId: sheet.getSheetId(),
+                    });
                 }
             },
             contextMenu: (e: MouseEvent) => {
@@ -263,6 +296,7 @@ export class SheetBarUIController {
     protected _refreshSheetData(): void {
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         const sheets = workbook.getSheets();
+
         this._menuList = sheets.map((sheet, index) => ({
             label: sheet.getName(),
             index: String(index),
@@ -274,10 +308,15 @@ export class SheetBarUIController {
                     const target = e.currentTarget as HTMLDivElement;
                     this._dataId = target.dataset.id as string;
                     sheet.showSheet();
-                    sheet.activate();
+                    // sheet.activate();
+                    this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                        workbookId: workbook.getUnitId(),
+                        worksheetId: sheet.getSheetId(),
+                    });
                 }
             },
         }));
+
         this._sheetList = sheets
             .filter((sheet) => !sheet.isSheetHidden())
             .map((sheet, index) => ({
@@ -293,8 +332,11 @@ export class SheetBarUIController {
                 onClick: (e: MouseEvent) => {
                     const target = e.currentTarget as HTMLDivElement;
                     this._dataId = target.dataset.id as string;
-
-                    sheet.activate();
+                    // sheet.activate();
+                    this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                        workbookId: workbook.getUnitId(),
+                        worksheetId: sheet.getSheetId(),
+                    });
                 },
             }));
         this._sheetIndex = sheets.findIndex((sheet) => sheet.getStatus() === 1);

@@ -582,7 +582,7 @@ test('Test getNextDataRange:top1', () => {
     };
 
     worksheet.getSelection().setSelection({ selection: rangeData });
-    const activeRange = worksheet.getSelection().getNextDataRange(Direction.TOP);
+    const activeRange = worksheet.getSelection().getNextDataRange(Direction.UP);
     if (activeRange) {
         expect(activeRange.getRangeData()).toEqual({
             startRow: 1,
@@ -814,7 +814,7 @@ test('Test getNextDataRange:top2', () => {
     };
 
     worksheet.getSelection().setSelection({ selection: rangeData });
-    const activeRange = worksheet.getSelection().getNextDataRange(Direction.TOP);
+    const activeRange = worksheet.getSelection().getNextDataRange(Direction.UP);
     if (activeRange) {
         expect(activeRange.getRangeData()).toEqual({
             startRow: 1,
@@ -1043,7 +1043,7 @@ test('Test getNextDataRange:top2.1', () => {
     };
 
     worksheet.getSelection().setSelection({ selection: rangeData });
-    const activeRange = worksheet.getSelection().getNextDataRange(Direction.TOP);
+    const activeRange = worksheet.getSelection().getNextDataRange(Direction.UP);
     if (activeRange) {
         expect(activeRange.getRangeData()).toEqual({
             startRow: 1,
@@ -1273,7 +1273,7 @@ test('Test getNextDataRange:top2.2', () => {
     };
 
     worksheet.getSelection().setSelection({ selection: rangeData });
-    const activeRange = worksheet.getSelection().getNextDataRange(Direction.TOP);
+    const activeRange = worksheet.getSelection().getNextDataRange(Direction.UP);
     if (activeRange) {
         expect(activeRange.getRangeData()).toEqual({
             startRow: 2,
@@ -1408,7 +1408,7 @@ test('Test getNextDataRange:top2.3', () => {
     };
 
     worksheet.getSelection().setSelection({ selection: rangeData });
-    const activeRange = worksheet.getSelection().getNextDataRange(Direction.TOP);
+    const activeRange = worksheet.getSelection().getNextDataRange(Direction.UP);
     if (activeRange) {
         expect(activeRange.getRangeData()).toEqual({
             startRow: 0,
@@ -1639,7 +1639,7 @@ test('Test getNextDataRange:top2.4', () => {
     };
 
     worksheet.getSelection().setSelection({ selection: rangeData });
-    const activeRange = worksheet.getSelection().getNextDataRange(Direction.TOP);
+    const activeRange = worksheet.getSelection().getNextDataRange(Direction.UP);
     if (activeRange) {
         expect(activeRange.getRangeData()).toEqual({
             startRow: 1,
@@ -1879,7 +1879,7 @@ test('Test getNextDataRange:top2.5', () => {
             endColumn: 3,
         },
     });
-    const activeRange = worksheet.getSelection().getNextDataRange(Direction.TOP);
+    const activeRange = worksheet.getSelection().getNextDataRange(Direction.UP);
     if (activeRange) {
         expect(activeRange.getRangeData()).toEqual({
             startRow: 0,
@@ -2119,7 +2119,7 @@ test('Test getNextDataRange:top3', () => {
             endColumn: 1,
         },
     });
-    const activeRange = worksheet.getSelection().getNextDataRange(Direction.TOP);
+    const activeRange = worksheet.getSelection().getNextDataRange(Direction.UP);
     if (activeRange) {
         expect(activeRange.getRangeData()).toEqual({
             startRow: 2,
@@ -2359,7 +2359,7 @@ test('Test getNextDataRange:top4', () => {
             endColumn: 3,
         },
     });
-    const activeRange = worksheet.getSelection().getNextDataRange(Direction.TOP);
+    const activeRange = worksheet.getSelection().getNextDataRange(Direction.UP);
     if (activeRange) {
         expect(activeRange.getRangeData()).toEqual({
             startRow: 3,
@@ -2530,7 +2530,7 @@ test('Test getNextDataRange:bottom1', () => {
     worksheet.getSelection().setSelection({
         selection: rangeData,
     });
-    const activeRange = worksheet.getSelection().getNextDataRange(Direction.BOTTOM);
+    const activeRange = worksheet.getSelection().getNextDataRange(Direction.DOWN);
     if (activeRange) {
         expect(activeRange.getRangeData()).toEqual({
             startRow: 0,
@@ -2698,7 +2698,7 @@ test('Test getNextDataRange:bottom1.1', () => {
     worksheet.getSelection().setSelection({
         selection: rangeData,
     });
-    const activeRange = worksheet.getSelection().getNextDataRange(Direction.BOTTOM);
+    const activeRange = worksheet.getSelection().getNextDataRange(Direction.DOWN);
     if (activeRange) {
         expect(activeRange.getRangeData()).toEqual({
             startRow: 0,
@@ -2900,7 +2900,7 @@ test('Test getNextDataRange:bottom2.1', () => {
     worksheet.getSelection().setSelection({
         selection: rangeData,
     });
-    const activeRange = worksheet.getSelection().getNextDataRange(Direction.BOTTOM);
+    const activeRange = worksheet.getSelection().getNextDataRange(Direction.DOWN);
     if (activeRange) {
         expect(activeRange.getRangeData()).toEqual({
             startRow: 0,
@@ -3100,7 +3100,7 @@ test('Test getNextDataRange:bottom2.2', () => {
     worksheet.getSelection().setSelection({
         selection: rangeData,
     });
-    const activeRange = worksheet.getSelection().getNextDataRange(Direction.BOTTOM);
+    const activeRange = worksheet.getSelection().getNextDataRange(Direction.DOWN);
     if (activeRange) {
         expect(activeRange.getRangeData()).toEqual({
             startRow: 0,
@@ -3306,7 +3306,7 @@ test('Test getNextDataRange:bottom3.1', () => {
             endColumn: 1,
         },
     });
-    const activeRange = worksheet.getSelection().getNextDataRange(Direction.BOTTOM);
+    const activeRange = worksheet.getSelection().getNextDataRange(Direction.DOWN);
     if (activeRange) {
         expect(activeRange.getRangeData()).toEqual({
             startRow: 2,
@@ -3511,7 +3511,7 @@ test('Test getNextDataRange:bottom3.2', () => {
             endColumn: 1,
         },
     });
-    const activeRange = worksheet.getSelection().getNextDataRange(Direction.BOTTOM);
+    const activeRange = worksheet.getSelection().getNextDataRange(Direction.DOWN);
     if (activeRange) {
         expect(activeRange.getRangeData()).toEqual({
             startRow: 3,
@@ -3717,7 +3717,7 @@ test('Test getNextDataRange:bottom4.1', () => {
             endColumn: 1,
         },
     });
-    const activeRange = worksheet.getSelection().getNextDataRange(Direction.BOTTOM);
+    const activeRange = worksheet.getSelection().getNextDataRange(Direction.DOWN);
     if (activeRange) {
         expect(activeRange.getRangeData()).toEqual({
             startRow: 1,
@@ -3924,7 +3924,7 @@ test('Test getNextDataRange:bottom4.2', () => {
             endColumn: 1,
         },
     });
-    const activeRange = worksheet.getSelection().getNextDataRange(Direction.BOTTOM);
+    const activeRange = worksheet.getSelection().getNextDataRange(Direction.DOWN);
     if (activeRange) {
         expect(activeRange.getRangeData()).toEqual({
             startRow: 3,

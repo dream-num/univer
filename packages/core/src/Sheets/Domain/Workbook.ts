@@ -1,9 +1,9 @@
-import { Inject, forwardRef } from '@wendellhu/redi';
+import { Inject, Injector, forwardRef } from '@wendellhu/redi';
 
 import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../../Types/Const';
 import { Command, CommandManager } from '../../Command';
 import { BooleanNumber } from '../../Types/Enum';
-import { InsertSheetAction, ISetSheetOrderActionData, RemoveSheetAction, SetSheetOrderAction, IInsertSheetActionData, IRemoveSheetActionData } from '../Action';
+import { InsertSheetAction, ISetSheetOrderActionData, SetSheetOrderAction, IInsertSheetActionData } from '../Action';
 import {
     IColumnStartEndData,
     IGridRange,
@@ -21,7 +21,6 @@ import { Selection } from './Selection';
 import { Styles } from './Styles';
 import { Worksheet } from './Worksheet';
 import { Range } from './Range';
-import { NamedRange } from './NamedRange';
 import { ObserverManager } from '../../Observer';
 import { ICurrentUniverService } from '../../Service/Current.service';
 
@@ -56,7 +55,8 @@ export class Workbook {
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(forwardRef(() => GenName)) private readonly _genName: GenName,
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
+        @Inject(Injector) readonly _injector: Injector
     ) {
         this._config = Tools.commonExtend(DEFAULT_WORKBOOK, workbookData);
 
@@ -126,6 +126,9 @@ export class Workbook {
 
     // TODO: @Dushusir: this function has too many function overloads
 
+    /**
+     * @deprecated
+     */
     insertSheet(): Nullable<string>;
     insertSheet(index: number): Nullable<string>;
     insertSheet(name: string): Nullable<string>;
@@ -392,6 +395,18 @@ export class Workbook {
         }
     }
 
+    insertSheetByIndexSheet(index: number, sheet: IWorksheetConfig) {
+        const { sheets, sheetOrder } = this._config;
+        if (sheets[sheet.id]) {
+            throw new Error(`Insert sheet fail ${sheet.id} already exists.`);
+        }
+        sheets[sheet.id] = sheet;
+
+        sheetOrder.splice(index, 0, sheet.id);
+        const worksheet = this._injector.createInstance(Worksheet, sheet);
+        this._worksheets.set(sheet.id, worksheet);
+    }
+
     getActiveSpreadsheet(): Workbook {
         return this;
     }
@@ -576,35 +591,20 @@ export class Workbook {
     }
 
     removeSheetBySheetId(sheetId: string): void {
-        const { _config } = this;
-        const { sheetOrder } = _config;
-        const commandManager = this.getCommandManager();
-        const sheet = this.getSheetBySheetId(sheetId);
+        const iSheets = this._worksheets;
+        const config = this._config;
 
-        if (sheetOrder.length > 1 && sheet != null) {
-            const index = this.getSheetIndex(sheet);
-            const before = this._observerManager.getObserver<{ index: number }>('onBeforeRemoveSheetObservable', 'core')!;
-            const aftert = this._observerManager.getObserver<{ index: number; sheetId: string }>('onAfterRemoveSheetObservable', 'core')!;
-            before.notifyObservers({
-                index,
-            });
-            commandManager.invoke(
-                new Command(
-                    {
-                        WorkBookUnit: this,
-                    },
-                    {
-                        actionName: RemoveSheetAction.NAME,
-                        sheetId,
-                    } as IRemoveSheetActionData
-                )
-            );
-            aftert.notifyObservers({
-                index,
-                sheetId,
-            });
-            this.activateSheetByIndex(index);
+        const { sheets } = config;
+        if (sheets[sheetId] == null) {
+            throw new Error(`Remove sheet fail ${sheetId} does not exist`);
         }
+        const findIndex = config.sheetOrder.findIndex((id) => id === sheetId);
+        delete sheets[sheetId];
+
+        config.sheetOrder.splice(findIndex, 1);
+        iSheets.delete(sheetId);
+
+        // this.activateSheetByIndex(index);
     }
 
     getSheetBySheetName(name: string): Nullable<Worksheet> {
@@ -762,8 +762,8 @@ export class Workbook {
 
         let firstWorksheet = null;
 
-        for (let sheetId in sheets) {
-            let config = sheets[sheetId];
+        for (const sheetId in sheets) {
+            const config = sheets[sheetId];
             config.name = this._genName.sheetName(config.name);
             const worksheet = new Worksheet(config, this._commandManager, this._observerManager, this._currentUniverService);
             _worksheets.set(sheetId, worksheet);

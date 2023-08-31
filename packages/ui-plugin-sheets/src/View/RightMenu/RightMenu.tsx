@@ -1,5 +1,5 @@
 import { IMouseEvent } from '@univerjs/base-render';
-import { BaseRightMenuProps, Menu } from '@univerjs/base-ui';
+import { BaseRightMenuProps, IDisplayMenuItem, Menu } from '@univerjs/base-ui';
 import { Component, createRef } from 'preact';
 import { RightMenuProps } from '../../Controller';
 import Style from './index.module.less';
@@ -9,6 +9,7 @@ interface IState {
     srcElement: any;
     eventType: string | null;
     children: RightMenuProps[];
+    menuItems: IDisplayMenuItem[];
 }
 
 export class RightMenu extends Component<BaseRightMenuProps, IState> {
@@ -27,6 +28,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
             srcElement: null,
             eventType: null,
             children: [],
+            menuItems: [],
         };
     }
 
@@ -35,6 +37,12 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
             children,
         });
     }
+
+    setMenuListNeo = (menuItems: IDisplayMenuItem[]) => {
+        this.setState({
+            menuItems,
+        });
+    };
 
     // TODO:添加到具体的元素
     override componentDidMount() {
@@ -134,7 +142,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
                         e.preventDefault();
                     }}
                 >
-                    <Menu ref={this.ulRef} menu={this.state.children} onClick={this.handleClick}></Menu>
+                    <Menu ref={this.ulRef} menuItems={this.state.menuItems} menu={this.state.children} onClick={this.handleClick}></Menu>
                 </div>
             )
         );

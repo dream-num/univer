@@ -1,5 +1,6 @@
 import { ComponentChildren, JSX } from 'preact';
 import { BaseComponent, JSXComponent } from '../BaseComponent';
+import { IDisplayMenuItem } from '../services/menu/menu.service';
 
 export interface BaseMenuItem {
     className?: string;
@@ -14,7 +15,9 @@ export interface BaseMenuItem {
 }
 
 export interface BaseMenuProps {
+    /** @deprecated this is legacy menu mechanism. Do not use it. Use `menuItems` instead. */
     menu?: BaseMenuItem[];
+    menuItems?: IDisplayMenuItem[];
     onClick?: (...arg: any) => void;
     className?: string;
     style?: JSX.CSSProperties;

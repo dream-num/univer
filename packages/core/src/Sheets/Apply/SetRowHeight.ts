@@ -11,11 +11,7 @@ import { ISetRowHeightActionData } from '../Action';
  *
  * @internal
  */
-export function SetRowHeight(
-    rowIndex: number = 0,
-    rowHeight: number[],
-    rowManager: RowManager
-) {
+export function SetRowHeight(rowIndex: number = 0, rowHeight: number[], rowManager: RowManager) {
     const result: number[] = [];
     for (let i = rowIndex; i < rowIndex + rowHeight.length; i++) {
         const row = rowManager.getRowOrCreate(i);

@@ -11,11 +11,7 @@ import { IRemoveRowActionData } from '../Action';
  *
  * @internal
  */
-export function RemoveRow(
-    rowIndex: number,
-    rowCount: number,
-    primitiveData: ObjectArrayPrimitiveType<IRowData>
-): number {
+export function RemoveRow(rowIndex: number, rowCount: number, primitiveData: ObjectArrayPrimitiveType<IRowData>): number {
     const wrapper = new ObjectArray(primitiveData);
     const result = new ObjectArray<IRowData>();
     const start = rowIndex;
@@ -29,10 +25,7 @@ export function RemoveRow(
     return result.getLength();
 }
 
-export function RemoveRowApply(
-    unit: CommandUnit,
-    data: IRemoveRowActionData
-): number {
+export function RemoveRowApply(unit: CommandUnit, data: IRemoveRowActionData): number {
     const worksheet = unit.WorkBookUnit!.getSheetBySheetId(data.sheetId);
     const rowManager = worksheet!.getRowManager();
     const primitiveData = rowManager.getRowData().toJSON();

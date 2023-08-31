@@ -32,5 +32,7 @@ export * from './Slides/Domain';
 
 export { ICurrentUniverService } from './Service/Current.service';
 export { LocaleService } from './Service/Locale.service';
-export { ICommandService, ICommand, CommandType, IMutation } from './Service/Command/Command.service';
+export { ICommandService, ICommand, CommandType, IMutation, IOperation } from './Service/Command/Command.service';
 export { IUndoRedoService, LocalUndoRedoService, UndoCommand, RedoCommand } from './Service/UndoRedo/undoRedo.service';
+export { ILogService, DesktopLogService } from './Service/log/log.service';
+export { IPermissionService, DesktopPermissionService } from './Service/permission/perimission.service';

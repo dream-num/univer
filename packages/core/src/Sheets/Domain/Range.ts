@@ -552,14 +552,14 @@ export class Range {
         const { startRow, endRow, startColumn, endColumn } = this._rangeData;
         const maxRow = _worksheet.getMaxRows();
         const maxColumn = _worksheet.getMaxColumns();
-        if (direction === Direction.BOTTOM) {
+        if (direction === Direction.DOWN) {
             for (let i = 0; i < maxRow - startColumn; i++) {
                 const value = this._worksheet.getCellMatrix().getValue(startRow + i, startColumn);
                 if (value) _worksheet.getRange(startRow + i, startColumn, startRow + i, startColumn);
             }
             return _worksheet.getRange(maxRow, startColumn, maxRow, startColumn);
         }
-        if (direction === Direction.TOP) {
+        if (direction === Direction.UP) {
             for (let i = 0; i < startRow; i++) {
                 const value = this._worksheet.getCellMatrix().getValue(startRow - i, startColumn);
                 if (value) _worksheet.getRange(startRow - i, startColumn, startRow - i, startRow);
@@ -953,17 +953,6 @@ export class Range {
      * @param fontLine  The font line style; a null value resets the font line style
      * @returns This range, for chaining.
      */
-    setUnderline(fontLine: Nullable<ITextDecoration>): Range {
-        this._setStyle(fontLine, 'ul');
-        return this;
-    }
-
-    /**
-     * Sets the font line style of the given range
-     *
-     * @param fontLine  The font line style; a null value resets the font line style
-     * @returns This range, for chaining.
-     */
     setOverline(fontLine: Nullable<ITextDecoration>): Range {
         this._setStyle(fontLine, 'ol');
         return this;
@@ -986,30 +975,8 @@ export class Range {
      * @param fontLines  A two-dimensional array of font line styles ; null values reset the font line style.
      * @returns This range, for chaining.
      */
-    setUnderlines(fontLines: Array<Array<Nullable<ITextDecoration>>>): Range {
-        this._setStyles(fontLines, 'ul');
-        return this;
-    }
-
-    /**
-     * Sets the font line style of the given range
-     *
-     * @param fontLines  A two-dimensional array of font line styles ; null values reset the font line style.
-     * @returns This range, for chaining.
-     */
     setOverlines(fontLines: Array<Array<Nullable<ITextDecoration>>>): Range {
         this._setStyles(fontLines, 'ol');
-        return this;
-    }
-
-    /**
-     * Sets the font line style of the given range
-     *
-     * @param fontLines  A two-dimensional array of font line styles ; null values reset the font line style.
-     * @returns This range, for chaining.
-     */
-    setStrikeThroughs(fontLines: Array<Array<Nullable<ITextDecoration>>>): Range {
-        this._setStyles(fontLines, 'st');
         return this;
     }
 
@@ -1047,28 +1014,6 @@ export class Range {
     }
 
     /**
-     * Set the font weight for the given range (normal/bold).
-     *
-     * @param fontWeight   The font weight, either 'bold' or 'normal'; a null value resets the font weight.
-     * @returns This range, for chaining.
-     */
-    setFontWeight(fontWeight: Nullable<FontWeight>): Range {
-        this._setStyle(fontWeight, 'bl');
-        return this;
-    }
-
-    /**
-     * Sets a rectangular grid of font weights (must match dimensions of this range).
-     *
-     * @param fontWeights  A two-dimensional array of font weights, either 'bold' or 'normal'; null values reset the font weight.
-     * @returns This range, for chaining.
-     */
-    setFontWeights(fontWeights: Array<Array<Nullable<FontWeight>>>): Range {
-        this._setStyles(fontWeights, 'bl');
-        return this;
-    }
-
-    /**
      * Sets a rectangular grid of horizontal alignments.
      *
      * @param alignments  A two-dimensional array of alignments, either 'left', 'center' or 'normal'; a null value resets the alignment.
@@ -1078,135 +1023,6 @@ export class Range {
         this._setStyles(alignments, 'ht');
         return this;
     }
-
-    /**
-     * Sets the note to the given value.
-     *
-     * @param note The note value to set for the range; a null value removes the note.
-     * @returns This range, for chaining.
-     */
-    // setNote(note: string): Range {
-    //     const { _rangeData, _context, _commandManager, _worksheet } = this;
-    //     const { startRow, startColumn, endRow, endColumn } = _rangeData;
-    //     const cellValue = new ObjectMatrix<string>();
-    //     for (let r = startRow; r <= endRow; r++) {
-    //         for (let c = startColumn; c <= endColumn; c++) {
-    //             cellValue.setValue(r, c, note);
-    //         }
-    //     }
-    //     const setValue: ISetRangeNoteActionData = {
-    //         sheetId: _worksheet.getSheetId(),
-    //         actionName: ACTION_NAMES.SET_RANGE_NOTE_ACTION,
-    //         cellNote: cellValue.getData(),
-    //         rangeData: this._rangeData,
-    //     };
-    //     const command = new Command(this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook(), setValue);
-    //     _commandManager.invoke(command);
-
-    //     return this;
-    // }
-
-    /**
-     * Sets the note to the given value.
-     *
-     * @param notes A two-dimensional array of notes; null values remove the note.
-     * @returns This range, for chaining.
-     */
-    // setNotes(notes: string[][]): Range {
-    //     const { _rangeData, _context, _commandManager, _worksheet } = this;
-
-    //     const { startRow, startColumn, endRow, endColumn } = _rangeData;
-
-    //     const cellValue = new ObjectMatrix<string>();
-    //     for (let r = 0; r <= endRow - startRow; r++) {
-    //         for (let c = 0; c <= endColumn - startColumn; c++) {
-    //             cellValue.setValue(r + startRow, c + startColumn, notes[r][c]);
-    //         }
-    //     }
-
-    //     const setValue: ISetRangeNoteActionData = {
-    //         sheetId: _worksheet.getSheetId(),
-    //         actionName: ACTION_NAMES.SET_RANGE_NOTE_ACTION,
-    //         cellNote: cellValue.getData(),
-    //         rangeData: this._rangeData,
-    //     };
-    //     const command = new Command(this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook(), setValue);
-    //     _commandManager.invoke(command);
-
-    //     return this;
-    // }
-
-    /**
-     * Sets the number or date format to the given formatting string.
-     *
-     * @param numberFormat 	A number format string.
-     * @returns This range, for chaining.
-     */
-    // setNumberFormat(numberFormat: string): Range {
-    //     const { _rangeData, _context, _commandManager, _worksheet } = this;
-
-    //     const { startRow, startColumn, endRow, endColumn } = _rangeData;
-
-    //     const cellValue = new ObjectMatrix<string>();
-    //     for (let r = 0; r <= endRow - startRow; r++) {
-    //         for (let c = 0; c <= endColumn - startColumn; c++) {
-    //             const fm = {
-    //                 f: numberFormat,
-    //                 t: FormatType.NUMBER,
-    //             };
-    //             cellValue.setValue(r + startRow, c + startColumn, JSON.stringify(fm));
-    //         }
-    //     }
-
-    //     const setValue: ISetRangeFormatActionData = {
-    //         sheetId: _worksheet.getSheetId(),
-    //         actionName: ACTION_NAMES.SET_RANGE_FORMAT_ACTION,
-    //         cellFormat: cellValue.getData(),
-    //         rangeData: this._rangeData,
-    //     };
-    //     const command = new Command(this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook(), setValue);
-    //     _commandManager.invoke(command);
-
-    //     return this;
-    // }
-
-    /**
-     * Sets a rectangular grid of number or date formats (must match dimensions of this range).
-     *
-     * @param numberFormats A two-dimensional array of number formats.
-     * @returns This range, for chaining.
-     */
-    // setNumberFormats(numberFormats: string[][]): Range {
-    //     const { _rangeData, _context, _commandManager, _worksheet } = this;
-
-    //     const { startRow, startColumn, endRow, endColumn } = _rangeData;
-
-    //     const cellValue = new ObjectMatrix<string>();
-    //     for (let r = 0; r <= endRow - startRow; r++) {
-    //         for (let c = 0; c <= endColumn - startColumn; c++) {
-    //             const fm = {
-    //                 f: numberFormats[r][c],
-    //                 t: FormatType.NUMBER,
-    //             };
-    //             cellValue.setValue(r + startRow, c + startColumn, JSON.stringify(fm));
-    //         }
-    //     }
-
-    //     const setValue: ISetRangeFormatActionData = {
-    //         sheetId: _worksheet.getSheetId(),
-    //         actionName: ACTION_NAMES.SET_RANGE_FORMAT_ACTION,
-    //         cellFormat: cellValue.getData(),
-    //         rangeData: this._rangeData,
-    //     };
-    //     const command = new Command(this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook(), setValue);
-    //     _commandManager.invoke(command);
-
-    //     return this;
-    // }
-
-    // setRichTextValue(value) {}
-    // setRichTextValues(values) {}
-    // setShowHyperlink(showHyperlink) {}
 
     /**
      * Sets a rectangular grid of text directions.
@@ -1444,126 +1260,6 @@ export class Range {
         this._setStyles(isWrapEnabled, 'tb');
         return this;
     }
-
-    /**
-     * Fills the destinationRange with data based on the data in this range. The new values are also determined by the specified series type. The destination range must contain this range and extend it in only one direction. For example, the following fills A1:A20 with a series of increasing numbers based on the current values in A1:A4:
-     *
-     * @param destination The range to be auto-filled with values. The destination range should contain this range and extend it in only one direction (upwards, downwards, left, or right).
-     * @param series The type of autoFill series that should be used to calculate new values. The effect of this series differs based on the type and amount of source data.
-     * @returns This range, for chaining.
-     */
-    // autoFill(destination: Range, series: AutoFillSeries): Range {
-    //     const { _worksheet, _context, _commandManager } = this;
-    //     const { startRow, endRow, startColumn, endColumn } = this._rangeData;
-    //     const {
-    //         startRow: Dsr,
-    //         endRow: Der,
-    //         startColumn: Dsc,
-    //         endColumn: Dec,
-    //     } = destination._rangeData;
-    //     let direction = Direction.BOTTOM;
-    //     let csLen: number = 0;
-    //     let asLen: number = 0;
-
-    //     // 复制范围
-    //     const copy_str_r = startRow;
-    //     const copy_end_r = endRow;
-    //     const copy_str_c = startColumn;
-    //     const copy_end_c = endColumn;
-
-    //     // 应用范围
-    //     const apply_str_r = Dsr;
-    //     const apply_end_r = Der;
-    //     const apply_str_c = Dsc;
-    //     const apply_end_c = Dec;
-
-    //     const matrix = new ObjectMatrix<ICellData>();
-
-    //     if (apply_str_c === copy_str_c && apply_end_c === copy_end_c) {
-    //         if (apply_end_r > copy_end_r) {
-    //             direction = Direction.BOTTOM;
-    //         } else {
-    //             direction = Direction.TOP;
-    //         }
-    //     } else if (apply_end_c > copy_end_c) {
-    //         direction = Direction.RIGHT;
-    //     } else {
-    //         direction = Direction.LEFT;
-    //     }
-
-    //     if (direction === Direction.BOTTOM || direction === Direction.TOP) {
-    //         // 列
-    //         csLen = copy_end_r - copy_str_r + 1;
-    //         asLen = apply_end_r - apply_str_r + 1;
-
-    //         for (let i = 0; i <= endColumn - startColumn; i++) {
-    //             const sourceRange = this.getColumnMatrix(i).toArray();
-
-    //             const copydata = DropCell.getCopyData(
-    //                 sourceRange,
-    //                 copy_str_r,
-    //                 copy_end_r,
-    //                 copy_str_c,
-    //                 copy_end_c,
-    //                 direction
-    //             );
-    //             copydata.forEach((item) => {
-    //                 const data = DropCell.getApplyData(
-    //                     item,
-    //                     csLen,
-    //                     asLen,
-    //                     series,
-    //                     direction
-    //                 );
-    //                 data.forEach((dataItem, j) => {
-    //                     matrix.setValue(j, i, dataItem);
-    //                 });
-    //             });
-    //         }
-    //     } else if (direction === Direction.RIGHT || direction === Direction.LEFT) {
-    //         asLen = apply_end_c - apply_str_c;
-    //         csLen = copy_end_c - copy_str_c;
-    //         // 行
-    //         for (let i = 0; i <= endRow - startRow; i++) {
-    //             const sourceRange = this.getRowMatrix(i).toArray();
-
-    //             const copydata = DropCell.getCopyData(
-    //                 sourceRange,
-    //                 copy_str_r,
-    //                 copy_end_r,
-    //                 copy_str_c,
-    //                 copy_end_c,
-    //                 direction
-    //             );
-    //             copydata.forEach((item) => {
-    //                 const data = DropCell.getApplyData(
-    //                     item,
-    //                     csLen,
-    //                     asLen,
-    //                     series,
-    //                     direction
-    //                 );
-    //             });
-    //         }
-    //     }
-
-    //     const setValue: ISetRangeDataActionData = {
-    //         sheetId: _worksheet.getSheetId(),
-    //         actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-    //         cellValue: matrix.getData(),
-    //     };
-    //     const command = new Command(
-    //         {
-    //             WorkBookUnit: this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook(),
-    //         },
-    //         setValue
-    //     );
-    //     _commandManager.invoke(command);
-    //     return this;
-    // }
-
-    // TODO
-    // autoFillToNeighbor(series: AutoFillSeries) {}
 
     /**
      * Returns a copy of the range expanded in the four cardinal Directions to cover all adjacent cells with data in them.
@@ -3565,135 +3261,4 @@ export class Range {
         _commandManager.invoke(command);
         return this;
     }
-
-    // /**
-    //  * Applies a default row banding theme to the range. By default, the banding has header and no footer color.
-    //  */
-    // applyRowBanding(): Nullable<Banding>;
-
-    // /**
-    //  * Applies a specified row banding theme to the range. By default, the banding has header and no footer color.
-    //  * @param bandingTheme
-    //  */
-    // applyRowBanding(bandingTheme: BandingTheme | IBandingProperties): Nullable<Banding>;
-
-    // /**
-    //  * Applies a specified row banding theme to the range with specified header and footer settings.
-    //  * @param bandingTheme
-    //  * @param showHeader
-    //  * @param showFooter
-    //  */
-    // applyRowBanding(
-    //     bandingTheme: BandingTheme | IBandingProperties,
-    //     showHeader: boolean,
-    //     showFooter: boolean
-    // ): Nullable<Banding>;
-    // applyRowBanding(...argument: any): Nullable<Banding> {
-
-    //     // default argument
-    //     const bandedRangeId = 'banded-range-' + Tools.generateRandomId(6);
-    //     const rangeData = this.getRangeData()
-    //     let rowProperties:IBanding = {
-    //         bandingTheme:argument[0] || BandingTheme.LIGHT_GRAY,
-    //         showHeader:argument[1] || true,
-    //         showFooter:argument[2] || false,
-    //     }
-
-    //     const { _commandManager } = this;
-    //     // Check whether the incoming range has been set to alternate colors
-    //     const bandings = this.getSheet().getBandings();
-    //     const isIntersection =
-    //         bandings &&
-    //         bandings.find((banding: Banding) =>
-    //             banding.getRange().isIntersection(this)
-    //         );
-    //     if (isIntersection) {
-    //         console.error(
-    //             'You cannot add alternating background colors to a range that already has alternating background colors.'
-    //         );
-    //         return
-    //     }
-
-    //     // Organize action data
-    //     const actionData: IAddBandingActionData = {
-    //         actionName: ACTION_NAMES.ADD_BANDING_ACTION,
-    //         bandedRange:{
-    //             bandedRangeId,
-    //             rangeData,
-    //             rowProperties
-    //         },
-    //         sheetId: this.getSheet().getSheetId(),
-    //     };
-
-    //     // Execute action
-    //     const command = new Command(this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook(), actionData);
-    //     _commandManager.invoke(command);
-
-    //     return this.getSheet().getBandingById(bandedRangeId)
-    // }
-    // /**
-    //  * Applies a default row banding theme to the range. By default, the banding has header and no footer color.
-    //  */
-    // applyRowBanding(): Nullable<Banding>;
-
-    // /**
-    //  * Applies a specified row banding theme to the range. By default, the banding has header and no footer color.
-    //  * @param bandingTheme
-    //  */
-    // applyRowBanding(
-    //     bandingTheme: BandingTheme | IBandingProperties
-    // ): Nullable<Banding>;
-
-    // /**
-    //  * Applies a specified row banding theme to the range with specified header and footer settings.
-    //  * @param bandingTheme
-    //  * @param showHeader
-    //  * @param showFooter
-    //  */
-    // applyRowBanding(
-    //     bandingTheme: BandingTheme | IBandingProperties,
-    //     showHeader: boolean,
-    //     showFooter: boolean
-    // ): Nullable<Banding>;
-    // applyRowBanding(...argument: any): Nullable<Banding> {
-    //     // default argument
-    //     const bandedRangeId = 'banded-range-' + Tools.generateRandomId(6);
-    //     const rangeData = this.getRangeData();
-    //     let rowProperties: IBanding = {
-    //         bandingTheme: argument[0] || BandingTheme.LIGHT_GRAY,
-    //         showHeader: argument[1] || true,
-    //         showFooter: argument[2] || false,
-    //     };
-
-    //     const { _worksheet } = this;
-    //     // Check whether the incoming range has been set to alternate colors
-    //     const bandedRanges = _worksheet.getConfig().bandedRanges;
-    //     const isIntersection =
-    //         bandedRanges &&
-    //         bandedRanges.find((bandedRange: IBandedRange) =>
-    //             _worksheet.getRange(bandedRange.rangeData).isIntersection(this)
-    //         );
-    //     if (isIntersection) {
-    //         console.error(
-    //             'You cannot add alternating background colors to a range that already has alternating background colors.'
-    //         );
-    //         return;
-    //     }
-
-    //     return new Banding(this._worksheet).addRowBanding({
-    //         bandedRangeId,
-    //         rangeData,
-    //         rowProperties,
-    //     });
-    // }
-
-    /**
-     * Creates a filter applied to the range. There can be at most one filter in a sheet.
-     * @returns The new filter.
-     */
-    // createFilter(): Filter {
-    //     return new Filter(this);
-    // }
 }
-
-// Alternating Colors =  bandingIns,  range.applyRowBanding()  bandingIns.setRowBanding(XXX)  // bandingIns.remove(id)

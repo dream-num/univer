@@ -6048,10 +6048,10 @@ test('Test getNextDataCell', () => {
 
     const range = worksheet.getRange('C3:D3');
 
-    const cellTop = range.getNextDataCell(Direction.TOP).getA1Notation();
+    const cellTop = range.getNextDataCell(Direction.UP).getA1Notation();
     expect(cellTop).toEqual('C1');
 
-    const cellBottom = range.getNextDataCell(Direction.BOTTOM).getA1Notation();
+    const cellBottom = range.getNextDataCell(Direction.DOWN).getA1Notation();
     expect(cellBottom).toEqual('C31');
 
     const cellLeft = range.getNextDataCell(Direction.LEFT).getA1Notation();

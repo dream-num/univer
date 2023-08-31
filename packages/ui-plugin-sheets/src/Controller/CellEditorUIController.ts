@@ -285,7 +285,7 @@ export class CellEditorUIController {
                                 const currentCell = selectionManager.getCurrentCellModel();
                                 if (!currentCell?.isMerged) {
                                     // move to cell below
-                                    selectionManager.move(Direction.BOTTOM);
+                                    selectionManager.move(Direction.DOWN);
                                 }
                             } else {
                                 this.enterEditMode();
@@ -300,13 +300,13 @@ export class CellEditorUIController {
 
                         case 'ArrowUp':
                             if (!this.isEditMode) {
-                                selectionManager.move(Direction.TOP);
+                                selectionManager.move(Direction.UP);
                             }
                             break;
 
                         case 'ArrowDown':
                             if (!this.isEditMode) {
-                                selectionManager.move(Direction.BOTTOM);
+                                selectionManager.move(Direction.DOWN);
                             }
                             break;
 

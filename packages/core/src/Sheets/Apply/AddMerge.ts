@@ -12,7 +12,7 @@ import { IAddMergeActionData } from '../Action';
  * @internal
  */
 export function addMerge(merges: Merges, rectangles: IRangeData[]): IRangeData[] {
-    let remove: IRangeData[] = [];
+    const remove: IRangeData[] = [];
     for (let i = 0; i < rectangles.length; i++) {
         merges.add(rectangles[i]);
         // remove = remove.concat(merges.add(rectangles[i]));
@@ -20,15 +20,12 @@ export function addMerge(merges: Merges, rectangles: IRangeData[]): IRangeData[]
     return remove;
 }
 
-export function addMergeApply(
-    unit: CommandUnit,
-    data: IAddMergeActionData
-): IRangeData[] {
-    let worksheet = unit?.WorkBookUnit?.getSheetBySheetId(data.sheetId);
+export function addMergeApply(unit: CommandUnit, data: IAddMergeActionData): IRangeData[] {
+    const worksheet = unit?.WorkBookUnit?.getSheetBySheetId(data.sheetId);
     if (worksheet) {
-        let config = worksheet.getConfig();
-        let mergeConfigData = config.mergeData;
-        let mergeAppendData = data.rectangles;
+        const config = worksheet.getConfig();
+        const mergeConfigData = config.mergeData;
+        const mergeAppendData = data.rectangles;
         for (let i = 0; i < mergeAppendData.length; i++) {
             mergeConfigData.push(mergeAppendData[i]);
         }

@@ -5,7 +5,7 @@ import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../Mutation
 import { InsertRangeMutation } from '../Mutations/insert-range.mutation';
 import { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../Basics/Interfaces/MutationInterface';
 
-export interface IDeleteRangeMoveTopParams {
+export interface IDeleteRangeMoveUpParams {
     workbookId: string;
     worksheetId: string;
     range: IRangeData;
@@ -14,11 +14,11 @@ export interface IDeleteRangeMoveTopParams {
 /**
  * The command to delete range.
  */
-export const DeleteRangeMoveTopCommand: ICommand = {
+export const DeleteRangeMoveUpCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.delete-range-move-top',
+    id: 'sheet.command.delete-range-move-up',
 
-    handler: async (accessor: IAccessor, params: IDeleteRangeMoveTopParams) => {
+    handler: async (accessor: IAccessor, params: IDeleteRangeMoveUpParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const { range, workbookId, worksheetId } = params;

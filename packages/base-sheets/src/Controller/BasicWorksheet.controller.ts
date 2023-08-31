@@ -31,7 +31,7 @@ import { DeleteRangeMutation } from '../Commands/Mutations/delete-range.mutation
 import { SetRangeFormattedValueMutation } from '../Commands/Mutations/set-range-formatted-value.mutation';
 import { IInsertRangeMoveRightParams, InsertRangeMoveRightCommand } from '../Commands/Commands/insert-range-move-right.command';
 import { DeleteRangeMoveLeftCommand, IDeleteRangeMoveLeftParams } from '../Commands/Commands/delete-range-move-left.command';
-import { DeleteRangeMoveTopCommand, IDeleteRangeMoveTopParams } from '../Commands/Commands/delete-range-move-top.command';
+import { DeleteRangeMoveUpCommand, IDeleteRangeMoveUpParams } from '../Commands/Commands/delete-range-move-up.command';
 import { IInsertRangeMoveBottomParams, InsertRangeMoveBottomCommand } from '../Commands/Commands/insert-range-move-bottom.command';
 import { SetWorksheetOrderCommand } from '../Commands/Commands/set-worksheet-order.command';
 import { SetWorksheetOrderMutation } from '../Commands/Mutations/set-worksheet-order.mutation';
@@ -86,7 +86,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             InsertRangeMoveBottomCommand,
             InsertRangeMutation,
             DeleteRangeMoveLeftCommand,
-            DeleteRangeMoveTopCommand,
+            DeleteRangeMoveUpCommand,
             DeleteRangeMutation,
             SetRangeFormattedValueCommand,
             SetRangeFormattedValueMutation,
@@ -163,13 +163,13 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
         return this._commandService.executeCommand(DeleteRangeMoveLeftCommand.id, options);
     }
 
-    async deleteRangeMoveTop(workbookId: string, worksheetId: string, range: IRangeData): Promise<boolean> {
-        const options: IDeleteRangeMoveTopParams = {
+    async deleteRangeMoveUp(workbookId: string, worksheetId: string, range: IRangeData): Promise<boolean> {
+        const options: IDeleteRangeMoveUpParams = {
             workbookId,
             worksheetId,
             range,
         };
-        return this._commandService.executeCommand(DeleteRangeMoveTopCommand.id, options);
+        return this._commandService.executeCommand(DeleteRangeMoveUpCommand.id, options);
     }
 
     /**

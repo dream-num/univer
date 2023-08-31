@@ -70,6 +70,7 @@
         "lint-staged": "^13.0.3",
         "minimist": "^1.2.8",
         "nodemon": "^2.0.3",
+        "preact": "^10.17.1",
         "prettier": "^2.3.2",
         "rimraf": "^3.0.2",
         "tree-kill": "^1.2.2",

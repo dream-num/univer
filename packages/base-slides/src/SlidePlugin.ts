@@ -6,7 +6,7 @@ import { install, SlidePluginObserve, uninstall } from './Basics/Observer';
 import { CanvasView } from './View/Render';
 import { ToolbarController } from './Controller';
 
-export interface ISlidePluginConfig { }
+export interface ISlidePluginConfig {}
 
 const DEFAULT_SLIDE_PLUGIN_DATA = {};
 
@@ -41,7 +41,7 @@ export class SlidePlugin extends Plugin<SlidePluginObserve> {
         install(this);
         // this.initConfig();
         this.initController();
-        this.initCanvasView();
+        this.initCanvasEngine();
         // this.registerExtension();
         // this.listenEventManager();
     }
@@ -56,7 +56,7 @@ export class SlidePlugin extends Plugin<SlidePluginObserve> {
         this._toolbarController = this._injector.get(ToolbarController);
     }
 
-    initCanvasView() {
+    initCanvasEngine() {
         this._canvasEngine = this._injector.get(IRenderingEngine);
     }
 

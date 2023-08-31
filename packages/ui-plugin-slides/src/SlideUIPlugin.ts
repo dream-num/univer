@@ -2,6 +2,7 @@ import { Plugin, Tools, LocaleService, PluginType } from '@univerjs/core';
 import { RegisterManager, ComponentManager, getRefElement, DragManager } from '@univerjs/base-ui';
 import { IRenderingEngine } from '@univerjs/base-render';
 import { Inject, Injector } from '@wendellhu/redi';
+import { CanvasView } from '@univerjs/base-slides';
 import { zh, en } from './Locale';
 import { SLIDE_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { AppUIController } from './Controller/AppUIController';
@@ -18,13 +19,14 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve> {
     private _config: ISlideUIPluginConfig;
 
     private _dragManager: DragManager;
-    
+
     private _componentManager: ComponentManager;
 
     constructor(
         config: Partial<ISlideUIPluginConfig> = {},
         @Inject(Injector) override readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(CanvasView) private readonly _canvasView: CanvasView
     ) {
         super(SLIDE_UI_PLUGIN_NAME);
         this._config = Tools.deepMerge({}, DefaultSlideUIConfig, config);
@@ -66,16 +68,17 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve> {
         // should be clear
         setTimeout(() => {
             engine.resize();
+            this._canvasView.scrollToCenter();
         }, 0);
     }
 
-    initUI() { }
+    initUI() {}
 
     override onMounted(): void {
         this.initialize();
     }
 
-    override onDestroy(): void { }
+    override onDestroy(): void {}
 
     getAppUIController() {
         return this._appUIController;

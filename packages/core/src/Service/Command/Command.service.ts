@@ -27,11 +27,12 @@ export interface ICommand<P extends object = object, R = boolean> {
  */
 export interface IMutation<P extends object = object, R = boolean> extends ICommand<P, R> {
     type: CommandType.MUTATION;
+    handler(accessor: IAccessor, params: P): Promise<R>; // mutations must have params
 }
 
 /**
  * Operation would change the state of Univer applications. State should only be in memory and does not
- * require data conflicting.
+ * require confliction resolution.
  */
 export interface IOperation<P extends object = object, R = boolean> extends ICommand<P, R> {
     type: CommandType.OPERATION;
@@ -231,11 +232,17 @@ export class CommandService implements ICommandService {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private async _execute(command: ICommand, injector: Injector, params?: object): Promise<boolean> {
-        this._log.log(`${' | '.repeat(this._commandExecutingLevel)}[ICommandService]: executing command "${command.id}".`);
+        this._log.log(`%c${' | '.repeat(this._commandExecutingLevel)}[ICommandService]: executing command "${command.id}".`, 'color:cyan');
 
         this._commandExecutingLevel++;
-        const result = await injector.invoke(command.handler, params);
-        this._commandExecutingLevel--;
+        let result: boolean;
+        try {
+            result = await injector.invoke(command.handler, params);
+            this._commandExecutingLevel--;
+        } catch (e) {
+            result = false;
+            this._commandExecutingLevel = 0;
+        }
 
         // TODO: remove from old command manager
         if (command.type === CommandType.MUTATION) {

@@ -325,20 +325,6 @@ export class RangeList {
     setFontFamily(fontFamily: Nullable<string>): RangeList {
         return this._setStyle(fontFamily, 'ff');
     }
-    // setFontLine(fontLine) {}
-
-    /**
-     * Sets the underline for each Range in the range list.
-     *
-     * @param fontLine  The underline to set; a null value resets the underline.
-     * @returns This range list, for chaining.
-     */
-    setUnderline(fontLine: Nullable<boolean | BooleanNumber>): RangeList {
-        const textDecoration: ITextDecoration = {
-            s: fontLine ? BooleanNumber.TRUE : BooleanNumber.FALSE,
-        };
-        return this._setStyle(textDecoration, 'ul');
-    }
 
     /**
      * Sets the Overline for each Range in the range list.
@@ -351,19 +337,6 @@ export class RangeList {
             s: fontLine ? BooleanNumber.TRUE : BooleanNumber.FALSE,
         };
         return this._setStyle(textDecoration, 'ol');
-    }
-
-    /**
-     * Sets the StrikeThrough for each Range in the range list.
-     *
-     * @param fontLine  The StrikeThrough to set; a null value resets the StrikeThrough.
-     * @returns This range list, for chaining.
-     */
-    setStrikeThrough(fontLine: Nullable<boolean | BooleanNumber>): RangeList {
-        const textDecoration: ITextDecoration = {
-            s: fontLine ? BooleanNumber.TRUE : BooleanNumber.FALSE,
-        };
-        return this._setStyle(textDecoration, 'st');
     }
 
     /**
@@ -388,17 +361,6 @@ export class RangeList {
     }
 
     /**
-     * Set the font style for each Range in the range list.
-     *
-     * @param fontWeight The font weight, either 'bold' or 'normal'; a null value resets the font weight.
-     * @returns This range list, for chaining.
-     */
-    setFontWeight(fontWeight: Nullable<boolean | BooleanNumber>): RangeList {
-        const fontBoolean = fontWeight ? BooleanNumber.TRUE : BooleanNumber.FALSE;
-        return this._setStyle(fontBoolean, 'bl');
-    }
-
-    /**
      * Set the horizontal alignment for each Range in the range list.
      *
      * @param alignment The alignment, either 'left', 'center' or 'right'; a null value resets the alignment.
@@ -407,84 +369,6 @@ export class RangeList {
     setHorizontalAlignment(alignment: Nullable<HorizontalAlign>): RangeList {
         return this._setStyle(alignment, 'ht');
     }
-
-    /**
-     * Sets the note text for each Range in the range list.
-     *
-     * @param note 	The note text to set; a null value removes the note.
-     * @returns This range list, for chaining.
-     */
-    // setNote(note: Nullable<string>): RangeList {
-    //     let { _rangeList, _context, _commandManager, _worksheet } = this;
-
-    //     const setList = _rangeList.map((range) => {
-    //         let { startRow, startColumn, endRow, endColumn } = range;
-
-    //         let cellValue = new ObjectMatrix<string>();
-    //         for (let r = startRow; r <= endRow; r++) {
-    //             for (let c = startColumn; c <= endColumn; c++) {
-    //                 cellValue.setValue(r, c, note);
-    //             }
-    //         }
-
-    //         let setValue: ISetRangeNoteActionData = {
-    //             sheetId: _worksheet.getSheetId(),
-    //             actionName: ACTION_NAMES.SET_RANGE_NOTE_ACTION,
-    //             cellNote: cellValue.getData(),
-    //             rangeData: range,
-    //         };
-
-    //         return setValue;
-    //     });
-
-    //     let command = new Command(_context.getWorkBook(), ...setList);
-    //     _commandManager.invoke(command);
-    //     return this;
-    // }
-
-    /**
-     * Sets the note text for each Range in the range list.
-     *
-     * @param numberFormat A number format string.
-     * @returns This range list, for chaining.
-     */
-    // setNumberFormat(numberFormat: string): RangeList {
-    //     let { _rangeList, _context, _commandManager, _worksheet } = this;
-
-    //     const setList = _rangeList.map((range) => {
-    //         let { startRow, startColumn, endRow, endColumn } = range;
-
-    //         let cellValue = new ObjectMatrix<string>();
-    //         for (let r = 0; r <= endRow - startRow; r++) {
-    //             for (let c = 0; c <= endColumn - startColumn; c++) {
-    //                 const fm = {
-    //                     f: numberFormat,
-    //                     t: FormatType.NUMBER,
-    //                 };
-    //                 cellValue.setValue(r + startRow, c + startColumn, JSON.stringify(fm));
-    //             }
-    //         }
-
-    //         let setValue: ISetRangeFormatActionData = {
-    //             sheetId: _worksheet.getSheetId(),
-    //             actionName: ACTION_NAMES.SET_RANGE_FORMAT_ACTION,
-    //             cellFormat: cellValue.getData(),
-    //             rangeData: range,
-    //         };
-
-    //         return setValue;
-    //     });
-
-    //     let command = new Command(_context.getWorkBook(), ...setList);
-    //     _commandManager.invoke(command);
-    //     return this;
-    // }
-
-    /**
-     * Sets the note text for each Range in the range list.
-     */
-    // TODO
-    // setShowHyperlink(showHyperlink) {}
 
     /**
      * Sets the text direction for the cells in each Range in the range list.

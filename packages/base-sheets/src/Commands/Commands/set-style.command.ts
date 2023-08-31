@@ -167,10 +167,12 @@ export const SetUnderlineCommand: ICommand = {
         const selectionManager = accessor.get(ISelectionManager);
         const currentlyUnderline = !!selectionManager.getCurrentCell()?.getUnderline().s;
 
-        const setStyleParams: ISetStyleParams<BooleanNumber> = {
+        const setStyleParams: ISetStyleParams<{ s: number }> = {
             style: {
                 type: 'ul',
-                value: currentlyUnderline ? BooleanNumber.FALSE : BooleanNumber.TRUE,
+                value: {
+                    s: currentlyUnderline ? BooleanNumber.FALSE : BooleanNumber.TRUE,
+                },
             },
         };
 
@@ -189,10 +191,10 @@ export const SetStrikeThroughCommand: ICommand = {
         const selectionManager = accessor.get(ISelectionManager);
         const currentlyStrokeThrough = !!selectionManager.getCurrentCell()?.getStrikeThrough().s;
 
-        const setStyleParams: ISetStyleParams<BooleanNumber> = {
+        const setStyleParams: ISetStyleParams<{ s: number }> = {
             style: {
                 type: 'st',
-                value: currentlyStrokeThrough ? BooleanNumber.FALSE : BooleanNumber.TRUE,
+                value: { s: currentlyStrokeThrough ? BooleanNumber.FALSE : BooleanNumber.TRUE },
             },
         };
 

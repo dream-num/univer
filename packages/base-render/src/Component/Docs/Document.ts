@@ -1,6 +1,6 @@
 import { BooleanNumber, HorizontalAlign, Nullable, Observable, Observer, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DocComponent } from './DocComponent';
-import { IDocumentSkeletonCached, IDocumentSkeletonPage, IDocumentSkeletonSpan, LineType, PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
+import { IDocumentSkeletonCached, IDocumentSkeletonPage, LineType, PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';
 import { DocumentsSpanAndLineExtensionRegistry, IExtensionConfig } from '../Extension';
 import { DocumentSkeleton } from './DocSkeleton';

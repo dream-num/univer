@@ -1,8 +1,20 @@
 import { Documents, IDocumentSkeletonLine, IDocumentSkeletonSpan, IEditorInputConfig, SpanType, TextSelection } from '@univerjs/base-render';
-import { DataStreamTreeTokenType, DocumentModel, ICurrentUniverService, IParagraph, KeyboardKeyType, Nullable, Observable } from '@univerjs/core';
+import { DataStreamTreeTokenType, DocumentModel, ICurrentUniverService, IParagraph, Nullable, Observable } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { CanvasView } from '../View/Render/CanvasView';
 import { DocsView } from '../View/Render/Views';
+
+enum KeyboardKeyType {
+    Backspace = 'Backspace',
+    Delete = 'Delete',
+    Enter = 'Enter',
+    Copy = 'c',
+    Paste = 'v',
+    ArrowUp = 'ArrowUp',
+    ArrowDown = 'ArrowDown',
+    ArrowLeft = 'ArrowLeft',
+    ArrowRight = 'ArrowRight',
+}
 
 export class InputController {
     private _previousIMEContent: string = '';

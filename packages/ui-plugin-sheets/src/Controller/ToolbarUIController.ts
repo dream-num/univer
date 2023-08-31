@@ -1,6 +1,6 @@
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 import { BorderInfo, ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
-import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentChildren, ComponentManager, CustomComponent, IMenuService, MenuPosition } from '@univerjs/base-ui';
+import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentManager, CustomComponent, IMenuService, MenuPosition } from '@univerjs/base-ui';
 import {
     BorderType,
     CommandManager,
@@ -19,6 +19,7 @@ import {
     ObserverManager,
     Disposable,
 } from '@univerjs/core';
+import { ComponentChildren } from 'preact';
 import { DefaultToolbarConfig, SheetToolbarConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
 import {
@@ -388,7 +389,6 @@ export class ToolbarUIController extends Disposable {
         this._toolList.push(config);
     }
 
-    // 删除toolbar配置
     /**
      * @deprecated
      */
@@ -410,29 +410,7 @@ export class ToolbarUIController extends Disposable {
     }
 
     changeColor(color: string) {
-        const strikethroughItem = this._toolList.find((item) => item.name === 'strikethrough');
-        const underlineItem = this._toolList.find((item) => item.name === 'underline');
         this.setFontColor(color);
-        if (underlineItem) {
-            this.setUnderline(underlineItem.active ?? false);
-        }
-        if (strikethroughItem) {
-            this.setStrikeThrough(strikethroughItem.active ?? false);
-        }
-    }
-
-    setUndo() {
-        const msg = {
-            name: 'undo',
-        };
-        this.setUIObserve(msg);
-    }
-
-    setRedo() {
-        const msg = {
-            name: 'redo',
-        };
-        this.setUIObserve(msg);
     }
 
     setFontFamily(fontFamily: string) {
@@ -449,38 +427,6 @@ export class ToolbarUIController extends Disposable {
             value: fontSize,
         };
         this.setUIObserve<number>(msg);
-    }
-
-    setFontWeight(isBold: boolean) {
-        const msg = {
-            name: 'fontWeight',
-            value: isBold,
-        };
-        this.setUIObserve<boolean>(msg);
-    }
-
-    setFontStyle(isItalic: boolean) {
-        const msg = {
-            name: 'fontStyle',
-            value: isItalic,
-        };
-        this.setUIObserve<boolean>(msg);
-    }
-
-    setStrikeThrough(isStrikethrough: boolean) {
-        const msg = {
-            name: 'strikeThrough',
-            value: isStrikethrough,
-        };
-        this.setUIObserve<boolean>(msg);
-    }
-
-    setUnderline(isUnderLine: boolean) {
-        const msg = {
-            name: 'underLine',
-            value: isUnderLine,
-        };
-        this.setUIObserve<boolean>(msg);
     }
 
     setFontColor(color: string) {

@@ -232,7 +232,7 @@ export class CommandService implements ICommandService {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private async _execute(command: ICommand, injector: Injector, params?: object): Promise<boolean> {
-        this._log.log(`%c${' | '.repeat(this._commandExecutingLevel)}[ICommandService]: executing command "${command.id}".`, 'color:cyan');
+        this._log.log(`${'|-'.repeat(this._commandExecutingLevel)}[ICommandService]: executing command "${command.id}".`);
 
         this._commandExecutingLevel++;
         let result: boolean;

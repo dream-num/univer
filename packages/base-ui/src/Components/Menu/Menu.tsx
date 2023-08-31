@@ -6,6 +6,7 @@ import { joinClassNames } from '../../Utils';
 import { CustomLabel } from '../CustomLabel';
 import styles from './index.module.less';
 import { IDisplayMenuItem } from '../../services/menu/menu.service';
+import AppContext from '../../Common/AppContext';
 
 export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     private _MenuRef = createRef<HTMLUListElement>();
@@ -162,6 +163,8 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
 }
 
 export class MenuItem extends Component<{ menuItem: IDisplayMenuItem; onClick: () => void }, { disabled: boolean }> {
+    static override contextType = AppContext;
+
     private disabledSubscription: Subscription | undefined;
 
     constructor() {

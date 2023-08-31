@@ -99,7 +99,7 @@ export const cancelRequestFrame = (requestID: number, requester?: any) => {
 };
 
 export const createCanvasElement = (): HTMLCanvasElement => {
-    let canvas = document.createElement('canvas');
+    const canvas = document.createElement('canvas');
     // on some environments canvas.style is readonly
     try {
         (canvas as any).style = canvas.style || {};
@@ -154,7 +154,7 @@ export const IsSafari = (): boolean => {
 };
 
 export const generateRandomKey = (prefix: string = 'obj', keyLength: number = 4): string => {
-    let userAgent = window.navigator.userAgent.replace(/[^a-zA-Z0-9]/g, '').split('');
+    const userAgent = window.navigator.userAgent.replace(/[^a-zA-Z0-9]/g, '').split('');
 
     let mid = '';
 
@@ -162,7 +162,7 @@ export const generateRandomKey = (prefix: string = 'obj', keyLength: number = 4)
         mid += userAgent[Math.round(Math.random() * (userAgent.length - 1))];
     }
 
-    let time = new Date().getTime();
+    const time = new Date().getTime();
 
     return `${prefix}_${mid}_${time}`;
 };
@@ -288,7 +288,7 @@ export function getFontStyleString(textStyle?: IStyleBase, fontLocale?: IFontLoc
 }
 
 export function isSupportBoundingBox(ctx: CanvasRenderingContext2D) {
-    let measureText = ctx.measureText('田');
+    const measureText = ctx.measureText('田');
     if (measureText.actualBoundingBoxAscent == null) {
         return false;
     }
@@ -297,7 +297,7 @@ export function isSupportBoundingBox(ctx: CanvasRenderingContext2D) {
 
 // 是否有中文
 export function hasChineseText(text: string) {
-    let pattern = /[\u4E00-\u9FA5]|[\uFE30-\uFFA0]/gi;
+    const pattern = /[\u4E00-\u9FA5]|[\uFE30-\uFFA0]/gi;
     // /^([^\p{Han}]*?)(?:\s+([\p{Han}].*))?$/gim;
 
     if (!pattern.exec(text)) {
@@ -308,7 +308,7 @@ export function hasChineseText(text: string) {
 
 // 是否有日文
 export function hasJapaneseText(text: string) {
-    let pattern = /[一-龠]+|[ぁ-ゔ]+|[ァ-ヴー]+|[a-zA-Z0-9]+|[ａ-ｚＡ-Ｚ０-９]+|[々〆〤]+/giu;
+    const pattern = /[一-龠]+|[ぁ-ゔ]+|[ァ-ヴー]+|[a-zA-Z0-9]+|[ａ-ｚＡ-Ｚ０-９]+|[々〆〤]+/giu;
 
     if (!pattern.exec(text)) {
         return false;
@@ -318,7 +318,7 @@ export function hasJapaneseText(text: string) {
 
 // 是否有韩文
 export function hasKoreanText(text: string) {
-    let pattern = /[^a-zA-Z0-9\p{Hangul}]/gi;
+    const pattern = /[^a-zA-Z0-9\p{Hangul}]/gi;
 
     if (!pattern.exec(text)) {
         return false;
@@ -328,7 +328,7 @@ export function hasKoreanText(text: string) {
 
 // 是否有中文、日文、韩文等可以垂直布局的文字，东亚文字
 export function hasCJK(text: string) {
-    let pattern = /[\u2E80-\uA4CF]|[\uF900-\uFAFF]|[\uFE30-\uFE4F]|[\uFF00-\uFFEF]/gi;
+    const pattern = /[\u2E80-\uA4CF]|[\uF900-\uFAFF]|[\uFE30-\uFE4F]|[\uFF00-\uFFEF]/gi;
     if (!pattern.exec(text)) {
         return false;
     }
@@ -341,7 +341,7 @@ export function hasWrappableText(text: string) {
 }
 
 export function hasAllLatin(text: string) {
-    let pattern = /[\u0000-\u024F]/gi;
+    const pattern = /[\u0000-\u024F]/gi;
     if (!pattern.exec(text)) {
         return false;
     }
@@ -349,7 +349,7 @@ export function hasAllLatin(text: string) {
 }
 
 export function hasBasicLatin(text: string) {
-    let pattern = /[\u0000-\u007F]/gi;
+    const pattern = /[\u0000-\u007F]/gi;
     if (!pattern.exec(text)) {
         return false;
     }
@@ -357,7 +357,7 @@ export function hasBasicLatin(text: string) {
 }
 
 export function hasLatinOneSupplement(text: string) {
-    let pattern = /[\u0080-\u00FF]/gi;
+    const pattern = /[\u0080-\u00FF]/gi;
     if (!pattern.exec(text)) {
         return false;
     }
@@ -365,7 +365,7 @@ export function hasLatinOneSupplement(text: string) {
 }
 
 export function hasLatinExtendedA(text: string) {
-    let pattern = /[\u0100-\u017F]/gi;
+    const pattern = /[\u0100-\u017F]/gi;
     if (!pattern.exec(text)) {
         return false;
     }
@@ -373,7 +373,7 @@ export function hasLatinExtendedA(text: string) {
 }
 
 export function hasLatinExtendedB(text: string) {
-    let pattern = /[\u0180-\u024F]/gi;
+    const pattern = /[\u0180-\u024F]/gi;
     if (!pattern.exec(text)) {
         return false;
     }
@@ -381,7 +381,7 @@ export function hasLatinExtendedB(text: string) {
 }
 
 export function hasArabic(text: string) {
-    let pattern = /[\u0600-\u06FF]|[\u0750-\u0750]|[\u0870-\u08FF]|[\uFB50-\uFDFF]|[\uFE70-\uFEFF]/gi;
+    const pattern = /[\u0600-\u06FF]|[\u0750-\u0750]|[\u0870-\u08FF]|[\uFB50-\uFDFF]|[\uFE70-\uFEFF]/gi;
     if (!pattern.exec(text)) {
         return false;
     }
@@ -389,7 +389,7 @@ export function hasArabic(text: string) {
 }
 
 export function hasTibetan(text: string) {
-    let pattern = /[\u0180-\u024F]/gi;
+    const pattern = /[\u0180-\u024F]/gi;
     if (!pattern.exec(text)) {
         return false;
     }
@@ -397,7 +397,7 @@ export function hasTibetan(text: string) {
 }
 
 export function hasSpaceAndTab(text: string) {
-    let pattern = /\s+|\t+/g;
+    const pattern = /\s+|\t+/g;
     if (!pattern.exec(text)) {
         return false;
     }
@@ -455,11 +455,11 @@ export function getCellPositionByIndex(row: number, column: number, rowHeightAcc
     const startRow = row - 1;
     const startColumn = column - 1;
 
-    let startY = rowHeightAccumulation[startRow] || 0;
-    let endY = rowHeightAccumulation[row];
+    const startY = rowHeightAccumulation[startRow] || 0;
+    const endY = rowHeightAccumulation[row];
 
-    let startX = columnWidthAccumulation[startColumn] || 0;
-    let endX = columnWidthAccumulation[column];
+    const startX = columnWidthAccumulation[startColumn] || 0;
+    const endX = columnWidthAccumulation[column];
 
     return {
         startY,
@@ -476,6 +476,7 @@ export function getCellByIndex(
     columnWidthAccumulation: number[],
     dataMergeCache: ObjectMatrix<IRangeData>
 ): ICellInfo {
+    // eslint-disable-next-line prefer-const
     let { startY, endY, startX, endX } = getCellPositionByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation);
 
     const { isMerged, isMergedMainCell, newEndRow, newEndColumn, mergeRow, mergeColumn } = mergeCellHandler(row, column, dataMergeCache);
@@ -491,11 +492,11 @@ export function getCellByIndex(
         endX: 0,
     };
     if (isMerged && mergeRow !== -1 && mergeColumn !== -1) {
-        let mergeStartY = rowHeightAccumulation[mergeRow - 1] || 0;
-        let mergeEndY = rowHeightAccumulation[newEndRow];
+        const mergeStartY = rowHeightAccumulation[mergeRow - 1] || 0;
+        const mergeEndY = rowHeightAccumulation[newEndRow];
 
-        let mergeStartX = columnWidthAccumulation[mergeColumn - 1] || 0;
-        let mergeEndX = columnWidthAccumulation[newEndColumn];
+        const mergeStartX = columnWidthAccumulation[mergeColumn - 1] || 0;
+        const mergeEndX = columnWidthAccumulation[newEndColumn];
         mergeInfo = {
             ...mergeInfo,
             startY: mergeStartY,
@@ -590,7 +591,7 @@ export function injectStyle(styles: string[]) {
 
     const styleSheet = styleElement.sheet;
 
-    for (let style of styles) {
+    for (const style of styles) {
         styleSheet?.insertRule(style, styleSheet.cssRules.length);
     }
 }

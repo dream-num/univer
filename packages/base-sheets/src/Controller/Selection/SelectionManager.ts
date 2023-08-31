@@ -756,13 +756,13 @@ export class SelectionManager {
 
             let selectionControl: Nullable<SelectionController> = this.getCurrentControl();
 
-            const curControls = this.getCurrentControls();
+            const controls = this.getCurrentControls();
 
-            if (!curControls) {
+            if (!controls) {
                 return false;
             }
 
-            for (const control of curControls) {
+            for (const control of controls) {
                 // right click
                 if (evt.button === 2 && control.model.isInclude(startSelectionRange)) {
                     selectionControl = control;
@@ -780,24 +780,20 @@ export class SelectionManager {
                 }
             }
 
-            // In addition to pressing the ctrl or shift key, we must clear the previous selection
-            if (curControls.length > 0 && !evt.ctrlKey && !evt.shiftKey) {
-                for (const control of curControls) {
+            // if ctrl key and shift key is not holding, we must clear the previous selections
+            if (controls.length > 0 && !evt.ctrlKey && !evt.shiftKey) {
+                for (const control of controls) {
                     control.dispose();
                 }
-
-                curControls.length = 0; // clear currentSelectionControls
+                controls.length = 0;
             }
 
+            // if shift key is held, extend the current selection control
             const currentCell = selectionControl && selectionControl.model.currentCell;
-
             if (selectionControl && evt.shiftKey && currentCell) {
                 const { row, column } = currentCell;
-
-                // TODO startCell position calculate error
                 const startCell = main.getNoMergeCellPositionByIndex(row, column);
                 const endCell = main.getNoMergeCellPositionByIndex(endRow, endColumn);
-
                 const newSelectionRange = {
                     startColumn: column,
                     startRow: row,
@@ -810,9 +806,9 @@ export class SelectionManager {
                 };
                 selectionControl.update(newSelectionRange, currentCell);
             } else {
-                selectionControl = SelectionController.create(this._injector, curControls.length);
+                selectionControl = SelectionController.create(this._injector, controls.length);
                 selectionControl.update(startSelectionRange, cellInfo);
-                curControls.push(selectionControl);
+                controls.push(selectionControl);
             }
 
             this.hasSelection = true;

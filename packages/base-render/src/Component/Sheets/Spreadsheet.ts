@@ -110,7 +110,7 @@ export class Spreadsheet extends SheetComponent {
         this._calculateOverflow();
 
         const extensions = this.getExtensionsByOrder();
-        for (let extension of extensions) {
+        for (const extension of extensions) {
             extension.draw(ctx, parentScale, spreadsheetSkeleton);
         }
     }
@@ -189,6 +189,7 @@ export class Spreadsheet extends SheetComponent {
             }
         }
 
+        // eslint-disable-next-line prefer-const
         let { isMerged, startY, endY, startX, endX, mergeInfo, isMergedMainCell } = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, dataMergeCacheAll);
 
         startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
@@ -226,6 +227,7 @@ export class Spreadsheet extends SheetComponent {
         const { scaleX = 1, scaleY = 1 } = this.getParentScale();
         const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight, dataMergeCacheAll } = spreadsheetSkeleton;
 
+        // eslint-disable-next-line prefer-const
         let { isMerged, startY, endY, startX, endX, mergeInfo, isMergedMainCell } = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, dataMergeCacheAll);
 
         startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
@@ -249,7 +251,7 @@ export class Spreadsheet extends SheetComponent {
     }
 
     override getScrollXYByRelativeCoords(coord: Vector2) {
-        let scene = this.getParent() as Scene;
+        const scene = this.getParent() as Scene;
         let x = 0;
         let y = 0;
         const viewPort = scene.getActiveViewportByRelativeCoord(coord);
@@ -270,7 +272,7 @@ export class Spreadsheet extends SheetComponent {
 
         let x = 0;
         let y = 0;
-        let coord = Vector2.FromArray([offsetX, offsetY]);
+        const coord = Vector2.FromArray([offsetX, offsetY]);
         while (parent) {
             if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
                 const scene = parent as Scene;
@@ -304,7 +306,7 @@ export class Spreadsheet extends SheetComponent {
             this._cacheOffsetX = 0;
             this._cacheOffsetY = 0;
             if (this.isDirty()) {
-                let newBounds = bounds;
+                const newBounds = bounds;
                 const ctx = this._cacheCanvas.getContext();
 
                 if (newBounds) {
@@ -510,7 +512,7 @@ export class Spreadsheet extends SheetComponent {
             if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
                 const viewports = parent.getViewports();
                 const viewPorts = this._getHasScrollViewports(viewports);
-                for (let viewport of viewports) {
+                for (const viewport of viewports) {
                     if (viewport) {
                         fn(viewport);
                     }
@@ -522,7 +524,7 @@ export class Spreadsheet extends SheetComponent {
 
     private _getHasScrollViewports(viewports: Viewport[]) {
         const newViewports: Viewport[] = [];
-        for (let viewport of viewports) {
+        for (const viewport of viewports) {
             const scrollBar = viewport.getScrollBar();
             if (scrollBar) {
                 newViewports.push(viewport);
@@ -579,7 +581,7 @@ export class Spreadsheet extends SheetComponent {
                 fontObjectArray.forEach((row, fontArray) => {
                     fontArray.forEach((column, docsConfig) => {
                         // wrap and angle handler
-                        let { documentSkeleton, angle = 0, verticalAlign, horizontalAlign, wrapStrategy } = docsConfig;
+                        const { documentSkeleton, angle = 0, verticalAlign, horizontalAlign, wrapStrategy } = docsConfig;
                         const cell = spreadsheetSkeleton.getCellData().getValue(row, column);
 
                         const sheetSkeleton = this.getSkeleton();
@@ -602,7 +604,7 @@ export class Spreadsheet extends SheetComponent {
                             }
 
                             if (angle !== 0) {
-                                let { startY, endY, startX, endX } = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+                                const { startY, endY, startX, endX } = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
                                 const cellWidth = endX - startX;
                                 const cellHeight = endY - startY;
 
@@ -630,7 +632,7 @@ export class Spreadsheet extends SheetComponent {
                                 endColumn,
                             });
                         } else if (wrapStrategy === WrapStrategy.WRAP && angle !== 0) {
-                            let { startY, endY } = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+                            const { startY, endY } = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
 
                             const cellHeight = endY - startY;
                             documentSkeleton.getModel().updateDocumentDataPageSize(cellHeight);

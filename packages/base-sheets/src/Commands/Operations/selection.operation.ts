@@ -18,7 +18,9 @@ export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> =
     type: CommandType.OPERATION,
     handler: async (accessor, params) => {
         const selectionManager = accessor.get(ISelectionManager);
-        selectionManager.setModels(params.selections);
+        selectionManager.setModels(params!.selections);
+        const models = selectionManager.getCurrentModels();
+        models?.forEach((m) => m.setCurrentCell());
         selectionManager.renderCurrentControls(false);
         return true;
     },

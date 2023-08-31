@@ -1,6 +1,6 @@
 import { ComponentChildren, JSX } from 'preact';
 import { BaseComponent, JSXComponent } from '../BaseComponent';
-import { IDisplayMenuItem } from '../services/menu/menu.service';
+import { IDisplayMenuItem, IMenuItem } from '../services/menu/menu.service';
 
 export interface BaseMenuItem {
     className?: string;
@@ -25,6 +25,10 @@ export interface BaseMenuProps {
     dom?: HTMLElement;
     ref?: any;
     deep?: number;
+}
+
+export interface TreeMenuItems extends IMenuItem {
+    subMenuItems: TreeMenuItems[];
 }
 
 export type BaseMenuState = {

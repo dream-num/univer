@@ -49,11 +49,8 @@ export class SheetBarController {
                     // if (lastSheet) {
                     //     lastSheet.activate();
                     // }
-                    this._commandService.executeCommand(InsertSheetCommand.id, {
-                        workbookId: workbook.getUnitId(),
-                        index: number,
-                        sheet: IWorksheetConfig;
-                    });
+                    // TODO 待处理...
+                    this._commandService.executeCommand(InsertSheetCommand.id, {});
                     break;
                 }
                 case 'unHideSheet': {

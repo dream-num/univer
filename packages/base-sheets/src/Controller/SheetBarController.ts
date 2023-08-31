@@ -1,6 +1,7 @@
 import { UIObserver, ObserverManager, LocaleService, ICurrentUniverService, GenName, ICommandService } from '@univerjs/core';
 import { Inject, SkipSelf } from '@wendellhu/redi';
 import { SetWorksheetNameCommand } from '../Commands/Commands/set-worksheet-name.command';
+import { InsertSheetCommand } from '../Commands/Commands/insert-sheet.command';
 
 export class SheetBarController {
     constructor(
@@ -41,14 +42,18 @@ export class SheetBarController {
                     break;
                 }
                 case 'addSheet': {
-                    workbook.insertSheet();
-
-                    const size = workbook.getSheetSize();
-                    const sheets = workbook.getSheets();
-                    const lastSheet = sheets[size - 1];
-                    if (lastSheet) {
-                        lastSheet.activate();
-                    }
+                    // workbook.insertSheet();
+                    // const size = workbook.getSheetSize();
+                    // const sheets = workbook.getSheets();
+                    // const lastSheet = sheets[size - 1];
+                    // if (lastSheet) {
+                    //     lastSheet.activate();
+                    // }
+                    this._commandService.executeCommand(InsertSheetCommand.id, {
+                        workbookId: workbook.getUnitId(),
+                        index: number,
+                        sheet: IWorksheetConfig;
+                    });
                     break;
                 }
                 case 'unHideSheet': {

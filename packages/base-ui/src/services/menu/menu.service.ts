@@ -1,6 +1,8 @@
 import { Disposable, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
+import { BaseSelectChildrenProps } from '../../Components/Select/Select';
+import { ComponentChildren } from '../../Framework/Preact';
 
 export type OneOrMany<T> = T | T[];
 
@@ -18,10 +20,28 @@ export interface IMenuItemState {
     checked?: boolean;
 }
 
+// TODO@Dushusir  remove CustomLabelProps and CustomLabel in rightMenuUIController after migrate new UI system
+
+interface CustomLabelProps {
+    prefix?: string[] | string;
+    suffix?: string[] | string;
+    options?: BaseSelectChildrenProps[];
+    label?: string;
+    children?: CustomLabelProps[];
+    onKeyUp?: (e: Event) => void;
+}
+
+export interface CustomLabel {
+    name: string;
+    props?: CustomLabelProps;
+}
+
 export interface IMenuItem {
     id: string;
     menu: OneOrMany<MenuPosition>;
-    subMenus?: string[];
+    subMenus?: string[]; // submenu id list
+    parentId?: string; // if it is submenu
+    label?: string | CustomLabel | ComponentChildren;
 
     title: string;
     icon?: string;

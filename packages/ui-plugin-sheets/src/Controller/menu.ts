@@ -7,12 +7,16 @@ import {
     SetStrikeThroughCommand,
     SetUnderlineCommand,
     RemoveColCommand,
-    RemoveRowCommand
+    RemoveRowCommand,
+    SetWorksheetRowHeightCommand,
+    SetWorksheetColWidthCommand,
+    DeleteRangeCommand,
 } from '@univerjs/base-sheets';
 import { IMenuItem, MenuPosition } from '@univerjs/base-ui';
 import { IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 import { map } from 'rxjs/operators';
+import { RightMenuInput } from '../View/RightMenu/RightMenuInput';
 
 export function UndoMenuItemFactory(accessor: IAccessor): IMenuItem {
     const undoRedoService = accessor.get(IUndoRedoService);
@@ -138,5 +142,61 @@ export function RemoveColMenuItemFactory(accessor: IAccessor): IMenuItem {
         id: RemoveColCommand.id,
         menu: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.deleteSelectedColumn',
+    };
+}
+
+export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: SetWorksheetRowHeightCommand.id,
+        menu: [MenuPosition.CONTEXT_MENU],
+        title: 'rightClick.rowHeight',
+        label: {
+            name: RightMenuInput.name,
+            props: {
+                prefix: 'rightClick.rowHeight',
+                suffix: 'px',
+            },
+        },
+    };
+}
+
+export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: SetWorksheetColWidthCommand.id,
+        menu: [MenuPosition.CONTEXT_MENU],
+        title: 'rightClick.columnWidth',
+        label: {
+            name: RightMenuInput.name,
+            props: {
+                prefix: 'rightClick.columnWidth',
+                suffix: 'px',
+            },
+        },
+    };
+}
+
+export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: `${DeleteRangeCommand.id}.parent`,
+        menu: [MenuPosition.CONTEXT_MENU],
+        title: 'rightClick.deleteCell',
+        subMenus: [DeleteRangeCommand.id, `${DeleteRangeCommand.id}up`],
+    };
+}
+export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: DeleteRangeCommand.id,
+        menu: [MenuPosition.CONTEXT_MENU],
+        title: 'rightClick.moveLeft',
+        parentId: `${DeleteRangeCommand.id}.parent`,
+    };
+}
+
+export function DeleteRangeMoveUpMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: `${DeleteRangeCommand.id}up`,
+        menu: [MenuPosition.CONTEXT_MENU],
+        title: 'rightClick.moveUp',
+        parentId: `${DeleteRangeCommand.id}.parent`,
     };
 }

@@ -6,7 +6,18 @@ import { CanvasView } from '@univerjs/base-sheets';
 import { DefaultRightMenuConfig, SheetRightMenuConfig } from '../Basics';
 import { RightMenu, RightMenuInput, RightMenuItem } from '../View';
 import styles from '../View/RightMenu/index.module.less';
-import { ClearSelectionMenuItemFactory, InsertColMenuItemFactory, InsertRowMenuItemFactory, RemoveColMenuItemFactory, RemoveRowMenuItemFactory } from './menu';
+import {
+    ClearSelectionMenuItemFactory,
+    DeleteRangeMenuItemFactory,
+    DeleteRangeMoveLeftMenuItemFactory,
+    DeleteRangeMoveUpMenuItemFactory,
+    InsertColMenuItemFactory,
+    InsertRowMenuItemFactory,
+    RemoveColMenuItemFactory,
+    RemoveRowMenuItemFactory,
+    SetColWidthMenuItemFactory,
+    SetRowHeightMenuItemFactory,
+} from './menu';
 
 interface CustomLabelProps {
     prefix?: string[] | string;
@@ -196,7 +207,7 @@ export class RightMenuUIController extends Disposable {
 
     // 刷新
     setMenuList() {
-        this._rightMenu?.setMenuList(this._menuList);
+        // this._rightMenu?.setMenuList(this._menuList);
         this._rightMenu?.setMenuListNeo(this._menuService.getMenuItems(MenuPosition.CONTEXT_MENU));
     }
 
@@ -306,7 +317,18 @@ export class RightMenuUIController extends Disposable {
     }
 
     private _initializeContextMenu() {
-        [ClearSelectionMenuItemFactory, InsertRowMenuItemFactory, InsertColMenuItemFactory, RemoveRowMenuItemFactory, RemoveColMenuItemFactory].forEach((factory) => {
+        [
+            ClearSelectionMenuItemFactory,
+            InsertRowMenuItemFactory,
+            InsertColMenuItemFactory,
+            RemoveRowMenuItemFactory,
+            RemoveColMenuItemFactory,
+            SetRowHeightMenuItemFactory,
+            SetColWidthMenuItemFactory,
+            DeleteRangeMenuItemFactory,
+            DeleteRangeMoveLeftMenuItemFactory,
+            DeleteRangeMoveUpMenuItemFactory,
+        ].forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
     }

@@ -32,3 +32,6 @@ export {
 export { ClearSelectionContentCommand } from './Commands/Commands/clear-selection-content.command';
 export { InsertRowCommand, InsertColCommand } from './Commands/Commands/insert-row-col.command';
 export { RemoveRowCommand, RemoveColCommand } from './Commands/Commands/remove-row-col.command';
+export { SetWorksheetRowHeightCommand } from './Commands/Commands/set-worksheet-row-height.command';
+export { SetWorksheetColWidthCommand } from './Commands/Commands/set-worksheet-col-width.command';
+export { DeleteRangeCommand } from './Commands/Commands/delete-range.command';

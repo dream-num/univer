@@ -1,5 +1,5 @@
 import { IMouseEvent } from '@univerjs/base-render';
-import { BaseRightMenuProps, Component, createRef, IMenuItem, Menu } from '@univerjs/base-ui';
+import { BaseRightMenuProps, Component, createRef, IMenuItem, Menu, TreeMenuItems } from '@univerjs/base-ui';
 import { RightMenuProps } from '../../Controller';
 import Style from './index.module.less';
 
@@ -8,7 +8,7 @@ interface IState {
     srcElement: any;
     eventType: string | null;
     children: RightMenuProps[];
-    menuItems: IMenuItem[];
+    menuItems: TreeMenuItems[];
 }
 
 export class RightMenu extends Component<BaseRightMenuProps, IState> {
@@ -34,9 +34,25 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
 
     setMenuListNeo = (menuItems: IMenuItem[]) => {
         this.setState({
-            menuItems,
+            menuItems: this.buildMenuTree(menuItems),
         });
     };
+
+    buildMenuTree(items: IMenuItem[], parentId?: string): TreeMenuItems[] {
+        const tree: TreeMenuItems[] = [];
+
+        for (const item of items) {
+            if (item.parentId === parentId) {
+                const treeItem: TreeMenuItems = {
+                    ...item,
+                    subMenuItems: this.buildMenuTree(items, item.id),
+                };
+                tree.push(treeItem);
+            }
+        }
+
+        return tree;
+    }
 
     // TODO:添加到具体的元素
     override componentDidMount() {
@@ -119,9 +135,9 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
     }
 
     render() {
-        if (!this.state.children.length) {
-            return;
-        }
+        // if (!this.state.children.length) {
+        //     return;
+        // }
 
         const wrapStyles = { ...this.props.style };
         const { visible } = this.state;

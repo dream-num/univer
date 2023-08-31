@@ -1,12 +1,11 @@
 import { ComponentChild } from 'preact';
 import { Subscription } from 'rxjs';
 import { ICommandService } from '@univerjs/core';
-import { Component, createRef } from '../../Framework';
-import { BaseMenuProps, BaseMenuState, BaseMenuItem, BaseMenuStyle } from '../../Interfaces';
+import { Component, createRef, JSX } from '../../Framework';
+import { BaseMenuProps, BaseMenuState, BaseMenuItem, BaseMenuStyle, TreeMenuItems } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
 
 import styles from './index.module.less';
-import { IMenuItem } from '../../services/menu/menu.service';
 
 export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     private _MenuRef = createRef<HTMLUListElement>();
@@ -102,7 +101,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     };
 
     render() {
-        const { className = '', style = '', menu, menuItems, deep = 0 } = this.props;
+        const { className = '', menuItems, style = '', menu, deep = 0 } = this.props;
         const { show, posStyle } = this.state;
 
         return (
@@ -142,9 +141,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
                         </>
                     );
                 })}
-                {menuItems?.map((item, index) => (
-                    <MenuItem menuItem={item} onClick={() => this.showMenu(false)} />
-                ))}
+                {menuItems?.map((item, index) => item && <MenuItem menuItem={item} index={index} onClick={() => this.showMenu(false)} />)}
             </ul>
         );
     }
@@ -157,8 +154,10 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     }
 }
 
-export class MenuItem extends Component<{ menuItem: IMenuItem; onClick: () => void }, { disabled: boolean }> {
+export class MenuItem extends Component<{ menuItem: TreeMenuItems; index: number; onClick: () => void; style?: JSX.CSSProperties }, { disabled: boolean }> {
     private disabledSubscription: Subscription | undefined;
+
+    private _refs: Menu[] = [];
 
     constructor() {
         super();
@@ -167,6 +166,20 @@ export class MenuItem extends Component<{ menuItem: IMenuItem; onClick: () => vo
             disabled: false,
         };
     }
+
+    mouseEnter = (e: MouseEvent, index: number) => {
+        const { menuItem } = this.props;
+        if (menuItem.subMenus) {
+            this._refs[index].showMenu(true);
+        }
+    };
+
+    mouseLeave = (e: MouseEvent, index: number) => {
+        const { menuItem } = this.props;
+        if (menuItem.subMenus) {
+            this._refs[index].showMenu(false);
+        }
+    };
 
     override componentDidMount(): void {
         this.disabledSubscription = this.props.menuItem.disabled$?.subscribe((disabled) => {
@@ -179,19 +192,31 @@ export class MenuItem extends Component<{ menuItem: IMenuItem; onClick: () => vo
     }
 
     override render(): ComponentChild {
-        const { menuItem: item } = this.props;
+        const { menuItem: item, index, style } = this.props;
         const commandService: ICommandService = this.context.injector.get(ICommandService);
         const { disabled } = this.state;
 
         return (
             <li
                 className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}
+                style={{ ...style }}
                 onClick={() => {
                     this.props.onClick();
                     commandService.executeCommand(item.id);
                 }}
+                onMouseEnter={(e) => {
+                    this.mouseEnter(e, index);
+                }}
+                onMouseLeave={(e) => {
+                    this.mouseLeave(e, index);
+                }}
             >
-                {this.getLabel(item.title)}
+                {this.getLabel(item.label || item.title)}
+                {item.subMenuItems && item.subMenuItems.length > 0 ? (
+                    <Menu ref={(ele: Menu) => (this._refs[index] = ele)} menuItems={item.subMenuItems} parent={this}></Menu>
+                ) : (
+                    <></>
+                )}
             </li>
         );
     }

@@ -17,7 +17,7 @@ export interface BaseMenuItem {
 export interface BaseMenuProps {
     /** @deprecated this is legacy menu mechanism. Do not use it. Use `menuItems` instead. */
     menu?: BaseMenuItem[];
-    menuItems?: IMenuItem[];
+    menuItems?: TreeMenuItems[];
     onClick?: (...arg: any) => void;
     className?: string;
     style?: JSX.CSSProperties;
@@ -25,6 +25,10 @@ export interface BaseMenuProps {
     dom?: HTMLElement;
     ref?: any;
     deep?: number;
+}
+
+export interface TreeMenuItems extends IMenuItem {
+    subMenuItems: TreeMenuItems[];
 }
 
 export type BaseMenuState = {

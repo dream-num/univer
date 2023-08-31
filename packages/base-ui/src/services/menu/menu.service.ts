@@ -1,9 +1,10 @@
 import { Disposable, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
+import { ComponentChildren } from 'preact';
 import { IShortcutService } from '../shortcut/shorcut.service';
 import { ICustomLabelType } from '../../Interfaces/CustomLabel';
-import { ComponentChildren } from 'preact';
+import { BaseSelectProps, DisplayTypes, SelectTypes } from '../../Components/Select/Select';
 
 export type OneOrMany<T> = T | T[];
 
@@ -12,16 +13,13 @@ export const enum MenuPosition {
     CONTEXT_MENU,
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface IMenuItemState {
-    id: string;
-
-    disabled?: boolean;
-    hidden?: boolean;
-    checked?: boolean;
+export const enum MenuItemType {
+    /** default */
+    BUTTON,
+    SELECTOR,
 }
 
-export interface IMenuItem {
+interface IMenuItemBase {
     id: string;
     menu: OneOrMany<MenuPosition>;
     subMenus?: string[]; // submenu id list
@@ -29,6 +27,9 @@ export interface IMenuItem {
     label?: string | ICustomLabelType | ComponentChildren;
 
     title: string;
+
+    className?: string;
+
     icon?: string;
     tooltip?: string;
     description?: string;
@@ -36,13 +37,35 @@ export interface IMenuItem {
     hidden$?: Observable<boolean>;
     activated$?: Observable<boolean>;
     disabled$?: Observable<boolean>;
+
+    type?: MenuItemType;
 }
 
-export interface IDisplayMenuItem extends IMenuItem {
+export interface IMenuButtonItem extends IMenuItemBase {}
+
+export interface IMenuSelectorItem extends IMenuItemBase {
+    type: MenuItemType.SELECTOR;
+
+    display?: DisplayTypes;
+
+    label?: {
+        name: string;
+        props: any; // TODO: fix later
+    };
+
+    selectType: SelectTypes;
+    selections?: Array<number | BaseSelectProps>;
+}
+
+export type IMenuItem = IMenuButtonItem | IMenuSelectorItem;
+
+// TODO@wzhudev: maybe we should separate `IMenuItemState` to different types of menu items.
+
+export type IDisplayMenuItem<T extends IMenuItem> = T & {
     /** MenuService should get responsible shortcut and display on the UI. */
     shortcut?: string;
-    subMenuItems?: IDisplayMenuItem[];
-}
+    subMenuItems?: Array<IDisplayMenuItem<any>>;
+};
 
 export const IMenuService = createIdentifier<IMenuService>('univer.menu-service');
 
@@ -88,12 +111,12 @@ export class DesktopMenuService extends Disposable implements IMenuService {
         });
     }
 
-    getMenuItems(positions: MenuPosition): IDisplayMenuItem[] {
+    getMenuItems(positions: MenuPosition): Array<IDisplayMenuItem<any>> {
         if (this._menuByPositions.has(positions)) {
             return [...this._menuByPositions.get(positions)!.values()].map((menu) => this.getDisplayMenuItems(menu));
         }
 
-        return [] as IDisplayMenuItem[];
+        return [] as Array<IDisplayMenuItem<any>>;
     }
 
     getMenuItem(id: string): IMenuItem | null {
@@ -104,7 +127,7 @@ export class DesktopMenuService extends Disposable implements IMenuService {
         return null;
     }
 
-    private getDisplayMenuItems(menuItem: IMenuItem): IDisplayMenuItem {
+    private getDisplayMenuItems(menuItem: IMenuItem): IDisplayMenuItem<any> {
         const shortcut = this._shortcutService.getCommandShortcut(menuItem.id);
         if (!shortcut) {
             return menuItem;

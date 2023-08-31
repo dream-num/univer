@@ -1,6 +1,5 @@
 import { ComponentChildren, createRef, RefObject } from 'preact';
 import { PureComponent } from 'preact/compat';
-import { Icon } from '..';
 import { ICustomComponent } from '../../Common';
 import { BaseMenuItem } from '../../Interfaces';
 import { Dropdown } from '../Dropdown';
@@ -8,6 +7,9 @@ import { Input } from '../Input';
 import { BaseItemProps, Item } from '../Item/Item';
 import { CustomLabel } from '../CustomLabel';
 import styles from './index.module.less';
+import { Icon } from '../..'; // FIXME: strange import
+
+// TODO: these type definitions should be moved out of components to menu service
 
 export enum SelectTypes {
     SINGLE, // 普通下拉
@@ -18,7 +20,7 @@ export enum SelectTypes {
     DOUBLEFIX,
 }
 
-enum DisplayTypes {
+export enum DisplayTypes {
     LABEL,
     SUFFIX,
 }

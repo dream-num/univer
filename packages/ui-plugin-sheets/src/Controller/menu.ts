@@ -14,13 +14,23 @@ import {
     SetWorksheetRowHeightCommand,
     RemoveRowCommand,
     RemoveColCommand,
+    SetFontFamilyCommand,
+    SetFontSizeCommand,
+    SetTextColorCommand,
+    SetBackgroundColorCommand,
+    SetCellBorderCommand,
 } from '@univerjs/base-sheets';
-import { IMenuItem, MenuPosition } from '@univerjs/base-ui';
+import { ColorPicker, DisplayTypes, IMenuItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes } from '@univerjs/base-ui';
 import { FontItalic, FontWeight, ICommandService, IPermissionService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { RightMenuInput } from '../View';
+import { BORDER_LINE_CHILDREN, BORDER_SIZE_CHILDREN, FONT_FAMILY_CHILDREN, FONT_SIZE_CHILDREN } from '../View/Toolbar/Const';
+import { ColorSelect, LineBold, LineColor } from '../View/Common';
+import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const/PLUGIN_NAME';
+
+import styles from '../View/Toolbar/index.module.less';
 
 export function UndoMenuItemFactory(accessor: IAccessor): IMenuItem {
     const undoRedoService = accessor.get(IUndoRedoService);
@@ -224,15 +234,234 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
-export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuItem {}
+export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    // NOTE: we could get more font options from (a) font service, so user can provide their own fonts
 
-export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuItem {}
+    return {
+        id: SetFontFamilyCommand.id,
+        title: 'font',
+        tooltip: 'toolbar.font',
+        selectType: SelectTypes.SINGLE,
+        type: MenuItemType.SELECTOR,
+        menu: [MenuPosition.TOOLBAR],
+        selections: FONT_FAMILY_CHILDREN,
+    };
+}
 
-export function FontColorSelectorMenuItemFactory(accessor: IAccessor): IMenuItem {}
+export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    return {
+        id: SetFontSizeCommand.id,
+        title: 'fontSize',
+        tooltip: 'toolbar.fontSize',
+        type: MenuItemType.SELECTOR,
+        selectType: SelectTypes.INPUT,
+        menu: [MenuPosition.TOOLBAR],
+        selections: FONT_SIZE_CHILDREN,
+    };
+}
 
-export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuItem {}
+export function FontColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    return {
+        id: SetTextColorCommand.id,
+        title: 'textColor',
+        type: MenuItemType.SELECTOR,
+        selectType: SelectTypes.DOUBLEFIX,
+        menu: [MenuPosition.TOOLBAR],
+        label: {
+            name: SHEET_UI_PLUGIN_NAME + ColorSelect.name,
+            props: {
+                getComponent: (ref: ColorSelect) => {},
+                color: '#000',
+                label: {
+                    name: 'TextColorIcon',
+                },
+            },
+        },
+        className: styles.selectColorPickerParent,
+        selections: [
+            {
+                label: 'toolbar.resetColor',
+            },
+            {
+                label: {
+                    name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
+                    props: {
+                        onClick: (color: string, e: MouseEvent) => {},
+                    },
+                },
+                className: styles.selectColorPicker,
+            },
+        ],
+    };
+}
 
-export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuItem {}
+export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    return {
+        id: SetBackgroundColorCommand.id,
+        title: 'fillColor',
+        type: MenuItemType.SELECTOR,
+        selectType: SelectTypes.DOUBLEFIX,
+        menu: [MenuPosition.TOOLBAR],
+        label: {
+            name: SHEET_UI_PLUGIN_NAME + ColorSelect.name,
+            props: {
+                getComponent: (ref: ColorSelect) => {},
+                color: '#fff',
+                label: {
+                    name: 'FillColorIcon',
+                },
+            },
+        },
+        className: styles.selectColorPickerParent,
+        selections: [
+            {
+                label: 'toolbar.resetColor',
+            },
+            {
+                label: {
+                    name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
+                    props: {
+                        onClick: (color: string, e: MouseEvent) => {},
+                    },
+                },
+                className: styles.selectColorPicker,
+            },
+        ],
+    };
+}
+
+export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    return {
+        id: SetCellBorderCommand.id,
+        title: 'border',
+        display: DisplayTypes.SUFFIX,
+        menu: [MenuPosition.TOOLBAR],
+        type: MenuItemType.SELECTOR,
+        selectType: SelectTypes.DOUBLEFIX,
+        selections: [
+            ...BORDER_LINE_CHILDREN,
+            {
+                name: 'borderColor',
+                label: {
+                    name: SHEET_UI_PLUGIN_NAME + LineColor.name,
+                    props: {
+                        color: '#000',
+                        label: 'borderLine.borderColor',
+                    },
+                },
+                className: styles.selectColorPickerParent,
+                children: [
+                    {
+                        label: {
+                            name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
+                            props: {},
+                        },
+                        className: styles.selectColorPicker,
+                        onClick: (...arg) => {
+                            arg[0].stopPropagation();
+                        },
+                    },
+                ],
+            },
+            {
+                label: {
+                    name: SHEET_UI_PLUGIN_NAME + LineBold.name,
+                    props: {
+                        img: 0,
+                        label: 'borderLine.borderSize',
+                    },
+                },
+                onClick: (...arg) => {},
+                className: styles.selectLineBoldParent,
+                children: BORDER_SIZE_CHILDREN,
+            },
+        ],
+    };
+}
+
+// this._toolList = [
+//     {
+//         type: 3,
+//         display: 1,
+//         show: this._config.border,
+//         tooltip: 'toolbar.border.main',
+//         className: styles.selectDoubleString,
+//         onClick: (value: string) => {
+//             if (value) {
+//                 this._borderInfo.type = value as BorderType;
+//             }
+//             this.hideTooltip();
+//             this.setBorder();
+//         },
+//         name: 'border',
+//     },
+//     {
+//         type: 5,
+//         tooltip: 'toolbar.mergeCell.main',
+//         label: {
+//             name: 'MergeIcon',
+//         },
+//         show: this._config.mergeCell,
+//         onClick: (value: string) => {
+//             this.setMerge(value ?? 'all');
+//             this.hideTooltip();
+//         },
+//         name: 'mergeCell',
+//         children: MERGE_CHILDREN,
+//     },
+//     {
+//         type: 3,
+//         tooltip: 'toolbar.horizontalAlignMode.main',
+//         className: styles.selectDoubleString,
+//         display: 1,
+//         name: 'horizontalAlignMode',
+//         show: this._config.horizontalAlignMode,
+//         onClick: (value: HorizontalAlign) => {
+//             this.setHorizontalAlignment(value);
+//             this.hideTooltip();
+//         },
+//         children: HORIZONTAL_ALIGN_CHILDREN,
+//     },
+//     {
+//         type: 3,
+//         tooltip: 'toolbar.verticalAlignMode.main',
+//         className: styles.selectDoubleString,
+//         display: 1,
+//         name: 'verticalAlignMode',
+//         show: this._config.verticalAlignMode,
+//         onClick: (value: VerticalAlign) => {
+//             this.setVerticalAlignment(value);
+//             this.hideTooltip();
+//         },
+//         children: VERTICAL_ALIGN_CHILDREN,
+//     },
+//     {
+//         type: 3,
+//         className: styles.selectDoubleString,
+//         tooltip: 'toolbar.textWrapMode.main',
+//         display: 1,
+//         name: 'textWrapMode',
+//         show: this._config.textWrapMode,
+//         onClick: (value: WrapStrategy) => {
+//             this.setWrapStrategy(value);
+//             this.hideTooltip();
+//         },
+//         children: TEXT_WRAP_CHILDREN,
+//     },
+//     {
+//         type: 3,
+//         className: styles.selectDoubleString,
+//         name: 'textRotateMode',
+//         tooltip: 'toolbar.textRotateMode.main',
+//         display: 1,
+//         show: this._config.textRotateMode,
+//         onClick: (value: number | string) => {
+//             this.setTextRotation(value);
+//             this.hideTooltip();
+//         },
+//         children: TEXT_ROTATE_CHILDREN,
+//     },
+// ];
 
 export function MergeCellMenuItemFactory(accessor: IAccessor): IMenuItem {}
 

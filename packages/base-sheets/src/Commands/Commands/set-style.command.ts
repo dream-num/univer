@@ -232,7 +232,7 @@ export interface ISetFontSizeCommandParams {
 
 export const SetFontSizeCommand: ICommand<ISetFontSizeCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.set-font-family',
+    id: 'sheet.command.set-font-size',
     handler: async (accessor, params) => {
         if (!params) {
             return false;
@@ -256,7 +256,7 @@ export interface ISetColorCommandParams {
 
 export const SetTextColorCommand: ICommand<ISetColorCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.set-font-family',
+    id: 'sheet.command.set-text-color',
     handler: async (accessor, params) => {
         if (!params) {
             return false;

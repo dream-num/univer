@@ -1,7 +1,7 @@
 import { ComponentChild, Component } from 'preact';
 import { Subscription } from 'rxjs';
 
-import { AppContext, Button, Tooltip, CustomLabel } from '@univerjs/base-ui';
+import { AppContext, Button, Tooltip, CustomLabel, IDisplayMenuItem, MenuItemType, Select, IMenuSelectorItem, IMenuItem } from '@univerjs/base-ui';
 import { ICommandService } from '@univerjs/core';
 
 import styles from './index.module.less';
@@ -11,7 +11,7 @@ export interface IToolbarItemStatus {
     activated: boolean;
 }
 
-export class ToolbarItem extends Component<IDisplayMenuItem, IToolbarItemStatus> {
+export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbarItemStatus> {
     static override contextType = AppContext;
 
     private disabledSubscription: Subscription | undefined;
@@ -39,12 +39,45 @@ export class ToolbarItem extends Component<IDisplayMenuItem, IToolbarItemStatus>
 
     override componentWillMount() {
         this.disabledSubscription?.unsubscribe();
+        this.activatedSubscription?.unsubscribe();
     }
 
     render(): ComponentChild {
-        const { props, context } = this;
+        // here we render different types of toolbar item according to their type
+        switch (this.props.type) {
+            case MenuItemType.SELECTOR:
+                return this.renderSelectorType();
+            default:
+                return this.renderButtonType();
+        }
+    }
+
+    private renderSelectorType(): ComponentChild {
+        const { context, state } = this;
         const commandService: ICommandService = context.injector.get(ICommandService);
-        const { disabled, activated } = this.state;
+        const { disabled, activated } = state;
+
+        const props = this.props as IDisplayMenuItem<IMenuSelectorItem>;
+
+        return (
+            <Tooltip title={props.title + (props.shortcut ? ` (${props.shortcut})` : '')} placement="bottom">
+                <Select
+                    className={props.className}
+                    tooltip={props.tooltip}
+                    label={props.label}
+                    display={props.display}
+                    type={props.selectType!}
+                    children={props.selections!}
+                    onClick={(value) => commandService.executeCommand(props.id, value)}
+                ></Select>
+            </Tooltip>
+        );
+    }
+
+    private renderButtonType(): ComponentChild {
+        const { props, context, state } = this;
+        const commandService: ICommandService = context.injector.get(ICommandService);
+        const { disabled, activated } = state;
 
         return (
             <Tooltip title={props.title + (props.shortcut ? ` (${props.shortcut})` : '')} placement="bottom">

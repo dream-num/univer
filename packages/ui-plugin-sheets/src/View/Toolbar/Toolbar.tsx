@@ -1,17 +1,5 @@
-import {
-    AppContext,
-    AppContextValues,
-    BaseComponentProps,
-    Button,
-    Component,
-    Container,
-    createRef,
-    debounce,
-    IDisplayMenuItem,
-    PreactContext,
-    Select,
-    Tooltip,
-} from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps, Button, Container, CustomLabel, debounce, IDisplayMenuItem, Select, Tooltip } from '@univerjs/base-ui';
+import { Component, createRef } from 'preact';
 import { IToolbarItemProps, SheetContainerUIController } from '../../Controller';
 import styles from './index.module.less';
 import { ToolbarItem } from './ToolbarItem';
@@ -31,7 +19,7 @@ interface IState {
 }
 
 export class Toolbar extends Component<IProps, IState> {
-    static override contextType: PreactContext<Partial<AppContextValues>> = AppContext;
+    static override contextType = AppContext;
 
     toolbarRef = createRef();
 
@@ -50,7 +38,12 @@ export class Toolbar extends Component<IProps, IState> {
         this.setToolbarListWidth();
     }, 50);
 
-    override initialize() {
+    constructor(props: IProps) {
+        super(props);
+        this.initialize();
+    }
+
+    initialize() {
         this.state = {
             // Button contains main button and drop down arrow, translation file contains main and right
             showMore: false,
@@ -214,7 +207,7 @@ export class Toolbar extends Component<IProps, IState> {
                     return (
                         <Tooltip title={item.tooltip} placement={'bottom'}>
                             <Button unActive={item.unActive} className={styles.textButton} type="text" active={item.active} onClick={item.onClick}>
-                                {this.getLabel(item.label)}
+                                <CustomLabel label={item.label} />
                             </Button>
                         </Tooltip>
                     );
@@ -255,7 +248,9 @@ export class Toolbar extends Component<IProps, IState> {
                     <div ref={this.moreBtnRef} className={styles.moreButton} style={{ visibility: moreToolList.length ? 'visible' : 'hidden' }}>
                         <Tooltip title={'toolbar.toolMoreTip'} placement={'bottom'}>
                             <Button type="text" onClick={this.showMore}>
-                                <div style={{ fontSize: '14px' }}>{this.getLocale('toolbar.toolMore')}</div>
+                                <div style={{ fontSize: '14px' }}>
+                                    <CustomLabel label={'toolbar.toolMore'} />
+                                </div>
                             </Button>
                         </Tooltip>
                     </div>

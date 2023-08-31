@@ -1,6 +1,7 @@
+import { Component } from 'preact';
 import { BaseComponentProps } from '../../BaseComponent';
 import { SlotComponent } from '../../Common/SlotManager';
-import { Component } from '../../Framework';
+import { AppContext } from '../../Common';
 
 interface IState {
     slotGroup: Map<string, SlotComponent>;
@@ -11,7 +12,14 @@ interface IProps extends BaseComponentProps {
 }
 
 export class Slot extends Component<IProps, IState> {
+    static override contextType = AppContext;
+
     private _refs: any[] = [];
+
+    constructor(props: IProps) {
+        super(props);
+        this.initialize();
+    }
 
     initialize() {
         this.state = {
@@ -19,7 +27,7 @@ export class Slot extends Component<IProps, IState> {
         };
     }
 
-    componentDidMount(): void {
+    override componentDidMount(): void {
         this.props.getComponent?.(this);
     }
 
@@ -68,7 +76,7 @@ export class Slot extends Component<IProps, IState> {
         slotGroup.forEach((item, index) => {
             const Label = this.context.componentManager.get(item.component.name);
             if (Label) {
-                arr.push(<Label ref={(ref: any) => (this._refs[index as any] = ref)} {...item.component.props}></Label>);
+                arr.push(<Label ref={(ref: any) => (this._refs[index as any] = ref)} {...item.component.props} />);
             }
         });
         return arr;

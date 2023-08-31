@@ -1,4 +1,5 @@
-import { BaseComponentProps, CellRange, Component } from '@univerjs/base-ui';
+import { BaseComponentProps, CellRange, CustomLabel } from '@univerjs/base-ui';
+import { Component } from 'preact';
 import { FormulaParamType, FunParams } from '../../../Basics';
 import styles from './index.module.less';
 
@@ -14,7 +15,12 @@ interface IState {
 }
 
 export class SearchItem extends Component<IProps, IState> {
-    override initialize() {
+    constructor(props: IProps) {
+        super(props);
+        this.initialize();
+    }
+
+    initialize() {
         this.state = {
             description: {},
             rangeList: [],
@@ -62,10 +68,10 @@ export class SearchItem extends Component<IProps, IState> {
                             <span>{item.name}:</span>
                             <div onClick={() => this.handleClick(index)}>
                                 <CellRange
-                                    contentPlaceholder={this.getLocale('formula.formulaMore.tipDataRangeTitle')}
-                                    title={this.getLocale('formula.formulaMore.tipSelectDataRange')}
+                                    contentPlaceholder={(<CustomLabel label="formula.formulaMore.tipDataRangeTitle" />) as unknown as string}
+                                    title={(<CustomLabel label="formula.formulaMore.tipSelectDataRange" />) as unknown as string}
                                     value={rangeList[index]}
-                                ></CellRange>
+                                />
                             </div>
                             <span>={'{}'}</span>
                         </div>

@@ -1,35 +1,12 @@
 {
+    "extends": "../../tsconfig.json",
     "compilerOptions": {
         "rootDir": "./",
         "outDir": "lib",
-        "target": "ESNext",
-        "lib": [
-            "ESNext",
-            "DOM",
-            "WebWorker"
-        ],
-        "module": "ESNext",
         "moduleResolution": "Node", //This value is needed for Node.js.
-        "declaration": true,
-        "declarationDir": "./lib",
-        "declarationMap": true,
-        "sourceMap": true,
-        "resolveJsonModule": true,
-        "strict": true,
-        "noImplicitOverride": true,
-        "allowJs": true,
         "baseUrl": "./",
-        "skipLibCheck": true,
         "esModuleInterop": true, // auto allowSyntheticDefaultImports true
-        "experimentalDecorators": true,
-        "jsx": "react-jsx",
-        "jsxImportSource": "preact",
-        "strictPropertyInitialization": false,
-        "types": [
-            "jest",
-            "node",
-            "@types/jest"
-        ]
+        "strictPropertyInitialization": false
     },
     "include": [
         "src/**/*",

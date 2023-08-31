@@ -1,5 +1,5 @@
+import { useRef } from 'preact/hooks';
 import { JSXComponent } from '../../BaseComponent';
-import { useRef } from '../../Framework';
 import { BaseCheckboxGroupProps, CheckboxGroupComponent } from '../../Interfaces';
 import { Checkbox } from './Checkbox';
 import styles from './index.module.less';
@@ -20,8 +20,8 @@ import styles from './index.module.less';
 // };
 
 export const CheckboxGroup = (props: BaseCheckboxGroupProps) => {
-    let { options, onChange, disabled, name } = props;
-    let ref = useRef<HTMLDivElement>(null);
+    const { options, onChange, disabled, name } = props;
+    const ref = useRef<HTMLDivElement>(null);
 
     if (disabled) {
         options.forEach((item) => {
@@ -36,10 +36,10 @@ export const CheckboxGroup = (props: BaseCheckboxGroupProps) => {
 
     const handelChange = () => {
         if (!onChange) return;
-        let input = ref.current?.querySelectorAll('label input');
-        let value: string[] = [];
+        const input = ref.current?.querySelectorAll('label input');
+        const value: string[] = [];
         input?.forEach((item) => {
-            let element = item as HTMLInputElement;
+            const element = item as HTMLInputElement;
             if (element.checked) {
                 value.push(element.value);
             }

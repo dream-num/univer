@@ -1,4 +1,4 @@
-import { Component, RefObject } from '../Framework';
+import { Component, RefObject } from 'preact';
 
 /**
  * check element

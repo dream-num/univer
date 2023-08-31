@@ -1,4 +1,5 @@
-import { BaseComponentProps, Component, Container, Content, createRef, Footer, Header, Layout, Sider } from '@univerjs/base-ui';
+import { BaseComponentProps, Container, Content, Footer, Header, Layout, Sider } from '@univerjs/base-ui';
+import { Component, createRef } from 'preact';
 import defaultSkin from '@univerjs/base-ui/Basics/CSS/Skin/default.module.less';
 import { Tools } from '@univerjs/core';
 import cssVars from 'css-vars-ponyfill';
@@ -34,7 +35,7 @@ export class DocContainer extends Component<BaseDocContainerProps> {
         this.changeSkin(props.config.container as string, 'default');
     }
 
-    componentDidMount() {
+    override componentDidMount() {
         this.props.getComponent?.(this);
     }
 
@@ -96,7 +97,7 @@ export class DocContainer extends Component<BaseDocContainerProps> {
      */
     changeSkin(container: HTMLElement | string, skin: string) {
         // Collect all  skins
-        let root = document.documentElement;
+        const root = document.documentElement;
 
         const id = typeof container === 'string' ? container : container.id;
 
@@ -124,7 +125,7 @@ export class DocContainer extends Component<BaseDocContainerProps> {
             });
         } else {
             // set css variable
-            let doc = getSkinStyleDoc(id);
+            const doc = getSkinStyleDoc(id);
 
             /**
              *  covert object to style, remove " and replace , to ;

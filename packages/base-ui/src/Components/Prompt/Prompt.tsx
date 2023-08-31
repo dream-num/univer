@@ -1,5 +1,6 @@
-import { Component } from '../../Framework';
+import { Component } from 'preact';
 import { Modal } from '../Modal';
+import { CustomLabel } from '../CustomLabel';
 import styles from './index.module.less';
 
 interface BaseConfirmProps {
@@ -36,12 +37,12 @@ export class Prompt extends Component<BaseConfirmProps, IState> {
     getGroup() {
         const group = [
             {
-                label: this.getLocale('button.confirm'),
+                label: <CustomLabel label="button.confirm" />,
                 type: 'primary',
                 onClick: () => this.handleClick(),
             },
             {
-                label: this.getLocale('button.cancel'),
+                label: <CustomLabel label="button.cancel" />,
                 onClick: () => this.showModal(false),
             },
         ];
@@ -61,8 +62,8 @@ export class Prompt extends Component<BaseConfirmProps, IState> {
         const { show } = this.state;
         return (
             <div className={styles.confirmModal}>
-                <Modal visible={show} isDrag={true} title={this.getLocale(title)} group={this.getGroup()}>
-                    {this.getLocale(content)}
+                <Modal visible={show} isDrag={true} title={<CustomLabel label={title} />} group={this.getGroup()}>
+                    <CustomLabel label={content} />
                 </Modal>
             </div>
         );

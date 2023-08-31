@@ -1,4 +1,4 @@
-import { Component, createRef } from '../../Framework';
+import { Component, createRef } from 'preact';
 import { JSXComponent } from '../../BaseComponent';
 import { BaseSliderRangeProps, BaseSliderSingleProps, SliderComponent } from '../../Interfaces';
 import { randomId } from '../../Utils';
@@ -17,6 +17,11 @@ export class Slider extends Component<BaseSliderRangeProps | BaseSliderSinglePro
     width: number;
 
     ref = createRef();
+
+    constructor(props: BaseSliderSingleProps | BaseSliderRangeProps) {
+        super();
+        this.initialize(props);
+    }
 
     initialize(props: BaseSliderSingleProps | BaseSliderRangeProps) {
         this.state = {
@@ -38,7 +43,7 @@ export class Slider extends Component<BaseSliderRangeProps | BaseSliderSinglePro
     onClick = (index: number, e: MouseEvent) => {
         const { min = 0, max = 100, step = 1 } = this.props;
         const target = e.currentTarget as HTMLElement;
-        let track = e.offsetX;
+        const track = e.offsetX;
         const width = target.offsetWidth;
         if (track < 0 || track > width) return;
         let value = (track / this.width) * (max - min);
@@ -56,9 +61,9 @@ export class Slider extends Component<BaseSliderRangeProps | BaseSliderSinglePro
      * 控制input样式
      */
     changeInputValue = (index: number, value: number | string) => {
-        let parentNode = this.ref.current;
-        let input = parentNode.getElementsByTagName('input')[index];
-        let id = input.id;
+        const parentNode = this.ref.current;
+        const input = parentNode.getElementsByTagName('input')[index];
+        const id = input.id;
 
         parentNode.style.setProperty(`--${id}`, value);
         if (!index) {
@@ -85,9 +90,9 @@ export class Slider extends Component<BaseSliderRangeProps | BaseSliderSinglePro
 
     componentDidMount() {
         const { min = 0, max = 100, range } = this.props;
-        let diff = max - min;
+        const diff = max - min;
 
-        let slider = this.ref.current;
+        const slider = this.ref.current;
         this.width = slider.offsetWidth;
         slider.style.cssText += `--${this.idPrev}: ${this.state.valuePrev}; --${this.idNext}: ${this.state.valueNext}`;
 

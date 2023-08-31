@@ -1,4 +1,5 @@
-import { BaseCountBarProps, Button, Component, CountBarComponent, createRef, Icon, JSXComponent, Slider } from '@univerjs/base-ui';
+import { BaseCountBarProps, Button, CountBarComponent, Icon, JSXComponent, Slider, AppContext } from '@univerjs/base-ui';
+import { Component, createRef } from 'preact';
 import { ObserverManager, PLUGIN_NAMES } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import styles from './index.module.less';
@@ -13,13 +14,20 @@ interface CountBarProps extends BaseCountBarProps {
 }
 
 export class CountBar extends Component<CountBarProps, CountState> {
+    static override contextType = AppContext;
+
     max = 400;
 
     min = 0;
 
     ref = createRef();
 
-    override initialize(props: CountBarProps) {
+    constructor(props: CountBarProps) {
+        super(props);
+        this.initialize(props);
+    }
+
+    initialize(props: CountBarProps) {
         this.state = {
             zoom: 100,
             content: '',
@@ -45,7 +53,7 @@ export class CountBar extends Component<CountBarProps, CountState> {
     }
 
     onChange = (e: Event) => {
-        let target = e.target as HTMLInputElement;
+        const target = e.target as HTMLInputElement;
         if (this.props.onChange) {
             this.props.onChange(target.value);
         }
@@ -58,7 +66,7 @@ export class CountBar extends Component<CountBarProps, CountState> {
     };
 
     addZoom = () => {
-        let number = Math.floor(this.state.zoom / 10);
+        const number = Math.floor(this.state.zoom / 10);
         let value = (number + 1) * 10;
         if (value >= this.max) value = this.max;
         this.setValue({ zoom: value });
@@ -68,7 +76,7 @@ export class CountBar extends Component<CountBarProps, CountState> {
     };
 
     reduceZoom = () => {
-        let number = Math.ceil(this.state.zoom / 10);
+        const number = Math.ceil(this.state.zoom / 10);
         let value = (number - 1) * 10;
         if (value <= this.min) value = this.min;
         this.setValue({ zoom: value });

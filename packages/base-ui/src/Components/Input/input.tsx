@@ -1,4 +1,4 @@
-import { Component, createRef } from '../../Framework';
+import { Component, createRef } from 'preact';
 import { JSXComponent } from '../../BaseComponent';
 import { BaseInputProps, InputComponent } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
@@ -29,6 +29,11 @@ type IState = {
 
 export class Input extends Component<BaseInputProps, IState> {
     ref = createRef();
+
+    constructor(props: BaseInputProps) {
+        super();
+        this.initialize(props);
+    }
 
     initialize(props: BaseInputProps) {
         // super(props);

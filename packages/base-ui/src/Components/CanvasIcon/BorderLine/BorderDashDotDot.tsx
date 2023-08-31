@@ -1,5 +1,5 @@
+import { Component, createRef, RefObject } from 'preact';
 import { JSXComponent } from '../../../BaseComponent';
-import { Component, createRef, RefObject } from '../../../Framework';
 import { IconComponent } from '../../../Interfaces';
 import { CanvasIcon } from '../CanvasIcon';
 
@@ -14,7 +14,7 @@ class BorderDashDotDot extends Component<IProps, IState> {
 
     drawLine(ref: RefObject<CanvasIcon>) {
         const canvas = ref.current! as unknown as HTMLCanvasElement;
-        let ctx = canvas.getContext('2d')!;
+        const ctx = canvas.getContext('2d')!;
         this.ref.current.setLineDash(ctx, 'DashDotDot', 'h', 0, 5, 100, 5);
         ctx.stroke();
         ctx.closePath();

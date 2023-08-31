@@ -1,4 +1,4 @@
-import { Component } from '@univerjs/base-ui';
+import { Component } from 'preact';
 
 type LocationProps = {
     config: any;

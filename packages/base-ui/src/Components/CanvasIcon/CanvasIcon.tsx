@@ -1,4 +1,4 @@
-import { Component, createRef, RefObject } from '../../Framework';
+import { Component, createRef, RefObject } from 'preact';
 import Style from './index.module.less';
 
 type IProps = {
@@ -11,7 +11,7 @@ type IState = {};
 class CanvasIcon extends Component<IProps, IState> {
     canvasRef = createRef();
 
-    componentDidMount() {
+    override componentDidMount() {
         this.drawLine();
     }
 
@@ -31,7 +31,7 @@ class CanvasIcon extends Component<IProps, IState> {
      * @param line_ed   End Y
      */
     setLineDash(ctx: CanvasRenderingContext2D, type: string, hv: string, m_st: number, m_ed: number, line_st: number, line_ed: number) {
-        let borderType: { [index: string]: string } = {
+        const borderType: { [index: string]: string } = {
             '0': 'none',
             '1': 'Thin',
             '2': 'Hair',

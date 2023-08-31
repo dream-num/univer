@@ -1,4 +1,5 @@
-import { BaseComponentRender, Component, Input } from '@univerjs/base-ui';
+import { BaseComponentRender, Input } from '@univerjs/base-ui';
+import { Component } from 'preact';
 
 interface IProps {
     prefix?: string;
@@ -9,8 +10,6 @@ interface IProps {
 
 export class ClipboardInput extends Component<IProps> {
     private _render: BaseComponentRender;
-
-    override initialize() {}
 
     render() {
         const { prefix, placeholder1, suffix, placeholder2 } = this.props;

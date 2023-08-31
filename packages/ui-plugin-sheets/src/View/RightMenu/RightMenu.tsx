@@ -1,5 +1,6 @@
 import { IMouseEvent } from '@univerjs/base-render';
-import { BaseRightMenuProps, Component, createRef, IDisplayMenuItem, Menu } from '@univerjs/base-ui';
+import { BaseRightMenuProps, IDisplayMenuItem, Menu } from '@univerjs/base-ui';
+import { Component, createRef } from 'preact';
 import { RightMenuProps } from '../../Controller';
 import Style from './index.module.less';
 
@@ -16,7 +17,12 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
 
     root = createRef();
 
-    override initialize() {
+    constructor(props: BaseRightMenuProps) {
+        super(props);
+        this.initialize();
+    }
+
+    initialize() {
         this.state = {
             visible: false,
             srcElement: null,

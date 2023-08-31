@@ -1,5 +1,5 @@
+import { VNode } from 'preact';
 import { BaseComponent, JSXComponent } from '../BaseComponent';
-import { VNode } from '../Framework';
 
 export interface BaseRadioIProps {
     value: string;

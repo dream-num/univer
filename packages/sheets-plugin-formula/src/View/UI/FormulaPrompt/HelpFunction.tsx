@@ -1,4 +1,5 @@
-import { BaseComponentProps, Component, createRef } from '@univerjs/base-ui';
+import { BaseComponentProps, CustomLabel } from '@univerjs/base-ui';
+import { Component, createRef } from 'preact';
 import { IKeyValue } from '@univerjs/core';
 import { FormulaParamType, FormulaType } from '../../../Basics';
 import styles from './index.module.less';
@@ -21,7 +22,12 @@ interface IState {
 export class HelpFunction extends Component<IProps, IState> {
     contentRef = createRef<HTMLDivElement>();
 
-    override initialize() {
+    constructor(props: IProps) {
+        super(props);
+        this.initialize();
+    }
+
+    initialize() {
         this.state = {
             activeIndex: 0,
             functionInfo: {},
@@ -72,17 +78,22 @@ export class HelpFunction extends Component<IProps, IState> {
                     <Help title={functionInfo.n} value={functionInfo.p} type="name" active={activeIndex} />
                 </div>
                 <div className={styles.helpFunctionContent}>
-                    <div>{this.getLocale('formula.formulaMore.helpExample')}</div>
+                    <div>
+                        <CustomLabel label="formula.formulaMore.helpExample" />
+                    </div>
                     <Help title={functionInfo.n} value={functionInfo.p} type="example" active={activeIndex} />
-                    <Params title={this.getLocale('formula.formulaMore.helpAbstract')} value={this.getLocale(functionInfo.d)} />
+                    <Params
+                        title={(<CustomLabel label="formula.formulaMore.helpAbstract" />) as unknown as string}
+                        value={(<CustomLabel label={functionInfo.d} />) as unknown as string}
+                    />
                     <>
                         {functionInfo &&
                             functionInfo.p &&
                             functionInfo.p.map((item: FormulaParamType, i: number) => (
                                 <Params
                                     className={activeIndex === i ? styles.helpFunctionActive : ''}
-                                    title={this.getLocale(item.name)}
-                                    value={this.getLocale(item.detail)}
+                                    title={(<CustomLabel label={item.name} />) as unknown as string}
+                                    value={(<CustomLabel label={item.detail} />) as unknown as string}
                                     active={activeIndex}
                                 />
                             ))}
@@ -128,7 +139,9 @@ class Help extends Component<IHelpProps, IHelpState> {
                 </span>
                 {props.value &&
                     props.value.map((item: FormulaParamType, i: number) => (
-                        <span className={props.active === i ? styles.helpFunctionActive : ''}>{this.getLocale((item as IKeyValue)[`${props.type}`])},</span>
+                        <span className={props.active === i ? styles.helpFunctionActive : ''}>
+                            <CustomLabel label={(item as IKeyValue)[`${props.type}`]} />,
+                        </span>
                     ))}
                 <span>{')'}</span>
             </div>

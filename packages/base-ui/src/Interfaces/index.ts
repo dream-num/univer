@@ -6,6 +6,7 @@ export * from './ColorPicker';
 export * from './ColorPickerCircleButton';
 export * from './Container';
 export * from './CountBar';
+export * from './CustomLabel';
 export * from './Drag';
 export * from './FilterSelect';
 // export * from './FormatModal';

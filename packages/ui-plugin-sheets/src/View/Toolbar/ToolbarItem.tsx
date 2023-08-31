@@ -1,7 +1,7 @@
-import { ComponentChild, ComponentChildren, isValidElement } from 'preact';
+import { ComponentChild, Component } from 'preact';
 import { Subscription } from 'rxjs';
 
-import { Button, Tooltip, Component, CustomComponent, IDisplayMenuItem } from '@univerjs/base-ui';
+import { AppContext, Button, Tooltip, CustomLabel } from '@univerjs/base-ui';
 import { ICommandService } from '@univerjs/core';
 
 import styles from './index.module.less';
@@ -12,6 +12,8 @@ export interface IToolbarItemStatus {
 }
 
 export class ToolbarItem extends Component<IDisplayMenuItem, IToolbarItemStatus> {
+    static override contextType = AppContext;
+
     private disabledSubscription: Subscription | undefined;
 
     private activatedSubscription: Subscription | undefined;
@@ -47,26 +49,9 @@ export class ToolbarItem extends Component<IDisplayMenuItem, IToolbarItemStatus>
         return (
             <Tooltip title={props.title + (props.shortcut ? ` (${props.shortcut})` : '')} placement="bottom">
                 <Button active={activated} className={styles.textButton} type="text" disabled={disabled} onClick={() => commandService.executeCommand(props.id)}>
-                    {this.getLabel({ name: props.icon })}
+                    <CustomLabel label={{ name: props.icon }} />
                 </Button>
             </Tooltip>
         );
-    }
-
-    override getLabel(label: string | CustomComponent | ComponentChildren) {
-        if (typeof label === 'string') {
-            return this.getLocale(label);
-        }
-        if (isValidElement(label)) {
-            return label;
-        }
-        if (label) {
-            const Label = this.context.componentManager.get((label as CustomComponent).name);
-            if (Label) {
-                const props = (label as CustomComponent).props ?? {};
-                return <Label {...props}></Label>;
-            }
-        }
-        return null;
     }
 }

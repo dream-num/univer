@@ -1,6 +1,6 @@
+import { Component, createRef } from 'preact';
 import { Icon, Modal } from '..';
 import { BaseComponentProps } from '../../BaseComponent';
-import { Component, createRef } from '../../Framework';
 import { ModalButtonGroup } from '../../Interfaces';
 import { Input } from '../Input';
 import styles from './index.module.less';
@@ -62,7 +62,7 @@ export class CellRange extends Component<BaseCellRangeModalProps, IState> {
         onChange?.(e);
     };
 
-    componentWillReceiveProps(props: BaseCellRangeModalProps) {
+    override componentWillReceiveProps(props: BaseCellRangeModalProps) {
         if (props.value !== this.state.value) {
             this.setState({
                 value: props.value,

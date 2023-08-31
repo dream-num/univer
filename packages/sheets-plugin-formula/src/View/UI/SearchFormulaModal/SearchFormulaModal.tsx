@@ -1,4 +1,5 @@
-import { BaseComponentProps, Component, Modal } from '@univerjs/base-ui';
+import { BaseComponentProps, Modal } from '@univerjs/base-ui';
+import { Component } from 'preact';
 import { SearchFormulaModalData } from '../../../Basics/Interfaces/IFormula';
 
 interface IProps extends BaseComponentProps {}
@@ -8,7 +9,12 @@ interface IState {
 }
 
 export class SearchFormulaModal extends Component<IProps, IState> {
-    override initialize() {
+    constructor(props: IProps) {
+        super(props);
+        this.initialize();
+    }
+
+    initialize() {
         this.state = {
             modalData: [],
         };

@@ -1,4 +1,5 @@
-import { BaseComponentProps, Component, Icon } from '@univerjs/base-ui';
+import { BaseComponentProps, CustomLabel, Icon } from '@univerjs/base-ui';
+import { Component } from 'preact';
 
 interface IState {
     color: string;
@@ -10,17 +11,22 @@ interface IProps extends BaseComponentProps {
 }
 
 export class LineColor extends Component<IProps, IState> {
+    constructor(props: IProps) {
+        super(props);
+        this.initialize();
+    }
+
     initialize() {
         this.state = {
             color: this.props.color,
         };
     }
 
-    componentDidMount() {
+    override componentDidMount() {
         this.props.getComponent?.(this);
     }
 
-    componentWillReceiveProps(props: IProps): void {
+    override componentWillReceiveProps(props: IProps): void {
         this.setState({
             color: props.color,
         });
@@ -38,7 +44,9 @@ export class LineColor extends Component<IProps, IState> {
 
         return (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ display: 'inline-block', borderBottom: `3px solid ${color}` }}>{this.getLocale(label)}</span>
+                <span style={{ display: 'inline-block', borderBottom: `3px solid ${color}` }}>
+                    <CustomLabel label={label} />
+                </span>
                 <Icon.RightIcon />
             </div>
         );

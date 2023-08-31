@@ -1,10 +1,9 @@
-import { ComponentChild } from 'preact';
+import { Component, ComponentChild, createRef } from 'preact';
 import { Subscription } from 'rxjs';
 import { ICommandService } from '@univerjs/core';
-import { Component, createRef } from '../../Framework';
 import { BaseMenuProps, BaseMenuState, BaseMenuItem, BaseMenuStyle } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
-
+import { CustomLabel } from '../CustomLabel';
 import styles from './index.module.less';
 import { IDisplayMenuItem } from '../../services/menu/menu.service';
 
@@ -12,6 +11,11 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     private _MenuRef = createRef<HTMLUListElement>();
 
     private _refs: Menu[] = [];
+
+    constructor(props: BaseMenuProps) {
+        super(props);
+        this.initialize();
+    }
 
     getMenuRef = () => this._MenuRef;
 
@@ -123,7 +127,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
                                     this.mouseLeave(e, index);
                                 }}
                             >
-                                {this.getLabel(item.label)}
+                                <CustomLabel label={item.label} />
                                 {item.children ? (
                                     <Menu
                                         ref={(ele: Menu) => (this._refs[index] = ele)}
@@ -149,7 +153,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
         );
     }
 
-    protected override initialize() {
+    protected initialize() {
         this.state = {
             show: false,
             posStyle: {},
@@ -191,7 +195,7 @@ export class MenuItem extends Component<{ menuItem: IDisplayMenuItem; onClick: (
                     commandService.executeCommand(item.id);
                 }}
             >
-                {this.getLabel(item.title)}
+                <CustomLabel label={item.title}></CustomLabel>
                 {item.shortcut && ` (${item.shortcut})`}
             </li>
         );

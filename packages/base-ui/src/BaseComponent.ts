@@ -1,7 +1,8 @@
+import { ComponentClass } from 'preact';
+import { ForwardFn } from 'preact/compat';
 import { BasePlugin } from '@univerjs/core';
 import { Context } from '@univerjs/core/src/Basics/Context';
 import { Injector } from '@wendellhu/redi';
-import { ComponentClass, ForwardFn } from './Framework';
 import { Description } from './Interfaces';
 
 // TODO Button const enum; BaseComponentSheet => BaseComponentXXX

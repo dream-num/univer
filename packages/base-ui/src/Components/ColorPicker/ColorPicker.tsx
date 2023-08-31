@@ -1,9 +1,11 @@
-import { BaseColorPickerProps, ColorPickerComponent, Component, createRef, JSXComponent } from '../..';
+import { Component, createRef } from 'preact';
+import { BaseColorPickerProps, ColorPickerComponent, JSXComponent } from '../..';
 import { Button, Tooltip } from '../index';
 import { ColorPickerPanel } from './ColorPickerPanel';
+import { CustomLabel } from '../CustomLabel';
 import styles from './index.module.less';
 
-let allColor = [
+const allColor = [
     ['#000', '#444', '#666', '#999', '#ccc', '#eee', '#f3f3f3', '#fff'],
     ['#f00', '#f90', '#ff0', '#0f0', '#0ff', '#00f', '#90f', '#f0f'],
     ['#f4cccc', '#fce5cd', '#fff2cc', '#d9ead3', '#d0e0e3', '#cfe2f3', '#d9d2e9', '#ead1dc'],
@@ -27,6 +29,11 @@ interface IState {
 
 class ColorPicker extends Component<BaseColorPickerProps, IState> {
     ulRef = createRef();
+
+    constructor(props: BaseColorPickerProps) {
+        super();
+        this.initialize(props);
+    }
 
     initialize(props: BaseColorPickerProps) {
         this.state = {
@@ -165,7 +172,9 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                             ))}
                         </div>
                         <div onClick={(e) => e.stopImmediatePropagation()}>
-                            <Button onClick={this.onSwitch}>{this.state.setting ? this.getLocale('colorPicker.collapse') : this.getLocale('colorPicker.customColor')}</Button>
+                            <Button onClick={this.onSwitch}>
+                                {this.state.setting ? <CustomLabel label="colorPicker.collapse" /> : <CustomLabel label="colorPicker.customColor" />}
+                            </Button>
                         </div>
                     </div>
 
@@ -181,7 +190,7 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                                         // this.hideSelect();
                                     }}
                                 >
-                                    {this.getLocale('colorPicker.confirmColor')}
+                                    <CustomLabel label="colorPicker.confirmColor" />
                                 </Button>
                                 <Button
                                     danger
@@ -189,7 +198,7 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                                         this.onCancel();
                                     }}
                                 >
-                                    {this.getLocale('colorPicker.cancelColor')}
+                                    <CustomLabel label="colorPicker.cancelColor" />
                                 </Button>
                                 <Button
                                     onClick={(e: MouseEvent) => {
@@ -199,7 +208,7 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                                         });
                                     }}
                                 >
-                                    {this.getLocale('colorPicker.change')}
+                                    <CustomLabel label="colorPicker.change" />
                                 </Button>
                             </div>
                         </div>

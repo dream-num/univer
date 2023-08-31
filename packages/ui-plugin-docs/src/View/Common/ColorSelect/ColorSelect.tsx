@@ -1,4 +1,5 @@
-import { BaseComponentProps, Component, ComponentChildren, CustomComponent } from '@univerjs/base-ui';
+import { BaseComponentProps, CustomComponent, CustomLabel } from '@univerjs/base-ui';
+import { Component, ComponentChildren } from 'preact';
 import styles from './index.module.less';
 
 interface IProps extends BaseComponentProps {
@@ -12,11 +13,11 @@ interface IState {
 }
 
 export class ColorSelect extends Component<IProps, IState> {
-    componentDidMount(): void {
+    override componentDidMount(): void {
         this.props.getComponent?.(this);
     }
 
-    componentWillReceiveProps(props: IProps) {
+    override componentWillReceiveProps(props: IProps) {
         this.setState({
             color: props.color,
         });
@@ -32,7 +33,9 @@ export class ColorSelect extends Component<IProps, IState> {
         const { label } = this.props;
         return (
             <div className={styles.colorSelect}>
-                <div>{this.getLabel(label)}</div>
+                <div>
+                    <CustomLabel label={label} />
+                </div>
                 <div className={styles.colorSelectLine} style={{ background: this.state.color }}></div>
             </div>
         );

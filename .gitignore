@@ -6,7 +6,7 @@
 #npm
 package-lock.json
 yarn.lock
-pnpm-lock.yaml
+# pnpm-lock.yaml
 
 dist
 local

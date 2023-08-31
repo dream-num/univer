@@ -1,5 +1,5 @@
+import { ComponentChildren, JSX } from 'preact';
 import { BaseComponent, JSXComponent } from '../BaseComponent';
-import { ComponentChildren, JSX } from '../Framework';
 import { IDisplayMenuItem } from '../services/menu/menu.service';
 
 export interface BaseMenuItem {

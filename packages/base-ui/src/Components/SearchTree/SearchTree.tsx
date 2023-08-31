@@ -1,4 +1,4 @@
-import { Component, createRef } from '../../Framework';
+import { Component, createRef } from 'preact';
 import { JSXComponent } from '../../BaseComponent';
 import { BaseSearchTreeProps, SearchTreeComponent } from '../../Interfaces';
 import * as Icon from '../Icon';
@@ -17,6 +17,11 @@ interface IState {
 
 class SearchTree extends Component<BaseSearchTreeProps, IState> {
     input = createRef();
+
+    constructor(props: BaseSearchTreeProps) {
+        super();
+        this.initialize(props);
+    }
 
     initialize(props: BaseSearchTreeProps) {
         this.state = {
@@ -40,7 +45,7 @@ class SearchTree extends Component<BaseSearchTreeProps, IState> {
      * @param event
      */
     onInput(event: Event) {
-        let searchValue = this.input.current.value;
+        const searchValue = this.input.current.value;
         this.setState({
             searchValue,
         });
@@ -52,8 +57,8 @@ class SearchTree extends Component<BaseSearchTreeProps, IState> {
      * @param val
      */
     search(val: string) {
-        let data = this.state.data;
-        let dataClone = data.filter((item) => item.label.includes(val));
+        const data = this.state.data;
+        const dataClone = data.filter((item) => item.label.includes(val));
         this.setState({
             dataClone,
         });
@@ -64,7 +69,7 @@ class SearchTree extends Component<BaseSearchTreeProps, IState> {
      * @param index
      */
     onClick(index: number) {
-        let data = this.state.dataClone;
+        const data = this.state.dataClone;
         data[index].checked = !data[index].checked;
         this.setState({
             dataClone: data,
@@ -75,7 +80,7 @@ class SearchTree extends Component<BaseSearchTreeProps, IState> {
      * 全选
      */
     clickAll() {
-        let data = this.state.dataClone;
+        const data = this.state.dataClone;
         data.forEach((item) => {
             item.checked = true;
         });
@@ -88,7 +93,7 @@ class SearchTree extends Component<BaseSearchTreeProps, IState> {
      * 清除
      */
     clickClean() {
-        let data = this.state.dataClone;
+        const data = this.state.dataClone;
         data.forEach((item) => {
             item.checked = false;
         });
@@ -101,7 +106,7 @@ class SearchTree extends Component<BaseSearchTreeProps, IState> {
      * 反选
      */
     clickInvert() {
-        let data = this.state.dataClone;
+        const data = this.state.dataClone;
         data.forEach((item) => {
             item.checked = !item.checked;
         });

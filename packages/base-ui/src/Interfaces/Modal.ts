@@ -1,8 +1,8 @@
+import { ComponentChildren } from 'preact';
 import { BaseComponent, JSXComponent } from '../BaseComponent';
-import { ComponentChildren } from '../Framework';
 
 export interface BaseModalProps {
-    title?: string;
+    title?: string | JSX.Element;
     width?: number;
     top?: number;
     style?: JSX.CSSProperties;

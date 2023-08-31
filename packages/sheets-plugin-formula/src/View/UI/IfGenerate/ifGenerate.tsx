@@ -1,4 +1,5 @@
-import { BaseButtonProps, BaseModalProps, BaseSelectProps, Component, FunctionComponent, Button, Modal, Select } from '@univerjs/base-ui';
+import { BaseButtonProps, BaseModalProps, BaseSelectProps, FunctionComponent, Button, Modal, Select, AppContext } from '@univerjs/base-ui';
+import { Component } from 'preact';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { IConfig } from '../../../Basics/Interfaces/IFormula';
 import styles from './index.module.less';
@@ -17,6 +18,8 @@ interface IState {
 }
 
 class IfGenerate extends Component<IProps, IState> {
+    static override contextType = AppContext;
+
     Button: FunctionComponent<BaseButtonProps>;
 
     Modal: FunctionComponent<BaseModalProps>;

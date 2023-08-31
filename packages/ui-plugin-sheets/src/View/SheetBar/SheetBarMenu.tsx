@@ -1,7 +1,8 @@
-import { Component, Icon, joinClassNames } from '@univerjs/base-ui';
+import { CustomLabel, Icon, joinClassNames } from '@univerjs/base-ui';
+import { Component } from 'preact';
 import styles from './index.module.less';
 
-export interface SheetBarMenuItem {
+export interface ISheetBarMenuItem {
     label?: string;
     hide?: boolean;
     selected?: boolean;
@@ -10,8 +11,8 @@ export interface SheetBarMenuItem {
     onClick?: (e?: MouseEvent) => void;
 }
 
-export interface SheetBarMenuProps {
-    menu: SheetBarMenuItem[];
+export interface ISheetBarMenuProps {
+    menu: ISheetBarMenuItem[];
     style?: JSX.CSSProperties;
     onClick?: (e?: MouseEvent) => void;
 }
@@ -20,14 +21,19 @@ interface IState {
     show: boolean;
 }
 
-export class SheetBarMenu extends Component<SheetBarMenuProps, IState> {
+export class SheetBarMenu extends Component<ISheetBarMenuProps, IState> {
+    constructor(props: ISheetBarMenuProps) {
+        super(props);
+        this.initialize();
+    }
+
     initialize() {
         this.state = {
             show: false,
         };
     }
 
-    handleClick(e: MouseEvent, item: SheetBarMenuItem) {
+    handleClick(e: MouseEvent, item: ISheetBarMenuItem) {
         e.stopPropagation();
         const { onClick } = this.props;
         if (item.onClick) {
@@ -59,7 +65,9 @@ export class SheetBarMenu extends Component<SheetBarMenuProps, IState> {
                         <span className={styles.sheetBarMenuIcon}>
                             <EffIcon item={item}></EffIcon>
                         </span>
-                        <span className={styles.sheetBarMenuTitle}>{this.getLabel(item.label ?? '')}</span>
+                        <span className={styles.sheetBarMenuTitle}>
+                            <CustomLabel label={item.label ?? ''} />
+                        </span>
                     </li>
                 ))}
             </ul>
@@ -67,7 +75,7 @@ export class SheetBarMenu extends Component<SheetBarMenuProps, IState> {
     }
 }
 
-function EffIcon(props: { item: SheetBarMenuItem }) {
+function EffIcon(props: { item: ISheetBarMenuItem }) {
     if (props.item.hide) {
         return <Icon.HideIcon />;
     }

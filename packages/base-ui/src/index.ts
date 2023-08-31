@@ -6,7 +6,6 @@ export * from './Utils';
 export * from './Helpers';
 export * from './Components';
 export * from './BaseComponent';
-export * from './Framework';
 export * from './UIPlugin';
 
 export { IMenuService, IMenuItem, MenuPosition, DesktopMenuService, IDisplayMenuItem } from './services/menu/menu.service';

@@ -21,14 +21,25 @@ import {
     SetCellBorderCommand,
     SetTextRotationCommand,
     SetTextWrapCommand,
+    SetHorizontalTextAlignCommand,
+    SetVerticalTextAlignCommand,
 } from '@univerjs/base-sheets';
 import { ColorPicker, DisplayTypes, IMenuItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes } from '@univerjs/base-ui';
-import { FontItalic, FontWeight, ICommandService, IPermissionService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
+import { FontItalic, FontWeight, IBorderData, ICommandService, IPermissionService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { RightMenuInput } from '../View';
-import { BORDER_LINE_CHILDREN, BORDER_SIZE_CHILDREN, FONT_FAMILY_CHILDREN, FONT_SIZE_CHILDREN, TEXT_ROTATE_CHILDREN, TEXT_WRAP_CHILDREN } from '../View/Toolbar/Const';
+import {
+    BORDER_LINE_CHILDREN,
+    BORDER_SIZE_CHILDREN,
+    FONT_FAMILY_CHILDREN,
+    FONT_SIZE_CHILDREN,
+    HORIZONTAL_ALIGN_CHILDREN,
+    TEXT_ROTATE_CHILDREN,
+    TEXT_WRAP_CHILDREN,
+    VERTICAL_ALIGN_CHILDREN,
+} from '../View/Toolbar/Const';
 import { ColorSelect, LineBold, LineColor } from '../View/Common';
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const/PLUGIN_NAME';
 
@@ -89,7 +100,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuItem {
             };
         }),
         activated$: new Observable<boolean>((subscriber) => {
-            commandService.onCommandExecuted((c) => {
+            const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
                 if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
                     return;
@@ -101,7 +112,9 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuItem {
 
                 subscriber.next(isBold === FontWeight.BOLD);
             });
+
             subscriber.next(false);
+            return disposable.dispose;
         }),
     };
 }
@@ -134,7 +147,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuItem {
             };
         }),
         activated$: new Observable<boolean>((subscriber) => {
-            commandService.onCommandExecuted((c) => {
+            const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
                 if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
                     return;
@@ -145,7 +158,9 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuItem {
 
                 subscriber.next(isItalic === FontItalic.ITALIC);
             });
+
             subscriber.next(false);
+            return disposable.dispose;
         }),
     };
 }
@@ -178,7 +193,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuItem {
             };
         }),
         activated$: new Observable<boolean>((subscriber) => {
-            commandService.onCommandExecuted((c) => {
+            const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
                 if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
                     return;
@@ -189,7 +204,9 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuItem {
 
                 subscriber.next(!!(isUnderline && isUnderline.s));
             });
+
             subscriber.next(false);
+            return disposable.dispose;
         }),
     };
 }
@@ -222,7 +239,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuItem {
             };
         }),
         activated$: new Observable<boolean>((subscriber) => {
-            commandService.onCommandExecuted((c) => {
+            const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
                 if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
                     return;
@@ -233,7 +250,9 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuItem {
 
                 subscriber.next(!!(st && st.s));
             });
+
             subscriber.next(false);
+            return disposable.dispose;
         }),
     };
 }
@@ -252,6 +271,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         type: MenuItemType.SELECTOR,
         menu: [MenuPosition.TOOLBAR],
         selections: FONT_FAMILY_CHILDREN,
+        className: styles.selectLabelString,
         disabled$: new Observable<boolean>((subscriber) => {
             let editable = false;
             function update() {
@@ -270,7 +290,9 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
             };
         }),
         value$: new Observable<string>((subscriber) => {
-            commandService.onCommandExecuted((c) => {
+            const defaultValue = FONT_FAMILY_CHILDREN[0].value;
+
+            const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
                 if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
                     return;
@@ -279,10 +301,11 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
                 const range = selectionManager.getCurrentCell();
                 const ff = range?.getFontFamily();
 
-                subscriber.next(ff);
+                subscriber.next(ff ?? defaultValue);
             });
 
-            subscriber.next(FONT_FAMILY_CHILDREN[0].value);
+            subscriber.next(defaultValue);
+            return disposable.dispose;
         }),
     };
 }
@@ -318,7 +341,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
             };
         }),
         value$: new Observable<number>((subscriber) => {
-            commandService.onCommandExecuted((c) => {
+            const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
                 if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
                     return;
@@ -329,11 +352,17 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
 
                 subscriber.next(fs);
             });
+
+            return disposable.dispose;
         }),
     };
 }
 
 export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    const permissionService = accessor.get(IPermissionService);
+    const commandService = accessor.get(ICommandService);
+    const selectionManager = accessor.get(ISelectionManager);
+
     return {
         id: SetTextColorCommand.id,
         title: 'textColor',
@@ -366,10 +395,29 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
                 className: styles.selectColorPicker,
             },
         ],
+        value$: new Observable<string>((subscriber) => {
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+                if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
+                    return;
+                }
+
+                const range = selectionManager.getCurrentCell();
+                const color = range?.getFontColor();
+
+                subscriber.next(color ?? '');
+            });
+
+            return disposable.dispose;
+        }),
     };
 }
 
 export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    const permissionService = accessor.get(IPermissionService);
+    const commandService = accessor.get(ICommandService);
+    const selectionManager = accessor.get(ISelectionManager);
+
     return {
         id: SetBackgroundColorCommand.id,
         title: 'fillColor',
@@ -401,10 +449,29 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
                 className: styles.selectColorPicker,
             },
         ],
+        value$: new Observable<string>((subscriber) => {
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+                if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
+                    return;
+                }
+
+                const range = selectionManager.getCurrentCell();
+                const color = range?.getBackground();
+
+                subscriber.next(color ?? '');
+            });
+
+            return disposable.dispose;
+        }),
     };
 }
 
 export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    const permissionService = accessor.get(IPermissionService);
+    const commandService = accessor.get(ICommandService);
+    const selectionManager = accessor.get(ISelectionManager);
+
     return {
         id: SetCellBorderCommand.id,
         title: 'border',
@@ -450,98 +517,57 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
                 children: BORDER_SIZE_CHILDREN,
             },
         ],
+        value$: new Observable<IBorderData | undefined>((subscriber) => {
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+                if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
+                    return;
+                }
+
+                const range = selectionManager.getCurrentCell();
+                const borderData = range?.getBorder();
+
+                subscriber.next(borderData);
+            });
+
+            return disposable.dispose;
+        }),
     };
 }
 
-// this._toolList = [
-//     {
-//         type: 3,
-//         display: 1,
-//         show: this._config.border,
-//         tooltip: 'toolbar.border.main',
-//         className: styles.selectDoubleString,
-//         onClick: (value: string) => {
-//             if (value) {
-//                 this._borderInfo.type = value as BorderType;
-//             }
-//             this.hideTooltip();
-//             this.setBorder();
-//         },
-//         name: 'border',
-//     },
-//     {
-//         type: 5,
-//         tooltip: 'toolbar.mergeCell.main',
-//         label: {
-//             name: 'MergeIcon',
-//         },
-//         show: this._config.mergeCell,
-//         onClick: (value: string) => {
-//             this.setMerge(value ?? 'all');
-//             this.hideTooltip();
-//         },
-//         name: 'mergeCell',
-//         children: MERGE_CHILDREN,
-//     },
-//     {
-//         type: 3,
-//         tooltip: 'toolbar.horizontalAlignMode.main',
-//         className: styles.selectDoubleString,
-//         display: 1,
-//         name: 'horizontalAlignMode',
-//         show: this._config.horizontalAlignMode,
-//         onClick: (value: HorizontalAlign) => {
-//             this.setHorizontalAlignment(value);
-//             this.hideTooltip();
-//         },
-//         children: HORIZONTAL_ALIGN_CHILDREN,
-//     },
-//     {
-//         type: 3,
-//         tooltip: 'toolbar.verticalAlignMode.main',
-//         className: styles.selectDoubleString,
-//         display: 1,
-//         name: 'verticalAlignMode',
-//         show: this._config.verticalAlignMode,
-//         onClick: (value: VerticalAlign) => {
-//             this.setVerticalAlignment(value);
-//             this.hideTooltip();
-//         },
-//         children: VERTICAL_ALIGN_CHILDREN,
-//     },
-//     {
-//         type: 3,
-//         className: styles.selectDoubleString,
-//         tooltip: 'toolbar.textWrapMode.main',
-//         display: 1,
-//         name: 'textWrapMode',
-//         show: this._config.textWrapMode,
-//         onClick: (value: WrapStrategy) => {
-//             this.setWrapStrategy(value);
-//             this.hideTooltip();
-//         },
-//         children: TEXT_WRAP_CHILDREN,
-//     },
-//     {
-//         type: 3,
-//         className: styles.selectDoubleString,
-//         name: 'textRotateMode',
-//         tooltip: 'toolbar.textRotateMode.main',
-//         display: 1,
-//         show: this._config.textRotateMode,
-//         onClick: (value: number | string) => {
-//             this.setTextRotation(value);
-//             this.hideTooltip();
-//         },
-//         children: TEXT_ROTATE_CHILDREN,
-//     },
-// ];
+// Merge cell command is not ready yet.
+// export function MergeCellMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+//     return {
+//     }
+// }
 
-export function MergeCellMenuItemFactory(accessor: IAccessor): IMenuItem {}
+export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    return {
+        id: SetHorizontalTextAlignCommand.id,
+        title: 'horizontalAlignMode',
+        menu: [MenuPosition.TOOLBAR],
+        tooltip: 'toolbar.horizontalAlignMode.main',
+        className: styles.selectDoubleString,
+        display: DisplayTypes.SUFFIX,
+        type: MenuItemType.SELECTOR,
+        selectType: SelectTypes.DOUBLE,
+        selections: HORIZONTAL_ALIGN_CHILDREN,
+    };
+}
 
-export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuItem {}
-
-export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuItem {}
+export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    return {
+        id: SetVerticalTextAlignCommand.id,
+        title: 'verticalAlignMode',
+        tooltip: 'toolbar.verticalAlignMode.main',
+        className: styles.selectDoubleString,
+        display: DisplayTypes.SUFFIX,
+        type: MenuItemType.SELECTOR,
+        menu: [MenuPosition.TOOLBAR],
+        selectType: SelectTypes.DOUBLE,
+        selections: VERTICAL_ALIGN_CHILDREN,
+    };
+}
 
 export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     const commandService = accessor.get(ICommandService);

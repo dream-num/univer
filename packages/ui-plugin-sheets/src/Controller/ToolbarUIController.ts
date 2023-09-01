@@ -20,6 +20,8 @@ import {
     UnderlineMenuItemFactory,
     UndoMenuItemFactory,
     WrapTextMenuItemFactory,
+    HorizontalAlignMenuItemFactory,
+    VerticalAlignMenuItemFactory,
 } from './menu';
 
 export interface BaseToolbarSelectProps extends BaseSelectProps {
@@ -127,6 +129,8 @@ export class ToolbarUIController extends Disposable {
             TextColorSelectorMenuItemFactory,
             BackgroundColorSelectorMenuItemFactory,
             CellBorderSelectorMenuItemFactory,
+            HorizontalAlignMenuItemFactory,
+            VerticalAlignMenuItemFactory,
             WrapTextMenuItemFactory,
             TextRotateMenuItemFactory,
         ].forEach((factory) => {

@@ -26,7 +26,7 @@ function valueIsError(value: string) {
 }
 
 // 是否是纯数字
-function isRealNum(val: string | number) {
+export function isRealNum(val: string | number) {
     if (val === null || val.toString().replace(/\s/g, '') === '') {
         return false;
     }
@@ -35,7 +35,7 @@ function isRealNum(val: string | number) {
         return false;
     }
 
-    if (!Number.isNaN(val as number)) {
+    if (!isNaN(val as number)) {
         return true;
     }
     return false;

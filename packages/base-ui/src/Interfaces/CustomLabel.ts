@@ -19,6 +19,7 @@ export interface ICustomLabelType {
 
 export interface IBaseCustomLabelProps {
     label: string | ICustomComponent | ComponentChildren;
+    onChange?: (e: Event) => void;
 }
 
 export interface CustomLabelComponent extends BaseComponent<IBaseCustomLabelProps> {

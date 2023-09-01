@@ -1,48 +1,48 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
-import { ISetWorksheetOrderMutationParams, SetWorksheetOrderMutation, SetWorksheetOrderUndoMutationFactory } from '../Mutations/set-worksheet-order.mutation';
+import { ISetZoomRatioMutationParams, SetZoomRatioMutation, SetZoomRatioUndoMutationFactory } from '../Mutations/set-zoom-ratio.mutation';
 
-export interface ISetWorksheetOrderCommandParams {
-    order?: number;
+export interface ISetZoomRatioCommandParams {
+    zoomRatio?: number;
     workbookId?: string;
     worksheetId?: string;
 }
 
-export const SetWorksheetOrderCommand: ICommand = {
+export const SetZoomRatioCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.set-worksheet-order',
+    id: 'sheet.command.set-zoom-ratio',
 
-    handler: async (accessor: IAccessor, params: ISetWorksheetOrderCommandParams) => {
+    handler: async (accessor: IAccessor, params: ISetZoomRatioCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
         const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
-        const order = params.order ?? 0;
+        const zoomRatio = params.zoomRatio ?? 1;
 
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
 
-        const setWorksheetOrderMutationParams: ISetWorksheetOrderMutationParams = {
-            order,
+        const setZoomRatioMutationParams: ISetZoomRatioMutationParams = {
+            zoomRatio,
             workbookId,
             worksheetId,
         };
 
-        const undoMutationParams = SetWorksheetOrderUndoMutationFactory(accessor, setWorksheetOrderMutationParams);
-        const result = commandService.executeCommand(SetWorksheetOrderMutation.id, setWorksheetOrderMutationParams);
+        const undoMutationParams = SetZoomRatioUndoMutationFactory(accessor, setZoomRatioMutationParams);
+        const result = commandService.executeCommand(SetZoomRatioMutation.id, setZoomRatioMutationParams);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: 'sheet',
                 undo() {
-                    return commandService.executeCommand(SetWorksheetOrderMutation.id, undoMutationParams);
+                    return commandService.executeCommand(SetZoomRatioMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetWorksheetOrderMutation.id, setWorksheetOrderMutationParams);
+                    return commandService.executeCommand(SetZoomRatioMutation.id, setZoomRatioMutationParams);
                 },
             });
             return true;

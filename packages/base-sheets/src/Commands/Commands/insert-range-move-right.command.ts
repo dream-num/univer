@@ -4,11 +4,12 @@ import { CommandType, Dimension, ICellData, ICommand, ICommandService, ICurrentU
 import { DeleteRangeMutation } from '../Mutations/delete-range.mutation';
 import { InsertRangeMutation, InsertRangeUndoMutationFactory } from '../Mutations/insert-range.mutation';
 import { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../Basics/Interfaces/MutationInterface';
+import { ISelectionManager } from '../../Services/tokens';
 
 export interface IInsertRangeMoveRightParams {
-    workbookId: string;
-    worksheetId: string;
-    range: IRangeData;
+    workbookId?: string;
+    worksheetId?: string;
+    range?: IRangeData;
     destination?: IRangeData;
 }
 
@@ -20,15 +21,24 @@ export const InsertRangeMoveRightCommand: ICommand = {
     id: 'sheet.command.insert-range-move-right',
 
     handler: async (accessor: IAccessor, params: IInsertRangeMoveRightParams) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        const selectionManager = accessor.get(ISelectionManager);
 
-        const { destination, workbookId, worksheetId, range } = params;
+        const range = params.range || selectionManager.getCurrentSelections()[0];
+        if (!range) {
+            return false;
+        }
+
+        const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+
         let rangeData: IRangeData = range;
         const cellValue = new ObjectMatrix<ICellData>();
         const { startRow, endRow, startColumn, endColumn } = range;
-        if (destination) {
+        if (params.destination) {
+            const destination = params.destination;
             const worksheet = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook().getSheetBySheetId(worksheetId);
             if (!worksheet) return false;
             const sheetMatrix = worksheet.getCellMatrix();

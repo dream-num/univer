@@ -15,10 +15,10 @@ import { IAccessor } from '@wendellhu/redi';
 import { ISetRangeStyleMutationParams, SetRangeStyleMutation, SetRangeStyleUndoMutationFactory } from '../Mutations/set-range-styles.mutation';
 
 export interface ICopyFormatToRangeCommandParams {
-    workbookId: string;
-    worksheetId: string;
-    originRange: IRangeData;
-    destinationRange: IRangeData;
+    workbookId?: string;
+    worksheetId?: string;
+    originRange?: IRangeData;
+    destinationRange?: IRangeData;
 }
 
 export const CopyFormatToRangeCommand: ICommand = {
@@ -27,10 +27,15 @@ export const CopyFormatToRangeCommand: ICommand = {
     handler: async (accessor: IAccessor, params: ICopyFormatToRangeCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId)?.getWorkBook();
+        if (!params.originRange || !params.destinationRange) return false;
+
+        const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
-        const handleResult = handleCopyRange(accessor, params.workbookId, params.worksheetId, params.originRange, params.destinationRange);
+        const handleResult = handleCopyRange(accessor, workbookId, worksheetId, params.originRange, params.destinationRange);
         if (!handleResult) return false;
         const value = handleResult[0];
         const range = handleResult[1];
@@ -46,8 +51,8 @@ export const CopyFormatToRangeCommand: ICommand = {
 
         const setRangeStyleMutationParams: ISetRangeStyleMutationParams = {
             range: [range],
-            worksheetId: params.worksheetId,
-            workbookId: params.workbookId,
+            worksheetId,
+            workbookId,
             value: stylesMatrix.getData(),
         };
 
@@ -65,7 +70,7 @@ export const CopyFormatToRangeCommand: ICommand = {
             });
             return true;
         }
-        return true;
+        return false;
     },
 };
 

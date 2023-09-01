@@ -3,6 +3,9 @@ import { IAccessor } from '@wendellhu/redi';
 import { ISetWorksheetColWidthMutationParams, SetWorksheetColWidthMutation, SetWorksheetColWidthMutationFactory } from '../Mutations/set-worksheet-col-width.mutation';
 import { ISelectionManager } from '../../Services/tokens';
 
+/**
+ * TODO@Dushusir 支持多个选区
+ */
 export interface SetWorksheetColWidthCommandParams {
     workbookId?: string;
     worksheetId?: string;
@@ -22,7 +25,7 @@ export const SetWorksheetColWidthCommand: ICommand = {
         const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         const range = selections[0];
 
-        let { worksheetId, workbookId, colIndex, value } = params;
+        let { worksheetId, workbookId, colIndex, value } = params || {};
         if (!workbookId) {
             workbookId = workbook.getUnitId();
         }

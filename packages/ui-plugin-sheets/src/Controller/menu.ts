@@ -16,6 +16,8 @@ import {
     RemoveColCommand,
     DeleteRangeMoveLeftCommand,
     DeleteRangeMoveUpCommand,
+    SetWorksheetRowHideCommand,
+    SetWorksheetRowShowCommand,
 } from '@univerjs/base-sheets';
 import { IMenuItem, MenuPosition } from '@univerjs/base-ui';
 import { FontItalic, FontWeight, ICommandService, IPermissionService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
@@ -285,6 +287,22 @@ export function RemoveRowMenuItemFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
+export function HideRowMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: SetWorksheetRowHideCommand.id,
+        menu: [MenuPosition.CONTEXT_MENU],
+        title: 'rightClick.hideSelectedRow',
+    };
+}
+
+export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: SetWorksheetRowShowCommand.id,
+        menu: [MenuPosition.CONTEXT_MENU],
+        title: 'rightClick.showHideRow',
+    };
+}
+
 export function RemoveColMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: RemoveColCommand.id,
@@ -337,7 +355,7 @@ export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuIt
         id: DeleteRangeMoveLeftCommand.id,
         menu: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.moveLeft',
-        parentId:  DeleteRangeCommand.id
+        parentId: DeleteRangeCommand.id,
     };
 }
 
@@ -346,6 +364,6 @@ export function DeleteRangeMoveUpMenuItemFactory(accessor: IAccessor): IMenuItem
         id: DeleteRangeMoveUpCommand.id,
         menu: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.moveUp',
-        parentId:  DeleteRangeCommand.id,
+        parentId: DeleteRangeCommand.id,
     };
 }

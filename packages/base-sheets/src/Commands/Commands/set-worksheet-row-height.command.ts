@@ -3,6 +3,9 @@ import { IAccessor } from '@wendellhu/redi';
 import { ISetWorksheetRowHeightMutationParams, SetWorksheetRowHeightMutation, SetWorksheetRowHeightMutationFactory } from '../Mutations/set-worksheet-row-height.mutation';
 import { ISelectionManager } from '../../Services/tokens';
 
+/**
+ * TODO@Dushusir 支持多个选区
+ */
 export interface SetWorksheetRowHeightCommandParams {
     workbookId?: string;
     worksheetId?: string;

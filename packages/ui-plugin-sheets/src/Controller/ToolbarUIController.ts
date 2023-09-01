@@ -6,19 +6,7 @@ import { ComponentChildren } from 'preact';
 import { SheetToolbarConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
 
-import {
-    BackgroundColorSelectorMenuItemFactory,
-    BoldMenuItemFactory,
-    CellBorderSelectorMenuItemFactory,
-    FontColorSelectorMenuItemFactory,
-    FontFamilySelectorMenuItemFactory,
-    FontSizeSelectorMenuItemFactory,
-    ItalicMenuItemFactory,
-    RedoMenuItemFactory,
-    StrikeThroughMenuItemFactory,
-    UnderlineMenuItemFactory,
-    UndoMenuItemFactory,
-} from './menu';
+import { WrapTextMenuItemFactory } from './menu';
 
 export interface BaseToolbarSelectProps extends BaseSelectProps {
     children?: BaseSelectChildrenProps[];
@@ -114,17 +102,19 @@ export class ToolbarUIController extends Disposable {
         // TODO@wzhudev: now we register menu items that only display in the toolbar here. In fact we should register all commands and menu items and shortcuts
         // in a single controller. I will do that layer.
         [
-            UndoMenuItemFactory,
-            RedoMenuItemFactory,
-            FontFamilySelectorMenuItemFactory,
-            FontSizeSelectorMenuItemFactory,
-            BoldMenuItemFactory,
-            ItalicMenuItemFactory,
-            UnderlineMenuItemFactory,
-            StrikeThroughMenuItemFactory,
-            FontColorSelectorMenuItemFactory,
-            BackgroundColorSelectorMenuItemFactory,
-            CellBorderSelectorMenuItemFactory,
+            // UndoMenuItemFactory,
+            // RedoMenuItemFactory,
+            // FontFamilySelectorMenuItemFactory,
+            // FontSizeSelectorMenuItemFactory,
+            // BoldMenuItemFactory,
+            // ItalicMenuItemFactory,
+            // UnderlineMenuItemFactory,
+            // StrikeThroughMenuItemFactory,
+            // FontColorSelectorMenuItemFactory,
+            // BackgroundColorSelectorMenuItemFactory,
+            // CellBorderSelectorMenuItemFactory,
+            WrapTextMenuItemFactory,
+            // TextRotateMenuItemFactory,
         ].forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });

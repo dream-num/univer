@@ -7,7 +7,15 @@ import { SetWorksheetNameCommand } from '../Commands/Commands/set-worksheet-name
 import { SetWorksheetNameMutation } from '../Commands/Mutations/set-worksheet-name.mutation';
 import { SetWorksheetActivateCommand } from '../Commands/Commands/set-worksheet-activate.command';
 import { SetWorksheetActivateMutation } from '../Commands/Mutations/set-worksheet-activate.mutation';
-import { ISetStyleParams, SetBackgroundColorCommand, SetCellBorderCommand, SetStyleCommand, SetTextColorCommand } from '../Commands/Commands/set-style.command';
+import {
+    ISetStyleParams,
+    SetBackgroundColorCommand,
+    SetCellBorderCommand,
+    SetStyleCommand,
+    SetTextColorCommand,
+    SetTextRotationCommand,
+    SetTextWrapCommand,
+} from '../Commands/Commands/set-style.command';
 import { SetRangeStyleMutation } from '../Commands/Mutations/set-range-styles.mutation';
 import { ISetRangeFormattedValueParams, SetRangeFormattedValueCommand } from '../Commands/Commands/set-range-formatted-value.command';
 import { TrimWhitespaceCommand } from '../Commands/Commands/trim-whitespace.command';
@@ -94,6 +102,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetTextColorCommand,
             SetBackgroundColorCommand,
             SetCellBorderCommand,
+            SetTextWrapCommand,
+            SetTextRotationCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

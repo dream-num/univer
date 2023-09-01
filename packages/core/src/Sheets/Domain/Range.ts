@@ -677,7 +677,7 @@ export class Range {
      * Returns the text rotation settings for the top left cell of the range.
      */
     // getTextRotation(): number {
-    getTextRotation() {
+    getTextRotation(): number {
         return this.getTextRotations()[0][0];
     }
 
@@ -685,8 +685,8 @@ export class Range {
      * Returns the text rotation settings for the cells in the range.
      */
     // getTextRotations(): number[][] {
-    getTextRotations() {
-        return this._getStyles('tr');
+    getTextRotations(): number[][] {
+        return this._getStyles('tr') as any as number[][]; // FIXME@Dushusir: fix type
     }
 
     /**

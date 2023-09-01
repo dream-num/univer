@@ -19,6 +19,8 @@ import {
     SetTextColorCommand,
     SetBackgroundColorCommand,
     SetCellBorderCommand,
+    SetTextRotationCommand,
+    SetTextWrapCommand,
 } from '@univerjs/base-sheets';
 import { ColorPicker, DisplayTypes, IMenuItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes } from '@univerjs/base-ui';
 import { FontItalic, FontWeight, ICommandService, IPermissionService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
@@ -26,7 +28,7 @@ import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { RightMenuInput } from '../View';
-import { BORDER_LINE_CHILDREN, BORDER_SIZE_CHILDREN, FONT_FAMILY_CHILDREN, FONT_SIZE_CHILDREN } from '../View/Toolbar/Const';
+import { BORDER_LINE_CHILDREN, BORDER_SIZE_CHILDREN, FONT_FAMILY_CHILDREN, FONT_SIZE_CHILDREN, TEXT_ROTATE_CHILDREN, TEXT_WRAP_CHILDREN } from '../View/Toolbar/Const';
 import { ColorSelect, LineBold, LineColor } from '../View/Common';
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const/PLUGIN_NAME';
 
@@ -540,9 +542,69 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuItem {
 
 export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuItem {}
 
-export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuItem {}
+export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    const commandService = accessor.get(ICommandService);
+    const selectionManager = accessor.get(ISelectionManager);
 
-export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuItem {}
+    return {
+        id: SetTextWrapCommand.id,
+        title: 'textWrapMode',
+        label: {
+            name: 'textWrapMode',
+            props: undefined,
+        },
+        tooltip: 'toolbar.textWrapMode.main',
+        type: MenuItemType.SELECTOR,
+        selectType: SelectTypes.SINGLE,
+        menu: [MenuPosition.TOOLBAR],
+        selections: TEXT_WRAP_CHILDREN,
+        value$: new Observable((subscriber) => {
+            const dispose = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+                if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
+                    return;
+                }
+
+                const range = selectionManager.getCurrentCell();
+                const ws = range?.getWrapStrategy();
+
+                subscriber.next(ws);
+            });
+
+            return () => dispose.dispose();
+        }),
+    };
+}
+
+// FIXME: set rotation would cause a bug
+export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    const permissionService = accessor.get(IPermissionService);
+    const commandService = accessor.get(ICommandService);
+    const selectionManager = accessor.get(ISelectionManager);
+
+    return {
+        id: SetTextRotationCommand.id,
+        title: 'textRotateMode',
+        tooltip: 'toolbar.textRotateMode.main',
+        type: MenuItemType.SELECTOR,
+        selectType: SelectTypes.SINGLE,
+        menu: [MenuPosition.TOOLBAR],
+        value$: new Observable<number>((subscriber) => {
+            commandService.onCommandExecuted((c) => {
+                const id = c.id;
+                if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
+                    return;
+                }
+
+                const range = selectionManager.getCurrentCell();
+                const tr = range?.getTextRotation();
+
+                subscriber.next(tr);
+            });
+        }),
+        selections: TEXT_ROTATE_CHILDREN,
+    };
+}
 
 export function NumberFormatMenuItemFactory(accessor: IAccessor): IMenuItem {}
 

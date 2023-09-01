@@ -317,7 +317,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuItem {
             name: RightMenuInput.name,
             props: {
                 prefix: 'rightClick.columnWidth',
-                suffix: 'px'
+                suffix: 'px',
             },
         },
     };

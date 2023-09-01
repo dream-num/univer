@@ -1,10 +1,9 @@
 import { Component, ComponentChild, createRef } from 'preact';
 import { Subscription } from 'rxjs';
-import { ICommandService } from '@univerjs/core';
+import { ICommandService, isRealNum } from '@univerjs/core';
+import { BaseMenuProps, BaseMenuState, BaseMenuItem, BaseMenuStyle } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
 import { CustomLabel } from '../CustomLabel';
-
-import { BaseMenuProps, BaseMenuState, BaseMenuItem, BaseMenuStyle } from '../../Interfaces';
 
 import styles from './index.module.less';
 import { IDisplayMenuItem } from '../../services/menu/menu.service';
@@ -164,7 +163,11 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     }
 }
 
-export class MenuItem extends Component<{ menuItem: IDisplayMenuItem; index: number; onClick: () => void }, { disabled: boolean }> {
+/**
+ * state
+ * value: use for command params
+ */
+export class MenuItem extends Component<{ menuItem: IDisplayMenuItem; index: number; onClick: () => void }, { disabled: boolean; value: any }> {
     static override contextType = AppContext;
 
     private disabledSubscription: Subscription | undefined;
@@ -176,6 +179,7 @@ export class MenuItem extends Component<{ menuItem: IDisplayMenuItem; index: num
 
         this.state = {
             disabled: false,
+            value: {},
         };
     }
 
@@ -207,8 +211,23 @@ export class MenuItem extends Component<{ menuItem: IDisplayMenuItem; index: num
         // item.onClick?.call(null, e, item.value, index, deep);
         const commandService: ICommandService = this.context.injector.get(ICommandService);
         this.props.onClick();
-        !(item.subMenuItems && item.subMenuItems.length > 0) && commandService.executeCommand(item.id);
+
+        const value = this.state.value;
+        !(item.subMenuItems && item.subMenuItems.length > 0) && commandService.executeCommand(item.id, { value });
         // this.showMenu(false);
+    };
+
+    /**
+     * user input change value from CustomLabel
+     * @param e
+     */
+    onChange = (e: Event) => {
+        const targetValue = (e.target as HTMLInputElement).value;
+        const value = isRealNum(targetValue) ? parseInt(targetValue) : targetValue;
+
+        this.setState({
+            value,
+        });
     };
 
     override render(): ComponentChild {
@@ -231,7 +250,7 @@ export class MenuItem extends Component<{ menuItem: IDisplayMenuItem; index: num
                     this.mouseLeave(e, index);
                 }}
             >
-                <CustomLabel label={item.label || item.title}></CustomLabel>
+                <CustomLabel label={item.label || item.title} onChange={this.onChange}></CustomLabel>
                 {item.shortcut && ` (${item.shortcut})`}
                 {item.subMenuItems && item.subMenuItems.length > 0 ? (
                     <Menu ref={(ele: Menu) => (this._refs[index] = ele)} menuItems={item.subMenuItems} parent={this}></Menu>

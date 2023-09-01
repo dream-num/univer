@@ -1,9 +1,10 @@
 import { Disposable, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
+import { ComponentChildren } from 'preact';
 import { IShortcutService } from '../shortcut/shorcut.service';
 import { ICustomLabelType } from '../../Interfaces/CustomLabel';
-import { ComponentChildren } from 'preact';
+import { BaseSelectChildrenProps } from '../../Components/Select/Select';
 
 export type OneOrMany<T> = T | T[];
 
@@ -19,6 +20,22 @@ export interface IMenuItemState {
     disabled?: boolean;
     hidden?: boolean;
     checked?: boolean;
+}
+
+// TODO@Dushusir  remove CustomLabelProps and CustomLabel in rightMenuUIController after migrate new UI system
+
+interface CustomLabelProps {
+    prefix?: string[] | string;
+    suffix?: string[] | string;
+    options?: BaseSelectChildrenProps[];
+    label?: string;
+    children?: CustomLabelProps[];
+    onKeyUp?: (e: Event) => void;
+}
+
+export interface CustomLabel {
+    name: string;
+    props?: CustomLabelProps;
 }
 
 export interface IMenuItem {
@@ -89,6 +106,7 @@ export class DesktopMenuService extends Disposable implements IMenuService {
     }
 
     getMenuItems(positions: MenuPosition): IDisplayMenuItem[] {
+        // TODO: @wzhudev: compose shortcut to returned menu items.
         if (this._menuByPositions.has(positions)) {
             return [...this._menuByPositions.get(positions)!.values()].map((menu) => this.getDisplayMenuItems(menu));
         }

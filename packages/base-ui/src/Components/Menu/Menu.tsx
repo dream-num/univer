@@ -1,9 +1,11 @@
 import { Component, ComponentChild, createRef } from 'preact';
 import { Subscription } from 'rxjs';
 import { ICommandService } from '@univerjs/core';
-import { BaseMenuProps, BaseMenuState, BaseMenuItem, BaseMenuStyle } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
 import { CustomLabel } from '../CustomLabel';
+
+import { BaseMenuProps, BaseMenuState, BaseMenuItem, BaseMenuStyle } from '../../Interfaces';
+
 import styles from './index.module.less';
 import { IDisplayMenuItem } from '../../services/menu/menu.service';
 import AppContext from '../../Common/AppContext';
@@ -107,7 +109,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     };
 
     render() {
-        const { className = '', style = '', menu, menuItems, deep = 0 } = this.props;
+        const { className = '', menuItems, style = '', menu, deep = 0 } = this.props;
         const { show, posStyle } = this.state;
 
         return (
@@ -154,7 +156,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
         );
     }
 
-    protected initialize() {
+    protected override initialize() {
         this.state = {
             show: false,
             posStyle: {},
@@ -177,16 +179,6 @@ export class MenuItem extends Component<{ menuItem: IDisplayMenuItem; index: num
         };
     }
 
-    override componentDidMount(): void {
-        this.disabledSubscription = this.props.menuItem.disabled$?.subscribe((disabled) => {
-            this.setState({ disabled });
-        });
-    }
-
-    override componentWillUnmount(): void {
-        this.disabledSubscription?.unsubscribe();
-    }
-
     mouseEnter = (e: MouseEvent, index: number) => {
         const { menuItem } = this.props;
         if (menuItem.subMenus) {
@@ -201,6 +193,16 @@ export class MenuItem extends Component<{ menuItem: IDisplayMenuItem; index: num
         }
     };
 
+    override componentDidMount(): void {
+        this.disabledSubscription = this.props.menuItem.disabled$?.subscribe((disabled) => {
+            this.setState({ disabled });
+        });
+    }
+
+    override componentWillUnmount(): void {
+        this.disabledSubscription?.unsubscribe();
+    }
+
     override render(): ComponentChild {
         const { menuItem: item, index } = this.props;
         const commandService: ICommandService = this.context.injector.get(ICommandService);
@@ -209,6 +211,7 @@ export class MenuItem extends Component<{ menuItem: IDisplayMenuItem; index: num
         return (
             <li
                 className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}
+                // style={{ ...style }}
                 onClick={() => {
                     this.props.onClick();
                     commandService.executeCommand(item.id);

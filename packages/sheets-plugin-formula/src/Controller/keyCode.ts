@@ -47,6 +47,13 @@ export enum KeyCode {
  * https://www.freecodecamp.org/news/javascript-keycode-list-keypress-event-key-codes/
  */
 export enum KeyboardKeyType {
-    backspace = 'Backspace',
-    delete = 'Delete',
+    Backspace = 'Backspace',
+    Delete = 'Delete',
+    Enter = 'Enter',
+    Copy = 'c',
+    Paste = 'v',
+    ArrowUp = 'ArrowUp',
+    ArrowDown = 'ArrowDown',
+    ArrowLeft = 'ArrowLeft',
+    ArrowRight = 'ArrowRight',
 }

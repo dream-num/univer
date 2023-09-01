@@ -43,7 +43,7 @@ export interface ISetStyleParams<T> {
  * The command to set cell style.
  * Set style to a bunch of ranges.
  */
-export const SetStyleCommand: ICommand = {
+export const SetStyleCommand: ICommand<ISetStyleParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-style',
 
@@ -224,6 +224,8 @@ export const SetFontFamilyCommand: ICommand<ISetFontFamilyCommandParams> = {
 
         return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
     },
+    // all subsequent mutations should succeed inorder to make the whole process succeed
+    // Promise.all([]).then(() => true),
 };
 
 export interface ISetFontSizeCommandParams {
@@ -418,4 +420,64 @@ export const SetSpanCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-span',
     handler: async (accessor, params) => true,
+};
+
+export const SetFontFamilyCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-font-family',
+    handler: async (accessor) => true,
+};
+
+export const SetFontSizeCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-font-family',
+    handler: async (accessor) => true,
+};
+
+export const SetTextColorCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-font-family',
+    handler: async (accessor) => true,
+};
+
+export const SetBackgroundColorCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-background-color',
+    handler: async (accessor) => true,
+};
+
+export const SetCellBorderCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-cell-border',
+    handler: async (accessor) => true,
+};
+
+export const SetSpanCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-span',
+    handler: async (params) => true,
+};
+
+export const SetVerticalTextAlignCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-vertical-text-align',
+    handler: async (params) => true,
+};
+
+export const SetHorizontalTextAlignCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-horizontal-text-align',
+    handler: async (params) => true,
+};
+
+export const SetTextWrapCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-text-wrap',
+    handler: async (params) => true,
+};
+
+export const SetTextRotationCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-text-rotation',
+    handler: async (params) => true,
 };

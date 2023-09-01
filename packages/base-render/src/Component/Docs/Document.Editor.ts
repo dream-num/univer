@@ -33,6 +33,8 @@ export class DocsEditor {
 
     onCompositionendObservable = new Observable<IEditorInputConfig>();
 
+    onSelectionStartObservable = new Observable<INodeInfo | false>();
+
     private _container: HTMLDivElement;
 
     private _inputParent: HTMLDivElement;
@@ -92,7 +94,7 @@ export class DocsEditor {
 
     getActiveTextSelection() {
         const list = this._textSelectionList;
-        for (let textSelection of list) {
+        for (const textSelection of list) {
             if (textSelection.isActive()) {
                 return textSelection;
             }
@@ -119,6 +121,10 @@ export class DocsEditor {
 
     sync() {
         this._syncDomToSelection();
+    }
+
+    scroll() {
+        this._scrollToSelection();
     }
 
     active(x: number, y: number) {
@@ -396,16 +402,48 @@ export class DocsEditor {
         };
     }
 
+    // Let the selection show on the current screen.
+    private _scrollToSelection() {
+        const activeTextSelection = this.getActiveTextSelection();
+        const anchor = activeTextSelection?.getAnchor();
+        if (!anchor || (anchor && !anchor.visible) || this._activeViewport == null) {
+            return;
+        }
+
+        const { left, top } = anchor;
+
+        const { tl, tr, bl } = this._activeViewport.getBounding();
+        const constantOffset = 100;
+        let offsetY = 0;
+        let offsetX = 0;
+        if (top < tl.y + constantOffset) {
+            offsetY = top - tl.y - constantOffset;
+        } else if (top > bl.y - constantOffset) {
+            offsetY = top - bl.y + constantOffset;
+        }
+
+        if (left < tl.x + constantOffset) {
+            offsetX = left - tl.x - constantOffset;
+        } else if (left > tr.x - constantOffset) {
+            offsetX = left - tr.x + constantOffset;
+        }
+
+        const config = this._activeViewport.getBarScroll(offsetX, offsetY);
+        this._activeViewport.scrollBy(config);
+    }
+
     private _syncDomToSelection() {
         const activeTextSelection = this.getActiveTextSelection();
         const anchor = activeTextSelection?.getAnchor();
-        if (!anchor || (anchor && !anchor.visible)) {
+        if (!anchor || (anchor && !anchor.visible) || this._activeViewport == null) {
             return;
         }
 
         const { height, left, top } = anchor;
 
-        const absoluteCoord = this._activeViewport?.getAbsoluteVector(Vector2.FromArray([left, top]));
+        const absoluteCoord = this._activeViewport.getAbsoluteVector(Vector2.FromArray([left, top]));
+
+        const { x, y } = absoluteCoord;
 
         this._cursor.style.height = `${height}px`;
 
@@ -413,9 +451,9 @@ export class DocsEditor {
 
         let { left: canvasLeft, top: canvasTop } = this._getCanvasOffset();
 
-        canvasLeft += absoluteCoord?.x || 0;
+        canvasLeft += x;
 
-        canvasTop += absoluteCoord?.y || 0;
+        canvasTop += y;
 
         this.active(canvasLeft, canvasTop);
     }
@@ -547,7 +585,6 @@ export class DocsEditor {
             if (this._documents == null) {
                 return;
             }
-
             this.onInputObservable.notifyObservers({
                 event: e,
                 content,
@@ -676,6 +713,8 @@ export class DocsEditor {
             this._viewportScrollX = scrollX;
             this._viewportScrollY = scrollY;
 
+            this.onSelectionStartObservable.notifyObservers(startNode);
+
             this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
                 const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
                 this._moving(moveOffsetX, moveOffsetY, scrollTimer);
@@ -707,6 +746,7 @@ export class DocsEditor {
         this.onCompositionstartObservable.clear();
         this.onCompositionupdateObservable.clear();
         this.onCompositionendObservable.clear();
+        this.onSelectionStartObservable.clear();
     }
 
     private _activeSelectionRefresh() {

@@ -1,8 +1,10 @@
-import { Disposable, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 import { ComponentChildren } from 'preact';
-import { IShortcutService } from '../shortcut/shorcut.service';
+
+import { Disposable, toDisposable } from '@univerjs/core';
+
+import { IShortcutService } from '../shortcut/shortcut.service';
 import { ICustomLabelType } from '../../Interfaces/CustomLabel';
 import { BaseSelectProps, DisplayTypes, SelectTypes } from '../../Components/Select/Select';
 
@@ -21,40 +23,42 @@ export const enum MenuItemType {
 
 interface IMenuItemBase {
     id: string;
-    menu: OneOrMany<MenuPosition>;
-    subMenus?: string[]; // submenu id list
-    parentId?: string; // if it is submenu
+    description?: string;
+    icon?: string;
     label?: string | ICustomLabelType | ComponentChildren;
-
+    menu: OneOrMany<MenuPosition>;
     title: string;
+    tooltip?: string;
+    type?: MenuItemType;
 
+    /** @deprecated should avoid using this */
     className?: string;
 
-    icon?: string;
-    tooltip?: string;
-    description?: string;
+    /** @deprecated */
+    subMenus?: string[]; // submenu id list
+    parentId?: string; // if it is submenu
 
     hidden$?: Observable<boolean>;
     activated$?: Observable<boolean>;
     disabled$?: Observable<boolean>;
-
-    type?: MenuItemType;
 }
 
 export interface IMenuButtonItem extends IMenuItemBase {}
 
 export interface IMenuSelectorItem extends IMenuItemBase {
     type: MenuItemType.SELECTOR;
-
     display?: DisplayTypes;
-
-    label?: {
-        name: string;
-        props: any; // TODO: fix later
-    };
-
     selectType: SelectTypes;
     selections?: Array<number | BaseSelectProps>;
+
+    /** On observable value that should emit the value of the corresponding selection component. */
+    value$?: Observable<unknown>; // TODO@wzhudev: it could be a generic type. optional for now. But it should be required.
+
+    /** @deprecated */
+    label?: {
+        name: string;
+        props: any; // TODO@wzhudev: fix later
+    };
 }
 
 export type IMenuItem = IMenuButtonItem | IMenuSelectorItem;
@@ -64,15 +68,17 @@ export type IMenuItem = IMenuButtonItem | IMenuSelectorItem;
 export type IDisplayMenuItem<T extends IMenuItem> = T & {
     /** MenuService should get responsible shortcut and display on the UI. */
     shortcut?: string;
-    subMenuItems?: Array<IDisplayMenuItem<any>>;
+    /** Composed menu structure by the menu service. */
+    subMenuItems?: Array<IDisplayMenuItem<IMenuItem>>; // TODO@wzhudev: related mechanism is not implemented yet
 };
 
 export const IMenuService = createIdentifier<IMenuService>('univer.menu-service');
 
 export interface IMenuService {
     addMenuItem(item: IMenuItem): IDisposable;
-    /** Get menu items at a given position. */
-    getMenuItems(position: MenuPosition): IMenuItem[];
+
+    /** Get menu items for display at a given position. */
+    getMenuItems(position: MenuPosition): Array<IDisplayMenuItem<IMenuItem>>;
     getMenuItem(id: string): IMenuItem | null;
 }
 
@@ -111,7 +117,7 @@ export class DesktopMenuService extends Disposable implements IMenuService {
         });
     }
 
-    getMenuItems(positions: MenuPosition): Array<IDisplayMenuItem<any>> {
+    getMenuItems(positions: MenuPosition): Array<IDisplayMenuItem<IMenuItem>> {
         if (this._menuByPositions.has(positions)) {
             return [...this._menuByPositions.get(positions)!.values()].map((menu) => this.getDisplayMenuItems(menu));
         }
@@ -127,7 +133,7 @@ export class DesktopMenuService extends Disposable implements IMenuService {
         return null;
     }
 
-    private getDisplayMenuItems(menuItem: IMenuItem): IDisplayMenuItem<any> {
+    private getDisplayMenuItems(menuItem: IMenuItem): IDisplayMenuItem<IMenuItem> {
         const shortcut = this._shortcutService.getCommandShortcut(menuItem.id);
         if (!shortcut) {
             return menuItem;

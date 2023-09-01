@@ -96,6 +96,7 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
         }
     }
 
+    // eslint-disable-next-line max-lines-per-function
     initData() {
         const { type, display, children = [], label } = this.props;
 
@@ -223,11 +224,11 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
         }
     }
 
-    componentDidMount() {
+    override componentDidMount() {
         this.initData();
     }
 
-    componentWillReceiveProps(nextProps: BaseSelectProps) {
+    override componentWillReceiveProps(nextProps: BaseSelectProps) {
         // this.props = Object.assign(this.props, nextProps);
         // this.initData();
     }
@@ -331,7 +332,7 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
             <div className={`${styles.selectDouble} ${className}`}>
                 <Dropdown tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
                     <div className={styles.selectLabel}>
-                        <CustomLabel label={content} />
+                        <CustomLabel label={label} />
                     </div>
                 </Dropdown>
             </div>

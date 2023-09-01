@@ -238,19 +238,58 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuItem {
 
 export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     // NOTE: we could get more font options from (a) font service, so user can provide their own fonts
+    const permissionService = accessor.get(IPermissionService);
+    const commandService = accessor.get(ICommandService);
+    const selectionManager = accessor.get(ISelectionManager);
 
     return {
         id: SetFontFamilyCommand.id,
         title: 'font',
         tooltip: 'toolbar.font',
-        selectType: SelectTypes.SINGLE,
+        selectType: SelectTypes.FIX,
         type: MenuItemType.SELECTOR,
         menu: [MenuPosition.TOOLBAR],
         selections: FONT_FAMILY_CHILDREN,
+        disabled$: new Observable<boolean>((subscriber) => {
+            let editable = false;
+            function update() {
+                subscriber.next(!editable);
+            }
+
+            update();
+
+            const permission$ = permissionService.editable$.subscribe((e) => {
+                editable = e;
+                update();
+            });
+
+            return () => {
+                permission$.unsubscribe();
+            };
+        }),
+        value$: new Observable<string>((subscriber) => {
+            commandService.onCommandExecuted((c) => {
+                const id = c.id;
+                if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
+                    return;
+                }
+
+                const range = selectionManager.getCurrentCell();
+                const ff = range?.getFontFamily();
+
+                subscriber.next(ff);
+            });
+
+            subscriber.next(FONT_FAMILY_CHILDREN[0].value);
+        }),
     };
 }
 
 export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    const permissionService = accessor.get(IPermissionService);
+    const commandService = accessor.get(ICommandService);
+    const selectionManager = accessor.get(ISelectionManager);
+
     return {
         id: SetFontSizeCommand.id,
         title: 'fontSize',
@@ -259,6 +298,36 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
         selectType: SelectTypes.INPUT,
         menu: [MenuPosition.TOOLBAR],
         selections: FONT_SIZE_CHILDREN,
+        disabled$: new Observable<boolean>((subscriber) => {
+            let editable = false;
+            function update() {
+                subscriber.next(!editable);
+            }
+
+            update();
+
+            const permission$ = permissionService.editable$.subscribe((e) => {
+                editable = e;
+                update();
+            });
+
+            return () => {
+                permission$.unsubscribe();
+            };
+        }),
+        value$: new Observable<number>((subscriber) => {
+            commandService.onCommandExecuted((c) => {
+                const id = c.id;
+                if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
+                    return;
+                }
+
+                const range = selectionManager.getCurrentCell();
+                const fs = range?.getFontSize();
+
+                subscriber.next(fs);
+            });
+        }),
     };
 }
 

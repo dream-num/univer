@@ -30,7 +30,6 @@ export interface IStyleTypeValue<T> {
 
 export interface ISetStyleParams<T> {
     style: IStyleTypeValue<T>;
-
     ranges?: IRangeData[];
     workbookId?: string;
     worksheetId?: string;

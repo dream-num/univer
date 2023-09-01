@@ -2,7 +2,7 @@ import { CommandType, ICurrentUniverService, IMutation, ObjectArray, ObjectMatri
 import { IAccessor } from '@wendellhu/redi';
 import { IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowMutationParams } from '../../Basics/Interfaces/MutationInterface';
 
-export const RemoveRowMutationFactory = (accessor: IAccessor, params: IRemoveRowMutationParams): IInsertRowMutationParams => {
+export const IRemoveRowMutationFactory = (accessor: IAccessor, params: IRemoveRowMutationParams): IInsertRowMutationParams => {
     const currentUniverService = accessor.get(ICurrentUniverService);
     const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
 

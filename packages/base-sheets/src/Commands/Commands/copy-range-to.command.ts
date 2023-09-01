@@ -2,33 +2,33 @@ import {
     CommandType,
     ICellData,
     ICellDataMatrix,
-    ICellV,
     ICommand,
     ICommandService,
     ICurrentUniverService,
+    IOptionData,
     IRangeData,
     IUndoRedoService,
     Nullable,
     ObjectMatrix,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
-import { ISetRangeFormattedValueMutationParams, SetRangeFormattedValueMutation, SetRangeFormattedValueUndoMutationFactory } from '../Mutations/set-range-formatted-value.mutation';
+import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
 
-export interface ICopyValuesToRangeCommandParams {
+export interface ICopyRangeToCommandParams {
     workbookId?: string;
     worksheetId?: string;
     originRange?: IRangeData;
     destinationRange?: IRangeData;
+    options?: IOptionData;
 }
 
-export const CopyValuesToRangeCommand: ICommand = {
+export const CopyRangeToCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.copy-values-to-range',
-    handler: async (accessor: IAccessor, params: ICopyValuesToRangeCommandParams) => {
+    id: 'sheet.command.copy-range-to',
+    handler: async (accessor: IAccessor, params: ICopyRangeToCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
-
         if (!params.originRange || !params.destinationRange) return false;
 
         const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
@@ -39,31 +39,33 @@ export const CopyValuesToRangeCommand: ICommand = {
         if (!handleResult) return false;
         const value = handleResult[0];
         const range = handleResult[1];
-        const cellValue = new ObjectMatrix<ICellV>();
+        const options = params.options ?? {};
+        const cellValue = new ObjectMatrix<ICellData>();
         value.forEach((row, r) =>
             row.forEach((cell, c) => {
                 cell = cell as ICellData;
-                cellValue.setValue(r + range.startRow, c + range.startColumn, cell?.v || '');
+                cellValue.setValue(r + range.startRow, c + range.startColumn, cell || {});
             })
         );
 
-        const setRangeFormattedValueMutationParams: ISetRangeFormattedValueMutationParams = {
-            range: [range],
+        const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
+            rangeData: range,
             worksheetId,
             workbookId,
-            value: cellValue.getData(),
+            cellValue: cellValue.getData(),
+            options,
         };
 
-        const undoMutationParams: ISetRangeFormattedValueMutationParams = SetRangeFormattedValueUndoMutationFactory(accessor, setRangeFormattedValueMutationParams);
-        const result = commandService.executeCommand(SetRangeFormattedValueMutation.id, setRangeFormattedValueMutationParams);
+        const undoMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(accessor, setRangeValuesMutationParams);
+        const result = commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: 'sheet',
                 undo() {
-                    return commandService.executeCommand(SetRangeFormattedValueMutation.id, undoMutationParams);
+                    return commandService.executeCommand(SetRangeValuesMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetRangeFormattedValueMutation.id, setRangeFormattedValueMutationParams);
+                    return commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
                 },
             });
             return true;

@@ -37,6 +37,7 @@ export const SetWorksheetHideCommand: ICommand = {
             });
             return true;
         }
-        return true;
+
+        return false;
     },
 };

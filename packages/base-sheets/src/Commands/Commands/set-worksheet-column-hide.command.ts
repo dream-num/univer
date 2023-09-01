@@ -1,48 +1,48 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
-import { ISetWorksheetOrderMutationParams, SetWorksheetOrderMutation, SetWorksheetOrderUndoMutationFactory } from '../Mutations/set-worksheet-order.mutation';
+import { ISetWorksheetColumnHideMutationParams, SetWorksheetColumnHideMutation, SetWorksheetColumnHideMutationFactory } from '../Mutations/set-worksheet-column-hide.mutation';
+import { SetWorksheetColumnShowMutation } from '../Mutations/set-worksheet-column-show.mutation';
 
-export interface ISetWorksheetOrderCommandParams {
-    order?: number;
+export interface SetWorksheetColumnHideCommandParams {
     workbookId?: string;
     worksheetId?: string;
+    columnIndex?: number;
+    columnCount?: number;
 }
 
-export const SetWorksheetOrderCommand: ICommand = {
+export const SetWorksheetColumnHideCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.set-worksheet-order',
-
-    handler: async (accessor: IAccessor, params: ISetWorksheetOrderCommandParams) => {
+    id: 'sheet.command.set-worksheet-column-hide',
+    handler: async (accessor: IAccessor, params: SetWorksheetColumnHideCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
         const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
-        const order = params.order ?? 0;
 
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
 
-        const setWorksheetOrderMutationParams: ISetWorksheetOrderMutationParams = {
-            order,
+        const redoMutationParams: ISetWorksheetColumnHideMutationParams = {
             workbookId,
             worksheetId,
+            columnIndex: params.columnIndex ?? 0,
+            columnCount: params.columnCount ?? 1,
         };
 
-        const undoMutationParams = SetWorksheetOrderUndoMutationFactory(accessor, setWorksheetOrderMutationParams);
-        const result = commandService.executeCommand(SetWorksheetOrderMutation.id, setWorksheetOrderMutationParams);
-
+        const undoMutationParams = SetWorksheetColumnHideMutationFactory(accessor, redoMutationParams);
+        const result = commandService.executeCommand(SetWorksheetColumnHideMutation.id, redoMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: 'sheet',
                 undo() {
-                    return commandService.executeCommand(SetWorksheetOrderMutation.id, undoMutationParams);
+                    return commandService.executeCommand(SetWorksheetColumnShowMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetWorksheetOrderMutation.id, setWorksheetOrderMutationParams);
+                    return commandService.executeCommand(SetWorksheetColumnHideMutation.id, redoMutationParams);
                 },
             });
             return true;

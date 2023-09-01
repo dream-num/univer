@@ -1,9 +1,10 @@
 import { IAccessor } from '@wendellhu/redi';
-import { CommandType, Dimension, ICommand, ICommandService, IRangeData, IUndoRedoService } from '@univerjs/core';
+import { CommandType, Dimension, ICommand, ICommandService, ICurrentUniverService, IRangeData, IUndoRedoService } from '@univerjs/core';
 
 import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../Mutations/delete-range.mutation';
 import { InsertRangeMutation } from '../Mutations/insert-range.mutation';
 import { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../Basics/Interfaces/MutationInterface';
+import { ISelectionManager } from '../../Services/tokens';
 
 export interface IDeleteRangeMoveUpParams {
     workbookId: string;
@@ -21,7 +22,16 @@ export const DeleteRangeMoveUpCommand: ICommand = {
     handler: async (accessor: IAccessor, params: IDeleteRangeMoveUpParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const { range, workbookId, worksheetId } = params;
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        const selectionManager = accessor.get(ISelectionManager);
+
+        const range = params.range || selectionManager.getCurrentSelections()[0];
+        if (!range) {
+            return false;
+        }
+
+        const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
 
         const deleteRangeMutationParams: IDeleteRangeMutationParams = {
             range,

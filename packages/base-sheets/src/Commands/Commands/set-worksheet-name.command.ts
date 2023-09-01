@@ -39,6 +39,7 @@ export const SetWorksheetNameCommand: ICommand = {
 
             return true;
         }
-        return true;
+
+        return false;
     },
 };

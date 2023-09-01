@@ -1,11 +1,23 @@
-import { CommandType, ICellData, ICommand, ICommandService, IRangeData, IUndoRedoService, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '@univerjs/core';
+import {
+    CommandType,
+    ICellData,
+    ICommand,
+    ICommandService,
+    ICurrentUniverService,
+    IRangeData,
+    IUndoRedoService,
+    ObjectMatrix,
+    ObjectMatrixPrimitiveType,
+    Tools,
+} from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
+import { ISelectionManager } from '../../Services/tokens';
 
 export interface ISetRangeValuesCommandParams {
-    worksheetId: string;
-    workbookId: string;
-    range: IRangeData;
+    worksheetId?: string;
+    workbookId?: string;
+    range?: IRangeData;
     value: ICellData | ICellData[][] | ObjectMatrixPrimitiveType<ICellData>;
 }
 
@@ -18,8 +30,18 @@ export const SetRangeValuesCommand: ICommand = {
     handler: async (accessor: IAccessor, params: ISetRangeValuesCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        const selectionManager = accessor.get(ISelectionManager);
 
-        const { range, value, workbookId, worksheetId } = params;
+        const range = params.range || selectionManager.getCurrentSelections()[0];
+        if (!range) {
+            return false;
+        }
+
+        const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+
+        const { value } = params;
         const { startRow, startColumn, endRow, endColumn } = range;
         let cellValue = new ObjectMatrix<ICellData>();
 

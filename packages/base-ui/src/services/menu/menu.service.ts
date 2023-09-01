@@ -13,6 +13,9 @@ export type OneOrMany<T> = T | T[];
 export const enum MenuPosition {
     TOOLBAR,
     CONTEXT_MENU,
+    TAB_CONTEXT_MENU,
+    ROW_HEADER_CONTEXT_MENU,
+    COL_HEADER_CONTEXT_MENU,
 }
 
 export const enum MenuItemType {

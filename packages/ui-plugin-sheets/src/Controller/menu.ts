@@ -333,10 +333,11 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
     };
 }
 
-export function FontColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: SetTextColorCommand.id,
         title: 'textColor',
+        tooltip: 'toolbar.textColor.main',
         type: MenuItemType.SELECTOR,
         selectType: SelectTypes.DOUBLEFIX,
         menu: [MenuPosition.TOOLBAR],
@@ -410,7 +411,7 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         display: DisplayTypes.SUFFIX,
         menu: [MenuPosition.TOOLBAR],
         type: MenuItemType.SELECTOR,
-        selectType: SelectTypes.DOUBLEFIX,
+        selectType: SelectTypes.DOUBLE,
         selections: [
             ...BORDER_LINE_CHILDREN,
             {
@@ -549,17 +550,14 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem 
     return {
         id: SetTextWrapCommand.id,
         title: 'textWrapMode',
-        label: {
-            name: 'textWrapMode',
-            props: undefined,
-        },
         tooltip: 'toolbar.textWrapMode.main',
         type: MenuItemType.SELECTOR,
-        selectType: SelectTypes.SINGLE,
+        selectType: SelectTypes.DOUBLE,
         menu: [MenuPosition.TOOLBAR],
         selections: TEXT_WRAP_CHILDREN,
+        display: DisplayTypes.SUFFIX,
         value$: new Observable((subscriber) => {
-            const dispose = commandService.onCommandExecuted((c) => {
+            const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
                 if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
                     return;
@@ -571,7 +569,7 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem 
                 subscriber.next(ws);
             });
 
-            return () => dispose.dispose();
+            return () => disposable.dispose();
         }),
     };
 }
@@ -586,8 +584,9 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
         id: SetTextRotationCommand.id,
         title: 'textRotateMode',
         tooltip: 'toolbar.textRotateMode.main',
+        display: DisplayTypes.SUFFIX,
         type: MenuItemType.SELECTOR,
-        selectType: SelectTypes.SINGLE,
+        selectType: SelectTypes.DOUBLE,
         menu: [MenuPosition.TOOLBAR],
         value$: new Observable<number>((subscriber) => {
             commandService.onCommandExecuted((c) => {

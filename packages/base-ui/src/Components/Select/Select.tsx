@@ -12,7 +12,8 @@ import { Icon } from '../..'; // FIXME: strange import
 // TODO: these type definitions should be moved out of components to menu service
 
 export enum SelectTypes {
-    SINGLE, // 普通下拉
+    SINGLE,
+    /** dropdown with input */
     INPUT,
     COLOR,
     DOUBLE,
@@ -224,11 +225,18 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
         }
     }
 
+    updateData() {
+        if (this.props.type === SelectTypes.INPUT) {
+            this.setState({ content: this.props.label });
+        }
+    }
+
     override componentDidMount() {
         this.initData();
     }
 
     override componentWillReceiveProps(nextProps: BaseSelectProps) {
+        this.updateData();
         // this.props = Object.assign(this.props, nextProps);
         // this.initData();
     }
@@ -303,7 +311,12 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
         return (
             <div className={`${styles.selectInput} ${className}`}>
                 <Dropdown onMainClick={onMainClick} ref={ref} tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
-                    <Input onPressEnter={(e) => this.handlePressEnter(e, ref)} onBlur={this.onPressEnter} type="number" value={content as string} />
+                    <Input
+                        onPressEnter={(e) => this.handlePressEnter(e, ref)}
+                        onBlur={this.onPressEnter}
+                        type="number"
+                        value={`${this.props.label as number}` ?? (content as string)}
+                    />
                 </Dropdown>
             </div>
         );

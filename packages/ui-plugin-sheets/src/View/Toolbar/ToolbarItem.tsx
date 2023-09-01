@@ -42,7 +42,8 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
         });
 
         if (this.props.type === MenuItemType.SELECTOR) {
-            this.currentValueSubscription = (this.props as IDisplayMenuItem<IMenuSelectorItem>).value$?.subscribe((value) => {
+            const props = this.props as IDisplayMenuItem<IMenuSelectorItem>;
+            this.currentValueSubscription = props.value$?.subscribe((value) => {
                 this.setState({ value });
             });
         }
@@ -71,15 +72,15 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
         const props = this.props as IDisplayMenuItem<IMenuSelectorItem>;
 
         return (
-            <Tooltip title={props.title + (props.shortcut ? ` (${props.shortcut})` : '')} placement="bottom">
+            <Tooltip title={props.tooltip + (props.shortcut ? ` (${props.shortcut})` : '')} placement="bottom">
                 <Select
                     className={props.className}
-                    tooltip={props.tooltip}
                     label={value ?? props.label}
                     display={props.display}
                     type={props.selectType!}
                     children={props.selections!}
                     onClick={(value) => commandService.executeCommand(props.id, { value })}
+                    onPressEnter={(value) => commandService.executeCommand(props.id, { value })}
                 ></Select>
             </Tooltip>
         );

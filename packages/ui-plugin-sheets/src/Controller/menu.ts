@@ -18,8 +18,9 @@ import {
     DeleteRangeMoveUpCommand,
     SetWorksheetRowHideCommand,
     SetWorksheetRowShowCommand,
+    RemoveSheetCommand,
 } from '@univerjs/base-sheets';
-import { IMenuItem, MenuPosition } from '@univerjs/base-ui';
+import { IDisplayMenuItem, IMenuItem, MenuPosition } from '@univerjs/base-ui';
 import { FontItalic, FontWeight, ICommandService, IPermissionService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
@@ -255,6 +256,7 @@ export function NumberFormatMenuItemFactory(accessor: IAccessor): IMenuItem {}
 // export function ImportMenuItemFactory(accessor: IAccessor): IMenuItem {}
 // export function ImageMenuItemFactory(accessor: IAccessor): IMenuItem {}
 
+// right menu in main container
 export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: ClearSelectionContentCommand.id,
@@ -366,4 +368,29 @@ export function DeleteRangeMoveUpMenuItemFactory(accessor: IAccessor): IMenuItem
         title: 'rightClick.moveUp',
         parentId: DeleteRangeCommand.id,
     };
+}
+
+// right menu in main sheet bar
+export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: RemoveSheetCommand.id,
+        menu: [MenuPosition.SHEET_BAR],
+        title: 'sheetConfig.delete',
+    };
+}
+
+export function buildMenuTree(items: IMenuItem[], parentId?: string): IDisplayMenuItem[] {
+    const tree: IDisplayMenuItem[] = [];
+
+    for (const item of items) {
+        if (item.parentId === parentId) {
+            const treeItem: IDisplayMenuItem = {
+                ...item,
+                subMenuItems: buildMenuTree(items, item.id),
+            };
+            tree.push(treeItem);
+        }
+    }
+
+    return tree;
 }

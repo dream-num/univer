@@ -11,6 +11,7 @@ export type OneOrMany<T> = T | T[];
 export const enum MenuPosition {
     TOOLBAR,
     CONTEXT_MENU,
+    SHEET_BAR,
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -44,3 +44,4 @@ export { DeleteRangeMoveUpCommand } from './Commands/Commands/delete-range-move-
 export { RemoveRowCommand, RemoveColCommand } from './Commands/Commands/remove-row-col.command';
 export { SetWorksheetRowHideCommand } from './Commands/Commands/set-worksheet-row-hide.command';
 export { SetWorksheetRowShowCommand } from './Commands/Commands/set-worksheet-row-show.command';
+export { RemoveSheetCommand } from './Commands/Commands/remove-sheet.command';

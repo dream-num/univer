@@ -40,7 +40,7 @@ import {
     TEXT_WRAP_CHILDREN,
     VERTICAL_ALIGN_CHILDREN,
 } from '../View/Toolbar/Const';
-import { ColorSelect, LineBold, LineColor } from '../View/Common';
+import { LineBold, LineColor } from '../View/Common';
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const/PLUGIN_NAME';
 
 import styles from '../View/Toolbar/index.module.less';
@@ -341,6 +341,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
             };
         }),
         value$: new Observable<number>((subscriber) => {
+            const DEFAULT_SIZE = 14;
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
                 if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
@@ -348,7 +349,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
                 }
 
                 const range = selectionManager.getCurrentCell();
-                const fs = range?.getFontSize();
+                const fs = range?.getFontSize() ?? DEFAULT_SIZE;
 
                 subscriber.next(fs);
             });
@@ -359,28 +360,20 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
 }
 
 export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
-    const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
     const selectionManager = accessor.get(ISelectionManager);
 
     return {
         id: SetTextColorCommand.id,
-        title: 'textColor',
+        title: 'TextColorIcon',
+        icon: 'TextColorIcon',
         tooltip: 'toolbar.textColor.main',
         type: MenuItemType.SELECTOR,
         selectType: SelectTypes.DOUBLEFIX,
         menu: [MenuPosition.TOOLBAR],
-        label: {
-            name: SHEET_UI_PLUGIN_NAME + ColorSelect.name,
-            props: {
-                getComponent: (ref: ColorSelect) => {},
-                color: '#000',
-                label: {
-                    name: 'TextColorIcon',
-                },
-            },
-        },
+        display: DisplayTypes.COLOR,
         className: styles.selectColorPickerParent,
+        // FIXME: click this toolbar icon would not trigger color change
         selections: [
             {
                 label: 'toolbar.resetColor',
@@ -414,26 +407,18 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
 }
 
 export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
-    const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
     const selectionManager = accessor.get(ISelectionManager);
 
     return {
         id: SetBackgroundColorCommand.id,
-        title: 'fillColor',
+        tooltip: 'toolbar.fillColor.main',
+        title: 'TextColorIcon',
         type: MenuItemType.SELECTOR,
         selectType: SelectTypes.DOUBLEFIX,
         menu: [MenuPosition.TOOLBAR],
-        label: {
-            name: SHEET_UI_PLUGIN_NAME + ColorSelect.name,
-            props: {
-                getComponent: (ref: ColorSelect) => {},
-                color: '#fff',
-                label: {
-                    name: 'FillColorIcon',
-                },
-            },
-        },
+        display: DisplayTypes.COLOR,
+        icon: 'FillColorIcon',
         className: styles.selectColorPickerParent,
         selections: [
             {

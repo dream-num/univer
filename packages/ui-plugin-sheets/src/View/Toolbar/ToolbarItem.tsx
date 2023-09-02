@@ -74,6 +74,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
         return (
             <Tooltip title={props.tooltip + (props.shortcut ? ` (${props.shortcut})` : '')} placement="bottom">
                 <Select
+                    icon={props.icon}
                     className={props.className}
                     label={value ?? props.label}
                     display={props.display}

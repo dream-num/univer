@@ -24,6 +24,7 @@ export enum SelectTypes {
 export enum DisplayTypes {
     LABEL,
     SUFFIX,
+    COLOR,
 }
 
 export interface BaseSelectChildrenProps extends BaseItemProps {
@@ -49,6 +50,8 @@ export interface BaseSelectProps {
     name?: string;
     suffix?: any;
     tooltip?: string;
+    value?: string | number;
+    icon?: string;
 }
 
 interface IState {
@@ -84,15 +87,15 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
 
     getType(type: SelectTypes) {
         switch (type) {
-            case 0:
+            case SelectTypes.SINGLE:
                 return this.getSingle();
-            case 1:
+            case SelectTypes.INPUT:
                 return this.getInput();
-            case 3:
+            case SelectTypes.DOUBLE:
                 return this.getDouble();
-            case 4:
+            case SelectTypes.FIX:
                 return this.getFix();
-            case 5:
+            case SelectTypes.DOUBLEFIX:
                 return this.getDoubleFix();
         }
     }
@@ -353,13 +356,13 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
     };
 
     getDoubleFix = () => {
-        const { label, className = '', tooltip, onClick } = this.props;
+        const { label, className = '', tooltip, onClick, display, value, icon } = this.props;
         const { menu } = this.state;
         return (
             <div className={`${styles.selectDouble} ${className}`}>
                 <Dropdown tooltip={tooltip} onClick={onClick} menu={{ menu, onClick: this.onClick }} icon={<Icon.NextIcon />}>
                     <div className={styles.selectLabel}>
-                        <CustomLabel label={label} />
+                        <CustomLabel display={display} label={label} value={value} icon={icon} />
                     </div>
                 </Dropdown>
             </div>

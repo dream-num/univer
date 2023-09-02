@@ -115,7 +115,7 @@ export class ToolbarUIController extends Disposable {
     }
 
     private _initializeToolbar(): void {
-        // TODO@wzhudev: now we register menu items that only display in the toolbar here. In fact we should register all commands and menu items and shortcuts
+        // TODO: @wzhudev: now we register menu items that only display in the toolbar here. In fact we should register all commands and menu items and shortcuts
         // in a single controller. I will do that layer.
         [
             UndoMenuItemFactory,

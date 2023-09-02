@@ -585,8 +585,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.6
-        version: 0.12.6
+        specifier: ^0.12.7
+        version: 0.12.7
       css-vars-ponyfill:
         specifier: ^2.4.6
         version: 2.4.6
@@ -631,8 +631,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.6
-        version: 0.12.6
+        specifier: ^0.12.7
+        version: 0.12.7
       preact:
         specifier: ^10.12.1
         version: 10.17.1
@@ -726,8 +726,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.6
-        version: 0.12.6
+        specifier: ^0.12.7
+        version: 0.12.7
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
@@ -784,8 +784,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.6
-        version: 0.12.6
+        specifier: ^0.12.7
+        version: 0.12.7
     devDependencies:
       '@preact/preset-vite':
         specifier: 2.0.0
@@ -845,8 +845,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.6
-        version: 0.12.6
+        specifier: ^0.12.7
+        version: 0.12.7
       css-vars-ponyfill:
         specifier: ^2.4.6
         version: 2.4.6
@@ -894,8 +894,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.6
-        version: 0.12.6
+        specifier: ^0.12.7
+        version: 0.12.7
       preact:
         specifier: ^10.12.1
         version: 10.17.1
@@ -1050,8 +1050,8 @@ importers:
   packages/core:
     dependencies:
       '@wendellhu/redi':
-        specifier: ^0.12.6
-        version: 0.12.6
+        specifier: ^0.12.7
+        version: 0.12.7
       dayjs:
         specifier: ^1.11.5
         version: 1.11.5
@@ -1178,8 +1178,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
-        specifier: ^0.12.6
-        version: 0.12.6
+        specifier: ^0.12.7
+        version: 0.12.7
       preact:
         specifier: ^10.12.1
         version: 10.17.1
@@ -1248,8 +1248,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
-        specifier: ^0.12.6
-        version: 0.12.6
+        specifier: ^0.12.7
+        version: 0.12.7
       preact:
         specifier: ^10.12.1
         version: 10.17.1
@@ -1318,8 +1318,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
-        specifier: ^0.12.6
-        version: 0.12.6
+        specifier: ^0.12.7
+        version: 0.12.7
       preact:
         specifier: ^10.12.1
         version: 10.17.1
@@ -1388,8 +1388,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
-        specifier: ^0.12.6
-        version: 0.12.6
+        specifier: ^0.12.7
+        version: 0.12.7
       luckyexcel:
         specifier: ^1.0.1
         version: 1.0.1
@@ -1452,8 +1452,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
-        specifier: ^0.12.6
-        version: 0.12.6
+        specifier: ^0.12.7
+        version: 0.12.7
       preact:
         specifier: ^10.12.1
         version: 10.17.1
@@ -1522,8 +1522,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
-        specifier: ^0.12.6
-        version: 0.12.6
+        specifier: ^0.12.7
+        version: 0.12.7
       preact:
         specifier: ^10.12.1
         version: 10.17.1
@@ -1574,8 +1574,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.6
-        version: 0.12.6
+        specifier: ^0.12.7
+        version: 0.12.7
       css-vars-ponyfill:
         specifier: ^2.4.6
         version: 2.4.6
@@ -1632,8 +1632,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.6
-        version: 0.12.6
+        specifier: ^0.12.7
+        version: 0.12.7
       css-vars-ponyfill:
         specifier: ^2.4.6
         version: 2.4.6
@@ -1693,8 +1693,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.6
-        version: 0.12.6
+        specifier: ^0.12.7
+        version: 0.12.7
       css-vars-ponyfill:
         specifier: ^2.4.6
         version: 2.4.6
@@ -1972,6 +1972,7 @@ packages:
   /@babel/plugin-proposal-class-properties@7.18.6(@babel/core@7.22.11):
     resolution: {integrity: sha512-cumfXOF0+nzZrrN8Rf0t7M+tF6sZc7vhQwYQck9q1/5w2OExlD+b4v4RpMJFaV1Z7WcDRgO6FqvxqxGlwo+RHQ==}
     engines: {node: '>=6.9.0'}
+    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-class-properties instead.
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
@@ -1983,6 +1984,7 @@ packages:
   /@babel/plugin-proposal-dynamic-import@7.18.6(@babel/core@7.22.11):
     resolution: {integrity: sha512-1auuwmK+Rz13SJj36R+jqFPMJWyKEDd7lLSdOj4oJK0UTgGueSAtkrCvz9ewmgyU/P941Rv2fQwZJN8s6QruXw==}
     engines: {node: '>=6.9.0'}
+    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-dynamic-import instead.
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
@@ -1994,6 +1996,7 @@ packages:
   /@babel/plugin-proposal-export-namespace-from@7.18.9(@babel/core@7.22.11):
     resolution: {integrity: sha512-k1NtHyOMvlDDFeb9G5PhUXuGj8m/wiwojgQVEhJ/fsVsMCpLyOP4h0uGEjYJKrRI+EVPlb5Jk+Gt9P97lOGwtA==}
     engines: {node: '>=6.9.0'}
+    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-export-namespace-from instead.
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
@@ -2005,6 +2008,7 @@ packages:
   /@babel/plugin-proposal-logical-assignment-operators@7.20.7(@babel/core@7.22.11):
     resolution: {integrity: sha512-y7C7cZgpMIjWlKE5T7eJwp+tnRYM89HmRvWM5EQuB5BoHEONjmQ8lSNmBUwOyy/GFRsohJED51YBF79hE1djug==}
     engines: {node: '>=6.9.0'}
+    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-logical-assignment-operators instead.
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
@@ -2016,6 +2020,7 @@ packages:
   /@babel/plugin-proposal-nullish-coalescing-operator@7.18.6(@babel/core@7.22.11):
     resolution: {integrity: sha512-wQxQzxYeJqHcfppzBDnm1yAY0jSRkUXR2z8RePZYrKwMKgMlE8+Z6LUno+bd6LvbGh8Gltvy74+9pIYkr+XkKA==}
     engines: {node: '>=6.9.0'}
+    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-nullish-coalescing-operator instead.
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
@@ -2027,6 +2032,7 @@ packages:
   /@babel/plugin-proposal-numeric-separator@7.18.6(@babel/core@7.22.11):
     resolution: {integrity: sha512-ozlZFogPqoLm8WBr5Z8UckIoE4YQ5KESVcNudyXOR8uqIkliTEgJ3RoketfG6pmzLdeZF0H/wjE9/cCEitBl7Q==}
     engines: {node: '>=6.9.0'}
+    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-numeric-separator instead.
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
@@ -2038,6 +2044,7 @@ packages:
   /@babel/plugin-proposal-optional-chaining@7.21.0(@babel/core@7.22.11):
     resolution: {integrity: sha512-p4zeefM72gpmEe2fkUr/OnOXpWEf8nAgk7ZYVqqfFiyIG7oFfVZcCrU64hWn5xp4tQ9LkV4bTIa5rD0KANpKNA==}
     engines: {node: '>=6.9.0'}
+    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-optional-chaining instead.
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
@@ -2050,6 +2057,7 @@ packages:
   /@babel/plugin-proposal-private-methods@7.18.6(@babel/core@7.22.11):
     resolution: {integrity: sha512-nutsvktDItsNn4rpGItSNV2sz1XwS+nfU0Rg8aCx3W3NOKVzdMjJRu0O5OkgDp3ZGICSTbgRpxZoWsxoKRvbeA==}
     engines: {node: '>=6.9.0'}
+    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-methods instead.
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
@@ -2061,6 +2069,7 @@ packages:
   /@babel/plugin-proposal-private-property-in-object@7.21.11(@babel/core@7.22.11):
     resolution: {integrity: sha512-0QZ8qP/3RLDVBwBFoWAwCtgcDZJVwA5LUJRZU8x2YFfKNuFq161wK3cuGrALu5yiPu+vzwTAg/sMWVNeWeNyaw==}
     engines: {node: '>=6.9.0'}
+    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-property-in-object instead.
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
@@ -2624,13 +2633,13 @@ packages:
       '@types/node': 20.4.7
       chalk: 4.1.2
       cosmiconfig: 8.2.0
-      cosmiconfig-typescript-loader: 4.4.0(@types/node@20.4.7)(cosmiconfig@8.2.0)(ts-node@10.9.1)(typescript@4.7.4)
+      cosmiconfig-typescript-loader: 4.4.0(@types/node@20.4.7)(cosmiconfig@8.2.0)(ts-node@10.9.1)(typescript@4.9.5)
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       lodash.uniq: 4.5.0
       resolve-from: 5.0.0
-      ts-node: 10.9.1(@types/node@20.4.7)(typescript@4.7.4)
-      typescript: 4.7.4
+      ts-node: 10.9.1(@types/node@20.4.7)(typescript@4.9.5)
+      typescript: 4.9.5
     transitivePeerDependencies:
       - '@swc/core'
       - '@swc/wasm'
@@ -3684,7 +3693,7 @@ packages:
     resolution: {integrity: sha512-mki5uBvhHzO8kYYix/WRy2WX8S3B5wdVSc9D6KcU5lQNglP2yt58/VfLuAK49glRXChosY8ap2oJ1qgma3GUVA==}
     dependencies:
       '@babel/runtime': 7.22.11
-      '@types/node': 12.20.24
+      '@types/node': 12.20.55
       find-up: 4.1.0
       fs-extra: 8.1.0
     dev: true
@@ -4223,6 +4232,10 @@ packages:
     resolution: {integrity: sha512-yxDeaQIAJlMav7fH5AQqPH1u8YIuhYJXYBzxaQ4PifsU0GDO38MSdmEDeRlIxrKbC6NbEaaEHDanWb+y30U8SQ==}
     dev: true
 
+  /@types/node@12.20.55:
+    resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
+    dev: true
+
   /@types/node@16.4.6:
     resolution: {integrity: sha512-FKyawK3o5KL16AwbeFajen8G4K3mmqUrQsehn5wNKs8IzlKHE8TfnSmILXVMVziAEcnB23u1RCFU1NT6hSyr7Q==}
     dev: true
@@ -4452,8 +4465,8 @@ packages:
       vite: 2.4.4
     dev: true
 
-  /@wendellhu/redi@0.12.6:
-    resolution: {integrity: sha512-mrYQUPUoCsR1YOS+Ze8T9vKGVbF6KCxXJ/gTb/MnREKOtgiuyp204B8/wFXLO452u9Vl9Apazitdip4g7wsJFw==}
+  /@wendellhu/redi@0.12.7:
+    resolution: {integrity: sha512-HAJhOfAqD1E7O/FGEnz27psFjDq6h3xBbmN9b/j2ijAslleb71WLnHUrhRtMCgIWEm7Ktb8fkk0aK80pJsTlng==}
     dev: false
 
   /JSONStream@1.3.5:
@@ -4888,7 +4901,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001525
-      electron-to-chromium: 1.4.506
+      electron-to-chromium: 1.4.508
       node-releases: 2.0.13
       update-browserslist-db: 1.0.11(browserslist@4.21.10)
     dev: true
@@ -5286,7 +5299,7 @@ packages:
     resolution: {integrity: sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==}
     dev: false
 
-  /cosmiconfig-typescript-loader@4.4.0(@types/node@20.4.7)(cosmiconfig@8.2.0)(ts-node@10.9.1)(typescript@4.7.4):
+  /cosmiconfig-typescript-loader@4.4.0(@types/node@20.4.7)(cosmiconfig@8.2.0)(ts-node@10.9.1)(typescript@4.9.5):
     resolution: {integrity: sha512-BabizFdC3wBHhbI4kJh0VkQP9GkBfoHPydD0COMce1nJ1kJAB3F2TmJ/I7diULBKtmEWSwEbuN/KDtgnmUUVmw==}
     engines: {node: '>=v14.21.3'}
     peerDependencies:
@@ -5297,8 +5310,8 @@ packages:
     dependencies:
       '@types/node': 20.4.7
       cosmiconfig: 8.2.0
-      ts-node: 10.9.1(@types/node@20.4.7)(typescript@4.7.4)
-      typescript: 4.7.4
+      ts-node: 10.9.1(@types/node@20.4.7)(typescript@4.9.5)
+      typescript: 4.9.5
     dev: true
 
   /cosmiconfig@8.2.0:
@@ -5687,8 +5700,8 @@ packages:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
     dev: true
 
-  /electron-to-chromium@1.4.506:
-    resolution: {integrity: sha512-xxGct4GPAKSRlrLBtJxJFYy74W11zX6PO9GyHgl/U+2s3Dp0ZEwAklDfNHXOWcvH7zWMpsmgbR0ggEuaYAVvHA==}
+  /electron-to-chromium@1.4.508:
+    resolution: {integrity: sha512-FFa8QKjQK/A5QuFr2167myhMesGrhlOBD+3cYNxO9/S4XzHEXesyTD/1/xF644gC8buFPz3ca6G1LOQD0tZrrg==}
     dev: true
 
   /emittery@0.13.1:
@@ -8315,8 +8328,8 @@ packages:
     resolution: {integrity: sha512-8wb9Yw966OSxApiCt0K3yNJL8pnNeIv+OEq2YMidz4FKP6nonSRoOXc80iXY4JaN2FC11B9qsNmDsm+ZOfMROA==}
     dev: true
 
-  /joi@17.10.0:
-    resolution: {integrity: sha512-hrazgRSlhzacZ69LdcKfhi3Vu13z2yFfoAzmEov3yFIJlatTdVGUW6vle1zjH8qkzdCn/qGw8rapjqsObbYXAg==}
+  /joi@17.10.1:
+    resolution: {integrity: sha512-vIiDxQKmRidUVp8KngT8MZSOcmRVm2zV7jbMjNYWuHcJWI0bUck3nRTGQjhpPlQenIQIBC5Vp9AhcnHbWQqafw==}
     dependencies:
       '@hapi/hoek': 9.3.0
       '@hapi/topo': 5.1.0
@@ -10998,7 +11011,7 @@ packages:
       yn: 3.1.1
     dev: true
 
-  /ts-node@10.9.1(@types/node@20.4.7)(typescript@4.7.4):
+  /ts-node@10.9.1(@types/node@20.4.7)(typescript@4.9.5):
     resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
     hasBin: true
     peerDependencies:
@@ -11024,7 +11037,7 @@ packages:
       create-require: 1.1.1
       diff: 4.0.2
       make-error: 1.3.6
-      typescript: 4.7.4
+      typescript: 4.9.5
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
     dev: true
@@ -11168,6 +11181,12 @@ packages:
 
   /typescript@4.7.4:
     resolution: {integrity: sha512-C0WQT0gezHuw6AdY1M2jxUO83Rjf0HP7Sk1DtXj6j1EwkQNZrHAg2XPWlq62oqEhYvONq5pkC2Y9oPljWToLmQ==}
+    engines: {node: '>=4.2.0'}
+    hasBin: true
+    dev: true
+
+  /typescript@4.9.5:
+    resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
     engines: {node: '>=4.2.0'}
     hasBin: true
     dev: true
@@ -11350,7 +11369,7 @@ packages:
     hasBin: true
     dependencies:
       axios: 0.25.0(debug@4.3.4)
-      joi: 17.10.0
+      joi: 17.10.1
       lodash: 4.17.21
       minimist: 1.2.8
       rxjs: 7.8.1

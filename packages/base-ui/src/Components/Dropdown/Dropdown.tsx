@@ -91,6 +91,7 @@ export class Dropdown extends PureComponent<BaseDropdownProps, IState> {
                 )}
                 {content}
                 <Menu
+                    options={menu.options}
                     onClick={menu.onClick}
                     ref={this.MenuRef}
                     menu={menu.menu}

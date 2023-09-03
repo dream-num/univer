@@ -6,7 +6,18 @@ import { ComponentChildren } from 'preact';
 import { SheetToolbarConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
 
-import { ResetTextColorMenuItemFactory, TextColorSelectorMenuItemFactory } from './menu';
+import {
+    BoldMenuItemFactory,
+    FontFamilySelectorMenuItemFactory,
+    FontSizeSelectorMenuItemFactory,
+    ItalicMenuItemFactory,
+    RedoMenuItemFactory,
+    ResetTextColorMenuItemFactory,
+    StrikeThroughMenuItemFactory,
+    TextColorSelectorMenuItemFactory,
+    UnderlineMenuItemFactory,
+    UndoMenuItemFactory,
+} from './menu';
 
 export interface BaseToolbarSelectProps extends BaseSelectProps {
     children?: BaseSelectChildrenProps[];
@@ -102,14 +113,14 @@ export class ToolbarUIController extends Disposable {
         // TODO: @wzhudev: now we register menu items that only display in the toolbar here. In fact we should register all commands and menu items and shortcuts
         // in a single controller. I will do that layer.
         [
-            // UndoMenuItemFactory,
-            // RedoMenuItemFactory,
-            // FontFamilySelectorMenuItemFactory,
-            // FontSizeSelectorMenuItemFactory,
-            // BoldMenuItemFactory,
-            // ItalicMenuItemFactory,
-            // UnderlineMenuItemFactory,
-            // StrikeThroughMenuItemFactory,
+            UndoMenuItemFactory,
+            RedoMenuItemFactory,
+            FontFamilySelectorMenuItemFactory,
+            FontSizeSelectorMenuItemFactory,
+            BoldMenuItemFactory,
+            ItalicMenuItemFactory,
+            UnderlineMenuItemFactory,
+            StrikeThroughMenuItemFactory,
             TextColorSelectorMenuItemFactory,
             ResetTextColorMenuItemFactory,
             // BackgroundColorSelectorMenuItemFactory,

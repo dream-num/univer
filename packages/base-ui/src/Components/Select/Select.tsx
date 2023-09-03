@@ -8,6 +8,7 @@ import { BaseItemProps, Item } from '../Item/Item';
 import { CustomLabel, NeoCustomLabel } from '../CustomLabel';
 import styles from './index.module.less';
 import { Icon, IDisplayMenuItem, IMenuItem, IMenuService } from '../..'; // FIXME: strange import
+import { IValueOption } from '../../services/menu/menu.service';
 
 // TODO: these type definitions should be moved out of components to menu service
 
@@ -66,6 +67,7 @@ export interface BaseSelectProps {
     value?: string | number;
     icon?: string;
     id?: string;
+    options?: IValueOption;
     title?: string;
 }
 
@@ -402,7 +404,7 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
     };
 
     renderNeo = () => {
-        const { tooltip, onClick, display, value, icon, title, id } = this.props;
+        const { tooltip, onClick, display, value, icon, title, id, options } = this.props;
         const { menuItems } = this.state;
 
         const onClickInner = (...args: unknown[]) => {
@@ -413,7 +415,7 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
             <div className={`${styles.selectDouble}`}>
                 {/* TODO@wzhudev: we should compose options and builtin component here. They may have different onClick callback. */}
                 {/* TODO@wzhudev: should pass in a value to set the menu's selected status. */}
-                <Dropdown tooltip={tooltip} onClick={onClick} menu={{ parentId: id, onClick: onClickInner, menuItems }} icon={<Icon.NextIcon />}>
+                <Dropdown tooltip={tooltip} onClick={onClick} menu={{ parentId: id, options, onClick: onClickInner, menuItems }} icon={<Icon.NextIcon />}>
                     {/* TODO@wzhudev: change menu props of Dropdown. Dropdown shouldn't know how to create a menu. */}
                     <div className={styles.selectLabel}>
                         <NeoCustomLabel icon={icon} display={display} title={title!} value={value} onChange={(v) => onClick?.(v)} />

@@ -1,6 +1,6 @@
 import { ComponentChildren, JSX } from 'preact';
 import { BaseComponent, JSXComponent } from '../BaseComponent';
-import { IDisplayMenuItem } from '../services/menu/menu.service';
+import { IDisplayMenuItem, IValueOption } from '../services/menu/menu.service';
 
 export interface BaseMenuItem {
     className?: string;
@@ -15,13 +15,6 @@ export interface BaseMenuItem {
 }
 
 export interface BaseMenuProps {
-    /** @deprecated this is legacy menu mechanism. Do not use it. Use `menuItems` instead. */
-    parentId?: string;
-    menu?: BaseMenuItem[];
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    menuItems?: Array<IDisplayMenuItem<any>>;
-
     onClick?: (...arg: any) => void;
     className?: string;
     style?: JSX.CSSProperties;
@@ -29,6 +22,15 @@ export interface BaseMenuProps {
     dom?: HTMLElement;
     ref?: any;
     deep?: number;
+    /** @deprecated this is legacy menu mechanism. Do not use it. Use `menuItems` instead. */
+    menu?: BaseMenuItem[]; // TODO: should be renamed to `items`
+
+    // NOTE: options above are legacy. They are going to be removed after we complete refactoring.
+
+    menuId?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    menuItems?: Array<IDisplayMenuItem<any>>;
+    options?: IValueOption[];
 }
 
 export type BaseMenuState = {

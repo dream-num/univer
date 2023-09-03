@@ -7,6 +7,7 @@ import { CustomLabel } from '../CustomLabel';
 import styles from './index.module.less';
 import { IDisplayMenuItem } from '../../services/menu/menu.service';
 import { AppContext } from '../../Common/AppContext';
+import { IMenuItem } from '../../services/menu/menu';
 
 export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     private _MenuRef = createRef<HTMLUListElement>();
@@ -93,15 +94,15 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     };
 
     render() {
-        const { className = '', style = '', menu, menuItems, deep = 0 } = this.props;
+        const { className = '', style = '', menu, menuItems, deep = 0, options } = this.props;
         const { show, posStyle } = this.state;
 
         return (
             <ul className={joinClassNames(styles.colsMenu, className)} style={{ ...style, ...posStyle, display: show ? 'block' : 'none' }} ref={this._MenuRef}>
-                {/* NOTE: this will be dropped after we complete migrating to new UI system. */}
-                {/* render selections */}
+                {/* legacy: render selections */}
                 {menu?.map((item: BaseMenuItem, index: number) => {
                     if (item.show === false) return;
+                    // TODO@wzhudev: missing a mechanism to highlight currently selected option via value.
                     return (
                         <>
                             <li
@@ -116,6 +117,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
                                 }}
                             >
                                 <CustomLabel label={item.label} />
+                                {/* TODO: if the menu itself contains a submenu. It should be served as an `IMenuItem` not wrapped options. */}
                                 {item.children ? (
                                     <Menu
                                         ref={(ele: Menu) => (this._refs[index] = ele)}
@@ -134,6 +136,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
                         </>
                     );
                 })}
+                {/* render custom components */}
                 {/* render submenus */}
                 {menuItems?.map((item, index) => (
                     <MenuItem menuItem={item} index={index} onClick={() => this.showMenu(false)} />
@@ -150,7 +153,13 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     }
 }
 
-export class MenuItem extends Component<{ menuItem: IDisplayMenuItem<any>; index: number; onClick: () => void }, { disabled: boolean }> {
+export interface IMenuItemProps {
+    menuItem: IDisplayMenuItem<IMenuItem>;
+    index: number;
+    onClick: () => void;
+}
+
+export class MenuItem extends Component<IMenuItemProps, { disabled: boolean }> {
     static override contextType = AppContext;
 
     private disabledSubscription: Subscription | undefined;

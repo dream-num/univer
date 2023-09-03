@@ -33,7 +33,6 @@ import { map } from 'rxjs/operators';
 import { RightMenuInput } from '../View';
 import {
     BORDER_LINE_CHILDREN,
-    BORDER_SIZE_CHILDREN,
     FONT_FAMILY_CHILDREN,
     FONT_SIZE_CHILDREN,
     HORIZONTAL_ALIGN_CHILDREN,
@@ -41,7 +40,6 @@ import {
     TEXT_WRAP_CHILDREN,
     VERTICAL_ALIGN_CHILDREN,
 } from '../View/Toolbar/Const';
-import { LineBold, LineColor } from '../View/Common';
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const/PLUGIN_NAME';
 
 import styles from '../View/Toolbar/index.module.less';
@@ -399,10 +397,6 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
             },
             {
                 id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
-                // label: {
-                //     name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
-                // // },
-                // className: styles.selectColorPicker,
             },
         ],
         value$: new Observable<string>((subscriber) => {
@@ -423,7 +417,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
     };
 }
 
-export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
     const selectionManager = accessor.get(ISelectionManager);
 
@@ -439,16 +433,10 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
         className: styles.selectColorPickerParent,
         selections: [
             {
-                label: 'toolbar.resetColor',
+                id: 'toolbar.resetColor',
             },
             {
-                label: {
-                    name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
-                    props: {
-                        onClick: (color: string, e: MouseEvent) => {},
-                    },
-                },
-                className: styles.selectColorPicker,
+                id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
             },
         ],
         value$: new Observable<string>((subscriber) => {
@@ -469,7 +457,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
     };
 }
 
-export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<IBorderData | undefined> {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
     const selectionManager = accessor.get(ISelectionManager);
@@ -483,41 +471,43 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         selectType: SelectTypes.DOUBLE,
         selections: [
             ...BORDER_LINE_CHILDREN,
-            {
-                name: 'borderColor',
-                label: {
-                    name: SHEET_UI_PLUGIN_NAME + LineColor.name,
-                    props: {
-                        color: '#000',
-                        label: 'borderLine.borderColor',
-                    },
-                },
-                className: styles.selectColorPickerParent,
-                children: [
-                    {
-                        label: {
-                            name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
-                            props: {},
-                        },
-                        className: styles.selectColorPicker,
-                        onClick: (...arg) => {
-                            arg[0].stopPropagation();
-                        },
-                    },
-                ],
-            },
-            {
-                label: {
-                    name: SHEET_UI_PLUGIN_NAME + LineBold.name,
-                    props: {
-                        img: 0,
-                        label: 'borderLine.borderSize',
-                    },
-                },
-                onClick: (...arg) => {},
-                className: styles.selectLineBoldParent,
-                children: BORDER_SIZE_CHILDREN,
-            },
+            // TODO: change to border color menu item here
+            // {
+            //     name: 'borderColor',
+            //     label: {
+            //         name: SHEET_UI_PLUGIN_NAME + LineColor.name,
+            //         props: {
+            //             color: '#000',
+            //             label: 'borderLine.borderColor',
+            //         },
+            //     },
+            //     className: styles.selectColorPickerParent,
+            //     children: [
+            //         {
+            //             label: {
+            //                 name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
+            //                 props: {},
+            //             },
+            //             className: styles.selectColorPicker,
+            //             onClick: (...arg) => {
+            //                 arg[0].stopPropagation();
+            //             },
+            //         },
+            //     ],
+            // },
+            // TODO: add a set line bold menu item here
+            // {
+            //     label: {
+            //         name: SHEET_UI_PLUGIN_NAME + LineBold.name,
+            //         props: {
+            //             img: 0,
+            //             label: 'borderLine.borderSize',
+            //         },
+            //     },
+            //     onClick: (...arg) => {},
+            //     className: styles.selectLineBoldParent,
+            //     children: BORDER_SIZE_CHILDREN,
+            // },
         ],
         value$: new Observable<IBorderData | undefined>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
@@ -543,7 +533,7 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
 //     }
 // }
 
-export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
     return {
         id: SetHorizontalTextAlignCommand.id,
         title: 'horizontalAlignMode',
@@ -557,7 +547,7 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
     };
 }
 
-export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
     return {
         id: SetVerticalTextAlignCommand.id,
         title: 'verticalAlignMode',
@@ -571,7 +561,7 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
     };
 }
 
-export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
     const commandService = accessor.get(ICommandService);
     const selectionManager = accessor.get(ISelectionManager);
 

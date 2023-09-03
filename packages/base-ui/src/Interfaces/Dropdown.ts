@@ -4,6 +4,7 @@ import { BaseMenuProps } from './Menu';
 
 export interface BaseDropdownProps {
     children: ComponentChildren;
+    /** @deprecated dropdown shouldn't know what is inside */
     menu: BaseMenuProps;
     placement?: 'Left' | 'Right' | 'Top' | 'Bottom';
     showArrow?: boolean;
@@ -11,6 +12,7 @@ export interface BaseDropdownProps {
     onClick?: () => void;
     onMainClick?: () => void; //非功能按钮事件
     tooltip?: string;
+    content?: ComponentChildren;
 }
 
 export interface DropdownComponent extends BaseComponent<BaseDropdownProps> {

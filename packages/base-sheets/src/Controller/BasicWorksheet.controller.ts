@@ -9,6 +9,7 @@ import { SetWorksheetActivateCommand } from '../Commands/Commands/set-worksheet-
 import { SetWorksheetActivateMutation } from '../Commands/Mutations/set-worksheet-activate.mutation';
 import {
     ISetStyleParams,
+    ResetTextColorCommand,
     SetBackgroundColorCommand,
     SetCellBorderCommand,
     SetStyleCommand,
@@ -104,6 +105,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetCellBorderCommand,
             SetTextWrapCommand,
             SetTextRotationCommand,
+            ResetTextColorCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

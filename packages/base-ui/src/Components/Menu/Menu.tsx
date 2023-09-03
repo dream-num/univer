@@ -6,7 +6,7 @@ import { joinClassNames } from '../../Utils';
 import { CustomLabel } from '../CustomLabel';
 import styles from './index.module.less';
 import { IDisplayMenuItem } from '../../services/menu/menu.service';
-import AppContext from '../../Common/AppContext';
+import { AppContext } from '../../Common/AppContext';
 
 export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     private _MenuRef = createRef<HTMLUListElement>();
@@ -90,20 +90,6 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
                 posStyle: style,
             });
         }
-        // else {
-        //     if (curPosition.width > docPosition!.right) {
-        //         // 边界碰到univer-main-content右边界或者小于视口
-        //         style.right = '0';
-        //         style.left = 'auto';
-        //     } else {
-        //         style.left = '0';
-        //         style.right = 'auto';
-        //     }
-        //     if (curPosition.top >= docPosition.bottom) {
-        //         style.top = 'auto';
-        //         style.bottom = '100%';
-        //     }
-        // }
     };
 
     render() {
@@ -113,6 +99,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
         return (
             <ul className={joinClassNames(styles.colsMenu, className)} style={{ ...style, ...posStyle, display: show ? 'block' : 'none' }} ref={this._MenuRef}>
                 {/* NOTE: this will be dropped after we complete migrating to new UI system. */}
+                {/* render selections */}
                 {menu?.map((item: BaseMenuItem, index: number) => {
                     if (item.show === false) return;
                     return (
@@ -147,6 +134,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
                         </>
                     );
                 })}
+                {/* render submenus */}
                 {menuItems?.map((item, index) => (
                     <MenuItem menuItem={item} index={index} onClick={() => this.showMenu(false)} />
                 ))}
@@ -162,7 +150,7 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     }
 }
 
-export class MenuItem extends Component<{ menuItem: IDisplayMenuItem; index: number; onClick: () => void }, { disabled: boolean }> {
+export class MenuItem extends Component<{ menuItem: IDisplayMenuItem<any>; index: number; onClick: () => void }, { disabled: boolean }> {
     static override contextType = AppContext;
 
     private disabledSubscription: Subscription | undefined;
@@ -178,7 +166,7 @@ export class MenuItem extends Component<{ menuItem: IDisplayMenuItem; index: num
     }
 
     override componentDidMount(): void {
-        this.disabledSubscription = this.props.menuItem.disabled$?.subscribe((disabled) => {
+        this.disabledSubscription = this.props.menuItem.disabled$?.subscribe((disabled: boolean) => {
             this.setState({ disabled });
         });
     }

@@ -1,12 +1,47 @@
 import { Component, isValidElement, JSX } from 'preact';
 import { useContext } from 'preact/hooks';
 
-import { AppContext, ICustomComponent } from '../../Common';
+import { AppContext, AppContextValues, ICustomComponent } from '../../Common';
 import { IBaseCustomLabelProps } from '../../Interfaces';
 import { DisplayTypes } from '../Select';
 
 import styles from './CustomLabel.module.less';
+import { IMenuSelectorItem } from '../../services/menu/menu.service';
 
+function getLocale(context: Partial<AppContextValues>, name: string) {
+    return context.localeService?.t(name);
+}
+
+export interface INeoCustomLabelProps<T> {
+    value: T;
+    onChange?(v: T): void;
+}
+
+export function NeoCustomLabel<T>(props: Pick<IMenuSelectorItem<unknown>, 'icon' | 'display' | 'title'> & INeoCustomLabelProps<T>): JSX.Element | null {
+    const context = useContext(AppContext);
+    const { display, value, title, icon } = props;
+
+    if (display === DisplayTypes.COLOR) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return <ColorSelect value={value as any} title={title} icon={icon} />;
+    }
+
+    if (display === DisplayTypes.FONT) {
+        return (
+            <div className={styles.fontSelect} style={{ fontFamily: value as string }}>
+                {getLocale(context, value as string)}
+            </div>
+        );
+    }
+
+    if (display === DisplayTypes.INPUT) {
+        // TODO: implement display input
+    }
+
+    return <>{value}</>;
+}
+
+/** @deprecated */
 export function CustomLabel(props: IBaseCustomLabelProps): JSX.Element | null {
     const context = useContext(AppContext);
     const { label, display } = props;

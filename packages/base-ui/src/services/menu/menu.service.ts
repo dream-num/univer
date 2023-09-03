@@ -6,11 +6,12 @@ import { Disposable, toDisposable } from '@univerjs/core';
 
 import { IShortcutService } from '../shortcut/shortcut.service';
 import { ICustomLabelType } from '../../Interfaces/CustomLabel';
-import { BaseSelectProps, DisplayTypes, SelectTypes } from '../../Components/Select/Select';
+import { DisplayTypes, SelectTypes } from '../../Components/Select/Select';
 
 export type OneOrMany<T> = T | T[];
 
 export const enum MenuPosition {
+    VOID,
     TOOLBAR,
     CONTEXT_MENU,
     TAB_CONTEXT_MENU,
@@ -19,43 +20,74 @@ export const enum MenuPosition {
 }
 
 export const enum MenuItemType {
-    /** default */
+    /** Button style menu item. */
     BUTTON,
+    /** Menu item with submenus. Submenus could be other IMenuItem or an ID of a registered component. */
     SELECTOR,
 }
 
 interface IMenuItemBase {
+    /** ID of the menu item. Normally it should be the same as the ID of the command that it would invoke.  */
     id: string;
+    title: string;
     description?: string;
     icon?: string;
-    label?: string | ICustomLabelType | ComponentChildren;
-    menu: OneOrMany<MenuPosition>;
-    title: string;
     tooltip?: string;
-    type?: MenuItemType;
 
-    /** @deprecated should avoid using this */
+    type: MenuItemType;
+
+    /** In what menu should the item display. */
+    positions: OneOrMany<MenuPosition>;
+
+    /** @deprecated this parameter would be removed after refactoring */
+    label?: string | ICustomLabelType | ComponentChildren;
+
+    /** @deprecated this parameter would be removed after refactoring */
     className?: string;
 
-    /** @deprecated */
-    subMenus?: string[]; // submenu id list
     parentId?: string; // if it is submenu
 
     hidden$?: Observable<boolean>;
-    activated$?: Observable<boolean>;
     disabled$?: Observable<boolean>;
 }
 
-export interface IMenuButtonItem extends IMenuItemBase {}
+export interface IMenuButtonItem extends IMenuItemBase {
+    type: MenuItemType.BUTTON;
 
-export interface IMenuSelectorItem extends IMenuItemBase {
+    activated$?: Observable<boolean>;
+}
+
+export interface IValueOption {
+    value: string | number;
+    label: string;
+    icon?: string;
+    tooltip?: string;
+    style?: object;
+}
+
+export interface ICustomComponentOption {
+    id: string;
+}
+
+export interface IMenuSelectorItem<V> extends IMenuItemBase {
     type: MenuItemType.SELECTOR;
+
+    /** Determines how the label of the selector should display. */
     display?: DisplayTypes;
+    /** @deprecated this parameter would be removed after we complete refactoring */
     selectType: SelectTypes;
-    selections?: Array<number | BaseSelectProps>;
+
+    // selections 子菜单可以为三种类型
+    // 一个是当前 menu 的 options，选中后直接使用其 value 触发 command
+    // 一个是一个特殊组件，比如 color picker，选中后直接使用其 value 触发 command
+    // 一个是其他 menu 的 id，直接渲染成其他的 menu
+    /** Options or IDs of registered components. */
+    selections?: Array<IValueOption | ICustomComponentOption>; // TODO: we should probably change this to an observable value
+    /** @deprecated use parentId instead. */
+    submenus?: string[];
 
     /** On observable value that should emit the value of the corresponding selection component. */
-    value$?: Observable<unknown>; // TODO@wzhudev: it could be a generic type. optional for now. But it should be required.
+    value$?: Observable<V>;
 
     /** @deprecated */
     label?: {
@@ -64,13 +96,15 @@ export interface IMenuSelectorItem extends IMenuItemBase {
     };
 }
 
-export type IMenuItem = IMenuButtonItem | IMenuSelectorItem;
+export type IMenuItem = IMenuButtonItem | IMenuSelectorItem<unknown>;
 
-// TODO@wzhudev: maybe we should separate `IMenuItemState` to different types of menu items.
-
+/**
+ * @internal
+ */
 export type IDisplayMenuItem<T extends IMenuItem> = T & {
-    /** MenuService should get responsible shortcut and display on the UI. */
+    /** MenuService get responsible shortcut and display on the UI. */
     shortcut?: string;
+
     /** Composed menu structure by the menu service. */
     subMenuItems?: Array<IDisplayMenuItem<IMenuItem>>; // TODO@wzhudev: related mechanism is not implemented yet
 };
@@ -82,6 +116,7 @@ export interface IMenuService {
 
     /** Get menu items for display at a given position. */
     getMenuItems(position: MenuPosition): Array<IDisplayMenuItem<IMenuItem>>;
+    getSubMenuItems(parentId: string): Array<IDisplayMenuItem<IMenuItem>>;
     getMenuItem(id: string): IMenuItem | null;
 }
 
@@ -89,6 +124,9 @@ export class DesktopMenuService extends Disposable implements IMenuService {
     private readonly _menuItemMap = new Map<string, IMenuItem>();
 
     private readonly _menuByPositions = new Map<MenuPosition, Map<string, IMenuItem>>();
+
+    // TODO@wzhudev: add map to parent menu item & child menu item
+    private readonly _menuByParentId = new Map<string, string[]>();
 
     constructor(@IShortcutService private readonly _shortcutService: IShortcutService) {
         super();
@@ -104,28 +142,53 @@ export class DesktopMenuService extends Disposable implements IMenuService {
         }
 
         this._menuItemMap.set(item.id, item);
-        if (Array.isArray(item.menu)) {
-            item.menu.forEach((menu) => this.appendMenuToPosition(item, menu));
+
+        if (Array.isArray(item.positions)) {
+            item.positions.forEach((menu) => this.appendMenuToPosition(item, menu));
         } else {
-            this.appendMenuToPosition(item, item.menu);
+            this.appendMenuToPosition(item, item.positions);
+        }
+
+        if (item.parentId) {
+            this._menuByParentId.set(item.parentId, [...(this._menuByParentId.get(item.parentId) ?? []), item.id]);
         }
 
         return toDisposable(() => {
             this._menuItemMap.delete(item.id);
-            if (Array.isArray(item.menu)) {
-                item.menu.forEach((menu) => this._menuByPositions.get(menu)?.delete(item.id));
+
+            if (Array.isArray(item.positions)) {
+                item.positions.forEach((menu) => this._menuByPositions.get(menu)?.delete(item.id));
             } else {
-                this._menuByPositions.get(item.menu)?.delete(item.id);
+                this._menuByPositions.get(item.positions)?.delete(item.id);
+            }
+
+            if (item.parentId) {
+                const children = this._menuByParentId.get(item.parentId);
+                if (children) {
+                    const index = children.findIndex((id) => id === item.id);
+                    if (index > -1) {
+                        children.splice(index, 1);
+                    }
+                }
             }
         });
     }
 
     getMenuItems(positions: MenuPosition): Array<IDisplayMenuItem<IMenuItem>> {
         if (this._menuByPositions.has(positions)) {
-            return [...this._menuByPositions.get(positions)!.values()].map((menu) => this.getDisplayMenuItems(menu));
+            return [...this._menuByPositions.get(positions)!.values()].filter((menu) => !menu.parentId).map((menu) => this.getDisplayMenuItems(menu));
         }
 
         return [] as Array<IDisplayMenuItem<any>>;
+    }
+
+    getSubMenuItems(parentId: string): Array<IDisplayMenuItem<IMenuItem>> {
+        const subMenuIds = this._menuByParentId.get(parentId);
+        if (!subMenuIds) {
+            return [];
+        }
+
+        return subMenuIds.map((id) => this.getDisplayMenuItems(this._menuItemMap.get(id)!));
     }
 
     getMenuItem(id: string): IMenuItem | null {

@@ -1,7 +1,7 @@
 import { ComponentChild, Component } from 'preact';
 import { Subscription } from 'rxjs';
 
-import { AppContext, Button, Tooltip, CustomLabel, IDisplayMenuItem, MenuItemType, Select, IMenuSelectorItem, IMenuItem } from '@univerjs/base-ui';
+import { AppContext, Button, Tooltip, CustomLabel, IDisplayMenuItem, MenuItemType, Select, IMenuSelectorItem, IMenuItem, IMenuButtonItem } from '@univerjs/base-ui';
 import { ICommandService } from '@univerjs/core';
 
 import styles from './index.module.less';
@@ -13,6 +13,8 @@ export interface IToolbarItemStatus {
     value: any;
 }
 
+// TODO@wzhudev: the following component should be moved to base-ui after refactoring
+/** The component to render toolbar item. */
 export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbarItemStatus> {
     static override contextType = AppContext;
 
@@ -37,12 +39,15 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
             this.setState({ disabled });
         });
 
-        this.activatedSubscription = this.props.activated$?.subscribe((activated) => {
-            this.setState({ activated });
-        });
+        if (this.props.type === MenuItemType.BUTTON) {
+            const props = this.props as IDisplayMenuItem<IMenuButtonItem>;
+            this.activatedSubscription = props.activated$?.subscribe((activated) => {
+                this.setState({ activated });
+            });
+        }
 
         if (this.props.type === MenuItemType.SELECTOR) {
-            const props = this.props as IDisplayMenuItem<IMenuSelectorItem>;
+            const props = this.props as IDisplayMenuItem<IMenuSelectorItem<unknown>>;
             this.currentValueSubscription = props.value$?.subscribe((value) => {
                 this.setState({ value });
             });
@@ -52,10 +57,10 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
     override componentWillMount() {
         this.disabledSubscription?.unsubscribe();
         this.activatedSubscription?.unsubscribe();
+        this.currentValueSubscription?.unsubscribe();
     }
 
     render(): ComponentChild {
-        // here we render different types of toolbar item according to their type
         switch (this.props.type) {
             case MenuItemType.SELECTOR:
                 return this.renderSelectorType();
@@ -67,21 +72,25 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
     private renderSelectorType(): ComponentChild {
         const { context, state } = this;
         const commandService: ICommandService = context.injector.get(ICommandService);
-        const { disabled, activated, value } = state;
+        const { disabled, value } = state;
 
-        const props = this.props as IDisplayMenuItem<IMenuSelectorItem>;
+        const props = this.props as IDisplayMenuItem<IMenuSelectorItem<unknown>>;
+        const { icon, title, className, label, display, selectType, selections, id } = props;
 
         return (
-            <Tooltip title={props.tooltip + (props.shortcut ? ` (${props.shortcut})` : '')} placement="bottom">
+            <Tooltip title={this.getTooltip()} placement="bottom">
                 <Select
-                    icon={props.icon}
-                    className={props.className}
-                    label={value ?? props.label}
-                    display={props.display}
-                    type={props.selectType!}
-                    children={props.selections!}
-                    onClick={(value) => commandService.executeCommand(props.id, { value })}
-                    onPressEnter={(value) => commandService.executeCommand(props.id, { value })}
+                    id={id}
+                    title={title}
+                    children={selections!}
+                    className={className}
+                    display={display}
+                    icon={icon}
+                    value={value}
+                    label={value ?? label} // TODO: this line is strange
+                    onClick={(value) => commandService.executeCommand(id, { value })} // TODO@wzhudev: should be merged to a single API on value change
+                    onPressEnter={(value) => commandService.executeCommand(id, { value })}
+                    type={selectType!}
                 ></Select>
             </Tooltip>
         );
@@ -89,15 +98,19 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
 
     private renderButtonType(): ComponentChild {
         const { props, context, state } = this;
-        const commandService: ICommandService = context.injector.get(ICommandService);
         const { disabled, activated } = state;
+        const commandService: ICommandService = context.injector.get(ICommandService);
 
         return (
-            <Tooltip title={props.title + (props.shortcut ? ` (${props.shortcut})` : '')} placement="bottom">
+            <Tooltip title={this.getTooltip()} placement="bottom">
                 <Button active={activated} className={styles.textButton} type="text" disabled={disabled} onClick={() => commandService.executeCommand(props.id)}>
                     <CustomLabel label={{ name: props.icon }} />
                 </Button>
             </Tooltip>
         );
+    }
+
+    private getTooltip(): string {
+        return this.context.localeService?.t(this.props.tooltip) + (this.props.shortcut ? ` (${this.props.shortcut})` : '');
     }
 }

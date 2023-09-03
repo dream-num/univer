@@ -32,6 +32,7 @@ export {
     SetSpanCommand,
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
+    ResetTextColorCommand,
 } from './Commands/Commands/set-style.command';
 export { InsertSheetCommand } from './Commands/Commands/insert-sheet.command';
 export { ClearSelectionContentCommand } from './Commands/Commands/clear-selection-content.command';

@@ -274,6 +274,24 @@ export const SetTextColorCommand: ICommand<ISetColorCommandParams> = {
     },
 };
 
+export const ResetTextColorCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.reset-text-color',
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        const setStyleParams: ISetStyleParams<IColorStyle> = {
+            style: {
+                type: 'cl',
+                value: {
+                    rgb: '#000',
+                },
+            },
+        };
+
+        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+    },
+};
+
 export const SetBackgroundColorCommand: ICommand<ISetColorCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-background-color',

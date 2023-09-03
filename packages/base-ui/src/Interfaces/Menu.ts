@@ -16,8 +16,12 @@ export interface BaseMenuItem {
 
 export interface BaseMenuProps {
     /** @deprecated this is legacy menu mechanism. Do not use it. Use `menuItems` instead. */
+    parentId?: string;
     menu?: BaseMenuItem[];
-    menuItems?: IDisplayMenuItem[];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    menuItems?: Array<IDisplayMenuItem<any>>;
+
     onClick?: (...arg: any) => void;
     className?: string;
     style?: JSX.CSSProperties;

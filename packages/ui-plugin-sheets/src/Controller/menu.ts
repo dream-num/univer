@@ -23,8 +23,9 @@ import {
     SetTextWrapCommand,
     SetHorizontalTextAlignCommand,
     SetVerticalTextAlignCommand,
+    ResetTextColorCommand,
 } from '@univerjs/base-sheets';
-import { ColorPicker, DisplayTypes, IMenuItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes } from '@univerjs/base-ui';
+import { ColorPicker, DisplayTypes, IMenuButtonItem, IMenuItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes } from '@univerjs/base-ui';
 import { FontItalic, FontWeight, IBorderData, ICommandService, IPermissionService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
@@ -45,42 +46,45 @@ import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const/PLUGIN_NAME';
 
 import styles from '../View/Toolbar/index.module.less';
 
-export function UndoMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const undoRedoService = accessor.get(IUndoRedoService);
 
     return {
         id: UndoCommand.id,
+        type: MenuItemType.BUTTON,
         icon: 'ForwardIcon',
         title: 'Undo',
-        menu: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR],
         disabled$: undoRedoService.undoRedoStatus$.pipe(map((v) => v.undos <= 0)),
     };
 }
 
-export function RedoMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function RedoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const undoRedoService = accessor.get(IUndoRedoService);
 
     return {
         id: RedoCommand.id,
+        type: MenuItemType.BUTTON,
         icon: 'BackIcon',
         title: 'Redo',
-        menu: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR],
         disabled$: undoRedoService.undoRedoStatus$.pipe(map((v) => v.redos <= 0)),
     };
 }
 
 // TODO@wzhudev: in the future we will support add rich format value to in-cell texts. Then we would make some changes to how these menu items works.
 
-export function BoldMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
     const permissionService = accessor.get(IPermissionService);
     const selectionManager = accessor.get(ISelectionManager);
 
     return {
         id: SetBoldCommand.id,
+        type: MenuItemType.BUTTON,
         icon: 'BoldIcon',
         title: 'Set bold',
-        menu: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR],
         disabled$: new Observable<boolean>((subscriber) => {
             let editable = false;
             function update() {
@@ -106,7 +110,6 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuItem {
                     return;
                 }
 
-                // FIXME: range is undefined when moving selection with cursor
                 const range = selectionManager.getCurrentCell();
                 const isBold = range?.getFontWeight();
 
@@ -119,16 +122,17 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
-export function ItalicMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
     const selectionManager = accessor.get(ISelectionManager);
 
     return {
         id: SetItalicCommand.id,
+        type: MenuItemType.BUTTON,
         icon: 'ItalicIcon',
         title: 'Set italic',
-        menu: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR],
         disabled$: new Observable<boolean>((subscriber) => {
             let editable = false;
             function update() {
@@ -165,16 +169,17 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
-export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
     const selectionManager = accessor.get(ISelectionManager);
 
     return {
         id: SetUnderlineCommand.id,
+        type: MenuItemType.BUTTON,
         icon: 'UnderLineIcon',
         title: 'Set underline',
-        menu: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR],
         disabled$: new Observable<boolean>((subscriber) => {
             let editable = false;
             function update() {
@@ -211,16 +216,17 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
-export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
     const selectionManager = accessor.get(ISelectionManager);
 
     return {
         id: SetStrikeThroughCommand.id,
+        type: MenuItemType.BUTTON,
         icon: 'DeleteLineIcon',
         title: 'Set strike through',
-        menu: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR],
         disabled$: new Observable<boolean>((subscriber) => {
             let editable = false;
             function update() {
@@ -257,7 +263,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
-export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     // NOTE: we could get more font options from (a) font service, so user can provide their own fonts
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
@@ -265,14 +271,15 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
 
     return {
         id: SetFontFamilyCommand.id,
-        title: 'font',
+        title: 'toolbar.font',
         tooltip: 'toolbar.font',
-        selectType: SelectTypes.FIX,
+        selectType: SelectTypes.NEO,
         type: MenuItemType.SELECTOR,
-        menu: [MenuPosition.TOOLBAR],
+        display: DisplayTypes.FONT,
+        positions: [MenuPosition.TOOLBAR],
         selections: FONT_FAMILY_CHILDREN,
         className: styles.selectLabelString,
-        disabled$: new Observable<boolean>((subscriber) => {
+        disabled$: new Observable((subscriber) => {
             let editable = false;
             function update() {
                 subscriber.next(!editable);
@@ -289,7 +296,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
                 permission$.unsubscribe();
             };
         }),
-        value$: new Observable<string>((subscriber) => {
+        value$: new Observable((subscriber) => {
             const defaultValue = FONT_FAMILY_CHILDREN[0].value;
 
             const disposable = commandService.onCommandExecuted((c) => {
@@ -310,7 +317,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     };
 }
 
-export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
     const selectionManager = accessor.get(ISelectionManager);
@@ -320,8 +327,9 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
         title: 'fontSize',
         tooltip: 'toolbar.fontSize',
         type: MenuItemType.SELECTOR,
-        selectType: SelectTypes.INPUT,
-        menu: [MenuPosition.TOOLBAR],
+        selectType: SelectTypes.NEO,
+        display: DisplayTypes.INPUT,
+        positions: [MenuPosition.TOOLBAR],
         selections: FONT_SIZE_CHILDREN,
         disabled$: new Observable<boolean>((subscriber) => {
             let editable = false;
@@ -340,7 +348,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
                 permission$.unsubscribe();
             };
         }),
-        value$: new Observable<number>((subscriber) => {
+        value$: new Observable((subscriber) => {
             const DEFAULT_SIZE = 14;
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -354,38 +362,47 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
                 subscriber.next(fs);
             });
 
+            subscriber.next(DEFAULT_SIZE);
+
             return disposable.dispose;
         }),
     };
 }
 
-export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: ResetTextColorCommand.id,
+        type: MenuItemType.BUTTON,
+        title: 'toolbar.resetColor',
+        positions: [MenuPosition.TOOLBAR],
+        parentId: SetTextColorCommand.id,
+    };
+}
+
+export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
     const selectionManager = accessor.get(ISelectionManager);
 
     return {
         id: SetTextColorCommand.id,
-        title: 'TextColorIcon',
+        title: 'toolbar.textColor.main',
         icon: 'TextColorIcon',
         tooltip: 'toolbar.textColor.main',
         type: MenuItemType.SELECTOR,
-        selectType: SelectTypes.DOUBLEFIX,
-        menu: [MenuPosition.TOOLBAR],
+        selectType: SelectTypes.NEO,
+        positions: [MenuPosition.TOOLBAR],
         display: DisplayTypes.COLOR,
         className: styles.selectColorPickerParent,
-        // FIXME: click this toolbar icon would not trigger color change
         selections: [
             {
-                label: 'toolbar.resetColor',
+                id: 'toolbar.resetColor',
             },
             {
-                label: {
-                    name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
-                    props: {
-                        onClick: (color: string, e: MouseEvent) => {},
-                    },
-                },
-                className: styles.selectColorPicker,
+                id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
+                // label: {
+                //     name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
+                // // },
+                // className: styles.selectColorPicker,
             },
         ],
         value$: new Observable<string>((subscriber) => {
@@ -415,8 +432,8 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
         tooltip: 'toolbar.fillColor.main',
         title: 'TextColorIcon',
         type: MenuItemType.SELECTOR,
-        selectType: SelectTypes.DOUBLEFIX,
-        menu: [MenuPosition.TOOLBAR],
+        selectType: SelectTypes.NEO,
+        positions: [MenuPosition.TOOLBAR],
         display: DisplayTypes.COLOR,
         icon: 'FillColorIcon',
         className: styles.selectColorPickerParent,
@@ -461,7 +478,7 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         id: SetCellBorderCommand.id,
         title: 'border',
         display: DisplayTypes.SUFFIX,
-        menu: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR],
         type: MenuItemType.SELECTOR,
         selectType: SelectTypes.DOUBLE,
         selections: [
@@ -530,7 +547,7 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
     return {
         id: SetHorizontalTextAlignCommand.id,
         title: 'horizontalAlignMode',
-        menu: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR],
         tooltip: 'toolbar.horizontalAlignMode.main',
         className: styles.selectDoubleString,
         display: DisplayTypes.SUFFIX,
@@ -548,7 +565,7 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
         className: styles.selectDoubleString,
         display: DisplayTypes.SUFFIX,
         type: MenuItemType.SELECTOR,
-        menu: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR],
         selectType: SelectTypes.DOUBLE,
         selections: VERTICAL_ALIGN_CHILDREN,
     };
@@ -564,7 +581,7 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem 
         tooltip: 'toolbar.textWrapMode.main',
         type: MenuItemType.SELECTOR,
         selectType: SelectTypes.DOUBLE,
-        menu: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR],
         selections: TEXT_WRAP_CHILDREN,
         display: DisplayTypes.SUFFIX,
         value$: new Observable((subscriber) => {
@@ -598,7 +615,7 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
         display: DisplayTypes.SUFFIX,
         type: MenuItemType.SELECTOR,
         selectType: SelectTypes.DOUBLE,
-        menu: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR],
         value$: new Observable<number>((subscriber) => {
             commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -627,14 +644,14 @@ export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: ClearSelectionContentCommand.id,
         title: 'rightClick.clearContent',
-        menu: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU],
     };
 }
 
 export function InsertRowMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: InsertRowCommand.id,
-        menu: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.insertRow',
     };
 }
@@ -642,7 +659,7 @@ export function InsertRowMenuItemFactory(accessor: IAccessor): IMenuItem {
 export function InsertColMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: InsertColCommand.id,
-        menu: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.insertColumn',
     };
 }
@@ -650,7 +667,7 @@ export function InsertColMenuItemFactory(accessor: IAccessor): IMenuItem {
 export function RemoveRowMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: RemoveRowCommand.id,
-        menu: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.deleteSelectedRow',
     };
 }
@@ -658,7 +675,7 @@ export function RemoveRowMenuItemFactory(accessor: IAccessor): IMenuItem {
 export function RemoveColMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: RemoveColCommand.id,
-        menu: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.deleteSelectedColumn',
     };
 }
@@ -666,7 +683,7 @@ export function RemoveColMenuItemFactory(accessor: IAccessor): IMenuItem {
 export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SetWorksheetRowHeightCommand.id,
-        menu: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.rowHeight',
         label: {
             name: RightMenuInput.name,
@@ -681,7 +698,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuItem {
 export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SetWorksheetColWidthCommand.id,
-        menu: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.columnWidth',
         label: {
             name: RightMenuInput.name,
@@ -696,15 +713,15 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuItem {
 export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: `${DeleteRangeCommand.id}.parent`,
-        menu: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.deleteCell',
-        subMenus: [DeleteRangeCommand.id, `${DeleteRangeCommand.id}up`],
+        submenus: [DeleteRangeCommand.id, `${DeleteRangeCommand.id}up`],
     };
 }
 export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: DeleteRangeCommand.id,
-        menu: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.moveLeft',
         parentId: `${DeleteRangeCommand.id}.parent`,
     };
@@ -713,7 +730,7 @@ export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuIt
 export function DeleteRangeMoveUpMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: `${DeleteRangeCommand.id}up`,
-        menu: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.moveUp',
         parentId: `${DeleteRangeCommand.id}.parent`,
     };

@@ -1,13 +1,13 @@
 import { ComponentChildren, createRef, RefObject } from 'preact';
 import { PureComponent } from 'preact/compat';
-import { ICustomComponent } from '../../Common';
+import { AppContext, ICustomComponent } from '../../Common';
 import { BaseMenuItem } from '../../Interfaces';
 import { Dropdown } from '../Dropdown';
 import { Input } from '../Input';
 import { BaseItemProps, Item } from '../Item/Item';
-import { CustomLabel } from '../CustomLabel';
+import { CustomLabel, NeoCustomLabel } from '../CustomLabel';
 import styles from './index.module.less';
-import { Icon } from '../..'; // FIXME: strange import
+import { Icon, IDisplayMenuItem, IMenuItem, IMenuService } from '../..'; // FIXME: strange import
 
 // TODO: these type definitions should be moved out of components to menu service
 
@@ -19,12 +19,25 @@ export enum SelectTypes {
     DOUBLE,
     FIX,
     DOUBLEFIX,
+
+    /** This should be the only type. The enum would be removed after we finish refactor. */
+    NEO,
 }
 
 export enum DisplayTypes {
     LABEL,
+
+    /** @deprecated */
     SUFFIX,
+
+    ICON,
+
+    /** Label as color display. */
     COLOR,
+
+    INPUT,
+
+    FONT,
 }
 
 export interface BaseSelectChildrenProps extends BaseItemProps {
@@ -52,20 +65,29 @@ export interface BaseSelectProps {
     tooltip?: string;
     value?: string | number;
     icon?: string;
+    id?: string;
+    title?: string;
 }
 
 interface IState {
     menu: BaseMenuItem[];
-    color: string;
+    color: string; // TODO@wzhudev: this state is strange
     content: ComponentChildren;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any;
+    menuItems: Array<IDisplayMenuItem<IMenuItem>>;
 }
 
 export class Select extends PureComponent<BaseSelectProps, IState> {
+    static override contextType = AppContext;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ColorRef: any;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onClick: (...arg: any) => void;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onPressEnter: (...arg: any[]) => void;
 
     constructor(props: BaseSelectProps) {
@@ -82,6 +104,7 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
             color: this.props.defaultColor ?? '#000',
             content: '',
             value: '',
+            menuItems: [],
         };
     }
 
@@ -97,12 +120,16 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
                 return this.getFix();
             case SelectTypes.DOUBLEFIX:
                 return this.getDoubleFix();
+            case SelectTypes.NEO:
+                return this.renderNeo();
         }
     }
 
     // eslint-disable-next-line max-lines-per-function
     initData() {
         const { type, display, children = [], label } = this.props;
+
+        // TODO@wzhudev: the way of binding onClick is ridiculous. Fix it.
 
         // 显示值可变
         if (type === 0 || type === 3) {
@@ -236,16 +263,20 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
 
     override componentDidMount() {
         this.initData();
+        this.getSubMenus();
     }
 
     override componentWillReceiveProps(nextProps: BaseSelectProps) {
         this.updateData();
-        // this.props = Object.assign(this.props, nextProps);
-        // this.initData();
+
+        if (this.props.id !== nextProps.id && nextProps.id) {
+            this.getSubMenus();
+        }
     }
 
     resetMenu(children: BaseSelectChildrenProps[], hideSelectedIcon?: boolean) {
         const list: BaseMenuItem[] = [];
+        // TODO@wzhudev: ID prop is not handled
         for (let i = 0; i < children.length; i++) {
             let selected = false;
             if (!hideSelectedIcon) {
@@ -358,11 +389,34 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
     getDoubleFix = () => {
         const { label, className = '', tooltip, onClick, display, value, icon } = this.props;
         const { menu } = this.state;
+
         return (
             <div className={`${styles.selectDouble} ${className}`}>
                 <Dropdown tooltip={tooltip} onClick={onClick} menu={{ menu, onClick: this.onClick }} icon={<Icon.NextIcon />}>
                     <div className={styles.selectLabel}>
-                        <CustomLabel display={display} label={label} value={value} icon={icon} />
+                        <CustomLabel display={display} label={label} value={`${value}`} icon={icon} />
+                    </div>
+                </Dropdown>
+            </div>
+        );
+    };
+
+    renderNeo = () => {
+        const { tooltip, onClick, display, value, icon, title, id } = this.props;
+        const { menuItems } = this.state;
+
+        const onClickInner = (...args: unknown[]) => {
+            onClick?.(args[1] as number | string);
+        };
+
+        return (
+            <div className={`${styles.selectDouble}`}>
+                {/* TODO@wzhudev: we should compose options and builtin component here. They may have different onClick callback. */}
+                {/* TODO@wzhudev: should pass in a value to set the menu's selected status. */}
+                <Dropdown tooltip={tooltip} onClick={onClick} menu={{ parentId: id, onClick: onClickInner, menuItems }} icon={<Icon.NextIcon />}>
+                    {/* TODO@wzhudev: change menu props of Dropdown. Dropdown shouldn't know how to create a menu. */}
+                    <div className={styles.selectLabel}>
+                        <NeoCustomLabel icon={icon} display={display} title={title!} value={value} onChange={(v) => onClick?.(v)} />
                     </div>
                 </Dropdown>
             </div>
@@ -373,5 +427,15 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
         const { type = 0 } = this.props;
 
         return <div className={styles.selectComponent}>{this.getType(type)}</div>;
+    }
+
+    private getSubMenus() {
+        const { id } = this.props;
+        if (id) {
+            const menuService: IMenuService = this.context.injector.get(IMenuService);
+            this.setState({
+                menuItems: menuService.getSubMenuItems(id),
+            });
+        }
     }
 }

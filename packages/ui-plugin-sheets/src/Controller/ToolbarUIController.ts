@@ -6,23 +6,7 @@ import { ComponentChildren } from 'preact';
 import { SheetToolbarConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
 
-import {
-    BackgroundColorSelectorMenuItemFactory,
-    BoldMenuItemFactory,
-    CellBorderSelectorMenuItemFactory,
-    TextColorSelectorMenuItemFactory,
-    FontFamilySelectorMenuItemFactory,
-    FontSizeSelectorMenuItemFactory,
-    ItalicMenuItemFactory,
-    RedoMenuItemFactory,
-    StrikeThroughMenuItemFactory,
-    TextRotateMenuItemFactory,
-    UnderlineMenuItemFactory,
-    UndoMenuItemFactory,
-    WrapTextMenuItemFactory,
-    HorizontalAlignMenuItemFactory,
-    VerticalAlignMenuItemFactory,
-} from './menu';
+import { ResetTextColorMenuItemFactory, TextColorSelectorMenuItemFactory } from './menu';
 
 export interface BaseToolbarSelectProps extends BaseSelectProps {
     children?: BaseSelectChildrenProps[];
@@ -118,21 +102,22 @@ export class ToolbarUIController extends Disposable {
         // TODO: @wzhudev: now we register menu items that only display in the toolbar here. In fact we should register all commands and menu items and shortcuts
         // in a single controller. I will do that layer.
         [
-            UndoMenuItemFactory,
-            RedoMenuItemFactory,
-            FontFamilySelectorMenuItemFactory,
-            FontSizeSelectorMenuItemFactory,
-            BoldMenuItemFactory,
-            ItalicMenuItemFactory,
-            UnderlineMenuItemFactory,
-            StrikeThroughMenuItemFactory,
+            // UndoMenuItemFactory,
+            // RedoMenuItemFactory,
+            // FontFamilySelectorMenuItemFactory,
+            // FontSizeSelectorMenuItemFactory,
+            // BoldMenuItemFactory,
+            // ItalicMenuItemFactory,
+            // UnderlineMenuItemFactory,
+            // StrikeThroughMenuItemFactory,
             TextColorSelectorMenuItemFactory,
-            BackgroundColorSelectorMenuItemFactory,
-            CellBorderSelectorMenuItemFactory,
-            HorizontalAlignMenuItemFactory,
-            VerticalAlignMenuItemFactory,
-            WrapTextMenuItemFactory,
-            TextRotateMenuItemFactory,
+            ResetTextColorMenuItemFactory,
+            // BackgroundColorSelectorMenuItemFactory,
+            // CellBorderSelectorMenuItemFactory,
+            // HorizontalAlignMenuItemFactory,
+            // VerticalAlignMenuItemFactory,
+            // WrapTextMenuItemFactory,
+            // TextRotateMenuItemFactory,
         ].forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });

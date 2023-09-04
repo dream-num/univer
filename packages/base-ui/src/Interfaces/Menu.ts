@@ -1,6 +1,7 @@
 import { ComponentChildren, JSX } from 'preact';
 import { BaseComponent, JSXComponent } from '../BaseComponent';
-import { IDisplayMenuItem, IValueOption } from '../services/menu/menu.service';
+import { ICustomComponentOption, IValueOption } from '../services/menu/menu';
+import { DisplayTypes } from '../Components/Select/Select';
 
 export interface BaseMenuItem {
     className?: string;
@@ -15,28 +16,30 @@ export interface BaseMenuItem {
 }
 
 export interface BaseMenuProps {
+    /** @deprecated */
     onClick?: (...arg: any) => void;
+    /** @deprecated */
     className?: string;
+    /** @deprecated */
     style?: JSX.CSSProperties;
+    /** @deprecated */
     parent?: any;
+    /** @deprecated */
     dom?: HTMLElement;
+    /** @deprecated */
     ref?: any;
+    /** @deprecated */
     deep?: number;
     /** @deprecated this is legacy menu mechanism. Do not use it. Use `menuItems` instead. */
     menu?: BaseMenuItem[]; // TODO: should be renamed to `items`
 
     // NOTE: options above are legacy. They are going to be removed after we complete refactoring.
 
+    display?: DisplayTypes;
     menuId?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    menuItems?: Array<IDisplayMenuItem<any>>;
-    options?: IValueOption[];
+    options?: Array<IValueOption | ICustomComponentOption>;
+    onOptionSelect?: (option: IValueOption) => void;
 }
-
-export type BaseMenuState = {
-    show: boolean;
-    posStyle: BaseMenuStyle;
-};
 
 export type BaseMenuStyle = {
     left?: string;

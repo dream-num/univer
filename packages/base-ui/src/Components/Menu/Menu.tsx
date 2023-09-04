@@ -1,15 +1,23 @@
 import { Component, ComponentChild, createRef } from 'preact';
 import { Subscription } from 'rxjs';
 import { ICommandService } from '@univerjs/core';
-import { BaseMenuProps, BaseMenuState, BaseMenuItem, BaseMenuStyle } from '../../Interfaces';
+import { BaseMenuProps, BaseMenuItem, BaseMenuStyle } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
-import { CustomLabel } from '../CustomLabel';
+import { CustomLabel, NeoCustomLabel } from '../CustomLabel';
 import styles from './index.module.less';
-import { IDisplayMenuItem } from '../../services/menu/menu.service';
+import { IDisplayMenuItem, IMenuService } from '../../services/menu/menu.service';
 import { AppContext } from '../../Common/AppContext';
-import { IMenuItem } from '../../services/menu/menu';
+import { ICustomComponentOption, IMenuItem, IValueOption, isValueOptions } from '../../services/menu/menu';
 
-export class Menu extends Component<BaseMenuProps, BaseMenuState> {
+export interface IBaseMenuState {
+    show: boolean;
+    posStyle: BaseMenuStyle;
+    menuItems: Array<IDisplayMenuItem<IMenuItem>>;
+}
+
+export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
+    static override contextType = AppContext;
+
     private _MenuRef = createRef<HTMLUListElement>();
 
     private _refs: Menu[] = [];
@@ -17,6 +25,16 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
     constructor(props: BaseMenuProps) {
         super(props);
         this.initialize();
+    }
+
+    override componentDidMount(): void {
+        this.getSubMenus();
+    }
+
+    override componentWillReceiveProps(nextProps: Readonly<BaseMenuProps>): void {
+        if (this.props.menuId !== nextProps.menuId) {
+            this.getSubMenus();
+        }
     }
 
     getMenuRef = () => this._MenuRef;
@@ -93,9 +111,11 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
         }
     };
 
+    // eslint-disable-next-line max-lines-per-function
     render() {
-        const { className = '', style = '', menu, menuItems, deep = 0, options } = this.props;
-        const { show, posStyle } = this.state;
+        const { context, props, state } = this;
+        const { className = '', style = '', menu, deep = 0, options, display } = props;
+        const { show, posStyle, menuItems } = state;
 
         return (
             <ul className={joinClassNames(styles.colsMenu, className)} style={{ ...style, ...posStyle, display: show ? 'block' : 'none' }} ref={this._MenuRef}>
@@ -136,7 +156,38 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
                         </>
                     );
                 })}
-                {/* render custom components */}
+                {options?.map((option: IValueOption | ICustomComponentOption, index: number) => {
+                    // render value option
+                    const isValueOption = isValueOptions(option);
+                    if (isValueOption) {
+                        return (
+                            <li
+                                className={joinClassNames(styles.colsMenuitem, option.disabled ? styles.colsMenuitemDisabled : '')}
+                                onClick={() => {
+                                    if (option.value) {
+                                        this.props.onOptionSelect!(option);
+                                    }
+                                    // TODO: handle if options is a custom component
+                                }}
+                            >
+                                <NeoCustomLabel value={option.value} display={display} title={option.label} />
+                            </li>
+                        );
+                    }
+
+                    // custom component option
+                    const CustomComponent = context.componentManager?.get(option.id);
+                    return (
+                        <li>
+                            <CustomComponent
+                                onValueChange={(v: string | number) => {
+                                    this.props.onOptionSelect!({ value: v, label: option.id });
+                                    this.showMenu(false);
+                                }}
+                            />
+                        </li>
+                    );
+                })}
                 {/* render submenus */}
                 {menuItems?.map((item, index) => (
                     <MenuItem menuItem={item} index={index} onClick={() => this.showMenu(false)} />
@@ -149,7 +200,18 @@ export class Menu extends Component<BaseMenuProps, BaseMenuState> {
         this.state = {
             show: false,
             posStyle: {},
+            menuItems: [],
         };
+    }
+
+    private getSubMenus() {
+        const { menuId } = this.props;
+        if (menuId) {
+            const menuService: IMenuService = this.context.injector.get(IMenuService);
+            this.setState({
+                menuItems: menuService.getSubMenuItems(menuId),
+            });
+        }
     }
 }
 

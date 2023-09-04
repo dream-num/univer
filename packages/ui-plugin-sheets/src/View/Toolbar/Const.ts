@@ -151,6 +151,7 @@ export const FONT_FAMILY_CHILDREN = [
 export const BORDER_LINE_CHILDREN = [
     {
         label: 'borderLine.borderTop',
+        icon: 'TopBorderIcon',
         suffix: {
             name: 'TopBorderIcon',
         },

@@ -20,6 +20,7 @@ export const enum MenuItemType {
     BUTTON,
     /** Menu item with submenus. Submenus could be other IMenuItem or an ID of a registered component. */
     SELECTOR,
+    DROPDOWN,
 }
 
 interface IMenuItemBase {
@@ -63,12 +64,25 @@ export interface IValueOption {
     disabled?: boolean;
 }
 
+export function isValueOptions(v: IValueOption | ICustomComponentOption): v is IValueOption {
+    return typeof (v as IValueOption).value !== 'undefined';
+}
+
 export interface ICustomComponentOption {
     id: string;
 }
 
+export interface ICustomComponentProps<T> {
+    value: T;
+    onValueChange: (v: T) => void;
+}
+
+export function isCustomComponentOption(v: IValueOption | ICustomComponentOption): v is ICustomComponentOption {
+    return typeof (v as ICustomComponentOption).id !== 'undefined';
+}
+
 export interface IMenuSelectorItem<V> extends IMenuItemBase {
-    type: MenuItemType.SELECTOR;
+    type: MenuItemType.SELECTOR | MenuItemType.DROPDOWN;
 
     /** Determines how the label of the selector should display. */
     display?: DisplayTypes;

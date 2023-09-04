@@ -91,13 +91,18 @@ export class Dropdown extends PureComponent<BaseDropdownProps, IState> {
                 )}
                 {content}
                 <Menu
+                    menuId={menu.menuId}
                     options={menu.options}
+                    display={menu.display}
                     onClick={menu.onClick}
                     ref={this.MenuRef}
                     menu={menu.menu}
-                    menuItems={menu.menuItems}
                     className={menu.className}
                     style={{ ...menu.style, ...menuStyle }}
+                    onOptionSelect={(v) => {
+                        menu.onOptionSelect?.(v);
+                        this.hideMenu();
+                    }}
                 ></Menu>
             </div>
         );

@@ -24,6 +24,8 @@ import {
     SetHorizontalTextAlignCommand,
     SetVerticalTextAlignCommand,
     ResetTextColorCommand,
+    ResetBackgroundColorCommand,
+    SetCellBorderColorCommand,
 } from '@univerjs/base-sheets';
 import { ColorPicker, DisplayTypes, IMenuButtonItem, IMenuItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes } from '@univerjs/base-ui';
 import { FontItalic, FontWeight, IBorderData, ICommandService, IPermissionService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
@@ -393,9 +395,6 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
         className: styles.selectColorPickerParent,
         selections: [
             {
-                id: 'toolbar.resetColor',
-            },
-            {
                 id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
             },
         ],
@@ -417,6 +416,16 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
     };
 }
 
+export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: ResetBackgroundColorCommand.id,
+        type: MenuItemType.BUTTON,
+        title: 'toolbar.resetColor',
+        positions: [MenuPosition.TOOLBAR],
+        parentId: SetBackgroundColorCommand.id,
+    };
+}
+
 export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
     const selectionManager = accessor.get(ISelectionManager);
@@ -432,9 +441,6 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
         icon: 'FillColorIcon',
         className: styles.selectColorPickerParent,
         selections: [
-            {
-                id: 'toolbar.resetColor',
-            },
             {
                 id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
             },
@@ -457,7 +463,24 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
     };
 }
 
-export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<IBorderData | undefined> {
+export function SetBorderColorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<IBorderData | undefined> {
+    return {
+        id: SetCellBorderColorCommand.id,
+        title: 'border',
+        positions: [MenuPosition.TOOLBAR],
+        parentId: SetCellBorderCommand.id,
+        display: DisplayTypes.COLOR,
+        selectType: SelectTypes.NEO,
+        type: MenuItemType.SELECTOR,
+        selections: [
+            {
+                id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
+            },
+        ],
+    };
+}
+
+export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
     const selectionManager = accessor.get(ISelectionManager);
@@ -465,36 +488,12 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     return {
         id: SetCellBorderCommand.id,
         title: 'border',
-        display: DisplayTypes.SUFFIX,
+        display: DisplayTypes.ICON,
         positions: [MenuPosition.TOOLBAR],
-        type: MenuItemType.SELECTOR,
-        selectType: SelectTypes.DOUBLE,
+        type: MenuItemType.DROPDOWN,
+        selectType: SelectTypes.NEO,
         selections: [
             ...BORDER_LINE_CHILDREN,
-            // TODO: change to border color menu item here
-            // {
-            //     name: 'borderColor',
-            //     label: {
-            //         name: SHEET_UI_PLUGIN_NAME + LineColor.name,
-            //         props: {
-            //             color: '#000',
-            //             label: 'borderLine.borderColor',
-            //         },
-            //     },
-            //     className: styles.selectColorPickerParent,
-            //     children: [
-            //         {
-            //             label: {
-            //                 name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
-            //                 props: {},
-            //             },
-            //             className: styles.selectColorPicker,
-            //             onClick: (...arg) => {
-            //                 arg[0].stopPropagation();
-            //             },
-            //         },
-            //     ],
-            // },
             // TODO: add a set line bold menu item here
             // {
             //     label: {
@@ -509,20 +508,8 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
             //     children: BORDER_SIZE_CHILDREN,
             // },
         ],
-        value$: new Observable<IBorderData | undefined>((subscriber) => {
-            const disposable = commandService.onCommandExecuted((c) => {
-                const id = c.id;
-                if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
-                    return;
-                }
-
-                const range = selectionManager.getCurrentCell();
-                const borderData = range?.getBorder();
-
-                subscriber.next(borderData);
-            });
-
-            return disposable.dispose;
+        value$: new Observable<string>((subscriber) => {
+            subscriber.next('border');
         }),
     };
 }
@@ -593,7 +580,7 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
 }
 
 // FIXME: set rotation would cause a bug
-export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
     const selectionManager = accessor.get(ISelectionManager);
@@ -705,7 +692,8 @@ export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuItem {
         id: `${DeleteRangeCommand.id}.parent`,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.deleteCell',
-        submenus: [DeleteRangeCommand.id, `${DeleteRangeCommand.id}up`],
+        type: MenuItemType.BUTTON,
+        // submenus: [DeleteRangeCommand.id, `${DeleteRangeCommand.id}up`],
     };
 }
 export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuItem {

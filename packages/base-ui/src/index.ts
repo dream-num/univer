@@ -8,7 +8,18 @@ export * from './Components';
 export * from './BaseComponent';
 export * from './UIPlugin';
 
-export { MenuItemType, MenuPosition, ICustomComponentOption, IMenuButtonItem, IMenuItem, IMenuSelectorItem, IValueOption } from './services/menu/menu';
+export {
+    ICustomComponentProps,
+    ICustomComponentOption,
+    IMenuButtonItem,
+    IMenuItem,
+    IMenuSelectorItem,
+    IValueOption,
+    MenuItemType,
+    MenuPosition,
+    isCustomComponentOption,
+    isValueOptions,
+} from './services/menu/menu';
 export { IMenuService, DesktopMenuService, IDisplayMenuItem } from './services/menu/menu.service';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { IShortcutService, IShortcutItem, DesktopShortcutService } from './services/shortcut/shortcut.service';

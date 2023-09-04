@@ -1,5 +1,6 @@
-import { Component, createRef } from 'preact';
+import { Component, JSX, createRef } from 'preact';
 import { BaseColorPickerProps, ColorPickerComponent, JSXComponent } from '../..';
+import { ICustomComponentProps } from '../../services/menu/menu';
 import { Button, Tooltip } from '../index';
 import { ColorPickerPanel } from './ColorPickerPanel';
 import { CustomLabel } from '../CustomLabel';
@@ -27,7 +28,7 @@ interface IState {
     root: Element | null;
 }
 
-class ColorPicker extends Component<BaseColorPickerProps, IState> {
+class ColorPicker extends Component<BaseColorPickerProps & ICustomComponentProps<string>, IState> {
     ulRef = createRef();
 
     constructor(props: BaseColorPickerProps) {
@@ -66,8 +67,8 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
      * @eventProperty
      */
     onClick = (color: string, e: MouseEvent) => {
-        this.props.onClick && this.props.onClick(color, e);
-        // this.hideSelect();
+        this.props.onClick?.(color, e);
+        this.props.onValueChange?.(color);
     };
 
     /**
@@ -134,7 +135,7 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
         });
     };
 
-    componentDidMount() {
+    override componentDidMount() {
         this.props.getComponent?.(this);
     }
 
@@ -161,8 +162,7 @@ class ColorPicker extends Component<BaseColorPickerProps, IState> {
                                                     className={styles.pickerSwatchBtn}
                                                     style={{ background: item }}
                                                     onClick={(e: MouseEvent) => {
-                                                        // this.hideSelect();
-                                                        this.props.onClick && this.props.onClick(item, e);
+                                                        this.onClick(item, e);
                                                     }}
                                                 />
                                             </Tooltip>

@@ -6,7 +6,7 @@ import { IBaseCustomLabelProps } from '../../Interfaces';
 import { DisplayTypes } from '../Select';
 
 import styles from './CustomLabel.module.less';
-import { IMenuSelectorItem } from '../../services/menu/menu.service';
+import { IMenuSelectorItem } from '../../services/menu/menu';
 
 function getLocale(context: Partial<AppContextValues>, name: string) {
     return context.localeService?.t(name);
@@ -36,6 +36,11 @@ export function NeoCustomLabel<T>(props: Pick<IMenuSelectorItem<unknown>, 'icon'
 
     if (display === DisplayTypes.INPUT) {
         // TODO: implement display input
+    }
+
+    // if the render type is icon, then render value to icon
+    if (display === DisplayTypes.ICON) {
+        return <>{value}</>;
     }
 
     return <>{value}</>;

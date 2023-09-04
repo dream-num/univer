@@ -251,7 +251,7 @@ export const SetFontSizeCommand: ICommand<ISetFontSizeCommandParams> = {
 };
 
 export interface ISetColorCommandParams {
-    value: IColorStyle;
+    value: string;
 }
 
 export const SetTextColorCommand: ICommand<ISetColorCommandParams> = {
@@ -266,7 +266,9 @@ export const SetTextColorCommand: ICommand<ISetColorCommandParams> = {
         const setStyleParams: ISetStyleParams<IColorStyle> = {
             style: {
                 type: 'cl',
-                value: params.value,
+                value: {
+                    rgb: params.value,
+                },
             },
         };
 
@@ -304,7 +306,27 @@ export const SetBackgroundColorCommand: ICommand<ISetColorCommandParams> = {
         const setStyleParams: ISetStyleParams<IColorStyle> = {
             style: {
                 type: 'bg',
-                value: params.value,
+                value: {
+                    rgb: params.value,
+                },
+            },
+        };
+
+        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+    },
+};
+
+export const ResetBackgroundColorCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.reset-background-color',
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        const setStyleParams: ISetStyleParams<IColorStyle> = {
+            style: {
+                type: 'bg',
+                value: {
+                    rgb: undefined,
+                },
             },
         };
 
@@ -313,7 +335,7 @@ export const SetBackgroundColorCommand: ICommand<ISetColorCommandParams> = {
 };
 
 export interface ISetCellBorderCommandParams {
-    border: IBorderData;
+    value: IBorderData;
 }
 
 export const SetCellBorderCommand: ICommand<ISetCellBorderCommandParams> = {
@@ -328,7 +350,44 @@ export const SetCellBorderCommand: ICommand<ISetCellBorderCommandParams> = {
         const setStyleParams: ISetStyleParams<IBorderData> = {
             style: {
                 type: 'bd',
-                value: params.border,
+                value: params.value,
+            },
+        };
+
+        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+    },
+};
+
+export interface ISetCellBorderColorCommandParams {
+    value: string;
+}
+
+export const SetCellBorderColorCommand: ICommand<ISetCellBorderColorCommandParams> = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-cell-border-color',
+    handler: async (accessor, params) => {
+        if (!params) {
+            return false;
+        }
+
+        const commandService = accessor.get(ICommandService);
+
+        const currentCell = accessor.get(ISelectionManager).getCurrentCell();
+        if (!currentCell) {
+            return false;
+        }
+
+        const currentBorder = currentCell.getBorder();
+        const newBorder = Tools.deepMerge(currentBorder, {
+            color: {
+                rgb: params.value,
+            },
+        });
+
+        const setStyleParams: ISetStyleParams<IBorderData> = {
+            style: {
+                type: 'bd',
+                value: newBorder,
             },
         };
 

@@ -1,7 +1,7 @@
 import { ComponentChild, Component } from 'preact';
 import { Subscription } from 'rxjs';
 
-import { AppContext, Button, Tooltip, CustomLabel, IDisplayMenuItem, MenuItemType, Select, IMenuSelectorItem, IMenuItem, IMenuButtonItem } from '@univerjs/base-ui';
+import { AppContext, Button, Tooltip, CustomLabel, IDisplayMenuItem, MenuItemType, Select, IMenuSelectorItem, IMenuItem, IMenuButtonItem, IValueOption } from '@univerjs/base-ui';
 import { ICommandService } from '@univerjs/core';
 
 import styles from './index.module.less';
@@ -62,6 +62,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
 
     render(): ComponentChild {
         switch (this.props.type) {
+            case MenuItemType.DROPDOWN:
             case MenuItemType.SELECTOR:
                 return this.renderSelectorType();
             default:
@@ -84,6 +85,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
                     title={title}
                     children={selections!}
                     className={className}
+                    options={selections as IValueOption[]}
                     display={display}
                     icon={icon}
                     value={value}

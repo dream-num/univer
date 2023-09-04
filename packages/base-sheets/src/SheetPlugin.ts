@@ -26,6 +26,7 @@ import { RowTitleController } from './Controller/Selection/RowTitleController';
 import { ColumnRulerManager } from './Basics/Register/ColumnRegister';
 import { HideColumnRulerFactory } from './Basics/Register/HideColumnRuler';
 import { BasicWorksheetController } from './Controller/BasicWorksheet.controller';
+import { BorderStyleManagerService } from './Services/border-style-manager.service';
 
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
@@ -194,6 +195,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
 
             [BasicWorksheetController],
             [BasicWorkbookController],
+
+            [BorderStyleManagerService],
         ];
 
         dependencies.forEach((d) => {

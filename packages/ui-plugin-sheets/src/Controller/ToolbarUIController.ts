@@ -6,7 +6,8 @@ import { ComponentChildren } from 'preact';
 import { SheetToolbarConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
 
-import { CellBorderSelectorMenuItemFactory, SetBorderColorMenuItemFactory } from './menu';
+import { SetBorderColorMenuItemFactory, SetBorderStyleMenuItemFactory } from './menu';
+import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 
 export interface BaseToolbarSelectProps extends BaseSelectProps {
     children?: BaseSelectChildrenProps[];
@@ -116,6 +117,7 @@ export class ToolbarUIController extends Disposable {
             // ResetBackgroundColorMenuItemFactory,
             CellBorderSelectorMenuItemFactory,
             SetBorderColorMenuItemFactory,
+            SetBorderStyleMenuItemFactory,
             // HorizontalAlignMenuItemFactory,
             // VerticalAlignMenuItemFactory,
             // WrapTextMenuItemFactory,

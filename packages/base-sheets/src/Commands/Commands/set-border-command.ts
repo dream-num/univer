@@ -5,6 +5,7 @@ import {
     IBorderStyleData,
     ICommand,
     ICommandService,
+    ICurrentUniverService,
     IRangeData,
     IStyleData,
     IUndoRedoService,
@@ -15,20 +16,8 @@ import {
 import { IAccessor } from '@wendellhu/redi';
 
 import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
-
-export interface ISetBorderCommandParams {
-    workbookId: string;
-    worksheetId: string;
-    range: IRangeData;
-    top: Nullable<boolean>;
-    left: Nullable<boolean>;
-    bottom: Nullable<boolean>;
-    right: Nullable<boolean>;
-    vertical: Nullable<boolean>;
-    horizontal: Nullable<boolean>;
-    color?: string;
-    style?: BorderStyleTypes;
-}
+import { BorderStyleManagerService } from '../../Services/border-style-manager.service';
+import { ISelectionManager } from '../../Services/tokens';
 
 function forEach(rangeData: IRangeData, action: (row: number, column: number) => void): void {
     const { startRow, startColumn, endRow, endColumn } = rangeData;
@@ -46,7 +35,36 @@ export interface ISetBorderPositionCommandParams {
 export const SetBorderPositionCommand: ICommand<ISetBorderPositionCommandParams> = {
     id: 'sheet.command.set-border-position',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: ISetBorderPositionCommandParams) => true,
+    handler: async (accessor: IAccessor, params: ISetBorderPositionCommandParams) => {
+        const commandService = accessor.get(ICommandService);
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        const selectionManager = accessor.get(ISelectionManager);
+        const borderStyleManagerService = accessor.get(BorderStyleManagerService);
+
+        const selections = selectionManager.getCurrentSelections();
+        const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        if (!selections.length) {
+            return false;
+        }
+
+        const value = params.value;
+        const borderInfo = borderStyleManagerService.getBorderInfo();
+        const destParams: ISetBorderCommandParams = {
+            workbookId: workbook.getUnitId(),
+            worksheetId: workbook.getActiveSheet().getSheetId(),
+            range: selections[0],
+            top: value === BorderType.TOP || value === BorderType.ALL || value === BorderType.OUTSIDE || value === BorderType.HORIZONTAL,
+            left: value === BorderType.LEFT || value === BorderType.ALL || value === BorderType.OUTSIDE || value === BorderType.VERTICAL,
+            bottom: value === BorderType.BOTTOM || value === BorderType.ALL || value === BorderType.OUTSIDE || value === BorderType.HORIZONTAL,
+            right: value === BorderType.RIGHT || value === BorderType.ALL || value === BorderType.OUTSIDE || value === BorderType.VERTICAL,
+            vertical: value === BorderType.VERTICAL || value === BorderType.ALL || value === BorderType.INSIDE,
+            horizontal: value === BorderType.HORIZONTAL || value === BorderType.ALL || value === BorderType.INSIDE,
+            style: borderInfo.style,
+            color: borderInfo.color,
+        };
+
+        return commandService.executeCommand(SetBorderCommand.id, destParams);
+    },
 };
 
 export interface ISetBorderStyleCommandParams {
@@ -56,7 +74,11 @@ export interface ISetBorderStyleCommandParams {
 export const SetBorderStyleCommand: ICommand = {
     id: 'sheet.command.set-border-style',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: ISetBorderStyleCommandParams) => true,
+    handler: async (accessor: IAccessor, params: ISetBorderStyleCommandParams) => {
+        const borderManager = accessor.get(BorderStyleManagerService);
+        borderManager.setStyle(params.value);
+        return true;
+    },
 };
 
 export interface ISetBorderColorCommandParams {
@@ -66,8 +88,26 @@ export interface ISetBorderColorCommandParams {
 export const SetBorderColorCommand: ICommand<ISetBorderColorCommandParams> = {
     id: 'sheet.command.set-border-color',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: ISetBorderColorCommandParams) => true,
+    handler: async (accessor: IAccessor, params: ISetBorderColorCommandParams) => {
+        const borderManager = accessor.get(BorderStyleManagerService);
+        borderManager.setColor(params.value);
+        return true;
+    },
 };
+
+export interface ISetBorderCommandParams {
+    workbookId: string;
+    worksheetId: string;
+    range: IRangeData;
+    top: Nullable<boolean>;
+    left: Nullable<boolean>;
+    bottom: Nullable<boolean>;
+    right: Nullable<boolean>;
+    vertical: Nullable<boolean>;
+    horizontal: Nullable<boolean>;
+    color?: string;
+    style?: BorderStyleTypes;
+}
 
 /**
  * The command to clear content in current selected ranges.
@@ -319,7 +359,8 @@ export const SetBorderCommand: ICommand<ISetBorderCommandParams> = {
 
         const clearMutationParams: ISetRangeValuesMutationParams = {
             rangeData: range,
-            worksheetId: worksheet.getSheetId(),
+            worksheetId,
+            workbookId,
         };
         const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(accessor, clearMutationParams);
 

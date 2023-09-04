@@ -12,12 +12,16 @@ import { Icon, IDisplayMenuItem, IMenuItem, IValueOption } from '../..'; // FIXM
 // TODO: these type definitions should be moved out of components to menu service
 
 export enum SelectTypes {
+    /** 单选 */
     SINGLE,
     /** dropdown with input */
     INPUT,
     COLOR,
+    /** 两栏菜单，主按钮会跟着上次的选项发生变化 */
     DOUBLE,
+    /** 显示一个固定的值 */
     FIX,
+    /** 显示一个固定的值 */
     DOUBLEFIX,
 
     /** This should be the only type. The enum would be removed after we finish refactor. */
@@ -38,6 +42,8 @@ export enum DisplayTypes {
     INPUT,
 
     FONT,
+
+    CUSTOM,
 }
 
 export interface BaseSelectChildrenProps extends BaseItemProps {
@@ -409,14 +415,24 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
             onClick?.(option.value);
         };
 
+        const iconToDisplay = options?.find((o) => o.value === value)?.icon ?? icon;
         return (
             <div className={`${styles.selectDouble}`}>
-                {/* TODO@wzhudev: we should compose options and builtin component here. They may have different onClick callback. */}
-                {/* TODO@wzhudev: should pass in a value to set the menu's selected status. */}
-                <Dropdown tooltip={tooltip} onClick={onClick} menu={{ menuId: id, options, onClick: onClickInner, onOptionSelect, display }} icon={<Icon.NextIcon />}>
+                <Dropdown
+                    tooltip={tooltip}
+                    onClick={type === SelectTypes.NEO ? () => onClick?.(value) : onClick}
+                    menu={{
+                        menuId: id,
+                        options,
+                        onClick: onClickInner,
+                        onOptionSelect,
+                        display: display === DisplayTypes.ICON ? DisplayTypes.LABEL : display === DisplayTypes.INPUT ? DisplayTypes.LABEL : display,
+                    }}
+                    icon={<Icon.NextIcon />}
+                >
                     {/* TODO@wzhudev: change menu props of Dropdown. Dropdown shouldn't know how to create a menu. */}
                     <div className={styles.selectLabel}>
-                        <NeoCustomLabel icon={icon} display={display} title={title!} value={value} onChange={(v) => onClick?.(v)} />
+                        <NeoCustomLabel icon={iconToDisplay} display={display} title={title!} value={value} onChange={(v) => onClick?.(v)} />
                     </div>
                 </Dropdown>
             </div>

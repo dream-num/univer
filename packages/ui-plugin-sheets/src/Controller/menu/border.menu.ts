@@ -5,7 +5,133 @@ import { IAccessor } from '@wendellhu/redi';
 import { map } from 'rxjs/operators';
 
 import { SHEET_UI_PLUGIN_NAME } from '../../Basics/Const/PLUGIN_NAME';
-import { BORDER_LINE_CHILDREN, BORDER_SIZE_CHILDREN } from '../../View/Toolbar/Const';
+import { LineBold } from '../../View';
+
+export const BORDER_LINE_CHILDREN = [
+    {
+        label: 'borderLine.borderTop',
+        icon: 'TopBorderIcon',
+        value: 'top',
+    },
+    {
+        label: 'borderLine.borderBottom',
+        icon: 'BottomBorderIcon',
+        value: 'bottom',
+    },
+    {
+        label: 'borderLine.borderLeft',
+        icon: 'LeftBorderIcon',
+        value: 'left',
+    },
+    {
+        label: 'borderLine.borderRight',
+        icon: 'RightBorderIcon',
+        value: 'right',
+    },
+    {
+        label: 'borderLine.borderNone',
+        icon: 'NoneBorderIcon',
+        value: 'none',
+    },
+    {
+        label: 'borderLine.borderAll',
+        icon: 'FullBorderIcon',
+        value: 'all',
+    },
+    {
+        label: 'borderLine.borderOutside',
+        icon: 'OuterBorderIcon',
+        value: 'outside',
+    },
+    {
+        label: 'borderLine.borderInside',
+        icon: 'InnerBorderIcon',
+        value: 'inside',
+    },
+    {
+        label: 'borderLine.borderHorizontal',
+        icon: 'StripingBorderIcon',
+        value: 'horizontal',
+    },
+    {
+        label: 'borderLine.borderVertical',
+        icon: 'VerticalBorderIcon',
+        value: 'vertical',
+    },
+];
+
+export const BORDER_SIZE_CHILDREN = [
+    {
+        label: 'borderLine.borderNone',
+        value: BorderStyleTypes.NONE,
+    },
+    {
+        label: {
+            name: 'BorderThin',
+        },
+        value: BorderStyleTypes.THIN,
+    },
+    {
+        label: {
+            name: 'BorderHair',
+        },
+        value: BorderStyleTypes.HAIR,
+    },
+    {
+        label: {
+            name: 'BorderDotted',
+        },
+        value: BorderStyleTypes.DOTTED,
+    },
+    {
+        label: {
+            name: 'BorderDashed',
+        },
+        value: BorderStyleTypes.DASHED,
+    },
+    {
+        label: {
+            name: 'BorderDashDot',
+        },
+        value: BorderStyleTypes.DOTTED,
+    },
+    {
+        label: {
+            name: 'BorderDashDotDot',
+        },
+        value: BorderStyleTypes.DASH_DOT_DOT,
+    },
+    {
+        label: {
+            name: 'BorderMedium',
+        },
+        value: BorderStyleTypes.MEDIUM,
+    },
+    {
+        label: {
+            name: 'BorderMediumDashed',
+        },
+        value: BorderStyleTypes.MEDIUM_DASHED,
+    },
+    {
+        label: {
+            name: 'BorderMediumDashDot',
+        },
+        value: BorderStyleTypes.MEDIUM_DASH_DOT,
+    },
+    {
+        label: {
+            name: 'BorderMediumDashDotDot',
+        },
+        value: BorderStyleTypes.MEDIUM_DASH_DOT_DOT,
+    },
+    {
+        label: {
+            name: 'BorderThick',
+        },
+        value: BorderStyleTypes.THICK,
+    },
+];
 
 export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const permissionService = accessor.get(IPermissionService);
@@ -15,6 +141,7 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     return {
         id: SetBorderPositionCommand.id,
         title: 'border',
+        icon: 'FullBorderIcon',
         display: DisplayTypes.ICON,
         positions: [MenuPosition.TOOLBAR],
         type: MenuItemType.DROPDOWN,
@@ -54,9 +181,10 @@ export function SetBorderStyleMenuItemFactory(accessor: IAccessor): IMenuSelecto
     return {
         id: SetBorderStyleCommand.id,
         title: 'borderStyle',
+        label: SHEET_UI_PLUGIN_NAME + LineBold.name,
         positions: [MenuPosition.TOOLBAR],
         parentId: SetBorderPositionCommand.id,
-        display: DisplayTypes.LABEL,
+        display: DisplayTypes.CUSTOM,
         selectType: SelectTypes.NEO,
         type: MenuItemType.SELECTOR,
         selections: [...BORDER_SIZE_CHILDREN],

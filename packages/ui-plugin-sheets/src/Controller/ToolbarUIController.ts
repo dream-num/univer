@@ -3,11 +3,31 @@ import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
 import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentManager, IMenuService, MenuPosition } from '@univerjs/base-ui';
 import { UIObserver, ICurrentUniverService, ObserverManager, Disposable } from '@univerjs/core';
 import { ComponentChildren } from 'preact';
+import { IMenuItemFactory } from '@univerjs/base-ui/src/services/menu/menu';
 import { SheetToolbarConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
 
-import { SetBorderColorMenuItemFactory } from './menu';
-import { CellBorderSelectorMenuItemFactory, SetBorderStyleMenuItemFactory } from './menu/border.menu';
+import {
+    BackgroundColorSelectorMenuItemFactory,
+    BoldMenuItemFactory,
+    FontFamilySelectorMenuItemFactory,
+    FontSizeSelectorMenuItemFactory,
+    HorizontalAlignMenuItemFactory,
+    ItalicMenuItemFactory,
+    RedoMenuItemFactory,
+    ResetBackgroundColorMenuItemFactory,
+    ResetTextColorMenuItemFactory,
+    SetBorderColorMenuItemFactory,
+    SetBorderStyleMenuItemFactory,
+    StrikeThroughMenuItemFactory,
+    TextColorSelectorMenuItemFactory,
+    TextRotateMenuItemFactory,
+    UnderlineMenuItemFactory,
+    UndoMenuItemFactory,
+    VerticalAlignMenuItemFactory,
+    WrapTextMenuItemFactory,
+} from './menu';
+import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 
 export interface BaseToolbarSelectProps extends BaseSelectProps {
     children?: BaseSelectChildrenProps[];
@@ -102,28 +122,29 @@ export class ToolbarUIController extends Disposable {
     private _initializeToolbar(): void {
         // TODO: @wzhudev: now we register menu items that only display in the toolbar here. In fact we should register all commands and menu items and shortcuts
         // in a single controller. I will do that layer.
-        [
-            // UndoMenuItemFactory,
-            // RedoMenuItemFactory,
-            // FontFamilySelectorMenuItemFactory,
-            // FontSizeSelectorMenuItemFactory,
-            // BoldMenuItemFactory,
-            // ItalicMenuItemFactory,
-            // UnderlineMenuItemFactory,
-            // StrikeThroughMenuItemFactory,
-            // TextColorSelectorMenuItemFactory,
-            // ResetTextColorMenuItemFactory,
-            // BackgroundColorSelectorMenuItemFactory,
-            // ResetBackgroundColorMenuItemFactory,
-            CellBorderSelectorMenuItemFactory,
-            SetBorderColorMenuItemFactory,
-            SetBorderStyleMenuItemFactory,
-            // SetBorderStyleMenuItemFactory,
-            // HorizontalAlignMenuItemFactory,
-            // VerticalAlignMenuItemFactory,
-            // WrapTextMenuItemFactory,
-            // TextRotateMenuItemFactory,
-        ].forEach((factory) => {
+        (
+            [
+                UndoMenuItemFactory,
+                RedoMenuItemFactory,
+                FontFamilySelectorMenuItemFactory,
+                FontSizeSelectorMenuItemFactory,
+                BoldMenuItemFactory,
+                ItalicMenuItemFactory,
+                UnderlineMenuItemFactory,
+                StrikeThroughMenuItemFactory,
+                TextColorSelectorMenuItemFactory,
+                ResetTextColorMenuItemFactory,
+                BackgroundColorSelectorMenuItemFactory,
+                ResetBackgroundColorMenuItemFactory,
+                CellBorderSelectorMenuItemFactory,
+                SetBorderColorMenuItemFactory,
+                SetBorderStyleMenuItemFactory,
+                HorizontalAlignMenuItemFactory,
+                VerticalAlignMenuItemFactory,
+                WrapTextMenuItemFactory,
+                TextRotateMenuItemFactory,
+            ] as IMenuItemFactory[]
+        ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
     }

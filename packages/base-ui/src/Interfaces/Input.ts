@@ -14,6 +14,7 @@ export interface BaseInputProps extends BaseComponentProps {
     onFocus?: (e: Event) => void;
     onBlur?: (e: FocusEvent) => void;
     onClick?: (e: MouseEvent) => void;
+    onValueChange?: (value: string) => void;
     className?: string;
     readonly?: boolean;
     id?: string;

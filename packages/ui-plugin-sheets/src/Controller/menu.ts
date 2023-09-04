@@ -31,12 +31,24 @@ import {
     SetWorksheetRowShowCommand,
     SetWorksheetHideCommand,
 } from '@univerjs/base-sheets';
-import { ColorPicker, DisplayTypes, IMenuButtonItem, IMenuItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes, IDisplayMenuItem, IValueOption, ICustomComponentOption } from '@univerjs/base-ui';
-import { FontItalic, FontWeight, ICommandService, IPermissionService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
+import { ColorPicker, DisplayTypes, IMenuButtonItem, IMenuItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes, IDisplayMenuItem } from '@univerjs/base-ui';
+import {
+    FontItalic,
+    FontWeight,
+    HorizontalAlign,
+    ICommandService,
+    IPermissionService,
+    IUndoRedoService,
+    RedoCommand,
+    UndoCommand,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
 
 import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { ISetHorizontalTextAlignCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams } from '@univerjs/base-sheets/src/Commands/Commands/set-style.command';
 import { RightMenuInput } from '../View';
 import { FONT_FAMILY_CHILDREN, FONT_SIZE_CHILDREN, HORIZONTAL_ALIGN_CHILDREN, TEXT_ROTATE_CHILDREN, TEXT_WRAP_CHILDREN, VERTICAL_ALIGN_CHILDREN } from '../View/Toolbar/Const';
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const/PLUGIN_NAME';
@@ -263,7 +275,6 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
 }
 
 export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
-    // NOTE: we could get more font options from (a) font service, so user can provide their own fonts
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
     const selectionManager = accessor.get(ISelectionManager);
@@ -398,18 +409,15 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
             },
         ],
         value$: new Observable<string>((subscriber) => {
+            const defaultColor = '#000';
             const disposable = commandService.onCommandExecuted((c) => {
-                const id = c.id;
-                if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
-                    return;
+                if (c.id === SetTextColorCommand.id) {
+                    const color = (c.params as { value: string }).value;
+                    subscriber.next(color ?? defaultColor);
                 }
-
-                const range = selectionManager.getCurrentCell();
-                const color = range?.getFontColor();
-
-                subscriber.next(color ?? '');
             });
 
+            subscriber.next(defaultColor);
             return disposable.dispose;
         }),
     };
@@ -445,18 +453,15 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
             },
         ],
         value$: new Observable<string>((subscriber) => {
+            const defaultColor = '#fff';
             const disposable = commandService.onCommandExecuted((c) => {
-                const id = c.id;
-                if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
-                    return;
+                if (c.id === SetBackgroundColorCommand.id) {
+                    const color = (c.params as { value: string }).value;
+                    subscriber.next(color ?? defaultColor);
                 }
-
-                const range = selectionManager.getCurrentCell();
-                const color = range?.getBackground();
-
-                subscriber.next(color ?? '');
             });
 
+            subscriber.next(defaultColor);
             return disposable.dispose;
         }),
     };
@@ -468,102 +473,112 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
 //     }
 // }
 
-export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
+export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<HorizontalAlign> {
     return {
         id: SetHorizontalTextAlignCommand.id,
         title: 'horizontalAlignMode',
+        icon: HORIZONTAL_ALIGN_CHILDREN[0].icon,
         positions: [MenuPosition.TOOLBAR],
         tooltip: 'toolbar.horizontalAlignMode.main',
         className: styles.selectDoubleString,
-        display: DisplayTypes.SUFFIX,
+        display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
-        selectType: SelectTypes.DOUBLE,
+        selectType: SelectTypes.NEO,
         selections: HORIZONTAL_ALIGN_CHILDREN,
+        value$: new Observable<HorizontalAlign>((subscriber) => {
+            const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
+                if (c.id === SetHorizontalTextAlignCommand.id) {
+                    const align = (c.params as ISetHorizontalTextAlignCommandParams).value;
+                    subscriber.next(align);
+                }
+            });
+
+            subscriber.next(HorizontalAlign.LEFT);
+
+            return disposable.dispose;
+        }),
     };
 }
 
-export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
+export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<VerticalAlign> {
     return {
         id: SetVerticalTextAlignCommand.id,
         title: 'verticalAlignMode',
+        icon: VERTICAL_ALIGN_CHILDREN[0].icon,
         tooltip: 'toolbar.verticalAlignMode.main',
         className: styles.selectDoubleString,
-        display: DisplayTypes.SUFFIX,
+        display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR],
-        selectType: SelectTypes.DOUBLE,
+        selectType: SelectTypes.NEO,
         selections: VERTICAL_ALIGN_CHILDREN,
+        value$: new Observable<VerticalAlign>((subscriber) => {
+            const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
+                if (c.id === SetVerticalTextAlignCommand.id) {
+                    const align = (c.params as ISetVerticalTextAlignCommandParams).value;
+                    subscriber.next(align);
+                }
+            });
+
+            subscriber.next(VerticalAlign.TOP);
+
+            return disposable.dispose;
+        }),
     };
 }
 
-export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
-    const commandService = accessor.get(ICommandService);
-    const selectionManager = accessor.get(ISelectionManager);
-
+export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<WrapStrategy> {
     return {
         id: SetTextWrapCommand.id,
         title: 'textWrapMode',
         tooltip: 'toolbar.textWrapMode.main',
+        icon: TEXT_WRAP_CHILDREN[0].icon,
         type: MenuItemType.SELECTOR,
-        selectType: SelectTypes.DOUBLE,
+        selectType: SelectTypes.NEO,
         positions: [MenuPosition.TOOLBAR],
         selections: TEXT_WRAP_CHILDREN,
-        display: DisplayTypes.SUFFIX,
+        display: DisplayTypes.ICON,
         value$: new Observable((subscriber) => {
-            const disposable = commandService.onCommandExecuted((c) => {
-                const id = c.id;
-                if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
-                    return;
+            const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
+                if (c.id === SetTextWrapCommand.id) {
+                    const wrap = (c.params as ISetTextWrapCommandParams).value;
+                    subscriber.next(wrap ?? WrapStrategy.OVERFLOW);
                 }
-
-                const range = selectionManager.getCurrentCell();
-                const ws = range?.getWrapStrategy();
-
-                subscriber.next(ws);
             });
 
-            return () => disposable.dispose();
+            subscriber.next(WrapStrategy.OVERFLOW);
+
+            return disposable.dispose;
         }),
     };
 }
 
 // FIXME: set rotation would cause a bug
-export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
-    const permissionService = accessor.get(IPermissionService);
-    const commandService = accessor.get(ICommandService);
-    const selectionManager = accessor.get(ISelectionManager);
-
+export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number | string> {
     return {
         id: SetTextRotationCommand.id,
         title: 'textRotateMode',
         tooltip: 'toolbar.textRotateMode.main',
-        display: DisplayTypes.SUFFIX,
+        icon: TEXT_ROTATE_CHILDREN[0].icon,
+        display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
-        selectType: SelectTypes.DOUBLE,
-        positions: [MenuPosition.TOOLBAR],
-        value$: new Observable<number>((subscriber) => {
-            commandService.onCommandExecuted((c) => {
-                const id = c.id;
-                if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
-                    return;
-                }
-
-                const range = selectionManager.getCurrentCell();
-                const tr = range?.getTextRotation();
-
-                subscriber.next(tr);
-            });
-        }),
+        selectType: SelectTypes.NEO,
         selections: TEXT_ROTATE_CHILDREN,
+        positions: [MenuPosition.TOOLBAR],
+        value$: new Observable<number | string>((subscriber) => {
+            const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
+                if (c.id === SetTextRotationCommand.id) {
+                    const rotation = (c.params as { value: number | string }).value;
+                    subscriber.next(rotation ?? 0);
+                }
+            });
+
+            subscriber.next(0);
+
+            return disposable.dispose;
+        }),
     };
 }
-
-export function NumberFormatMenuItemFactory(accessor: IAccessor): IMenuItem {}
-
-// NOTE: these menu icons should be registered by plugins not defined here.
-// export function SearchReplaceMenuItemFactory(accessor: IAccessor): IMenuItem {}
-// export function ImportMenuItemFactory(accessor: IAccessor): IMenuItem {}
-// export function ImageMenuItemFactory(accessor: IAccessor): IMenuItem {}
 
 // right menu in main container
 export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
@@ -572,7 +587,7 @@ export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuButtonI
         type: MenuItemType.BUTTON,
         title: 'rightClick.clearContent',
         positions: [MenuPosition.CONTEXT_MENU],
-        parentId: 'right-menu'
+        parentId: 'right-menu',
     };
 }
 
@@ -582,7 +597,7 @@ export function InsertRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.insertRow',
-        parentId: 'right-menu'
+        parentId: 'right-menu',
     };
 }
 
@@ -592,7 +607,7 @@ export function InsertColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.insertColumn',
-        parentId: 'right-menu'
+        parentId: 'right-menu',
     };
 }
 
@@ -602,7 +617,7 @@ export function RemoveRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.deleteSelectedRow',
-        parentId: 'right-menu'
+        parentId: 'right-menu',
     };
 }
 
@@ -612,7 +627,7 @@ export function HideRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.hideSelectedRow',
-        parentId: 'right-menu'
+        parentId: 'right-menu',
     };
 }
 
@@ -622,7 +637,7 @@ export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.showHideRow',
-        parentId: 'right-menu'
+        parentId: 'right-menu',
     };
 }
 
@@ -632,7 +647,7 @@ export function RemoveColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.deleteSelectedColumn',
-        parentId: 'right-menu'
+        parentId: 'right-menu',
     };
 }
 
@@ -649,7 +664,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
                 suffix: 'px',
             },
         },
-        parentId: 'right-menu'
+        parentId: 'right-menu',
     };
 }
 
@@ -714,7 +729,7 @@ export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         // TODO@Dushusir use real command id
-        id: "CopySheetCommand.id",
+        id: 'CopySheetCommand.id',
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.SHEET_BAR],
         title: 'sheetConfig.copy',
@@ -726,22 +741,22 @@ export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 // No need to trigger command after clicking，maybe no need Command id?
 export function RenameSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: "RenameSheetCommand.id",
+        id: 'RenameSheetCommand.id',
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.SHEET_BAR],
         title: 'sheetConfig.rename',
         parentId: 'sheet-bar-right-menu',
-        onClick:()=>{
+        onClick: () => {
             // TODO@Dushusir 这里能监听到点击事件，但是无法触发到 this._sheetBar.reNameSheet(this._dataId);
-            console.info('rename=========')
-        }
+            console.info('rename=========');
+        },
     };
 }
 
 // TODO@Dushusir add command
 export function ChangeColorSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
-        id: "ChangeColorSheetCommand.id",
+        id: 'ChangeColorSheetCommand.id',
         title: 'sheetConfig.changeColor',
         positions: [MenuPosition.SHEET_BAR],
         display: DisplayTypes.COLOR,
@@ -769,7 +784,7 @@ export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 // TODO@Dushusir use show worksheet command
 export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: "SetWorksheetHideCommand.id",
+        id: 'SetWorksheetHideCommand.id',
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.SHEET_BAR],
         title: 'sheetConfig.unhide',

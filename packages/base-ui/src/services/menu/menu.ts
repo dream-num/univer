@@ -1,7 +1,5 @@
 import { Observable } from 'rxjs';
-import { ComponentChildren } from 'preact';
 
-import { ICustomLabelType } from '../../Interfaces/CustomLabel';
 import { DisplayTypes, SelectTypes } from '../../Components/Select/Select';
 
 export type OneOrMany<T> = T | T[];
@@ -39,8 +37,12 @@ interface IMenuItemBase {
     /** In what menu should the item display. */
     positions: OneOrMany<MenuPosition>;
 
-    /** @deprecated this parameter would be removed after refactoring */
-    label?: string | ICustomLabelType | ComponentChildren;
+    /**
+     * Custom label component id.
+     *
+     * @deprecated this parameter would be removed after refactoring
+     * */
+    label?: string;
 
     /** @deprecated this parameter would be removed after refactoring */
     className?: string;
@@ -119,3 +121,5 @@ export type IMenuItem = IMenuButtonItem | IMenuSelectorItem<unknown>;
 export type IDisplayMenuItem<T extends IMenuItem> = T & {
     shortcut?: string;
 };
+
+export type IMenuItemFactory = (accessor: IAccessor) => IMenuItem;

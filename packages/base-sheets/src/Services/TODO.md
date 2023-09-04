@@ -1,0 +1,1 @@
+- [ ] maybe the status managers could be merged into a single status service?

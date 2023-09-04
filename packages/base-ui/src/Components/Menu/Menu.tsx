@@ -189,7 +189,7 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
                                     // TODO: handle if options is a custom component
                                 }}
                             >
-                                <NeoCustomLabel value={option.value} display={display} title={option.label} />
+                                <NeoCustomLabel value={option.value} display={display} title={option.label} icon={option.icon} />
                             </li>
                         );
                     }
@@ -363,7 +363,7 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
                 onMouseLeave={(e) => this.mouseLeave(e, index)}
                 onClick={(e) => this.handleClick(e, item, index)}
             >
-                <NeoCustomLabel title={item.title} value={value} onChange={this.onChange} icon={item.icon} display={item.display}></NeoCustomLabel>
+                <NeoCustomLabel title={item.title} value={value} onChange={this.onChange} icon={item.icon} display={item.display} label={item.label}></NeoCustomLabel>
                 {item.shortcut && ` (${item.shortcut})`}
                 {(menuItems.length > 0 || (item as IMenuSelectorItem<unknown>).selections?.length) && (
                     <Menu

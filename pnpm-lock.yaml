@@ -768,6 +768,9 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.12.7
         version: 0.12.7
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
     devDependencies:
       '@testing-library/preact':
         specifier: ^2.0.1

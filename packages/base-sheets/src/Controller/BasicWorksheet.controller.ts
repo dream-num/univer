@@ -12,10 +12,12 @@ import {
     ResetBackgroundColorCommand,
     ResetTextColorCommand,
     SetBackgroundColorCommand,
+    SetHorizontalTextAlignCommand,
     SetStyleCommand,
     SetTextColorCommand,
     SetTextRotationCommand,
     SetTextWrapCommand,
+    SetVerticalTextAlignCommand,
 } from '../Commands/Commands/set-style.command';
 import { SetRangeStyleMutation } from '../Commands/Mutations/set-range-styles.mutation';
 import { ISetRangeFormattedValueParams, SetRangeFormattedValueCommand } from '../Commands/Commands/set-range-formatted-value.command';
@@ -107,6 +109,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetTextRotationCommand,
             ResetTextColorCommand,
             ResetBackgroundColorCommand,
+            SetHorizontalTextAlignCommand,
+            SetVerticalTextAlignCommand,
 
             SetBorderCommand,
             SetBorderColorCommand,

@@ -408,7 +408,7 @@ export const SetTextWrapCommand: ICommand<ISetTextWrapCommandParams> = {
 };
 
 export interface ISetTextRotationCommandParams {
-    value: ITextRotation;
+    value: number | string;
 }
 
 export const SetTextRotationCommand: ICommand<ISetTextRotationCommandParams> = {
@@ -423,7 +423,9 @@ export const SetTextRotationCommand: ICommand<ISetTextRotationCommandParams> = {
         const setStyleParams: ISetStyleParams<ITextRotation> = {
             style: {
                 type: 'tr',
-                value: params.value,
+                value: {
+                    a: params.value as number,
+                },
             },
         };
 

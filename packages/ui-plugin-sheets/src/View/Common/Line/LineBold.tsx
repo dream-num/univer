@@ -7,10 +7,12 @@ interface IState {
 
 interface IProps extends BaseComponentProps {
     label: string;
-    img: string;
+    value: string;
 }
 
 export class LineBold extends Component<IProps, IState> {
+    static readonly componentName = 'bold';
+
     static override contextType = AppContext;
 
     constructor(props: IProps) {
@@ -30,7 +32,7 @@ export class LineBold extends Component<IProps, IState> {
 
     override componentWillReceiveProps(props: IProps) {
         this.setState({
-            img: props.img,
+            img: props.value,
         });
     }
 
@@ -57,7 +59,7 @@ export class LineBold extends Component<IProps, IState> {
             <div style={{ paddingBottom: '3px', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className={'base-sheets-line-bold'} style={{ position: 'relative' }}>
                     <CustomLabel label={label} />
-                    <div style={{ width: '100%', height: 0, position: 'absolute', left: 0, bottom: '14px' }}>{img.length ? this.getImg(img) : ''}</div>
+                    <div style={{ width: '100%', height: 0, position: 'absolute', left: 0, bottom: '14px' }}>{img && this.getImg(img)}</div>
                 </span>
                 <Icon.RightIcon />
             </div>

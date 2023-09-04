@@ -29,6 +29,7 @@ import {
     RemoveSheetCommand,
     SetWorksheetRowHideCommand,
     SetWorksheetRowShowCommand,
+    SetWorksheetHideCommand,
 } from '@univerjs/base-sheets';
 import { ColorPicker, DisplayTypes, IMenuButtonItem, IMenuItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes, IDisplayMenuItem, IValueOption, ICustomComponentOption } from '@univerjs/base-ui';
 import { FontItalic, FontWeight, ICommandService, IPermissionService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
@@ -703,8 +704,76 @@ export function DeleteRangeMoveUpMenuItemFactory(accessor: IAccessor): IMenuButt
 export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: RemoveSheetCommand.id,
+        type: MenuItemType.BUTTON,
         positions: [MenuPosition.SHEET_BAR],
         title: 'sheetConfig.delete',
+        parentId: 'sheet-bar-right-menu',
+    };
+}
+
+export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        // TODO@Dushusir use real command id
+        id: "CopySheetCommand.id",
+        type: MenuItemType.BUTTON,
+        positions: [MenuPosition.SHEET_BAR],
+        title: 'sheetConfig.copy',
+        parentId: 'sheet-bar-right-menu',
+    };
+}
+
+// TODO@Dushusir onClick to rename tab
+// No need to trigger command after clicking，maybe no need Command id?
+export function RenameSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: "RenameSheetCommand.id",
+        type: MenuItemType.BUTTON,
+        positions: [MenuPosition.SHEET_BAR],
+        title: 'sheetConfig.rename',
+        parentId: 'sheet-bar-right-menu',
+        onClick:()=>{
+            // TODO@Dushusir 这里能监听到点击事件，但是无法触发到 this._sheetBar.reNameSheet(this._dataId);
+            console.info('rename=========')
+        }
+    };
+}
+
+// TODO@Dushusir add command
+export function ChangeColorSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+    return {
+        id: "ChangeColorSheetCommand.id",
+        title: 'sheetConfig.changeColor',
+        positions: [MenuPosition.SHEET_BAR],
+        display: DisplayTypes.COLOR,
+        selectType: SelectTypes.NEO,
+        type: MenuItemType.SELECTOR,
+        selections: [
+            {
+                id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
+            },
+        ],
+        parentId: 'sheet-bar-right-menu',
+    };
+}
+
+export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: SetWorksheetHideCommand.id,
+        type: MenuItemType.BUTTON,
+        positions: [MenuPosition.SHEET_BAR],
+        title: 'sheetConfig.hide',
+        parentId: 'sheet-bar-right-menu',
+    };
+}
+
+// TODO@Dushusir use show worksheet command
+export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: "SetWorksheetHideCommand.id",
+        type: MenuItemType.BUTTON,
+        positions: [MenuPosition.SHEET_BAR],
+        title: 'sheetConfig.unhide',
+        parentId: 'sheet-bar-right-menu',
     };
 }
 

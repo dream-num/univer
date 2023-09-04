@@ -23,7 +23,7 @@ import { SheetBar } from '../View/SheetBar';
 import styles from '../View/SheetBar/index.module.less';
 import { SheetBarMenuItem } from '../View/SheetBar/SheetBarMenu';
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const';
-import { DeleteSheetMenuItemFactory } from './menu';
+import { ChangeColorSheetMenuItemFactory, CopySheetMenuItemFactory, DeleteSheetMenuItemFactory, HideSheetMenuItemFactory, RenameSheetMenuItemFactory, UnHideSheetMenuItemFactory } from './menu';
 
 interface SheetUl extends BaseMenuItem {
     label?: ICustomComponent | string;
@@ -358,7 +358,14 @@ export class SheetBarUIController extends Disposable {
     }
 
     private _initializeContextMenu() {
-        [DeleteSheetMenuItemFactory].forEach((factory) => {
+        [
+            DeleteSheetMenuItemFactory,
+            CopySheetMenuItemFactory,
+            RenameSheetMenuItemFactory,
+            ChangeColorSheetMenuItemFactory,
+            HideSheetMenuItemFactory,
+            UnHideSheetMenuItemFactory,
+        ].forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
     }

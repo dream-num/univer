@@ -56,6 +56,8 @@ export interface IMenuButtonItem extends IMenuItemBase {
     type: MenuItemType.BUTTON;
 
     activated$?: Observable<boolean>;
+
+    onClick?: (...arg: any) => void; // menu button click callback, does not trigger command.  e.g. sheet bar rename
 }
 
 export function isMenuButtonItem(v: IMenuItem): v is IMenuButtonItem {

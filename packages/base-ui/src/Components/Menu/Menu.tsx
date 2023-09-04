@@ -122,6 +122,14 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
         }
     };
 
+    handleItemClick = (item:IMenuButtonItem) =>{
+
+        // When there is no need to execute the command, execute click
+        if(item.onClick){
+            item.onClick()
+        }
+        this.showMenu(false)
+    }
     // eslint-disable-next-line max-lines-per-function
     render() {
         const { context, props, state } = this;
@@ -200,8 +208,8 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
                     );
                 })}
                 {/* render submenus */}
-                {menuItems?.map((item, index) => (
-                    <MenuItem menuItem={item} index={index} onClick={() => this.showMenu(false)} />
+                {menuItems?.map((item: IDisplayMenuItem<IMenuItem>, index) => (
+                    <MenuItem menuItem={item} index={index} onClick={this.handleItemClick.bind(this,item as IMenuButtonItem)} />
                 ))}
             </ul>
         );
@@ -335,7 +343,7 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
         const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
 
         return (
-            <li className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}>
+            <li className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}  onClick={(e) => this.handleClick(e, item, index)}>
                 {/* FIXME after translate title,use title for value display*/}
                 <NeoCustomLabel value={item.title} onChange={this.onChange}></NeoCustomLabel>
             </li>

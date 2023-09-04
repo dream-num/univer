@@ -214,7 +214,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 </div>
 
                 {/* mouse right button context menu */}
-                <Menu className={styles.sheetUl} menu={sheetUl} menuItems={this.state.menuItems} ref={this.ulRef} />
+                <Menu className={styles.sheetUl} menu={sheetUl} menuId={'sheet-bar-right-menu'} ref={this.ulRef} />
 
                 {/* prev next scroll button */}
                 <div className={`${styles.sheetBarOptions} ${styles.sheetBarScrollButton}`}>

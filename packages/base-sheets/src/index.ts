@@ -67,3 +67,4 @@ export {
 export { SetWorksheetRowHideCommand } from './Commands/Commands/set-worksheet-row-hide.command';
 export { SetWorksheetRowShowCommand } from './Commands/Commands/set-worksheet-row-show.command';
 export { RemoveSheetCommand } from './Commands/Commands/remove-sheet.command';
+export { SetWorksheetHideCommand } from './Commands/Commands/set-worksheet-hide.command';

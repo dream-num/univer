@@ -5,7 +5,7 @@ module.exports = {
         es2021: true,
     },
     parser: '@typescript-eslint/parser',
-    plugins: ['@typescript-eslint', 'prettier', 'import', 'import-newlines', 'unused-imports'],
+    plugins: ['@typescript-eslint', 'prettier', 'import', 'import-newlines', 'unused-imports', 'simple-import-sort'],
     extends: [
         'airbnb-base', // https://www.npmjs.com/package/eslint-config-airbnb-base
         'airbnb-typescript/base', // https://www.npmjs.com/package/eslint-config-airbnb-typescript
@@ -104,6 +104,9 @@ module.exports = {
         'no-unsafe-optional-chaining': 'off',
         '@typescript-eslint/consistent-type-assertions': 'off',
         '@typescript-eslint/no-redeclare': 'off', // dependency interface and dependency token share the same name
+        'no-magic-numbers': ['warn'],
+        'simple-import-sort/imports': 'error',
+        'simple-import-sort/exports': 'error',
     },
     // https://www.npmjs.com/package/eslint-import-resolver-typescript
     settings: {

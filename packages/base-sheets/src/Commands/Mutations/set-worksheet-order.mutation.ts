@@ -10,7 +10,7 @@ export interface ISetWorksheetOrderMutationParams {
 export const SetWorksheetOrderUndoMutationFactory = (accessor: IAccessor, params: ISetWorksheetOrderMutationParams): ISetWorksheetOrderMutationParams => {
     const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId)?.getWorkBook();
     const config = workbook!.getConfig();
-    const oldIndex = config.sheetOrder.findIndex((current) => current === params.worksheetId);
+    const oldIndex = config.sheetOrder.findIndex((current: string) => current === params.worksheetId);
     return {
         ...Tools.deepClone(params),
         order: oldIndex,
@@ -23,7 +23,7 @@ export const SetWorksheetOrderMutation: IMutation<ISetWorksheetOrderMutationPara
     handler: async (accessor, params) => {
         const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId)?.getWorkBook();
         const config = workbook!.getConfig();
-        const exclude = config.sheetOrder.filter((currentId) => currentId !== params.worksheetId);
+        const exclude = config.sheetOrder.filter((currentId: string) => currentId !== params.worksheetId);
         exclude.splice(params.order, 0, params.worksheetId);
         config.sheetOrder = exclude;
         return true;

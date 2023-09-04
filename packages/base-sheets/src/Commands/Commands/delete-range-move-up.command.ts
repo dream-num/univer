@@ -6,7 +6,7 @@ import { InsertRangeMutation } from '../Mutations/insert-range.mutation';
 import { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../Basics/Interfaces/MutationInterface';
 import { ISelectionManager } from '../../Services/tokens';
 
-export interface IDeleteRangeMoveLeftParams {
+export interface IDeleteRangeMoveUpParams {
     workbookId?: string;
     worksheetId?: string;
     range?: IRangeData[];
@@ -15,11 +15,11 @@ export interface IDeleteRangeMoveLeftParams {
 /**
  * The command to delete range.
  */
-export const DeleteRangeMoveLeftCommand: ICommand = {
+export const DeleteRangeMoveUpCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.delete-range-move-left',
+    id: 'sheet.command.delete-range-move-up',
 
-    handler: async (accessor: IAccessor, params?: IDeleteRangeMoveLeftParams) => {
+    handler: async (accessor: IAccessor, params: IDeleteRangeMoveUpParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
@@ -42,16 +42,11 @@ export const DeleteRangeMoveLeftCommand: ICommand = {
             if (!range.length) return false;
         }
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
-        if (!worksheet) return false;
-
         const deleteRangeMutationParams: IDeleteRangeMutationParams = {
             range,
             worksheetId,
             workbookId,
-            shiftDimension: Dimension.COLUMNS,
+            shiftDimension: Dimension.ROWS,
         };
 
         const insertRangeMutationParams: Nullable<IInsertRangeMutationParams> = DeleteRangeUndoMutationFactory(accessor, deleteRangeMutationParams);

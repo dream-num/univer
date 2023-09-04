@@ -31,8 +31,8 @@ import { DeleteRangeMutation } from '../Commands/Mutations/delete-range.mutation
 import { SetRangeFormattedValueMutation } from '../Commands/Mutations/set-range-formatted-value.mutation';
 import { IInsertRangeMoveRightParams, InsertRangeMoveRightCommand } from '../Commands/Commands/insert-range-move-right.command';
 import { DeleteRangeMoveLeftCommand, IDeleteRangeMoveLeftParams } from '../Commands/Commands/delete-range-move-left.command';
-import { DeleteRangeMoveTopCommand, IDeleteRangeMoveTopParams } from '../Commands/Commands/delete-range-move-top.command';
-import { IInsertRangeMoveBottomParams, InsertRangeMoveBottomCommand } from '../Commands/Commands/insert-range-move-bottom.command';
+import { DeleteRangeMoveTopCommand, IDeleteRangeMoveTopParams } from '../Commands/Commands/delete-range-move-up.command';
+import { IInsertRangeMoveBottomParams, InsertRangeMoveBottomCommand } from '../Commands/Commands/insert-range-move-down.command';
 import { SetWorksheetOrderCommand } from '../Commands/Commands/set-worksheet-order.command';
 import { SetWorksheetOrderMutation } from '../Commands/Mutations/set-worksheet-order.mutation';
 

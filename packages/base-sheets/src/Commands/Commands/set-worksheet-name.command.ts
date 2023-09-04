@@ -9,7 +9,7 @@ export interface SetWorksheetNameCommandParams {
 }
 
 /**
- * The command to insert a row into a worksheet.
+ * The command to set the sheet name.
  */
 export const SetWorksheetNameCommand: ICommand = {
     type: CommandType.COMMAND,

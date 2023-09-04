@@ -51,7 +51,7 @@ export interface IRemoveColMutationParams {
 export interface IDeleteRangeMutationParams {
     workbookId: string;
     worksheetId: string;
-    range: IRangeData;
+    range: IRangeData[];
     shiftDimension: Dimension;
 }
 
@@ -59,7 +59,7 @@ export interface IDeleteRangeMutationParams {
 export interface IInsertRangeMutationParams {
     workbookId: string;
     worksheetId: string;
-    range: IRangeData;
+    range: IRangeData[];
     shiftDimension: Dimension;
     cellValue: ObjectMatrixPrimitiveType<ICellData>;
 }

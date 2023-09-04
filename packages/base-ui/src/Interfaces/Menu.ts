@@ -41,10 +41,6 @@ export interface BaseMenuProps {
     onOptionSelect?: (option: IValueOption) => void;
 }
 
-export interface TreeMenuItems extends IMenuButtonItem {
-    subMenuItems: TreeMenuItems[];
-}
-
 export type BaseMenuState = {
     show: boolean;
     posStyle: BaseMenuStyle;

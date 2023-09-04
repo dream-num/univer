@@ -3,7 +3,7 @@ import { BaseRightMenuProps, IDisplayMenuItem, IMenuItem, Menu } from '@univerjs
 import { Component, createRef } from 'preact';
 import { RightMenuProps } from '../../Controller';
 import Style from './index.module.less';
-import { buildMenuTree } from '../../Controller/menu';
+import { RightMenuItem } from './RightMenuItem';
 
 interface IState {
     visible: boolean;
@@ -41,7 +41,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
 
     setMenuListNeo = (menuItems: IMenuItem[]) => {
         this.setState({
-            menuItems: buildMenuTree(menuItems),
+            menuItems,
         });
     };
 
@@ -143,7 +143,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
                         e.preventDefault();
                     }}
                 >
-                    <Menu ref={this.ulRef} menuItems={this.state.menuItems} menu={this.state.children} onClick={this.handleClick}></Menu>
+                    <Menu ref={this.ulRef} menu={this.state.menuItems} onClick={this.handleClick}></Menu>
                 </div>
             )
         );

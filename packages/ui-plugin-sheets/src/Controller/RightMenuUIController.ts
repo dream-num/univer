@@ -9,9 +9,6 @@ import { RightMenu, RightMenuInput, RightMenuItem } from '../View';
 import styles from '../View/RightMenu/index.module.less';
 import {
     ClearSelectionMenuItemFactory,
-    DeleteRangeMenuItemFactory,
-    DeleteRangeMoveLeftMenuItemFactory,
-    DeleteRangeMoveUpMenuItemFactory,
     InsertColMenuItemFactory,
     InsertRowMenuItemFactory,
     RemoveColMenuItemFactory,
@@ -312,9 +309,9 @@ export class RightMenuUIController extends Disposable {
             RemoveColMenuItemFactory,
             SetRowHeightMenuItemFactory,
             SetColWidthMenuItemFactory,
-            DeleteRangeMenuItemFactory,
-            DeleteRangeMoveLeftMenuItemFactory,
-            DeleteRangeMoveUpMenuItemFactory,
+            // DeleteRangeMenuItemFactory,
+            // DeleteRangeMoveLeftMenuItemFactory,
+            // DeleteRangeMoveUpMenuItemFactory,
         ].forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });

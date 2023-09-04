@@ -642,7 +642,7 @@ export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: ClearSelectionContentCommand.id,
         title: 'rightClick.clearContent',
-        positions: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU]
     };
 }
 
@@ -673,7 +673,7 @@ export function RemoveRowMenuItemFactory(accessor: IAccessor): IMenuItem {
 export function HideRowMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SetWorksheetRowHideCommand.id,
-        menu: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.hideSelectedRow',
     };
 }
@@ -681,7 +681,7 @@ export function HideRowMenuItemFactory(accessor: IAccessor): IMenuItem {
 export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SetWorksheetRowShowCommand.id,
-        menu: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.showHideRow',
     };
 }
@@ -727,7 +727,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuItem {
 export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: DeleteRangeCommand.id,
-        menu: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.deleteCell',
         subMenus: [DeleteRangeMoveLeftCommand.id, DeleteRangeMoveUpCommand.id],
     };
@@ -736,7 +736,7 @@ export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuItem {
 export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: DeleteRangeMoveLeftCommand.id,
-        menu: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.moveLeft',
         parentId: DeleteRangeCommand.id,
     };
@@ -745,7 +745,7 @@ export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuIt
 export function DeleteRangeMoveUpMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: DeleteRangeMoveUpCommand.id,
-        menu: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.moveUp',
         parentId: DeleteRangeCommand.id,
     };
@@ -755,7 +755,7 @@ export function DeleteRangeMoveUpMenuItemFactory(accessor: IAccessor): IMenuItem
 export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: RemoveSheetCommand.id,
-        menu: [MenuPosition.SHEET_BAR],
+        positions: [MenuPosition.SHEET_BAR],
         title: 'sheetConfig.delete',
     };
 }

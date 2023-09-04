@@ -1,7 +1,7 @@
 import { Component, ComponentChild, createRef } from 'preact';
 import { Subscription } from 'rxjs';
 import { ICommandService, isRealNum } from '@univerjs/core';
-import { BaseMenuProps, BaseMenuState, BaseMenuItem, BaseMenuStyle } from '../../Interfaces';
+import { BaseMenuProps, BaseMenuItem, BaseMenuStyle } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
 import { CustomLabel } from '../CustomLabel';
 

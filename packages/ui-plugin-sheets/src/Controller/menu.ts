@@ -18,15 +18,12 @@ import {
     SetFontSizeCommand,
     SetTextColorCommand,
     SetBackgroundColorCommand,
-    SetBorderColorCommand,
-    SetBorderPositionCommand,
     SetTextRotationCommand,
     SetTextWrapCommand,
     SetHorizontalTextAlignCommand,
     SetVerticalTextAlignCommand,
     ResetTextColorCommand,
     ResetBackgroundColorCommand,
-    SetBorderStyleCommand,
     DeleteRangeMoveLeftCommand,
     DeleteRangeMoveUpCommand,
     RemoveSheetCommand,
@@ -34,24 +31,18 @@ import {
     SetWorksheetRowShowCommand,
 } from '@univerjs/base-sheets';
 import { ColorPicker, DisplayTypes, IMenuButtonItem, IMenuItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes, IDisplayMenuItem } from '@univerjs/base-ui';
-import { FontItalic, FontWeight, IBorderData, ICommandService, IPermissionService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
+import { FontItalic, FontWeight, ICommandService, IPermissionService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
 
 import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { RightMenuInput } from '../View';
-import {
-    BORDER_LINE_CHILDREN,
-    FONT_FAMILY_CHILDREN,
-    FONT_SIZE_CHILDREN,
-    HORIZONTAL_ALIGN_CHILDREN,
-    TEXT_ROTATE_CHILDREN,
-    TEXT_WRAP_CHILDREN,
-    VERTICAL_ALIGN_CHILDREN,
-} from '../View/Toolbar/Const';
+import { FONT_FAMILY_CHILDREN, FONT_SIZE_CHILDREN, HORIZONTAL_ALIGN_CHILDREN, TEXT_ROTATE_CHILDREN, TEXT_WRAP_CHILDREN, VERTICAL_ALIGN_CHILDREN } from '../View/Toolbar/Const';
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const/PLUGIN_NAME';
 
 import styles from '../View/Toolbar/index.module.less';
+
+export { SetBorderColorMenuItemFactory, SetBorderStyleMenuItemFactory } from './menu/border.menu';
 
 export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const undoRedoService = accessor.get(IUndoRedoService);
@@ -466,70 +457,6 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
             });
 
             return disposable.dispose;
-        }),
-    };
-}
-
-export function SetBorderColorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<IBorderData | undefined> {
-    return {
-        id: SetBorderColorCommand.id,
-        title: 'border',
-        positions: [MenuPosition.TOOLBAR],
-        parentId: SetBorderPositionCommand.id,
-        display: DisplayTypes.COLOR,
-        selectType: SelectTypes.NEO,
-        type: MenuItemType.SELECTOR,
-        selections: [
-            {
-                id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
-            },
-        ],
-    };
-}
-
-export function SetBorderStyleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<IBorderData | undefined> {
-    return {
-        id: SetBorderStyleCommand.id,
-        title: 'borderStyle',
-        positions: [MenuPosition.TOOLBAR],
-        parentId: SetBorderPositionCommand.id,
-        display: DisplayTypes.COLOR,
-        selectType: SelectTypes.NEO,
-        type: MenuItemType.SELECTOR,
-        selections: [],
-    };
-}
-
-export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
-    const permissionService = accessor.get(IPermissionService);
-    const commandService = accessor.get(ICommandService);
-    const selectionManager = accessor.get(ISelectionManager);
-
-    return {
-        id: SetBorderPositionCommand.id,
-        title: 'border',
-        display: DisplayTypes.ICON,
-        positions: [MenuPosition.TOOLBAR],
-        type: MenuItemType.DROPDOWN,
-        selectType: SelectTypes.NEO,
-        selections: [
-            ...BORDER_LINE_CHILDREN,
-            // TODO: add a set line bold menu item here
-            // {
-            //     label: {
-            //         name: SHEET_UI_PLUGIN_NAME + LineBold.name,
-            //         props: {
-            //             img: 0,
-            //             label: 'borderLine.borderSize',
-            //         },
-            //     },
-            //     onClick: (...arg) => {},
-            //     className: styles.selectLineBoldParent,
-            //     children: BORDER_SIZE_CHILDREN,
-            // },
-        ],
-        value$: new Observable<string>((subscriber) => {
-            subscriber.next('border');
         }),
     };
 }

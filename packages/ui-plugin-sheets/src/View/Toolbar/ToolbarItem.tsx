@@ -13,7 +13,6 @@ export interface IToolbarItemStatus {
     value: any;
 }
 
-// TODO@wzhudev: the following component should be moved to base-ui after refactoring
 /** The component to render toolbar item. */
 export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbarItemStatus> {
     static override contextType = AppContext;

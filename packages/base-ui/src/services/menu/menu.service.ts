@@ -94,13 +94,13 @@ export class DesktopMenuService extends Disposable implements IMenuService {
         });
     }
 
-    getMenuItems(positions: MenuPosition): Array<IDisplayMenuItem<any>> {
+    getMenuItems(positions: MenuPosition): Array<IDisplayMenuItem<IMenuItem>> {
         // TODO: @wzhudev: compose shortcut to returned menu items.
         if (this._menuByPositions.has(positions)) {
             return [...this._menuByPositions.get(positions)!.values()].filter((menu) => !menu.parentId).map((menu) => this.getDisplayMenuItems(menu));
         }
 
-        return [] as Array<IDisplayMenuItem<any>>;
+        return [] as Array<IDisplayMenuItem<IMenuItem>>;
     }
 
     getSubMenuItems(parentId: string): Array<IDisplayMenuItem<IMenuItem>> {

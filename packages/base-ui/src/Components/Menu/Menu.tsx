@@ -3,15 +3,12 @@ import { Subscription } from 'rxjs';
 import { ICommandService, isRealNum } from '@univerjs/core';
 import { BaseMenuProps, BaseMenuItem, BaseMenuStyle } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
-import { CustomLabel } from '../CustomLabel';
-
-import styles from './index.module.less';
 import { AppContext } from '../../Common/AppContext';
-import { ICustomComponentOption, IDisplayMenuItem, IMenuItem, IValueOption, isValueOptions } from '../../services/menu/menu';
-import { BaseMenuItem, BaseMenuProps, BaseMenuStyle } from '../../Interfaces/Menu';
-import { joinClassNames } from '../../Utils/util';
+import { ICustomComponentOption, IDisplayMenuItem, IMenuButtonItem, IMenuItem, IMenuSelectorItem, IValueOption, MenuItemType, isValueOptions } from '../../services/menu/menu';
 import { CustomLabel, NeoCustomLabel } from '../CustomLabel/CustomLabel';
 import { IMenuService } from '../../services/menu/menu.service';
+
+import styles from './index.module.less';
 
 export interface IBaseMenuState {
     show: boolean;
@@ -225,10 +222,20 @@ export interface IMenuItemProps {
     onClick: () => void;
 }
 
-export class MenuItem extends Component<IMenuItemProps, { disabled: boolean }> {
+export interface IMenuItemState {
+    disabled: boolean;
+    menuItems: Array<IDisplayMenuItem<IMenuItem>>;
+    value: any;
+}
+
+// TODO: this component should have something in common with ToolbarItem
+
+export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
     static override contextType = AppContext;
 
     private disabledSubscription: Subscription | undefined;
+
+    private valueSubscription: Subscription | undefined;
 
     private _refs: Menu[] = [];
 
@@ -237,42 +244,48 @@ export class MenuItem extends Component<IMenuItemProps, { disabled: boolean }> {
 
         this.state = {
             disabled: false,
-            value: {},
+            value: undefined,
+            menuItems: [],
         };
     }
 
     mouseEnter = (e: MouseEvent, index: number) => {
-        const { menuItem } = this.props;
-        if (menuItem.subMenus) {
-            this._refs[index].showMenu(true);
-        }
+        this._refs[index]?.showMenu(true);
     };
 
     mouseLeave = (e: MouseEvent, index: number) => {
-        const { menuItem } = this.props;
-        if (menuItem.subMenus) {
-            this._refs[index].showMenu(false);
-        }
+        this._refs[index]?.showMenu(false);
     };
 
     override componentDidMount(): void {
         this.disabledSubscription = this.props.menuItem.disabled$?.subscribe((disabled) => {
             this.setState({ disabled });
         });
+
+        this.disabledSubscription = this.props.menuItem.value$?.subscribe((value) => {
+            this.setState({ value });
+        });
+
+        this.getSubMenus();
     }
 
     override componentWillUnmount(): void {
         this.disabledSubscription?.unsubscribe();
     }
 
-    handleClick = (e: MouseEvent, item: IDisplayMenuItem, index: number) => {
-        // item.onClick?.call(null, e, item.value, index, deep);
+    override componentWillReceiveProps(nextProps: Readonly<IMenuItemProps>): void {
+        if (this.props.menuItem.id !== nextProps.menuItem.id) {
+            this.getSubMenus();
+        }
+    }
+
+    handleClick = (e: MouseEvent, item: IDisplayMenuItem<IMenuItem>, index: number) => {
         const commandService: ICommandService = this.context.injector.get(ICommandService);
         this.props.onClick();
 
+        // TODO: type here is not correct
         const value = this.state.value;
-        !(item.subMenuItems && item.subMenuItems.length > 0) && commandService.executeCommand(item.id, { value });
-        // this.showMenu(false);
+        // !(item.subMenuItems && item.subMenuItems.length > 0) && commandService.executeCommand(item.id, { value });
     };
 
     /**
@@ -289,33 +302,53 @@ export class MenuItem extends Component<IMenuItemProps, { disabled: boolean }> {
     };
 
     override render(): ComponentChild {
-        const { menuItem: item, index } = this.props;
-        // const commandService: ICommandService = this.context.injector.get(ICommandService);
+        switch (this.props.menuItem.type) {
+            case MenuItemType.DROPDOWN:
+            case MenuItemType.SELECTOR:
+                return this.renderSelectorType();
+            default:
+                return this.renderButtonType();
+        }
+    }
+
+    private renderButtonType(): ComponentChild {
+        const { menuItem, index } = this.props;
         const { disabled } = this.state;
+        const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
+
+        return <li>{'button element to do'}</li>;
+    }
+
+    private renderSelectorType(): ComponentChild {
+        const { menuItem, index } = this.props;
+        const { disabled, menuItems, value } = this.state;
+        const item = menuItem as IDisplayMenuItem<IMenuSelectorItem<unknown>>;
 
         return (
             <li
                 className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}
-                // onClick={() => {
-                //     this.props.onClick();
-                //     commandService.executeCommand(item.id);
-                // }}
+                onMouseEnter={(e) => this.mouseEnter(e, index)}
+                onMouseLeave={(e) => this.mouseLeave(e, index)}
                 onClick={(e) => this.handleClick(e, item, index)}
-                onMouseEnter={(e) => {
-                    this.mouseEnter(e, index);
-                }}
-                onMouseLeave={(e) => {
-                    this.mouseLeave(e, index);
-                }}
             >
-                <CustomLabel label={item.label || item.title} onChange={this.onChange}></CustomLabel>
+                <NeoCustomLabel title={item.title} value={value} onChange={this.onChange} icon={item.icon} display={item.display}></NeoCustomLabel>
                 {item.shortcut && ` (${item.shortcut})`}
-                {item.subMenuItems && item.subMenuItems.length > 0 ? (
-                    <Menu ref={(ele: Menu) => (this._refs[index] = ele)} menuItems={item.subMenuItems} parent={this}></Menu>
-                ) : (
-                    <></>
+                {(menuItems.length > 0 || (item as IMenuSelectorItem<unknown>).selections?.length) && (
+                    <Menu ref={(ele: Menu) => (this._refs[index] = ele)} menuId={item.id} options={item.selections} display={item.display} parent={this}></Menu>
                 )}
             </li>
         );
+    }
+
+    private getSubMenus() {
+        const { menuItem } = this.props;
+        const { id } = menuItem;
+
+        if (id) {
+            const menuService: IMenuService = this.context.injector.get(IMenuService);
+            this.setState({
+                menuItems: menuService.getSubMenuItems(id),
+            });
+        }
     }
 }

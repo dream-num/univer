@@ -10,7 +10,7 @@ interface IState {
     srcElement: any;
     eventType: string | null;
     children: RightMenuProps[];
-    menuItems: IDisplayMenuItem[];
+    menuItems: Array<IDisplayMenuItem<IMenuItem>>;
 }
 
 export class RightMenu extends Component<BaseRightMenuProps, IState> {
@@ -44,6 +44,22 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
             menuItems,
         });
     };
+
+    buildMenuTree(items: IMenuItem[], parentId?: string): IDisplayMenuItem<IMenuItem[]> {
+        const tree: IDisplayMenuItem[] = [];
+
+        for (const item of items) {
+            if (item.parentId === parentId) {
+                const treeItem: IDisplayMenuItem = {
+                    ...item,
+                    subMenuItems: this.buildMenuTree(items, item.id),
+                };
+                tree.push(treeItem);
+            }
+        }
+
+        return tree;
+    }
 
     // TODO:添加到具体的元素
     override componentDidMount() {

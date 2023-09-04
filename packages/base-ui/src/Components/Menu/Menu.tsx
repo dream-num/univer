@@ -206,7 +206,14 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
     }
 
     private getSubMenus() {
-        const { menuId } = this.props;
+        const { menuId, menu } = this.props;
+
+        // TODO@Dushusir remove menu
+        if (menu) {
+            this.setState({ menuItems: menu as Array<IDisplayMenuItem<IMenuItem>> });
+            return;
+        }
+
         if (menuId) {
             const menuService: IMenuService = this.context.injector.get(IMenuService);
             this.setState({
@@ -316,7 +323,12 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
         const { disabled } = this.state;
         const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
 
-        return <li>{'button element to do'}</li>;
+        return (
+            <li className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}>
+                {/* FIXME use title*/}
+                <NeoCustomLabel value={item.title} onChange={this.onChange}></NeoCustomLabel>
+            </li>
+        );
     }
 
     private renderSelectorType(): ComponentChild {

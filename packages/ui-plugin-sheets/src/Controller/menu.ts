@@ -18,14 +18,15 @@ import {
     SetFontSizeCommand,
     SetTextColorCommand,
     SetBackgroundColorCommand,
-    SetCellBorderCommand,
+    SetBorderColorCommand,
+    SetBorderPositionCommand,
     SetTextRotationCommand,
     SetTextWrapCommand,
     SetHorizontalTextAlignCommand,
     SetVerticalTextAlignCommand,
     ResetTextColorCommand,
     ResetBackgroundColorCommand,
-    SetCellBorderColorCommand,
+    SetBorderStyleCommand,
 } from '@univerjs/base-sheets';
 import { ColorPicker, DisplayTypes, IMenuButtonItem, IMenuItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes } from '@univerjs/base-ui';
 import { FontItalic, FontWeight, IBorderData, ICommandService, IPermissionService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
@@ -465,10 +466,10 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
 
 export function SetBorderColorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<IBorderData | undefined> {
     return {
-        id: SetCellBorderColorCommand.id,
+        id: SetBorderColorCommand.id,
         title: 'border',
         positions: [MenuPosition.TOOLBAR],
-        parentId: SetCellBorderCommand.id,
+        parentId: SetBorderPositionCommand.id,
         display: DisplayTypes.COLOR,
         selectType: SelectTypes.NEO,
         type: MenuItemType.SELECTOR,
@@ -480,13 +481,26 @@ export function SetBorderColorMenuItemFactory(accessor: IAccessor): IMenuSelecto
     };
 }
 
+export function SetBorderStyleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<IBorderData | undefined> {
+    return {
+        id: SetBorderStyleCommand.id,
+        title: 'borderStyle',
+        positions: [MenuPosition.TOOLBAR],
+        parentId: SetBorderPositionCommand.id,
+        display: DisplayTypes.COLOR,
+        selectType: SelectTypes.NEO,
+        type: MenuItemType.SELECTOR,
+        selections: [],
+    };
+}
+
 export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
     const selectionManager = accessor.get(ISelectionManager);
 
     return {
-        id: SetCellBorderCommand.id,
+        id: SetBorderPositionCommand.id,
         title: 'border',
         display: DisplayTypes.ICON,
         positions: [MenuPosition.TOOLBAR],

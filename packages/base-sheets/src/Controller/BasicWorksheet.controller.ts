@@ -12,7 +12,6 @@ import {
     ResetBackgroundColorCommand,
     ResetTextColorCommand,
     SetBackgroundColorCommand,
-    SetCellBorderCommand,
     SetStyleCommand,
     SetTextColorCommand,
     SetTextRotationCommand,
@@ -45,6 +44,7 @@ import { DeleteRangeMoveTopCommand, IDeleteRangeMoveTopParams } from '../Command
 import { IInsertRangeMoveBottomParams, InsertRangeMoveBottomCommand } from '../Commands/Commands/insert-range-move-bottom.command';
 import { SetWorksheetOrderCommand } from '../Commands/Commands/set-worksheet-order.command';
 import { SetWorksheetOrderMutation } from '../Commands/Mutations/set-worksheet-order.mutation';
+import { SetBorderColorCommand, SetBorderCommand, SetBorderPositionCommand, SetBorderStyleCommand } from '../Commands/Commands/set-border-command';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -103,11 +103,15 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
 
             SetTextColorCommand,
             SetBackgroundColorCommand,
-            SetCellBorderCommand,
             SetTextWrapCommand,
             SetTextRotationCommand,
             ResetTextColorCommand,
             ResetBackgroundColorCommand,
+
+            SetBorderCommand,
+            SetBorderColorCommand,
+            SetBorderStyleCommand,
+            SetBorderPositionCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

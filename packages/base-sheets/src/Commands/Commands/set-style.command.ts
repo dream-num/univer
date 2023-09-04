@@ -5,7 +5,6 @@ import {
     FontItalic,
     FontWeight,
     HorizontalAlign,
-    IBorderData,
     IColorStyle,
     ICommand,
     ICommandService,
@@ -329,67 +328,6 @@ export const ResetBackgroundColorCommand: ICommand = {
                 value: {
                     rgb: undefined,
                 },
-            },
-        };
-
-        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
-    },
-};
-
-export interface ISetCellBorderCommandParams {
-    value: IBorderData;
-}
-
-export const SetCellBorderCommand: ICommand<ISetCellBorderCommandParams> = {
-    type: CommandType.COMMAND,
-    id: 'sheet.command.set-cell-border',
-    handler: async (accessor, params) => {
-        if (!params) {
-            return false;
-        }
-
-        const commandService = accessor.get(ICommandService);
-        const setStyleParams: ISetStyleParams<IBorderData> = {
-            style: {
-                type: 'bd',
-                value: params.value,
-            },
-        };
-
-        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
-    },
-};
-
-export interface ISetCellBorderColorCommandParams {
-    value: string;
-}
-
-export const SetCellBorderColorCommand: ICommand<ISetCellBorderColorCommandParams> = {
-    type: CommandType.COMMAND,
-    id: 'sheet.command.set-cell-border-color',
-    handler: async (accessor, params) => {
-        if (!params) {
-            return false;
-        }
-
-        const commandService = accessor.get(ICommandService);
-
-        const currentCell = accessor.get(ISelectionManager).getCurrentCell();
-        if (!currentCell) {
-            return false;
-        }
-
-        const currentBorder = currentCell.getBorder();
-        const newBorder = Tools.deepMerge(currentBorder, {
-            color: {
-                rgb: params.value,
-            },
-        });
-
-        const setStyleParams: ISetStyleParams<IBorderData> = {
-            style: {
-                type: 'bd',
-                value: newBorder,
             },
         };
 

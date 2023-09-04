@@ -5,6 +5,8 @@ export * from './Basics';
 export * from './View';
 export { ICanvasView, ISelectionManager } from './Services/tokens';
 
+// #region commands
+
 // mutations
 export { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from './Commands/Mutations/remove-sheet.mutation';
 export { InsertSheetMutation, InsertSheetUndoMutationFactory } from './Commands/Mutations/insert-sheet.mutation';
@@ -26,14 +28,12 @@ export {
     SetFontSizeCommand,
     SetTextColorCommand,
     SetBackgroundColorCommand,
-    SetCellBorderCommand,
     SetTextRotationCommand,
     SetHorizontalTextAlignCommand,
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
     ResetTextColorCommand,
     ResetBackgroundColorCommand,
-    SetCellBorderColorCommand,
 } from './Commands/Commands/set-style.command';
 export { InsertSheetCommand } from './Commands/Commands/insert-sheet.command';
 export { SetWorksheetActivateCommand } from './Commands/Commands/set-worksheet-activate.command';
@@ -44,3 +44,15 @@ export { DeleteRangeCommand } from './Commands/Commands/delete-range.command';
 export { RemoveRowCommand, RemoveColCommand } from './Commands/Commands/remove-row-col.command';
 export { InsertColCommand, InsertRowCommand, InsertColCommandParams, InsertRowCommandParams } from './Commands/Commands/insert-row-col.command';
 export { ClearSelectionContentCommand } from './Commands/Commands/clear-selection-content.command';
+export {
+    SetBorderColorCommand,
+    SetBorderCommand,
+    SetBorderPositionCommand,
+    SetBorderStyleCommand,
+    ISetBorderColorCommandParams,
+    ISetBorderCommandParams,
+    ISetBorderPositionCommandParams,
+    ISetBorderStyleCommandParams,
+} from './Commands/Commands/set-border-command';
+
+// #endregion

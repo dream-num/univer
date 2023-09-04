@@ -1,5 +1,6 @@
 import {
     BorderStyleTypes,
+    BorderType,
     CommandType,
     IBorderStyleData,
     ICommand,
@@ -38,10 +39,40 @@ function forEach(rangeData: IRangeData, action: (row: number, column: number) =>
     }
 }
 
+export interface ISetBorderPositionCommandParams {
+    value: BorderType;
+}
+
+export const SetBorderPositionCommand: ICommand<ISetBorderPositionCommandParams> = {
+    id: 'sheet.command.set-border-position',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor, params: ISetBorderPositionCommandParams) => true,
+};
+
+export interface ISetBorderStyleCommandParams {
+    value: BorderStyleTypes;
+}
+
+export const SetBorderStyleCommand: ICommand = {
+    id: 'sheet.command.set-border-style',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor, params: ISetBorderStyleCommandParams) => true,
+};
+
+export interface ISetBorderColorCommandParams {
+    value: string;
+}
+
+export const SetBorderColorCommand: ICommand<ISetBorderColorCommandParams> = {
+    id: 'sheet.command.set-border-color',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor, params: ISetBorderColorCommandParams) => true,
+};
+
 /**
  * The command to clear content in current selected ranges.
  */
-export const SetBorderCommand: ICommand = {
+export const SetBorderCommand: ICommand<ISetBorderCommandParams> = {
     id: 'sheet.command.set-border',
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function

@@ -88,13 +88,13 @@ export interface IColorSelectProps {
 
 export class ColorSelect extends Component<IColorSelectProps> {
     render() {
-        const { value, icon } = this.props;
+        const { value, icon, title } = this.props;
+
+        console.log('debug color select value', value);
 
         return (
             <div className={styles.colorSelect}>
-                <div>
-                    <CustomLabel label={{ name: icon }} />
-                </div>
+                <div>{icon ? <CustomLabel label={{ name: icon }} /> : title}</div>
                 <div className={styles.colorSelectLine} style={{ background: value }}></div>
             </div>
         );

@@ -41,7 +41,7 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     };
 }
 
-export function SetBorderColorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<IBorderData | undefined> {
+export function SetBorderColorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: SetBorderColorCommand.id,
         title: 'border',
@@ -55,6 +55,9 @@ export function SetBorderColorMenuItemFactory(accessor: IAccessor): IMenuSelecto
                 id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
             },
         ],
+        value$: new Observable<string>((subscriber) => {
+            subscriber.next('#ff0000');
+        }),
     };
 }
 

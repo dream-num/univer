@@ -7,7 +7,7 @@ import { SheetToolbarConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
 
 import { SetBorderColorMenuItemFactory } from './menu';
-import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
+import { CellBorderSelectorMenuItemFactory, SetBorderStyleMenuItemFactory } from './menu/border.menu';
 
 export interface BaseToolbarSelectProps extends BaseSelectProps {
     children?: BaseSelectChildrenProps[];
@@ -117,6 +117,7 @@ export class ToolbarUIController extends Disposable {
             // ResetBackgroundColorMenuItemFactory,
             CellBorderSelectorMenuItemFactory,
             SetBorderColorMenuItemFactory,
+            SetBorderStyleMenuItemFactory,
             // SetBorderStyleMenuItemFactory,
             // HorizontalAlignMenuItemFactory,
             // VerticalAlignMenuItemFactory,

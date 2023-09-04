@@ -83,6 +83,10 @@ export class Workbook {
         return typeof range === 'string' || 'startRow' in range || 'row' in range;
     }
 
+    onUniver() {
+        this._getDefaultWorkSheet();
+    }
+
     getUnitId() {
         return this._unitId;
     }
@@ -745,5 +749,40 @@ export class Workbook {
             },
         };
         return item;
+    }
+
+    /**
+     * Get Default Sheet
+     * @private
+     */
+    private _getDefaultWorkSheet(): void {
+        const { _config, _worksheets } = this;
+        const { sheets, sheetOrder } = _config;
+
+        // One worksheet by default
+        if (Tools.isEmptyObject(sheets)) {
+            sheets[DEFAULT_WORKSHEET.id] = Object.assign(DEFAULT_WORKSHEET, {
+                status: BooleanNumber.TRUE,
+            });
+        }
+
+        let firstWorksheet = null;
+
+        for (const sheetId in sheets) {
+            const config = sheets[sheetId];
+            config.name = this._genName.sheetName(config.name);
+            const worksheet = new Worksheet(config, this._commandManager, this._observerManager, this._currentUniverService);
+            _worksheets.set(sheetId, worksheet);
+            if (!sheetOrder.includes(sheetId)) {
+                sheetOrder.push(sheetId);
+            }
+            if (firstWorksheet == null) {
+                firstWorksheet = worksheet;
+            }
+        }
+
+        // if (firstWorksheet) {
+        //     firstWorksheet.activate();
+        // }
     }
 }

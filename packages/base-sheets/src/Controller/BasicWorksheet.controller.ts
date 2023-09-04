@@ -1,5 +1,5 @@
 import { IDisposable } from '@wendellhu/redi';
-import { Disposable, ICellData, ICellV, ICommandService, IRangeData, IStyleData, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import { Disposable, ICommandService, IStyleData } from '@univerjs/core';
 
 import { ClearSelectionContentCommand } from '../Commands/Commands/clear-selection-content.command';
 import { SetRangeValuesMutation } from '../Commands/Mutations/set-range-values.mutation';
@@ -20,9 +20,9 @@ import {
     SetVerticalTextAlignCommand,
 } from '../Commands/Commands/set-style.command';
 import { SetRangeStyleMutation } from '../Commands/Mutations/set-range-styles.mutation';
-import { ISetRangeFormattedValueParams, SetRangeFormattedValueCommand } from '../Commands/Commands/set-range-formatted-value.command';
+import { SetRangeFormattedValueCommand } from '../Commands/Commands/set-range-formatted-value.command';
 import { TrimWhitespaceCommand } from '../Commands/Commands/trim-whitespace.command';
-import { ISetRangeValuesCommandParams, SetRangeValuesCommand } from '../Commands/Commands/set-range-values.command';
+import { SetRangeValuesCommand } from '../Commands/Commands/set-range-values.command';
 import { SetWorksheetHideCommand } from '../Commands/Commands/set-worksheet-hide.command';
 import { SetWorksheetHideMutation } from '../Commands/Mutations/set-worksheet-hide.mutation';
 import { InsertColCommand } from '../Commands/Commands/insert-row-col.command';

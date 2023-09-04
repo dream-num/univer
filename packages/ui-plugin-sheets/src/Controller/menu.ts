@@ -1,8 +1,5 @@
 import {
-    ClearSelectionContentCommand,
     ISelectionManager,
-    InsertColCommand,
-    InsertRowCommand,
     SetBoldCommand,
     SetItalicCommand,
     SetSelectionsOperation,

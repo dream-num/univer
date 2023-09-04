@@ -1,4 +1,4 @@
-import { BaseMenuItem, BaseUlProps, ColorPicker, ComponentManager, ICustomComponent } from '@univerjs/base-ui';
+import { BaseMenuItem, BaseUlProps, ColorPicker, ComponentManager, ICustomComponent, IMenuService, MenuPosition } from '@univerjs/base-ui';
 import {
     Nullable,
     CommandManager,
@@ -18,11 +18,12 @@ import {
     ICommandService,
 } from '@univerjs/core';
 import { InsertSheetMutation, RemoveSheetMutation, SetWorksheetActivateCommand, SetWorksheetOrderCommand } from '@univerjs/base-sheets';
-import { Inject, SkipSelf } from '@wendellhu/redi';
+import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 import { SheetBar } from '../View/SheetBar';
 import styles from '../View/SheetBar/index.module.less';
 import { SheetBarMenuItem } from '../View/SheetBar/SheetBarMenu';
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const';
+import { DeleteSheetMenuItemFactory } from './menu';
 
 interface SheetUl extends BaseMenuItem {
     label?: ICustomComponent | string;
@@ -50,10 +51,12 @@ export class SheetBarUIController extends Disposable {
 
     // eslint-disable-next-line max-lines-per-function
     constructor(
+        @Inject(Injector) private readonly _injector: Injector,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @SkipSelf() @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IMenuService private readonly _menuService: IMenuService
     ) {
         super();
         const that = this;
@@ -114,6 +117,8 @@ export class SheetBarUIController extends Disposable {
                 },
             },
         ];
+
+        this._initializeContextMenu();
 
         this._componentManager.register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
 
@@ -291,6 +296,8 @@ export class SheetBarUIController extends Disposable {
                 //this._barControl.dragEnd(elements);
             },
         });
+
+        this._sheetBar.setSheetUlNeo(this._menuService.getMenuItems(MenuPosition.SHEET_BAR));
     }
 
     protected _refreshSheetData(): void {
@@ -348,5 +355,11 @@ export class SheetBarUIController extends Disposable {
     protected _refreshComponent(): void {
         this._refreshSheetData();
         this._refreshSheetBarUI();
+    }
+
+    private _initializeContextMenu() {
+        [DeleteSheetMenuItemFactory].forEach((factory) => {
+            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
+        });
     }
 }

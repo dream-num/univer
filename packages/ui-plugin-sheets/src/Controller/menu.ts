@@ -27,9 +27,15 @@ import {
     ResetTextColorCommand,
     ResetBackgroundColorCommand,
     SetBorderStyleCommand,
+    DeleteRangeMoveLeftCommand,
+    DeleteRangeMoveUpCommand,
+    RemoveSheetCommand,
+    SetWorksheetRowHideCommand,
+    SetWorksheetRowShowCommand,
 } from '@univerjs/base-sheets';
-import { ColorPicker, DisplayTypes, IMenuButtonItem, IMenuItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes } from '@univerjs/base-ui';
+import { ColorPicker, DisplayTypes, IMenuButtonItem, IMenuItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes, IDisplayMenuItem } from '@univerjs/base-ui';
 import { FontItalic, FontWeight, IBorderData, ICommandService, IPermissionService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
+
 import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -631,6 +637,7 @@ export function NumberFormatMenuItemFactory(accessor: IAccessor): IMenuItem {}
 // export function ImportMenuItemFactory(accessor: IAccessor): IMenuItem {}
 // export function ImageMenuItemFactory(accessor: IAccessor): IMenuItem {}
 
+// right menu in main container
 export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: ClearSelectionContentCommand.id,
@@ -660,6 +667,22 @@ export function RemoveRowMenuItemFactory(accessor: IAccessor): IMenuItem {
         id: RemoveRowCommand.id,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.deleteSelectedRow',
+    };
+}
+
+export function HideRowMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: SetWorksheetRowHideCommand.id,
+        menu: [MenuPosition.CONTEXT_MENU],
+        title: 'rightClick.hideSelectedRow',
+    };
+}
+
+export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: SetWorksheetRowShowCommand.id,
+        menu: [MenuPosition.CONTEXT_MENU],
+        title: 'rightClick.showHideRow',
     };
 }
 
@@ -703,27 +726,52 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuItem {
 
 export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
-        id: `${DeleteRangeCommand.id}.parent`,
-        positions: [MenuPosition.CONTEXT_MENU],
+        id: DeleteRangeCommand.id,
+        menu: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.deleteCell',
-        type: MenuItemType.BUTTON,
-        // submenus: [DeleteRangeCommand.id, `${DeleteRangeCommand.id}up`],
+        subMenus: [DeleteRangeMoveLeftCommand.id, DeleteRangeMoveUpCommand.id],
     };
 }
+
 export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
-        id: DeleteRangeCommand.id,
-        positions: [MenuPosition.CONTEXT_MENU],
+        id: DeleteRangeMoveLeftCommand.id,
+        menu: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.moveLeft',
-        parentId: `${DeleteRangeCommand.id}.parent`,
+        parentId: DeleteRangeCommand.id,
     };
 }
 
 export function DeleteRangeMoveUpMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
-        id: `${DeleteRangeCommand.id}up`,
-        positions: [MenuPosition.CONTEXT_MENU],
+        id: DeleteRangeMoveUpCommand.id,
+        menu: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.moveUp',
-        parentId: `${DeleteRangeCommand.id}.parent`,
+        parentId: DeleteRangeCommand.id,
     };
+}
+
+// right menu in main sheet bar
+export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: RemoveSheetCommand.id,
+        menu: [MenuPosition.SHEET_BAR],
+        title: 'sheetConfig.delete',
+    };
+}
+
+export function buildMenuTree(items: IMenuItem[], parentId?: string): IDisplayMenuItem[] {
+    const tree: IDisplayMenuItem[] = [];
+
+    for (const item of items) {
+        if (item.parentId === parentId) {
+            const treeItem: IDisplayMenuItem = {
+                ...item,
+                subMenuItems: buildMenuTree(items, item.id),
+            };
+            tree.push(treeItem);
+        }
+    }
+
+    return tree;
 }

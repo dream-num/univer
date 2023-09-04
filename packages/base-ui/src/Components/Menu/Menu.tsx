@@ -1,6 +1,10 @@
 import { Component, ComponentChild, createRef } from 'preact';
 import { Subscription } from 'rxjs';
-import { ICommandService } from '@univerjs/core';
+import { ICommandService, isRealNum } from '@univerjs/core';
+import { BaseMenuProps, BaseMenuState, BaseMenuItem, BaseMenuStyle } from '../../Interfaces';
+import { joinClassNames } from '../../Utils';
+import { CustomLabel } from '../CustomLabel';
+
 import styles from './index.module.less';
 import { AppContext } from '../../Common/AppContext';
 import { ICustomComponentOption, IDisplayMenuItem, IMenuItem, IValueOption, isValueOptions } from '../../services/menu/menu';
@@ -233,6 +237,7 @@ export class MenuItem extends Component<IMenuItemProps, { disabled: boolean }> {
 
         this.state = {
             disabled: false,
+            value: {},
         };
     }
 
@@ -260,19 +265,42 @@ export class MenuItem extends Component<IMenuItemProps, { disabled: boolean }> {
         this.disabledSubscription?.unsubscribe();
     }
 
+    handleClick = (e: MouseEvent, item: IDisplayMenuItem, index: number) => {
+        // item.onClick?.call(null, e, item.value, index, deep);
+        const commandService: ICommandService = this.context.injector.get(ICommandService);
+        this.props.onClick();
+
+        const value = this.state.value;
+        !(item.subMenuItems && item.subMenuItems.length > 0) && commandService.executeCommand(item.id, { value });
+        // this.showMenu(false);
+    };
+
+    /**
+     * user input change value from CustomLabel
+     * @param e
+     */
+    onChange = (e: Event) => {
+        const targetValue = (e.target as HTMLInputElement).value;
+        const value = isRealNum(targetValue) ? parseInt(targetValue) : targetValue;
+
+        this.setState({
+            value,
+        });
+    };
+
     override render(): ComponentChild {
         const { menuItem: item, index } = this.props;
-        const commandService: ICommandService = this.context.injector.get(ICommandService);
+        // const commandService: ICommandService = this.context.injector.get(ICommandService);
         const { disabled } = this.state;
 
         return (
             <li
                 className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}
-                // style={{ ...style }}
-                onClick={() => {
-                    this.props.onClick();
-                    commandService.executeCommand(item.id);
-                }}
+                // onClick={() => {
+                //     this.props.onClick();
+                //     commandService.executeCommand(item.id);
+                // }}
+                onClick={(e) => this.handleClick(e, item, index)}
                 onMouseEnter={(e) => {
                     this.mouseEnter(e, index);
                 }}
@@ -280,7 +308,7 @@ export class MenuItem extends Component<IMenuItemProps, { disabled: boolean }> {
                     this.mouseLeave(e, index);
                 }}
             >
-                <CustomLabel label={item.label || item.title}></CustomLabel>
+                <CustomLabel label={item.label || item.title} onChange={this.onChange}></CustomLabel>
                 {item.shortcut && ` (${item.shortcut})`}
                 {item.subMenuItems && item.subMenuItems.length > 0 ? (
                     <Menu ref={(ele: Menu) => (this._refs[index] = ele)} menuItems={item.subMenuItems} parent={this}></Menu>

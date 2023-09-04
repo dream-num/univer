@@ -49,7 +49,7 @@ export function NeoCustomLabel<T>(props: Pick<IMenuSelectorItem<unknown>, 'icon'
 /** @deprecated */
 export function CustomLabel(props: IBaseCustomLabelProps): JSX.Element | null {
     const context = useContext(AppContext);
-    const { label, display } = props;
+    const { label, display, onChange } = props;
 
     function getLocale(name: string) {
         return context.localeService?.t(name);
@@ -72,7 +72,7 @@ export function CustomLabel(props: IBaseCustomLabelProps): JSX.Element | null {
         const Label = context.componentManager?.get((label as ICustomComponent).name) as any;
         if (Label) {
             const props = (label as ICustomComponent).props ?? {};
-            return <Label {...props} />;
+            return <Label onChange={onChange} {...props} />;
         }
     }
 

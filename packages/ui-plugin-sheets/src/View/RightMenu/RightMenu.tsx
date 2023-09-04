@@ -3,6 +3,7 @@ import { BaseRightMenuProps, IDisplayMenuItem, IMenuItem, Menu } from '@univerjs
 import { Component, createRef } from 'preact';
 import { RightMenuProps } from '../../Controller';
 import Style from './index.module.less';
+import { buildMenuTree } from '../../Controller/menu';
 
 interface IState {
     visible: boolean;
@@ -40,25 +41,9 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
 
     setMenuListNeo = (menuItems: IMenuItem[]) => {
         this.setState({
-            menuItems: this.buildMenuTree(menuItems),
+            menuItems: buildMenuTree(menuItems),
         });
     };
-
-    buildMenuTree(items: IMenuItem[], parentId?: string): IDisplayMenuItem[] {
-        const tree: IDisplayMenuItem[] = [];
-
-        for (const item of items) {
-            if (item.parentId === parentId) {
-                const treeItem: IDisplayMenuItem = {
-                    ...item,
-                    subMenuItems: this.buildMenuTree(items, item.id),
-                };
-                tree.push(treeItem);
-            }
-        }
-
-        return tree;
-    }
 
     // TODO:添加到具体的元素
     override componentDidMount() {

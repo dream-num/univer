@@ -13,6 +13,7 @@ export const enum MenuPosition {
     TAB_CONTEXT_MENU,
     ROW_HEADER_CONTEXT_MENU,
     COL_HEADER_CONTEXT_MENU,
+    SHEET_BAR,
 }
 
 export const enum MenuItemType {

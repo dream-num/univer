@@ -28,47 +28,48 @@ export const InsertRangeMutation: IMutation<IInsertRangeMutationParams, boolean>
         if (!worksheet) return false;
 
         const cellMatrix = worksheet.getCellMatrix();
-        const lastEndRow = worksheet?.getLastRow() ?? 0;
-        const lastEndColumn = worksheet!?.getLastColumn() ?? 0;
+        const lastEndRow = worksheet.getLastRow();
+        const lastEndColumn = worksheet.getLastColumn();
 
-        const rangeData = params.range;
-        const { startRow, endRow, startColumn, endColumn } = rangeData;
-        const rows = endRow - startRow + 1;
-        const columns = endColumn - startColumn + 1;
+        for (let i = 0; i < params.range.length; i++) {
+            const { startRow, endRow, startColumn, endColumn } = params.range[i];
+            const rows = endRow - startRow + 1;
+            const columns = endColumn - startColumn + 1;
 
-        if (params.shiftDimension === Dimension.ROWS) {
-            // build new data
-            for (let r = lastEndRow; r >= startRow; r--) {
-                for (let c = startColumn; c <= endColumn; c++) {
-                    // get value blow current range
-                    const value = cellMatrix?.getValue(r, c);
-                    cellMatrix?.setValue(r + rows, c, value as ICellData);
+            if (params.shiftDimension === Dimension.ROWS) {
+                // build new data
+                for (let r = lastEndRow; r >= startRow; r--) {
+                    for (let c = startColumn; c <= endColumn; c++) {
+                        // get value blow current range
+                        const value = cellMatrix.getValue(r, c);
+                        cellMatrix.setValue(r + rows, c, value as ICellData);
+                    }
                 }
-            }
-            // insert cell value from user
-            for (let r = endRow; r >= startRow; r--) {
-                for (let c = startColumn; c <= endColumn; c++) {
-                    cellMatrix?.setValue(r, c, params.cellValue[r - startRow][c - startColumn]);
+                // insert cell value from user
+                for (let r = endRow; r >= startRow; r--) {
+                    for (let c = startColumn; c <= endColumn; c++) {
+                        cellMatrix.setValue(r, c, params.cellValue[r - startRow][c - startColumn]);
+                    }
                 }
-            }
-        } else if (params.shiftDimension === Dimension.COLUMNS) {
-            for (let r = startRow; r <= endRow; r++) {
-                for (let c = lastEndColumn; c >= startColumn; c--) {
-                    // get value blow current range
-                    const value = cellMatrix?.getValue(r, c);
+            } else if (params.shiftDimension === Dimension.COLUMNS) {
+                for (let r = startRow; r <= endRow; r++) {
+                    for (let c = lastEndColumn; c >= startColumn; c--) {
+                        // get value blow current range
+                        const value = cellMatrix.getValue(r, c);
 
-                    cellMatrix?.setValue(r, c + columns, value as ICellData);
+                        cellMatrix.setValue(r, c + columns, value as ICellData);
+                    }
                 }
-            }
-            // insert cell value from user
-            // for (let r = endRow; r >= startRow; r--) {
-            //     for (let c = startColumn; c <= endColumn; c++) {
-            //         cellMatrix.setValue(r, c, (cellValue as ICellData)[r - startRow][c - startColumn]);
-            //     }
-            // }
-            for (let r = startRow; r <= endRow; r++) {
-                for (let c = endColumn; c >= startColumn; c--) {
-                    cellMatrix?.setValue(r, c, params.cellValue[r - startRow][c - startColumn]);
+                // insert cell value from user
+                // for (let r = endRow; r >= startRow; r--) {
+                //     for (let c = startColumn; c <= endColumn; c++) {
+                //         cellMatrix.setValue(r, c, (cellValue as ICellData)[r - startRow][c - startColumn]);
+                //     }
+                // }
+                for (let r = startRow; r <= endRow; r++) {
+                    for (let c = endColumn; c >= startColumn; c--) {
+                        cellMatrix.setValue(r, c, params.cellValue[r - startRow][c - startColumn]);
+                    }
                 }
             }
         }

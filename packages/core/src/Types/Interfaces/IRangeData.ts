@@ -66,9 +66,7 @@ export type IRowStartEndData = [startRow: number, endRow: number] | number[];
 /**
  * Column data type
  */
-export type IColumnStartEndData =
-    | [startColumn: number, endColumn: number]
-    | number[];
+export type IColumnStartEndData = [startColumn: number, endColumn: number] | number[];
 
 /**
  * One of the range types,
@@ -113,11 +111,7 @@ export type IRangeCellData = {
  *
  * Allow users to provide one of three formats, we need to convert to IRangeData to store
  */
-export type IRangeType =
-    | IRangeData
-    | IRangeStringData
-    | IRangeArrayData
-    | IRangeCellData;
+export type IRangeType = IRangeData | IRangeStringData | IRangeArrayData | IRangeCellData;
 
 // export interface IInfoObjData extends IRangeArrayData {
 //     sheetId?: Nullable<string>;

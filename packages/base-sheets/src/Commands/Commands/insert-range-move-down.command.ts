@@ -1,25 +1,25 @@
 import { IAccessor } from '@wendellhu/redi';
-import { CommandType, Dimension, ICommand, ICommandService, ICurrentUniverService, IRangeData, IUndoRedoService, Nullable } from '@univerjs/core';
+import { CommandType, Dimension, ICellData, ICommand, ICommandService, ICurrentUniverService, IRangeData, IUndoRedoService, ObjectMatrix } from '@univerjs/core';
 
-import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../Mutations/delete-range.mutation';
-import { InsertRangeMutation } from '../Mutations/insert-range.mutation';
+import { DeleteRangeMutation } from '../Mutations/delete-range.mutation';
+import { InsertRangeMutation, InsertRangeUndoMutationFactory } from '../Mutations/insert-range.mutation';
 import { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../Basics/Interfaces/MutationInterface';
 import { ISelectionManager } from '../../Services/tokens';
 
-export interface IDeleteRangeMoveLeftParams {
+export interface IInsertRangeMoveDownParams {
     workbookId?: string;
     worksheetId?: string;
     range?: IRangeData[];
 }
 
 /**
- * The command to delete range.
+ * The command to insert range.
  */
-export const DeleteRangeMoveLeftCommand: ICommand = {
+export const InsertRangeMoveDownCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.delete-range-move-left',
+    id: 'sheet.command.insert-range-move-down',
 
-    handler: async (accessor: IAccessor, params?: IDeleteRangeMoveLeftParams) => {
+    handler: async (accessor: IAccessor, params?: IInsertRangeMoveDownParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
@@ -42,33 +42,39 @@ export const DeleteRangeMoveLeftCommand: ICommand = {
             if (!range.length) return false;
         }
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
-        if (!worksheet) return false;
+        const cellValue = new ObjectMatrix<ICellData>();
+        for (let i = 0; i < range.length; i++) {
+            const { startRow, endRow, startColumn, endColumn } = range[i];
 
-        const deleteRangeMutationParams: IDeleteRangeMutationParams = {
+            for (let r = startRow; r <= endRow; r++) {
+                for (let c = startColumn; c <= endColumn; c++) {
+                    cellValue.setValue(r, c, { m: '', v: '' });
+                }
+            }
+        }
+
+        const insertRangeMutationParams: IInsertRangeMutationParams = {
             range,
             worksheetId,
             workbookId,
-            shiftDimension: Dimension.COLUMNS,
+            shiftDimension: Dimension.ROWS,
+            cellValue: cellValue.getData(),
         };
 
-        const insertRangeMutationParams: Nullable<IInsertRangeMutationParams> = DeleteRangeUndoMutationFactory(accessor, deleteRangeMutationParams);
-        if (!insertRangeMutationParams) return false;
+        const deleteRangeMutationParams: IDeleteRangeMutationParams = InsertRangeUndoMutationFactory(accessor, insertRangeMutationParams);
 
         // execute do mutations and add undo mutations to undo stack if completed
-        const result = commandService.executeCommand(DeleteRangeMutation.id, deleteRangeMutationParams);
+        const result = commandService.executeCommand(InsertRangeMutation.id, insertRangeMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 // 如果有多个 mutation 构成一个封装项目，那么要封装在同一个 undo redo element 里面
                 // 通过勾子可以 hook 外部 controller 的代码来增加新的 action
                 URI: 'sheet', // TODO: this URI is fake
                 undo() {
-                    return commandService.executeCommand(InsertRangeMutation.id, insertRangeMutationParams);
+                    return commandService.executeCommand(DeleteRangeMutation.id, deleteRangeMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(DeleteRangeMutation.id, deleteRangeMutationParams);
+                    return commandService.executeCommand(InsertRangeMutation.id, insertRangeMutationParams);
                 },
             });
 

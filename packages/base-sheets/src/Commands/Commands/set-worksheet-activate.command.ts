@@ -1,6 +1,6 @@
 import { CommandType, ICommand, ICommandService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
-import { ISetWorksheetActivateMutationParams, SetWorksheetActivateMutation, SetWorksheetActivateMutationFactory } from '../Mutations/set-worksheet-activate.mutation';
+import { ISetWorksheetActivateMutationParams, SetWorksheetActivateMutation, SetWorksheetUnActivateMutationFactory } from '../Mutations/set-worksheet-activate.mutation';
 
 export interface ISetWorksheetActivateCommandParams {
     workbookId: string;
@@ -19,7 +19,7 @@ export const SetWorksheetActivateCommand: ICommand = {
             workbookId: params.workbookId,
             worksheetId: params.worksheetId,
         };
-        const undoMutationParams = SetWorksheetActivateMutationFactory(accessor, redoMutationParams);
+        const undoMutationParams = SetWorksheetUnActivateMutationFactory(accessor, redoMutationParams);
         const result = commandService.executeCommand(SetWorksheetActivateMutation.id, redoMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({

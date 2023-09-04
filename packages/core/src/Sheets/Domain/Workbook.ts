@@ -15,12 +15,10 @@ import {
     IWorkbookConfig,
     IWorksheetConfig,
 } from '../../Types/Interfaces';
-import { GenName, Nullable, Tools, Tuples } from '../../Shared';
-import { RangeList } from './RangeList';
+import { GenName, Nullable, Tools } from '../../Shared';
 import { Selection } from './Selection';
 import { Styles } from './Styles';
 import { Worksheet } from './Worksheet';
-import { Range } from './Range';
 import { ObserverManager } from '../../Observer';
 import { ICurrentUniverService } from '../../Service/Current.service';
 
@@ -85,43 +83,12 @@ export class Workbook {
         return typeof range === 'string' || 'startRow' in range || 'row' in range;
     }
 
-    onUniver() {
-        this._getDefaultWorkSheet();
-    }
-
     getUnitId() {
         return this._unitId;
     }
 
     getWorksheets(): Map<string, Worksheet> {
         return this._worksheets;
-    }
-
-    activateSheetByIndex(index: number): Nullable<Worksheet> {
-        if (index >= 0) {
-            const { sheetOrder } = this._config;
-            for (let i = index; i < sheetOrder.length; i++) {
-                const worksheet = this._worksheets.get(sheetOrder[i]);
-                if (worksheet && !worksheet.isSheetHidden()) {
-                    worksheet.activate();
-                    return worksheet;
-                }
-            }
-            if (index < sheetOrder.length) {
-                for (let i = index - 1; i >= 0; i--) {
-                    const worksheet = this._worksheets.get(sheetOrder[i]);
-                    if (worksheet && !worksheet.isSheetHidden()) {
-                        worksheet.activate();
-                        return worksheet;
-                    }
-                }
-            }
-            const worksheet = this._worksheets.get(sheetOrder[sheetOrder.length - 1]);
-            if (worksheet) {
-                worksheet.activate();
-            }
-            return worksheet;
-        }
     }
 
     // TODO: @Dushusir: this function has too many function overloads
@@ -450,10 +417,6 @@ export class Workbook {
         }
     }
 
-    setDefaultActiveSheet(): void {
-        this._setDefaultActiveSheet();
-    }
-
     getIndexBySheetId(sheetId: string): number {
         const { sheetOrder } = this._config;
         return sheetOrder.findIndex((id) => id === sheetId);
@@ -510,15 +473,6 @@ export class Workbook {
         return null;
     }
 
-    getActiveRangeList(): Nullable<RangeList> {
-        const workSheet = this.getActiveSheet();
-        if (workSheet) {
-            const selection = workSheet.getSelection();
-            return selection.getActiveRangeList();
-        }
-        return null;
-    }
-
     getSelection(): Nullable<Selection> {
         const workSheet = this.getActiveSheet();
         if (workSheet) {
@@ -535,14 +489,6 @@ export class Workbook {
 
     getSheetSize(): number {
         return this._config.sheetOrder.length;
-    }
-
-    /**
-     * Sets the specified cell as the current cell.
-     * @param cell
-     */
-    setCurrentCell(cell: Range): Range {
-        return cell.activateAsCurrentCell();
     }
 
     /**
@@ -618,37 +564,6 @@ export class Workbook {
 
     getSheetBySheetId(sheetId: string): Nullable<Worksheet> {
         return this._worksheets.get(sheetId);
-    }
-
-    /**
-     * Sets the active sheet in a spreadsheet. The Google Sheets UI displays the chosen sheet unless the sheet belongs to a different spreadsheet.
-     *
-     * @param sheet - The new active sheet.
-     * @returns {@link WorkSheet } the sheet that has been made the new active sheet
-     */
-    setActiveSheet(sheet: Worksheet): Worksheet;
-    /**
-     * Sets the active sheet in a spreadsheet, with the option to restore the most recent selection within that sheet. The Google Sheets UI displays the chosen sheet unless the sheet belongs to a different spreadsheet.
-     * @param sheet - The new active sheet.
-     * @param restoreSelection - If true, the most recent selection of the new active sheet becomes selected again as the new sheet becomes active; if false, the new sheet becomes active without changing the current selection.
-     * @returns {@link WorkSheet} - the new active sheet
-     */
-    setActiveSheet(sheet: Worksheet, restoreSelection: boolean): Worksheet;
-    setActiveSheet(...argument: any): Worksheet {
-        let restoreSelection = false;
-        const worksheet: Worksheet = argument[0];
-        if (Tuples.checkup(argument, Worksheet, Tuples.BOOLEAN_TYPE)) {
-            restoreSelection = argument[1];
-        }
-
-        worksheet.activate();
-
-        // restore selection
-        if (restoreSelection) {
-            worksheet.setActiveSelection();
-        }
-
-        return worksheet;
     }
 
     getPluginMeta<T>(name: string): T {
@@ -743,55 +658,6 @@ export class Workbook {
     save(): IWorkbookConfig {
         // TODO
         return this._config;
-    }
-
-    /**
-     * Get Default Sheet
-     * @private
-     */
-    private _getDefaultWorkSheet(): void {
-        const { _config, _worksheets } = this;
-        const { sheets, sheetOrder } = _config;
-
-        // One worksheet by default
-        if (Tools.isEmptyObject(sheets)) {
-            sheets[DEFAULT_WORKSHEET.id] = Object.assign(DEFAULT_WORKSHEET, {
-                status: BooleanNumber.TRUE,
-            });
-        }
-
-        let firstWorksheet = null;
-
-        for (const sheetId in sheets) {
-            const config = sheets[sheetId];
-            config.name = this._genName.sheetName(config.name);
-            const worksheet = new Worksheet(config, this._commandManager, this._observerManager, this._currentUniverService);
-            _worksheets.set(sheetId, worksheet);
-            if (!sheetOrder.includes(sheetId)) {
-                sheetOrder.push(sheetId);
-            }
-            if (firstWorksheet == null) {
-                firstWorksheet = worksheet;
-            }
-        }
-
-        if (firstWorksheet) {
-            firstWorksheet.activate();
-        }
-    }
-
-    /**
-     * Get Default Active Sheet
-     * @private
-     */
-    private _setDefaultActiveSheet(): void {
-        if (this._worksheets.size > 0) {
-            this._worksheets.forEach((sheet) => {
-                sheet.setStatus(BooleanNumber.FALSE);
-            });
-            const { sheetOrder } = this._config;
-            this._worksheets.get(sheetOrder[0])?.setStatus(BooleanNumber.TRUE);
-        }
     }
 
     /**

@@ -9,8 +9,7 @@ import { ISelectionManager } from '../../Services/tokens';
 export interface IInsertRangeMoveRightParams {
     workbookId?: string;
     worksheetId?: string;
-    range?: IRangeData;
-    destination?: IRangeData;
+    range?: IRangeData[];
 }
 
 /**
@@ -20,42 +19,33 @@ export const InsertRangeMoveRightCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-range-move-right',
 
-    handler: async (accessor: IAccessor, params: IInsertRangeMoveRightParams) => {
+    handler: async (accessor: IAccessor, params?: IInsertRangeMoveRightParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
         const selectionManager = accessor.get(ISelectionManager);
 
-        const range = params.range || selectionManager.getCurrentSelections()[0];
-        if (!range) {
-            return false;
+        let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        let worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        let range = selectionManager.getCurrentSelections();
+
+        if (params) {
+            workbookId = params.workbookId ?? workbookId;
+            worksheetId = params.worksheetId ?? worksheetId;
+            if (params.range) {
+                if (!params.range.length) return false;
+                range = params.range;
+            } else {
+                if (!range.length) return false;
+            }
+        } else {
+            if (!range.length) return false;
         }
 
-        const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
-
-        let rangeData: IRangeData = range;
         const cellValue = new ObjectMatrix<ICellData>();
-        const { startRow, endRow, startColumn, endColumn } = range;
-        if (params.destination) {
-            const destination = params.destination;
-            const worksheet = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook().getSheetBySheetId(worksheetId);
-            if (!worksheet) return false;
-            const sheetMatrix = worksheet.getCellMatrix();
+        for (let i = 0; i < range.length; i++) {
+            const { startRow, endRow, startColumn, endColumn } = range[i];
 
-            for (let r = startRow; r <= endRow; r++) {
-                for (let c = startColumn; c <= endColumn; c++) {
-                    cellValue.setValue(r - startRow, c - startColumn, sheetMatrix.getValue(r, c) || {});
-                }
-            }
-
-            rangeData = {
-                startRow,
-                endRow: startRow + destination.endRow - destination.startRow,
-                startColumn,
-                endColumn: startRow + destination.endColumn - destination.startColumn,
-            };
-        } else {
             for (let r = startRow; r <= endRow; r++) {
                 for (let c = startColumn; c <= endColumn; c++) {
                     cellValue.setValue(r, c, { m: '', v: '' });
@@ -64,7 +54,7 @@ export const InsertRangeMoveRightCommand: ICommand = {
         }
 
         const insertRangeMutationParams: IInsertRangeMutationParams = {
-            range: rangeData,
+            range,
             worksheetId,
             workbookId,
             shiftDimension: Dimension.COLUMNS,

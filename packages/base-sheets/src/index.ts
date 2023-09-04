@@ -3,7 +3,13 @@ export * from './Model';
 export * from './Controller';
 export * from './Basics';
 export * from './View';
+
+// #region services
+
 export { ICanvasView, ISelectionManager } from './Services/tokens';
+export { BorderStyleManagerService } from './Services/border-style-manager.service';
+
+// #endregion
 
 // #region commands
 

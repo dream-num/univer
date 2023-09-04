@@ -44,7 +44,8 @@ interface IMenuItemBase {
     /** @deprecated this parameter would be removed after refactoring */
     className?: string;
 
-    parentId?: string; // if it is submenu
+    /** If the menu is in a submenu, this property would be its parent menu item's id. */
+    parentId?: string;
 
     hidden$?: Observable<boolean>;
     disabled$?: Observable<boolean>;
@@ -54,6 +55,10 @@ export interface IMenuButtonItem extends IMenuItemBase {
     type: MenuItemType.BUTTON;
 
     activated$?: Observable<boolean>;
+}
+
+export function isMenuButtonItem(v: IMenuItem): v is IMenuButtonItem {
+    return v.type === MenuItemType.BUTTON;
 }
 
 export interface IValueOption {
@@ -100,6 +105,10 @@ export interface IMenuSelectorItem<V> extends IMenuItemBase {
 
     /** On observable value that should emit the value of the corresponding selection component. */
     value$?: Observable<V>;
+}
+
+export function isMenuSelectorItem<T>(v: IMenuItem): v is IMenuSelectorItem<T> {
+    return v.type === MenuItemType.SELECTOR || v.type === MenuItemType.DROPDOWN;
 }
 
 export type IMenuItem = IMenuButtonItem | IMenuSelectorItem<unknown>;

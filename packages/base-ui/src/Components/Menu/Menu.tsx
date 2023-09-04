@@ -216,13 +216,7 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
     }
 
     private getSubMenus() {
-        const { menuId, menu } = this.props;
-
-        // TODO@Dushusir remove menu
-        if (menu) {
-            this.setState({ menuItems: menu as Array<IDisplayMenuItem<IMenuItem>> });
-            return;
-        }
+        const { menuId } = this.props;
 
         if (menuId) {
             const menuService: IMenuService = this.context.injector.get(IMenuService);
@@ -328,6 +322,8 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
             case MenuItemType.DROPDOWN:
             case MenuItemType.SELECTOR:
                 return this.renderSelectorType();
+            case MenuItemType.SUBITEMS:
+                return this.renderSubItemsType();
             default:
                 return this.renderButtonType();
         }
@@ -340,7 +336,7 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
 
         return (
             <li className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}>
-                {/* FIXME use title*/}
+                {/* FIXME after translate title,use title for value display*/}
                 <NeoCustomLabel value={item.title} onChange={this.onChange}></NeoCustomLabel>
             </li>
         );
@@ -368,6 +364,37 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
                         menuId={item.id}
                         options={item.selections}
                         display={item.display}
+                        parent={this}
+                    ></Menu>
+                )}
+            </li>
+        );
+    }
+
+    private renderSubItemsType(): ComponentChild {
+        const { menuItem, index } = this.props;
+        const { disabled, menuItems, value } = this.state;
+        const item = menuItem as IDisplayMenuItem<IMenuSelectorItem<unknown>>;
+        const commandService: ICommandService = this.context.injector.get(ICommandService);
+
+        return (
+            <li
+                className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}
+                onMouseEnter={(e) => this.mouseEnter(e, index)}
+                onMouseLeave={(e) => this.mouseLeave(e, index)}
+                onClick={(e) => this.handleClick(e, item, index)}
+            >   
+
+                {/* FIXME after translate title,use title for value display */}
+                <NeoCustomLabel title={item.title} value={item.title} onChange={this.onChange} icon={item.icon} display={item.display}></NeoCustomLabel>
+                {item.shortcut && ` (${item.shortcut})`}
+                {(menuItems.length > 0 || (item as IMenuSelectorItem<unknown>).selections?.length) && (
+                    <Menu
+                        ref={(ele: Menu) => (this._refs[index] = ele)}
+                        // onOptionSelect={(v) => commandService.executeCommand(item.id, { value: v.value })}
+                        menuId={item.id}
+                        // options={item.selections}
+                        // display={item.display}
                         parent={this}
                     ></Menu>
                 )}

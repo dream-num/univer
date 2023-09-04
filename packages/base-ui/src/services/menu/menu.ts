@@ -20,8 +20,9 @@ export const enum MenuItemType {
     /** Button style menu item. */
     BUTTON,
     /** Menu item with submenus. Submenus could be other IMenuItem or an ID of a registered component. */
-    SELECTOR,
+    SELECTOR, // Multiple sub-options share one command
     DROPDOWN,
+    SUBITEMS, // Multiple sub-menu items have different commands
 }
 
 interface IMenuItemBase {
@@ -88,7 +89,7 @@ export function isCustomComponentOption(v: IValueOption | ICustomComponentOption
 }
 
 export interface IMenuSelectorItem<V> extends IMenuItemBase {
-    type: MenuItemType.SELECTOR | MenuItemType.DROPDOWN;
+    type: MenuItemType.SELECTOR | MenuItemType.DROPDOWN | MenuItemType.SUBITEMS;
 
     /** Determines how the label of the selector should display. */
     display?: DisplayTypes;
@@ -108,7 +109,7 @@ export interface IMenuSelectorItem<V> extends IMenuItemBase {
 }
 
 export function isMenuSelectorItem<T>(v: IMenuItem): v is IMenuSelectorItem<T> {
-    return v.type === MenuItemType.SELECTOR || v.type === MenuItemType.DROPDOWN;
+    return v.type === MenuItemType.SELECTOR || v.type === MenuItemType.DROPDOWN  ||  v.type === MenuItemType.SUBITEMS;
 }
 
 export type IMenuItem = IMenuButtonItem | IMenuSelectorItem<unknown>;

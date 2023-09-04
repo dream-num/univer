@@ -159,7 +159,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
                         e.preventDefault();
                     }}
                 >
-                    <Menu ref={this.ulRef} menu={this.state.menuItems} onClick={this.handleClick}></Menu>
+                    <Menu ref={this.ulRef} menuId={'right-menu'} onClick={this.handleClick}></Menu>
                 </div>
             )
         );

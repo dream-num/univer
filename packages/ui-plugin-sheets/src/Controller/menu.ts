@@ -30,7 +30,7 @@ import {
     SetWorksheetRowHideCommand,
     SetWorksheetRowShowCommand,
 } from '@univerjs/base-sheets';
-import { ColorPicker, DisplayTypes, IMenuButtonItem, IMenuItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes, IDisplayMenuItem } from '@univerjs/base-ui';
+import { ColorPicker, DisplayTypes, IMenuButtonItem, IMenuItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes, IDisplayMenuItem, IValueOption, ICustomComponentOption } from '@univerjs/base-ui';
 import { FontItalic, FontWeight, ICommandService, IPermissionService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
 
 import { IAccessor } from '@wendellhu/redi';
@@ -571,60 +571,74 @@ export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuButtonI
         type: MenuItemType.BUTTON,
         title: 'rightClick.clearContent',
         positions: [MenuPosition.CONTEXT_MENU],
+        parentId: 'right-menu'
     };
 }
 
 export function InsertRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: InsertRowCommand.id,
+        type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.insertRow',
+        parentId: 'right-menu'
     };
 }
 
 export function InsertColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: InsertColCommand.id,
+        type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.insertColumn',
+        parentId: 'right-menu'
     };
 }
 
 export function RemoveRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: RemoveRowCommand.id,
+        type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.deleteSelectedRow',
+        parentId: 'right-menu'
     };
 }
 
 export function HideRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetWorksheetRowHideCommand.id,
+        type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.hideSelectedRow',
+        parentId: 'right-menu'
     };
 }
 
 export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetWorksheetRowShowCommand.id,
+        type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.showHideRow',
+        parentId: 'right-menu'
     };
 }
 
 export function RemoveColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: RemoveColCommand.id,
+        type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.deleteSelectedColumn',
+        parentId: 'right-menu'
     };
 }
 
 export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetWorksheetRowHeightCommand.id,
+        type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.rowHeight',
         label: {
@@ -634,12 +648,14 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
                 suffix: 'px',
             },
         },
+        parentId: 'right-menu'
     };
 }
 
 export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetWorksheetColWidthCommand.id,
+        type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.columnWidth',
         label: {
@@ -649,20 +665,24 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
                 suffix: 'px',
             },
         },
+        parentId: 'right-menu',
     };
 }
 
 export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: DeleteRangeCommand.id,
+        type: MenuItemType.SUBITEMS, // 子菜单也需要单独command id，无法使用selector的selections
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.deleteCell',
+        parentId: 'right-menu',
     };
 }
 
 export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: DeleteRangeMoveLeftCommand.id,
+        type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.moveLeft',
         parentId: DeleteRangeCommand.id,
@@ -672,6 +692,7 @@ export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuBu
 export function DeleteRangeMoveUpMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: DeleteRangeMoveUpCommand.id,
+        type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.moveUp',
         parentId: DeleteRangeCommand.id,

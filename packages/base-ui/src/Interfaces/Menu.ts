@@ -1,6 +1,6 @@
 import { ComponentChildren, JSX } from 'preact';
 import { BaseComponent, JSXComponent } from '../BaseComponent';
-import { ICustomComponentOption, IValueOption } from '../services/menu/menu';
+import { ICustomComponentOption, IMenuButtonItem, IValueOption } from '../services/menu/menu';
 import { DisplayTypes } from '../Components/Select/Select';
 
 export interface BaseMenuItem {
@@ -40,6 +40,15 @@ export interface BaseMenuProps {
     options?: Array<IValueOption | ICustomComponentOption>;
     onOptionSelect?: (option: IValueOption) => void;
 }
+
+export interface TreeMenuItems extends IMenuButtonItem {
+    subMenuItems: TreeMenuItems[];
+}
+
+export type BaseMenuState = {
+    show: boolean;
+    posStyle: BaseMenuStyle;
+};
 
 export type BaseMenuStyle = {
     left?: string;

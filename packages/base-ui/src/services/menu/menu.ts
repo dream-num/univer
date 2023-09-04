@@ -102,3 +102,7 @@ export interface IMenuSelectorItem<V> extends IMenuItemBase {
 }
 
 export type IMenuItem = IMenuButtonItem | IMenuSelectorItem<unknown>;
+
+export type IDisplayMenuItem<T extends IMenuItem> = T & {
+    shortcut?: string;
+};

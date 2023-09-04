@@ -1,20 +1,34 @@
-import { createIdentifier, IDisposable } from '@wendellhu/redi';
-
+import { IDisposable, createIdentifier } from '@wendellhu/redi';
 import { Disposable, toDisposable } from '@univerjs/core';
-
 import { IShortcutService } from '../shortcut/shortcut.service';
-import { IMenuItem, MenuPosition } from './menu';
+import { BaseSelectChildrenProps } from '../../Components/Select/Select';
 
-/**
- * @internal
- */
-export type IDisplayMenuItem<T extends IMenuItem> = T & {
-    /** MenuService get responsible shortcut and display on the UI. */
-    shortcut?: string;
+import { IDisplayMenuItem, IMenuItem, MenuPosition } from './menu';
 
-    /** Composed menu structure by the menu service. */
-    subMenuItems?: Array<IDisplayMenuItem<IMenuItem>>; // TODO@wzhudev: related mechanism is not implemented yet
-};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface IMenuItemState {
+    id: string;
+
+    disabled?: boolean;
+    hidden?: boolean;
+    checked?: boolean;
+}
+
+// TODO@Dushusir  remove CustomLabelProps and CustomLabel in rightMenuUIController after migrate new UI system
+
+interface CustomLabelProps {
+    prefix?: string[] | string;
+    suffix?: string[] | string;
+    options?: BaseSelectChildrenProps[];
+    label?: string;
+    children?: CustomLabelProps[];
+    onKeyUp?: (e: Event) => void;
+}
+
+export interface CustomLabel {
+    name: string;
+    props?: CustomLabelProps;
+}
 
 export const IMenuService = createIdentifier<IMenuService>('univer.menu-service');
 
@@ -80,7 +94,8 @@ export class DesktopMenuService extends Disposable implements IMenuService {
         });
     }
 
-    getMenuItems(positions: MenuPosition): Array<IDisplayMenuItem<IMenuItem>> {
+    getMenuItems(positions: MenuPosition): Array<IDisplayMenuItem<any>> {
+        // TODO: @wzhudev: compose shortcut to returned menu items.
         if (this._menuByPositions.has(positions)) {
             return [...this._menuByPositions.get(positions)!.values()].filter((menu) => !menu.parentId).map((menu) => this.getDisplayMenuItems(menu));
         }

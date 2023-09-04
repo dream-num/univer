@@ -100,10 +100,12 @@ export class DrawingsView extends BaseView {
 }
 
 class DrawingsViewFactory {
-    zIndex = 3;
+    readonly zIndex = 2;
 
-    create(_scene: Scene, injector: Injector) {
-        return injector.createInstance(DrawingsView);
+    create(scene: Scene, injector: Injector) {
+        const drawingsView = injector.createInstance(DrawingsView) as DrawingsView;
+        drawingsView.initialize(scene);
+        return drawingsView;
     }
 }
 

@@ -28,7 +28,7 @@ export class RetainAction extends DocActionBase<IRetainActionData, IRetainAction
         const document = this.getDocument();
         const { len, segmentId, body, coverType } = actionData;
 
-        let result: Nullable<IDocumentBody> = UpdateAttributeApply(document, body, len, commonParameter.cursor, coverType, segmentId);
+        const result: Nullable<IDocumentBody> = UpdateAttributeApply(document, body, len, commonParameter.cursor, coverType, segmentId);
 
         commonParameter.moveCursor(len);
 

@@ -21,6 +21,7 @@ import { columnIterator } from '../Docs/Common/Tools';
 import { DocumentSkeleton } from '../Docs/DocSkeleton';
 import { IDocumentSkeletonColumn } from '../../Basics/IDocumentSkeletonCached';
 import { getRotateOffsetAndFarthestHypotenuse, getRotateOrientation } from '../../Basics/Draw';
+import { SelectionManager } from './Selection/SelectionManager';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 
@@ -42,6 +43,8 @@ export class Spreadsheet extends SheetComponent {
     private _cacheOffsetY = 0;
 
     private _hasSelection = false;
+
+    private _selection: SelectionManager;
 
     private _documents: Documents = new Documents(OBJECT_KEY, undefined, {
         pageMarginLeft: 0,
@@ -189,8 +192,9 @@ export class Spreadsheet extends SheetComponent {
             }
         }
 
-        // eslint-disable-next-line prefer-const
-        let { isMerged, startY, endY, startX, endX, mergeInfo, isMergedMainCell } = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, dataMergeCacheAll);
+        const cellInfo = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, dataMergeCacheAll);
+        const { isMerged, isMergedMainCell } = cellInfo;
+        let { startY, endY, startX, endX, mergeInfo } = cellInfo;
 
         startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
         endY = fixLineWidthByScale(endY + columnTitleHeight, scaleY);
@@ -227,8 +231,9 @@ export class Spreadsheet extends SheetComponent {
         const { scaleX = 1, scaleY = 1 } = this.getParentScale();
         const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight, dataMergeCacheAll } = spreadsheetSkeleton;
 
-        // eslint-disable-next-line prefer-const
-        let { isMerged, startY, endY, startX, endX, mergeInfo, isMergedMainCell } = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, dataMergeCacheAll);
+        const cellInfo = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, dataMergeCacheAll);
+        const { isMerged, isMergedMainCell } = cellInfo;
+        let { startY, endY, startX, endX, mergeInfo } = cellInfo;
 
         startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
         endY = fixLineWidthByScale(endY + columnTitleHeight, scaleY);
@@ -363,10 +368,12 @@ export class Spreadsheet extends SheetComponent {
         if (this._hasSelection) {
             return;
         }
+        this._selection = SelectionManager.create(this);
         this._hasSelection = true;
     }
 
     disableSelection() {
+        this._selection?.dispose();
         this._hasSelection = false;
     }
 
@@ -480,7 +487,7 @@ export class Spreadsheet extends SheetComponent {
         let parent: any = this.parent;
         while (parent) {
             if (parent.classType === RENDER_CLASS_TYPE.ENGINE || parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                return parent;
+                return parent as Nullable<Engine | SceneViewer>;
             }
             parent = parent?.getParent && parent?.getParent();
         }

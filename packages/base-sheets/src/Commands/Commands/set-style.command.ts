@@ -224,6 +224,8 @@ export const SetFontFamilyCommand: ICommand<ISetFontFamilyCommandParams> = {
 
         return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
     },
+    // all subsequent mutations should succeed inorder to make the whole process succeed
+    // Promise.all([]).then(() => true),
 };
 
 export interface ISetFontSizeCommandParams {
@@ -489,10 +491,4 @@ export const SetTextRotationCommand: ICommand<ISetTextRotationCommandParams> = {
 
         return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
     },
-};
-
-export const SetSpanCommand: ICommand = {
-    type: CommandType.COMMAND,
-    id: 'sheet.command.set-span',
-    handler: async (accessor, params) => true,
 };

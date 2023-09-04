@@ -42,7 +42,7 @@ export class DeleteAction extends DocActionBase<IDeleteActionData, IInsertAction
 
         const body = DeleteApply(document, len, commonParameter.cursor, segmentId);
 
-        commonParameter.moveCursor(len);
+        // commonParameter.moveCursor(len);
 
         this._observers.notifyObservers({
             type: ActionType.REDO,

@@ -38,9 +38,9 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
         });
     }
 
-    setMenuListNeo = (menuItems: IDisplayMenuItem[]) => {
+    setMenuListNeo = (menuItems: IMenuItem[]) => {
         this.setState({
-            menuItems:this.buildMenuTree(menuItems),
+            menuItems: this.buildMenuTree(menuItems),
         });
     };
 

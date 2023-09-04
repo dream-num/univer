@@ -308,7 +308,15 @@ export class DocumentSkeleton extends Skeleton {
         // 计算页和节的位置信息
         updateBlockIndex(allSkeletonPages);
 
+        this._setPageParent(allSkeletonPages, skeleton);
+
         return skeleton;
+    }
+
+    private _setPageParent(pages: IDocumentSkeletonPage[], parent: IDocumentSkeletonCached) {
+        for (const page of pages) {
+            page.parent = parent;
+        }
     }
 
     // 一页存在多个section的情况，仅在SectionType.CONTINUOUS的情况下出现

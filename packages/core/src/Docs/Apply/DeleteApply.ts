@@ -1,6 +1,8 @@
 import { DocumentModel } from '../Domain/DocumentModel';
-import { deleteContent, getDocsUpdateBody } from '../../Shared/Common';
+import { getDocsUpdateBody } from '../../Shared/Common';
+import { deleteContent } from '../../Shared/DocTool';
 import { IDocumentBody } from '../../Types/Interfaces/IDocumentData';
+import { deleteCustomBlocks, deleteCustomRanges, deleteParagraphs, deleteSectionBreaks, deleteTables, deleteTextRuns } from './Common';
 
 export function DeleteApply(document: DocumentModel, textLength: number, currentIndex: number, segmentId?: string) {
     const doc = document.snapshot;
@@ -15,7 +17,11 @@ export function DeleteApply(document: DocumentModel, textLength: number, current
 
     bodyModel.delete(currentIndex, textLength);
 
-    return updateAttributeByDelete(body, textLength, currentIndex);
+    const deleBody = updateAttributeByDelete(body, textLength, currentIndex);
+
+    console.log('删除的model打印', bodyModel, body, deleBody);
+
+    return deleBody;
 }
 
 function updateAttributeByDelete(body: IDocumentBody, textLength: number, currentIndex: number): IDocumentBody {

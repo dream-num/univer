@@ -13,8 +13,8 @@ import {
     SpreadsheetSkeleton,
     Viewport,
 } from '@univerjs/base-render';
-import { EventState, ICellData, IPageElement, ObjectMatrix, PageElementType, Styles, Injector, LocaleService } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { EventState, ICellData, IPageElement, ObjectMatrix, PageElementType, Styles, LocaleService } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 
 enum SHEET_VIEW_KEY {
@@ -111,6 +111,7 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
         return sv;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _updateViewport(id: string, rowTitleWidth: number, columnTitleHeight: number, scene: Scene, mainScene: Scene) {
         if (mainScene == null) {
             return;

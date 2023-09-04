@@ -1,5 +1,6 @@
 import { IMouseEvent, IPointerEvent } from '@univerjs/base-render';
-import { BaseMenuItem, BaseSelectChildrenProps, ComponentChildren, ComponentManager, CustomLabel, ICustomLabelType, IMenuService, MenuPosition } from '@univerjs/base-ui';
+import { BaseMenuItem, ComponentManager, ICustomLabelType, IMenuService, MenuPosition } from '@univerjs/base-ui';
+import { ComponentChildren } from 'preact';
 import { Disposable, ICurrentUniverService, ObserverManager, Tools, UIObserver } from '@univerjs/core';
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 import { CanvasView } from '@univerjs/base-sheets';

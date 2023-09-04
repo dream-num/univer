@@ -15,7 +15,6 @@
         "build": "tsc && vite build",
         "build:demo": "vite build -c vite.demo.config.ts",
         "watch": "vite build",
-        "link": "pnpm link ./",
         "serve": "vite preview"
     },
     "devDependencies": {

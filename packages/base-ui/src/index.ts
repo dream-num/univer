@@ -17,10 +17,11 @@ export {
     IValueOption,
     MenuItemType,
     MenuPosition,
+    IDisplayMenuItem,
     isCustomComponentOption,
     isValueOptions,
 } from './services/menu/menu';
-export { IMenuService, DesktopMenuService, IDisplayMenuItem } from './services/menu/menu.service';
+export { IMenuService, DesktopMenuService } from './services/menu/menu.service';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { IShortcutService, IShortcutItem, DesktopShortcutService } from './services/shortcut/shortcut.service';
 export { IPlatformService, DesktopPlatformService } from './services/platform/platform.service';

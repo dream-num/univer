@@ -76,7 +76,7 @@ function _convertRoman(num: number, uppercase = false) {
         lookup = upperLookup;
     }
     let romanStr = '';
-    for (let i in lookup) {
+    for (const i in lookup) {
         while (num >= lookup[i]) {
             romanStr += i;
             num -= lookup[i];

@@ -1,5 +1,5 @@
 import { Documents, DocumentSkeleton, IDocumentSkeletonDrawing, Picture, Scene } from '@univerjs/base-render';
-import { CommandManager, DocumentModel, ICurrentUniverService, IDocumentData, LocaleService } from '@univerjs/core';
+import { CommandManager, DocumentModel, ICurrentUniverService, LocaleService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { BaseView, CanvasViewRegistry, CANVAS_VIEW_KEY } from '../BaseView';
 
@@ -57,7 +57,7 @@ export class DocsView extends BaseView {
 
         const docsModel = this._currentUniverService.getCurrentUniverDocInstance().getDocument();
 
-        const documentSkeleton = this._buildSkeleton(docsModel.getSnapshot());
+        const documentSkeleton = this._buildSkeleton(docsModel);
 
         const documents = new Documents(DOCS_VIEW_KEY.MAIN, documentSkeleton);
         documents.zIndex = 1000;
@@ -117,11 +117,8 @@ export class DocsView extends BaseView {
         documents.enableEditor();
     }
 
-    private _buildSkeleton(snapshot: IDocumentData) {
-        const docModel = new DocumentModel(snapshot, this._commandManager);
-        const docsSkeleton = DocumentSkeleton.create(docModel, this._localeService);
-
-        return docsSkeleton;
+    private _buildSkeleton(model: DocumentModel) {
+        return DocumentSkeleton.create(model, this._localeService);
     }
 }
 
@@ -129,7 +126,7 @@ export class DocsViewFactory {
     readonly zIndex = 0;
 
     create(scene: Scene, injector: Injector): DocsView {
-        const docsView = injector.createInstance(DocsView);
+        const docsView = injector.createInstance(DocsView) as DocsView;
         docsView.initialize(scene);
         return docsView;
     }

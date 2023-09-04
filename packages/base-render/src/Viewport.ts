@@ -330,9 +330,9 @@ export class Viewport {
         };
     }
 
-    transformScroll() {
-        let x = this.scrollX;
-        let y = this.scrollY;
+    getTransformedScroll() {
+        const x = this.scrollX;
+        const y = this.scrollY;
 
         return this.getActualScroll(x, y);
     }
@@ -379,7 +379,7 @@ export class Viewport {
             this._applyCache(mainCtx);
             return;
         }
-        let sceneTrans = this._scene.transform.clone();
+        const sceneTrans = this._scene.transform.clone();
 
         sceneTrans.multiply(Transform.create([1, 0, 0, 1, -this.actualScrollX || 0, -this.actualScrollY || 0]));
 
@@ -431,7 +431,7 @@ export class Viewport {
 
     getRelativeVector(coord: Vector2) {
         const sceneTrans = this.scene.transform.clone().invert();
-        const scroll = this.transformScroll();
+        const scroll = this.getTransformedScroll();
 
         const svCoord = sceneTrans.applyPoint(coord).add(Vector2.FromArray([scroll.x, scroll.y]));
         return svCoord;
@@ -439,7 +439,7 @@ export class Viewport {
 
     getAbsoluteVector(coord: Vector2) {
         const sceneTrans = this.scene.transform.clone();
-        const scroll = this.transformScroll();
+        const scroll = this.getTransformedScroll();
 
         const svCoord = sceneTrans.applyPoint(coord).subtract(Vector2.FromArray([scroll.x, scroll.y]));
         return svCoord;
@@ -456,7 +456,7 @@ export class Viewport {
             // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
             const allWidth = this._scene.width;
             const viewWidth = this.width || 1;
-            let scrollNum = (viewWidth / allWidth) * deltaFactor;
+            const scrollNum = (viewWidth / allWidth) * deltaFactor;
 
             if (evt.deltaX > 0) {
                 isLimitedStore = this.scrollBy({
@@ -484,7 +484,7 @@ export class Viewport {
             const allHeight = this._scene.height;
             const viewHeight = this.height || 1;
             // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
-            let scrollNum = (viewHeight / allHeight) * deltaFactor;
+            const scrollNum = (viewHeight / allHeight) * deltaFactor;
             if (evt.shiftKey) {
                 if (evt.deltaY > 0) {
                     isLimitedStore = this.scrollBy({
@@ -596,7 +596,7 @@ export class Viewport {
             width = this._widthOrigin!;
         } else {
             const referenceWidth = parent.width;
-            let containerWidth = parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceWidth * parent.scaleX : referenceWidth;
+            const containerWidth = parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceWidth * parent.scaleX : referenceWidth;
             width = containerWidth - (this._left + this._right);
         }
 
@@ -604,7 +604,7 @@ export class Viewport {
             height = this._heightOrigin!;
         } else {
             const referenceHeight = parent.height;
-            let containerHeight = parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceHeight * parent.scaleY : referenceHeight;
+            const containerHeight = parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceHeight * parent.scaleY : referenceHeight;
             height = containerHeight - (this._top + this._bottom);
         }
 
@@ -716,7 +716,7 @@ export class Viewport {
             this.makeDirty(true);
         }
 
-        const scroll = this.transformScroll();
+        const scroll = this.getTransformedScroll();
         this.actualScrollX = scroll.x;
         this.actualScrollY = scroll.y;
 
@@ -738,12 +738,12 @@ export class Viewport {
     }
 
     private _calViewportRelativeBounding() {
-        let ratioScrollX = this._scrollBar?.ratioScrollX ?? 1;
-        let ratioScrollY = this._scrollBar?.ratioScrollY ?? 1;
-        let xFrom: number = this.left;
-        let xTo: number = (this.width || 0) + this.left;
-        let yFrom: number = this.top;
-        let yTo: number = (this.height || 0) + this.top;
+        const ratioScrollX = this._scrollBar?.ratioScrollX ?? 1;
+        const ratioScrollY = this._scrollBar?.ratioScrollY ?? 1;
+        const xFrom: number = this.left;
+        const xTo: number = (this.width || 0) + this.left;
+        const yFrom: number = this.top;
+        const yTo: number = (this.height || 0) + this.top;
 
         let differenceX = 0;
         let differenceY = 0;

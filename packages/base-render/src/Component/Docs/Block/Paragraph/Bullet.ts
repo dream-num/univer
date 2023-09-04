@@ -9,7 +9,7 @@ export function dealWidthBullet(
     bullet?: IBullet,
     lists?: ILists,
     listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>,
-    fontLocale?: IFontLocale,
+    fontLocale?: IFontLocale
 ): IDocumentSkeletonBullet | undefined {
     if (!bullet || !lists) {
         return;
@@ -29,7 +29,7 @@ export function dealWidthBullet(
         return getDefaultBulletSke(listId, listLevelAncestors?.[nestingLevel]?.startIndexItem, fontLocale);
     }
 
-    const bulletSke = _getBulletSke(listId, nestingLevel, list.nestingLevel, listLevelAncestors, textStyle, fontLocale, context);
+    const bulletSke = _getBulletSke(listId, nestingLevel, list.nestingLevel, listLevelAncestors, textStyle, fontLocale);
     return bulletSke;
 }
 
@@ -66,7 +66,7 @@ function _getBulletSke(
     nestings: INestingLevel[],
     listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>,
     textStyleConfig?: ITextStyle,
-    fontLocale?: IFontLocale,
+    fontLocale?: IFontLocale
 ): IDocumentSkeletonBullet {
     const nesting = nestings[nestingLevel];
     const { bulletAlignment, glyphFormat, textStyle: textStyleFirst, startNumber, glyphType, glyphSymbol, indentFirstLine, hanging, indentStart } = nesting;
@@ -81,7 +81,7 @@ function _getBulletSke(
         symbolContent = glyphSymbol;
     } else {
         // 有序列表
-        symbolContent = __generateOrderedListSymbol(glyphFormat, nestingLevel, nestings, listLevelAncestors, context); // 有序列表的处理
+        symbolContent = __generateOrderedListSymbol(glyphFormat, nestingLevel, nestings, listLevelAncestors); // 有序列表的处理
     }
 
     const bBox = FontCache.getTextSize(symbolContent, fontStyle);
@@ -103,12 +103,7 @@ function _getBulletSke(
     };
 }
 
-function __generateOrderedListSymbol(
-    glyphFormat: string,
-    nestingLevel: number,
-    nestings: INestingLevel[],
-    listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>,
-) {
+function __generateOrderedListSymbol(glyphFormat: string, nestingLevel: number, nestings: INestingLevel[], listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>) {
     // const indexNumber = startNumber + startIndex;
     // parse  <prefix>%[nestingLevelMinusOne]<suffix>, return symbolContent
     // <w:lvl w:ilvl="0">
@@ -127,7 +122,7 @@ function __generateOrderedListSymbol(
         if (level !== nestingLevel && listLevelAncestors?.[level] !== null) {
             startIndexItem -= 1;
         }
-        const singleSymbol = ___getSymbolByBesting(startIndexItem, nestings[level], context);
+        const singleSymbol = ___getSymbolByBesting(startIndexItem, nestings[level]);
         // console.log(
         //     '___getSymbolByBesting',
         //     singleSymbol,
@@ -155,7 +150,7 @@ function ___getSymbolByBesting(startIndex: number = 1, nesting: INestingLevel) {
         return '\u25CF';
     }
 
-    return getBulletOrderedSymbol(startIndex, startNumber, glyphType, context);
+    return getBulletOrderedSymbol(startIndex, startNumber, glyphType);
 }
 
 function ___getLevelAndSuffix(levelAndSuffixPre: string) {

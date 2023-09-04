@@ -74,6 +74,7 @@ export interface IDocumentSkeletonPage {
     ed: number; // endIndex 文本结束索引
     skeDrawings: Map<string, IDocumentSkeletonDrawing>;
     renderConfig?: IDocumentRenderConfig;
+    parent?: IDocumentSkeletonCached;
 }
 
 export interface IDocumentSkeletonSection {

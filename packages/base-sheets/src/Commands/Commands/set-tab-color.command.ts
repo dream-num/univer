@@ -3,9 +3,7 @@ import { IAccessor } from '@wendellhu/redi';
 import { ISetTabColorMutationParams, SetTabColorMutation, SetTabColorUndoMutationFactory } from '../Mutations/set-tab-color.mutation';
 
 export interface ISetTabColorCommandParams {
-    color?: string;
-    workbookId?: string;
-    worksheetId?: string;
+    color: string;
 }
 
 export const SetTabColorCommand: ICommand = {
@@ -17,9 +15,8 @@ export const SetTabColorCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
-        const color = params.color || '#000'; // Todo: 先默认黑色
+        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
 
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
@@ -27,7 +24,7 @@ export const SetTabColorCommand: ICommand = {
         if (!worksheet) return false;
 
         const setTabColorMutationParams: ISetTabColorMutationParams = {
-            color,
+            color: params.color,
             workbookId,
             worksheetId,
         };

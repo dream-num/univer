@@ -22,8 +22,10 @@ export const SetZoomRatioMutation: IMutation<ISetZoomRatioMutationParams> = {
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
         const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId)?.getWorkBook();
-        const worksheet = workbook!.getSheetBySheetId(params.worksheetId);
-        worksheet!.getConfig().zoomRatio = params.zoomRatio;
+        if (!workbook) return false;
+        const worksheet = workbook.getSheetBySheetId(params.worksheetId);
+        if (!worksheet) return false;
+        worksheet.getConfig().zoomRatio = params.zoomRatio;
 
         return true;
     },

@@ -25,8 +25,10 @@ export const SetTabColorMutation: IMutation<ISetTabColorMutationParams> = {
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
         const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId)?.getWorkBook();
-        const worksheet = workbook!.getSheetBySheetId(params.worksheetId);
-        worksheet!.getConfig().tabColor = params.color;
+        if (!workbook) return false;
+        const worksheet = workbook.getSheetBySheetId(params.worksheetId);
+        if (!worksheet) return false;
+        worksheet.getConfig().tabColor = params.color;
 
         return true;
     },

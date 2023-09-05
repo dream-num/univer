@@ -1,34 +1,35 @@
 import { IAccessor } from '@wendellhu/redi';
-import { CommandType, ICellV, ICommand, ICommandService, ICurrentUniverService, IRangeData, IUndoRedoService, ObjectMatrix } from '@univerjs/core';
+import { CommandType, ICellV, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, ObjectMatrix } from '@univerjs/core';
 
 import { ISetRangeFormattedValueMutationParams, SetRangeFormattedValueMutation, SetRangeFormattedValueUndoMutationFactory } from '../Mutations/set-range-formatted-value.mutation';
-
-export interface ITrimWhitespaceParams {
-    workbookId: string;
-    worksheetId: string;
-    range: IRangeData[];
-}
+import { ISelectionManager } from '../../Services/tokens';
 
 /**
- * The command to insert range.
+ * The command to trim whitespace.
  */
 export const TrimWhitespaceCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.trim-whitespace',
 
-    handler: async (accessor: IAccessor, params: ITrimWhitespaceParams) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
+    handler: async (accessor: IAccessor) => {
+        const selectionManager = accessor.get(ISelectionManager);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const { workbookId, worksheetId, range } = params;
+        const selections = selectionManager.getCurrentSelections();
+        if (!selections.length) return false;
+
+        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+
         const worksheet = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook().getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
         const sheetMatrix = worksheet.getCellMatrix();
         const cellValue = new ObjectMatrix<ICellV>();
 
-        for (let i = 0; i < range.length; i++) {
-            const { startRow, endRow, startColumn, endColumn } = range[i];
+        for (let i = 0; i < selections.length; i++) {
+            const { startRow, endRow, startColumn, endColumn } = selections[i];
             const regx = /\s+/g;
             for (let r = startRow; r <= endRow; r++) {
                 for (let c = startColumn; c <= endColumn; c++) {
@@ -39,7 +40,7 @@ export const TrimWhitespaceCommand: ICommand = {
         }
 
         const setRangeFormattedValueMutationParams: ISetRangeFormattedValueMutationParams = {
-            range,
+            range: selections,
             worksheetId,
             workbookId,
             value: cellValue.getData(),

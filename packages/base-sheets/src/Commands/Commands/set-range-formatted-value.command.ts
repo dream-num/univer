@@ -1,14 +1,11 @@
 import { IAccessor } from '@wendellhu/redi';
-import { CommandType, ICellV, ICommand, ICommandService, ICurrentUniverService, IRangeData, IUndoRedoService, ObjectMatrix, Tools } from '@univerjs/core';
+import { CommandType, ICellV, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, ObjectMatrix, Tools } from '@univerjs/core';
 
 import { ISetRangeFormattedValueMutationParams, SetRangeFormattedValueMutation, SetRangeFormattedValueUndoMutationFactory } from '../Mutations/set-range-formatted-value.mutation';
 import { ISelectionManager } from '../../Services/tokens';
 
 export interface ISetRangeFormattedValueParams {
-    range?: IRangeData[];
     value: ICellV | ICellV[][] | ObjectMatrix<ICellV>;
-    workbookId?: string;
-    worksheetId?: string;
 }
 
 /**
@@ -24,13 +21,18 @@ export const SetRangeFormattedValueCommand: ICommand = {
         const currentUniverService = accessor.get(ICurrentUniverService);
         const selectionManager = accessor.get(ISelectionManager);
 
-        const ranges = params.range || selectionManager.getCurrentSelections();
-        if (!ranges) {
+        const ranges = selectionManager.getCurrentSelections();
+        if (!ranges.length) {
             return false;
         }
 
-        const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
+        if (!workbook) return false;
+        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        if (!worksheet) return false;
 
         let cellValue = new ObjectMatrix<ICellV>();
         const value = params.value;

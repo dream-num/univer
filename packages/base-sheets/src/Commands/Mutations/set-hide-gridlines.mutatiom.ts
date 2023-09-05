@@ -25,8 +25,10 @@ export const SetHideGridlinesMutation: IMutation<ISetHideGridlinesMutationParams
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
         const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId)?.getWorkBook();
-        const worksheet = workbook!.getSheetBySheetId(params.worksheetId);
-        const config = worksheet!.getConfig();
+        if (!workbook) return false;
+        const worksheet = workbook.getSheetBySheetId(params.worksheetId);
+        if (!worksheet) return false;
+        const config = worksheet.getConfig();
 
         config.showGridlines = params.hideGridlines;
 

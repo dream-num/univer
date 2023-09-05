@@ -1,4 +1,4 @@
-import { Dimension, ICellData, IRangeData, IWorksheetConfig, Nullable, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import { Dimension, ICellData, IColumnData, IRangeData, IRowData, IWorksheetConfig, ObjectArray, ObjectMatrixPrimitiveType } from '@univerjs/core';
 
 /** Params of `RemoveSheetMutation` */
 export interface IRemoveSheetMutationParams {
@@ -17,34 +17,30 @@ export interface IInsertSheetMutationParams {
 export interface IInsertRowMutationParams {
     workbookId: string;
     worksheetId: string;
-    rowIndex: number;
-    rowCount: number;
-    insertRowData: Nullable<ObjectMatrixPrimitiveType<ICellData>>;
+    ranges: IRangeData[];
+    rowInfo?: ObjectArray<IRowData>;
 }
 
 /** Params of InsertColMutation */
 export interface IInsertColMutationParams {
     workbookId: string;
     worksheetId: string;
-    colIndex: number;
-    colCount: number;
-    insertColData: Nullable<ObjectMatrixPrimitiveType<ICellData>>;
+    ranges: IRangeData[];
+    colInfo?: ObjectArray<IColumnData>;
 }
 
 /** Params of InsertRowMutation */
 export interface IRemoveRowMutationParams {
     workbookId: string;
     worksheetId: string;
-    rowIndex: number;
-    rowCount: number;
+    ranges: IRangeData[];
 }
 
 /** Params of InsertColMutation */
 export interface IRemoveColMutationParams {
     workbookId: string;
     worksheetId: string;
-    colIndex: number;
-    colCount: number;
+    ranges: IRangeData[];
 }
 
 /** Params of DeleteRange */
@@ -68,12 +64,12 @@ export interface IInsertRangeMutationParams {
 export interface IRemoveWorksheetMergeMutationParams {
     workbookId: string;
     worksheetId: string;
-    rectangles: IRangeData[];
+    ranges: IRangeData[];
 }
 
 /** Params of AddWorksheetMergeMutation */
 export interface IAddWorksheetMergeMutationParams {
     workbookId: string;
     worksheetId: string;
-    rectangles: IRangeData[];
+    ranges: IRangeData[];
 }

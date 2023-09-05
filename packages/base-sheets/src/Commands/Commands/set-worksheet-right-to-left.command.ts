@@ -16,14 +16,20 @@ export const SetWorksheetRightToLeftCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-right-to-left',
 
-    handler: async (accessor: IAccessor, params: ISetWorksheetRightToLeftCommandParams) => {
+    handler: async (accessor: IAccessor, params?: ISetWorksheetRightToLeftCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
-        const rightToLeft = params.rightToLeft ?? 0;
+        let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        let worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        let rightToLeft = BooleanNumber.FALSE;
+
+        if (params) {
+            workbookId = params.workbookId ?? workbookId;
+            worksheetId = params.worksheetId ?? worksheetId;
+            rightToLeft = params.rightToLeft ?? BooleanNumber.FALSE;
+        }
 
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;

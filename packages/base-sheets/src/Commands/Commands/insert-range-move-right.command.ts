@@ -1,16 +1,10 @@
 import { IAccessor } from '@wendellhu/redi';
-import { CommandType, Dimension, ICellData, ICommand, ICommandService, ICurrentUniverService, IRangeData, IUndoRedoService, ObjectMatrix } from '@univerjs/core';
+import { CommandType, Dimension, ICellData, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, ObjectMatrix } from '@univerjs/core';
 
 import { DeleteRangeMutation } from '../Mutations/delete-range.mutation';
 import { InsertRangeMutation, InsertRangeUndoMutationFactory } from '../Mutations/insert-range.mutation';
 import { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../Basics/Interfaces/MutationInterface';
 import { ISelectionManager } from '../../Services/tokens';
-
-export interface IInsertRangeMoveRightParams {
-    workbookId?: string;
-    worksheetId?: string;
-    range?: IRangeData[];
-}
 
 /**
  * The command to insert range.
@@ -19,28 +13,21 @@ export const InsertRangeMoveRightCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-range-move-right',
 
-    handler: async (accessor: IAccessor, params?: IInsertRangeMoveRightParams) => {
+    handler: async (accessor: IAccessor) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
         const selectionManager = accessor.get(ISelectionManager);
 
-        let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        let worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
-        let range = selectionManager.getCurrentSelections();
+        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const range = selectionManager.getCurrentSelections();
+        if (!range.length) return false;
 
-        if (params) {
-            workbookId = params.workbookId ?? workbookId;
-            worksheetId = params.worksheetId ?? worksheetId;
-            if (params.range) {
-                if (!params.range.length) return false;
-                range = params.range;
-            } else {
-                if (!range.length) return false;
-            }
-        } else {
-            if (!range.length) return false;
-        }
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
+        if (!workbook) return false;
+        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        if (!worksheet) return false;
 
         const cellValue = new ObjectMatrix<ICellData>();
         for (let i = 0; i < range.length; i++) {

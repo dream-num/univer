@@ -23,8 +23,10 @@ export const SetWorksheetConfigMutation: IMutation<ISetWorksheetConfigMutationPa
     id: 'sheet.mutation.set-worksheet-config',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId)?.getWorkBook()!;
-        const worksheet = workbook.getSheetBySheetId(params.worksheetId)!;
+        const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId)?.getWorkBook();
+        if (!workbook) return false;
+        const worksheet = workbook.getSheetBySheetId(params.worksheetId);
+        if (!worksheet) return false;
         worksheet.setConfig(params.config);
 
         return true;

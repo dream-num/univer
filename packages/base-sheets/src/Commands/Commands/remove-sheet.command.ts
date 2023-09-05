@@ -1,4 +1,4 @@
-import { CommandType, ICommand, ICommandService, IUndoRedoService } from '@univerjs/core';
+import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from '../Mutations/remove-sheet.mutation';
@@ -6,8 +6,8 @@ import { InsertSheetMutation } from '../Mutations/insert-sheet.mutation';
 import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Basics/Interfaces/MutationInterface';
 
 export interface RemoveSheetCommandParams {
-    workbookId: string;
-    worksheetId: string;
+    workbookId?: string;
+    worksheetId?: string;
 }
 
 /**
@@ -16,11 +16,23 @@ export interface RemoveSheetCommandParams {
 export const RemoveSheetCommand: ICommand = {
     id: 'sheet.command.remove-sheet',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: RemoveSheetCommandParams) => {
+    handler: async (accessor: IAccessor, params?: RemoveSheetCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        let worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
 
-        const { worksheetId, workbookId } = params;
+        if (params) {
+            workbookId = params.workbookId ?? workbookId;
+            worksheetId = params.worksheetId ?? worksheetId;
+        }
+
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
+        if (!workbook) return false;
+        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        if (!worksheet) return false;
+
         // prepare do mutations
         const RemoveSheetMutationParams: IRemoveSheetMutationParams = {
             worksheetId,

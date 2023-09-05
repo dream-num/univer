@@ -3,7 +3,7 @@ import { IAccessor } from '@wendellhu/redi';
 import { ISetWorksheetOrderMutationParams, SetWorksheetOrderMutation, SetWorksheetOrderUndoMutationFactory } from '../Mutations/set-worksheet-order.mutation';
 
 export interface ISetWorksheetOrderCommandParams {
-    order?: number;
+    order: number;
     workbookId?: string;
     worksheetId?: string;
 }
@@ -19,7 +19,6 @@ export const SetWorksheetOrderCommand: ICommand = {
 
         const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
-        const order = params.order ?? 0;
 
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
@@ -27,7 +26,7 @@ export const SetWorksheetOrderCommand: ICommand = {
         if (!worksheet) return false;
 
         const setWorksheetOrderMutationParams: ISetWorksheetOrderMutationParams = {
-            order,
+            order: params.order,
             workbookId,
             worksheetId,
         };

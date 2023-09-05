@@ -1,55 +1,38 @@
-import { CommandType, ICommand, ICommandService, ICurrentUniverService, IRangeData, IUndoRedoService } from '@univerjs/core';
+import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
-import { IRemoveWorksheetMergeMutationParams } from '../../Basics/Interfaces/MutationInterface';
+import { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '../../Basics/Interfaces/MutationInterface';
 import { AddWorksheetMergeMutation } from '../Mutations/add-worksheet-merge.mutation';
 import { RemoveWorksheetMergeMutation, RemoveWorksheetMergeMutationFactory } from '../Mutations/remove-worksheet-merge.mutation';
 import { ISelectionManager } from '../../Services/tokens';
 
-export interface IRemoveWorksheetMergeCommandParams {
-    workbookId: string;
-    worksheetId: string;
-    rectangles: IRangeData[];
-}
-
 export const RemoveWorksheetMergeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.remove-worksheet-merge',
-    handler: async (accessor: IAccessor, params?: IRemoveWorksheetMergeCommandParams) => {
+    handler: async (accessor: IAccessor) => {
         const selectionManager = accessor.get(ISelectionManager);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        let redoMutationParams: IRemoveWorksheetMergeMutationParams;
-        if (params == null) {
-            const selections = selectionManager.getCurrentSelections();
-            const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-            if (!selections.length) {
-                return false;
-            }
-            const range = selections[0];
-            redoMutationParams = {
-                workbookId: workbook.getUnitId(),
-                worksheetId: workbook.getActiveSheet().getSheetId(),
-                rectangles: [
-                    {
-                        startRow: range.startRow,
-                        startColumn: range.startColumn,
-                        endRow: range.endRow,
-                        endColumn: range.endColumn,
-                    },
-                ],
-            };
-        } else {
-            redoMutationParams = {
-                workbookId: params.workbookId,
-                worksheetId: params.worksheetId,
-                rectangles: params.rectangles,
-            };
-        }
+        const selections = selectionManager.getCurrentSelections();
+        if (!selections.length) return false;
+        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
 
-        const undoMutationParams: IRemoveWorksheetMergeMutationParams = RemoveWorksheetMergeMutationFactory(accessor, redoMutationParams);
-        const result = commandService.executeCommand(RemoveWorksheetMergeMutation.id, redoMutationParams);
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
+        if (!workbook) return false;
+        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        if (!worksheet) return false;
+
+        const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+            workbookId,
+            worksheetId,
+            ranges: selections,
+        };
+
+        const undoMutationParams: IAddWorksheetMergeMutationParams = RemoveWorksheetMergeMutationFactory(accessor, removeMergeMutationParams);
+        const result = commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
+
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: 'sheet',
@@ -57,7 +40,7 @@ export const RemoveWorksheetMergeCommand: ICommand = {
                     return commandService.executeCommand(AddWorksheetMergeMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(RemoveWorksheetMergeMutation.id, redoMutationParams);
+                    return commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
                 },
             });
             return true;

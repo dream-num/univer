@@ -22,7 +22,8 @@ export const SetWorksheetOrderMutation: IMutation<ISetWorksheetOrderMutationPara
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
         const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId)?.getWorkBook();
-        const config = workbook!.getConfig();
+        if (!workbook) return false;
+        const config = workbook.getConfig();
         const exclude = config.sheetOrder.filter((currentId: string) => currentId !== params.worksheetId);
         exclude.splice(params.order, 0, params.worksheetId);
         config.sheetOrder = exclude;

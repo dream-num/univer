@@ -39,9 +39,7 @@ export const SetWorksheetActivateMutation: IMutation<ISetWorksheetActivateMutati
     handler: async (accessor, params) => {
         const universheet = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId);
 
-        if (universheet == null) {
-            return false;
-        }
+        if (!universheet) return false;
 
         const worksheets = universheet.getWorkBook().getWorksheets();
 

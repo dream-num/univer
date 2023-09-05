@@ -1,16 +1,10 @@
 import { IAccessor } from '@wendellhu/redi';
-import { CommandType, Dimension, ICommand, ICommandService, ICurrentUniverService, IRangeData, IUndoRedoService, Nullable } from '@univerjs/core';
+import { CommandType, Dimension, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, Nullable } from '@univerjs/core';
 
 import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../Mutations/delete-range.mutation';
 import { InsertRangeMutation } from '../Mutations/insert-range.mutation';
 import { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../Basics/Interfaces/MutationInterface';
 import { ISelectionManager } from '../../Services/tokens';
-
-export interface IDeleteRangeMoveLeftParams {
-    workbookId?: string;
-    worksheetId?: string;
-    range?: IRangeData[];
-}
 
 /**
  * The command to delete range.
@@ -19,28 +13,16 @@ export const DeleteRangeMoveLeftCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.delete-range-move-left',
 
-    handler: async (accessor: IAccessor, params?: IDeleteRangeMoveLeftParams) => {
+    handler: async (accessor: IAccessor) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
         const selectionManager = accessor.get(ISelectionManager);
 
-        let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        let worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
-        let range = selectionManager.getCurrentSelections();
-
-        if (params) {
-            workbookId = params.workbookId ?? workbookId;
-            worksheetId = params.worksheetId ?? worksheetId;
-            if (params.range) {
-                if (!params.range.length) return false;
-                range = params.range;
-            } else {
-                if (!range.length) return false;
-            }
-        } else {
-            if (!range.length) return false;
-        }
+        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const range = selectionManager.getCurrentSelections();
+        if (!range.length) return false;
 
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;

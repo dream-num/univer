@@ -14,7 +14,7 @@ import { IAccessor } from '@wendellhu/redi';
 
 /** Params of `SetRangeValuesMutation` */
 export interface ISetRangeValuesMutationParams {
-    rangeData: IRangeData;
+    rangeData: IRangeData[];
     worksheetId: string;
 
     cellValue?: ObjectMatrixPrimitiveType<ICellData>;
@@ -32,14 +32,21 @@ export interface ISetRangeValuesMutationParams {
 export const SetRangeValuesUndoMutationFactory = (accessor: IAccessor, params: ISetRangeValuesMutationParams): ISetRangeValuesMutationParams => {
     const currentUniverService = accessor.get(ICurrentUniverService);
     const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(params.worksheetId);
-    const cellMatrix = worksheet?.getCellMatrix();
-    const { startRow, endRow, startColumn, endColumn } = params.rangeData;
+    if (worksheet == null) {
+        throw new Error('worksheet is null error!');
+    }
+    const cellMatrix = worksheet.getCellMatrix();
 
     const undoData = new ObjectMatrix<ICellData>();
-    for (let r = startRow; r <= endRow; r++) {
-        for (let c = startColumn; c <= endColumn; c++) {
-            const value = cellMatrix?.getValue(r, c);
-            undoData.setValue(r, c, Tools.deepClone(value as ICellData));
+
+    for (let i = 0; i < params.rangeData.length; i++) {
+        const { startRow, endRow, startColumn, endColumn } = params.rangeData[i];
+
+        for (let r = startRow; r <= endRow; r++) {
+            for (let c = startColumn; c <= endColumn; c++) {
+                const value = cellMatrix?.getValue(r, c);
+                undoData.setValue(r, c, Tools.deepClone(value as ICellData));
+            }
         }
     }
 
@@ -63,47 +70,50 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
 
         const cellMatrix = worksheet.getCellMatrix();
         const { cellValue, rangeData } = params;
-        const { startRow, startColumn, endColumn, endRow } = rangeData;
-
-        // clear selection content
-        createRowColIter(startRow, endRow, startColumn, endColumn).forEach((r, c) => {
-            if (cellMatrix.getValue(r, c)) {
-                cellMatrix.setValue(r, c, { v: null });
-            }
-        });
-
         const newValues = new ObjectMatrix(cellValue);
-        newValues.forValue((row, col, newVal) => {
-            const oldVal = cellMatrix.getValue(row, col) || {};
 
-            // clear all
-            if (!newVal) {
-                cellMatrix?.setValue(row, col, {
-                    v: null,
-                });
-            } else {
-                // TODO: @wzhudev: add config to change value or format only
-                if (newVal.p != null) {
-                    oldVal.p = newVal.p;
+        for (let i = 0; i < rangeData.length; i++) {
+            const { startRow, startColumn, endColumn, endRow } = rangeData[i];
+
+            // clear selection content
+            createRowColIter(startRow, endRow, startColumn, endColumn).forEach((r, c) => {
+                if (cellMatrix.getValue(r, c)) {
+                    cellMatrix.setValue(r, c, { v: null });
                 }
+            });
 
-                if (newVal.v != null) {
-                    oldVal.v = newVal.v;
-                }
+            newValues.forValue((row, col, newVal) => {
+                const oldVal = cellMatrix.getValue(row, col) || {};
 
-                if (newVal.m != null) {
-                    oldVal.m = newVal.m;
+                // clear all
+                if (!newVal) {
+                    cellMatrix?.setValue(row, col, {
+                        v: null,
+                    });
                 } else {
-                    oldVal.m = String(oldVal.v);
-                }
+                    // TODO: @wzhudev: add config to change value or format only
+                    if (newVal.p != null) {
+                        oldVal.p = newVal.p;
+                    }
 
-                if (newVal.t != null) {
-                    oldVal.t = newVal.t;
-                }
+                    if (newVal.v != null) {
+                        oldVal.v = newVal.v;
+                    }
 
-                cellMatrix.setValue(row, col, oldVal);
-            }
-        });
+                    if (newVal.m != null) {
+                        oldVal.m = newVal.m;
+                    } else {
+                        oldVal.m = String(oldVal.v);
+                    }
+
+                    if (newVal.t != null) {
+                        oldVal.t = newVal.t;
+                    }
+
+                    cellMatrix.setValue(row, col, oldVal);
+                }
+            });
+        }
 
         return true;
     },

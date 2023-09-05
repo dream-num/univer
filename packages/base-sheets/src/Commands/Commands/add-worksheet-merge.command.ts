@@ -1,63 +1,41 @@
-import { CommandType, ICommand, ICommandService, ICurrentUniverService, IRangeData, IUndoRedoService } from '@univerjs/core';
+import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 import { AddWorksheetMergeMutation, AddWorksheetMergeMutationFactory } from '../Mutations/add-worksheet-merge.mutation';
 import { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '../../Basics/Interfaces/MutationInterface';
 import { RemoveWorksheetMergeMutation, RemoveWorksheetMergeMutationFactory } from '../Mutations/remove-worksheet-merge.mutation';
 import { ISelectionManager } from '../../Services/tokens';
 
-export interface IAddWorksheetMergeCommandParams {
-    workbookId?: string;
-    worksheetId?: string;
-    rectangles?: IRangeData[];
-}
-
 export const AddWorksheetMergeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.add-worksheet-merge',
-    handler: async (accessor: IAccessor, params?: IAddWorksheetMergeCommandParams) => {
+    handler: async (accessor: IAccessor) => {
         const selectionManager = accessor.get(ISelectionManager);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
         const selections = selectionManager.getCurrentSelections();
-        let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        let worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        if (!selections.length) return false;
+        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
 
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
 
-        let rectangles = selections;
-        if (params == null) {
-            if (!selections.length) {
-                return false;
-            }
-        } else {
-            workbookId = params.workbookId ?? workbookId;
-            worksheetId = params.worksheetId ?? worksheetId;
-            if (params.rectangles) {
-                rectangles = params.rectangles;
-            } else {
-                if (!selections.length) {
-                    return false;
-                }
-            }
-        }
-
         const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
             workbookId,
             worksheetId,
-            rectangles,
+            ranges: selections,
         };
-        const undoRemoveMergeMutationParams: IAddWorksheetMergeCommandParams = RemoveWorksheetMergeMutationFactory(accessor, removeMergeMutationParams);
+        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveWorksheetMergeMutationFactory(accessor, removeMergeMutationParams);
         const removeResult = commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
 
         const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
             workbookId,
             worksheetId,
-            rectangles,
+            ranges: selections,
         };
         const undoMutationParams: IRemoveWorksheetMergeMutationParams = AddWorksheetMergeMutationFactory(accessor, addMergeMutationParams);
         const result = commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);

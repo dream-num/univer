@@ -4,10 +4,7 @@ import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUn
 import { ISelectionManager } from '../../Services/tokens';
 
 export interface IMoveRangeToCommandParams {
-    workbookId?: string;
-    worksheetId?: string;
-    originRange?: IRangeData;
-    destinationRange?: IRangeData;
+    destinationRange: IRangeData;
 }
 
 export const MoveRangeToCommand: ICommand = {
@@ -19,21 +16,20 @@ export const MoveRangeToCommand: ICommand = {
         const currentUniverService = accessor.get(ICurrentUniverService);
         const selectionManager = accessor.get(ISelectionManager);
 
-        if (!params.destinationRange) return false;
-        const originRange = params.originRange || selectionManager.getCurrentSelections()[0];
+        const originRange = selectionManager.getCurrentSelections()[0];
         if (!originRange) {
             return false;
         }
 
-        const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
 
         const clearMutationParams: ISetRangeValuesMutationParams = {
-            rangeData: originRange,
+            rangeData: [originRange],
             worksheetId,
         };
         const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(accessor, clearMutationParams);
@@ -53,7 +49,7 @@ export const MoveRangeToCommand: ICommand = {
         }
 
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-            rangeData: params.destinationRange,
+            rangeData: [params.destinationRange],
             worksheetId,
             workbookId,
             cellValue: targetMatrix.getData(),

@@ -12,14 +12,20 @@ export const SetHideGridlinesCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-hide-gridlines',
 
-    handler: async (accessor: IAccessor, params: ISetHideGridlinesCommandParams) => {
+    handler: async (accessor: IAccessor, params?: ISetHideGridlinesCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
-        const hideGridlines = params.hideGridlines ?? 0;
+        let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        let worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        let hideGridlines = BooleanNumber.FALSE;
+
+        if (params) {
+            workbookId = params.workbookId ?? workbookId;
+            worksheetId = params.worksheetId ?? workbookId;
+            hideGridlines = params.hideGridlines ?? BooleanNumber.FALSE;
+        }
 
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;

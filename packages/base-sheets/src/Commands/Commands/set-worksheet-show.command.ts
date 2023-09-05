@@ -2,15 +2,15 @@ import { BooleanNumber, CommandType, ICommand, ICommandService, ICurrentUniverSe
 import { IAccessor } from '@wendellhu/redi';
 import { ISetWorksheetHideMutationParams, SetWorksheetHideMutation, SetWorksheetHideMutationFactory } from '../Mutations/set-worksheet-hide.mutation';
 
-export interface ISetWorksheetHiddenCommandParams {
+export interface ISetWorksheetShowCommandParams {
     worksheetId?: string;
 }
 
-export const SetWorksheetHideCommand: ICommand = {
+export const SetWorksheetShowCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.set-worksheet-hidden',
+    id: 'sheet.command.set-worksheet-show',
 
-    handler: async (accessor: IAccessor, params?: ISetWorksheetHiddenCommandParams) => {
+    handler: async (accessor: IAccessor, params?: ISetWorksheetShowCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
@@ -28,12 +28,12 @@ export const SetWorksheetHideCommand: ICommand = {
         if (!worksheet) return false;
 
         const hidden = worksheet.getConfig().hidden;
-        if (hidden === BooleanNumber.TRUE) return false;
+        if (hidden === BooleanNumber.FALSE) return false;
 
         const redoMutationParams: ISetWorksheetHideMutationParams = {
             workbookId,
             worksheetId,
-            hidden: BooleanNumber.TRUE,
+            hidden: BooleanNumber.FALSE,
         };
 
         const undoMutationParams = SetWorksheetHideMutationFactory(accessor, redoMutationParams);

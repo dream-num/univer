@@ -12,14 +12,20 @@ export const SetZoomRatioCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-zoom-ratio',
 
-    handler: async (accessor: IAccessor, params: ISetZoomRatioCommandParams) => {
+    handler: async (accessor: IAccessor, params?: ISetZoomRatioCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
-        const zoomRatio = params.zoomRatio ?? 1;
+        let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        let worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        let zoomRatio = 1;
+
+        if (params) {
+            workbookId = params.workbookId ?? workbookId;
+            worksheetId = params.worksheetId ?? worksheetId;
+            zoomRatio = params.zoomRatio ?? zoomRatio;
+        }
 
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;

@@ -1,11 +1,11 @@
-import { CommandType, ICurrentUniverService, IMutation } from '@univerjs/core';
+import { CommandType, ICurrentUniverService, IMutation, IRangeData, ObjectArray } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetRowHeightMutationParams {
     workbookId: string;
     worksheetId: string;
-    rowIndex: number;
-    rowHeight: number[];
+    ranges: IRangeData[];
+    rowHeight: number | ObjectArray<number>;
 }
 
 export const SetWorksheetRowHeightMutationFactory = (accessor: IAccessor, params: ISetWorksheetRowHeightMutationParams): ISetWorksheetRowHeightMutationParams => {
@@ -16,18 +16,26 @@ export const SetWorksheetRowHeightMutationFactory = (accessor: IAccessor, params
         throw new Error('universheet is null error!');
     }
 
-    const manager = universheet.getWorkBook().getSheetBySheetId(params.worksheetId)!.getRowManager();
-    const rowHeight = [];
-    for (let i = params.rowIndex; i < params.rowIndex + params.rowHeight.length; i++) {
-        const row = manager.getRowOrCreate(i);
-        rowHeight[i - params.rowIndex] = row.h;
+    const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
+    if (worksheet == null) {
+        throw new Error('universheet is null error!');
+    }
+    const rowHeight = new ObjectArray<number>();
+    const manager = worksheet.getRowManager();
+    const ranges = params.ranges;
+    for (let i = 0; i < ranges.length; i++) {
+        const range = ranges[i];
+        for (let j = range.startRow; j < range.endRow + 1; j++) {
+            const row = manager.getRowOrCreate(i);
+            rowHeight.set(j, row.h);
+        }
     }
 
     return {
         workbookId: params.workbookId,
         worksheetId: params.worksheetId,
-        rowIndex: params.rowIndex,
-        rowHeight: params.rowHeight,
+        ranges: params.ranges,
+        rowHeight,
     };
 };
 
@@ -42,11 +50,23 @@ export const SetWorksheetRowHeightMutation: IMutation<ISetWorksheetRowHeightMuta
             throw new Error('universheet is null error!');
         }
 
-        const manager = universheet.getWorkBook().getSheetBySheetId(params.worksheetId)!.getRowManager();
-        for (let i = params.rowIndex; i < params.rowIndex + params.rowHeight.length; i++) {
-            const row = manager.getRowOrCreate(i);
-            row.h = params.rowHeight[i - params.rowIndex];
+        const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
+        if (!worksheet) return false;
+        const defaultRowHeight = worksheet.getConfig().defaultRowHeight;
+        const manager = worksheet.getRowManager();
+        const ranges = params.ranges;
+        for (let i = 0; i < ranges.length; i++) {
+            const range = ranges[i];
+            for (let j = range.startRow; j < range.endRow + 1; j++) {
+                const row = manager.getRowOrCreate(i);
+                if (typeof params.rowHeight === 'number') {
+                    row.h = params.rowHeight;
+                } else {
+                    row.h = params.rowHeight.get(j) ?? defaultRowHeight;
+                }
+            }
         }
+
         return true;
     },
 };

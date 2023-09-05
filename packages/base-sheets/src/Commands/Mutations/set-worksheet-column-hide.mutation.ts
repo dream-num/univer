@@ -1,11 +1,10 @@
-import { CommandType, ICurrentUniverService, IMutation } from '@univerjs/core';
+import { CommandType, ICurrentUniverService, IMutation, IRangeData } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetColumnHideMutationParams {
     workbookId: string;
     worksheetId: string;
-    columnIndex: number;
-    columnCount: number;
+    ranges: IRangeData[];
 }
 
 export const SetWorksheetColumnHideMutationFactory = (accessor: IAccessor, params: ISetWorksheetColumnHideMutationParams) => {
@@ -19,8 +18,7 @@ export const SetWorksheetColumnHideMutationFactory = (accessor: IAccessor, param
     return {
         workbookId: params.workbookId,
         worksheetId: params.worksheetId,
-        columnIndex: params.columnIndex,
-        columnCount: params.columnCount,
+        ranges: params.ranges,
     };
 };
 
@@ -31,17 +29,21 @@ export const SetWorksheetColumnHideMutation: IMutation<ISetWorksheetColumnHideMu
         const currentUniverService = accessor.get(ICurrentUniverService);
         const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
 
-        if (universheet == null) {
-            throw new Error('universheet is null error!');
+        if (!universheet) {
+            return false;
         }
 
         const manager = universheet.getWorkBook().getSheetBySheetId(params.worksheetId)!.getColumnManager();
-        for (let i = params.columnIndex; i < params.columnIndex + params.columnCount; i++) {
-            const column = manager.getColumnOrCreate(i);
-            if (column != null) {
-                column.hd = 1;
+        for (let i = 0; i < params.ranges.length; i++) {
+            const range = params.ranges[i];
+            for (let j = range.startColumn; j < range.startColumn + range.endColumn; j++) {
+                const column = manager.getColumnOrCreate(j);
+                if (column != null) {
+                    column.hd = 1;
+                }
             }
         }
+
         return true;
     },
 };

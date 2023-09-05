@@ -1,11 +1,10 @@
-import { CommandType, ICurrentUniverService, IMutation } from '@univerjs/core';
+import { CommandType, ICurrentUniverService, IMutation, IRangeData } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetRowHideMutationParams {
     workbookId: string;
     worksheetId: string;
-    rowIndex: number;
-    rowCount: number;
+    ranges: IRangeData[];
 }
 
 export const SetWorksheetRowHideMutationFactory = (accessor: IAccessor, params: ISetWorksheetRowHideMutationParams) => {
@@ -19,8 +18,7 @@ export const SetWorksheetRowHideMutationFactory = (accessor: IAccessor, params: 
     return {
         workbookId: params.workbookId,
         worksheetId: params.worksheetId,
-        rowIndex: params.rowIndex,
-        rowCount: params.rowCount,
+        ranges: params.ranges,
     };
 };
 
@@ -36,12 +34,17 @@ export const SetWorksheetRowHideMutation: IMutation<ISetWorksheetRowHideMutation
         }
 
         const manager = universheet.getWorkBook().getSheetBySheetId(params.worksheetId)!.getRowManager();
-        for (let i = params.rowIndex; i < params.rowIndex + params.rowCount; i++) {
-            const row = manager.getRowOrCreate(i);
-            if (row != null) {
-                row.hd = 1;
+
+        for (let i = 0; i < params.ranges.length; i++) {
+            const range = params.ranges[i];
+            for (let j = range.startRow; j < range.endRow + 1; j++) {
+                const row = manager.getRowOrCreate(j);
+                if (row != null) {
+                    row.hd = 1;
+                }
             }
         }
+
         return true;
     },
 };

@@ -9,7 +9,6 @@ import {
     ICommand,
     ICommandService,
     ICurrentUniverService,
-    IRangeData,
     IStyleData,
     ITextRotation,
     IUndoRedoService,
@@ -30,9 +29,6 @@ export interface IStyleTypeValue<T> {
 
 export interface ISetStyleParams<T> {
     style: IStyleTypeValue<T>;
-    ranges?: IRangeData[];
-    workbookId?: string;
-    worksheetId?: string;
 }
 
 // TODO: @wzhudev: move parameters logic from BasicWorksheetController to here. 30th Aug.
@@ -51,14 +47,19 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
         const selectionManager = accessor.get(ISelectionManager);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const ranges = params.ranges || selectionManager.getCurrentSelections();
-        if (!ranges) {
+        const ranges = selectionManager.getCurrentSelections();
+        if (!ranges.length) {
             return false;
         }
 
-        const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
         const style = params.style;
+
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
+        if (!workbook) return false;
+        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        if (!worksheet) return false;
 
         let value: ObjectMatrixPrimitiveType<IStyleData>;
         for (let i = 0; i < ranges.length; i++) {

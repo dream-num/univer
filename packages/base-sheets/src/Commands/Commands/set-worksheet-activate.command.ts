@@ -1,23 +1,32 @@
-import { CommandType, ICommand, ICommandService, IUndoRedoService } from '@univerjs/core';
+import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 import { ISetWorksheetActivateMutationParams, SetWorksheetActivateMutation, SetWorksheetUnActivateMutationFactory } from '../Mutations/set-worksheet-activate.mutation';
 
 export interface ISetWorksheetActivateCommandParams {
-    workbookId: string;
-    worksheetId: string;
+    workbookId?: string;
+    worksheetId?: string;
 }
 
 export const SetWorksheetActivateCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-activate',
 
-    handler: async (accessor: IAccessor, params: ISetWorksheetActivateCommandParams) => {
+    handler: async (accessor: IAccessor, params?: ISetWorksheetActivateCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const currentUniverService = accessor.get(ICurrentUniverService);
+
+        let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        let worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+
+        if (params) {
+            workbookId = params.workbookId ?? workbookId;
+            worksheetId = params.worksheetId ?? worksheetId;
+        }
 
         const redoMutationParams: ISetWorksheetActivateMutationParams = {
-            workbookId: params.workbookId,
-            worksheetId: params.worksheetId,
+            workbookId,
+            worksheetId,
         };
         const undoMutationParams = SetWorksheetUnActivateMutationFactory(accessor, redoMutationParams);
         const result = commandService.executeCommand(SetWorksheetActivateMutation.id, redoMutationParams);

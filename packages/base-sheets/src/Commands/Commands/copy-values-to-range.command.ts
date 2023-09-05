@@ -13,29 +13,29 @@ import {
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 import { ISetRangeFormattedValueMutationParams, SetRangeFormattedValueMutation, SetRangeFormattedValueUndoMutationFactory } from '../Mutations/set-range-formatted-value.mutation';
+import { ISelectionManager } from '../../Services/tokens';
 
 export interface ICopyValuesToRangeCommandParams {
-    workbookId?: string;
-    worksheetId?: string;
-    originRange?: IRangeData;
-    destinationRange?: IRangeData;
+    destinationRange: IRangeData;
 }
 
 export const CopyValuesToRangeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.copy-values-to-range',
     handler: async (accessor: IAccessor, params: ICopyValuesToRangeCommandParams) => {
+        const selectionManager = accessor.get(ISelectionManager);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        if (!params.originRange || !params.destinationRange) return false;
-
-        const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const selections = selectionManager.getCurrentSelections();
+        if (!selections.length) return false;
+        const originRange = selections[0];
+        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
-        const handleResult = handleCopyRange(accessor, workbookId, worksheetId, params.originRange, params.destinationRange);
+        const handleResult = handleCopyRange(accessor, workbookId, worksheetId, originRange, params.destinationRange);
         if (!handleResult) return false;
         const value = handleResult[0];
         const range = handleResult[1];

@@ -1,4 +1,4 @@
-import { CommandType, ICommand, ICommandService, ICurrentUniverService, IRangeData, IUndoRedoService } from '@univerjs/core';
+import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 import { ISelectionManager } from '../../Services/tokens';
 import { IInsertColMutationParams, IRemoveColMutationParams } from '../../Basics/Interfaces/MutationInterface';
@@ -6,10 +6,7 @@ import { IRemoveColMutationFactory, RemoveColMutation } from '../Mutations/remov
 import { InsertColMutation, InsertColMutationFactory } from '../Mutations/insert-row-col.mutation';
 
 export interface IMoveColumnsToCommandParams {
-    workbookId?: string;
-    worksheetId?: string;
-    originRange?: IRangeData;
-    destinationIndex?: number;
+    destinationIndex: number;
 }
 
 export const MoveColumnsToCommand: ICommand = {
@@ -21,14 +18,13 @@ export const MoveColumnsToCommand: ICommand = {
         const currentUniverService = accessor.get(ICurrentUniverService);
         const selectionManager = accessor.get(ISelectionManager);
 
-        const destinationIndex = params.destinationIndex ?? 0;
-        const originRange = params.originRange || selectionManager.getCurrentSelections()[0];
+        const originRange = selectionManager.getCurrentSelections()[0];
         if (!originRange) {
             return false;
         }
 
-        const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
@@ -39,8 +35,14 @@ export const MoveColumnsToCommand: ICommand = {
         const removeColumnMutationParams: IRemoveColMutationParams = {
             workbookId,
             worksheetId,
-            colIndex: startColumn,
-            colCount: endColumn - startColumn + 1,
+            ranges: [
+                {
+                    startColumn,
+                    endColumn,
+                    startRow: 0,
+                    endRow: 0,
+                },
+            ],
         };
         const undoRemoveColumnMutationParams: IInsertColMutationParams = IRemoveColMutationFactory(accessor, removeColumnMutationParams);
 
@@ -48,8 +50,14 @@ export const MoveColumnsToCommand: ICommand = {
 
         const insertColMutationParams: IInsertColMutationParams = {
             ...undoRemoveColumnMutationParams,
-            colIndex: destinationIndex,
-            colCount: endColumn - startColumn + 1,
+            ranges: [
+                {
+                    startColumn: params.destinationIndex,
+                    endColumn: params.destinationIndex + endColumn - startColumn,
+                    startRow: 0,
+                    endRow: 0,
+                },
+            ],
         };
 
         const undoMutationParams: IRemoveColMutationParams = InsertColMutationFactory(accessor, insertColMutationParams);

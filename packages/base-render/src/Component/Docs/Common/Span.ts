@@ -34,7 +34,6 @@ export function _createSkeletonWordOrLetter(spanType: SpanType, content: string,
         DT.PAGE_BREAK,
         DT.DOCS_END,
         DT.CUSTOM_BLOCK,
-        DT.SPACE,
     ];
     let streamType = DT.LETTER;
     if (skipWidthList.indexOf(content) > -1) {

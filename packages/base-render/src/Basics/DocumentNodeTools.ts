@@ -1,4 +1,5 @@
-import { DataStreamTreeTokenType, IDocumentBody, Nullable, checkParagraphHasIndentByStyle } from '@univerjs/core';
+import { checkParagraphHasIndentByStyle, DataStreamTreeTokenType, IDocumentBody, Nullable } from '@univerjs/core';
+
 import { IDocumentSkeletonSpan, SpanType } from './IDocumentSkeletonCached';
 
 export function hasListSpan(span: Nullable<IDocumentSkeletonSpan>) {
@@ -96,7 +97,10 @@ export function isPlaceholderOrSpace(span: Nullable<IDocumentSkeletonSpan>) {
         return false;
     }
 
-    if ([DataStreamTreeTokenType.SPACE, DataStreamTreeTokenType.PARAGRAPH, DataStreamTreeTokenType.TAB, DataStreamTreeTokenType.SECTION_BREAK].indexOf(span.streamType) !== -1) {
+    if (
+        [DataStreamTreeTokenType.PARAGRAPH, DataStreamTreeTokenType.TAB, DataStreamTreeTokenType.SECTION_BREAK].indexOf(span.streamType) !== -1 ||
+        span.content === DataStreamTreeTokenType.SPACE
+    ) {
         return true;
     }
 

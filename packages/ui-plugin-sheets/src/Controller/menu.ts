@@ -384,8 +384,7 @@ export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonI
         id: ResetTextColorCommand.id,
         type: MenuItemType.BUTTON,
         title: 'toolbar.resetColor',
-        positions: [MenuPosition.TOOLBAR],
-        parentId: SetTextColorCommand.id,
+        positions: SetTextColorCommand.id,
     };
 }
 
@@ -428,8 +427,7 @@ export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuB
         id: ResetBackgroundColorCommand.id,
         type: MenuItemType.BUTTON,
         title: 'toolbar.resetColor',
-        positions: [MenuPosition.TOOLBAR],
-        parentId: SetBackgroundColorCommand.id,
+        positions: SetBackgroundColorCommand.id,
     };
 }
 
@@ -553,7 +551,6 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
     };
 }
 
-// FIXME: set rotation would cause a bug
 export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number | string> {
     return {
         id: SetTextRotationCommand.id,
@@ -580,14 +577,12 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
     };
 }
 
-// right menu in main container
 export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: ClearSelectionContentCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.clearContent',
         positions: [MenuPosition.CONTEXT_MENU],
-        parentId: 'right-menu',
     };
 }
 
@@ -597,7 +592,6 @@ export function InsertRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.insertRow',
-        parentId: 'right-menu',
     };
 }
 
@@ -607,7 +601,6 @@ export function InsertColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.insertColumn',
-        parentId: 'right-menu',
     };
 }
 
@@ -617,7 +610,6 @@ export function RemoveRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.deleteSelectedRow',
-        parentId: 'right-menu',
     };
 }
 
@@ -627,7 +619,6 @@ export function HideRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.hideSelectedRow',
-        parentId: 'right-menu',
     };
 }
 
@@ -637,7 +628,6 @@ export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.showHideRow',
-        parentId: 'right-menu',
     };
 }
 
@@ -647,7 +637,6 @@ export function RemoveColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.deleteSelectedColumn',
-        parentId: 'right-menu',
     };
 }
 
@@ -664,7 +653,6 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
                 suffix: 'px',
             },
         },
-        parentId: 'right-menu',
     };
 }
 
@@ -681,7 +669,6 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
                 suffix: 'px',
             },
         },
-        parentId: 'right-menu',
     };
 }
 
@@ -691,7 +678,6 @@ export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
         type: MenuItemType.SUBITEMS, // 子菜单也需要单独command id，无法使用selector的selections
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.deleteCell',
-        parentId: 'right-menu',
     };
 }
 
@@ -699,9 +685,8 @@ export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuBu
     return {
         id: DeleteRangeMoveLeftCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.moveLeft',
-        parentId: DeleteRangeCommand.id,
+        positions: DeleteRangeCommand.id,
     };
 }
 
@@ -709,9 +694,8 @@ export function DeleteRangeMoveUpMenuItemFactory(accessor: IAccessor): IMenuButt
     return {
         id: DeleteRangeMoveUpCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.moveUp',
-        parentId: DeleteRangeCommand.id,
+        positions: DeleteRangeCommand.id,
     };
 }
 
@@ -722,7 +706,6 @@ export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.SHEET_BAR],
         title: 'sheetConfig.delete',
-        parentId: 'sheet-bar-right-menu',
     };
 }
 
@@ -733,7 +716,6 @@ export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.SHEET_BAR],
         title: 'sheetConfig.copy',
-        parentId: 'sheet-bar-right-menu',
     };
 }
 
@@ -745,7 +727,6 @@ export function RenameSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.SHEET_BAR],
         title: 'sheetConfig.rename',
-        parentId: 'sheet-bar-right-menu',
         onClick: () => {
             // TODO@Dushusir 这里能监听到点击事件，但是无法触发到 this._sheetBar.reNameSheet(this._dataId);
             console.info('rename=========');
@@ -767,7 +748,6 @@ export function ChangeColorSheetMenuItemFactory(accessor: IAccessor): IMenuSelec
                 id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
             },
         ],
-        parentId: 'sheet-bar-right-menu',
     };
 }
 
@@ -777,7 +757,6 @@ export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.SHEET_BAR],
         title: 'sheetConfig.hide',
-        parentId: 'sheet-bar-right-menu',
     };
 }
 
@@ -788,10 +767,10 @@ export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.SHEET_BAR],
         title: 'sheetConfig.unhide',
-        parentId: 'sheet-bar-right-menu',
     };
 }
 
+/** @deprecated not the correct ui mechanism */
 export function buildMenuTree(items: IMenuItem[], parentId?: string): IDisplayMenuItem[] {
     const tree: IDisplayMenuItem[] = [];
 

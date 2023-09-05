@@ -1,4 +1,4 @@
-import { AppContext, BaseComponentProps, Button, Container, CustomLabel, debounce, IDisplayMenuItem, Select, Tooltip } from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps, Button, Container, CustomLabel, debounce, IDisplayMenuItem, IMenuItem, Select, Tooltip } from '@univerjs/base-ui';
 import { Component, createRef } from 'preact';
 import { IToolbarItemProps, SheetContainerUIController } from '../../Controller';
 import styles from './index.module.less';
@@ -150,7 +150,7 @@ export class Toolbar extends Component<IProps, IState> {
         }
     };
 
-    setToolbarNeo = (menuItems: IDisplayMenuItem[]) => {
+    setToolbarNeo = (menuItems: Array<IDisplayMenuItem<IMenuItem>>) => {
         this.setState(
             {
                 menuItems,

@@ -9,7 +9,7 @@ type SheetState = {
     sheetList: BaseSheetBarProps[];
     menuList: BaseSheetBarProps[];
     sheetUl: BaseMenuItem[];
-    menuItems: IDisplayMenuItem[];
+    menuItems: Array<IDisplayMenuItem<IMenuItem>>;
 };
 
 export class SheetBar extends Component<BaseSheetBarProps, SheetState> {

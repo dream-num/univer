@@ -137,8 +137,7 @@ export function SetBorderColorMenuItemFactory(accessor: IAccessor): IMenuSelecto
     return {
         id: SetBorderColorCommand.id,
         title: 'border',
-        positions: [MenuPosition.TOOLBAR],
-        parentId: SetBorderPositionCommand.id,
+        positions: SetBorderPositionCommand.id,
         display: DisplayTypes.COLOR,
         selectType: SelectTypes.NEO,
         type: MenuItemType.SELECTOR,
@@ -151,7 +150,6 @@ export function SetBorderColorMenuItemFactory(accessor: IAccessor): IMenuSelecto
     };
 }
 
-// TODO@wzhudev: fix UI problems
 export function SetBorderStyleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<BorderStyleTypes> {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
@@ -161,8 +159,7 @@ export function SetBorderStyleMenuItemFactory(accessor: IAccessor): IMenuSelecto
         id: SetBorderStyleCommand.id,
         title: 'borderLine.borderSize',
         label: SHEET_UI_PLUGIN_NAME + LineBold.name,
-        positions: [MenuPosition.TOOLBAR],
-        parentId: SetBorderPositionCommand.id,
+        positions: SetBorderPositionCommand.id,
         display: DisplayTypes.CUSTOM,
         selectType: SelectTypes.NEO,
         type: MenuItemType.SELECTOR,

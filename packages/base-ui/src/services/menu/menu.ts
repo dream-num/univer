@@ -6,13 +6,13 @@ import { DisplayTypes, SelectTypes } from '../../Components/Select/Select';
 export type OneOrMany<T> = T | T[];
 
 export const enum MenuPosition {
-    VOID,
-    TOOLBAR,
-    CONTEXT_MENU,
-    TAB_CONTEXT_MENU,
-    ROW_HEADER_CONTEXT_MENU,
-    COL_HEADER_CONTEXT_MENU,
-    SHEET_BAR,
+    VOID = 'void',
+    TOOLBAR = 'toolbar',
+    CONTEXT_MENU = 'contextMenu',
+    TAB_CONTEXT_MENU = 'tabContextMenu',
+    ROW_HEADER_CONTEXT_MENU = 'rowHeaderContextMenu',
+    COL_HEADER_CONTEXT_MENU = 'colHeaderContextMenu',
+    SHEET_BAR = 'sheetBar',
 }
 
 export const enum MenuItemType {
@@ -36,7 +36,7 @@ interface IMenuItemBase {
     type: MenuItemType;
 
     /** In what menu should the item display. */
-    positions: OneOrMany<MenuPosition>;
+    positions: OneOrMany<MenuPosition | string>;
 
     /**
      * Custom label component id.
@@ -48,7 +48,10 @@ interface IMenuItemBase {
     /** @deprecated this parameter would be removed after refactoring */
     className?: string;
 
-    /** If the menu is in a submenu, this property would be its parent menu item's id. */
+    /**
+     * If the menu is in a submenu, this property would be its parent menu item's id.
+     * @deprecated use positions instead
+     */
     parentId?: string;
 
     hidden$?: Observable<boolean>;

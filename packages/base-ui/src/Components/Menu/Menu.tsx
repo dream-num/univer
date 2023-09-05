@@ -178,7 +178,6 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
                     // render value option
                     const isValueOption = isValueOptions(option);
                     if (isValueOption) {
-                        console.log('selected', value, option.value);
                         return (
                             <li
                                 className={joinClassNames(styles.colsMenuitem, option.disabled ? styles.colsMenuitemDisabled : '')}
@@ -235,7 +234,7 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
         if (menuId) {
             const menuService: IMenuService = this.context.injector.get(IMenuService);
             this.setState({
-                menuItems: menuService.getSubMenuItems(menuId),
+                menuItems: menuService.getMenuItems(menuId),
             });
         }
     }
@@ -422,7 +421,7 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
         if (id) {
             const menuService: IMenuService = this.context.injector.get(IMenuService);
             this.setState({
-                menuItems: menuService.getSubMenuItems(id),
+                menuItems: menuService.getMenuItems(id),
             });
         }
     }

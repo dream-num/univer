@@ -733,6 +733,7 @@ export function RenameSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         parentId: 'sheet-bar-right-menu',
         onClick:()=>{
             // TODO@Dushusir 这里能监听到点击事件，但是无法触发到 this._sheetBar.reNameSheet(this._dataId);
+            // 或许不应该通过这里的onClick直接更新UI？
             console.info('rename=========')
         }
     };
@@ -775,20 +776,4 @@ export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         title: 'sheetConfig.unhide',
         parentId: 'sheet-bar-right-menu',
     };
-}
-
-export function buildMenuTree(items: IMenuItem[], parentId?: string): IDisplayMenuItem[] {
-    const tree: IDisplayMenuItem[] = [];
-
-    for (const item of items) {
-        if (item.parentId === parentId) {
-            const treeItem: IDisplayMenuItem = {
-                ...item,
-                subMenuItems: buildMenuTree(items, item.id),
-            };
-            tree.push(treeItem);
-        }
-    }
-
-    return tree;
 }

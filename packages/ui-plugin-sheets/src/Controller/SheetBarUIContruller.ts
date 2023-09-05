@@ -297,7 +297,7 @@ export class SheetBarUIController extends Disposable {
             },
         });
 
-        this._sheetBar.setSheetUlNeo(this._menuService.getMenuItems(MenuPosition.SHEET_BAR));
+        // this._sheetBar.setSheetUlNeo(this._menuService.getMenuItems(MenuPosition.SHEET_BAR));
     }
 
     protected _refreshSheetData(): void {

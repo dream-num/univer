@@ -3,7 +3,6 @@ import { RefObject, Component, createRef } from 'preact';
 import { SheetBarMenu, ISheetBarMenuItem } from './SheetBarMenu';
 import styles from './index.module.less';
 import { SlideTabBar } from '../../Basics/SlideTabBar/SlideTabBar';
-import { buildMenuTree } from '../../Controller/menu';
 
 type SheetState = {
     sheetList: BaseSheetBarProps[];
@@ -58,11 +57,12 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         this.setState((prevState) => ({ ...value }), fn);
     };
 
-    setSheetUlNeo(menuItems: IMenuItem[]) {
-        this.setState({
-            menuItems: buildMenuTree(menuItems),
-        });
-    }
+    // TODO@Dushusir remove after refactoring
+    // setSheetUlNeo(menuItems: IMenuItem[]) {
+    //     this.setState({
+    //         menuItems: buildMenuTree(menuItems),
+    //     });
+    // }
 
     // 点击按钮左右滑动
     scrollLeft = (e: MouseEvent) => {

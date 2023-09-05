@@ -320,7 +320,6 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
 
     override render(): ComponentChild {
         switch (this.props.menuItem.type) {
-            case MenuItemType.DROPDOWN:
             case MenuItemType.SELECTOR:
                 return this.renderSelectorType();
             case MenuItemType.SUBITEMS:
@@ -396,29 +395,18 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
 
     private renderSubItemsType(): ComponentChild {
         const { menuItem, index } = this.props;
-        const { disabled, menuItems, value } = this.state;
+        const { disabled, menuItems } = this.state;
         const item = menuItem as IDisplayMenuItem<IMenuSelectorItem<unknown>>;
-        const commandService: ICommandService = this.context.injector.get(ICommandService);
 
         return (
             <li
                 className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}
                 onMouseEnter={(e) => this.mouseEnter(e, index)}
                 onMouseLeave={(e) => this.mouseLeave(e, index)}
-                onClick={(e) => this.handleClick(e, item, index)}
             >
-                {/* FIXME after translate title,use title for value display */}
-                <NeoCustomLabel title={item.title} value={item.title} onChange={this.onChange} icon={item.icon} display={item.display}></NeoCustomLabel>
-                {item.shortcut && ` (${item.shortcut})`}
+                <NeoCustomLabel title={item.title} value={item.title} icon={item.icon} display={item.display} label={item.label}></NeoCustomLabel>
                 {(menuItems.length > 0 || (item as IMenuSelectorItem<unknown>).selections?.length) && (
-                    <Menu
-                        ref={(ele: Menu) => (this._refs[index] = ele)}
-                        // onOptionSelect={(v) => commandService.executeCommand(item.id, { value: v.value })}
-                        menuId={item.id}
-                        // options={item.selections}
-                        // display={item.display}
-                        parent={this}
-                    ></Menu>
+                    <Menu ref={(ele: Menu) => (this._refs[index] = ele)} menuId={item.id} parent={this} display={item.display}></Menu>
                 )}
             </li>
         );

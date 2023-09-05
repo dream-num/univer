@@ -61,7 +61,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
 
     render(): ComponentChild {
         switch (this.props.type) {
-            case MenuItemType.DROPDOWN:
+            case MenuItemType.SUBITEMS:
             case MenuItemType.SELECTOR:
                 return this.renderSelectorType();
             default:
@@ -75,7 +75,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
         const { disabled, value } = state;
 
         const props = this.props as IDisplayMenuItem<IMenuSelectorItem<unknown>>;
-        const { icon, title, className, label, display, selectType, selections, id } = props;
+        const { icon, title, label, display, selectType, selections, id } = props;
 
         return (
             <Tooltip title={this.getTooltip()} placement="bottom">
@@ -83,7 +83,6 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
                     id={id}
                     title={title}
                     children={selections!}
-                    className={className}
                     options={selections as IValueOption[]}
                     display={display}
                     icon={icon}

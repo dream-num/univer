@@ -9,7 +9,6 @@ import {
     SetStrikeThroughCommand,
     SetUnderlineCommand,
     SetRangeStyleMutation,
-    DeleteRangeCommand,
     SetWorksheetColWidthCommand,
     SetWorksheetRowHeightCommand,
     RemoveRowCommand,
@@ -709,12 +708,14 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     };
 }
 
+const DELETE_RANGE_MENU_ID = 'sheet.menu.delete-range';
 export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
-        id: DeleteRangeCommand.id,
-        type: MenuItemType.SUBITEMS, // 子菜单也需要单独command id，无法使用selector的selections
-        positions: [MenuPosition.CONTEXT_MENU],
+        id: DELETE_RANGE_MENU_ID,
+        type: MenuItemType.SUBITEMS,
         title: 'rightClick.deleteCell',
+        positions: [MenuPosition.CONTEXT_MENU],
+        selectType: SelectTypes.NEO,
     };
 }
 
@@ -723,7 +724,7 @@ export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuBu
         id: DeleteRangeMoveLeftCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveLeft',
-        positions: DeleteRangeCommand.id,
+        positions: DELETE_RANGE_MENU_ID,
     };
 }
 
@@ -732,7 +733,7 @@ export function DeleteRangeMoveUpMenuItemFactory(accessor: IAccessor): IMenuButt
         id: DeleteRangeMoveUpCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveUp',
-        positions: DeleteRangeCommand.id,
+        positions: DELETE_RANGE_MENU_ID,
     };
 }
 

@@ -11,17 +11,10 @@
     "private": true,
     "scripts": {
         "test": "jest",
-        "dev": "vite",
-        "build": "tsc && vite build",
-        "build:demo": "vite build -c vite.demo.config.ts",
-        "watch": "vite build",
-        "serve": "vite preview",
-        "start": "ts-node --transpile-only ./scripts/start.ts",
-        "build:esbuild": "ts-node --transpile-only ./scripts/build.ts"
+        "esbuild:demo": "node ./esbuild.config.js"
     },
     "devDependencies": {
         "@playwright/test": "^1.18.1",
-        "@preact/preset-vite": "2.0.0",
         "@testing-library/preact": "^2.0.1",
         "@types/jest": "^27.5.2",
         "@types/node": "^18.14.0",
@@ -36,9 +29,7 @@
         "prettier": "^2.3.2",
         "ts-jest": "29.0.1",
         "ts-node": "^10.9.1",
-        "typescript": "^4.4.1-rc",
-        "vite": "^2.4.4",
-        "vite-plugin-external": "1.2.3"
+        "typescript": "^4.4.1-rc"
     },
     "dependencies": {
         "@univerjs/base-render": "workspace:^0.0.1",

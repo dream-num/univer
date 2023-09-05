@@ -54,6 +54,9 @@ importers:
       esbuild-plugin-clean:
         specifier: ^1.0.1
         version: 1.0.1(esbuild@0.19.2)
+      esbuild-plugin-copy:
+        specifier: ^2.1.1
+        version: 2.1.1(esbuild@0.19.2)
       esbuild-style-plugin:
         specifier: ^1.6.2
         version: 1.6.2
@@ -157,9 +160,6 @@ importers:
         specifier: ^10.12.1
         version: 10.17.1
     devDependencies:
-      '@preact/preset-vite':
-        specifier: 2.0.0
-        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
         version: 2.0.1(preact@10.17.1)
@@ -199,12 +199,6 @@ importers:
       typescript:
         specifier: ^4.4.1-rc
         version: 4.7.2
-      vite:
-        specifier: ^2.4.4
-        version: 2.4.4
-      vite-plugin-external:
-        specifier: 1.2.3
-        version: 1.2.3
 
   examples/univer-preact-ts:
     dependencies:
@@ -351,9 +345,6 @@ importers:
       '@playwright/test':
         specifier: ^1.18.1
         version: 1.18.1
-      '@preact/preset-vite':
-        specifier: 2.0.0
-        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
         version: 2.0.1(preact@10.17.1)
@@ -399,12 +390,6 @@ importers:
       typescript:
         specifier: ^4.4.1-rc
         version: 4.7.2
-      vite:
-        specifier: ^2.4.4
-        version: 2.4.4
-      vite-plugin-external:
-        specifier: 1.2.3
-        version: 1.2.3
 
   examples/univer-slide-ts:
     dependencies:
@@ -430,9 +415,6 @@ importers:
         specifier: ^10.12.1
         version: 10.17.1
     devDependencies:
-      '@preact/preset-vite':
-        specifier: 2.0.0
-        version: 2.0.0(preact@10.17.1)(vite@2.4.4)
       '@testing-library/preact':
         specifier: ^2.0.1
         version: 2.0.1(preact@10.17.1)
@@ -472,12 +454,6 @@ importers:
       typescript:
         specifier: ^4.4.1-rc
         version: 4.7.2
-      vite:
-        specifier: ^2.4.4
-        version: 2.4.4
-      vite-plugin-external:
-        specifier: 1.2.3
-        version: 1.2.3
 
   examples/univer-vanilla-ts:
     dependencies:
@@ -5820,6 +5796,18 @@ packages:
       chalk: 4.1.2
       del: 6.1.1
       esbuild: 0.19.2
+    dev: true
+
+  /esbuild-plugin-copy@2.1.1(esbuild@0.19.2):
+    resolution: {integrity: sha512-Bk66jpevTcV8KMFzZI1P7MZKZ+uDcrZm2G2egZ2jNIvVnivDpodZI+/KnpL3Jnap0PBdIHU7HwFGB8r+vV5CVw==}
+    peerDependencies:
+      esbuild: '>= 0.14.0'
+    dependencies:
+      chalk: 4.1.2
+      chokidar: 3.5.3
+      esbuild: 0.19.2
+      fs-extra: 10.1.0
+      globby: 11.1.0
     dev: true
 
   /esbuild-style-plugin@1.6.1:

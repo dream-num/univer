@@ -1,8 +1,10 @@
 import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType } from '@univerjs/core';
-import { validationGrid } from './Tools';
-import { IDocumentSkeletonBullet, IDocumentSkeletonSpan, SpanType } from '../../../Basics/IDocumentSkeletonCached';
+
 import { FontCache } from '../../../Basics/FontCache';
+import { IDocumentSkeletonBullet, IDocumentSkeletonDivide, IDocumentSkeletonSpan, SpanType } from '../../../Basics/IDocumentSkeletonCached';
 import { IFontCreateConfig } from '../../../Basics/Interfaces';
+import { hasCJK } from '../../../Basics/Tools';
+import { validationGrid } from './Tools';
 
 export function createSkeletonWordSpan(content: string, config: IFontCreateConfig, spanWidth?: number): IDocumentSkeletonSpan {
     return _createSkeletonWordOrLetter(SpanType.WORD, content, config, spanWidth);
@@ -68,9 +70,9 @@ export function _createSkeletonWordOrLetter(spanType: SpanType, content: string,
     let paddingLeft = 0;
     if (validationGrid(gridType, snapToGrid)) {
         // 当文字也需要对齐到网格式，进行处理
-        const multiple = Math.ceil(contentWidth / charSpace);
-        width = multiple * charSpace;
-        if (gridType === GridType.LINES_AND_CHARS) {
+        // const multiple = Math.ceil(contentWidth / charSpace);
+        width = contentWidth + (hasCJK(content) ? charSpace : charSpace / 2);
+        if (gridType === GridType.SNAP_TO_CHARS) {
             paddingLeft = (width - contentWidth) / 2;
         }
     }
@@ -135,6 +137,33 @@ export function setSpanGroupLeft(spanGroup: IDocumentSkeletonSpan[], left: numbe
 
 export function setSpanLeft(span: IDocumentSkeletonSpan, left: number = 0) {
     span.left = left;
+}
+
+export function addSpanToDivide(divide: IDocumentSkeletonDivide, spanGroup: IDocumentSkeletonSpan[], offsetLeft: number = 0) {
+    // const line = divide.parent;
+    // if (line != null) {
+    //     const isFirstLine = line.divides[0].spanGroup[0] == null;
+    //     const firstSpan = spanGroup[0];
+    //     const firstSpanContent = firstSpan.content || ' ';
+    //     if (isFirstLine && firstSpanContent === ' ') {
+    //         const width = firstSpan.width;
+    //         firstSpan.width = 0;
+    //         for (const span of spanGroup) {
+    //             if (span === firstSpan) {
+    //                 continue;
+    //             }
+
+    //             span.left -= width;
+    //         }
+    //     }
+    // }
+
+    setSpanGroupLeft(spanGroup, offsetLeft);
+    for (const span of spanGroup) {
+        span.parent = divide;
+    }
+
+    divide.spanGroup.push(...spanGroup);
 }
 
 function _getMaxBoundingBox(span: IDocumentSkeletonSpan, bulletSkeleton: IDocumentSkeletonBullet) {

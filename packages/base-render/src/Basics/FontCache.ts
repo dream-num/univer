@@ -81,7 +81,7 @@ export class FontCache {
         let isDelete = false;
         let i = 0;
 
-        for (let item of this._globalFontMeasureCache) {
+        for (const item of this._globalFontMeasureCache) {
             const [, values] = item;
             allSize += values.size;
             if (allSize > cacheLimit) {
@@ -93,7 +93,7 @@ export class FontCache {
 
         if (isDelete) {
             let deleteAllSize = 0;
-            for (let item of this._globalFontMeasureCache) {
+            for (const item of this._globalFontMeasureCache) {
                 const [key, values] = item;
                 deleteAllSize += values.size;
                 if (deleteAllSize > cacheLimit / 2) {
@@ -200,7 +200,7 @@ export class FontCache {
 
         // 兼容不支持textMetrics的情况
         if (fontBoundingBoxAscent == null || fontBoundingBoxDescent == null || Number.isNaN(fontBoundingBoxAscent) || Number.isNaN(fontBoundingBoxDescent)) {
-            let oneLineTextHeight = this.getTextSizeByDom(DEFAULT_MEASURE_TEXT, fontString).height;
+            const oneLineTextHeight = this.getTextSizeByDom(DEFAULT_MEASURE_TEXT, fontString).height;
 
             if (ctx.textBaseline === 'top') {
                 cache.fontBoundingBoxAscent = cache.actualBoundingBoxAscent = oneLineTextHeight;
@@ -220,7 +220,7 @@ export class FontCache {
 
     private static _clearMeasureCache(limit: number, values: Map<string, IMeasureTextCache>) {
         let valueIndex = 0;
-        for (let txtItem of values) {
+        for (const txtItem of values) {
             const [txtKey] = txtItem;
             if (valueIndex > limit) {
                 break;

@@ -4,7 +4,7 @@ import { deleteContent } from '../../Shared/DocTool';
 import { IDocumentBody } from '../../Types/Interfaces/IDocumentData';
 import { deleteCustomBlocks, deleteCustomRanges, deleteParagraphs, deleteSectionBreaks, deleteTables, deleteTextRuns } from './Common';
 
-export function DeleteApply(document: DocumentModel, textLength: number, currentIndex: number, segmentId?: string) {
+export function DeleteApply(document: DocumentModel, textLength: number, currentIndex: number, segmentId?: string): IDocumentBody {
     const doc = document.snapshot;
 
     const bodyModel = document.getBodyModel(segmentId);
@@ -13,6 +13,10 @@ export function DeleteApply(document: DocumentModel, textLength: number, current
 
     if (body == null) {
         throw new Error('no body has changed');
+    }
+
+    if (textLength <= 0) {
+        return { dataStream: '' };
     }
 
     bodyModel.delete(currentIndex, textLength);

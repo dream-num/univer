@@ -11,7 +11,9 @@ export class DataStreamTreeNode {
 
     endIndex: number;
 
-    isBullet: boolean = false;
+    // isBullet: boolean = false;
+
+    // isIndent: boolean = false;
 
     blocks: number[] = [];
 

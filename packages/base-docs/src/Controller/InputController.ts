@@ -1,5 +1,19 @@
-import { Documents, IDocumentSkeletonLine, IDocumentSkeletonSpan, IEditorInputConfig, SpanType, TextSelection } from '@univerjs/base-render';
-import { DataStreamTreeTokenType, DocumentModel, ICurrentUniverService, IParagraph, Nullable, Observable } from '@univerjs/core';
+import {
+    Documents,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonSpan,
+    IEditorInputConfig,
+    INodePosition,
+    INodeSearch,
+    TextSelection,
+    getParagraphBySpan,
+    hasListSpan,
+    isFirstSpan,
+    isIndentBySpan,
+    isPlaceholderOrSpace,
+    isSameLine,
+} from '@univerjs/base-render';
+import { DataStreamTreeTokenType, DocumentModel, ICurrentUniverService, IParagraph, Nullable, Observable, UpdateDocsAttributeType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { CanvasView } from '../View/Render/CanvasView';
 import { DocsView } from '../View/Render/Views';
@@ -21,16 +35,14 @@ export class InputController {
 
     private _previousIMEStart: number;
 
-    private _currentSpan: Nullable<IDocumentSkeletonSpan>;
+    private _currentNodePosition: Nullable<INodePosition>;
 
-    private _currentSpanPosBack: boolean = false;
-
-    constructor(@Inject(CanvasView) private readonly _CanvasView: CanvasView, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
+    constructor(@Inject(CanvasView) private readonly _canvasView: CanvasView, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
         this._initialize();
     }
 
     private _initialize() {
-        const docsView = this._CanvasView.getDocsView() as DocsView;
+        const docsView = this._canvasView.getDocsView() as DocsView;
         const events = docsView.getDocs().getEditorInputEvent();
 
         const docsModel = this._currentUniverService.getCurrentUniverDocInstance().getDocument();
@@ -47,12 +59,8 @@ export class InputController {
 
         this._initialComposition(onCompositionstartObservable, onCompositionupdateObservable, onCompositionendObservable, docsModel);
 
-        onSelectionStartObservable.add((nodeInfo) => {
-            if (nodeInfo === false) {
-                this._currentSpan = null;
-            } else {
-                this._currentSpan = nodeInfo.node;
-            }
+        onSelectionStartObservable.add((nodePosition) => {
+            this._currentNodePosition = nodePosition;
         });
     }
 
@@ -67,6 +75,8 @@ export class InputController {
 
             const activeRange = activeSelection?.getRange();
 
+            const startNodePosition = activeSelection?.getStart();
+
             const segmentId = activeSelection?.segmentId;
 
             const skeleton = document.getSkeleton();
@@ -78,6 +88,12 @@ export class InputController {
             const { cursorStart, cursorEnd, isCollapse, isEndBack, isStartBack } = activeRange;
 
             if (e.key === KeyboardKeyType.Backspace) {
+                const preSpan = document.findSpanByPosition(startNodePosition);
+
+                const preIsBullet = hasListSpan(preSpan);
+
+                const preIsIndent = isIndentBySpan(preSpan, docsModel.body);
+
                 let cursor = cursorStart;
 
                 if (isStartBack === true) {
@@ -88,17 +104,79 @@ export class InputController {
                     cursor += 1;
                 }
 
+                let span = document.findNodeByCharIndex(cursor);
+
                 const selectionRemain = document.remainActiveSelection() as TextSelection | undefined;
 
                 // const content = document.findNodeByCharIndex(cursor - 1)?.content || '';
+                const isUpdateParagraph = isFirstSpan(preSpan) && span !== preSpan && (preIsBullet === true || preIsIndent === true);
+                if (isUpdateParagraph) {
+                    const paragraph = getParagraphBySpan(preSpan, docsModel.body);
 
-                docsModel.delete(activeRange, segmentId);
+                    if (paragraph == null) {
+                        return;
+                    }
+
+                    const paragraphIndex = paragraph?.startIndex;
+
+                    const updateParagraph: IParagraph = { startIndex: 0 };
+
+                    const paragraphStyle = paragraph.paragraphStyle;
+                    if (preIsBullet === true) {
+                        const paragraphStyle = paragraph.paragraphStyle;
+                        if (paragraphStyle) {
+                            updateParagraph.paragraphStyle = paragraphStyle;
+                        }
+                    } else if (preIsIndent === true) {
+                        const bullet = paragraph.bullet;
+                        if (bullet) {
+                            updateParagraph.bullet = bullet;
+                        }
+                        if (paragraphStyle != null) {
+                            updateParagraph.paragraphStyle = { ...paragraphStyle };
+                            delete updateParagraph.paragraphStyle.hanging;
+                            delete updateParagraph.paragraphStyle.indentStart;
+                        }
+                    }
+
+                    docsModel.update(
+                        { dataStream: '', paragraphs: [{ ...updateParagraph }] },
+                        {
+                            cursorStart: paragraphIndex,
+                            cursorEnd: paragraphIndex,
+                            isEndBack: false,
+                            isStartBack: false,
+                            isCollapse: true,
+                        },
+                        UpdateDocsAttributeType.REPLACE,
+                        segmentId
+                    );
+                } else {
+                    const endNodePosition = activeSelection?.getEnd();
+                    if (endNodePosition != null) {
+                        const endSpan = document.findSpanByPosition(endNodePosition);
+                        if (hasListSpan(endSpan) && !isSameLine(preSpan, endSpan)) {
+                            activeRange.cursorEnd -= 1;
+                        }
+                    }
+                    docsModel.delete(activeRange, segmentId);
+                }
 
                 skeleton.calculate();
 
-                const span = document.findNodeByCharIndex(cursor - 1);
+                let isBack = false;
 
-                this._adjustSelection(document as Documents, selectionRemain, span);
+                if (isUpdateParagraph) {
+                    isBack = true;
+                    cursor++;
+                } else if (isFirstSpan(span)) {
+                    isBack = true;
+                } else {
+                    cursor--;
+                }
+                span = document.findNodeByCharIndex(cursor);
+
+                this._adjustSelection(document as Documents, selectionRemain, span, isBack);
 
                 this._resetIME();
             } else if (e.key === KeyboardKeyType.Enter) {
@@ -122,58 +200,102 @@ export class InputController {
 
                 skeleton.calculate();
 
-                const span = document.findNodeByCharIndex(cursor + 1);
+                const span = document.findNodeByCharIndex(++cursor);
 
                 this._adjustSelection(document as Documents, selectionRemain, span, true);
             } else if (e.key === KeyboardKeyType.ArrowUp) {
-                let cursor = cursorStart;
-                if (isStartBack === true) {
-                    cursor -= 1;
-                }
-                const span = document.findNodeByCharIndex(cursor);
-                const newSpan = this._getTopOrBottomSpan(span, false);
-                if (newSpan == null) {
+                const preSpan = document.findSpanByPosition(startNodePosition);
+                // let cursor = cursorStart;
+                // if (isStartBack === true) {
+                //     cursor -= 1;
+                // }
+                // const span = document.findNodeByCharIndex(cursor);
+                const newPos = this._getTopOrBottomPosition(document as Documents, preSpan, false);
+                if (newPos == null) {
                     return;
                 }
                 const selectionRemain = document.remainActiveSelection() as TextSelection | undefined;
-                this._adjustSelection(document as Documents, selectionRemain, newSpan, false, true);
+
+                if (selectionRemain == null) {
+                    return;
+                }
+
+                this._syncSelection(document as Documents, selectionRemain, newPos, true);
+                // this._adjustSelection(document as Documents, selectionRemain, newSpan, false, true);
             } else if (e.key === KeyboardKeyType.ArrowDown) {
-                let cursor = cursorStart;
-                if (isStartBack === true) {
-                    cursor -= 1;
-                }
-                const span = document.findNodeByCharIndex(cursor);
-                const newSpan = this._getTopOrBottomSpan(span, true);
-                if (newSpan == null) {
+                const preSpan = document.findSpanByPosition(startNodePosition);
+                // let cursor = cursorStart;
+                // if (isStartBack === true) {
+                //     cursor -= 1;
+                // }
+
+                // const span = document.findNodeByCharIndex(cursor);
+                const newPos = this._getTopOrBottomPosition(document as Documents, preSpan, true);
+                if (newPos == null) {
                     return;
                 }
                 const selectionRemain = document.remainActiveSelection() as TextSelection | undefined;
-                this._adjustSelection(document as Documents, selectionRemain, newSpan, false, true);
+                if (selectionRemain == null) {
+                    return;
+                }
+                this._syncSelection(document as Documents, selectionRemain, newPos, true);
+                // this._adjustSelection(document as Documents, selectionRemain, newSpan, false, true);
             } else if (e.key === KeyboardKeyType.ArrowLeft) {
                 let cursor = cursorStart;
                 if (isStartBack === true) {
                     cursor -= 1;
                 }
-                const span = document.findNodeByCharIndex(cursor - 1);
-                this._currentSpan = span;
+
+                const preSpan = document.findSpanByPosition(startNodePosition);
+                let span: Nullable<IDocumentSkeletonSpan>;
+                let isBack = false;
+                if (isFirstSpan(preSpan)) {
+                    span = document.findNodeByCharIndex(cursor);
+
+                    if (preSpan === span) {
+                        isBack = true;
+                    }
+
+                    while (isPlaceholderOrSpace(span)) {
+                        span = document.findNodeByCharIndex(--cursor);
+                    }
+                } else {
+                    span = document.findNodeByCharIndex(--cursor);
+                }
+
                 if (span == null) {
                     return;
                 }
                 const selectionRemain = document.remainActiveSelection() as TextSelection | undefined;
-                this._adjustSelection(document as Documents, selectionRemain, span, false, true);
+                this._adjustSelection(document as Documents, selectionRemain, span, isBack, true);
             } else if (e.key === KeyboardKeyType.ArrowRight) {
-                // copy handler
+                const preSpan = document.findSpanByPosition(startNodePosition);
+
                 let cursor = cursorStart;
                 if (isStartBack === true) {
                     cursor -= 1;
                 }
-                const span = document.findNodeByCharIndex(cursor + 1);
-                this._currentSpan = span;
+
+                let span = document.findNodeByCharIndex(++cursor);
+
+                const originCursor = cursor;
+
+                while (isPlaceholderOrSpace(span)) {
+                    span = document.findNodeByCharIndex(++cursor);
+                }
+
+                let isBack = false;
+                if (isFirstSpan(span) && preSpan !== span) {
+                    isBack = true;
+                } else {
+                    span = document.findNodeByCharIndex(originCursor);
+                }
+
                 if (span == null) {
                     return;
                 }
                 const selectionRemain = document.remainActiveSelection() as TextSelection | undefined;
-                this._adjustSelection(document as Documents, selectionRemain, span, false, true);
+                this._adjustSelection(document as Documents, selectionRemain, span, isBack, true);
             } else if (e.key === KeyboardKeyType.Copy && isCtrl) {
                 // copy handler
             } else if (e.key === KeyboardKeyType.Paste && isCtrl) {
@@ -216,7 +338,9 @@ export class InputController {
 
             skeleton.calculate();
 
-            const span = document.findNodeByCharIndex(cursor + content.length - 1);
+            cursor += content.length - 1;
+
+            const span = document.findNodeByCharIndex(cursor);
 
             this._adjustSelection(document as Documents, selectionRemain, span);
         });
@@ -250,7 +374,7 @@ export class InputController {
         onCompositionupdateObservable.add((config) => {
             const { event, document, activeSelection } = config;
 
-            const cursor = this._previousIMEStart;
+            let cursor = this._previousIMEStart;
 
             const skeleton = document.getSkeleton();
 
@@ -274,7 +398,9 @@ export class InputController {
 
             skeleton.calculate();
 
-            const span = document.findNodeByCharIndex(cursor + content.length);
+            cursor += content.length;
+
+            const span = document.findNodeByCharIndex(cursor);
 
             this._adjustSelection(document as Documents, selectionRemain, span);
 
@@ -286,8 +412,8 @@ export class InputController {
         });
     }
 
-    private _getTopOrBottomSpan(span: Nullable<IDocumentSkeletonSpan>, direction: boolean) {
-        const referenceSpan = this._currentSpan;
+    private _getTopOrBottomPosition(document: Documents, span: Nullable<IDocumentSkeletonSpan>, direction: boolean): Nullable<INodePosition> {
+        const referenceSpan = document.findSpanByPosition(this._currentNodePosition);
         if (referenceSpan == null || span == null) {
             return;
         }
@@ -300,9 +426,17 @@ export class InputController {
             return;
         }
 
-        const newSpan = this._matchSpanByLeftOffset(line, offsetLeft);
+        const position: Nullable<INodeSearch> = this._matchPositionByLeftOffset(document, line, offsetLeft);
 
-        return newSpan;
+        let isBack = this._currentNodePosition?.isBack;
+
+        isBack = isBack == null ? false : isBack;
+
+        if (position == null) {
+            return;
+        }
+
+        return { ...position, isBack };
     }
 
     private _getSpanLeftOffsetInLine(span: IDocumentSkeletonSpan) {
@@ -316,10 +450,16 @@ export class InputController {
 
         const { left, width } = span;
 
-        return divideLeft + left + width;
+        const start = divideLeft + left;
+
+        if (this._currentNodePosition?.isBack === true) {
+            return start;
+        }
+
+        return start + width;
     }
 
-    private _matchSpanByLeftOffset(line: IDocumentSkeletonLine, offsetLeft: number) {
+    private _matchPositionByLeftOffset(document: Documents, line: IDocumentSkeletonLine, offsetLeft: number) {
         const nearestNode: {
             span?: IDocumentSkeletonSpan;
             distance: number;
@@ -333,7 +473,7 @@ export class InputController {
                 const leftSide = divideLeft + left;
                 const rightSide = leftSide + width;
                 if (offsetLeft >= leftSide && offsetLeft <= rightSide) {
-                    return span;
+                    return document.findPositionBySpan(span);
                 }
 
                 const distance = Math.abs(offsetLeft - (leftSide + rightSide) / 2);
@@ -344,7 +484,11 @@ export class InputController {
             }
         }
 
-        return nearestNode.span;
+        if (nearestNode.span == null) {
+            return;
+        }
+
+        return document.findPositionBySpan(nearestNode.span);
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -497,12 +641,30 @@ export class InputController {
             return;
         }
 
-        if (this._hasListSpan(span)) {
-            position.span += 1;
-        }
+        const newPos: INodePosition = { ...position, isBack };
 
-        const newPos = { ...position, isBack };
+        this._syncSelection(document, selectionRemain, newPos, isSyncScroll);
 
+        this._currentNodePosition = selectionRemain.getStart();
+
+        // document.addSelection(selectionRemain);
+
+        // selectionRemain.startNodePosition = newPos;
+
+        // selectionRemain.endNodePosition = undefined;
+
+        // selectionRemain.refresh(document);
+
+        // this._currentNodePosition = selectionRemain.getStart();
+
+        // if (isSyncScroll) {
+        //     document.scrollBySelection();
+        // }
+
+        // document.syncSelection();
+    }
+
+    private _syncSelection(document: Documents, selectionRemain: TextSelection, newPos: INodePosition, isSyncScroll = false) {
         document.addSelection(selectionRemain);
 
         selectionRemain.startNodePosition = newPos;
@@ -516,17 +678,5 @@ export class InputController {
         }
 
         document.syncSelection();
-    }
-
-    private _hasListSpan(span: Nullable<IDocumentSkeletonSpan>) {
-        const divide = span?.parent;
-
-        if (divide == null) {
-            return false;
-        }
-
-        const spanGroup = divide.spanGroup;
-
-        return spanGroup[0]?.spanType === SpanType.LIST;
     }
 }

@@ -14,7 +14,7 @@ import {
     insertTables,
     insertTextRuns,
 } from './Common';
-import { ICustomBlock, ICustomRange, IDocumentBody, IParagraph, ISectionBreak, ITable, ITextRun } from '../../Interfaces/IDocumentData';
+import { ICustomBlock, ICustomRange, IDocumentBody, IParagraph, ISectionBreak, ITable, ITextRun } from '../../Types/Interfaces/IDocumentData';
 
 export function UpdateAttributeApply(
     document: DocumentModel,
@@ -66,7 +66,7 @@ function updateAttribute(body: IDocumentBody, updateBody: IDocumentBody, textLen
 function updateTextRuns(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType) {
     const { textRuns } = body;
 
-    let { textRuns: updateDataTextRuns } = updateBody;
+    const { textRuns: updateDataTextRuns } = updateBody;
 
     if (textRuns == null || updateDataTextRuns == null) {
         return;
@@ -84,10 +84,11 @@ function updateTextRuns(body: IDocumentBody, updateBody: IDocumentBody, textLeng
 
 function coverTextRun(updateDataTextRuns: ITextRun[], removeTextRuns: ITextRun[], coverType: UpdateDocsAttributeType) {
     const newUpdateTextRun: ITextRun[] = [];
-    for (let updateTextRun of updateDataTextRuns) {
-        let { st: updateSt, ed: updateEd, ts: updateStyle } = updateTextRun;
+    for (const updateTextRun of updateDataTextRuns) {
+        let { st: updateSt } = updateTextRun;
+        const { ed: updateEd, ts: updateStyle } = updateTextRun;
         let splitUpdateTextRuns: ITextRun[] = [];
-        for (let removeTextRun of removeTextRuns) {
+        for (const removeTextRun of removeTextRuns) {
             const { st: removeSt, ed: removeEd, ts: removeStyle, sId } = removeTextRun;
             let newTs;
             if (coverType === UpdateDocsAttributeType.COVER) {
@@ -158,19 +159,19 @@ function coverTextRun(updateDataTextRuns: ITextRun[], removeTextRuns: ITextRun[]
 function updateParagraphs(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType) {
     const { paragraphs } = body;
 
-    let { paragraphs: updateDataParagraphs } = updateBody;
+    const { paragraphs: updateDataParagraphs } = updateBody;
 
     if (paragraphs == null || updateDataParagraphs == null) {
         return;
     }
 
-    const removeParagraphs = deleteParagraphs(body, textLength, currentIndex);
+    const removeParagraphs = deleteParagraphs(body, textLength, currentIndex, true);
     if (coverType !== UpdateDocsAttributeType.REPLACE) {
         const newUpdateParagraphs: IParagraph[] = [];
-        for (let updateParagraph of updateDataParagraphs) {
-            let { startIndex: updateStartIndex, paragraphStyle: updateParagraphStyle, bullet: updateBullet } = updateParagraph;
+        for (const updateParagraph of updateDataParagraphs) {
+            const { startIndex: updateStartIndex, paragraphStyle: updateParagraphStyle, bullet: updateBullet } = updateParagraph;
             let splitUpdateParagraphs: IParagraph[] = [];
-            for (let removeParagraph of removeParagraphs) {
+            for (const removeParagraph of removeParagraphs) {
                 const { startIndex: removeStartIndex, paragraphStyle: removeParagraphStyle, bullet: removeBullet } = removeParagraph;
                 let newParagraphStyle;
                 let newBullet;
@@ -205,7 +206,7 @@ function updateParagraphs(body: IDocumentBody, updateBody: IDocumentBody, textLe
 function updateSectionBreaks(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType) {
     const { sectionBreaks } = body;
 
-    let { sectionBreaks: updateDataSectionBreaks } = updateBody;
+    const { sectionBreaks: updateDataSectionBreaks } = updateBody;
 
     if (sectionBreaks == null || updateDataSectionBreaks == null) {
         return;
@@ -214,10 +215,10 @@ function updateSectionBreaks(body: IDocumentBody, updateBody: IDocumentBody, tex
     const removeSectionBreaks = deleteSectionBreaks(body, textLength, currentIndex);
     if (coverType !== UpdateDocsAttributeType.REPLACE) {
         const newUpdateSectionBreaks: ISectionBreak[] = [];
-        for (let updateSectionBreak of updateDataSectionBreaks) {
-            let { startIndex: updateStartIndex } = updateSectionBreak;
+        for (const updateSectionBreak of updateDataSectionBreaks) {
+            const { startIndex: updateStartIndex } = updateSectionBreak;
             let splitUpdateSectionBreaks: ISectionBreak[] = [];
-            for (let removeSectionBreak of removeSectionBreaks) {
+            for (const removeSectionBreak of removeSectionBreaks) {
                 const { startIndex: removeStartIndex } = removeSectionBreak;
                 if (updateStartIndex === removeStartIndex) {
                     if (coverType === UpdateDocsAttributeType.COVER) {
@@ -247,7 +248,7 @@ function updateSectionBreaks(body: IDocumentBody, updateBody: IDocumentBody, tex
 function updateCustomBlocks(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType) {
     const { customBlocks } = body;
 
-    let { customBlocks: updateDataCustomBlocks } = updateBody;
+    const { customBlocks: updateDataCustomBlocks } = updateBody;
 
     if (customBlocks == null || updateDataCustomBlocks == null) {
         return;
@@ -256,10 +257,10 @@ function updateCustomBlocks(body: IDocumentBody, updateBody: IDocumentBody, text
     const removeCustomBlocks = deleteCustomBlocks(body, textLength, currentIndex);
     if (coverType !== UpdateDocsAttributeType.REPLACE) {
         const newUpdateCustomBlocks: ICustomBlock[] = [];
-        for (let updateCustomBlock of updateDataCustomBlocks) {
-            let { startIndex: updateStartIndex } = updateCustomBlock;
+        for (const updateCustomBlock of updateDataCustomBlocks) {
+            const { startIndex: updateStartIndex } = updateCustomBlock;
             let splitUpdateCustomBlocks: ICustomBlock[] = [];
-            for (let removeCustomBlock of removeCustomBlocks) {
+            for (const removeCustomBlock of removeCustomBlocks) {
                 const { startIndex: removeStartIndex } = removeCustomBlock;
                 if (updateStartIndex === removeStartIndex) {
                     if (coverType === UpdateDocsAttributeType.COVER) {
@@ -289,7 +290,7 @@ function updateCustomBlocks(body: IDocumentBody, updateBody: IDocumentBody, text
 function updateTables(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType) {
     const { tables } = body;
 
-    let { tables: updateDataTables } = updateBody;
+    const { tables: updateDataTables } = updateBody;
 
     if (tables == null || updateDataTables == null) {
         return;
@@ -298,10 +299,10 @@ function updateTables(body: IDocumentBody, updateBody: IDocumentBody, textLength
     const removeTables = deleteTables(body, textLength, currentIndex);
     if (coverType !== UpdateDocsAttributeType.REPLACE) {
         const newUpdateTables: ITable[] = [];
-        for (let updateTable of updateDataTables) {
-            let { startIndex: updateStartIndex, endIndex: updateEndIndex } = updateTable;
+        for (const updateTable of updateDataTables) {
+            const { startIndex: updateStartIndex, endIndex: updateEndIndex } = updateTable;
             let splitUpdateTables: ITable[] = [];
-            for (let removeTable of removeTables) {
+            for (const removeTable of removeTables) {
                 const { startIndex: removeStartIndex, endIndex: removeEndIndex } = removeTable;
                 if (removeStartIndex >= updateStartIndex && removeEndIndex <= updateEndIndex) {
                     if (coverType === UpdateDocsAttributeType.COVER) {
@@ -331,7 +332,7 @@ function updateTables(body: IDocumentBody, updateBody: IDocumentBody, textLength
 function updateCustomRanges(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType) {
     const { customRanges } = body;
 
-    let { tables: updateDataCustomRanges } = updateBody;
+    const { tables: updateDataCustomRanges } = updateBody;
 
     if (customRanges == null || updateDataCustomRanges == null) {
         return;
@@ -340,10 +341,10 @@ function updateCustomRanges(body: IDocumentBody, updateBody: IDocumentBody, text
     const removeCustomRanges = deleteCustomRanges(body, textLength, currentIndex);
     if (coverType !== UpdateDocsAttributeType.REPLACE) {
         const newUpdateCustomRanges: ICustomRange[] = [];
-        for (let updateCustomRange of updateDataCustomRanges) {
-            let { startIndex: updateStartIndex, endIndex: updateEndIndex } = updateCustomRange;
+        for (const updateCustomRange of updateDataCustomRanges) {
+            const { startIndex: updateStartIndex, endIndex: updateEndIndex } = updateCustomRange;
             let splitUpdateCustomRanges: ICustomRange[] = [];
-            for (let removeCustomRange of removeCustomRanges) {
+            for (const removeCustomRange of removeCustomRanges) {
                 const { startIndex: removeStartIndex, endIndex: removeEndIndex } = removeCustomRange;
                 if (removeStartIndex >= updateStartIndex && removeEndIndex <= updateEndIndex) {
                     if (coverType === UpdateDocsAttributeType.COVER) {

@@ -1,4 +1,4 @@
-import { IParagraph } from '../Types/Interfaces/IDocumentData';
+import { IParagraph, IParagraphStyle } from '../Types/Interfaces/IDocumentData';
 
 export function horizontalLineSegmentsSubtraction(A1: number, A2: number, B1: number, B2: number) {
     // 确保A1 < A2, B1 < B2
@@ -52,7 +52,15 @@ export function checkParagraphHasIndent(paragraph: IParagraph) {
     }
     const paragraphStyle = paragraph.paragraphStyle;
 
-    if (paragraphStyle?.indentStart == null || paragraphStyle?.indentStart === 0) {
+    return checkParagraphHasIndentByStyle(paragraphStyle);
+}
+
+export function checkParagraphHasIndentByStyle(paragraphStyle?: IParagraphStyle) {
+    if (paragraphStyle == null) {
+        return false;
+    }
+
+    if (((paragraphStyle?.indentStart == null || paragraphStyle?.indentStart === 0) && paragraphStyle?.hanging == null) || paragraphStyle?.hanging === 0) {
         return false;
     }
 

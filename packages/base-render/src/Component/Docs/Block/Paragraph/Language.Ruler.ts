@@ -1,4 +1,4 @@
-import { DataStreamTreeNode, DocumentBodyModel, IParagraphStyle, Nullable } from '@univerjs/core';
+import { DataStreamTreeNode, DataStreamTreeTokenType, DocumentBodyModel, IParagraphStyle, Nullable } from '@univerjs/core';
 import { createSkeletonLetterSpan, createSkeletonWordSpan } from '../../Common/Span';
 import { hasArabic, hasCJK, hasSpaceAndTab, hasTibetan } from '../../../../Basics/Tools';
 import { IDocumentSkeletonSpan } from '../../../../Basics/IDocumentSkeletonCached';
@@ -19,6 +19,9 @@ export function composeCharForLanguage(
     sectionBreakConfig: ISectionBreakConfig,
     paragraphStyle: IParagraphStyle
 ): Nullable<LanguageResult> {
+    if (char === DataStreamTreeTokenType.SPACE) {
+        return;
+    }
     if (hasArabic(char)) {
         return ArabicHandler(char, index, charArray, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
     }

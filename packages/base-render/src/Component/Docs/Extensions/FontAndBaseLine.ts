@@ -23,9 +23,9 @@ export class FontAndBaseLine extends docExtension {
         }
 
         const { asc = 0, marginTop: lineMarginTop = 0, paddingTop: linePaddingTop = 0 } = line;
-        let maxLineAsc = asc + lineMarginTop + linePaddingTop;
+        const maxLineAsc = asc + lineMarginTop + linePaddingTop;
         const { ts: textStyle, content, fontStyle, bBox } = span;
-        let { spanPointWithFont = Vector2.create(0, 0) } = this.extensionOffset;
+        const { spanPointWithFont = Vector2.create(0, 0) } = this.extensionOffset;
         if (!textStyle) {
             if (content != null) {
                 ctx.fillText(content, spanPointWithFont.x, spanPointWithFont.y);

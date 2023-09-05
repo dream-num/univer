@@ -1,7 +1,5 @@
 import { IDocumentBody, ITextRun } from '../../Types/Interfaces/IDocumentData';
 
-import { checkParagraphHasBullet } from '../../Shared/DocTool';
-
 import { Nullable } from '../../Shared/Types';
 import { DataStreamTreeNode } from './DataStreamTreeNode';
 import { DataStreamTreeNodeType, DataStreamTreeTokenType } from './Types';
@@ -56,7 +54,7 @@ export class DocumentBodyModelSimple {
         const sectionList: DataStreamTreeNode[] = [];
         let nodeList: DataStreamTreeNode[] = [];
         let currentBlocks: number[] = [];
-        let paragraphIndex = 0;
+        // let paragraphIndex = 0;
         for (let i = 0; i < dataStreamLen; i++) {
             const char = dataStream[i];
             if (char === DataStreamTreeTokenType.PARAGRAPH) {
@@ -66,10 +64,13 @@ export class DocumentBodyModelSimple {
 
                     content
                 );
-                const isBullet = this._checkParagraphBullet(paragraphIndex++);
+                // const isBullet = this._checkParagraphBullet(paragraphIndex);
+                // const isIndent = isBullet === true ? true : this._checkParagraphIndent(paragraphIndex);
+                // paragraphIndex++;
                 node.setIndexRange(i - content.length + 1, i);
                 node.addBlocks(currentBlocks);
-                node.isBullet = isBullet;
+                // node.isBullet = isBullet;
+                // node.isIndent = isIndent;
                 nodeList.push(node);
                 content = '';
                 currentBlocks = [];
@@ -159,14 +160,23 @@ export class DocumentBodyModelSimple {
         parent.setIndexRange(children[0].startIndex - startOffset, children[children.length - 1].endIndex + 1);
     }
 
-    private _checkParagraphBullet(index: number) {
-        const { paragraphs } = this.body;
-        if (paragraphs == null) {
-            return false;
-        }
+    // private _checkParagraphBullet(index: number) {
+    //     const { paragraphs } = this.body;
+    //     if (paragraphs == null) {
+    //         return false;
+    //     }
 
-        return checkParagraphHasBullet(paragraphs[index]);
-    }
+    //     return checkParagraphHasBullet(paragraphs[index]);
+    // }
+
+    // private _checkParagraphIndent(index: number) {
+    //     const { paragraphs } = this.body;
+    //     if (paragraphs == null) {
+    //         return false;
+    //     }
+
+    //     return checkParagraphHasIndent(paragraphs[index]);
+    // }
 }
 
 export class DocumentBodyModel extends DocumentBodyModelSimple {
@@ -293,14 +303,14 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
                         continue;
                     }
 
-                    if (nextNode.isBullet) {
-                        i++;
-                        continue;
-                    } else {
-                        node.minus(startIndex, endIndex);
-                        node.merge(nextNode);
-                        nodeCount--;
-                    }
+                    // if (nextNode.isBullet || nextNode.isIndent) {
+                    //     i++;
+                    //     continue;
+                    // } else {
+                    node.minus(startIndex, endIndex);
+                    node.merge(nextNode);
+                    nodeCount--;
+                    // }
                 }
                 // else if (node.nodeType === DataStreamTreeNodeType.SECTION_BREAK) {
                 // } else if (node.nodeType === DataStreamTreeNodeType.TABLE) {
@@ -321,12 +331,12 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
                 // The third case.
                 // The text selection left contains the current node
                 node.minus(st, endIndex);
-                if (mergeNode) {
+                if (mergeNode != null) {
                     mergeNode.merge(node);
                     mergeNode = null;
+                    nodeCount--;
+                    continue;
                 }
-                nodeCount--;
-                continue;
             } else if (startIndex > st && startIndex < ed) {
                 // The fourth case.
                 // The text selection right contains the current node

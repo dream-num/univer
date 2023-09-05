@@ -1,12 +1,12 @@
 import { Nullable } from '@univerjs/core';
 import { IBoundRect } from '../../Basics/Vector2';
-import { INodeInfo, INodeSearch, ITransformChangeState } from '../../Basics/Interfaces';
+import { INodeInfo, INodePosition, INodeSearch, ITransformChangeState } from '../../Basics/Interfaces';
 import { Canvas } from '../../Canvas';
 import { RenderComponent } from '../Component';
 import { DocumentSkeleton } from './DocSkeleton';
 import { Scene } from '../../Scene';
 import { DOCS_EXTENSION_TYPE } from './DocExtension';
-import { IDocumentSkeletonLine, IDocumentSkeletonSpan, PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
+import { IDocumentSkeletonLine, IDocumentSkeletonSpan, PageLayoutType, SpanType } from '../../Basics/IDocumentSkeletonCached';
 import { RENDER_CLASS_TYPE } from '../../Basics/Const';
 
 export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE> {
@@ -90,6 +90,34 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
 
     remainActiveSelection() {}
 
+    findSpanByPosition(position: Nullable<INodePosition>) {
+        const skeleton = this.getSkeleton();
+
+        if (!skeleton || position == null) {
+            return;
+        }
+
+        const skeletonData = skeleton.getSkeletonData();
+
+        const { divide, line, column, section, page, isBack } = position;
+
+        let { span } = position;
+
+        if (isBack === true) {
+            span -= 1;
+        }
+
+        span = span < 0 ? 0 : span;
+
+        const spanGroup = skeletonData.pages[page].sections[section].columns[column].lines[line].divides[divide].spanGroup;
+
+        if (spanGroup[span].spanType === SpanType.LIST) {
+            return spanGroup[span + 1];
+        }
+
+        return spanGroup[span];
+    }
+
     findPositionBySpan(span: IDocumentSkeletonSpan): Nullable<INodeSearch> {
         const divide = span.parent;
 
@@ -129,9 +157,7 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
         };
     }
 
-    findNodeByCoord(offsetX: number, offsetY: number): false | INodeInfo {
-        return false;
-    }
+    findNodeByCoord(offsetX: number, offsetY: number): Nullable<INodeInfo> {}
 
     findCoordByNode(span: IDocumentSkeletonSpan) {}
 
@@ -181,6 +207,10 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
 
                             if (charIndex < st || charIndex > ed) {
                                 continue;
+                            }
+
+                            if (spanGroup[0].spanType === SpanType.LIST) {
+                                charIndex++;
                             }
 
                             const span = spanGroup[charIndex - st];

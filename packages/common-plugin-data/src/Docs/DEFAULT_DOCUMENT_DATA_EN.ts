@@ -398,5 +398,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
         marginBottom: 72,
         marginRight: 90,
         marginLeft: 90,
+        // gridType: GridType.LINES_AND_CHARS,
+        // linePitch: 24,
+        // charSpace: 12,
     },
 };

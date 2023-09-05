@@ -1,4 +1,5 @@
 import { IKeyValue } from '@univerjs/core';
+
 import {
     BorderDashDot,
     BorderDashDotDot,
@@ -114,7 +115,7 @@ export class ComponentManager {
         }
 
         // Register common components
-        this.register('Item',Item)
+        this.register('Item', Item);
     }
 
     register(name: string, component: any) {

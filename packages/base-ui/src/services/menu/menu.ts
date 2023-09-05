@@ -1,6 +1,6 @@
+import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
-import { IAccessor } from '@wendellhu/redi';
 import { DisplayTypes, SelectTypes } from '../../Components/Select/Select';
 
 export type OneOrMany<T> = T | T[];
@@ -84,7 +84,7 @@ export function isValueOptions(v: IValueOption | ICustomComponentOption): v is I
 
 export interface ICustomComponentOption {
     id: string;
-    props?: Record<string, string | number>;// custom property by component
+    props?: Record<string, string | number>; // custom property by component
 }
 
 export interface ICustomComponentProps<T> {

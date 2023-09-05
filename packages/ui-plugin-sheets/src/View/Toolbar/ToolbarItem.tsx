@@ -1,8 +1,7 @@
-import { ComponentChild, Component } from 'preact';
-import { Subscription } from 'rxjs';
-
-import { AppContext, Button, Tooltip, CustomLabel, IDisplayMenuItem, MenuItemType, Select, IMenuSelectorItem, IMenuItem, IMenuButtonItem, IValueOption } from '@univerjs/base-ui';
+import { AppContext, Button, CustomLabel, IDisplayMenuItem, IMenuButtonItem, IMenuItem, IMenuSelectorItem, IValueOption, MenuItemType, Select, Tooltip } from '@univerjs/base-ui';
 import { ICommandService } from '@univerjs/core';
+import { Component, ComponentChild } from 'preact';
+import { Subscription } from 'rxjs';
 
 import styles from './index.module.less';
 
@@ -99,7 +98,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
     private renderButtonType(): ComponentChild {
         const { props, context, state } = this;
         const { disabled, activated } = state;
-        const { icon, title } = props
+        const { icon, title } = props;
         const commandService: ICommandService = context.injector.get(ICommandService);
 
         return (

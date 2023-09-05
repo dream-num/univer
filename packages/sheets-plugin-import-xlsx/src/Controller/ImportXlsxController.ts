@@ -1,14 +1,14 @@
-import { Inject, Injector } from '@wendellhu/redi';
-import { Disposable, ICurrentUniverService, IKeyValue, migrate, Tools } from '@univerjs/core';
-import { BaseComponentRender, IMenuService } from '@univerjs/base-ui';
-import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
-
-import * as LuckyExcel from 'luckyexcel';
 import { BasicWorkbookController } from '@univerjs/base-sheets';
+import { BaseComponentRender, IMenuService } from '@univerjs/base-ui';
+import { Disposable, ICurrentUniverService, IKeyValue, migrate, Tools } from '@univerjs/core';
+import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
+import { Inject, Injector } from '@wendellhu/redi';
+import * as LuckyExcel from 'luckyexcel';
+
 import { IMPORT_XLSX_PLUGIN_NAME } from '../Basics/Const';
 import { ImportMenuItemFactory } from './menu';
 
-export class ImportXlsxController extends Disposable{
+export class ImportXlsxController extends Disposable {
     protected _toolButton: IToolbarItemProps;
 
     protected _render: BaseComponentRender;
@@ -106,9 +106,7 @@ export class ImportXlsxController extends Disposable{
     }
 
     private _initializeContextMenu() {
-        [
-            ImportMenuItemFactory
-        ].forEach((factory) => {
+        [ImportMenuItemFactory].forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
     }

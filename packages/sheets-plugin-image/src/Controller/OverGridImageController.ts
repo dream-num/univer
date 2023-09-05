@@ -1,11 +1,12 @@
-import { BaseComponentRender, ComponentManager, IMenuService, Icon } from '@univerjs/base-ui';
+import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
+import { BaseComponentRender, ComponentManager, Icon, IMenuService } from '@univerjs/base-ui';
+import { Command, CommandManager, Disposable, ICurrentUniverService, ObserverManager, Tools } from '@univerjs/core';
 import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject, Injector } from '@wendellhu/redi';
-import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
-import { Command, CommandManager, Disposable, ICurrentUniverService, ObserverManager, Tools } from '@univerjs/core';
+
 import { FileSelected, IOverGridImageProperty, OVER_GRID_IMAGE_PLUGIN_NAME, OverGridImageBorderType } from '../Basics';
-import { IImagePluginData } from '../Symbol';
 import { AddOverGridImageAction, IAddOverGridImageActionData } from '../Model';
+import { IImagePluginData } from '../Symbol';
 import { ImportImageMenuItemFactory } from './menu';
 
 export class OverGridImageController extends Disposable {
@@ -73,9 +74,7 @@ export class OverGridImageController extends Disposable {
     }
 
     private _initializeContextMenu() {
-        [
-            ImportImageMenuItemFactory
-        ].forEach((factory) => {
+        [ImportImageMenuItemFactory].forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
     }

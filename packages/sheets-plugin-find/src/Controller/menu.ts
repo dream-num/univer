@@ -1,8 +1,7 @@
-import { IMenuButtonItem, MenuItemType, MenuPosition } from "@univerjs/base-ui";
-import { IAccessor } from "@wendellhu/redi";
+import { IMenuButtonItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
+import { IAccessor } from '@wendellhu/redi';
 
 export function FindMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-
     return {
         // TODO@Dushusir find command trigger open modal
         id: 'FindCommand.id',
@@ -10,7 +9,7 @@ export function FindMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         icon: 'SearchIcon',
         title: 'find.findLabel',
         tooltip: 'find.findLabel',
-        positions: [MenuPosition.TOOLBAR]
+        positions: [MenuPosition.TOOLBAR],
         // TODO@Dushusir disabled$ status
     };
 }

@@ -1,9 +1,10 @@
+import { ComponentManager, Icon, IMenuService } from '@univerjs/base-ui';
+import { Disposable } from '@univerjs/core';
 import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject, Injector } from '@wendellhu/redi';
-import { ComponentManager, IMenuService, Icon } from '@univerjs/base-ui';
+
 import { FIND_PLUGIN_NAME } from '../Const/PLUGIN_NAME';
 import { FindModalController } from './FindModalController';
-import { Disposable } from '@univerjs/core';
 import { FindMenuItemFactory } from './menu';
 
 export class FindController extends Disposable {
@@ -41,10 +42,9 @@ export class FindController extends Disposable {
     getFindList() {
         return this._findList;
     }
+
     private _initializeContextMenu() {
-        [
-            FindMenuItemFactory
-        ].forEach((factory) => {
+        [FindMenuItemFactory].forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
     }

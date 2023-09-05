@@ -1,13 +1,13 @@
-import { BaseMenuItem, CustomLabel, Icon, joinClassNames } from "@univerjs/base-ui";
-import { BaseItemProps } from "@univerjs/base-ui/src/Components/Item/Item";
-import { ComponentChildren, Component } from "preact";
+import { BaseMenuItem, CustomLabel, Icon, joinClassNames } from '@univerjs/base-ui';
+import { Component, ComponentChildren } from 'preact';
+
 import styles from './FormatItem.module.less';
 
 export interface BaseFormatItemProps extends BaseMenuItem {
     selected?: boolean;
     suffix?: ComponentChildren;
     border?: boolean;
-    onValueChange: (v: string | number)=>void
+    onValueChange: (v: string | number) => void;
 }
 
 /**
@@ -15,12 +15,10 @@ export interface BaseFormatItemProps extends BaseMenuItem {
  */
 export class FormatItem extends Component<BaseFormatItemProps> {
     render() {
-        const { selected, label, suffix, disabled,value, onValueChange } = this.props;
+        const { selected, label, suffix, disabled, value, onValueChange } = this.props;
 
         return (
-            <div className={joinClassNames(styles.formatItem, disabled ? styles.selectDisabledItem : '')}
-            onClick={()=>onValueChange(value)}
-            >
+            <div className={joinClassNames(styles.formatItem, disabled ? styles.selectDisabledItem : '')} onClick={() => onValueChange(value)}>
                 {selected && (
                     <span className={styles.formatItemSelected}>
                         <Icon.CorrectIcon />

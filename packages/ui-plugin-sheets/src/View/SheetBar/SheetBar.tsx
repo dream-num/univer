@@ -58,11 +58,11 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     };
 
     // TODO@Dushusir remove after refactoring
-    setSheetUlNeo(menuItems: IMenuItem[]) {
-        this.setState({
-            menuItems,
-        });
-    }
+    // setSheetUlNeo(menuItems: IMenuItem[]) {
+    //     this.setState({
+    //         menuItems: buildMenuTree(menuItems),
+    //     });
+    // }
 
     // 点击按钮左右滑动
     scrollLeft = (e: MouseEvent) => {

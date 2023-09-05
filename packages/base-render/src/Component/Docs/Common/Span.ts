@@ -1,9 +1,10 @@
 import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType } from '@univerjs/core';
-import { validationGrid } from './Tools';
-import { IDocumentSkeletonBullet, IDocumentSkeletonDivide, IDocumentSkeletonSpan, SpanType } from '../../../Basics/IDocumentSkeletonCached';
+
 import { FontCache } from '../../../Basics/FontCache';
+import { IDocumentSkeletonBullet, IDocumentSkeletonDivide, IDocumentSkeletonSpan, SpanType } from '../../../Basics/IDocumentSkeletonCached';
 import { IFontCreateConfig } from '../../../Basics/Interfaces';
 import { hasCJK } from '../../../Basics/Tools';
+import { validationGrid } from './Tools';
 
 export function createSkeletonWordSpan(content: string, config: IFontCreateConfig, spanWidth?: number): IDocumentSkeletonSpan {
     return _createSkeletonWordOrLetter(SpanType.WORD, content, config, spanWidth);
@@ -33,6 +34,7 @@ export function _createSkeletonWordOrLetter(spanType: SpanType, content: string,
         DT.PAGE_BREAK,
         DT.DOCS_END,
         DT.CUSTOM_BLOCK,
+        DT.SPACE,
     ];
     let streamType = DT.LETTER;
     if (skipWidthList.indexOf(content) > -1) {
